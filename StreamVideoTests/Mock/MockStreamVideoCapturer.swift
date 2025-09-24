@@ -24,12 +24,12 @@ final class MockStreamVideoCapturer: StreamVideoCapturing, Mockable, @unchecked 
 
     enum MockCallFunctionInputKey: Payloadable {
         case startCapture(
-            position: AVCaptureDevice.Position,
+            position: CameraPosition,
             dimensions: CGSize,
             frameRate: Int
         )
         case stopCapture
-        case setCameraPosition(position: AVCaptureDevice.Position)
+        case setCameraPosition(position: CameraPosition)
         case setVideoFilter(videoFilter: VideoFilter?)
         case updateCaptureQuality(dimensions: CGSize)
         case focus(point: CGPoint)
@@ -42,27 +42,27 @@ final class MockStreamVideoCapturer: StreamVideoCapturing, Mockable, @unchecked 
         var payload: Any {
             switch self {
             case let .startCapture(position, dimensions, frameRate):
-                return (position, dimensions, frameRate)
+                (position, dimensions, frameRate)
             case .stopCapture:
-                return ()
+                ()
             case let .setCameraPosition(position):
-                return position
+                position
             case let .setVideoFilter(videoFilter):
-                return videoFilter!
+                videoFilter!
             case let .updateCaptureQuality(dimensions):
-                return dimensions
+                dimensions
             case let .focus(point):
-                return point
+                point
             case let .zoom(factor):
-                return factor
+                factor
             case let .addCapturePhotoOutput(capturePhotoOutput):
-                return capturePhotoOutput
+                capturePhotoOutput
             case let .removeCapturePhotoOutput(capturePhotoOutput):
-                return capturePhotoOutput
+                capturePhotoOutput
             case let .addVideoOutput(videoOutput):
-                return videoOutput
+                videoOutput
             case let .removeVideoOutput(videoOutput):
-                return videoOutput
+                videoOutput
             }
         }
     }
@@ -80,7 +80,7 @@ final class MockStreamVideoCapturer: StreamVideoCapturing, Mockable, @unchecked 
         stubbedProperty[propertyKey(for: keyPath)] = value
     }
 
-    func stub<T>(for function: FunctionKey, with value: T) {
+    func stub(for function: FunctionKey, with value: some Any) {
         stubbedFunction[function] = value
     }
 
@@ -89,7 +89,7 @@ final class MockStreamVideoCapturer: StreamVideoCapturing, Mockable, @unchecked 
     }
 
     func startCapture(
-        position: AVCaptureDevice.Position,
+        position: CameraPosition,
         dimensions: CGSize,
         frameRate: Int
     ) async throws {
@@ -106,7 +106,7 @@ final class MockStreamVideoCapturer: StreamVideoCapturing, Mockable, @unchecked 
         stubbedFunctionInput[.stopCapture]?.append(.stopCapture)
     }
 
-    func setCameraPosition(_ position: AVCaptureDevice.Position) async throws {
+    func setCameraPosition(_ position: CameraPosition) async throws {
         stubbedFunctionInput[.setCameraPosition]?.append(.setCameraPosition(position: position))
     }
 

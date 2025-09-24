@@ -19,6 +19,7 @@ public class Images {
     public var speakerOn = Image(systemName: "speaker.wave.3.fill")
     public var speakerOff = Image(systemName: "speaker.slash.fill")
     public var toggleCamera = Image(systemName: toggleCameraImageName)
+    public var cameraSelector = Image(systemName: "camera.badge.ellipsis.fill")
     public var hangup = Image(systemName: "phone.down.fill")
     public var acceptCall = Image(systemName: "phone.circle.fill")
     public var participants = Image(systemName: "person.2.fill")
@@ -33,9 +34,9 @@ public class Images {
 
     private static var toggleCameraImageName: String {
         if #available(iOS 14, *) {
-            return "arrow.triangle.2.circlepath.camera.fill"
+            "arrow.triangle.2.circlepath.camera.fill"
         } else {
-            return "arrow.up.arrow.down"
+            "arrow.up.arrow.down"
         }
     }
 }

@@ -12,7 +12,7 @@ final class CameraCaptureHandler: StreamVideoCapturerActionHandler, @unchecked S
 
     private struct Configuration: Equatable, Sendable {
         /// The camera position to use for capturing (e.g., front or back camera).
-        var position: AVCaptureDevice.Position
+        var position: CameraPosition
         /// The dimensions (width and height) for the captured video.
         var dimensions: CGSize
         /// The frame rate for video capturing in frames per second (fps).
@@ -88,6 +88,7 @@ final class CameraCaptureHandler: StreamVideoCapturerActionHandler, @unchecked S
                 return
             }
             await executeStop(cameraVideoCapturer)
+
         default:
             break
         }
@@ -122,9 +123,9 @@ final class CameraCaptureHandler: StreamVideoCapturerActionHandler, @unchecked S
         }
 
         guard let outputFormat = captureDevice.outputFormat(
-            preferredDimensions: .init(configuration.dimensions),
-            preferredFrameRate: configuration.frameRate,
-            preferredMediaSubType: videoCapturer.preferredOutputPixelFormat()
+            dimensions: .init(configuration.dimensions),
+            frameRate: configuration.frameRate,
+            mediaSubType: videoCapturer.preferredOutputPixelFormat()
         ) else {
             throw ClientError(
                 "\(type(of: self)) was unable to perform action because no output format found for dimensions:\(configuration.dimensions) frameRate:\(configuration.frameRate)."
@@ -203,7 +204,7 @@ final class CameraCaptureHandler: StreamVideoCapturerActionHandler, @unchecked S
         )
 
         if let videoCapturerDelegate = videoCapturerDelegate as? StreamVideoCaptureHandler {
-            videoCapturerDelegate.currentCameraPosition = device.position
+            videoCapturerDelegate.currentCameraPosition = configuration.position
         }
     }
 

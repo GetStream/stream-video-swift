@@ -563,7 +563,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
                     return
                 }
 
-                await self.negotiate(constraints: .iceRestartConstraints)
+                await negotiate(constraints: .iceRestartConstraints)
             }
         }
 
@@ -586,7 +586,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     /// - Parameter position: The new camera position to use.
     /// - Throws: An error if changing the camera position fails.
     func didUpdateCameraPosition(
-        _ position: AVCaptureDevice.Position
+        _ position: CameraPosition
     ) async throws {
         log.debug(
             """
@@ -860,9 +860,9 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
                 .filter {
                     switch (trackType, $0.trackType) {
                     case (.audio, .audio), (.video, .video), (.screenshare, .screenShare):
-                        return true
+                        true
                     default:
-                        return false
+                        false
                     }
                 }
                 .map(\.trackID)
@@ -901,17 +901,17 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     /// received, it calls the restartICE() method to renegotiate the
     /// connection.
     private func observeICERestartEvents() {
-        let peerType = self.peerType
+        let peerType = peerType
         sfuAdapter
             .publisher(eventType: Stream_Video_Sfu_Event_ICERestart.self)
             .filter {
                 switch ($0.peerType, peerType) {
                 case (.publisherUnspecified, .publisher):
-                    return true
+                    true
                 case (.subscriber, .subscriber):
-                    return true
+                    true
                 default:
-                    return false
+                    false
                 }
             }
             .log(.debug, subsystems: subsystem) { "Processing SFU event of type:\(type(of: $0))" }

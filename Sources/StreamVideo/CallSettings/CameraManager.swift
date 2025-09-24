@@ -8,7 +8,7 @@ import Foundation
 /// Handles the camera state during a call.
 public final class CameraManager: ObservableObject, CallSettingsManager, @unchecked Sendable {
     
-    internal let callController: CallController
+    let callController: CallController
     @Published public internal(set) var status: CallSettingsStatus
     @Published public internal(set) var direction: CameraPosition
     let state = CallSettingsState()
@@ -33,6 +33,11 @@ public final class CameraManager: ObservableObject, CallSettingsManager, @unchec
         let next = direction.next()
         try await callController.changeCameraMode(position: next)
         direction = next
+    }
+
+    public func setPosition(_ position: CameraPosition) async throws {
+        try await callController.changeCameraMode(position: position)
+        direction = position
     }
 
     /// Enables the camera.

@@ -76,7 +76,11 @@ public final class CurrentDevice: @unchecked Sendable {
                 case .phone:
                     return .phone
                 case .pad:
-                    return .pad
+                    if #available(iOS 14.0, *), ProcessInfo.processInfo.isiOSAppOnMac {
+                        return .mac
+                    } else {
+                        return .pad
+                    }
                 case .tv:
                     return .tv
                 case .carPlay:
@@ -102,7 +106,7 @@ public final class CurrentDevice: @unchecked Sendable {
     ///   to `.mac` (AppKit) or `.unspecified`.
 
     init(
-        currentDeviceProvider: @MainActor @escaping @Sendable() -> DeviceType
+        currentDeviceProvider: @MainActor @escaping @Sendable () -> DeviceType
     ) {
         Task { @MainActor in
             self.systemVersion = UIDevice.current.systemVersion

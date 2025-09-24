@@ -13,7 +13,7 @@ import StreamWebRTC
 actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, WebRTCPermissionsAdapterDelegate {
 
     typealias ParticipantsStorage = [String: CallParticipant]
-    typealias ParticipantOperation = @Sendable(ParticipantsStorage) -> ParticipantsStorage
+    typealias ParticipantOperation = @Sendable (ParticipantsStorage) -> ParticipantsStorage
 
     /// Enum representing different types of media tracks.
     enum TrackEntry {
@@ -25,11 +25,11 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         var id: String {
             switch self {
             case let .audio(id, _):
-                return id
+                id
             case let .video(id, _):
-                return id
+                id
             case let .screenShare(id, _):
-                return id
+                id
             }
         }
     }
@@ -128,7 +128,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         self.rtcPeerConnectionCoordinatorFactory = rtcPeerConnectionCoordinatorFactory
         self.videoCaptureSessionProvider = videoCaptureSessionProvider
         self.screenShareSessionProvider = screenShareSessionProvider
-        self.audioSession = .init()
+        audioSession = .init()
 
         Task { [weak self] in
             _ = await self?.permissionsAdapter
@@ -137,7 +137,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
 
     /// Sets the session ID.
     func set(sessionID value: String) {
-        self.sessionID = value
+        sessionID = value
     }
 
     /// Sets the call settings.
@@ -146,50 +146,50 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         file: StaticString = #file,
         function: StaticString = #function,
         line: UInt = #line
-    ) { self.callSettings = value }
+    ) { callSettings = value }
 
     /// Sets the initial call settings.
-    func set(initialCallSettings value: CallSettings?) { self.initialCallSettings = value }
+    func set(initialCallSettings value: CallSettings?) { initialCallSettings = value }
 
     /// Sets the audio settings.
-    func set(audioSettings value: AudioSettings) { self.audioSettings = value }
+    func set(audioSettings value: AudioSettings) { audioSettings = value }
 
     /// Sets the video options.
-    func set(videoOptions value: VideoOptions) { self.videoOptions = value }
+    func set(videoOptions value: VideoOptions) { videoOptions = value }
 
     /// Sets the publish options.
-    func set(publishOptions value: PublishOptions) { self.publishOptions = value }
+    func set(publishOptions value: PublishOptions) { publishOptions = value }
 
     /// Sets the connection options.
-    func set(connectOptions value: ConnectOptions) { self.connectOptions = value }
+    func set(connectOptions value: ConnectOptions) { connectOptions = value }
 
     /// Sets the own capabilities of the current user.
-    func set(ownCapabilities value: Set<OwnCapability>) { self.ownCapabilities = value }
+    func set(ownCapabilities value: Set<OwnCapability>) { ownCapabilities = value }
 
     /// Sets the WebRTC stats reporter.
     func set(statsAdapter value: WebRTCStatsAdapting?) {
-        self.statsAdapter = value
+        statsAdapter = value
         value?.consume(queuedTraces)
     }
 
     /// Sets the SFU (Selective Forwarding Unit) adapter and updates the stats
     /// reporter.
     func set(sfuAdapter value: SFUAdapter?) {
-        self.sfuAdapter = value
+        sfuAdapter = value
         statsAdapter?.sfuAdapter = value
     }
 
     /// Sets the number of participants in the call.
-    func set(participantsCount value: UInt32) { self.participantsCount = value }
+    func set(participantsCount value: UInt32) { participantsCount = value }
 
     /// Sets the anonymous participant count.
-    func set(anonymousCount value: UInt32) { self.anonymousCount = value }
+    func set(anonymousCount value: UInt32) { anonymousCount = value }
 
     /// Sets the participant pins.
-    func set(participantPins value: [PinInfo]) { self.participantPins = value }
+    func set(participantPins value: [PinInfo]) { participantPins = value }
 
     /// Sets the token for the session.
-    func set(token value: String) { self.token = value }
+    func set(token value: String) { token = value }
 
     /// Sets the video filter and applies it to the publisher.
     func set(videoFilter value: VideoFilter?) {
@@ -199,11 +199,11 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
 
     /// Sets the manual trackSize that will be used when updating subscriptions with the SFU.
     func set(incomingVideoQualitySettings value: IncomingVideoQualitySettings) {
-        self.incomingVideoQualitySettings = value
+        incomingVideoQualitySettings = value
     }
 
     func set(isTracingEnabled value: Bool) {
-        self.isTracingEnabled = value
+        isTracingEnabled = value
         statsAdapter?.isTracingEnabled = value
     }
 
@@ -218,11 +218,11 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     // MARK: - Client Capabilities
 
     func enableClientCapabilities(_ capabilities: Set<ClientCapability>) {
-        self.clientCapabilities = self.clientCapabilities.union(capabilities)
+        clientCapabilities = clientCapabilities.union(capabilities)
     }
 
     func disableClientCapabilities(_ capabilities: Set<ClientCapability>) {
-        self.clientCapabilities = self.clientCapabilities.subtracting(capabilities)
+        clientCapabilities = clientCapabilities.subtracting(capabilities)
     }
 
     // MARK: - Session Management
@@ -237,7 +237,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     /// - Throws: Throws an error if the SFU adapter is not set or other
     ///   connection setup fails.
     func configurePeerConnections() async throws {
-        guard let sfuAdapter = sfuAdapter else {
+        guard let sfuAdapter else {
             throw ClientError("SFUAdapter hasn't been created.")
         }
 
@@ -254,10 +254,10 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
             subsystems: .webRTC
         )
 
-        let publisher = rtcPeerConnectionCoordinatorFactory.buildCoordinator(
+        let publisher = try rtcPeerConnectionCoordinatorFactory.buildCoordinator(
             sessionId: sessionID,
             peerType: .publisher,
-            peerConnection: try StreamRTCPeerConnection(
+            peerConnection: StreamRTCPeerConnection(
                 peerConnectionFactory,
                 configuration: connectOptions.rtcConfiguration
             ),
@@ -273,10 +273,10 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
             clientCapabilities: clientCapabilities
         )
 
-        let subscriber = rtcPeerConnectionCoordinatorFactory.buildCoordinator(
+        let subscriber = try rtcPeerConnectionCoordinatorFactory.buildCoordinator(
             sessionId: sessionID,
             peerType: .subscriber,
-            peerConnection: try StreamRTCPeerConnection(
+            peerConnection: StreamRTCPeerConnection(
                 peerConnectionFactory,
                 configuration: connectOptions.rtcConfiguration
             ),
@@ -341,9 +341,9 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         disposableBag.removeAll()
         await publisher?.close()
         await subscriber?.close()
-        self.publisher = nil
-        self.subscriber = nil
-        self.statsAdapter = nil
+        publisher = nil
+        subscriber = nil
+        statsAdapter = nil
         await sfuAdapter?.disconnect()
         enqueue { _ in [:] }
         set(sfuAdapter: nil)
@@ -437,12 +437,12 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         of trackType: TrackType
     ) -> RTCMediaStreamTrack? {
         if let trackLookupPrefix = participant.trackLookupPrefix {
-            return trackStorage.track(
+            trackStorage.track(
                 for: trackLookupPrefix,
                 of: trackType
             ) ?? trackStorage.track(for: participant.sessionId, of: trackType)
         } else {
-            return trackStorage.track(for: participant.sessionId, of: trackType)
+            trackStorage.track(for: participant.sessionId, of: trackType)
         }
     }
 
@@ -509,7 +509,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
             await set(callSettings: updatedCallSettings)
 
             guard
-                let publisher = await self.publisher
+                let publisher = await publisher
             else {
                 return
             }
@@ -518,7 +518,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
 
             if updatedCallSettings.cameraPosition != currentCallSettings.cameraPosition {
                 try await publisher.didUpdateCameraPosition(
-                    updatedCallSettings.cameraPosition == .back ? .back : .front
+                    updatedCallSettings.cameraPosition
                 )
             }
 
@@ -583,8 +583,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
             /// provide additional limits.
             if
                 newParticipant.sessionId != sessionID,
-                incomingVideoQualitySettings.isVideoDisabled(for: entry.value.sessionId)
-            {
+                incomingVideoQualitySettings.isVideoDisabled(for: entry.value.sessionId) {
                 newParticipant = newParticipant.withUpdated(track: nil)
             }
 
@@ -603,16 +602,14 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         }
 
         enqueueCallSettings { currentCallSettings in
-            let possibleNewCallSettings = {
-                switch event.type {
-                case .audio:
-                    return currentCallSettings.withUpdatedAudioState(false)
-                case .video:
-                    return currentCallSettings.withUpdatedVideoState(false)
-                default:
-                    return currentCallSettings
-                }
-            }()
+            let possibleNewCallSettings = switch event.type {
+            case .audio:
+                currentCallSettings.withUpdatedAudioState(false)
+            case .video:
+                currentCallSettings.withUpdatedVideoState(false)
+            default:
+                currentCallSettings
+            }
             return possibleNewCallSettings
         }
     }
@@ -689,7 +686,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
             guard let self else {
                 return
             }
-            await self.enqueueCallSettings {
+            await enqueueCallSettings {
                 $0.withUpdatedSpeakerState(speakerOn)
             }
             log.debug(
@@ -709,7 +706,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
             guard let self else {
                 return
             }
-            await self.enqueueCallSettings {
+            await enqueueCallSettings {
                 $0.withUpdatedAudioState(audioOn)
             }
             log.debug(
@@ -727,7 +724,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
             guard let self else {
                 return
             }
-            await self.enqueueCallSettings {
+            await enqueueCallSettings {
                 $0.withUpdatedVideoState(videoOn)
             }
             log.debug(

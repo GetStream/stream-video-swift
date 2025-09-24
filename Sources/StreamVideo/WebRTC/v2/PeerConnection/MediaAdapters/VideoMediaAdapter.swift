@@ -166,9 +166,9 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
     ///
     /// - Parameter position: The new camera position.
     func didUpdateCameraPosition(
-        _ position: AVCaptureDevice.Position
+        _ position: CameraPosition
     ) async throws {
-        try await(localMediaManager as? LocalVideoMediaAdapter)?
+        try await (localMediaManager as? LocalVideoMediaAdapter)?
             .didUpdateCameraPosition(position)
     }
 
@@ -184,14 +184,14 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
     ///
     /// - Parameter factor: The zoom factor.
     func zoom(by factor: CGFloat) async throws {
-        try await(localMediaManager as? LocalVideoMediaAdapter)?.zoom(by: factor)
+        try await (localMediaManager as? LocalVideoMediaAdapter)?.zoom(by: factor)
     }
 
     /// Focuses the camera at a given point.
     ///
     /// - Parameter point: The point to focus on.
     func focus(at point: CGPoint) async throws {
-        try await(localMediaManager as? LocalVideoMediaAdapter)?.focus(at: point)
+        try await (localMediaManager as? LocalVideoMediaAdapter)?.focus(at: point)
     }
 
     /// Adds a video output to the capture session.
@@ -200,7 +200,7 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
     func addVideoOutput(
         _ videoOutput: AVCaptureVideoDataOutput
     ) async throws {
-        try await(localMediaManager as? LocalVideoMediaAdapter)?.addVideoOutput(videoOutput)
+        try await (localMediaManager as? LocalVideoMediaAdapter)?.addVideoOutput(videoOutput)
     }
 
     /// Removes a video output from the capture session.
@@ -209,7 +209,7 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
     func removeVideoOutput(
         _ videoOutput: AVCaptureVideoDataOutput
     ) async throws {
-        try await(localMediaManager as? LocalVideoMediaAdapter)?.removeVideoOutput(videoOutput)
+        try await (localMediaManager as? LocalVideoMediaAdapter)?.removeVideoOutput(videoOutput)
     }
 
     /// Adds a photo output to the capture session.
@@ -218,7 +218,7 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
     func addCapturePhotoOutput(
         _ capturePhotoOutput: AVCapturePhotoOutput
     ) async throws {
-        try await(localMediaManager as? LocalVideoMediaAdapter)?
+        try await (localMediaManager as? LocalVideoMediaAdapter)?
             .addCapturePhotoOutput(capturePhotoOutput)
     }
 
@@ -228,7 +228,7 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
     func removeCapturePhotoOutput(
         _ capturePhotoOutput: AVCapturePhotoOutput
     ) async throws {
-        try await(localMediaManager as? LocalVideoMediaAdapter)?
+        try await (localMediaManager as? LocalVideoMediaAdapter)?
             .removeCapturePhotoOutput(capturePhotoOutput)
     }
 

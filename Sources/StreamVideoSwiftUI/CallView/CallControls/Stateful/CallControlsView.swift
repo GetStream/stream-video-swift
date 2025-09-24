@@ -45,9 +45,9 @@ public struct CallControlsView: View {
     private var call: Call? {
         switch viewModel.callingState {
         case .incoming, .outgoing:
-            return streamVideo.state.ringingCall
+            streamVideo.state.ringingCall
         default:
-            return viewModel.call
+            viewModel.call
         }
     }
 }
@@ -120,6 +120,76 @@ public struct ToggleCameraIconView: View {
     public var body: some View {
         StatelessToggleCameraIconView(call: viewModel.call) { [weak viewModel] in
             viewModel?.toggleCameraPosition()
+        }
+    }
+}
+
+public struct CaptureDeviceSelectorIconView: View {
+
+    @Injected(\.images) var images
+    @Injected(\.currentDevice) var currentDevice
+    @Injected(\.captureDeviceProvider) var captureDeviceProvider
+
+    var viewModel: CallViewModel
+    var size: CGFloat
+
+    @State private var currentValue: CameraPosition
+
+    public init(viewModel: CallViewModel, size: CGFloat = 44) {
+        self.viewModel = viewModel
+        self.size = size
+        currentValue = viewModel.callSettings.cameraPosition
+    }
+
+    public var body: some View {
+        contentView
+            .onReceive(viewModel.$callSettings.map(\.cameraPosition)) { currentValue = $0 }
+    }
+
+    // MARK: - Private Helpers
+
+    @ViewBuilder
+    private var contentView: some View {
+        if currentDevice.deviceType == .phone || currentDevice.deviceType == .pad {
+            ToggleCameraIconView(viewModel: viewModel, size: size)
+        } else if #available(iOS 14.0, *) {
+            selectorView
+        } else {
+            ToggleCameraIconView(viewModel: viewModel, size: size)
+        }
+    }
+
+    @available(iOS 14.0, *)
+    @ViewBuilder
+    private var selectorView: some View {
+        Menu {
+            devicesListView
+        } label: {
+            CallIconView(
+                icon: images.cameraSelector,
+                size: size,
+                iconStyle: .secondary
+            )
+        }
+    }
+
+    @ViewBuilder
+    private var devicesListView: some View {
+        ForEach(captureDeviceProvider.availableDevices, id: \.uniqueID) { device in
+            if let capturePosition = captureDeviceProvider.cameraPosition(for: device) {
+                Button {
+                    viewModel.setCameraPosition(capturePosition)
+                } label: {
+                    switch capturePosition {
+                    case .front:
+                        Text("Front")
+                    case .back:
+                        Text("Back")
+                    case .other:
+                        Text(device.name)
+                    }
+                }
+            }
         }
     }
 }

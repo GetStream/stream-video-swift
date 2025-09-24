@@ -15,14 +15,14 @@ struct VideoOptions: Sendable {
     ///
     /// This property determines which camera (e.g., front or back) should be
     /// used as the default for video capture during a call.
-    var preferredCameraPosition: AVCaptureDevice.Position
+    var preferredCameraPosition: CameraPosition
 
     /// Creates a new instance of `VideoOptions` with the specified configuration.
     ///
     /// - Parameter preferredCameraPosition: The preferred camera position for
     ///   video capture. Defaults to `.front`.
     init(
-        preferredCameraPosition: AVCaptureDevice.Position = .front
+        preferredCameraPosition: CameraPosition = .front
     ) {
         self.preferredCameraPosition = preferredCameraPosition
     }

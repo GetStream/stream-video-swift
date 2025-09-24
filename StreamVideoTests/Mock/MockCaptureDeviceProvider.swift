@@ -15,15 +15,15 @@ final class MockCaptureDeviceProvider: CaptureDeviceProviding, Mockable, @unchec
     }
 
     enum MockFunctionInputKey: Payloadable {
-        case deviceForAVPosition(position: AVCaptureDevice.Position)
+        case deviceForAVPosition(position: CameraPosition)
         case deviceForPosition(position: CameraPosition)
 
         var payload: Any {
             switch self {
             case let .deviceForAVPosition(position):
-                return position
+                position
             case let .deviceForPosition(position):
-                return position
+                position
             }
         }
     }
@@ -36,25 +36,16 @@ final class MockCaptureDeviceProvider: CaptureDeviceProviding, Mockable, @unchec
         stubbedProperty[propertyKey(for: keyPath)] = value
     }
 
-    func stub<T>(for function: FunctionKey, with value: T) { stubbedFunction[function] = value }
+    func stub(for function: FunctionKey, with value: some Any) { stubbedFunction[function] = value }
 
     // MARK: - CaptureDeviceProviding
 
     func device(
-        for position: AVCaptureDevice.Position
+        for position: CameraPosition
     ) -> CaptureDeviceProtocol? {
         stubbedFunctionInput[.deviceForAVPosition]?.append(
             .deviceForAVPosition(position: position)
         )
         return stubbedFunction[.deviceForAVPosition] as? CaptureDeviceProtocol
-    }
-
-    func device(
-        for position: CameraPosition
-    ) -> CaptureDeviceProtocol? {
-        stubbedFunctionInput[.deviceForPosition]?.append(
-            .deviceForPosition(position: position)
-        )
-        return stubbedFunction[.deviceForPosition] as? CaptureDeviceProtocol
     }
 }

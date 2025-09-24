@@ -15,7 +15,7 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
     let colorSpace: CGColorSpace
     var selectedFilter: VideoFilter?
     var sceneOrientation: StreamDeviceOrientation = .portrait(isUpsideDown: false)
-    var currentCameraPosition: AVCaptureDevice.Position = .front
+    var currentCameraPosition: CameraPosition = .front
     private let handleRotation: Bool
 
     private lazy var processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
@@ -77,7 +77,7 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
             CVPixelBufferLockBaseAddress(imageBuffer, .readOnly)
             let inputImage = CIImage(
                 cvPixelBuffer: imageBuffer,
-                options: [CIImageOption.colorSpace: self.colorSpace]
+                options: [CIImageOption.colorSpace: colorSpace]
             )
             let outputImage = await filter.filter(
                 VideoFilter.Input(
@@ -91,7 +91,7 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
                 outputImage,
                 to: imageBuffer,
                 bounds: outputImage.extent,
-                colorSpace: self.colorSpace
+                colorSpace: colorSpace
             )
             process(capturer: capturer, frame: frame, buffer: buffer)
         }

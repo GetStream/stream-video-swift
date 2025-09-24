@@ -201,13 +201,13 @@ final class MediaAdapter {
     ) -> [Stream_Video_Sfu_Models_TrackInfo] {
         switch type {
         case .audio:
-            return audioMediaAdapter.trackInfo(for: collectionType)
+            audioMediaAdapter.trackInfo(for: collectionType)
         case .video:
-            return videoMediaAdapter.trackInfo(for: collectionType)
+            videoMediaAdapter.trackInfo(for: collectionType)
         case .screenshare:
-            return screenShareMediaAdapter.trackInfo(for: collectionType)
+            screenShareMediaAdapter.trackInfo(for: collectionType)
         default:
-            return []
+            []
         }
     }
     
@@ -270,7 +270,7 @@ final class MediaAdapter {
     ///
     /// - Parameter position: The new camera position.
     func didUpdateCameraPosition(
-        _ position: AVCaptureDevice.Position
+        _ position: CameraPosition
     ) async throws {
         try await videoMediaAdapter.didUpdateCameraPosition(position)
     }

@@ -126,7 +126,8 @@ open class CallViewModel: ObservableObject {
     /// Contains info about a participant event. It's reset to nil after 2 seconds.
     @Published public var participantEvent: ParticipantEvent?
 
-    /// Provides information about the current call settings, such as the camera position and whether there's an audio and video turned on.
+    /// Provides information about the current call settings, such as the camera position and whether there's an audio and video
+    /// turned on.
     @Published public internal(set) var callSettings: CallSettings {
         didSet {
             localCallSettingsChange = true
@@ -203,11 +204,10 @@ open class CallViewModel: ObservableObject {
             if
                 participantsLayout == .grid,
                 updateParticipants.count <= 3,
-                (call?.state.screenSharingSession == nil || call?.state.isCurrentUserScreensharing == true)
-            {
-                return $0.id != call?.state.sessionId
+                (call?.state.screenSharingSession == nil || call?.state.isCurrentUserScreensharing == true) {
+                $0.id != call?.state.sessionId
             } else {
-                return true
+                true
             }
         }
     }
@@ -250,7 +250,7 @@ open class CallViewModel: ObservableObject {
 
     /// Toggles the state of the camera (visible vs non-visible).
     public func toggleCameraEnabled() {
-        guard let call = call else {
+        guard let call else {
             callSettings = callSettings.withUpdatedVideoState(!callSettings.videoOn)
             return
         }
@@ -267,7 +267,7 @@ open class CallViewModel: ObservableObject {
 
     /// Toggles the state of the microphone (muted vs unmuted).
     public func toggleMicrophoneEnabled() {
-        guard let call = call else {
+        guard let call else {
             callSettings = callSettings.withUpdatedAudioState(!callSettings.audioOn)
             return
         }
@@ -284,8 +284,8 @@ open class CallViewModel: ObservableObject {
 
     /// Toggles the camera position (front vs back).
     public func toggleCameraPosition() {
-        guard let call = call, callSettings.videoOn else {
-            self.callSettings = callSettings.withUpdatedCameraPosition(callSettings.cameraPosition.next())
+        guard let call, callSettings.videoOn else {
+            callSettings = callSettings.withUpdatedCameraPosition(callSettings.cameraPosition.next())
             return
         }
         Task(disposableBag: disposableBag, priority: .userInitiated) { [weak self] in
@@ -299,9 +299,25 @@ open class CallViewModel: ObservableObject {
         }
     }
 
+    public func setCameraPosition(_ position: CameraPosition) {
+        guard let call, callSettings.videoOn else {
+            callSettings = callSettings.withUpdatedCameraPosition(position)
+            return
+        }
+        Task(disposableBag: disposableBag, priority: .userInitiated) { [weak self] in
+            guard let self else { return }
+            do {
+                try await call.camera.setPosition(position)
+                localCallSettingsChange = true
+            } catch {
+                log.error("Error toggling camera position", error: error)
+            }
+        }
+    }
+
     /// Enables or disables the audio output.
     public func toggleAudioOutput() {
-        guard let call = call else {
+        guard let call else {
             callSettings = callSettings.withUpdatedAudioOutputState(!callSettings.audioOutputOn)
             return
         }
@@ -322,7 +338,7 @@ open class CallViewModel: ObservableObject {
 
     /// Enables or disables the speaker.
     public func toggleSpeaker() {
-        guard let call = call else {
+        guard let call else {
             callSettings = callSettings.withUpdatedSpeakerState(!callSettings.speakerOn)
             return
         }
@@ -451,7 +467,7 @@ open class CallViewModel: ObservableObject {
                 do {
                     let call = streamVideo.call(callType: callType, callId: callId)
                     let info = try await call.get()
-                    self.callSettings = .init(info.call.settings)
+                    callSettings = .init(info.call.settings)
                 } catch {
                     log.error(error)
                 }
@@ -763,7 +779,7 @@ open class CallViewModel: ObservableObject {
             .autoconnect()
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
-                guard let self = self else { return }
+                guard let self else { return }
                 log.debug("Detected ringing timeout, hanging up...")
                 handleCallHangUp(ringTimeout: true)
             }
@@ -836,8 +852,7 @@ open class CallViewModel: ObservableObject {
                     case let .userBlocked(callEventInfo):
                         if
                             callEventInfo.user?.id == streamVideo.user.id,
-                            callEventInfo.callCid == call?.cId
-                        {
+                            callEventInfo.callCid == call?.cId {
                             leaveCall()
                         }
                     case .userUnblocked:
@@ -922,13 +937,11 @@ open class CallViewModel: ObservableObject {
                 return
             }
             let outgoingMembersCount = outgoingCallMembers.filter { $0.id != streamVideo.user.id }.count
-            let rejections = {
-                if outgoingMembersCount == 1, event.user?.id != streamVideo.user.id {
-                    return 1
-                } else {
-                    return outgoingCall.state.session?.rejectedBy.count ?? 0
-                }
-            }()
+            let rejections = if outgoingMembersCount == 1, event.user?.id != streamVideo.user.id {
+                1
+            } else {
+                outgoingCall.state.session?.rejectedBy.count ?? 0
+            }
             let accepted = outgoingCall.state.session?.acceptedBy.count ?? 0
             if accepted == 0, rejections >= outgoingMembersCount {
                 Task(disposableBag: disposableBag, priority: .userInitiated) { [weak self] in
@@ -1010,7 +1023,8 @@ open class CallViewModel: ObservableObject {
     ///   - The screen sharing type is `.inApp`
     ///   - Picture-in-Picture is currently enabled
     ///
-    /// For more information, see [Screen Sharing Documentation](https://getstream.io/video/docs/ios/advanced/screensharing/#broadcasting)
+    /// For more information, see [Screen Sharing
+    /// Documentation](https://getstream.io/video/docs/ios/advanced/screensharing/#broadcasting)
     private func disablePictureInPictureIfRequired(_ type: ScreensharingType) async {
         guard type == .inApp, isPictureInPictureEnabled else {
             return
@@ -1048,19 +1062,19 @@ public enum CallingState: Equatable, CustomStringConvertible, Sendable {
     public var description: String {
         switch self {
         case .idle:
-            return ".idle"
+            ".idle"
         case let .lobby(lobbyInfo):
-            return ".lobby(type:\(lobbyInfo.callType), id:\(lobbyInfo.callId))"
+            ".lobby(type:\(lobbyInfo.callType), id:\(lobbyInfo.callId))"
         case let .incoming(incomingCall):
-            return ".incoming(type:\(incomingCall.type), id:\(incomingCall.id))"
+            ".incoming(type:\(incomingCall.type), id:\(incomingCall.id))"
         case .outgoing:
-            return ".outgoing"
+            ".outgoing"
         case .joining:
-            return ".joining"
+            ".joining"
         case .inCall:
-            return ".inCall"
+            ".inCall"
         case .reconnecting:
-            return ".reconnecting"
+            ".reconnecting"
         }
     }
 }

@@ -103,6 +103,7 @@ extension VideoRendererView {
     public final class Coordinator: @unchecked Sendable {
         /// Injected dependency for accessing the video renderer pool.
         @Injected(\.videoRendererPool) private var videoRendererPool
+        @Injected(\.currentDevice) private var currentDevice
 
         /// A closure to handle the rendering of the video.
         private let handleRendering: ((VideoRenderer) -> Void)?
@@ -161,14 +162,14 @@ extension VideoRendererView {
                 }
                 .store(in: disposableBag)
 
-            #if targetEnvironment(macCatalyst)
-            renderer
-                .trackSizePublisher
-                .map { $0.width > $0.height ? UIView.ContentMode.scaleAspectFill : .scaleAspectFit }
-                .receive(on: DispatchQueue.main)
-                .sink { [weak self] in self?.renderer.videoContentMode = $0 }
-                .store(in: disposableBag)
-            #endif
+            if currentDevice.deviceType == .mac {
+                renderer
+                    .trackSizePublisher
+                    .map { $0.width > $0.height ? UIView.ContentMode.scaleAspectFill : .scaleAspectFit }
+                    .receive(on: DispatchQueue.main)
+                    .sink { [weak self] in self?.renderer.videoContentMode = $0 }
+                    .store(in: disposableBag)
+            }
         }
     }
 }

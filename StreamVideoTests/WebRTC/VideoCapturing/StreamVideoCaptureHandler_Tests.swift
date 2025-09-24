@@ -105,7 +105,7 @@ final class StreamVideoCaptureHandler_Tests: XCTestCase, @unchecked Sendable {
     @MainActor
     func assertFrameOrientation(
         deviceOrientation: StreamDeviceOrientation,
-        cameraPosition: AVCaptureDevice.Position,
+        cameraPosition: CameraPosition,
         expected: RTCVideoRotation,
         file: StaticString = #file,
         line: UInt = #line
@@ -120,8 +120,8 @@ final class StreamVideoCaptureHandler_Tests: XCTestCase, @unchecked Sendable {
         _ = subject
         await fulfillment { timesOrientationRequest == 1 }
         subject.currentCameraPosition = cameraPosition
-        let frame = RTCVideoFrame(
-            buffer: RTCCVPixelBuffer(pixelBuffer: try .make()),
+        let frame = try RTCVideoFrame(
+            buffer: RTCCVPixelBuffer(pixelBuffer: .make()),
             rotation: ._270,
             timeStampNs: 0
         )

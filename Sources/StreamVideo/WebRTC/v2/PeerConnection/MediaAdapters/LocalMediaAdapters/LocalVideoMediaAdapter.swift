@@ -159,7 +159,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         registerPrimaryTrackIfPossible(settings)
 
         try await configureActiveVideoCaptureSession(
-            position: settings.cameraPosition == .back ? .back : .front,
+            position: settings.cameraPosition,
             track: primaryTrack
         )
     }
@@ -189,7 +189,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             backgroundMuteAdapter.didUpdateCallSettings(settings)
 
             try await configureActiveVideoCaptureSession(
-                position: settings.cameraPosition == .back ? .back : .front,
+                position: settings.cameraPosition,
                 track: primaryTrack
             )
 
@@ -218,28 +218,25 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                 log.error(error)
             }
 
-            publishOptions
-                .forEach {
-                    self.addTransceiverIfRequired(
-                        for: $0,
-                        with: self
-                            .primaryTrack
-                            .clone(from: self.peerConnectionFactory)
-                    )
-                }
+            for publishOption in publishOptions {
+                addTransceiverIfRequired(
+                    for: publishOption,
+                    with: primaryTrack
+                        .clone(from: peerConnectionFactory)
+                )
+            }
 
-            let activePublishOptions = Set(self.publishOptions)
+            let activePublishOptions = Set(publishOptions)
 
-            transceiverStorage
-                .forEach {
-                    if activePublishOptions.contains($0.key) {
-                        $0.value.track.isEnabled = true
-                        $0.value.transceiver.sender.track = $0.value.track
-                    } else {
-                        $0.value.track.isEnabled = false
-                        $0.value.transceiver.sender.track = nil
-                    }
+            for item in transceiverStorage {
+                if activePublishOptions.contains(item.key) {
+                    item.value.track.isEnabled = true
+                    item.value.transceiver.sender.track = item.value.track
+                } else {
+                    item.value.track.isEnabled = false
+                    item.value.transceiver.sender.track = nil
                 }
+            }
 
             log.debug(
                 """
@@ -312,23 +309,22 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
             let activePublishOptions = Set(self.publishOptions)
 
-            transceiverStorage
-                .forEach {
-                    if activePublishOptions.contains($0.key) {
-                        $0.value.track.isEnabled = true
-                        $0.value.transceiver.sender.track = $0.value.track
-                    } else {
-                        $0.value.track.isEnabled = false
-                        $0.value.transceiver.sender.track = nil
-                    }
+            for item in transceiverStorage {
+                if activePublishOptions.contains(item.key) {
+                    item.value.track.isEnabled = true
+                    item.value.transceiver.sender.track = item.value.track
+                } else {
+                    item.value.track.isEnabled = false
+                    item.value.transceiver.sender.track = nil
                 }
+            }
 
             log.debug(
                 """
                 Local videoTracks updated with:
                     PublishOptions:
                         \(self.publishOptions.map { "\($0)" }.joined(separator: "\n"))
-                    
+                
                     TransceiverStorage:
                         \(transceiverStorage)
                 """,
@@ -343,24 +339,22 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     func trackInfo(
         for collectionType: RTCPeerConnectionTrackInfoCollectionType
     ) -> [Stream_Video_Sfu_Models_TrackInfo] {
-        let entries: [(PublishOptions.VideoPublishOptions, RTCRtpTransceiver, RTCMediaStreamTrack)] = {
-            switch collectionType {
-            case .allAvailable:
-                return transceiverStorage
-                    .map { ($0, $1.transceiver, $1.track) }
-            case .lastPublishOptions:
-                return publishOptions
-                    .compactMap {
-                        if
-                            let entry = transceiverStorage.get(for: $0),
-                            entry.transceiver.sender.track != nil {
-                            return ($0, entry.transceiver, entry.track)
-                        } else {
-                            return nil
-                        }
+        let entries: [(PublishOptions.VideoPublishOptions, RTCRtpTransceiver, RTCMediaStreamTrack)] = switch collectionType {
+        case .allAvailable:
+            transceiverStorage
+                .map { ($0, $1.transceiver, $1.track) }
+        case .lastPublishOptions:
+            publishOptions
+                .compactMap {
+                    if
+                        let entry = transceiverStorage.get(for: $0),
+                        entry.transceiver.sender.track != nil {
+                        ($0, entry.transceiver, entry.track)
+                    } else {
+                        nil
                     }
-            }
-        }()
+                }
+        }
 
         return entries
             .compactMap { publishOptions, transceiver, track in
@@ -416,13 +410,11 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                     return
                 }
 
-                let isUsingSVCCodec = {
-                    if let preferredCodec = params.codecs.first {
-                        return VideoCodec(preferredCodec).isSVC
-                    } else {
-                        return false
-                    }
-                }()
+                let isUsingSVCCodec = if let preferredCodec = params.codecs.first {
+                    VideoCodec(preferredCodec).isSVC
+                } else {
+                    false
+                }
                 var updatedEncodings = [RTCRtpEncodingParameters]()
 
                 for encoding in params.encodings {
@@ -446,32 +438,28 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
                     if
                         layerSettings.scaleResolutionDownBy >= 1,
-                        layerSettings.scaleResolutionDownBy != Float(truncating: encoding.scaleResolutionDownBy ?? 0)
-                    {
+                        layerSettings.scaleResolutionDownBy != Float(truncating: encoding.scaleResolutionDownBy ?? 0) {
                         encoding.scaleResolutionDownBy = .init(value: layerSettings.scaleResolutionDownBy)
                         hasChanges = true
                     }
 
                     if
                         layerSettings.maxBitrate > 0,
-                        layerSettings.maxBitrate != Int32(truncating: encoding.maxBitrateBps ?? 0)
-                    {
+                        layerSettings.maxBitrate != Int32(truncating: encoding.maxBitrateBps ?? 0) {
                         encoding.maxBitrateBps = .init(value: layerSettings.maxBitrate)
                         hasChanges = true
                     }
 
                     if
                         layerSettings.maxFramerate > 0,
-                        layerSettings.maxFramerate != Int32(truncating: encoding.maxFramerate ?? 0)
-                    {
+                        layerSettings.maxFramerate != Int32(truncating: encoding.maxFramerate ?? 0) {
                         encoding.maxFramerate = .init(value: layerSettings.maxFramerate)
                         hasChanges = true
                     }
 
                     if
                         !layerSettings.scalabilityMode.isEmpty,
-                        layerSettings.scalabilityMode != encoding.scalabilityMode
-                    {
+                        layerSettings.scalabilityMode != encoding.scalabilityMode {
                         encoding.scalabilityMode = layerSettings.scalabilityMode
                         hasChanges = true
                     }
@@ -481,7 +469,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
                 let activeLayers = videoSender
                     .layers
-                    .filter { $0.active }
+                    .filter(\.active)
                     .map {
                         let value = [
                             "name:\($0.name)",
@@ -545,7 +533,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     ///
     /// - Parameter position: The new camera position.
     func didUpdateCameraPosition(
-        _ position: AVCaptureDevice.Position
+        _ position: CameraPosition
     ) async throws {
         try await configureActiveVideoCaptureSession(
             position: position,
@@ -622,7 +610,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     ///   - position: The desired camera position.
     ///   - track: The video track to configure.
     private func configureActiveVideoCaptureSession(
-        position: AVCaptureDevice.Position,
+        position: CameraPosition,
         track: RTCVideoTrack
     ) async throws {
         if videoCaptureSessionProvider.activeSession == nil {

@@ -5,7 +5,11 @@
 import AVFoundation
 
 /// A protocol that defines the properties and methods for a capture device.
-protocol CaptureDeviceProtocol: Sendable {
+public protocol CaptureDeviceProtocol: Sendable, CustomStringConvertible {
+    var uniqueID: String { get }
+
+    var name: String { get }
+
     /// The physical position of the capture device (e.g., front or back).
     var position: AVCaptureDevice.Position { get }
 
@@ -20,11 +24,31 @@ protocol CaptureDeviceProtocol: Sendable {
     ///   - preferredMediaSubType: Desired pixel format or encoding (e.g., '420v').
     /// - Returns: A format that best matches the criteria, or `nil` if none found.
     func outputFormat(
-        preferredDimensions: CMVideoDimensions,
-        preferredFrameRate: Int,
-        preferredMediaSubType: FourCharCode
+        dimensions preferredDimensions: CMVideoDimensions,
+        frameRate preferredFrameRate: Int,
+        mediaSubType preferredMediaSubType: FourCharCode
     ) -> AVCaptureDevice.Format?
 }
 
 /// Extend `AVCaptureDevice` to conform to `CaptureDeviceProtocol`.
-extension AVCaptureDevice: CaptureDeviceProtocol {}
+extension AVCaptureDevice: CaptureDeviceProtocol {
+    public var name: String { localizedName }
+    
+    public func outputFormat(
+        dimensions preferredDimensions: CMVideoDimensions,
+        frameRate preferredFrameRate: Int,
+        mediaSubType preferredMediaSubType: FourCharCode
+    ) -> AVCaptureDevice.Format? {
+        outputFormat(
+            preferredDimensions: preferredDimensions,
+            preferredFrameRate: preferredFrameRate,
+            preferredMediaSubType: preferredMediaSubType
+        )
+    }
+}
+
+extension CaptureDeviceProtocol {
+    var description: String {
+        "\(name)(\(position))"
+    }
+}

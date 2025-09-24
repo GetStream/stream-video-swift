@@ -9,14 +9,14 @@ protocol StreamVideoCapturing: AnyObject, Sendable {
     func supportsBackgrounding() async -> Bool
 
     func startCapture(
-        position: AVCaptureDevice.Position,
+        position: CameraPosition,
         dimensions: CGSize,
         frameRate: Int
     ) async throws
 
     func stopCapture() async throws
 
-    func setCameraPosition(_ position: AVCaptureDevice.Position) async throws
+    func setCameraPosition(_ position: CameraPosition) async throws
 
     func setVideoFilter(_ videoFilter: VideoFilter?) async
 

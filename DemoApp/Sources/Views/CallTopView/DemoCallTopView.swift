@@ -35,7 +35,7 @@ struct DemoCallTopView<Factory: ViewFactory>: View {
                             .accessibility(identifier: "viewMenu")
                     }
 
-                    ToggleCameraIconView(viewModel: viewModel)
+                    CaptureDeviceSelectorIconView(viewModel: viewModel)
 
                     Spacer()
                 }

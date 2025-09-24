@@ -96,16 +96,6 @@ public final class CallSettings: ObservableObject, Sendable, Equatable, CustomSt
     }
 }
 
-/// The camera position.
-public enum CameraPosition: Sendable, Equatable {
-    case front
-    case back
-    
-    public func next() -> CameraPosition {
-        self == .front ? .back : .front
-    }
-}
-
 public extension CallSettings {
     func withUpdatedCameraPosition(
         _ cameraPosition: CameraPosition,

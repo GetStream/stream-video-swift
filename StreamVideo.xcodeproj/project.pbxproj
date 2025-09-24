@@ -399,6 +399,8 @@
 		407F2A002AA6011B00C3EAF8 /* LogQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4093861B2AA0A11500FF5AF4 /* LogQueue.swift */; };
 		40802AE92DD2A7C700B9F970 /* AVAudioSessionProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40802AE82DD2A7C700B9F970 /* AVAudioSessionProtocol.swift */; };
 		40802AEB2DD2A92E00B9F970 /* MockAVAudioSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40802AEA2DD2A92E00B9F970 /* MockAVAudioSession.swift */; };
+		4084ED882E843F6E00B99DF0 /* CameraPosition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4084ED872E843F6E00B99DF0 /* CameraPosition.swift */; };
+		4084ED8A2E84422F00B99DF0 /* AVCaptureDevice+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4084ED892E84422F00B99DF0 /* AVCaptureDevice+Convenience.swift */; };
 		408521E52D661C7600F012B8 /* RawJSON+Double.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408521E42D661C7500F012B8 /* RawJSON+Double.swift */; };
 		408521E72D661CA700F012B8 /* ThermalState+Comparable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408521E62D661CA700F012B8 /* ThermalState+Comparable.swift */; };
 		408679F72BD12F1000D027E0 /* AudioFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408679F62BD12F1000D027E0 /* AudioFilter.swift */; };
@@ -584,7 +586,7 @@
 		40AB35692B738D3D00E465CC /* EffectsLibrary in Frameworks */ = {isa = PBXBuildFile; productRef = 40AB35682B738D3D00E465CC /* EffectsLibrary */; };
 		40AB356D2B73B7A400E465CC /* DemoCallingViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB356C2B73B7A400E465CC /* DemoCallingViewModifier.swift */; };
 		40AB356E2B73B7A400E465CC /* DemoCallingViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB356C2B73B7A400E465CC /* DemoCallingViewModifier.swift */; };
-		40AC73B42BE0062B00C57517 /* StreamVideoNoiseCancellation in Frameworks */ = {isa = PBXBuildFile; productRef = 40AC73B32BE0062B00C57517 /* StreamVideoNoiseCancellation */; };
+		40AC73B42BE0062B00C57517 /* StreamVideoNoiseCancellation in Frameworks */ = {isa = PBXBuildFile; platformFilter = ios; productRef = 40AC73B32BE0062B00C57517 /* StreamVideoNoiseCancellation */; };
 		40AD64B12DC15BEB0077AE15 /* WebRTCTrace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AD64B02DC15BEB0077AE15 /* WebRTCTrace.swift */; };
 		40AD64B82DC16AB10077AE15 /* WebRTCTracesAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AD64B72DC16AB10077AE15 /* WebRTCTracesAdapter.swift */; };
 		40AD64C42DC269E60077AE15 /* ProximityMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AD64BD2DC269E60077AE15 /* ProximityMonitor.swift */; };
@@ -1597,14 +1599,14 @@
 		84F737FB287C13AD00A363F4 /* StreamVideo.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F737EF287C13AC00A363F4 /* StreamVideo.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		84F7380F287C141000A363F4 /* StreamVideoSwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F73807287C141000A363F4 /* StreamVideoSwiftUI.framework */; };
 		84F73817287C141000A363F4 /* StreamVideoSwiftUI.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F73809287C141000A363F4 /* StreamVideoSwiftUI.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		84F7381A287C141000A363F4 /* StreamVideoSwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F73807287C141000A363F4 /* StreamVideoSwiftUI.framework */; };
-		84F7381B287C141000A363F4 /* StreamVideoSwiftUI.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 84F73807287C141000A363F4 /* StreamVideoSwiftUI.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		84F7381A287C141000A363F4 /* StreamVideoSwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F73807287C141000A363F4 /* StreamVideoSwiftUI.framework */; platformFilter = ios; };
+		84F7381B287C141000A363F4 /* StreamVideoSwiftUI.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 84F73807287C141000A363F4 /* StreamVideoSwiftUI.framework */; platformFilter = ios; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		84F73830287C146D00A363F4 /* StreamVideoUIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F73828287C146D00A363F4 /* StreamVideoUIKit.framework */; };
 		84F73836287C146D00A363F4 /* StreamVideoUIKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F7382A287C146D00A363F4 /* StreamVideoUIKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		84F73843287C195600A363F4 /* StreamVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F737ED287C13AC00A363F4 /* StreamVideo.framework */; };
 		84F73848287C196B00A363F4 /* StreamVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F737ED287C13AC00A363F4 /* StreamVideo.framework */; };
-		84F7384D287C198500A363F4 /* StreamVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F737ED287C13AC00A363F4 /* StreamVideo.framework */; };
-		84F7384E287C198500A363F4 /* StreamVideo.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 84F737ED287C13AC00A363F4 /* StreamVideo.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		84F7384D287C198500A363F4 /* StreamVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F737ED287C13AC00A363F4 /* StreamVideo.framework */; platformFilter = ios; };
+		84F7384E287C198500A363F4 /* StreamVideo.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 84F737ED287C13AC00A363F4 /* StreamVideo.framework */; platformFilter = ios; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		84F73853287C1A2900A363F4 /* InjectedValues.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C299722876E8C90034B735 /* InjectedValues.swift */; };
 		84F73854287C1A2D00A363F4 /* InjectedValuesExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C299742876E8F80034B735 /* InjectedValuesExtensions.swift */; };
 		84F73855287C1A3400A363F4 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C2997C28784BB30034B735 /* Utils.swift */; };
@@ -2093,6 +2095,8 @@
 		407E67582DC101DF00878FFC /* CallCRUDTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallCRUDTests.swift; sourceTree = "<group>"; };
 		40802AE82DD2A7C700B9F970 /* AVAudioSessionProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AVAudioSessionProtocol.swift; sourceTree = "<group>"; };
 		40802AEA2DD2A92E00B9F970 /* MockAVAudioSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAVAudioSession.swift; sourceTree = "<group>"; };
+		4084ED872E843F6E00B99DF0 /* CameraPosition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPosition.swift; sourceTree = "<group>"; };
+		4084ED892E84422F00B99DF0 /* AVCaptureDevice+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AVCaptureDevice+Convenience.swift"; sourceTree = "<group>"; };
 		408521E42D661C7500F012B8 /* RawJSON+Double.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RawJSON+Double.swift"; sourceTree = "<group>"; };
 		408521E62D661CA700F012B8 /* ThermalState+Comparable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ThermalState+Comparable.swift"; sourceTree = "<group>"; };
 		408679F62BD12F1000D027E0 /* AudioFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioFilter.swift; sourceTree = "<group>"; };
@@ -5733,6 +5737,7 @@
 				40E363512D0A11620028C52A /* AVCaptureDevice+OutputFormat.swift */,
 				408722362E13C91F006A68CB /* AVCaptureDevice.Format+MediaSubType.swift */,
 				40E363442D09F2BD0028C52A /* AVCaptureDevice.Format+Convenience.swift */,
+				4084ED892E84422F00B99DF0 /* AVCaptureDevice+Convenience.swift */,
 			);
 			path = AVFoundation;
 			sourceTree = "<group>";
@@ -6653,6 +6658,7 @@
 				84F3B0DF289150B10088751D /* CallParticipant.swift */,
 				40ADB8572D64AFDE00B06AAF /* PinInfo.swift */,
 				8458872D28A4EC1F002A81BF /* CallSettings.swift */,
+				4084ED872E843F6E00B99DF0 /* CameraPosition.swift */,
 				84E4F7D0294CB5F300DD4CE3 /* ConnectionQuality.swift */,
 				84D6493F29E94C14002CA428 /* CallsQuery.swift */,
 				842D3B5D29F6D36E0051698A /* DeviceData.swift */,
@@ -8448,6 +8454,7 @@
 				40944D1D2E4E368400088AF0 /* StreamCallAudioRecorder+Namespace.swift in Sources */,
 				841BAA462BD15CDE000C73E4 /* CallStatsReportSummaryResponse.swift in Sources */,
 				84DC38D829ADFCFD00946713 /* JoinCallRequest.swift in Sources */,
+				4084ED882E843F6E00B99DF0 /* CameraPosition.swift in Sources */,
 				40ADB8612D65DFD700B06AAF /* String.StringInterpolation+Nil.swift in Sources */,
 				84AF64D2287C78E70012A503 /* User.swift in Sources */,
 				84274F482884251600CF8794 /* InternetConnection.swift in Sources */,
@@ -8511,6 +8518,7 @@
 				40F646242C7F225200FFB10A /* CollectionDelayedUpdateObserver.swift in Sources */,
 				40382F282C88B80C00C2D00F /* SignalServerEvent.swift in Sources */,
 				84BAD77C2A6BFF4300733156 /* BroadcastBufferReaderConnection.swift in Sources */,
+				4084ED8A2E84422F00B99DF0 /* AVCaptureDevice+Convenience.swift in Sources */,
 				84DC38DB29ADFCFD00946713 /* JSONDataEncoding.swift in Sources */,
 				40FB15112BF77D5800D5E580 /* StreamStateMachineStage.swift in Sources */,
 				8496A9A629CC500F00F15FF1 /* StreamVideoCaptureHandler.swift in Sources */,
@@ -9736,6 +9744,7 @@
 		};
 		84F73819287C141000A363F4 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
+			platformFilter = ios;
 			target = 84F73806287C141000A363F4 /* StreamVideoSwiftUI */;
 			targetProxy = 84F73818287C141000A363F4 /* PBXContainerItemProxy */;
 		};
@@ -9751,6 +9760,7 @@
 		};
 		84F73850287C198500A363F4 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
+			platformFilter = ios;
 			target = 84F737EC287C13AC00A363F4 /* StreamVideo */;
 			targetProxy = 84F7384F287C198500A363F4 /* PBXContainerItemProxy */;
 		};
@@ -10072,6 +10082,9 @@
 				PRODUCT_BUNDLE_IDENTIFIER = io.getstream.iOS.VideoDemoApp;
 				PRODUCT_NAME = "StreamVideoCallApp-Test";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
@@ -10488,6 +10501,9 @@
 				PRODUCT_BUNDLE_IDENTIFIER = io.getstream.iOS.VideoDemoApp;
 				PRODUCT_NAME = "StreamVideoCallApp-Debug";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_STRICT_CONCURRENCY = targeted;
@@ -10538,6 +10554,9 @@
 				PRODUCT_NAME = StreamVideoCallApp;
 				PROVISIONING_PROFILE_SPECIFIER = VideoDemoAppStore;
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "match AppStore io.getstream.iOS.VideoDemoApp";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_STRICT_CONCURRENCY = targeted;
 				SWIFT_VERSION = 5.0;
