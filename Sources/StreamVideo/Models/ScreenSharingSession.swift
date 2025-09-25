@@ -7,6 +7,7 @@ import StreamWebRTC
 
 public struct ScreenSharingSession {
     public let track: RTCVideoTrack?
+    public let hasScreenshareAudiotrack: Bool
     public let participant: CallParticipant
 }
 

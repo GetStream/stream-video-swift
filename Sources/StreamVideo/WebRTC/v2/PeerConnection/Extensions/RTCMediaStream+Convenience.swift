@@ -7,6 +7,7 @@ import StreamWebRTC
 
 /// Constant representing the identifier suffix for screen share tracks.
 private let screenShareTrackType = "TRACK_TYPE_SCREEN_SHARE"
+private let screenShareAudioTrackType = "TRACK_TYPE_SCREEN_SHARE_AUDIO"
 
 /// Constant representing the identifier suffix for video tracks.
 private let videoTrackType = "TRACK_TYPE_VIDEO"
@@ -34,6 +35,8 @@ extension RTCMediaStream {
             return .video
         case audioTrackType:
             return .audio
+        case screenShareAudioTrackType:
+            return .screenshareAudio
         default:
             return .unknown
         }

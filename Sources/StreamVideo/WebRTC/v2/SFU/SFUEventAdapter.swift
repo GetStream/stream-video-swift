@@ -366,6 +366,17 @@ final class SFUEventAdapter: @unchecked Sendable {
                     subsystems: .webRTC
                 )
 
+            case .screenShareAudio:
+                updatedParticipants[sessionID] = participant
+                    .withUpdated(hasScreenshareAudiotrack: true)
+                log.debug(
+                    """
+                    ScreenShareAudioTrack was published
+                    name: \(participant.name)
+                    """,
+                    subsystems: .webRTC
+                )
+
             default:
                 break
             }
@@ -425,10 +436,24 @@ final class SFUEventAdapter: @unchecked Sendable {
                 updatedParticipants[sessionID] = participant
                     .withUpdated(screensharing: false)
                     .withUpdated(screensharingTrack: nil)
+                    .withUpdated(hasScreenshareAudiotrack: false)
                     .withUnpausedTrack(.screenshare)
                 log.debug(
                     """
                     ScreenShareTrack was unpublished
+                    name: \(participant.name)
+                    cause: \(event.cause)
+                    """,
+                    subsystems: .webRTC
+                )
+
+            case .screenShareAudio:
+                updatedParticipants[sessionID] = participant
+                    .withUpdated(hasScreenshareAudiotrack: false)
+
+                log.debug(
+                    """
+                    ScreenShareAudioTrack was unpublished
                     name: \(participant.name)
                     cause: \(event.cause)
                     """,
@@ -463,8 +488,7 @@ final class SFUEventAdapter: @unchecked Sendable {
             for (key, participant) in updatedParticipants {
                 if
                     sessionIds.contains(key),
-                    (participant.pin == nil || participant.pin?.isLocal == true)
-                {
+                    (participant.pin == nil || participant.pin?.isLocal == true) {
                     updatedParticipants[key] = participant
                         .withUpdated(pin: .init(isLocal: false, pinnedAt: .init()))
                 } else {
@@ -498,6 +522,7 @@ final class SFUEventAdapter: @unchecked Sendable {
                 .withUpdated(pin: participant.pin)
                 .withUpdated(track: participant.track)
                 .withUpdated(screensharingTrack: participant.screenshareTrack)
+                .withUpdated(hasScreenshareAudiotrack: participant.hasScreenshareAudiotrack)
             return updatedParticipants
         }
     }

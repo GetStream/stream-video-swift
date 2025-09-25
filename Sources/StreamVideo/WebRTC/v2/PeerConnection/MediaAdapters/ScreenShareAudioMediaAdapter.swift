@@ -92,6 +92,7 @@ final class ScreenShareAudioMediaAdapter: MediaAdapting, @unchecked Sendable {
         // Set up observers for added and removed streams
         peerConnection
             .publisher(eventType: StreamRTCPeerConnection.AddedStreamEvent.self)
+            .log(.debug) { "Added track with trackType:\($0.stream.trackType)" }
             .filter { $0.stream.trackType == .screenshareAudio }
             .sink { [weak self] in self?.add($0.stream) }
             .store(in: disposableBag)

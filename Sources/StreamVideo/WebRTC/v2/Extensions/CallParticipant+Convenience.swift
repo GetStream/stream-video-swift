@@ -56,6 +56,16 @@ extension CallParticipant {
                     type: .screenShare
                 )
             )
+
+            if hasScreenshareAudiotrack {
+                result.append(
+                    .init(
+                        for: userId,
+                        sessionId: sessionId,
+                        type: .screenShareAudio
+                    )
+                )
+            }
         }
 
         return result

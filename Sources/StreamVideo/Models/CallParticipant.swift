@@ -27,6 +27,7 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
     public var trackSize: CGSize
     /// Returns the screensharing track for the participant.
     public var screenshareTrack: RTCVideoTrack?
+    public var hasScreenshareAudiotrack: Bool
     /// Returns whether the track should be shown.
     public var showTrack: Bool
     /// Returns whether the participant is speaking.
@@ -88,6 +89,7 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
         track: RTCVideoTrack? = nil,
         trackSize: CGSize = CGSize(width: 1024, height: 720),
         screenshareTrack: RTCVideoTrack? = nil,
+        hasScreenshareAudiotrack: Bool = false,
         isSpeaking: Bool = false,
         isDominantSpeaker: Bool,
         sessionId: String,
@@ -116,6 +118,7 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
         self.isDominantSpeaker = isDominantSpeaker
         self.sessionId = sessionId
         self.screenshareTrack = screenshareTrack
+        self.hasScreenshareAudiotrack = hasScreenshareAudiotrack
         self.connectionQuality = connectionQuality
         isScreensharing = isScreenSharing
         self.joinedAt = joinedAt
@@ -146,6 +149,7 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
             lhs.pin == rhs.pin &&
             lhs.track === rhs.track &&
             lhs.screenshareTrack === rhs.screenshareTrack &&
+            lhs.hasScreenshareAudiotrack == rhs.hasScreenshareAudiotrack &&
             lhs.pausedTracks == rhs.pausedTracks
     }
 
@@ -180,6 +184,7 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
             track: track,
             trackSize: trackSize,
             screenshareTrack: screenshareTrack,
+            hasScreenshareAudiotrack: hasScreenshareAudiotrack,
             isSpeaking: isSpeaking,
             isDominantSpeaker: isDominantSpeaker,
             sessionId: sessionId,
@@ -207,6 +212,7 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
             track: track,
             trackSize: trackSize,
             screenshareTrack: screenshareTrack,
+            hasScreenshareAudiotrack: hasScreenshareAudiotrack,
             isSpeaking: isSpeaking,
             isDominantSpeaker: isDominantSpeaker,
             sessionId: sessionId,
@@ -234,6 +240,35 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
             track: track,
             trackSize: trackSize,
             screenshareTrack: screensharingTrack,
+            hasScreenshareAudiotrack: hasScreenshareAudiotrack,
+            isSpeaking: isSpeaking,
+            isDominantSpeaker: isDominantSpeaker,
+            sessionId: sessionId,
+            connectionQuality: connectionQuality,
+            joinedAt: joinedAt,
+            audioLevel: audioLevel,
+            audioLevels: audioLevels,
+            pin: pin,
+            pausedTracks: pausedTracks
+        )
+    }
+
+    public func withUpdated(hasScreenshareAudiotrack: Bool) -> CallParticipant {
+        CallParticipant(
+            id: id,
+            userId: userId,
+            roles: roles,
+            name: name,
+            profileImageURL: profileImageURL,
+            trackLookupPrefix: trackLookupPrefix,
+            hasVideo: hasVideo,
+            hasAudio: hasAudio,
+            isScreenSharing: isScreensharing,
+            showTrack: showTrack,
+            track: track,
+            trackSize: trackSize,
+            screenshareTrack: screenshareTrack,
+            hasScreenshareAudiotrack: hasScreenshareAudiotrack,
             isSpeaking: isSpeaking,
             isDominantSpeaker: isDominantSpeaker,
             sessionId: sessionId,
@@ -261,6 +296,7 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
             track: track,
             trackSize: trackSize,
             screenshareTrack: screenshareTrack,
+            hasScreenshareAudiotrack: hasScreenshareAudiotrack,
             isSpeaking: isSpeaking,
             isDominantSpeaker: isDominantSpeaker,
             sessionId: sessionId,
@@ -288,6 +324,7 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
             track: track,
             trackSize: trackSize,
             screenshareTrack: screenshareTrack,
+            hasScreenshareAudiotrack: hasScreenshareAudiotrack,
             isSpeaking: isSpeaking,
             isDominantSpeaker: isDominantSpeaker,
             sessionId: sessionId,
@@ -315,6 +352,7 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
             track: track,
             trackSize: trackSize,
             screenshareTrack: screenshareTrack,
+            hasScreenshareAudiotrack: hasScreenshareAudiotrack,
             isSpeaking: isSpeaking,
             isDominantSpeaker: isDominantSpeaker,
             sessionId: sessionId,
@@ -342,6 +380,7 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
             track: track,
             trackSize: trackSize,
             screenshareTrack: screenshareTrack,
+            hasScreenshareAudiotrack: hasScreenshareAudiotrack,
             isSpeaking: isSpeaking,
             isDominantSpeaker: isDominantSpeaker,
             sessionId: sessionId,
@@ -369,6 +408,7 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
             track: track,
             trackSize: trackSize,
             screenshareTrack: screenshareTrack,
+            hasScreenshareAudiotrack: hasScreenshareAudiotrack,
             isSpeaking: isSpeaking,
             isDominantSpeaker: isDominantSpeaker,
             sessionId: sessionId,
@@ -405,6 +445,7 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
             track: track,
             trackSize: trackSize,
             screenshareTrack: screenshareTrack,
+            hasScreenshareAudiotrack: hasScreenshareAudiotrack,
             isSpeaking: isSpeaking,
             isDominantSpeaker: isDominantSpeaker,
             sessionId: sessionId,
@@ -432,6 +473,7 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
             track: track,
             trackSize: trackSize,
             screenshareTrack: screenshareTrack,
+            hasScreenshareAudiotrack: hasScreenshareAudiotrack,
             isSpeaking: isSpeaking,
             isDominantSpeaker: dominantSpeaker,
             sessionId: sessionId,
@@ -459,6 +501,7 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
             track: track,
             trackSize: trackSize,
             screenshareTrack: screenshareTrack,
+            hasScreenshareAudiotrack: hasScreenshareAudiotrack,
             isSpeaking: isSpeaking,
             isDominantSpeaker: isDominantSpeaker,
             sessionId: sessionId,
@@ -486,6 +529,7 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
             track: track,
             trackSize: trackSize,
             screenshareTrack: screenshareTrack,
+            hasScreenshareAudiotrack: hasScreenshareAudiotrack,
             isSpeaking: isSpeaking,
             isDominantSpeaker: isDominantSpeaker,
             sessionId: sessionId,
@@ -516,6 +560,7 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
             track: track,
             trackSize: trackSize,
             screenshareTrack: screenshareTrack,
+            hasScreenshareAudiotrack: hasScreenshareAudiotrack,
             isSpeaking: isSpeaking,
             isDominantSpeaker: isDominantSpeaker,
             sessionId: sessionId,
@@ -546,6 +591,7 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
             track: track,
             trackSize: trackSize,
             screenshareTrack: screenshareTrack,
+            hasScreenshareAudiotrack: hasScreenshareAudiotrack,
             isSpeaking: isSpeaking,
             isDominantSpeaker: isDominantSpeaker,
             sessionId: sessionId,
