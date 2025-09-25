@@ -7,6 +7,7 @@ import SwiftUI
 
 /// A SwiftUI view for displaying an incoming call screen.
 @available(iOS 14.0, *)
+@available(macCatalyst 14.0, *)
 public struct IncomingCallView<Factory: ViewFactory>: View {
 
     @Injected(\.fonts) var fonts

@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 60;
+	objectVersion = 55;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -400,6 +400,7 @@
 		407F2A002AA6011B00C3EAF8 /* LogQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4093861B2AA0A11500FF5AF4 /* LogQueue.swift */; };
 		40802AE92DD2A7C700B9F970 /* AVAudioSessionProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40802AE82DD2A7C700B9F970 /* AVAudioSessionProtocol.swift */; };
 		40802AEB2DD2A92E00B9F970 /* MockAVAudioSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40802AEA2DD2A92E00B9F970 /* MockAVAudioSession.swift */; };
+		4084ED8C2E85868B00B99DF0 /* ScreenShareCaptureHandler_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4084ED8B2E85868B00B99DF0 /* ScreenShareCaptureHandler_macOS.swift */; };
 		408521E52D661C7600F012B8 /* RawJSON+Double.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408521E42D661C7500F012B8 /* RawJSON+Double.swift */; };
 		408521E72D661CA700F012B8 /* ThermalState+Comparable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408521E62D661CA700F012B8 /* ThermalState+Comparable.swift */; };
 		408679F72BD12F1000D027E0 /* AudioFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408679F62BD12F1000D027E0 /* AudioFilter.swift */; };
@@ -593,7 +594,6 @@
 		40AB35692B738D3D00E465CC /* EffectsLibrary in Frameworks */ = {isa = PBXBuildFile; productRef = 40AB35682B738D3D00E465CC /* EffectsLibrary */; };
 		40AB356D2B73B7A400E465CC /* DemoCallingViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB356C2B73B7A400E465CC /* DemoCallingViewModifier.swift */; };
 		40AB356E2B73B7A400E465CC /* DemoCallingViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB356C2B73B7A400E465CC /* DemoCallingViewModifier.swift */; };
-		40AC73B42BE0062B00C57517 /* StreamVideoNoiseCancellation in Frameworks */ = {isa = PBXBuildFile; productRef = 40AC73B32BE0062B00C57517 /* StreamVideoNoiseCancellation */; };
 		40AD64B12DC15BEB0077AE15 /* WebRTCTrace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AD64B02DC15BEB0077AE15 /* WebRTCTrace.swift */; };
 		40AD64B82DC16AB10077AE15 /* WebRTCTracesAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AD64B72DC16AB10077AE15 /* WebRTCTracesAdapter.swift */; };
 		40AD64C42DC269E60077AE15 /* ProximityMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AD64BD2DC269E60077AE15 /* ProximityMonitor.swift */; };
@@ -1183,7 +1183,7 @@
 		84274F482884251600CF8794 /* InternetConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84274F472884251600CF8794 /* InternetConnection.swift */; };
 		8427FF642A03D1D100AFD2C3 /* Intents.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8427FF632A03D1D100AFD2C3 /* Intents.framework */; };
 		8427FF672A03D1D100AFD2C3 /* IntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8427FF662A03D1D100AFD2C3 /* IntentHandler.swift */; };
-		8427FF6B2A03D1D100AFD2C3 /* CallIntent.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 8427FF622A03D1D100AFD2C3 /* CallIntent.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		8427FF6B2A03D1D100AFD2C3 /* CallIntent.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 8427FF622A03D1D100AFD2C3 /* CallIntent.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		842B8E162A2DFED900863A87 /* CallRingEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842B8DFA2A2DFED600863A87 /* CallRingEvent.swift */; };
 		842B8E172A2DFED900863A87 /* EgressRTMPResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842B8DFB2A2DFED600863A87 /* EgressRTMPResponse.swift */; };
 		842B8E1A2A2DFED900863A87 /* CallLiveStartedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842B8DFE2A2DFED700863A87 /* CallLiveStartedEvent.swift */; };
@@ -1354,7 +1354,6 @@
 		848A805E290A808E00F3079B /* StreamVideoUIKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 84F73828287C146D00A363F4 /* StreamVideoUIKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		848C46A42A6ABF7E00E5AC09 /* ReplayKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 848C46A32A6ABF7E00E5AC09 /* ReplayKit.framework */; };
 		848C46A72A6ABF7E00E5AC09 /* SampleHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 848C46A62A6ABF7E00E5AC09 /* SampleHandler.swift */; };
-		848C46AB2A6ABF7E00E5AC09 /* ScreenSharing.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 848C46A22A6ABF7E00E5AC09 /* ScreenSharing.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		848CCCE52AB8ED8F002E83A2 /* StopHLSBroadcastingResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 848CCCDA2AB8ED8F002E83A2 /* StopHLSBroadcastingResponse.swift */; };
 		848CCCE62AB8ED8F002E83A2 /* BroadcastSettingsResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 848CCCDB2AB8ED8F002E83A2 /* BroadcastSettingsResponse.swift */; };
 		848CCCE72AB8ED8F002E83A2 /* ThumbnailsSettingsRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 848CCCDC2AB8ED8F002E83A2 /* ThumbnailsSettingsRequest.swift */; };
@@ -1657,13 +1656,6 @@
 			remoteGlobalIDString = 8427FF612A03D1D100AFD2C3;
 			remoteInfo = CallIntent;
 		};
-		848C46A92A6ABF7E00E5AC09 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 842D8BBB2865B31B00801910 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 848C46A12A6ABF7E00E5AC09;
-			remoteInfo = ScreenSharing;
-		};
 		84932246290832B90013C029 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 842D8BBB2865B31B00801910 /* Project object */;
@@ -1766,7 +1758,6 @@
 			dstSubfolderSpec = 13;
 			files = (
 				8427FF6B2A03D1D100AFD2C3 /* CallIntent.appex in Embed Foundation Extensions */,
-				848C46AB2A6ABF7E00E5AC09 /* ScreenSharing.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2109,6 +2100,7 @@
 		407E67582DC101DF00878FFC /* CallCRUDTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallCRUDTests.swift; sourceTree = "<group>"; };
 		40802AE82DD2A7C700B9F970 /* AVAudioSessionProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AVAudioSessionProtocol.swift; sourceTree = "<group>"; };
 		40802AEA2DD2A92E00B9F970 /* MockAVAudioSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAVAudioSession.swift; sourceTree = "<group>"; };
+		4084ED8B2E85868B00B99DF0 /* ScreenShareCaptureHandler_macOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenShareCaptureHandler_macOS.swift; sourceTree = "<group>"; };
 		408521E42D661C7500F012B8 /* RawJSON+Double.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RawJSON+Double.swift"; sourceTree = "<group>"; };
 		408521E62D661CA700F012B8 /* ThermalState+Comparable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ThermalState+Comparable.swift"; sourceTree = "<group>"; };
 		408679F62BD12F1000D027E0 /* AudioFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioFilter.swift; sourceTree = "<group>"; };
@@ -2502,7 +2494,7 @@
 		40E9B3B22BCD93AE00ACF18F /* JoinCallResponse+Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JoinCallResponse+Dummy.swift"; sourceTree = "<group>"; };
 		40E9B3B42BCD93F500ACF18F /* Credentials+Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Credentials+Dummy.swift"; sourceTree = "<group>"; };
 		40E9B3B62BCD941600ACF18F /* SFUResponse+Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SFUResponse+Dummy.swift"; sourceTree = "<group>"; };
-		40ECE5FC2E7D82A400FF3378 /* StreamWebRTC.xcframework */ = {isa = PBXFileReference; expectedSignature = "AppleDeveloperProgram:EHV7XZLAHA:Stream.io Inc"; lastKnownFileType = wrapper.xcframework; name = StreamWebRTC.xcframework; path = ../webrtc/.products/StreamWebRTC.xcframework; sourceTree = SOURCE_ROOT; };
+		40ECE5FC2E7D82A400FF3378 /* StreamWebRTC.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = StreamWebRTC.xcframework; path = ../webrtc/.products/StreamWebRTC.xcframework; sourceTree = SOURCE_ROOT; };
 		40ED6D4A2B14F0E600FB5F69 /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		40F017382BBEAF6400E89FD1 /* MockCallKitService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockCallKitService.swift; sourceTree = "<group>"; };
 		40F0173A2BBEB1A900E89FD1 /* CallKitAdapterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitAdapterTests.swift; sourceTree = "<group>"; };
@@ -3231,7 +3223,6 @@
 				4046DEF02A9F469100CA6D2F /* GDPerformanceView-Swift in Frameworks */,
 				401A64A52A9DF79E00534ED1 /* StreamChatSwiftUI in Frameworks */,
 				8423B7562950BB0B00012F8D /* Sentry in Frameworks */,
-				40AC73B42BE0062B00C57517 /* StreamVideoNoiseCancellation in Frameworks */,
 				401A64A82A9DF7B400534ED1 /* EffectsLibrary in Frameworks */,
 				4035913C2BC53D2A00B5B767 /* Accelerate.framework in Frameworks */,
 				84F7381A287C141000A363F4 /* StreamVideoSwiftUI.framework in Frameworks */,
@@ -5840,6 +5831,7 @@
 		40E3636A2D0A24280028C52A /* ScreenShare */ = {
 			isa = PBXGroup;
 			children = (
+				4084ED8B2E85868B00B99DF0 /* ScreenShareCaptureHandler_macOS.swift */,
 				40DB90022E82A819009B8B51 /* ScreenShareAudioConverter.swift */,
 				40DB90042E82AA8C009B8B51 /* ScreenShareAudioDiagnostics.swift */,
 				4031FD802E82C6DC00AE31FE /* ScreenShareAudioDiagnostics.swift */,
@@ -7712,7 +7704,6 @@
 				84F73819287C141000A363F4 /* PBXTargetDependency */,
 				84F73850287C198500A363F4 /* PBXTargetDependency */,
 				8427FF6A2A03D1D100AFD2C3 /* PBXTargetDependency */,
-				848C46AA2A6ABF7E00E5AC09 /* PBXTargetDependency */,
 			);
 			name = DemoApp;
 			packageProductDependencies = (
@@ -7721,7 +7712,6 @@
 				401A64A72A9DF7B400534ED1 /* EffectsLibrary */,
 				4046DEEF2A9F469100CA6D2F /* GDPerformanceView-Swift */,
 				844ADA642AD3F1AB00769F6A /* GoogleSignInSwift */,
-				40AC73B32BE0062B00C57517 /* StreamVideoNoiseCancellation */,
 				4014F1022D8C2EBC004E7EFD /* Gleap */,
 			);
 			productName = StreamVideoSwiftUI;
@@ -7974,7 +7964,6 @@
 				4046DEEC2A9F404300CA6D2F /* XCRemoteSwiftPackageReference "GDPerformanceView-Swift" */,
 				844ADA612AD3F1AB00769F6A /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 				82EB8F552B0277730038B5A2 /* XCRemoteSwiftPackageReference "stream-video-swift-webrtc" */,
-				40AC73B22BE0062B00C57517 /* XCRemoteSwiftPackageReference "stream-video-noise-cancellation-swift" */,
 				4014F1012D8C2EBC004E7EFD /* XCRemoteSwiftPackageReference "Gleap-iOS-SDK" */,
 			);
 			productRefGroup = 842D8BC42865B31B00801910 /* Products */;
@@ -8885,6 +8874,7 @@
 				84FC2C2428AD1B5E00181490 /* WebRTCEventDecoder.swift in Sources */,
 				40149DCE2B7E837A00473176 /* StreamCallAudioRecorder.swift in Sources */,
 				40E741FF2D553ACD0044C955 /* CurrentDevice.swift in Sources */,
+				4084ED8C2E85868B00B99DF0 /* ScreenShareCaptureHandler_macOS.swift in Sources */,
 				84DC389B29ADFCFD00946713 /* PermissionRequestEvent.swift in Sources */,
 				406B3C432C91E41400FC93A1 /* WebRTCAuthenticator.swift in Sources */,
 				4019A2682E40ED5900CE70A4 /* RTCAudioStore+InterruptionEffect.swift in Sources */,
@@ -9764,13 +9754,9 @@
 		};
 		8427FF6A2A03D1D100AFD2C3 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
+			platformFilter = ios;
 			target = 8427FF612A03D1D100AFD2C3 /* CallIntent */;
 			targetProxy = 8427FF692A03D1D100AFD2C3 /* PBXContainerItemProxy */;
-		};
-		848C46AA2A6ABF7E00E5AC09 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 848C46A12A6ABF7E00E5AC09 /* ScreenSharing */;
-			targetProxy = 848C46A92A6ABF7E00E5AC09 /* PBXContainerItemProxy */;
 		};
 		84932247290832B90013C029 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -9936,7 +9922,7 @@
 				INFOPLIST_FILE = "$(SRCROOT)/Sources/StreamVideo/Info.plist";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -10000,7 +9986,7 @@
 				INFOPLIST_FILE = "$(SRCROOT)/Sources/StreamVideoSwiftUI/Info.plist";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -10058,7 +10044,7 @@
 				INFOPLIST_FILE = "$(SRCROOT)/Sources/StreamVideoUIKit/Info.plist";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -10140,6 +10126,8 @@
 				PRODUCT_BUNDLE_IDENTIFIER = io.getstream.iOS.VideoDemoApp;
 				PRODUCT_NAME = "StreamVideoCallApp-Test";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
@@ -10556,6 +10544,8 @@
 				PRODUCT_BUNDLE_IDENTIFIER = io.getstream.iOS.VideoDemoApp;
 				PRODUCT_NAME = "StreamVideoCallApp-Debug";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_STRICT_CONCURRENCY = targeted;
@@ -10606,6 +10596,8 @@
 				PRODUCT_NAME = StreamVideoCallApp;
 				PROVISIONING_PROFILE_SPECIFIER = VideoDemoAppStore;
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "match AppStore io.getstream.iOS.VideoDemoApp";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_STRICT_CONCURRENCY = targeted;
 				SWIFT_VERSION = 5.0;
@@ -10802,7 +10794,7 @@
 				INFOPLIST_FILE = "$(SRCROOT)/Sources/StreamVideo/Info.plist";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -10844,7 +10836,7 @@
 				INFOPLIST_FILE = "$(SRCROOT)/Sources/StreamVideo/Info.plist";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -10920,7 +10912,7 @@
 				INFOPLIST_FILE = "$(SRCROOT)/Sources/StreamVideoSwiftUI/Info.plist";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -10960,7 +10952,7 @@
 				INFOPLIST_FILE = "$(SRCROOT)/Sources/StreamVideoSwiftUI/Info.plist";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -11036,7 +11028,7 @@
 				INFOPLIST_FILE = "$(SRCROOT)/Sources/StreamVideoUIKit/Info.plist";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -11076,7 +11068,7 @@
 				INFOPLIST_FILE = "$(SRCROOT)/Sources/StreamVideoUIKit/Info.plist";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -11291,14 +11283,6 @@
 				minimumVersion = 2.0.0;
 			};
 		};
-		40AC73B22BE0062B00C57517 /* XCRemoteSwiftPackageReference "stream-video-noise-cancellation-swift" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/GetStream/stream-video-noise-cancellation-swift";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.3;
-			};
-		};
 		40F445C32A9E1D91004BE3DA /* XCRemoteSwiftPackageReference "stream-chat-swift-test-helpers" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/GetStream/stream-chat-swift-test-helpers";
@@ -11376,11 +11360,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 401A64A62A9DF7B400534ED1 /* XCRemoteSwiftPackageReference "effects-library" */;
 			productName = EffectsLibrary;
-		};
-		40AC73B32BE0062B00C57517 /* StreamVideoNoiseCancellation */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 40AC73B22BE0062B00C57517 /* XCRemoteSwiftPackageReference "stream-video-noise-cancellation-swift" */;
-			productName = StreamVideoNoiseCancellation;
 		};
 		40C708D52D8D729500D3501F /* Gleap */ = {
 			isa = XCSwiftPackageProductDependency;

@@ -6,6 +6,7 @@ import StreamVideo
 import SwiftUI
 
 @available(iOS 14.0, *)
+@available(macCatalyst 14.0, *)
 public struct CallParticipantsInfoView<Factory: ViewFactory>: View {
 
     var viewFactory: Factory
@@ -35,6 +36,7 @@ public struct CallParticipantsInfoView<Factory: ViewFactory>: View {
 }
 
 @available(iOS 14.0, *)
+@available(macCatalyst 14.0, *)
 struct CallParticipantsView<Factory: ViewFactory>: View {
 
     var viewFactory: Factory
@@ -80,6 +82,7 @@ struct CallParticipantsView<Factory: ViewFactory>: View {
 }
 
 @available(iOS 14.0, *)
+@available(macCatalyst 14.0, *)
 struct CallParticipantsViewContainer<Factory: ViewFactory>: View {
 
     @ObservedObject var viewModel: CallParticipantsInfoViewModel
@@ -232,7 +235,7 @@ struct ParticipantsButton: View {
 struct BlockedUsersView: View {
     
     var blockedUsers: [User]
-    var unblockActions: @MainActor(User) -> [CallParticipantMenuAction]
+    var unblockActions: @MainActor (User) -> [CallParticipantMenuAction]
     
     var body: some View {
         HStack {

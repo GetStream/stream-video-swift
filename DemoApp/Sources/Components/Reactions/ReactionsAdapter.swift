@@ -151,7 +151,9 @@ final class ReactionsAdapter: ObservableObject, @unchecked Sendable {
 
     private func handleFireworksReaction(_ reaction: Reaction, from user: User) {
         guard reaction.id == .fireworks else { return }
-        showFireworks = true
+        Task { @MainActor [weak self] in
+            self?.showFireworks = true
+        }
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
             self.showFireworks = false
         }

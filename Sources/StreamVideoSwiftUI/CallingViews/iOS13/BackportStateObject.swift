@@ -6,7 +6,9 @@ import Combine
 import SwiftUI
 
 /// A property wrapper type that instantiates an observable object.
-@propertyWrapper @available(iOS, introduced: 13, obsoleted: 14)
+@available(iOS, introduced: 13, obsoleted: 14)
+@available(macCatalyst 13.0, *)
+@propertyWrapper
 public final class BackportStateObject<ObjectType: ObservableObject & Sendable>: DynamicProperty, @unchecked Sendable
     where ObjectType.ObjectWillChangePublisher == ObservableObjectPublisher {
     
@@ -41,7 +43,7 @@ public final class BackportStateObject<ObjectType: ObservableObject & Sendable>:
         self.thunk = thunk
     }
 
-    nonisolated public func update() {
+    public nonisolated func update() {
         Task { @MainActor in
             // Not sure what this does but we'll just forward it
             _state.update()
@@ -52,7 +54,9 @@ public final class BackportStateObject<ObjectType: ObservableObject & Sendable>:
 
 /// Just like @Published this sends willSet events to the enclosing ObservableObject's ObjectWillChangePublisher
 /// but unlike @Published it also sends the wrapped value's published changes on to the enclosing ObservableObject
-@propertyWrapper @available(iOS, introduced: 13, obsoleted: 14)
+@available(iOS, introduced: 13, obsoleted: 14)
+@available(macCatalyst 13.0, *)
+@propertyWrapper
 public struct PublishedObject<Value> {
 
     public init(wrappedValue: Value) where Value: ObservableObject & Sendable,

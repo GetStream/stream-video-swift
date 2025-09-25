@@ -14,6 +14,7 @@ import SwiftUI
 /// The view reacts dynamically to the state of the associated call and allows
 /// customisation of its behaviour through policies and callback actions.
 @available(iOS 14.0, *)
+@available(macCatalyst 14.0, *)
 public struct LivestreamPlayer<Factory: ViewFactory>: View {
     
     /// Determines the join behavior for the livestream.
@@ -103,7 +104,7 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
         call.updateParticipantsSorting(with: livestreamOrAudioRoomSortPreset)
     }
     
-    internal init(
+    init(
         viewFactory: Factory = DefaultViewFactory.shared,
         call: Call,
         countdown: TimeInterval = 0,
@@ -177,7 +178,7 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
                     try? await Task.sleep(nanoseconds: 2_000_000_000)
                     try? Task.checkCancellation()
                     if !streamPaused {
-                        self.controlsShown = false
+                        controlsShown = false
                     }
                 }
             }
@@ -540,9 +541,9 @@ extension LivestreamState {
     var canJoinCall: Bool {
         switch self {
         case .backstage, .error, .initial:
-            return true
+            true
         default:
-            return false
+            false
         }
     }
 }

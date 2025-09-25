@@ -32,6 +32,7 @@ public struct ScreenshareIconView: View {
 }
 
 @available(iOS 14.0, *)
+@available(macCatalyst 14.0, *)
 public struct BroadcastIconView: View {
     
     @Injected(\.images) var images
@@ -53,13 +54,11 @@ public struct BroadcastIconView: View {
         self.viewModel = viewModel
         self.preferredExtension = preferredExtension
         self.size = size
-        offset = {
-            if #available(iOS 16.0, *) {
-                return .init(x: -5, y: -4)
-            } else {
-                return .zero
-            }
-        }()
+        offset = if #available(iOS 16.0, *) {
+            .init(x: -5, y: -4)
+        } else {
+            .zero
+        }
     }
     
     public var body: some View {

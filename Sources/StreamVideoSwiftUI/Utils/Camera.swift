@@ -9,6 +9,7 @@ import StreamVideo
 import UIKit
 
 @available(iOS 14.0, *)
+@available(macCatalyst 14.0, *)
 class Camera: NSObject, @unchecked Sendable {
     @Injected(\.orientationAdapter) private var orientationAdapter
     @Injected(\.permissions) private var permissions
@@ -65,13 +66,13 @@ class Camera: NSObject, @unchecked Sendable {
 
     private var availableCaptureDevices: [AVCaptureDevice] {
         captureDevices
-            .filter { $0.isConnected }
+            .filter(\.isConnected)
             .filter { !$0.isSuspended }
     }
 
     private var captureDevice: AVCaptureDevice? {
         didSet {
-            guard let captureDevice = captureDevice else { return }
+            guard let captureDevice else { return }
             log.debug("Using capture device: \(captureDevice.localizedName)")
             sessionQueue.async {
                 self.updateSessionForCaptureDevice(captureDevice)
@@ -88,12 +89,12 @@ class Camera: NSObject, @unchecked Sendable {
     }
     
     var isUsingFrontCaptureDevice: Bool {
-        guard let captureDevice = captureDevice else { return false }
+        guard let captureDevice else { return false }
         return frontCaptureDevices.contains(captureDevice)
     }
     
     var isUsingBackCaptureDevice: Bool {
-        guard let captureDevice = captureDevice else { return false }
+        guard let captureDevice else { return false }
         return backCaptureDevices.contains(captureDevice)
     }
     
@@ -101,16 +102,14 @@ class Camera: NSObject, @unchecked Sendable {
     
     var isPreviewPaused = false
     
-    lazy var previewStream: AsyncStream<CIImage> = {
-        AsyncStream { continuation in
-            addToPreviewStream = { [weak self] ciImage in
-                guard let self else { return }
-                if !self.isPreviewPaused {
-                    continuation.yield(ciImage)
-                }
+    lazy var previewStream: AsyncStream<CIImage> = AsyncStream { continuation in
+        addToPreviewStream = { [weak self] ciImage in
+            guard let self else { return }
+            if !isPreviewPaused {
+                continuation.yield(ciImage)
             }
         }
-    }()
+    }
         
     override init() {
         super.init()
@@ -151,7 +150,7 @@ class Camera: NSObject, @unchecked Sendable {
         }
         
         guard
-            let captureDevice = captureDevice,
+            let captureDevice,
             let deviceInput = try? AVCaptureDeviceInput(device: captureDevice)
         else {
             log.error("Failed to obtain video input.")
@@ -231,7 +230,7 @@ class Camera: NSObject, @unchecked Sendable {
     }
     
     private func updateVideoOutputConnection() {
-        if let videoOutput = videoOutput, let videoOutputConnection = videoOutput.connection(with: .video) {
+        if let videoOutput, let videoOutputConnection = videoOutput.connection(with: .video) {
             if videoOutputConnection.isVideoMirroringSupported {
                 videoOutputConnection.isVideoMirrored = isUsingFrontCaptureDevice
             }
@@ -251,14 +250,14 @@ class Camera: NSObject, @unchecked Sendable {
         if isCaptureSessionConfigured {
             if !captureSession.isRunning {
                 sessionQueue.async { [self] in
-                    self.captureSession.startRunning()
+                    captureSession.startRunning()
                 }
             }
             return
         }
         
         sessionQueue.async { [self] in
-            self.configureCaptureSession { success in
+            configureCaptureSession { success in
                 guard success else { return }
                 self.captureSession.startRunning()
             }
@@ -280,7 +279,7 @@ class Camera: NSObject, @unchecked Sendable {
         guard canRequestCameraAccess else {
             return
         }
-        if let captureDevice = captureDevice, let index = availableCaptureDevices.firstIndex(of: captureDevice) {
+        if let captureDevice, let index = availableCaptureDevices.firstIndex(of: captureDevice) {
             let nextIndex = (index + 1) % availableCaptureDevices.count
             self.captureDevice = availableCaptureDevices[nextIndex]
         } else {
@@ -290,6 +289,7 @@ class Camera: NSObject, @unchecked Sendable {
 }
 
 @available(iOS 14.0, *)
+@available(macCatalyst 14.0, *)
 extension Camera: AVCaptureVideoDataOutputSampleBufferDelegate {
     
     func captureOutput(

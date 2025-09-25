@@ -10,6 +10,8 @@ final class CameraBackgroundAccessHandler: StreamVideoCapturerActionHandler {
     // MARK: - StreamVideoCapturerActionHandler
 
     func handle(_ action: StreamVideoCapturer.Action) async throws {
+        #if targetEnvironment(macCatalyst)
+        #else
         guard #available(iOS 16, *) else {
             return
         }
@@ -24,5 +26,6 @@ final class CameraBackgroundAccessHandler: StreamVideoCapturerActionHandler {
         default:
             break
         }
+        #endif
     }
 }

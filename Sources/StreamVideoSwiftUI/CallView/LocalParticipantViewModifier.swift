@@ -7,6 +7,7 @@ import StreamVideo
 import SwiftUI
 
 @available(iOS 14.0, *)
+@available(macCatalyst 14.0, *)
 public struct LocalParticipantViewModifier: ViewModifier {
 
     private let localParticipant: CallParticipant
@@ -74,6 +75,7 @@ public struct LocalParticipantViewModifier: ViewModifier {
 }
 
 @available(iOS, introduced: 13, obsoleted: 14)
+@available(macCatalyst, introduced: 13, obsoleted: 14)
 public struct LocalParticipantViewModifier_iOS13: ViewModifier {
 
     private let localParticipant: CallParticipant
@@ -141,7 +143,7 @@ public struct LocalParticipantViewModifier_iOS13: ViewModifier {
     }
 }
 
-internal struct ParticipantMicrophoneCheckView: View {
+struct ParticipantMicrophoneCheckView: View {
 
     var audioLevels: [Float]
     var microphoneOn: Bool

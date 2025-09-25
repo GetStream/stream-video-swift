@@ -6,6 +6,7 @@ import StreamVideo
 import SwiftUI
 
 @available(iOS, introduced: 13, obsoleted: 14)
+@available(macCatalyst 13.0, *)
 public struct CallContainer_iOS13<Factory: ViewFactory>: View {
     
     @Injected(\.utils) var utils
@@ -71,9 +72,9 @@ public struct CallContainer_iOS13<Factory: ViewFactory>: View {
     private var shouldShowCallView: Bool {
         switch viewModel.callingState {
         case .outgoing, .incoming(_), .inCall, .joining, .lobby:
-            return true
+            true
         default:
-            return false
+            false
         }
     }
 }

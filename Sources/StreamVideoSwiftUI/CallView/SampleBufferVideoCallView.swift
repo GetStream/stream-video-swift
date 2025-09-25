@@ -39,6 +39,7 @@ final class SampleBufferVideoCallView: UIView {
 
 protocol SampleBufferVideoRendering {
     @available(iOS 14.0, *)
+    @available(macCatalyst 14.0, *)
     var requiresFlushToResumeDecoding: Bool { get }
     var isReadyForMoreMediaData: Bool { get }
     func flush()

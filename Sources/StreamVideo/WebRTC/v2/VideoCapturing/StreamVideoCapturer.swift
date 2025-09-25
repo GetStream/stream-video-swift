@@ -60,12 +60,22 @@ final class StreamVideoCapturer: StreamVideoCapturing {
     static func screenShareCapturer(
         with videoSource: RTCVideoSource
     ) -> StreamVideoCapturer {
-        .init(
+        #if targetEnvironment(macCatalyst)
+        let handler: StreamVideoCapturerActionHandler = if #available(macCatalyst 18.2, *) {
+            ScreenShareCaptureHandlerMacOS()
+        } else {
+            ScreenShareCaptureHandler()
+        }
+        #else
+        let handler: StreamVideoCapturerActionHandler = ScreenShareCaptureHandler()
+        #endif
+
+        return .init(
             videoSource: videoSource,
             videoCapturer: RTCVideoCapturer(delegate: videoSource),
             videoCapturerDelegate: videoSource,
             actionHandlers: [
-                ScreenShareCaptureHandler()
+                handler
             ]
         )
     }
@@ -224,9 +234,13 @@ final class StreamVideoCapturer: StreamVideoCapturing {
 
     func supportsBackgrounding() -> Bool {
         if #available(iOS 16.0, *) {
-            videoCaptureSession?.isMultitaskingCameraAccessSupported ?? false
+            #if targetEnvironment(macCatalyst)
+            return false
+            #else
+            return videoCaptureSession?.isMultitaskingCameraAccessSupported ?? false
+            #endif
         } else {
-            false
+            return false
         }
     }
 

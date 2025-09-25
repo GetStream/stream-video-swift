@@ -48,7 +48,7 @@ public protocol ViewFactory: AnyObject {
     func makeVideoParticipantsView(
         viewModel: CallViewModel,
         availableFrame: CGRect,
-        onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
+        onChangeTrackVisibility: @escaping @MainActor (CallParticipant, Bool) -> Void
     ) -> ParticipantsViewType
 
     associatedtype ParticipantViewType: View = VideoCallParticipantView<Self>
@@ -246,7 +246,7 @@ extension ViewFactory {
     public func makeVideoParticipantsView(
         viewModel: CallViewModel,
         availableFrame: CGRect,
-        onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
+        onChangeTrackVisibility: @escaping @MainActor (CallParticipant, Bool) -> Void
     ) -> some View {
         VideoParticipantsView(
             viewFactory: self,
@@ -385,12 +385,16 @@ extension ViewFactory {
                 showAllInfo: true
             )
         } else {
+            #if targetEnvironment(macCatalyst)
+            return EmptyModifier()
+            #else
             return LocalParticipantViewModifier_iOS13(
                 localParticipant: localParticipant,
                 call: call,
                 callSettings: callSettings,
                 showAllInfo: true
             )
+            #endif
         }
     }
 

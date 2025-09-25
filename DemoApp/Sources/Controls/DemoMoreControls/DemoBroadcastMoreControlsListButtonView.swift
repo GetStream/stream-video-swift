@@ -44,6 +44,23 @@ struct DemoBroadcastMoreControlsListButtonView: View {
     }
 
     @ViewBuilder
+    private var deviceAudioShareButtonView: some View {
+        #if targetEnvironment(macCatalyst)
+        DemoMoreControlListButtonView(
+            action: {
+                viewModel.startScreensharingAudio()
+            },
+            label: "Share audio"
+        ) {
+            Image(systemName: "record.circle")
+                .foregroundColor(appearance.colors.text)
+        }
+        #else
+        EmptyView()
+        #endif
+    }
+
+    @ViewBuilder
     private var inAppScreenshareButtonView: some View {
         DemoMoreControlListButtonView(
             action: {
@@ -91,39 +108,45 @@ struct DemoBroadcastMoreControlsListButtonView: View {
 
     @ViewBuilder
     private var screenShareAudioView: some View {
-        if selection == .inApp, !HuddleTrack.allCases.filter({ $0.exists == true }).isEmpty {
-            Menu {
-                Button {
-                    audioPlayer.stopPlaying()
-                    viewModel.stopScreensharingAudio()
-                } label: {
-                    Text("None")
-                }
+        if selection == .inApp {
+            VStack {
+                deviceAudioShareButtonView
 
-                ForEach(HuddleTrack.allCases, id: \.rawValue) { track in
-                    if track.exists {
+                if !HuddleTrack.allCases.filter({ $0.exists == true }).isEmpty {
+                    Menu {
                         Button {
-                            audioPlayer.startPlaying(track)
-                            viewModel.startScreensharingAudio()
+                            audioPlayer.stopPlaying()
+                            viewModel.stopScreensharingAudio()
                         } label: {
-                            Label {
-                                Text(track.rawValue)
-                            } icon: {
-                                if audioPlayer.selectedTrack == track {
-                                    Image(systemName: "play")
+                            Text("None")
+                        }
+
+                        ForEach(HuddleTrack.allCases, id: \.rawValue) { track in
+                            if track.exists {
+                                Button {
+                                    audioPlayer.startPlaying(track)
+                                    viewModel.startScreensharingAudio()
+                                } label: {
+                                    Label {
+                                        Text(track.rawValue)
+                                    } icon: {
+                                        if audioPlayer.selectedTrack == track {
+                                            Image(systemName: "play")
+                                        }
+                                    }
                                 }
                             }
                         }
+                    } label: {
+                        Label("Play audio", systemImage: "chevron.down")
+                            .frame(height: 40)
+                            .frame(maxWidth: .infinity)
+                            .buttonStyle(.borderless)
+                            .foregroundColor(appearance.colors.white)
+                            .background(Color(appearance.colors.participantBackground))
+                            .clipShape(Capsule())
                     }
                 }
-            } label: {
-                Label("Play audio", systemImage: "chevron.down")
-                    .frame(height: 40)
-                    .frame(maxWidth: .infinity)
-                    .buttonStyle(.borderless)
-                    .foregroundColor(appearance.colors.white)
-                    .background(Color(appearance.colors.participantBackground))
-                    .clipShape(Capsule())
             }
         }
     }

@@ -6,6 +6,7 @@ import StreamVideo
 import SwiftUI
 
 @available(iOS 14.0, *)
+@available(macCatalyst 14.0, *)
 public struct LobbyView<Factory: ViewFactory>: View {
 
     @StateObject var viewModel: LobbyViewModel
@@ -302,6 +303,7 @@ struct CallSettingsView: View {
 }
 
 @available(iOS 14.0, *)
+@available(macCatalyst 14.0, *)
 struct ParticipantsInCallView<Factory: ViewFactory>: View {
 
     struct ParticipantInCall: Identifiable {

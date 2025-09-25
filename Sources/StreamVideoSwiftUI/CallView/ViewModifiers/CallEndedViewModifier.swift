@@ -41,6 +41,7 @@ private final class CallEndedViewModifierViewModel: ObservableObject, @unchecked
 }
 
 @available(iOS 14.0, *)
+@available(macCatalyst 14.0, *)
 private struct CallEndedViewModifier<Subview: View>: ViewModifier {
 
     private var presentationValidator: (Call?) -> Bool
@@ -129,6 +130,7 @@ private struct CallEndedViewModifier<Subview: View>: ViewModifier {
 }
 
 @available(iOS, introduced: 13, obsoleted: 14)
+@available(macCatalyst 13.0, *)
 private struct CallEndedViewModifier_iOS13<Subview: View>: ViewModifier {
 
     private var presentationValidator: (Call?) -> Bool
