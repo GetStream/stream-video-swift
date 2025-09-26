@@ -7,7 +7,7 @@ import SwiftUI
 
 /// A property wrapper type that instantiates an observable object.
 @available(iOS, introduced: 13, obsoleted: 14)
-@available(macCatalyst 13.0, *)
+@available(iOS, unavailable)
 @propertyWrapper
 public final class BackportStateObject<ObjectType: ObservableObject & Sendable>: DynamicProperty, @unchecked Sendable
     where ObjectType.ObjectWillChangePublisher == ObservableObjectPublisher {
