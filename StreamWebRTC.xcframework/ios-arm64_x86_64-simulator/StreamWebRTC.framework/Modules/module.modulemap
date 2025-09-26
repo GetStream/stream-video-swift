@@ -1,0 +1,6 @@
+framework module StreamWebRTC {
+  umbrella header "StreamWebRTC.h"
+
+  export *
+  module * { export * }
+}
