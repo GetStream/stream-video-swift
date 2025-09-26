@@ -6,7 +6,6 @@ import StreamVideo
 import SwiftUI
 
 @available(iOS, introduced: 13, obsoleted: 14)
-@available(macCatalyst 13.0, *)
 public struct IncomingCallView_iOS13<Factory: ViewFactory>: View {
     @Injected(\.streamVideo) var streamVideo
     @Injected(\.fonts) var fonts
