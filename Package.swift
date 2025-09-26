@@ -6,7 +6,10 @@ import PackageDescription
 let package = Package(
     name: "StreamVideo",
     defaultLocalization: "en",
-    platforms: [.iOS(.v13)],
+    platforms: [
+        .iOS(.v13),
+        .macCatalyst(.v14)
+    ],
     products: [
         .library(
             name: "StreamVideo",
@@ -23,7 +26,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-protobuf.git", from: "1.29.0"),
-        .package(url: "https://github.com/GetStream/stream-video-swift-webrtc.git", exact: "137.0.41")
+        .package(url: "https://github.com/GetStream/stream-video-swift-webrtc.git", branch: "enhancement/enable-maccatalyst")
     ],
     targets: [
         .target(
