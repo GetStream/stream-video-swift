@@ -747,6 +747,14 @@ struct Stream_Video_Sfu_Event_JoinRequest {
     set {_uniqueStorage()._sessionID = newValue}
   }
 
+  /// user_session id can change during reconnects, this helps us to
+  /// identify the user across reconnects and should remain consistent until the user explicitly
+  /// disconnects, is kicked or the call is ended.
+  var unifiedSessionID: String {
+    get {return _storage._unifiedSessionID}
+    set {_uniqueStorage()._unifiedSessionID = newValue}
+  }
+
   /// dumb SDP that allow us to extract subscriber's decode codecs
   var subscriberSdp: String {
     get {return _storage._subscriberSdp}
@@ -2364,6 +2372,7 @@ extension Stream_Video_Sfu_Event_JoinRequest: SwiftProtobuf.Message, SwiftProtob
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "token"),
     2: .standard(proto: "session_id"),
+    13: .standard(proto: "unified_session_id"),
     3: .standard(proto: "subscriber_sdp"),
     8: .standard(proto: "publisher_sdp"),
     4: .standard(proto: "client_details"),
@@ -2379,6 +2388,7 @@ extension Stream_Video_Sfu_Event_JoinRequest: SwiftProtobuf.Message, SwiftProtob
 fileprivate class _StorageClass: @unchecked Sendable {
     var _token: String = String()
     var _sessionID: String = String()
+    var _unifiedSessionID: String = String()
     var _subscriberSdp: String = String()
     var _publisherSdp: String = String()
     var _clientDetails: Stream_Video_Sfu_Models_ClientDetails? = nil
@@ -2397,6 +2407,7 @@ fileprivate class _StorageClass: @unchecked Sendable {
     init(copying source: _StorageClass) {
       _token = source._token
       _sessionID = source._sessionID
+      _unifiedSessionID = source._unifiedSessionID
       _subscriberSdp = source._subscriberSdp
       _publisherSdp = source._publisherSdp
       _clientDetails = source._clientDetails
@@ -2437,6 +2448,7 @@ fileprivate class _StorageClass: @unchecked Sendable {
         case 10: try { try decoder.decodeRepeatedMessageField(value: &_storage._preferredSubscribeOptions) }()
         case 11: try { try decoder.decodeRepeatedEnumField(value: &_storage._capabilities) }()
         case 12: try { try decoder.decodeSingularEnumField(value: &_storage._source) }()
+        case 13: try { try decoder.decodeSingularStringField(value: &_storage._unifiedSessionID) }()
         default: break
         }
       }
@@ -2485,6 +2497,9 @@ fileprivate class _StorageClass: @unchecked Sendable {
       if _storage._source != .webrtcUnspecified {
         try visitor.visitSingularEnumField(value: _storage._source, fieldNumber: 12)
       }
+      if !_storage._unifiedSessionID.isEmpty {
+        try visitor.visitSingularStringField(value: _storage._unifiedSessionID, fieldNumber: 13)
+      }
     }
     try unknownFields.traverse(visitor: &visitor)
   }
@@ -2496,6 +2511,7 @@ fileprivate class _StorageClass: @unchecked Sendable {
         let rhs_storage = _args.1
         if _storage._token != rhs_storage._token {return false}
         if _storage._sessionID != rhs_storage._sessionID {return false}
+        if _storage._unifiedSessionID != rhs_storage._unifiedSessionID {return false}
         if _storage._subscriberSdp != rhs_storage._subscriberSdp {return false}
         if _storage._publisherSdp != rhs_storage._publisherSdp {return false}
         if _storage._clientDetails != rhs_storage._clientDetails {return false}
