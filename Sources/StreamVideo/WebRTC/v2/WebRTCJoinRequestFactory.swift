@@ -18,9 +18,9 @@ struct WebRTCJoinRequestFactory {
         var isFastReconnect: Bool {
             switch self {
             case .fastReconnect:
-                return true
+                true
             default:
-                return false
+                false
             }
         }
     }
@@ -63,6 +63,7 @@ struct WebRTCJoinRequestFactory {
         )
         result.capabilities = capabilities
         result.source = .webrtcUnspecified
+        result.unifiedSessionID = coordinator.stateAdapter.unifiedSessionId
 
         if let reconnectDetails = await buildReconnectDetails(
             for: connectionType,
@@ -112,11 +113,11 @@ struct WebRTCJoinRequestFactory {
                 function: function,
                 line: line
             )
-            result.subscriptions = buildSubscriptionDetails(
+            result.subscriptions = await buildSubscriptionDetails(
                 nil,
-                sessionID: await coordinator.stateAdapter.sessionID,
-                participants: Array(await coordinator.stateAdapter.participants.values),
-                incomingVideoQualitySettings: await coordinator
+                sessionID: coordinator.stateAdapter.sessionID,
+                participants: Array(coordinator.stateAdapter.participants.values),
+                incomingVideoQualitySettings: coordinator
                     .stateAdapter
                     .incomingVideoQualitySettings,
                 file: file,
@@ -135,11 +136,11 @@ struct WebRTCJoinRequestFactory {
                 line: line
             )
             result.fromSfuID = fromHostname
-            result.subscriptions = buildSubscriptionDetails(
+            result.subscriptions = await buildSubscriptionDetails(
                 nil,
-                sessionID: await coordinator.stateAdapter.sessionID,
-                participants: Array(await coordinator.stateAdapter.participants.values),
-                incomingVideoQualitySettings: await coordinator
+                sessionID: coordinator.stateAdapter.sessionID,
+                participants: Array(coordinator.stateAdapter.participants.values),
+                incomingVideoQualitySettings: coordinator
                     .stateAdapter
                     .incomingVideoQualitySettings,
                 file: file,
@@ -157,11 +158,11 @@ struct WebRTCJoinRequestFactory {
                 function: function,
                 line: line
             )
-            result.subscriptions = buildSubscriptionDetails(
+            result.subscriptions = await buildSubscriptionDetails(
                 fromSessionID,
-                sessionID: await coordinator.stateAdapter.sessionID,
-                participants: Array(await coordinator.stateAdapter.participants.values),
-                incomingVideoQualitySettings: await coordinator
+                sessionID: coordinator.stateAdapter.sessionID,
+                participants: Array(coordinator.stateAdapter.participants.values),
+                incomingVideoQualitySettings: coordinator
                     .stateAdapter
                     .incomingVideoQualitySettings,
                 file: file,
