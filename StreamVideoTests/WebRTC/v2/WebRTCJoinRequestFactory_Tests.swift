@@ -18,7 +18,7 @@ final class WebRTCJoinRequestFactory_Tests: XCTestCase, @unchecked Sendable {
     // MARK: - Lifecycle
 
     override class func tearDown() {
-        Self.videoConfig = nil
+        videoConfig = nil
         super.tearDown()
     }
 
@@ -42,6 +42,10 @@ final class WebRTCJoinRequestFactory_Tests: XCTestCase, @unchecked Sendable {
             .coordinator
             .stateAdapter
             .sessionID
+        let unifiedSessionId = await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .unifiedSessionId
         await mockCoordinatorStack
             .coordinator
             .stateAdapter
@@ -57,6 +61,7 @@ final class WebRTCJoinRequestFactory_Tests: XCTestCase, @unchecked Sendable {
         )
 
         XCTAssertEqual(result.sessionID, sessionId)
+        XCTAssertEqual(result.unifiedSessionID, unifiedSessionId)
         XCTAssertEqual(result.subscriberSdp, subscriberSdp)
         XCTAssertFalse(result.fastReconnect)
         XCTAssertEqual(result.token, token)
@@ -81,6 +86,10 @@ final class WebRTCJoinRequestFactory_Tests: XCTestCase, @unchecked Sendable {
             .coordinator
             .stateAdapter
             .sessionID
+        let unifiedSessionId = await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .unifiedSessionId
         await mockCoordinatorStack
             .coordinator
             .stateAdapter
@@ -96,6 +105,7 @@ final class WebRTCJoinRequestFactory_Tests: XCTestCase, @unchecked Sendable {
         )
 
         XCTAssertEqual(result.sessionID, sessionId)
+        XCTAssertEqual(result.unifiedSessionID, unifiedSessionId)
         XCTAssertEqual(result.subscriberSdp, subscriberSdp)
         XCTAssertTrue(result.fastReconnect)
         XCTAssertEqual(result.token, token)
@@ -120,6 +130,10 @@ final class WebRTCJoinRequestFactory_Tests: XCTestCase, @unchecked Sendable {
             .coordinator
             .stateAdapter
             .sessionID
+        let unifiedSessionId = await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .unifiedSessionId
         await mockCoordinatorStack
             .coordinator
             .stateAdapter
@@ -136,6 +150,7 @@ final class WebRTCJoinRequestFactory_Tests: XCTestCase, @unchecked Sendable {
         )
 
         XCTAssertEqual(result.sessionID, sessionId)
+        XCTAssertEqual(result.unifiedSessionID, unifiedSessionId)
         XCTAssertEqual(result.subscriberSdp, subscriberSdp)
         XCTAssertFalse(result.fastReconnect)
         XCTAssertEqual(result.token, token)
@@ -160,6 +175,10 @@ final class WebRTCJoinRequestFactory_Tests: XCTestCase, @unchecked Sendable {
             .coordinator
             .stateAdapter
             .sessionID
+        let unifiedSessionId = await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .unifiedSessionId
         await mockCoordinatorStack
             .coordinator
             .stateAdapter
@@ -176,6 +195,7 @@ final class WebRTCJoinRequestFactory_Tests: XCTestCase, @unchecked Sendable {
         )
 
         XCTAssertEqual(result.sessionID, sessionId)
+        XCTAssertEqual(result.unifiedSessionID, unifiedSessionId)
         XCTAssertEqual(result.subscriberSdp, subscriberSdp)
         XCTAssertFalse(result.fastReconnect)
         XCTAssertEqual(result.token, token)
@@ -400,10 +420,10 @@ final class WebRTCJoinRequestFactory_Tests: XCTestCase, @unchecked Sendable {
                 .participants.count == 4
         }
 
-        let result = subject.buildSubscriptionDetails(
+        let result = await subject.buildSubscriptionDetails(
             .unique,
-            sessionID: await mockCoordinatorStack.coordinator.stateAdapter.sessionID,
-            participants: Array(await mockCoordinatorStack.coordinator.stateAdapter.participants.values),
+            sessionID: mockCoordinatorStack.coordinator.stateAdapter.sessionID,
+            participants: Array(mockCoordinatorStack.coordinator.stateAdapter.participants.values),
             incomingVideoQualitySettings: .none
         ).sorted { $0.sessionID <= $1.sessionID }
 
