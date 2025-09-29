@@ -155,6 +155,15 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
         }
     }
 
+    func cleanUp() {
+        processingQueue.addOperation { [weak self] in
+            // By emptying the Set we are saying that there are no permissions
+            // required, so when the app moves to foreground no prompts will
+            // appear.
+            self?.requiredPermissions = []
+        }
+    }
+
     // MARK: - Private Helpers
 
     /// Requests pending permissions when returning to foreground, if needed.
