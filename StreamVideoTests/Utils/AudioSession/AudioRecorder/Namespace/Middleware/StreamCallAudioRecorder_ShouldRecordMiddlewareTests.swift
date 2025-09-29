@@ -14,6 +14,12 @@ final class StreamCallAudioRecorder_ShouldRecordMiddlewareTests: StreamVideoTest
 
     private lazy var mockAudioStore: MockRTCAudioStore! = .init()
 
+    override func setUp() {
+        super.setUp()
+        _ = PermissionStore.currentValue
+        _ = mockAudioStore
+    }
+
     override func tearDown() {
         mockAudioStore?.dismantle()
         mockAudioStore = nil
@@ -41,6 +47,7 @@ final class StreamCallAudioRecorder_ShouldRecordMiddlewareTests: StreamVideoTest
 
         let call = await MockCall(.dummy())
         try await call.microphone.enable()
+        await fulfilmentInMainActor { call.state.callSettings.audioOn }
         streamVideo.state.activeCall = call
 
         await safeFulfillment(of: [validation])
@@ -64,6 +71,7 @@ final class StreamCallAudioRecorder_ShouldRecordMiddlewareTests: StreamVideoTest
 
         let call = await MockCall(.dummy())
         try await call.microphone.enable()
+        await fulfilmentInMainActor { call.state.callSettings.audioOn }
         streamVideo.state.activeCall = call
 
         await wait(for: 0.1)
@@ -100,6 +108,7 @@ final class StreamCallAudioRecorder_ShouldRecordMiddlewareTests: StreamVideoTest
 
         let call = await MockCall(.dummy())
         try await call.microphone.enable()
+        await fulfilmentInMainActor { call.state.callSettings.audioOn }
         streamVideo.state.activeCall = call
 
         await safeFulfillment(of: [validation])
