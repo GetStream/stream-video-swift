@@ -2,14 +2,15 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import Foundation
 @testable import StreamVideo
 import XCTest
 
 final class IdleTimerAdapter_Tests: XCTestCase, @unchecked Sendable {
 
-    private var mockStreamVideo: MockStreamVideo! = .init()
-    private lazy var subject: IdleTimerAdapter! = .init(mockStreamVideo)
+    private var activeCallSubject: CurrentValueSubject<Call?, Never>! = .init(nil)
+    private lazy var subject: IdleTimerAdapter! = .init(activeCallSubject.eraseToAnyPublisher())
 
     override func setUp() {
         super.setUp()
@@ -18,37 +19,40 @@ final class IdleTimerAdapter_Tests: XCTestCase, @unchecked Sendable {
 
     override func tearDown() {
         subject = nil
-        mockStreamVideo = nil
+        activeCallSubject.send(nil)
+        activeCallSubject = nil
         super.tearDown()
     }
 
     // MARK: - hasActiveCall
 
     func test_hasActiveCall_isTrue_IdleTimerIsDisabled() async {
-        mockStreamVideo.state.activeCall = .dummy()
+        activeCallSubject.send(.dummy())
 
-        await fulfilmentInMainActor { self.subject.isIdleTimerDisabled == true }
+        await fulfilmentInMainActor {
+            let result = self.subject.isIdleTimerDisabled == true
+            return result
+        }
     }
 
     func test_hasActiveCall_isFalse_IdleTimerIsEnabled() async {
-        mockStreamVideo.state.activeCall = nil
+        activeCallSubject.send(nil)
 
         await fulfilmentInMainActor { self.subject.isIdleTimerDisabled == false }
     }
 
     func test_hasActiveCall_changesFromFalseToTrue_firstIsEnabledThenDisabled() async {
-        mockStreamVideo.state.activeCall = nil
+        activeCallSubject.send(nil)
         await fulfilmentInMainActor { self.subject.isIdleTimerDisabled == false }
 
-        mockStreamVideo.state.activeCall = .dummy()
+        activeCallSubject.send(.dummy())
         await fulfilmentInMainActor { self.subject.isIdleTimerDisabled == true }
     }
 
     func test_hasActiveCall_changesFromTrueToFalse_firstIsDisabledThenEnabled() async {
-        mockStreamVideo.state.activeCall = .dummy()
-        await fulfilmentInMainActor { self.subject.isIdleTimerDisabled == true }
+        activeCallSubject.send(.dummy())
+        activeCallSubject.send(nil)
 
-        mockStreamVideo.state.activeCall = nil
         await fulfilmentInMainActor { self.subject.isIdleTimerDisabled == false }
     }
 }

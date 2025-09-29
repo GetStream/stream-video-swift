@@ -4,6 +4,7 @@
 
 // swiftlint:disable discourage_task_init
 
+import Combine
 import Foundation
 #if canImport(UIKit)
 import UIKit
@@ -11,30 +12,33 @@ import UIKit
 
 final class IdleTimerAdapter: @unchecked Sendable {
 
+    private var observationCancellable: AnyCancellable?
     private(set) var isIdleTimerDisabled: Bool = false
-    private let disposableBag = DisposableBag()
 
-    init(_ streamVideo: StreamVideo) {
+    convenience init(_ streamVideo: StreamVideo) {
+        self.init(streamVideo.state.$activeCall.eraseToAnyPublisher())
+    }
+
+    init(_ publisher: AnyPublisher<Call?, Never>) {
         #if canImport(UIKit)
         Task { @MainActor in
             self.isIdleTimerDisabled = UIApplication.shared.isIdleTimerDisabled
         }
-        streamVideo
-            .state
-            .$activeCall
+        observationCancellable = publisher
             .map { $0 != nil }
-            .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in self?.didUpdate(hasActiveCall: $0) }
-            .store(in: disposableBag)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] hasActiveCall in
+                MainActor.assumeIsolated { [weak self] in
+                    UIApplication.shared.isIdleTimerDisabled = hasActiveCall
+                    self?.isIdleTimerDisabled = hasActiveCall
+                }
+            }
         #endif
     }
 
-    // MARK: - Private helpers
-
-    @MainActor
-    private func didUpdate(hasActiveCall: Bool) {
+    deinit {
         #if canImport(UIKit)
-        UIApplication.shared.isIdleTimerDisabled = hasActiveCall
-        isIdleTimerDisabled = hasActiveCall
+        Task { @MainActor in UIApplication.shared.isIdleTimerDisabled = false }
         #endif
     }
 }

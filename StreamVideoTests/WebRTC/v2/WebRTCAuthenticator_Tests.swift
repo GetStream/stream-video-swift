@@ -157,11 +157,10 @@ final class WebRTCAuthenticator_Tests: XCTestCase, @unchecked Sendable {
             options: options
         )
 
-        let callSettings = await mockCoordinatorStack
-            .coordinator
-            .stateAdapter
-            .callSettings
-        XCTAssertEqual(callSettings, .init(expected.call.settings))
+        await fulfillment {
+            let callSettings = await self.mockCoordinatorStack.coordinator.stateAdapter.callSettings
+            return callSettings == .init(expected.call.settings)
+        }
     }
 
     func test_authenticate_withCreateFalseAndInitialCallSettings_shouldSetInitialCallSettings() async throws {
@@ -190,11 +189,10 @@ final class WebRTCAuthenticator_Tests: XCTestCase, @unchecked Sendable {
             options: options
         )
 
-        let callSettings = await mockCoordinatorStack
-            .coordinator
-            .stateAdapter
-            .callSettings
-        XCTAssertEqual(callSettings, initialCallSettings)
+        await fulfillment {
+            let callSettings = await self.mockCoordinatorStack.coordinator.stateAdapter.callSettings
+            return callSettings == initialCallSettings
+        }
     }
 
     func test_authenticate_withCreateFalseWithoutInitialCallSettings_shouldSetCallSettingsFromResponse() async throws {
@@ -214,11 +212,10 @@ final class WebRTCAuthenticator_Tests: XCTestCase, @unchecked Sendable {
             options: options
         )
 
-        let callSettings = await mockCoordinatorStack
-            .coordinator
-            .stateAdapter
-            .callSettings
-        XCTAssertEqual(callSettings, .init(expected.call.settings))
+        await fulfillment {
+            let callSettings = await self.mockCoordinatorStack.coordinator.stateAdapter.callSettings
+            return callSettings == .init(expected.call.settings)
+        }
     }
 
     func test_authenticate_updatesVideoOptions() async throws {
