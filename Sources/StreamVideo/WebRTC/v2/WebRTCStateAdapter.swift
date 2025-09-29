@@ -355,6 +355,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         set(participantPins: [])
         trackStorage.removeAll()
         audioSession.deactivate()
+        permissionsAdapter.cleanUp()
     }
 
     /// Cleans up the session for reconnection, clearing adapters and tracks.
