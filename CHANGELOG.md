@@ -5,6 +5,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 # Upcoming
 
 ### 🔄 Changed
+- Permissions prompts won't show up when moving to background for a call that has already ended but the feedback screen is visible. [#951](https://github.com/GetStream/stream-video-swift/pull/951)
 
 # [1.33.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.33.0)
 _September 15, 2025_
