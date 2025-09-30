@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		27293A6712944001B2C5E10D /* LoggerConcurrency_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD04B38CCAB544BBA6FEF29C /* LoggerConcurrency_Tests.swift */; };
 		40034C202CFDABE600A318B1 /* PublishOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40034C1F2CFDABE600A318B1 /* PublishOptions.swift */; };
 		40034C262CFE155C00A318B1 /* CallKitAvailabilityPolicyProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40034C252CFE155C00A318B1 /* CallKitAvailabilityPolicyProtocol.swift */; };
 		40034C282CFE156800A318B1 /* CallKitAvailabilityPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40034C272CFE156800A318B1 /* CallKitAvailabilityPolicy.swift */; };
@@ -3176,6 +3177,7 @@
 		84FCE44B2CE208C400649F86 /* StartClosedCaptionsResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartClosedCaptionsResponse.swift; sourceTree = "<group>"; };
 		84FCE44C2CE208C400649F86 /* StopClosedCaptionsResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopClosedCaptionsResponse.swift; sourceTree = "<group>"; };
 		84FFB0692A8D1380005BA275 /* DemoCallTopView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoCallTopView.swift; sourceTree = "<group>"; };
+		CD04B38CCAB544BBA6FEF29C /* LoggerConcurrency_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggerConcurrency_Tests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -6442,6 +6444,7 @@
 				40FAAC872DDC9F83007BF93A /* ConsumableBucket */,
 				40FB95CD2DAD6FD700B24BC7 /* Extensions */,
 				406568882E04275700A67EAC /* IdleTimerAdapter */,
+				94556563353E4DE4876A08A4 /* Logger */,
 				400C9FC22D9D0BC900DB26DC /* OperationQueue+TaskOperations */,
 				40C4DF4E2C1C41470035DBC2 /* ParticipantAutoLeavePolicy */,
 				40B3E5392DBBAF8B00DE8F50 /* Proximity */,
@@ -7567,6 +7570,14 @@
 			path = WebRTC;
 			sourceTree = "<group>";
 		};
+		94556563353E4DE4876A08A4 /* Logger */ = {
+			isa = PBXGroup;
+			children = (
+				CD04B38CCAB544BBA6FEF29C /* LoggerConcurrency_Tests.swift */,
+			);
+			path = Logger;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -7858,7 +7869,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1430;
-				LastUpgradeCheck = 1640;
+				LastUpgradeCheck = 2600;
 				TargetAttributes = {
 					82392D502993C9E100941435 = {
 						CreatedOnToolsVersion = 14.2;
@@ -9319,6 +9330,7 @@
 				40B48C2C2D14D0FF002C4EAB /* StreamVideoSfuModelsPublishOption_ConvenienceTests.swift in Sources */,
 				406B3C1C2C903A2B00FC93A1 /* MockVideoCapturerFactory.swift in Sources */,
 				84BB570E2A20D7BB0002C123 /* Mapping_Tests.swift in Sources */,
+				27293A6712944001B2C5E10D /* LoggerConcurrency_Tests.swift in Sources */,
 				8251E62F2A17BEEF00E7257A /* ImageFactory.swift in Sources */,
 				401C1EF02D493DCA00304609 /* OrderedCapacityQueueTests.swift in Sources */,
 				40E9B3B32BCD93AE00ACF18F /* JoinCallResponse+Dummy.swift in Sources */,
@@ -9843,6 +9855,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG STREAM_TESTS";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_STRICT_CONCURRENCY = targeted;
@@ -10380,6 +10393,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG STREAM_TESTS";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_STRICT_CONCURRENCY = targeted;
@@ -10439,6 +10453,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_STRICT_CONCURRENCY = targeted;

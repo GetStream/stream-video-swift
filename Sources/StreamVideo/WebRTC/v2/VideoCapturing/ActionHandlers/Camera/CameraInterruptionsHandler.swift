@@ -134,6 +134,8 @@ extension AVCaptureSession.InterruptionReason {
             return ".videoDeviceNotAvailableWithMultipleForegroundApps"
         case .videoDeviceNotAvailableDueToSystemPressure:
             return ".videoDeviceNotAvailableDueToSystemPressure"
+        case .sensitiveContentMitigationActivated:
+            return ".sensitiveContentMitigationActivated"
         @unknown default:
             return "\(self)"
         }

@@ -94,6 +94,8 @@ final class ApplicationLifecycleVideoMuteAdapterTests: XCTestCase, @unchecked Se
 
     func test_didStartCapturing_supportsBackgroundingIsFalseAndMovesToForeground_sfuWasCalledWithMuteFalse() async throws {
         mockCapturer.stub(for: .supportsBackgrounding, with: false)
+        mockSFUStack.service.resetRecords(for: .updateTrackMuteState)
+        mockSFUStack.service.updateMuteStatesWasCalledWithRequest = nil
 
         await subject.didStartCapturing(with: mockCapturer)
         // Reset after receiving the foreground initial state

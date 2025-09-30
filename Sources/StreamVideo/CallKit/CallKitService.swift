@@ -121,7 +121,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         localizedCallerName: String,
         callerId: String,
         hasVideo: Bool = false,
-        completion: @escaping (Error?) -> Void
+        completion: @Sendable @escaping (Error?) -> Void
     ) {
         let (callUUID, callUpdate) = buildCallUpdate(
             cid: cid,

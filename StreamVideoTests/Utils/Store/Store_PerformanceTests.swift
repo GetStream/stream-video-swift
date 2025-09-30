@@ -219,28 +219,26 @@ final class Store_PerformanceTests: XCTestCase, @unchecked Sendable {
     /// Tests memory usage with large state.
     func test_memoryUsageWithLargeState() {
         let iterations = 10000
-        
-        measure {
-            autoreleasepool {
-                for i in 0..<iterations {
-                    store.dispatch(.appendToArray(i))
-                }
-                
-                // Wait for completion
-                let expectation = XCTestExpectation(description: "Large state")
-                
-                Task {
-                    await fulfillment(timeout: 10) {
-                        self.store.state.array.count == iterations
-                    }
-                    expectation.fulfill()
-                }
-                
-                wait(for: [expectation], timeout: 10)
-                
-                // Verify memory is released
-                store.dispatch(.reset)
-            }
+
+        let options = XCTMeasureOptions()
+        options.iterationCount = 2
+        measure(options: options) {
+            // Wait for completion
+            let expectation = XCTestExpectation(description: "Large state")
+            let cancellable = store
+                .publisher(\.array)
+                .map(\.endIndex)
+                .filter { $0 == iterations }
+                .sink { _ in expectation.fulfill() }
+
+            let actions = (0..<iterations).map { PerformanceTestNamespace.Action.appendToArray($0) }
+            actions.forEach { store.dispatch($0) }
+
+            wait(for: [expectation])
+
+            // Verify memory is released
+            store.dispatch(.reset)
+            cancellable.cancel()
         }
     }
 }

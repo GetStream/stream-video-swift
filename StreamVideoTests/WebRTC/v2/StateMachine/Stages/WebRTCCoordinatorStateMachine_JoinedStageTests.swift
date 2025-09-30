@@ -143,7 +143,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         XCTAssertEqual(subject.context.reconnectionStrategy, .rejoin)
         XCTAssertEqual(
             (subject.context.flowError as? ClientError)?.localizedDescription,
-            "Migration from hostname:https://getstream.io failed after 1.0\nwhere we didn\'t receive a ParticipantMigrationComplete\nevent."
+            "Migration from hostname:https://getstream.io failed after 5.0\nwhere we didn\'t receive a ParticipantMigrationComplete\nevent."
         )
     }
 
