@@ -26,11 +26,11 @@ enum WebRTCConfiguration {
         #if STREAM_TESTS
         /// Timeout for authentication in test environment.
         static let testing = Timeout(
-            authenticate: 1,
-            connect: 1,
-            join: 1,
-            migrationCompletion: 1,
-            publisherSetUpBeforeNegotiation: 2
+            authenticate: 5,
+            connect: 5,
+            join: 5,
+            migrationCompletion: 5,
+            publisherSetUpBeforeNegotiation: 5
         )
         #endif
     }

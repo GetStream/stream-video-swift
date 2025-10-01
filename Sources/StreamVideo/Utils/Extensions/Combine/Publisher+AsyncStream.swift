@@ -53,14 +53,13 @@ public extension Publisher where Output: Sendable {
         function: StaticString = #function,
         line: UInt = #line
     ) async throws -> Output {
-        nonisolated(unsafe) let selfReference = self
-        return try await Task(
+        try await Task(
             timeoutInSeconds: timeoutInSeconds,
             file: file,
             function: function,
             line: line
-        ) {
-            try await selfReference.firstValue(file: file, line: line)
+        ) { [self] in
+            try await self.firstValue(file: file, line: line)
         }.value
     }
 

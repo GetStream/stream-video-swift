@@ -13,7 +13,7 @@ protocol MicrophonePermissionProviding {
     
     /// Requests microphone permission from the user.
     /// - Parameter completion: Called with `true` if permission granted.
-    func requestPermission(_ completion: @escaping (Bool) -> Void)
+    func requestPermission(_ completion: @Sendable @escaping (Bool) -> Void)
 }
 
 /// Default implementation for microphone permission management using
@@ -45,7 +45,7 @@ final class StreamMicrophonePermissionProvider: MicrophonePermissionProviding {
         }
     }
 
-    func requestPermission(_ completion: @escaping (Bool) -> Void) {
+    func requestPermission(_ completion: @Sendable @escaping (Bool) -> Void) {
         if #available(iOS 17.0, *) {
             AVAudioApplication
                 .requestRecordPermission(completionHandler: completion)

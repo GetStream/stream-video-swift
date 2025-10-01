@@ -18,7 +18,7 @@ protocol PushNotificationsPermissionProviding {
     ///   - completion: Called with grant status and optional error.
     func requestPermission(
         with options: UNAuthorizationOptions,
-        _ completion: @escaping (Bool, Error?) -> Void
+        _ completion: @Sendable @escaping (Bool, Error?) -> Void
     )
 }
 
@@ -56,7 +56,7 @@ final class StreamPushNotificationsPermissionProvider: PushNotificationsPermissi
 
     func requestPermission(
         with options: UNAuthorizationOptions,
-        _ completion: @escaping (Bool, Error?) -> Void
+        _ completion: @Sendable @escaping (Bool, Error?) -> Void
     ) {
         UNUserNotificationCenter
             .current()

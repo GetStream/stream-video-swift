@@ -8,7 +8,7 @@ import Foundation
 import StreamWebRTC
 
 private class Message {
-    nonisolated(unsafe) static let imageContextVar: CIContext? = {
+    static let imageContextVar: CIContext? = {
         var imageContext = CIContext(options: nil)
         return imageContext
     }()
