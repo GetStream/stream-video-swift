@@ -6,6 +6,7 @@ import Combine
 @testable import StreamVideo
 @preconcurrency import XCTest
 
+@MainActor
 final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, @unchecked Sendable {
 
     private struct TestError: Error {}

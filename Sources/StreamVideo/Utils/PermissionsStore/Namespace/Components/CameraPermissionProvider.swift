@@ -13,7 +13,7 @@ protocol CameraPermissionProviding {
     
     /// Requests camera permission from the user.
     /// - Parameter completion: Called with `true` if permission granted.
-    func requestPermission(_ completion: @escaping (Bool) -> Void)
+    func requestPermission(_ completion: @Sendable @escaping (Bool) -> Void)
 }
 
 /// Default implementation for camera permission management using AVFoundation.
@@ -33,7 +33,7 @@ final class StreamCameraPermissionProvider: CameraPermissionProviding {
         }
     }
 
-    func requestPermission(_ completion: @escaping (Bool) -> Void) {
+    func requestPermission(_ completion: @Sendable @escaping (Bool) -> Void) {
         AVCaptureDevice
             .requestAccess(for: .video, completionHandler: completion)
     }

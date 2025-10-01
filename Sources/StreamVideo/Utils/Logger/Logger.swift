@@ -239,7 +239,7 @@ public enum LogConfig {
         }
     }
     
-    nonisolated(unsafe) private static var _destinations: [LogDestination]?
+    private static let _destinations: AtomicStorage<[LogDestination]?> = .init(nil)
 
     /// Destinations for the default logger. Please see `LogDestination`.
     /// Defaults to only `ConsoleLogDestination`, which only prints the messages.
@@ -247,10 +247,11 @@ public enum LogConfig {
     /// - Important: Other options in `ChatClientConfig.Logging` will not take affect if this is changed.
     public static var destinations: [LogDestination] {
         get {
-            if let destinations = _destinations {
+            if let destinations = _destinations.get() {
                 return destinations
             } else {
-                _destinations = destinationTypes.map {
+                let _destinationTypes = destinationTypes
+                let newDestinations = _destinationTypes.map {
                     $0.init(
                         identifier: identifier,
                         level: level,
@@ -266,12 +267,13 @@ public enum LogConfig {
                         showFunctionName: showFunctionName
                     )
                 }
-                return _destinations!
+                _destinations.set(newDestinations)
+                return newDestinations
             }
         }
         set {
             invalidateLogger()
-            _destinations = newValue
+            _destinations.set(newValue)
         }
     }
     
@@ -303,25 +305,29 @@ public enum LogConfig {
     /// Invalidates the current logger instance so it can be recreated.
     private static func invalidateLogger() {
         _logger = nil
-        _destinations = nil
+        _destinations.set(nil)
     }
 }
 
 /// Entity used for logging messages.
-public class Logger {
+public class Logger: @unchecked Sendable {
     /// Identifier of the Logger. Will be visible if a destination has `showIdentifiers` enabled.
     public let identifier: String
     
     /// Destinations for this logger.
     /// See `LogDestination` protocol for details.
-    public var destinations: [LogDestination]
-    
+    @Atomic private var _destinations: [LogDestination]
+    public var destinations: [LogDestination] {
+        get { _destinations }
+        set { _destinations = newValue }
+    }
+
     private let loggerQueue = DispatchQueue(label: "LoggerQueue \(UUID())")
     
     /// Init a logger with a given identifier and destinations.
     public init(identifier: String = "", destinations: [LogDestination] = []) {
         self.identifier = identifier
-        self.destinations = destinations
+        _destinations = destinations
     }
     
     /// Allows logger to be called as function.
@@ -371,23 +377,33 @@ public class Logger {
         subsystems: LogSubsystem = .other,
         error: Error?
     ) {
-        let enabledDestinations = destinations.filter { $0.isEnabled(level: level, subsystems: subsystems) }
-        guard !enabledDestinations.isEmpty else { return }
-        
-        let logDetails = LogDetails(
-            loggerIdentifier: identifier,
-            subsystem: subsystems,
-            level: level,
-            date: Date(),
-            message: String(describing: message()),
-            threadName: threadName,
-            functionName: functionName,
-            fileName: fileName,
-            lineNumber: lineNumber,
-            error: error
-        )
-        for destination in enabledDestinations {
-            loggerQueue.async {
+        let resolvedMessage = String(describing: message())
+        let resolvedError = error
+        let resolvedThreadName = threadName
+        let timestamp = Date()
+        let loggerIdentifier = identifier
+        let destinations = self.destinations
+
+        loggerQueue.async {
+            let enabledDestinations = destinations.filter {
+                $0.isEnabled(level: level, subsystems: subsystems)
+            }
+            guard !enabledDestinations.isEmpty else { return }
+
+            let logDetails = LogDetails(
+                loggerIdentifier: loggerIdentifier,
+                subsystem: subsystems,
+                level: level,
+                date: timestamp,
+                message: resolvedMessage,
+                threadName: resolvedThreadName,
+                functionName: functionName,
+                fileName: fileName,
+                lineNumber: lineNumber,
+                error: resolvedError
+            )
+
+            for destination in enabledDestinations {
                 destination.process(logDetails: logDetails)
             }
         }
@@ -587,4 +603,16 @@ extension Data {
             return "<not available string representation>"
         }
     }
+}
+
+final class AtomicStorage<Element>: @unchecked Sendable {
+
+    private let queue = UnfairQueue()
+    private var value: Element
+
+    init(_ initial: Element) { value = initial }
+
+    func get() -> Element { queue.sync { value } }
+
+    func set(_ newValue: Element) { queue.sync { value = newValue } }
 }
