@@ -10,6 +10,7 @@ import Foundation
 
 final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
 
+    private var completionError: Error?
     private lazy var subject: CallKitService! = .init()
     private lazy var uuidFactory: MockUUIDFactory! = .init()
     private lazy var callController: MockCXCallController! = .init()
@@ -58,6 +59,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         localizedCallerName = nil
         callerId = nil
         mockAudioStore = nil
+        completionError = nil
         super.tearDown()
     }
 
@@ -156,7 +158,6 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
     func test_reportIncomingCall_callProviderWasCalledWithExpectedValues() {
         // Given
         let expectation = self.expectation(description: "Report Incoming Call")
-        var completionError: Error?
 
         // When
         subject.reportIncomingCall(
@@ -165,7 +166,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
             callerId: callerId,
             hasVideo: false
         ) { error in
-            completionError = error
+            self.completionError = error
             expectation.fulfill()
         }
 
