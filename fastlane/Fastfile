@@ -19,7 +19,7 @@ source_packages_path = is_ci ? 'spm_cache' : nil
 gci = ENV['GOOGLE_CLIENT_ID'] || ''
 reversed_gci = gci.split('.').reverse.join('.')
 is_localhost = !is_ci
-@force_check = false
+@force_check = true
 swift_environment_path = File.absolute_path('../Sources/StreamVideo/Generated/SystemEnvironment+Version.swift')
 
 before_all do |lane|
