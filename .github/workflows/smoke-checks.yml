@@ -131,9 +131,9 @@ jobs:
 
   automated-code-review:
     name: Automated Code Review
-    runs-on: macos-15
+    runs-on: macos-14
     env:
-      XCODE_VERSION: "16.0"
+      XCODE_VERSION: "16.1"
     if: ${{ github.event.inputs.record_snapshots_swiftui != 'true' && github.event.inputs.record_snapshots_uikit != 'true' }}
     steps:
     - uses: actions/checkout@v4.1.1
@@ -149,27 +149,28 @@ jobs:
 
   build-old-xcode:
     name: Build SDKs (Old Xcode)
-    runs-on: macos-15
+    runs-on: macos-14
     needs: test-llc-debug
     if: ${{ github.event.inputs.record_snapshots_swiftui != 'true' && github.event.inputs.record_snapshots_uikit != 'true' }}
     env:
-      XCODE_VERSION: "16.0"
+      XCODE_VERSION: "16.1"
     steps:
     - name: Connect Bot
       uses: webfactory/ssh-agent@v0.7.0
       with:
         ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
     - uses: actions/checkout@v3.1.0
+    - uses: ./.github/actions/xcode-cache
     - uses: ./.github/actions/ruby-cache
     - name: List Xcode versions
       run: mdfind "kMDItemCFBundleIdentifier = 'com.apple.dt.Xcode'"
     - name: Build LLC
-      run: bundle exec fastlane test device:"iPhone 15" build_for_testing:true
+      run: bundle exec fastlane test device:"iPhone 16" build_for_testing:true
       timeout-minutes: 25
     - name: Build SwiftUI
-      run: bundle exec fastlane test_swiftui device:"iPhone 15" build_for_testing:true
+      run: bundle exec fastlane test_swiftui device:"iPhone 16" build_for_testing:true
     - name: Build UIKit
-      run: bundle exec fastlane test_uikit device:"iPhone 15" build_for_testing:true
+      run: bundle exec fastlane test_uikit device:"iPhone 16" build_for_testing:true
       timeout-minutes: 25
     - name: Build XCFrameworks
       run: bundle exec fastlane build_xcframeworks
