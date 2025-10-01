@@ -215,7 +215,7 @@ struct AppUserView: View {
     @Injected(\.colors) var colors
     var user: User
     var size: CGFloat = 32
-    var overrideUserName: String? = nil
+    var overrideUserName: String?
 
     var body: some View {
         if user.imageURL != nil {

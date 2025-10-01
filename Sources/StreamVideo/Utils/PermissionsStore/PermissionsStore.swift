@@ -180,7 +180,7 @@ public final class PermissionStore: ObservableObject, @unchecked Sendable {
 }
 
 extension PermissionStore: InjectionKey {
-    nonisolated(unsafe) public static var currentValue: PermissionStore = .shared
+    public nonisolated(unsafe) static var currentValue: PermissionStore = .shared
 }
 
 extension InjectedValues {

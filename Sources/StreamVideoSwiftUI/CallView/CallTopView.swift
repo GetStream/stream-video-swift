@@ -30,8 +30,7 @@ public struct CallTopView<Factory: ViewFactory>: View {
                 HStack {
                     if
                         #available(iOS 14.0, *),
-                        viewModel.callParticipants.count > 1
-                    {
+                        viewModel.callParticipants.count > 1 {
                         LayoutMenuView(viewModel: viewModel)
                             .opacity(hideLayoutMenu ? 0 : 1)
                             .accessibility(identifier: "viewMenu")

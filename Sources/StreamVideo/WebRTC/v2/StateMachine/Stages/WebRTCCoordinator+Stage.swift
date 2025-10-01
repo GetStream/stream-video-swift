@@ -19,11 +19,11 @@ extension WebRTCCoordinator.StateMachine {
             var disconnectionTimeout: TimeInterval = 0
             var reportingIntervalMs: TimeInterval = 0
             var reconnectionStrategy: ReconnectionStrategy = .unknown
-            var disconnectionSource: WebSocketConnectionState.DisconnectionSource? = nil
+            var disconnectionSource: WebSocketConnectionState.DisconnectionSource?
             var flowError: Error?
             var joinSource: JoinSource?
 
-            var isRejoiningFromSessionID: String? = nil
+            var isRejoiningFromSessionID: String?
             var migratingFromSFU: String = ""
             var migrationStatusObserver: WebRTCMigrationStatusObserver?
             var previousSessionPublisher: RTCPeerConnectionCoordinator?

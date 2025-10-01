@@ -38,8 +38,7 @@ final class Router: ObservableObject {
 
         if
             appState.unsecureRepository.currentConfiguration() != AppEnvironment.configuration
-            || appState.unsecureRepository.currentBaseURL() != AppEnvironment.baseURL
-        {
+            || appState.unsecureRepository.currentBaseURL() != AppEnvironment.baseURL {
             // Clean up the currently logged in use, if we run in different
             // configuration since the last time.
             appState.unsecureRepository.removeCurrentUser()

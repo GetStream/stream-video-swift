@@ -2,17 +2,65 @@
 --header "\nCopyright © {year} Stream.io Inc. All rights reserved.\n"
 --swiftversion 5.9
 
---ifdef no-indent
---disable redundantType
---disable extensionAccessControl
---disable andOperator
---disable blankLinesAtStartOfScope
+# Use allow-list
+--rules blankLinesAroundMark
+--rules blankLinesAtEndOfScope
+--rules blankLinesBetweenScopes
+--rules braces
+--rules consecutiveBlankLines
+--rules consecutiveSpaces
+--rules duplicateImports
+--rules elseOnSameLine
+--rules emptyBraces
+--rules enumNamespaces
+--rules fileHeader
+--rules indent
+--rules initCoderUnavailable
+--rules isEmpty
+--rules leadingDelimiters
+--rules linebreakAtEndOfFile
+--rules linebreaks
+--rules modifierOrder
+--rules numberFormatting
+--rules redundantBackticks
+--rules redundantBreak
+--rules redundantExtensionACL
+--rules redundantFileprivate
+--rules redundantLet
+--rules redundantLetError
+--rules redundantNilInit
+--rules redundantObjc
+--rules redundantPattern
+--rules redundantRawValues
+--rules redundantVoidReturnType
+--rules semicolons
+--rules sortImports
+--rules spaceAroundBraces
+--rules spaceAroundBrackets
+--rules spaceAroundComments
+--rules spaceAroundGenerics
+--rules spaceAroundOperators
+--rules spaceAroundParens
+--rules spaceInsideBraces
+--rules spaceInsideBrackets
+--rules spaceInsideComments
+--rules spaceInsideGenerics
+--rules spaceInsideParens
+--rules strongOutlets
+--rules strongifiedSelf
+--rules todos
+--rules trailingCommas
+--rules trailingSpace
+--rules unusedArguments
+--rules void
+--rules wrap
+--rules wrapArguments
+--rules wrapAttributes
+--rules yodaConditions
 
-# Rules inferred from Swift Standard Library:
---disable anyObjectProtocol, wrapMultilineStatementBraces
+# Configuration for enabled rules
+--ifdef no-indent
 --indent 4
---enable isEmpty
---disable redundantParens # it generates mistakes for e.g. "if (a || b), let x = ... {}"
 --semicolons inline
 --nospaceoperators ..., ..< # what about ==, +=?
 --commas inline

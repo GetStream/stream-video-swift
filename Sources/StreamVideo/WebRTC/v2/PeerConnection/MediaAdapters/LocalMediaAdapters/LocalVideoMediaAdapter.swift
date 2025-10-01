@@ -328,7 +328,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                 Local videoTracks updated with:
                     PublishOptions:
                         \(self.publishOptions.map { "\($0)" }.joined(separator: "\n"))
-                    
+                
                     TransceiverStorage:
                         \(transceiverStorage)
                 """,
@@ -446,32 +446,28 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
                     if
                         layerSettings.scaleResolutionDownBy >= 1,
-                        layerSettings.scaleResolutionDownBy != Float(truncating: encoding.scaleResolutionDownBy ?? 0)
-                    {
+                        layerSettings.scaleResolutionDownBy != Float(truncating: encoding.scaleResolutionDownBy ?? 0) {
                         encoding.scaleResolutionDownBy = .init(value: layerSettings.scaleResolutionDownBy)
                         hasChanges = true
                     }
 
                     if
                         layerSettings.maxBitrate > 0,
-                        layerSettings.maxBitrate != Int32(truncating: encoding.maxBitrateBps ?? 0)
-                    {
+                        layerSettings.maxBitrate != Int32(truncating: encoding.maxBitrateBps ?? 0) {
                         encoding.maxBitrateBps = .init(value: layerSettings.maxBitrate)
                         hasChanges = true
                     }
 
                     if
                         layerSettings.maxFramerate > 0,
-                        layerSettings.maxFramerate != Int32(truncating: encoding.maxFramerate ?? 0)
-                    {
+                        layerSettings.maxFramerate != Int32(truncating: encoding.maxFramerate ?? 0) {
                         encoding.maxFramerate = .init(value: layerSettings.maxFramerate)
                         hasChanges = true
                     }
 
                     if
                         !layerSettings.scalabilityMode.isEmpty,
-                        layerSettings.scalabilityMode != encoding.scalabilityMode
-                    {
+                        layerSettings.scalabilityMode != encoding.scalabilityMode {
                         encoding.scalabilityMode = layerSettings.scalabilityMode
                         hasChanges = true
                     }

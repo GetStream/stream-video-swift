@@ -58,16 +58,16 @@ final class StreamYUVToARGBConversion {
     ///     - YpCbCrToARGBMatrix_ITU_R_709_2: ITU-R Recommendation BT.709, often used for
     ///     high-definition television.
     enum Coefficient: @unchecked Sendable {
-    /// ITU-R Recommendation BT.601, often used for standard-definition video.
-    case YpCbCrToARGBMatrix_ITU_R_601_4
+        /// ITU-R Recommendation BT.601, often used for standard-definition video.
+        case YpCbCrToARGBMatrix_ITU_R_601_4
 
-         /// ITU-R Recommendation BT.709, often used for high-definition video.
-         case YpCbCrToARGBMatrix_ITU_R_709_2
+        /// ITU-R Recommendation BT.709, often used for high-definition video.
+        case YpCbCrToARGBMatrix_ITU_R_709_2
 
-         /// Computed property to provide a pointer to the relevant conversion matrix.
-         ///
-         /// - Returns: A pointer to the selected color conversion matrix.
-         var value: UnsafePointer<vImage_YpCbCrToARGBMatrix> {
+        /// Computed property to provide a pointer to the relevant conversion matrix.
+        ///
+        /// - Returns: A pointer to the selected color conversion matrix.
+        var value: UnsafePointer<vImage_YpCbCrToARGBMatrix> {
             switch self {
             case .YpCbCrToARGBMatrix_ITU_R_601_4: return kvImage_YpCbCrToARGBMatrix_ITU_R_601_4
             case .YpCbCrToARGBMatrix_ITU_R_709_2: return kvImage_YpCbCrToARGBMatrix_ITU_R_709_2

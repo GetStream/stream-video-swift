@@ -7,7 +7,7 @@ import Foundation
 /// The type that does events batching.
 protocol EventBatcher: Sendable {
     typealias Batch = [WrappedEvent]
-    typealias BatchHandler = @Sendable(_ batch: Batch, _ completion: @Sendable @escaping () -> Void) -> Void
+    typealias BatchHandler = @Sendable (_ batch: Batch, _ completion: @Sendable @escaping() -> Void) -> Void
 
     /// The current batch of events.
     var currentBatch: Batch { get }
@@ -35,7 +35,7 @@ final class Batcher<Item> {
     /// The timer that  calls `processor` when fired.
     private var batchProcessingTimer: TimerControl?
     /// The closure which processes the batch.
-    private let handler: @Sendable(_ batch: [Item], _ completion: @Sendable @escaping () -> Void) -> Void
+    private let handler: @Sendable (_ batch: [Item], _ completion: @Sendable @escaping() -> Void) -> Void
     /// The serial queue where item appends and batch processing is happening on.
     private let queue = DispatchQueue(label: "io.getstream.Batch.\(Item.self)")
     /// The current batch of items.
@@ -71,7 +71,7 @@ final class Batcher<Item> {
         }
     }
     
-    private func process(completion: (@Sendable() -> Void)? = nil) {
+    private func process(completion: (@Sendable () -> Void)? = nil) {
         handler(currentBatch) { completion?() }
         currentBatch.removeAll()
         batchProcessingTimer?.cancel()

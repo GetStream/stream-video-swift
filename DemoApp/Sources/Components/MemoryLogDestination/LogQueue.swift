@@ -28,7 +28,8 @@ enum LogQueue {
         let logContent = """
         Stream Video Logs - Generated: \(Date())
         \(logs.reversed().map { "\($0.level) - [\($0.fileName):\($0.lineNumber):\($0.functionName)] \($0.message)" }
-            .joined(separator: "\n"))
+            .joined(separator: "\n")
+        )
         """
 
         try logContent.write(to: fileURL, atomically: true, encoding: .utf8)

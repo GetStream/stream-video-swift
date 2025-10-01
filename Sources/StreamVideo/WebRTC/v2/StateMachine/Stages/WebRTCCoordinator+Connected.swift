@@ -25,8 +25,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
     /// Represents the connected stage in the WebRTC coordinator state machine.
     final class ConnectedStage:
         WebRTCCoordinator.StateMachine.Stage,
-        @unchecked Sendable
-    {
+        @unchecked Sendable {
         /// Initializes a new instance of `ConnectedStage`.
         /// - Parameter context: The context for the connected stage.
         init(

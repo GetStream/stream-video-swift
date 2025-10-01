@@ -40,7 +40,7 @@ extension OperationQueue {
         file: StaticString = #file,
         function: StaticString = #function,
         line: UInt = #line,
-        operation: @escaping @Sendable() async throws -> Void
+        operation: @escaping @Sendable () async throws -> Void
     ) {
         addOperation(
             TaskOperation<Void>(
@@ -87,7 +87,7 @@ extension OperationQueue {
         file: StaticString = #file,
         function: StaticString = #function,
         line: UInt = #line,
-        operation: @escaping @Sendable() async throws -> Output
+        operation: @escaping @Sendable () async throws -> Output
     ) async throws -> Output {
         try await withCheckedThrowingContinuation { continuation in
             addOperation(
@@ -108,7 +108,7 @@ private final class TaskOperation<Output: Sendable>: Operation, @unchecked Senda
     #if compiler(>=6.0)
     typealias Block = @Sendable @isolated(any) () async throws -> Output
     #else
-    typealias Block = @Sendable() async throws -> Output
+    typealias Block = @Sendable () async throws -> Output
     #endif
 
     private let file: StaticString

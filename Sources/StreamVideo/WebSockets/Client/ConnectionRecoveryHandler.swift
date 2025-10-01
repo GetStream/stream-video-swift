@@ -27,9 +27,9 @@ final class DefaultConnectionRecoveryHandler: ConnectionRecoveryHandler, @unchec
     private let reconnectionTimerType: Timer.Type
     private let keepConnectionAliveInBackground: Bool
     private let disposableBag = DisposableBag()
-    nonisolated(unsafe) private var reconnectionStrategy: RetryStrategy
-    nonisolated(unsafe) private var reconnectionTimer: TimerControl?
-    nonisolated(unsafe) private var reconnectionPolicies: [AutomaticReconnectionPolicy]
+    private nonisolated(unsafe) var reconnectionStrategy: RetryStrategy
+    private nonisolated(unsafe) var reconnectionTimer: TimerControl?
+    private nonisolated(unsafe) var reconnectionPolicies: [AutomaticReconnectionPolicy]
 
     // MARK: - Init
 

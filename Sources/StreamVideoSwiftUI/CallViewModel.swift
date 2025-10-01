@@ -203,8 +203,7 @@ open class CallViewModel: ObservableObject {
             if
                 participantsLayout == .grid,
                 updateParticipants.count <= 3,
-                (call?.state.screenSharingSession == nil || call?.state.isCurrentUserScreensharing == true)
-            {
+                (call?.state.screenSharingSession == nil || call?.state.isCurrentUserScreensharing == true) {
                 return $0.id != call?.state.sessionId
             } else {
                 return true
@@ -836,8 +835,7 @@ open class CallViewModel: ObservableObject {
                     case let .userBlocked(callEventInfo):
                         if
                             callEventInfo.user?.id == streamVideo.user.id,
-                            callEventInfo.callCid == call?.cId
-                        {
+                            callEventInfo.callCid == call?.cId {
                             leaveCall()
                         }
                     case .userUnblocked:

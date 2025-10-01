@@ -812,8 +812,8 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
 
     private func assertTransitionAfterTrigger(
         expectedTarget: WebRTCCoordinator.StateMachine.Stage.ID? = nil,
-        trigger: @escaping @Sendable() async -> Void,
-        validationHandler: @escaping @Sendable(WebRTCCoordinator.StateMachine.Stage) async -> Void,
+        trigger: @escaping @Sendable () async -> Void,
+        validationHandler: @escaping @Sendable (WebRTCCoordinator.StateMachine.Stage) async -> Void,
         file: StaticString = #file,
         line: UInt = #line
     ) async {
@@ -868,8 +868,8 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
     }
 
     private func assertResultAfterTrigger(
-        trigger: @escaping @Sendable() async -> Void,
-        validationHandler: @escaping @Sendable(XCTestExpectation) async -> Void,
+        trigger: @escaping @Sendable () async -> Void,
+        validationHandler: @escaping @Sendable (XCTestExpectation) async -> Void,
         file: StaticString = #file,
         line: UInt = #line
     ) async {

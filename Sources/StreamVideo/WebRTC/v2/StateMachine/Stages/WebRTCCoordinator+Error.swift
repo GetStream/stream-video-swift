@@ -28,8 +28,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
     /// A class representing the error stage in the `StreamCallStateMachine`.
     final class ErrorStage:
         WebRTCCoordinator.StateMachine.Stage,
-        @unchecked Sendable
-    {
+        @unchecked Sendable {
         let error: Error
         private let disposableBag = DisposableBag()
 

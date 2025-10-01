@@ -235,7 +235,7 @@ extension InternetConnection: InjectionKey {
     ///
     /// This property provides a default implementation of the
     /// `InternetConnection` with a default monitor.
-    nonisolated(unsafe) public static var currentValue: InternetConnectionProtocol = InternetConnection(
+    public nonisolated(unsafe) static var currentValue: InternetConnectionProtocol = InternetConnection(
         monitor: InternetConnection.Monitor()
     )
 }

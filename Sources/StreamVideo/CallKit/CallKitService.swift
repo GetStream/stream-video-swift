@@ -813,7 +813,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
 
 extension CallKitService: InjectionKey {
     /// Current `CallKitService` instance.
-    nonisolated(unsafe) public static var currentValue: CallKitService = .init()
+    public nonisolated(unsafe) static var currentValue: CallKitService = .init()
 }
 
 extension InjectedValues {

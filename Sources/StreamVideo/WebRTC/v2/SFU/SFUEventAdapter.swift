@@ -463,8 +463,7 @@ final class SFUEventAdapter: @unchecked Sendable {
             for (key, participant) in updatedParticipants {
                 if
                     sessionIds.contains(key),
-                    (participant.pin == nil || participant.pin?.isLocal == true)
-                {
+                    (participant.pin == nil || participant.pin?.isLocal == true) {
                     updatedParticipants[key] = participant
                         .withUpdated(pin: .init(isLocal: false, pinnedAt: .init()))
                 } else {

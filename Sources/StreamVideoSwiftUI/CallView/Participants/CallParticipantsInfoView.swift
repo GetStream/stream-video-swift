@@ -232,7 +232,7 @@ struct ParticipantsButton: View {
 struct BlockedUsersView: View {
     
     var blockedUsers: [User]
-    var unblockActions: @MainActor(User) -> [CallParticipantMenuAction]
+    var unblockActions: @MainActor (User) -> [CallParticipantMenuAction]
     
     var body: some View {
         HStack {

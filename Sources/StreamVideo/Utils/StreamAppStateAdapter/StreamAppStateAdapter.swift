@@ -87,7 +87,7 @@ final class StreamAppStateAdapter: AppStateProviding, ObservableObject, @uncheck
 }
 
 enum AppStateProviderKey: InjectionKey {
-    nonisolated(unsafe) public static var currentValue: AppStateProviding = StreamAppStateAdapter()
+    public nonisolated(unsafe) static var currentValue: AppStateProviding = StreamAppStateAdapter()
 }
 
 extension InjectedValues {

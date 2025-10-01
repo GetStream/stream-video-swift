@@ -23,7 +23,7 @@ extension SFUAdapter {
     /// Indicates that the adapter has disconnected from the SFU.
     struct DisconnectEvent: SFUAdapterEvent, Equatable {
         var hostname: String
-        var payload: SwiftProtobuf.Message? = nil
+        var payload: SwiftProtobuf.Message?
 
         var traceTag: String { "disconnect" }
 

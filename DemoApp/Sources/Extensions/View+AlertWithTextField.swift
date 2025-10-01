@@ -8,7 +8,7 @@ import SwiftUI
 private struct DemoAlertWithTextFieldViewModifier<Value: CustomStringConvertible>: ViewModifier {
 
     var title: String
-    var message: String? = nil
+    var message: String?
     var placeholder: String
     var presentationBinding: Binding<Bool>
     var valueBinding: Binding<Value>

@@ -92,8 +92,7 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
             var result = initialCallSettings ?? remoteCallSettings
             if
                 coordinator.stateAdapter.audioSession.currentRoute.isExternal,
-                result.speakerOn
-            {
+                result.speakerOn {
                 result = result.withUpdatedSpeakerState(false)
             }
             return result

@@ -106,7 +106,7 @@ final class MockStreamVideo: StreamVideo, Mockable, @unchecked Sendable {
     func process(
         _ event: WrappedEvent,
         postNotification: Bool = true,
-        completion: (@Sendable() -> Void)? = nil
+        completion: (@Sendable () -> Void)? = nil
     ) {
         eventNotificationCenter.process(
             event,

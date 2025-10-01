@@ -22,8 +22,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
     /// Represents the idle stage in the WebRTC coordinator state machine.
     final class IdleStage:
         WebRTCCoordinator.StateMachine.Stage,
-        @unchecked Sendable
-    {
+        @unchecked Sendable {
         /// Convenience initializer for creating an `IdleStage`.
         /// - Parameter context: The context for the idle stage.
         convenience init(_ context: Context) {

@@ -187,7 +187,7 @@ public extension ReflectiveStringConvertible {
                     return nil
                 }
             }
-            .forEach { (child: (label: String, value: Any)) -> Void in
+            .forEach { (child: (label: String, value: Any)) in
                 output.append(" - \(child.label): \(child.value)")
             }
 
