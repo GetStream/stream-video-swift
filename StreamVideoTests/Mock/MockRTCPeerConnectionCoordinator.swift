@@ -10,8 +10,7 @@ import StreamWebRTC
 final class MockRTCPeerConnectionCoordinator:
     RTCPeerConnectionCoordinator,
     Mockable,
-    @unchecked Sendable
-{
+    @unchecked Sendable {
 
     // MARK: - Mockable
 

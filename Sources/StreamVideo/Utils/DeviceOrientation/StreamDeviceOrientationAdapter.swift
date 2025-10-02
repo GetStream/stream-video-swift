@@ -71,7 +71,7 @@ public enum StreamDeviceOrientation: Equatable, Sendable {
 
 /// An observable object that adapts to device orientation changes.
 open class StreamDeviceOrientationAdapter: ObservableObject, @unchecked Sendable {
-    public typealias Provider = @Sendable() async -> StreamDeviceOrientation
+    public typealias Provider = @Sendable () async -> StreamDeviceOrientation
 
     /// The default provider for device orientation based on platform.
     public static let defaultProvider: Provider = {

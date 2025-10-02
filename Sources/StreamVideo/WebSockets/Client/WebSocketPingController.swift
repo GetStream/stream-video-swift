@@ -18,8 +18,8 @@ protocol WebSocketPingControllerDelegate: AnyObject {
 }
 
 struct HealthCheckInfo: Equatable {
-    var coordinatorHealthCheck: HealthCheckEvent? = nil
-    var sfuHealthCheck: Stream_Video_Sfu_Event_HealthCheckResponse? = nil
+    var coordinatorHealthCheck: HealthCheckEvent?
+    var sfuHealthCheck: Stream_Video_Sfu_Event_HealthCheckResponse?
 }
 
 protocol HealthCheck: Event, Equatable {}

@@ -86,7 +86,7 @@ open class CallKitAdapter {
 
 extension CallKitAdapter: InjectionKey {
     /// Provides the current instance of `CallKitAdapter`.
-    nonisolated(unsafe) public static var currentValue: CallKitAdapter = .init()
+    public nonisolated(unsafe) static var currentValue: CallKitAdapter = .init()
 }
 
 extension InjectedValues {

@@ -26,8 +26,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
     /// Represents the joining stage in the WebRTC coordinator state machine.
     final class JoiningStage:
         WebRTCCoordinator.StateMachine.Stage,
-        @unchecked Sendable
-    {
+        @unchecked Sendable {
         private enum FlowType { case regular, fast, rejoin, migrate }
         private let disposableBag = DisposableBag()
         private let startTime = Date()

@@ -5,15 +5,15 @@
 @testable import StreamVideo
 
 extension StreamVideo {
-    static nonisolated(unsafe) var apiKey = "key1"
-    static nonisolated(unsafe) var mockUser = User(
+    nonisolated(unsafe) static var apiKey = "key1"
+    nonisolated(unsafe) static var mockUser = User(
         id: "testuser",
         name: "Test User",
         imageURL: ImageFactory.get(0),
         customData: [:]
     )
     
-    static nonisolated(unsafe) var mockToken =
+    nonisolated(unsafe) static var mockToken =
         UserToken(
             rawValue: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci90ZXN0dXNlciIsImlhdCI6MTY2NjY5ODczMSwidXNlcl9pZCI6InRlc3R1c2VyIn0.h4lnaF6OFYaNPjeK8uFkKirR5kHtj1vAKuipq3A5nM0"
         )

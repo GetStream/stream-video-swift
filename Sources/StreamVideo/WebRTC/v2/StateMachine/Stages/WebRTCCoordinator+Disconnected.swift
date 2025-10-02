@@ -27,8 +27,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
     /// machine.
     final class DisconnectedStage:
         WebRTCCoordinator.StateMachine.Stage,
-        @unchecked Sendable
-    {
+        @unchecked Sendable {
         @Injected(\.internetConnectionObserver) private var internetConnectionObserver
 
         private var internetObservationCancellable: AnyCancellable?

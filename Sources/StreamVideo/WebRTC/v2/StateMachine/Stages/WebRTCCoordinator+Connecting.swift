@@ -37,8 +37,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
     /// Represents the connecting stage in the WebRTC coordinator state machine.
     final class ConnectingStage:
         WebRTCCoordinator.StateMachine.Stage,
-        @unchecked Sendable
-    {
+        @unchecked Sendable {
         let create: Bool
         let options: CreateCallOptions?
         /// Indicates whether to ring the other participants.

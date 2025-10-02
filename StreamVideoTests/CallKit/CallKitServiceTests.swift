@@ -927,7 +927,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
     @MainActor
     private func assertReportCallEnded(
         _ expectedReason: CXCallEndedReason,
-        actionBlock: @MainActor @Sendable() -> Void,
+        actionBlock: @MainActor @Sendable () -> Void,
         file: StaticString = #file,
         line: UInt = #line
     ) async {
@@ -953,7 +953,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
 
     @MainActor
     private func assertNoAction(
-        actionBlock: @MainActor @Sendable() -> Void,
+        actionBlock: @MainActor @Sendable () -> Void,
         file: StaticString = #file,
         line: UInt = #line
     ) async {
@@ -968,7 +968,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
     @MainActor
     private func assertRequestTransaction<T>(
         _ expected: T.Type,
-        actionBlock: @MainActor @Sendable() -> Void,
+        actionBlock: @MainActor @Sendable () -> Void,
         file: StaticString = #file,
         line: UInt = #line
     ) async throws {
@@ -1001,7 +1001,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
 
     private func assertNotRequestTransaction<T>(
         _ expected: T.Type,
-        actionBlock: @Sendable() -> Void,
+        actionBlock: @Sendable () -> Void,
         file: StaticString = #file,
         line: UInt = #line
     ) async throws {
@@ -1022,7 +1022,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
 
     @MainActor
     private func assertWithoutRequestTransaction(
-        actionBlock: @MainActor @Sendable() -> Void,
+        actionBlock: @MainActor @Sendable () -> Void,
         file: StaticString = #file,
         line: UInt = #line
     ) async throws {

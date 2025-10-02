@@ -185,8 +185,7 @@ struct DemoStatsView: View {
         )
         if
             resolution != .zero,
-            report.highestFramesPerSecond > 0
-        {
+            report.highestFramesPerSecond > 0 {
             return "\(Int(resolution.width))x\(Int(resolution.height))@\(report.highestFramesPerSecond)"
         } else {
             return "none"

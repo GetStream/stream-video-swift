@@ -26,8 +26,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
     /// Represents the rejoining stage in the WebRTC coordinator state machine.
     final class RejoiningStage:
         WebRTCCoordinator.StateMachine.Stage,
-        @unchecked Sendable
-    {
+        @unchecked Sendable {
         private let disposableBag = DisposableBag()
 
         /// Initializes a new instance of `RejoiningStage`.

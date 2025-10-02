@@ -26,8 +26,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
     /// Represents the joined stage in the WebRTC coordinator state machine.
     final class JoinedStage:
         WebRTCCoordinator.StateMachine.Stage,
-        @unchecked Sendable
-    {
+        @unchecked Sendable {
         @Injected(\.internetConnectionObserver) private var internetConnectionObserver
         @Injected(\.audioStore) private var audioStore
 

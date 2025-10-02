@@ -6,14 +6,14 @@ import Foundation
 
 /// A comparator decorator which applies the decorated comparator only if the participant is invisible.
 /// This ensures stable sorting when all participants are visible.
-nonisolated(unsafe) public let ifInvisibleBy = conditional { (a: CallParticipant, b: CallParticipant) in
+public nonisolated(unsafe) let ifInvisibleBy = conditional { (a: CallParticipant, b: CallParticipant) in
     a.showTrack == false || b.showTrack == false
 }
 
-nonisolated(unsafe) public let ifInvisible = ifInvisibleBy
+public nonisolated(unsafe) let ifInvisible = ifInvisibleBy
 
 /// The default sorting preset.
-nonisolated(unsafe) public let defaultSortPreset = [
+public nonisolated(unsafe) let defaultSortPreset = [
     pinned,
     screenSharing,
     ifInvisibleBy(
@@ -29,10 +29,10 @@ nonisolated(unsafe) public let defaultSortPreset = [
     ifInvisibleBy(userId)
 ]
 
-nonisolated(unsafe) public let defaultComparators = defaultSortPreset
+public nonisolated(unsafe) let defaultComparators = defaultSortPreset
 
 /// The sorting preset for speaker layout.
-nonisolated(unsafe) public let speakerLayoutSortPreset = [
+public nonisolated(unsafe) let speakerLayoutSortPreset = [
     pinned,
     screenSharing,
     dominantSpeaker,
@@ -48,10 +48,10 @@ nonisolated(unsafe) public let speakerLayoutSortPreset = [
     ifInvisibleBy(userId)
 ]
 
-nonisolated(unsafe) public let screensharing = speakerLayoutSortPreset
+public nonisolated(unsafe) let screensharing = speakerLayoutSortPreset
 
 /// The sorting preset for layouts that don't render all participants but instead, render them in pages.
-nonisolated(unsafe) public let paginatedLayoutSortPreset = [
+public nonisolated(unsafe) let paginatedLayoutSortPreset = [
     pinned,
     ifInvisibleBy(
         combineComparators(
@@ -67,7 +67,7 @@ nonisolated(unsafe) public let paginatedLayoutSortPreset = [
 ]
 
 /// The sorting preset for livestreams and audio rooms.
-nonisolated(unsafe) public let livestreamOrAudioRoomSortPreset = [
+public nonisolated(unsafe) let livestreamOrAudioRoomSortPreset = [
     ifInvisibleBy(
         combineComparators(
             [

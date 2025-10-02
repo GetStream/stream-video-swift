@@ -47,8 +47,8 @@ func executeTask<Output>(
 
 struct RetryPolicy: Sendable {
     let maxRetries: Int
-    let delay: @Sendable(Int) -> TimeInterval
-    var runPrecondition: @Sendable() async -> Bool = { true }
+    let delay: @Sendable (Int) -> TimeInterval
+    var runPrecondition: @Sendable () async -> Bool = { true }
 }
 
 extension RetryPolicy {

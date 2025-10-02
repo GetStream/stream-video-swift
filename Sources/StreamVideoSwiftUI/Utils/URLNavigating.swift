@@ -18,7 +18,7 @@ public protocol URLNavigating {
 }
 
 enum URLNavigatingKey: InjectionKey {
-    nonisolated(unsafe) public static var currentValue: URLNavigating = StreamURLNavigator()
+    public nonisolated(unsafe) static var currentValue: URLNavigating = StreamURLNavigator()
 }
 
 extension InjectedValues {

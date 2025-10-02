@@ -26,7 +26,7 @@ public protocol RejectionReasonProviding: Sendable {
 final class StreamRejectionReasonProvider: RejectionReasonProviding, @unchecked Sendable {
 
     /// The stream video associated with this provider.
-    nonisolated(unsafe) private weak var streamVideo: StreamVideo?
+    private nonisolated(unsafe) weak var streamVideo: StreamVideo?
 
     /// A container for managing cancellable subscriptions.
     private let disposableBag: DisposableBag = .init()
