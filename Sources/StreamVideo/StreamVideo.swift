@@ -7,7 +7,7 @@ import Foundation
 import StreamWebRTC
 import SwiftProtobuf
 
-public typealias UserTokenProvider = @Sendable (@Sendable @escaping(Result<UserToken, Error>) -> Void) -> Void
+public typealias UserTokenProvider = @Sendable (@Sendable @escaping (Result<UserToken, Error>) -> Void) -> Void
 public typealias UserTokenUpdater = @Sendable (UserToken) -> Void
 
 /// Main class for interacting with the `StreamVideo` SDK.
