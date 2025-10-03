@@ -11282,8 +11282,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/apple/swift-protobuf";
 			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.18.0;
+				kind = exactVersion;
+				version = 1.30.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
