@@ -17,7 +17,7 @@ extension XCTestCase {
     @MainActor
     func fulfilmentInMainActor(
         timeout: TimeInterval = defaultTimeout,
-        _ message: @MainActor @Sendable @autoclosure () -> String = "",
+        _ message: @MainActor @autoclosure () -> String = "",
         file: StaticString = #file,
         line: UInt = #line,
         block: @MainActor @Sendable @escaping () -> Bool
