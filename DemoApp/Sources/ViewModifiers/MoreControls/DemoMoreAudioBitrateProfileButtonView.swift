@@ -8,15 +8,16 @@
 import Foundation
 import SwiftUI
 import StreamVideo
+import StreamVideoSwiftUI
 
 struct DemoMoreAudioBitrateProfileButtonView: View {
     @Injected(\.colors) private var colors
 
-    private var call: Call?
+    private var viewModel: CallViewModel
     @State private var selected: AudioBitrateProfile = .voiceStandard
 
-    init(call: Call?) {
-        self.call = call
+    init(viewModel: CallViewModel) {
+        self.viewModel = viewModel
     }
 
     var body: some View {
@@ -29,7 +30,7 @@ struct DemoMoreAudioBitrateProfileButtonView: View {
 
     private var isSupported: Bool {
         // TODO: add check for
-        call != nil
+        viewModel.call != nil
     }
 
     @ViewBuilder
@@ -57,6 +58,7 @@ struct DemoMoreAudioBitrateProfileButtonView: View {
     private func view(for item: AudioBitrateProfile) -> some View {
         Button {
             selected = item
+            viewModel.setAudioBitrateProfile(item)
         } label: {
             Label {
                 Text(item.title)

@@ -7,10 +7,21 @@
 
 import Foundation
 
-public enum AudioBitrateProfile: Int {
+public enum AudioBitrateProfile: Int, CustomStringConvertible {
     case voiceStandard = 0
     case voiceHighQuality
     case musicHighQuality
+
+    public var description: String {
+        switch self {
+        case .voiceStandard:
+            return ".voiceStandard"
+        case .voiceHighQuality:
+            return ".voiceHighQuality"
+        case .musicHighQuality:
+            return ".musicHighQuality"
+        }
+    }
 
     var source: Stream_Video_Sfu_Models_AudioBitrateProfile {
         switch self {

@@ -336,6 +336,22 @@ open class CallViewModel: ObservableObject {
         }
     }
 
+    public func setAudioBitrateProfile(_ profile: AudioBitrateProfile) {
+        guard let call else {
+            return
+        }
+
+        Task(disposableBag: disposableBag) { [weak self] in
+            guard let self else { return }
+            do {
+                try await call.microphone.setAudioBitrateProfile(profile)
+                localCallSettingsChange = true
+            } catch {
+                log.error("Error setting audioBitrateProfile:\(profile)", error: error)
+            }
+        }
+    }
+
     /// Starts a call with the provided info.
     /// - Parameters:
     ///  - callType: the type of the call.
