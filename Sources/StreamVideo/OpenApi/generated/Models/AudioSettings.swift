@@ -14,7 +14,7 @@ public final class AudioSettings: @unchecked Sendable, Codable, JSONEncodable, H
         public init(from decoder: Decoder) throws {
             let container = try decoder.singleValueContainer()
             if let decodedValue = try? container.decode(String.self),
-               let value = Self(rawValue: decodedValue) {
+                let value = Self(rawValue: decodedValue) {
                 self = value
             } else {
                 self = .unknown
@@ -24,33 +24,28 @@ public final class AudioSettings: @unchecked Sendable, Codable, JSONEncodable, H
     
     public var accessRequestEnabled: Bool
     public var defaultDevice: DefaultDevice
+    public var hifiAudioEnabled: Bool?
     public var micDefaultOn: Bool
     public var noiseCancellation: NoiseCancellationSettingsRequest?
     public var opusDtxEnabled: Bool
     public var redundantCodingEnabled: Bool
     public var speakerDefaultOn: Bool
 
-    public init(
-        accessRequestEnabled: Bool,
-        defaultDevice: DefaultDevice,
-        micDefaultOn: Bool,
-        noiseCancellation: NoiseCancellationSettingsRequest? = nil,
-        opusDtxEnabled: Bool,
-        redundantCodingEnabled: Bool,
-        speakerDefaultOn: Bool
-    ) {
+    public init(accessRequestEnabled: Bool, defaultDevice: DefaultDevice, hifiAudioEnabled: Bool? = nil, micDefaultOn: Bool, noiseCancellation: NoiseCancellationSettingsRequest? = nil, opusDtxEnabled: Bool, redundantCodingEnabled: Bool, speakerDefaultOn: Bool) {
         self.accessRequestEnabled = accessRequestEnabled
         self.defaultDevice = defaultDevice
+        self.hifiAudioEnabled = hifiAudioEnabled
         self.micDefaultOn = micDefaultOn
         self.noiseCancellation = noiseCancellation
         self.opusDtxEnabled = opusDtxEnabled
         self.redundantCodingEnabled = redundantCodingEnabled
         self.speakerDefaultOn = speakerDefaultOn
     }
-    
+
     public enum CodingKeys: String, CodingKey, CaseIterable {
         case accessRequestEnabled = "access_request_enabled"
         case defaultDevice = "default_device"
+        case hifiAudioEnabled = "hifi_audio_enabled"
         case micDefaultOn = "mic_default_on"
         case noiseCancellation = "noise_cancellation"
         case opusDtxEnabled = "opus_dtx_enabled"
@@ -60,17 +55,19 @@ public final class AudioSettings: @unchecked Sendable, Codable, JSONEncodable, H
     
     public static func == (lhs: AudioSettings, rhs: AudioSettings) -> Bool {
         lhs.accessRequestEnabled == rhs.accessRequestEnabled &&
-            lhs.defaultDevice == rhs.defaultDevice &&
-            lhs.micDefaultOn == rhs.micDefaultOn &&
-            lhs.noiseCancellation == rhs.noiseCancellation &&
-            lhs.opusDtxEnabled == rhs.opusDtxEnabled &&
-            lhs.redundantCodingEnabled == rhs.redundantCodingEnabled &&
-            lhs.speakerDefaultOn == rhs.speakerDefaultOn
+        lhs.defaultDevice == rhs.defaultDevice &&
+        lhs.hifiAudioEnabled == rhs.hifiAudioEnabled &&
+        lhs.micDefaultOn == rhs.micDefaultOn &&
+        lhs.noiseCancellation == rhs.noiseCancellation &&
+        lhs.opusDtxEnabled == rhs.opusDtxEnabled &&
+        lhs.redundantCodingEnabled == rhs.redundantCodingEnabled &&
+        lhs.speakerDefaultOn == rhs.speakerDefaultOn
     }
 
     public func hash(into hasher: inout Hasher) {
         hasher.combine(accessRequestEnabled)
         hasher.combine(defaultDevice)
+        hasher.combine(hifiAudioEnabled)
         hasher.combine(micDefaultOn)
         hasher.combine(noiseCancellation)
         hasher.combine(opusDtxEnabled)
