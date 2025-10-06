@@ -216,12 +216,16 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         )
     }
 
-    func set(audioBitrateProfile: AudioBitrateProfile) {
-        guard audioBitrateProfile != self.audioBitrateProfile else {
+    func set(audioBitrateProfile value: AudioBitrateProfile) throws {
+        guard audioSettings.hifiAudioEnabled == true else {
+            throw ClientError("High Fidelity audio is not enabled for this call.")
+        }
+        
+        guard value != self.audioBitrateProfile else {
             return
         }
         self.audioBitrateProfile = audioBitrateProfile
-        // TODO: Update publisher
+        publisher?.setAudioBitrateProfile(value)
     }
 
     // MARK: - Client Capabilities
@@ -329,6 +333,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         self.publisher = publisher
         try await restoreScreenSharing()
         publisher.setVideoFilter(videoFilter)
+        publisher.setAudioBitrateProfile(audioBitrateProfile)
         publisher.completeSetUp()
 
         try await subscriber.setUp(

@@ -713,6 +713,12 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         try await mediaAdapter.stopScreenSharing()
     }
 
+    // MARK: - AudioBitrate profiles
+
+    func setAudioBitrateProfile(_ profile: AudioBitrateProfile) {
+        mediaAdapter.setAudioBitrateProfile(profile)
+    }
+
     // MARK: - Private helpers
 
     /// Negotiates the peer connection.

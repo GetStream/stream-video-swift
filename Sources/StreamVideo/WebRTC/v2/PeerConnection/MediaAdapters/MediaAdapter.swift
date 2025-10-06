@@ -355,4 +355,10 @@ final class MediaAdapter {
     func stopScreenSharing() async throws {
         try await screenShareMediaAdapter.stopScreenSharing()
     }
+
+    // MARK: - AudioBitrate profiles
+
+    func setAudioBitrateProfile(_ profile: AudioBitrateProfile) {
+        audioMediaAdapter.setAudioBitrateProfile(profile)
+    }
 }

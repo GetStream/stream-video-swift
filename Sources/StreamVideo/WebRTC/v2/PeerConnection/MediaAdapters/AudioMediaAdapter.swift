@@ -158,6 +158,12 @@ final class AudioMediaAdapter: MediaAdapting, @unchecked Sendable {
         (localMediaManager as? LocalAudioMediaAdapter)?
             .changePublishQuality(with: layerSettings)
     }
+    
+    func setAudioBitrateProfile(_ profile: AudioBitrateProfile) {
+        (localMediaManager as? LocalAudioMediaAdapter)?.setAudioBitrateProfile(
+            profile
+        )
+    }
 
     // MARK: - Observers
 

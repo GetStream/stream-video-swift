@@ -326,6 +326,10 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         with layerSettings: [Stream_Video_Sfu_Event_AudioSender]
     ) { /* No-op */ }
 
+    func setAudioBitrateProfile(_ profile: AudioBitrateProfile) {
+        
+    }
+
     // MARK: - Private Helpers
 
     /// Adds or updates a transceiver for a given audio track and publish option.
