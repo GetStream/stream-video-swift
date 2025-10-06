@@ -192,6 +192,11 @@ class CallController: @unchecked Sendable {
         )
     }
 
+    func changeAudioBitrateProfile(_ profile: AudioBitrateProfile) async throws {
+        // TODO: Add check for dashboard setting.
+        await webRTCCoordinator.changeAudioBitrateProfile(profile)
+    }
+
     /// Sets a `videoFilter` for the current call.
     /// - Parameter videoFilter: A `VideoFilter` instance representing the video filter to set.
     func setVideoFilter(_ videoFilter: VideoFilter?) {

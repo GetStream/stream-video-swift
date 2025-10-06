@@ -33,8 +33,10 @@ public final class MicrophoneManager: ObservableObject, CallSettingsManager, @un
         try await updateAudioStatus(.disabled)
     }
 
-    public func setAudioBitrateProfile(_ profile: AudioBitrateProfile) async throws {
-        
+    public func setAudioBitrateProfile(
+        _ profile: AudioBitrateProfile
+    ) async throws {
+        try await callController.changeAudioBitrateProfile(profile)
     }
 
     // MARK: - private

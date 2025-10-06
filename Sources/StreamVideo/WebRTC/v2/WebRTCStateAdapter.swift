@@ -77,6 +77,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     @Published private(set) var participantPins: [PinInfo] = []
     @Published private(set) var incomingVideoQualitySettings: IncomingVideoQualitySettings = .none
     @Published private(set) var isTracingEnabled: Bool = false
+    @Published private(set) var audioBitrateProfile: AudioBitrateProfile = .voiceStandard
 
     private(set) var clientCapabilities: Set<ClientCapability> = [
         .subscriberVideoPause
@@ -213,6 +214,14 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
             callSettings: callSettings,
             ownCapabilities: ownCapabilities
         )
+    }
+
+    func set(audioBitrateProfile: AudioBitrateProfile) {
+        guard audioBitrateProfile != self.audioBitrateProfile else {
+            return
+        }
+        self.audioBitrateProfile = audioBitrateProfile
+        // TODO: Update publisher
     }
 
     // MARK: - Client Capabilities

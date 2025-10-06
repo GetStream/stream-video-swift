@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum AudioBitrateProfile: Int, CustomStringConvertible {
+public enum AudioBitrateProfile: Int, CustomStringConvertible, Equatable, Sendable {
     case voiceStandard = 0
     case voiceHighQuality
     case musicHighQuality
