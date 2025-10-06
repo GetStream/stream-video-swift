@@ -149,6 +149,7 @@
 		4025017C2E93B718001FEEEE /* AudioBitrateProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4025017B2E93B718001FEEEE /* AudioBitrateProfile.swift */; };
 		4025017F2E93B927001FEEEE /* DemoMoreAudioBitrateProfileButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402501782E93B523001FEEEE /* DemoMoreAudioBitrateProfileButtonView.swift */; };
 		402501802E93B927001FEEEE /* DemoMoreAudioBitrateProfileButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402501782E93B523001FEEEE /* DemoMoreAudioBitrateProfileButtonView.swift */; };
+		402501822E93FD23001FEEEE /* RTCAudioStore+StereoRecordingMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402501812E93FD23001FEEEE /* RTCAudioStore+StereoRecordingMiddleware.swift */; };
 		402778832BD13C62002F4399 /* NoiseCancellationFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402778822BD13C62002F4399 /* NoiseCancellationFilter.swift */; };
 		4028FE982DC4F638001F9DC3 /* ConsumableBucket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4028FE972DC4F638001F9DC3 /* ConsumableBucket.swift */; };
 		4028FE9A2DC4FC8E001F9DC3 /* ConsumableBucketItemTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4028FE992DC4FC8E001F9DC3 /* ConsumableBucketItemTransformer.swift */; };
@@ -1901,6 +1902,7 @@
 		40245F682BE27CCB00FCF075 /* StatelessParticipantsListButton_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatelessParticipantsListButton_Tests.swift; sourceTree = "<group>"; };
 		402501782E93B523001FEEEE /* DemoMoreAudioBitrateProfileButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoMoreAudioBitrateProfileButtonView.swift; sourceTree = "<group>"; };
 		4025017B2E93B718001FEEEE /* AudioBitrateProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioBitrateProfile.swift; sourceTree = "<group>"; };
+		402501812E93FD23001FEEEE /* RTCAudioStore+StereoRecordingMiddleware.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCAudioStore+StereoRecordingMiddleware.swift"; sourceTree = "<group>"; };
 		402778822BD13C62002F4399 /* NoiseCancellationFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoiseCancellationFilter.swift; sourceTree = "<group>"; };
 		4028FE972DC4F638001F9DC3 /* ConsumableBucket.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsumableBucket.swift; sourceTree = "<group>"; };
 		4028FE992DC4FC8E001F9DC3 /* ConsumableBucketItemTransformer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsumableBucketItemTransformer.swift; sourceTree = "<group>"; };
@@ -3561,6 +3563,7 @@
 			isa = PBXGroup;
 			children = (
 				4019A2622E40EB6000CE70A4 /* RTCAudioStoreMiddleware.swift */,
+				402501812E93FD23001FEEEE /* RTCAudioStore+StereoRecordingMiddleware.swift */,
 			);
 			path = Middleware;
 			sourceTree = "<group>";
@@ -8883,6 +8886,7 @@
 				40E363502D0A03FF0028C52A /* StreamCaptureDeviceProvider.swift in Sources */,
 				842B8E2E2A2DFED900863A87 /* RejectCallResponse.swift in Sources */,
 				845C09852C0DEB5C00F725B3 /* LimitsSettingsResponse.swift in Sources */,
+				402501822E93FD23001FEEEE /* RTCAudioStore+StereoRecordingMiddleware.swift in Sources */,
 				4159F1952C86FA41002B94D3 /* AggregatedStats.swift in Sources */,
 				84A7E1942883652000526C98 /* EventMiddleware.swift in Sources */,
 				40944D272E4E3F7000088AF0 /* StoreExecutor.swift in Sources */,

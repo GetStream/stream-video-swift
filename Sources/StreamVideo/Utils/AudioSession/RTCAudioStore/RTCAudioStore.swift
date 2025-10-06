@@ -54,6 +54,7 @@ final class RTCAudioStore: @unchecked Sendable {
         processingQueue.underlyingQueue = underlyingQueue
 
         add(RTCAudioSessionReducer(store: self))
+        add(StereoRecordingMiddleware(self))
 
         dispatch(.audioSession(.setPrefersNoInterruptionsFromSystemAlerts(true)))
         dispatch(.audioSession(.useManualAudio(true)))
