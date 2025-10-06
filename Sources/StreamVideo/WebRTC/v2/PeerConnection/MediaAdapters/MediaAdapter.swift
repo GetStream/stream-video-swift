@@ -51,6 +51,7 @@ final class MediaAdapter {
         sfuAdapter: SFUAdapter,
         videoOptions: VideoOptions,
         videoConfig: VideoConfig,
+        isStereoEnabled: Bool,
         publishOptions: PublishOptions,
         videoCaptureSessionProvider: VideoCaptureSessionProvider,
         screenShareSessionProvider: ScreenShareSessionProvider
@@ -89,6 +90,7 @@ final class MediaAdapter {
                 subject: subject,
                 audioMediaAdapter: .init(
                     sessionID: sessionID,
+                    isStereoEnabled: isStereoEnabled,
                     peerConnection: peerConnection,
                     peerConnectionFactory: peerConnectionFactory,
                     sfuAdapter: sfuAdapter,

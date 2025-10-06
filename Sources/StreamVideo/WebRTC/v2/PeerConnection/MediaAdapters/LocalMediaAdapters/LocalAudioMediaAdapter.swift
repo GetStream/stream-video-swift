@@ -43,6 +43,8 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
     private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
 
+    private let isStereoEnabled: Bool
+
     /// The primary audio track for this adapter.
     let primaryTrack: RTCAudioTrack
 
@@ -63,6 +65,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     ///   - subject: A publisher that emits track events.
     init(
         sessionID: String,
+        isStereoEnabled: Bool,
         peerConnection: StreamRTCPeerConnectionProtocol,
         peerConnectionFactory: PeerConnectionFactory,
         sfuAdapter: SFUAdapter,
@@ -70,6 +73,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         subject: PassthroughSubject<TrackEvent, Never>
     ) {
         self.sessionID = sessionID
+        self.isStereoEnabled = isStereoEnabled
         self.peerConnection = peerConnection
         self.peerConnectionFactory = peerConnectionFactory
         self.sfuAdapter = sfuAdapter
@@ -302,6 +306,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                 trackInfo.mid = transceiver.mid
                 trackInfo.muted = !track.isEnabled
                 trackInfo.codec = .init(publishOptions.codec)
+                trackInfo.stereo = isStereoEnabled
                 return trackInfo
             }
     }

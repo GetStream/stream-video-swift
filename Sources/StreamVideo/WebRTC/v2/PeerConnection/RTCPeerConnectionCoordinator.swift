@@ -161,6 +161,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
                 sfuAdapter: sfuAdapter,
                 videoOptions: videoOptions,
                 videoConfig: videoConfig,
+                isStereoEnabled: audioSettings.hifiAudioEnabled == true,
                 publishOptions: publishOptions,
                 videoCaptureSessionProvider: videoCaptureSessionProvider,
                 screenShareSessionProvider: screenShareSessionProvider
