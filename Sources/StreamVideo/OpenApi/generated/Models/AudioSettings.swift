@@ -31,7 +31,16 @@ public final class AudioSettings: @unchecked Sendable, Codable, JSONEncodable, H
     public var redundantCodingEnabled: Bool
     public var speakerDefaultOn: Bool
 
-    public init(accessRequestEnabled: Bool, defaultDevice: DefaultDevice, hifiAudioEnabled: Bool? = nil, micDefaultOn: Bool, noiseCancellation: NoiseCancellationSettingsRequest? = nil, opusDtxEnabled: Bool, redundantCodingEnabled: Bool, speakerDefaultOn: Bool) {
+    public init(
+        accessRequestEnabled: Bool,
+        defaultDevice: DefaultDevice,
+        hifiAudioEnabled: Bool? = nil,
+        micDefaultOn: Bool,
+        noiseCancellation: NoiseCancellationSettingsRequest? = nil,
+        opusDtxEnabled: Bool,
+        redundantCodingEnabled: Bool,
+        speakerDefaultOn: Bool
+    ) {
         self.accessRequestEnabled = accessRequestEnabled
         self.defaultDevice = defaultDevice
         self.hifiAudioEnabled = hifiAudioEnabled
