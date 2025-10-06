@@ -224,7 +224,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         guard value != self.audioBitrateProfile else {
             return
         }
-        self.audioBitrateProfile = audioBitrateProfile
+        self.audioBitrateProfile = value
         publisher?.setAudioBitrateProfile(value)
     }
 

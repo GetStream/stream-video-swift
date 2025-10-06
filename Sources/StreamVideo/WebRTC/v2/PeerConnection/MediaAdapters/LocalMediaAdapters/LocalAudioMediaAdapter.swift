@@ -16,6 +16,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
     /// The audio recorder for capturing audio during the call session.
     @Injected(\.callAudioRecorder) private var audioRecorder
+    @Injected(\.audioStore) private var audioStore
 
     /// The unique identifier for the current session.
     private let sessionID: String
@@ -90,6 +91,9 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
         // Disable the primary track by default.
         track.isEnabled = false
+
+        audioStore.dispatch(.audioSession(.setStereoPlayout(isStereoEnabled)))
+        audioStore.dispatch(.audioSession(.setStereoRecording(false)))
     }
 
     /// Cleans up resources when the instance is deallocated.
@@ -338,6 +342,8 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             ? RTCMediaConstraints.hiFiAudioConstraints
             : .defaultConstraints
 
+            let currentTrackId = primaryTrack.trackId
+
             // 1. Ensure we have the track in the storage
             if profile == .musicHighQuality, trackStorage[.hiFiAudioConstraints] == nil {
                 trackStorage[.hiFiAudioConstraints] = peerConnectionFactory
@@ -352,37 +358,58 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                 return
             }
 
-            newPrimaryTrack.isEnabled = primaryTrack.isEnabled
+            if newPrimaryTrack.trackId != primaryTrack.trackId {
+                newPrimaryTrack.isEnabled = primaryTrack.isEnabled
 
-            let keys = transceiverStorage.map(\.key)
-            for key in keys {
-                guard
-                    var currentValue = transceiverStorage.get(for: key)
-                else {
-                    continue
+                let keys = transceiverStorage.map(\.key)
+                for key in keys {
+                    guard
+                        var currentValue = transceiverStorage.get(for: key)
+                    else {
+                        continue
+                    }
+
+                    let newTrack = newPrimaryTrack.clone(from: peerConnectionFactory)
+                    newTrack.isEnabled = currentValue.track.isEnabled
+                    currentValue.track = newTrack
+
+                    if currentValue.transceiver.sender.track != nil {
+                        currentValue.transceiver.sender.track = newTrack
+                    }
+
+                    if let maxBitrate = key.bitrateProfiles[profile] {
+                        currentValue.transceiver.setMaxBitrate(maxBitrate)
+                    }
+
+                    transceiverStorage.set(
+                        currentValue.transceiver,
+                        track: newTrack,
+                        for: key
+                    )
                 }
+                primaryTrack.isEnabled = false
+                primaryTrack = newPrimaryTrack
+                log.debug("Switched tracks for profile:\(profile) from \(currentTrackId) → \(primaryTrack.trackId).")
+            } else {
+                let keys = transceiverStorage.map(\.key)
+                for key in keys {
+                    guard
+                        let currentValue = transceiverStorage.get(for: key),
+                        let maxBitrate = key.bitrateProfiles[profile]
+                    else {
+                        continue
+                    }
 
-                let newTrack = newPrimaryTrack.clone(from: peerConnectionFactory)
-                newTrack.isEnabled = currentValue.track.isEnabled
-                currentValue.track = newTrack
-
-                if currentValue.transceiver.sender.track != nil {
-                    currentValue.transceiver.sender.track = newTrack
-                }
-
-                if let maxBitrate = key.bitrateProfiles[profile] {
                     currentValue.transceiver.setMaxBitrate(maxBitrate)
                 }
-
-                transceiverStorage.set(
-                    currentValue.transceiver,
-                    track: newTrack,
-                    for: key
-                )
+                log.debug("Updated transceivers for profile:\(profile) for \(primaryTrack.trackId).")
             }
 
-            primaryTrack.isEnabled = false
-            primaryTrack = newPrimaryTrack
+            if profile == .musicHighQuality {
+                audioStore.dispatch(.audioSession(.setStereoRecording(true)))
+            } else {
+                audioStore.dispatch(.audioSession(.setStereoRecording(false)))
+            }
         }
     }
 
