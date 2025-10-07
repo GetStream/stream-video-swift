@@ -1,14 +1,11 @@
 # Directory and file filters
-included:
-  - Sources
-  - DemoApp
-  - DemoAppUIKit
 excluded:
   - Tests/SwiftLintFrameworkTests/Resources
   - Sources/StreamVideo/Generated
   - Sources/StreamVideo/OpenApi
   - Sources/StreamVideo/protobuf
   - Sources/StreamVideoSwiftUI/Generated
+  - DocumentationTests
 
 # Custom Rules
 custom_rules:
