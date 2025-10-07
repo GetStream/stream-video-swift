@@ -1,14 +1,18 @@
+//
+// Copyright © 2025 Stream.io Inc. All rights reserved.
+//
+
+import Combine
+import class StreamChat.ChatChannelController
+import struct StreamChatSwiftUI.ChatChannelView
+import struct StreamChatSwiftUI.UnreadIndicatorView
 import StreamVideo
 import StreamVideoSwiftUI
 import StreamVideoUIKit
 import SwiftUI
-import Combine
-import struct StreamChatSwiftUI.ChatChannelView
-import struct StreamChatSwiftUI.UnreadIndicatorView
-import class StreamChat.ChatChannelController
 
 @MainActor
-fileprivate func content() {
+private func content() {
 
     container {
         class VideoWithChatViewFactory: ViewFactory {
@@ -20,7 +24,6 @@ fileprivate func content() {
             func makeCallControlsView(viewModel: CallViewModel) -> some View {
                 ChatCallControls(viewModel: viewModel)
             }
-
         }
     }
 
@@ -35,7 +38,6 @@ fileprivate func content() {
                 let videoView = makeVideoView(with: VideoWithChatViewFactory.shared)
                 view.embed(videoView)
             }
-
         }
 
         @MainActor
@@ -79,7 +81,7 @@ fileprivate func content() {
             private func listenToIncomingCalls() {
                 callViewModel.$callingState.sink { [weak self] newState in
                     guard let self = self else { return }
-                    if case .incoming(_) = newState, self == self.navigationController?.topViewController {
+                    if case .incoming = newState, self == self.navigationController?.topViewController {
                         let next = CallChatViewController.makeCallChatController(with: self.callViewModel)
                         CallViewHelper.shared.add(callView: next.view)
                     } else if newState == .idle {
@@ -126,12 +128,13 @@ fileprivate func content() {
                                 )
                                 .overlay(
                                     chatHelper.unreadCount > 0 ?
-                                    TopRightView(content: {
-                                        UnreadIndicatorView(unreadCount: chatHelper.unreadCount)
-                                    })
-                                    : nil
+                                        TopRightView(content: {
+                                            UnreadIndicatorView(unreadCount: chatHelper.unreadCount)
+                                        })
+                                        : nil
                                 )
-                            })
+                            }
+                        )
                         .frame(maxWidth: .infinity)
 
                         Button(
@@ -213,7 +216,7 @@ fileprivate func content() {
                         .cornerRadius(16)
                         .edgesIgnoringSafeArea(.all)
                 )
-                .onReceive(viewModel.$callParticipants, perform: { output in
+                .onReceive(viewModel.$callParticipants, perform: { _ in
                     if viewModel.callParticipants.count > 1 {
                         chatHelper.update(memberIds: Set(viewModel.callParticipants.map(\.key)))
                     }

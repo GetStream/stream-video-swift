@@ -45,8 +45,8 @@ struct Safari {
     @discardableResult
     func alertHandler() -> Self {
         safari.buttons["ReloadButton"].wait()
-        if safari.alerts.count > 0 {
-            while safari.alerts.count > 0 {
+        if !safari.alerts.isEmpty {
+            while !safari.alerts.isEmpty {
                 safari.alerts.buttons["Allow"].safeTap()
                 sleep(UInt32(0.5))
             }

@@ -1,10 +1,14 @@
+//
+// Copyright © 2025 Stream.io Inc. All rights reserved.
+//
+
+import Combine
 import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
-import Combine
 
 @MainActor
-fileprivate func content() {
+private func content() {
 
     container {
         struct JoinCallView: View {
@@ -25,7 +29,6 @@ fileprivate func content() {
                 }
                 .padding()
             }
-
         }
 
         struct HomeView<Factory: ViewFactory>: View {
@@ -87,10 +90,9 @@ fileprivate func content() {
                                 BottomRightView {
                                     MuteIndicatorView()
                                 }
-                            : nil
+                                : nil
                         )
                 }
-
             }
 
             struct MuteIndicatorView: View {

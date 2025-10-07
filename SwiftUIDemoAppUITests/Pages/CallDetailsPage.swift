@@ -24,6 +24,7 @@ enum CallDetailsPage {
             return app.collectionViews["participantList"]
         }
     }
+
     static var participants: XCUIElementQuery { participantList.buttons }
     static var connectionErrorAlert: XCUIElement {
         app.staticTexts.matching(NSPredicate(format: "label CONTAINS 'failed with error'")).firstMatch

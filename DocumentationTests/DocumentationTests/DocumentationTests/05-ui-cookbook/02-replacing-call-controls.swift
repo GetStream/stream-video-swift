@@ -1,17 +1,20 @@
+//
+// Copyright © 2025 Stream.io Inc. All rights reserved.
+//
+
+import Combine
 import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
-import Combine
 
 @MainActor
-fileprivate func content() {
+private func content() {
     container {
         class CustomViewFactory: ViewFactory {
 
             public func makeCallControlsView(viewModel: CallViewModel) -> some View {
                 CustomCallControlsView(viewModel: viewModel)
             }
-
         }
     }
 
@@ -88,7 +91,6 @@ fileprivate func content() {
                             .cornerRadius(24)
                     }
                 }
-
             }
 
             class CustomViewFactory: ViewFactory {
@@ -96,7 +98,6 @@ fileprivate func content() {
                 func makeCallControlsView(viewModel: CallViewModel) -> some View {
                     FBCallControlsView(viewModel: viewModel)
                 }
-
             }
         }
     }

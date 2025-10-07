@@ -1,10 +1,14 @@
+//
+// Copyright © 2025 Stream.io Inc. All rights reserved.
+//
+
+import Combine
 import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
-import Combine
 
 @MainActor
-fileprivate func content() {
+private func content() {
     asyncContainer {
         let call = streamVideo.call(callType: "default", callId: "my-call-id")
         await call.disableClientCapabilities([.subscriberVideoPause])

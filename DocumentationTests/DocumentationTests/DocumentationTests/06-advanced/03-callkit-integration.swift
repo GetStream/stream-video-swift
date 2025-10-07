@@ -1,18 +1,15 @@
 //
-//  03-callkit-integration.swift
-//  DocumentationTests
-//
-//  Created by Ilias Pavlidakis on 29/1/24.
+// Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+import Combine
+import Intents
 import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
-import Combine
-import Intents
 
 @MainActor
-fileprivate func content() {
+private func content() {
 
     container {
         @Injected(\.callKitAdapter) var callKitAdapter
@@ -61,12 +58,12 @@ fileprivate func content() {
             @Injected(\.sounds) var sounds
             var body: some View {
                 EmptyView() // Your content goes here.
-                .onAppear {
-                    // Here we register for incomingCalls and provide
-                    // a logo as we did on the previous example
-                    // Provide the ringtone to use when a CallKit call is ringing
-                    callKitAdapter.ringtoneSound = sounds.incomingCallSound.fileName
-                }
+                    .onAppear {
+                        // Here we register for incomingCalls and provide
+                        // a logo as we did on the previous example
+                        // Provide the ringtone to use when a CallKit call is ringing
+                        callKitAdapter.ringtoneSound = sounds.incomingCallSound.fileName
+                    }
             }
         }
     }

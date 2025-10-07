@@ -1,8 +1,12 @@
+//
+// Copyright © 2025 Stream.io Inc. All rights reserved.
+//
+
 import StreamVideo
 import StreamVideoSwiftUI
 
 @MainActor
-fileprivate func content() {
+private func content() {
     container {
         let call = streamVideo.call(callType: "default", callId: "123")
         let camera = call.camera

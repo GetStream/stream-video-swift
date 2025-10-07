@@ -1,6 +1,10 @@
+//
+// Copyright © 2025 Stream.io Inc. All rights reserved.
+//
+
 import StreamVideo
 
-fileprivate enum First {
+private enum First {
     static let streamVideo = StreamVideo(
         apiKey: apiKey,
         user: user,
@@ -9,7 +13,7 @@ fileprivate enum First {
     )
 }
 
-fileprivate enum Second {
+private enum Second {
     static let streamVideo = StreamVideo(
         apiKey: apiKey,
         user: .guest("guest"),
@@ -18,7 +22,7 @@ fileprivate enum Second {
     )
 }
 
-fileprivate enum Third {
+private enum Third {
     static let streamVideo = StreamVideo(
         apiKey: apiKey,
         user: .anonymous,
@@ -27,7 +31,7 @@ fileprivate enum Third {
     )
 }
 
-fileprivate enum Fourth {
+private enum Fourth {
     static let streamVideo = StreamVideo(
         apiKey: apiKey,
         user: user,

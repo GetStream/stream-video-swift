@@ -1,10 +1,14 @@
+//
+// Copyright © 2025 Stream.io Inc. All rights reserved.
+//
+
+import Combine
 import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
-import Combine
 
 @MainActor
-fileprivate func content() {
+private func content() {
     container {
         class CustomViewFactory: ViewFactory {
 
@@ -20,7 +24,6 @@ fileprivate func content() {
             func makeOutgoingCallView(viewModel: CallViewModel) -> some View {
                 CustomOutgoingCallView(viewModel: viewModel)
             }
-
         }
     }
 
@@ -40,7 +43,6 @@ fileprivate func content() {
             public func makeIncomingCallView(viewModel: CallViewModel, callInfo: IncomingCall) -> some View {
                 CustomIncomingCallView(callInfo: callInfo, viewModel: viewModel)
             }
-
         }
     }
 
@@ -59,7 +61,6 @@ fileprivate func content() {
             public func makeCallView(viewModel: CallViewModel) -> some View {
                 CustomCallView(viewModel: viewModel)
             }
-
         }
     }
 
@@ -78,7 +79,6 @@ fileprivate func content() {
             func makeCallControlsView(viewModel: CallViewModel) -> some View {
                 CustomCallControlsView(viewModel: viewModel)
             }
-
         }
     }
 
@@ -88,7 +88,7 @@ fileprivate func content() {
             public func makeVideoParticipantsView(
                 viewModel: CallViewModel,
                 availableFrame: CGRect,
-                onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
+                onChangeTrackVisibility: @escaping @MainActor (CallParticipant, Bool) -> Void
             ) -> some View {
                 VideoParticipantsView(
                     viewFactory: self,
@@ -97,7 +97,6 @@ fileprivate func content() {
                     onChangeTrackVisibility: onChangeTrackVisibility
                 )
             }
-
         }
     }
 
@@ -117,11 +116,10 @@ fileprivate func content() {
                     id: id,
                     availableFrame: availableFrame,
                     contentMode: contentMode,
-                    customData: customData, 
+                    customData: customData,
                     call: call
                 )
             }
-
         }
     }
 
@@ -129,11 +127,11 @@ fileprivate func content() {
         class CustomViewFactory: ViewFactory {
 
             public func makeVideoCallParticipantModifier(
-                    participant: CallParticipant,
-                    call: Call?,
-                    availableFrame: CGRect,
-                    ratio: CGFloat,
-                    showAllInfo: Bool
+                participant: CallParticipant,
+                call: Call?,
+                availableFrame: CGRect,
+                ratio: CGFloat,
+                showAllInfo: Bool
             ) -> some ViewModifier {
                 VideoCallParticipantModifier(
                     participant: participant,
@@ -143,7 +141,6 @@ fileprivate func content() {
                     showAllInfo: showAllInfo
                 )
             }
-
         }
     }
 
@@ -162,7 +159,6 @@ fileprivate func content() {
             public func makeCallTopView(viewModel: CallViewModel) -> some View {
                 CallTopView(viewModel: viewModel)
             }
-
         }
     }
 }

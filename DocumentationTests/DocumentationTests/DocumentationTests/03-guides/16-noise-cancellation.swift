@@ -1,11 +1,15 @@
+//
+// Copyright © 2025 Stream.io Inc. All rights reserved.
+//
+
+import Combine
 import StreamVideo
+import StreamVideoNoiseCancellation
 import StreamVideoSwiftUI
 import SwiftUI
-import Combine
-import StreamVideoNoiseCancellation
 
 @MainActor
-fileprivate func content() {
+private func content() {
     container {
         let processor = NoiseCancellationProcessor()
 

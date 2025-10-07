@@ -1,8 +1,12 @@
+//
+// Copyright © 2025 Stream.io Inc. All rights reserved.
+//
+
 import StreamVideo
 import StreamVideoSwiftUI
 
 @MainActor
-fileprivate func content() {
+private func content() {
     container {
         let clientState = streamVideo.state
         let callState = call.state
@@ -17,7 +21,7 @@ fileprivate func content() {
     }
 
     container {
-        let cancellable = call.state.$participants.sink { participants in
+        let cancellable = call.state.$participants.sink { _ in
             // ..
         }
 

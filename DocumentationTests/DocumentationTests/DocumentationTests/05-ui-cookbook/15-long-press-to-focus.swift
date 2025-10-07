@@ -1,10 +1,14 @@
+//
+// Copyright © 2025 Stream.io Inc. All rights reserved.
+//
+
+import Combine
 import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
-import Combine
 
 @MainActor
-fileprivate func content() {
+private func content() {
     asyncContainer {
         // Create the call with the callType and id
         let call = streamVideo.call(callType: "default", callId: "123")
@@ -66,7 +70,7 @@ fileprivate func content() {
                 id: String,
                 availableFrame: CGRect,
                 contentMode: UIView.ContentMode,
-                customData: [String : RawJSON],
+                customData: [String: RawJSON],
                 call: Call?
             ) -> some View {
                 DefaultViewFactory.shared.makeVideoParticipantView(
@@ -79,12 +83,12 @@ fileprivate func content() {
                 )
                 .longPressToFocus(availableFrame: availableFrame) { point in
                     Task {
-                        guard call?.state.sessionId == participant.sessionId else { return } // We are using this to only allow long pressing on our local video feed
+                        guard call?.state.sessionId == participant.sessionId
+                        else { return } // We are using this to only allow long pressing on our local video feed
                         try await call?.focus(at: point)
                     }
                 }
             }
-
         }
     }
 }

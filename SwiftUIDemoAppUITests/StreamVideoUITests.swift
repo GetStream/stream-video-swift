@@ -2,7 +2,7 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
-@_exported import StreamSwiftTestHelpers
 import Foundation
+@_exported import StreamSwiftTestHelpers
 
 final class StreamVideoUITests {}

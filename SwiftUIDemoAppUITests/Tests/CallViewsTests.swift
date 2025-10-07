@@ -2,8 +2,8 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
-import XCTest
 import StreamVideo
+import XCTest
 
 final class CallViewsTests: StreamTestCase {
     
@@ -147,7 +147,9 @@ final class CallViewsTests: StreamTestCase {
         THEN("there are \(participants) participants on the call") {
             userRobot
                 .assertCallControls()
-                .assertSpotlightView(with: participants - 1) // We get one less due to the LazyHStack that initializes only a few items after the visible ones
+                .assertSpotlightView(with: participants -
+                    1
+                ) // We get one less due to the LazyHStack that initializes only a few items after the visible ones
         }
         WHEN("user enables fullscreen view") {
             userRobot.setView(mode: .fullscreen)

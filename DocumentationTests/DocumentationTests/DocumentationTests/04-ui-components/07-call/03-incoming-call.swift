@@ -1,22 +1,26 @@
+//
+// Copyright © 2025 Stream.io Inc. All rights reserved.
+//
+
+import Combine
 import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
-import Combine
 
 @MainActor
-fileprivate func content() {
+private func content() {
     container {
         struct CustomView: View {
             var callInfo: IncomingCall
 
             public var body: some View {
                 IncomingCallView(
-                   callInfo: callInfo,
-                   onCallAccepted: { _ in
-                    // handle call accepted
-                   }, onCallRejected: { _ in
-                    // handle call rejected
-                   }
+                    callInfo: callInfo,
+                    onCallAccepted: { _ in
+                        // handle call accepted
+                    }, onCallRejected: { _ in
+                        // handle call rejected
+                    }
                 )
             }
         }
@@ -28,7 +32,6 @@ fileprivate func content() {
             public func makeIncomingCallView(viewModel: CallViewModel, callInfo: IncomingCall) -> some View {
                 CustomIncomingCallView(viewModel: viewModel, callInfo: callInfo)
             }
-
         }
     }
 

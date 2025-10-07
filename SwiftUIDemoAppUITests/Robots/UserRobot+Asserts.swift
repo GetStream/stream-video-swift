@@ -20,7 +20,11 @@ extension UserRobot {
     
     @discardableResult
     private func assertParticipantEvent(_ expectedText: String) -> Self {
-        let participantEvent = CallPage.participantEvent.wait().waitForText(expectedText, timeout: UserRobot.defaultTimeout, mustBeEqual: false)
+        let participantEvent = CallPage.participantEvent.wait().waitForText(
+            expectedText,
+            timeout: UserRobot.defaultTimeout,
+            mustBeEqual: false
+        )
         let errMessage = "`\(participantEvent.label)` does not contain `\(expectedText)`"
         XCTAssertTrue(participantEvent.label.contains(expectedText), errMessage)
         return self
@@ -60,11 +64,15 @@ extension UserRobot {
     private func assertToogle(_ toogle: XCUIElement, state: UserControls) -> Self {
         switch state {
         case .enable:
-            XCTAssertTrue(toogle.wait().waitForValue("1", timeout: UserRobot.defaultTimeout).isOn,
-                          "Toggle should be on")
+            XCTAssertTrue(
+                toogle.wait().waitForValue("1", timeout: UserRobot.defaultTimeout).isOn,
+                "Toggle should be on"
+            )
         case .disable:
-            XCTAssertTrue(toogle.wait().waitForValue("0", timeout: UserRobot.defaultTimeout).isOff,
-                          "Toggle should be off")
+            XCTAssertTrue(
+                toogle.wait().waitForValue("0", timeout: UserRobot.defaultTimeout).isOff,
+                "Toggle should be off"
+            )
         }
         return self
     }
@@ -79,7 +87,10 @@ extension UserRobot {
     func assertParticipantStartSharingScreen() -> Self {
         let expectedText = "presenting"
         XCTAssertTrue(CallPage.screenSharingView.wait(timeout: UserRobot.defaultTimeout).exists, "screenSharingView should appear")
-        XCTAssertTrue(CallPage.screenSharingLabel.label.contains(expectedText), "`\(CallPage.screenSharingLabel.label)` does not contain `\(expectedText)`")
+        XCTAssertTrue(
+            CallPage.screenSharingLabel.label.contains(expectedText),
+            "`\(CallPage.screenSharingLabel.label)` does not contain `\(expectedText)`"
+        )
         return self
     }
     
@@ -88,7 +99,10 @@ extension UserRobot {
         if isVisible {
             XCTAssertTrue(CallPage.recordingView.wait().exists, "recording icon should appear")
         } else {
-            XCTAssertFalse(CallPage.recordingView.waitForDisappearance(timeout: UserRobot.defaultTimeout).exists, "recording icon should disappear")
+            XCTAssertFalse(
+                CallPage.recordingView.waitForDisappearance(timeout: UserRobot.defaultTimeout).exists,
+                "recording icon should disappear"
+            )
         }
         return self
     }
@@ -98,14 +112,21 @@ extension UserRobot {
         if isVisible {
             XCTAssertTrue(CallPage.callDurationView.wait().exists, "callDurationView should appear")
         } else {
-            XCTAssertFalse(CallPage.callDurationView.waitForDisappearance(timeout: UserRobot.defaultTimeout).exists, "callDurationView should disappear")
+            XCTAssertFalse(
+                CallPage.callDurationView.waitForDisappearance(timeout: UserRobot.defaultTimeout).exists,
+                "callDurationView should disappear"
+            )
         }
         return self
     }
     
     @discardableResult
     func assertUserCountWhenScreenSharing(_ userCount: Int) -> Self {
-        let actualViewsCount = CallPage.screenSharingParticipantView.waitCount(userCount, timeout: UserRobot.defaultTimeout, exact: true).count
+        let actualViewsCount = CallPage.screenSharingParticipantView.waitCount(
+            userCount,
+            timeout: UserRobot.defaultTimeout,
+            exact: true
+        ).count
         XCTAssertEqual(userCount, actualViewsCount)
         return self
     }
@@ -118,14 +139,18 @@ extension UserRobot {
     @discardableResult
     private func assertParticipantListVisibility(expectedPercent: Int, details: XCUIElement) -> Self {
         let expectedValue = "\(expectedPercent)%"
-        let actualValue = (details.wait().waitForValue("\(expectedPercent)", mustBeEqual: false).value as! String).filter { !$0.isWhitespace }
+        let actualValue = (details.wait().waitForValue("\(expectedPercent)", mustBeEqual: false).value as! String)
+            .filter { !$0.isWhitespace }
         XCTAssertEqual(expectedValue, actualValue)
         return self
     }
     
     @discardableResult
     func assertParticipantStopSharingScreen() -> Self {
-        XCTAssertFalse(CallPage.screenSharingView.waitForDisappearance(timeout: Self.defaultTimeout).exists, "screenSharingView should disappear")
+        XCTAssertFalse(
+            CallPage.screenSharingView.waitForDisappearance(timeout: Self.defaultTimeout).exists,
+            "screenSharingView should disappear"
+        )
         XCTAssertFalse(CallPage.screenSharingLabel.exists, "screenSharingLabel should disappear")
         XCTAssertEqual(0, CallPage.screenSharingParticipantView.count)
         return self
@@ -162,15 +187,26 @@ extension UserRobot {
         XCTAssertTrue(CallPage.ConnectingView.callConnectingView.wait().exists, "callConnectingView should appear")
         XCTAssertTrue(CallPage.ConnectingView.callingIndicator.exists, "callingIndicator should appear")
         if participantCount > 3 {
-            XCTAssertEqual(3, CallPage.ConnectingView.participantsBubblesWithImages.count + CallPage.ConnectingView.participantsBubblesWithoutImages.count)
+            XCTAssertEqual(
+                3,
+                CallPage.ConnectingView.participantsBubblesWithImages.count + CallPage.ConnectingView
+                    .participantsBubblesWithoutImages.count
+            )
             XCTAssertEqual("+\(participantCount - 2)", CallPage.ConnectingView.participantsBubblesWithoutImages.lastMatch?.text)
         } else if participantCount > 1 {
-            XCTAssertEqual(participantCount, CallPage.ConnectingView.participantsBubblesWithImages.count + CallPage.ConnectingView.participantsBubblesWithoutImages.count)
+            XCTAssertEqual(
+                participantCount,
+                CallPage.ConnectingView.participantsBubblesWithImages.count + CallPage.ConnectingView
+                    .participantsBubblesWithoutImages.count
+            )
             if let name = CallPage.ConnectingView.participantsBubblesWithoutImages.lastMatch?.text {
                 XCTAssertFalse(name.contains("+"))
             }
         } else if participantCount > 0 {
-            XCTAssertTrue(CallPage.ConnectingView.callConnectingParticipantView.exists, "callConnectingParticipantView should appear")
+            XCTAssertTrue(
+                CallPage.ConnectingView.callConnectingParticipantView.exists,
+                "callConnectingParticipantView should appear"
+            )
         }
         return self
     }
@@ -198,7 +234,10 @@ extension UserRobot {
         let maxVisibleCount = 6
         let actualCount = CallPage.spotlightParticipantView.count
         if participantCount > maxVisibleCount {
-            XCTAssertTrue(actualCount >= maxVisibleCount && actualCount <= participantCount, "SpotlightView, expected: \(maxVisibleCount) <= \(actualCount) <= \(participantCount)")
+            XCTAssertTrue(
+                actualCount >= maxVisibleCount && actualCount <= participantCount,
+                "SpotlightView, expected: \(maxVisibleCount) <= \(actualCount) <= \(participantCount)"
+            )
         } else {
             XCTAssertEqual(participantCount, actualCount, "SpotlightView")
         }
@@ -241,7 +280,10 @@ extension UserRobot {
         if isVisible {
             XCTAssertTrue(CallPage.reconnectingMessage.wait().exists, "reconnectingMessage should appear")
         } else {
-            XCTAssertFalse(CallPage.reconnectingMessage.waitForDisappearance(timeout: UserRobot.defaultTimeout * 2).exists, "reconnectingMessage should disappear")
+            XCTAssertFalse(
+                CallPage.reconnectingMessage.waitForDisappearance(timeout: UserRobot.defaultTimeout * 2).exists,
+                "reconnectingMessage should disappear"
+            )
         }
         return self
     }

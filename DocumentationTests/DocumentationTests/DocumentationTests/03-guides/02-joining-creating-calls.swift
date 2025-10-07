@@ -1,6 +1,10 @@
+//
+// Copyright © 2025 Stream.io Inc. All rights reserved.
+//
+
 import StreamVideo
 
-fileprivate func content() {
+private func content() {
     asyncContainer {
         let call = streamVideo.call(callType: "default", callId: "123")
         let result = try await call.create()

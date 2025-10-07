@@ -1,10 +1,14 @@
+//
+// Copyright © 2025 Stream.io Inc. All rights reserved.
+//
+
+import Combine
 import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
-import Combine
 
 @MainActor
-fileprivate func content() {
+private func content() {
     asyncContainer {
         Task {
             let call = streamVideo.call(callType: "default", callId: "123")
@@ -36,9 +40,9 @@ fileprivate func content() {
         class CustomViewFactory: ViewFactory {
 
             func makeScreenSharingView(
-                    viewModel: CallViewModel,
-                    screensharingSession: ScreenSharingSession,
-                    availableFrame: CGRect
+                viewModel: CallViewModel,
+                screensharingSession: ScreenSharingSession,
+                availableFrame: CGRect
             ) -> some View {
                 CustomScreenSharingView(
                     viewModel: viewModel,

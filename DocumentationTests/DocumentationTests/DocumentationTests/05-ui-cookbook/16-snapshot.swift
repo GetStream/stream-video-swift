@@ -1,17 +1,21 @@
+//
+// Copyright © 2025 Stream.io Inc. All rights reserved.
+//
+
+import AVFoundation
+import Combine
 import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
-import Combine
-import AVFoundation
 
 @MainActor
-fileprivate func content() {
+private func content() {
 
     viewContainer {
         YourHostView()
             .snapshot(
                 trigger: snapshotTrigger,
-                snapshotHandler: { snapshot in
+                snapshotHandler: { _ in
                     // Further processing ...
                 }
             )
@@ -53,7 +57,6 @@ fileprivate func content() {
                     } icon: {
                         Image(systemName: "circle.inset.filled")
                     }
-
                 }
             }
         }
@@ -65,7 +68,7 @@ fileprivate func content() {
             func makeVideoParticipantsView(
                 viewModel: CallViewModel,
                 availableFrame: CGRect,
-                onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
+                onChangeTrackVisibility: @escaping @MainActor (CallParticipant, Bool) -> Void
             ) -> some View {
                 DefaultViewFactory.shared.makeVideoParticipantsView(
                     viewModel: viewModel,
@@ -262,7 +265,7 @@ fileprivate func content() {
             Task {
                 guard await state.isCapturingVideoFrame else { return }
 
-                if  let imageBuffer = sampleBuffer.imageBuffer {
+                if let imageBuffer = sampleBuffer.imageBuffer {
                     let ciImage = CIImage(cvPixelBuffer: imageBuffer)
                     if let data = UIImage(ciImage: ciImage).jpegData(compressionQuality: 1) {
                         await sendImageData(data)

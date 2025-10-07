@@ -1,11 +1,15 @@
+//
+// Copyright © 2025 Stream.io Inc. All rights reserved.
+//
+
+import AVKit
+import Combine
 import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
-import Combine
-import AVKit
 
 @MainActor
-fileprivate func content() {
+private func content() {
     container {
         func startRecording() {
             Task {
@@ -27,14 +31,14 @@ fileprivate func content() {
             Task {
                 for await event in call.subscribe() {
                     switch event {
-                        case .typeCallRecordingStartedEvent(let recordingStartedEvent):
-                            log.debug("received an event \(recordingStartedEvent)")
-                            /* handle recording event */
-                        case .typeCallRecordingStoppedEvent(let recordingStoppedEvent):
-                            log.debug("received an event \(recordingStoppedEvent)")
-                            /* handle recording event */
-                        default:
-                            break
+                    case .typeCallRecordingStartedEvent(let recordingStartedEvent):
+                        log.debug("received an event \(recordingStartedEvent)")
+                    /* handle recording event */
+                    case .typeCallRecordingStoppedEvent(let recordingStoppedEvent):
+                        log.debug("received an event \(recordingStoppedEvent)")
+                    /* handle recording event */
+                    default:
+                        break
                     }
                 }
             }
@@ -62,7 +66,7 @@ fileprivate func content() {
             var body: some View {
                 Group {
                     if let url = URL(string: recording.url) {
-                        VideoPlayer(player: AVPlayer(url:  url))
+                        VideoPlayer(player: AVPlayer(url: url))
                     } else {
                         Text("Video can't be loaded")
                     }

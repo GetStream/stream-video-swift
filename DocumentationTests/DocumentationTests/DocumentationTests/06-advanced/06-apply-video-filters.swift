@@ -1,13 +1,17 @@
+//
+// Copyright © 2025 Stream.io Inc. All rights reserved.
+//
+
+import CoreImage
 import Foundation
 import StreamVideo
 import StreamVideoSwiftUI
-import CoreImage
+import StreamWebRTC
 import SwiftUI
 import Vision
-import StreamWebRTC
 
 @MainActor
-fileprivate func content() {
+private func content() {
     container {
         let sepia: VideoFilter = {
             let sepia = VideoFilter(id: "sepia", name: "Sepia") { input in
@@ -37,7 +41,7 @@ fileprivate func content() {
                 videoFilters: FiltersService.supportedFilters
             ),
             // highlight-end
-            tokenProvider: { result in
+            tokenProvider: { _ in
                 // Unrelated code skipped. Check repository for complete code:
                 // https://github.com/GetStream/stream-video-ios-examples/blob/main/VideoWithChat/VideoWithChat/StreamWrapper.swift
             }
@@ -103,7 +107,6 @@ fileprivate func content() {
                                         .background(filtersService.selectedFilter?.id == filter.id ? Color.blue : Color.gray)
                                     /* more modifiers */
                                 }
-
                             }
                         }
                     }
@@ -116,7 +119,7 @@ fileprivate func content() {
     container {
         func detectFaces(image: CIImage) async throws -> CGRect {
             return try await withCheckedThrowingContinuation { continuation in
-                let detectFaceRequest = VNDetectFaceRectanglesRequest { (request, error) in
+                let detectFaceRequest = VNDetectFaceRectanglesRequest { (request, _) in
                     if let result = request.results?.first as? VNFaceObservation {
                         continuation.resume(returning: result.boundingBox)
                     } else {
@@ -141,7 +144,7 @@ fileprivate func content() {
             format.scale = 1
             format.opaque = true
             let renderer = UIGraphicsImageRenderer(size: size, format: format)
-            return renderer.image { context in
+            return renderer.image { _ in
                 image.draw(in: CGRect(origin: CGPoint.zero, size: size))
                 logo.draw(in: inRect)
             }
@@ -234,7 +237,8 @@ fileprivate func content() {
                         for j in 0..<frameSize {
                             let shiftedIndex = Int(Float(j) * pitchShift)
                             let originalIndex = inputOffset + j
-                            if shiftedIndex >= 0 && shiftedIndex < frameSize && originalIndex >= 0 && originalIndex < buffer.frames {
+                            if shiftedIndex >= 0 && shiftedIndex < frameSize && originalIndex >= 0 && originalIndex < buffer
+                                .frames {
                                 outputFrame[shiftedIndex] = channelBuffer[originalIndex]
                             }
                         }

@@ -1,10 +1,14 @@
+//
+// Copyright © 2025 Stream.io Inc. All rights reserved.
+//
+
+import Combine
 import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
-import Combine
 
 @MainActor
-fileprivate func content() {
+private func content() {
     asyncContainer {
         let filters: [String: RawJSON] = ["ended_at": .nil]
         let sort = [SortParamRequest.descending("created_at")]
@@ -90,7 +94,7 @@ fileprivate func content() {
 
             ScrollView {
                 LazyVStack {
-                    ForEach(callsViewModel.calls, id: \.callId) { call in
+                    ForEach(callsViewModel.calls, id: \.callId) { _ in
                         CallView(viewFactory: viewFactory, viewModel: viewModel)
                             .padding(.vertical, 4)
                     }

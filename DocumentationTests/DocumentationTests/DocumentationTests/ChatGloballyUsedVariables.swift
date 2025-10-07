@@ -1,5 +1,9 @@
-import StreamChatSwiftUI
+//
+// Copyright © 2025 Stream.io Inc. All rights reserved.
+//
+
 import StreamChat
+import StreamChatSwiftUI
 
 final class ChatViewFactory: ViewFactory {
     var chatClient: ChatClient
