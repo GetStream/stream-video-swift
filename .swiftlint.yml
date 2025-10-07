@@ -6,6 +6,11 @@ excluded:
   - Sources/StreamVideo/protobuf
   - Sources/StreamVideoSwiftUI/Generated
   - DocumentationTests
+  - Pods
+  - .build
+  - spm_cache
+  - vendor/bundle
+  - derived_data
 
 # Custom Rules
 custom_rules:
