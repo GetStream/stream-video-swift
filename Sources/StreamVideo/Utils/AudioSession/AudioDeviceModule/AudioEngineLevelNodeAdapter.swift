@@ -12,48 +12,41 @@ import AVFoundation
 final class AudioEngineLevelNodeAdapter {
 
     private let publisher: (Float) -> Void
-    private var isInstalled = false
+    private var inputTap: AVAudioMixerNode?
 
     init(publisher: @escaping (Float) -> Void) {
         self.publisher = publisher
     }
 
-    func install(
-        on audioEngine: AVAudioEngine,
+    func installInputTap(
+        on node: AVAudioNode,
+        format: AVAudioFormat,
+        bus: Int = 0,
         bufferSize: UInt32 = 1024
     ) {
-        guard !isInstalled else {
-            log.warning(
-                "AudioEngineLevelNode is already installed. Cannot be installed again.",
-                subsystems: .audioSession
-            )
-            return
+        guard let mixer = node as? AVAudioMixerNode, inputTap == nil else { return }
+
+        mixer.installTap(
+            onBus: bus,
+            bufferSize: bufferSize,
+            format: format
+        ) { [weak self] buffer, _ in
+            self?.processInputBuffer(buffer)
         }
-
-        let format = audioEngine.mainMixerNode.outputFormat(forBus: 0)
-        audioEngine
-            .mainMixerNode
-            .installTap(
-                onBus: 0,
-                bufferSize: bufferSize,
-                format: format
-            ) { [weak self] buffer, _ in self?.didReceiveBuffer(buffer) }
-
-        isInstalled = true
+        inputTap = mixer
     }
 
-    func uninstall(on audioEngine: AVAudioEngine) {
-        guard isInstalled else {
-            return
+    func uninstall(on bus: Int = 0) {
+        if let mixer = inputTap {
+            mixer.removeTap(onBus: 0)
+            inputTap = nil
+            publisher(0)
         }
-        audioEngine.mainMixerNode.removeTap(onBus: 0)
-        publisher(0)
-        isInstalled = false
     }
 
     // MARK: - Private Helpers
 
-    private func didReceiveBuffer(_ buffer: AVAudioPCMBuffer) {
+    private func processInputBuffer(_ buffer: AVAudioPCMBuffer) {
         guard let channelData = buffer.floatChannelData else { return }
 
         let frameCount = vDSP_Length(buffer.frameLength)

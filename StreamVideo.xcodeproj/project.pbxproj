@@ -854,6 +854,9 @@
 		40E9B3B72BCD941600ACF18F /* SFUResponse+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E9B3B62BCD941600ACF18F /* SFUResponse+Dummy.swift */; };
 		40ED6D4B2B14F0E600FB5F69 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 40ED6D4A2B14F0E600FB5F69 /* Launch Screen.storyboard */; };
 		40EDA17C2C13792D00583A65 /* View+AlertWithTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408937902C134305000EEB69 /* View+AlertWithTextField.swift */; };
+		40EE9D2B2E969F010000EA92 /* AudioDeviceModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40EE9D282E969F010000EA92 /* AudioDeviceModule.swift */; };
+		40EE9D2C2E969F010000EA92 /* AudioEngineLevelNodeAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40EE9D292E969F010000EA92 /* AudioEngineLevelNodeAdapter.swift */; };
+		40EE9D2E2E969F180000EA92 /* SafePublished.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40EE9D2D2E969F180000EA92 /* SafePublished.swift */; };
 		40F017392BBEAF6400E89FD1 /* MockCallKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F017382BBEAF6400E89FD1 /* MockCallKitService.swift */; };
 		40F0173B2BBEB1A900E89FD1 /* CallKitAdapterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F0173A2BBEB1A900E89FD1 /* CallKitAdapterTests.swift */; };
 		40F0173E2BBEB86800E89FD1 /* TestsAuthenticationProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F0173D2BBEB86800E89FD1 /* TestsAuthenticationProvider.swift */; };
@@ -2480,6 +2483,9 @@
 		40E9B3B42BCD93F500ACF18F /* Credentials+Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Credentials+Dummy.swift"; sourceTree = "<group>"; };
 		40E9B3B62BCD941600ACF18F /* SFUResponse+Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SFUResponse+Dummy.swift"; sourceTree = "<group>"; };
 		40ED6D4A2B14F0E600FB5F69 /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
+		40EE9D282E969F010000EA92 /* AudioDeviceModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioDeviceModule.swift; sourceTree = "<group>"; };
+		40EE9D292E969F010000EA92 /* AudioEngineLevelNodeAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioEngineLevelNodeAdapter.swift; sourceTree = "<group>"; };
+		40EE9D2D2E969F180000EA92 /* SafePublished.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafePublished.swift; sourceTree = "<group>"; };
 		40F017382BBEAF6400E89FD1 /* MockCallKitService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockCallKitService.swift; sourceTree = "<group>"; };
 		40F0173A2BBEB1A900E89FD1 /* CallKitAdapterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitAdapterTests.swift; sourceTree = "<group>"; };
 		40F0173D2BBEB86800E89FD1 /* TestsAuthenticationProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestsAuthenticationProvider.swift; sourceTree = "<group>"; };
@@ -4272,6 +4278,7 @@
 		4067F3062CDA32F0002E28BD /* AudioSession */ = {
 			isa = PBXGroup;
 			children = (
+				40EE9D2A2E969F010000EA92 /* AudioDeviceModule */,
 				40151F8E2E7440D000326540 /* AudioProcessing */,
 				4019A24E2E40E08200CE70A4 /* RTCAudioStore */,
 				40802AE72DD2A7BA00B9F970 /* Protocols */,
@@ -5808,6 +5815,15 @@
 			path = CurrentDevice;
 			sourceTree = "<group>";
 		};
+		40EE9D2A2E969F010000EA92 /* AudioDeviceModule */ = {
+			isa = PBXGroup;
+			children = (
+				40EE9D282E969F010000EA92 /* AudioDeviceModule.swift */,
+				40EE9D292E969F010000EA92 /* AudioEngineLevelNodeAdapter.swift */,
+			);
+			path = AudioDeviceModule;
+			sourceTree = "<group>";
+		};
 		40F0173C2BBEB85F00E89FD1 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
@@ -6989,6 +7005,7 @@
 				401A0F022AB1C1B600BE2DBD /* ThermalStateObserver.swift */,
 				40A0E9612B88D3DC0089E8D3 /* UIInterfaceOrientation+CGOrientation.swift */,
 				84C2997C28784BB30034B735 /* Utils.swift */,
+				40EE9D2D2E969F180000EA92 /* SafePublished.swift */,
 				4067F3062CDA32F0002E28BD /* AudioSession */,
 				40FB15082BF74C0A00D5E580 /* CallCache */,
 				402F04AC2B714E9B00CA1986 /* DeviceOrientation */,
@@ -8350,6 +8367,8 @@
 				40DFA8912CC11155003DCE05 /* LayoutSettings.swift in Sources */,
 				40DFA8902CC11146003DCE05 /* APIKey.swift in Sources */,
 				40DFA88F2CC11137003DCE05 /* UpdateCallResponse.swift in Sources */,
+				40EE9D2B2E969F010000EA92 /* AudioDeviceModule.swift in Sources */,
+				40EE9D2C2E969F010000EA92 /* AudioEngineLevelNodeAdapter.swift in Sources */,
 				40DFA88E2CC1111E003DCE05 /* CallState.swift in Sources */,
 				403793C72D3670BC00C752DF /* ApplicationLifecycleVideoMuteAdapter.swift in Sources */,
 				4029E94E2CB8162900E1D571 /* IncomingVideoQualitySettings.swift in Sources */,
@@ -8825,6 +8844,7 @@
 				40D75C652E44F5CE000E0438 /* CameraInterruptionsHandler.swift in Sources */,
 				40AD64C72DC269E60077AE15 /* SpeakerProximityPolicy.swift in Sources */,
 				842E70D92B91BE1700D2D68B /* CallClosedCaption.swift in Sources */,
+				40EE9D2E2E969F180000EA92 /* SafePublished.swift in Sources */,
 				84FC2C2428AD1B5E00181490 /* WebRTCEventDecoder.swift in Sources */,
 				40149DCE2B7E837A00473176 /* StreamCallAudioRecorder.swift in Sources */,
 				40E741FF2D553ACD0044C955 /* CurrentDevice.swift in Sources */,

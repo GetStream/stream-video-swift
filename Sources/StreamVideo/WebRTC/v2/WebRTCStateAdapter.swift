@@ -35,6 +35,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     }
 
     @Injected(\.permissions) private var permissions
+    @Injected(\.audioStore) private var audioStore
 
     // Properties for user, API key, call ID, video configuration, and factories.
     let unifiedSessionId: String = UUID().uuidString
@@ -671,6 +672,11 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     }
 
     func configureAudioSession(source: JoinSource?) async throws {
+        try await audioStore.dispatchAsync(
+            .audioSession(
+                .setAudioDeviceModule(.init(peerConnectionFactory.audioDeviceModule))
+            )
+        )
         audioSession.activate(
             callSettingsPublisher: $callSettings.removeDuplicates().eraseToAnyPublisher(),
             ownCapabilitiesPublisher: $ownCapabilities.removeDuplicates().eraseToAnyPublisher(),
