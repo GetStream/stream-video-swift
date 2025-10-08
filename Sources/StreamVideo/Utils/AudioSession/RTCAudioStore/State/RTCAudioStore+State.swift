@@ -40,6 +40,8 @@ extension RTCAudioStore {
         /// Indicates if the app has permission to record audio.
         var hasRecordingPermission: Bool
 
+        var audioDeviceModule: AudioDeviceModule?
+
         /// The initial default state for the audio store.
         static let initial = State(
             isActive: false,
@@ -51,7 +53,8 @@ extension RTCAudioStore {
             mode: .voiceChat,
             options: .allowBluetooth,
             overrideOutputAudioPort: .none,
-            hasRecordingPermission: false
+            hasRecordingPermission: false,
+            audioDeviceModule: nil
         )
 
         /// Encodes this state into the given encoder.

@@ -45,5 +45,7 @@ extension RTCAudioStoreAction {
         /// - Warning: It has the potential to cause misalignment with the underline RTCAudioSession.
         /// It should be used with caution.
         case setAVAudioSessionActive(Bool)
+
+        case setAudioDeviceModule(AudioDeviceModule?)
     }
 }

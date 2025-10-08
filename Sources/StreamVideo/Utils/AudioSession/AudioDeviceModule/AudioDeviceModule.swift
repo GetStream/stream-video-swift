@@ -32,14 +32,6 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate {
     var isRecordingPublisher: AnyPublisher<Bool, Never> { _isRecording.publisher }
 
     @SafePublished
-    var isStereoPlayoutAvailable: Bool = false
-    var isStereoPlayoutAvailablePublisher: AnyPublisher<Bool, Never> { _isStereoPlayoutAvailable.publisher }
-
-    @SafePublished
-    var isStereoPlayoutEnabled: Bool = false
-    var isStereoPlayoutEnabledPublisher: AnyPublisher<Bool, Never> { _isStereoPlayoutEnabled.publisher }
-
-    @SafePublished
     var audioLevel: Float = 0
     var audioLevelPublisher: AnyPublisher<Float, Never> { _audioLevel.publisher }
 
@@ -63,25 +55,6 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate {
         super.init()
 
         source.observer = self
-
-        source
-            .publisher(for: \.isStereoPlayoutAvailable)
-            .sink { [weak self] in self?._isStereoPlayoutAvailable.set($0) }
-            .store(in: disposableBag)
-
-        source
-            .publisher(for: \.isStereoPlayoutEnabled)
-            .sink { [weak self] in self?._isStereoPlayoutEnabled.set($0) }
-            .store(in: disposableBag)
-    }
-
-    // MARK: - Stereo Playout
-
-    func setStereoPlayout(enabled: Bool) {
-        guard enabled != source.isStereoPlayoutEnabled else {
-            return
-        }
-        source.isStereoPlayoutEnabled = enabled
     }
 
     // MARK: - RTCAudioDeviceModuleDelegate
@@ -105,9 +78,6 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate {
         didCreateEngine engine: AVAudioEngine
     ) -> Int {
         subject.send(.didCreateAudioEngine(engine))
-
-        audioLevelsAdapter.install(on: engine)
-
         return 0
     }
 
@@ -142,7 +112,7 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate {
         isRecordingEnabled: Bool
     ) -> Int {
         subject.send(.didStopAudioEngine(engine))
-        audioLevelsAdapter.uninstall(on: engine)
+        audioLevelsAdapter.uninstall()
         _isPlaying.set(isPlayoutEnabled)
         _isRecording.set(isRecordingEnabled)
         return 0
@@ -155,7 +125,7 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate {
         isRecordingEnabled: Bool
     ) -> Int {
         subject.send(.didDisableAudioEngine(engine))
-        audioLevelsAdapter.uninstall(on: engine)
+        audioLevelsAdapter.uninstall()
         _isPlaying.set(isPlayoutEnabled)
         _isRecording.set(isRecordingEnabled)
         return 0
@@ -166,7 +136,7 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate {
         willReleaseEngine engine: AVAudioEngine
     ) -> Int {
         subject.send(.willReleaseAudioEngine(engine))
-        audioLevelsAdapter.uninstall(on: engine)
+        audioLevelsAdapter.uninstall()
         return 0
     }
 
@@ -178,7 +148,8 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate {
         format: AVAudioFormat,
         context: [AnyHashable : Any]
     ) -> Int {
-        0
+        audioLevelsAdapter.installInputTap(on: destination, format: format)
+        return 0
     }
 
     func audioDeviceModule(
