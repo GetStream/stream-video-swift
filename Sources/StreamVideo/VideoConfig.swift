@@ -14,8 +14,13 @@ public final class VideoConfig: Sendable {
     public let noiseCancellationFilter: NoiseCancellationFilter?
 
     /// The audio processing module that handles the audio streams provided by WebRTC.
-    public let audioProcessingModule: AudioProcessingModule
-        
+    /// Lazily initialized to avoid requesting microphone permission until actually needed.
+    public lazy var audioProcessingModule: AudioProcessingModule = {
+        _customAudioProcessingModule ?? InjectedValues[\.audioFilterProcessingModule]
+    }()
+
+    private let _customAudioProcessingModule: AudioProcessingModule?
+
     /// Initializes a new instance of `VideoConfig` with the specified parameters.
     /// - Parameters:
     ///   - videoFilters: An array of `VideoFilter` objects representing the filters to apply to the video.
@@ -31,6 +36,6 @@ public final class VideoConfig: Sendable {
     ) {
         self.videoFilters = videoFilters
         self.noiseCancellationFilter = noiseCancellationFilter
-        self.audioProcessingModule = audioProcessingModule ?? InjectedValues[\.audioFilterProcessingModule]
+        self._customAudioProcessingModule = audioProcessingModule
     }
 }
