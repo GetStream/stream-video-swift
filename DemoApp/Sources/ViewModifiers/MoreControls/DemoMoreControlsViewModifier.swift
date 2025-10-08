@@ -53,7 +53,12 @@ struct DemoMoreControlsViewModifier: ViewModifier {
                             }
 
                             DemoMoreControlListButtonView(
-                                action: { viewModel.toggleAudioOutput() },
+                                action: {
+                                    if viewModel.callSettings.audioOn {
+                                        viewModel.toggleMicrophoneEnabled()
+                                    }
+                                    viewModel.toggleAudioOutput()
+                                },
                                 label: viewModel.callSettings.audioOutputOn ? "Disable audio output" : "Enable audio output"
                             ) {
                                 Image(

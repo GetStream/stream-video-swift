@@ -59,7 +59,9 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
     
     /// Executor that processes actions through the pipeline.
     private let executor: StoreExecutor<Namespace>
-    
+
+    private let coordinator: StoreCoordinator<Namespace>
+
     /// Publisher that holds and emits the current state.
     private let stateSubject: CurrentValueSubject<Namespace.State, Never>
     
@@ -87,7 +89,8 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
         reducers: [Reducer<Namespace>],
         middleware: [Middleware<Namespace>],
         logger: StoreLogger<Namespace>,
-        executor: StoreExecutor<Namespace>
+        executor: StoreExecutor<Namespace>,
+        coordinator: StoreCoordinator<Namespace>
     ) {
         self.identifier = identifier
         stateSubject = .init(initialState)
@@ -95,6 +98,7 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
         self.middleware = []
         self.logger = logger
         self.executor = executor
+        self.coordinator = coordinator
 
         middleware.forEach { add($0) }
     }
@@ -251,7 +255,7 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
         function: StaticString = #function,
         line: UInt = #line
     ) -> StoreTask<Namespace> {
-        let task = StoreTask(executor: executor)
+        let task = StoreTask(executor: executor, coordinator: coordinator)
         processingQueue.addTaskOperation { [weak self] in
             guard let self else {
                 return

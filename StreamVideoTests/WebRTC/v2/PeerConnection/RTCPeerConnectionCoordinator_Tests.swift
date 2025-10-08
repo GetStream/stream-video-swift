@@ -819,7 +819,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
     // MARK: - Private helpers
 
     private func simulateConcurrentPeerConnectionSetUp(
-        callSettings: CallSettings = .init(),
+        callSettings: CallSettings = .default,
         ownCapabilities: [OwnCapability] = [],
         setUpDelay: TimeInterval = 0,
         shouldFail: Bool = false,

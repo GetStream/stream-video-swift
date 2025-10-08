@@ -90,6 +90,24 @@ class StoreLogger<Namespace: StoreNamespace> {
         )
     }
 
+    func didSkip(
+        identifier: String,
+        action: Namespace.Action,
+        state: Namespace.State,
+        file: StaticString,
+        function: StaticString,
+        line: UInt
+    ) {
+        defer { statistics.record(action) }
+        log.debug(
+            "Store identifier:\(identifier) skipped action:\(action)).",
+            subsystems: logSubsystem,
+            functionName: function,
+            fileName: file,
+            lineNumber: line
+        )
+    }
+
     /// Called when an action fails during processing.
     ///
     /// Override this method to customize error logging. The default

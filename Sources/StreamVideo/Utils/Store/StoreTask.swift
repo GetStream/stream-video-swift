@@ -22,12 +22,15 @@ final class StoreTask<Namespace: StoreNamespace>: Sendable {
     private enum State { case idle, running, completed, failed(Error) }
 
     private let executor: StoreExecutor<Namespace>
+    private let coordinator: StoreCoordinator<Namespace>
     private let resultSubject: CurrentValueSubject<State, Never> = .init(.idle)
 
     init(
-        executor: StoreExecutor<Namespace>
+        executor: StoreExecutor<Namespace>,
+        coordinator: StoreCoordinator<Namespace>
     ) {
         self.executor = executor
+        self.coordinator = coordinator
     }
 
     // MARK: - Execution
@@ -64,10 +67,25 @@ final class StoreTask<Namespace: StoreNamespace>: Sendable {
     ) async {
         resultSubject.send(.running)
         do {
+            var updatedState = state
             for action in actions {
-                try await executor.run(
+                guard
+                    coordinator.shouldExecute(action: action.wrappedValue, state: updatedState)
+                else {
+                    logger.didSkip(
+                        identifier: identifier,
+                        action: action.wrappedValue,
+                        state: updatedState,
+                        file: file,
+                        function: function,
+                        line: line
+                    )
+                    continue
+                }
+
+                updatedState = try await executor.run(
                     identifier: identifier,
-                    state: state,
+                    state: updatedState,
                     action: action,
                     reducers: reducers,
                     middleware: middleware,
