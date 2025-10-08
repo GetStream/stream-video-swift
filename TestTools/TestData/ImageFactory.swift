@@ -4,7 +4,7 @@
 
 import Foundation
 
-struct ImageFactory {
+enum ImageFactory {
     
     static func get(_ number: Int) -> URL? {
         switch number {

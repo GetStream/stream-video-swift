@@ -1,10 +1,14 @@
+//
+// Copyright © 2025 Stream.io Inc. All rights reserved.
+//
+
+import Combine
 import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
-import Combine
 
 @MainActor
-fileprivate func content() {
+private func content() {
     container {
         struct CustomParticipantModifier: ViewModifier {
 
@@ -70,7 +74,6 @@ fileprivate func content() {
                     showAllInfo: showAllInfo
                 )
             }
-
         }
     }
 }

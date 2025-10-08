@@ -1,10 +1,14 @@
+//
+// Copyright © 2025 Stream.io Inc. All rights reserved.
+//
+
+import Combine
 import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
-import Combine
 
 @MainActor
-fileprivate func content() {
+private func content() {
 
     container {
         struct CustomLobbyView: View {
@@ -15,15 +19,15 @@ fileprivate func content() {
             var callId: String
             var callType: String
             @Binding var callSettings: CallSettings
-            var onJoinCallTap: () -> ()
-            var onCloseLobby: () -> ()
+            var onJoinCallTap: () -> Void
+            var onCloseLobby: () -> Void
 
             public init(
                 callId: String,
                 callType: String,
                 callSettings: Binding<CallSettings>,
-                onJoinCallTap: @escaping () -> (),
-                onCloseLobby: @escaping () -> ()
+                onJoinCallTap: @escaping () -> Void,
+                onCloseLobby: @escaping () -> Void
             ) {
                 self.callId = callId
                 self.callType = callType
@@ -63,8 +67,8 @@ fileprivate func content() {
             var callId: String
             var callType: String
             @Binding var callSettings: CallSettings
-            var onJoinCallTap: () -> ()
-            var onCloseLobby: () -> ()
+            var onJoinCallTap: () -> Void
+            var onCloseLobby: () -> Void
 
             var body: some View {
                 GeometryReader { reader in
@@ -171,7 +175,7 @@ fileprivate func content() {
                             MicrophoneCheckView(
                                 audioLevels: microphoneChecker.audioLevels,
                                 microphoneOn: callSettings.audioOn,
-                                isSilent: microphoneChecker.isSilent, 
+                                isSilent: microphoneChecker.isSilent,
                                 isPinned: false
                             )
                             .accessibility(identifier: "microphoneCheckView")
@@ -183,7 +187,7 @@ fileprivate func content() {
             }
 
             private var cameraSize: CGFloat {
-                if viewModel.participants.count > 0 {
+                if !viewModel.participants.isEmpty {
                     return availableSize.height / 2 - 64
                 } else {
                     return availableSize.height / 2
@@ -244,7 +248,7 @@ fileprivate func content() {
             var callId: String
             var callType: String
             var callParticipants: [User]
-            var onJoinCallTap: () -> ()
+            var onJoinCallTap: () -> Void
 
             var body: some View {
                 VStack(spacing: 16) {
@@ -254,7 +258,7 @@ fileprivate func content() {
                         .streamAccessibility(value: "\(otherParticipantsCount)")
 
                     if #available(iOS 14, *) {
-                        if callParticipants.count > 0 {
+                        if !callParticipants.isEmpty {
                             ParticipantsInCallView(
                                 callParticipants: callParticipants
                             )

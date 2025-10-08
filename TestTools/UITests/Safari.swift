@@ -42,6 +42,7 @@ struct Safari {
         return self
     }
     
+    // swiftformat:disable isEmpty
     @discardableResult
     func alertHandler() -> Self {
         safari.buttons["ReloadButton"].wait()
@@ -53,6 +54,8 @@ struct Safari {
         }
         return self
     }
+
+    // swiftformat:enable isEmpty
     
     @discardableResult
     func tapOnDeeplinkButton(_ timeout: Double = 5) -> Self {

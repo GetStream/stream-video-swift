@@ -671,13 +671,9 @@ desc 'Run source code formatting/linting'
 lane :run_swift_format do |options|
   Dir.chdir('..') do
     strict = options[:strict] ? '--lint' : nil
-    sources_matrix[:swiftformat].each do |path|
-      sh("swiftformat #{strict} --config .swiftformat #{path}")
-      next if path.include?('Tests')
-
-      sh("swiftlint lint --config .swiftlint.yml --fix --progress --quiet --reporter json #{path}") unless strict
-      sh("swiftlint lint --config .swiftlint.yml --strict --progress --quiet --reporter json #{path}")
-    end
+    sh("swiftformat #{strict} --config .swiftformat .")
+    sh("swiftlint lint --config .swiftlint.yml --fix --progress --quiet --reporter json") unless strict
+    sh("swiftlint lint --config .swiftlint.yml --strict --progress --quiet --reporter json")
   end
 end
 
@@ -708,8 +704,7 @@ lane :sources_matrix do
     documentation_tests: ['Sources', 'DocumentationTests', xcode_project],
     size: ['Sources', xcode_project],
     public_interface: ['Sources'],
-    ruby: ['fastlane'],
-    swiftformat: ['Sources', 'DemoApp', 'DemoAppUIKit', 'StreamVideoTests', 'StreamVideoSwiftUITests', 'StreamVideoUIKitTests']
+    ruby: ['fastlane']
   }
 end
 

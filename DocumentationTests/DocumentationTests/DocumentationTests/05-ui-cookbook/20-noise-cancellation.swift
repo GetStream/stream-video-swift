@@ -1,10 +1,14 @@
+//
+// Copyright © 2025 Stream.io Inc. All rights reserved.
+//
+
+import Combine
 import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
-import Combine
 
 @MainActor
-fileprivate func content() {
+private func content() {
     container {
         struct NoiseCancellationButtonView: View {
 
@@ -21,7 +25,8 @@ fileprivate func content() {
                 } else {
                     self.isNoiseCancellationAvailable = false
                 }
-                self.isActive = streamVideo.videoConfig.noiseCancellationFilter?.id == streamVideo.videoConfig.audioProcessingModule.activeAudioFilter?.id
+                self.isActive = streamVideo.videoConfig.noiseCancellationFilter?.id == streamVideo.videoConfig.audioProcessingModule
+                    .activeAudioFilter?.id
             }
 
             var body: some View {
@@ -42,8 +47,8 @@ fileprivate func content() {
                                 } icon: {
                                     Image(
                                         systemName: isActive
-                                        ? "waveform.path.ecg"
-                                        : "waveform.path"
+                                            ? "waveform.path.ecg"
+                                            : "waveform.path"
                                     )
                                 }
                             }

@@ -1,10 +1,14 @@
+//
+// Copyright © 2025 Stream.io Inc. All rights reserved.
+//
+
+import Combine
 import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
-import Combine
 
 @MainActor
-fileprivate func content() {
+private func content() {
     viewContainer {
         VideoParticipantsView(
             viewFactory: DefaultViewFactory.shared,
@@ -20,7 +24,7 @@ fileprivate func content() {
             public func makeVideoParticipantsView(
                 viewModel: CallViewModel,
                 availableFrame: CGRect,
-                onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
+                onChangeTrackVisibility: @escaping @MainActor (CallParticipant, Bool) -> Void
             ) -> some View {
                 CustomVideoParticipantsView(
                     viewFactory: self,

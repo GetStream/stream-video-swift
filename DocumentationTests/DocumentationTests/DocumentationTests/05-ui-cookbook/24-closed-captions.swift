@@ -1,16 +1,20 @@
+//
+// Copyright © 2025 Stream.io Inc. All rights reserved.
+//
+
+import Combine
 import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
-import Combine
 
 @MainActor
-fileprivate func content() {
+private func content() {
     asyncContainer {
-        try await call.startClosedCaptions(); // start closed captions
+        try await call.startClosedCaptions() // start closed captions
     }
 
     asyncContainer {
-        try await call.stopClosedCaptions(); // stop closed captions
+        try await call.stopClosedCaptions() // stop closed captions
     }
 
     container {
@@ -69,8 +73,8 @@ fileprivate func content() {
             init(call: Call) {
                 self.call = call
                 areClosedCaptionsAvailable = (call.state.settings?.transcription.closedCaptionMode ?? .disabled) != .disabled
-                && call.currentUserHasCapability(.startClosedCaptionsCall) == true
-                && call.currentUserHasCapability(.stopClosedCaptionsCall) == true
+                    && call.currentUserHasCapability(.startClosedCaptionsCall) == true
+                    && call.currentUserHasCapability(.stopClosedCaptionsCall) == true
                 isCaptioning = call.state.captioning == true
             }
 
@@ -78,25 +82,25 @@ fileprivate func content() {
                 Group {
                     if areClosedCaptionsAvailable {
                         Button {
-                                Task {
-                                    do {
-                                        if isCaptioning {
-                                            try await call.stopClosedCaptions()
-                                        } else {
-                                            try await call.startClosedCaptions()
-                                        }
-                                    } catch {
-                                        log.error(error)
+                            Task {
+                                do {
+                                    if isCaptioning {
+                                        try await call.stopClosedCaptions()
+                                    } else {
+                                        try await call.startClosedCaptions()
                                     }
+                                } catch {
+                                    log.error(error)
                                 }
+                            }
                         } label: {
                             Label {
                                 Text(isCaptioning ? "Disable Closed Captions" : "Closed Captions")
                             } icon: {
                                 Image(
                                     systemName: isCaptioning
-                                    ? "captions.bubble.fill"
-                                    : "captions.bubble"
+                                        ? "captions.bubble.fill"
+                                        : "captions.bubble"
                                 )
                             }
                         }
@@ -120,7 +124,7 @@ fileprivate func content() {
                 closedCaptionMode: .available,
                 mode: .available
             )
-        );
+        )
     }
 
     asyncContainer {

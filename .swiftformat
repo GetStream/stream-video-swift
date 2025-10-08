@@ -81,4 +81,4 @@
 --wrapcollections before-first
 
 # Exclude paths
---exclude **/Generated,**/generated,**/protobuf,**/OpenApi
+--exclude **/Generated,**/generated,**/protobuf,**/OpenApi,vendor/bundle,Pods,spm_cache,derived_data,.build

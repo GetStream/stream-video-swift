@@ -1,16 +1,20 @@
+//
+// Copyright © 2025 Stream.io Inc. All rights reserved.
+//
+
+import Combine
 import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
-import Combine
 
 @MainActor
-fileprivate func content() {
+private func content() {
 
     container {
         struct CustomView: View {
             public var body: some View {
                 OutgoingCallView(
-                    outgoingCallMembers: outgoingCallMembers, 
+                    outgoingCallMembers: outgoingCallMembers,
                     callTopView: callTopView,
                     callControls: callControls
                 )
@@ -24,7 +28,6 @@ fileprivate func content() {
             public func makeOutgoingCallView(viewModel: CallViewModel) -> some View {
                 CustomOutgoingCallView(viewModel: viewModel)
             }
-
         }
     }
 

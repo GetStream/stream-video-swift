@@ -2,9 +2,9 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
-import SwiftUI
 @testable import StreamVideo
 @testable import StreamVideoSwiftUI
+import SwiftUI
 
 class TestViewFactory: ViewFactory {
     
@@ -55,7 +55,7 @@ class TestViewFactory: ViewFactory {
     }
 }
 
-struct ParticipantFactory {
+enum ParticipantFactory {
     static func get(
         _ count: Int,
         withVideo hasVideo: Bool = false,
@@ -95,7 +95,7 @@ struct ParticipantFactory {
     }
 }
 
-struct UserFactory {
+enum UserFactory {
     static func get(_ count: Int) -> [Member] {
         var factory: [Member] = []
         guard count > 0 else { return factory }

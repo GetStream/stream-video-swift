@@ -1,8 +1,12 @@
-import SwiftUI
+//
+// Copyright © 2025 Stream.io Inc. All rights reserved.
+//
+
 import StreamVideo
 import StreamVideoSwiftUI
+import SwiftUI
 
-fileprivate func content() {
+private func content() {
     container {
         struct VideoDemoSwiftUIApp: View {
 
@@ -53,7 +57,7 @@ fileprivate func content() {
                         callViewModel.startCall(
                             callType: "default",
                             callId: callId,
-                            members: [/* Your list of participants goes here. */]
+                            members: [ /* Your list of participants goes here. */ ]
                         )
                     } label: {
                         Text("Start a call")
@@ -127,7 +131,7 @@ fileprivate func content() {
                         callViewModel.startCall(
                             callType: "default",
                             callId: callId,
-                            members: [/* Your list of participants goes here. */]
+                            members: [ /* Your list of participants goes here. */ ]
                         )
                     } label: {
                         Text("Start a call")
@@ -137,7 +141,5 @@ fileprivate func content() {
                 .modifier(CallModifier(viewFactory: CustomViewFactory(), viewModel: callViewModel))
             }
         }
-
     }
-
 }

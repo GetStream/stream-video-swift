@@ -121,7 +121,7 @@ final class Authentication_Tests: StreamTestCase {
             userRobot
                 .waitForAutoLogin()
                 .startCall(callId, waitForCompletion: false)
-        }   
+        }
         WHEN("app requests a token refresh") {}
         THEN("app shows a connection error alert") {
             userRobot.assertConnectionErrorAlert()

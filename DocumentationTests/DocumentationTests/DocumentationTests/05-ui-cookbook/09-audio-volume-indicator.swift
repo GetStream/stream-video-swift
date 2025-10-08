@@ -1,10 +1,14 @@
+//
+// Copyright © 2025 Stream.io Inc. All rights reserved.
+//
+
+import Combine
 import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
-import Combine
 
 @MainActor
-fileprivate func content() {
+private func content() {
     container {
         AudioVolumeIndicator(
             audioLevels: [0.8, 0.9, 0.7],
@@ -25,7 +29,7 @@ fileprivate func content() {
         MicrophoneCheckView(
             audioLevels: microphoneChecker.audioLevels,
             microphoneOn: callViewModel.callSettings.audioOn,
-            isSilent: microphoneChecker.isSilent, 
+            isSilent: microphoneChecker.isSilent,
             isPinned: false
         )
     }

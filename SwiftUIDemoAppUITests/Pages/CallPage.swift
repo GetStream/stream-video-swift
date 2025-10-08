@@ -45,6 +45,7 @@ enum CallPage {
         static var participantsBubblesWithImages: XCUIElementQuery {
             app.staticTexts["callConnectingGroupView"].images
         }
+
         static var participantsBubblesWithoutImages: XCUIElementQuery {
             app.staticTexts["callConnectingGroupView"].staticTexts
         }
@@ -73,13 +74,16 @@ enum CallPage {
     static var screenSharingParticipantView: XCUIElementQuery {
         spotlightParticipantView
     }
+
     static var screenSharingParticipantList: XCUIElement {
         spotlightViewParticipantList
     }
+
     static var gridViewParticipantList: XCUIElement { app.scrollViews["gridScrollView"] }
     static var gridViewParticipantListDetails: XCUIElement {
         gridViewParticipantList.otherElements.matching(NSPredicate(format: "label CONTAINS 'Vertical scroll bar'")).firstMatch
     }
+
     static var spotlightViewParticipantList: XCUIElement { app.scrollViews["horizontalParticipantsList"] }
     static var reconnectingMessage: XCUIElement { app.staticTexts["reconnectingMessage"] }
 }

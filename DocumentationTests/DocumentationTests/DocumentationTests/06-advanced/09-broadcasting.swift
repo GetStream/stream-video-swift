@@ -1,10 +1,14 @@
+//
+// Copyright © 2025 Stream.io Inc. All rights reserved.
+//
+
+import Combine
 import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
-import Combine
 
 @MainActor
-fileprivate func content() {
+private func content() {
     asyncContainer {
         let call = streamVideo.call(callType: .default, callId: callId)
         Task {
@@ -23,14 +27,14 @@ fileprivate func content() {
     asyncContainer {
         for await event in call.subscribe() {
             switch event {
-                case .typeCallHLSBroadcastingStartedEvent(let broadcastingStartedEvent):
-                    log.debug("received an event \(broadcastingStartedEvent)")
-                    /* handle recording event */
-                case .typeCallHLSBroadcastingStoppedEvent(let broadcastingStoppedEvent):
-                    log.debug("received an event \(broadcastingStoppedEvent)")
-                    /* handle recording event */
-                default:
-                    break
+            case .typeCallHLSBroadcastingStartedEvent(let broadcastingStartedEvent):
+                log.debug("received an event \(broadcastingStartedEvent)")
+            /* handle recording event */
+            case .typeCallHLSBroadcastingStoppedEvent(let broadcastingStoppedEvent):
+                log.debug("received an event \(broadcastingStoppedEvent)")
+            /* handle recording event */
+            default:
+                break
             }
         }
     }

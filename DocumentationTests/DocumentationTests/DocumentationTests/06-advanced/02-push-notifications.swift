@@ -1,14 +1,18 @@
+//
+// Copyright © 2025 Stream.io Inc. All rights reserved.
+//
+
+import CallKit
+import Combine
+import PushKit
 import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
-import Combine
-import CallKit
-import PushKit
 
-typealias VoIPPushHandler = ((PKPushPayload, PKPushType, () -> Void)) -> ()
+typealias VoIPPushHandler = ((PKPushPayload, PKPushType, () -> Void)) -> Void
 
 @MainActor
-fileprivate func content() {
+private func content() {
     container {
         class VoIPPushService: NSObject, PKPushRegistryDelegate {
 
@@ -78,25 +82,25 @@ fileprivate func content() {
             private init() {}
 
             func registerForIncomingCalls() {
-            #if targetEnvironment(simulator)
+                #if targetEnvironment(simulator)
                 log.info("CallKit notifications not working on a simulator")
-            #else
+                #else
                 voIPPushService.registerForVoIPPushes()
-            #endif
+                #endif
             }
 
             private func unregisterForIncomingCalls() {
-            #if targetEnvironment(simulator)
+                #if targetEnvironment(simulator)
                 log.info("CallKit notifications not working on a simulator")
-            #else
+                #else
                 voIPPushService.unregisterForVoIPPushes()
-            #endif
+                #endif
             }
 
             private func makeVoIPPushService() -> VoIPPushService {
                 let defaultCallText = "Unknown Caller"
 
-                return .init(voIPTokenHandler: AppState.shared.unsecureRepository) { [weak self] payload, type, completion in
+                return .init(voIPTokenHandler: AppState.shared.unsecureRepository) { [weak self] payload, _, completion in
                     guard let self = self else {
                         completion()
                         return

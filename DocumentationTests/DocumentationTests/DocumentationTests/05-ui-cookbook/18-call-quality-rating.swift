@@ -1,18 +1,22 @@
+//
+// Copyright © 2025 Stream.io Inc. All rights reserved.
+//
+
+import AVFoundation
+import Combine
 import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
-import Combine
-import AVFoundation
 
 @MainActor
-fileprivate func content() {
+private func content() {
 
     asyncContainer {
         try await call.collectUserFeedback(
             rating: rating, // a rating grade from 1 - 5,
             reason: "it worked great!", // the main feedback
             custom: [
-                 // ... any extra properties that you wish to collect
+                // ... any extra properties that you wish to collect
                 "callWasAwesome": .bool(true)
             ]
         )

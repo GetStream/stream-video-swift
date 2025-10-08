@@ -1,9 +1,13 @@
-import StreamVideo
-import StreamVideoSwiftUI
-import SwiftUI
+//
+// Copyright © 2025 Stream.io Inc. All rights reserved.
+//
+
 import Combine
 import CoreImage
+import StreamVideo
+import StreamVideoSwiftUI
 import StreamWebRTC
+import SwiftUI
 
 var apiKey = ""
 var user = User(id: "")
@@ -44,7 +48,7 @@ var contentMode = UIView.ContentMode.scaleAspectFit
 var id = ""
 var customData = [String: RawJSON]()
 var ratio: CGFloat = 0
-var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void = { _, _ in }
+var onChangeTrackVisibility: @MainActor (CallParticipant, Bool) -> Void = { _, _ in }
 var orientation: UIInterfaceOrientation = .unknown
 var localParticipant = participant
 var reader: GeometryProxy!
@@ -81,9 +85,11 @@ extension UserCredentials {
 class CustomType {
     // your custom logic here
 }
+
 struct CustomInjectionKey: InjectionKey {
     static var currentValue: CustomType = CustomType()
 }
+
 extension InjectedValues {
     /// Provides access to the `CustomType` instance in the views and view models.
     var customType: CustomType {
@@ -100,6 +106,7 @@ final class CustomViewFactory: ViewFactory {}
 final class VideoWithChatViewFactory: ViewFactory {
     static let shared = VideoWithChatViewFactory()
 }
+
 struct YourRootView: View { @ViewBuilder var body: some View { EmptyView() } }
 var outgoingCallMembers = [Member]()
 @MainActor var callControls = CallControlsView(viewModel: viewModel)
@@ -249,9 +256,7 @@ final class AppState: ObservableObject {
 }
 
 final class UnsecureRepository: VoIPTokenHandler {
-    func save(voIPPushToken: String?) {
-
-    }
+    func save(voIPPushToken: String?) {}
 
     func currentVoIPPushToken() -> String? {
         nil
@@ -277,7 +282,6 @@ protocol VoIPTokenHandler {
     func save(voIPPushToken: String?)
 
     func currentVoIPPushToken() -> String?
-
 }
 
 final class CallKitService {
@@ -297,6 +301,7 @@ final class StreamSnapshotTrigger: SnapshotTriggering {
 
     func capture() {}
 }
+
 var snapshotTrigger = StreamSnapshotTrigger()
 /// Provides the default value of the `StreamSnapshotTrigger` class.
 struct StreamSnapshotTriggerKey: InjectionKey {
@@ -315,6 +320,7 @@ extension InjectedValues {
         }
     }
 }
+
 final class SnapshotViewModel: ObservableObject {
     @Published var toast: Toast?
 }
@@ -351,7 +357,7 @@ final class RobotVoiceFilter: AudioFilter {
     let id: String = ""
 
     let pitchShift: Float
-    init(pitchShift: Float) {self.pitchShift = pitchShift}
+    init(pitchShift: Float) { self.pitchShift = pitchShift }
     func applyEffect(to audioBuffer: inout RTCAudioBuffer) {}
 }
 
@@ -359,8 +365,8 @@ let uiImage = UIImage()
 
 let noiseCancellationFilter = NoiseCancellationFilter(
     name: "noise-cancellation",
-    initialize: { _, _ in},
-    process: { _, _ , _, _ in },
+    initialize: { _, _ in },
+    process: { _, _, _, _ in },
     release: {}
 )
 
@@ -426,9 +432,10 @@ var otherParticipant = CallParticipant(
     pausedTracks: []
 )
 
-final class UserManager {
+enum UserManager {
     struct AppUser {
         var isPremium: Bool
     }
+
     static var currentUser: AppUser?
 }

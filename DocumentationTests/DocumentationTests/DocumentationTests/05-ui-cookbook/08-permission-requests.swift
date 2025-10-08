@@ -1,10 +1,14 @@
+//
+// Copyright © 2025 Stream.io Inc. All rights reserved.
+//
+
+import Combine
 import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
-import Combine
 
 @MainActor
-fileprivate func content() {
+private func content() {
 
     container {
         final class CustomCallViewModel: CallViewModel {
@@ -21,7 +25,11 @@ fileprivate func content() {
 
             func grantUserPermissions() async throws {
                 guard let request = permissionRequest else { return }
-                let permissionRequests = request.permissions.map { PermissionRequest(permission: $0, user: request.user.toUser, requestedAt: request.createdAt) }
+                let permissionRequests = request.permissions.map { PermissionRequest(
+                    permission: $0,
+                    user: request.user.toUser,
+                    requestedAt: request.createdAt
+                ) }
                 for permissionRequest in permissionRequests {
                     try await call?.grant(request: permissionRequest)
                 }
@@ -43,10 +51,8 @@ fileprivate func content() {
                             },
                             secondaryButton: .cancel()
                         )
-                }
+                    }
             }
         }
-
-
     }
 }

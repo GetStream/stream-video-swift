@@ -1,10 +1,14 @@
+//
+// Copyright © 2025 Stream.io Inc. All rights reserved.
+//
+
+import Combine
 import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
-import Combine
 
 @MainActor
-fileprivate func content() {
+private func content() {
     
     container {
         struct CustomIncomingCallView: View {
@@ -77,7 +81,6 @@ fileprivate func content() {
                         Spacer()
                     }
                     .padding()
-
                 }
                 .background(Color.white.edgesIgnoringSafeArea(.all))
             }
@@ -92,7 +95,6 @@ fileprivate func content() {
             func makeIncomingCallView(viewModel: CallViewModel, callInfo: IncomingCall) -> some View {
                 CustomIncomingCallView(callInfo: callInfo, callViewModel: viewModel)
             }
-
         }
     }
 }

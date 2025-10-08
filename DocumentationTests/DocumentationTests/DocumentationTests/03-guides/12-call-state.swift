@@ -1,34 +1,38 @@
+//
+// Copyright © 2025 Stream.io Inc. All rights reserved.
+//
+
+import Combine
 import StreamVideo
 import StreamVideoSwiftUI
 import StreamVideoUIKit
 import SwiftUI
-import Combine
 
 @MainActor
-fileprivate func content() {
+private func content() {
     viewContainer {
         ZStack {
-                if viewModel.callingState == .outgoing {
-                    viewFactory.makeOutgoingCallView(viewModel: viewModel)
-                } else if viewModel.callingState == .inCall {
-                    if !viewModel.participants.isEmpty {
-                        if viewModel.isMinimized {
-                            MinimizedCallView(viewModel: viewModel)
-                        } else {
-                            viewFactory.makeCallView(viewModel: viewModel)
-                        }
+            if viewModel.callingState == .outgoing {
+                viewFactory.makeOutgoingCallView(viewModel: viewModel)
+            } else if viewModel.callingState == .inCall {
+                if !viewModel.participants.isEmpty {
+                    if viewModel.isMinimized {
+                        MinimizedCallView(viewModel: viewModel)
                     } else {
-                        WaitingLocalUserView(viewModel: viewModel, viewFactory: viewFactory)
+                        viewFactory.makeCallView(viewModel: viewModel)
                     }
-                } else if case let .incoming(callInfo) = viewModel.callingState {
-                    viewFactory.makeIncomingCallView(viewModel: viewModel, callInfo: callInfo)
+                } else {
+                    WaitingLocalUserView(viewModel: viewModel, viewFactory: viewFactory)
                 }
+            } else if case let .incoming(callInfo) = viewModel.callingState {
+                viewFactory.makeIncomingCallView(viewModel: viewModel, callInfo: callInfo)
             }
-            .onReceive(viewModel.$callingState) { _ in
-                if viewModel.callingState == .idle || viewModel.callingState == .inCall {
-                    utils.callSoundsPlayer.stopOngoingSound()
-                }
+        }
+        .onReceive(viewModel.$callingState) { _ in
+            if viewModel.callingState == .idle || viewModel.callingState == .inCall {
+                utils.callSoundsPlayer.stopOngoingSound()
             }
+        }
     }
 
     container {
@@ -67,7 +71,7 @@ fileprivate func content() {
             private func listenToIncomingCalls() {
                 callViewModel.$callingState.sink { [weak self] newState in
                     guard let self = self else { return }
-                    if case .incoming(_) = newState, self == self.navigationController?.topViewController {
+                    if case .incoming = newState, self == self.navigationController?.topViewController {
                         let next = CallViewController(viewModel: self.callViewModel)
                         CallViewHelper.shared.add(callView: next.view)
                     } else if newState == .idle {

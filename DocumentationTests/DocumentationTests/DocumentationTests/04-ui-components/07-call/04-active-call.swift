@@ -1,10 +1,14 @@
+//
+// Copyright © 2025 Stream.io Inc. All rights reserved.
+//
+
+import Combine
 import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
-import Combine
 
 @MainActor
-fileprivate func content() {
+private func content() {
     container {
         struct CustomView: View {
             var callInfo: IncomingCall
@@ -39,7 +43,7 @@ fileprivate func content() {
             public func makeVideoParticipantsView(
                 viewModel: CallViewModel,
                 availableFrame: CGRect,
-                onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
+                onChangeTrackVisibility: @escaping @MainActor (CallParticipant, Bool) -> Void
             ) -> some View {
                 VideoParticipantsView(
                     viewFactory: self,
@@ -78,11 +82,11 @@ fileprivate func content() {
         class CustomViewFactory: ViewFactory {
 
             public func makeVideoCallParticipantModifier(
-                    participant: CallParticipant,
-                    call: Call?,
-                    availableFrame: CGRect,
-                    ratio: CGFloat,
-                    showAllInfo: Bool
+                participant: CallParticipant,
+                call: Call?,
+                availableFrame: CGRect,
+                ratio: CGFloat,
+                showAllInfo: Bool
             ) -> some ViewModifier {
                 VideoCallParticipantModifier(
                     participant: participant,

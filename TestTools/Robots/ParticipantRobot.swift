@@ -6,9 +6,9 @@ import XCTest
 
 public class ParticipantRobot {
     private let videoBuddyUrlString = "http://localhost:5678/stream-video-buddy"
-    private var screenSharingDuration: Int? = nil
-    private var callRecordingDuration: Int? = nil
-    private var messageCount: Int? = nil
+    private var screenSharingDuration: Int?
+    private var callRecordingDuration: Int?
+    private var messageCount: Int?
     private var userCount: Int = 1
     private var callDuration: Double = TestRunnerEnvironment.isCI ? 60 : 30
     private var _showWindow: Bool = false

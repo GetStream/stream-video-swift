@@ -1,11 +1,15 @@
+//
+// Copyright © 2025 Stream.io Inc. All rights reserved.
+//
+
+import AVFoundation
+import Combine
 import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
-import Combine
-import AVFoundation
 
 @MainActor
-fileprivate func content() {
+private func content() {
     container {
         struct TranscriptionButtonView: View {
             
@@ -41,8 +45,8 @@ fileprivate func content() {
                                 } icon: {
                                     Image(
                                         systemName: isTranscribing
-                                        ? "captions.bubble.fill"
-                                        : "captions.bubble"
+                                            ? "captions.bubble.fill"
+                                            : "captions.bubble"
                                     )
                                 }
                             }

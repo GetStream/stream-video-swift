@@ -1,10 +1,14 @@
+//
+// Copyright © 2025 Stream.io Inc. All rights reserved.
+//
+
+import Combine
 import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
-import Combine
 
 @MainActor
-fileprivate func content() {
+private func content() {
     container {
         final class CustomObject {
             private var client: StreamVideo
@@ -15,9 +19,9 @@ fileprivate func content() {
 
             init() {
                 let user = User(
-                   id: userId,
-                   name: "Obi-Wan Kenobi", // name and imageURL are used in the UI
-                   imageURL: .init(string: "https://picsum.photos/120")
+                    id: userId,
+                    name: "Obi-Wan Kenobi", // name and imageURL are used in the UI
+                    imageURL: .init(string: "https://picsum.photos/120")
                 )
 
                 // Initialize Stream Video client
@@ -47,7 +51,7 @@ fileprivate func content() {
             options: .init(
                 members: [
                     .init(userId: "john_smith"),
-                    .init(userId: "jane_doe"),
+                    .init(userId: "jane_doe")
                 ],
                 custom: [
                     "title": .string("SwiftUI heads"),
@@ -129,7 +133,7 @@ fileprivate func content() {
                                 options: .init(
                                     members: [
                                         .init(userId: "john_smith"),
-                                        .init(userId: "jane_doe"),
+                                        .init(userId: "jane_doe")
                                     ],
                                     custom: [
                                         "title": .string("SwiftUI heads"),
@@ -165,20 +169,20 @@ fileprivate func content() {
                 VStack {
                     VStack {
                         Text("\(title ?? "")")
-                          .font(.title)
-                          .frame(maxWidth: .infinity, alignment: .leading)
-                          .lineLimit(1)
-                          .padding([.bottom], 8)
+                            .font(.title)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .lineLimit(1)
+                            .padding([.bottom], 8)
 
                         Text("\(description ?? "")")
-                          .font(.body)
-                          .frame(maxWidth: .infinity, alignment: .leading)
-                          .lineLimit(1)
-                          .padding([.bottom], 4)
+                            .font(.body)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .lineLimit(1)
+                            .padding([.bottom], 4)
 
                         Text("\(participants.count) participants")
-                          .font(.caption)
-                          .frame(maxWidth: .infinity, alignment: .leading)
+                            .font(.caption)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                     }.padding([.leading, .trailing])
                 }
             }
@@ -216,9 +220,9 @@ fileprivate func content() {
 
             var body: some View {
                 Button {
-                   Task {
-                       try await microphone.toggle()
-                   }
+                    Task {
+                        try await microphone.toggle()
+                    }
                 } label: {
                     Image(systemName: microphone.status == .enabled ? "mic.circle" : "mic.slash.circle")
                         .foregroundColor(microphone.status == .enabled ? .red : .primary)
@@ -243,7 +247,7 @@ fileprivate func content() {
             var participant: CallParticipant
 
             var body: some View {
-                VStack{
+                VStack {
                     ZStack {
                         Circle()
                             .fill(participant.isSpeaking ? .green : .white)
@@ -275,9 +279,9 @@ fileprivate func content() {
                     HStack {
                         Text("\(request.user.name) requested to \(request.permission)")
                         Button {
-                           Task {
-                               try await call.grant(request: request)
-                           }
+                            Task {
+                                try await call.grant(request: request)
+                            }
                         } label: {
                             Label("", systemImage: "hand.thumbsup.circle").tint(.green)
                         }

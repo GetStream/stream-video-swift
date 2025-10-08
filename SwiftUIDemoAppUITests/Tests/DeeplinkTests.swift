@@ -7,7 +7,7 @@ import XCTest
 // Requires running a standalone Sinatra server
 final class DeeplinkTests: StreamTestCase {
 
-    static override func setUp() {
+    override static func setUp() {
         super.setUp()
 
         // We are launching and terminating the app to ensure the executable
@@ -52,7 +52,7 @@ final class DeeplinkTests: StreamTestCase {
         try [
             "https://getstream.io/.well-known/apple-app-site-association",
             "https://staging.getstream.io/.well-known/apple-app-site-association",
-            "https://pronto.getstream.io/.well-known/apple-app-site-association",
+            "https://pronto.getstream.io/.well-known/apple-app-site-association"
         ].forEach { try assertEnvironment($0) }
     }
 

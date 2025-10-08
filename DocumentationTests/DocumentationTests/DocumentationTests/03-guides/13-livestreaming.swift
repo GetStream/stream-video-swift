@@ -1,11 +1,15 @@
+//
+// Copyright © 2025 Stream.io Inc. All rights reserved.
+//
+
+import Combine
 import StreamVideo
 import StreamVideoSwiftUI
 import StreamVideoUIKit
 import SwiftUI
-import Combine
 
 @MainActor
-fileprivate func content() {
+private func content() {
     container {
         struct LivestreamApp: App {
             @State var streamVideo: StreamVideo
@@ -81,7 +85,7 @@ fileprivate func content() {
                         }
                     }
 
-                if let recordings, recordings.count > 0 {
+                if let recordings, !recordings.isEmpty {
                     Text("Watch recordings:")
                     ForEach(recordings, id: \.self) { recording in
                         Button {
@@ -124,7 +128,7 @@ fileprivate func content() {
                 GeometryReader { reader in
                     if let first = state.participants.first(where: { hostIds.contains($0.userId) }) {
                         VideoRendererView(id: first.id, size: reader.size) { renderer in
-                            renderer.handleViewRendering(for: first) { size, participant in }
+                            renderer.handleViewRendering(for: first) { _, _ in }
                         }
                     } else {
                         Text("The host's video is not available")
@@ -134,7 +138,7 @@ fileprivate func content() {
             }
 
             var hostIds: [String] {
-               state.members.filter { $0.role == "host" }.map(\.id)
+                state.members.filter { $0.role == "host" }.map(\.id)
             }
         }
     }
