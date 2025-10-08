@@ -40,6 +40,9 @@ extension RTCAudioStore {
         /// Indicates if the app has permission to record audio.
         var hasRecordingPermission: Bool
 
+        var stereoPlayout: Bool
+        var stereoRecording: Bool
+
         /// The initial default state for the audio store.
         static let initial = State(
             isActive: false,
@@ -51,7 +54,9 @@ extension RTCAudioStore {
             mode: .voiceChat,
             options: .allowBluetooth,
             overrideOutputAudioPort: .none,
-            hasRecordingPermission: false
+            hasRecordingPermission: false,
+            stereoPlayout: false,
+            stereoRecording: false
         )
 
         /// Encodes this state into the given encoder.
@@ -71,6 +76,8 @@ extension RTCAudioStore {
             try container.encode(options.rawValue, forKey: .options)
             try container.encode(overrideOutputAudioPort.rawValue, forKey: .overrideOutputAudioPort)
             try container.encode(hasRecordingPermission, forKey: .hasRecordingPermission)
+            try container.encode(stereoPlayout, forKey: .stereoPlayout)
+            try container.encode(stereoRecording, forKey: .stereoRecording)
         }
 
         /// Coding keys for encoding and decoding the state.
@@ -85,6 +92,8 @@ extension RTCAudioStore {
             case options
             case overrideOutputAudioPort
             case hasRecordingPermission
+            case stereoPlayout
+            case stereoRecording
         }
     }
 }

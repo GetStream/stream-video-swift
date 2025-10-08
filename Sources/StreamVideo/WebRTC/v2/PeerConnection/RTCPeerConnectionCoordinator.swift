@@ -161,6 +161,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
                 sfuAdapter: sfuAdapter,
                 videoOptions: videoOptions,
                 videoConfig: videoConfig,
+                isStereoEnabled: audioSettings.hifiAudioEnabled == true,
                 publishOptions: publishOptions,
                 videoCaptureSessionProvider: videoCaptureSessionProvider,
                 screenShareSessionProvider: screenShareSessionProvider
@@ -710,6 +711,12 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     /// - Throws: An error if stopping screen sharing fails.
     func stopScreenSharing() async throws {
         try await mediaAdapter.stopScreenSharing()
+    }
+
+    // MARK: - AudioBitrate profiles
+
+    func setAudioBitrateProfile(_ profile: AudioBitrateProfile) {
+        mediaAdapter.setAudioBitrateProfile(profile)
     }
 
     // MARK: - Private helpers

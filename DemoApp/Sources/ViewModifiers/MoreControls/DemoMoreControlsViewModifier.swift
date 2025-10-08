@@ -63,6 +63,8 @@ struct DemoMoreControlsViewModifier: ViewModifier {
                                 )
                             }
 
+                            DemoMoreAudioBitrateProfileButtonView(viewModel: viewModel)
+
                             DemoTranscriptionAndClosedCaptionsButtonView(viewModel: viewModel)
 
                             DemoMoreThermalStateButtonView()

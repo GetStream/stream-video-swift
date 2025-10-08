@@ -77,6 +77,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     @Published private(set) var participantPins: [PinInfo] = []
     @Published private(set) var incomingVideoQualitySettings: IncomingVideoQualitySettings = .none
     @Published private(set) var isTracingEnabled: Bool = false
+    @Published private(set) var audioBitrateProfile: AudioBitrateProfile = .voiceStandard
 
     private(set) var clientCapabilities: Set<ClientCapability> = [
         .subscriberVideoPause
@@ -215,6 +216,18 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         )
     }
 
+    func set(audioBitrateProfile value: AudioBitrateProfile) throws {
+        guard audioSettings.hifiAudioEnabled == true else {
+            throw ClientError("High Fidelity audio is not enabled for this call.")
+        }
+        
+        guard value != self.audioBitrateProfile else {
+            return
+        }
+        self.audioBitrateProfile = value
+        publisher?.setAudioBitrateProfile(value)
+    }
+
     // MARK: - Client Capabilities
 
     func enableClientCapabilities(_ capabilities: Set<ClientCapability>) {
@@ -320,6 +333,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         self.publisher = publisher
         try await restoreScreenSharing()
         publisher.setVideoFilter(videoFilter)
+        publisher.setAudioBitrateProfile(audioBitrateProfile)
         publisher.completeSetUp()
 
         try await subscriber.setUp(

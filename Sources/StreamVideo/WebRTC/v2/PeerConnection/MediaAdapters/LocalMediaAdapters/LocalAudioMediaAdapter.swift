@@ -16,6 +16,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
     /// The audio recorder for capturing audio during the call session.
     @Injected(\.callAudioRecorder) private var audioRecorder
+    @Injected(\.audioStore) private var audioStore
 
     /// The unique identifier for the current session.
     private let sessionID: String
@@ -43,14 +44,17 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
     private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
 
+    private let isStereoEnabled: Bool
+
     /// The primary audio track for this adapter.
-    let primaryTrack: RTCAudioTrack
+    private var primaryTrack: RTCAudioTrack
 
     /// A publisher that emits events related to audio tracks.
     let subject: PassthroughSubject<TrackEvent, Never>
 
     private var hasRegisteredPrimaryTrack: Bool = false
     private var ownCapabilities: [OwnCapability] = []
+    private var trackStorage: [RTCMediaConstraints: RTCAudioTrack] = [:]
 
     /// Initializes a new instance of `LocalAudioMediaAdapter`.
     ///
@@ -63,6 +67,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     ///   - subject: A publisher that emits track events.
     init(
         sessionID: String,
+        isStereoEnabled: Bool,
         peerConnection: StreamRTCPeerConnectionProtocol,
         peerConnectionFactory: PeerConnectionFactory,
         sfuAdapter: SFUAdapter,
@@ -70,6 +75,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         subject: PassthroughSubject<TrackEvent, Never>
     ) {
         self.sessionID = sessionID
+        self.isStereoEnabled = isStereoEnabled
         self.peerConnection = peerConnection
         self.peerConnectionFactory = peerConnectionFactory
         self.sfuAdapter = sfuAdapter
@@ -79,11 +85,15 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         // Create the primary audio track for the session.
         let source = peerConnectionFactory.makeAudioSource(.defaultConstraints)
         let track = peerConnectionFactory.makeAudioTrack(source: source)
+        trackStorage[.defaultConstraints] = track
         primaryTrack = track
         streamIds = ["\(sessionID):audio"]
 
         // Disable the primary track by default.
         track.isEnabled = false
+
+        audioStore.dispatch(.audioSession(.setStereoPlayout(isStereoEnabled)))
+        audioStore.dispatch(.audioSession(.setStereoRecording(false)))
     }
 
     /// Cleans up resources when the instance is deallocated.
@@ -302,6 +312,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                 trackInfo.mid = transceiver.mid
                 trackInfo.muted = !track.isEnabled
                 trackInfo.codec = .init(publishOptions.codec)
+                trackInfo.stereo = isStereoEnabled
                 return trackInfo
             }
     }
@@ -320,6 +331,87 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     func changePublishQuality(
         with layerSettings: [Stream_Video_Sfu_Event_AudioSender]
     ) { /* No-op */ }
+
+    func setAudioBitrateProfile(_ profile: AudioBitrateProfile) {
+        processingQueue.addOperation { [weak self] in
+            guard let self else {
+                return
+            }
+
+            let profileConstraints = profile == .musicHighQuality
+            ? RTCMediaConstraints.hiFiAudioConstraints
+            : .defaultConstraints
+
+            let currentTrackId = primaryTrack.trackId
+
+            // 1. Ensure we have the track in the storage
+            if profile == .musicHighQuality, trackStorage[.hiFiAudioConstraints] == nil {
+                trackStorage[.hiFiAudioConstraints] = peerConnectionFactory
+                    .makeAudioTrack(
+                        source: peerConnectionFactory
+                            .makeAudioSource(.hiFiAudioConstraints)
+                    )
+            }
+
+            guard let newPrimaryTrack = trackStorage[profileConstraints] else {
+                log.warning("No audioTrack found for target media constraints.")
+                return
+            }
+
+            if newPrimaryTrack.trackId != primaryTrack.trackId {
+                newPrimaryTrack.isEnabled = primaryTrack.isEnabled
+
+                let keys = transceiverStorage.map(\.key)
+                for key in keys {
+                    guard
+                        var currentValue = transceiverStorage.get(for: key)
+                    else {
+                        continue
+                    }
+
+                    let newTrack = newPrimaryTrack.clone(from: peerConnectionFactory)
+                    newTrack.isEnabled = currentValue.track.isEnabled
+                    currentValue.track = newTrack
+
+                    if currentValue.transceiver.sender.track != nil {
+                        currentValue.transceiver.sender.track = newTrack
+                    }
+
+                    if let maxBitrate = key.bitrateProfiles[profile] {
+                        currentValue.transceiver.setMaxBitrate(maxBitrate)
+                    }
+
+                    transceiverStorage.set(
+                        currentValue.transceiver,
+                        track: newTrack,
+                        for: key
+                    )
+                }
+                primaryTrack.isEnabled = false
+                primaryTrack = newPrimaryTrack
+                log.debug("Switched tracks for profile:\(profile) from \(currentTrackId) → \(primaryTrack.trackId).")
+            } else {
+                let keys = transceiverStorage.map(\.key)
+                for key in keys {
+                    guard
+                        let currentValue = transceiverStorage.get(for: key),
+                        let maxBitrate = key.bitrateProfiles[profile]
+                    else {
+                        continue
+                    }
+
+                    currentValue.transceiver.setMaxBitrate(maxBitrate)
+                }
+                log.debug("Updated transceivers for profile:\(profile) for \(primaryTrack.trackId).")
+            }
+
+            if profile == .musicHighQuality {
+                audioStore.dispatch(.audioSession(.setStereoRecording(true)))
+            } else {
+                audioStore.dispatch(.audioSession(.setStereoRecording(false)))
+            }
+        }
+    }
 
     // MARK: - Private Helpers
 
@@ -366,5 +458,22 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             )
         )
         hasRegisteredPrimaryTrack = true
+    }
+}
+
+extension RTCRtpTransceiver {
+
+    func setMaxBitrate(_ value: Int) {
+        let encodings = sender.parameters.encodings
+
+        guard !encodings.isEmpty else {
+            return
+        }
+
+        encodings.filter { $0.isActive }.forEach {
+            $0.maxBitrateBps = .init(value: value)
+        }
+
+        self.sender.parameters.encodings = encodings
     }
 }

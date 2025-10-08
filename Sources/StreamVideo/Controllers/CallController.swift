@@ -192,6 +192,15 @@ class CallController: @unchecked Sendable {
         )
     }
 
+    func changeAudioBitrateProfile(_ profile: AudioBitrateProfile) async throws {
+        // Disable any active audio filters (e.g. noise-cancellation.)
+        if profile == .musicHighQuality {
+            call?.setAudioFilter(nil)
+        }
+        
+        try await webRTCCoordinator.changeAudioBitrateProfile(profile)
+    }
+
     /// Sets a `videoFilter` for the current call.
     /// - Parameter videoFilter: A `VideoFilter` instance representing the video filter to set.
     func setVideoFilter(_ videoFilter: VideoFilter?) {

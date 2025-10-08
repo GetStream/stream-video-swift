@@ -41,6 +41,10 @@ extension RTCAudioStoreAction {
         /// Sets the recording permission state for the session.
         case setHasRecordingPermission(Bool)
 
+        case setStereoPlayout(Bool)
+
+        case setStereoRecording(Bool)
+
         /// Used when activating/deactivating audioOutput from CallSettings.
         /// - Warning: It has the potential to cause misalignment with the underline RTCAudioSession.
         /// It should be used with caution.

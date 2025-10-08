@@ -29,6 +29,10 @@ protocol AudioSessionProtocol: AnyObject {
 
     var recordPermissionGranted: Bool { get }
 
+    var maximumInputNumberOfChannels: Int { get }
+
+    var maximumOutputNumberOfChannels: Int { get }
+
     func requestRecordPermission() async -> Bool
 
     var currentRoute: AVAudioSessionRouteDescription { get }

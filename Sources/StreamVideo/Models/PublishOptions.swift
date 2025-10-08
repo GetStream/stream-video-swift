@@ -18,6 +18,7 @@ struct PublishOptions: Sendable, Hashable {
         var codec: AudioCodec
         /// Bitrate allocated for the audio stream, measured in bits per second.
         var bitrate: Int
+        var bitrateProfiles: [AudioBitrateProfile: Int]
 
         /// A string representation of the audio publish options.
         var description: String {
@@ -31,6 +32,11 @@ struct PublishOptions: Sendable, Hashable {
             id = Int(publishOption.id)
             codec = .init(publishOption.codec)
             bitrate = Int(publishOption.bitrate)
+            bitrateProfiles = publishOption
+                .audioBitrateProfiles
+                .reduce(into: [AudioBitrateProfile: Int](), { partialResult, item in
+                    partialResult[AudioBitrateProfile(item.profile)] = Int(item.bitrate)
+                })
         }
 
         /// Initializes audio options with specific parameters.
@@ -47,6 +53,7 @@ struct PublishOptions: Sendable, Hashable {
             self.id = id
             self.codec = codec
             self.bitrate = bitrate
+            self.bitrateProfiles = [:]
         }
 
         /// Combines properties into a hash value for use in hash-based collections.

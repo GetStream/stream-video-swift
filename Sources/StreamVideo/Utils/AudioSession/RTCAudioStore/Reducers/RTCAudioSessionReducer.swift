@@ -139,6 +139,36 @@ final class RTCAudioSessionReducer: RTCAudioStoreReducer {
             }
             updatedState.isActive = value
             updatedState.isAudioEnabled = value
+
+        case let .setStereoPlayout(value):
+            if source.maximumOutputNumberOfChannels > 1 {
+                try source.perform {
+                    let webRTCConfiguration = RTCAudioSessionConfiguration.webRTC()
+                    webRTCConfiguration.outputNumberOfChannels = value ? 2 : 1
+
+                    try $0.setConfiguration(webRTCConfiguration)
+                    RTCAudioSessionConfiguration.setWebRTC(webRTCConfiguration)
+
+                }
+                updatedState.stereoPlayout = value
+            } else {
+                log.warning("Stereo playout not supported.", subsystems: .audioSession)
+            }
+
+        case let .setStereoRecording(value):
+            if source.maximumInputNumberOfChannels > 1 {
+                try source.perform {
+                    let webRTCConfiguration = RTCAudioSessionConfiguration.webRTC()
+                    webRTCConfiguration.inputNumberOfChannels = value ? 2 : 1
+
+                    try $0.setConfiguration(webRTCConfiguration)
+                    RTCAudioSessionConfiguration.setWebRTC(webRTCConfiguration)
+
+                }
+                updatedState.stereoRecording = value
+            } else {
+                log.warning("Stereo recording not supported.", subsystems: .audioSession)
+            }
         }
 
         return updatedState

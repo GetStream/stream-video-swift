@@ -44,6 +44,7 @@ final class AudioMediaAdapter: MediaAdapting, @unchecked Sendable {
     ///   - subject: A subject for publishing track events.
     convenience init(
         sessionID: String,
+        isStereoEnabled: Bool,
         peerConnection: StreamRTCPeerConnectionProtocol,
         peerConnectionFactory: PeerConnectionFactory,
         sfuAdapter: SFUAdapter,
@@ -56,6 +57,7 @@ final class AudioMediaAdapter: MediaAdapting, @unchecked Sendable {
             peerConnectionFactory: peerConnectionFactory,
             localMediaManager: LocalAudioMediaAdapter(
                 sessionID: sessionID,
+                isStereoEnabled: isStereoEnabled,
                 peerConnection: peerConnection,
                 peerConnectionFactory: peerConnectionFactory,
                 sfuAdapter: sfuAdapter,
@@ -155,6 +157,12 @@ final class AudioMediaAdapter: MediaAdapting, @unchecked Sendable {
     ) {
         (localMediaManager as? LocalAudioMediaAdapter)?
             .changePublishQuality(with: layerSettings)
+    }
+    
+    func setAudioBitrateProfile(_ profile: AudioBitrateProfile) {
+        (localMediaManager as? LocalAudioMediaAdapter)?.setAudioBitrateProfile(
+            profile
+        )
     }
 
     // MARK: - Observers
