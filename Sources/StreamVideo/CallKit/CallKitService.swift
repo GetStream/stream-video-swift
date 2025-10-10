@@ -106,6 +106,8 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
 
     private let muteActionSubject = PassthroughSubject<MuteRequest, Never>()
     private var muteActionCancellable: AnyCancellable?
+    private let muteProcessingQueue = OperationQueue(maxConcurrentOperationCount: 1)
+    private var isMuted = false
 
     /// Initialize.
     override public init() {
@@ -128,8 +130,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             .removeDuplicates()
             .filter { [weak self] _ in self?.applicationStateAdapter.state != .foreground }
             .debounce(for: 0.5, scheduler: DispatchQueue.global(qos: .userInteractive))
-            .receive(on: DispatchQueue.global(qos: .userInteractive))
-            .sinkTask(storeIn: disposableBag) { [weak self] in await self?.performMuteRequest($0) }
+            .sink { [weak self] in self?.performMuteRequest($0) }
     }
 
     /// Report an incoming call to CallKit.
@@ -778,40 +779,61 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 .call
                 .state
                 .$callSettings
-                .map { !$0.audioOn }
+                .map { $0.audioOn == false }
                 .removeDuplicates()
                 .log(.debug, subsystems: .callKit) { "Will perform SetMutedCallAction with muted:\($0). " }
-                .sinkTask(storeIn: disposableBag) { [weak self] in
-                    do {
-                        try await self?.requestTransaction(CXSetMutedCallAction(call: callUUID, muted: $0))
-                    } catch {
-                        log.warning("Unable to apply CallSettings.audioOn:\(!$0).", subsystems: .callKit)
-                    }
-                }
+                .sink { [weak self] in self?.performCallSettingMuteRequest($0, callUUID: callUUID) }
                 .store(in: disposableBag, key: key)
         }
     }
 
-    private func performMuteRequest(_ request: MuteRequest) async {
-        guard
-            let stackEntry = callEntry(for: request.callUUID)
-        else {
-            return
-        }
-
-        do {
-            if request.isMuted {
-                stackEntry.call.didPerform(.performSetMutedCall)
-                try await stackEntry.call.microphone.disable()
-            } else {
-                stackEntry.call.didPerform(.performSetMutedCall)
-                try await stackEntry.call.microphone.enable()
+    private func performCallSettingMuteRequest(
+        _ muted: Bool,
+        callUUID: UUID
+    ) {
+        muteProcessingQueue.addTaskOperation { [weak self] in
+            guard
+                let self,
+                callUUID == active,
+                isMuted != muted
+            else {
+                return
             }
-        } catch {
-            log.error(
-                "Unable to set call uuid:\(request.callUUID) muted:\(request.isMuted) state.",
-                error: error
-            )
+            do {
+                try await requestTransaction(CXSetMutedCallAction(call: callUUID, muted: muted))
+                isMuted = muted
+            } catch {
+                log.warning("Unable to apply CallSettings.audioOn:\(!muted).", subsystems: .callKit)
+            }
+        }
+    }
+
+    private func performMuteRequest(_ request: MuteRequest) {
+        muteProcessingQueue.addTaskOperation { [weak self] in
+            guard
+                let self,
+                request.callUUID == active,
+                isMuted != request.isMuted,
+                let stackEntry = callEntry(for: request.callUUID)
+            else {
+                return
+            }
+
+            do {
+                if request.isMuted {
+                    stackEntry.call.didPerform(.performSetMutedCall)
+                    try await stackEntry.call.microphone.disable()
+                } else {
+                    stackEntry.call.didPerform(.performSetMutedCall)
+                    try await stackEntry.call.microphone.enable()
+                }
+                isMuted = request.isMuted
+            } catch {
+                log.error(
+                    "Unable to set call uuid:\(request.callUUID) muted:\(request.isMuted) state.",
+                    error: error
+                )
+            }
         }
     }
 }
