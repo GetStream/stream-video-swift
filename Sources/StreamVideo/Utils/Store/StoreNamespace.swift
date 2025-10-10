@@ -89,6 +89,8 @@ protocol StoreNamespace: Sendable {
     /// - Returns: An executor instance for this store.
     static func executor() -> StoreExecutor<Self>
 
+    static func coordinator() -> StoreCoordinator<Self>
+
     /// Creates a configured store instance.
     ///
     /// This method assembles all components into a functioning store.
@@ -102,7 +104,8 @@ protocol StoreNamespace: Sendable {
         reducers: [Reducer<Self>],
         middleware: [Middleware<Self>],
         logger: StoreLogger<Self>,
-        executor: StoreExecutor<Self>
+        executor: StoreExecutor<Self>,
+        coordinator: StoreCoordinator<Self>
     ) -> Store<Self>
 }
 
@@ -122,6 +125,8 @@ extension StoreNamespace {
     /// Default implementation returns basic executor.
     static func executor() -> StoreExecutor<Self> { .init() }
 
+    static func coordinator() -> StoreCoordinator<Self> { .init() }
+
     /// Default implementation creates a store with all components.
     ///
     /// This implementation:
@@ -136,7 +141,8 @@ extension StoreNamespace {
         reducers: [Reducer<Self>] = Self.reducers(),
         middleware: [Middleware<Self>] = Self.middleware(),
         logger: StoreLogger<Self> = Self.logger(),
-        executor: StoreExecutor<Self> = Self.executor()
+        executor: StoreExecutor<Self> = Self.executor(),
+        coordinator: StoreCoordinator<Self> = Self.coordinator()
     ) -> Store<Self> {
         .init(
             identifier: Self.identifier,
@@ -144,7 +150,8 @@ extension StoreNamespace {
             reducers: reducers,
             middleware: middleware,
             logger: logger,
-            executor: executor
+            executor: executor,
+            coordinator: coordinator
         )
     }
 }

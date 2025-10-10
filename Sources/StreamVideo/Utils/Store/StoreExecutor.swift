@@ -63,7 +63,7 @@ class StoreExecutor<Namespace: StoreNamespace>: @unchecked Sendable {
         file: StaticString,
         function: StaticString,
         line: UInt
-    ) async throws {
+    ) async throws -> Namespace.State {
         // Apply optional delay before processing action
         await action.applyDelayBeforeIfRequired()
 
@@ -106,6 +106,8 @@ class StoreExecutor<Namespace: StoreNamespace>: @unchecked Sendable {
 
             // Apply optional delay after successful processing
             await action.applyDelayAfterIfRequired()
+
+            return updatedState
         } catch {
             // Log failure and rethrow
             logger.didFail(
