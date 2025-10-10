@@ -33,15 +33,20 @@ final class AudioEngineLevelNodeAdapter {
         ) { [weak self] buffer, _ in
             self?.processInputBuffer(buffer)
         }
+
         inputTap = mixer
+        log.debug("Input node installed", subsystems: .audioRecording)
     }
 
     func uninstall(on bus: Int = 0) {
-        if let mixer = inputTap {
+        if let mixer = inputTap, mixer.engine != nil {
             mixer.removeTap(onBus: 0)
-            inputTap = nil
-            publisher(0)
+
+
         }
+        publisher(0)
+        inputTap = nil
+        log.debug("Input node uninstalled", subsystems: .audioRecording)
     }
 
     // MARK: - Private Helpers

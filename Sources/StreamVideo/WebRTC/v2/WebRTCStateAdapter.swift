@@ -52,7 +52,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     /// Published properties that represent different parts of the WebRTC state.
     @Published private(set) var sessionID: String = UUID().uuidString
     @Published private(set) var token: String = ""
-    @Published private(set) var callSettings: CallSettings = .init()
+    @Published private(set) var callSettings: CallSettings = .default
     @Published private(set) var audioSettings: AudioSettings = .init()
 
     /// Published property to track video options and update them.
@@ -509,6 +509,13 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
             }
 
             await set(callSettings: updatedCallSettings)
+            log.debug(
+                "CallSettings updated \(currentCallSettings) -> \(updatedCallSettings)",
+                subsystems: .webRTC,
+                functionName: functionName,
+                fileName: fileName,
+                lineNumber: lineNumber
+            )
 
             guard
                 let publisher = await self.publisher
@@ -672,11 +679,11 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     }
 
     func configureAudioSession(source: JoinSource?) async throws {
-        try await audioStore.dispatchAsync(
-            .audioSession(
-                .setAudioDeviceModule(.init(peerConnectionFactory.audioDeviceModule))
-            )
-        )
+        try await audioStore.dispatch([
+            .setRecording(peerConnectionFactory.audioDeviceModule.isRecording),
+            .setMicrophoneMuted(peerConnectionFactory.audioDeviceModule.isMicrophoneMuted),
+            .setAudioDeviceModule(peerConnectionFactory.audioDeviceModule)
+        ]).result()
         audioSession.activate(
             callSettingsPublisher: $callSettings.removeDuplicates().eraseToAnyPublisher(),
             ownCapabilitiesPublisher: $ownCapabilities.removeDuplicates().eraseToAnyPublisher(),
@@ -690,19 +697,32 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
 
     // MARK: - AudioSessionDelegate
 
-    nonisolated func audioSessionAdapterDidUpdateSpeakerOn(_ speakerOn: Bool) {
+    nonisolated func audioSessionAdapterDidUpdateSpeakerOn(
+        _ speakerOn: Bool,
+        file: StaticString,
+        function: StaticString,
+        line: UInt
+
+    ) {
         Task(disposableBag: disposableBag) { [weak self] in
             guard let self else {
                 return
             }
-            await self.enqueueCallSettings {
+            await self.enqueueCallSettings(
+                functionName: function,
+                fileName: file,
+                lineNumber: line
+            ) {
                 $0.withUpdatedSpeakerState(speakerOn)
             }
-            log.debug(
-                "AudioSession delegated updated speakerOn:\(speakerOn).",
-                subsystems: .audioSession
-            )
         }
+        log.debug(
+            "AudioSession delegated updated speakerOn:\(speakerOn).",
+            subsystems: .audioSession,
+            functionName: function,
+            fileName: file,
+            lineNumber: line
+        )
     }
 
     // MARK: - WebRTCPermissionsAdapterDelegate
