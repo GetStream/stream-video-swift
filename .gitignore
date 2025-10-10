@@ -104,6 +104,7 @@ App Thinning Size Report.txt
 app-thinning.plist
 *.dmg
 yeetd-normal.pkg
+*LinkMap.txt
 
 # Stream Video Buddy
 video-buddy-server.log
