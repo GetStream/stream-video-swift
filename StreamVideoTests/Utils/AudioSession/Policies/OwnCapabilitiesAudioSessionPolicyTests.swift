@@ -92,7 +92,7 @@ final class OwnCapabilitiesAudioSessionPolicyTests: XCTestCase, @unchecked Senda
 
         // Then
         XCTAssertEqual(configuration.category, .playAndRecord)
-        XCTAssertEqual(configuration.mode, .videoChat)
+        XCTAssertEqual(configuration.mode, .voiceChat)
         XCTAssertEqual(
             configuration.options,
             [
@@ -143,23 +143,6 @@ final class OwnCapabilitiesAudioSessionPolicyTests: XCTestCase, @unchecked Senda
     }
 
     // MARK: - Tests for different video settings
-
-    func testConfiguration_WhenVideoOnSpeakerOn_ReturnsVideoChatMode() async {
-        // Given
-        currentDeviceType = .phone
-        await fulfilmentInMainActor { self.currentDevice.deviceType == self.currentDeviceType }
-        let callSettings = CallSettings(audioOn: true, videoOn: true, speakerOn: true)
-        let ownCapabilities: Set<OwnCapability> = [.sendAudio, .sendVideo]
-
-        // When
-        let configuration = subject.configuration(
-            for: callSettings,
-            ownCapabilities: ownCapabilities
-        )
-
-        // Then
-        XCTAssertEqual(configuration.mode, .videoChat)
-    }
 
     func testConfiguration_WhenVideoOffSpeakerOnBackgroundFalse_ReturnsVoiceChatMode() async {
         // Given

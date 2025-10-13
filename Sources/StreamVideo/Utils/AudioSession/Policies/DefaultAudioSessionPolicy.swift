@@ -27,7 +27,7 @@ public struct DefaultAudioSessionPolicy: AudioSessionPolicy {
             return .init(
                 isActive: callSettings.audioOutputOn,
                 category: .playAndRecord,
-                mode: callSettings.videoOn ? .videoChat : .voiceChat,
+                mode: .voiceChat,
                 options: .playAndRecord(
                     videoOn: callSettings.videoOn,
                     speakerOn: callSettings.speakerOn,
@@ -42,7 +42,7 @@ public struct DefaultAudioSessionPolicy: AudioSessionPolicy {
         return .init(
             isActive: callSettings.audioOutputOn,
             category: .playAndRecord,
-            mode: callSettings.videoOn && callSettings.speakerOn ? .videoChat : .voiceChat,
+            mode: .voiceChat,
             options: .playAndRecord(
                 videoOn: callSettings.videoOn,
                 speakerOn: callSettings.speakerOn,
