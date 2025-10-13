@@ -26,7 +26,7 @@ final class StreamCallAudioRecorder_CategoryMiddlewareTests: XCTestCase, @unchec
         validation.isInverted = true
         subject.dispatcher = .init { _, _, _, _ in }
 
-        audioStore.dispatch(.audioSession(.setCategory(.playAndRecord, mode: .videoChat, options: [])))
+        audioStore.dispatch(.audioSession(.setCategory(.playAndRecord, mode: .voiceChat, options: [])))
 
         await safeFulfillment(of: [validation], timeout: 1)
     }
@@ -36,7 +36,7 @@ final class StreamCallAudioRecorder_CategoryMiddlewareTests: XCTestCase, @unchec
         validation.isInverted = true
         subject.dispatcher = .init { _, _, _, _ in }
 
-        audioStore.dispatch(.audioSession(.setCategory(.record, mode: .videoChat, options: [])))
+        audioStore.dispatch(.audioSession(.setCategory(.record, mode: .voiceChat, options: [])))
 
         await safeFulfillment(of: [validation], timeout: 1)
     }
@@ -52,7 +52,7 @@ final class StreamCallAudioRecorder_CategoryMiddlewareTests: XCTestCase, @unchec
             }
         }
 
-        audioStore.dispatch(.audioSession(.setCategory(.playback, mode: .videoChat, options: [])))
+        audioStore.dispatch(.audioSession(.setCategory(.playback, mode: .voiceChat, options: [])))
 
         await safeFulfillment(of: [validation])
     }

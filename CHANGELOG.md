@@ -4,7 +4,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
-### 🔄 Changed
+### 🐞 Fixed
+- An issue that was causing the speaker to toggle nonstop. [#968](https://github.com/GetStream/stream-video-swift/pull/968)
 
 # [1.34.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.34.0)
 _October 07, 2025_

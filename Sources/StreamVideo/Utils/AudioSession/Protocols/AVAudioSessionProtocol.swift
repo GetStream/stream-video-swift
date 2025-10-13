@@ -10,7 +10,7 @@ protocol AVAudioSessionProtocol {
     /// Configures the audio session category and options.
     /// - Parameters:
     ///   - category: The audio category (e.g., `.playAndRecord`).
-    ///   - mode: The audio mode (e.g., `.videoChat`).
+    ///   - mode: The audio mode (e.g., `.voiceChat`).
     ///   - categoryOptions: The options for the category (e.g., `.allowBluetooth`).
     /// - Throws: An error if setting the category fails.
     func setCategory(

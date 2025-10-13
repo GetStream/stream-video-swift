@@ -188,7 +188,7 @@ final class CallAudioSession: @unchecked Sendable {
     private func initialAudioSessionConfiguration() {
         let state = audioStore.state
         let requiresCategoryUpdate = state.category != .playAndRecord
-        let requiresModeUpdate = state.mode != .voiceChat && state.mode != .videoChat
+        let requiresModeUpdate = state.mode != .voiceChat
 
         guard requiresCategoryUpdate || requiresModeUpdate else {
             log.info(
