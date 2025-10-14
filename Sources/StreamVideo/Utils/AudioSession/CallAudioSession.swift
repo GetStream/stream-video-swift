@@ -46,12 +46,6 @@ final class CallAudioSession: @unchecked Sendable {
 
         self.delegate = delegate
         self.statsAdapter = statsAdapter
-        interruptionEffect = .init(audioStore)
-        routeChangeEffect = .init(
-            audioStore,
-            callSettingsPublisher: callSettingsPublisher,
-            delegate: delegate
-        )
 
         Publishers
             .CombineLatest(callSettingsPublisher, ownCapabilitiesPublisher)
@@ -76,6 +70,13 @@ final class CallAudioSession: @unchecked Sendable {
             // and respected.
             audioStore.restartAudioSession()
         }
+
+        interruptionEffect = .init(audioStore)
+        routeChangeEffect = .init(
+            audioStore,
+            callSettingsPublisher: callSettingsPublisher,
+            delegate: delegate
+        )
 
         statsAdapter?.trace(.init(audioSession: traceRepresentation))
     }

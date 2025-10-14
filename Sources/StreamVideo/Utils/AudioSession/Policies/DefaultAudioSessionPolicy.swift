@@ -23,32 +23,17 @@ public struct DefaultAudioSessionPolicy: AudioSessionPolicy {
         for callSettings: CallSettings,
         ownCapabilities: Set<OwnCapability>
     ) -> AudioSessionConfiguration {
-        guard applicationStateAdapter.state == .foreground else {
-            return .init(
-                isActive: callSettings.audioOutputOn,
-                category: .playAndRecord,
-                mode: .voiceChat,
-                options: .playAndRecord(
-                    videoOn: callSettings.videoOn,
-                    speakerOn: callSettings.speakerOn,
-                    appIsInForeground: false
-                ),
-                overrideOutputAudioPort: callSettings.speakerOn
-                    ? .speaker
-                    : AVAudioSession.PortOverride.none
-            )
-        }
-
-        return .init(
+        .init(
             isActive: callSettings.audioOutputOn,
             category: .playAndRecord,
             mode: .voiceChat,
-            options: .playAndRecord(
-                videoOn: callSettings.videoOn,
-                speakerOn: callSettings.speakerOn,
-                appIsInForeground: true
-            ),
-            overrideOutputAudioPort: callSettings.speakerOn ? .speaker : AVAudioSession.PortOverride.none
+            options: [
+                .allowBluetooth,
+                .allowBluetoothA2DP
+            ],
+            overrideOutputAudioPort: callSettings.speakerOn
+                ? .speaker
+                : AVAudioSession.PortOverride.none
         )
     }
 }
