@@ -56,6 +56,14 @@ extension CallParticipant {
                     type: .screenShare
                 )
             )
+
+            result.append(
+                .init(
+                    for: userId,
+                    sessionId: sessionId,
+                    type: .screenShareAudio
+                )
+            )
         }
 
         return result
