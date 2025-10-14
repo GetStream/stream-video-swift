@@ -39,7 +39,8 @@ final class DefaultAudioSessionPolicyTests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(
             configuration.options,
             [
-                .allowBluetooth
+                .allowBluetooth,
+                .allowBluetoothA2DP
             ]
         )
         XCTAssertEqual(configuration.overrideOutputAudioPort, .speaker)
@@ -60,7 +61,8 @@ final class DefaultAudioSessionPolicyTests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(
             configuration.options,
             [
-                .allowBluetooth
+                .allowBluetooth,
+                .allowBluetoothA2DP
             ]
         )
         XCTAssertNotNil(configuration.overrideOutputAudioPort)
@@ -80,7 +82,8 @@ final class DefaultAudioSessionPolicyTests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(
             configuration.options,
             [
-                .allowBluetooth
+                .allowBluetooth,
+                .allowBluetoothA2DP
             ]
         )
         XCTAssertEqual(configuration.overrideOutputAudioPort, AVAudioSession.PortOverride.none)
@@ -101,7 +104,8 @@ final class DefaultAudioSessionPolicyTests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(
             configuration.options,
             [
-                .allowBluetooth
+                .allowBluetooth,
+                .allowBluetoothA2DP
             ]
         )
         XCTAssertNotNil(configuration.overrideOutputAudioPort)
@@ -124,7 +128,7 @@ final class DefaultAudioSessionPolicyTests: XCTestCase, @unchecked Sendable {
             configuration.options,
             [
                 .allowBluetooth,
-                .defaultToSpeaker
+                .allowBluetoothA2DP
             ]
         )
         XCTAssertEqual(configuration.overrideOutputAudioPort, .speaker)
@@ -145,7 +149,8 @@ final class DefaultAudioSessionPolicyTests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(
             configuration.options,
             [
-                .allowBluetooth
+                .allowBluetooth,
+                .allowBluetoothA2DP
             ]
         )
         XCTAssertNotNil(configuration.overrideOutputAudioPort)
@@ -166,7 +171,8 @@ final class DefaultAudioSessionPolicyTests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(
             configuration.options,
             [
-                .allowBluetooth
+                .allowBluetooth,
+                .allowBluetoothA2DP
             ]
         )
         XCTAssertEqual(configuration.overrideOutputAudioPort, AVAudioSession.PortOverride.none)
@@ -187,7 +193,8 @@ final class DefaultAudioSessionPolicyTests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(
             configuration.options,
             [
-                .allowBluetooth
+                .allowBluetooth,
+                .allowBluetoothA2DP
             ]
         )
         XCTAssertNotNil(configuration.overrideOutputAudioPort)
