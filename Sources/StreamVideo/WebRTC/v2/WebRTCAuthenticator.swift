@@ -98,6 +98,8 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
             return result
         }()
 
+        log.debug("CallSettings when joining speakerOn:\(callSettings.speakerOn)", subsystems: .webRTC)
+
         await coordinator
             .stateAdapter
             .enqueueCallSettings { _ in callSettings }

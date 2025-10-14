@@ -48,6 +48,7 @@ extension RTCAudioStore {
 
             callSettingsCancellable = callSettingsPublisher
                 .removeDuplicates()
+                .dropFirst() // We drop the first one as we allow on init the CallAudioSession to configure as expected.
                 .sink { [weak self] in self?.activeCallSettings = $0 }
             session.add(self)
         }

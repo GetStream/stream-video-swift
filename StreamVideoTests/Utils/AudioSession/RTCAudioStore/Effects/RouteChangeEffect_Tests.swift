@@ -109,6 +109,8 @@ final class RouteChangeEffect_Tests: XCTestCase, @unchecked Sendable {
         CurrentDevice.currentValue = .init { currentDevice }
         await fulfillment { CurrentDevice.currentValue.deviceType == currentDevice }
         _ = subject
+        // we send this one to be the one that will be dropped
+        callSettingsSubject.send(activeCallSettings.withUpdatedAudioOutputState(false))
         callSettingsSubject.send(activeCallSettings)
         store.session.category = category.rawValue
         store.session.currentRoute = updatedRoute
