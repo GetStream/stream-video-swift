@@ -62,6 +62,8 @@ extension RTCAudioStore {
                 break
             case .setHasRecordingPermission:
                 break
+            case .setPrefersHiFiPlayback:
+                break
             case .setCurrentRoute:
                 break
             case .avAudioSession:
@@ -69,6 +71,8 @@ extension RTCAudioStore {
             case .webRTCAudioSession:
                 break
             case .callKit:
+                break
+            case .streamVideo:
                 break
             }
         }

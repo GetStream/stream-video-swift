@@ -109,9 +109,10 @@ extension RTCAudioStore {
                 var isExternal: Bool
                 var isSpeaker: Bool
                 var isReceiver: Bool
+                var channels: Int
 
                 var description: String {
-                    " { id:\(id), name:\(name), type:\(type) }"
+                    " { id:\(id), name:\(name), type:\(type), channels:\(channels) }"
                 }
 
                 init(_ source: AVAudioSessionPortDescription) {
@@ -121,6 +122,7 @@ extension RTCAudioStore {
                     self.isExternal = Self.externalPorts.contains(source.portType)
                     self.isSpeaker = source.portType == .builtInSpeaker
                     self.isReceiver = source.portType == .builtInReceiver
+                    self.channels = source.channels?.endIndex ?? 0
                 }
             }
 
@@ -163,6 +165,8 @@ extension RTCAudioStore {
         var isMicrophoneMuted: Bool
         var hasRecordingPermission: Bool
 
+        var prefersHiFiPlayback: Bool
+
         var audioDeviceModule: AudioDeviceModule?
         var currentRoute: AudioRoute
 
@@ -177,10 +181,11 @@ extension RTCAudioStore {
             ", isRecording:\(isRecording)" +
             ", isMicrophoneMuted:\(isMicrophoneMuted)" +
             ", hasRecordingPermission:\(hasRecordingPermission)" +
-            ", audioSessionConfiguration:\(audioSessionConfiguration)" +
-            ", webRTCAudioSessionConfiguration:\(webRTCAudioSessionConfiguration)" +
+            ", prefersHiFiPlayback:\(prefersHiFiPlayback)" +
             ", audioDeviceModule:\(audioDeviceModule)" +
             ", currentRoute:\(currentRoute)" +
+            ", audioSessionConfiguration:\(audioSessionConfiguration)" +
+            ", webRTCAudioSessionConfiguration:\(webRTCAudioSessionConfiguration)" +
             " }"
         }
 
@@ -191,10 +196,11 @@ extension RTCAudioStore {
             case isRecording
             case isMicrophoneMuted
             case hasRecordingPermission
-            case audioSessionConfiguration
-            case webRTCAudioSessionConfiguration
+            case prefersHiFiPlayback
             case audioDeviceModule
             case currentRoute
+            case audioSessionConfiguration
+            case webRTCAudioSessionConfiguration
         }
 
         func encode(to encoder: Encoder) throws {
@@ -208,6 +214,12 @@ extension RTCAudioStore {
                 hasRecordingPermission,
                 forKey: .hasRecordingPermission
             )
+            try container.encode(prefersHiFiPlayback, forKey: .prefersHiFiPlayback)
+            try container.encodeIfPresent(
+                audioDeviceModule,
+                forKey: .audioDeviceModule
+            )
+            try container.encode(currentRoute, forKey: .currentRoute)
             try container.encode(
                 audioSessionConfiguration,
                 forKey: .audioSessionConfiguration
@@ -216,11 +228,6 @@ extension RTCAudioStore {
                 webRTCAudioSessionConfiguration,
                 forKey: .webRTCAudioSessionConfiguration
             )
-            try container.encodeIfPresent(
-                audioDeviceModule,
-                forKey: .audioDeviceModule
-            )
-            try container.encode(currentRoute, forKey: .currentRoute)
         }
 
         static func == (lhs: StoreState, rhs: StoreState) -> Bool {
@@ -230,11 +237,11 @@ extension RTCAudioStore {
             && lhs.isRecording == rhs.isRecording
             && lhs.isMicrophoneMuted == rhs.isMicrophoneMuted
             && lhs.hasRecordingPermission == rhs.hasRecordingPermission
-            && lhs.audioSessionConfiguration == rhs.audioSessionConfiguration
-            && lhs.webRTCAudioSessionConfiguration
-                == rhs.webRTCAudioSessionConfiguration
+            && lhs.prefersHiFiPlayback == rhs.prefersHiFiPlayback
             && lhs.audioDeviceModule === rhs.audioDeviceModule
             && lhs.currentRoute == rhs.currentRoute
+            && lhs.audioSessionConfiguration == rhs.audioSessionConfiguration
+            && lhs.webRTCAudioSessionConfiguration == rhs.webRTCAudioSessionConfiguration
         }
 
         func hash(into hasher: inout Hasher) {
@@ -244,6 +251,7 @@ extension RTCAudioStore {
             hasher.combine(isRecording)
             hasher.combine(isMicrophoneMuted)
             hasher.combine(hasRecordingPermission)
+            hasher.combine(prefersHiFiPlayback)
             hasher.combine(audioSessionConfiguration)
             hasher.combine(webRTCAudioSessionConfiguration)
             if let audioDeviceModule {

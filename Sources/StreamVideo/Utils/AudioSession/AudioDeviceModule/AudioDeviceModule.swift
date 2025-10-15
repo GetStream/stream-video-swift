@@ -36,6 +36,26 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
     var isMicrophoneMutedPublisher: AnyPublisher<Bool, Never> { _isMicrophoneMuted.publisher }
 
     @SafePublished
+    var isStereoPlayoutEnabled: Bool = false
+    var isStereoPlayoutEnabledPublisher: AnyPublisher<Bool, Never> { _isStereoPlayoutEnabled.publisher }
+
+    @SafePublished
+    var isStereoPlayoutAvailable: Bool = false
+    var isStereoPlayoutAvailablePublisher: AnyPublisher<Bool, Never> { _isStereoPlayoutAvailable.publisher }
+
+    @SafePublished
+    var isVoiceProcessingBypassed: Bool = false
+    var isVoiceProcessingBypassedPublisher: AnyPublisher<Bool, Never> { _isVoiceProcessingBypassed.publisher }
+
+    @SafePublished
+    var isVoiceProcessingEnabled: Bool = false
+    var isVoiceProcessingEnabledPublisher: AnyPublisher<Bool, Never> { _isVoiceProcessingEnabled.publisher }
+
+    @SafePublished
+    var isVoiceProcessingAGCEnabled: Bool = false
+    var isVoiceProcessingAGCEnabledPublisher: AnyPublisher<Bool, Never> { _isVoiceProcessingAGCEnabled.publisher }
+
+    @SafePublished
     var audioLevel: Float = 0
     var audioLevelPublisher: AnyPublisher<Float, Never> { _audioLevel.publisher }
 
@@ -52,6 +72,11 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         "isPlaying:\(isPlaying)" +
         ", isRecording:\(isRecording)" +
         ", isMicrophoneMuted:\(isMicrophoneMuted)" +
+        ", isStereoPlayoutEnabled:\(isStereoPlayoutEnabled)" +
+        ", isStereoPlayoutAvailable:\(isStereoPlayoutAvailable)" +
+        ", isVoiceProcessingBypassed:\(isVoiceProcessingBypassed)" +
+        ", isVoiceProcessingEnabled:\(isVoiceProcessingEnabled)" +
+        ", isVoiceProcessingAGCEnabled:\(isVoiceProcessingAGCEnabled)" +
         ", audioLevel:\(audioLevel)" +
         ", source:\(source)" +
         " }"
@@ -76,6 +101,32 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
             .sink { [weak self] in self?._isMicrophoneMuted.set($0) }
             .store(in: disposableBag)
 
+        source
+            .publisher(for: \.isStereoPlayoutEnabled)
+            .receive(on: dispatchQueue)
+            .sink { [weak self] in self?._isStereoPlayoutEnabled.set($0) }
+            .store(in: disposableBag)
+
+        source
+            .publisher(for: \.isStereoPlayoutAvailable)
+            .receive(on: dispatchQueue)
+            .sink { [weak self] in self?._isStereoPlayoutAvailable.set($0) }
+            .store(in: disposableBag)
+        source
+            .publisher(for: \.isVoiceProcessingBypassed)
+            .receive(on: dispatchQueue)
+            .sink { [weak self] in self?._isVoiceProcessingBypassed.set($0) }
+            .store(in: disposableBag)
+        source
+            .publisher(for: \.isVoiceProcessingEnabled)
+            .receive(on: dispatchQueue)
+            .sink { [weak self] in self?._isVoiceProcessingEnabled.set($0) }
+            .store(in: disposableBag)
+        source
+            .publisher(for: \.isVoiceProcessingAGCEnabled)
+            .receive(on: dispatchQueue)
+            .sink { [weak self] in self?._isVoiceProcessingAGCEnabled.set($0) }
+            .store(in: disposableBag)
     }
 
     // MARK: - Recording
@@ -114,6 +165,49 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         } else {
             log.error("setMicrophoneMuted:\(isMuted) failed with result:\(result).", subsystems: .audioSession)
         }
+    }
+
+    func setStereoPlayoutEnabled(
+        _ isEnabled: Bool,
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line
+    ) throws  {
+        guard isEnabled != source.isStereoPlayoutEnabled else {
+            return
+        }
+
+        let currentVoiceProcessingEnabled = source.isVoiceProcessingEnabled
+        let currentVoiceProcessingBypassed = source.isVoiceProcessingBypassed
+
+        source.isVoiceProcessingBypassed = isEnabled
+
+        guard
+            source.setVoiceProcessingEnabled(!isEnabled) == 0
+        else {
+            source.setVoiceProcessingEnabled(currentVoiceProcessingEnabled)
+            source.isVoiceProcessingBypassed = currentVoiceProcessingBypassed
+            throw ClientError(
+                "Failed to setVoiceProcessingEnabled:\(!isEnabled) while trying to setStereoPlayoutEnabled:\(isEnabled).",
+                file,
+                line
+            )
+        }
+
+        source.isStereoPlayoutEnabled = isEnabled
+
+        guard source.isStereoPlayoutEnabled != isEnabled else {
+            return
+        }
+
+        source.setVoiceProcessingEnabled(currentVoiceProcessingEnabled)
+        source.isVoiceProcessingBypassed = currentVoiceProcessingBypassed
+
+        throw ClientError(
+            "Failed to setStereoPlayoutEnabled:\(isEnabled).",
+            file,
+            line
+        )
     }
 
     // MARK: - RTCAudioDeviceModuleDelegate
@@ -232,6 +326,11 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         case isPlaying
         case isRecording
         case isMicrophoneMuted
+        case isStereoPlayoutAvailable
+        case isStereoPlayoutEnabled
+        case isVoiceProcessingBypassed
+        case isVoiceProcessingEnabled
+        case isVoiceProcessingAGCEnabled
         case audioLevel
     }
 
@@ -240,6 +339,11 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         try container.encode(isPlaying, forKey: .isPlaying)
         try container.encode(isRecording, forKey: .isRecording)
         try container.encode(isMicrophoneMuted, forKey: .isMicrophoneMuted)
+        try container.encode(isStereoPlayoutAvailable, forKey: .isStereoPlayoutAvailable)
+        try container.encode(isStereoPlayoutEnabled, forKey: .isStereoPlayoutEnabled)
+        try container.encode(isVoiceProcessingBypassed, forKey: .isVoiceProcessingBypassed)
+        try container.encode(isVoiceProcessingEnabled, forKey: .isVoiceProcessingEnabled)
+        try container.encode(isVoiceProcessingAGCEnabled, forKey: .isVoiceProcessingAGCEnabled)
         try container.encode(audioLevel, forKey: .audioLevel)
     }
 }

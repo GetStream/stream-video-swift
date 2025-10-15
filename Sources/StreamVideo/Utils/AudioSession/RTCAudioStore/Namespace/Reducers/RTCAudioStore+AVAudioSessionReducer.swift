@@ -26,10 +26,42 @@ extension RTCAudioStore.Namespace {
             function: StaticString,
             line: UInt
         ) throws -> State {
-            guard case let .avAudioSession(action) = action else {
+            switch action {
+            case let .setPrefersHiFiPlayback(value):
+                var updatedState = state
+                let targetMode = rewriteModeForStereoPlayoutIfRequired(value, mode: state.audioSessionConfiguration.mode)
+                try performUpdate(
+                    state: state.audioSessionConfiguration,
+                    category: state.audioSessionConfiguration.category,
+                    mode: targetMode,
+                    categoryOptions: state.audioSessionConfiguration.options
+                )
+                updatedState.audioSessionConfiguration.mode = targetMode
+                return updatedState
+
+            case let .avAudioSession(action):
+                return try processAVAudioSessionAction(
+                    state: state,
+                    action: action,
+                    file: file,
+                    function: function,
+                    line: line
+                )
+
+            default:
                 return state
             }
+        }
 
+        // MARK: - Private Helpers
+
+        private func processAVAudioSessionAction(
+            state: State,
+            action: RTCAudioStore.StoreAction.AVAudioSessionAction,
+            file: StaticString,
+            function: StaticString,
+            line: UInt
+        ) throws -> State {
             var updatedState = state
 
             switch action {
@@ -43,63 +75,92 @@ extension RTCAudioStore.Namespace {
                 updatedState.audioSessionConfiguration.category = value
 
             case let .setMode(value):
+                let targetMode = rewriteModeForStereoPlayoutIfRequired(state.prefersHiFiPlayback, mode: value)
                 try performUpdate(
                     state: state.audioSessionConfiguration,
                     category: state.audioSessionConfiguration.category,
-                    mode: value,
+                    mode: targetMode,
                     categoryOptions: state.audioSessionConfiguration.options
                 )
-                updatedState.audioSessionConfiguration.mode = value
+                updatedState.audioSessionConfiguration.mode = targetMode
 
             case let .setCategoryOptions(value):
+                let targetOptions = rewriteCategoryOptionsForStereoPlayoutIfRequired(
+                    state.prefersHiFiPlayback,
+                    options: value
+                )
                 try performUpdate(
                     state: state.audioSessionConfiguration,
                     category: state.audioSessionConfiguration.category,
                     mode: state.audioSessionConfiguration.mode,
-                    categoryOptions: value
+                    categoryOptions: targetOptions
                 )
-                updatedState.audioSessionConfiguration.options = value
+                updatedState.audioSessionConfiguration.options = targetOptions
 
             case let .setCategoryAndMode(category, mode):
+                let targetMode = rewriteModeForStereoPlayoutIfRequired(
+                    state.prefersHiFiPlayback,
+                    mode: mode
+                )
                 try performUpdate(
                     state: state.audioSessionConfiguration,
                     category: category,
-                    mode: mode,
+                    mode: targetMode,
                     categoryOptions: state.audioSessionConfiguration.options
                 )
                 updatedState.audioSessionConfiguration.category = category
-                updatedState.audioSessionConfiguration.mode = mode
+                updatedState.audioSessionConfiguration.mode = targetMode
 
             case let .setCategoryAndCategoryOptions(category, categoryOptions):
+                let targetOptions = rewriteCategoryOptionsForStereoPlayoutIfRequired(
+                    state.prefersHiFiPlayback,
+                    options: categoryOptions
+                )
                 try performUpdate(
                     state: state.audioSessionConfiguration,
                     category: category,
                     mode: state.audioSessionConfiguration.mode,
-                    categoryOptions: categoryOptions
+                    categoryOptions: targetOptions
                 )
                 updatedState.audioSessionConfiguration.category = category
-                updatedState.audioSessionConfiguration.options = categoryOptions
+                updatedState.audioSessionConfiguration.options = targetOptions
 
             case let .setModeAndCategoryOptions(mode, categoryOptions):
+                let targetMode = rewriteModeForStereoPlayoutIfRequired(
+                    state.prefersHiFiPlayback,
+                    mode: mode
+                )
+                let targetOptions = rewriteCategoryOptionsForStereoPlayoutIfRequired(
+                    state.prefersHiFiPlayback,
+                    options: categoryOptions
+                )
                 try performUpdate(
                     state: state.audioSessionConfiguration,
                     category: state.audioSessionConfiguration.category,
-                    mode: mode,
-                    categoryOptions: categoryOptions
+                    mode: targetMode,
+                    categoryOptions: targetOptions
                 )
-                updatedState.audioSessionConfiguration.mode = mode
-                updatedState.audioSessionConfiguration.options = categoryOptions
+                updatedState.audioSessionConfiguration.mode = targetMode
+                updatedState.audioSessionConfiguration.options = targetOptions
 
             case let .setCategoryAndModeAndCategoryOptions(category, mode, categoryOptions):
+                let targetMode = rewriteModeForStereoPlayoutIfRequired(
+                    state.prefersHiFiPlayback,
+                    mode: mode
+                )
+                let targetOptions = rewriteCategoryOptionsForStereoPlayoutIfRequired(
+                    state.prefersHiFiPlayback,
+                    options: categoryOptions
+                )
                 try performUpdate(
                     state: state.audioSessionConfiguration,
                     category: category,
-                    mode: mode,
-                    categoryOptions: categoryOptions
+                    mode: targetMode,
+                    categoryOptions: targetOptions
                 )
                 updatedState.audioSessionConfiguration.category = category
-                updatedState.audioSessionConfiguration.mode = mode
-                updatedState.audioSessionConfiguration.options = categoryOptions
+                updatedState.audioSessionConfiguration.mode = targetMode
+                updatedState.audioSessionConfiguration.options = targetOptions
 
             case let .setOverrideOutputAudioPort(value):
                 try performUpdate(
@@ -112,7 +173,34 @@ extension RTCAudioStore.Namespace {
             return updatedState
         }
 
-        // MARK: - Private Helpers
+        private func rewriteModeForStereoPlayoutIfRequired(
+            _ isStereoPlayoutEnabled: Bool,
+            mode: AVAudioSession.Mode
+        ) -> AVAudioSession.Mode {
+            guard
+                isStereoPlayoutEnabled,
+                mode != .default
+            else {
+                return mode
+            }
+
+            return .default
+        }
+
+        private func rewriteCategoryOptionsForStereoPlayoutIfRequired(
+            _ isStereoPlayoutEnabled: Bool,
+            options: AVAudioSession.CategoryOptions
+        ) -> AVAudioSession.CategoryOptions {
+            guard
+                isStereoPlayoutEnabled,
+                options.contains(.allowBluetoothHFP) || options.contains(.allowBluetooth)
+            else {
+                return options
+            }
+
+            let result = options.subtracting([.allowBluetoothHFP, .allowBluetooth])
+            return result
+        }
 
         private func performUpdate(
             state: State.AVAudioSessionConfiguration,

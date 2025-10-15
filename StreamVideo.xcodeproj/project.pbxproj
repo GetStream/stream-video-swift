@@ -293,6 +293,8 @@
 		40635C692E9E42770005C8D7 /* StreamWebRTC.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 40635C652E9E425D0005C8D7 /* StreamWebRTC.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		40635C6A2E9E427D0005C8D7 /* StreamWebRTC.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 40635C652E9E425D0005C8D7 /* StreamWebRTC.xcframework */; };
 		40635C6B2E9E427D0005C8D7 /* StreamWebRTC.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 40635C652E9E425D0005C8D7 /* StreamWebRTC.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		40635C6D2E9E92890005C8D7 /* RTCAudioStore+ActiveCallMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40635C6C2E9E92890005C8D7 /* RTCAudioStore+ActiveCallMiddleware.swift */; };
+		40635C6F2E9E97A10005C8D7 /* RTCAudioStore+HiFiMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40635C6E2E9E97A10005C8D7 /* RTCAudioStore+HiFiMiddleware.swift */; };
 		40635C722E9FC0220005C8D7 /* SFUOverride.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40635C712E9FC0220005C8D7 /* SFUOverride.swift */; };
 		406568872E0426FD00A67EAC /* IdleTimerAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406568862E0426FD00A67EAC /* IdleTimerAdapter.swift */; };
 		4065688A2E04275F00A67EAC /* IdleTimerAdapter_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406568892E04275F00A67EAC /* IdleTimerAdapter_Tests.swift */; };
@@ -2016,6 +2018,8 @@
 		4063033E2AD847EC0091AE77 /* CallState_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallState_Tests.swift; sourceTree = "<group>"; };
 		406303412AD848000091AE77 /* CallParticipant_Mock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallParticipant_Mock.swift; sourceTree = "<group>"; };
 		40635C652E9E425D0005C8D7 /* StreamWebRTC.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = StreamWebRTC.xcframework; path = ../webrtc/.products/StreamWebRTC.xcframework; sourceTree = SOURCE_ROOT; };
+		40635C6C2E9E92890005C8D7 /* RTCAudioStore+ActiveCallMiddleware.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCAudioStore+ActiveCallMiddleware.swift"; sourceTree = "<group>"; };
+		40635C6E2E9E97A10005C8D7 /* RTCAudioStore+HiFiMiddleware.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCAudioStore+HiFiMiddleware.swift"; sourceTree = "<group>"; };
 		40635C712E9FC0220005C8D7 /* SFUOverride.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SFUOverride.swift; sourceTree = "<group>"; };
 		406568862E0426FD00A67EAC /* IdleTimerAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdleTimerAdapter.swift; sourceTree = "<group>"; };
 		406568892E04275F00A67EAC /* IdleTimerAdapter_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdleTimerAdapter_Tests.swift; sourceTree = "<group>"; };
@@ -5796,6 +5800,8 @@
 				40EE9D502E97C7C60000EA92 /* RTCAudioStore+RouteChangeMiddleware.swift */,
 				40EE9D542E97CA7F0000EA92 /* RTCAudioStore+InterruptionsMiddleware.swift */,
 				40EE9D562E97FC980000EA92 /* RTCAudioStore+AudioDeviceModuleMiddleware.swift */,
+				40635C6C2E9E92890005C8D7 /* RTCAudioStore+ActiveCallMiddleware.swift */,
+				40635C6E2E9E97A10005C8D7 /* RTCAudioStore+HiFiMiddleware.swift */,
 			);
 			path = Middleware;
 			sourceTree = "<group>";
@@ -8479,6 +8485,7 @@
 				40151F932E74410400326540 /* AudioProcessingStore+Namespace.swift in Sources */,
 				40BBC49E2C623D03002AEF92 /* RTCIceConnectionState+CustomStringConvertible.swift in Sources */,
 				84A7E18C288363AC00526C98 /* EventNotificationCenter.swift in Sources */,
+				40635C6F2E9E97A10005C8D7 /* RTCAudioStore+HiFiMiddleware.swift in Sources */,
 				40E363492D09F6BB0028C52A /* StreamVideoCapturer.swift in Sources */,
 				404098C12DDE2B2500D7BEC5 /* WebRTCStatsItemTransformer.swift in Sources */,
 				84A7E1962883661A00526C98 /* BackgroundTaskScheduler.swift in Sources */,
@@ -8825,6 +8832,7 @@
 				84A7E1A82883E46200526C98 /* Timer.swift in Sources */,
 				40B284E12D52422A0064C1FE /* AVAudioSessionPortOverride+Convenience.swift in Sources */,
 				84DC38B129ADFCFD00946713 /* AudioSettings.swift in Sources */,
+				40635C6D2E9E92890005C8D7 /* RTCAudioStore+ActiveCallMiddleware.swift in Sources */,
 				848CCCED2AB8ED8F002E83A2 /* CallHLSBroadcastingStartedEvent.swift in Sources */,
 				840F59932A77FDCB00EF3EB2 /* PinResponse.swift in Sources */,
 				840042C52A6FED2900917B30 /* IntExtensions.swift in Sources */,

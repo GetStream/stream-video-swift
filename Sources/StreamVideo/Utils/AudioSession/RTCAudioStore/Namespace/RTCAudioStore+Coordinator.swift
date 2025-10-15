@@ -33,6 +33,9 @@ extension RTCAudioStore {
             case let .setHasRecordingPermission(value):
                 return value != state.hasRecordingPermission
 
+            case let .setPrefersHiFiPlayback(value):
+                return value != state.prefersHiFiPlayback
+
             case let .setAudioDeviceModule(value):
                 return value !== state.audioDeviceModule
 
@@ -52,6 +55,9 @@ extension RTCAudioStore {
                 )
 
             case .callKit:
+                return true
+
+            case .streamVideo:
                 return true
             }
         }

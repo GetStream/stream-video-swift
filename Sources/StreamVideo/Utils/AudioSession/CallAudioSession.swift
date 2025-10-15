@@ -82,14 +82,7 @@ final class CallAudioSession: @unchecked Sendable {
                 )
             }
             .store(in: disposableBag)
-
-        interruptionEffect = .init(audioStore)
-        routeChangeEffect = .init(
-            audioStore,
-            callSettingsPublisher: callSettingsPublisher,
-            delegate: delegate
-        )
-
+        
         statsAdapter?.trace(.init(audioSession: traceRepresentation))
     }
 

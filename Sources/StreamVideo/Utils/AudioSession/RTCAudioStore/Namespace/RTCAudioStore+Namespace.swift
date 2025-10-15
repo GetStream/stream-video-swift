@@ -32,7 +32,9 @@ extension RTCAudioStore {
             [
                 InterruptionsMiddleware(audioSession),
                 RouteChangeMiddleware(audioSession),
-                AudioDeviceModuleMiddleware()
+                AudioDeviceModuleMiddleware(),
+                ActiveCallMiddleware(),
+                HiFiMiddleware()
             ]
         }
 

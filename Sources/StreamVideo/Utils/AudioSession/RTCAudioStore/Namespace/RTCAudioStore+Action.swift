@@ -16,6 +16,24 @@ extension RTCAudioStore {
     /// via middleware responsible for requesting permissions.
     public enum StoreAction: Sendable, Equatable, StoreActionBoxProtocol, CustomStringConvertible {
 
+        enum StreamVideoAction: Equatable, Sendable, CustomStringConvertible {
+            case setActiveCall(Call?)
+
+            var description: String {
+                switch self {
+                case .setActiveCall(let call):
+                    return ".setActiveCall(cId:\(call?.cId))"
+                }
+            }
+
+            static func ==(lhs: StreamVideoAction, rhs: StreamVideoAction) -> Bool {
+                switch (lhs, rhs) {
+                case (let .setActiveCall(lhsCall), let .setActiveCall(rhsCall)):
+                    return lhsCall === rhsCall
+                }
+            }
+        }
+
         enum AVAudioSessionAction: Equatable, Sendable, CustomStringConvertible {
             case setCategory(AVAudioSession.Category)
             case setMode(AVAudioSession.Mode)
@@ -110,9 +128,12 @@ extension RTCAudioStore {
         case setAudioDeviceModule(AudioDeviceModule?)
         case setCurrentRoute(RTCAudioStore.StoreState.AudioRoute)
 
+        case setPrefersHiFiPlayback(Bool)
+
         case avAudioSession(AVAudioSessionAction)
         case webRTCAudioSession(WebRTCAudioSessionAction)
         case callKit(CallKitAction)
+        case streamVideo(StreamVideoAction)
 
         var description: String {
             switch self {
@@ -140,6 +161,9 @@ extension RTCAudioStore {
             case .setCurrentRoute(let value):
                 return ".setCurrentRoute(\(value))"
 
+            case .setPrefersHiFiPlayback(let value):
+                return ".setPrefersHiFiPlayback(\(value))"
+
             case .avAudioSession(let value):
                 return ".avAudioSession(\(value))"
 
@@ -148,6 +172,9 @@ extension RTCAudioStore {
 
             case .callKit(let value):
                 return ".callKit(\(value))"
+
+            case .streamVideo(let value):
+                return ".streamVideo(\(value))"
             }
         }
     }
