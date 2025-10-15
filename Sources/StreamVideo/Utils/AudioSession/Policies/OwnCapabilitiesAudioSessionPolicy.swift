@@ -55,7 +55,7 @@ public struct OwnCapabilitiesAudioSessionPolicy: AudioSessionPolicy {
             : .playback
 
         let mode: AVAudioSession.Mode = category == .playAndRecord
-            ? callSettings.videoOn && callSettings.speakerOn ? .videoChat : .voiceChat
+            ? .voiceChat
             : .default
 
         let categoryOptions: AVAudioSession.CategoryOptions = category == .playAndRecord

@@ -140,7 +140,7 @@ final class RTCAudioSessionReducer_Tests: XCTestCase, @unchecked Sendable {
             action: .audioSession(
                 .setCategory(
                     .playAndRecord,
-                    mode: .videoChat,
+                    mode: .voiceChat,
                     options: [
                         .allowBluetooth,
                         .mixWithOthers
@@ -160,7 +160,7 @@ final class RTCAudioSessionReducer_Tests: XCTestCase, @unchecked Sendable {
             )?.first
         )
         XCTAssertEqual(input.category, AVAudioSession.Category.playAndRecord.rawValue)
-        XCTAssertEqual(input.mode, AVAudioSession.Mode.videoChat.rawValue)
+        XCTAssertEqual(input.mode, AVAudioSession.Mode.voiceChat.rawValue)
         XCTAssertEqual(input.categoryOptions, [.allowBluetooth, .mixWithOthers])
     }
 
@@ -175,7 +175,7 @@ final class RTCAudioSessionReducer_Tests: XCTestCase, @unchecked Sendable {
             action: .audioSession(
                 .setCategory(
                     .playAndRecord,
-                    mode: .videoChat,
+                    mode: .voiceChat,
                     options: [
                         .allowBluetooth,
                         .mixWithOthers
@@ -188,7 +188,7 @@ final class RTCAudioSessionReducer_Tests: XCTestCase, @unchecked Sendable {
         )
 
         XCTAssertEqual(updatedState.category, .playAndRecord)
-        XCTAssertEqual(updatedState.mode, .videoChat)
+        XCTAssertEqual(updatedState.mode, .voiceChat)
         XCTAssertEqual(updatedState.options, [.allowBluetooth, .mixWithOthers])
     }
 
