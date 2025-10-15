@@ -293,6 +293,7 @@
 		40635C692E9E42770005C8D7 /* StreamWebRTC.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 40635C652E9E425D0005C8D7 /* StreamWebRTC.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		40635C6A2E9E427D0005C8D7 /* StreamWebRTC.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 40635C652E9E425D0005C8D7 /* StreamWebRTC.xcframework */; };
 		40635C6B2E9E427D0005C8D7 /* StreamWebRTC.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 40635C652E9E425D0005C8D7 /* StreamWebRTC.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		40635C722E9FC0220005C8D7 /* SFUOverride.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40635C712E9FC0220005C8D7 /* SFUOverride.swift */; };
 		406568872E0426FD00A67EAC /* IdleTimerAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406568862E0426FD00A67EAC /* IdleTimerAdapter.swift */; };
 		4065688A2E04275F00A67EAC /* IdleTimerAdapter_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406568892E04275F00A67EAC /* IdleTimerAdapter_Tests.swift */; };
 		4065688B2E042B2E00A67EAC /* MockStreamCallAudioRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406B3C0D2C8F865F00FC93A1 /* MockStreamCallAudioRecorder.swift */; };
@@ -2015,6 +2016,7 @@
 		4063033E2AD847EC0091AE77 /* CallState_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallState_Tests.swift; sourceTree = "<group>"; };
 		406303412AD848000091AE77 /* CallParticipant_Mock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallParticipant_Mock.swift; sourceTree = "<group>"; };
 		40635C652E9E425D0005C8D7 /* StreamWebRTC.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = StreamWebRTC.xcframework; path = ../webrtc/.products/StreamWebRTC.xcframework; sourceTree = SOURCE_ROOT; };
+		40635C712E9FC0220005C8D7 /* SFUOverride.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SFUOverride.swift; sourceTree = "<group>"; };
 		406568862E0426FD00A67EAC /* IdleTimerAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdleTimerAdapter.swift; sourceTree = "<group>"; };
 		406568892E04275F00A67EAC /* IdleTimerAdapter_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdleTimerAdapter_Tests.swift; sourceTree = "<group>"; };
 		406568932E05515700A67EAC /* Signposting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Signposting.swift; sourceTree = "<group>"; };
@@ -4154,6 +4156,14 @@
 				4063033E2AD847EC0091AE77 /* CallState_Tests.swift */,
 			);
 			path = CallState;
+			sourceTree = "<group>";
+		};
+		40635C702E9FC0150005C8D7 /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				40635C712E9FC0220005C8D7 /* SFUOverride.swift */,
+			);
+			path = Utilities;
 			sourceTree = "<group>";
 		};
 		406568852E0426F600A67EAC /* IdleTimerAdapter */ = {
@@ -8671,6 +8681,7 @@
 				84DC38BE29ADFCFD00946713 /* CallSettingsRequest.swift in Sources */,
 				40944D212E4E3D6C00088AF0 /* StreamCallAudioRecorder+Action.swift in Sources */,
 				408721F12E12741F006A68CB /* DispatchWorkItem+TimerControl.swift in Sources */,
+				40635C722E9FC0220005C8D7 /* SFUOverride.swift in Sources */,
 				845C09972C11AAA200F725B3 /* RejectCallRequest.swift in Sources */,
 				4028FEA52DC5046F001F9DC3 /* WebRTCStatsAdapter.swift in Sources */,
 				40FB02032BAC93A800A1C206 /* CallKitAdapter.swift in Sources */,
@@ -10502,7 +10513,7 @@
 				);
 				MARKETING_VERSION = 1.0;
 				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu11 gnu++17";
-				OTHER_SWIFT_FLAGS = "-DSTREAM_DEBUG -DOBSERVE_RECONNECTION_NOTIFICATIONS";
+				OTHER_SWIFT_FLAGS = "-DSTREAM_DEBUG -DALLOW_SFU_OVERRIDE -DOBSERVE_RECONNECTION_NOTIFICATIONS";
 				PRODUCT_BUNDLE_IDENTIFIER = io.getstream.iOS.VideoDemoApp;
 				PRODUCT_NAME = "StreamVideoCallApp-Debug";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -10760,7 +10771,7 @@
 				);
 				MARKETING_VERSION = "";
 				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu11 gnu++17";
-				OTHER_SWIFT_FLAGS = "-DOBSERVE_RECONNECTION_NOTIFICATIONS";
+				OTHER_SWIFT_FLAGS = "-DALLOW_SFU_OVERRIDE -DOBSERVE_RECONNECTION_NOTIFICATIONS";
 				PRODUCT_BUNDLE_IDENTIFIER = io.getstream.iOS.StreamVideo;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;

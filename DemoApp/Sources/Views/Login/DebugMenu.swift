@@ -134,6 +134,11 @@ struct DebugMenu: View {
         didSet { AppEnvironment.clientCapabilities = preferredClientCapabilities }
     }
 
+    @State private var presentsSFUOverride = false
+    @State private var sfuOverride = SFUOverride.currentValue {
+        didSet { SFUOverride.currentValue = sfuOverride }
+    }
+
     var body: some View {
         Menu {
             makeMenu(
@@ -307,6 +312,8 @@ struct DebugMenu: View {
                 label: "WebRTC Logs"
             ) { LogConfig.webRTCLogsEnabled = $0 }
 
+            customSFUOverrideView
+
             Button {
                 isLogsViewerVisible = true
             } label: {
@@ -383,6 +390,20 @@ struct DebugMenu: View {
                 self.availableCallTypes.append(customPreferredCallType)
                 self.preferredCallType = customPreferredCallType
             }
+        )
+        .alertWithTextField(
+            title: "Enter SFU override",
+            placeholder: "SFU Url",
+            presentationBinding: $presentsSFUOverride,
+            valueBinding: $sfuOverride,
+            transformer: {
+                if !$0.isEmpty {
+                    return .enabled($0)
+                } else {
+                    return .disabled
+                }
+            },
+            action: { }
         )
     }
 
@@ -495,6 +516,25 @@ struct DebugMenu: View {
                 Text("Add")
             } icon: {
                 Image(systemName: "plus")
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var customSFUOverrideView: some View {
+        switch sfuOverride {
+        case .disabled:
+            Button {
+                presentsSFUOverride = true
+            } label: {
+                Text("No SFU Override")
+            }
+
+        case .enabled:
+            Button {
+                presentsSFUOverride = true
+            } label: {
+                Text("With SFU Override")
             }
         }
     }

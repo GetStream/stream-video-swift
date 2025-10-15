@@ -58,3 +58,22 @@ struct DefaultParams: DefaultAPIClientMiddleware {
         return try await next(modifiedRequest)
     }
 }
+
+struct SFUOverrideMiddleware: DefaultAPIClientMiddleware {
+    func intercept(
+        _ request: Request,
+        next: (Request) async throws -> (Data, URLResponse)
+    ) async throws -> (Data, URLResponse) {
+        guard request.url.path.hasSuffix("/join") else {
+            return try await next(request)
+        }
+        switch SFUOverride.currentValue {
+        case .disabled:
+            return try await next(request)
+        case .enabled(let override):
+            var modifiedRequest = request
+            modifiedRequest.queryParams.append(.init(name: "sfu_id", value: override))
+            return try await next(modifiedRequest)
+        }
+    }
+}

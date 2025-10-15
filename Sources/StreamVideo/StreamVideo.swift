@@ -16,11 +16,12 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     
     @Injected(\.callCache) private var callCache
     @Injected(\.screenProperties) private var screenProperties
-    @Injected(\.audioStore) private var audioStore
 
     private enum DisposableKey: String { case ringEventReceived }
 
     public final class State: ObservableObject, @unchecked Sendable {
+        @Injected(\.audioStore) private var audioStore
+
         @Published public internal(set) var connection: ConnectionStatus
         @Published public internal(set) var user: User
         @Published public internal(set) var activeCall: Call? {
@@ -48,6 +49,8 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
                     self?.ringingCall = nil
                 }
             }
+
+            audioStore.dispatch(.streamVideo(.setActiveCall(activeCall)))
         }
 
         private func stopRingingCallIfRequired() {
@@ -214,6 +217,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
                 return await self.loadConnectionId()
             }
             coordinatorClient.middlewares.append(userAuth)
+            coordinatorClient.middlewares.append(SFUOverrideMiddleware())
         } else {
             let anonymousAuth = AnonymousAuth(token: token.rawValue)
             coordinatorClient.middlewares.append(anonymousAuth)
