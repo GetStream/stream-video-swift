@@ -20,7 +20,7 @@ final class PeerConnectionFactory: @unchecked Sendable {
         )
         let decoderFactory = RTCDefaultVideoDecoderFactory()
         return RTCPeerConnectionFactory(
-            audioDeviceModuleType: .platformDefault,
+            audioDeviceModuleType: .audioEngine,
             bypassVoiceProcessing: false,
             encoderFactory: encoderFactory,
             decoderFactory: decoderFactory,
@@ -44,7 +44,7 @@ final class PeerConnectionFactory: @unchecked Sendable {
         defaultDecoder.supportedCodecs()
     }
 
-    var audioDeviceModule: RTCAudioDeviceModule { factory.audioDeviceModule }
+    private(set) lazy var audioDeviceModule: AudioDeviceModule = .init(factory.audioDeviceModule)
 
     /// Creates or retrieves a PeerConnectionFactory instance for a given
     /// audio processing module.
@@ -67,6 +67,7 @@ final class PeerConnectionFactory: @unchecked Sendable {
     private init(_ audioProcessingModule: RTCAudioProcessingModule) {
         self.audioProcessingModule = audioProcessingModule
         _ = factory
+        _ = audioDeviceModule
         PeerConnectionFactoryStorage.shared.store(self, for: audioProcessingModule)
     }
     
