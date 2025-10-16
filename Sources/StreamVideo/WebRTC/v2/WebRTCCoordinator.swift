@@ -135,9 +135,25 @@ final class WebRTCCoordinator: @unchecked Sendable {
     /// Changes the audio state (enabled/disabled) for the call.
     ///
     /// - Parameter isEnabled: Whether the audio should be enabled.
-    func changeAudioState(isEnabled: Bool) async {
+    func changeAudioState(
+        isEnabled: Bool,
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line
+    ) async {
         await stateAdapter
-            .enqueueCallSettings { $0.withUpdatedAudioState(isEnabled) }
+            .enqueueCallSettings(
+                functionName: function,
+                fileName: file,
+                lineNumber: line
+            ) {
+                $0.withUpdatedAudioState(
+                    isEnabled,
+                    file: file,
+                    function: function,
+                    line: line
+                )
+            }
     }
 
     /// Changes the video state (enabled/disabled) for the call.

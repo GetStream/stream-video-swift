@@ -92,7 +92,10 @@ extension RTCAudioStore {
                         subsystems: .audioSession
                     )
                     delegate?.audioSessionAdapterDidUpdateSpeakerOn(
-                        session.currentRoute.isSpeaker
+                        session.currentRoute.isSpeaker,
+                        file: #file,
+                        function: #function,
+                        line: #line
                     )
                 }
                 return
@@ -101,12 +104,18 @@ extension RTCAudioStore {
             switch (activeCallSettings.speakerOn, session.currentRoute.isSpeaker) {
             case (true, false):
                 delegate?.audioSessionAdapterDidUpdateSpeakerOn(
-                    false
+                    false,
+                    file: #file,
+                    function: #function,
+                    line: #line
                 )
 
             case (false, true) where session.category == AVAudioSession.Category.playAndRecord.rawValue:
                 delegate?.audioSessionAdapterDidUpdateSpeakerOn(
-                    true
+                    true,
+                    file: #file,
+                    function: #function,
+                    line: #line
                 )
 
             default:
