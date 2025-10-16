@@ -51,7 +51,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     /// Published properties that represent different parts of the WebRTC state.
     @Published private(set) var sessionID: String = UUID().uuidString
     @Published private(set) var token: String = ""
-    @Published private(set) var callSettings: CallSettings = .init()
+    @Published private(set) var callSettings: CallSettings = .default
     @Published private(set) var audioSettings: AudioSettings = .init()
 
     /// Published property to track video options and update them.
