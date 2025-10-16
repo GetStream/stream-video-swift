@@ -1549,7 +1549,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
         from: WebRTCCoordinator.StateMachine.Stage.ID,
         expectedTarget: WebRTCCoordinator.StateMachine.Stage.ID,
         subject: WebRTCCoordinator.StateMachine.Stage,
-        validator: @escaping @Sendable (WebRTCCoordinator.StateMachine.Stage) async throws -> Void,
+        validator: @escaping @Sendable(WebRTCCoordinator.StateMachine.Stage) async throws -> Void,
         file: StaticString = #file,
         line: UInt = #line
     ) async throws {

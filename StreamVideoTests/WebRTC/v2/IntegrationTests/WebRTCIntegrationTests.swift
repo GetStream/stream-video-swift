@@ -10,7 +10,7 @@ final class WebRTCIntegrationTests: XCTestCase, @unchecked Sendable {
 
     struct Operation {
         var delay: TimeInterval = 0
-        var operation: @Sendable () async throws -> Void
+        var operation: @Sendable() async throws -> Void
     }
 
     private enum FlowOperation {

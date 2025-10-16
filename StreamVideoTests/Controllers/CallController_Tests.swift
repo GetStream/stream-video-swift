@@ -696,8 +696,8 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
 
     private func assertTransitionToStage(
         _ id: WebRTCCoordinator.StateMachine.Stage.ID,
-        operation: @escaping @Sendable () async throws -> Void,
-        handler: @escaping @Sendable (WebRTCCoordinator.StateMachine.Stage) async throws -> Void,
+        operation: @escaping @Sendable() async throws -> Void,
+        handler: @escaping @Sendable(WebRTCCoordinator.StateMachine.Stage) async throws -> Void,
         file: StaticString = #file,
         line: UInt = #line
     ) async rethrows {

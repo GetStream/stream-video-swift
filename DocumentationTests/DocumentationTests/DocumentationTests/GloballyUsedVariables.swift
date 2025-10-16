@@ -48,7 +48,7 @@ var contentMode = UIView.ContentMode.scaleAspectFit
 var id = ""
 var customData = [String: RawJSON]()
 var ratio: CGFloat = 0
-var onChangeTrackVisibility: @MainActor (CallParticipant, Bool) -> Void = { _, _ in }
+var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void = { _, _ in }
 var orientation: UIInterfaceOrientation = .unknown
 var localParticipant = participant
 var reader: GeometryProxy!

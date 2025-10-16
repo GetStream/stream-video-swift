@@ -88,55 +88,55 @@ final class StreamVideoCapturer: StreamVideoCapturing {
     // MARK: - Nested Types
 
     enum Action: @unchecked Sendable, CustomStringConvertible {
-        case checkBackgroundCameraAccess(_ videoCaptureSession: AVCaptureSession)
-        case startCapture(
-            position: AVCaptureDevice.Position,
-            dimensions: CGSize,
-            frameRate: Int,
-            videoSource: RTCVideoSource,
-            videoCapturer: RTCVideoCapturer,
-            videoCapturerDelegate: RTCVideoCapturerDelegate
-        )
-        case stopCapture(videoCapturer: RTCVideoCapturer)
-        case setCameraPosition(
-            position: AVCaptureDevice.Position,
-            videoSource: RTCVideoSource,
-            videoCapturer: RTCVideoCapturer,
-            videoCapturerDelegate: RTCVideoCapturerDelegate
-        )
-        case updateCaptureQuality(
-            dimensions: CGSize,
-            device: AVCaptureDevice,
-            videoSource: RTCVideoSource,
-            videoCapturer: RTCVideoCapturer,
-            videoCapturerDelegate: RTCVideoCapturerDelegate
-        )
-        case focus(
-            point: CGPoint,
-            videoCaptureSession: AVCaptureSession
-        )
-        case addCapturePhotoOutput(
-            capturePhotoOutput: AVCapturePhotoOutput,
-            videoCaptureSession: AVCaptureSession
-        )
-        case removeCapturePhotoOutput(
-            capturePhotoOutput: AVCapturePhotoOutput,
-            videoCaptureSession: AVCaptureSession
-        )
-        case addVideoOutput(
-            videoOutput: AVCaptureVideoDataOutput,
-            videoCaptureSession: AVCaptureSession
-        )
-        case removeVideoOutput(
-            videoOutput: AVCaptureVideoDataOutput,
-            videoCaptureSession: AVCaptureSession
-        )
-        case zoom(
-            factor: CGFloat,
-            videoCaptureSession: AVCaptureSession
-        )
+    case checkBackgroundCameraAccess(_ videoCaptureSession: AVCaptureSession)
+         case startCapture(
+             position: AVCaptureDevice.Position,
+             dimensions: CGSize,
+             frameRate: Int,
+             videoSource: RTCVideoSource,
+             videoCapturer: RTCVideoCapturer,
+             videoCapturerDelegate: RTCVideoCapturerDelegate
+         )
+         case stopCapture(videoCapturer: RTCVideoCapturer)
+         case setCameraPosition(
+             position: AVCaptureDevice.Position,
+             videoSource: RTCVideoSource,
+             videoCapturer: RTCVideoCapturer,
+             videoCapturerDelegate: RTCVideoCapturerDelegate
+         )
+         case updateCaptureQuality(
+             dimensions: CGSize,
+             device: AVCaptureDevice,
+             videoSource: RTCVideoSource,
+             videoCapturer: RTCVideoCapturer,
+             videoCapturerDelegate: RTCVideoCapturerDelegate
+         )
+         case focus(
+             point: CGPoint,
+             videoCaptureSession: AVCaptureSession
+         )
+         case addCapturePhotoOutput(
+             capturePhotoOutput: AVCapturePhotoOutput,
+             videoCaptureSession: AVCaptureSession
+         )
+         case removeCapturePhotoOutput(
+             capturePhotoOutput: AVCapturePhotoOutput,
+             videoCaptureSession: AVCaptureSession
+         )
+         case addVideoOutput(
+             videoOutput: AVCaptureVideoDataOutput,
+             videoCaptureSession: AVCaptureSession
+         )
+         case removeVideoOutput(
+             videoOutput: AVCaptureVideoDataOutput,
+             videoCaptureSession: AVCaptureSession
+         )
+         case zoom(
+             factor: CGFloat,
+             videoCaptureSession: AVCaptureSession
+         )
 
-        var description: String {
+         var description: String {
             switch self {
             case let .checkBackgroundCameraAccess(videoCaptureSession):
                 return ".checkBackgroundCameraAccess(videoCaptureSession:\(customString(for: videoCaptureSession)))"

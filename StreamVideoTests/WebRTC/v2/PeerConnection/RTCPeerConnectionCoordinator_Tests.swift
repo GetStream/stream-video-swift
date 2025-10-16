@@ -823,7 +823,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
         ownCapabilities: [OwnCapability] = [],
         setUpDelay: TimeInterval = 0,
         shouldFail: Bool = false,
-        _ operation: @escaping @Sendable () async throws -> Void
+        _ operation: @escaping @Sendable() async throws -> Void
     ) async throws {
         try await withThrowingTaskGroup(of: Void.self) { group in
             group.addTask {

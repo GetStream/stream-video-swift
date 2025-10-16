@@ -12,14 +12,14 @@ public struct ParticipantsFullScreenLayout<Factory: ViewFactory>: View {
     var participant: CallParticipant
     var call: Call?
     var frame: CGRect
-    var onChangeTrackVisibility: @MainActor (CallParticipant, Bool) -> Void
+    var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
     
     public init(
         viewFactory: Factory = DefaultViewFactory.shared,
         participant: CallParticipant,
         call: Call?,
         frame: CGRect,
-        onChangeTrackVisibility: @escaping @MainActor (CallParticipant, Bool) -> Void
+        onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
     ) {
         self.viewFactory = viewFactory
         self.participant = participant
@@ -66,7 +66,7 @@ public struct ParticipantsFullScreenLayout<Factory: ViewFactory>: View {
 struct ParticipantChangeModifier: ViewModifier {
     
     var participant: CallParticipant
-    var onChangeTrackVisibility: @MainActor (CallParticipant, Bool) -> Void
+    var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
     
     func body(content: Content) -> some View {
         if #available(iOS 14, *) {

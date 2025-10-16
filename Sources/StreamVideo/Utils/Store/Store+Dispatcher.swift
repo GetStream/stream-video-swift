@@ -21,7 +21,7 @@ extension Store {
         // MARK: - Types
 
         /// Low‑level dispatch closure used internally.
-        typealias Handler = @Sendable (
+        typealias Handler = @Sendable(
             [StoreActionBox<Namespace.Action>],
             StaticString,
             StaticString,

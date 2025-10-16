@@ -102,7 +102,7 @@ public final class CurrentDevice: @unchecked Sendable {
     ///   to `.mac` (AppKit) or `.unspecified`.
 
     init(
-        currentDeviceProvider: @MainActor @escaping @Sendable () -> DeviceType
+        currentDeviceProvider: @MainActor @escaping @Sendable() -> DeviceType
     ) {
         Task { @MainActor in
             self.systemVersion = UIDevice.current.systemVersion

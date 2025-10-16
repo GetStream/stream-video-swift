@@ -18,7 +18,7 @@ final class WSEventsMiddleware: EventMiddleware, @unchecked Sendable {
                 if let subscriber = subscriber as? StreamVideo {
                     streamVideo = subscriber
                 } else {
-                    await (subscriber as? WSEventsSubscriber)?.onEvent(event)
+                    await(subscriber as? WSEventsSubscriber)?.onEvent(event)
                 }
             }
             await streamVideo?.onEvent(event)

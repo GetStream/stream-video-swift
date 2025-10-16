@@ -21,7 +21,7 @@ class EventNotificationCenter: NotificationCenter, @unchecked Sendable {
     func process(
         _ events: [WrappedEvent],
         postNotifications: Bool = true,
-        completion: (@Sendable () -> Void)? = nil
+        completion: (@Sendable() -> Void)? = nil
     ) {
         let processingEventsDebugMessage: () -> String = {
             let eventNames = events.map(\.name)
@@ -49,7 +49,7 @@ extension EventNotificationCenter {
     func process(
         _ event: WrappedEvent,
         postNotification: Bool = true,
-        completion: (@Sendable () -> Void)? = nil
+        completion: (@Sendable() -> Void)? = nil
     ) {
         process([event], postNotifications: postNotification, completion: completion)
     }

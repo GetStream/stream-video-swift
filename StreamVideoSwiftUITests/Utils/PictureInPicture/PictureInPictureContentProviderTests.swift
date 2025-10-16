@@ -288,7 +288,7 @@ final class PictureInPictureContentProviderTests: XCTestCase, @unchecked Sendabl
     // MARK: - Private Helpers
 
     private func assertContentUpdate(
-        _ operation: @MainActor @escaping @Sendable (MockCall) -> Void,
+        _ operation: @MainActor @escaping @Sendable(MockCall) -> Void,
         validation: @escaping (PictureInPictureContent) -> Bool,
         file: StaticString = #file,
         function: StaticString = #function,
@@ -313,7 +313,7 @@ final class PictureInPictureContentProviderTests: XCTestCase, @unchecked Sendabl
     private func assertPreferredContentSizeUpdate(
         isActive: Bool,
         expected: CGSize,
-        _ operation: @MainActor @escaping @Sendable (MockCall) -> Void,
+        _ operation: @MainActor @escaping @Sendable(MockCall) -> Void,
         file: StaticString = #file,
         function: StaticString = #function,
         line: UInt = #line

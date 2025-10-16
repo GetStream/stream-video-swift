@@ -12,13 +12,13 @@ public struct VideoParticipantsView<Factory: ViewFactory>: View {
     var viewFactory: Factory
     @ObservedObject var viewModel: CallViewModel
     var availableFrame: CGRect
-    var onChangeTrackVisibility: @MainActor (CallParticipant, Bool) -> Void
+    var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
 
     public init(
         viewFactory: Factory = DefaultViewFactory.shared,
         viewModel: CallViewModel,
         availableFrame: CGRect,
-        onChangeTrackVisibility: @escaping @MainActor (CallParticipant, Bool) -> Void
+        onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
     ) {
         self.viewFactory = viewFactory
         self.viewModel = viewModel

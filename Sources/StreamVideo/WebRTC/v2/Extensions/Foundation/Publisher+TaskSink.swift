@@ -32,8 +32,8 @@ extension Publisher where Output: Sendable {
         file: StaticString = #file,
         function: StaticString = #function,
         line: UInt = #line,
-        receiveCompletion: @escaping (@Sendable (Subscribers.Completion<Failure>) -> Void) = { _ in },
-        receiveValue: @escaping (@Sendable (Output) async throws -> Void)
+        receiveCompletion: @escaping (@Sendable(Subscribers.Completion<Failure>) -> Void) = { _ in },
+        receiveValue: @escaping (@Sendable(Output) async throws -> Void)
     ) -> AnyCancellable {
         // Subscribe to the publisher's events and process the received input.
         sink(receiveCompletion: receiveCompletion) { @Sendable [weak disposableBag] input in
@@ -76,8 +76,8 @@ extension Publisher where Output: Sendable {
         file: StaticString = #file,
         function: StaticString = #function,
         line: UInt = #line,
-        receiveCompletion: @escaping (@Sendable (Subscribers.Completion<Failure>) -> Void) = { _ in },
-        receiveValue: @escaping (@Sendable (Output) async throws -> Void)
+        receiveCompletion: @escaping (@Sendable(Subscribers.Completion<Failure>) -> Void) = { _ in },
+        receiveValue: @escaping (@Sendable(Output) async throws -> Void)
     ) -> AnyCancellable {
         // Subscribe to the publisher's events and process the received input.
         sink(receiveCompletion: receiveCompletion) { [weak queue] input in
@@ -122,7 +122,7 @@ extension Publisher where Output: Sendable {
         file: StaticString = #file,
         function: StaticString = #function,
         line: UInt = #line,
-        handler: @escaping @Sendable (ActorType, Output) async -> Void
+        handler: @escaping @Sendable(ActorType, Output) async -> Void
     ) -> AnyCancellable {
         sink(receiveCompletion: { _ in }) { @Sendable [weak actor] input in
             guard let actor else {
