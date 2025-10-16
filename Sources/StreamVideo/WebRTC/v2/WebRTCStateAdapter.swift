@@ -509,6 +509,13 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
             }
 
             await set(callSettings: updatedCallSettings)
+            log.debug(
+                "CallSettings updated \(currentCallSettings) -> \(updatedCallSettings)",
+                subsystems: .webRTC,
+                functionName: functionName,
+                fileName: fileName,
+                lineNumber: lineNumber
+            )
 
             guard
                 let publisher = await self.publisher
@@ -700,19 +707,32 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
 
     // MARK: - AudioSessionDelegate
 
-    nonisolated func audioSessionAdapterDidUpdateSpeakerOn(_ speakerOn: Bool) {
+    nonisolated func audioSessionAdapterDidUpdateSpeakerOn(
+        _ speakerOn: Bool,
+        file: StaticString,
+        function: StaticString,
+        line: UInt
+
+    ) {
         Task(disposableBag: disposableBag) { [weak self] in
             guard let self else {
                 return
             }
-            await self.enqueueCallSettings {
+            await self.enqueueCallSettings(
+                functionName: function,
+                fileName: file,
+                lineNumber: line
+            ) {
                 $0.withUpdatedSpeakerState(speakerOn)
             }
-            log.debug(
-                "AudioSession delegated updated speakerOn:\(speakerOn).",
-                subsystems: .audioSession
-            )
         }
+        log.debug(
+            "AudioSession delegated updated speakerOn:\(speakerOn).",
+            subsystems: .audioSession,
+            functionName: function,
+            fileName: file,
+            lineNumber: line
+        )
     }
 
     // MARK: - WebRTCPermissionsAdapterDelegate
