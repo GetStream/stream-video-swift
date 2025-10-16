@@ -831,7 +831,10 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         }
 
         subject.audioSessionAdapterDidUpdateSpeakerOn(
-            true
+            true,
+            file: #file,
+            function: #function,
+            line: #line
         )
 
         await fulfillment { await self.subject.callSettings.speakerOn }

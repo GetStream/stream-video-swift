@@ -14,7 +14,12 @@ final class RouteChangeEffect_Tests: XCTestCase, @unchecked Sendable {
     final class MockDelegate: StreamAudioSessionAdapterDelegate {
         private(set) var updatedSpeakerOn: Bool?
 
-        func audioSessionAdapterDidUpdateSpeakerOn(_ speakerOn: Bool) {
+        func audioSessionAdapterDidUpdateSpeakerOn(
+            _ speakerOn: Bool,
+            file: StaticString,
+            function: StaticString,
+            line: UInt
+        ) {
             updatedSpeakerOn = speakerOn
         }
     }
