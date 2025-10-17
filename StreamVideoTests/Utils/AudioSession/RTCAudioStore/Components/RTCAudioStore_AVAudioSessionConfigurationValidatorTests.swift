@@ -32,7 +32,7 @@ final class RTCAudioStore_AVAudioSessionConfigurationValidatorTests: XCTestCase,
         subject = .init(
             category: .playAndRecord,
             mode: .voiceChat,
-            options: [.allowBluetoothHFP, .defaultToSpeaker],
+            options: [.allowBluetooth, .defaultToSpeaker],
             overrideOutputAudioPort: .none
         )
 

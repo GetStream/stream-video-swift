@@ -40,7 +40,7 @@ final class CallAudioSession: @unchecked Sendable {
                 .setCategoryAndModeAndCategoryOptions(
                     .playAndRecord,
                     mode: .voiceChat,
-                    categoryOptions: [.allowBluetoothHFP, .allowBluetoothA2DP]
+                    categoryOptions: [.allowBluetooth, .allowBluetoothA2DP]
                 )
             )
         )
@@ -146,7 +146,7 @@ final class CallAudioSession: @unchecked Sendable {
             .avAudioSession(
                 .setOverrideOutputAudioPort(configuration.overrideOutputAudioPort ?? .none)
             ),
-            .setActive(configuration.isActive),
+            .setActive(configuration.isActive)
         ]
 
         if ownCapabilities.contains(.sendAudio) {

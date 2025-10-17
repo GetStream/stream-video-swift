@@ -1,12 +1,9 @@
 //
-//  Validator.swift
-//  StreamVideo
-//
-//  Created by Ilias Pavlidakis on 9/10/25.
+// Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
-import Foundation
 import AVFoundation
+import Foundation
 
 extension RTCAudioStore.StoreState.AVAudioSessionConfiguration {
 
@@ -58,27 +55,27 @@ extension RTCAudioStore.StoreState.AVAudioSessionConfiguration {
 
         // .playAndRecord
         var playAndRecordModes: Set<AVAudioSession.Mode> =
-        makeModes(
-            [
-                .default,
-                .voiceChat,
-                .videoChat,
-                .gameChat,
-                .videoRecording,
-                .measurement,
-                .spokenAudio
-            ]
-        )
+            makeModes(
+                [
+                    .default,
+                    .voiceChat,
+                    .videoChat,
+                    .gameChat,
+                    .videoRecording,
+                    .measurement,
+                    .spokenAudio
+                ]
+            )
         if #available(iOS 15.0, *) { playAndRecordModes.insert(.voicePrompt) }
         var playAndRecordOptions: AVAudioSession.CategoryOptions =
-        [
-            .mixWithOthers,
-            .duckOthers,
-            .interruptSpokenAudioAndMixWithOthers,
-            .defaultToSpeaker,
-            .allowBluetoothHFP,
-            .allowBluetoothA2DP
-        ]
+            [
+                .mixWithOthers,
+                .duckOthers,
+                .interruptSpokenAudioAndMixWithOthers,
+                .defaultToSpeaker,
+                .allowBluetooth,
+                .allowBluetoothA2DP
+            ]
         map[.playAndRecord] = AllowedConfiguration(
             modes: playAndRecordModes,
             options: playAndRecordOptions
