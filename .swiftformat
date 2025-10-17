@@ -34,7 +34,7 @@
 --rules redundantRawValues
 --rules redundantVoidReturnType
 --rules semicolons
---rules sortedImports
+--rules sortImports
 --rules spaceAroundBraces
 --rules spaceAroundBrackets
 --rules spaceAroundComments

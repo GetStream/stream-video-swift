@@ -361,8 +361,8 @@ final class WebRTCCoordinatorStateMachine_DisconnectedStageTests: XCTestCase, @u
 
     private func assertTransitionAfterTrigger(
         expectedTarget: WebRTCCoordinator.StateMachine.Stage.ID? = nil,
-        trigger: @escaping @Sendable() async -> Void,
-        validationHandler: @escaping @Sendable(WebRTCCoordinator.StateMachine.Stage) async -> Void,
+        trigger: @escaping @Sendable () async -> Void,
+        validationHandler: @escaping @Sendable (WebRTCCoordinator.StateMachine.Stage) async -> Void,
         file: StaticString = #file,
         line: UInt = #line
     ) async {

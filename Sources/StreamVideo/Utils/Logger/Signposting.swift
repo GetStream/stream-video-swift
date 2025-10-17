@@ -37,7 +37,7 @@ public protocol Signposting {
         file: StaticString,
         function: StaticString,
         line: UInt,
-        block: @Sendable() async throws -> T
+        block: @Sendable () async throws -> T
     ) async rethrows -> T
 }
 
@@ -65,7 +65,7 @@ final class NoopSignposter: Signposting {
         file: StaticString = #file,
         function: StaticString = #function,
         line: UInt = #line,
-        block: @Sendable() async throws -> T
+        block: @Sendable () async throws -> T
     ) async rethrows -> T { try await block() }
 }
 
@@ -96,7 +96,7 @@ final class Signposter: Signposting {
         file: StaticString = #file,
         function: StaticString = #function,
         line: UInt = #line,
-        block: @Sendable() async throws -> T
+        block: @Sendable () async throws -> T
     ) async rethrows -> T {
         let signposter = signposter(for: subsystem)
         let signpostID = signposter.makeSignpostID()

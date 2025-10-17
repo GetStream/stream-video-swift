@@ -130,7 +130,7 @@ extension VideoRenderer {
     ///   - onTrackSizeUpdate: A closure to be called when the track size is updated.
     public func handleViewRendering(
         for participant: CallParticipant,
-        onTrackSizeUpdate: @escaping @Sendable(CGSize, CallParticipant) -> Void
+        onTrackSizeUpdate: @escaping @Sendable (CGSize, CallParticipant) -> Void
     ) {
         if let track = participant.track {
             log.info(

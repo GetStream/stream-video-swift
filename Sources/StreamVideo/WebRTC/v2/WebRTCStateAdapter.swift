@@ -13,7 +13,7 @@ import StreamWebRTC
 actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, WebRTCPermissionsAdapterDelegate {
 
     typealias ParticipantsStorage = [String: CallParticipant]
-    typealias ParticipantOperation = @Sendable(ParticipantsStorage) -> ParticipantsStorage
+    typealias ParticipantOperation = @Sendable (ParticipantsStorage) -> ParticipantsStorage
 
     /// Enum representing different types of media tracks.
     enum TrackEntry {

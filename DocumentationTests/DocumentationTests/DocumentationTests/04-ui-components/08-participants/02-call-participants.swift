@@ -24,7 +24,7 @@ private func content() {
             public func makeVideoParticipantsView(
                 viewModel: CallViewModel,
                 availableFrame: CGRect,
-                onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
+                onChangeTrackVisibility: @escaping @MainActor (CallParticipant, Bool) -> Void
             ) -> some View {
                 CustomVideoParticipantsView(
                     viewFactory: self,

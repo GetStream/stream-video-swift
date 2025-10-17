@@ -12,7 +12,7 @@ public struct ParticipantsGridLayout<Factory: ViewFactory>: View {
     var call: Call?
     var participants: [CallParticipant]
     var availableFrame: CGRect
-    var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
+    var onChangeTrackVisibility: @MainActor (CallParticipant, Bool) -> Void
 
     @ObservedObject private var orientationAdapter = InjectedValues[\.orientationAdapter]
 
@@ -21,7 +21,7 @@ public struct ParticipantsGridLayout<Factory: ViewFactory>: View {
         call: Call?,
         participants: [CallParticipant],
         availableFrame: CGRect,
-        onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
+        onChangeTrackVisibility: @escaping @MainActor (CallParticipant, Bool) -> Void
     ) {
         self.viewFactory = viewFactory
         self.participants = participants
@@ -60,7 +60,7 @@ struct VideoParticipantsViewPortrait<Factory: ViewFactory>: View {
     var call: Call?
     var participants: [CallParticipant]
     var availableFrame: CGRect
-    var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
+    var onChangeTrackVisibility: @MainActor (CallParticipant, Bool) -> Void
     
     var body: some View {
         ZStack {
@@ -112,7 +112,7 @@ struct VideoParticipantsViewLandscape<Factory: ViewFactory>: View {
     var call: Call?
     var participants: [CallParticipant]
     var availableFrame: CGRect
-    var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
+    var onChangeTrackVisibility: @MainActor (CallParticipant, Bool) -> Void
     
     var body: some View {
         ZStack {
@@ -168,7 +168,7 @@ struct TwoColumnParticipantsView<Factory: ViewFactory>: View {
     var rightColumnParticipants: [CallParticipant]
     var availableFrame: CGRect
     var innerItemSpace: CGFloat = 8
-    var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
+    var onChangeTrackVisibility: @MainActor (CallParticipant, Bool) -> Void
     
     var body: some View {
         HStack(spacing: innerItemSpace) {
@@ -216,7 +216,7 @@ struct TwoRowParticipantsView<Factory: ViewFactory>: View {
     var secondRowParticipants: [CallParticipant]
     var availableFrame: CGRect
     var innerItemSpacing: CGFloat = 8
-    var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
+    var onChangeTrackVisibility: @MainActor (CallParticipant, Bool) -> Void
     
     var body: some View {
         VStack(spacing: 8) {
@@ -256,7 +256,7 @@ struct VerticalParticipantsView<Factory: ViewFactory>: View {
     var availableFrame: CGRect
     var innerItemSpace: CGFloat = 8
     var includeSpacer: Bool = false
-    var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
+    var onChangeTrackVisibility: @MainActor (CallParticipant, Bool) -> Void
 
     var body: some View {
         VStack(spacing: innerItemSpace) {
@@ -313,7 +313,7 @@ struct HorizontalParticipantsView<Factory: ViewFactory>: View {
     var participants: [CallParticipant]
     var availableFrame: CGRect
     var innerItemSpacing: CGFloat = 8
-    var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
+    var onChangeTrackVisibility: @MainActor (CallParticipant, Bool) -> Void
 
     var body: some View {
         HStack(spacing: innerItemSpacing) {

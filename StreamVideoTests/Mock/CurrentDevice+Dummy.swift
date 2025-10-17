@@ -7,7 +7,7 @@ import Foundation
 
 extension CurrentDevice {
     static func dummy(
-        currentDeviceProvider: @MainActor @escaping @Sendable() -> DeviceType
+        currentDeviceProvider: @MainActor @escaping @Sendable () -> DeviceType
     ) -> CurrentDevice {
         .init(currentDeviceProvider: currentDeviceProvider)
     }
