@@ -7,8 +7,7 @@ import AVFoundation
 import XCTest
 
 final class RTCAudioStore_AVAudioSessionConfigurationValidatorTests: XCTestCase,
-    @unchecked Sendable
-{
+    @unchecked Sendable {
 
     private var subject: RTCAudioStore.StoreState.AVAudioSessionConfiguration!
 

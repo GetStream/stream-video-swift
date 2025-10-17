@@ -1,8 +1,5 @@
 //
-//  RTCAudioStore+Coordinator.swift
-//  StreamVideo
-//
-//  Created by Ilias Pavlidakis on 10/10/25.
+// Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
@@ -110,6 +107,5 @@ extension RTCAudioStore {
                 return value != state.prefersNoInterruptionsFromSystemAlerts
             }
         }
-
     }
 }

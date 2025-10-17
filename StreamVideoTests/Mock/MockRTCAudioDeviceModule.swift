@@ -1,14 +1,11 @@
 //
-//  MockRTCAudioDeviceModule.swift
-//  StreamVideoTests
-//
-//  Created by Ilias Pavlidakis on 16/10/25.
+// Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
-import Foundation
-import StreamWebRTC
-@testable import StreamVideo
 import Combine
+import Foundation
+@testable import StreamVideo
+import StreamWebRTC
 
 final class MockRTCAudioDeviceModule: RTCAudioDeviceModuleControlling, Mockable, @unchecked Sendable {
 

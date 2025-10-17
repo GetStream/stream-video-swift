@@ -1,12 +1,9 @@
 //
-//  RTCAudioStore+AudioDeviceModuleMiddleware.swift
-//  StreamVideo
-//
-//  Created by Ilias Pavlidakis on 9/10/25.
+// Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
-import Foundation
 import AVFoundation
+import Foundation
 import StreamWebRTC
 
 extension RTCAudioStore {

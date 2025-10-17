@@ -1,13 +1,10 @@
 //
-//  RTCAudioStore.swift
-//  StreamVideo
-//
-//  Created by Ilias Pavlidakis on 9/10/25.
+// Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import Foundation
 import StreamWebRTC
-import Combine
 
 /// Redux-style store that keeps WebRTC, CallKit, and app audio state aligned
 /// while exposing Combine publishers to observers.
@@ -50,13 +47,13 @@ final class RTCAudioStore: @unchecked Sendable {
                 )
             ),
             reducers: Namespace.reducers(audioSession: audioSession),
-            middleware: Namespace.middleware(audioSession: audioSession),
+            middleware: Namespace.middleware(audioSession: audioSession)
         )
 
         store.dispatch([
             .normal(.webRTCAudioSession(.setPrefersNoInterruptionsFromSystemAlerts(true))),
             .normal(.webRTCAudioSession(.setUseManualAudio(true))),
-            .normal(.webRTCAudioSession(.setAudioEnabled(false))),
+            .normal(.webRTCAudioSession(.setAudioEnabled(false)))
         ])
     }
 
@@ -114,7 +111,7 @@ final class RTCAudioStore: @unchecked Sendable {
         function: StaticString = #function,
         line: UInt = #line
     ) -> StoreTask<Namespace> {
-        store.dispatch( 
+        store.dispatch(
             [action],
             file: file,
             function: function,

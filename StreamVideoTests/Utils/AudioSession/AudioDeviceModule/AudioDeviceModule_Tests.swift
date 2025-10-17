@@ -519,7 +519,7 @@ final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
         operation: (RTCAudioDeviceModule) -> Void,
         file: StaticString = #file,
         function: StaticString = #function,
-        line: UInt = #line,
+        line: UInt = #line
     ) async throws {
         let sinkExpectation = expectation(description: "Sink was called.")
         let disposableBag = DisposableBag()
