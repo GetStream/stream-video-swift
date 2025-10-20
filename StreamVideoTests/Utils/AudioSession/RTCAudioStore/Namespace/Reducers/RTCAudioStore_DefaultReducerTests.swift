@@ -26,11 +26,11 @@ final class RTCAudioStore_DefaultReducerTests: XCTestCase, @unchecked Sendable {
 
     // MARK: - setActive
 
-    func test_reduce_setActive_whenStateDiffers_updatesSessionAndState() throws {
+    func test_reduce_setActive_whenStateDiffers_updatesSessionAndState() async throws {
         session.isActive = false
         let state = makeState(isActive: false)
 
-        let result = try subject.reduce(
+        let result = try await subject.reduce(
             state: state,
             action: .setActive(true),
             file: #file,
@@ -49,11 +49,11 @@ final class RTCAudioStore_DefaultReducerTests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(setIsActiveCalls, [true])
     }
 
-    func test_reduce_setActive_whenStateMatches_skipsSessionWork() throws {
+    func test_reduce_setActive_whenStateMatches_skipsSessionWork() async throws {
         session.isActive = false
         let state = makeState(isActive: false)
 
-        let result = try subject.reduce(
+        let result = try await subject.reduce(
             state: state,
             action: .setActive(false),
             file: #file,
@@ -70,7 +70,7 @@ final class RTCAudioStore_DefaultReducerTests: XCTestCase, @unchecked Sendable {
         XCTAssertTrue((avSession.recordedInputPayload(Bool.self, for: .setIsActive) ?? []).isEmpty)
     }
 
-    func test_reduce_setActive_whenSessionThrows_propagatesError() {
+    func test_reduce_setActive_whenSessionThrows_propagatesError() async {
         session.isActive = false
         let state = makeState(isActive: false)
 
@@ -79,15 +79,16 @@ final class RTCAudioStore_DefaultReducerTests: XCTestCase, @unchecked Sendable {
         }
         avSession.stub(for: .setIsActive, with: TestError.stub)
 
-        XCTAssertThrowsError(
-            try subject.reduce(
+        do {
+            _ = try await subject.reduce(
                 state: state,
                 action: .setActive(true),
                 file: #file,
                 function: #function,
                 line: #line
             )
-        ) { error in
+            XCTFail()
+        } catch {
             XCTAssertTrue(error is TestError)
             let calls = self.session.recordedInputPayload(Bool.self, for: .setActive) ?? []
             XCTAssertEqual(calls, [true])
@@ -96,7 +97,7 @@ final class RTCAudioStore_DefaultReducerTests: XCTestCase, @unchecked Sendable {
 
     // MARK: - setAudioDeviceModule
 
-    func test_reduce_setAudioDeviceModule_nil_resetsRecordingFlags() throws {
+    func test_reduce_setAudioDeviceModule_nil_resetsRecordingFlags() async throws {
         let module = AudioDeviceModule(MockRTCAudioDeviceModule())
         let state = makeState(
             shouldRecord: true,
@@ -105,7 +106,7 @@ final class RTCAudioStore_DefaultReducerTests: XCTestCase, @unchecked Sendable {
             audioDeviceModule: module
         )
 
-        let result = try subject.reduce(
+        let result = try await subject.reduce(
             state: state,
             action: .setAudioDeviceModule(nil),
             file: #file,
@@ -119,7 +120,7 @@ final class RTCAudioStore_DefaultReducerTests: XCTestCase, @unchecked Sendable {
         XCTAssertFalse(result.isMicrophoneMuted)
     }
 
-    func test_reduce_setAudioDeviceModule_nonNil_preservesRecordingFlags() throws {
+    func test_reduce_setAudioDeviceModule_nonNil_preservesRecordingFlags() async throws {
         let currentModule = AudioDeviceModule(MockRTCAudioDeviceModule())
         let replacement = AudioDeviceModule(MockRTCAudioDeviceModule())
         let state = makeState(
@@ -129,7 +130,7 @@ final class RTCAudioStore_DefaultReducerTests: XCTestCase, @unchecked Sendable {
             audioDeviceModule: currentModule
         )
 
-        let result = try subject.reduce(
+        let result = try await subject.reduce(
             state: state,
             action: .setAudioDeviceModule(replacement),
             file: #file,
@@ -145,10 +146,10 @@ final class RTCAudioStore_DefaultReducerTests: XCTestCase, @unchecked Sendable {
 
     // MARK: - Passthrough actions
 
-    func test_reduce_avAudioSessionAction_returnsUnchangedState() throws {
+    func test_reduce_avAudioSessionAction_returnsUnchangedState() async throws {
         let state = makeState()
 
-        let result = try subject.reduce(
+        let result = try await subject.reduce(
             state: state,
             action: .avAudioSession(.setMode(.voiceChat)),
             file: #file,

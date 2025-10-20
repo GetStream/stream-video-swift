@@ -25,10 +25,10 @@ final class RTCAudioStore_AVAudioSessionReducerTests: XCTestCase, @unchecked Sen
         super.tearDown()
     }
 
-    func test_reduce_nonAVAudioSessionAction_returnsUnchangedState() throws {
+    func test_reduce_nonAVAudioSessionAction_returnsUnchangedState() async throws {
         let state = makeState()
 
-        let result = try subject.reduce(
+        let result = try await subject.reduce(
             state: state,
             action: .setActive(true),
             file: #file,
@@ -40,7 +40,7 @@ final class RTCAudioStore_AVAudioSessionReducerTests: XCTestCase, @unchecked Sen
         XCTAssertEqual(session.timesCalled(.setConfiguration), 0)
     }
 
-    func test_reduce_setCategory_updatesSessionAndState() throws {
+    func test_reduce_setCategory_updatesSessionAndState() async throws {
         let state = makeState(
             category: .soloAmbient,
             mode: .default,
@@ -48,7 +48,7 @@ final class RTCAudioStore_AVAudioSessionReducerTests: XCTestCase, @unchecked Sen
         )
         session.category = AVAudioSession.Category.soloAmbient.rawValue
 
-        let result = try subject.reduce(
+        let result = try await subject.reduce(
             state: state,
             action: .avAudioSession(.setCategory(.playback)),
             file: #file,
@@ -60,7 +60,7 @@ final class RTCAudioStore_AVAudioSessionReducerTests: XCTestCase, @unchecked Sen
         XCTAssertEqual(session.timesCalled(.setConfiguration), 1)
     }
 
-    func test_reduce_setCategory_sameValue_skipsSessionWork() throws {
+    func test_reduce_setCategory_sameValue_skipsSessionWork() async throws {
         let state = makeState(
             category: .playback,
             mode: .default,
@@ -68,7 +68,7 @@ final class RTCAudioStore_AVAudioSessionReducerTests: XCTestCase, @unchecked Sen
         )
         session.category = AVAudioSession.Category.playback.rawValue
 
-        let result = try subject.reduce(
+        let result = try await subject.reduce(
             state: state,
             action: .avAudioSession(.setCategory(.playback)),
             file: #file,
@@ -80,28 +80,29 @@ final class RTCAudioStore_AVAudioSessionReducerTests: XCTestCase, @unchecked Sen
         XCTAssertEqual(session.timesCalled(.setConfiguration), 0)
     }
 
-    func test_reduce_setMode_invalidConfiguration_throws() {
+    func test_reduce_setMode_invalidConfiguration_throws() async {
         let state = makeState(
             category: .playback,
             mode: .default,
             options: []
         )
 
-        XCTAssertThrowsError(
-            try subject.reduce(
+        do {
+            _ = try await subject.reduce(
                 state: state,
                 action: .avAudioSession(.setMode(.voiceChat)),
                 file: #file,
                 function: #function,
                 line: #line
             )
-        ) { error in
+            XCTFail()
+        } catch {
             XCTAssertTrue(error is ClientError)
             XCTAssertEqual(self.session.timesCalled(.setConfiguration), 0)
         }
     }
 
-    func test_reduce_setCategoryOptions_activeSession_restartsAudioSession() throws {
+    func test_reduce_setCategoryOptions_activeSession_restartsAudioSession() async throws {
         let state = makeState(
             category: .playAndRecord,
             mode: .voiceChat,
@@ -112,7 +113,7 @@ final class RTCAudioStore_AVAudioSessionReducerTests: XCTestCase, @unchecked Sen
         session.categoryOptions = [.allowBluetooth]
         session.isActive = true
 
-        let result = try subject.reduce(
+        let result = try await subject.reduce(
             state: state,
             action: .avAudioSession(.setCategoryOptions([.allowBluetooth, .defaultToSpeaker])),
             file: #file,
@@ -126,7 +127,7 @@ final class RTCAudioStore_AVAudioSessionReducerTests: XCTestCase, @unchecked Sen
         XCTAssertEqual(session.timesCalled(.setConfiguration), 1)
     }
 
-    func test_reduce_setOverrideOutputAudioPort_playAndRecord_forwardsToSession() throws {
+    func test_reduce_setOverrideOutputAudioPort_playAndRecord_forwardsToSession() async throws {
         let state = makeState(
             category: .playAndRecord,
             mode: .voiceChat,
@@ -134,7 +135,7 @@ final class RTCAudioStore_AVAudioSessionReducerTests: XCTestCase, @unchecked Sen
         )
         session.category = AVAudioSession.Category.playAndRecord.rawValue
 
-        let result = try subject.reduce(
+        let result = try await subject.reduce(
             state: state,
             action: .avAudioSession(.setOverrideOutputAudioPort(.speaker)),
             file: #file,
@@ -150,7 +151,7 @@ final class RTCAudioStore_AVAudioSessionReducerTests: XCTestCase, @unchecked Sen
         XCTAssertEqual(recorded, [.speaker])
     }
 
-    func test_reduce_setOverrideOutputAudioPort_updatesDefaultToSpeakerOption() throws {
+    func test_reduce_setOverrideOutputAudioPort_updatesDefaultToSpeakerOption() async throws {
         let state = makeState(
             category: .playback,
             mode: .default,
@@ -159,7 +160,7 @@ final class RTCAudioStore_AVAudioSessionReducerTests: XCTestCase, @unchecked Sen
         session.category = AVAudioSession.Category.playback.rawValue
         session.categoryOptions = []
 
-        let result = try subject.reduce(
+        let result = try await subject.reduce(
             state: state,
             action: .avAudioSession(.setOverrideOutputAudioPort(.speaker)),
             file: #file,
@@ -171,7 +172,7 @@ final class RTCAudioStore_AVAudioSessionReducerTests: XCTestCase, @unchecked Sen
         XCTAssertEqual(session.timesCalled(.setConfiguration), 1)
     }
 
-    func test_reduce_setOverrideOutputAudioPort_disablingSpeakerRemovesOption() throws {
+    func test_reduce_setOverrideOutputAudioPort_disablingSpeakerRemovesOption() async throws {
         let state = makeState(
             category: .playback,
             mode: .default,
@@ -180,7 +181,7 @@ final class RTCAudioStore_AVAudioSessionReducerTests: XCTestCase, @unchecked Sen
         session.category = AVAudioSession.Category.playback.rawValue
         session.categoryOptions = [.defaultToSpeaker]
 
-        let result = try subject.reduce(
+        let result = try await subject.reduce(
             state: state,
             action: .avAudioSession(.setOverrideOutputAudioPort(.none)),
             file: #file,

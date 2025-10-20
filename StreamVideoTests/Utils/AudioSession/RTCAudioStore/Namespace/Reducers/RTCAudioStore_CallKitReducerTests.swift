@@ -23,10 +23,10 @@ final class RTCAudioStore_CallKitReducerTests: XCTestCase, @unchecked Sendable {
         super.tearDown()
     }
 
-    func test_reduce_nonCallKitAction_returnsUnchangedState() throws {
+    func test_reduce_nonCallKitAction_returnsUnchangedState() async throws {
         let state = makeState()
 
-        let result = try subject.reduce(
+        let result = try await subject.reduce(
             state: state,
             action: .setActive(true),
             file: #file,
@@ -39,12 +39,12 @@ final class RTCAudioStore_CallKitReducerTests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(session.timesCalled(.audioSessionDidDeactivate), 0)
     }
 
-    func test_reduce_activate_forwardsToSessionAndUpdatesState() throws {
+    func test_reduce_activate_forwardsToSessionAndUpdatesState() async throws {
         let state = makeState(isActive: false)
         session.isActive = true
         let avSession = AVAudioSession.sharedInstance()
 
-        let result = try subject.reduce(
+        let result = try await subject.reduce(
             state: state,
             action: .callKit(.activate(avSession)),
             file: #file,
@@ -61,12 +61,12 @@ final class RTCAudioStore_CallKitReducerTests: XCTestCase, @unchecked Sendable {
         XCTAssertTrue(result.isActive)
     }
 
-    func test_reduce_deactivate_forwardsToSessionAndUpdatesState() throws {
+    func test_reduce_deactivate_forwardsToSessionAndUpdatesState() async throws {
         let state = makeState(isActive: true)
         session.isActive = false
         let avSession = AVAudioSession.sharedInstance()
 
-        let result = try subject.reduce(
+        let result = try await subject.reduce(
             state: state,
             action: .callKit(.deactivate(avSession)),
             file: #file,

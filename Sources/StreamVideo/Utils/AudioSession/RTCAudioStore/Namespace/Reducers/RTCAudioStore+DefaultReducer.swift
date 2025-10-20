@@ -26,7 +26,7 @@ extension RTCAudioStore.Namespace {
             file: StaticString,
             function: StaticString,
             line: UInt
-        ) throws -> State {
+        ) async throws -> State {
             var updatedState = state
 
             switch action {

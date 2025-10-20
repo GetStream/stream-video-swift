@@ -24,10 +24,10 @@ final class RTCAudioStore_WebRTCAudioSessionReducerTests: XCTestCase, @unchecked
         super.tearDown()
     }
 
-    func test_reduce_nonWebRTCAudioSessionAction_returnsUnchangedState() throws {
+    func test_reduce_nonWebRTCAudioSessionAction_returnsUnchangedState() async throws {
         let state = makeState()
 
-        let result = try subject.reduce(
+        let result = try await subject.reduce(
             state: state,
             action: .setActive(true),
             file: #file,
@@ -40,7 +40,7 @@ final class RTCAudioStore_WebRTCAudioSessionReducerTests: XCTestCase, @unchecked
         XCTAssertFalse(session.useManualAudio)
     }
 
-    func test_reduce_setAudioEnabled_updatesSessionAndState() throws {
+    func test_reduce_setAudioEnabled_updatesSessionAndState() async throws {
         session.isAudioEnabled = false
         let state = makeState(
             webRTCAudioSessionConfiguration: .init(
@@ -50,7 +50,7 @@ final class RTCAudioStore_WebRTCAudioSessionReducerTests: XCTestCase, @unchecked
             )
         )
 
-        let result = try subject.reduce(
+        let result = try await subject.reduce(
             state: state,
             action: .webRTCAudioSession(.setAudioEnabled(true)),
             file: #file,
@@ -62,7 +62,7 @@ final class RTCAudioStore_WebRTCAudioSessionReducerTests: XCTestCase, @unchecked
         XCTAssertTrue(result.webRTCAudioSessionConfiguration.isAudioEnabled)
     }
 
-    func test_reduce_setUseManualAudio_updatesSessionAndState() throws {
+    func test_reduce_setUseManualAudio_updatesSessionAndState() async throws {
         session.useManualAudio = false
         let state = makeState(
             webRTCAudioSessionConfiguration: .init(
@@ -72,7 +72,7 @@ final class RTCAudioStore_WebRTCAudioSessionReducerTests: XCTestCase, @unchecked
             )
         )
 
-        let result = try subject.reduce(
+        let result = try await subject.reduce(
             state: state,
             action: .webRTCAudioSession(.setUseManualAudio(true)),
             file: #file,
@@ -84,7 +84,7 @@ final class RTCAudioStore_WebRTCAudioSessionReducerTests: XCTestCase, @unchecked
         XCTAssertTrue(result.webRTCAudioSessionConfiguration.useManualAudio)
     }
 
-    func test_reduce_setPrefersNoInterruptions_updatesSessionAndState() throws {
+    func test_reduce_setPrefersNoInterruptions_updatesSessionAndState() async throws {
         guard #available(iOS 14.5, macOS 11.3, *) else {
             throw XCTSkip("setPrefersNoInterruptionsFromSystemAlerts available from iOS 14.5 / macOS 11.3.")
         }
@@ -97,7 +97,7 @@ final class RTCAudioStore_WebRTCAudioSessionReducerTests: XCTestCase, @unchecked
             )
         )
 
-        let result = try subject.reduce(
+        let result = try await subject.reduce(
             state: state,
             action: .webRTCAudioSession(.setPrefersNoInterruptionsFromSystemAlerts(true)),
             file: #file,
@@ -109,7 +109,7 @@ final class RTCAudioStore_WebRTCAudioSessionReducerTests: XCTestCase, @unchecked
         XCTAssertTrue(result.webRTCAudioSessionConfiguration.prefersNoInterruptionsFromSystemAlerts)
     }
 
-    func test_reduce_setPrefersNoInterruptions_propagatesError() throws {
+    func test_reduce_setPrefersNoInterruptions_propagatesError() async throws {
         guard #available(iOS 14.5, macOS 11.3, *) else {
             throw XCTSkip("setPrefersNoInterruptionsFromSystemAlerts available from iOS 14.5 / macOS 11.3.")
         }
@@ -120,15 +120,16 @@ final class RTCAudioStore_WebRTCAudioSessionReducerTests: XCTestCase, @unchecked
         )
         let state = makeState()
 
-        XCTAssertThrowsError(
-            try subject.reduce(
+        do {
+            _ = try await subject.reduce(
                 state: state,
                 action: .webRTCAudioSession(.setPrefersNoInterruptionsFromSystemAlerts(true)),
                 file: #file,
                 function: #function,
                 line: #line
             )
-        ) { error in
+            XCTFail()
+        } catch {
             XCTAssertTrue(error is TestError)
             let calls = self.session.recordedInputPayload(
                 Bool.self,

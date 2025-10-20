@@ -26,7 +26,7 @@ extension RTCAudioStore.Namespace {
             file: StaticString,
             function: StaticString,
             line: UInt
-        ) throws -> State {
+        ) async throws -> State {
             guard case let .avAudioSession(action) = action else {
                 return state
             }
@@ -109,7 +109,7 @@ extension RTCAudioStore.Namespace {
                     }
                     updatedState.audioSessionConfiguration.overrideOutputAudioPort = value
                 } else {
-                    updatedState = try setDefaultToSpeaker(
+                    updatedState = try await setDefaultToSpeaker(
                         state: state,
                         speakerOn: value == .speaker
                     )
@@ -182,7 +182,7 @@ extension RTCAudioStore.Namespace {
         private func setDefaultToSpeaker(
             state: State,
             speakerOn: Bool
-        ) throws -> State {
+        ) async throws -> State {
             var categoryOptions = source.categoryOptions
             let defaultToSpeakerExists = categoryOptions.contains(.defaultToSpeaker)
 
@@ -204,7 +204,7 @@ extension RTCAudioStore.Namespace {
                 return state
             }
 
-            return try reduce(
+            return try await reduce(
                 state: state,
                 action: .avAudioSession(
                     .setCategoryAndModeAndCategoryOptions(

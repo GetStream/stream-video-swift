@@ -25,7 +25,7 @@ extension RTCAudioStore.Namespace {
             file: StaticString,
             function: StaticString,
             line: UInt
-        ) throws -> State {
+        ) async throws -> State {
             guard case let .webRTCAudioSession(action) = action else {
                 return state
             }
