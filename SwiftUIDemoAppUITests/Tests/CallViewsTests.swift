@@ -147,8 +147,9 @@ final class CallViewsTests: StreamTestCase {
         THEN("there are \(participants) participants on the call") {
             userRobot
                 .assertCallControls()
-                .assertSpotlightView(with: participants -
-                    1
+                .assertSpotlightView(
+                    with: participants -
+                        1
                 ) // We get one less due to the LazyHStack that initializes only a few items after the visible ones
         }
         WHEN("user enables fullscreen view") {

@@ -14,10 +14,10 @@ extension Bundle {
         let candidates = [
             // Bundle should be present here when the package is linked into an App.
             Bundle.main.resourceURL,
-
+            
             // Bundle should be present here when the package is linked into a framework.
             Bundle(for: StreamVideoTestResources.self).resourceURL,
-
+            
             // For command-line tools.
             Bundle.main.bundleURL
         ]
