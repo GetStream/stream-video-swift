@@ -17,6 +17,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     @Injected(\.callCache) private var callCache
     @Injected(\.screenProperties) private var screenProperties
     @Injected(\.audioStore) private var audioStore
+    @Injected(\.battery) private var battery
 
     private enum DisposableKey: String { case ringEventReceived }
 
@@ -203,6 +204,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         // Warm up
         _ = eventNotificationCenter
         _ = idleTimerAdapter
+        _ = battery
 
         if user.type != .anonymous {
             let userAuth = UserAuth { [weak self] in
