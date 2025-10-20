@@ -107,7 +107,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     private let muteActionSubject = PassthroughSubject<MuteRequest, Never>()
     private var muteActionCancellable: AnyCancellable?
     private let muteProcessingQueue = OperationQueue(maxConcurrentOperationCount: 1)
-    private var isMuted = false
+    private var isMuted: Bool?
 
     /// Initialize.
     override public init() {

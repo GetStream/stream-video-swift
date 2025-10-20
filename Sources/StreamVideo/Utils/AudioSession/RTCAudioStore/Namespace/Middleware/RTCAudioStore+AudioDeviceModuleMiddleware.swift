@@ -10,7 +10,8 @@ extension RTCAudioStore {
 
     /// Keeps the `AudioDeviceModule` in sync with store-driven intent and
     /// propagates ADM state changes back into the store.
-    final class AudioDeviceModuleMiddleware: Middleware<RTCAudioStore.Namespace>, @unchecked Sendable {
+    final class AudioDeviceModuleMiddleware: Middleware<RTCAudioStore.Namespace>,
+        @unchecked Sendable {
 
         private let disposableBag = DisposableBag()
 
@@ -23,50 +24,50 @@ extension RTCAudioStore {
             function: StaticString,
             line: UInt
         ) {
-            guard
-                let audioDeviceModule = state.audioDeviceModule
-            else {
-                return
-            }
-
             switch action {
-            case let .setInterrupted(value):
-                log.throwing(
-                    "Unable to process setInterrupted:\(value).",
-                    subsystems: .audioSession
-                ) {
-                    try didSetInterrupted(
-                        value,
-                        state: state,
-                        audioDeviceModule: audioDeviceModule
-                    )
+            case .setInterrupted(let value):
+                if let audioDeviceModule = state.audioDeviceModule {
+                    log.throwing(
+                        "Unable to process setInterrupted:\(value).",
+                        subsystems: .audioSession
+                    ) {
+                        try didSetInterrupted(
+                            value,
+                            state: state,
+                            audioDeviceModule: audioDeviceModule
+                        )
+                    }
                 }
 
-            case let .setShouldRecord(value):
-                log.throwing(
-                    "Unable to process setShouldRecord:\(value).",
-                    subsystems: .audioSession
-                ) {
-                    try didSetShouldRecord(
-                        value,
-                        state: state,
-                        audioDeviceModule: audioDeviceModule
-                    )
+            case .setShouldRecord(let value):
+                if let audioDeviceModule = state.audioDeviceModule {
+                    log.throwing(
+                        "Unable to process setShouldRecord:\(value).",
+                        subsystems: .audioSession
+                    ) {
+                        try didSetShouldRecord(
+                            value,
+                            state: state,
+                            audioDeviceModule: audioDeviceModule
+                        )
+                    }
                 }
 
-            case let .setMicrophoneMuted(value):
-                log.throwing(
-                    "Unable to process setMicrophoneMuted:\(value).",
-                    subsystems: .audioSession
-                ) {
-                    try didSetMicrophoneMuted(
-                        value,
-                        state: state,
-                        audioDeviceModule: audioDeviceModule
-                    )
+            case .setMicrophoneMuted(let value):
+                if let audioDeviceModule = state.audioDeviceModule {
+                    log.throwing(
+                        "Unable to process setMicrophoneMuted:\(value).",
+                        subsystems: .audioSession
+                    ) {
+                        try didSetMicrophoneMuted(
+                            value,
+                            state: state,
+                            audioDeviceModule: audioDeviceModule
+                        )
+                    }
                 }
 
-            case let .setAudioDeviceModule(value):
+            case .setAudioDeviceModule(let value):
                 log.throwing(
                     "Unable to process setAudioDeviceModule:\(value).",
                     subsystems: .audioSession

@@ -10,7 +10,7 @@ final class StreamCallAudioRecorder_CategoryMiddlewareTests: XCTestCase, @unchec
 
     @Injected(\.audioStore) private var audioStore
 
-    private var subject: StreamCallAudioRecorder
+    private lazy var subject: StreamCallAudioRecorder
         .Namespace
         .CategoryMiddleware! = .init()
 
@@ -57,7 +57,8 @@ final class StreamCallAudioRecorder_CategoryMiddlewareTests: XCTestCase, @unchec
         await safeFulfillment(of: [validation], timeout: 1)
     }
 
-    func test_audioStoreCategory_noRecordOrPlaybackCategory_setIsRecordingDispatchWithFalse() async {
+    func test_audioStoreCategory_noRecordOrPlaybackCategory_setIsRecordingDispatchWithFalse() async throws {
+        try await audioStore.dispatch(.avAudioSession(.setCategory(.playAndRecord))).result()
         let validation = expectation(description: "Dispatcher was called")
         subject.dispatcher = .init { actions, _, _, _ in
             switch actions[0].wrappedValue {
@@ -72,7 +73,7 @@ final class StreamCallAudioRecorder_CategoryMiddlewareTests: XCTestCase, @unchec
             .avAudioSession(
                 .setCategoryAndModeAndCategoryOptions(
                     .playback,
-                    mode: .voiceChat,
+                    mode: .default,
                     categoryOptions: []
                 )
             )

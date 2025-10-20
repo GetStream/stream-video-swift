@@ -59,6 +59,10 @@ final class RTCAudioStore: @unchecked Sendable {
 
     // MARK: - Observation
 
+    func add(_ middleware: Middleware<Namespace>) {
+        store.add(middleware)
+    }
+
     /// Emits values when the provided key path changes within the store state.
     /// - Parameter keyPath: The state value to observe.
     /// - Returns: A publisher of distinct values for the key path.
