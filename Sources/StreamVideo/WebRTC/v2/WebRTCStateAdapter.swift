@@ -132,6 +132,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
 
         Task { [weak self] in
             _ = await self?.permissionsAdapter
+            await self?.configureBatteryObservation()
         }
     }
 
@@ -680,6 +681,21 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
             /// shouldn't attempt another activation.
             shouldSetActive: source != .callKit
         )
+    }
+
+    private func configureBatteryObservation() {
+        // Observe battery to attach traces when needed
+        let battery = BatteryStore.currentValue
+        Publishers
+            .CombineLatest(
+                battery.publisher(\.level).removeDuplicates().eraseToAnyPublisher(),
+                battery.publisher(\.state).removeDuplicates().eraseToAnyPublisher()
+            )
+            .compactMap { [weak battery] _ in battery }
+            .sinkTask(on: self, storeIn: disposableBag, handler: { actor, battery in
+                await actor.trace(.init(battery))
+            })
+            .store(in: disposableBag)
     }
 
     // MARK: - AudioSessionDelegate

@@ -10,7 +10,7 @@ import UIKit
 
 /// Monitors the device battery state and exposes the latest readings through
 /// the shared store pipeline.
-final class BatteryStore: CustomStringConvertible {
+final class BatteryStore: CustomStringConvertible, @unchecked Sendable {
 
     var state: Namespace.State { store.state }
 
@@ -62,6 +62,12 @@ final class BatteryStore: CustomStringConvertible {
             }
             .store(in: disposableBag)
         #endif
+    }
+
+    func publisher<V: Equatable>(
+        _ keyPath: KeyPath<Namespace.State, V>
+    ) -> AnyPublisher<V, Never> {
+        store.publisher(keyPath)
     }
 
     func dispatch(
