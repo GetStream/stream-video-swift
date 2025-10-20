@@ -427,7 +427,7 @@ final class WebRTCJoinRequestFactory_Tests: XCTestCase, @unchecked Sendable {
             incomingVideoQualitySettings: .none
         ).sorted { $0.sessionID <= $1.sessionID }
 
-        XCTAssertEqual(result.count, 3)
+        XCTAssertEqual(result.count, 4)
         XCTAssertEqual(result[0].userID, "1")
         XCTAssertEqual(result[0].sessionID, "1")
         XCTAssertEqual(result[0].trackType, .video)
@@ -438,7 +438,10 @@ final class WebRTCJoinRequestFactory_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(result[1].trackType, .audio)
         XCTAssertEqual(result[2].userID, "3")
         XCTAssertEqual(result[2].sessionID, "3")
-        XCTAssertEqual(result[2].trackType, .screenShare)
+        XCTAssertEqual(result[2].trackType, .screenShareAudio)
+        XCTAssertEqual(result[3].userID, "3")
+        XCTAssertEqual(result[3].sessionID, "3")
+        XCTAssertEqual(result[3].trackType, .screenShare)
     }
 
     // MARK: - buildPreferredPublishOptions
