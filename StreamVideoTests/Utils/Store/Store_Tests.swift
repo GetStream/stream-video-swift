@@ -13,9 +13,11 @@ final class Store_Tests: XCTestCase, @unchecked Sendable {
     private lazy var middlewareB: MockMiddleware<TestStoreNamespace>! = .init()
     private lazy var reducerA: TestStoreReducer! = .init()
     private lazy var reducerB: TestStoreReducer! = .init()
+    private lazy var coordinator: TestStoreCoordinator! = .init()
 
     private lazy var subject: Store<TestStoreNamespace>! = TestStoreNamespace.store(
-        initialState: .init()
+        initialState: .init(),
+        coordinator: coordinator
     )
 
     override func setUp() {
@@ -68,6 +70,16 @@ final class Store_Tests: XCTestCase, @unchecked Sendable {
             self.subject.state.reducersAccessVerification == "A_B"
         }
     }
+
+    func test_dispatch_coordinatorSkipsUnnecessaryAction() async {
+        coordinator.shouldExecuteNextAction = false
+        subject.dispatch(.callReducersWithStep)
+        await wait(for: 1)
+
+        XCTAssertEqual(reducerA.timesCalled, 0)
+        XCTAssertEqual(reducerB.timesCalled, 0)
+        XCTAssertEqual(subject.state.reducersCalled, 0)
+    }
 }
 
 // MARK: - Private Types
@@ -111,6 +123,17 @@ private final class TestStoreReducer: Reducer<TestStoreNamespace>, @unchecked Se
         }
 
         return updatedState
+    }
+}
+
+private final class TestStoreCoordinator: StoreCoordinator<TestStoreNamespace>, @unchecked Sendable {
+    var shouldExecuteNextAction = true
+
+    override func shouldExecute(
+        action: TestStoreAction,
+        state: TestStoreState
+    ) -> Bool {
+        shouldExecuteNextAction
     }
 }
 
