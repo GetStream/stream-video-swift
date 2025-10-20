@@ -59,7 +59,10 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
     
     /// Executor that processes actions through the pipeline.
     private let executor: StoreExecutor<Namespace>
-    
+
+    /// Coordinator that can skip redundant actions before execution.
+    private let coordinator: StoreCoordinator<Namespace>
+
     /// Publisher that holds and emits the current state.
     private let stateSubject: CurrentValueSubject<Namespace.State, Never>
     
@@ -81,13 +84,15 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
     ///   - middleware: Array of middleware for side effects.
     ///   - logger: Logger for recording store operations.
     ///   - executor: Executor for processing the action pipeline.
+    ///   - coordinator: Coordinator that validates actions before execution.
     init(
         identifier: String,
         initialState: Namespace.State,
         reducers: [Reducer<Namespace>],
         middleware: [Middleware<Namespace>],
         logger: StoreLogger<Namespace>,
-        executor: StoreExecutor<Namespace>
+        executor: StoreExecutor<Namespace>,
+        coordinator: StoreCoordinator<Namespace>
     ) {
         self.identifier = identifier
         stateSubject = .init(initialState)
@@ -95,6 +100,7 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
         self.middleware = []
         self.logger = logger
         self.executor = executor
+        self.coordinator = coordinator
 
         middleware.forEach { add($0) }
     }
@@ -241,17 +247,17 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
     ///     logger.error("Action failed: \(error)")
     /// }
     /// ```
-
+    ///
+    /// - Returns: A ``StoreTask`` that can be awaited or ignored for
+    ///   fire-and-forget semantics.
     @discardableResult
-    /// - Returns: A ``StoreTask`` that can be awaited for completion
-    ///   or ignored for fire-and-forget semantics.
     func dispatch(
         _ actions: [StoreActionBox<Namespace.Action>],
         file: StaticString = #file,
         function: StaticString = #function,
         line: UInt = #line
     ) -> StoreTask<Namespace> {
-        let task = StoreTask(executor: executor)
+        let task = StoreTask(executor: executor, coordinator: coordinator)
         processingQueue.addTaskOperation { [weak self] in
             guard let self else {
                 return
@@ -272,9 +278,13 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
         return task
     }
 
+    /// Dispatches a single boxed action asynchronously.
+    ///
+    /// Wraps the action in an array and forwards to
+    /// ``dispatch(_:file:function:line:)``.
+    ///
+    /// - Returns: A ``StoreTask`` that can be awaited or ignored.
     @discardableResult
-    /// - Returns: A ``StoreTask`` that can be awaited for completion
-    ///   or ignored for fire-and-forget semantics.
     func dispatch(
         _ action: StoreActionBox<Namespace.Action>,
         file: StaticString = #file,
@@ -289,9 +299,13 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
         )
     }
 
+    /// Dispatches multiple unboxed actions asynchronously.
+    ///
+    /// Actions are boxed automatically before being forwarded to
+    /// ``dispatch(_:file:function:line:)``.
+    ///
+    /// - Returns: A ``StoreTask`` that can be awaited or ignored.
     @discardableResult
-    /// - Returns: A ``StoreTask`` that can be awaited for completion
-    ///   or ignored for fire-and-forget semantics.
     func dispatch(
         _ actions: [Namespace.Action],
         file: StaticString = #file,
@@ -306,9 +320,13 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
         )
     }
 
+    /// Dispatches a single unboxed action asynchronously.
+    ///
+    /// The action is boxed automatically and forwarded to
+    /// ``dispatch(_:file:function:line:)``.
+    ///
+    /// - Returns: A ``StoreTask`` that can be awaited or ignored.
     @discardableResult
-    /// - Returns: A ``StoreTask`` that can be awaited for completion
-    ///   or ignored for fire-and-forget semantics.
     func dispatch(
         _ action: Namespace.Action,
         file: StaticString = #file,
