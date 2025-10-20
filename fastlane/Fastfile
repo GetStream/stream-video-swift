@@ -786,6 +786,7 @@ private_lane :frameworks_sizes do
 
   gym(
     scheme: 'DemoAppUIKit',
+    configuration: 'Release',
     archive_path: archive_dir,
     export_method: 'ad-hoc',
     export_options: 'fastlane/sdk_size_export_options.plist',
