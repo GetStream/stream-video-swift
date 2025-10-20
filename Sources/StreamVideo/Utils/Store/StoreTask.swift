@@ -64,10 +64,11 @@ final class StoreTask<Namespace: StoreNamespace>: Sendable {
     ) async {
         resultSubject.send(.running)
         do {
+            var workingState = state
             for action in actions {
-                try await executor.run(
+                workingState = try await executor.run(
                     identifier: identifier,
-                    state: state,
+                    state: workingState,
                     action: action,
                     reducers: reducers,
                     middleware: middleware,

@@ -16,7 +16,7 @@ extension PermissionStore {
             file: StaticString,
             function: StaticString,
             line: UInt
-        ) throws -> PermissionStore.StoreState {
+        ) async throws -> PermissionStore.StoreState {
             var updatedState = state
 
             switch action {

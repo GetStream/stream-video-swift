@@ -19,15 +19,15 @@ final class PermissionStore_DefaultReducerTests: XCTestCase, @unchecked Sendable
 
     // MARK: setMicrophonePermission
 
-    func test_reducer_setMicrophonePermission_granted_returnsExpectedState() throws {
-        try assertState(
+    func test_reducer_setMicrophonePermission_granted_returnsExpectedState() async throws {
+        try await assertState(
             action: .setMicrophonePermission(.granted),
             validation: { $0.microphonePermission == .granted }
         )
     }
 
-    func test_reducer_setMicrophonePermission_denied_returnsExpectedState() throws {
-        try assertState(
+    func test_reducer_setMicrophonePermission_denied_returnsExpectedState() async throws {
+        try await assertState(
             action: .setMicrophonePermission(.denied),
             validation: { $0.microphonePermission == .denied }
         )
@@ -35,8 +35,8 @@ final class PermissionStore_DefaultReducerTests: XCTestCase, @unchecked Sendable
 
     // MARK: requestMicrophonePermission
 
-    func test_reducer_requestMicrophonePermission_returnsExpectedState() throws {
-        try assertState(
+    func test_reducer_requestMicrophonePermission_returnsExpectedState() async throws {
+        try await assertState(
             action: .requestMicrophonePermission,
             validation: { $0.microphonePermission == .requesting }
         )
@@ -44,15 +44,15 @@ final class PermissionStore_DefaultReducerTests: XCTestCase, @unchecked Sendable
 
     // MARK: setCameraPermission
 
-    func test_reducer_setCameraPermission_granted_returnsExpectedState() throws {
-        try assertState(
+    func test_reducer_setCameraPermission_granted_returnsExpectedState() async throws {
+        try await assertState(
             action: .setCameraPermission(.granted),
             validation: { $0.cameraPermission == .granted }
         )
     }
 
-    func test_reducer_setCameraPermission_denied_returnsExpectedState() throws {
-        try assertState(
+    func test_reducer_setCameraPermission_denied_returnsExpectedState() async throws {
+        try await assertState(
             action: .setCameraPermission(.denied),
             validation: { $0.cameraPermission == .denied }
         )
@@ -60,8 +60,8 @@ final class PermissionStore_DefaultReducerTests: XCTestCase, @unchecked Sendable
 
     // MARK: requestCameraPermission
 
-    func test_reducer_requestCameraPermission_returnsExpectedState() throws {
-        try assertState(
+    func test_reducer_requestCameraPermission_returnsExpectedState() async throws {
+        try await assertState(
             action: .requestCameraPermission,
             validation: { $0.cameraPermission == .requesting }
         )
@@ -69,15 +69,15 @@ final class PermissionStore_DefaultReducerTests: XCTestCase, @unchecked Sendable
 
     // MARK: setPushNotificationPermission
 
-    func test_reducer_setPushNotificationPermission_granted_returnsExpectedState() throws {
-        try assertState(
+    func test_reducer_setPushNotificationPermission_granted_returnsExpectedState() async throws {
+        try await assertState(
             action: .setPushNotificationPermission(.granted),
             validation: { $0.pushNotificationPermission == .granted }
         )
     }
 
-    func test_reducer_setPushNotificationPermission_denied_returnsExpectedState() throws {
-        try assertState(
+    func test_reducer_setPushNotificationPermission_denied_returnsExpectedState() async throws {
+        try await assertState(
             action: .setPushNotificationPermission(.denied),
             validation: { $0.pushNotificationPermission == .denied }
         )
@@ -85,8 +85,8 @@ final class PermissionStore_DefaultReducerTests: XCTestCase, @unchecked Sendable
 
     // MARK: requestPushNotificationPermission
 
-    func test_reducer_requestPushNotificationPermission_returnsExpectedState() throws {
-        try assertState(
+    func test_reducer_requestPushNotificationPermission_returnsExpectedState() async throws {
+        try await assertState(
             action: .requestPushNotificationPermission([]),
             validation: { $0.pushNotificationPermission == .requesting }
         )
@@ -100,8 +100,8 @@ final class PermissionStore_DefaultReducerTests: XCTestCase, @unchecked Sendable
         function: StaticString = #function,
         line: UInt = #line,
         validation: (PermissionStore.Namespace.State) -> Bool
-    ) throws {
-        let actual = try subject.reduce(
+    ) async throws {
+        let actual = try await subject.reduce(
             state: .initial,
             action: action,
             file: file,

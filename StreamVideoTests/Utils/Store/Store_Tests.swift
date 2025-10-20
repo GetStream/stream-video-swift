@@ -93,7 +93,7 @@ private final class TestStoreReducer: Reducer<TestStoreNamespace>, @unchecked Se
         file: StaticString,
         function: StaticString,
         line: UInt
-    ) throws -> TestStoreState {
+    ) async throws -> TestStoreState {
         defer { timesCalled += 1 }
 
         var updatedState = state

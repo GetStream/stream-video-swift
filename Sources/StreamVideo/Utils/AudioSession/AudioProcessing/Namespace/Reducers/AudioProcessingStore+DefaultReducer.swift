@@ -17,7 +17,7 @@ extension AudioProcessingStore.Namespace {
             file: StaticString,
             function: StaticString,
             line: UInt
-        ) throws -> AudioProcessingStore.Namespace.StoreState {
+        ) async throws -> AudioProcessingStore.Namespace.StoreState {
             var updatedState = state
 
             switch action {

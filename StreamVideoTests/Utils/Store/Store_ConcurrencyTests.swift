@@ -349,7 +349,7 @@ private final class ConcurrencyTestReducer: Reducer<ConcurrencyTestNamespace>, @
         file: StaticString,
         function: StaticString,
         line: UInt
-    ) throws -> ConcurrencyTestState {
+    ) async throws -> ConcurrencyTestState {
         var newState = state
         
         switch action {
@@ -393,7 +393,7 @@ private final class IncrementReducer: Reducer<ConcurrencyTestNamespace>, @unchec
         file: StaticString,
         function: StaticString,
         line: UInt
-    ) throws -> ConcurrencyTestState {
+    ) async throws -> ConcurrencyTestState {
         var newState = state
         
         if case .increment = action {

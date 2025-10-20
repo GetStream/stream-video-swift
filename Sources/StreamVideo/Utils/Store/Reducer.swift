@@ -76,7 +76,7 @@ class Reducer<Namespace: StoreNamespace>: @unchecked Sendable {
         file: StaticString,
         function: StaticString,
         line: UInt
-    ) throws -> Namespace.State {
+    ) async throws -> Namespace.State {
         state
     }
 }

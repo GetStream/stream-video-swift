@@ -311,7 +311,7 @@ private final class RaceTestReducer: Reducer<RaceTestNamespace>, @unchecked Send
         file: StaticString,
         function: StaticString,
         line: UInt
-    ) throws -> RaceTestState {
+    ) async throws -> RaceTestState {
         var newState = state
         
         switch action {

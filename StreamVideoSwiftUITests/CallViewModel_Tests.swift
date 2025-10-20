@@ -219,7 +219,6 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
     }
 
     func test_outgoingCall_callCreatedPriorToStarting_rejectedEventFromOneParticipantCallRemainsOngoing() async throws {
-        LogConfig.level = .debug
         // Given
         let memberResponses = (participants + [thirdUser]).map {
             MemberResponse(

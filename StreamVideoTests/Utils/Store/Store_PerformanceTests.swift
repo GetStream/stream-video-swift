@@ -151,10 +151,11 @@ final class Store_PerformanceTests: XCTestCase, @unchecked Sendable {
         
         measure {
             for i in 0..<iterations {
-                // Mix of different state updates
-                store.dispatch(.increment)
-                store.dispatch(.appendToArray(i))
-                store.dispatch(.updateDictionary(key: "key\(i)", value: i))
+                store.dispatch([
+                    .increment,
+                    .appendToArray(i),
+                    .updateDictionary(key: "key\(i)", value: i)
+                ])
             }
             
             // Wait for completion
@@ -286,7 +287,7 @@ private final class PerformanceTestReducer: Reducer<PerformanceTestNamespace>, @
         file: StaticString,
         function: StaticString,
         line: UInt
-    ) throws -> PerformanceTestState {
+    ) async throws -> PerformanceTestState {
         var newState = state
         
         switch action {

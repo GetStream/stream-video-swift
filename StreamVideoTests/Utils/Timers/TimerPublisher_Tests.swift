@@ -64,7 +64,6 @@ final class TimerPublisher_Tests: XCTestCase, @unchecked Sendable {
 
         let expectation = expectation(description: "Should receive values after resubscription")
 
-        LogConfig.level = .debug
         var cancellable = subject
             .log(.debug) { "Received value: \($0.millisecondsSince1970)" }
             .sink { [weak self] in self?.receivedDates.append($0) }

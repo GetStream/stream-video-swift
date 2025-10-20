@@ -136,7 +136,7 @@ private final class TaskTestReducer: Reducer<TaskTestNamespace>, @unchecked Send
         file: StaticString,
         function: StaticString,
         line: UInt
-    ) throws -> TaskTestState {
+    ) async throws -> TaskTestState {
         var newState = state
 
         switch action {

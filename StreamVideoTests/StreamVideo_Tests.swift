@@ -58,7 +58,6 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
     }
 
     func test_streamVideo_activeCallAndLeave() async throws {
-        LogConfig.level = .debug
         // Given
         let streamVideo = StreamVideo.mock(httpClient: HTTPClient_Mock())
         self.streamVideo = streamVideo
@@ -79,7 +78,6 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
 
         // Then
         XCTAssert(streamVideo.state.activeCall == nil)
-        LogConfig.level = .info
     }
 
     func test_streamVideo_ringCallAccept() async throws {
@@ -148,7 +146,6 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
     }
 
     func test_streamVideo_incomingCallAccept() async throws {
-        LogConfig.level = .debug
         // Given
         let streamVideo = StreamVideo.mock(httpClient: HTTPClient_Mock())
         self.streamVideo = streamVideo
@@ -182,7 +179,6 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
         // Then
         XCTAssert(streamVideo.state.ringingCall == nil)
         XCTAssert(streamVideo.state.activeCall?.cId == call.cId)
-        LogConfig.level = .info
     }
 
     func test_streamVideo_incomingCallReject() async throws {

@@ -16,10 +16,10 @@ final class AudioProcessingStore_DefaultReducer_Tests: XCTestCase, @unchecked Se
         super.tearDown()
     }
 
-    func test_setInitializedConfiguration_updatesSampleRateAndChannels() throws {
+    func test_setInitializedConfiguration_updatesSampleRateAndChannels() async throws {
         let initial = AudioProcessingStore.Namespace.StoreState.initial
 
-        let updated = try subject.reduce(
+        let updated = try await subject.reduce(
             state: initial,
             action: .setInitializedConfiguration(sampleRate: 48000, channels: 2),
             file: #file,
@@ -31,11 +31,11 @@ final class AudioProcessingStore_DefaultReducer_Tests: XCTestCase, @unchecked Se
         XCTAssertEqual(updated.initializedChannels, 2)
     }
 
-    func test_setAudioFilter_setsActiveFilter() throws {
+    func test_setAudioFilter_setsActiveFilter() async throws {
         let initial = AudioProcessingStore.Namespace.StoreState.initial
         let filter = MockAudioFilter(id: "test-filter")
 
-        let updated = try subject.reduce(
+        let updated = try await subject.reduce(
             state: initial,
             action: .setAudioFilter(filter),
             file: #file,
@@ -46,11 +46,11 @@ final class AudioProcessingStore_DefaultReducer_Tests: XCTestCase, @unchecked Se
         XCTAssertEqual(updated.audioFilter?.id, "test-filter")
     }
 
-    func test_setNumberOfCaptureChannels_updatesCount() throws {
+    func test_setNumberOfCaptureChannels_updatesCount() async throws {
         var initial = AudioProcessingStore.Namespace.StoreState.initial
         initial.numberOfCaptureChannels = 1
 
-        let updated = try subject.reduce(
+        let updated = try await subject.reduce(
             state: initial,
             action: .setNumberOfCaptureChannels(2),
             file: #file,
@@ -61,12 +61,12 @@ final class AudioProcessingStore_DefaultReducer_Tests: XCTestCase, @unchecked Se
         XCTAssertEqual(updated.numberOfCaptureChannels, 2)
     }
 
-    func test_release_resetsInitialization() throws {
+    func test_release_resetsInitialization() async throws {
         var initial = AudioProcessingStore.Namespace.StoreState.initial
         initial.initializedSampleRate = 44100
         initial.initializedChannels = 1
 
-        let updated = try subject.reduce(
+        let updated = try await subject.reduce(
             state: initial,
             action: .release,
             file: #file,

@@ -20,7 +20,7 @@ final class MockReducer<Namespace: StoreNamespace>: Reducer<Namespace>, @uncheck
         file: StaticString,
         function: StaticString,
         line: UInt
-    ) throws -> Namespace.State {
+    ) async throws -> Namespace.State {
         inputs.append(.init(action: action, state: state))
         return state
     }

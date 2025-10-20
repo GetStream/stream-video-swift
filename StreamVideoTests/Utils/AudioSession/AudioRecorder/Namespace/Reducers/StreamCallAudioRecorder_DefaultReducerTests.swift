@@ -19,15 +19,15 @@ final class StreamCallAudioRecorder_DefaultReducerTests: XCTestCase, @unchecked 
 
     // MARK: isRecording
 
-    func test_reducer_setIsRecording_true_returnsExpectedState() throws {
-        try assertState(
+    func test_reducer_setIsRecording_true_returnsExpectedState() async throws {
+        try await assertState(
             action: .setIsRecording(true),
             validation: { $0.isRecording == true }
         )
     }
 
-    func test_reducer_setIsRecording_false_returnsExpectedState() throws {
-        try assertState(
+    func test_reducer_setIsRecording_false_returnsExpectedState() async throws {
+        try await assertState(
             action: .setIsRecording(false),
             validation: { $0.isRecording == false }
         )
@@ -35,15 +35,15 @@ final class StreamCallAudioRecorder_DefaultReducerTests: XCTestCase, @unchecked 
 
     // MARK: isInterrupted
 
-    func test_reducer_setIsInterrupted_true_returnsExpectedState() throws {
-        try assertState(
+    func test_reducer_setIsInterrupted_true_returnsExpectedState() async throws {
+        try await assertState(
             action: .setIsInterrupted(true),
             validation: { $0.isInterrupted == true }
         )
     }
 
-    func test_reducer_setIsInterrupted_false_returnsExpectedState() throws {
-        try assertState(
+    func test_reducer_setIsInterrupted_false_returnsExpectedState() async throws {
+        try await assertState(
             action: .setIsInterrupted(false),
             validation: { $0.isInterrupted == false }
         )
@@ -51,15 +51,15 @@ final class StreamCallAudioRecorder_DefaultReducerTests: XCTestCase, @unchecked 
 
     // MARK: shouldRecord
 
-    func test_reducer_setShouldRecord_true_returnsExpectedState() throws {
-        try assertState(
+    func test_reducer_setShouldRecord_true_returnsExpectedState() async throws {
+        try await assertState(
             action: .setShouldRecord(true),
             validation: { $0.shouldRecord == true }
         )
     }
 
-    func test_reducer_setShouldRecord_false_returnsExpectedState() throws {
-        try assertState(
+    func test_reducer_setShouldRecord_false_returnsExpectedState() async throws {
+        try await assertState(
             action: .setShouldRecord(false),
             validation: { $0.shouldRecord == false }
         )
@@ -67,8 +67,8 @@ final class StreamCallAudioRecorder_DefaultReducerTests: XCTestCase, @unchecked 
 
     // MARK: meter
 
-    func test_reducer_setMeter_true_returnsExpectedState() throws {
-        try assertState(
+    func test_reducer_setMeter_true_returnsExpectedState() async throws {
+        try await assertState(
             action: .setMeter(10.1),
             validation: { $0.meter == 10.1 }
         )
@@ -82,8 +82,8 @@ final class StreamCallAudioRecorder_DefaultReducerTests: XCTestCase, @unchecked 
         function: StaticString = #function,
         line: UInt = #line,
         validation: (StreamCallAudioRecorder.Namespace.State) -> Bool
-    ) throws {
-        let actual = try subject.reduce(
+    ) async throws {
+        let actual = try await subject.reduce(
             state: .initial,
             action: action,
             file: file,
