@@ -3,5 +3,5 @@ builder:
   configs:
   - platform: ios
     documentation_targets: [StreamVideoSwiftUI, StreamVideoUIKit, StreamVideo]
-    scheme: StreamChatSwiftUI
+    scheme: StreamVideoSwiftUI
 
