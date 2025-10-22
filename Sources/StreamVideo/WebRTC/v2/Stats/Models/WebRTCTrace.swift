@@ -217,3 +217,15 @@ extension WebRTCTrace {
         )
     }
 }
+
+extension WebRTCTrace {
+    init(
+        _ battery: BatteryStore
+    ) {
+        self.init(
+            id: nil,
+            tag: "device.battery.\(battery.state.state)",
+            data: .init(battery)
+        )
+    }
+}
