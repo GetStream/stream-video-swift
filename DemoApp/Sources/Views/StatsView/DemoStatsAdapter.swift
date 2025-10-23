@@ -29,8 +29,15 @@ final class DemoStatsAdapter {
         callStatsReportCancellable = call?
             .state
             .$statsReport
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] in
-                if let report = $0 { self?.reports.append(report) }
+                guard let self, let report = $0 else { return }
+
+                reports.append(report)
+
+                if reports.endIndex > 20 {
+                    _ = reports.dropFirst()
+                }
             }
     }
 }
