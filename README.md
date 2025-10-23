@@ -247,10 +247,27 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 - [x] Better audio support for livestreams
 
 ### 1.5.0 milestone - June
-- [] Livestreaming support on 1080p @ 60fps
-- [] Distinguish between RTMP and regular tracks
-- [] Waiting rooms
-- [] Improve visibility on join call issues
+- [x] Livestreaming support on 1080p @ 60fps
+- [x] Improve visibility on join call issues
+- [x] Stats V2
+- [x] Configure policies based on the the device's proximity information
+
+### 1.6.0 milestone - September
+
+- [x] Pausing video on low bandwidths
+- [x] Distinguish between RTMP and regular tracks
+- [x] WHIP
+- [x] SRT ingress
+- [x] Python RTC SDK (A/V AI integrations)
+- [x] TURN/STUN on TCP/UDP 443 and static IP ranges
+
+### 1.7.0 milestone - December
+
+- [] Hifi Audio
+- [] Screensharing Audio
+- [] Battery usage improvements
+- [] Swift 6.2 support
+- [] RTMP streaming from device
 
 ### After 1.5.0
 
