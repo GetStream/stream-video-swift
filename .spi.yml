@@ -4,4 +4,5 @@ builder:
   - platform: ios
     documentation_targets: [StreamVideoSwiftUI, StreamVideoUIKit, StreamVideo]
     scheme: StreamVideoSwiftUI
+    swift_version: '6.1'
 
