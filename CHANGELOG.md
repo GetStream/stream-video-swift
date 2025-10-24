@@ -11,6 +11,8 @@ _October 24, 2025_
 
 ### 🔄 Changed
 
+- Update WebRTC to 137.0.42 which brings performance improvements on video rendering. [#983](https://github.com/GetStream/stream-video-swift/pull/983)
+
 # [1.34.1](https://github.com/GetStream/stream-video-swift/releases/tag/1.34.1)
 _October 14, 2025_
 
@@ -36,7 +38,7 @@ _September 08, 2025_
 
 ### ✅ Added
 - When the user is missing a permission, the SDK will prompt them to accept any missing permission. [#915](https://github.com/GetStream/stream-video-swift/pull/915)
-- You can now set the `ViewFactory` instance to be used from Picture-in-Picture. [#934](https://github.com/GetStream/stream-video-swift/pull/934) 
+- You can now set the `ViewFactory` instance to be used from Picture-in-Picture. [#934](https://github.com/GetStream/stream-video-swift/pull/934)
 - `CallParticipant` now exposes the `source` property, which can be used to distinguish between WebRTC users and ingest sources like RTMP or SIP. [#93](https://github.com/GetStream/stream-video-swift/pull/933)
 - Add the user action to kick a participant from a call. [#928](https://github.com/GetStream/stream-video-swift/pull/928)
 
