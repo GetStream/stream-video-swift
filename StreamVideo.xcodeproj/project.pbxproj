@@ -11364,7 +11364,7 @@
 			repositoryURL = "https://github.com/GetStream/stream-video-swift-webrtc";
 			requirement = {
 				kind = exactVersion;
-				version = 137.0.41;
+				version = 137.0.42;
 			};
 		};
 		8423B7542950BB0A00012F8D /* XCRemoteSwiftPackageReference "sentry-cocoa" */ = {
