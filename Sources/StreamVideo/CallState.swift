@@ -308,6 +308,10 @@ public class CallState: ObservableObject {
             break
         case .typeCallUserFeedbackSubmittedEvent:
             break
+        case .typeCallModerationBlurEvent:
+            break
+        case .typeCallModerationWarningEvent:
+            break
         }
     }
     
