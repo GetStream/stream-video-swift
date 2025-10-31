@@ -78,15 +78,9 @@ final class WebRTCPermissionsAdapter_Tests: StreamVideoTestCase, @unchecked Send
         mockPermissions.stubMicrophonePermission(.unknown)
         await fulfillment { self.mockPermissions.mockStore.state.microphonePermission == .unknown }
 
-        await withTaskGroup(of: Void.self) { group in
-            group.addTask {
-                let input = CallSettings(audioOn: true, videoOn: false)
-                let output = await self.subject.willSet(callSettings: input)
-                XCTAssertEqual(output.audioOn, false)
-            }
-
-            await group.waitForAll()
-        }
+        let input = CallSettings(audioOn: true, videoOn: false)
+        let output = await self.subject.willSet(callSettings: input)
+        XCTAssertEqual(output.audioOn, false)
     }
 
     func test_willSet_audioOnTrue_unknownMic_inForeground_withSendAudio_requestsPermission_andKeepsAudioOnWhenGranted() async {
@@ -119,18 +113,11 @@ final class WebRTCPermissionsAdapter_Tests: StreamVideoTestCase, @unchecked Send
         mockAppStateAdapter.makeShared()
         mockAppStateAdapter.stubbedState = .foreground
         mockPermissions.stubCameraPermission(.unknown)
-        subject.willSet(ownCapabilities: [.sendVideo])
         await fulfillment { self.mockPermissions.mockStore.state.cameraPermission == .unknown }
 
-        await withTaskGroup(of: Void.self) { group in
-            group.addTask {
-                let input = CallSettings(audioOn: false, videoOn: true)
-                let output = await self.subject.willSet(callSettings: input)
-                XCTAssertEqual(output.videoOn, false)
-            }
-
-            await group.waitForAll()
-        }
+        let input = CallSettings(audioOn: false, videoOn: true)
+        let output = await self.subject.willSet(callSettings: input)
+        XCTAssertEqual(output.videoOn, false)
     }
 
     func test_willSet_videoOnTrue_unknownCamera_inForeground_withSendVideo_requestsPermission_andKeepsVideoOnWhenGranted() async {
