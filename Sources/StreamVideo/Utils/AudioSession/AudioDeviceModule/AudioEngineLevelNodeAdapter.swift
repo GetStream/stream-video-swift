@@ -25,6 +25,11 @@ protocol AudioEngineNodeAdapting {
 /// analytics consumers.
 final class AudioEngineLevelNodeAdapter: AudioEngineNodeAdapting {
 
+    enum Constant {
+        // The down limit of audio pipeline in DB that is considered silence.
+        static let silenceDB: Float = -160
+    }
+
     var subject: CurrentValueSubject<Float, Never>?
 
 //    private let publisher: (Float) -> Void
@@ -62,7 +67,7 @@ final class AudioEngineLevelNodeAdapter: AudioEngineNodeAdapting {
         if let mixer = inputTap, mixer.engine != nil {
             mixer.removeTap(onBus: 0)
         }
-        subject?.send(-160)
+        subject?.send(Constant.silenceDB)
         inputTap = nil
         log.debug("Input node uninstalled", subsystems: .audioRecording)
     }
