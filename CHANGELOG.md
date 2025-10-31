@@ -4,7 +4,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
-### 🔄 Changed
+### 🐞 Fixed
+- Fix permission prompts appearing when not needed. [#988](https://github.com/GetStream/stream-video-swift/pull/988)
 
 # [1.34.2](https://github.com/GetStream/stream-video-swift/releases/tag/1.34.2)
 _October 24, 2025_
