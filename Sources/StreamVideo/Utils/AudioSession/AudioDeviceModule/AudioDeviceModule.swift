@@ -11,6 +11,15 @@ import StreamWebRTC
 /// audio pipeline can stay in sync with application logic.
 final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable, @unchecked Sendable {
 
+    enum Constant {
+        // WebRTC interfaces are returning integer result codes. We use this typed/named
+        // constant to define the Success of an operation.
+        static let successResult = 0
+
+        // The down limit of audio pipeline in DB that is considered silence.
+        static let silenceDB: Float = -160
+    }
+
     /// Events emitted as the underlying audio engine changes state.
     enum Event: Equatable {
         case speechActivityStarted
@@ -35,7 +44,7 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
     var isMicrophoneMuted: Bool { isMicrophoneMutedSubject.value }
     var isMicrophoneMutedPublisher: AnyPublisher<Bool, Never> { isMicrophoneMutedSubject.eraseToAnyPublisher() }
 
-    private let audioLevelSubject = CurrentValueSubject<Float, Never>(-160) // default to silence
+    private let audioLevelSubject = CurrentValueSubject<Float, Never>(Constant.silenceDB) // default to silence
     var audioLevel: Float { audioLevelSubject.value }
     var audioLevelPublisher: AnyPublisher<Float, Never> { audioLevelSubject.eraseToAnyPublisher() }
 
@@ -159,7 +168,7 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         didCreateEngine engine: AVAudioEngine
     ) -> Int {
         subject.send(.didCreateAudioEngine(engine))
-        return 0
+        return Constant.successResult
     }
 
     func audioDeviceModule(
@@ -171,7 +180,7 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         subject.send(.willEnableAudioEngine(engine))
         isPlayingSubject.send(isPlayoutEnabled)
         isRecordingSubject.send(isRecordingEnabled)
-        return 0
+        return Constant.successResult
     }
 
     func audioDeviceModule(
@@ -183,7 +192,7 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         subject.send(.willStartAudioEngine(engine))
         isPlayingSubject.send(isPlayoutEnabled)
         isRecordingSubject.send(isRecordingEnabled)
-        return 0
+        return Constant.successResult
     }
 
     func audioDeviceModule(
@@ -196,7 +205,7 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         audioLevelsAdapter.uninstall(on: 0)
         isPlayingSubject.send(isPlayoutEnabled)
         isRecordingSubject.send(isRecordingEnabled)
-        return 0
+        return Constant.successResult
     }
 
     func audioDeviceModule(
@@ -209,7 +218,7 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         audioLevelsAdapter.uninstall(on: 0)
         isPlayingSubject.send(isPlayoutEnabled)
         isRecordingSubject.send(isRecordingEnabled)
-        return 0
+        return Constant.successResult
     }
 
     func audioDeviceModule(
@@ -218,7 +227,7 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
     ) -> Int {
         subject.send(.willReleaseAudioEngine(engine))
         audioLevelsAdapter.uninstall(on: 0)
-        return 0
+        return Constant.successResult
     }
 
     func audioDeviceModule(
@@ -235,7 +244,7 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
             bus: 0,
             bufferSize: 1024
         )
-        return 0
+        return Constant.successResult
     }
 
     func audioDeviceModule(
@@ -246,13 +255,13 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         format: AVAudioFormat,
         context: [AnyHashable: Any]
     ) -> Int {
-        0
+        Constant.successResult
     }
 
     func audioDeviceModuleDidUpdateDevices(
         _ audioDeviceModule: RTCAudioDeviceModule
     ) {
-        // TODO:
+        /* No-op */
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -281,7 +290,7 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
     ) throws {
         let result = operation()
 
-        guard result != 0 else {
+        guard result != Constant.successResult else {
             return
         }
 
