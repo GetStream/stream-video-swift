@@ -4,6 +4,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### ✅ Added
+- SwiftUI modifiers that surface moderation blur and warning events in `CallView`. [#]()
+
 ### 🔄 Changed
 
 # [1.34.2](https://github.com/GetStream/stream-video-swift/releases/tag/1.34.2)
