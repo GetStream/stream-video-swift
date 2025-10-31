@@ -37,6 +37,8 @@ public enum VideoEvent: Codable, Hashable {
     case typeCallMemberUpdatedEvent(CallMemberUpdatedEvent)
     case typeCallMemberUpdatedPermissionEvent(CallMemberUpdatedPermissionEvent)
     case typeCallMissedEvent(CallMissedEvent)
+    case typeCallModerationBlurEvent(CallModerationBlurEvent)
+    case typeCallModerationWarningEvent(CallModerationWarningEvent)
     case typeCallNotificationEvent(CallNotificationEvent)
     case typePermissionRequestEvent(PermissionRequestEvent)
     case typeUpdatedCallPermissionsEvent(UpdatedCallPermissionsEvent)
@@ -119,6 +121,10 @@ public enum VideoEvent: Codable, Hashable {
         case let .typeCallMemberUpdatedPermissionEvent(value):
             return value.type
         case let .typeCallMissedEvent(value):
+            return value.type
+        case let .typeCallModerationBlurEvent(value):
+            return value.type
+        case let .typeCallModerationWarningEvent(value):
             return value.type
         case let .typeCallNotificationEvent(value):
             return value.type
@@ -237,6 +243,10 @@ public enum VideoEvent: Codable, Hashable {
             return value
         case let .typeCallMissedEvent(value):
             return value
+        case let .typeCallModerationBlurEvent(value):
+            return value
+        case let .typeCallModerationWarningEvent(value):
+            return value
         case let .typeCallNotificationEvent(value):
             return value
         case let .typePermissionRequestEvent(value):
@@ -354,6 +364,10 @@ public enum VideoEvent: Codable, Hashable {
         case let .typeCallMemberUpdatedPermissionEvent(value):
             try container.encode(value)
         case let .typeCallMissedEvent(value):
+            try container.encode(value)
+        case let .typeCallModerationBlurEvent(value):
+            try container.encode(value)
+        case let .typeCallModerationWarningEvent(value):
             try container.encode(value)
         case let .typeCallNotificationEvent(value):
             try container.encode(value)
@@ -497,6 +511,12 @@ public enum VideoEvent: Codable, Hashable {
         } else if dto.type == "call.missed" {
             let value = try container.decode(CallMissedEvent.self)
             self = .typeCallMissedEvent(value)
+        } else if dto.type == "call.moderation_blur" {
+            let value = try container.decode(CallModerationBlurEvent.self)
+            self = .typeCallModerationBlurEvent(value)
+        } else if dto.type == "call.moderation_warning" {
+            let value = try container.decode(CallModerationWarningEvent.self)
+            self = .typeCallModerationWarningEvent(value)
         } else if dto.type == "call.notification" {
             let value = try container.decode(CallNotificationEvent.self)
             self = .typeCallNotificationEvent(value)
