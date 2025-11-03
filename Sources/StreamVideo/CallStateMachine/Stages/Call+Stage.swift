@@ -31,7 +31,7 @@ extension Call.StateMachine {
                 var ring: Bool
                 var notify: Bool
                 var source: JoinSource
-                var deliverySubject: PassthroughSubject<JoinCallResponse, Error>
+                var deliverySubject: CurrentValueSubject<JoinCallResponse?, Error>
 
                 var currentNumberOfRetries = 0
                 var retryPolicy: RetryPolicy = .fastAndSimple
