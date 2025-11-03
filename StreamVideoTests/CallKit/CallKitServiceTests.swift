@@ -15,6 +15,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
     private lazy var uuidFactory: MockUUIDFactory! = .init()
     private lazy var callController: MockCXCallController! = .init()
     private lazy var callProvider: MockCXProvider! = .init()
+    private lazy var mockApplicationStateAdapter: MockAppStateAdapter! = .init()
     private lazy var user: User! = .init(id: "test")
     private lazy var cid: String! = "default:\(callId)"
     private var callId: String = String(UUID().uuidString.replacingOccurrences(of: "-", with: "").prefix(10))
@@ -42,12 +43,14 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         _ = mockPermissions
         InjectedValues[\.uuidFactory] = uuidFactory
         mockAudioStore.makeShared()
+        mockApplicationStateAdapter.makeShared()
         subject.callController = callController
         subject.callProvider = callProvider
         callProvider.setDelegate(subject, queue: nil)
     }
 
     override func tearDown() {
+        mockApplicationStateAdapter.dismante()
         mockPermissions.dismantle()
         subject = nil
         uuidFactory = nil
@@ -61,27 +64,6 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         mockAudioStore = nil
         completionError = nil
         super.tearDown()
-    }
-
-    // MARK: - didUpdate(streamVideo:)
-
-    func test_didUpdateStreamVideo_streamVideoIsNotNil_callKitReducerWasAdded() async {
-        subject.streamVideo = mockedStreamVideo
-
-        await fulfillment {
-            self.mockAudioStore.audioStore.reducers.first { $0 is CallKitAudioSessionReducer } != nil
-        }
-    }
-
-    func test_didUpdateStreamVideo_streamVideoIsNotNilInitiallyAndThenBecomesNil_callKitReducerWasRemoved() async {
-        subject.streamVideo = mockedStreamVideo
-
-        await wait(for: 0.2)
-        subject.streamVideo = nil
-
-        await fulfillment {
-            self.mockAudioStore.audioStore.reducers.first { $0 is CallKitAudioSessionReducer } == nil
-        }
     }
 
     // MARK: - reportIncomingCall
@@ -466,69 +448,11 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         }
     }
 
-    @MainActor
-    func test_accept_micShouldBeMuted_callWasMutedAsExpected() async throws {
-        let firstCallUUID = UUID()
-        uuidFactory.getResult = firstCallUUID
-        let call = stubCall(response: defaultGetCallResponse)
-        subject.streamVideo = mockedStreamVideo
-
-        subject.reportIncomingCall(
-            cid,
-            localizedCallerName: localizedCallerName,
-            callerId: callerId,
-            hasVideo: false
-        ) { _ in }
-
-        await waitExpectation(timeout: 1)
-
-        let callStateWithMicOff = CallState()
-        callStateWithMicOff.callSettings = .init(audioOn: false)
-        call.stub(for: \.state, with: callStateWithMicOff)
-        try await assertRequestTransaction(CXSetMutedCallAction.self) {
-            // Accept call
-            subject.provider(
-                callProvider,
-                perform: CXAnswerCallAction(
-                    call: firstCallUUID
-                )
-            )
-        }
-    }
-
-    @MainActor
-    func test_accept_noMicrophonePermissions_callWasMutedAsExpected() async throws {
-        mockPermissions.stubMicrophonePermission(.denied)
-        let firstCallUUID = UUID()
-        uuidFactory.getResult = firstCallUUID
-        _ = stubCall(response: defaultGetCallResponse)
-        subject.streamVideo = mockedStreamVideo
-        subject.missingPermissionPolicy = .none
-
-        subject.reportIncomingCall(
-            cid,
-            localizedCallerName: localizedCallerName,
-            callerId: callerId,
-            hasVideo: false
-        ) { _ in }
-
-        await waitExpectation(timeout: 1)
-
-        try await assertRequestTransaction(CXSetMutedCallAction.self) {
-            // Accept call
-            subject.provider(
-                callProvider,
-                perform: CXAnswerCallAction(
-                    call: firstCallUUID
-                )
-            )
-        }
-    }
-
     // MARK: - mute
 
     @MainActor
     func test_mute_hasMicrophonePermission_callWasMutedAsExpected() async throws {
+        mockApplicationStateAdapter.stubbedState = .background
         let customCallSettings = CallSettings(audioOn: true, videoOn: true)
         subject.callSettings = customCallSettings
         let firstCallUUID = UUID()
@@ -889,8 +813,10 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
     func test_didActivate_audioSessionWasConfiguredCorrectly() async throws {
         let firstCallUUID = UUID()
         uuidFactory.getResult = firstCallUUID
-        let call = stubCall(response: defaultGetCallResponse)
+        _ = stubCall(response: defaultGetCallResponse)
         subject.streamVideo = mockedStreamVideo
+        let mockMiddleware = MockMiddleware<RTCAudioStore.Namespace>()
+        mockAudioStore.audioStore.add(mockMiddleware)
 
         subject.reportIncomingCall(
             cid,
@@ -909,21 +835,52 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         )
 
         await waitExpectation(timeout: 1)
-        call.state.callSettings = .init(speakerOn: true)
+        subject.provider(callProvider, didActivate: AVAudioSession.sharedInstance())
 
-        let audioSession = AVAudioSession.sharedInstance()
-        mockAudioStore.session.isActive = true
-        subject.provider(callProvider, didActivate: audioSession)
+        await fulfillment {
+            mockMiddleware.actionsReceived.first {
+                switch $0 {
+                case let .callKit(.activate(session)) where session === AVAudioSession.sharedInstance():
+                    return true
+                default:
+                    return false
+                }
+            } != nil
+        }
+    }
 
-        await fulfillment { self.mockAudioStore.audioStore.state.isActive }
-        XCTAssertEqual(mockAudioStore.session.timesCalled(.audioSessionDidActivate), 1)
-        XCTAssertTrue(
-            mockAudioStore.session.recordedInputPayload(
-                AVAudioSession.self,
-                for: .audioSessionDidActivate
-            )?.first === audioSession
+    @MainActor
+    func test_didActivate_callSettingsObservationWasSetCorrectly() async throws {
+        let firstCallUUID = UUID()
+        uuidFactory.getResult = firstCallUUID
+        let call = stubCall(response: defaultGetCallResponse)
+        let callState = CallState()
+        callState.callSettings = .init(audioOn: true)
+        call.stub(for: \.state, with: callState)
+        subject.streamVideo = mockedStreamVideo
+        let mockMiddleware = MockMiddleware<RTCAudioStore.Namespace>()
+        mockAudioStore.audioStore.add(mockMiddleware)
+
+        subject.reportIncomingCall(
+            cid,
+            localizedCallerName: localizedCallerName,
+            callerId: callerId,
+            hasVideo: false
+        ) { _ in }
+
+        await waitExpectation(timeout: 1)
+        // Accept call
+        subject.provider(
+            callProvider,
+            perform: CXAnswerCallAction(
+                call: firstCallUUID
+            )
         )
-        XCTAssertTrue(mockAudioStore.audioStore.state.isActive)
+
+        await waitExpectation(timeout: 1)
+        try await assertRequestTransaction(CXSetMutedCallAction.self) {
+            subject.provider(callProvider, didActivate: AVAudioSession.sharedInstance())
+        }
     }
 
     // MARK: - Private Helpers

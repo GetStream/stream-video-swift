@@ -174,11 +174,11 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 currentStage.id == .joining {
                 return stateMachine
                     .publisher
-                    .tryCompactMap {
-                        switch $0.id {
+                    .tryMap { (stage) -> JoinCallResponse? in
+                        switch stage.id {
                         case .joined:
                             guard
-                                let stage = $0 as? Call.StateMachine.Stage.JoinedStage
+                                let stage = stage as? Call.StateMachine.Stage.JoinedStage
                             else {
                                 throw ClientError()
                             }
@@ -190,7 +190,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                             }
                         case .error:
                             guard
-                                let stage = $0 as? Call.StateMachine.Stage.ErrorStage
+                                let stage = stage as? Call.StateMachine.Stage.ErrorStage
                             else {
                                 throw ClientError()
                             }
@@ -201,7 +201,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                     }
                     .eraseToAnyPublisher()
             } else {
-                let deliverySubject = PassthroughSubject<JoinCallResponse, Error>()
+                let deliverySubject = CurrentValueSubject<JoinCallResponse?, Error>(nil)
                 transitionHandler(
                     .joining(
                         self,
@@ -224,8 +224,11 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
         if let joinResponse = result as? JoinCallResponse {
             return joinResponse
-        } else if let publisher = result as? AnyPublisher<JoinCallResponse, Error> {
-            return try await publisher.nextValue(timeout: CallConfiguration.timeout.join)
+        } else if let publisher = result as? AnyPublisher<JoinCallResponse?, Error> {
+            let result = try await publisher
+                .compactMap { $0 }
+                .nextValue(timeout: CallConfiguration.timeout.join)
+            return result
         } else {
             throw ClientError("Call was unable to join call.")
         }

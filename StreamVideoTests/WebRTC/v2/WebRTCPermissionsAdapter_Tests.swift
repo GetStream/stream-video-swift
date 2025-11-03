@@ -14,6 +14,7 @@ final class WebRTCPermissionsAdapter_Tests: StreamVideoTestCase, @unchecked Send
     private lazy var subject: WebRTCPermissionsAdapter! = .init(delegate)
 
     override func tearDown() {
+        mockAppStateAdapter?.dismante()
         mockPermissions?.dismantle()
         mockAppStateAdapter = nil
         mockPermissions = nil
@@ -48,6 +49,7 @@ final class WebRTCPermissionsAdapter_Tests: StreamVideoTestCase, @unchecked Send
 
     func test_willSet_audioOnTrue_unknownMic_inForeground_requestsPermission_andKeepsAudioOnWhenGranted() async {
         mockAppStateAdapter.makeShared()
+        defer { mockAppStateAdapter.dismante() }
         mockAppStateAdapter.stubbedState = .foreground
         mockPermissions.stubMicrophonePermission(.unknown)
         await fulfillment { self.mockPermissions.mockStore.state.microphonePermission == .unknown }
@@ -72,6 +74,7 @@ final class WebRTCPermissionsAdapter_Tests: StreamVideoTestCase, @unchecked Send
     }
 
     func test_willSet_videoOnTrue_unknownCamera_inForeground_requestsPermission_andKeepsVideoOnWhenGranted() async {
+        defer { mockAppStateAdapter.dismante() }
         mockAppStateAdapter.makeShared()
         mockAppStateAdapter.stubbedState = .foreground
         mockPermissions.stubCameraPermission(.unknown)
