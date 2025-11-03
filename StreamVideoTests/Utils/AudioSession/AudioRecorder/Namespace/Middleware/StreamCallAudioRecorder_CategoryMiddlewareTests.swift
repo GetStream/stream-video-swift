@@ -10,7 +10,7 @@ final class StreamCallAudioRecorder_CategoryMiddlewareTests: XCTestCase, @unchec
 
     @Injected(\.audioStore) private var audioStore
 
-    private var subject: StreamCallAudioRecorder
+    private lazy var subject: StreamCallAudioRecorder
         .Namespace
         .CategoryMiddleware! = .init()
 
@@ -26,7 +26,15 @@ final class StreamCallAudioRecorder_CategoryMiddlewareTests: XCTestCase, @unchec
         validation.isInverted = true
         subject.dispatcher = .init { _, _, _, _ in }
 
-        audioStore.dispatch(.audioSession(.setCategory(.playAndRecord, mode: .voiceChat, options: [])))
+        audioStore.dispatch(
+            .avAudioSession(
+                .setCategoryAndModeAndCategoryOptions(
+                    .playAndRecord,
+                    mode: .voiceChat,
+                    categoryOptions: []
+                )
+            )
+        )
 
         await safeFulfillment(of: [validation], timeout: 1)
     }
@@ -36,12 +44,21 @@ final class StreamCallAudioRecorder_CategoryMiddlewareTests: XCTestCase, @unchec
         validation.isInverted = true
         subject.dispatcher = .init { _, _, _, _ in }
 
-        audioStore.dispatch(.audioSession(.setCategory(.record, mode: .voiceChat, options: [])))
+        audioStore.dispatch(
+            .avAudioSession(
+                .setCategoryAndModeAndCategoryOptions(
+                    .record,
+                    mode: .voiceChat,
+                    categoryOptions: []
+                )
+            )
+        )
 
         await safeFulfillment(of: [validation], timeout: 1)
     }
 
-    func test_audioStoreCategory_noRecordOrPlaybackCategory_setIsRecordingDispatchWithFalse() async {
+    func test_audioStoreCategory_noRecordOrPlaybackCategory_setIsRecordingDispatchWithFalse() async throws {
+        try await audioStore.dispatch(.avAudioSession(.setCategory(.playAndRecord))).result()
         let validation = expectation(description: "Dispatcher was called")
         subject.dispatcher = .init { actions, _, _, _ in
             switch actions[0].wrappedValue {
@@ -52,7 +69,15 @@ final class StreamCallAudioRecorder_CategoryMiddlewareTests: XCTestCase, @unchec
             }
         }
 
-        audioStore.dispatch(.audioSession(.setCategory(.playback, mode: .voiceChat, options: [])))
+        audioStore.dispatch(
+            .avAudioSession(
+                .setCategoryAndModeAndCategoryOptions(
+                    .playback,
+                    mode: .default,
+                    categoryOptions: []
+                )
+            )
+        )
 
         await safeFulfillment(of: [validation])
     }

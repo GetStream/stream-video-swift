@@ -19,7 +19,7 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
             ring: true,
             notify: true,
             source: .inApp,
-            deliverySubject: .init()
+            deliverySubject: .init(nil)
         )
     )
     private lazy var allOtherStages: [Call.StateMachine.Stage]! = Call.StateMachine.Stage.ID
@@ -103,7 +103,7 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
                     ring: true,
                     notify: false,
                     source: .inApp,
-                    deliverySubject: .init(),
+                    deliverySubject: .init(nil),
                     retryPolicy: .init(maxRetries: 0, delay: { _ in 0 })
                 )
             )
@@ -126,7 +126,7 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
                     ring: true,
                     notify: false,
                     source: .inApp,
-                    deliverySubject: .init()
+                    deliverySubject: .init(nil)
                 )
             )
         )
@@ -153,7 +153,7 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
                     ring: true,
                     notify: false,
                     source: .inApp,
-                    deliverySubject: .init()
+                    deliverySubject: .init(nil)
                 )
             )
         )
@@ -179,7 +179,7 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
                     ring: true,
                     notify: false,
                     source: .inApp,
-                    deliverySubject: .init()
+                    deliverySubject: .init(nil)
                 )
             )
         )
@@ -205,7 +205,7 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
                     ring: true,
                     notify: false,
                     source: .inApp,
-                    deliverySubject: .init()
+                    deliverySubject: .init(nil)
                 )
             )
         )
@@ -221,10 +221,10 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
     }
 
     func test_execute_withoutRetries_deliverySubjectsReceivesTheJoinCallResponse() async throws {
-        let deliverySubject = PassthroughSubject<JoinCallResponse, Error>()
+        let deliverySubject = CurrentValueSubject<JoinCallResponse?, Error>(nil)
         let joinCallResponse = JoinCallResponse.dummy(ownCapabilities: [.changeMaxDuration])
         let deliveryExpectation = expectation(description: "DeliverySubject delivered value.")
-        let cancellable = deliverySubject.sink { _ in XCTFail() } receiveValue: {
+        let cancellable = deliverySubject.compactMap { $0 }.sink { _ in XCTFail() } receiveValue: {
             XCTAssertEqual($0, joinCallResponse)
             deliveryExpectation.fulfill()
         }
@@ -268,7 +268,7 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
                     ring: true,
                     notify: false,
                     source: .inApp,
-                    deliverySubject: .init()
+                    deliverySubject: .init(nil)
                 )
             )
         )
@@ -294,7 +294,7 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
                     ring: true,
                     notify: false,
                     source: .inApp,
-                    deliverySubject: .init(),
+                    deliverySubject: .init(nil),
                     retryPolicy: .init(maxRetries: 2, delay: { _ in 0 })
                 )
             )
@@ -310,9 +310,9 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
 
     func test_execute_withRetries_whenJoinFailsAndThereAreAvailableRetries_afterRetriesFailItDeliversErrorToDeliverySubject(
     ) async throws {
-        let deliverySubject = PassthroughSubject<JoinCallResponse, Error>()
+        let deliverySubject = CurrentValueSubject<JoinCallResponse?, Error>(nil)
         let deliveryExpectation = expectation(description: "DeliverySubject delivered value.")
-        let cancellable = deliverySubject.sink {
+        let cancellable = deliverySubject.compactMap { $0 }.sink {
             switch $0 {
             case .finished:
                 XCTFail()

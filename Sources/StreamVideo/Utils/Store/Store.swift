@@ -51,6 +51,8 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
     /// For observing changes, use ``publisher(_:)`` instead.
     var state: Namespace.State { stateSubject.value }
 
+    let statePublisher: AnyPublisher<Namespace.State, Never>
+
     /// Unique identifier for this store instance.
     private let identifier: String
     
@@ -95,7 +97,9 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
         coordinator: StoreCoordinator<Namespace>
     ) {
         self.identifier = identifier
-        stateSubject = .init(initialState)
+        let stateSubject = CurrentValueSubject<Namespace.State, Never>(initialState)
+        self.stateSubject = stateSubject
+        self.statePublisher = stateSubject.eraseToAnyPublisher()
         self.reducers = reducers
         self.middleware = []
         self.logger = logger
