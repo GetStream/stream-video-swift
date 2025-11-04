@@ -9,8 +9,8 @@ extension RTCAudioStore {
 
     /// Namespace that defines the store configuration for permission
     /// management.
-    enum Namespace: StoreNamespace {
-        typealias State = StoreState
+    public enum Namespace: StoreNamespace {
+        public typealias State = StoreState
 
         typealias Action = StoreAction
 
@@ -21,7 +21,8 @@ extension RTCAudioStore {
                 DefaultReducer(audioSession),
                 AVAudioSessionReducer(audioSession),
                 WebRTCAudioSessionReducer(audioSession),
-                CallKitReducer(audioSession)
+                CallKitReducer(audioSession),
+                StereoReducer()
             ]
         }
 
@@ -29,7 +30,9 @@ extension RTCAudioStore {
             [
                 InterruptionsMiddleware(audioSession),
                 RouteChangeMiddleware(audioSession),
-                AudioDeviceModuleMiddleware()
+                AudioDeviceModuleMiddleware(),
+//                ActiveCallMiddleware(),
+                HiFiMiddleware()
             ]
         }
 

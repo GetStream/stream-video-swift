@@ -11,7 +11,34 @@ extension RTCAudioStore {
     ///
     /// Use these to update cached statuses or to trigger system prompts
     /// via middleware responsible for requesting permissions.
-    public enum StoreAction: Sendable, Equatable, StoreActionBoxProtocol, CustomStringConvertible {
+    enum StoreAction: Sendable, Equatable, StoreActionBoxProtocol, CustomStringConvertible {
+
+        enum StereoAction: Equatable, Sendable, CustomStringConvertible {
+            case setPlayoutAvailable(Bool)
+            case setPlayoutEnabled(Bool)
+
+            var description: String {
+                switch self {
+                case let .setPlayoutAvailable(value):
+                    return "setPlayoutAvailable(\(value))"
+                case let .setPlayoutEnabled(value):
+                    return "setPlayoutEnabled(\(value))"
+                }
+            }
+
+            static func == (lhs: StereoAction, rhs: StereoAction) -> Bool {
+                switch (lhs, rhs) {
+                case (let .setPlayoutAvailable(lhsValue), let .setPlayoutAvailable(rhsValue)):
+                    return lhsValue == rhsValue
+
+                case (let .setPlayoutEnabled(lhsValue), let .setPlayoutEnabled(rhsValue)):
+                    return lhsValue == rhsValue
+
+                default:
+                    return false
+                }
+            }
+        }
 
         enum AVAudioSessionAction: Equatable, Sendable, CustomStringConvertible {
             case setCategory(AVAudioSession.Category)
@@ -103,13 +130,17 @@ extension RTCAudioStore {
         case setRecording(Bool)
         case setMicrophoneMuted(Bool)
         case setHasRecordingPermission(Bool)
+        case setSpeakerOutputChannels(Int)
+        case setReceiverOutputChannels(Int)
 
         case setAudioDeviceModule(AudioDeviceModule?)
         case setCurrentRoute(RTCAudioStore.StoreState.AudioRoute)
+        case setRouteTransitionState(RTCAudioStore.StoreState.RouteTransitionState)
 
         case avAudioSession(AVAudioSessionAction)
         case webRTCAudioSession(WebRTCAudioSessionAction)
         case callKit(CallKitAction)
+        case stereo(StereoAction)
 
         var description: String {
             switch self {
@@ -131,8 +162,17 @@ extension RTCAudioStore {
             case .setHasRecordingPermission(let value):
                 return ".setHasRecordingPermission(\(value))"
 
+            case .setSpeakerOutputChannels(let value):
+                return ".setSpeakerOutputChannels(\(value))"
+
+            case .setReceiverOutputChannels(let value):
+                return ".setReceiverOutputChannels(\(value))"
+
             case .setAudioDeviceModule(let value):
                 return ".setAudioDeviceModule(\(value))"
+
+            case .setRouteTransitionState(let value):
+                return ".setRouteTransitionState(\(value))"
 
             case .setCurrentRoute(let value):
                 return ".setCurrentRoute(\(value))"
@@ -145,6 +185,9 @@ extension RTCAudioStore {
 
             case .callKit(let value):
                 return ".callKit(\(value))"
+
+            case .stereo(let value):
+                return ".stereo(\(value))"
             }
         }
     }

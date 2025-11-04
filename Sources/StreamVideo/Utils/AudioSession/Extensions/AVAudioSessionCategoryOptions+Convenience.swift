@@ -32,6 +32,12 @@ extension AVAudioSession.CategoryOptions {
         if contains(.allowBluetooth) {
             options.append(".allowBluetooth")
         }
+//
+//        // Adds ".allowBluetoothHFP" if present, permitting audio playback through
+//        // Bluetooth devices.
+//        if contains(.allowBluetoothHFP) {
+//            options.append(".allowBluetoothHFP")
+//        }
 
         // Adds ".defaultToSpeaker" if present, enabling speaker output by default.
         if contains(.defaultToSpeaker) {
@@ -69,4 +75,9 @@ extension AVAudioSession.CategoryOptions {
         // the list of option names with commas for readability.
         return options.isEmpty ? ".noOptions" : options.joined(separator: ", ")
     }
+
+    static let baseline: AVAudioSession.CategoryOptions = [
+        .allowBluetooth,
+        .allowBluetoothA2DP
+    ]
 }

@@ -41,6 +41,8 @@ struct DemoMoreControlsViewModifier: ViewModifier {
                         VStack {
                             DemoNoiseCancellationButtonView(viewModel: viewModel)
 
+                            DemoMoreStereoPlayoutButtonView(call: viewModel.call)
+
                             DemoMoreControlListButtonView(
                                 action: { viewModel.toggleSpeaker() },
                                 label: viewModel.callSettings.speakerOn ? "Disable Speaker" : "Speaker"

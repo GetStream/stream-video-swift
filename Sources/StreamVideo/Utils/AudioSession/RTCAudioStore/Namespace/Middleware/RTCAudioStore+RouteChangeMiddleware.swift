@@ -13,7 +13,9 @@ extension RTCAudioStore {
     final class RouteChangeMiddleware: Middleware<RTCAudioStore.Namespace>, @unchecked Sendable {
 
         private let audioSessionObserver: RTCAudioSessionPublisher
+        private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
         private let disposableBag = DisposableBag()
+        private var ignoreRouteChanges = false
 
         convenience init(_ source: RTCAudioSession) {
             self.init(.init(source))
@@ -33,8 +35,26 @@ extension RTCAudioStore {
                     }
                     return (reason, from, to)
                 }
+                .receive(on: processingQueue)
                 .sink { [weak self] in self?.didChangeRoute(reason: $0, from: $1, to: $2) }
                 .store(in: disposableBag)
+        }
+
+        override func apply(
+            state: RTCAudioStore.StoreState,
+            action: RTCAudioStore.StoreAction,
+            file: StaticString,
+            function: StaticString,
+            line: UInt
+        ) {
+            switch action {
+            case let .setRouteTransitionState(value):
+                processingQueue.addOperation { [weak self] in
+                    self?.ignoreRouteChanges = value == .updating
+                }
+            default:
+                break
+            }
         }
 
         // MARK: - Private Helpers
@@ -46,8 +66,25 @@ extension RTCAudioStore {
             from: AVAudioSessionRouteDescription,
             to: AVAudioSessionRouteDescription
         ) {
-            let currentRoute = StoreState.AudioRoute(to)
+            let currentRoute = StoreState.AudioRoute(to, reason: reason)
             let previousRoute = StoreState.AudioRoute(from)
+
+            if currentRoute.isSpeaker {
+                dispatcher?.dispatch(.setSpeakerOutputChannels(currentRoute.outputs.first?.channels ?? 1))
+            } else if currentRoute.isReceiver {
+                dispatcher?.dispatch(.setReceiverOutputChannels(currentRoute.outputs.first?.channels ?? 1))
+            }
+
+            guard
+                !ignoreRouteChanges
+            else {
+                log.debug(
+                    "AudioSession route changed from \(previousRoute) to \(currentRoute) due to:\(reason) but the store identifier:io.getstream.audio.store is transitioning routes. Ignoring.",
+                    subsystems: .audioSession
+                )
+                return
+            }
+
             dispatcher?.dispatch([
                 .normal(.setCurrentRoute(currentRoute)),
                 .normal(.avAudioSession(.setOverrideOutputAudioPort(currentRoute.isSpeaker ? .speaker : .none)))

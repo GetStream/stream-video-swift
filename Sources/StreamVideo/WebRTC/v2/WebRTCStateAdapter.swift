@@ -78,6 +78,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     @Published private(set) var participantPins: [PinInfo] = []
     @Published private(set) var incomingVideoQualitySettings: IncomingVideoQualitySettings = .none
     @Published private(set) var isTracingEnabled: Bool = false
+    @Published private(set) var enforceStereoPlayoutOnExternalDevices: Bool = false
 
     private(set) var clientCapabilities: Set<ClientCapability> = [
         .subscriberVideoPause
@@ -129,7 +130,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         self.rtcPeerConnectionCoordinatorFactory = rtcPeerConnectionCoordinatorFactory
         self.videoCaptureSessionProvider = videoCaptureSessionProvider
         self.screenShareSessionProvider = screenShareSessionProvider
-        self.audioSession = .init()
+        self.audioSession = .init(enforceStereoPlayoutOnExternalDevices: false)
 
         Task { [weak self] in
             _ = await self?.permissionsAdapter
@@ -214,6 +215,11 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
             callSettings: callSettings,
             ownCapabilities: ownCapabilities
         )
+    }
+
+    func set(enforceStereoPlayoutOnExternalDevices value: Bool) {
+        enforceStereoPlayoutOnExternalDevices = value
+        audioSession.setEnforceStereoPlayoutOnExternalDevices(value)
     }
 
     // MARK: - Client Capabilities

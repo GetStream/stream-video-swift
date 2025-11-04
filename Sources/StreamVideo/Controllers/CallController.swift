@@ -517,6 +517,12 @@ class CallController: @unchecked Sendable {
             .sink { [weak self] in self?.webRTCClientDidUpdateStage($0) }
     }
 
+    // MARK: - Stereo
+
+    func updateStereoPlayoutEnforcementOnExternalDevices(_ isEnforced: Bool) async {
+        await webRTCCoordinator.updateStereoPlayoutEnforcementOnExternalDevices(isEnforced)
+    }
+
     // MARK: - Client Capabilities
 
     func enableClientCapabilities(_ capabilities: Set<ClientCapability>) async {

@@ -11,4 +11,13 @@ extension AVAudioSession.Category {
     public var description: String {
         rawValue
     }
+
+    var isOverrideOutputPortSupported: Bool {
+        switch self {
+        case .playback, .playAndRecord:
+            return true
+        default:
+            return false
+        }
+    }
 }

@@ -425,6 +425,10 @@ final class WebRTCCoordinator: @unchecked Sendable {
         )
     }
 
+    func updateStereoPlayoutEnforcementOnExternalDevices(_ isEnforced: Bool) async {
+        await stateAdapter.set(enforceStereoPlayoutOnExternalDevices: isEnforced)
+    }
+
     func updateAudioSessionPolicy(_ policy: AudioSessionPolicy) async {
         await stateAdapter.set(audioSessionPolicy: policy)
     }

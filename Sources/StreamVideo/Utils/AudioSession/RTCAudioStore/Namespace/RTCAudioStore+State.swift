@@ -8,18 +8,22 @@ import Foundation
 extension RTCAudioStore {
 
     /// The state container for all permission statuses.
-    struct StoreState: CustomStringConvertible, Encodable, Hashable, Sendable {
+    public struct StoreState: CustomStringConvertible, Encodable, Hashable, Sendable {
 
-        struct AVAudioSessionConfiguration: CustomStringConvertible, Encodable, Hashable, Sendable {
-            var category: AVAudioSession.Category
+        public enum RouteTransitionState: Encodable, Hashable, Sendable {
+            case idle, updating
+        }
+
+        public struct AVAudioSessionConfiguration: CustomStringConvertible, Encodable, Hashable, Sendable {
+            public var category: AVAudioSession.Category
             /// The AVAudioSession mode. Encoded as its string value.
-            var mode: AVAudioSession.Mode
+            public var mode: AVAudioSession.Mode
             /// The AVAudioSession category options. Encoded as its raw value.
-            var options: AVAudioSession.CategoryOptions
+            public var options: AVAudioSession.CategoryOptions
             /// The AVAudioSession port override. Encoded as its raw value.
-            var overrideOutputAudioPort: AVAudioSession.PortOverride
+            public var overrideOutputAudioPort: AVAudioSession.PortOverride
 
-            var description: String {
+            public var description: String {
                 " { " +
                     "category:\(category), " +
                     "mode:\(mode), " +
@@ -28,7 +32,7 @@ extension RTCAudioStore {
                     " }"
             }
 
-            static func == (
+            public static func == (
                 lhs: AVAudioSessionConfiguration,
                 rhs: AVAudioSessionConfiguration
             ) -> Bool {
@@ -45,7 +49,7 @@ extension RTCAudioStore {
                 case overrideOutputAudioPort
             }
 
-            func encode(to encoder: Encoder) throws {
+            public func encode(to encoder: Encoder) throws {
                 var container = encoder.container(keyedBy: CodingKeys.self)
                 try container.encode(category.rawValue, forKey: .category)
                 try container.encode(mode.rawValue, forKey: .mode)
@@ -68,7 +72,7 @@ extension RTCAudioStore {
                 self.overrideOutputAudioPort = overrideOutputAudioPort
             }
 
-            func hash(into hasher: inout Hasher) {
+            public func hash(into hasher: inout Hasher) {
                 hasher.combine(category.rawValue)
                 hasher.combine(mode.rawValue)
                 hasher.combine(options.rawValue)
@@ -76,14 +80,14 @@ extension RTCAudioStore {
             }
         }
 
-        struct WebRTCAudioSessionConfiguration: CustomStringConvertible, Encodable, Hashable, Sendable {
+        public struct WebRTCAudioSessionConfiguration: CustomStringConvertible, Encodable, Hashable, Sendable {
             /// If true, audio is enabled.
-            var isAudioEnabled: Bool
+            public var isAudioEnabled: Bool
             /// If true, manual audio management is enabled.
-            var useManualAudio: Bool
-            var prefersNoInterruptionsFromSystemAlerts: Bool
+            public var useManualAudio: Bool
+            public var prefersNoInterruptionsFromSystemAlerts: Bool
 
-            var description: String {
+            public var description: String {
                 " { " +
                     "isAudioEnabled:\(isAudioEnabled)" +
                     ", useManualAudio:\(useManualAudio)" +
@@ -92,23 +96,24 @@ extension RTCAudioStore {
             }
         }
 
-        struct AudioRoute: Hashable, CustomStringConvertible, Encodable, Sendable {
+        public struct AudioRoute: Hashable, CustomStringConvertible, Encodable, Sendable {
 
-            struct Port: Hashable, CustomStringConvertible, Encodable, Sendable {
+            public struct Port: Hashable, CustomStringConvertible, Encodable, Sendable {
                 private static let externalPorts: Set<AVAudioSession.Port> = [
                     .bluetoothA2DP, .bluetoothLE, .bluetoothHFP, .carAudio, .headphones
                 ]
 
-                var type: String
-                var name: String
-                var id: String
+                public var type: String
+                public var name: String
+                public var id: String
 
-                var isExternal: Bool
-                var isSpeaker: Bool
-                var isReceiver: Bool
+                public var isExternal: Bool
+                public var isSpeaker: Bool
+                public var isReceiver: Bool
+                public var channels: Int
 
-                var description: String {
-                    " { id:\(id), name:\(name), type:\(type) }"
+                public var description: String {
+                    " { id:\(id), name:\(name), type:\(type), channels:\(channels) }"
                 }
 
                 init(_ source: AVAudioSessionPortDescription) {
@@ -118,6 +123,7 @@ extension RTCAudioStore {
                     self.isExternal = Self.externalPorts.contains(source.portType)
                     self.isSpeaker = source.portType == .builtInSpeaker
                     self.isReceiver = source.portType == .builtInReceiver
+                    self.channels = source.channels?.endIndex ?? 0
                 }
 
                 init(
@@ -126,7 +132,8 @@ extension RTCAudioStore {
                     id: String,
                     isExternal: Bool,
                     isSpeaker: Bool,
-                    isReceiver: Bool
+                    isReceiver: Bool,
+                    channels: Int
                 ) {
                     self.type = type
                     self.name = name
@@ -134,55 +141,82 @@ extension RTCAudioStore {
                     self.isExternal = isExternal
                     self.isSpeaker = isSpeaker
                     self.isReceiver = isReceiver
+                    self.channels = channels
                 }
             }
 
-            let inputs: [Port]
-            let outputs: [Port]
+            public let inputs: [Port]
+            public let outputs: [Port]
+            let reason: AVAudioSession.RouteChangeReason
 
-            var isExternal: Bool
-            var isSpeaker: Bool
-            var isReceiver: Bool
+            public var isExternal: Bool
+            public var isSpeaker: Bool
+            public var isReceiver: Bool
+            public var supportsStereoPlayout: Bool
 
-            var description: String {
-                " { inputs:\(inputs), outputs:\(outputs) }"
+            public var description: String {
+                " { inputs:\(inputs), outputs:\(outputs), reason:\(reason) }"
             }
 
-            init(_ source: AVAudioSessionRouteDescription) {
+            init(
+                _ source: AVAudioSessionRouteDescription,
+                reason: AVAudioSession.RouteChangeReason = .unknown
+            ) {
                 self.init(
                     inputs: source.inputs.map(Port.init),
-                    outputs: source.outputs.map(Port.init)
+                    outputs: source.outputs.map(Port.init),
+                    reason: reason
                 )
             }
 
             init(
                 inputs: [Port],
-                outputs: [Port]
+                outputs: [Port],
+                reason: AVAudioSession.RouteChangeReason
             ) {
                 self.inputs = inputs
                 self.outputs = outputs
+                self.reason = reason
                 self.isExternal = outputs.first { $0.isExternal } != nil
                 self.isSpeaker = outputs.first { $0.isSpeaker } != nil
                 self.isReceiver = outputs.first { $0.isReceiver } != nil
+                self.supportsStereoPlayout = (outputs.first?.channels ?? 1) > 1
             }
 
-            static let empty = AudioRoute(inputs: [], outputs: [])
+            static let empty = AudioRoute(inputs: [], outputs: [], reason: .unknown)
         }
 
-        var isActive: Bool
-        var isInterrupted: Bool
-        var shouldRecord: Bool
-        var isRecording: Bool
-        var isMicrophoneMuted: Bool
-        var hasRecordingPermission: Bool
+        public struct Stereo: Hashable, CustomStringConvertible, Encodable, Sendable {
+            public var playoutAvailable: Bool
+            public var playoutEnabled: Bool
+
+            public var description: String {
+                " { " +
+                    "playoutAvailable:\(playoutAvailable)" +
+                    ", playoutEnabled:\(playoutEnabled)" +
+                    " }"
+            }
+        }
+
+        public var isActive: Bool
+        public var isInterrupted: Bool
+        public var shouldRecord: Bool
+        public var isRecording: Bool
+        public var isMicrophoneMuted: Bool
+        public var hasRecordingPermission: Bool
+        public var speakerOutputChannels: Int
+        public var receiverOutputChannels: Int
 
         var audioDeviceModule: AudioDeviceModule?
-        var currentRoute: AudioRoute
+        public var routeTransitionState: RouteTransitionState
+        public var currentRoute: AudioRoute
 
-        var audioSessionConfiguration: AVAudioSessionConfiguration
-        var webRTCAudioSessionConfiguration: WebRTCAudioSessionConfiguration
+        public var stereo: Stereo
 
-        var description: String {
+        public var audioSessionConfiguration: AVAudioSessionConfiguration
+        public var webRTCAudioSessionConfiguration: WebRTCAudioSessionConfiguration
+
+        public var description: String {
             " { " +
                 "isActive:\(isActive)" +
                 ", isInterrupted:\(isInterrupted)" +
@@ -190,10 +224,14 @@ extension RTCAudioStore {
                 ", isRecording:\(isRecording)" +
                 ", isMicrophoneMuted:\(isMicrophoneMuted)" +
                 ", hasRecordingPermission:\(hasRecordingPermission)" +
+                ", speakerOutputChannels:\(String(describing: speakerOutputChannels))" +
+                ", receiverOutputChannels:\(String(describing: receiverOutputChannels))" +
                 ", audioSessionConfiguration:\(audioSessionConfiguration)" +
                 ", webRTCAudioSessionConfiguration:\(webRTCAudioSessionConfiguration)" +
                 ", audioDeviceModule:\(audioDeviceModule)" +
+                ", routeTransitionState:\(routeTransitionState)" +
                 ", currentRoute:\(currentRoute)" +
+                ", stereo:\(stereo)" +
                 " }"
         }
 
@@ -204,13 +242,17 @@ extension RTCAudioStore {
             case isRecording
             case isMicrophoneMuted
             case hasRecordingPermission
+            case speakerOutputChannels
+            case receiverOutputChannels
             case audioSessionConfiguration
             case webRTCAudioSessionConfiguration
             case audioDeviceModule
+            case routeTransitionState
             case currentRoute
+            case stereo
         }
 
-        func encode(to encoder: Encoder) throws {
+        public func encode(to encoder: Encoder) throws {
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(isActive, forKey: .isActive)
             try container.encode(isInterrupted, forKey: .isInterrupted)
@@ -220,6 +262,14 @@ extension RTCAudioStore {
             try container.encode(
                 hasRecordingPermission,
                 forKey: .hasRecordingPermission
+            )
+            try container.encodeIfPresent(
+                speakerOutputChannels,
+                forKey: .speakerOutputChannels
+            )
+            try container.encodeIfPresent(
+                receiverOutputChannels,
+                forKey: .receiverOutputChannels
             )
             try container.encode(
                 audioSessionConfiguration,
@@ -233,30 +283,38 @@ extension RTCAudioStore {
                 audioDeviceModule,
                 forKey: .audioDeviceModule
             )
+            try container.encode(routeTransitionState, forKey: .routeTransitionState)
             try container.encode(currentRoute, forKey: .currentRoute)
+            try container.encode(stereo, forKey: .stereo)
         }
 
-        static func == (lhs: StoreState, rhs: StoreState) -> Bool {
+        public static func == (lhs: StoreState, rhs: StoreState) -> Bool {
             lhs.isActive == rhs.isActive
                 && lhs.isInterrupted == rhs.isInterrupted
                 && lhs.shouldRecord == rhs.shouldRecord
                 && lhs.isRecording == rhs.isRecording
                 && lhs.isMicrophoneMuted == rhs.isMicrophoneMuted
                 && lhs.hasRecordingPermission == rhs.hasRecordingPermission
+                && lhs.speakerOutputChannels == rhs.speakerOutputChannels
+                && lhs.receiverOutputChannels == rhs.receiverOutputChannels
                 && lhs.audioSessionConfiguration == rhs.audioSessionConfiguration
                 && lhs.webRTCAudioSessionConfiguration
                 == rhs.webRTCAudioSessionConfiguration
                 && lhs.audioDeviceModule === rhs.audioDeviceModule
+                && lhs.routeTransitionState == rhs.routeTransitionState
                 && lhs.currentRoute == rhs.currentRoute
+                && lhs.stereo == rhs.stereo
         }
 
-        func hash(into hasher: inout Hasher) {
+        public func hash(into hasher: inout Hasher) {
             hasher.combine(isActive)
             hasher.combine(isInterrupted)
             hasher.combine(shouldRecord)
             hasher.combine(isRecording)
             hasher.combine(isMicrophoneMuted)
             hasher.combine(hasRecordingPermission)
+            hasher.combine(speakerOutputChannels)
+            hasher.combine(receiverOutputChannels)
             hasher.combine(audioSessionConfiguration)
             hasher.combine(webRTCAudioSessionConfiguration)
             if let audioDeviceModule {
@@ -264,7 +322,9 @@ extension RTCAudioStore {
             } else {
                 hasher.combine(0 as UInt8)
             }
+            hasher.combine(routeTransitionState)
             hasher.combine(currentRoute)
+            hasher.combine(stereo)
         }
     }
 }

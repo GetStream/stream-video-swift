@@ -8,18 +8,14 @@ import StreamWebRTC
 
 extension RTCAudioStore.Namespace {
 
-    /// Applies `AVAudioSession` specific actions to both the live WebRTC session
-    /// and the store state, keeping them aligned.
     final class AVAudioSessionReducer: Reducer<RTCAudioStore.Namespace>, @unchecked Sendable {
 
-        private let source: AudioSessionProtocol
+        private let source: RTCAudioSession
 
-        init(_ source: AudioSessionProtocol) {
+        init(_ source: RTCAudioSession) {
             self.source = source
         }
 
-        /// Handles `StoreAction.avAudioSession` cases by mutating the session and
-        /// returning an updated state snapshot.
         override func reduce(
             state: State,
             action: Action,
@@ -42,6 +38,8 @@ extension RTCAudioStore.Namespace {
                     categoryOptions: state.audioSessionConfiguration.options
                 )
                 updatedState.audioSessionConfiguration.category = value
+                // Reset
+                updatedState.audioSessionConfiguration.overrideOutputAudioPort = .none
 
             case let .setMode(value):
                 try performUpdate(
@@ -51,6 +49,8 @@ extension RTCAudioStore.Namespace {
                     categoryOptions: state.audioSessionConfiguration.options
                 )
                 updatedState.audioSessionConfiguration.mode = value
+                // Reset
+                updatedState.audioSessionConfiguration.overrideOutputAudioPort = .none
 
             case let .setCategoryOptions(value):
                 try performUpdate(
@@ -70,6 +70,8 @@ extension RTCAudioStore.Namespace {
                 )
                 updatedState.audioSessionConfiguration.category = category
                 updatedState.audioSessionConfiguration.mode = mode
+                // Reset
+                updatedState.audioSessionConfiguration.overrideOutputAudioPort = .none
 
             case let .setCategoryAndCategoryOptions(category, categoryOptions):
                 try performUpdate(
@@ -80,6 +82,8 @@ extension RTCAudioStore.Namespace {
                 )
                 updatedState.audioSessionConfiguration.category = category
                 updatedState.audioSessionConfiguration.options = categoryOptions
+                // Reset
+                updatedState.audioSessionConfiguration.overrideOutputAudioPort = .none
 
             case let .setModeAndCategoryOptions(mode, categoryOptions):
                 try performUpdate(
@@ -90,6 +94,8 @@ extension RTCAudioStore.Namespace {
                 )
                 updatedState.audioSessionConfiguration.mode = mode
                 updatedState.audioSessionConfiguration.options = categoryOptions
+                // Reset
+                updatedState.audioSessionConfiguration.overrideOutputAudioPort = .none
 
             case let .setCategoryAndModeAndCategoryOptions(category, mode, categoryOptions):
                 try performUpdate(
@@ -101,28 +107,20 @@ extension RTCAudioStore.Namespace {
                 updatedState.audioSessionConfiguration.category = category
                 updatedState.audioSessionConfiguration.mode = mode
                 updatedState.audioSessionConfiguration.options = categoryOptions
+                // Reset
+                updatedState.audioSessionConfiguration.overrideOutputAudioPort = .none
 
             case let .setOverrideOutputAudioPort(value):
-                if state.audioSessionConfiguration.category == .playAndRecord {
-                    try source.perform {
-                        try $0.overrideOutputAudioPort(value)
-                    }
-                    updatedState.audioSessionConfiguration.overrideOutputAudioPort = value
-                } else {
-                    updatedState = try await setDefaultToSpeaker(
-                        state: state,
-                        speakerOn: value == .speaker
-                    )
-                }
+                try performUpdate(
+                    state: state.audioSessionConfiguration,
+                    overrideOutputAudioPort: value
+                )
+                updatedState.audioSessionConfiguration.overrideOutputAudioPort = value
             }
 
             return updatedState
         }
 
-        // MARK: - Private Helpers
-
-        /// Ensures the requested configuration is valid, applies it to the
-        /// session, and returns the canonicalised state.
         private func performUpdate(
             state: State.AVAudioSessionConfiguration,
             category: AVAudioSession.Category,
@@ -150,23 +148,8 @@ extension RTCAudioStore.Namespace {
                 )
             }
 
-            let requiresRestart = source.isActive
-
-            let webRTCConfiguration = RTCAudioSessionConfiguration.webRTC()
-            webRTCConfiguration.category = category.rawValue
-            webRTCConfiguration.mode = mode.rawValue
-            webRTCConfiguration.categoryOptions = categoryOptions
-
-            try source.perform { session in
-                if requiresRestart {
-                    try session.setActive(false)
-                }
-
-                try session.setConfiguration(
-                    webRTCConfiguration,
-                    active: requiresRestart
-                )
-            }
+            source.lockForConfiguration()
+            defer { source.unlockForConfiguration() }
 
             /// We update the `webRTC` default configuration because, the WebRTC audioStack
             /// can be restarted for various reasons. When the stack restarts it gets reconfigured
@@ -175,14 +158,44 @@ extension RTCAudioStore.Namespace {
             /// as our callSetting may be failing to get applied.
             /// By updating the `webRTC` configuration we ensure that the audioStack will
             /// start from the last known state in every restart, making things simpler to recover.
+            let webRTCConfiguration = RTCAudioSessionConfiguration.webRTC()
+            webRTCConfiguration.category = category.rawValue
+            webRTCConfiguration.mode = mode.rawValue
+            webRTCConfiguration.categoryOptions = categoryOptions
+
+            let requiresRestart = source.isActive
+
+            if requiresRestart { try source.setActive(false) }
+            try source.setConfiguration(webRTCConfiguration, active: requiresRestart)
             RTCAudioSessionConfiguration.setWebRTC(webRTCConfiguration)
         }
 
-        /// Updates the `defaultToSpeaker` option to mirror a requested override.
+        private func performUpdate(
+            state: State.AVAudioSessionConfiguration,
+            overrideOutputAudioPort: AVAudioSession.PortOverride
+        ) throws {
+            guard
+                state.overrideOutputAudioPort != overrideOutputAudioPort
+            else {
+                return
+            }
+
+            if state.category == .playAndRecord {
+                source.lockForConfiguration()
+                defer { source.unlockForConfiguration() }
+                try source.overrideOutputAudioPort(overrideOutputAudioPort)
+            } else {
+                try setDefaultToSpeaker(
+                    state: state,
+                    speakerOn: overrideOutputAudioPort == .speaker
+                )
+            }
+        }
+
         private func setDefaultToSpeaker(
-            state: State,
+            state: State.AVAudioSessionConfiguration,
             speakerOn: Bool
-        ) async throws -> State {
+        ) throws {
             var categoryOptions = source.categoryOptions
             let defaultToSpeakerExists = categoryOptions.contains(.defaultToSpeaker)
 
@@ -201,21 +214,14 @@ extension RTCAudioStore.Namespace {
             }
 
             guard didUpdate else {
-                return state
+                return
             }
 
-            return try await reduce(
+            try performUpdate(
                 state: state,
-                action: .avAudioSession(
-                    .setCategoryAndModeAndCategoryOptions(
-                        state.audioSessionConfiguration.category,
-                        mode: state.audioSessionConfiguration.mode,
-                        categoryOptions: categoryOptions
-                    )
-                ),
-                file: #file,
-                function: #function,
-                line: #line
+                category: state.category,
+                mode: state.mode,
+                categoryOptions: categoryOptions
             )
         }
     }

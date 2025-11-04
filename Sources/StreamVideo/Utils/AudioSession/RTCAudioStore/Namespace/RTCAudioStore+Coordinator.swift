@@ -34,11 +34,20 @@ extension RTCAudioStore {
             case let .setHasRecordingPermission(value):
                 return value != state.hasRecordingPermission
 
+            case let .setSpeakerOutputChannels(value):
+                return value != state.speakerOutputChannels
+                
+            case let .setReceiverOutputChannels(value):
+                return value != state.receiverOutputChannels
+
             case let .setAudioDeviceModule(value):
                 return value !== state.audioDeviceModule
 
             case let .setCurrentRoute(value):
                 return value != state.currentRoute
+
+            case let .setRouteTransitionState(value):
+                return value != state.routeTransitionState
 
             case let .avAudioSession(value):
                 return shouldExecute(
@@ -54,6 +63,9 @@ extension RTCAudioStore {
 
             case .callKit:
                 return true
+
+            case let .stereo(value):
+                return shouldExecute(action: value, state: state.stereo)
             }
         }
 
@@ -105,6 +117,18 @@ extension RTCAudioStore {
 
             case let .setPrefersNoInterruptionsFromSystemAlerts(value):
                 return value != state.prefersNoInterruptionsFromSystemAlerts
+            }
+        }
+
+        private func shouldExecute(
+            action: StoreAction.StereoAction,
+            state: StoreState.Stereo
+        ) -> Bool {
+            switch action {
+            case let .setPlayoutAvailable(value):
+                return value != state.playoutAvailable
+            case let .setPlayoutEnabled(value):
+                return value != state.playoutEnabled
             }
         }
     }

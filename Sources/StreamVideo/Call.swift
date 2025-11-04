@@ -1411,6 +1411,13 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         proximity.remove(policy)
     }
 
+    // MARK: - Stereo
+
+    public func updateStereoPlayoutEnforcementOnExternalDevices(_ isEnforced: Bool) async {
+        await callController
+            .updateStereoPlayoutEnforcementOnExternalDevices(isEnforced)
+    }
+
     // MARK: - Client Capabilities
 
     /// Enables a set of client capabilities for the call.

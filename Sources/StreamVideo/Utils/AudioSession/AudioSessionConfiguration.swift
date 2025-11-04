@@ -16,6 +16,33 @@ public struct AudioSessionConfiguration: ReflectiveStringConvertible, Equatable,
     /// The audio session port override.
     var overrideOutputAudioPort: AVAudioSession.PortOverride?
 
+    func withEnforcedStereoPlayoutOnExternalDevices(_ isEnforced: Bool) -> AudioSessionConfiguration {
+        var newValue = self
+        if isEnforced {
+            newValue.options.remove(.allowBluetooth)
+            newValue.options.insert(.allowBluetoothA2DP)
+        } else if !isEnforced {
+            newValue.options.insert(.allowBluetooth)
+        }
+        return newValue
+    }
+
+    func withStereoPlayoutCapableMode(
+        _ state: RTCAudioStore.StoreState
+    ) -> AudioSessionConfiguration {
+        var newValue = self
+
+        if state.currentRoute.supportsStereoPlayout {
+            newValue.mode = .default
+        } else if overrideOutputAudioPort == .speaker, state.speakerOutputChannels > 1 {
+            newValue.mode = .default
+        } else {
+            /* No-op */
+        }
+
+        return newValue
+    }
+
     /// Compares two `AudioSessionConfiguration` instances for equality.
     public static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.isActive == rhs.isActive &&

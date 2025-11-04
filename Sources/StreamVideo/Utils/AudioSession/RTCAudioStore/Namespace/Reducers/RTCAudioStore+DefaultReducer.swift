@@ -54,6 +54,12 @@ extension RTCAudioStore.Namespace {
             case let .setHasRecordingPermission(value):
                 updatedState.hasRecordingPermission = value
 
+            case let .setSpeakerOutputChannels(value):
+                updatedState.speakerOutputChannels = value
+
+            case let .setReceiverOutputChannels(value):
+                updatedState.receiverOutputChannels = value
+
             case let .setAudioDeviceModule(value):
                 updatedState.audioDeviceModule = value
                 if value == nil {
@@ -65,6 +71,9 @@ extension RTCAudioStore.Namespace {
             case let .setCurrentRoute(value):
                 updatedState.currentRoute = value
 
+            case let .setRouteTransitionState(value):
+                updatedState.routeTransitionState = value
+
             case .avAudioSession:
                 break
 
@@ -72,6 +81,9 @@ extension RTCAudioStore.Namespace {
                 break
 
             case .callKit:
+                break
+
+            case .stereo:
                 break
             }
 

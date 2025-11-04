@@ -23,14 +23,11 @@ public struct DefaultAudioSessionPolicy: AudioSessionPolicy {
         for callSettings: CallSettings,
         ownCapabilities: Set<OwnCapability>
     ) -> AudioSessionConfiguration {
-        .init(
+        return .init(
             isActive: callSettings.audioOutputOn,
             category: .playAndRecord,
             mode: .voiceChat,
-            options: [
-                .allowBluetooth,
-                .allowBluetoothA2DP
-            ],
+            options: .baseline,
             overrideOutputAudioPort: callSettings.speakerOn
                 ? .speaker
                 : AVAudioSession.PortOverride.none

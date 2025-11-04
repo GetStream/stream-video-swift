@@ -40,7 +40,7 @@ public struct OwnCapabilitiesAudioSessionPolicy: AudioSessionPolicy {
                 isActive: callSettings.audioOutputOn,
                 category: .playback,
                 mode: .default,
-                options: .playback,
+                options: .baseline,
                 overrideOutputAudioPort: nil
             )
         }
@@ -58,14 +58,6 @@ public struct OwnCapabilitiesAudioSessionPolicy: AudioSessionPolicy {
             ? .voiceChat
             : .default
 
-        let categoryOptions: AVAudioSession.CategoryOptions = category == .playAndRecord
-            ? .playAndRecord(
-                videoOn: callSettings.videoOn,
-                speakerOn: callSettings.speakerOn,
-                appIsInForeground: applicationStateAdapter.state == .foreground
-            )
-            : .playback
-
         let overrideOutputAudioPort: AVAudioSession.PortOverride? = category == .playAndRecord && applicationStateAdapter
             .state == .foreground
             ? callSettings.speakerOn == true ? .speaker : AVAudioSession.PortOverride.none
@@ -75,7 +67,7 @@ public struct OwnCapabilitiesAudioSessionPolicy: AudioSessionPolicy {
             isActive: callSettings.audioOutputOn,
             category: category,
             mode: mode,
-            options: categoryOptions,
+            options: .baseline,
             overrideOutputAudioPort: overrideOutputAudioPort
         )
     }

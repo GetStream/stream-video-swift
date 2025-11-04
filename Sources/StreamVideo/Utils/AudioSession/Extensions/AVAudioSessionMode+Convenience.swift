@@ -11,4 +11,13 @@ extension AVAudioSession.Mode {
     public var description: String {
         rawValue
     }
+
+    var supportsStereoPlayout: Bool {
+        switch self {
+        case .videoChat, .voiceChat, .gameChat:
+            return false
+        default:
+            return true
+        }
+    }
 }
