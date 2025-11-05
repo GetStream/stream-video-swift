@@ -66,6 +66,7 @@ public struct CallContainer<Factory: ViewFactory>: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .toastView(toast: $viewModel.toast)
+        .moderationWarning(call: viewModel.call)
         .overlay(overlayView)
         .onReceive(viewModel.$callingState) { _ in
             if viewModel.callingState == .idle || viewModel.callingState == .inCall {

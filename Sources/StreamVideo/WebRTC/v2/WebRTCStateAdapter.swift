@@ -165,7 +165,10 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     func set(connectOptions value: ConnectOptions) { self.connectOptions = value }
 
     /// Sets the own capabilities of the current user.
-    func set(ownCapabilities value: Set<OwnCapability>) { self.ownCapabilities = value }
+    func set(ownCapabilities value: Set<OwnCapability>) {
+        self.ownCapabilities = value
+        permissionsAdapter.willSet(ownCapabilities: value)
+    }
 
     /// Sets the WebRTC stats reporter.
     func set(statsAdapter value: WebRTCStatsAdapting?) {
