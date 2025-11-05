@@ -515,6 +515,8 @@
 		40A0FFBB2EA63E9A00F39D8F /* BatteryStore+DefaultReducer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A0FFBA2EA63E9A00F39D8F /* BatteryStore+DefaultReducer.swift */; };
 		40A0FFBE2EA63FE500F39D8F /* BatteryStore+ObservationMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A0FFBD2EA63FE500F39D8F /* BatteryStore+ObservationMiddleware.swift */; };
 		40A0FFC02EA6418000F39D8F /* Sequence+AsyncReduce.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A0FFBF2EA6418000F39D8F /* Sequence+AsyncReduce.swift */; };
+		40A317E82EB504C900733948 /* ModerationBlurViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A317E72EB504C900733948 /* ModerationBlurViewModifier.swift */; };
+		40A317EB2EB5081500733948 /* ModerationWarningViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A317EA2EB5081500733948 /* ModerationWarningViewModifier.swift */; };
 		40A7C5B52E099B4600EEDF9C /* ParticipantEventResetAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A7C5B22E099B1000EEDF9C /* ParticipantEventResetAdapter.swift */; };
 		40A7C5B82E099D6200EEDF9C /* ParticipantEventResetAdapter_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A7C5B72E099D6200EEDF9C /* ParticipantEventResetAdapter_Tests.swift */; };
 		40A9416E2B4D959F006D6965 /* StreamPictureInPictureAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A9416D2B4D959F006D6965 /* StreamPictureInPictureAdapter.swift */; };
@@ -2210,6 +2212,8 @@
 		40A0FFBA2EA63E9A00F39D8F /* BatteryStore+DefaultReducer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BatteryStore+DefaultReducer.swift"; sourceTree = "<group>"; };
 		40A0FFBD2EA63FE500F39D8F /* BatteryStore+ObservationMiddleware.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BatteryStore+ObservationMiddleware.swift"; sourceTree = "<group>"; };
 		40A0FFBF2EA6418000F39D8F /* Sequence+AsyncReduce.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sequence+AsyncReduce.swift"; sourceTree = "<group>"; };
+		40A317E72EB504C900733948 /* ModerationBlurViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModerationBlurViewModifier.swift; sourceTree = "<group>"; };
+		40A317EA2EB5081500733948 /* ModerationWarningViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModerationWarningViewModifier.swift; sourceTree = "<group>"; };
 		40A7C5B22E099B1000EEDF9C /* ParticipantEventResetAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantEventResetAdapter.swift; sourceTree = "<group>"; };
 		40A7C5B72E099D6200EEDF9C /* ParticipantEventResetAdapter_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantEventResetAdapter_Tests.swift; sourceTree = "<group>"; };
 		40A9416D2B4D959F006D6965 /* StreamPictureInPictureAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPictureInPictureAdapter.swift; sourceTree = "<group>"; };
@@ -4910,6 +4914,15 @@
 			path = Middleware;
 			sourceTree = "<group>";
 		};
+		40A317E62EB504B900733948 /* Moderation */ = {
+			isa = PBXGroup;
+			children = (
+				40A317E72EB504C900733948 /* ModerationBlurViewModifier.swift */,
+				40A317EA2EB5081500733948 /* ModerationWarningViewModifier.swift */,
+			);
+			path = Moderation;
+			sourceTree = "<group>";
+		};
 		40A7C5B42E099B1600EEDF9C /* ParticipantEventResetAdapter */ = {
 			isa = PBXGroup;
 			children = (
@@ -5559,6 +5572,7 @@
 		40C7B82A2B612D5100FB9DB2 /* ViewModifiers */ = {
 			isa = PBXGroup;
 			children = (
+				40A317E62EB504B900733948 /* Moderation */,
 				403EFC9E2BDBFE050057C248 /* CallEndedViewModifier.swift */,
 				408D29A02B6D208700885473 /* Snapshot */,
 				409145E92B68FDD2007F3C17 /* ReadableContentGuide */,
@@ -9474,6 +9488,7 @@
 				84F3B0DE28913E0F0088751D /* CallControlsView.swift in Sources */,
 				8435EB9029CDAADA00E02651 /* ParticipantsGridLayout.swift in Sources */,
 				8434C52D289AA41D0001490A /* ImageExtensions.swift in Sources */,
+				40A317E82EB504C900733948 /* ModerationBlurViewModifier.swift in Sources */,
 				849EDA8B297AFCC80072A12D /* PreJoiningView.swift in Sources */,
 				84D425082AA61E9900473150 /* LivestreamPlayer.swift in Sources */,
 				40A941762B4D9F16006D6965 /* PictureInPictureSourceView.swift in Sources */,
@@ -9487,6 +9502,7 @@
 				843697D228C7A25F00839D99 /* ParticipantsGridView.swift in Sources */,
 				840042CF2A70212D00917B30 /* ScreensharingControls.swift in Sources */,
 				40C7B8342B613A8200FB9DB2 /* ControlBadgeView.swift in Sources */,
+				40A317EB2EB5081500733948 /* ModerationWarningViewModifier.swift in Sources */,
 				8406269A2A37A5E2004B8748 /* CallEvents.swift in Sources */,
 				40C7B8362B613C7800FB9DB2 /* ParticipantsListButton.swift in Sources */,
 				40AA2EE22AE0137E000DCA5C /* ClipCorners.swift in Sources */,
