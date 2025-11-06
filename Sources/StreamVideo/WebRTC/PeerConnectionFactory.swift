@@ -20,7 +20,7 @@ final class PeerConnectionFactory: @unchecked Sendable {
         )
         let decoderFactory = RTCDefaultVideoDecoderFactory()
         return RTCPeerConnectionFactory(
-            audioDeviceModuleType: .audioEngine,
+            audioDeviceModuleType: .platformDefault,
             bypassVoiceProcessing: false,
             encoderFactory: encoderFactory,
             decoderFactory: decoderFactory,

@@ -4,9 +4,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
-### 🐞 Fixed
-- Fix permission prompts appearing when not needed. [#988](https://github.com/GetStream/stream-video-swift/pull/988)
-
 ### ✅ Added
 - SwiftUI modifiers that surface moderation blur and warning events in `CallView`. [#987](https://github.com/GetStream/stream-video-swift/pull/987)
 

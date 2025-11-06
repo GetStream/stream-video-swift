@@ -52,7 +52,6 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
     private weak var delegate: WebRTCPermissionsAdapterDelegate?
     private var requiredPermissions: Set<RequiredPermission> = []
     private var lastCallSettings: CallSettings?
-    private var ownCapabilities: Set<OwnCapability> = []
 
     /// Creates an adapter and begins observing app/permission changes.
     ///
@@ -156,12 +155,6 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
         }
     }
 
-    func willSet(ownCapabilities: Set<OwnCapability>) {
-        processingQueue.addOperation { [weak self] in
-            self?.ownCapabilities = ownCapabilities
-        }
-    }
-
     func cleanUp() {
         processingQueue.addOperation { [weak self] in
             // By emptying the Set we are saying that there are no permissions
@@ -244,11 +237,9 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
 
             switch permission {
             case .microphone:
-                return !permissions.hasMicrophonePermission && permissions.canRequestMicrophonePermission && ownCapabilities
-                    .contains(.sendAudio)
+                return !permissions.hasMicrophonePermission && permissions.canRequestMicrophonePermission
             case .camera:
-                return !permissions.hasCameraPermission && permissions.canRequestCameraPermission && ownCapabilities
-                    .contains(.sendVideo)
+                return !permissions.hasCameraPermission && permissions.canRequestCameraPermission
             }
         }
     }
