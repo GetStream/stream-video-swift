@@ -12,8 +12,6 @@ _November 05, 2025_
 ### ✅ Added
 - SwiftUI modifiers that surface moderation blur and warning events in `CallView`. [#987](https://github.com/GetStream/stream-video-swift/pull/987)
 
-### 🔄 Changed
-
 # [1.34.2](https://github.com/GetStream/stream-video-swift/releases/tag/1.34.2)
 _October 24, 2025_
 
