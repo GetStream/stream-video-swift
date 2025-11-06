@@ -13,7 +13,7 @@ struct ModerationBlurViewModifier: ViewModifier {
     var participant: CallParticipant
     var blurRadius: Float
 
-    @State var isBlurred: Bool = true
+    @State var isBlurred: Bool = false
 
     func body(content: Content) -> some View {
         Group {
