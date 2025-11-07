@@ -51,6 +51,16 @@ import Foundation
 /// state. They are executed in sequence, with each reducer receiving the
 /// state produced by the previous one.
 class Reducer<Namespace: StoreNamespace>: @unchecked Sendable {
+    /// Closure for dispatching new actions to the store.
+    ///
+    /// Use this to trigger additional actions in response to the current
+    /// action. The dispatcher is automatically set when the middleware is
+    /// added to a store.
+    ///
+    /// - Warning: Avoid creating infinite loops by dispatching actions
+    ///   that trigger the same middleware repeatedly.
+    var dispatcher: Store<Namespace>.Dispatcher?
+
     /// Processes an action to produce a new state.
     ///
     /// Override this method to implement state transformation logic. The

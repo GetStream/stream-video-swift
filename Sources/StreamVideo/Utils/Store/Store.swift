@@ -100,12 +100,13 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
         let stateSubject = CurrentValueSubject<Namespace.State, Never>(initialState)
         self.stateSubject = stateSubject
         self.statePublisher = stateSubject.eraseToAnyPublisher()
-        self.reducers = reducers
+        self.reducers = []
         self.middleware = []
         self.logger = logger
         self.executor = executor
         self.coordinator = coordinator
 
+        reducers.forEach { add($0) }
         middleware.forEach { add($0) }
     }
 
@@ -168,6 +169,7 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
                 return
             }
             reducers.append(value)
+            value.dispatcher = .init(self)
         }
     }
 
@@ -182,6 +184,7 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
                 return
             }
             reducers = reducers.filter { $0 !== value }
+            value.dispatcher = nil
         }
     }
 

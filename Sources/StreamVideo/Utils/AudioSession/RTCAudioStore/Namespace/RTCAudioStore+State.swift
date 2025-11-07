@@ -10,6 +10,21 @@ extension RTCAudioStore {
     /// The state container for all permission statuses.
     struct StoreState: CustomStringConvertible, Encodable, Hashable, Sendable {
 
+        struct StereoConfiguration: CustomStringConvertible, Encodable, Hashable, Sendable {
+            struct Playout: CustomStringConvertible, Encodable, Hashable, Sendable {
+                var available: Bool
+                var enabled: Bool
+
+                var description: String { "{ available:\(available), enabled:\(enabled) }" }
+            }
+
+            var playout: Playout
+
+            var description: String {
+                "{ playout:\(playout) }"
+            }
+        }
+
         struct AVAudioSessionConfiguration: CustomStringConvertible, Encodable, Hashable, Sendable {
             var category: AVAudioSession.Category
             /// The AVAudioSession mode. Encoded as its string value.
@@ -106,6 +121,7 @@ extension RTCAudioStore {
                 var isExternal: Bool
                 var isSpeaker: Bool
                 var isReceiver: Bool
+                var channels: Int
 
                 var description: String {
                     " { id:\(id), name:\(name), type:\(type) }"
@@ -118,6 +134,7 @@ extension RTCAudioStore {
                     self.isExternal = Self.externalPorts.contains(source.portType)
                     self.isSpeaker = source.portType == .builtInSpeaker
                     self.isReceiver = source.portType == .builtInReceiver
+                    self.channels = source.channels?.endIndex ?? 0
                 }
 
                 init(
@@ -126,7 +143,8 @@ extension RTCAudioStore {
                     id: String,
                     isExternal: Bool,
                     isSpeaker: Bool,
-                    isReceiver: Bool
+                    isReceiver: Bool,
+                    channels: Int
                 ) {
                     self.type = type
                     self.name = name
@@ -134,6 +152,7 @@ extension RTCAudioStore {
                     self.isExternal = isExternal
                     self.isSpeaker = isSpeaker
                     self.isReceiver = isReceiver
+                    self.channels = channels
                 }
             }
 
@@ -144,8 +163,11 @@ extension RTCAudioStore {
             var isSpeaker: Bool
             var isReceiver: Bool
 
+            var supportsStereoOutput: Bool
+            var supportsStereoInput: Bool
+
             var description: String {
-                " { inputs:\(inputs), outputs:\(outputs) }"
+                " { inputs:\(inputs), outputs:\(outputs), supportsStereoInput:\(supportsStereoInput), supportsStereoOutput:\(supportsStereoOutput) }"
             }
 
             init(_ source: AVAudioSessionRouteDescription) {
@@ -164,6 +186,8 @@ extension RTCAudioStore {
                 self.isExternal = outputs.first { $0.isExternal } != nil
                 self.isSpeaker = outputs.first { $0.isSpeaker } != nil
                 self.isReceiver = outputs.first { $0.isReceiver } != nil
+                self.supportsStereoInput = inputs.first { $0.channels > 1 } != nil
+                self.supportsStereoOutput = outputs.first { $0.channels > 1 } != nil
             }
 
             static let empty = AudioRoute(inputs: [], outputs: [])
@@ -181,6 +205,7 @@ extension RTCAudioStore {
 
         var audioSessionConfiguration: AVAudioSessionConfiguration
         var webRTCAudioSessionConfiguration: WebRTCAudioSessionConfiguration
+        var stereoConfiguration: StereoConfiguration
 
         var description: String {
             " { " +
@@ -192,6 +217,7 @@ extension RTCAudioStore {
                 ", hasRecordingPermission:\(hasRecordingPermission)" +
                 ", audioSessionConfiguration:\(audioSessionConfiguration)" +
                 ", webRTCAudioSessionConfiguration:\(webRTCAudioSessionConfiguration)" +
+                ", stereoConfiguration:\(stereoConfiguration)" +
                 ", audioDeviceModule:\(audioDeviceModule)" +
                 ", currentRoute:\(currentRoute)" +
                 " }"
@@ -206,6 +232,7 @@ extension RTCAudioStore {
             case hasRecordingPermission
             case audioSessionConfiguration
             case webRTCAudioSessionConfiguration
+            case stereoConfiguration
             case audioDeviceModule
             case currentRoute
         }
@@ -229,6 +256,10 @@ extension RTCAudioStore {
                 webRTCAudioSessionConfiguration,
                 forKey: .webRTCAudioSessionConfiguration
             )
+            try container.encode(
+                stereoConfiguration,
+                forKey: .stereoConfiguration
+            )
             try container.encodeIfPresent(
                 audioDeviceModule,
                 forKey: .audioDeviceModule
@@ -244,8 +275,8 @@ extension RTCAudioStore {
                 && lhs.isMicrophoneMuted == rhs.isMicrophoneMuted
                 && lhs.hasRecordingPermission == rhs.hasRecordingPermission
                 && lhs.audioSessionConfiguration == rhs.audioSessionConfiguration
-                && lhs.webRTCAudioSessionConfiguration
-                == rhs.webRTCAudioSessionConfiguration
+                && lhs.webRTCAudioSessionConfiguration == rhs.webRTCAudioSessionConfiguration
+                && lhs.stereoConfiguration == rhs.stereoConfiguration
                 && lhs.audioDeviceModule === rhs.audioDeviceModule
                 && lhs.currentRoute == rhs.currentRoute
         }
@@ -259,6 +290,7 @@ extension RTCAudioStore {
             hasher.combine(hasRecordingPermission)
             hasher.combine(audioSessionConfiguration)
             hasher.combine(webRTCAudioSessionConfiguration)
+            hasher.combine(stereoConfiguration)
             if let audioDeviceModule {
                 hasher.combine(ObjectIdentifier(audioDeviceModule))
             } else {

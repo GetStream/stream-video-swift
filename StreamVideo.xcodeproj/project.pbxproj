@@ -5865,6 +5865,7 @@
 		40EE9D442E97B3A60000EA92 /* Reducers */ = {
 			isa = PBXGroup;
 			children = (
+				403908712EBE477700B19FA1 /* RTCAudioStore+StereoPlayoutAvailabilityReducer.swift */,
 				40EE9D452E97BC940000EA92 /* RTCAudioStore+DefaultReducer.swift */,
 				40EE9D472E97BCA50000EA92 /* RTCAudioStore+AVAudioSessionReducer.swift */,
 				40EE9D492E97BCB20000EA92 /* RTCAudioStore+WebRTCAudioSessionReducer.swift */,
@@ -8528,6 +8529,7 @@
 				840042C92A6FF9A200917B30 /* BroadcastConstants.swift in Sources */,
 				84F73854287C1A2D00A363F4 /* InjectedValuesExtensions.swift in Sources */,
 				40C9E44A2C94744E00802B28 /* Stream_Video_Sfu_Models_VideoDimension+Convenience.swift in Sources */,
+				403908722EBE477700B19FA1 /* RTCAudioStore+StereoPlayoutAvailabilityReducer.swift in Sources */,
 				40944D1D2E4E368400088AF0 /* StreamCallAudioRecorder+Namespace.swift in Sources */,
 				841BAA462BD15CDE000C73E4 /* CallStatsReportSummaryResponse.swift in Sources */,
 				84DC38D829ADFCFD00946713 /* JoinCallRequest.swift in Sources */,

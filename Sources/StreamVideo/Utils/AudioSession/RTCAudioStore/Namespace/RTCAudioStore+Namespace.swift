@@ -21,7 +21,8 @@ extension RTCAudioStore {
                 DefaultReducer(audioSession),
                 AVAudioSessionReducer(audioSession),
                 WebRTCAudioSessionReducer(audioSession),
-                CallKitReducer(audioSession)
+                CallKitReducer(audioSession),
+                StereoPlayoutAvailabilityReducer() // This needs to be after the AVAudioSessionReducer
             ]
         }
 

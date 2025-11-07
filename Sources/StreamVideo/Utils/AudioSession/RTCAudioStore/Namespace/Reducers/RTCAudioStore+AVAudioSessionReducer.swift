@@ -206,13 +206,7 @@ extension RTCAudioStore.Namespace {
 
             return try await reduce(
                 state: state,
-                action: .avAudioSession(
-                    .setCategoryAndModeAndCategoryOptions(
-                        state.audioSessionConfiguration.category,
-                        mode: state.audioSessionConfiguration.mode,
-                        categoryOptions: categoryOptions
-                    )
-                ),
+                action: .avAudioSession(.setCategoryOptions(categoryOptions)),
                 file: #file,
                 function: #function,
                 line: #line
