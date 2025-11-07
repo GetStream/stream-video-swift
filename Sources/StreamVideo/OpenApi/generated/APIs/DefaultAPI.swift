@@ -1170,6 +1170,26 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
             try self.jsonDecoder.decode(EmptyResponse.self, from: $0)
         }
     }
+    
+    open func ringCall(type: String, id: String, ringCallRequest: RingCallRequest) async throws -> RingCallResponse {
+        var path = "/video/call/{type}/{id}/ring"
+
+        let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
+        let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        path = path.replacingOccurrences(of: String(format: "{%@}", "type"), with: typePostEscape, options: .literal, range: nil)
+        let idPreEscape = "\(APIHelper.mapValueToPathItem(id))"
+        let idPostEscape = idPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        path = path.replacingOccurrences(of: String(format: "{%@}", "id"), with: idPostEscape, options: .literal, range: nil)
+
+        let urlRequest = try makeRequest(
+            uriPath: path,
+            httpMethod: "POST",
+            request: ringCallRequest
+        )
+        return try await send(request: urlRequest) {
+            try self.jsonDecoder.decode(RingCallResponse.self, from: $0)
+        }
+    }
 }
 
 protocol DefaultAPIEndpoints {
@@ -1286,4 +1306,6 @@ protocol DefaultAPIEndpoints {
     func createGuest(createGuestRequest: CreateGuestRequest) async throws -> CreateGuestResponse
         
     func videoConnect() async throws -> Void
+    
+    func ringCall(type: String, id: String, ringCallRequest: RingCallRequest) async throws -> RingCallResponse
 }

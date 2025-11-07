@@ -1138,6 +1138,8 @@
 		8414081129F284A800FF2D7C /* AssertJSONEqual.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8414081029F284A800FF2D7C /* AssertJSONEqual.swift */; };
 		8414081329F28B5700FF2D7C /* RTCConfiguration_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8414081229F28B5600FF2D7C /* RTCConfiguration_Tests.swift */; };
 		8414081529F28FFC00FF2D7C /* CallSettings_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8414081429F28FFC00FF2D7C /* CallSettings_Tests.swift */; };
+		841457372EBE5BF100D0D034 /* RingCallResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841457362EBE5BF100D0D034 /* RingCallResponse.swift */; };
+		841457382EBE5BF100D0D034 /* RingCallRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841457352EBE5BF100D0D034 /* RingCallRequest.swift */; };
 		8415D3E1290B2AF2006E53CB /* outgoing.m4a in Resources */ = {isa = PBXBuildFile; fileRef = 8415D3E0290B2AF2006E53CB /* outgoing.m4a */; };
 		8415D3E3290BC882006E53CB /* Sounds.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8415D3E2290BC882006E53CB /* Sounds.swift */; };
 		841947982886D9CD0007B36E /* BundleExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841947972886D9CD0007B36E /* BundleExtensions.swift */; };
@@ -2720,6 +2722,8 @@
 		8414081029F284A800FF2D7C /* AssertJSONEqual.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssertJSONEqual.swift; sourceTree = "<group>"; };
 		8414081229F28B5600FF2D7C /* RTCConfiguration_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RTCConfiguration_Tests.swift; sourceTree = "<group>"; };
 		8414081429F28FFC00FF2D7C /* CallSettings_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallSettings_Tests.swift; sourceTree = "<group>"; };
+		841457352EBE5BF100D0D034 /* RingCallRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RingCallRequest.swift; sourceTree = "<group>"; };
+		841457362EBE5BF100D0D034 /* RingCallResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RingCallResponse.swift; sourceTree = "<group>"; };
 		8415D3E0290B2AF2006E53CB /* outgoing.m4a */ = {isa = PBXFileReference; lastKnownFileType = file; path = outgoing.m4a; sourceTree = "<group>"; };
 		8415D3E2290BC882006E53CB /* Sounds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sounds.swift; sourceTree = "<group>"; };
 		841947972886D9CD0007B36E /* BundleExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BundleExtensions.swift; sourceTree = "<group>"; };
@@ -7182,6 +7186,8 @@
 		84DC383E29ADFCFC00946713 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				841457352EBE5BF100D0D034 /* RingCallRequest.swift */,
+				841457362EBE5BF100D0D034 /* RingCallResponse.swift */,
 				8464FBA72EB3832000933768 /* CallModerationBlurEvent.swift */,
 				8464FBA82EB3832000933768 /* CallModerationWarningEvent.swift */,
 				8438AB042E5F3A2900BA834F /* AppEventResponse.swift */,
@@ -8628,6 +8634,8 @@
 				84DC38DB29ADFCFD00946713 /* JSONDataEncoding.swift in Sources */,
 				40FB15112BF77D5800D5E580 /* StreamStateMachineStage.swift in Sources */,
 				8496A9A629CC500F00F15FF1 /* StreamVideoCaptureHandler.swift in Sources */,
+				841457372EBE5BF100D0D034 /* RingCallResponse.swift in Sources */,
+				841457382EBE5BF100D0D034 /* RingCallRequest.swift in Sources */,
 				406568872E0426FD00A67EAC /* IdleTimerAdapter.swift in Sources */,
 				84CD12162C73831000056640 /* CallRtmpBroadcastStartedEvent.swift in Sources */,
 				40944D232E4E3D7D00088AF0 /* StreamCallAudioRecorder+State.swift in Sources */,
