@@ -90,6 +90,8 @@ extension RTCAudioStore {
                 break
             case .webRTCAudioSession:
                 break
+            case .stereo:
+                break
             case .callKit:
                 break
             }

@@ -44,6 +44,12 @@ final class RTCAudioStore: @unchecked Sendable {
                     isAudioEnabled: false,
                     useManualAudio: false,
                     prefersNoInterruptionsFromSystemAlerts: false
+                ),
+                stereoConfiguration: .init(
+                    playout: .init(
+                        available: false,
+                        enabled: false
+                    )
                 )
             ),
             reducers: Namespace.reducers(audioSession: audioSession),

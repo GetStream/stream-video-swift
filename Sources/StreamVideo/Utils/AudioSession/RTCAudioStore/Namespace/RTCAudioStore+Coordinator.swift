@@ -54,6 +54,12 @@ extension RTCAudioStore {
 
             case .callKit:
                 return true
+                
+            case let .stereo(value):
+                return shouldExecute(
+                    action: value,
+                    state: state.stereoConfiguration
+                )
             }
         }
 
@@ -105,6 +111,19 @@ extension RTCAudioStore {
 
             case let .setPrefersNoInterruptionsFromSystemAlerts(value):
                 return value != state.prefersNoInterruptionsFromSystemAlerts
+            }
+        }
+
+        private func shouldExecute(
+            action: StoreAction.StereoAction,
+            state: StoreState.StereoConfiguration
+        ) -> Bool {
+            switch action {
+            case let .setPlayoutAvailable(value):
+                state.playout.available != value
+
+            case let .setPlayoutEnabled(value):
+                state.playout.enabled != value
             }
         }
     }

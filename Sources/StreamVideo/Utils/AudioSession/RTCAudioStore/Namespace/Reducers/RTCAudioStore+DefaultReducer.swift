@@ -71,6 +71,9 @@ extension RTCAudioStore.Namespace {
             case .webRTCAudioSession:
                 break
 
+            case .stereo:
+                break
+
             case .callKit:
                 break
             }
