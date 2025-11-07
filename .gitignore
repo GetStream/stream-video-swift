@@ -124,3 +124,7 @@ Credentials.xcconfig
 .vscode/settings.json
 .vscode/launch.json
 buildServer.json
+
+# xcode-build-server files
+buildServer.json
+.compile
