@@ -25,4 +25,21 @@ public struct AudioSessionConfiguration: ReflectiveStringConvertible, Equatable,
             lhs.overrideOutputAudioPort?.rawValue ==
             rhs.overrideOutputAudioPort?.rawValue
     }
+
+    func withStereoPlayoutMode(_ mode: StereoPlayoutMode) -> AudioSessionConfiguration {
+        switch mode {
+        case .none:
+            return self
+        case .deviceOnly:
+            return self
+        case .externalOnly:
+            var update = self
+            update.options.remove(.allowBluetoothHFP)
+            return update
+        case .deviceAndExternal:
+            var update = self
+            update.options.remove(.allowBluetoothHFP)
+            return update
+        }
+    }
 }

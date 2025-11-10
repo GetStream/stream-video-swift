@@ -78,21 +78,7 @@ extension RTCAudioStore {
                     )
                 }
 
-            case .setActive:
-                break
-            case .setRecording:
-                break
-            case .setHasRecordingPermission:
-                break
-            case .setCurrentRoute:
-                break
-            case .avAudioSession:
-                break
-            case .webRTCAudioSession:
-                break
-            case .stereo:
-                break
-            case .callKit:
+            default:
                 break
             }
         }

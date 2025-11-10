@@ -94,6 +94,9 @@ extension RTCAudioStore {
 
             case let .setOverrideOutputAudioPort(value):
                 return value != state.overrideOutputAudioPort
+
+            case .prepareForSpeakerTransition:
+                return true
             }
         }
 

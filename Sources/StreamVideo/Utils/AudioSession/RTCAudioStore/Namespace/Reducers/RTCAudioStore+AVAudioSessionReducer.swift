@@ -42,6 +42,7 @@ extension RTCAudioStore.Namespace {
                     categoryOptions: state.audioSessionConfiguration.options
                 )
                 updatedState.audioSessionConfiguration.category = value
+                updatedState.audioSessionConfiguration.overrideOutputAudioPort = .none
 
             case let .setMode(value):
                 try performUpdate(
@@ -51,6 +52,7 @@ extension RTCAudioStore.Namespace {
                     categoryOptions: state.audioSessionConfiguration.options
                 )
                 updatedState.audioSessionConfiguration.mode = value
+                updatedState.audioSessionConfiguration.overrideOutputAudioPort = .none
 
             case let .setCategoryOptions(value):
                 try performUpdate(
@@ -60,6 +62,7 @@ extension RTCAudioStore.Namespace {
                     categoryOptions: value
                 )
                 updatedState.audioSessionConfiguration.options = value
+                updatedState.audioSessionConfiguration.overrideOutputAudioPort = .none
 
             case let .setCategoryAndMode(category, mode):
                 try performUpdate(
@@ -70,6 +73,7 @@ extension RTCAudioStore.Namespace {
                 )
                 updatedState.audioSessionConfiguration.category = category
                 updatedState.audioSessionConfiguration.mode = mode
+                updatedState.audioSessionConfiguration.overrideOutputAudioPort = .none
 
             case let .setCategoryAndCategoryOptions(category, categoryOptions):
                 try performUpdate(
@@ -80,6 +84,7 @@ extension RTCAudioStore.Namespace {
                 )
                 updatedState.audioSessionConfiguration.category = category
                 updatedState.audioSessionConfiguration.options = categoryOptions
+                updatedState.audioSessionConfiguration.overrideOutputAudioPort = .none
 
             case let .setModeAndCategoryOptions(mode, categoryOptions):
                 try performUpdate(
@@ -90,6 +95,7 @@ extension RTCAudioStore.Namespace {
                 )
                 updatedState.audioSessionConfiguration.mode = mode
                 updatedState.audioSessionConfiguration.options = categoryOptions
+                updatedState.audioSessionConfiguration.overrideOutputAudioPort = .none
 
             case let .setCategoryAndModeAndCategoryOptions(category, mode, categoryOptions):
                 try performUpdate(
@@ -101,6 +107,7 @@ extension RTCAudioStore.Namespace {
                 updatedState.audioSessionConfiguration.category = category
                 updatedState.audioSessionConfiguration.mode = mode
                 updatedState.audioSessionConfiguration.options = categoryOptions
+                updatedState.audioSessionConfiguration.overrideOutputAudioPort = .none
 
             case let .setOverrideOutputAudioPort(value):
                 if state.audioSessionConfiguration.category == .playAndRecord {
@@ -114,6 +121,9 @@ extension RTCAudioStore.Namespace {
                         speakerOn: value == .speaker
                     )
                 }
+
+            case .prepareForSpeakerTransition:
+                break
             }
 
             return updatedState

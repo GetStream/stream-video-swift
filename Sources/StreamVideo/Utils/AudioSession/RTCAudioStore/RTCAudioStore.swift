@@ -53,7 +53,8 @@ final class RTCAudioStore: @unchecked Sendable {
                 )
             ),
             reducers: Namespace.reducers(audioSession: audioSession),
-            middleware: Namespace.middleware(audioSession: audioSession)
+            middleware: Namespace.middleware(audioSession: audioSession),
+            effects: Namespace.effects(audioSession: audioSession)
         )
 
         store.dispatch([
