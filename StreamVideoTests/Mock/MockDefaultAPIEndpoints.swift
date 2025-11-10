@@ -585,6 +585,5 @@ final class MockDefaultAPIEndpoints: DefaultAPIEndpoints, Mockable, @unchecked S
     func ringCall(type: String, id: String, ringCallRequest: RingCallRequest) async throws -> RingCallResponse {
         stubbedFunctionInput[.ringCall]?.append(.ringCall(request: ringCallRequest))
         return try stubbedResult(for: .ringCall)
-
     }
 }
