@@ -19,6 +19,8 @@ extension RTCAudioStore {
             function: StaticString,
             line: UInt
         ) async throws -> RTCAudioStore.StoreState {
+            var updatedState = state
+
             switch action {
             case let .setCurrentRoute(value):
                 didUpdate(
@@ -50,11 +52,17 @@ extension RTCAudioStore {
                     mode: mode
                 )
 
+            case let .stereo(.setPlayoutAvailable(value)):
+                updatedState.stereoConfiguration.playout.available = value
+
+            case let .stereo(.setPlayoutEnabled(value)):
+                updatedState.stereoConfiguration.playout.enabled = value
+
             default:
                 break
             }
 
-            return state
+            return updatedState
         }
 
         // MARK: - Private Helpers

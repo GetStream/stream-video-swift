@@ -13,7 +13,9 @@ extension RTCAudioStore {
     final class RouteChangeMiddleware: Middleware<RTCAudioStore.Namespace>, @unchecked Sendable {
 
         private let audioSessionObserver: RTCAudioSessionPublisher
+        private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
         private let disposableBag = DisposableBag()
+        private var pauseUntilSpeaker = false
 
         convenience init(_ source: RTCAudioSession) {
             self.init(.init(source))
@@ -33,8 +35,27 @@ extension RTCAudioStore {
                     }
                     return (reason, from, to)
                 }
+                .receive(on: processingQueue)
                 .sink { [weak self] in self?.didChangeRoute(reason: $0, from: $1, to: $2) }
                 .store(in: disposableBag)
+        }
+
+        override func apply(
+            state: RTCAudioStore.StoreState,
+            action: RTCAudioStore.StoreAction,
+            file: StaticString,
+            function: StaticString,
+            line: UInt
+        ) {
+            switch action {
+            case .avAudioSession(.prepareForSpeakerTransition):
+                processingQueue.addOperation { [weak self] in
+                    self?.pauseUntilSpeaker = true
+                }
+
+            default:
+                break
+            }
         }
 
         // MARK: - Private Helpers
@@ -48,14 +69,25 @@ extension RTCAudioStore {
         ) {
             let currentRoute = StoreState.AudioRoute(to)
             let previousRoute = StoreState.AudioRoute(from)
-            dispatcher?.dispatch([
-                .normal(.setCurrentRoute(currentRoute)),
-                .normal(.avAudioSession(.setOverrideOutputAudioPort(currentRoute.isSpeaker ? .speaker : .none)))
-            ])
-            log.debug(
-                "AudioSession route changed from \(previousRoute) to \(currentRoute) due to:\(reason)",
-                subsystems: .audioSession
-            )
+
+            processingQueue.addOperation { [weak self] in
+                guard let self else { return }
+
+                if pauseUntilSpeaker, !currentRoute.isSpeaker {
+                    log.debug(
+                        "AudioSession route updated from \(previousRoute) → \(currentRoute) but we are waiting for speaker transition. Skipping.",
+                        subsystems: .audioSession
+                    )
+                    return
+                }
+
+                let actions: [StoreActionBox<RTCAudioStore.StoreAction>] = [
+                    .normal(.setCurrentRoute(currentRoute))
+                ]
+
+                pauseUntilSpeaker = false
+                dispatcher?.dispatch(actions)
+            }
         }
     }
 }

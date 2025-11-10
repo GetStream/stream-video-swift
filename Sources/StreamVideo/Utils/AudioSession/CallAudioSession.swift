@@ -6,6 +6,13 @@ import AVFoundation
 import Combine
 import Foundation
 
+enum StereoPlayoutMode {
+    case none
+    case deviceOnly
+    case externalOnly
+    case deviceAndExternal
+}
+
 /// `CallAudioSession` manages the audio session for calls, handling configuration,
 /// activation, and deactivation.
 final class CallAudioSession: @unchecked Sendable {
@@ -21,15 +28,19 @@ final class CallAudioSession: @unchecked Sendable {
     /// Determines audio behaviour for the call session.
     /// Set this property to change how the session is configured.
     @Atomic private(set) var policy: AudioSessionPolicy
+    private var stereoPlayoutMode: StereoPlayoutMode
 
     private let disposableBag = DisposableBag()
     private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
 
-    private var lastCallSettingSpeakerOn: Bool?
+    private var lastCallSettings: CallSettings?
+    private var lastOwnCapabilities: Set<OwnCapability>?
 
     init(
+        stereoPlayoutMode: StereoPlayoutMode = .externalOnly,
         policy: AudioSessionPolicy = DefaultAudioSessionPolicy()
     ) {
+        self.stereoPlayoutMode = stereoPlayoutMode
         self.policy = policy
 
         /// - Important: This runs whenever an CallAudioSession is created and ensures that
@@ -40,7 +51,11 @@ final class CallAudioSession: @unchecked Sendable {
                 .setCategoryAndModeAndCategoryOptions(
                     .playAndRecord,
                     mode: .voiceChat,
-                    categoryOptions: [.allowBluetooth, .allowBluetoothA2DP]
+                    categoryOptions: stereoPlayoutMode == .deviceAndExternal || stereoPlayoutMode == .externalOnly ?
+                        [.allowBluetoothA2DP] : [
+                            .allowBluetooth,
+                            .allowBluetoothA2DP
+                        ]
                 )
             )
         )
@@ -63,7 +78,16 @@ final class CallAudioSession: @unchecked Sendable {
         Publishers
             .CombineLatest(callSettingsPublisher, ownCapabilitiesPublisher)
             .receive(on: processingQueue)
-            .sink { [weak self] in self?.didUpdate(callSettings: $0, ownCapabilities: $1) }
+            .sink { [weak self] in
+                guard let self else {
+                    return
+                }
+                didUpdate(
+                    callSettings: $0,
+                    ownCapabilities: $1,
+                    currentRoute: audioStore.state.currentRoute
+                )
+            }
             .store(in: disposableBag)
 
         audioStore
@@ -71,15 +95,25 @@ final class CallAudioSession: @unchecked Sendable {
             .removeDuplicates()
             // We want to start listening on route changes **once** we have
             // expressed our initial preference.
-            .drop { [weak self] _ in self?.lastCallSettingSpeakerOn == nil }
+            .drop { [weak self] _ in self?.lastCallSettings == nil }
+            .throttle(for: 0.5, scheduler: processingQueue, latest: true)
             .receive(on: processingQueue)
-            .sink {
-                [weak self] in self?.delegate?.audioSessionAdapterDidUpdateSpeakerOn(
-                    $0.isSpeaker,
-                    file: #file,
-                    function: #function,
-                    line: #line
-                )
+            .sink { [weak self] in
+                guard let self, let lastCallSettings, let lastOwnCapabilities else { return }
+                if lastCallSettings.speakerOn != $0.isSpeaker {
+                    self.delegate?.audioSessionAdapterDidUpdateSpeakerOn(
+                        $0.isSpeaker,
+                        file: #file,
+                        function: #function,
+                        line: #line
+                    )
+                } else {
+                    didUpdate(
+                        callSettings: lastCallSettings,
+                        ownCapabilities: lastOwnCapabilities,
+                        currentRoute: $0
+                    )
+                }
             }
             .store(in: disposableBag)
         
@@ -115,9 +149,11 @@ final class CallAudioSession: @unchecked Sendable {
         }
 
         processingQueue.addOperation { [weak self] in
-            self?.didUpdate(
+            guard let self else { return }
+            didUpdate(
                 callSettings: callSettings,
-                ownCapabilities: ownCapabilities
+                ownCapabilities: ownCapabilities,
+                currentRoute: audioStore.state.currentRoute
             )
         }
     }
@@ -126,16 +162,51 @@ final class CallAudioSession: @unchecked Sendable {
 
     private func didUpdate(
         callSettings: CallSettings,
-        ownCapabilities: Set<OwnCapability>
+        ownCapabilities: Set<OwnCapability>,
+        currentRoute: RTCAudioStore.StoreState.AudioRoute
     ) {
         defer { statsAdapter?.trace(.init(audioSession: traceRepresentation)) }
 
-        let configuration = policy.configuration(
+        var configuration = policy.configuration(
             for: callSettings,
             ownCapabilities: ownCapabilities
         )
+        .withStereoPlayoutMode(stereoPlayoutMode)
 
-        var actions: [RTCAudioStore.Namespace.Action] = [
+        let currentRoute = audioStore.state.currentRoute
+
+        switch stereoPlayoutMode {
+        case .none:
+            break
+
+        case .deviceOnly:
+            if callSettings.speakerOn {
+                configuration.mode = .default
+            } else if currentRoute.isReceiver, currentRoute.supportsStereoOutput {
+                configuration.mode = .default
+            }
+
+        case .externalOnly:
+            if currentRoute.isExternal, currentRoute.supportsStereoOutput {
+                configuration.mode = .default
+            }
+
+        case .deviceAndExternal:
+            if callSettings.speakerOn {
+                configuration.mode = .default
+            } else if currentRoute.isReceiver, currentRoute.supportsStereoOutput {
+                configuration.mode = .default
+            } else if currentRoute.isExternal, currentRoute.supportsStereoOutput {
+                configuration.mode = .default
+            }
+        }
+
+        var actions: [RTCAudioStore.Namespace.Action] = []
+        if callSettings.speakerOn {
+            actions.append(.avAudioSession(.prepareForSpeakerTransition))
+        }
+
+        actions.append(contentsOf: [
             .avAudioSession(
                 .setCategoryAndModeAndCategoryOptions(
                     configuration.category,
@@ -143,11 +214,11 @@ final class CallAudioSession: @unchecked Sendable {
                     categoryOptions: configuration.options
                 )
             ),
+            .setActive(configuration.isActive),
             .avAudioSession(
                 .setOverrideOutputAudioPort(configuration.overrideOutputAudioPort ?? .none)
-            ),
-            .setActive(configuration.isActive)
-        ]
+            )
+        ])
 
         if ownCapabilities.contains(.sendAudio) {
             actions.append(.setShouldRecord(true))
@@ -158,7 +229,8 @@ final class CallAudioSession: @unchecked Sendable {
         }
 
         audioStore.dispatch(actions)
-        lastCallSettingSpeakerOn = configuration.overrideOutputAudioPort == .speaker
+        lastCallSettings = callSettings
+        lastOwnCapabilities = ownCapabilities
     }
 }
 

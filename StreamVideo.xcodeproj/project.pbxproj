@@ -215,6 +215,7 @@
 		403908852EBE4F4C00B19FA1 /* StreamWebRTC.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4039087D2EBE4F4200B19FA1 /* StreamWebRTC.xcframework */; };
 		403908862EBE4F4C00B19FA1 /* StreamWebRTC.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4039087D2EBE4F4200B19FA1 /* StreamWebRTC.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		4039088D2EC2311A00B19FA1 /* StoreEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4039088C2EC2311A00B19FA1 /* StoreEffect.swift */; };
+		403908AC2EC2A99C00B19FA1 /* RTCAudioStore+StereoPlayoutEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403908AB2EC2A99C00B19FA1 /* RTCAudioStore+StereoPlayoutEffect.swift */; };
 		4039F0C02D0099E40078159E /* RTCRtpCodecCapability+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4039F0BF2D0099E40078159E /* RTCRtpCodecCapability+Convenience.swift */; };
 		4039F0CA2D0222E40078159E /* Stream_Video_Sfu_Models_PublishOption+VideoLayers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4039F0C92D0222E40078159E /* Stream_Video_Sfu_Models_PublishOption+VideoLayers.swift */; };
 		4039F0CC2D0241120078159E /* AudioCodec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4039F0CB2D0241120078159E /* AudioCodec.swift */; };
@@ -1962,6 +1963,7 @@
 		403908712EBE477700B19FA1 /* RTCAudioStore+StereoPlayoutAvailabilityReducer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCAudioStore+StereoPlayoutAvailabilityReducer.swift"; sourceTree = "<group>"; };
 		4039087D2EBE4F4200B19FA1 /* StreamWebRTC.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = StreamWebRTC.xcframework; path = ../webrtc/src/.products/StreamWebRTC.xcframework; sourceTree = SOURCE_ROOT; };
 		4039088C2EC2311A00B19FA1 /* StoreEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreEffect.swift; sourceTree = "<group>"; };
+		403908AB2EC2A99C00B19FA1 /* RTCAudioStore+StereoPlayoutEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCAudioStore+StereoPlayoutEffect.swift"; sourceTree = "<group>"; };
 		4039F0BF2D0099E40078159E /* RTCRtpCodecCapability+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCRtpCodecCapability+Convenience.swift"; sourceTree = "<group>"; };
 		4039F0C92D0222E40078159E /* Stream_Video_Sfu_Models_PublishOption+VideoLayers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Stream_Video_Sfu_Models_PublishOption+VideoLayers.swift"; sourceTree = "<group>"; };
 		4039F0CB2D0241120078159E /* AudioCodec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioCodec.swift; sourceTree = "<group>"; };
@@ -4000,6 +4002,14 @@
 				40382F322C89A66000C2D00F /* RTCPeerConnectionCoordinatorProviding.swift */,
 			);
 			path = Protocols;
+			sourceTree = "<group>";
+		};
+		4039088B2EC230F100B19FA1 /* Effects */ = {
+			isa = PBXGroup;
+			children = (
+				403908AB2EC2A99C00B19FA1 /* RTCAudioStore+StereoPlayoutEffect.swift */,
+			);
+			path = Effects;
 			sourceTree = "<group>";
 		};
 		4039F0CD2D024DCE0078159E /* Utilities */ = {
@@ -8817,6 +8827,7 @@
 				40E1C89B2EA1156600AC3647 /* RTCAudioDeviceModuleControlling.swift in Sources */,
 				40BBC48C2C623C6E002AEF92 /* MediaAdapter.swift in Sources */,
 				40FB151D2BF77EFA00D5E580 /* Call+JoinedStage.swift in Sources */,
+				403908AC2EC2A99C00B19FA1 /* RTCAudioStore+StereoPlayoutEffect.swift in Sources */,
 				40BBC4B52C627761002AEF92 /* LocalVideoMediaAdapter.swift in Sources */,
 				84DC38C429ADFCFD00946713 /* MemberResponse.swift in Sources */,
 				40E363452D09F2BD0028C52A /* AVCaptureDevice.Format+Convenience.swift in Sources */,

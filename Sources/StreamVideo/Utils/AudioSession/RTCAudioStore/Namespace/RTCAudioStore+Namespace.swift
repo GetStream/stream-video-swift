@@ -34,6 +34,16 @@ extension RTCAudioStore {
             ]
         }
 
+        static func effects(audioSession: RTCAudioSession) -> Set<StoreEffect<RTCAudioStore.Namespace>> {
+            [
+                StereoPlayoutEffect()
+            ]
+        }
+
+        static func logger() -> StoreLogger<RTCAudioStore.Namespace> {
+            .init(logSkipped: false)
+        }
+
         static func coordinator() -> StoreCoordinator<RTCAudioStore.Namespace> {
             Coordinator()
         }
