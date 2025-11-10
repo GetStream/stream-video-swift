@@ -74,6 +74,7 @@ final class MockDefaultAPIEndpoints: DefaultAPIEndpoints, Mockable, @unchecked S
         case getEdges
         case createGuest
         case videoConnect
+        case ringCall
     }
 
     enum MockFunctionInputKey: Payloadable {
@@ -124,6 +125,7 @@ final class MockDefaultAPIEndpoints: DefaultAPIEndpoints, Mockable, @unchecked S
         case getEdges
         case createGuest(request: CreateGuestRequest)
         case videoConnect
+        case ringCall(request: RingCallRequest)
 
         var payload: Any {
             switch self {
@@ -221,6 +223,8 @@ final class MockDefaultAPIEndpoints: DefaultAPIEndpoints, Mockable, @unchecked S
                 return request
             case .videoConnect:
                 return ()
+            case let .ringCall(request: request):
+                return request
             }
         }
     }
@@ -576,5 +580,11 @@ final class MockDefaultAPIEndpoints: DefaultAPIEndpoints, Mockable, @unchecked S
         if let error = stubbedFunction[.videoConnect] as? Error { throw error }
         guard stubbedFunction[.videoConnect] != nil else { throw ClientError("Not stubbed function.") }
         return ()
+    }
+    
+    func ringCall(type: String, id: String, ringCallRequest: RingCallRequest) async throws -> RingCallResponse {
+        stubbedFunctionInput[.ringCall]?.append(.ringCall(request: ringCallRequest))
+        return try stubbedResult(for: .ringCall)
+
     }
 }
