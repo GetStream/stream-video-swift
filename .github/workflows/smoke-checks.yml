@@ -83,8 +83,6 @@ jobs:
     if: ${{ github.event.inputs.record_snapshots_uikit != 'true' || github.event.inputs.record_snapshots_swiftui == 'true' }}
     env:
       GITHUB_TOKEN: ${{ secrets.CI_BOT_GITHUB_TOKEN }} # to open a PR
-      IOS_SIMULATOR_DEVICE: "iPhone 16 Pro (18.5)" # TODO: IOS-1181
-      XCODE_VERSION: "16.4" # TODO: IOS-1181
     steps:
     - uses: actions/checkout@v4.1.1
     - uses: ./.github/actions/bootstrap
@@ -251,8 +249,6 @@ jobs:
     env:
       LAUNCH_ID: ${{ needs.allure_testops_launch.outputs.launch_id }}
       ALLURE_TOKEN: ${{ secrets.ALLURE_TOKEN }}
-      IOS_SIMULATOR_DEVICE: "iPhone 16 Pro (18.5)" # TODO: IOS-1181
-      XCODE_VERSION: "16.4" # TODO: IOS-1181
     strategy:
       matrix:
         batch: [0]
