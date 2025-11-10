@@ -77,6 +77,8 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
     /// Array of middleware that handle side effects.
     private var middleware: [Middleware<Namespace>]
 
+    private var effects: Set<StoreEffect<Namespace>>
+
     /// Initializes a new store with the specified configuration.
     ///
     /// - Parameters:
@@ -92,6 +94,7 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
         initialState: Namespace.State,
         reducers: [Reducer<Namespace>],
         middleware: [Middleware<Namespace>],
+        effects: Set<StoreEffect<Namespace>>,
         logger: StoreLogger<Namespace>,
         executor: StoreExecutor<Namespace>,
         coordinator: StoreCoordinator<Namespace>
@@ -102,12 +105,14 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
         self.statePublisher = stateSubject.eraseToAnyPublisher()
         self.reducers = []
         self.middleware = []
+        self.effects = []
         self.logger = logger
         self.executor = executor
         self.coordinator = coordinator
 
         reducers.forEach { add($0) }
         middleware.forEach { add($0) }
+        effects.forEach { add($0) }
     }
 
     // MARK: - Middleware Management
@@ -185,6 +190,44 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
             }
             reducers = reducers.filter { $0 !== value }
             value.dispatcher = nil
+        }
+    }
+
+    // MARK: - Effects Management
+
+    /// Adds an effect to respond to state changes.
+    ///
+    /// Effects are executed every time the store's state gets updated.
+    ///
+    /// - Parameter value: The effect to add.
+    func add<T: StoreEffect<Namespace>>(_ value: T) {
+        processingQueue.addOperation { [weak self] in
+            guard
+                let self
+            else {
+                return
+            }
+            effects.insert(value)
+            value.dispatcher = .init(self)
+            value.set(statePublisher: statePublisher)
+            value.stateProvider = { [weak self] in self?.state }
+        }
+    }
+
+    /// Removes a previously added reducer.
+    ///
+    /// - Parameter value: The reducer to remove.
+    func remove<T: StoreEffect<Namespace>>(_ value: T) {
+        processingQueue.addOperation { [weak self] in
+            guard
+                let self
+            else {
+                return
+            }
+            effects.remove(value)
+            value.dispatcher = nil
+            value.set(statePublisher: nil)
+            value.stateProvider = nil
         }
     }
 
