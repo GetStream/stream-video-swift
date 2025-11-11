@@ -13,61 +13,75 @@ extension RTCAudioStore {
     final class StereoPlayoutEffect: StoreEffect<RTCAudioStore.Namespace>, @unchecked Sendable {
 
         private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
-        private var cancellable: AnyCancellable?
+        private var audioDeviceModuleCancellable: AnyCancellable?
+        private var isStereoPlayoutAvailableCancellable: AnyCancellable?
 
         override func set(
             statePublisher: AnyPublisher<RTCAudioStore.StoreState, Never>?
         ) {
-            cancellable?.cancel()
-            cancellable = nil
-
             guard let statePublisher else {
                 return
             }
 
-            let audioDeviceModulePublisher = statePublisher
-                .map(\.audioDeviceModule)
-                .eraseToAnyPublisher()
-
-            let stereoPlayoutAvailable = statePublisher
-                .filter { $0.audioDeviceModule != nil }
-                .map(\.stereoConfiguration.playout.available)
-                .eraseToAnyPublisher()
-
             let currentRoutePublisher = statePublisher
-                .filter { $0.audioDeviceModule != nil }
                 .map(\.currentRoute)
+                .removeDuplicates()
                 .eraseToAnyPublisher()
 
-            cancellable = Publishers
-                .CombineLatest3(
-                    audioDeviceModulePublisher,
-                    stereoPlayoutAvailable,
-                    currentRoutePublisher
-                )
-                .filter { $0.2.supportsStereoOutput }
-                .throttle(for: 0.5, scheduler: processingQueue, latest: true)
+            audioDeviceModuleCancellable = statePublisher
+                .map(\.audioDeviceModule)
+                .removeDuplicates()
                 .receive(on: processingQueue)
-                .sink { [weak self] in self?.didUpdate(audioDeviceModule: $0.0, stereoPlayoutEnabled: $0.1) }
+                .log(.debug, subsystems: .audioSession) { "AudioDeviceModule was updated to \($0)." }
+                .sink { [weak self] in self?.didUpdate(audioDeviceModule: $0, currentRoutePublisher: currentRoutePublisher) }
         }
 
         // MARK: - Private Helpers
 
         private func didUpdate(
             audioDeviceModule: AudioDeviceModule?,
-            stereoPlayoutEnabled: Bool
+            currentRoutePublisher: AnyPublisher<RTCAudioStore.StoreState.AudioRoute, Never>
+        ) {
+            isStereoPlayoutAvailableCancellable?.cancel()
+            isStereoPlayoutAvailableCancellable = nil
+
+            guard let audioDeviceModule else {
+                return
+            }
+
+            let isStereoPlayoutAvailablePublisher = audioDeviceModule
+                .isStereoPlayoutAvailablePublisher
+                .removeDuplicates()
+                .eraseToAnyPublisher()
+
+            isStereoPlayoutAvailableCancellable = Publishers
+                .CombineLatest(isStereoPlayoutAvailablePublisher, currentRoutePublisher)
+                .receive(on: processingQueue)
+                .throttle(for: 0.2, scheduler: processingQueue, latest: true)
+                .log(.debug, subsystems: .audioSession) { "StereoPlayout updated to \($0)." }
+                .sink { [weak self, weak audioDeviceModule] in self?.didUpdate(
+                    audioDeviceModule: audioDeviceModule,
+                    stereoPlayoutAvailable: $0.0
+                ) }
+        }
+
+        private func didUpdate(
+            audioDeviceModule: AudioDeviceModule?,
+            stereoPlayoutAvailable: Bool
         ) {
             guard
-                let audioDeviceModule,
-                stereoPlayoutEnabled == audioDeviceModule.isStereoPlayoutAvailable
+                let audioDeviceModule
             else {
                 return
             }
 
+            dispatcher?.dispatch(.stereo(.setPlayoutAvailable(stereoPlayoutAvailable)))
+
             do {
-                try audioDeviceModule.setStereoPlayoutEnabled(stereoPlayoutEnabled)
-                dispatcher?.dispatch(.stereo(.setPlayoutEnabled(stereoPlayoutEnabled)))
+                try audioDeviceModule.setStereoPlayoutEnabled(stereoPlayoutAvailable)
+                dispatcher?.dispatch(.stereo(.setPlayoutEnabled(stereoPlayoutAvailable)))
             } catch {
+                dispatcher?.dispatch(.stereo(.setPlayoutAvailable(false)))
                 log.error(error, subsystems: .audioSession)
             }
         }
