@@ -208,12 +208,6 @@
 		40382F482C89D03700C2D00F /* Stream_Video_Sfu_Models_ConnectionQuality+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40382F412C89CF9300C2D00F /* Stream_Video_Sfu_Models_ConnectionQuality+Convenience.swift */; };
 		40382F502C8B3DAE00C2D00F /* StreamRTCPeerConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40382F4F2C8B3DA800C2D00F /* StreamRTCPeerConnection.swift */; };
 		403908722EBE477700B19FA1 /* RTCAudioStore+StereoPlayoutAvailabilityReducer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403908712EBE477700B19FA1 /* RTCAudioStore+StereoPlayoutAvailabilityReducer.swift */; };
-		403908812EBE4F4500B19FA1 /* StreamWebRTC.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4039087D2EBE4F4200B19FA1 /* StreamWebRTC.xcframework */; };
-		403908822EBE4F4500B19FA1 /* StreamWebRTC.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4039087D2EBE4F4200B19FA1 /* StreamWebRTC.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		403908832EBE4F4800B19FA1 /* StreamWebRTC.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4039087D2EBE4F4200B19FA1 /* StreamWebRTC.xcframework */; };
-		403908842EBE4F4800B19FA1 /* StreamWebRTC.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4039087D2EBE4F4200B19FA1 /* StreamWebRTC.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		403908852EBE4F4C00B19FA1 /* StreamWebRTC.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4039087D2EBE4F4200B19FA1 /* StreamWebRTC.xcframework */; };
-		403908862EBE4F4C00B19FA1 /* StreamWebRTC.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4039087D2EBE4F4200B19FA1 /* StreamWebRTC.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		4039088D2EC2311A00B19FA1 /* StoreEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4039088C2EC2311A00B19FA1 /* StoreEffect.swift */; };
 		403908AC2EC2A99C00B19FA1 /* RTCAudioStore+StereoPlayoutEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403908AB2EC2A99C00B19FA1 /* RTCAudioStore+StereoPlayoutEffect.swift */; };
 		4039F0C02D0099E40078159E /* RTCRtpCodecCapability+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4039F0BF2D0099E40078159E /* RTCRtpCodecCapability+Convenience.swift */; };
@@ -858,6 +852,9 @@
 		40E363772D0A2E320028C52A /* BroadcastBufferReaderKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E363762D0A2E320028C52A /* BroadcastBufferReaderKey.swift */; };
 		40E741FF2D553ACD0044C955 /* CurrentDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E741FE2D553ACD0044C955 /* CurrentDevice.swift */; };
 		40E7A45B2E29495500E8AB8B /* WebRTCLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E7A4582E29487700E8AB8B /* WebRTCLogger.swift */; };
+		40E91C792EC2BECD0049F63C /* StreamWebRTC in Frameworks */ = {isa = PBXBuildFile; productRef = 40E91C782EC2BECD0049F63C /* StreamWebRTC */; };
+		40E91C7B2EC2BED80049F63C /* StreamWebRTC in Frameworks */ = {isa = PBXBuildFile; productRef = 40E91C7A2EC2BED80049F63C /* StreamWebRTC */; };
+		40E91C7D2EC2BEDE0049F63C /* StreamWebRTC in Frameworks */ = {isa = PBXBuildFile; productRef = 40E91C7C2EC2BEDE0049F63C /* StreamWebRTC */; };
 		40E9B3B12BCD755F00ACF18F /* MemberResponse+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E9B3B02BCD755F00ACF18F /* MemberResponse+Dummy.swift */; };
 		40E9B3B32BCD93AE00ACF18F /* JoinCallResponse+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E9B3B22BCD93AE00ACF18F /* JoinCallResponse+Dummy.swift */; };
 		40E9B3B52BCD93F500ACF18F /* Credentials+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E9B3B42BCD93F500ACF18F /* Credentials+Dummy.swift */; };
@@ -1762,7 +1759,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				403908862EBE4F4C00B19FA1 /* StreamWebRTC.xcframework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1787,7 +1783,6 @@
 			files = (
 				848A805C290A808C00F3079B /* StreamVideoSwiftUI.framework in Embed Frameworks */,
 				848A8059290A808A00F3079B /* StreamVideo.framework in Embed Frameworks */,
-				403908822EBE4F4500B19FA1 /* StreamWebRTC.xcframework in Embed Frameworks */,
 				848A805E290A808E00F3079B /* StreamVideoUIKit.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
@@ -1809,7 +1804,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				403908842EBE4F4800B19FA1 /* StreamWebRTC.xcframework in Embed Frameworks */,
 				84F7384E287C198500A363F4 /* StreamVideo.framework in Embed Frameworks */,
 				84F7381B287C141000A363F4 /* StreamVideoSwiftUI.framework in Embed Frameworks */,
 			);
@@ -1961,7 +1955,6 @@
 		40382F442C89D00200C2D00F /* Stream_Video_Sfu_Models_Participant+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Stream_Video_Sfu_Models_Participant+Convenience.swift"; sourceTree = "<group>"; };
 		40382F4F2C8B3DA800C2D00F /* StreamRTCPeerConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamRTCPeerConnection.swift; sourceTree = "<group>"; };
 		403908712EBE477700B19FA1 /* RTCAudioStore+StereoPlayoutAvailabilityReducer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCAudioStore+StereoPlayoutAvailabilityReducer.swift"; sourceTree = "<group>"; };
-		4039087D2EBE4F4200B19FA1 /* StreamWebRTC.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = StreamWebRTC.xcframework; path = ../webrtc/src/.products/StreamWebRTC.xcframework; sourceTree = SOURCE_ROOT; };
 		4039088C2EC2311A00B19FA1 /* StoreEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreEffect.swift; sourceTree = "<group>"; };
 		403908AB2EC2A99C00B19FA1 /* RTCAudioStore+StereoPlayoutEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCAudioStore+StereoPlayoutEffect.swift"; sourceTree = "<group>"; };
 		4039F0BF2D0099E40078159E /* RTCRtpCodecCapability+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCRtpCodecCapability+Convenience.swift"; sourceTree = "<group>"; };
@@ -3248,12 +3241,12 @@
 			files = (
 				4014F1032D8C2EBC004E7EFD /* Gleap in Frameworks */,
 				844ADA652AD3F1AB00769F6A /* GoogleSignInSwift in Frameworks */,
-				403908832EBE4F4800B19FA1 /* StreamWebRTC.xcframework in Frameworks */,
 				4046DEF02A9F469100CA6D2F /* GDPerformanceView-Swift in Frameworks */,
 				401A64A52A9DF79E00534ED1 /* StreamChatSwiftUI in Frameworks */,
 				8423B7562950BB0B00012F8D /* Sentry in Frameworks */,
 				40AC73B42BE0062B00C57517 /* StreamVideoNoiseCancellation in Frameworks */,
 				401A64A82A9DF7B400534ED1 /* EffectsLibrary in Frameworks */,
+				40E91C7B2EC2BED80049F63C /* StreamWebRTC in Frameworks */,
 				4035913C2BC53D2A00B5B767 /* Accelerate.framework in Frameworks */,
 				84F7381A287C141000A363F4 /* StreamVideoSwiftUI.framework in Frameworks */,
 				84F7384D287C198500A363F4 /* StreamVideo.framework in Frameworks */,
@@ -3277,12 +3270,12 @@
 				406303462AD9432D0091AE77 /* GoogleSignInSwift in Frameworks */,
 				82E1C14F2AEA7DD50076D7BE /* GDPerformanceView-Swift in Frameworks */,
 				40F0178A2BC014EC00E89FD1 /* Sentry in Frameworks */,
-				403908812EBE4F4500B19FA1 /* StreamWebRTC.xcframework in Frameworks */,
 				4029A62A2AB069600065DAFB /* StreamChatSwiftUI in Frameworks */,
 				40AB35692B738D3D00E465CC /* EffectsLibrary in Frameworks */,
 				848A805D290A808E00F3079B /* StreamVideoUIKit.framework in Frameworks */,
 				848A8058290A808A00F3079B /* StreamVideo.framework in Frameworks */,
 				848A805B290A808C00F3079B /* StreamVideoSwiftUI.framework in Frameworks */,
+				40E91C7D2EC2BEDE0049F63C /* StreamWebRTC in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3290,8 +3283,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				403908852EBE4F4C00B19FA1 /* StreamWebRTC.xcframework in Frameworks */,
 				84BE8A5628BE314000B34D2F /* SwiftProtobuf in Frameworks */,
+				40E91C792EC2BECD0049F63C /* StreamWebRTC in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -7636,7 +7629,6 @@
 		84F73842287C195600A363F4 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				4039087D2EBE4F4200B19FA1 /* StreamWebRTC.xcframework */,
 				4035913B2BC53D2A00B5B767 /* Accelerate.framework */,
 				8400B48E29429ADC00663B99 /* libswift_Concurrency.tbd */,
 				8427FF632A03D1D100AFD2C3 /* Intents.framework */,
@@ -7769,6 +7761,7 @@
 				844ADA642AD3F1AB00769F6A /* GoogleSignInSwift */,
 				40AC73B32BE0062B00C57517 /* StreamVideoNoiseCancellation */,
 				4014F1022D8C2EBC004E7EFD /* Gleap */,
+				40E91C7A2EC2BED80049F63C /* StreamWebRTC */,
 			);
 			productName = StreamVideoSwiftUI;
 			productReference = 842D8BC32865B31B00801910 /* StreamVideoCallApp-Debug.app */;
@@ -7815,6 +7808,7 @@
 				40AB35682B738D3D00E465CC /* EffectsLibrary */,
 				40F017892BC014EC00E89FD1 /* Sentry */,
 				40C708D52D8D729500D3501F /* Gleap */,
+				40E91C7C2EC2BEDE0049F63C /* StreamWebRTC */,
 			);
 			productName = DemoAppUIKit;
 			productReference = 8493224C290837890013C029 /* DemoAppUIKit.app */;
@@ -7837,6 +7831,7 @@
 			name = StreamVideo;
 			packageProductDependencies = (
 				84BE8A5528BE314000B34D2F /* SwiftProtobuf */,
+				40E91C782EC2BECD0049F63C /* StreamWebRTC */,
 			);
 			productName = StreamVideo;
 			productReference = 84F737ED287C13AC00A363F4 /* StreamVideo.framework */;
@@ -8017,6 +8012,7 @@
 				844ADA612AD3F1AB00769F6A /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 				40AC73B22BE0062B00C57517 /* XCRemoteSwiftPackageReference "stream-video-noise-cancellation-swift" */,
 				4014F1012D8C2EBC004E7EFD /* XCRemoteSwiftPackageReference "Gleap-iOS-SDK" */,
+				403908AD2EC2B4C200B19FA1 /* XCRemoteSwiftPackageReference "stream-video-swift-webrtc" */,
 			);
 			productRefGroup = 842D8BC42865B31B00801910 /* Products */;
 			projectDirPath = "";
@@ -11355,6 +11351,14 @@
 				minimumVersion = 1.0.0;
 			};
 		};
+		403908AD2EC2B4C200B19FA1 /* XCRemoteSwiftPackageReference "stream-video-swift-webrtc" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/GetStream/stream-video-swift-webrtc.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 137.1.0;
+			};
+		};
 		4046DEEC2A9F404300CA6D2F /* XCRemoteSwiftPackageReference "GDPerformanceView-Swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/dani-gavrilov/GDPerformanceView-Swift";
@@ -11450,6 +11454,21 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 4014F1012D8C2EBC004E7EFD /* XCRemoteSwiftPackageReference "Gleap-iOS-SDK" */;
 			productName = Gleap;
+		};
+		40E91C782EC2BECD0049F63C /* StreamWebRTC */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 403908AD2EC2B4C200B19FA1 /* XCRemoteSwiftPackageReference "stream-video-swift-webrtc" */;
+			productName = StreamWebRTC;
+		};
+		40E91C7A2EC2BED80049F63C /* StreamWebRTC */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 403908AD2EC2B4C200B19FA1 /* XCRemoteSwiftPackageReference "stream-video-swift-webrtc" */;
+			productName = StreamWebRTC;
+		};
+		40E91C7C2EC2BEDE0049F63C /* StreamWebRTC */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 403908AD2EC2B4C200B19FA1 /* XCRemoteSwiftPackageReference "stream-video-swift-webrtc" */;
+			productName = StreamWebRTC;
 		};
 		40F017892BC014EC00E89FD1 /* Sentry */ = {
 			isa = XCSwiftPackageProductDependency;
