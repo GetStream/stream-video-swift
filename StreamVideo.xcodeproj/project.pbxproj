@@ -658,6 +658,21 @@
 		40B8FFA72EC393A80061E3F6 /* StreamWebRTC in Frameworks */ = {isa = PBXBuildFile; productRef = 40B8FFA62EC393A80061E3F6 /* StreamWebRTC */; };
 		40B8FFA92EC393B50061E3F6 /* StreamWebRTC in Frameworks */ = {isa = PBXBuildFile; productRef = 40B8FFA82EC393B50061E3F6 /* StreamWebRTC */; };
 		40B8FFAB2EC393BB0061E3F6 /* StreamWebRTC in Frameworks */ = {isa = PBXBuildFile; productRef = 40B8FFAA2EC393BB0061E3F6 /* StreamWebRTC */; };
+		40B8FFB62EC3949F0061E3F6 /* BatteryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B8FFB42EC3949F0061E3F6 /* BatteryStore.swift */; };
+		40B8FFB72EC3949F0061E3F6 /* BatteryStore+Action.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B8FFB02EC3949F0061E3F6 /* BatteryStore+Action.swift */; };
+		40B8FFB82EC3949F0061E3F6 /* BatteryStore+Namespace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B8FFB12EC3949F0061E3F6 /* BatteryStore+Namespace.swift */; };
+		40B8FFB92EC3949F0061E3F6 /* BatteryStore+State.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B8FFB22EC3949F0061E3F6 /* BatteryStore+State.swift */; };
+		40B8FFBA2EC3949F0061E3F6 /* BatteryStore+ObservationMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B8FFAC2EC3949F0061E3F6 /* BatteryStore+ObservationMiddleware.swift */; };
+		40B8FFBB2EC3949F0061E3F6 /* BatteryStore+DefaultReducer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B8FFAE2EC3949F0061E3F6 /* BatteryStore+DefaultReducer.swift */; };
+		40B8FFC02EC394AA0061E3F6 /* CallModerationBlurEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B8FFBC2EC394AA0061E3F6 /* CallModerationBlurEvent.swift */; };
+		40B8FFC12EC394AA0061E3F6 /* RingCallRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B8FFBE2EC394AA0061E3F6 /* RingCallRequest.swift */; };
+		40B8FFC22EC394AA0061E3F6 /* CallModerationWarningEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B8FFBD2EC394AA0061E3F6 /* CallModerationWarningEvent.swift */; };
+		40B8FFC32EC394AA0061E3F6 /* RingCallResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B8FFBF2EC394AA0061E3F6 /* RingCallResponse.swift */; };
+		40B8FFC72EC394C50061E3F6 /* ModerationWarningViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B8FFC52EC394C50061E3F6 /* ModerationWarningViewModifier.swift */; };
+		40B8FFC82EC394C50061E3F6 /* ModerationBlurViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B8FFC42EC394C50061E3F6 /* ModerationBlurViewModifier.swift */; };
+		40B8FFCD2EC394D30061E3F6 /* BatteryStoreDefaultReducer_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B8FFCA2EC394D30061E3F6 /* BatteryStoreDefaultReducer_Tests.swift */; };
+		40B8FFCE2EC394D30061E3F6 /* BatteryStore_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B8FFC92EC394D30061E3F6 /* BatteryStore_Tests.swift */; };
+		40B8FFCF2EC394D30061E3F6 /* BatteryStoreObservationMiddleware_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B8FFCB2EC394D30061E3F6 /* BatteryStoreObservationMiddleware_Tests.swift */; };
 		40BBC4792C6227DC002AEF92 /* DemoNoiseCancellationButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC4782C6227DC002AEF92 /* DemoNoiseCancellationButtonView.swift */; };
 		40BBC47C2C6227F1002AEF92 /* View+PresentDemoMoreMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC47B2C6227F1002AEF92 /* View+PresentDemoMoreMenu.swift */; };
 		40BBC47E2C62287F002AEF92 /* DemoReconnectionButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC47D2C62287F002AEF92 /* DemoReconnectionButtonView.swift */; };
@@ -2307,6 +2322,21 @@
 		40B575CF2DCCEBA900F489B8 /* PictureInPictureEnforcedStopAdapterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PictureInPictureEnforcedStopAdapterTests.swift; sourceTree = "<group>"; };
 		40B575D22DCCECDA00F489B8 /* MockAVPictureInPictureController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAVPictureInPictureController.swift; sourceTree = "<group>"; };
 		40B575D52DCCEFB500F489B8 /* StreamPictureInPictureControllerProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPictureInPictureControllerProtocol.swift; sourceTree = "<group>"; };
+		40B8FFAC2EC3949F0061E3F6 /* BatteryStore+ObservationMiddleware.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BatteryStore+ObservationMiddleware.swift"; sourceTree = "<group>"; };
+		40B8FFAE2EC3949F0061E3F6 /* BatteryStore+DefaultReducer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BatteryStore+DefaultReducer.swift"; sourceTree = "<group>"; };
+		40B8FFB02EC3949F0061E3F6 /* BatteryStore+Action.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BatteryStore+Action.swift"; sourceTree = "<group>"; };
+		40B8FFB12EC3949F0061E3F6 /* BatteryStore+Namespace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BatteryStore+Namespace.swift"; sourceTree = "<group>"; };
+		40B8FFB22EC3949F0061E3F6 /* BatteryStore+State.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BatteryStore+State.swift"; sourceTree = "<group>"; };
+		40B8FFB42EC3949F0061E3F6 /* BatteryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatteryStore.swift; sourceTree = "<group>"; };
+		40B8FFBC2EC394AA0061E3F6 /* CallModerationBlurEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallModerationBlurEvent.swift; sourceTree = "<group>"; };
+		40B8FFBD2EC394AA0061E3F6 /* CallModerationWarningEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallModerationWarningEvent.swift; sourceTree = "<group>"; };
+		40B8FFBE2EC394AA0061E3F6 /* RingCallRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RingCallRequest.swift; sourceTree = "<group>"; };
+		40B8FFBF2EC394AA0061E3F6 /* RingCallResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RingCallResponse.swift; sourceTree = "<group>"; };
+		40B8FFC42EC394C50061E3F6 /* ModerationBlurViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModerationBlurViewModifier.swift; sourceTree = "<group>"; };
+		40B8FFC52EC394C50061E3F6 /* ModerationWarningViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModerationWarningViewModifier.swift; sourceTree = "<group>"; };
+		40B8FFC92EC394D30061E3F6 /* BatteryStore_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatteryStore_Tests.swift; sourceTree = "<group>"; };
+		40B8FFCA2EC394D30061E3F6 /* BatteryStoreDefaultReducer_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatteryStoreDefaultReducer_Tests.swift; sourceTree = "<group>"; };
+		40B8FFCB2EC394D30061E3F6 /* BatteryStoreObservationMiddleware_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatteryStoreObservationMiddleware_Tests.swift; sourceTree = "<group>"; };
 		40BBC4782C6227DC002AEF92 /* DemoNoiseCancellationButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoNoiseCancellationButtonView.swift; sourceTree = "<group>"; };
 		40BBC47B2C6227F1002AEF92 /* View+PresentDemoMoreMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+PresentDemoMoreMenu.swift"; sourceTree = "<group>"; };
 		40BBC47D2C62287F002AEF92 /* DemoReconnectionButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoReconnectionButtonView.swift; sourceTree = "<group>"; };
@@ -5188,6 +5218,62 @@
 			path = Visitors;
 			sourceTree = "<group>";
 		};
+		40B8FFAD2EC3949F0061E3F6 /* Middleware */ = {
+			isa = PBXGroup;
+			children = (
+				40B8FFAC2EC3949F0061E3F6 /* BatteryStore+ObservationMiddleware.swift */,
+			);
+			path = Middleware;
+			sourceTree = "<group>";
+		};
+		40B8FFAF2EC3949F0061E3F6 /* Reducers */ = {
+			isa = PBXGroup;
+			children = (
+				40B8FFAE2EC3949F0061E3F6 /* BatteryStore+DefaultReducer.swift */,
+			);
+			path = Reducers;
+			sourceTree = "<group>";
+		};
+		40B8FFB32EC3949F0061E3F6 /* Namespace */ = {
+			isa = PBXGroup;
+			children = (
+				40B8FFAD2EC3949F0061E3F6 /* Middleware */,
+				40B8FFAF2EC3949F0061E3F6 /* Reducers */,
+				40B8FFB02EC3949F0061E3F6 /* BatteryStore+Action.swift */,
+				40B8FFB12EC3949F0061E3F6 /* BatteryStore+Namespace.swift */,
+				40B8FFB22EC3949F0061E3F6 /* BatteryStore+State.swift */,
+			);
+			path = Namespace;
+			sourceTree = "<group>";
+		};
+		40B8FFB52EC3949F0061E3F6 /* Battery */ = {
+			isa = PBXGroup;
+			children = (
+				40B8FFB32EC3949F0061E3F6 /* Namespace */,
+				40B8FFB42EC3949F0061E3F6 /* BatteryStore.swift */,
+			);
+			path = Battery;
+			sourceTree = "<group>";
+		};
+		40B8FFC62EC394C50061E3F6 /* Moderation */ = {
+			isa = PBXGroup;
+			children = (
+				40B8FFC42EC394C50061E3F6 /* ModerationBlurViewModifier.swift */,
+				40B8FFC52EC394C50061E3F6 /* ModerationWarningViewModifier.swift */,
+			);
+			path = Moderation;
+			sourceTree = "<group>";
+		};
+		40B8FFCC2EC394D30061E3F6 /* Battery */ = {
+			isa = PBXGroup;
+			children = (
+				40B8FFC92EC394D30061E3F6 /* BatteryStore_Tests.swift */,
+				40B8FFCA2EC394D30061E3F6 /* BatteryStoreDefaultReducer_Tests.swift */,
+				40B8FFCB2EC394D30061E3F6 /* BatteryStoreObservationMiddleware_Tests.swift */,
+			);
+			path = Battery;
+			sourceTree = "<group>";
+		};
 		40BBC47A2C6227DF002AEF92 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
@@ -5471,6 +5557,7 @@
 		40C7B82A2B612D5100FB9DB2 /* ViewModifiers */ = {
 			isa = PBXGroup;
 			children = (
+				40B8FFC62EC394C50061E3F6 /* Moderation */,
 				403EFC9E2BDBFE050057C248 /* CallEndedViewModifier.swift */,
 				408D29A02B6D208700885473 /* Snapshot */,
 				409145E92B68FDD2007F3C17 /* ReadableContentGuide */,
@@ -6506,6 +6593,7 @@
 		842747F429EEDACB00E063AD /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				40B8FFCC2EC394D30061E3F6 /* Battery */,
 				40064BD72E5C88DC007CDB33 /* PermissionStore */,
 				40C71B572E5355F800733BF6 /* Store */,
 				40FAAC852DDC9B2D007BF93A /* AnyEncodable.swift */,
@@ -7037,6 +7125,7 @@
 		84AF64D3287C79220012A503 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				40B8FFB52EC3949F0061E3F6 /* Battery */,
 				40C8F0042E55D21D00A0CC87 /* PermissionsStore */,
 				40944D132E4E2D8800088AF0 /* Store */,
 				406568852E0426F600A67EAC /* IdleTimerAdapter */,
@@ -7172,6 +7261,10 @@
 		84DC383E29ADFCFC00946713 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				40B8FFBC2EC394AA0061E3F6 /* CallModerationBlurEvent.swift */,
+				40B8FFBD2EC394AA0061E3F6 /* CallModerationWarningEvent.swift */,
+				40B8FFBE2EC394AA0061E3F6 /* RingCallRequest.swift */,
+				40B8FFBF2EC394AA0061E3F6 /* RingCallResponse.swift */,
 				8438AB042E5F3A2900BA834F /* AppEventResponse.swift */,
 				8438AB052E5F3A2900BA834F /* FileUploadConfig.swift */,
 				84DD68F22E5F24A9001A1DF5 /* AppUpdatedEvent.swift */,
@@ -8688,6 +8781,10 @@
 				4039F0CF2D024DDF0078159E /* MediaTransceiverStorage.swift in Sources */,
 				8469593829BB6B4E00134EA0 /* GetEdgesResponse.swift in Sources */,
 				40AB34AE2C5D02D400B5B6B3 /* SFUAdapter.swift in Sources */,
+				40B8FFC02EC394AA0061E3F6 /* CallModerationBlurEvent.swift in Sources */,
+				40B8FFC12EC394AA0061E3F6 /* RingCallRequest.swift in Sources */,
+				40B8FFC22EC394AA0061E3F6 /* CallModerationWarningEvent.swift in Sources */,
+				40B8FFC32EC394AA0061E3F6 /* RingCallResponse.swift in Sources */,
 				84DC389A29ADFCFD00946713 /* APIError.swift in Sources */,
 				8449824B2C738A830029734D /* DeleteCallRequest.swift in Sources */,
 				84AF64DB287C7A2C0012A503 /* ErrorPayload.swift in Sources */,
@@ -8728,6 +8825,12 @@
 				40C9E4442C94740600802B28 /* Stream_Video_Sfu_Models_VideoLayer+Convenience.swift in Sources */,
 				84CD12252C73840300056640 /* CallUserMutedEvent.swift in Sources */,
 				84DC38AC29ADFCFD00946713 /* CallAcceptedEvent.swift in Sources */,
+				40B8FFB62EC3949F0061E3F6 /* BatteryStore.swift in Sources */,
+				40B8FFB72EC3949F0061E3F6 /* BatteryStore+Action.swift in Sources */,
+				40B8FFB82EC3949F0061E3F6 /* BatteryStore+Namespace.swift in Sources */,
+				40B8FFB92EC3949F0061E3F6 /* BatteryStore+State.swift in Sources */,
+				40B8FFBA2EC3949F0061E3F6 /* BatteryStore+ObservationMiddleware.swift in Sources */,
+				40B8FFBB2EC3949F0061E3F6 /* BatteryStore+DefaultReducer.swift in Sources */,
 				84FC2C2828AD350100181490 /* WebRTCEvents.swift in Sources */,
 				4091158E2E06A1EA00F9135C /* OperationQueue+TaskOperations.swift in Sources */,
 				40E3635D2D0A17C10028C52A /* CameraVideoOutputHandler.swift in Sources */,
@@ -9407,6 +9510,9 @@
 				40B3E5472DBBCB2A00DE8F50 /* VideoProximityPolicy_Tests.swift in Sources */,
 				406B3C3F2C919BB300FC93A1 /* MockSFUStack.swift in Sources */,
 				403FB14C2BFE14760047A696 /* Publisher_NextTests.swift in Sources */,
+				40B8FFCD2EC394D30061E3F6 /* BatteryStoreDefaultReducer_Tests.swift in Sources */,
+				40B8FFCE2EC394D30061E3F6 /* BatteryStore_Tests.swift in Sources */,
+				40B8FFCF2EC394D30061E3F6 /* BatteryStoreObservationMiddleware_Tests.swift in Sources */,
 				84A4DCBB2A41DC6E00B1D1BF /* AsyncAssert.swift in Sources */,
 				406B3C162C90343300FC93A1 /* LocalVideoMediaAdapter_Tests.swift in Sources */,
 				40B48C3D2D14D7EF002C4EAB /* RTCRtpTransceiverInit_ConvenienceTests.swift in Sources */,
@@ -9510,6 +9616,8 @@
 				840A5A5629054F69006A1E4B /* UserListProvider.swift in Sources */,
 				40FAF3D32B10F611003F8029 /* UIDevice+Convenience.swift in Sources */,
 				8458872A28A3F935002A81BF /* OutgoingCallView.swift in Sources */,
+				40B8FFC72EC394C50061E3F6 /* ModerationWarningViewModifier.swift in Sources */,
+				40B8FFC82EC394C50061E3F6 /* ModerationBlurViewModifier.swift in Sources */,
 				40245F3A2BE26F7200FCF075 /* StatelessAudioOutputIconView.swift in Sources */,
 				8457CF9128BB835F00E8CF50 /* CallView.swift in Sources */,
 				846E4AFD29D1DDE8003733AB /* LayoutMenuView.swift in Sources */,
@@ -11367,8 +11475,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/GetStream/stream-video-swift-webrtc.git";
 			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 137.0.44;
+				kind = exactVersion;
+				version = 137.0.44;
 			};
 		};
 		40F445C32A9E1D91004BE3DA /* XCRemoteSwiftPackageReference "stream-chat-swift-test-helpers" */ = {
