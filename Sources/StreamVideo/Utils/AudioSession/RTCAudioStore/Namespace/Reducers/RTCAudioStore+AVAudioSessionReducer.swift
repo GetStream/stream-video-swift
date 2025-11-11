@@ -144,6 +144,10 @@ extension RTCAudioStore.Namespace {
                 || state.mode != mode
                 || state.options != categoryOptions
             else {
+                log.debug(
+                    "AVAudioSession configuration didn't change category:\(category), mode:\(mode), categoryOptions:\(categoryOptions).",
+                    subsystems: .audioSession
+                )
                 return
             }
 

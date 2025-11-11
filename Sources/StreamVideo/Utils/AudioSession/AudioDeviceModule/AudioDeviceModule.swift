@@ -24,6 +24,7 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
     enum Event: Equatable {
         case speechActivityStarted
         case speechActivityEnded
+        case didUpdateStereoPlayoutAvailable(Bool)
         case didCreateAudioEngine(AVAudioEngine)
         case willEnableAudioEngine(AVAudioEngine)
         case willStartAudioEngine(AVAudioEngine)
@@ -48,7 +49,9 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
     var isStereoPlayoutEnabled: Bool { isStereoPlayoutEnabledSubject.value }
     var isStereoPlayoutEnabledPublisher: AnyPublisher<Bool, Never> { isStereoPlayoutEnabledSubject.eraseToAnyPublisher() }
 
-    var isStereoPlayoutAvailable: Bool { source.isStereoPlayoutAvailable }
+    private let isStereoPlayoutAvailableSubject: CurrentValueSubject<Bool, Never>
+    var isStereoPlayoutAvailable: Bool { isStereoPlayoutAvailableSubject.value }
+    var isStereoPlayoutAvailablePublisher: AnyPublisher<Bool, Never> { isStereoPlayoutAvailableSubject.eraseToAnyPublisher() }
 
     private let isVoiceProcessingBypassedSubject: CurrentValueSubject<Bool, Never>
     var isVoiceProcessingBypassed: Bool { isVoiceProcessingBypassedSubject.value }
@@ -74,8 +77,6 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
     private var audioLevelsAdapter: AudioEngineNodeAdapting
     let publisher: AnyPublisher<Event, Never>
 
-    private var devices: [RTCIODevice] = []
-
     override var description: String {
         "{ " +
             "isPlaying:\(isPlaying)" +
@@ -88,7 +89,6 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
             ", isVoiceProcessingAGCEnabled:\(isVoiceProcessingAGCEnabled)" +
             ", audioLevel:\(audioLevel)" +
             ", source:\(source)" +
-            ", devices:\(devices)" +
             " }"
     }
 
@@ -105,6 +105,7 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         self.isPlayingSubject = .init(isPlaying)
         self.isRecordingSubject = .init(isRecording)
         self.isMicrophoneMutedSubject = .init(isMicrophoneMuted)
+        self.isStereoPlayoutAvailableSubject = .init(source.isStereoPlayoutAvailable)
         self.isStereoPlayoutEnabledSubject = .init(source.isStereoPlayoutEnabled)
         self.isVoiceProcessingBypassedSubject = .init(source.isVoiceProcessingBypassed)
         self.isVoiceProcessingEnabledSubject = .init(source.isVoiceProcessingEnabled)
@@ -128,6 +129,8 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
             .receive(on: dispatchQueue)
             .sink { [weak self] in self?.isMicrophoneMutedSubject.send($0) }
             .store(in: disposableBag)
+
+        source.manualRestoreVoiceProcessingOnMono = true
     }
 
     // MARK: - Recording
@@ -265,6 +268,18 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
 
     func audioDeviceModule(
         _ audioDeviceModule: RTCAudioDeviceModule,
+        isStereoPlayoutAvailable: Bool
+    ) {
+        isStereoPlayoutAvailableSubject.send(isStereoPlayoutAvailable)
+        subject.send(.didUpdateStereoPlayoutAvailable(isStereoPlayoutAvailable))
+        log.debug(
+            "AudioDeviceModule updated isStereoPlayoutAvailable:\(isStereoPlayoutAvailable).",
+            subsystems: .audioSession
+        )
+    }
+
+    func audioDeviceModule(
+        _ audioDeviceModule: RTCAudioDeviceModule,
         didCreateEngine engine: AVAudioEngine
     ) -> Int {
         subject.send(.didCreateAudioEngine(engine))
@@ -361,9 +376,7 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
     func audioDeviceModuleDidUpdateDevices(
         _ audioDeviceModule: RTCAudioDeviceModule
     ) {
-        let inputDevices = audioDeviceModule.inputDevices
-        let outputDevices = audioDeviceModule.outputDevices
-        devices = inputDevices + outputDevices
+        // No-op
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -412,30 +425,5 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
             file,
             line
         )
-    }
-}
-
-extension RTCIODevice: CustomStringConvertible {
-    override open var description: String {
-        var result = "{ "
-        result += "isDefault:\(isDefault)"
-        result += "type:\(type)"
-        result += "deviceId:\(deviceId)"
-        result += "name:\(name)"
-        result += " }"
-        return result
-    }
-}
-
-extension RTCIODeviceType: CustomStringConvertible {
-    public var description: String {
-        switch self {
-        case .input:
-            return ".input"
-        case .output:
-            return ".output"
-        @unknown default:
-            return ".unknownn"
-        }
     }
 }

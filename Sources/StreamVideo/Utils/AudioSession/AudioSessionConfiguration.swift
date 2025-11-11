@@ -5,7 +5,7 @@
 import AVFoundation
 
 /// Represents the audio session configuration.
-public struct AudioSessionConfiguration: ReflectiveStringConvertible, Equatable, Sendable {
+public struct AudioSessionConfiguration: CustomStringConvertible, Equatable, Sendable {
     var isActive: Bool
     /// The audio session category.
     var category: AVAudioSession.Category
@@ -15,6 +15,17 @@ public struct AudioSessionConfiguration: ReflectiveStringConvertible, Equatable,
     var options: AVAudioSession.CategoryOptions
     /// The audio session port override.
     var overrideOutputAudioPort: AVAudioSession.PortOverride?
+
+    public var description: String {
+        var result = "{ "
+        result += "isActive:\(isActive)"
+        result += ", category:\(category)"
+        result += ", mode:\(mode)"
+        result += ", options:\(options)"
+        result += ", overrideOutputAudioPort:\(overrideOutputAudioPort)"
+        result += " }"
+        return result
+    }
 
     /// Compares two `AudioSessionConfiguration` instances for equality.
     public static func == (lhs: Self, rhs: Self) -> Bool {
@@ -26,20 +37,58 @@ public struct AudioSessionConfiguration: ReflectiveStringConvertible, Equatable,
             rhs.overrideOutputAudioPort?.rawValue
     }
 
-    func withStereoPlayoutMode(_ mode: StereoPlayoutMode) -> AudioSessionConfiguration {
-        switch mode {
+    func withStereoPlayoutMode(
+        _ mode: StereoPlayoutMode,
+        currentRoute: RTCAudioStore.StoreState.AudioRoute
+    ) -> AudioSessionConfiguration {
+        var update = self
+        update.rewriteModeForStereoIfRequired(mode, currentRoute: currentRoute)
+        update.rewriteCategoryOptionsForStereoIfRequired(mode)
+        return update
+    }
+
+    // MARK: - Private helpers
+
+    private mutating func rewriteModeForStereoIfRequired(
+        _ playoutMode: StereoPlayoutMode,
+        currentRoute: RTCAudioStore.StoreState.AudioRoute
+    ) {
+        switch playoutMode {
         case .none:
-            return self
+            break
         case .deviceOnly:
-            return self
+            if overrideOutputAudioPort == .speaker {
+                mode = .default
+            } else if currentRoute.isReceiver, currentRoute.supportsStereoOutput {
+                mode = .default
+            }
         case .externalOnly:
-            var update = self
-            update.options.remove(.allowBluetoothHFP)
-            return update
+            if currentRoute.isExternal, currentRoute.supportsStereoOutput {
+                mode = .default
+            }
         case .deviceAndExternal:
-            var update = self
-            update.options.remove(.allowBluetoothHFP)
-            return update
+            if overrideOutputAudioPort == .speaker {
+                mode = .default
+            } else if currentRoute.isReceiver, currentRoute.supportsStereoOutput {
+                mode = .default
+            } else if currentRoute.isExternal, currentRoute.supportsStereoOutput {
+                mode = .default
+            }
+        }
+    }
+
+    private mutating func rewriteCategoryOptionsForStereoIfRequired(
+        _ playoutMode: StereoPlayoutMode
+    ) {
+        switch playoutMode {
+        case .none:
+            break
+        case .deviceOnly:
+            break
+        case .externalOnly:
+            options.remove(.allowBluetoothHFP)
+        case .deviceAndExternal:
+            options.remove(.allowBluetoothHFP)
         }
     }
 }
