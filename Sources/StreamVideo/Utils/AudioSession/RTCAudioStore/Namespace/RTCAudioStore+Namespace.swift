@@ -21,22 +21,21 @@ extension RTCAudioStore {
                 DefaultReducer(audioSession),
                 AVAudioSessionReducer(audioSession),
                 WebRTCAudioSessionReducer(audioSession),
-                CallKitReducer(audioSession),
-                StereoPlayoutAvailabilityReducer() // This needs to be after the AVAudioSessionReducer
+                CallKitReducer(audioSession)
             ]
         }
 
         static func middleware(audioSession: RTCAudioSession) -> [Middleware<RTCAudioStore.Namespace>] {
             [
                 InterruptionsMiddleware(audioSession),
-                RouteChangeMiddleware(audioSession),
                 AudioDeviceModuleMiddleware()
             ]
         }
 
         static func effects(audioSession: RTCAudioSession) -> Set<StoreEffect<RTCAudioStore.Namespace>> {
             [
-                StereoPlayoutEffect()
+                StereoPlayoutEffect(),
+                RouteChangeEffect(audioSession)
             ]
         }
 

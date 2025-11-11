@@ -82,13 +82,6 @@ final class CallAudioSession: @unchecked Sendable {
         configureCurrentRouteObservation()
 
         statsAdapter?.trace(.init(audioSession: traceRepresentation))
-
-        AVAudioSession
-            .sharedInstance()
-            .publisher(for: \.mode)
-            .log(.warning, subsystems: .audioSession) { "AVAudioSession mode changed to \($0) and audio.store may be out of sync." }
-            .sink { _ in }
-            .store(in: disposableBag)
     }
 
     func deactivate() {

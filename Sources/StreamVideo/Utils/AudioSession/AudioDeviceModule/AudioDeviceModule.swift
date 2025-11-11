@@ -130,6 +130,28 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
             .sink { [weak self] in self?.isMicrophoneMutedSubject.send($0) }
             .store(in: disposableBag)
 
+        source
+            .isStereoPlayoutEnabledPublisher()
+            .receive(on: dispatchQueue)
+            .sink { [weak self] in self?.isStereoPlayoutEnabledSubject.send($0) }
+            .store(in: disposableBag)
+
+        source
+            .isVoiceProcessingBypassedPublisher()
+            .receive(on: dispatchQueue)
+            .sink { [weak self] in self?.isVoiceProcessingBypassedSubject.send($0) }
+            .store(in: disposableBag)
+        source
+            .isVoiceProcessingEnabledPublisher()
+            .receive(on: dispatchQueue)
+            .sink { [weak self] in self?.isVoiceProcessingEnabledSubject.send($0) }
+            .store(in: disposableBag)
+        source
+            .isVoiceProcessingAGCEnabledPublisher()
+            .receive(on: dispatchQueue)
+            .sink { [weak self] in self?.isVoiceProcessingAGCEnabledSubject.send($0) }
+            .store(in: disposableBag)
+
         source.manualRestoreVoiceProcessingOnMono = true
     }
 
@@ -186,10 +208,6 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         function: StaticString = #function,
         line: UInt = #line
     ) throws {
-        guard isEnabled != source.isStereoPlayoutEnabled else {
-            return
-        }
-
         let currentVoiceProcessingEnabled = source.isVoiceProcessingEnabled
         let currentVoiceProcessingBypassed = source.isVoiceProcessingBypassed
 
