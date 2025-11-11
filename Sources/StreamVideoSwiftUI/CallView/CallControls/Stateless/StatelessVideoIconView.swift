@@ -39,7 +39,7 @@ public struct StatelessVideoIconView: View {
     ///   - actionHandler: An optional closure to handle button tap actions.
     public init(
         call: Call?,
-        callSettings: CallSettings = .init(),
+        callSettings: CallSettings = .default,
         size: CGFloat = 44,
         controlStyle: ToggleControlStyle = .init(
             enabled: .init(icon: Appearance.default.images.videoTurnOn, iconStyle: .transparent),

@@ -56,6 +56,16 @@ extension CallParticipant {
                     type: .screenShare
                 )
             )
+
+            /// We subscribe to screenShareAudio anytime a user is screenSharing. In the future
+            /// that should be driven by events to know if the user is actually publishing audio.
+            result.append(
+                .init(
+                    for: userId,
+                    sessionId: sessionId,
+                    type: .screenShareAudio
+                )
+            )
         }
 
         return result

@@ -15,6 +15,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
     private lazy var callCid: String! = .unique
     private lazy var rtcPeerConnectionCoordinatorFactory: MockRTCPeerConnectionCoordinatorFactory! = .init()
     private lazy var mockPermissions: MockPermissionsStore! = .init()
+    private lazy var mockAudioStore: MockRTCAudioStore! = .init()
     private lazy var subject: WebRTCStateAdapter! = .init(
         user: user,
         apiKey: apiKey,
@@ -27,10 +28,12 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
 
     override func setUp() {
         super.setUp()
+        mockAudioStore.makeShared()
         _ = mockPermissions
     }
 
     override func tearDown() {
+        mockAudioStore.dismantle()
         mockPermissions.dismantle()
         subject = nil
         mockPermissions = nil
@@ -493,6 +496,20 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         await assertTrueAsync(await subject.audioSession.statsAdapter === statsAdapter)
     }
 
+    func test_configureAudioSession_dispatchesAudioStoreUpdates() async throws {
+        try await subject.configureAudioSession(source: .inApp)
+
+        await fulfillment {
+            let state = self.mockAudioStore.audioStore.state
+            guard let module = state.audioDeviceModule else { return false }
+            let factory = await self.subject.peerConnectionFactory
+            let adapterModule = factory.audioDeviceModule
+            return module === adapterModule
+                && state.isRecording == adapterModule.isRecording
+                && state.isMicrophoneMuted == adapterModule.isMicrophoneMuted
+        }
+    }
+
     // MARK: - cleanUp
 
     func test_cleanUp_shouldResetProperties() async throws {
@@ -831,7 +848,10 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         }
 
         subject.audioSessionAdapterDidUpdateSpeakerOn(
-            true
+            true,
+            file: #file,
+            function: #function,
+            line: #line
         )
 
         await fulfillment { await self.subject.callSettings.speakerOn }

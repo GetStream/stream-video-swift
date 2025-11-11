@@ -5,10 +5,10 @@
 import Combine
 import Foundation
 
-/// A lightweight handle for a single dispatched store action.
+/// A lightweight handle for dispatched store actions.
 ///
-/// `StoreTask` coordinates the execution of one action via
-/// ``StoreExecutor`` and exposes a way to await the result. Callers can
+/// `StoreTask` coordinates the execution of one or more actions via
+/// ``StoreExecutor`` and ``StoreCoordinator``. Callers can
 /// dispatch-and-forget using `run(...)` and optionally await completion
 /// or failure later with ``result()``.
 ///
@@ -22,27 +22,30 @@ final class StoreTask<Namespace: StoreNamespace>: Sendable {
     private enum State { case idle, running, completed, failed(Error) }
 
     private let executor: StoreExecutor<Namespace>
+    private let coordinator: StoreCoordinator<Namespace>
     private let resultSubject: CurrentValueSubject<State, Never> = .init(.idle)
 
     init(
-        executor: StoreExecutor<Namespace>
+        executor: StoreExecutor<Namespace>,
+        coordinator: StoreCoordinator<Namespace>
     ) {
         self.executor = executor
+        self.coordinator = coordinator
     }
 
     // MARK: - Execution
 
-    /// Executes the given action through the store pipeline.
+    /// Executes the given actions through the store pipeline.
     ///
     /// The task transitions to `.running`, delegates to the
-    /// ``StoreExecutor`` and records completion or failure. Errors are
-    /// captured and can be retrieved by awaiting ``result()``.
+    /// ``StoreExecutor`` and ``StoreCoordinator``, and records completion
+    /// or failure. Errors are captured and can be retrieved by awaiting
+    /// ``result()``.
     ///
     /// - Parameters:
     ///   - identifier: Store identifier for logging context.
     ///   - state: Current state snapshot before processing.
-    ///   - action: Action to execute.
-    ///   - delay: Optional before/after delays.
+    ///   - actions: Actions to execute, each optionally delayed.
     ///   - reducers: Reducers to apply in order.
     ///   - middleware: Middleware for side effects.
     ///   - logger: Logger used for diagnostics.
@@ -64,11 +67,28 @@ final class StoreTask<Namespace: StoreNamespace>: Sendable {
     ) async {
         resultSubject.send(.running)
         do {
-            var workingState = state
+            var updatedState = state
             for action in actions {
-                workingState = try await executor.run(
+                guard
+                    coordinator.shouldExecute(
+                        action: action.wrappedValue,
+                        state: updatedState
+                    )
+                else {
+                    logger.didSkip(
+                        identifier: identifier,
+                        action: action.wrappedValue,
+                        state: updatedState,
+                        file: file,
+                        function: function,
+                        line: line
+                    )
+                    continue
+                }
+
+                updatedState = try await executor.run(
                     identifier: identifier,
-                    state: workingState,
+                    state: updatedState,
                     action: action,
                     reducers: reducers,
                     middleware: middleware,

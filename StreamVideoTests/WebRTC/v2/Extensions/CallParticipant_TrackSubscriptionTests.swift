@@ -63,8 +63,9 @@ final class CallParticipant_TrackSubscriptionTests: XCTestCase, @unchecked Senda
         let result = participant.trackSubscriptionDetails(incomingVideoQualitySettings: incomingSettings)
 
         // Then
-        XCTAssertEqual(result.count, 1)
+        XCTAssertEqual(result.count, 2)
         XCTAssertEqual(result.first?.trackType, .screenShare)
+        XCTAssertEqual(result.last?.trackType, .screenShareAudio)
     }
 
     func test_trackSubscriptionDetails_givenParticipantHasVideoAndVideoIsDisabled_whenVideoDisabled_thenDoesNotAddVideoTrackDetails(

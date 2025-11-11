@@ -85,7 +85,6 @@ final class MockStreamVideo: StreamVideo, Mockable, @unchecked Sendable {
         file: StaticString = #file,
         function: StaticString = #function,
         line: UInt = #line
-
     ) -> Call {
         stubbedFunctionInput[.call]?.append(
             .call(
