@@ -15,6 +15,7 @@ protocol RTCAudioDeviceModuleControlling: AnyObject {
     var isVoiceProcessingBypassed: Bool { get }
     var isVoiceProcessingEnabled: Bool { get }
     var isVoiceProcessingAGCEnabled: Bool { get }
+    var manualRestoreVoiceProcessingOnMono: Bool { get set }
 
     func initAndStartRecording() -> Int
     func setMicrophoneMuted(_ isMuted: Bool) -> Int

@@ -49,9 +49,10 @@ extension RTCAudioStore {
         ) {
             switch action {
             case .avAudioSession(.prepareForSpeakerTransition):
-                processingQueue.addOperation { [weak self] in
-                    self?.pauseUntilSpeaker = true
-                }
+//                processingQueue.addOperation { [weak self] in
+//                    self?.pauseUntilSpeaker = true
+//                }
+                break
 
             default:
                 break
