@@ -28,7 +28,7 @@ extension RTCAudioStore {
             cancellable = audioSessionObserver
                 .publisher
                 .compactMap {
-                    if case let .didChangeRoute(reason, from, to) = $0 {
+                    if case let .didChangeRoute(reason, from, to) = $0, reason.isValidRouteChange {
                         return (
                             reason,
                             RTCAudioStore.StoreState.AudioRoute(from),
