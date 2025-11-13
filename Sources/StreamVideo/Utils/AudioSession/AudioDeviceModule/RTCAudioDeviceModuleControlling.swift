@@ -17,7 +17,9 @@ protocol RTCAudioDeviceModuleControlling: AnyObject {
     var isVoiceProcessingAGCEnabled: Bool { get }
     var manualRestoreVoiceProcessingOnMono: Bool { get set }
 
-    func initAndStartPlayout() throws
+    func initAndStartPlayout() -> Int
+    func startPlayout() -> Int
+    func stopPlayout() -> Int
     func initAndStartRecording() -> Int
     func setMicrophoneMuted(_ isMuted: Bool) -> Int
     func stopRecording() -> Int
@@ -28,32 +30,23 @@ protocol RTCAudioDeviceModuleControlling: AnyObject {
 
     /// Publisher that emits whenever the microphone mute state changes.
     func microphoneMutedPublisher() -> AnyPublisher<Bool, Never>
-    func isStereoPlayoutEnabledPublisher() -> AnyPublisher<Bool, Never>
     func isVoiceProcessingBypassedPublisher() -> AnyPublisher<Bool, Never>
     func isVoiceProcessingEnabledPublisher() -> AnyPublisher<Bool, Never>
     func isVoiceProcessingAGCEnabledPublisher() -> AnyPublisher<Bool, Never>
 }
 
 extension RTCAudioDeviceModule: RTCAudioDeviceModuleControlling {
-    func initAndStartPlayout() throws {
+    func initAndStartPlayout() -> Int {
         var result = initPlayout()
-        guard result == 0 else {
-            throw ClientError("Unable to init playout code:\(result).")
-        }
-
-        result = startPlayout()
-        guard result == 0 else {
-            throw ClientError("Unable to start playout code:\(result).")
+        if result == 0 {
+            return startPlayout()
+        } else {
+            return result
         }
     }
-
+    
     func microphoneMutedPublisher() -> AnyPublisher<Bool, Never> {
         publisher(for: \.isMicrophoneMuted)
-            .eraseToAnyPublisher()
-    }
-
-    func isStereoPlayoutEnabledPublisher() -> AnyPublisher<Bool, Never> {
-        publisher(for: \.isStereoPlayoutEnabled)
             .eraseToAnyPublisher()
     }
 

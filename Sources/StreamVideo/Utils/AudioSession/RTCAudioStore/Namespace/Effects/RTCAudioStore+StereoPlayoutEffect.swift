@@ -13,77 +13,94 @@ extension RTCAudioStore {
     final class StereoPlayoutEffect: StoreEffect<RTCAudioStore.Namespace>, @unchecked Sendable {
 
         private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
+        private let restartStereoPlayoutSubject: PassthroughSubject<Bool, Never> = .init()
+        private let disposableBag = DisposableBag()
         private var audioDeviceModuleCancellable: AnyCancellable?
-        private var isStereoPlayoutAvailableCancellable: AnyCancellable?
 
         override func set(
             statePublisher: AnyPublisher<RTCAudioStore.StoreState, Never>?
         ) {
+            audioDeviceModuleCancellable?.cancel()
+            audioDeviceModuleCancellable = nil
+
             guard let statePublisher else {
                 return
             }
-
-            let currentRoutePublisher = statePublisher
-                .map(\.currentRoute)
-                .removeDuplicates()
-                .eraseToAnyPublisher()
 
             audioDeviceModuleCancellable = statePublisher
                 .map(\.audioDeviceModule)
                 .removeDuplicates()
                 .receive(on: processingQueue)
                 .log(.debug, subsystems: .audioSession) { "AudioDeviceModule was updated to \($0)." }
-                .sink { [weak self] in self?.didUpdate(audioDeviceModule: $0, currentRoutePublisher: currentRoutePublisher) }
+                .sink { [weak self] in self?.didUpdate(audioDeviceModule: $0, statePublisher: statePublisher) }
         }
 
         // MARK: - Private Helpers
 
         private func didUpdate(
             audioDeviceModule: AudioDeviceModule?,
-            currentRoutePublisher: AnyPublisher<RTCAudioStore.StoreState.AudioRoute, Never>
+            statePublisher: AnyPublisher<RTCAudioStore.StoreState, Never>
         ) {
-            isStereoPlayoutAvailableCancellable?.cancel()
-            isStereoPlayoutAvailableCancellable = nil
+            disposableBag.removeAll()
 
             guard let audioDeviceModule else {
                 return
             }
 
-            let isStereoPlayoutAvailablePublisher = audioDeviceModule
+            restartStereoPlayoutSubject
+                .debounce(for: .seconds(1), scheduler: processingQueue)
+                .receive(on: processingQueue)
+                .sink { [weak audioDeviceModule] enableStereoPlayout in
+                    log.throwing("Unable to setStereoPlayout:\(enableStereoPlayout)", subsystems: .audioSession) {
+                        try audioDeviceModule?.setStereoPlayoutEnabled(enableStereoPlayout)
+                    }
+                }
+                .store(in: disposableBag)
+
+            audioDeviceModule
                 .isStereoPlayoutAvailablePublisher
                 .removeDuplicates()
-                .eraseToAnyPublisher()
-
-            isStereoPlayoutAvailableCancellable = Publishers
-                .CombineLatest(isStereoPlayoutAvailablePublisher, currentRoutePublisher)
                 .receive(on: processingQueue)
-                .throttle(for: 0.2, scheduler: processingQueue, latest: true)
-                .log(.debug, subsystems: .audioSession) { "StereoPlayout updated to \($0)." }
-                .sink { [weak self, weak audioDeviceModule] in self?.didUpdate(
-                    audioDeviceModule: audioDeviceModule,
-                    stereoPlayoutAvailable: $0.0
-                ) }
-        }
+                .sink { [weak self] in self?.dispatcher?.dispatch(.stereo(.setPlayoutAvailable($0))) }
+                .store(in: disposableBag)
 
-        private func didUpdate(
-            audioDeviceModule: AudioDeviceModule?,
-            stereoPlayoutAvailable: Bool
-        ) {
-            guard
-                let audioDeviceModule
-            else {
-                return
-            }
+            audioDeviceModule
+                .isStereoPlayoutEnabledPublisher
+                .removeDuplicates()
+                .receive(on: processingQueue)
+                .sink { [weak self] in self?.dispatcher?.dispatch(.stereo(.setPlayoutEnabled($0))) }
+                .store(in: disposableBag)
 
-            dispatcher?.dispatch(.stereo(.setPlayoutAvailable(stereoPlayoutAvailable)))
+            Publishers
+                .CombineLatest3(
+                    audioDeviceModule
+                        .isMicrophoneMutedPublisher
+                        .eraseToAnyPublisher(),
+                    audioDeviceModule
+                        .isStereoPlayoutAvailablePublisher
+                        .eraseToAnyPublisher(),
+                    statePublisher
+                        .map(\.currentRoute)
+                        .removeDuplicates()
+                        .map(\.supportsStereoOutput)
+                )
+                .debounce(for: .seconds(1), scheduler: processingQueue)
+                .receive(on: processingQueue)
+                .log(.debug, subsystems: .audioSession) {
+                    "Received an update { isMicrophoneMuted:\($0.0) stereoPlayoutAvailable:\($0.1), currentRouteSupportsStereoOutput:\($0.2), resolved:\($0.1 && $0.2) }"
+                }
+                .map { $0.1 && $0.2 }
+                .sink { [weak self] in self?.restartStereoPlayoutSubject.send($0) }
+                .store(in: disposableBag)
 
-            do {
-                try audioDeviceModule.setStereoPlayoutEnabled(stereoPlayoutAvailable)
-                dispatcher?.dispatch(.stereo(.setPlayoutEnabled(stereoPlayoutAvailable)))
-            } catch {
-                dispatcher?.dispatch(.stereo(.setPlayoutAvailable(false)))
-                log.error(error, subsystems: .audioSession)
-            }
+//
+//            statePublisher
+//                .map(\.currentRoute)
+//                .scan(false, { $0 != $1.supportsStereoOutput })
+//                .receive(on: processingQueue)
+//                .log(.debug, subsystems: .audioSession) { "Current route changed and a stereoPlayout restart is \($0 ? "required" : "not required")." }
+//                .sink { [weak self] in self?.restartStereoPlayoutSubject.send($0) }
+//                .store(in: disposableBag)
         }
     }
 }
