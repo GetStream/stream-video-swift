@@ -16,7 +16,9 @@ extension RTCMediaConstraints {
             "googAutoGainControl": kRTCMediaConstraintsValueTrue,
             "googNoiseSuppression": kRTCMediaConstraintsValueTrue,
             "googEchoCancellation": kRTCMediaConstraintsValueTrue,
-            "googHighpassFilter": kRTCMediaConstraintsValueTrue
+            "googHighpassFilter": kRTCMediaConstraintsValueTrue,
+            "googTypingNoiseDetection": kRTCMediaConstraintsValueTrue,
+            "googAudioMirroring": kRTCMediaConstraintsValueFalse
         ]
     )
     
