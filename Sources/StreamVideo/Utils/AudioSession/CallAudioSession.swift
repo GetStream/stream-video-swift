@@ -233,14 +233,6 @@ final class CallAudioSession: @unchecked Sendable {
 
         var actions: [RTCAudioStore.Namespace.Action] = []
 
-        if ownCapabilities.contains(.sendAudio) {
-            actions.append(.setShouldRecord(true))
-            actions.append(.setMicrophoneMuted(!callSettings.audioOn))
-        } else {
-            actions.append(.setShouldRecord(false))
-            actions.append(.setMicrophoneMuted(true))
-        }
-
         if callSettings.speakerOn {
 //            actions.append(.avAudioSession(.prepareForSpeakerTransition))
             transitioningToSpeaker = true
@@ -262,6 +254,14 @@ final class CallAudioSession: @unchecked Sendable {
                 .setOverrideOutputAudioPort(configuration.overrideOutputAudioPort ?? .none)
             )
         ])
+
+        if ownCapabilities.contains(.sendAudio) {
+            actions.append(.setShouldRecord(true))
+            actions.append(.setMicrophoneMuted(!callSettings.audioOn))
+        } else {
+            actions.append(.setShouldRecord(false))
+            actions.append(.setMicrophoneMuted(true))
+        }
 
         audioStore.dispatch(
             actions,

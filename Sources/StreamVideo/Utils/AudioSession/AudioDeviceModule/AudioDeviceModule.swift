@@ -25,6 +25,7 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         case speechActivityStarted
         case speechActivityEnded
         case didUpdateStereoPlayoutAvailable(Bool)
+        case didUpdateStereoPlayoutEnabled(Bool)
         case didCreateAudioEngine(AVAudioEngine)
         case willEnableAudioEngine(AVAudioEngine)
         case willStartAudioEngine(AVAudioEngine)
@@ -131,12 +132,6 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
             .store(in: disposableBag)
 
         source
-            .isStereoPlayoutEnabledPublisher()
-            .receive(on: dispatchQueue)
-            .sink { [weak self] in self?.isStereoPlayoutEnabledSubject.send($0) }
-            .store(in: disposableBag)
-
-        source
             .isVoiceProcessingBypassedPublisher()
             .receive(on: dispatchQueue)
             .sink { [weak self] in self?.isVoiceProcessingBypassedSubject.send($0) }
@@ -185,7 +180,9 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
             }
 
             // Ensure that we always have audio.
-            try source.initAndStartPlayout()
+            try throwingExecution("Unable to initAndStartPlayout") {
+                source.initAndStartPlayout()
+            }
         }
 
         isRecordingSubject.send(isEnabled)
@@ -215,6 +212,8 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         function: StaticString = #function,
         line: UInt = #line
     ) throws {
+        /// We explicitelly avoid checking the current state of isStereoPlayoutEnabled as there are case
+        /// where the value may be true but playout isn't stereo and a restart is required.
         let currentVoiceProcessingEnabled = source.isVoiceProcessingEnabled
         let currentVoiceProcessingBypassed = source.isVoiceProcessingBypassed
 
@@ -236,6 +235,7 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         /// 3. enable voice-processing
         /// 4. enable voice-processing-agc
 
+        _ = source.stopPlayout()
         do {
             if isEnabled {
                 try throwingExecution("Failed to disable VoiceProcessing.") { source.setVoiceProcessingEnabled(false) }
@@ -252,6 +252,7 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
             onFailureReset()
             throw error
         }
+        _ = source.initAndStartPlayout()
 
         guard source.isStereoPlayoutEnabled != isEnabled else {
             log.debug(
@@ -275,6 +276,17 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         )
     }
 
+    func restartStereoPlayoutIfPossible() throws {
+        guard source.isStereoPlayoutAvailable else {
+            return
+        }
+
+        try throwingExecution("Failed to disable VoiceProcessing.") { source.setVoiceProcessingEnabled(false) }
+        try throwingExecution("Failed to disable VoiceProcessingAGC.") { source.setVoiceProcessingAGCEnabled(false) }
+        try throwingExecution("Failed to enable VoiceProcessing bypass.") { source.setVoiceProcessingBypassed(true) }
+        try throwingExecution("Failed to enable Stereo Playout.") { source.setStereoPlayoutEnabled(true) }
+    }
+
     // MARK: - RTCAudioDeviceModuleDelegate
 
     func audioDeviceModule(
@@ -295,10 +307,30 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         _ audioDeviceModule: RTCAudioDeviceModule,
         isStereoPlayoutAvailable: Bool
     ) {
+        guard isStereoPlayoutAvailable != self.isStereoPlayoutAvailable else {
+            return
+        }
+
         isStereoPlayoutAvailableSubject.send(isStereoPlayoutAvailable)
         subject.send(.didUpdateStereoPlayoutAvailable(isStereoPlayoutAvailable))
         log.debug(
             "AudioDeviceModule updated isStereoPlayoutAvailable:\(isStereoPlayoutAvailable).",
+            subsystems: .audioSession
+        )
+    }
+
+    func audioDeviceModule(
+        _ audioDeviceModule: RTCAudioDeviceModule,
+        isStereoPlayoutEnabled: Bool
+    ) {
+        guard isStereoPlayoutEnabled != self.isStereoPlayoutEnabled else {
+            return
+        }
+
+        isStereoPlayoutEnabledSubject.send(isStereoPlayoutEnabled)
+        subject.send(.didUpdateStereoPlayoutEnabled(isStereoPlayoutEnabled))
+        log.debug(
+            "AudioDeviceModule updated isStereoPlayoutEnabled:\(isStereoPlayoutEnabled).",
             subsystems: .audioSession
         )
     }
