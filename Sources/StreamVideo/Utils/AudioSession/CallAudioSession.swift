@@ -211,7 +211,8 @@ final class CallAudioSession: @unchecked Sendable {
         function: StaticString = #function,
         line: UInt = #line
     ) {
-        guard configuration != lastAppliedConfiguration else {
+        guard configuration != lastAppliedConfiguration || callSettings != lastCallSettings || ownCapabilities !=
+            lastOwnCapabilities else {
             log.debug(
                 "CallAudioSession won't apply configuration:\(configuration) as it's the same as the last applied one.",
                 subsystems: .audioSession,

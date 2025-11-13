@@ -60,6 +60,15 @@ extension RTCAudioStore.Namespace {
                     updatedState.shouldRecord = false
                     updatedState.isRecording = false
                     updatedState.isMicrophoneMuted = false
+                    updatedState.stereoConfiguration = .init(
+                        playout: .init(
+                            available: false,
+                            enabled: false
+                        )
+                    )
+                    updatedState.shouldRecord = false
+                    updatedState.isMicrophoneMuted = false
+                    updatedState.isRecording = false
                 }
 
             case let .setCurrentRoute(value):
