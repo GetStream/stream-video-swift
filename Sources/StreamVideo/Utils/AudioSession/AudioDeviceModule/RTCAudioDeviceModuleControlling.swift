@@ -17,6 +17,7 @@ protocol RTCAudioDeviceModuleControlling: AnyObject {
     var isVoiceProcessingAGCEnabled: Bool { get }
     var manualRestoreVoiceProcessingOnMono: Bool { get set }
 
+    func initAndStartPlayout() throws
     func initAndStartRecording() -> Int
     func setMicrophoneMuted(_ isMuted: Bool) -> Int
     func stopRecording() -> Int
@@ -34,6 +35,18 @@ protocol RTCAudioDeviceModuleControlling: AnyObject {
 }
 
 extension RTCAudioDeviceModule: RTCAudioDeviceModuleControlling {
+    func initAndStartPlayout() throws {
+        var result = initPlayout()
+        guard result == 0 else {
+            throw ClientError("Unable to init playout code:\(result).")
+        }
+
+        result = startPlayout()
+        guard result == 0 else {
+            throw ClientError("Unable to start playout code:\(result).")
+        }
+    }
+
     func microphoneMutedPublisher() -> AnyPublisher<Bool, Never> {
         publisher(for: \.isMicrophoneMuted)
             .eraseToAnyPublisher()

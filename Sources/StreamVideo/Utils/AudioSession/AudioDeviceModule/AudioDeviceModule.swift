@@ -82,11 +82,11 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
             "isPlaying:\(isPlaying)" +
             ", isRecording:\(isRecording)" +
             ", isMicrophoneMuted:\(isMicrophoneMuted)" +
-            ", isStereoPlayoutEnabled:\(isStereoPlayoutEnabled)" +
-            ", isStereoPlayoutAvailable:\(isStereoPlayoutAvailable)" +
-            ", isVoiceProcessingBypassed:\(isVoiceProcessingBypassed)" +
-            ", isVoiceProcessingEnabled:\(isVoiceProcessingEnabled)" +
-            ", isVoiceProcessingAGCEnabled:\(isVoiceProcessingAGCEnabled)" +
+            ", isStereoPlayoutEnabled:\(source.isStereoPlayoutEnabled)" +
+            ", isStereoPlayoutAvailable:\(source.isStereoPlayoutAvailable)" +
+            ", isVoiceProcessingBypassed:\(source.isVoiceProcessingBypassed)" +
+            ", isVoiceProcessingEnabled:\(source.isVoiceProcessingEnabled)" +
+            ", isVoiceProcessingAGCEnabled:\(source.isVoiceProcessingAGCEnabled)" +
             ", audioLevel:\(audioLevel)" +
             ", source:\(source)" +
             " }"
@@ -183,6 +183,9 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
             try throwingExecution("Unable to stopRecording.") {
                 source.stopRecording()
             }
+
+            // Ensure that we always have audio.
+            try source.initAndStartPlayout()
         }
 
         isRecordingSubject.send(isEnabled)
@@ -200,6 +203,10 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
             source.setMicrophoneMuted(isMuted)
         }
         isMicrophoneMutedSubject.send(isMuted)
+    }
+
+    func checkStereoPlayoutAvailability() {
+        _ = source.isStereoPlayoutAvailable
     }
 
     func setStereoPlayoutEnabled(
