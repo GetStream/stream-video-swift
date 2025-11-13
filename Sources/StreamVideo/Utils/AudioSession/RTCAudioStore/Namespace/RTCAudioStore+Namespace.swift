@@ -28,9 +28,19 @@ extension RTCAudioStore {
         static func middleware(audioSession: RTCAudioSession) -> [Middleware<RTCAudioStore.Namespace>] {
             [
                 InterruptionsMiddleware(audioSession),
-                RouteChangeMiddleware(audioSession),
                 AudioDeviceModuleMiddleware()
             ]
+        }
+
+        static func effects(audioSession: RTCAudioSession) -> Set<StoreEffect<RTCAudioStore.Namespace>> {
+            [
+                StereoPlayoutEffect(),
+                RouteChangeEffect(audioSession)
+            ]
+        }
+
+        static func logger() -> StoreLogger<RTCAudioStore.Namespace> {
+            .init(logSkipped: true)
         }
 
         static func coordinator() -> StoreCoordinator<RTCAudioStore.Namespace> {

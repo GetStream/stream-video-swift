@@ -13,6 +13,20 @@ extension RTCAudioStore {
     /// via middleware responsible for requesting permissions.
     public enum StoreAction: Sendable, Equatable, StoreActionBoxProtocol, CustomStringConvertible {
 
+        enum StereoAction: Equatable, Sendable, CustomStringConvertible {
+            case setPlayoutAvailable(Bool)
+            case setPlayoutEnabled(Bool)
+
+            var description: String {
+                switch self {
+                case .setPlayoutAvailable(let value):
+                    return ".setPlayoutAvailable(\(value))"
+                case .setPlayoutEnabled(let value):
+                    return ".setPlayoutEnabled(\(value))"
+                }
+            }
+        }
+
         enum AVAudioSessionAction: Equatable, Sendable, CustomStringConvertible {
             case setCategory(AVAudioSession.Category)
             case setMode(AVAudioSession.Mode)
@@ -33,6 +47,8 @@ extension RTCAudioStore {
                 categoryOptions: AVAudioSession.CategoryOptions
             )
             case setOverrideOutputAudioPort(AVAudioSession.PortOverride)
+
+            case prepareForSpeakerTransition
 
             var description: String {
                 switch self {
@@ -59,6 +75,9 @@ extension RTCAudioStore {
 
                 case .setOverrideOutputAudioPort(let portOverride):
                     return ".setOverrideOutputAudioPort(\(portOverride))"
+
+                case .prepareForSpeakerTransition:
+                    return ".prepareForSpeakerTransition"
                 }
             }
         }
@@ -109,6 +128,7 @@ extension RTCAudioStore {
 
         case avAudioSession(AVAudioSessionAction)
         case webRTCAudioSession(WebRTCAudioSessionAction)
+        case stereo(StereoAction)
         case callKit(CallKitAction)
 
         var description: String {
@@ -142,6 +162,9 @@ extension RTCAudioStore {
 
             case .webRTCAudioSession(let value):
                 return ".webRTCAudioSession(\(value))"
+
+            case .stereo(let value):
+                return ".stereo(\(value))"
 
             case .callKit(let value):
                 return ".callKit(\(value))"

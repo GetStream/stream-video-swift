@@ -74,6 +74,8 @@ protocol StoreNamespace: Sendable {
     /// - Returns: Array of middleware for this store.
     static func middleware() -> [Middleware<Self>]
 
+    static func effects() -> Set<StoreEffect<Self>>
+
     /// Creates the logger for this store.
     ///
     /// Override to provide custom logging behavior.
@@ -113,6 +115,7 @@ protocol StoreNamespace: Sendable {
         initialState: State,
         reducers: [Reducer<Self>],
         middleware: [Middleware<Self>],
+        effects: Set<StoreEffect<Self>>,
         logger: StoreLogger<Self>,
         executor: StoreExecutor<Self>,
         coordinator: StoreCoordinator<Self>
@@ -128,6 +131,8 @@ extension StoreNamespace {
 
     /// Default implementation returns empty array.
     static func middleware() -> [Middleware<Self>] { [] }
+
+    static func effects() -> Set<StoreEffect<Self>> { [] }
 
     /// Default implementation returns basic logger.
     static func logger() -> StoreLogger<Self> { .init() }
@@ -152,6 +157,7 @@ extension StoreNamespace {
         initialState: State,
         reducers: [Reducer<Self>] = Self.reducers(),
         middleware: [Middleware<Self>] = Self.middleware(),
+        effects: Set<StoreEffect<Self>> = Self.effects(),
         logger: StoreLogger<Self> = Self.logger(),
         executor: StoreExecutor<Self> = Self.executor(),
         coordinator: StoreCoordinator<Self> = Self.coordinator()
@@ -161,6 +167,7 @@ extension StoreNamespace {
             initialState: initialState,
             reducers: reducers,
             middleware: middleware,
+            effects: effects,
             logger: logger,
             executor: executor,
             coordinator: coordinator
