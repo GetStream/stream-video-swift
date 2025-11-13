@@ -32,7 +32,7 @@ extension RTCAudioStore {
                         return (
                             reason,
                             RTCAudioStore.StoreState.AudioRoute(from),
-                            RTCAudioStore.StoreState.AudioRoute(to)
+                            RTCAudioStore.StoreState.AudioRoute(to, reason: reason)
                         )
                     }
                     return nil

@@ -158,6 +158,7 @@ extension RTCAudioStore {
 
             let inputs: [Port]
             let outputs: [Port]
+            let reason: AVAudioSession.RouteChangeReason
 
             var isExternal: Bool
             var isSpeaker: Bool
@@ -167,22 +168,35 @@ extension RTCAudioStore {
             var supportsStereoInput: Bool
 
             var description: String {
-                " { inputs:\(inputs), outputs:\(outputs), supportsStereoInput:\(supportsStereoInput), supportsStereoOutput:\(supportsStereoOutput) }"
+                var result = "{ "
+                result += "inputs:\(inputs)"
+                result += ", outputs:\(outputs)"
+                result += ", reason:\(reason)"
+                result += ", supportsStereoInput:\(supportsStereoInput)"
+                result += ", supportsStereoOutput:\(supportsStereoOutput)"
+                result += " }"
+                return result
             }
 
-            init(_ source: AVAudioSessionRouteDescription) {
+            init(
+                _ source: AVAudioSessionRouteDescription,
+                reason: AVAudioSession.RouteChangeReason = .unknown
+            ) {
                 self.init(
                     inputs: source.inputs.map(Port.init),
-                    outputs: source.outputs.map(Port.init)
+                    outputs: source.outputs.map(Port.init),
+                    reason: reason
                 )
             }
 
             init(
                 inputs: [Port],
-                outputs: [Port]
+                outputs: [Port],
+                reason: AVAudioSession.RouteChangeReason = .unknown
             ) {
                 self.inputs = inputs
                 self.outputs = outputs
+                self.reason = reason
                 self.isExternal = outputs.first { $0.isExternal } != nil
                 self.isSpeaker = outputs.first { $0.isSpeaker } != nil
                 self.isReceiver = outputs.first { $0.isReceiver } != nil
