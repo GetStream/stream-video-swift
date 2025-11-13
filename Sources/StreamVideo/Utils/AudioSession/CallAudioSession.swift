@@ -148,10 +148,7 @@ final class CallAudioSession: @unchecked Sendable {
         audioStore
             .publisher(\.currentRoute)
             .removeDuplicates()
-            // We want to start listening on route changes **once** we have
-            // expressed our initial preference.
-            .drop { [weak self] _ in self?.lastCallSettings == nil }
-            .throttle(for: 0.5, scheduler: processingQueue, latest: true)
+            .debounce(for: .milliseconds(500), scheduler: processingQueue)
             .receive(on: processingQueue)
             .sink { [weak self] in
                 guard let self, let lastCallSettings, let lastOwnCapabilities else { return }
