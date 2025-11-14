@@ -323,19 +323,6 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         )
     }
 
-    func restartStereoPlayoutIfPossible() throws {
-        guard source.isStereoPlayoutAvailable else {
-            return
-        }
-
-        try throwingExecution("Failed to disable VoiceProcessing.") { source.setVoiceProcessingEnabled(false) }
-        try throwingExecution("Failed to disable VoiceProcessingAGC.") { source.setVoiceProcessingAGCEnabled(false) }
-        try throwingExecution("Failed to enable VoiceProcessing bypass.") { source.setVoiceProcessingBypassed(true) }
-        try throwingExecution("Failed to enable Stereo Playout.") { source.setStereoPlayoutEnabled(true) }
-
-        log.debug("StereoPlayout restart completed.", subsystems: .audioSession)
-    }
-
     // MARK: - RTCAudioDeviceModuleDelegate
 
     func audioDeviceModule(
