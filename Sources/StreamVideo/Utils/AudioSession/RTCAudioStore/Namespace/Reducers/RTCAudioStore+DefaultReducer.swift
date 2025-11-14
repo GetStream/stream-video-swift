@@ -74,6 +74,12 @@ extension RTCAudioStore.Namespace {
             case let .setCurrentRoute(value):
                 updatedState.currentRoute = value
 
+            case let .stereo(.setPlayoutAvailable(value)):
+                updatedState.stereoConfiguration.playout.available = value
+
+            case let .stereo(.setPlayoutEnabled(value)):
+                updatedState.stereoConfiguration.playout.enabled = value
+
             case .avAudioSession:
                 break
 
