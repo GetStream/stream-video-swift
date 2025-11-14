@@ -362,6 +362,16 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         }
         return response.call
     }
+    
+    @discardableResult
+    public func ring(request: RingCallRequest) async throws -> RingCallResponse {
+        let response = try await coordinatorClient.ringCall(
+            type: callType,
+            id: callId,
+            ringCallRequest: request
+        )
+        return response
+    }
 
     /// Updates an existing call with the specified parameters.
     /// - Parameters:

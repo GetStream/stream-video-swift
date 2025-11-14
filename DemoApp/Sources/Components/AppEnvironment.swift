@@ -212,7 +212,7 @@ extension AppEnvironment {
             #if targetEnvironment(simulator)
             return .simple
             #else
-            return .simple
+            return .detailed
             #endif
         case .release:
             return .simple
