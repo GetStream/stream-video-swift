@@ -142,7 +142,11 @@ extension RTCAudioStore {
             _ audioDeviceModule: AudioDeviceModule?,
             state: RTCAudioStore.StoreState
         ) throws {
-            try state.audioDeviceModule?.setRecording(false)
+            log
+                .throwing("Unable to disable recording.", subsystems: .audioSession) {
+                    try state.audioDeviceModule?.setRecording(false)
+                }
+            log.throwing("Unable to mute.", subsystems: .audioSession) { try state.audioDeviceModule?.setMuted(true) }
 
             disposableBag.removeAll()
 
@@ -159,7 +163,6 @@ extension RTCAudioStore {
             audioDeviceModule
                 .isMicrophoneMutedPublisher
                 .removeDuplicates()
-                .log(.debug) { "ADM sent isMicrophoneMuted:\($0)." }
                 .sink { [weak self] in self?.dispatcher?.dispatch(.setMicrophoneMuted($0)) }
                 .store(in: disposableBag)
         }
