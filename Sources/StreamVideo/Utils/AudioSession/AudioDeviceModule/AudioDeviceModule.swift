@@ -2,6 +2,8 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+import AudioToolbox
+import AVFAudio
 import AVFoundation
 import Combine
 import Foundation
@@ -21,17 +23,59 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
     }
 
     /// Events emitted as the underlying audio engine changes state.
-    enum Event: Equatable {
+    enum Event: Equatable, CustomStringConvertible {
         case speechActivityStarted
         case speechActivityEnded
         case didUpdateStereoPlayoutAvailable(Bool)
         case didUpdateStereoPlayoutEnabled(Bool)
         case didCreateAudioEngine(AVAudioEngine)
-        case willEnableAudioEngine(AVAudioEngine)
-        case willStartAudioEngine(AVAudioEngine)
-        case didStopAudioEngine(AVAudioEngine)
-        case didDisableAudioEngine(AVAudioEngine)
+        case willEnableAudioEngine(AVAudioEngine, isPlayoutEnabled: Bool, isRecordingEnabled: Bool)
+        case willStartAudioEngine(AVAudioEngine, isPlayoutEnabled: Bool, isRecordingEnabled: Bool)
+        case didStopAudioEngine(AVAudioEngine, isPlayoutEnabled: Bool, isRecordingEnabled: Bool)
+        case didDisableAudioEngine(AVAudioEngine, isPlayoutEnabled: Bool, isRecordingEnabled: Bool)
         case willReleaseAudioEngine(AVAudioEngine)
+        case configureInputFromSource(AVAudioEngine, source: AVAudioNode?, destination: AVAudioNode, format: AVAudioFormat)
+        case configureOutputFromSource(AVAudioEngine, source: AVAudioNode, destination: AVAudioNode?, format: AVAudioFormat)
+
+        var description: String {
+            switch self {
+            case .speechActivityStarted:
+                return ".speechActivityStarted"
+
+            case .speechActivityEnded:
+                return ".speechActivityEnded"
+
+            case .didUpdateStereoPlayoutAvailable(let value):
+                return ".didUpdateStereoPlayoutAvailable(\(value))"
+
+            case .didUpdateStereoPlayoutEnabled(let value):
+                return ".didUpdateStereoPlayoutEnabled(\(value))"
+
+            case .didCreateAudioEngine(let engine):
+                return ".didCreateAudioEngine(\(engine))"
+
+            case .willEnableAudioEngine(let engine, let isPlayoutEnabled, let isRecordingEnabled):
+                return ".willEnableAudioEngine(\(engine), isPlayoutEnabled:\(isPlayoutEnabled), isRecordingEnabled:\(isRecordingEnabled))"
+
+            case .willStartAudioEngine(let engine, let isPlayoutEnabled, let isRecordingEnabled):
+                return ".willStartAudioEngine(\(engine), isPlayoutEnabled:\(isPlayoutEnabled), isRecordingEnabled:\(isRecordingEnabled))"
+
+            case .didStopAudioEngine(let engine, let isPlayoutEnabled, let isRecordingEnabled):
+                return ".didStopAudioEngine(\(engine), isPlayoutEnabled:\(isPlayoutEnabled), isRecordingEnabled:\(isRecordingEnabled))"
+
+            case .didDisableAudioEngine(let engine, let isPlayoutEnabled, let isRecordingEnabled):
+                return ".didDisableAudioEngine(\(engine), isPlayoutEnabled:\(isPlayoutEnabled), isRecordingEnabled:\(isRecordingEnabled))"
+
+            case .willReleaseAudioEngine(let engine):
+                return ".willReleaseAudioEngine(\(engine))"
+
+            case .configureInputFromSource(let engine, let source, let destination, let format):
+                return ".configureInputFromSource(\(engine), source:\(source), destination:\(destination), format:\(format))"
+
+            case .configureOutputFromSource(let engine, let source, let destination, let format):
+                return ".configureOutputFromSource(\(engine), source:\(source), destination:\(destination), format:\(format))"
+            }
+        }
     }
 
     private let isPlayingSubject: CurrentValueSubject<Bool, Never>
@@ -78,6 +122,8 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
     private var audioLevelsAdapter: AudioEngineNodeAdapting
     let publisher: AnyPublisher<Event, Never>
 
+    private var engine: AVAudioEngine?
+
     override var description: String {
         "{ " +
             "isPlaying:\(isPlaying)" +
@@ -90,6 +136,7 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
             ", isVoiceProcessingAGCEnabled:\(source.isVoiceProcessingAGCEnabled)" +
             ", audioLevel:\(audioLevel)" +
             ", source:\(source)" +
+            ", engineOutput: \(engine?.outputDescription ?? "-")" +
             " }"
     }
 
@@ -285,6 +332,8 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         try throwingExecution("Failed to disable VoiceProcessingAGC.") { source.setVoiceProcessingAGCEnabled(false) }
         try throwingExecution("Failed to enable VoiceProcessing bypass.") { source.setVoiceProcessingBypassed(true) }
         try throwingExecution("Failed to enable Stereo Playout.") { source.setStereoPlayoutEnabled(true) }
+
+        log.debug("StereoPlayout restart completed.", subsystems: .audioSession)
     }
 
     // MARK: - RTCAudioDeviceModuleDelegate
@@ -339,6 +388,7 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         _ audioDeviceModule: RTCAudioDeviceModule,
         didCreateEngine engine: AVAudioEngine
     ) -> Int {
+        self.engine = engine
         subject.send(.didCreateAudioEngine(engine))
         return Constant.successResult
     }
@@ -349,7 +399,13 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         isPlayoutEnabled: Bool,
         isRecordingEnabled: Bool
     ) -> Int {
-        subject.send(.willEnableAudioEngine(engine))
+        subject.send(
+            .willEnableAudioEngine(
+                engine,
+                isPlayoutEnabled: isPlayoutEnabled,
+                isRecordingEnabled: isRecordingEnabled
+            )
+        )
         isPlayingSubject.send(isPlayoutEnabled)
         isRecordingSubject.send(isRecordingEnabled)
         return Constant.successResult
@@ -361,7 +417,13 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         isPlayoutEnabled: Bool,
         isRecordingEnabled: Bool
     ) -> Int {
-        subject.send(.willStartAudioEngine(engine))
+        subject.send(
+            .willStartAudioEngine(
+                engine,
+                isPlayoutEnabled: isPlayoutEnabled,
+                isRecordingEnabled: isRecordingEnabled
+            )
+        )
         isPlayingSubject.send(isPlayoutEnabled)
         isRecordingSubject.send(isRecordingEnabled)
         return Constant.successResult
@@ -373,7 +435,13 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         isPlayoutEnabled: Bool,
         isRecordingEnabled: Bool
     ) -> Int {
-        subject.send(.didStopAudioEngine(engine))
+        subject.send(
+            .didStopAudioEngine(
+                engine,
+                isPlayoutEnabled: isPlayoutEnabled,
+                isRecordingEnabled: isRecordingEnabled
+            )
+        )
         audioLevelsAdapter.uninstall(on: 0)
         isPlayingSubject.send(isPlayoutEnabled)
         isRecordingSubject.send(isRecordingEnabled)
@@ -386,7 +454,13 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         isPlayoutEnabled: Bool,
         isRecordingEnabled: Bool
     ) -> Int {
-        subject.send(.didDisableAudioEngine(engine))
+        subject.send(
+            .didDisableAudioEngine(
+                engine,
+                isPlayoutEnabled: isPlayoutEnabled,
+                isRecordingEnabled: isRecordingEnabled
+            )
+        )
         audioLevelsAdapter.uninstall(on: 0)
         isPlayingSubject.send(isPlayoutEnabled)
         isRecordingSubject.send(isRecordingEnabled)
@@ -397,6 +471,7 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         _ audioDeviceModule: RTCAudioDeviceModule,
         willReleaseEngine engine: AVAudioEngine
     ) -> Int {
+        self.engine = nil
         subject.send(.willReleaseAudioEngine(engine))
         audioLevelsAdapter.uninstall(on: 0)
         return Constant.successResult
@@ -410,6 +485,14 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         format: AVAudioFormat,
         context: [AnyHashable: Any]
     ) -> Int {
+        subject.send(
+            .configureInputFromSource(
+                engine,
+                source: source,
+                destination: destination,
+                format: format
+            )
+        )
         audioLevelsAdapter.installInputTap(
             on: destination,
             format: format,
@@ -427,7 +510,15 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         format: AVAudioFormat,
         context: [AnyHashable: Any]
     ) -> Int {
-        Constant.successResult
+        subject.send(
+            .configureOutputFromSource(
+                engine,
+                source: source,
+                destination: destination,
+                format: format
+            )
+        )
+        return Constant.successResult
     }
 
     func audioDeviceModuleDidUpdateDevices(
@@ -482,5 +573,32 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
             file,
             line
         )
+    }
+}
+
+extension AVAudioEngine {
+
+    var outputDescription: String {
+        guard let remoteIO = outputNode.audioUnit else {
+            return "not available"
+        }
+
+        var asbd = AudioStreamBasicDescription()
+        var size = UInt32(MemoryLayout<AudioStreamBasicDescription>.size)
+
+        let status = AudioUnitGetProperty(
+            remoteIO,
+            kAudioUnitProperty_StreamFormat,
+            kAudioUnitScope_Output,
+            0,
+            &asbd,
+            &size
+        )
+
+        guard status == noErr else {
+            return "failed to fetch information"
+        }
+
+        return "\(asbd.mChannelsPerFrame) ch @ \(asbd.mSampleRate) Hz"
     }
 }
