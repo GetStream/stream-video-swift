@@ -193,6 +193,7 @@ open class CallViewModel: ObservableObject {
     private(set) var localCallSettingsChange = false
 
     private var hasAcceptedCall = false
+    private var skipCallStateUpdates = false
 
     public var participants: [CallParticipant] {
         let updateParticipants = call?.state.participants ?? []
@@ -431,6 +432,46 @@ open class CallViewModel: ObservableObject {
             customData: customData
         )
     }
+    
+    public func ring(
+        callType: String,
+        callId: String,
+        members: [Member],
+        video: Bool? = nil,
+        showOutgoingScreen: Bool = false
+    ) {
+        outgoingCallMembers = members
+        if showOutgoingScreen {
+            skipCallStateUpdates = true
+            setCallingState(.outgoing)
+        }
+        if self.call == nil || (call?.id != callId && call?.callType != callType) {
+            let callSettings = localCallSettingsChange ? callSettings : nil
+            let call = streamVideo.call(
+                callType: callType,
+                callId: callId,
+                callSettings: callSettings
+            )
+            self.call = call
+        }
+        guard let call else { return }
+        Task(disposableBag: disposableBag, priority: .userInitiated) { [weak self] in
+            guard let self else { return }
+            do {
+                try await call.ring(
+                    request: .init(membersIds: members.map(\.id).filter { $0 != self.streamVideo.user.id }, video: video)
+                )
+                if let autoCancelTimeout = call.state.settings?.ring.autoCancelTimeoutMs {
+                    let timeoutSeconds = TimeInterval(autoCancelTimeout / 1000)
+                    startTimer(timeout: timeoutSeconds)
+                }
+            } catch {
+                self.error = error
+                setCallingState(.idle)
+                self.call = nil
+            }
+        }
+    }
 
     /// Enters into a lobby before joining a call.
     /// - Parameters:
@@ -593,7 +634,9 @@ open class CallViewModel: ObservableObject {
             lineNumber: line
         )
         if let call, (callingState != .inCall || self.call?.cId != call.cId) {
-            setCallingState(.inCall)
+            if !skipCallStateUpdates {
+                setCallingState(.inCall)
+            }
             self.call = call
         } else if call == nil, callingState != .idle {
             setCallingState(.idle)
@@ -887,6 +930,7 @@ open class CallViewModel: ObservableObject {
                 setActiveCall(call)
             }
         case .outgoing where call?.cId == event.callCid:
+            skipCallStateUpdates = false
             enterCall(
                 call: call,
                 callType: event.type,
@@ -942,6 +986,7 @@ open class CallViewModel: ObservableObject {
     }
 
     private func updateCallStateIfNeeded() {
+        guard !skipCallStateUpdates else { return }
         if callingState == .outgoing {
             if !callParticipants.isEmpty {
                 setCallingState(.inCall)

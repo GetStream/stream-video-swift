@@ -164,7 +164,7 @@ struct DetailedCallingView<Factory: ViewFactory>: View {
                                 callType: callType,
                                 callId: text,
                                 members: members,
-                                ring: callFlow == .ringEvents,
+                                ring: false,//callFlow == .ringEvents,
                                 video: viewModel.callSettings.videoOn
                             )
                         }
@@ -188,6 +188,18 @@ struct DetailedCallingView<Factory: ViewFactory>: View {
         .onReceive(appState.$currentUser) { currentUser in
             self.callAction = currentUser?.type == .regular ? callAction : .joinCall
             self.callFlow = currentUser?.type == .regular ? callFlow : .joinImmediately
+        }
+        .onChange(of: viewModel.callingState) { state in
+            if state == .inCall && !hasRang {
+                hasRang = true
+                viewModel.ring(
+                    callType: callType,
+                    callId: text,
+                    members: members,
+                    video: true,
+                    showOutgoingScreen: true
+                )
+            }
         }
     }
 
@@ -244,3 +256,6 @@ struct DetailedCallingView<Factory: ViewFactory>: View {
         )
     }
 }
+
+//TODO: temp for testing.
+var hasRang = false
