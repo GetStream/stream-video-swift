@@ -92,15 +92,6 @@ extension RTCAudioStore {
                 .map { $0.1 && $0.2 }
                 .sink { [weak self] in self?.restartStereoPlayoutSubject.send($0) }
                 .store(in: disposableBag)
-
-//
-//            statePublisher
-//                .map(\.currentRoute)
-//                .scan(false, { $0 != $1.supportsStereoOutput })
-//                .receive(on: processingQueue)
-//                .log(.debug, subsystems: .audioSession) { "Current route changed and a stereoPlayout restart is \($0 ? "required" : "not required")." }
-//                .sink { [weak self] in self?.restartStereoPlayoutSubject.send($0) }
-//                .store(in: disposableBag)
         }
     }
 }

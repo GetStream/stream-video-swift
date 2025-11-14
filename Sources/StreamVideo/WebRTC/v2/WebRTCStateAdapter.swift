@@ -681,10 +681,9 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
 
     func configureAudioSession(source: JoinSource?) async throws {
         try await audioStore.dispatch([
-            .setRecording(peerConnectionFactory.audioDeviceModule.isRecording),
-            .setMicrophoneMuted(peerConnectionFactory.audioDeviceModule.isMicrophoneMuted),
             .setAudioDeviceModule(peerConnectionFactory.audioDeviceModule)
         ]).result()
+        
         audioSession.activate(
             callSettingsPublisher: $callSettings.removeDuplicates().eraseToAnyPublisher(),
             ownCapabilitiesPublisher: $ownCapabilities.removeDuplicates().eraseToAnyPublisher(),

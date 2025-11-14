@@ -59,16 +59,9 @@ extension RTCAudioStore.Namespace {
                 if value == nil {
                     updatedState.shouldRecord = false
                     updatedState.isRecording = false
-                    updatedState.isMicrophoneMuted = false
-                    updatedState.stereoConfiguration = .init(
-                        playout: .init(
-                            available: false,
-                            enabled: false
-                        )
-                    )
-                    updatedState.shouldRecord = false
-                    updatedState.isMicrophoneMuted = false
-                    updatedState.isRecording = false
+                    updatedState.isMicrophoneMuted = true
+                    updatedState.stereoConfiguration.playout.available = false
+                    updatedState.stereoConfiguration.playout.enabled = false
                 }
 
             case let .setCurrentRoute(value):

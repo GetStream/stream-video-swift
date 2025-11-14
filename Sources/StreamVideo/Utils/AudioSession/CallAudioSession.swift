@@ -36,7 +36,6 @@ final class CallAudioSession: @unchecked Sendable {
     private var lastAppliedConfiguration: AudioSessionConfiguration?
     private var lastCallSettings: CallSettings?
     private var lastOwnCapabilities: Set<OwnCapability>?
-    private var transitioningToSpeaker = false
 
     init(
         stereoPlayoutMode: StereoPlayoutMode = .deviceAndExternal,
@@ -152,11 +151,7 @@ final class CallAudioSession: @unchecked Sendable {
             .receive(on: processingQueue)
             .sink { [weak self] in
                 guard let self, let lastCallSettings, let lastOwnCapabilities else { return }
-                if !$0.isSpeaker, transitioningToSpeaker {
-                    // No-op as we ignore to complete the transition we have started
-                } else if $0.isSpeaker, transitioningToSpeaker {
-                    transitioningToSpeaker = false
-                } else if lastCallSettings.speakerOn != $0.isSpeaker {
+                if lastCallSettings.speakerOn != $0.isSpeaker, $0.reason == .override {
                     self.delegate?.audioSessionAdapterDidUpdateSpeakerOn(
                         $0.isSpeaker,
                         file: #file,
@@ -229,11 +224,6 @@ final class CallAudioSession: @unchecked Sendable {
         )
 
         var actions: [RTCAudioStore.Namespace.Action] = []
-
-        if callSettings.speakerOn {
-//            actions.append(.avAudioSession(.prepareForSpeakerTransition))
-            transitioningToSpeaker = true
-        }
 
         actions.append(
             .avAudioSession(
