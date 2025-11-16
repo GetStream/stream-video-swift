@@ -472,7 +472,83 @@ open class CallViewModel: ObservableObject {
             }
         }
     }
+    
+    public func joinAndRingCall(
+        callType: String,
+        callId: String,
+        members: [Member],
+        team: String? = nil,
+        maxDuration: Int? = nil,
+        maxParticipants: Int? = nil,
+        startsAt: Date? = nil,
+        customData: [String: RawJSON]? = nil,
+        video: Bool? = nil
+    ) {
+        outgoingCallMembers = members
+        skipCallStateUpdates = true
+        setCallingState(.outgoing)
+        let membersRequest: [MemberRequest]? = members.isEmpty
+            ? nil
+            : members.map(\.toMemberRequest)
+        
+        if enteringCallTask != nil || callingState == .inCall {
+            return
+        }
+        enteringCallTask = Task(disposableBag: disposableBag, priority: .userInitiated) { [weak self] in
+            guard let self else { return }
+            do {
+                log.debug("Starting call")
+                let call = call ?? streamVideo.call(
+                    callType: callType,
+                    callId: callId,
+                    callSettings: callSettings
+                )
+                var settingsRequest: CallSettingsRequest?
+                var limits: LimitsSettingsRequest?
+                if maxDuration != nil || maxParticipants != nil {
+                    limits = .init(maxDurationSeconds: maxDuration, maxParticipants: maxParticipants)
+                }
+                settingsRequest = .init(limits: limits)
+                let options = CreateCallOptions(
+                    members: membersRequest,
+                    custom: customData,
+                    settings: settingsRequest,
+                    startsAt: startsAt,
+                    team: team
+                )
+                let settings = localCallSettingsChange ? callSettings : nil
 
+                call.updateParticipantsSorting(with: participantsSortComparators)
+
+                try await call.join(
+                    create: true,
+                    options: options,
+                    ring: false,
+                    callSettings: settings
+                )
+                
+                try await call.ring(
+                    request: .init(membersIds: members.map(\.id).filter { $0 != self.streamVideo.user.id }, video: video)
+                )
+                
+                if let autoCancelTimeout = call.state.settings?.ring.autoCancelTimeoutMs {
+                    let timeoutSeconds = TimeInterval(autoCancelTimeout / 1000)
+                    startTimer(timeout: timeoutSeconds)
+                }
+                save(call: call)
+                enteringCallTask = nil
+                hasAcceptedCall = false
+            } catch {
+                hasAcceptedCall = false
+                log.error("Error starting a call", error: error)
+                self.error = error
+                setCallingState(.idle)
+                audioRecorder.stopRecording()
+                enteringCallTask = nil
+            }
+        }
+    }
+    
     /// Enters into a lobby before joining a call.
     /// - Parameters:
     ///  - callType: the type of the call.
