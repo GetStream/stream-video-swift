@@ -13,7 +13,6 @@ extension RTCAudioStore {
     final class StereoPlayoutEffect: StoreEffect<RTCAudioStore.Namespace>, @unchecked Sendable {
 
         private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
-        private let setStereoPlayoutSubject: PassthroughSubject<Bool, Never> = .init()
         private let disposableBag = DisposableBag()
         private var audioDeviceModuleCancellable: AnyCancellable?
 
@@ -31,7 +30,6 @@ extension RTCAudioStore {
                 .map(\.audioDeviceModule)
                 .removeDuplicates()
                 .receive(on: processingQueue)
-                .log(.debug, subsystems: .audioSession) { "AudioDeviceModule was updated to \($0)." }
                 .sink { [weak self] in self?.didUpdate(audioDeviceModule: $0, statePublisher: statePublisher) }
         }
 
@@ -47,20 +45,16 @@ extension RTCAudioStore {
                 return
             }
 
-            setStereoPlayoutSubject
-                .receive(on: processingQueue)
-                .sink { [weak audioDeviceModule] enableStereoPlayout in
-                    log.throwing("Unable to setStereoPlayout:\(enableStereoPlayout)", subsystems: .audioSession) {
-                        try audioDeviceModule?.setStereoPlayoutEnabled(enableStereoPlayout)
-                    }
-                }
-                .store(in: disposableBag)
-
             audioDeviceModule
                 .isStereoPlayoutAvailablePublisher
                 .removeDuplicates()
                 .receive(on: processingQueue)
-                .sink { [weak self] in self?.dispatcher?.dispatch(.stereo(.setPlayoutAvailable($0))) }
+                .sink { [weak self, weak audioDeviceModule] isPlayoutAvailable in
+                    self?.dispatcher?.dispatch(.stereo(.setPlayoutAvailable(isPlayoutAvailable)))
+                    log.throwing("Unable to setStereoPlayout:\(isPlayoutAvailable)", subsystems: .audioSession) {
+                        try audioDeviceModule?.setStereoPlayoutEnabled(isPlayoutAvailable)
+                    }
+                }
                 .store(in: disposableBag)
 
             audioDeviceModule
@@ -68,25 +62,6 @@ extension RTCAudioStore {
                 .removeDuplicates()
                 .receive(on: processingQueue)
                 .sink { [weak self] in self?.dispatcher?.dispatch(.stereo(.setPlayoutEnabled($0))) }
-                .store(in: disposableBag)
-
-            Publishers
-                .CombineLatest(
-                    audioDeviceModule
-                        .isStereoPlayoutAvailablePublisher
-                        .eraseToAnyPublisher(),
-                    statePublisher
-                        .map(\.currentRoute)
-                        .removeDuplicates()
-                        .map(\.supportsStereoOutput)
-                )
-                .debounce(for: .seconds(1), scheduler: processingQueue)
-                .receive(on: processingQueue)
-                .log(.debug, subsystems: .audioSession) {
-                    "Received an update { stereoPlayoutAvailable:\($0.0), currentRouteSupportsStereoOutput:\($0.1), resolved:\($0.0 && $0.1) }"
-                }
-                .map { $0.0 && $0.1 }
-                .sink { [weak self] in self?.setStereoPlayoutSubject.send($0) }
                 .store(in: disposableBag)
         }
     }

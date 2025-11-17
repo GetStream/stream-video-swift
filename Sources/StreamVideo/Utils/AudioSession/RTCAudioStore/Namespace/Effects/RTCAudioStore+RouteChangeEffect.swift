@@ -15,7 +15,7 @@ extension RTCAudioStore {
 
         private let audioSessionObserver: RTCAudioSessionPublisher
         private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
-        private var cancellable: AnyCancellable?
+        private var disposableBag = DisposableBag()
 
         convenience init(_ source: RTCAudioSession) {
             self.init(.init(source))
@@ -25,22 +25,55 @@ extension RTCAudioStore {
             self.audioSessionObserver = audioSessionObserver
             super.init()
 
-            cancellable = audioSessionObserver
+            audioSessionObserver
                 .publisher
                 .compactMap {
-                    if case let .didChangeRoute(reason, from, to) = $0 {
+                    switch $0 {
+                    case let .didChangeRoute(reason, from, to):
                         return (
                             reason,
                             RTCAudioStore.StoreState.AudioRoute(from),
                             RTCAudioStore.StoreState.AudioRoute(to, reason: reason)
                         )
+                    default:
+                        return nil
                     }
-                    return nil
                 }
                 .receive(on: processingQueue)
                 .log(.debug, subsystems: .audioSession) { "AudioRoute updated \($1) → \($2) due to reason:\($0)." }
                 .map { $0.2 }
                 .sink { [weak self] in self?.dispatcher?.dispatch(.setCurrentRoute($0)) }
+                .store(in: disposableBag)
+
+            audioSessionObserver
+                .publisher
+                .compactMap {
+                    switch $0 {
+                    case let .didChangeCategory(value):
+                        return value
+                    default:
+                        return nil
+                    }
+                }
+                .receive(on: processingQueue)
+                .log(.debug, subsystems: .audioSession) { "AVAudioSession category updated \($0)." }
+                .sink { [weak self] in self?.dispatcher?.dispatch(.avAudioSession(.systemSetCategory($0))) }
+                .store(in: disposableBag)
+
+            audioSessionObserver
+                .publisher
+                .compactMap {
+                    switch $0 {
+                    case let .didChangeMode(value):
+                        return value
+                    default:
+                        return nil
+                    }
+                }
+                .receive(on: processingQueue)
+                .log(.debug, subsystems: .audioSession) { "AVAudioSession mode updated \($0)." }
+                .sink { [weak self] in self?.dispatcher?.dispatch(.avAudioSession(.systemSetMode($0))) }
+                .store(in: disposableBag)
         }
     }
 }

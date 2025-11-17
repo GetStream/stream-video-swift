@@ -27,13 +27,23 @@ extension RTCAudioStore.Namespace {
             function: StaticString,
             line: UInt
         ) async throws -> State {
-            guard case let .avAudioSession(action) = action else {
-                return state
-            }
-
             var updatedState = state
 
+            if case let .setCurrentRoute(value) = action {
+                updatedState.audioSessionConfiguration.overrideOutputAudioPort = value.isSpeaker ? .speaker : .none
+            }
+
+            guard case let .avAudioSession(action) = action else {
+                return updatedState
+            }
+
             switch action {
+            case let .systemSetCategory(value):
+                updatedState.audioSessionConfiguration.category = value
+
+            case let .systemSetMode(value):
+                updatedState.audioSessionConfiguration.mode = value
+
             case let .setCategory(value):
                 try performUpdate(
                     state: state.audioSessionConfiguration,

@@ -28,7 +28,9 @@ extension RTCAudioStore {
         }
 
         enum AVAudioSessionAction: Equatable, Sendable, CustomStringConvertible {
+            case systemSetCategory(AVAudioSession.Category)
             case setCategory(AVAudioSession.Category)
+            case systemSetMode(AVAudioSession.Mode)
             case setMode(AVAudioSession.Mode)
             case setCategoryOptions(AVAudioSession.CategoryOptions)
 
@@ -52,8 +54,14 @@ extension RTCAudioStore {
 
             var description: String {
                 switch self {
+                case .systemSetCategory(let category):
+                    return ".systemSetCategory(\(category))"
+
                 case .setCategory(let category):
                     return ".setCategory(\(category))"
+
+                case .systemSetMode(let mode):
+                    return ".systemSetMode(\(mode))"
 
                 case .setMode(let mode):
                     return ".setMode(\(mode))"

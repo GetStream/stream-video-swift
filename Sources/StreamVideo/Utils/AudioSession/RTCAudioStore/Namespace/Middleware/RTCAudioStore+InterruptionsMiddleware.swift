@@ -61,7 +61,7 @@ extension RTCAudioStore {
                 }
                 dispatcher?.dispatch(actions.map(\.box))
 
-            case .didChangeRoute:
+            default:
                 break
             }
         }

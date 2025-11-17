@@ -71,6 +71,12 @@ extension RTCAudioStore {
             state: StoreState.AVAudioSessionConfiguration
         ) -> Bool {
             switch action {
+            case let .systemSetCategory(value):
+                return value != state.category
+
+            case let .systemSetMode(value):
+                return value != state.mode
+                
             case let .setCategory(value):
                 return value != state.category
 

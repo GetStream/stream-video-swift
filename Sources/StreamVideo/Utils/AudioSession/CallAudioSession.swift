@@ -12,6 +12,31 @@ final class CallAudioSession: @unchecked Sendable {
 
     @Injected(\.audioStore) private var audioStore
 
+    private struct Input {
+        var callSettings: CallSettings
+        var ownCapabilities: Set<OwnCapability>
+        var currentRoute: RTCAudioStore.StoreState.AudioRoute?
+        var file: StaticString
+        var function: StaticString
+        var line: UInt
+
+        init(
+            callSettings: CallSettings,
+            ownCapabilities: Set<OwnCapability>,
+            currentRoute: RTCAudioStore.StoreState.AudioRoute? = nil,
+            file: StaticString = #file,
+            function: StaticString = #function,
+            line: UInt = #line
+        ) {
+            self.callSettings = callSettings
+            self.ownCapabilities = ownCapabilities
+            self.currentRoute = currentRoute
+            self.file = file
+            self.function = function
+            self.line = line
+        }
+    }
+
     var currentRouteIsExternal: Bool { audioStore.state.currentRoute.isExternal }
 
     private(set) weak var delegate: StreamAudioSessionAdapterDelegate?
@@ -24,6 +49,8 @@ final class CallAudioSession: @unchecked Sendable {
 
     private let disposableBag = DisposableBag()
     private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
+
+    private let processingPipeline = PassthroughSubject<Input, Never>()
 
     private var lastAppliedConfiguration: AudioSessionConfiguration?
     private var lastCallSettings: CallSettings?
@@ -54,6 +81,12 @@ final class CallAudioSession: @unchecked Sendable {
         shouldSetActive: Bool
     ) {
         disposableBag.removeAll()
+
+        processingPipeline
+            .debounce(for: .milliseconds(250), scheduler: processingQueue)
+            .receive(on: processingQueue)
+            .sink { [weak self] in self?.process($0) }
+            .store(in: disposableBag)
 
         self.delegate = delegate
         self.statsAdapter = statsAdapter
@@ -97,17 +130,35 @@ final class CallAudioSession: @unchecked Sendable {
             return
         }
 
-        processingQueue.addOperation { [weak self] in
-            guard let self else { return }
-            didUpdate(
+        processingPipeline.send(
+            .init(
                 callSettings: callSettings,
                 ownCapabilities: ownCapabilities,
                 currentRoute: audioStore.state.currentRoute
             )
-        }
+        )
     }
 
     // MARK: - Private Helpers
+
+    private func process(
+        _ input: Input
+    ) {
+        log.warning(
+            "Store identifier:audio.store.call.audiosession processes input:\(input).",
+            functionName: input.function,
+            fileName: input.file,
+            lineNumber: input.line
+        )
+        didUpdate(
+            callSettings: input.callSettings,
+            ownCapabilities: input.ownCapabilities,
+            currentRoute: input.currentRoute ?? audioStore.state.currentRoute,
+            file: input.file,
+            function: input.function,
+            line: input.line
+        )
+    }
 
     private func configureCallSettingsAndCapabilitiesObservation(
         callSettingsPublisher: AnyPublisher<CallSettings, Never>,
@@ -120,10 +171,12 @@ final class CallAudioSession: @unchecked Sendable {
                 guard let self else {
                     return
                 }
-                didUpdate(
-                    callSettings: $0,
-                    ownCapabilities: $1,
-                    currentRoute: audioStore.state.currentRoute
+
+                processingPipeline.send(
+                    .init(
+                        callSettings: $0,
+                        ownCapabilities: $1
+                    )
                 )
             }
             .store(in: disposableBag)
@@ -133,13 +186,8 @@ final class CallAudioSession: @unchecked Sendable {
         audioStore
             .publisher(\.currentRoute)
             .removeDuplicates()
-            .drop { [weak self] _ in self?.lastCallSettings == nil }
-            .log(.debug, subsystems: .audioSession) {
-                "Store identifier:audio.store received route update:\($0) on CallAudioSession. Debouncing..."
-            }
-            .debounce(for: .milliseconds(500), scheduler: DispatchQueue.sdk)
+            .filter { $0.reason.isValidRouteChange }
             .receive(on: processingQueue)
-            .log(.debug, subsystems: .audioSession) { "Store identifier:audio.store will process debounced route update: \($0)" }
             .sink { [weak self] in
                 guard let self, let lastCallSettings, let lastOwnCapabilities else { return }
                 if lastCallSettings.speakerOn != $0.isSpeaker {
@@ -150,10 +198,12 @@ final class CallAudioSession: @unchecked Sendable {
                         line: #line
                     )
                 } else {
-                    didUpdate(
-                        callSettings: lastCallSettings,
-                        ownCapabilities: lastOwnCapabilities,
-                        currentRoute: $0
+                    processingPipeline.send(
+                        .init(
+                            callSettings: lastCallSettings,
+                            ownCapabilities: lastOwnCapabilities,
+                            currentRoute: $0
+                        )
                     )
                 }
             }
@@ -191,18 +241,6 @@ final class CallAudioSession: @unchecked Sendable {
         function: StaticString = #function,
         line: UInt = #line
     ) {
-        guard configuration != lastAppliedConfiguration || callSettings != lastCallSettings || ownCapabilities !=
-            lastOwnCapabilities else {
-            log.debug(
-                "CallAudioSession won't apply configuration:\(configuration) as it's the same as the last applied one.",
-                subsystems: .audioSession,
-                functionName: function,
-                fileName: file,
-                lineNumber: line
-            )
-            return
-        }
-
         log.debug(
             "CallAudioSession will apply configuration:\(configuration)",
             subsystems: .audioSession,
@@ -211,32 +249,28 @@ final class CallAudioSession: @unchecked Sendable {
             lineNumber: line
         )
 
-        var actions: [RTCAudioStore.Namespace.Action] = []
+        var actions: [StoreActionBox<RTCAudioStore.Namespace.Action>] = []
+
+        actions.append(.normal(.setShouldRecord(ownCapabilities.contains(.sendAudio))))
+        actions.append(.normal(.setMicrophoneMuted(!callSettings.audioOn || !ownCapabilities.contains(.sendAudio))))
 
         actions.append(
-            .avAudioSession(
-                .setCategoryAndModeAndCategoryOptions(
-                    configuration.category,
-                    mode: configuration.mode,
-                    categoryOptions: configuration.options
+            .normal(
+                .avAudioSession(
+                    .setCategoryAndModeAndCategoryOptions(
+                        configuration.category,
+                        mode: configuration.mode,
+                        categoryOptions: configuration.options
+                    )
                 )
             )
+//            .withBeforeDelay(0.25)
         )
 
         actions.append(contentsOf: [
-            .setActive(configuration.isActive),
-            .avAudioSession(
-                .setOverrideOutputAudioPort(configuration.overrideOutputAudioPort ?? .none)
-            )
+            .normal(.setActive(configuration.isActive)),
+            .normal(.avAudioSession(.setOverrideOutputAudioPort(configuration.overrideOutputAudioPort ?? .none)))
         ])
-
-        if ownCapabilities.contains(.sendAudio) {
-            actions.append(.setShouldRecord(true))
-            actions.append(.setMicrophoneMuted(!callSettings.audioOn))
-        } else {
-            actions.append(.setShouldRecord(false))
-            actions.append(.setMicrophoneMuted(true))
-        }
 
         audioStore.dispatch(
             actions,
@@ -244,6 +278,7 @@ final class CallAudioSession: @unchecked Sendable {
             function: function,
             line: line
         )
+
         lastAppliedConfiguration = configuration
         lastCallSettings = callSettings
         lastOwnCapabilities = ownCapabilities

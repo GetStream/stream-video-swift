@@ -195,6 +195,7 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
             .store(in: disposableBag)
 
         source.manualRestoreVoiceProcessingOnMono = true
+        (source as? RTCAudioDeviceModule)?.setRecordingAlwaysPreparedMode(false)
     }
 
     // MARK: - Recording
@@ -209,6 +210,14 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
     /// - Parameter isEnabled: When `true` recording starts, otherwise stops.
     /// - Throws: `ClientError` when the underlying module reports a failure.
     func setRecording(_ isEnabled: Bool) throws {
+        defer {
+            log.throwing("Unable to start playout", subsystems: .audioSession) {
+                try throwingExecution("setReocording defer") {
+                    source.initAndStartPlayout()
+                }
+            }
+        }
+
         guard isEnabled != isRecording else {
             return
         }
@@ -240,8 +249,22 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
     /// - Parameter isMuted: `true` to mute the microphone, `false` to unmute.
     /// - Throws: `ClientError` when the underlying module reports a failure.
     func setMuted(_ isMuted: Bool) throws {
+        defer {
+            log.throwing("Unable to start playout", subsystems: .audioSession) {
+                try throwingExecution("setMuted defer") {
+                    source.initAndStartPlayout()
+                }
+            }
+        }
+
         guard isMuted != isMicrophoneMuted else {
             return
+        }
+
+        if isStereoPlayoutEnabled {
+            try throwingExecution("Unable to stop playout") {
+                source.stopPlayout()
+            }
         }
 
         try throwingExecution("Unable to setMicrophoneMuted:\(isMuted)") {
@@ -250,16 +273,19 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         isMicrophoneMutedSubject.send(isMuted)
     }
 
-    func checkStereoPlayoutAvailability() {
-        _ = source.isStereoPlayoutAvailable
-    }
-
     func setStereoPlayoutEnabled(
         _ isEnabled: Bool,
         file: StaticString = #file,
         function: StaticString = #function,
         line: UInt = #line
     ) throws {
+        defer {
+            log.throwing("Unable to start playout", subsystems: .audioSession) {
+                try throwingExecution("setStereoPlayoutEnabled defer") {
+                    source.initAndStartPlayout()
+                }
+            }
+        }
         /// We explicitelly avoid checking the current state of isStereoPlayoutEnabled as there are case
         /// where the value may be true but playout isn't stereo and a restart is required.
         let currentVoiceProcessingEnabled = source.isVoiceProcessingEnabled
@@ -269,6 +295,7 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
             _ = source.setVoiceProcessingEnabled(currentVoiceProcessingEnabled)
             _ = source.setVoiceProcessingBypassed(currentVoiceProcessingBypassed)
             _ = source.setVoiceProcessingAGCEnabled(currentVoiceProcessingEnabled)
+            try? startPlayout()
         }
 
         /// To enable stereoPlayout we need to do the following in the order mentioned below:
@@ -300,7 +327,6 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
             onFailureReset()
             throw error
         }
-        _ = source.initAndStartPlayout()
 
         guard source.isStereoPlayoutEnabled != isEnabled else {
             log.debug(
@@ -350,9 +376,6 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
 
         isStereoPlayoutAvailableSubject.send(isStereoPlayoutAvailable)
         subject.send(.didUpdateStereoPlayoutAvailable(isStereoPlayoutAvailable))
-        if !isStereoPlayoutAvailable {
-            self.audioDeviceModule(audioDeviceModule, isStereoPlayoutEnabled: false)
-        }
         log.debug(
             "AudioDeviceModule updated isStereoPlayoutAvailable:\(isStereoPlayoutAvailable).",
             subsystems: .audioSession

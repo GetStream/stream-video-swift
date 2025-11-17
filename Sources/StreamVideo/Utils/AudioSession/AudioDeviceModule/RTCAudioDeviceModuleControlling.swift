@@ -37,7 +37,7 @@ protocol RTCAudioDeviceModuleControlling: AnyObject {
 
 extension RTCAudioDeviceModule: RTCAudioDeviceModuleControlling {
     func initAndStartPlayout() -> Int {
-        var result = initPlayout()
+        let result = initPlayout()
         if result == 0 {
             return startPlayout()
         } else {
