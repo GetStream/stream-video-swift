@@ -6,13 +6,6 @@ import AVFoundation
 import Combine
 import Foundation
 
-enum StereoPlayoutMode {
-    case none
-    case deviceOnly
-    case externalOnly
-    case deviceAndExternal
-}
-
 /// `CallAudioSession` manages the audio session for calls, handling configuration,
 /// activation, and deactivation.
 final class CallAudioSession: @unchecked Sendable {
@@ -28,7 +21,6 @@ final class CallAudioSession: @unchecked Sendable {
     /// Determines audio behaviour for the call session.
     /// Set this property to change how the session is configured.
     @Atomic private(set) var policy: AudioSessionPolicy
-    private var stereoPlayoutMode: StereoPlayoutMode
 
     private let disposableBag = DisposableBag()
     private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
@@ -37,11 +29,7 @@ final class CallAudioSession: @unchecked Sendable {
     private var lastCallSettings: CallSettings?
     private var lastOwnCapabilities: Set<OwnCapability>?
 
-    init(
-        stereoPlayoutMode: StereoPlayoutMode = .deviceAndExternal,
-        policy: AudioSessionPolicy = DefaultAudioSessionPolicy()
-    ) {
-        self.stereoPlayoutMode = stereoPlayoutMode
+    init(policy: AudioSessionPolicy = DefaultAudioSessionPolicy()) {
         self.policy = policy
 
         /// - Important: This runs whenever an CallAudioSession is created and ensures that
@@ -51,10 +39,8 @@ final class CallAudioSession: @unchecked Sendable {
             .avAudioSession(
                 .setCategoryAndModeAndCategoryOptions(
                     .playAndRecord,
-                    mode: stereoPlayoutMode == .deviceAndExternal ? .default : .voiceChat,
-                    categoryOptions: stereoPlayoutMode == .deviceAndExternal || stereoPlayoutMode == .externalOnly
-                        ? [.allowBluetoothA2DP]
-                        : [.allowBluetooth, .allowBluetoothA2DP]
+                    mode: .voiceChat,
+                    categoryOptions: [.allowBluetooth, .allowBluetoothA2DP]
                 )
             )
         )
@@ -147,11 +133,16 @@ final class CallAudioSession: @unchecked Sendable {
         audioStore
             .publisher(\.currentRoute)
             .removeDuplicates()
-            .debounce(for: .milliseconds(500), scheduler: processingQueue)
+            .drop { [weak self] _ in self?.lastCallSettings == nil }
+            .log(.debug, subsystems: .audioSession) {
+                "Store identifier:audio.store received route update:\($0) on CallAudioSession. Debouncing..."
+            }
+            .debounce(for: .milliseconds(500), scheduler: DispatchQueue.sdk)
             .receive(on: processingQueue)
+            .log(.debug, subsystems: .audioSession) { "Store identifier:audio.store will process debounced route update: \($0)" }
             .sink { [weak self] in
                 guard let self, let lastCallSettings, let lastOwnCapabilities else { return }
-                if lastCallSettings.speakerOn != $0.isSpeaker, $0.reason == .override {
+                if lastCallSettings.speakerOn != $0.isSpeaker {
                     self.delegate?.audioSessionAdapterDidUpdateSpeakerOn(
                         $0.isSpeaker,
                         file: #file,
@@ -179,18 +170,11 @@ final class CallAudioSession: @unchecked Sendable {
     ) {
         defer { statsAdapter?.trace(.init(audioSession: traceRepresentation)) }
 
-        var configuration = policy.configuration(
-            for: callSettings,
-            ownCapabilities: ownCapabilities
-        )
-
-        if !callSettings.audioOn {
-            configuration = configuration
-                .withStereoPlayoutMode(stereoPlayoutMode, currentRoute: currentRoute)
-        }
-
         applyConfiguration(
-            configuration,
+            policy.configuration(
+                for: callSettings,
+                ownCapabilities: ownCapabilities
+            ),
             callSettings: callSettings,
             ownCapabilities: ownCapabilities,
             file: file,

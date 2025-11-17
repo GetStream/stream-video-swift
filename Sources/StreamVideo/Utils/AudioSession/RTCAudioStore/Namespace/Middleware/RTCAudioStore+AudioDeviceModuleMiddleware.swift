@@ -154,6 +154,8 @@ extension RTCAudioStore {
                 return
             }
 
+            try audioDeviceModule.startPlayout()
+
             audioDeviceModule
                 .isRecordingPublisher
                 .removeDuplicates()

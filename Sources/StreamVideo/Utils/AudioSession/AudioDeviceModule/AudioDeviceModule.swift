@@ -199,6 +199,12 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
 
     // MARK: - Recording
 
+    func startPlayout() throws {
+        try throwingExecution("Unable to start playout") {
+            source.initAndStartPlayout()
+        }
+    }
+
     /// Enables or disables recording on the wrapped audio device module.
     /// - Parameter isEnabled: When `true` recording starts, otherwise stops.
     /// - Throws: `ClientError` when the underlying module reports a failure.
@@ -224,11 +230,6 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         } else {
             try throwingExecution("Unable to stopRecording.") {
                 source.stopRecording()
-            }
-
-            // Ensure that we always have audio.
-            try throwingExecution("Unable to initAndStartPlayout") {
-                source.initAndStartPlayout()
             }
         }
 
