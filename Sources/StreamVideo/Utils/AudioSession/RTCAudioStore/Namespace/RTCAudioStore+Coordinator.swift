@@ -76,7 +76,10 @@ extension RTCAudioStore {
 
             case let .systemSetMode(value):
                 return value != state.mode
-                
+
+            case let .systemSetCategoryOptions(value):
+                return value != state.options
+
             case let .setCategory(value):
                 return value != state.category
 

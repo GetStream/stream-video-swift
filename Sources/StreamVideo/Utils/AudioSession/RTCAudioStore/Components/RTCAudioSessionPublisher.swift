@@ -21,9 +21,6 @@ final class RTCAudioSessionPublisher: NSObject, RTCAudioSessionDelegate, @unchec
             from: AVAudioSessionRouteDescription,
             to: AVAudioSessionRouteDescription
         )
-
-        case didChangeCategory(AVAudioSession.Category)
-        case didChangeMode(AVAudioSession.Mode)
     }
 
     /// The Combine publisher that emits session events.
@@ -40,20 +37,6 @@ final class RTCAudioSessionPublisher: NSObject, RTCAudioSessionDelegate, @unchec
         super.init()
         _ = publisher
         source.add(self)
-
-        DefaultTimer
-            .publish(every: 0.1)
-            .compactMap { [weak source] _ in source?.session.category }
-            .removeDuplicates()
-            .sink { [weak self] in self?.subject.send(.didChangeCategory($0)) }
-            .store(in: disposableBag)
-
-        DefaultTimer
-            .publish(every: 0.1)
-            .compactMap { [weak source] _ in source?.session.mode }
-            .removeDuplicates()
-            .sink { [weak self] in self?.subject.send(.didChangeMode($0)) }
-            .store(in: disposableBag)
     }
 
     deinit {

@@ -390,10 +390,10 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
             return
         }
 
-        isStereoPlayoutEnabledSubject.send(isStereoPlayoutEnabled)
-        subject.send(.didUpdateStereoPlayoutEnabled(isStereoPlayoutEnabled))
+        isStereoPlayoutEnabledSubject.send(isStereoPlayoutEnabled && isStereoPlayoutAvailable)
+        subject.send(.didUpdateStereoPlayoutEnabled(isStereoPlayoutEnabled && isStereoPlayoutAvailable))
         log.debug(
-            "AudioDeviceModule updated isStereoPlayoutEnabled:\(isStereoPlayoutEnabled).",
+            "AudioDeviceModule updated isStereoPlayoutEnabled:\(isStereoPlayoutEnabled && isStereoPlayoutAvailable).",
             subsystems: .audioSession
         )
     }

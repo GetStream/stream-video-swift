@@ -35,7 +35,8 @@ extension RTCAudioStore {
         static func effects(audioSession: RTCAudioSession) -> Set<StoreEffect<RTCAudioStore.Namespace>> {
             [
                 StereoPlayoutEffect(),
-                RouteChangeEffect(audioSession)
+                RouteChangeEffect(audioSession),
+                AVAudioSessionEffect()
             ]
         }
 

@@ -18,4 +18,14 @@ extension AVAudioSession.RouteChangeReason {
             return true
         }
     }
+
+    /// https://github.com/TheWidlarzGroup/react-native-video/blob/fbb260e9164194a55d2b26404aea000e924e2f04/ios/Video/AudioSessionManager.swift#L357
+    var requiresReconfiguration: Bool {
+        switch self {
+        case .categoryChange, .override, .wakeFromSleep, .newDeviceAvailable, .oldDeviceUnavailable:
+            return true
+        default:
+            return false
+        }
+    }
 }

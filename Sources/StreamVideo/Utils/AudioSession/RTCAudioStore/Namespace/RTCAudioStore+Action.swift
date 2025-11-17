@@ -32,6 +32,7 @@ extension RTCAudioStore {
             case setCategory(AVAudioSession.Category)
             case systemSetMode(AVAudioSession.Mode)
             case setMode(AVAudioSession.Mode)
+            case systemSetCategoryOptions(AVAudioSession.CategoryOptions)
             case setCategoryOptions(AVAudioSession.CategoryOptions)
 
             case setCategoryAndMode(AVAudioSession.Category, mode: AVAudioSession.Mode)
@@ -65,6 +66,9 @@ extension RTCAudioStore {
 
                 case .setMode(let mode):
                     return ".setMode(\(mode))"
+
+                case .systemSetCategoryOptions(let categoryOptions):
+                    return ".systemSetCategoryOptions(\(categoryOptions))"
 
                 case .setCategoryOptions(let categoryOptions):
                     return ".setCategoryOptions(\(categoryOptions))"

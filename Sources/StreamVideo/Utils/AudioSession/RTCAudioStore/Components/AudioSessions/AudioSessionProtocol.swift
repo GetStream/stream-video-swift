@@ -55,6 +55,8 @@ protocol AudioSessionProtocol: AnyObject {
 
     func overrideOutputAudioPort(_ port: AVAudioSession.PortOverride) throws
 
+    func setPreferredOutputNumberOfChannels(_ noOfChannels: Int) throws
+
     /// Applies the provided configuration to the audio session.
     /// - Parameter configuration: Desired audio session configuration.
     func setConfiguration(_ configuration: RTCAudioSessionConfiguration) throws

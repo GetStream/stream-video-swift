@@ -44,36 +44,6 @@ extension RTCAudioStore {
                 .map { $0.2 }
                 .sink { [weak self] in self?.dispatcher?.dispatch(.setCurrentRoute($0)) }
                 .store(in: disposableBag)
-
-            audioSessionObserver
-                .publisher
-                .compactMap {
-                    switch $0 {
-                    case let .didChangeCategory(value):
-                        return value
-                    default:
-                        return nil
-                    }
-                }
-                .receive(on: processingQueue)
-                .log(.debug, subsystems: .audioSession) { "AVAudioSession category updated \($0)." }
-                .sink { [weak self] in self?.dispatcher?.dispatch(.avAudioSession(.systemSetCategory($0))) }
-                .store(in: disposableBag)
-
-            audioSessionObserver
-                .publisher
-                .compactMap {
-                    switch $0 {
-                    case let .didChangeMode(value):
-                        return value
-                    default:
-                        return nil
-                    }
-                }
-                .receive(on: processingQueue)
-                .log(.debug, subsystems: .audioSession) { "AVAudioSession mode updated \($0)." }
-                .sink { [weak self] in self?.dispatcher?.dispatch(.avAudioSession(.systemSetMode($0))) }
-                .store(in: disposableBag)
         }
     }
 }

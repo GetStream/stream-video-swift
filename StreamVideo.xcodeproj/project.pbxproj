@@ -169,6 +169,8 @@
 		402C545B2B6BE50500672BFB /* MockStreamStatistics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402C545A2B6BE50500672BFB /* MockStreamStatistics.swift */; };
 		402C545D2B6BE5E200672BFB /* StreamCallStatisticsFormatter_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402C545C2B6BE5E200672BFB /* StreamCallStatisticsFormatter_Tests.swift */; };
 		402C5C5F2ECB3C2D0096F212 /* LivestreamAudioSessionPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402C5C5E2ECB3C2D0096F212 /* LivestreamAudioSessionPolicy.swift */; };
+		402C5C612ECB96D30096F212 /* AVAudioSessionObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402C5C602ECB96D30096F212 /* AVAudioSessionObserver.swift */; };
+		402C5C632ECB988A0096F212 /* RTCAudioStore+AVAudioSessionEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402C5C622ECB988A0096F212 /* RTCAudioStore+AVAudioSessionEffect.swift */; };
 		402D0E882D0C94CD00E9B83F /* RTCAudioTrack+Clone.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402D0E872D0C94CD00E9B83F /* RTCAudioTrack+Clone.swift */; };
 		402D0E8A2D0C94E600E9B83F /* RTCVideoTrack+Clone.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402D0E892D0C94E600E9B83F /* RTCVideoTrack+Clone.swift */; };
 		402D0E8C2D0C94F900E9B83F /* CallSettings+Audio.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402D0E8B2D0C94F900E9B83F /* CallSettings+Audio.swift */; };
@@ -1942,6 +1944,8 @@
 		402C545A2B6BE50500672BFB /* MockStreamStatistics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockStreamStatistics.swift; sourceTree = "<group>"; };
 		402C545C2B6BE5E200672BFB /* StreamCallStatisticsFormatter_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamCallStatisticsFormatter_Tests.swift; sourceTree = "<group>"; };
 		402C5C5E2ECB3C2D0096F212 /* LivestreamAudioSessionPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LivestreamAudioSessionPolicy.swift; sourceTree = "<group>"; };
+		402C5C602ECB96D30096F212 /* AVAudioSessionObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AVAudioSessionObserver.swift; sourceTree = "<group>"; };
+		402C5C622ECB988A0096F212 /* RTCAudioStore+AVAudioSessionEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "RTCAudioStore+AVAudioSessionEffect.swift"; path = "Sources/StreamVideo/Utils/AudioSession/RTCAudioStore/Components/RTCAudioStore+AVAudioSessionEffect.swift"; sourceTree = SOURCE_ROOT; };
 		402D0E872D0C94CD00E9B83F /* RTCAudioTrack+Clone.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCAudioTrack+Clone.swift"; sourceTree = "<group>"; };
 		402D0E892D0C94E600E9B83F /* RTCVideoTrack+Clone.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCVideoTrack+Clone.swift"; sourceTree = "<group>"; };
 		402D0E8B2D0C94F900E9B83F /* CallSettings+Audio.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CallSettings+Audio.swift"; sourceTree = "<group>"; };
@@ -4034,6 +4038,7 @@
 			children = (
 				403908AB2EC2A99C00B19FA1 /* RTCAudioStore+StereoPlayoutEffect.swift */,
 				40EE9D502E97C7C60000EA92 /* RTCAudioStore+RouteChangeEffect.swift */,
+				402C5C622ECB988A0096F212 /* RTCAudioStore+AVAudioSessionEffect.swift */,
 			);
 			path = Effects;
 			sourceTree = "<group>";
@@ -5976,6 +5981,7 @@
 				4019A2812E4352CB00CE70A4 /* AudioSessions */,
 				40EE9D4C2E97C3910000EA92 /* RTCAudioStore+AVAudioSessionConfigurationValidator.swift */,
 				40EE9D522E97C8B70000EA92 /* RTCAudioSessionPublisher.swift */,
+				402C5C602ECB96D30096F212 /* AVAudioSessionObserver.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -8745,6 +8751,7 @@
 				84DCA2142A38A428000C3411 /* CoordinatorModels.swift in Sources */,
 				4061288B2CF33088007F5CDC /* SupportedPrefix.swift in Sources */,
 				40BBC4C02C629408002AEF92 /* RTCTemporaryPeerConnection.swift in Sources */,
+				402C5C612ECB96D30096F212 /* AVAudioSessionObserver.swift in Sources */,
 				84B0091B2A4C521100CF1FA7 /* Retries.swift in Sources */,
 				4019A2802E43529000CE70A4 /* AudioSessionProtocol.swift in Sources */,
 				405BFFD22DBB8BE8005B2BE4 /* ProximityManager.swift in Sources */,
@@ -8883,6 +8890,7 @@
 				40FB8FF62D661DC400F4390A /* Call+Identifiable.swift in Sources */,
 				40944D252E4E3D9100088AF0 /* StreamCallAudioRecorder+Logger.swift in Sources */,
 				4039F0CC2D0241120078159E /* AudioCodec.swift in Sources */,
+				402C5C632ECB988A0096F212 /* RTCAudioStore+AVAudioSessionEffect.swift in Sources */,
 				4028FE982DC4F638001F9DC3 /* ConsumableBucket.swift in Sources */,
 				4097B3832BF4E37B0057992D /* OnChangeViewModifier_iOS13.swift in Sources */,
 				84A7E1862883632100526C98 /* ConnectionStatus.swift in Sources */,

@@ -98,6 +98,7 @@ final class CallAudioSession: @unchecked Sendable {
             ownCapabilitiesPublisher: ownCapabilitiesPublisher
         )
         configureCurrentRouteObservation()
+        configureCallOptionsObservation()
 
         statsAdapter?.trace(.init(audioSession: traceRepresentation))
     }
@@ -144,8 +145,8 @@ final class CallAudioSession: @unchecked Sendable {
     private func process(
         _ input: Input
     ) {
-        log.warning(
-            "Store identifier:audio.store.call.audiosession processes input:\(input).",
+        log.debug(
+            "⚙️ Processing input:\(input).",
             functionName: input.function,
             fileName: input.file,
             lineNumber: input.line
@@ -182,11 +183,22 @@ final class CallAudioSession: @unchecked Sendable {
             .store(in: disposableBag)
     }
 
+    private func configureCallOptionsObservation() {
+        audioStore
+            .publisher(\.audioSessionConfiguration.options)
+            .removeDuplicates()
+            .filter { $0.isEmpty }
+            .receive(on: processingQueue)
+            .compactMap { [weak self] _ in self?.lastAppliedConfiguration?.options }
+            .sink { [weak self] in self?.audioStore.dispatch(.avAudioSession(.setCategoryOptions($0))) }
+            .store(in: disposableBag)
+    }
+
     private func configureCurrentRouteObservation() {
         audioStore
             .publisher(\.currentRoute)
             .removeDuplicates()
-            .filter { $0.reason.isValidRouteChange }
+            .filter { $0.reason.requiresReconfiguration }
             .receive(on: processingQueue)
             .sink { [weak self] in
                 guard let self, let lastCallSettings, let lastOwnCapabilities else { return }
@@ -264,7 +276,6 @@ final class CallAudioSession: @unchecked Sendable {
                     )
                 )
             )
-//            .withBeforeDelay(0.25)
         )
 
         actions.append(contentsOf: [
