@@ -888,6 +888,10 @@ open class CallViewModel: ObservableObject {
     }
 
     private func handleCallHangUp(ringTimeout: Bool = false) {
+        if skipCallStateUpdates {
+            skipCallStateUpdates = false
+            updateCallStateIfNeeded()
+        }
         guard
             let call,
             callingState == .outgoing
