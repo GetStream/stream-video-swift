@@ -554,7 +554,7 @@ extension AppEnvironment {
 extension AppEnvironment {
 
     enum AudioSessionPolicyDebugConfiguration: Hashable, Debuggable, Sendable {
-        case `default`, ownCapabilities
+        case `default`, ownCapabilities, livestream
 
         var title: String {
             switch self {
@@ -562,6 +562,8 @@ extension AppEnvironment {
                 return "Default"
             case .ownCapabilities:
                 return "OwnCapabilities"
+            case .livestream:
+                return "Livestream"
             }
         }
 
@@ -571,12 +573,14 @@ extension AppEnvironment {
                 return DefaultAudioSessionPolicy()
             case .ownCapabilities:
                 return OwnCapabilitiesAudioSessionPolicy()
+            case .livestream:
+                return LivestreamAudioSessionPolicy()
             }
         }
     }
 
     static var audioSessionPolicy: AudioSessionPolicyDebugConfiguration = {
-        .default
+        .livestream
     }()
 }
 
