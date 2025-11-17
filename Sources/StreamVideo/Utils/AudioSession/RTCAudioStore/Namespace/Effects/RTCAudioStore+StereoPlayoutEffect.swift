@@ -45,9 +45,16 @@ extension RTCAudioStore {
                 return
             }
 
-            audioDeviceModule
-                .isStereoPlayoutAvailablePublisher
-                .removeDuplicates()
+            Publishers
+                .CombineLatest(
+                    audioDeviceModule
+                        .isStereoPlayoutAvailablePublisher
+                        .removeDuplicates(),
+                    statePublisher
+                        .map(\.isMicrophoneMuted)
+                        .removeDuplicates()
+                )
+                .map { $0 && $1 }
                 .receive(on: processingQueue)
                 .sink { [weak self, weak audioDeviceModule] isPlayoutAvailable in
                     self?.dispatcher?.dispatch(.stereo(.setPlayoutAvailable(isPlayoutAvailable)))

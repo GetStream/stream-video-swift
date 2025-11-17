@@ -114,6 +114,12 @@ extension RTCAudioStore {
                     .bluetoothA2DP, .bluetoothLE, .bluetoothHFP, .carAudio, .headphones
                 ]
 
+                private enum CodingKeys: String, CodingKey {
+                    case type
+                    case name
+                    case id
+                }
+
                 var type: String
                 var name: String
                 var id: String
@@ -122,6 +128,8 @@ extension RTCAudioStore {
                 var isSpeaker: Bool
                 var isReceiver: Bool
                 var channels: Int
+
+                let source: AVAudioSessionPortDescription?
 
                 var description: String {
                     " { id:\(id), name:\(name), type:\(type) }"
@@ -135,6 +143,7 @@ extension RTCAudioStore {
                     self.isSpeaker = source.portType == .builtInSpeaker
                     self.isReceiver = source.portType == .builtInReceiver
                     self.channels = source.channels?.endIndex ?? 0
+                    self.source = source
                 }
 
                 init(
@@ -153,6 +162,7 @@ extension RTCAudioStore {
                     self.isSpeaker = isSpeaker
                     self.isReceiver = isReceiver
                     self.channels = channels
+                    self.source = nil
                 }
             }
 
