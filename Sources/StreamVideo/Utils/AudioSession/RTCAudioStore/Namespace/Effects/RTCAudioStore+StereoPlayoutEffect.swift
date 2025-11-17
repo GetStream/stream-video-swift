@@ -13,7 +13,7 @@ extension RTCAudioStore {
     final class StereoPlayoutEffect: StoreEffect<RTCAudioStore.Namespace>, @unchecked Sendable {
 
         private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
-        private let restartStereoPlayoutSubject: PassthroughSubject<Bool, Never> = .init()
+        private let setStereoPlayoutSubject: PassthroughSubject<Bool, Never> = .init()
         private let disposableBag = DisposableBag()
         private var audioDeviceModuleCancellable: AnyCancellable?
 
@@ -47,8 +47,7 @@ extension RTCAudioStore {
                 return
             }
 
-            restartStereoPlayoutSubject
-                .debounce(for: .seconds(1), scheduler: processingQueue)
+            setStereoPlayoutSubject
                 .receive(on: processingQueue)
                 .sink { [weak audioDeviceModule] enableStereoPlayout in
                     log.throwing("Unable to setStereoPlayout:\(enableStereoPlayout)", subsystems: .audioSession) {
@@ -72,10 +71,7 @@ extension RTCAudioStore {
                 .store(in: disposableBag)
 
             Publishers
-                .CombineLatest3(
-                    audioDeviceModule
-                        .isMicrophoneMutedPublisher
-                        .eraseToAnyPublisher(),
+                .CombineLatest(
                     audioDeviceModule
                         .isStereoPlayoutAvailablePublisher
                         .eraseToAnyPublisher(),
@@ -87,10 +83,10 @@ extension RTCAudioStore {
                 .debounce(for: .seconds(1), scheduler: processingQueue)
                 .receive(on: processingQueue)
                 .log(.debug, subsystems: .audioSession) {
-                    "Received an update { isMicrophoneMuted:\($0.0) stereoPlayoutAvailable:\($0.1), currentRouteSupportsStereoOutput:\($0.2), resolved:\($0.1 && $0.2) }"
+                    "Received an update { stereoPlayoutAvailable:\($0.0), currentRouteSupportsStereoOutput:\($0.1), resolved:\($0.0 && $0.1) }"
                 }
-                .map { $0.1 && $0.2 }
-                .sink { [weak self] in self?.restartStereoPlayoutSubject.send($0) }
+                .map { $0.0 && $0.1 }
+                .sink { [weak self] in self?.setStereoPlayoutSubject.send($0) }
                 .store(in: disposableBag)
         }
     }

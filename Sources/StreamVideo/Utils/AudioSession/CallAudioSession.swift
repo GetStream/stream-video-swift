@@ -179,11 +179,15 @@ final class CallAudioSession: @unchecked Sendable {
     ) {
         defer { statsAdapter?.trace(.init(audioSession: traceRepresentation)) }
 
-        let configuration = policy.configuration(
+        var configuration = policy.configuration(
             for: callSettings,
             ownCapabilities: ownCapabilities
         )
-        .withStereoPlayoutMode(stereoPlayoutMode, currentRoute: currentRoute)
+
+        if !callSettings.audioOn {
+            configuration = configuration
+                .withStereoPlayoutMode(stereoPlayoutMode, currentRoute: currentRoute)
+        }
 
         applyConfiguration(
             configuration,
