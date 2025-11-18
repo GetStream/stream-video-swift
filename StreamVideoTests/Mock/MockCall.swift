@@ -18,6 +18,7 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
         case join
         case updateTrackSize
         case callKitActivated
+        case ring
     }
 
     enum MockCallFunctionInputKey: Payloadable {
@@ -35,6 +36,8 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
 
         case reject(reason: String?)
 
+        case ring(request: RingCallRequest)
+
         var payload: Any {
             switch self {
             case let .join(create, options, ring, notify, callSettings):
@@ -48,6 +51,9 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
 
             case let .reject(reason):
                 return reason ?? ""
+
+            case let .ring(request):
+                return request
             }
         }
     }
@@ -176,4 +182,17 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
             .updateTrackSize(trackSize: trackSize, participant: participant)
         )
     }
+
+    override func ring(request: RingCallRequest) async throws -> RingCallResponse {
+        stubbedFunctionInput[.ring]?.append(.ring(request: request))
+        if let response = stubbedFunction[.ring] as? RingCallResponse {
+            return response
+        } else if let error = stubbedFunction[.ring] as? Error {
+            throw error
+        } else {
+            // Default to a benign response if not stubbed to simplify tests
+            return RingCallResponse(duration: "0", membersIds: request.membersIds ?? [])
+        }
+    }
 }
+

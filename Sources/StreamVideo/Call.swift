@@ -363,11 +363,11 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         return response.call
     }
     
-    @discardableResult
     /// Initiates a ring action for the current call.
     /// - Parameter request: The `RingCallRequest` containing ring configuration, such as member ids and whether it's a video call.
     /// - Returns: A `RingCallResponse` with information about the ring operation.
     /// - Throws: An error if the coordinator request fails or the call cannot be rung.
+    @discardableResult
     public func ring(request: RingCallRequest) async throws -> RingCallResponse {
         let response = try await coordinatorClient.ringCall(
             type: callType,
