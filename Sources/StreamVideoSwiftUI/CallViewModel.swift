@@ -510,11 +510,8 @@ open class CallViewModel: ObservableObject {
                 )
                 
                 temporaryCallSettings = call.state.callSettings
-                if temporaryCallSettings?.speakerOn == true {
-                    try? await call.speaker.disableSpeakerPhone()
-                } else {
-                    temporaryCallSettings = nil
-                }                
+                try? await call.speaker.disableSpeakerPhone()
+
                 try await call.ring(
                     request: .init(membersIds: members.map(\.id).filter { $0 != self.streamVideo.user.id }, video: video)
                 )
