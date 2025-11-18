@@ -84,7 +84,17 @@ open class CallViewModel: ObservableObject {
 
     /// Tracks the current state of a call. It should be used to show different UI in your views.
     @Published public var callingState: CallingState = .idle {
-        didSet { handleRingingEvents() }
+        didSet {
+            if let temporaryCallSettings, oldValue == .outgoing && callingState == .inCall {
+                if temporaryCallSettings.speakerOn {
+                    Task {
+                        try await call?.speaker.enableSpeakerPhone()
+                    }
+                }
+                self.temporaryCallSettings = nil
+            }
+            handleRingingEvents()
+        }
     }
 
     /// Optional, has a value if there was an error. You can use it to display more detailed error messages to the users.
@@ -194,6 +204,7 @@ open class CallViewModel: ObservableObject {
 
     private var hasAcceptedCall = false
     private var skipCallStateUpdates = false
+    private var temporaryCallSettings: CallSettings?
 
     public var participants: [CallParticipant] {
         let updateParticipants = call?.state.participants ?? []
@@ -498,6 +509,12 @@ open class CallViewModel: ObservableObject {
                     callSettings: settings
                 )
                 
+                temporaryCallSettings = call.state.callSettings
+                if temporaryCallSettings?.speakerOn == true {
+                    try? await call.speaker.disableSpeakerPhone()
+                } else {
+                    temporaryCallSettings = nil
+                }                
                 try await call.ring(
                     request: .init(membersIds: members.map(\.id).filter { $0 != self.streamVideo.user.id }, video: video)
                 )
