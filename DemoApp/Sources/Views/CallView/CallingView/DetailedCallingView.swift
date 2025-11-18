@@ -14,7 +14,7 @@ struct DetailedCallingView<Factory: ViewFactory>: View {
     }
 
     enum CallFlow: String, Equatable, CaseIterable {
-        case joinImmediately = "Join immediately"
+        case joinImmediately = "Join now"
         case ringEvents = "Ring events"
         case lobby = "Lobby"
         case joinAndRing = "Join and ring"

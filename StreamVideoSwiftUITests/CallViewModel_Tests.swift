@@ -497,104 +497,108 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         await assertCallingState(.inCall)
     }
 
-    // MARK: - joinAndRingCall
-
-    func test_joinAndRing_setsOutgoingMembersAndOutgoingState() async throws {
+    func test_joinAndRingCall_joinsAndRingsMembers() async throws {
         // Given
         await prepare()
-
-        // When
-        subject.joinAndRingCall(
-            callType: callType,
-            callId: callId,
-            members: participants
-        )
-
-        // Then
-        XCTAssertEqual(subject.outgoingCallMembers, participants)
-        await assertCallingState(.outgoing)
-    }
-
-    func test_joinAndRing_invokesJoinThenRingWithFilteredMemberIds() async throws {
-        // Given
-        await prepare()
-        mockCall.stub(
-            for: .join,
-            with: JoinCallResponse.dummy(
-                call: .dummy(id: callId, type: callType)
-            )
-        )
-        mockCall.stub(
-            for: .ring,
-            with: RingCallResponse(duration: "0", membersIds: participants.map(\.id))
+        mockCall.resetRecords(for: .join)
+        mockCall.resetRecords(for: .ring)
+        let thirdParticipant = try XCTUnwrap(thirdUser)
+        let recipients: [Member] = participants + [thirdParticipant]
+        let team = "test-team"
+        let startsAt = Date(timeIntervalSince1970: 1_700_000_000)
+        let maxDuration = 600
+        let maxParticipants = 8
+        let customData: [String: RawJSON] = ["topic": .string("demo")]
+        let expectedOptions = CreateCallOptions(
+            members: recipients.map(\.toMemberRequest),
+            custom: customData,
+            settings: CallSettingsRequest(
+                limits: LimitsSettingsRequest(
+                    maxDurationSeconds: maxDuration,
+                    maxParticipants: maxParticipants
+                )
+            ),
+            startsAt: startsAt,
+            team: team
         )
 
         // When
         subject.joinAndRingCall(
             callType: callType,
             callId: callId,
-            members: participants,
+            members: recipients,
+            team: team,
+            maxDuration: maxDuration,
+            maxParticipants: maxParticipants,
+            startsAt: startsAt,
+            customData: customData,
             video: true
         )
 
         // Then
-        await fulfilmentInMainActor {
-            self
-                .mockCall
-                .recordedInputPayload(
-                    (Bool, CreateCallOptions?, Bool, Bool, CallSettings?).self,
-                    for: .join
-                )?
-                .isEmpty == false
-        }
-        let joinInput = try XCTUnwrap(
-            mockCall.recordedInputPayload(
-                (Bool, CreateCallOptions?, Bool, Bool, CallSettings?).self,
-                for: .join
-            )?.first
-        )
-        XCTAssertTrue(joinInput.0) // create
-        XCTAssertFalse(joinInput.2) // ring flag during join path
-        XCTAssertNil(joinInput.4) // default uses dashboard settings
+        XCTAssertEqual(subject.callingState, .outgoing)
+        XCTAssertEqual(subject.outgoingCallMembers, recipients)
 
-        await fulfilmentInMainActor {
-            self
-                .mockCall
+        await fulfilmentInMainActor { self.mockCall.timesCalled(.join) == 1 }
+        let joinPayload = try XCTUnwrap(
+            mockCall
+                .recordedInputPayload((Bool, CreateCallOptions?, Bool, Bool, CallSettings?).self, for: .join)?
+                .last
+        )
+        let (createFlag, options, ringFlag, notifyFlag, forwardedCallSettings) = joinPayload
+        XCTAssertTrue(createFlag)
+        XCTAssertEqual(options, expectedOptions)
+        XCTAssertFalse(ringFlag)
+        XCTAssertFalse(notifyFlag)
+        XCTAssertNil(forwardedCallSettings)
+
+        await fulfilmentInMainActor { self.mockCall.timesCalled(.ring) == 1 }
+        let ringRequest = try XCTUnwrap(
+            mockCall
                 .recordedInputPayload(RingCallRequest.self, for: .ring)?
-                .isEmpty == false
-        }
-        let ringInput = try XCTUnwrap(
-            mockCall.recordedInputPayload(RingCallRequest.self, for: .ring)?.first
+                .last
         )
-        XCTAssertEqual(ringInput.membersIds, [secondUser.id])
-        XCTAssertEqual(ringInput.video, true)
-    }
-
-    func test_joinAndRing_hangUp_transitionsToIdle() async throws {
-        // Given
-        await prepare()
-        mockCall.stub(
-            for: .join,
-            with: JoinCallResponse.dummy(
-                call: .dummy(id: callId, type: callType)
+        XCTAssertEqual(
+            ringRequest,
+            RingCallRequest(
+                membersIds: [secondUser.id, thirdParticipant.id],
+                video: true
             )
         )
-        mockCall.stub(
-            for: .ring,
-            with: RingCallResponse(duration: "0", membersIds: participants.map(\.id))
-        )
+    }
+
+    func test_joinAndRingCall_usesLocalCallSettingsOverrides() async throws {
+        // Given
+        await prepare()
+        mockCall.resetRecords(for: .join)
+        mockCall.resetRecords(for: .ring)
+        subject.toggleMicrophoneEnabled()
+        await fulfilmentInMainActor { self.subject.callSettings.audioOn == false }
+        let expectedCallSettings = subject.callSettings
+
+        // When
         subject.joinAndRingCall(
             callType: callType,
             callId: callId,
             members: participants
         )
-        await assertCallingState(.outgoing)
-
-        // When
-        subject.hangUp()
 
         // Then
-        await assertCallingState(.idle)
+        XCTAssertEqual(subject.callingState, .outgoing)
+        await fulfilmentInMainActor { self.mockCall.timesCalled(.join) == 1 }
+        let joinPayload = try XCTUnwrap(
+            mockCall
+                .recordedInputPayload((Bool, CreateCallOptions?, Bool, Bool, CallSettings?).self, for: .join)?
+                .last
+        )
+        let (_, _, _, _, forwardedCallSettings) = joinPayload
+        XCTAssertEqual(forwardedCallSettings, expectedCallSettings)
+        XCTAssertEqual(
+            joinPayload.1?.members,
+            participants.map(\.toMemberRequest)
+        )
+
+        await fulfilmentInMainActor { self.mockCall.timesCalled(.ring) == 1 }
     }
 
     // MARK: - EnterLobby
