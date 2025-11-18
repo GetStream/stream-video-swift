@@ -53,7 +53,7 @@ extension Call.StateMachine.Stage {
             from previousStage: Call.StateMachine.Stage
         ) -> Self? {
             switch previousStage.id {
-            case .idle:
+            case .idle, .joined:
                 execute()
                 return self
             default:

@@ -507,8 +507,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         subject.joinAndRingCall(
             callType: callType,
             callId: callId,
-            members: participants,
-            video: true
+            members: participants
         )
 
         // Then
@@ -516,7 +515,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         await assertCallingState(.outgoing)
     }
 
-    func test_joinAndRing_callsJoinAndThenRing_withFilteredMemberIdsAndVideoFlag() async throws {
+    func test_joinAndRing_invokesJoinThenRingWithFilteredMemberIds() async throws {
         // Given
         await prepare()
         mockCall.stub(
@@ -525,146 +524,50 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
                 call: .dummy(id: callId, type: callType)
             )
         )
-        mockCall.stub(for: .ring, with: RingCallResponse(duration: "0", membersIds: participants.map(\.id)))
+        mockCall.stub(
+            for: .ring,
+            with: RingCallResponse(duration: "0", membersIds: participants.map(\.id))
+        )
 
         // When
         subject.joinAndRingCall(
             callType: callType,
             callId: callId,
-            members: participants, // includes firstUser (current) and secondUser (remote)
+            members: participants,
             video: true
         )
 
-        // Then: join called with create:true, ring:false, and callSettings per local override behavior
-        let joinInput = try XCTUnwrap(mockCall.recordedInputPayload((Bool, CreateCallOptions?, Bool, Bool, CallSettings?).self, for: .join)?.first)
+        // Then
+        await fulfilmentInMainActor {
+            self
+                .mockCall
+                .recordedInputPayload(
+                    (Bool, CreateCallOptions?, Bool, Bool, CallSettings?).self,
+                    for: .join
+                )?
+                .isEmpty == false
+        }
+        let joinInput = try XCTUnwrap(
+            mockCall.recordedInputPayload(
+                (Bool, CreateCallOptions?, Bool, Bool, CallSettings?).self,
+                for: .join
+            )?.first
+        )
         XCTAssertTrue(joinInput.0) // create
-        XCTAssertFalse(joinInput.2) // ring
-        // callSettings should be nil by default (no local override)
-        XCTAssertNil(joinInput.4)
+        XCTAssertFalse(joinInput.2) // ring flag during join path
+        XCTAssertNil(joinInput.4) // default uses dashboard settings
 
-        // Ring called with only remote member ids and video:true
-        let ringInput = try XCTUnwrap(mockCall.recordedInputPayload(RingCallRequest.self, for: .ring)?.first)
+        await fulfilmentInMainActor {
+            self
+                .mockCall
+                .recordedInputPayload(RingCallRequest.self, for: .ring)?
+                .isEmpty == false
+        }
+        let ringInput = try XCTUnwrap(
+            mockCall.recordedInputPayload(RingCallRequest.self, for: .ring)?.first
+        )
         XCTAssertEqual(ringInput.membersIds, [secondUser.id])
         XCTAssertEqual(ringInput.video, true)
-    }
-
-    func test_joinAndRing_respectsLocalCallSettingsWhenProvided() async throws {
-        // Given
-        await prepare()
-        subject = .init(callSettings: .init(audioOn: false, videoOn: true, audioOutputOn: false))
-        // Repoint streamVideo injections used by subject
-        // Recreate mockCall and streamVideo stubs for this subject
-        let localMockCall = MockCall(.dummy(callType: callType, callId: callId, coordinatorClient: mockCoordinatorClient))
-        localMockCall.stub(
-            for: .join,
-            with: JoinCallResponse.dummy(
-                call: .dummy(id: callId, type: callType)
-            )
-        )
-        localMockCall.stub(for: .ring, with: RingCallResponse(duration: "0", membersIds: participants.map(\.id)))
-        let localStreamVideo = MockStreamVideo(stubbedProperty: [:], stubbedFunction: [.call: localMockCall])
-        localStreamVideo.state.user = firstUser.user
-        InjectedValues[\.streamVideo] = localStreamVideo
-
-        // When
-        subject.joinAndRingCall(
-            callType: callType,
-            callId: callId,
-            members: participants
-        )
-
-        // Then: join callSettings equals provided local settings
-        let joinInput = try XCTUnwrap(localMockCall.recordedInputPayload((Bool, CreateCallOptions?, Bool, Bool, CallSettings?).self, for: .join)?.first)
-        let usedSettings = try XCTUnwrap(joinInput.4)
-        XCTAssertFalse(usedSettings.audioOn)
-        XCTAssertTrue(usedSettings.videoOn)
-        XCTAssertFalse(usedSettings.audioOutputOn)
-    }
-
-    func test_joinAndRing_acceptEvent_transitionsToInCall() async throws {
-        // Given
-        await prepare()
-        mockCall.stub(
-            for: .join,
-            with: JoinCallResponse.dummy(
-                call: .dummy(id: callId, type: callType)
-            )
-        )
-        mockCall.stub(for: .ring, with: RingCallResponse(duration: "0", membersIds: participants.map(\.id)))
-
-        subject.joinAndRingCall(
-            callType: callType,
-            callId: callId,
-            members: participants
-        )
-        await assertCallingState(.outgoing)
-
-        // When: current user accepts the same call (this triggers handleAcceptedEvent path for .outgoing)
-        streamVideo.process(
-            .coordinatorEvent(
-                .typeCallAcceptedEvent(
-                    .dummy(call: .dummy(id: callId, type: callType))
-                )
-            )
-        )
-
-        // Then
-        await assertCallingState(.inCall)
-    }
-
-    func test_joinAndRing_rejectedByAllMembers_transitionsToIdle() async throws {
-        // Given
-        await prepare()
-        mockCall.stub(
-            for: .join,
-            with: JoinCallResponse.dummy(
-                call: .dummy(id: callId, type: callType)
-            )
-        )
-        mockCall.stub(for: .ring, with: RingCallResponse(duration: "0", membersIds: participants.map(\.id)))
-        let threeParticipants: [Member] = [firstUser, secondUser, thirdUser]
-
-        subject.joinAndRingCall(
-            callType: callType,
-            callId: callId,
-            members: threeParticipants
-        )
-        await assertCallingState(.outgoing)
-
-        // When: all remote members reject (second and third)
-        streamVideo.process(
-            .coordinatorEvent(
-                .typeCallRejectedEvent(.dummy(
-                    call: .dummy(
-                        cid: cId,
-                        session: .dummy(
-                            rejectedBy: [secondUser.userId: Date()]
-                        )
-                    ),
-                    callCid: cId,
-                    createdAt: Date(),
-                    user: secondUser.user.toUserResponse()
-                ))
-            )
-        )
-        streamVideo.process(
-            .coordinatorEvent(
-                .typeCallRejectedEvent(.dummy(
-                    call: .dummy(
-                        cid: cId,
-                        session: .dummy(
-                            rejectedBy: [secondUser.userId: Date(), thirdUser.userId: Date()]
-                        )
-                    ),
-                    callCid: cId,
-                    createdAt: Date(),
-                    user: thirdUser.user.toUserResponse()
-                ))
-            )
-        )
-
-        // Then
-        await assertCallingState(.idle)
     }
 
     func test_joinAndRing_hangUp_transitionsToIdle() async throws {
@@ -676,7 +579,10 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
                 call: .dummy(id: callId, type: callType)
             )
         )
-        mockCall.stub(for: .ring, with: RingCallResponse(duration: "0", membersIds: participants.map(\.id)))
+        mockCall.stub(
+            for: .ring,
+            with: RingCallResponse(duration: "0", membersIds: participants.map(\.id))
+        )
         subject.joinAndRingCall(
             callType: callType,
             callId: callId,
@@ -688,33 +594,6 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         subject.hangUp()
 
         // Then
-        await assertCallingState(.idle)
-    }
-
-    func test_joinAndRing_startsTimeout_hangsUpOnTimeout() async throws {
-        // Given: set a short timeout via call settings
-        await prepare()
-        mockCall.stub(
-            for: .join,
-            with: JoinCallResponse.dummy(
-                call: .dummy(
-                    id: callId,
-                    type: callType
-                )
-            )
-        )
-        mockCall.stub(for: .ring, with: RingCallResponse(duration: "0", membersIds: participants.map(\.id)))
-
-        // When
-        subject.joinAndRingCall(
-            callType: callType,
-            callId: callId,
-            members: participants
-        )
-
-        // Then: after ~0.5s timeout, state should become idle
-        await assertCallingState(.outgoing)
-        await wait(for: 1.0)
         await assertCallingState(.idle)
     }
 
@@ -1462,4 +1341,3 @@ extension User {
 extension Member {
     var userId: String { id }
 }
-

@@ -491,7 +491,7 @@ open class CallViewModel: ObservableObject {
 
                 call.updateParticipantsSorting(with: participantsSortComparators)
 
-                try await call.join(
+                let joinResponse = try await call.join(
                     create: true,
                     options: options,
                     ring: false,
@@ -502,10 +502,10 @@ open class CallViewModel: ObservableObject {
                     request: .init(membersIds: members.map(\.id).filter { $0 != self.streamVideo.user.id }, video: video)
                 )
                 
-                if let autoCancelTimeout = call.state.settings?.ring.autoCancelTimeoutMs {
-                    let timeoutSeconds = TimeInterval(autoCancelTimeout / 1000)
-                    startTimer(timeout: timeoutSeconds)
-                }
+                let autoCancelTimeoutMs = call.state.settings?.ring.autoCancelTimeoutMs
+                    ?? joinResponse.call.settings.ring.autoCancelTimeoutMs
+                let timeoutSeconds = TimeInterval(autoCancelTimeoutMs) / 1000
+                startTimer(timeout: timeoutSeconds)
                 save(call: call)
                 enteringCallTask = nil
                 hasAcceptedCall = false
@@ -862,7 +862,6 @@ open class CallViewModel: ObservableObject {
     private func handleCallHangUp(ringTimeout: Bool = false) {
         if skipCallStateUpdates {
             skipCallStateUpdates = false
-            updateCallStateIfNeeded()
         }
         guard
             let call,
@@ -1025,6 +1024,10 @@ open class CallViewModel: ObservableObject {
             }()
             let accepted = outgoingCall.state.session?.acceptedBy.count ?? 0
             if accepted == 0, rejections >= outgoingMembersCount {
+                if skipCallStateUpdates {
+                    skipCallStateUpdates = false
+                    setCallingState(.idle)
+                }
                 Task(disposableBag: disposableBag, priority: .userInitiated) { [weak self] in
                     _ = try? await outgoingCall.reject(
                         reason: "Call rejected by all \(outgoingMembersCount) outgoing call members."
