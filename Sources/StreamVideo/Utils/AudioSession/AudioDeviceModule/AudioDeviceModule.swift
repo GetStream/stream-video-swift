@@ -200,14 +200,20 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
             .store(in: disposableBag)
 
         source.manualRestoreVoiceProcessingOnMono = true
-        (source as? RTCAudioDeviceModule)?.setRecordingAlwaysPreparedMode(false)
+        (source as? RTCAudioDeviceModule)?.setRecordingAlwaysPreparedMode(true)
     }
 
     // MARK: - Recording
 
-    func startPlayout() throws {
-        try throwingExecution("Unable to start playout") {
-            source.initAndStartPlayout()
+    func setPlayout(_ isActive: Bool) throws {
+        try RetriableTask.run(iterations: 3) {
+            try throwingExecution("Unable to start playout") {
+                if isActive {
+                    return source.initAndStartPlayout()
+                } else {
+                    return source.stopPlayout()
+                }
+            }
         }
     }
 
@@ -215,14 +221,6 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
     /// - Parameter isEnabled: When `true` recording starts, otherwise stops.
     /// - Throws: `ClientError` when the underlying module reports a failure.
     func setRecording(_ isEnabled: Bool) throws {
-        defer {
-            log.throwing("Unable to start playout", subsystems: .audioSession) {
-                try throwingExecution("setReocording defer") {
-                    source.initAndStartPlayout()
-                }
-            }
-        }
-
         guard isEnabled != isRecording else {
             return
         }
@@ -254,22 +252,12 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
     /// - Parameter isMuted: `true` to mute the microphone, `false` to unmute.
     /// - Throws: `ClientError` when the underlying module reports a failure.
     func setMuted(_ isMuted: Bool) throws {
-        defer {
-            log.throwing("Unable to start playout", subsystems: .audioSession) {
-                try throwingExecution("setMuted defer") {
-                    source.initAndStartPlayout()
-                }
-            }
-        }
-
         guard isMuted != isMicrophoneMuted else {
             return
         }
 
-        if isStereoPlayoutEnabled {
-            try throwingExecution("Unable to stop playout") {
-                source.stopPlayout()
-            }
+        if !isMuted {
+            _ = source.initAndStartRecording()
         }
 
         try throwingExecution("Unable to setMicrophoneMuted:\(isMuted)") {
@@ -284,53 +272,8 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         function: StaticString = #function,
         line: UInt = #line
     ) throws {
-        defer {
-            log.throwing("Unable to start playout", subsystems: .audioSession) {
-                try throwingExecution("setStereoPlayoutEnabled defer") {
-                    source.initAndStartPlayout()
-                }
-            }
-        }
-        /// We explicitelly avoid checking the current state of isStereoPlayoutEnabled as there are case
-        /// where the value may be true but playout isn't stereo and a restart is required.
-        let currentVoiceProcessingEnabled = source.isVoiceProcessingEnabled
-        let currentVoiceProcessingBypassed = source.isVoiceProcessingBypassed
-
-        func onFailureReset() {
-            _ = source.setVoiceProcessingEnabled(currentVoiceProcessingEnabled)
-            _ = source.setVoiceProcessingBypassed(currentVoiceProcessingBypassed)
-            _ = source.setVoiceProcessingAGCEnabled(currentVoiceProcessingEnabled)
-            try? startPlayout()
-        }
-
-        /// To enable stereoPlayout we need to do the following in the order mentioned below:
-        /// 1. disable voice-processing
-        /// 2. disable voice-processing-agc
-        /// 3. set voice-processing-bypassed to `true`
-        /// 4. set stereo-playout to `true`
-        ///
-        /// To disable stereoPlayout we need to do the following in the order mentioned below:
-        /// 1. set stereo-playout to `false`
-        /// 2. set voice-processing-bypassed to `false`
-        /// 3. enable voice-processing
-        /// 4. enable voice-processing-agc
-
-        _ = source.stopPlayout()
-        do {
-            if isEnabled {
-                try throwingExecution("Failed to disable VoiceProcessing.") { source.setVoiceProcessingEnabled(false) }
-                try throwingExecution("Failed to disable VoiceProcessingAGC.") { source.setVoiceProcessingAGCEnabled(false) }
-                try throwingExecution("Failed to enable VoiceProcessing bypass.") { source.setVoiceProcessingBypassed(true) }
-                try throwingExecution("Failed to enable Stereo Playout.") { source.setStereoPlayoutEnabled(true) }
-            } else {
-                try throwingExecution("Failed to disable Stereo Playout.") { source.setStereoPlayoutEnabled(false) }
-                try throwingExecution("Failed to disable VoiceProcessing bypass.") { source.setVoiceProcessingBypassed(false) }
-                try throwingExecution("Failed to enable VoiceProcessing.") { source.setVoiceProcessingEnabled(true) }
-                try throwingExecution("Failed to enable VoiceProcessingAGC.") { source.setVoiceProcessingAGCEnabled(true) }
-            }
-        } catch {
-            onFailureReset()
-            throw error
+        try throwingExecution("Failed to enable Stereo Playout.") {
+            source.setStereoPlayoutEnabled(isEnabled)
         }
 
         guard source.isStereoPlayoutEnabled != isEnabled else {
@@ -341,7 +284,6 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
             return
         }
 
-        onFailureReset()
         throw ClientError(
             "Failed to"
                 + " setStereoPlayoutEnabled:\(isEnabled)."
@@ -619,5 +561,42 @@ extension AVAudioEngine {
         }
 
         return "\(asbd.mChannelsPerFrame) ch @ \(asbd.mSampleRate) Hz"
+    }
+}
+
+enum RetriableTask {
+    static func run(
+        iterations: Int,
+        operation: () throws -> Void
+    ) throws {
+        try execute(
+            currentIteration: 0,
+            iterations: iterations,
+            operation: operation
+        )
+    }
+
+    private static func execute(
+        currentIteration: Int,
+        iterations: Int,
+        operation: () throws -> Void
+    ) throws {
+        do {
+            return try operation()
+        } catch {
+            if currentIteration < iterations - 1 {
+                do {
+                    return try execute(
+                        currentIteration: currentIteration + 1,
+                        iterations: iterations,
+                        operation: operation
+                    )
+                } catch {
+                    throw error
+                }
+            } else {
+                throw error
+            }
+        }
     }
 }

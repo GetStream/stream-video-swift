@@ -45,22 +45,21 @@ extension RTCAudioStore {
                 return
             }
 
-            Publishers
-                .CombineLatest(
-                    audioDeviceModule
-                        .isStereoPlayoutAvailablePublisher
-                        .removeDuplicates(),
-                    statePublisher
-                        .map(\.isMicrophoneMuted)
-                        .removeDuplicates()
-                )
-                .map { $0 && $1 }
+            audioDeviceModule
+                .isStereoPlayoutAvailablePublisher
+                .removeDuplicates()
                 .debounce(for: .seconds(1), scheduler: processingQueue)
                 .receive(on: processingQueue)
                 .sink { [weak self, weak audioDeviceModule] isPlayoutAvailable in
-                    self?.dispatcher?.dispatch(.stereo(.setPlayoutAvailable(isPlayoutAvailable)))
+                    self?.dispatcher?.dispatch(
+                        .stereo(
+                            .setPlayoutAvailable(isPlayoutAvailable)
+                        )
+                    )
                     log.throwing(subsystems: .audioSession) {
-                        try audioDeviceModule?.setStereoPlayoutEnabled(isPlayoutAvailable)
+                        try audioDeviceModule?.setStereoPlayoutEnabled(
+                            isPlayoutAvailable
+                        )
                     }
                 }
                 .store(in: disposableBag)

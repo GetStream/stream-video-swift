@@ -25,6 +25,11 @@ extension RTCAudioStore {
             line: UInt
         ) {
             switch action {
+            case .setActive(let value):
+                log.throwing(subsystems: .audioSession) {
+                    try state.audioDeviceModule?.setPlayout(value)
+                }
+
             case .setInterrupted(let value):
                 if let audioDeviceModule = state.audioDeviceModule {
                     log.throwing(
@@ -154,7 +159,7 @@ extension RTCAudioStore {
                 return
             }
 
-            try audioDeviceModule.startPlayout()
+            try audioDeviceModule.setPlayout(state.isActive)
 
             audioDeviceModule
                 .isRecordingPublisher
