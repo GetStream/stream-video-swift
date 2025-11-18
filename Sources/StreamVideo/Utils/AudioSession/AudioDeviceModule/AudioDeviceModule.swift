@@ -169,6 +169,11 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
             .eraseToAnyPublisher()
         super.init()
 
+        subject
+            .log(.debug, subsystems: .audioSession) { "\($0)" }
+            .sink { _ in }
+            .store(in: disposableBag)
+
         audioLevelsAdapter.subject = audioLevelSubject
         source.observer = self
 

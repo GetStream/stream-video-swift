@@ -55,10 +55,11 @@ extension RTCAudioStore {
                         .removeDuplicates()
                 )
                 .map { $0 && $1 }
+                .debounce(for: .seconds(1), scheduler: processingQueue)
                 .receive(on: processingQueue)
                 .sink { [weak self, weak audioDeviceModule] isPlayoutAvailable in
                     self?.dispatcher?.dispatch(.stereo(.setPlayoutAvailable(isPlayoutAvailable)))
-                    log.throwing("Unable to setStereoPlayout:\(isPlayoutAvailable)", subsystems: .audioSession) {
+                    log.throwing(subsystems: .audioSession) {
                         try audioDeviceModule?.setStereoPlayoutEnabled(isPlayoutAvailable)
                     }
                 }

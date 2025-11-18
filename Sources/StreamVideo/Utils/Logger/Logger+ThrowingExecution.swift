@@ -7,7 +7,7 @@ import Foundation
 extension Logger {
 
     func throwing(
-        _ message: @autoclosure () -> String,
+        _ message: @autoclosure () -> String = "",
         subsystems: LogSubsystem,
         file: StaticString = #file,
         function: StaticString = #function,
