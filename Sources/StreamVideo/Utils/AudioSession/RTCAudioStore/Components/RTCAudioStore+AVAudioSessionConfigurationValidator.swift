@@ -73,7 +73,7 @@ extension RTCAudioStore.StoreState.AVAudioSessionConfiguration {
                 .duckOthers,
                 .interruptSpokenAudioAndMixWithOthers,
                 .defaultToSpeaker,
-                .allowBluetooth,
+                .allowBluetoothHFP,
                 .allowBluetoothA2DP
             ]
         map[.playAndRecord] = AllowedConfiguration(

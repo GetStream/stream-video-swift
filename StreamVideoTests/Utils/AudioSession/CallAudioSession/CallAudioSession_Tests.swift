@@ -37,7 +37,7 @@ final class CallAudioSession_Tests: XCTestCase, @unchecked Sendable {
                 isActive: true,
                 category: .playAndRecord,
                 mode: .voiceChat,
-                options: [.allowBluetooth, .allowBluetoothA2DP]
+                options: [.allowBluetoothHFP, .allowBluetoothA2DP]
             )
         )
 
@@ -47,7 +47,7 @@ final class CallAudioSession_Tests: XCTestCase, @unchecked Sendable {
             let configuration = self.mockAudioStore.audioStore.state.audioSessionConfiguration
             return configuration.category == .playAndRecord
                 && configuration.mode == .voiceChat
-                && configuration.options.contains(.allowBluetooth)
+                && configuration.options.contains(.allowBluetoothHFP)
                 && configuration.options.contains(.allowBluetoothA2DP)
         }
     }
@@ -62,7 +62,7 @@ final class CallAudioSession_Tests: XCTestCase, @unchecked Sendable {
             isActive: true,
             category: .playAndRecord,
             mode: .voiceChat,
-            options: [.allowBluetooth, .allowBluetoothA2DP],
+            options: [.allowBluetoothHFP, .allowBluetoothA2DP],
             overrideOutputAudioPort: .speaker
         )
         policy.stub(for: .configuration, with: policyConfiguration)
@@ -158,7 +158,7 @@ final class CallAudioSession_Tests: XCTestCase, @unchecked Sendable {
                 isActive: true,
                 category: .playAndRecord,
                 mode: .voiceChat,
-                options: [.allowBluetooth],
+                options: [.allowBluetoothHFP],
                 overrideOutputAudioPort: .speaker
             )
         )
@@ -176,7 +176,7 @@ final class CallAudioSession_Tests: XCTestCase, @unchecked Sendable {
         capabilitiesSubject.send([.sendAudio])
 
         await fulfillment {
-            self.mockAudioStore.audioStore.state.audioSessionConfiguration.options.contains(.allowBluetooth)
+            self.mockAudioStore.audioStore.state.audioSessionConfiguration.options.contains(.allowBluetoothHFP)
         }
 
         let updatedPolicy = MockAudioSessionPolicy()

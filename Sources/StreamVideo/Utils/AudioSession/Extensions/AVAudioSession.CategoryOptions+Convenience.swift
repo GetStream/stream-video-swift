@@ -14,11 +14,15 @@ extension AVAudioSession.CategoryOptions {
         appIsInForeground: Bool
     ) -> AVAudioSession.CategoryOptions {
         [
-            .allowBluetooth,
+            .allowBluetoothHFP,
             .allowBluetoothA2DP
         ]
     }
 
     /// Category options for playback.
     static let playback: AVAudioSession.CategoryOptions = []
+
+    #if !canImport(AVFoundation, _version: 2360.61.4.11)
+    public static let allowBluetoothHFP = Self.allowBluetooth
+    #endif
 }

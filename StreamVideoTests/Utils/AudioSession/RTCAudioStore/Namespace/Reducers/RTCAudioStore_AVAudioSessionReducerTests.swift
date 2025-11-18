@@ -106,16 +106,16 @@ final class RTCAudioStore_AVAudioSessionReducerTests: XCTestCase, @unchecked Sen
         let state = makeState(
             category: .playAndRecord,
             mode: .voiceChat,
-            options: [.allowBluetooth]
+            options: [.allowBluetoothHFP]
         )
         session.category = AVAudioSession.Category.playAndRecord.rawValue
         session.mode = AVAudioSession.Mode.voiceChat.rawValue
-        session.categoryOptions = [.allowBluetooth]
+        session.categoryOptions = [.allowBluetoothHFP]
         session.isActive = true
 
         let result = try await subject.reduce(
             state: state,
-            action: .avAudioSession(.setCategoryOptions([.allowBluetooth, .defaultToSpeaker])),
+            action: .avAudioSession(.setCategoryOptions([.allowBluetoothHFP, .defaultToSpeaker])),
             file: #file,
             function: #function,
             line: #line

@@ -67,7 +67,7 @@ final class CallAudioSession: @unchecked Sendable {
                 .setCategoryAndModeAndCategoryOptions(
                     .playAndRecord,
                     mode: .voiceChat,
-                    categoryOptions: [.allowBluetooth, .allowBluetoothA2DP]
+                    categoryOptions: [.allowBluetoothHFP, .allowBluetoothA2DP]
                 )
             )
         )

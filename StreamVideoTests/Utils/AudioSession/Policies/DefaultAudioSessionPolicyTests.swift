@@ -39,7 +39,7 @@ final class DefaultAudioSessionPolicyTests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(
             configuration.options,
             [
-                .allowBluetooth,
+                .allowBluetoothHFP,
                 .allowBluetoothA2DP
             ]
         )
@@ -61,7 +61,7 @@ final class DefaultAudioSessionPolicyTests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(
             configuration.options,
             [
-                .allowBluetooth,
+                .allowBluetoothHFP,
                 .allowBluetoothA2DP
             ]
         )
@@ -82,7 +82,7 @@ final class DefaultAudioSessionPolicyTests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(
             configuration.options,
             [
-                .allowBluetooth,
+                .allowBluetoothHFP,
                 .allowBluetoothA2DP
             ]
         )
@@ -104,7 +104,7 @@ final class DefaultAudioSessionPolicyTests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(
             configuration.options,
             [
-                .allowBluetooth,
+                .allowBluetoothHFP,
                 .allowBluetoothA2DP
             ]
         )
@@ -127,7 +127,7 @@ final class DefaultAudioSessionPolicyTests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(
             configuration.options,
             [
-                .allowBluetooth,
+                .allowBluetoothHFP,
                 .allowBluetoothA2DP
             ]
         )
@@ -149,7 +149,7 @@ final class DefaultAudioSessionPolicyTests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(
             configuration.options,
             [
-                .allowBluetooth,
+                .allowBluetoothHFP,
                 .allowBluetoothA2DP
             ]
         )
@@ -171,7 +171,7 @@ final class DefaultAudioSessionPolicyTests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(
             configuration.options,
             [
-                .allowBluetooth,
+                .allowBluetoothHFP,
                 .allowBluetoothA2DP
             ]
         )
@@ -193,7 +193,7 @@ final class DefaultAudioSessionPolicyTests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(
             configuration.options,
             [
-                .allowBluetooth,
+                .allowBluetoothHFP,
                 .allowBluetoothA2DP
             ]
         )
