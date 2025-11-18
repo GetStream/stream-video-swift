@@ -433,46 +433,17 @@ open class CallViewModel: ObservableObject {
         )
     }
     
-    public func ring(
-        callType: String,
-        callId: String,
-        members: [Member],
-        video: Bool? = nil,
-        showOutgoingScreen: Bool = false
-    ) {
-        outgoingCallMembers = members
-        if showOutgoingScreen {
-            skipCallStateUpdates = true
-            setCallingState(.outgoing)
-        }
-        if self.call == nil || (call?.id != callId && call?.callType != callType) {
-            let callSettings = localCallSettingsChange ? callSettings : nil
-            let call = streamVideo.call(
-                callType: callType,
-                callId: callId,
-                callSettings: callSettings
-            )
-            self.call = call
-        }
-        guard let call else { return }
-        Task(disposableBag: disposableBag, priority: .userInitiated) { [weak self] in
-            guard let self else { return }
-            do {
-                try await call.ring(
-                    request: .init(membersIds: members.map(\.id).filter { $0 != self.streamVideo.user.id }, video: video)
-                )
-                if let autoCancelTimeout = call.state.settings?.ring.autoCancelTimeoutMs {
-                    let timeoutSeconds = TimeInterval(autoCancelTimeout / 1000)
-                    startTimer(timeout: timeoutSeconds)
-                }
-            } catch {
-                self.error = error
-                setCallingState(.idle)
-                self.call = nil
-            }
-        }
-    }
-    
+    /// Joins a call and then rings the specified members.
+    /// - Parameters:
+    ///   - callType: The type of the call to join (for example, "default").
+    ///   - callId: The unique identifier of the call.
+    ///   - members: The members who should be rung for this call.
+    ///   - team: An optional team identifier to associate with the call.
+    ///   - maxDuration: The maximum duration of the call in seconds.
+    ///   - maxParticipants: The maximum number of participants allowed in the call.
+    ///   - startsAt: An optional scheduled start time for the call.
+    ///   - customData: Optional custom payload to associate with the call on creation.
+    ///   - video: Optional flag indicating whether the ring should suggest a video call.
     public func joinAndRingCall(
         callType: String,
         callId: String,
@@ -775,6 +746,7 @@ open class CallViewModel: ObservableObject {
         screenSharingUpdates = nil
         recordingUpdates?.cancel()
         recordingUpdates = nil
+        skipCallStateUpdates = false
         call?.leave()
 
         pictureInPictureAdapter.call = nil
@@ -1199,3 +1171,4 @@ public enum ParticipantsLayout {
     case spotlight
     case fullScreen
 }
+
