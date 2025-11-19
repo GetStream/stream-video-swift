@@ -195,4 +195,3 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
         }
     }
 }
-

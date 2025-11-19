@@ -1188,4 +1188,3 @@ public enum ParticipantsLayout {
     case spotlight
     case fullScreen
 }
-
