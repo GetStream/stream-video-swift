@@ -4,6 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### 🔄 Changed
+
+# [1.36.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.36.0)
+_November 19, 2025_
+
 ### ✅ Added
 - Add support for ringing individual members. [#995](https://github.com/GetStream/stream-video-swift/pull/995)
 
