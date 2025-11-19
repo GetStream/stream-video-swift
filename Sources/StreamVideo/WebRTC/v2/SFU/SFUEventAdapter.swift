@@ -330,9 +330,7 @@ final class SFUEventAdapter: @unchecked Sendable {
         await stateAdapter.enqueue { participants in
             var updatedParticipants = participants
 
-            guard let participant = updatedParticipants[sessionID] else {
-                return participants
-            }
+            let participant = updatedParticipants[sessionID] ?? event.participant.toCallParticipant()
 
             switch event.type {
             case .audio:
@@ -390,9 +388,7 @@ final class SFUEventAdapter: @unchecked Sendable {
         await stateAdapter.enqueue { participants in
             var updatedParticipants = participants
 
-            guard let participant = updatedParticipants[sessionID] else {
-                return participants
-            }
+            let participant = updatedParticipants[sessionID] ?? event.participant.toCallParticipant()
 
             switch event.type {
             case .audio:
@@ -484,19 +480,20 @@ final class SFUEventAdapter: @unchecked Sendable {
         await stateAdapter.enqueue { participants in
             var updatedParticipants = participants
 
-            guard
-                let participant = updatedParticipants[event.participant.sessionID]
-            else {
-                return participants
+            if let participant = updatedParticipants[event.participant.sessionID] {
+                updatedParticipants[event.participant.sessionID] = event
+                    .participant
+                    .toCallParticipant()
+                    .withUpdated(showTrack: participant.showTrack)
+                    .withUpdated(pin: participant.pin)
+                    .withUpdated(track: participant.track)
+                    .withUpdated(screensharingTrack: participant.screenshareTrack)
+            } else {
+                updatedParticipants[event.participant.sessionID] = event
+                    .participant
+                    .toCallParticipant()
             }
 
-            updatedParticipants[event.participant.sessionID] = event
-                .participant
-                .toCallParticipant()
-                .withUpdated(showTrack: participant.showTrack)
-                .withUpdated(pin: participant.pin)
-                .withUpdated(track: participant.track)
-                .withUpdated(screensharingTrack: participant.screenshareTrack)
             return updatedParticipants
         }
     }

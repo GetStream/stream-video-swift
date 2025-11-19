@@ -4,7 +4,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
-### 🔄 Changed
+### 🐞 Fixed
+- Ensure SFU track and participant updates create missing participants. [#996](https://github.com/GetStream/stream-video-swift/pull/996)
 
 # [1.35.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.35.0)
 _November 05, 2025_
