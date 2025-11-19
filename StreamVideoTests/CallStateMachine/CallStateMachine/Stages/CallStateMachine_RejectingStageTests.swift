@@ -19,7 +19,7 @@ final class CallStateMachineStageRejectingStage_Tests: StreamVideoTestCase, @unc
         .filter { $0 != subject.id }
         .map { Call.StateMachine.Stage(id: $0, context: .init(call: call)) }
     private lazy var validOtherStages: Set<Call.StateMachine.Stage.ID>! = [
-        .idle
+        .idle, .joined
     ]
     private lazy var response: RejectCallResponse! = .init(duration: "10")
     private lazy var subject: Call.StateMachine.Stage! = .rejecting(
