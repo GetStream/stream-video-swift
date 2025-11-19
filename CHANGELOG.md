@@ -4,6 +4,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### ✅ Added
+- Add support for ringing individual members. [#995](https://github.com/GetStream/stream-video-swift/pull/995)
+
 ### 🐞 Fixed
 - Ensure SFU track and participant updates create missing participants. [#996](https://github.com/GetStream/stream-video-swift/pull/996)
 
