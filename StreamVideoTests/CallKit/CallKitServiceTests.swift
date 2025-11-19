@@ -461,6 +461,8 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
             XCTFail()
         case .reject:
             XCTFail()
+        case .ring:
+            XCTFail()
         }
     }
 
@@ -558,6 +560,8 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         case .callKitActivated:
             XCTFail()
         case .reject:
+            XCTFail()
+        case .ring:
             XCTFail()
         }
         XCTAssertEqual(call.microphone.status, .enabled)

@@ -14,9 +14,10 @@ struct DetailedCallingView<Factory: ViewFactory>: View {
     }
 
     enum CallFlow: String, Equatable, CaseIterable {
-        case joinImmediately = "Join immediately"
+        case joinImmediately = "Join now"
         case ringEvents = "Ring events"
         case lobby = "Lobby"
+        case joinAndRing = "Join and ring"
     }
 
     @Injected(\.streamVideo) var streamVideo
@@ -158,6 +159,13 @@ struct DetailedCallingView<Factory: ViewFactory>: View {
                                 callType: callType,
                                 callId: text,
                                 members: members
+                            )
+                        } else if callFlow == .joinAndRing {
+                            viewModel.joinAndRingCall(
+                                callType: callType,
+                                callId: text,
+                                members: members,
+                                video: viewModel.callSettings.videoOn
                             )
                         } else {
                             viewModel.startCall(
