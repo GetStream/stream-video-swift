@@ -210,9 +210,9 @@ extension AppEnvironment {
             return .detailed
         case .debug:
             #if targetEnvironment(simulator)
-            return .detailed
+            return .simple
             #else
-            return .detailed
+            return .simple
             #endif
         case .release:
             return .simple
