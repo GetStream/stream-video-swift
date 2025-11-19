@@ -85,10 +85,17 @@ open class CallViewModel: ObservableObject {
     /// Tracks the current state of a call. It should be used to show different UI in your views.
     @Published public var callingState: CallingState = .idle {
         didSet {
+            // When we join a call and then ring, we need to disable the speaker.
+            // If the dashboard settings have the speaker on, we need to enable it
+            // again when we transition into a call.
             if let temporaryCallSettings, oldValue == .outgoing && callingState == .inCall {
                 if temporaryCallSettings.speakerOn {
                     Task {
-                        try await call?.speaker.enableSpeakerPhone()
+                        do {
+                            try await call?.speaker.enableSpeakerPhone()
+                        } catch {
+                            log.error("Error enabling the speaker: \(error.localizedDescription)")
+                        }
                     }
                 }
                 self.temporaryCallSettings = nil
@@ -761,6 +768,7 @@ open class CallViewModel: ObservableObject {
         recordingUpdates?.cancel()
         recordingUpdates = nil
         skipCallStateUpdates = false
+        temporaryCallSettings = nil
         call?.leave()
 
         pictureInPictureAdapter.call = nil
