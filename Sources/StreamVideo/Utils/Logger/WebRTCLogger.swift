@@ -8,7 +8,15 @@ import StreamWebRTC
 
 final class WebRTCLogger: @unchecked Sendable {
 
+    enum ValidFile: String {
+        case audioEngineDevice = "audio_engine_device.mm"
+    }
+
     static let `default` = WebRTCLogger()
+
+    private nonisolated(unsafe) static var validFiles: [ValidFile] = [
+        .audioEngineDevice
+    ]
 
     var enabled: Bool = false {
         didSet { didUpdate(enabled) }
@@ -33,11 +41,16 @@ final class WebRTCLogger: @unchecked Sendable {
             let trimmedMessage = message.trimmingCharacters(
                 in: .whitespacesAndNewlines
             )
+
             switch severity {
             case .none, .verbose:
-                log.debug(trimmedMessage, subsystems: .webRTCInternal)
+                if Self.isMessageFromValidFile(trimmedMessage) {
+                    log.debug(trimmedMessage, subsystems: .webRTCInternal)
+                }
             case .info:
-                log.info(trimmedMessage, subsystems: .webRTCInternal)
+                if Self.isMessageFromValidFile(trimmedMessage) {
+                    log.info(trimmedMessage, subsystems: .webRTCInternal)
+                }
             case .warning:
                 log.warning(trimmedMessage, subsystems: .webRTCInternal)
             case .error:
@@ -46,5 +59,18 @@ final class WebRTCLogger: @unchecked Sendable {
                 log.debug(trimmedMessage, subsystems: .webRTCInternal)
             }
         }
+    }
+
+    private static func isMessageFromValidFile(_ message: String) -> Bool {
+        guard !validFiles.isEmpty else {
+            return true
+        }
+
+        for validFile in validFiles {
+            if message.contains(validFile.rawValue) {
+                return true
+            }
+        }
+        return false
     }
 }

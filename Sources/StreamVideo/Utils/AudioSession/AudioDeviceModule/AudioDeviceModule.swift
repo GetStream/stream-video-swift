@@ -206,7 +206,6 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         /// sendAudio capability.
         (source as? RTCAudioDeviceModule)?.setRecordingAlwaysPreparedMode(true)
         source.prefersStereoPlayout = isPreferred
-        source.setManualRestoreVoiceProcessingOnMono(isPreferred)
 
         let isMuted = isMicrophoneMuted
 

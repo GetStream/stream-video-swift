@@ -6,7 +6,12 @@ import Foundation
 import StreamVideo
 
 enum LogQueue {
-    static let queue: Queue<LogDetails> = .init(maxCount: 3000)
+    #if DEBUG
+    private static let queueCapaity = 10000
+    #else
+    private static let queueCapaity = 1000
+    #endif
+    static let queue: Queue<LogDetails> = .init(maxCount: queueCapaity)
 
     static func insert(_ element: LogDetails) { queue.insert(element) }
 

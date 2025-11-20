@@ -14,7 +14,6 @@ protocol RTCAudioDeviceModuleControlling: AnyObject {
     var isVoiceProcessingBypassed: Bool { get }
     var isVoiceProcessingEnabled: Bool { get }
     var isVoiceProcessingAGCEnabled: Bool { get }
-    var isManualRestoreVoiceProcessingOnMono: Bool { get }
     var prefersStereoPlayout: Bool { get set }
 
     func reset() -> Int
@@ -24,7 +23,6 @@ protocol RTCAudioDeviceModuleControlling: AnyObject {
     func initAndStartRecording() -> Int
     func setMicrophoneMuted(_ isMuted: Bool) -> Int
     func stopRecording() -> Int
-    func setManualRestoreVoiceProcessingOnMono(_ isEnabled: Bool)
     func refreshStereoPlayoutState()
 
     /// Publisher that emits whenever the microphone mute state changes.
