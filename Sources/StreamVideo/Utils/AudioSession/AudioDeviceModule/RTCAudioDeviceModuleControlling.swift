@@ -17,7 +17,7 @@ protocol RTCAudioDeviceModuleControlling: AnyObject {
     var isManualRestoreVoiceProcessingOnMono: Bool { get }
     var prefersStereoPlayout: Bool { get set }
 
-    func terminate() -> Int
+    func reset() -> Int
     func initAndStartPlayout() -> Int
     func startPlayout() -> Int
     func stopPlayout() -> Int

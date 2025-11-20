@@ -188,8 +188,8 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
 
     // MARK: - Recording
 
-    func terminate() {
-        _ = source.terminate()
+    func reset() {
+        _ = source.reset()
     }
 
     func setStereoPlayoutPreference(_ isPreferred: Bool) {
@@ -264,7 +264,7 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
     /// - Parameter isMuted: `true` to mute the microphone, `false` to unmute.
     /// - Throws: `ClientError` when the underlying module reports a failure.
     func setMuted(_ isMuted: Bool) throws {
-        guard isMuted != isMicrophoneMuted else {
+        guard isMuted != source.isMicrophoneMuted else {
             return
         }
 

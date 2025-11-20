@@ -145,11 +145,7 @@ extension RTCAudioStore {
             _ audioDeviceModule: AudioDeviceModule?,
             state: RTCAudioStore.StoreState
         ) throws {
-            log
-                .throwing("Unable to disable recording.", subsystems: .audioSession) {
-                    try state.audioDeviceModule?.setRecording(false)
-                }
-            state.audioDeviceModule?.terminate()
+            state.audioDeviceModule?.reset()
 
             disposableBag.removeAll()
 
