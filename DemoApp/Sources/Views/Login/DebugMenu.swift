@@ -231,7 +231,7 @@ struct DebugMenu: View {
             }
 
             makeMenu(
-                for: [.default, .ownCapabilities],
+                for: [.default, .ownCapabilities, .livestream],
                 currentValue: audioSessionPolicy,
                 label: "AudioSession policy"
             ) { self.audioSessionPolicy = $0 }

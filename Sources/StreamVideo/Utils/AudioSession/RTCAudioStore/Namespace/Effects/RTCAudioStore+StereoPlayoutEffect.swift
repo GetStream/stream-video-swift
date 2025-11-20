@@ -46,25 +46,6 @@ extension RTCAudioStore {
             }
 
             audioDeviceModule
-                .isStereoPlayoutAvailablePublisher
-                .removeDuplicates()
-                .debounce(for: .seconds(1), scheduler: processingQueue)
-                .receive(on: processingQueue)
-                .sink { [weak self, weak audioDeviceModule] isPlayoutAvailable in
-                    self?.dispatcher?.dispatch(
-                        .stereo(
-                            .setPlayoutAvailable(isPlayoutAvailable)
-                        )
-                    )
-                    log.throwing(subsystems: .audioSession) {
-                        try audioDeviceModule?.setStereoPlayoutEnabled(
-                            isPlayoutAvailable
-                        )
-                    }
-                }
-                .store(in: disposableBag)
-
-            audioDeviceModule
                 .isStereoPlayoutEnabledPublisher
                 .removeDuplicates()
                 .receive(on: processingQueue)

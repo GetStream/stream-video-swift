@@ -47,7 +47,7 @@ final class RTCAudioStore: @unchecked Sendable {
                 ),
                 stereoConfiguration: .init(
                     playout: .init(
-                        available: false,
+                        preferred: false,
                         enabled: false
                     )
                 )

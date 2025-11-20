@@ -11,22 +11,21 @@ protocol RTCAudioDeviceModuleControlling: AnyObject {
     var observer: RTCAudioDeviceModuleDelegate? { get set }
     var isMicrophoneMuted: Bool { get }
     var isStereoPlayoutEnabled: Bool { get }
-    var isStereoPlayoutAvailable: Bool { get }
     var isVoiceProcessingBypassed: Bool { get }
     var isVoiceProcessingEnabled: Bool { get }
     var isVoiceProcessingAGCEnabled: Bool { get }
-    var manualRestoreVoiceProcessingOnMono: Bool { get set }
+    var isManualRestoreVoiceProcessingOnMono: Bool { get }
+    var prefersStereoPlayout: Bool { get set }
 
+    func terminate() -> Int
     func initAndStartPlayout() -> Int
     func startPlayout() -> Int
     func stopPlayout() -> Int
     func initAndStartRecording() -> Int
     func setMicrophoneMuted(_ isMuted: Bool) -> Int
     func stopRecording() -> Int
-    func setVoiceProcessingEnabled(_ isEnabled: Bool) -> Int
-    func setVoiceProcessingBypassed(_ isBypassed: Bool) -> Int
-    func setVoiceProcessingAGCEnabled(_ isEnabled: Bool) -> Int
-    func setStereoPlayoutEnabled(_ isEnabled: Bool) -> Int
+    func setManualRestoreVoiceProcessingOnMono(_ isEnabled: Bool)
+    func refreshStereoPlayoutState()
 
     /// Publisher that emits whenever the microphone mute state changes.
     func microphoneMutedPublisher() -> AnyPublisher<Bool, Never>

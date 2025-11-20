@@ -38,6 +38,7 @@ extension RTCAudioStore.Namespace {
                     }
                 }
                 updatedState.isActive = value
+                try updatedState.audioDeviceModule?.setPlayout(value)
 
             case let .setInterrupted(value):
                 updatedState.isInterrupted = value
@@ -60,15 +61,19 @@ extension RTCAudioStore.Namespace {
                     updatedState.shouldRecord = false
                     updatedState.isRecording = false
                     updatedState.isMicrophoneMuted = true
-                    updatedState.stereoConfiguration.playout.available = false
-                    updatedState.stereoConfiguration.playout.enabled = false
+                    updatedState.stereoConfiguration = .init(
+                        playout: .init(
+                            preferred: false,
+                            enabled: false
+                        )
+                    )
                 }
 
             case let .setCurrentRoute(value):
                 updatedState.currentRoute = value
 
-            case let .stereo(.setPlayoutAvailable(value)):
-                updatedState.stereoConfiguration.playout.available = value
+            case let .stereo(.setPlayoutPreferred(value)):
+                updatedState.stereoConfiguration.playout.preferred = value
 
             case let .stereo(.setPlayoutEnabled(value)):
                 updatedState.stereoConfiguration.playout.enabled = value

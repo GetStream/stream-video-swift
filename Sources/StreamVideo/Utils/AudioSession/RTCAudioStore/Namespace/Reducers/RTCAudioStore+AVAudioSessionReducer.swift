@@ -31,10 +31,6 @@ extension RTCAudioStore.Namespace {
 
             if case let .setCurrentRoute(value) = action {
                 updatedState.audioSessionConfiguration.overrideOutputAudioPort = value.isSpeaker ? .speaker : .none
-            } else if case let .stereo(.setPlayoutAvailable(value)) = action {
-                try source.perform {
-                    try $0.setPreferredOutputNumberOfChannels(value ? 2 : 1)
-                }
             }
 
             guard case let .avAudioSession(action) = action else {

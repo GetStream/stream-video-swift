@@ -25,11 +25,6 @@ extension RTCAudioStore {
             line: UInt
         ) {
             switch action {
-            case .setActive(let value):
-                log.throwing(subsystems: .audioSession) {
-                    try state.audioDeviceModule?.setPlayout(value)
-                }
-
             case .setInterrupted(let value):
                 if let audioDeviceModule = state.audioDeviceModule {
                     log.throwing(
@@ -82,6 +77,9 @@ extension RTCAudioStore {
                         state: state
                     )
                 }
+
+            case .stereo(.setPlayoutPreferred(let value)):
+                state.audioDeviceModule?.setStereoPlayoutPreference(value)
 
             default:
                 break
@@ -151,7 +149,7 @@ extension RTCAudioStore {
                 .throwing("Unable to disable recording.", subsystems: .audioSession) {
                     try state.audioDeviceModule?.setRecording(false)
                 }
-            log.throwing("Unable to mute.", subsystems: .audioSession) { try state.audioDeviceModule?.setMuted(true) }
+            state.audioDeviceModule?.terminate()
 
             disposableBag.removeAll()
 
@@ -160,6 +158,9 @@ extension RTCAudioStore {
             }
 
             try audioDeviceModule.setPlayout(state.isActive)
+            audioDeviceModule.setStereoPlayoutPreference(
+                state.stereoConfiguration.playout.preferred
+            )
 
             audioDeviceModule
                 .isRecordingPublisher

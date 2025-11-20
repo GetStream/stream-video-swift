@@ -131,8 +131,8 @@ extension RTCAudioStore {
             state: StoreState.StereoConfiguration
         ) -> Bool {
             switch action {
-            case let .setPlayoutAvailable(value):
-                state.playout.available != value
+            case let .setPlayoutPreferred(value):
+                state.playout.preferred != value
 
             case let .setPlayoutEnabled(value):
                 state.playout.enabled != value

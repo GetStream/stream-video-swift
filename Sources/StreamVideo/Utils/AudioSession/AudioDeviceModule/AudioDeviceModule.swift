@@ -26,8 +26,6 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
     enum Event: Equatable, CustomStringConvertible {
         case speechActivityStarted
         case speechActivityEnded
-        case didUpdateStereoPlayoutAvailable(Bool)
-        case didUpdateStereoPlayoutEnabled(Bool)
         case didCreateAudioEngine(AVAudioEngine)
         case willEnableAudioEngine(AVAudioEngine, isPlayoutEnabled: Bool, isRecordingEnabled: Bool)
         case willStartAudioEngine(AVAudioEngine, isPlayoutEnabled: Bool, isRecordingEnabled: Bool)
@@ -44,12 +42,6 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
 
             case .speechActivityEnded:
                 return ".speechActivityEnded"
-
-            case .didUpdateStereoPlayoutAvailable(let value):
-                return ".didUpdateStereoPlayoutAvailable(\(value))"
-
-            case .didUpdateStereoPlayoutEnabled(let value):
-                return ".didUpdateStereoPlayoutEnabled(\(value))"
 
             case .didCreateAudioEngine(let engine):
                 return ".didCreateAudioEngine(\(engine))"
@@ -94,10 +86,6 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
     var isStereoPlayoutEnabled: Bool { isStereoPlayoutEnabledSubject.value }
     var isStereoPlayoutEnabledPublisher: AnyPublisher<Bool, Never> { isStereoPlayoutEnabledSubject.eraseToAnyPublisher() }
 
-    private let isStereoPlayoutAvailableSubject: CurrentValueSubject<Bool, Never>
-    var isStereoPlayoutAvailable: Bool { isStereoPlayoutAvailableSubject.value }
-    var isStereoPlayoutAvailablePublisher: AnyPublisher<Bool, Never> { isStereoPlayoutAvailableSubject.eraseToAnyPublisher() }
-
     private let isVoiceProcessingBypassedSubject: CurrentValueSubject<Bool, Never>
     var isVoiceProcessingBypassed: Bool { isVoiceProcessingBypassedSubject.value }
     var isVoiceProcessingBypassedPublisher: AnyPublisher<Bool, Never> { isVoiceProcessingBypassedSubject.eraseToAnyPublisher() }
@@ -129,11 +117,10 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
             "isPlaying:\(isPlaying)" +
             ", isRecording:\(isRecording)" +
             ", isMicrophoneMuted:\(isMicrophoneMuted)" +
-            ", isStereoPlayoutEnabled:\(source.isStereoPlayoutEnabled)" +
-            ", isStereoPlayoutAvailable:\(source.isStereoPlayoutAvailable)" +
-            ", isVoiceProcessingBypassed:\(source.isVoiceProcessingBypassed)" +
-            ", isVoiceProcessingEnabled:\(source.isVoiceProcessingEnabled)" +
-            ", isVoiceProcessingAGCEnabled:\(source.isVoiceProcessingAGCEnabled)" +
+            ", isStereoPlayoutEnabled:\(isStereoPlayoutEnabled)" +
+            ", isVoiceProcessingBypassed:\(isVoiceProcessingBypassed)" +
+            ", isVoiceProcessingEnabled:\(isVoiceProcessingEnabled)" +
+            ", isVoiceProcessingAGCEnabled:\(isVoiceProcessingAGCEnabled)" +
             ", audioLevel:\(audioLevel)" +
             ", source:\(source)" +
             ", engineOutput: \(engine?.outputDescription ?? "-")" +
@@ -153,7 +140,6 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         self.isPlayingSubject = .init(isPlaying)
         self.isRecordingSubject = .init(isRecording)
         self.isMicrophoneMutedSubject = .init(isMicrophoneMuted)
-        self.isStereoPlayoutAvailableSubject = .init(source.isStereoPlayoutAvailable)
         self.isStereoPlayoutEnabledSubject = .init(source.isStereoPlayoutEnabled)
         self.isVoiceProcessingBypassedSubject = .init(source.isVoiceProcessingBypassed)
         self.isVoiceProcessingEnabledSubject = .init(source.isVoiceProcessingEnabled)
@@ -198,12 +184,38 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
             .receive(on: dispatchQueue)
             .sink { [weak self] in self?.isVoiceProcessingAGCEnabledSubject.send($0) }
             .store(in: disposableBag)
-
-        source.manualRestoreVoiceProcessingOnMono = true
-        (source as? RTCAudioDeviceModule)?.setRecordingAlwaysPreparedMode(true)
     }
 
     // MARK: - Recording
+
+    func terminate() {
+        _ = source.terminate()
+    }
+
+    func setStereoPlayoutPreference(_ isPreferred: Bool) {
+        /// - Important: `.voiceProcessing` requires VP to be enabled in order to mute and
+        /// `.restartEngine` rebuilds the whole graph. Each of them has different issues:
+        /// - `.voiceProcessing`: as it requires VP to be enabled in order to mute/unmute that
+        /// means that for outputs where VP is disabled (e.g. stereo) we cannot mute/unmute.
+        /// - `.restartEngine`: rebuilds the whole graph and requires explicit calling of
+        /// `initAndStartRecording` .
+        (source as? RTCAudioDeviceModule)?.setMuteMode(
+            isPreferred ? .inputMixer : .voiceProcessing
+        )
+        /// - Important: We can probably set this one to false when the user doesn't have
+        /// sendAudio capability.
+        (source as? RTCAudioDeviceModule)?.setRecordingAlwaysPreparedMode(true)
+        source.prefersStereoPlayout = isPreferred
+        source.setManualRestoreVoiceProcessingOnMono(isPreferred)
+
+        let isMuted = isMicrophoneMuted
+
+        _ = source.stopRecording()
+        _ = source.initAndStartRecording()
+        if isMuted {
+            _ = source.setMicrophoneMuted(isMuted)
+        }
+    }
 
     func setPlayout(_ isActive: Bool) throws {
         try RetriableTask.run(iterations: 3) {
@@ -256,45 +268,15 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
             return
         }
 
-        if !isMuted {
-            _ = source.initAndStartRecording()
-        }
-
         try throwingExecution("Unable to setMicrophoneMuted:\(isMuted)") {
             source.setMicrophoneMuted(isMuted)
         }
+
         isMicrophoneMutedSubject.send(isMuted)
     }
 
-    func setStereoPlayoutEnabled(
-        _ isEnabled: Bool,
-        file: StaticString = #file,
-        function: StaticString = #function,
-        line: UInt = #line
-    ) throws {
-        try throwingExecution("Failed to enable Stereo Playout.") {
-            source.setStereoPlayoutEnabled(isEnabled)
-        }
-
-        guard source.isStereoPlayoutEnabled != isEnabled else {
-            log.debug(
-                "Stereo playout has been \(isEnabled ? "activated" : "deactivated").",
-                subsystems: .audioSession
-            )
-            return
-        }
-
-        throw ClientError(
-            "Failed to"
-                + " setStereoPlayoutEnabled:\(isEnabled)."
-                + "("
-                + "isVoiceProcessingEnabled:\(source.isVoiceProcessingEnabled)"
-                + ", isVoiceProcessingBypassed:\(source.isVoiceProcessingBypassed)"
-                + ", isVoiceProcessingAGCEnabled:\(source.isVoiceProcessingAGCEnabled)"
-                + ")",
-            file,
-            line
-        )
+    func refreshStereoPlayoutState() {
+        source.refreshStereoPlayoutState()
     }
 
     // MARK: - RTCAudioDeviceModuleDelegate
@@ -311,38 +293,6 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         @unknown default:
             break
         }
-    }
-
-    func audioDeviceModule(
-        _ audioDeviceModule: RTCAudioDeviceModule,
-        isStereoPlayoutAvailable: Bool
-    ) {
-        guard isStereoPlayoutAvailable != self.isStereoPlayoutAvailable else {
-            return
-        }
-
-        isStereoPlayoutAvailableSubject.send(isStereoPlayoutAvailable)
-        subject.send(.didUpdateStereoPlayoutAvailable(isStereoPlayoutAvailable))
-        log.debug(
-            "AudioDeviceModule updated isStereoPlayoutAvailable:\(isStereoPlayoutAvailable).",
-            subsystems: .audioSession
-        )
-    }
-
-    func audioDeviceModule(
-        _ audioDeviceModule: RTCAudioDeviceModule,
-        isStereoPlayoutEnabled: Bool
-    ) {
-        guard isStereoPlayoutEnabled != self.isStereoPlayoutEnabled else {
-            return
-        }
-
-        isStereoPlayoutEnabledSubject.send(isStereoPlayoutEnabled && isStereoPlayoutAvailable)
-        subject.send(.didUpdateStereoPlayoutEnabled(isStereoPlayoutEnabled && isStereoPlayoutAvailable))
-        log.debug(
-            "AudioDeviceModule updated isStereoPlayoutEnabled:\(isStereoPlayoutEnabled && isStereoPlayoutAvailable).",
-            subsystems: .audioSession
-        )
     }
 
     func audioDeviceModule(
@@ -387,6 +337,7 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         )
         isPlayingSubject.send(isPlayoutEnabled)
         isRecordingSubject.send(isRecordingEnabled)
+
         return Constant.successResult
     }
 
@@ -403,7 +354,6 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
                 isRecordingEnabled: isRecordingEnabled
             )
         )
-        audioLevelsAdapter.uninstall(on: 0)
         isPlayingSubject.send(isPlayoutEnabled)
         isRecordingSubject.send(isRecordingEnabled)
         return Constant.successResult
@@ -422,7 +372,6 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
                 isRecordingEnabled: isRecordingEnabled
             )
         )
-        audioLevelsAdapter.uninstall(on: 0)
         isPlayingSubject.send(isPlayoutEnabled)
         isRecordingSubject.send(isRecordingEnabled)
         return Constant.successResult
@@ -488,11 +437,20 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         // No-op
     }
 
+    func audioDeviceModule(
+        _ module: RTCAudioDeviceModule,
+        didUpdateAudioProcessingState state: RTCAudioProcessingState
+    ) {
+        isVoiceProcessingEnabledSubject.send(state.voiceProcessingEnabled)
+        isVoiceProcessingBypassedSubject.send(state.voiceProcessingBypassed)
+        isVoiceProcessingAGCEnabledSubject.send(state.voiceProcessingAGCEnabled)
+        isStereoPlayoutEnabledSubject.send(state.stereoPlayoutEnabled)
+    }
+
     private enum CodingKeys: String, CodingKey {
         case isPlaying
         case isRecording
         case isMicrophoneMuted
-        case isStereoPlayoutAvailable
         case isStereoPlayoutEnabled
         case isVoiceProcessingBypassed
         case isVoiceProcessingEnabled
@@ -506,7 +464,6 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         try container.encode(isPlaying, forKey: .isPlaying)
         try container.encode(isRecording, forKey: .isRecording)
         try container.encode(isMicrophoneMuted, forKey: .isMicrophoneMuted)
-        try container.encode(isStereoPlayoutAvailable, forKey: .isStereoPlayoutAvailable)
         try container.encode(isStereoPlayoutEnabled, forKey: .isStereoPlayoutEnabled)
         try container.encode(isVoiceProcessingBypassed, forKey: .isVoiceProcessingBypassed)
         try container.encode(isVoiceProcessingEnabled, forKey: .isVoiceProcessingEnabled)

@@ -91,6 +91,7 @@ final class CallAudioSession: @unchecked Sendable {
         self.delegate = delegate
         self.statsAdapter = statsAdapter
 
+        audioStore.dispatch(.stereo(.setPlayoutPreferred(policy is LivestreamAudioSessionPolicy)))
         audioStore.dispatch(.webRTCAudioSession(.setAudioEnabled(true)))
 
         configureCallSettingsAndCapabilitiesObservation(

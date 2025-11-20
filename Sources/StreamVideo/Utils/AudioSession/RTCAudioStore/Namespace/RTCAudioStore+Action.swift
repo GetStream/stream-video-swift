@@ -14,13 +14,14 @@ extension RTCAudioStore {
     public enum StoreAction: Sendable, Equatable, StoreActionBoxProtocol, CustomStringConvertible {
 
         enum StereoAction: Equatable, Sendable, CustomStringConvertible {
-            case setPlayoutAvailable(Bool)
+            case setPlayoutPreferred(Bool)
             case setPlayoutEnabled(Bool)
 
             var description: String {
                 switch self {
-                case .setPlayoutAvailable(let value):
-                    return ".setPlayoutAvailable(\(value))"
+                case .setPlayoutPreferred(let value):
+                    return ".setPlayoutPreferred(\(value))"
+                    
                 case .setPlayoutEnabled(let value):
                     return ".setPlayoutEnabled(\(value))"
                 }

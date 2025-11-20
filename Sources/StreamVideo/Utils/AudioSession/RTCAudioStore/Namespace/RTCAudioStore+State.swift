@@ -12,10 +12,10 @@ extension RTCAudioStore {
 
         struct StereoConfiguration: CustomStringConvertible, Encodable, Hashable, Sendable {
             struct Playout: CustomStringConvertible, Encodable, Hashable, Sendable {
-                var available: Bool
+                var preferred: Bool
                 var enabled: Bool
 
-                var description: String { "{ available:\(available), enabled:\(enabled) }" }
+                var description: String { "{ preferred:\(preferred), enabled:\(enabled) }" }
             }
 
             var playout: Playout
