@@ -7,8 +7,6 @@ import Foundation
 
 /// Represents the settings for a call.
 public final class CallSettings: ObservableObject, Sendable, Equatable, CustomStringConvertible {
-    /// Canonical baseline settings used when we need a placeholder before the
-    /// backend sends the definitive values.
     public static let `default` = CallSettings()
 
     /// Whether the audio is on for the current user.

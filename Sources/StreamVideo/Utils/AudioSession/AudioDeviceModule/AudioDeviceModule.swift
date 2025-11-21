@@ -13,27 +13,45 @@ import StreamWebRTC
 /// audio pipeline can stay in sync with application logic.
 final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable, @unchecked Sendable {
 
+    /// Helper constants used across the module.
     enum Constant {
-        // WebRTC interfaces are returning integer result codes. We use this typed/named
-        // constant to define the Success of an operation.
+        /// WebRTC interfaces return integer result codes. We use this typed/named
+        /// constant to define the success of an operation.
         static let successResult = 0
 
-        // The down limit of audio pipeline in DB that is considered silence.
+        /// Audio pipeline floor in dB that we interpret as silence.
         static let silenceDB: Float = -160
     }
 
     /// Events emitted as the underlying audio engine changes state.
     enum Event: Equatable, CustomStringConvertible {
+        /// Outbound audio surpassed the silence threshold.
         case speechActivityStarted
+        /// Outbound audio dropped back to silence.
         case speechActivityEnded
+        /// A new `AVAudioEngine` instance has been created.
         case didCreateAudioEngine(AVAudioEngine)
+        /// The engine is about to enable playout/recording paths.
         case willEnableAudioEngine(AVAudioEngine, isPlayoutEnabled: Bool, isRecordingEnabled: Bool)
+        /// The engine is about to start rendering.
         case willStartAudioEngine(AVAudioEngine, isPlayoutEnabled: Bool, isRecordingEnabled: Bool)
+        /// The engine has fully stopped.
         case didStopAudioEngine(AVAudioEngine, isPlayoutEnabled: Bool, isRecordingEnabled: Bool)
+        /// The engine was disabled after stopping.
         case didDisableAudioEngine(AVAudioEngine, isPlayoutEnabled: Bool, isRecordingEnabled: Bool)
+        /// The engine will be torn down.
         case willReleaseAudioEngine(AVAudioEngine)
+        /// The input graph is configured with a new source node.
         case configureInputFromSource(AVAudioEngine, source: AVAudioNode?, destination: AVAudioNode, format: AVAudioFormat)
+        /// The output graph is configured with a destination node.
         case configureOutputFromSource(AVAudioEngine, source: AVAudioNode, destination: AVAudioNode?, format: AVAudioFormat)
+        /// Voice processing knobs changed.
+        case didUpdateAudioProcessingState(
+            voiceProcessingEnabled: Bool,
+            voiceProcessingBypassed: Bool,
+            voiceProcessingAGCEnabled: Bool,
+            stereoPlayoutEnabled: Bool
+        )
 
         var description: String {
             switch self {
@@ -66,52 +84,92 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
 
             case .configureOutputFromSource(let engine, let source, let destination, let format):
                 return ".configureOutputFromSource(\(engine), source:\(source), destination:\(destination), format:\(format))"
+
+            case let .didUpdateAudioProcessingState(
+                voiceProcessingEnabled,
+                voiceProcessingBypassed,
+                voiceProcessingAGCEnabled,
+                stereoPlayoutEnabled
+            ):
+                return ".didUpdateAudioProcessingState(voiceProcessingEnabled:\(voiceProcessingEnabled), voiceProcessingBypassed:\(voiceProcessingBypassed), voiceProcessingAGCEnabled:\(voiceProcessingAGCEnabled), stereoPlayoutEnabled:\(stereoPlayoutEnabled))"
             }
         }
     }
 
+    /// Tracks whether WebRTC is currently playing back audio.
     private let isPlayingSubject: CurrentValueSubject<Bool, Never>
+    /// `true` while audio playout is active.
     var isPlaying: Bool { isPlayingSubject.value }
+    /// Publisher that reflects playout activity changes.
     var isPlayingPublisher: AnyPublisher<Bool, Never> { isPlayingSubject.eraseToAnyPublisher() }
 
+    /// Tracks whether WebRTC is capturing microphone samples.
     private let isRecordingSubject: CurrentValueSubject<Bool, Never>
+    /// `true` while audio capture is active.
     var isRecording: Bool { isRecordingSubject.value }
+    /// Publisher that reflects recording activity changes.
     var isRecordingPublisher: AnyPublisher<Bool, Never> { isRecordingSubject.eraseToAnyPublisher() }
 
+    /// Tracks whether the microphone is muted at the ADM layer.
     private let isMicrophoneMutedSubject: CurrentValueSubject<Bool, Never>
+    /// `true` if the microphone is muted.
     var isMicrophoneMuted: Bool { isMicrophoneMutedSubject.value }
+    /// Publisher that reflects microphone mute changes.
     var isMicrophoneMutedPublisher: AnyPublisher<Bool, Never> { isMicrophoneMutedSubject.eraseToAnyPublisher() }
 
+    /// Tracks whether stereo playout is configured.
     private let isStereoPlayoutEnabledSubject: CurrentValueSubject<Bool, Never>
+    /// `true` if stereo playout is available and active.
     var isStereoPlayoutEnabled: Bool { isStereoPlayoutEnabledSubject.value }
+    /// Publisher emitting stereo playout state.
     var isStereoPlayoutEnabledPublisher: AnyPublisher<Bool, Never> { isStereoPlayoutEnabledSubject.eraseToAnyPublisher() }
 
+    /// Tracks whether VP processing is currently bypassed.
     private let isVoiceProcessingBypassedSubject: CurrentValueSubject<Bool, Never>
+    /// `true` if the voice processing unit is bypassed.
     var isVoiceProcessingBypassed: Bool { isVoiceProcessingBypassedSubject.value }
+    /// Publisher emitting VP bypass changes.
     var isVoiceProcessingBypassedPublisher: AnyPublisher<Bool, Never> { isVoiceProcessingBypassedSubject.eraseToAnyPublisher() }
 
+    /// Tracks whether voice processing is enabled.
     private let isVoiceProcessingEnabledSubject: CurrentValueSubject<Bool, Never>
+    /// `true` when Apple VP is active.
     var isVoiceProcessingEnabled: Bool { isVoiceProcessingEnabledSubject.value }
+    /// Publisher emitting VP enablement changes.
     var isVoiceProcessingEnabledPublisher: AnyPublisher<Bool, Never> { isVoiceProcessingEnabledSubject.eraseToAnyPublisher() }
 
+    /// Tracks whether automatic gain control is enabled inside VP.
     private let isVoiceProcessingAGCEnabledSubject: CurrentValueSubject<Bool, Never>
+    /// `true` while AGC is active.
     var isVoiceProcessingAGCEnabled: Bool { isVoiceProcessingAGCEnabledSubject.value }
+    /// Publisher emitting AGC changes.
     var isVoiceProcessingAGCEnabledPublisher: AnyPublisher<Bool, Never> { isVoiceProcessingAGCEnabledSubject.eraseToAnyPublisher() }
 
+    /// Observes RMS audio levels (in dB) derived from the input tap.
     private let audioLevelSubject = CurrentValueSubject<Float, Never>(Constant.silenceDB) // default to silence
+    /// Latest measured audio level.
     var audioLevel: Float { audioLevelSubject.value }
+    /// Publisher emitting audio level updates.
     var audioLevelPublisher: AnyPublisher<Float, Never> { audioLevelSubject.eraseToAnyPublisher() }
 
+    /// Wrapper around WebRTC `RTCAudioDeviceModule`.
     private let source: any RTCAudioDeviceModuleControlling
+    /// Manages Combine subscriptions generated by this module.
     private let disposableBag: DisposableBag = .init()
 
+    /// Serial queue used to deliver events to observers.
     private let dispatchQueue: DispatchQueue
+    /// Internal relay that feeds `publisher`.
     private let subject: PassthroughSubject<Event, Never>
+    /// Object that taps engine nodes and publishes audio level data.
     private var audioLevelsAdapter: AudioEngineNodeAdapting
+    /// Public stream of `Event` values describing engine transitions.
     let publisher: AnyPublisher<Event, Never>
 
+    /// Strong reference to the current engine so we can introspect it if needed.
     private var engine: AVAudioEngine?
 
+    /// Textual diagnostics for logging and debugging.
     override var description: String {
         "{ " +
             "isPlaying:\(isPlaying)" +
@@ -159,14 +217,20 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
 
         audioLevelsAdapter.subject = audioLevelSubject
         source.observer = self
+
+        source.isVoiceProcessingBypassed = true
     }
 
     // MARK: - Recording
 
+    /// Reinitializes the ADM, clearing its internal audio graph state.
     func reset() {
         _ = source.reset()
     }
 
+    /// Switches between stereo and mono playout while keeping the recording
+    /// state consistent across reinitializations.
+    /// - Parameter isPreferred: `true` when stereo output should be used.
     func setStereoPlayoutPreference(_ isPreferred: Bool) {
         /// - Important: `.voiceProcessing` requires VP to be enabled in order to mute and
         /// `.restartEngine` rebuilds the whole graph. Each of them has different issues:
@@ -189,11 +253,18 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         _ = source.stopRecording()
         _ = source.initAndStartRecording()
 
+        if isPreferred {
+            setVoiceProcessingBypassed(isPreferred)
+        }
+
         if isMuted {
             _ = source.setMicrophoneMuted(isMuted)
         }
     }
 
+    /// Starts or stops speaker playout on the ADM, retrying transient failures.
+    /// - Parameter isActive: `true` to start playout, `false` to stop.
+    /// - Throws: `ClientError` when WebRTC returns a non-zero status.
     func setPlayout(_ isActive: Bool) throws {
         try RetriableTask.run(iterations: 3) {
             try throwingExecution("Unable to start playout") {
@@ -245,6 +316,10 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
             return
         }
 
+        try throwingExecution("Unable to initAndStartRecording for setMicrophoneMuted:\(isMuted)") {
+            source.initAndStartRecording()
+        }
+
         try throwingExecution("Unable to setMicrophoneMuted:\(isMuted)") {
             source.setMicrophoneMuted(isMuted)
         }
@@ -252,12 +327,18 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         isMicrophoneMutedSubject.send(isMuted)
     }
 
+    /// Forces the ADM to recompute whether stereo output is supported.
     func refreshStereoPlayoutState() {
         source.refreshStereoPlayoutState()
     }
 
+    func setVoiceProcessingBypassed(_ value: Bool) {
+        source.isVoiceProcessingBypassed = value
+    }
+
     // MARK: - RTCAudioDeviceModuleDelegate
 
+    /// Receives speech activity notifications emitted by WebRTC VAD.
     func audioDeviceModule(
         _ audioDeviceModule: RTCAudioDeviceModule,
         didReceiveSpeechActivityEvent speechActivityEvent: RTCSpeechActivityEvent
@@ -272,6 +353,8 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         }
     }
 
+    /// Stores the created engine reference and emits an event so observers can
+    /// hook into the audio graph configuration.
     func audioDeviceModule(
         _ audioDeviceModule: RTCAudioDeviceModule,
         didCreateEngine engine: AVAudioEngine
@@ -281,6 +364,8 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         return Constant.successResult
     }
 
+    /// Keeps local playback/recording state in sync as WebRTC enables the
+    /// corresponding engine paths.
     func audioDeviceModule(
         _ audioDeviceModule: RTCAudioDeviceModule,
         willEnableEngine engine: AVAudioEngine,
@@ -299,6 +384,8 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         return Constant.successResult
     }
 
+    /// Mirrors state when the engine is about to start running and delivering
+    /// audio samples.
     func audioDeviceModule(
         _ audioDeviceModule: RTCAudioDeviceModule,
         willStartEngine engine: AVAudioEngine,
@@ -318,6 +405,8 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         return Constant.successResult
     }
 
+    /// Updates state and notifies observers once the engine has completely
+    /// stopped.
     func audioDeviceModule(
         _ audioDeviceModule: RTCAudioDeviceModule,
         didStopEngine engine: AVAudioEngine,
@@ -336,6 +425,8 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         return Constant.successResult
     }
 
+    /// Tracks when the engine has been disabled after stopping so clients can
+    /// react (e.g., rebuilding audio graphs).
     func audioDeviceModule(
         _ audioDeviceModule: RTCAudioDeviceModule,
         didDisableEngine engine: AVAudioEngine,
@@ -354,6 +445,7 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         return Constant.successResult
     }
 
+    /// Clears internal references before WebRTC disposes the engine.
     func audioDeviceModule(
         _ audioDeviceModule: RTCAudioDeviceModule,
         willReleaseEngine engine: AVAudioEngine
@@ -364,6 +456,8 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         return Constant.successResult
     }
 
+    /// Keeps observers informed when WebRTC sets up the input graph and installs
+    /// an audio level tap to monitor microphone activity.
     func audioDeviceModule(
         _ audioDeviceModule: RTCAudioDeviceModule,
         engine: AVAudioEngine,
@@ -389,6 +483,7 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         return Constant.successResult
     }
 
+    /// Emits an event whenever WebRTC reconfigures the output graph.
     func audioDeviceModule(
         _ audioDeviceModule: RTCAudioDeviceModule,
         engine: AVAudioEngine,
@@ -408,22 +503,34 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         return Constant.successResult
     }
 
+    /// Currently unused: CallKit/RoutePicker own the device selection UX.
     func audioDeviceModuleDidUpdateDevices(
         _ audioDeviceModule: RTCAudioDeviceModule
     ) {
         // No-op
     }
 
+    /// Mirrors state changes coming from CallKit/WebRTC voice-processing
+    /// controls so UI can reflect the correct toggles.
     func audioDeviceModule(
         _ module: RTCAudioDeviceModule,
         didUpdateAudioProcessingState state: RTCAudioProcessingState
     ) {
+        subject.send(
+            .didUpdateAudioProcessingState(
+                voiceProcessingEnabled: state.voiceProcessingEnabled,
+                voiceProcessingBypassed: state.voiceProcessingBypassed,
+                voiceProcessingAGCEnabled: state.voiceProcessingAGCEnabled,
+                stereoPlayoutEnabled: state.stereoPlayoutEnabled
+            )
+        )
         isVoiceProcessingEnabledSubject.send(state.voiceProcessingEnabled)
         isVoiceProcessingBypassedSubject.send(state.voiceProcessingBypassed)
         isVoiceProcessingAGCEnabledSubject.send(state.voiceProcessingAGCEnabled)
         isStereoPlayoutEnabledSubject.send(state.stereoPlayoutEnabled)
     }
 
+    /// Mirrors the subset of properties that can be encoded for debugging.
     private enum CodingKeys: String, CodingKey {
         case isPlaying
         case isRecording
@@ -436,6 +543,7 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         case audioLevel
     }
 
+    /// Serializes the module state, primarily for diagnostic payloads.
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(isPlaying, forKey: .isPlaying)
@@ -450,6 +558,8 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
 
     // MARK: - Private helpers
 
+    /// Runs a WebRTC ADM call and translates its integer result into a
+    /// `ClientError` enriched with call-site metadata.
     private func throwingExecution(
         _ message: @autoclosure () -> String,
         file: StaticString = #file,
@@ -473,6 +583,8 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
 
 extension AVAudioEngine {
 
+    /// Human-readable description of the current output node format, used in
+    /// logs when debugging device routing issues.
     var outputDescription: String {
         guard let remoteIO = outputNode.audioUnit else {
             return "not available"

@@ -13,7 +13,7 @@ protocol RTCAudioDeviceModuleControlling: AnyObject {
     var isRecording: Bool { get }
     var isMicrophoneMuted: Bool { get }
     var isStereoPlayoutEnabled: Bool { get }
-    var isVoiceProcessingBypassed: Bool { get }
+    var isVoiceProcessingBypassed: Bool { get set }
     var isVoiceProcessingEnabled: Bool { get }
     var isVoiceProcessingAGCEnabled: Bool { get }
     var prefersStereoPlayout: Bool { get set }
