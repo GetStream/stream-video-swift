@@ -219,7 +219,6 @@ extension RTCAudioStore {
 
         var isActive: Bool
         var isInterrupted: Bool
-        var shouldRecord: Bool
         var isRecording: Bool
         var isMicrophoneMuted: Bool
         var hasRecordingPermission: Bool
@@ -235,7 +234,6 @@ extension RTCAudioStore {
             " { " +
                 "isActive:\(isActive)" +
                 ", isInterrupted:\(isInterrupted)" +
-                ", shouldRecord:\(shouldRecord)" +
                 ", isRecording:\(isRecording)" +
                 ", isMicrophoneMuted:\(isMicrophoneMuted)" +
                 ", hasRecordingPermission:\(hasRecordingPermission)" +
@@ -250,7 +248,6 @@ extension RTCAudioStore {
         private enum CodingKeys: String, CodingKey {
             case isActive
             case isInterrupted
-            case shouldRecord
             case isRecording
             case isMicrophoneMuted
             case hasRecordingPermission
@@ -265,7 +262,6 @@ extension RTCAudioStore {
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(isActive, forKey: .isActive)
             try container.encode(isInterrupted, forKey: .isInterrupted)
-            try container.encode(shouldRecord, forKey: .shouldRecord)
             try container.encode(isRecording, forKey: .isRecording)
             try container.encode(isMicrophoneMuted, forKey: .isMicrophoneMuted)
             try container.encode(
@@ -294,7 +290,6 @@ extension RTCAudioStore {
         static func == (lhs: StoreState, rhs: StoreState) -> Bool {
             lhs.isActive == rhs.isActive
                 && lhs.isInterrupted == rhs.isInterrupted
-                && lhs.shouldRecord == rhs.shouldRecord
                 && lhs.isRecording == rhs.isRecording
                 && lhs.isMicrophoneMuted == rhs.isMicrophoneMuted
                 && lhs.hasRecordingPermission == rhs.hasRecordingPermission
@@ -308,7 +303,6 @@ extension RTCAudioStore {
         func hash(into hasher: inout Hasher) {
             hasher.combine(isActive)
             hasher.combine(isInterrupted)
-            hasher.combine(shouldRecord)
             hasher.combine(isRecording)
             hasher.combine(isMicrophoneMuted)
             hasher.combine(hasRecordingPermission)

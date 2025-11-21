@@ -243,36 +243,45 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         )
         /// - Important: We can probably set this one to false when the user doesn't have
         /// sendAudio capability.
-        (source as? RTCAudioDeviceModule)?.setRecordingAlwaysPreparedMode(true)
+        (source as? RTCAudioDeviceModule)?.setRecordingAlwaysPreparedMode(false)
         source.prefersStereoPlayout = isPreferred
 
-        /// We store the mic state before we perform `InitAndStartRecording` so we can restore
-        /// the state at the end.
-        let isMuted = isMicrophoneMuted
-
-        _ = source.stopRecording()
-        _ = source.initAndStartRecording()
-
-        if isPreferred {
-            setVoiceProcessingBypassed(isPreferred)
-        }
-
-        if isMuted {
-            _ = source.setMicrophoneMuted(isMuted)
-        }
+//        /// We store the mic state before we perform `InitAndStartRecording` so we can restore
+//        /// the state at the end.
+//        let isMuted = isMicrophoneMuted
+//
+        ////        _ = source.stopRecording()
+        ////        _ = source.initAndStartRecording()
+//
+//        if isPreferred {
+//            setVoiceProcessingBypassed(isPreferred)
+//        }
+//
+//        if isMuted {
+//            _ = source.setMicrophoneMuted(isMuted)
+//        }
     }
 
     /// Starts or stops speaker playout on the ADM, retrying transient failures.
     /// - Parameter isActive: `true` to start playout, `false` to stop.
     /// - Throws: `ClientError` when WebRTC returns a non-zero status.
     func setPlayout(_ isActive: Bool) throws {
-        try RetriableTask.run(iterations: 3) {
-            try throwingExecution("Unable to start playout") {
-                if isActive {
-                    return source.initAndStartPlayout()
-                } else {
-                    return source.stopPlayout()
+        guard isActive != isPlaying else {
+            return
+        }
+        if isActive {
+            if source.isPlayoutInitialized {
+                try throwingExecution("Unable to start playout") {
+                    source.startPlayout()
                 }
+            } else {
+                try throwingExecution("Unable to initAndStart playout") {
+                    source.initAndStartPlayout()
+                }
+            }
+        } else {
+            try throwingExecution("Unable to stop playout") {
+                source.stopPlayout()
             }
         }
     }
@@ -284,23 +293,18 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         guard isEnabled != isRecording else {
             return
         }
-
         if isEnabled {
-            let isMicrophoneMuted = source.isMicrophoneMuted
-
-            try throwingExecution("Unable to initAndStartRecording.") {
-                source.initAndStartRecording()
-            }
-
-            // After restarting the ADM it always returns with microphoneMute:false.
-            // Here we reinstate the muted condition after restarting ADM.
-            if isMicrophoneMuted {
-                try throwingExecution("Unable to setMicrophoneMuted:\(isEnabled).") {
-                    source.setMicrophoneMuted(isMicrophoneMuted)
+            if source.isRecordingInitialized {
+                try throwingExecution("Unable to start recording") {
+                    source.startRecording()
+                }
+            } else {
+                try throwingExecution("Unable to initAndStart recording") {
+                    source.initAndStartRecording()
                 }
             }
         } else {
-            try throwingExecution("Unable to stopRecording.") {
+            try throwingExecution("Unable to stop recording") {
                 source.stopRecording()
             }
         }
@@ -314,10 +318,6 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
     func setMuted(_ isMuted: Bool) throws {
         guard isMuted != source.isMicrophoneMuted else {
             return
-        }
-
-        try throwingExecution("Unable to initAndStartRecording for setMicrophoneMuted:\(isMuted)") {
-            source.initAndStartRecording()
         }
 
         try throwingExecution("Unable to setMicrophoneMuted:\(isMuted)") {

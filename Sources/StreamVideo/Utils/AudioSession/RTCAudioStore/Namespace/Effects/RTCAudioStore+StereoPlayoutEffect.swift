@@ -45,6 +45,16 @@ extension RTCAudioStore {
                 return
             }
 
+            /// This is important to support cases (e.g. a wired headphone) that do not trigger a valid
+            /// route change for WebRTC causing the user to join the call without stereo and requiring
+            /// either toggling the speaker or reconnect their wired headset.
+            statePublisher
+                .map(\.currentRoute)
+                .removeDuplicates()
+                .debounce(for: .seconds(2), scheduler: processingQueue)
+                .sink { [weak audioDeviceModule] _ in audioDeviceModule?.refreshStereoPlayoutState() }
+                .store(in: disposableBag)
+
             audioDeviceModule
                 .isStereoPlayoutEnabledPublisher
                 .removeDuplicates()

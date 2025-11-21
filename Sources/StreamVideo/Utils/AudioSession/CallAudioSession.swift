@@ -278,7 +278,7 @@ final class CallAudioSession: @unchecked Sendable {
 
         var actions: [StoreActionBox<RTCAudioStore.Namespace.Action>] = []
 
-        actions.append(.normal(.setShouldRecord(ownCapabilities.contains(.sendAudio))))
+//        actions.append(.normal(.setRecording(ownCapabilities.contains(.sendAudio))))
         actions.append(.normal(.setMicrophoneMuted(!callSettings.audioOn || !ownCapabilities.contains(.sendAudio))))
 
         actions.append(

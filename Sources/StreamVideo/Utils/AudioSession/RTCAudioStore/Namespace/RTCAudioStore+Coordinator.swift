@@ -22,9 +22,6 @@ extension RTCAudioStore {
             case let .setInterrupted(value):
                 return value != state.isInterrupted
 
-            case let .setShouldRecord(value):
-                return value != state.shouldRecord
-
             case let .setRecording(value):
                 return value != state.isRecording
 

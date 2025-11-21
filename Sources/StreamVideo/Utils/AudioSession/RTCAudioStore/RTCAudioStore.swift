@@ -28,7 +28,6 @@ final class RTCAudioStore: @unchecked Sendable {
             initialState: .init(
                 isActive: false,
                 isInterrupted: false,
-                shouldRecord: false,
                 isRecording: false,
                 isMicrophoneMuted: true,
                 hasRecordingPermission: false,

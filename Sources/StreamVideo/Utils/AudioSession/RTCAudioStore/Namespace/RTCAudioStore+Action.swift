@@ -126,7 +126,6 @@ extension RTCAudioStore {
 
         case setActive(Bool)
         case setInterrupted(Bool)
-        case setShouldRecord(Bool)
         case setRecording(Bool)
         case setMicrophoneMuted(Bool)
         case setHasRecordingPermission(Bool)
@@ -146,9 +145,6 @@ extension RTCAudioStore {
 
             case .setInterrupted(let value):
                 return ".setInterrupted(\(value))"
-
-            case .setShouldRecord(let value):
-                return ".setShouldRecord(\(value))"
 
             case .setRecording(let value):
                 return ".setRecording(\(value))"

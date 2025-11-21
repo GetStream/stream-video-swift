@@ -11,6 +11,8 @@ protocol RTCAudioDeviceModuleControlling: AnyObject {
     var observer: RTCAudioDeviceModuleDelegate? { get set }
     var isPlaying: Bool { get }
     var isRecording: Bool { get }
+    var isPlayoutInitialized: Bool { get }
+    var isRecordingInitialized: Bool { get }
     var isMicrophoneMuted: Bool { get }
     var isStereoPlayoutEnabled: Bool { get }
     var isVoiceProcessingBypassed: Bool { get set }
@@ -24,6 +26,7 @@ protocol RTCAudioDeviceModuleControlling: AnyObject {
     func stopPlayout() -> Int
     func initAndStartRecording() -> Int
     func setMicrophoneMuted(_ isMuted: Bool) -> Int
+    func startRecording() -> Int
     func stopRecording() -> Int
     func refreshStereoPlayoutState()
 }

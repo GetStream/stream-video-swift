@@ -39,20 +39,6 @@ extension RTCAudioStore {
                     }
                 }
 
-            case .setShouldRecord(let value):
-                if let audioDeviceModule = state.audioDeviceModule {
-                    log.throwing(
-                        "Unable to process setShouldRecord:\(value).",
-                        subsystems: .audioSession
-                    ) {
-                        try didSetShouldRecord(
-                            value,
-                            state: state,
-                            audioDeviceModule: audioDeviceModule
-                        )
-                    }
-                }
-
             case .setMicrophoneMuted(let value):
                 if let audioDeviceModule = state.audioDeviceModule {
                     log.throwing(
@@ -97,31 +83,14 @@ extension RTCAudioStore {
         ) throws {
             guard
                 state.isActive,
-                state.shouldRecord
+                state.isRecording
             else {
                 return
             }
 
-            if value {
-                try audioDeviceModule.setRecording(false)
-            } else {
-                // Restart the ADM
-                try audioDeviceModule.setRecording(false)
-                try audioDeviceModule.setRecording(true)
-            }
-        }
-
-        /// Starts or stops ADM recording when `shouldRecord` changes.
-        private func didSetShouldRecord(
-            _ value: Bool,
-            state: RTCAudioStore.StoreState,
-            audioDeviceModule: AudioDeviceModule
-        ) throws {
-            guard audioDeviceModule.isRecording != value else {
-                return
-            }
-
-            try audioDeviceModule.setRecording(value)
+            // Restart the ADM
+            try audioDeviceModule.setRecording(false)
+            try audioDeviceModule.setRecording(true)
         }
 
         /// Applies the store's microphone muted state to the ADM.
@@ -131,7 +100,7 @@ extension RTCAudioStore {
             audioDeviceModule: AudioDeviceModule
         ) throws {
             guard
-                state.shouldRecord
+                state.isRecording
             else {
                 return
             }

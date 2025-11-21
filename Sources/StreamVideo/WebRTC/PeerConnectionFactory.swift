@@ -68,8 +68,7 @@ final class PeerConnectionFactory: @unchecked Sendable {
         self.audioProcessingModule = audioProcessingModule
         _ = factory
         _ = audioDeviceModule
-        // Remove caching
-        PeerConnectionFactoryStorage.shared.store(self, for: audioProcessingModule)
+//        PeerConnectionFactoryStorage.shared.store(self, for: audioProcessingModule)
     }
     
     deinit {

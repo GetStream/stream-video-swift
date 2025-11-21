@@ -43,9 +43,6 @@ extension RTCAudioStore.Namespace {
             case let .setInterrupted(value):
                 updatedState.isInterrupted = value
 
-            case let .setShouldRecord(value):
-                updatedState.shouldRecord = value
-
             case let .setRecording(value):
                 updatedState.isRecording = value
 
@@ -58,7 +55,6 @@ extension RTCAudioStore.Namespace {
             case let .setAudioDeviceModule(value):
                 updatedState.audioDeviceModule = value
                 if value == nil {
-                    updatedState.shouldRecord = false
                     updatedState.isRecording = false
                     updatedState.isMicrophoneMuted = true
                     updatedState.stereoConfiguration = .init(
