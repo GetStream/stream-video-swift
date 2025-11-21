@@ -52,8 +52,6 @@ extension RTCAudioStore {
             )
             case setOverrideOutputAudioPort(AVAudioSession.PortOverride)
 
-            case prepareForSpeakerTransition
-
             var description: String {
                 switch self {
                 case .systemSetCategory(let category):
@@ -88,9 +86,6 @@ extension RTCAudioStore {
 
                 case .setOverrideOutputAudioPort(let portOverride):
                     return ".setOverrideOutputAudioPort(\(portOverride))"
-
-                case .prepareForSpeakerTransition:
-                    return ".prepareForSpeakerTransition"
                 }
             }
         }

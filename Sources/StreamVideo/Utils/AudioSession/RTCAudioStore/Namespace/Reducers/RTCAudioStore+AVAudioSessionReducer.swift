@@ -134,9 +134,6 @@ extension RTCAudioStore.Namespace {
                         speakerOn: value == .speaker
                     )
                 }
-
-            case .prepareForSpeakerTransition:
-                break
             }
 
             return updatedState

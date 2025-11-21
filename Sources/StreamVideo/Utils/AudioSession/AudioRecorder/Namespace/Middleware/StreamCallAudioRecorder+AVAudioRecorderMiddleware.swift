@@ -22,6 +22,8 @@ extension StreamCallAudioRecorder.Namespace {
     /// ensure thread safety when accessing the recorder instance.
     final class AVAudioRecorderMiddleware: Middleware<StreamCallAudioRecorder.Namespace>, @unchecked Sendable {
 
+        /// Tracks which metering backend is active so we can flip between
+        /// `AVAudioRecorder` and the audio device module seamlessly.
         enum Mode: Equatable {
             case invalid
             case audioRecorder(AVAudioRecorder)
@@ -39,6 +41,8 @@ extension StreamCallAudioRecorder.Namespace {
         
         /// Subscription for publishing meter updates at refresh rate.
         private var updateMetersCancellable: AnyCancellable?
+        /// Listens for ADM availability and pivots the metering source on the
+        /// fly when stereo playout is enabled.
         private var audioDeviceModuleCancellable: AnyCancellable?
 
         init(audioRecorder: AVAudioRecorder? = nil) {

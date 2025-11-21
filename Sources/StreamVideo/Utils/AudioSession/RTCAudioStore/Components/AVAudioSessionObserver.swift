@@ -7,6 +7,9 @@ import Combine
 import Foundation
 
 extension AVAudioSession {
+    /// Captures a stable view of the session so state changes can be diffed
+    /// outside of the AVAudioSession API, which otherwise exposes mutable
+    /// objects.
     struct Snapshot: Equatable, CustomStringConvertible {
         var category: AVAudioSession.Category
         var mode: AVAudioSession.Mode
@@ -23,6 +26,8 @@ extension AVAudioSession {
         var outputNumberOfChannels: Int
         var preferredOutputNumberOfChannels: Int
 
+        /// Produces a compact string payload that is easy to log when
+        /// diagnosing audio route transitions.
         var description: String {
             var result = "{"
             result += "category:\(category)"
@@ -43,6 +48,8 @@ extension AVAudioSession {
             return result
         }
 
+        /// Builds a new snapshot by pulling the latest values from the shared
+        /// AVAudioSession instance.
         init(_ source: AVAudioSession = .sharedInstance()) {
             self.category = source.category
             self.mode = source.mode
@@ -67,6 +74,7 @@ extension AVAudioSession {
     }
 }
 
+/// Polls the shared AVAudioSession on a timer so stores can react using Combine.
 final class AVAudioSessionObserver {
 
     var publisher: AnyPublisher<AVAudioSession.Snapshot, Never> { subject.eraseToAnyPublisher() }
@@ -74,12 +82,15 @@ final class AVAudioSessionObserver {
     private let subject: CurrentValueSubject<AVAudioSession.Snapshot, Never> = .init(.init())
     private var cancellable: AnyCancellable?
 
+    /// Starts emitting snapshots roughly every 100ms, which is fast enough to
+    /// catch rapid route transitions without adding noticeable overhead.
     func startObserving() {
         cancellable = DefaultTimer
             .publish(every: 0.1)
             .sink { [weak self] _ in self?.subject.send(.init()) }
     }
 
+    /// Cancels the observation timer and stops sending snapshot updates.
     func stopObserving() {
         cancellable?.cancel()
         cancellable = nil
@@ -91,6 +102,8 @@ extension AVAudioSessionObserver: InjectionKey {
 }
 
 extension InjectedValues {
+    /// Injects the audio session observer so effects can subscribe without
+    /// hard-coding their own polling logic.
     var avAudioSessionObserver: AVAudioSessionObserver {
         get { InjectedValues[AVAudioSessionObserver.self] }
         set { InjectedValues[AVAudioSessionObserver.self] = newValue }

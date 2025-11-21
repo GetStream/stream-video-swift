@@ -9,8 +9,9 @@ import StreamWebRTC
 
 extension RTCAudioStore {
 
-    /// Bridges `RTCAudioSession` route updates into store state so downstream
-    /// features can react to speaker/headset transitions.
+    /// Mirrors the system audio session into the store so reducers can keep a
+    /// coherent view of category, mode, and options that were set by other
+    /// actors such as CallKit or Control Center.
     final class AVAudioSessionEffect: StoreEffect<RTCAudioStore.Namespace>, @unchecked Sendable {
 
         @Injected(\.avAudioSessionObserver) private var avAudioSessionObserver
@@ -22,13 +23,15 @@ extension RTCAudioStore {
             super.init()
         }
 
+        /// Subscribes to adm availability changes and starts forwarding
+        /// snapshots once we have an audio device module configured.
         override func set(
             statePublisher: AnyPublisher<RTCAudioStore.StoreState, Never>?
         ) {
             avAudioSessionObserverCancellable?.cancel()
             avAudioSessionObserverCancellable = nil
-            avAudioSessionObserverCancellable?.cancel()
-            avAudioSessionObserverCancellable = nil
+            audioDeviceModuleCancellable?.cancel()
+            audioDeviceModuleCancellable = nil
             avAudioSessionObserver.stopObserving()
 
             guard let statePublisher else {
@@ -58,8 +61,6 @@ extension RTCAudioStore {
         }
 
         private func didUpdate(_ state: AVAudioSession.Snapshot) {
-            log.debug("AVAudioSession state updated: \(state).")
-
             dispatcher?.dispatch(
                 [
                     .normal(.avAudioSession(.systemSetCategory(state.category))),

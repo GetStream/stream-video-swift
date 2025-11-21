@@ -7,9 +7,8 @@ import Foundation
 
 extension AVAudioSession.RouteChangeReason {
 
-    /// Taken from https://chromium.googlesource.com/external/webrtc/+/34911ad55c4c4c549fe60e1b4cc127420b15666b/webrtc/modules/audio_device/ios/audio_device_ios.mm#557
-    /// in the routeChange logic. Useful to ignore route changes that don't really matter for our
-    /// webrtc sessions.
+    /// Mirrors the filtering logic used by WebRTC so we ignore redundant
+    /// callbacks such as `categoryChange` that would otherwise spam the store.
     var isValidRouteChange: Bool {
         switch self {
         case .categoryChange, .routeConfigurationChange:
@@ -19,7 +18,8 @@ extension AVAudioSession.RouteChangeReason {
         }
     }
 
-    /// https://github.com/TheWidlarzGroup/react-native-video/blob/fbb260e9164194a55d2b26404aea000e924e2f04/ios/Video/AudioSessionManager.swift#L357
+    /// Flags reasons that represent real hardware transitions so we can rebuild
+    /// the audio graph when necessary.
     var requiresReconfiguration: Bool {
         switch self {
         case .categoryChange, .override, .wakeFromSleep, .newDeviceAvailable, .oldDeviceUnavailable:

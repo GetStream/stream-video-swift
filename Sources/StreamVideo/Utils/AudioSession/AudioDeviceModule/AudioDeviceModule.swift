@@ -131,15 +131,12 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
     /// - Parameter source: The audio device module implementation to observe.
     init(
         _ source: any RTCAudioDeviceModuleControlling,
-        isPlaying: Bool = false,
-        isRecording: Bool = false,
-        isMicrophoneMuted: Bool = false,
         audioLevelsNodeAdapter: AudioEngineNodeAdapting = AudioEngineLevelNodeAdapter()
     ) {
         self.source = source
-        self.isPlayingSubject = .init(isPlaying)
-        self.isRecordingSubject = .init(isRecording)
-        self.isMicrophoneMutedSubject = .init(isMicrophoneMuted)
+        self.isPlayingSubject = .init(source.isPlaying)
+        self.isRecordingSubject = .init(source.isRecording)
+        self.isMicrophoneMutedSubject = .init(source.isMicrophoneMuted)
         self.isStereoPlayoutEnabledSubject = .init(source.isStereoPlayoutEnabled)
         self.isVoiceProcessingBypassedSubject = .init(source.isVoiceProcessingBypassed)
         self.isVoiceProcessingEnabledSubject = .init(source.isVoiceProcessingEnabled)
@@ -162,28 +159,6 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
 
         audioLevelsAdapter.subject = audioLevelSubject
         source.observer = self
-
-        source
-            .microphoneMutedPublisher()
-            .receive(on: dispatchQueue)
-            .sink { [weak self] in self?.isMicrophoneMutedSubject.send($0) }
-            .store(in: disposableBag)
-
-        source
-            .isVoiceProcessingBypassedPublisher()
-            .receive(on: dispatchQueue)
-            .sink { [weak self] in self?.isVoiceProcessingBypassedSubject.send($0) }
-            .store(in: disposableBag)
-        source
-            .isVoiceProcessingEnabledPublisher()
-            .receive(on: dispatchQueue)
-            .sink { [weak self] in self?.isVoiceProcessingEnabledSubject.send($0) }
-            .store(in: disposableBag)
-        source
-            .isVoiceProcessingAGCEnabledPublisher()
-            .receive(on: dispatchQueue)
-            .sink { [weak self] in self?.isVoiceProcessingAGCEnabledSubject.send($0) }
-            .store(in: disposableBag)
     }
 
     // MARK: - Recording
@@ -207,10 +182,13 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         (source as? RTCAudioDeviceModule)?.setRecordingAlwaysPreparedMode(true)
         source.prefersStereoPlayout = isPreferred
 
+        /// We store the mic state before we perform `InitAndStartRecording` so we can restore
+        /// the state at the end.
         let isMuted = isMicrophoneMuted
 
         _ = source.stopRecording()
         _ = source.initAndStartRecording()
+
         if isMuted {
             _ = source.setMicrophoneMuted(isMuted)
         }
@@ -517,42 +495,5 @@ extension AVAudioEngine {
         }
 
         return "\(asbd.mChannelsPerFrame) ch @ \(asbd.mSampleRate) Hz"
-    }
-}
-
-enum RetriableTask {
-    static func run(
-        iterations: Int,
-        operation: () throws -> Void
-    ) throws {
-        try execute(
-            currentIteration: 0,
-            iterations: iterations,
-            operation: operation
-        )
-    }
-
-    private static func execute(
-        currentIteration: Int,
-        iterations: Int,
-        operation: () throws -> Void
-    ) throws {
-        do {
-            return try operation()
-        } catch {
-            if currentIteration < iterations - 1 {
-                do {
-                    return try execute(
-                        currentIteration: currentIteration + 1,
-                        iterations: iterations,
-                        operation: operation
-                    )
-                } catch {
-                    throw error
-                }
-            } else {
-                throw error
-            }
-        }
     }
 }

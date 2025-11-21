@@ -8,8 +8,8 @@ import Foundation
 
 extension RTCAudioStore {
 
-    /// Converts audio session interruption callbacks into store actions so the
-    /// audio pipeline can gracefully pause and resume.
+    /// Observes the audio device module to detect when stereo playout becomes
+    /// available, keeping the store's stereo state aligned with WebRTC.
     final class StereoPlayoutEffect: StoreEffect<RTCAudioStore.Namespace>, @unchecked Sendable {
 
         private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)

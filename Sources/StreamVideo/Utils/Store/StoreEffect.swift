@@ -5,6 +5,8 @@
 import Combine
 import Foundation
 
+/// Base type for async side-effects that observe the store and can dispatch
+/// follow-up actions without touching reducers directly.
 class StoreEffect<Namespace: StoreNamespace>: @unchecked Sendable, Hashable {
     private lazy var identifier = "store.\(type(of: self))"
 
@@ -30,6 +32,8 @@ class StoreEffect<Namespace: StoreNamespace>: @unchecked Sendable, Hashable {
     /// Use this property to make decisions based on the current state.
     var state: Namespace.State? { stateProvider?() }
 
+    /// Supplies the state publisher once the effect is attached to a store,
+    /// giving subclasses a hook to start or stop their observations.
     func set(statePublisher: AnyPublisher<Namespace.State, Never>?) {
         // No-op
     }

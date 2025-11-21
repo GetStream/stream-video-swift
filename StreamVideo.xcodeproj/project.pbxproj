@@ -269,6 +269,7 @@
 		404A81342DA3CB66001F7FA8 /* CallStateMachine_RejectedStageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403FB1612BFE22A40047A696 /* CallStateMachine_RejectedStageTests.swift */; };
 		404A81362DA3CBF0001F7FA8 /* CallConfigurationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 404A81352DA3CBF0001F7FA8 /* CallConfigurationTests.swift */; };
 		404A81382DA3CC0C001F7FA8 /* CallConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 404A81372DA3CC0C001F7FA8 /* CallConfiguration.swift */; };
+		404B546B2ED06D8C009378F2 /* RetriableTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 404B546A2ED06D8C009378F2 /* RetriableTask.swift */; };
 		404C27CB2BF2552800DF2937 /* XCTestCase+PredicateFulfillment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409CA7982BEE21720045F7AA /* XCTestCase+PredicateFulfillment.swift */; };
 		404C27CC2BF2552900DF2937 /* XCTestCase+PredicateFulfillment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409CA7982BEE21720045F7AA /* XCTestCase+PredicateFulfillment.swift */; };
 		404CAEE72B8F48F6007087BC /* DemoBackgroundEffectSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A0E95F2B88ABC80089E8D3 /* DemoBackgroundEffectSelector.swift */; };
@@ -2031,6 +2032,7 @@
 		404A81302DA3C5F0001F7FA8 /* MockDefaultAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockDefaultAPI.swift; sourceTree = "<group>"; };
 		404A81352DA3CBF0001F7FA8 /* CallConfigurationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallConfigurationTests.swift; sourceTree = "<group>"; };
 		404A81372DA3CC0C001F7FA8 /* CallConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallConfiguration.swift; sourceTree = "<group>"; };
+		404B546A2ED06D8C009378F2 /* RetriableTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RetriableTask.swift; sourceTree = "<group>"; };
 		4050725F2E5F49D5003D2109 /* CallKitMissingPermissionPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitMissingPermissionPolicy.swift; sourceTree = "<group>"; };
 		405072612E5F4CCA003D2109 /* CallKitMissingPermissionPolicyProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitMissingPermissionPolicyProtocol.swift; sourceTree = "<group>"; };
 		405072642E5F4CDD003D2109 /* CallKitMissingPermissionPolicy+NoOp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CallKitMissingPermissionPolicy+NoOp.swift"; sourceTree = "<group>"; };
@@ -7170,6 +7172,7 @@
 				8456E6DA287EC530004E180E /* StreamRuntimeCheck.swift */,
 				8268615F290A7556005BFFED /* SystemEnvironment.swift */,
 				841FF51A2A5FED4800809BBB /* SystemEnvironment+XStreamClient.swift */,
+				404B546A2ED06D8C009378F2 /* RetriableTask.swift */,
 				401A0F022AB1C1B600BE2DBD /* ThermalStateObserver.swift */,
 				40A0E9612B88D3DC0089E8D3 /* UIInterfaceOrientation+CGOrientation.swift */,
 				84C2997C28784BB30034B735 /* Utils.swift */,
@@ -8782,6 +8785,7 @@
 				40BBC4C42C638789002AEF92 /* RTCPeerConnectionCoordinator.swift in Sources */,
 				40BBC4C62C638915002AEF92 /* WebRTCCoordinator.swift in Sources */,
 				40802AE92DD2A7C700B9F970 /* AVAudioSessionProtocol.swift in Sources */,
+				404B546B2ED06D8C009378F2 /* RetriableTask.swift in Sources */,
 				841BAA392BD15CDE000C73E4 /* UserSessionStats.swift in Sources */,
 				406B3BD72C8F332200FC93A1 /* RTCVideoTrack+Sendable.swift in Sources */,
 				406128812CF32FEF007F5CDC /* SDPLineVisitor.swift in Sources */,

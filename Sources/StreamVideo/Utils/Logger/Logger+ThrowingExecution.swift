@@ -6,6 +6,8 @@ import Foundation
 
 extension Logger {
 
+    /// Executes a throwing operation and routes any failures to the logging
+    /// backend using the supplied metadata.
     func throwing(
         _ message: @autoclosure () -> String = "",
         subsystems: LogSubsystem,

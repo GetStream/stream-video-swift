@@ -6,9 +6,11 @@ import Combine
 import StreamWebRTC
 
 /// Abstraction over `RTCAudioDeviceModule` so tests can provide fakes while
-/// production code keeps using the WebRTC implementation.
+/// production code continues to rely on the WebRTC-backed implementation.
 protocol RTCAudioDeviceModuleControlling: AnyObject {
     var observer: RTCAudioDeviceModuleDelegate? { get set }
+    var isPlaying: Bool { get }
+    var isRecording: Bool { get }
     var isMicrophoneMuted: Bool { get }
     var isStereoPlayoutEnabled: Bool { get }
     var isVoiceProcessingBypassed: Bool { get }
@@ -24,15 +26,11 @@ protocol RTCAudioDeviceModuleControlling: AnyObject {
     func setMicrophoneMuted(_ isMuted: Bool) -> Int
     func stopRecording() -> Int
     func refreshStereoPlayoutState()
-
-    /// Publisher that emits whenever the microphone mute state changes.
-    func microphoneMutedPublisher() -> AnyPublisher<Bool, Never>
-    func isVoiceProcessingBypassedPublisher() -> AnyPublisher<Bool, Never>
-    func isVoiceProcessingEnabledPublisher() -> AnyPublisher<Bool, Never>
-    func isVoiceProcessingAGCEnabledPublisher() -> AnyPublisher<Bool, Never>
 }
 
 extension RTCAudioDeviceModule: RTCAudioDeviceModuleControlling {
+    /// Convenience wrapper that mirrors the old `initPlayout` and
+    /// `startPlayout` sequence so the caller can request playout in one call.
     func initAndStartPlayout() -> Int {
         let result = initPlayout()
         if result == 0 {
@@ -40,25 +38,5 @@ extension RTCAudioDeviceModule: RTCAudioDeviceModuleControlling {
         } else {
             return result
         }
-    }
-    
-    func microphoneMutedPublisher() -> AnyPublisher<Bool, Never> {
-        publisher(for: \.isMicrophoneMuted)
-            .eraseToAnyPublisher()
-    }
-
-    func isVoiceProcessingBypassedPublisher() -> AnyPublisher<Bool, Never> {
-        publisher(for: \.isVoiceProcessingBypassed)
-            .eraseToAnyPublisher()
-    }
-
-    func isVoiceProcessingEnabledPublisher() -> AnyPublisher<Bool, Never> {
-        publisher(for: \.isVoiceProcessingEnabled)
-            .eraseToAnyPublisher()
-    }
-
-    func isVoiceProcessingAGCEnabledPublisher() -> AnyPublisher<Bool, Never> {
-        publisher(for: \.isVoiceProcessingAGCEnabled)
-            .eraseToAnyPublisher()
     }
 }

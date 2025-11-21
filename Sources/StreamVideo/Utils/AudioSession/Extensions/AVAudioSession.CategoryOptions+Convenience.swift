@@ -23,6 +23,8 @@ extension AVAudioSession.CategoryOptions {
     static let playback: AVAudioSession.CategoryOptions = []
 
     #if !canImport(AVFoundation, _version: 2360.61.4.11)
+    /// Older SDKs only expose ``allowBluetooth`` so we map the HFP alias to it
+    /// to avoid peppering the codebase with availability checks.
     public static let allowBluetoothHFP = Self.allowBluetooth
     #endif
 }

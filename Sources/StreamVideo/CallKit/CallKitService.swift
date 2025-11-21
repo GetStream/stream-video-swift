@@ -104,6 +104,8 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     private var callEndedNotificationCancellable: AnyCancellable?
     private var ringingTimerCancellable: AnyCancellable?
 
+    /// Debounces CallKit mute toggles that arrive in bursts when the app moves
+    /// between foreground and background states.
     private let muteActionSubject = PassthroughSubject<MuteRequest, Never>()
     private var muteActionCancellable: AnyCancellable?
     private let muteProcessingQueue = OperationQueue(maxConcurrentOperationCount: 1)
@@ -120,12 +122,9 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             .compactMap { $0.object as? Call }
             .sink { [weak self] in self?.callEnded($0.cId, ringingTimedOut: false) }
 
-        /// - Important:
-        /// It used to debounce System's attempts to mute/unmute the call. It seems that the system
-        /// performs rapid mute/unmute attempts when the call is being joined or moving to foreground.
-        /// The observation below is in place to guard and normalise those attempts to avoid
-        /// - rapid speaker and mic toggles
-        /// - unnecessary attempts to mute/unmute the mic
+        /// - Important: CallKit can rapidly toggle the mute state while the app
+        /// moves between foreground and background. This observation smooths
+        /// those bursts so we do not end up thrashing the audio pipeline.
         muteActionCancellable = muteActionSubject
             .removeDuplicates()
             .filter { [weak self] _ in self?.applicationStateAdapter.state != .foreground }
@@ -787,6 +786,8 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         }
     }
 
+    /// Normalises mute requests triggered by call settings so CallKit stays in
+    /// sync with the in-app toggle while avoiding redundant transactions.
     private func performCallSettingMuteRequest(
         _ muted: Bool,
         callUUID: UUID
@@ -808,6 +809,8 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         }
     }
 
+    /// Applies the debounced mute request once CallKit and permissions agree
+    /// that the action is allowed.
     private func performMuteRequest(_ request: MuteRequest) {
         muteProcessingQueue.addTaskOperation { [weak self] in
             guard

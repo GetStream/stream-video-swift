@@ -12,6 +12,8 @@ final class CallAudioSession: @unchecked Sendable {
 
     @Injected(\.audioStore) private var audioStore
 
+    /// Bundles the reactive inputs we need to evaluate whenever call
+    /// capabilities or settings change, keeping log context attached.
     private struct Input {
         var callSettings: CallSettings
         var ownCapabilities: Set<OwnCapability>
@@ -50,6 +52,8 @@ final class CallAudioSession: @unchecked Sendable {
     private let disposableBag = DisposableBag()
     private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
 
+    /// Serialises policy evaluations so the AVAudioSession only receives one
+    /// configuration at a time even when upstream publishers fire in bursts.
     private let processingPipeline = PassthroughSubject<Input, Never>()
 
     private var lastAppliedConfiguration: AudioSessionConfiguration?
@@ -91,6 +95,8 @@ final class CallAudioSession: @unchecked Sendable {
         self.delegate = delegate
         self.statsAdapter = statsAdapter
 
+        // Expose the policy's stereo preference so the audio device module can
+        // reconfigure itself before WebRTC starts playout.
         audioStore.dispatch(.stereo(.setPlayoutPreferred(policy is LivestreamAudioSessionPolicy)))
         audioStore.dispatch(.webRTCAudioSession(.setAudioEnabled(true)))
 
@@ -162,6 +168,8 @@ final class CallAudioSession: @unchecked Sendable {
         )
     }
 
+    /// Wires call setting and capability updates into the processing queue so
+    /// downstream work always executes serially.
     private func configureCallSettingsAndCapabilitiesObservation(
         callSettingsPublisher: AnyPublisher<CallSettings, Never>,
         ownCapabilitiesPublisher: AnyPublisher<Set<OwnCapability>, Never>
@@ -184,6 +192,8 @@ final class CallAudioSession: @unchecked Sendable {
             .store(in: disposableBag)
     }
 
+    /// Reapplies the last known category options when the system clears them,
+    /// which happens after some CallKit activations.
     private func configureCallOptionsObservation() {
         audioStore
             .publisher(\.audioSessionConfiguration.options)
@@ -195,6 +205,8 @@ final class CallAudioSession: @unchecked Sendable {
             .store(in: disposableBag)
     }
 
+    /// Keeps the delegate informed of hardware flips while also re-evaluating
+    /// the policy when we detect a reconfiguration-worthy route change.
     private func configureCurrentRouteObservation() {
         audioStore
             .publisher(\.currentRoute)
@@ -246,6 +258,8 @@ final class CallAudioSession: @unchecked Sendable {
         )
     }
 
+    /// Breaks the configuration into store actions so reducers update the
+    /// audio session and our own bookkeeping in a single dispatch.
     private func applyConfiguration(
         _ configuration: AudioSessionConfiguration,
         callSettings: CallSettings,
