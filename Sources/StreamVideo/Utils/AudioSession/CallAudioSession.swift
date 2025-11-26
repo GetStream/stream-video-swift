@@ -292,6 +292,10 @@ final class CallAudioSession: @unchecked Sendable {
         )
 
         actions.append(contentsOf: [
+            // Setting only the audioEnabled doesn't stop the audio playout
+            // as if a new track gets added later on WebRTC will try to restart
+            // the playout. However, the combination of audioEnabled:false
+            // and AVAudioSession.active:false seems to work.
             .normal(.webRTCAudioSession(.setAudioEnabled(configuration.isActive))),
             .normal(.setActive(configuration.isActive)),
             .normal(.avAudioSession(.setOverrideOutputAudioPort(configuration.overrideOutputAudioPort ?? .none)))
