@@ -67,6 +67,14 @@ extension RTCAudioStore {
             case .stereo(.setPlayoutPreferred(let value)):
                 state.audioDeviceModule?.setStereoPlayoutPreference(value)
 
+            case let .webRTCAudioSession(.setAudioEnabled(value)):
+                log.throwing(
+                    "Unable to process setPlayout:\(value).",
+                    subsystems: .audioSession
+                ) {
+                    try state.audioDeviceModule?.setPlayout(value)
+                }
+
             default:
                 break
             }
@@ -99,12 +107,6 @@ extension RTCAudioStore {
             state: RTCAudioStore.StoreState,
             audioDeviceModule: AudioDeviceModule
         ) throws {
-            guard
-                state.isRecording
-            else {
-                return
-            }
-
             try audioDeviceModule.setMuted(value)
         }
 
@@ -122,7 +124,6 @@ extension RTCAudioStore {
                 return
             }
 
-            try audioDeviceModule.setPlayout(state.isActive)
             audioDeviceModule.setStereoPlayoutPreference(
                 state.stereoConfiguration.playout.preferred
             )

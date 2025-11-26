@@ -245,21 +245,6 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         /// sendAudio capability.
         (source as? RTCAudioDeviceModule)?.setRecordingAlwaysPreparedMode(false)
         source.prefersStereoPlayout = isPreferred
-
-//        /// We store the mic state before we perform `InitAndStartRecording` so we can restore
-//        /// the state at the end.
-//        let isMuted = isMicrophoneMuted
-//
-        ////        _ = source.stopRecording()
-        ////        _ = source.initAndStartRecording()
-//
-//        if isPreferred {
-//            setVoiceProcessingBypassed(isPreferred)
-//        }
-//
-//        if isMuted {
-//            _ = source.setMicrophoneMuted(isMuted)
-//        }
     }
 
     /// Starts or stops speaker playout on the ADM, retrying transient failures.
@@ -318,6 +303,10 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
     func setMuted(_ isMuted: Bool) throws {
         guard isMuted != source.isMicrophoneMuted else {
             return
+        }
+
+        if !isMuted, !isRecording {
+            try setRecording(true)
         }
 
         try throwingExecution("Unable to setMicrophoneMuted:\(isMuted)") {

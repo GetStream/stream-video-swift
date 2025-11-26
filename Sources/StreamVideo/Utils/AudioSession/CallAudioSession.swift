@@ -98,7 +98,6 @@ final class CallAudioSession: @unchecked Sendable {
         // Expose the policy's stereo preference so the audio device module can
         // reconfigure itself before WebRTC starts playout.
         audioStore.dispatch(.stereo(.setPlayoutPreferred(policy is LivestreamAudioSessionPolicy)))
-        audioStore.dispatch(.webRTCAudioSession(.setAudioEnabled(true)))
 
         configureCallSettingsAndCapabilitiesObservation(
             callSettingsPublisher: callSettingsPublisher,
@@ -278,7 +277,6 @@ final class CallAudioSession: @unchecked Sendable {
 
         var actions: [StoreActionBox<RTCAudioStore.Namespace.Action>] = []
 
-//        actions.append(.normal(.setRecording(ownCapabilities.contains(.sendAudio))))
         actions.append(.normal(.setMicrophoneMuted(!callSettings.audioOn || !ownCapabilities.contains(.sendAudio))))
 
         actions.append(
@@ -294,6 +292,7 @@ final class CallAudioSession: @unchecked Sendable {
         )
 
         actions.append(contentsOf: [
+            .normal(.webRTCAudioSession(.setAudioEnabled(configuration.isActive))),
             .normal(.setActive(configuration.isActive)),
             .normal(.avAudioSession(.setOverrideOutputAudioPort(configuration.overrideOutputAudioPort ?? .none)))
         ])
