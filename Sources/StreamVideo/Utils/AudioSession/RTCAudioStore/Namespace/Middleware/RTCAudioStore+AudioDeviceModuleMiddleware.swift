@@ -39,6 +39,16 @@ extension RTCAudioStore {
                     }
                 }
 
+            case .setRecording(let value):
+                if let audioDeviceModule = state.audioDeviceModule {
+                    log.throwing(
+                        "Unable to process setRecording:\(value).",
+                        subsystems: .audioSession
+                    ) {
+                        try audioDeviceModule.setRecording(value)
+                    }
+                }
+
             case .setMicrophoneMuted(let value):
                 if let audioDeviceModule = state.audioDeviceModule {
                     log.throwing(
@@ -90,6 +100,7 @@ extension RTCAudioStore {
             audioDeviceModule: AudioDeviceModule
         ) throws {
             guard
+                !value,
                 state.isActive,
                 state.isRecording
             else {

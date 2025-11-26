@@ -27,8 +27,13 @@ final class CallStateMachineTests: StreamVideoTestCase, @unchecked Sendable {
     // MARK: - Test Transition
 
     func testValidTransition() {
+        /// The test case is expected to log the following ClientError
+        /// ClientError { location:{ file:StreamVideoTests/HTTPClient_Mock.swift, line:28 } message:Please setup responses }
+        
         // Given
-        let nextState = Call.StateMachine.Stage.AcceptingStage(.init(call: mockCall))
+        let nextState = Call.StateMachine.Stage.AcceptingStage(
+            .init(call: mockCall, input: .accepting(deliverySubject: .init()))
+        )
         XCTAssertEqual(subject.currentStage.id, .idle)
 
         // When

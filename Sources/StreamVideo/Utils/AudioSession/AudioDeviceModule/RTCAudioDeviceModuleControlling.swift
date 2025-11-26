@@ -29,6 +29,8 @@ protocol RTCAudioDeviceModuleControlling: AnyObject {
     func startRecording() -> Int
     func stopRecording() -> Int
     func refreshStereoPlayoutState()
+    func setMuteMode(_ mode: RTCAudioEngineMuteMode) -> Int
+    func setRecordingAlwaysPreparedMode(_ alwaysPreparedRecording: Bool) -> Int
 }
 
 extension RTCAudioDeviceModule: RTCAudioDeviceModuleControlling {

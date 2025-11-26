@@ -9,6 +9,14 @@ import StreamWebRTC
 final class MockRTCPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinatorProviding, @unchecked Sendable {
     var stubbedBuildCoordinatorResult: [PeerConnectionType: MockRTCPeerConnectionCoordinator] = [:]
 
+    var stubbedPeerConnectionFactory: PeerConnectionFactory?
+
+    init(
+        peerConnectionFactory: PeerConnectionFactory? = nil
+    ) {
+        self.stubbedPeerConnectionFactory = peerConnectionFactory
+    }
+
     func buildCoordinator(
         sessionId: String,
         peerType: PeerConnectionType,
@@ -28,7 +36,7 @@ final class MockRTCPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinato
             sessionId: sessionId,
             peerType: peerType,
             peerConnection: peerConnection,
-            peerConnectionFactory: peerConnectionFactory,
+            peerConnectionFactory: stubbedPeerConnectionFactory ?? peerConnectionFactory,
             videoOptions: videoOptions,
             videoConfig: videoConfig,
             callSettings: callSettings,

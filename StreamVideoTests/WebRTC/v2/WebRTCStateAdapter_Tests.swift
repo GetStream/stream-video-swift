@@ -13,7 +13,12 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
     private lazy var user: User! = .dummy()
     private lazy var apiKey: String! = .unique
     private lazy var callCid: String! = .unique
-    private lazy var rtcPeerConnectionCoordinatorFactory: MockRTCPeerConnectionCoordinatorFactory! = .init()
+    private lazy var mockPeerConnectionFactory: PeerConnectionFactory! = .build(
+        audioProcessingModule: Self.videoConfig.audioProcessingModule,
+        audioDeviceModuleSource: MockRTCAudioDeviceModule()
+    )
+    private lazy var rtcPeerConnectionCoordinatorFactory: MockRTCPeerConnectionCoordinatorFactory! =
+        .init(peerConnectionFactory: mockPeerConnectionFactory)
     private lazy var mockPermissions: MockPermissionsStore! = .init()
     private lazy var mockAudioStore: MockRTCAudioStore! = .init()
     private lazy var subject: WebRTCStateAdapter! = .init(
@@ -21,6 +26,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         apiKey: apiKey,
         callCid: callCid,
         videoConfig: Self.videoConfig,
+        peerConnectionFactory: mockPeerConnectionFactory,
         rtcPeerConnectionCoordinatorFactory: rtcPeerConnectionCoordinatorFactory
     )
 
@@ -32,7 +38,8 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         _ = mockPermissions
     }
 
-    override func tearDown() {
+    override func tearDown() async throws {
+        await subject.cleanUp()
         mockAudioStore.dismantle()
         mockPermissions.dismantle()
         subject = nil
@@ -40,7 +47,8 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         callCid = nil
         apiKey = nil
         user = nil
-        super.tearDown()
+        mockPeerConnectionFactory = nil
+        try await super.tearDown()
     }
 
     override class func tearDown() {

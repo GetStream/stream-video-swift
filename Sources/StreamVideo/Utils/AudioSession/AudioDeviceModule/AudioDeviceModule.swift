@@ -237,12 +237,10 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         /// means that for outputs where VP is disabled (e.g. stereo) we cannot mute/unmute.
         /// - `.restartEngine`: rebuilds the whole graph and requires explicit calling of
         /// `initAndStartRecording` .
-        (source as? RTCAudioDeviceModule)?.setMuteMode(
-            isPreferred ? .inputMixer : .voiceProcessing
-        )
+        _ = source.setMuteMode(isPreferred ? .inputMixer : .voiceProcessing)
         /// - Important: We can probably set this one to false when the user doesn't have
         /// sendAudio capability.
-        (source as? RTCAudioDeviceModule)?.setRecordingAlwaysPreparedMode(false)
+        _ = source.setRecordingAlwaysPreparedMode(false)
         source.prefersStereoPlayout = isPreferred
     }
 

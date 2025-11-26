@@ -7,10 +7,11 @@ import Foundation
 extension Stream_Video_Sfu_Models_Error: Error, ReflectiveStringConvertible {}
 
 /// A Client error.
-public class ClientError: Error, ReflectiveStringConvertible, @unchecked Sendable {
-    public struct Location: Equatable, Sendable {
+public class ClientError: Error, CustomStringConvertible, @unchecked Sendable {
+    public struct Location: Equatable, Sendable, CustomStringConvertible {
         public let file: String
         public let line: Int
+        public var description: String { "{ file:\(file), line:\(line) }" }
     }
     
     /// The file and line number which emitted the error.
@@ -33,7 +34,26 @@ public class ClientError: Error, ReflectiveStringConvertible, @unchecked Sendabl
     
     /// Retrieve the localized description for this error.
     public var localizedDescription: String { message ?? errorDescription ?? "" }
-    
+
+    public var description: String {
+        var result = "ClientError {"
+        result += " location:\(location)"
+        if let message {
+            result += " message:\(message)"
+        }
+        if let apiError {
+            result += ", apiError:\(apiError)"
+        }
+        if let underlyingError {
+            result += ", underlyingError:\(underlyingError)"
+        }
+        if let errorDescription {
+            result += ", errorDescription:\(errorDescription)"
+        }
+        result += " }"
+        return result
+    }
+
     /// A client error based on an external general error.
     /// - Parameters:
     ///   - error: an external error.

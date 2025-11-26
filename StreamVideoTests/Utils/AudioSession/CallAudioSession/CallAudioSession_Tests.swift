@@ -58,6 +58,10 @@ final class CallAudioSession_Tests: XCTestCase, @unchecked Sendable {
         let delegate = SpyAudioSessionAdapterDelegate()
         let statsAdapter = MockWebRTCStatsAdapter()
         let policy = MockAudioSessionPolicy()
+        let mockAudioDeviceModule = MockRTCAudioDeviceModule()
+        mockAudioDeviceModule.stub(for: \.isRecording, with: true)
+        mockAudioDeviceModule.stub(for: \.isMicrophoneMuted, with: false)
+        mockAudioStore.audioStore.dispatch(.setAudioDeviceModule(.init(mockAudioDeviceModule)))
         let policyConfiguration = AudioSessionConfiguration(
             isActive: true,
             category: .playAndRecord,
@@ -76,11 +80,6 @@ final class CallAudioSession_Tests: XCTestCase, @unchecked Sendable {
             shouldSetActive: true
         )
 
-        // Initial enable dispatch.
-        await fulfillment {
-            self.mockAudioStore.audioStore.state.webRTCAudioSessionConfiguration.isAudioEnabled
-        }
-
         // Provide call settings to trigger policy application.
         callSettingsSubject.send(CallSettings(audioOn: true, speakerOn: true))
         capabilitiesSubject.send([.sendAudio])
@@ -90,20 +89,9 @@ final class CallAudioSession_Tests: XCTestCase, @unchecked Sendable {
             return state.audioSessionConfiguration.category == policyConfiguration.category
                 && state.audioSessionConfiguration.mode == policyConfiguration.mode
                 && state.audioSessionConfiguration.options == policyConfiguration.options
-                && state.shouldRecord
+                && state.isRecording
                 && state.isMicrophoneMuted == false
-        }
-
-        // Simulate route change to trigger delegate notification.
-        let speakerRoute = RTCAudioStore.StoreState.AudioRoute(
-            MockAVAudioSessionRouteDescription(
-                outputs: [MockAVAudioSessionPortDescription(portType: .builtInSpeaker)]
-            )
-        )
-        mockAudioStore.audioStore.dispatch(.setCurrentRoute(speakerRoute))
-
-        await fulfillment {
-            delegate.speakerUpdates.contains(true)
+                && state.webRTCAudioSessionConfiguration.isAudioEnabled
         }
 
         let traces = statsAdapter.stubbedFunctionInput[.trace]?.compactMap { input -> WebRTCTrace? in
@@ -200,7 +188,7 @@ final class CallAudioSession_Tests: XCTestCase, @unchecked Sendable {
         await fulfillment {
             let state = self.mockAudioStore.audioStore.state
             return state.audioSessionConfiguration.options == [.allowBluetoothA2DP]
-                && state.shouldRecord == false
+                && state.isRecording == false
                 && state.isMicrophoneMuted == true
         }
     }

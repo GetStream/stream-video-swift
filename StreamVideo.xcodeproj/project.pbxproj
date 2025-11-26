@@ -5785,6 +5785,7 @@
 		40E1C8AA2EA1561D00AC3647 /* Namespace */ = {
 			isa = PBXGroup;
 			children = (
+				40EF61A12ED85E2B00ED1F04 /* Effects */,
 				40E1C8B42EA18C9400AC3647 /* Middleware */,
 				40E1C8AE2EA157FD00AC3647 /* Reducers */,
 				40E1C8A92EA1561D00AC3647 /* RTCAudioStore_CoordinatorTests.swift */,
@@ -5986,6 +5987,13 @@
 				402C5C602ECB96D30096F212 /* AVAudioSessionObserver.swift */,
 			);
 			path = Components;
+			sourceTree = "<group>";
+		};
+		40EF61A12ED85E2B00ED1F04 /* Effects */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Effects;
 			sourceTree = "<group>";
 		};
 		40F0173C2BBEB85F00E89FD1 /* Utilities */ = {

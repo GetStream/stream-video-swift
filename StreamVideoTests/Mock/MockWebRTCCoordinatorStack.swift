@@ -16,8 +16,10 @@ final class MockWebRTCCoordinatorStack: @unchecked Sendable {
     let webRTCAuthenticator: MockWebRTCAuthenticator
     let coordinator: WebRTCCoordinator
     let sfuStack: MockSFUStack
+    let mockAudioDeviceModule: MockRTCAudioDeviceModule
     let rtcPeerConnectionCoordinatorFactory: MockRTCPeerConnectionCoordinatorFactory
     let internetConnection: MockInternetConnection
+    let peerConenctionFactory: PeerConnectionFactory
 
     private var healthCheckCancellable: AnyCancellable?
 
@@ -29,7 +31,7 @@ final class MockWebRTCCoordinatorStack: @unchecked Sendable {
         callAuthenticator: MockCallAuthenticator = .init(),
         webRTCAuthenticator: MockWebRTCAuthenticator = .init(),
         sfuStack: MockSFUStack = .init(),
-        rtcPeerConnectionCoordinatorFactory: MockRTCPeerConnectionCoordinatorFactory = .init(),
+        rtcPeerConnectionCoordinatorFactory: MockRTCPeerConnectionCoordinatorFactory? = nil,
         internetConnection: MockInternetConnection = .init()
     ) {
         self.user = user
@@ -39,6 +41,14 @@ final class MockWebRTCCoordinatorStack: @unchecked Sendable {
         self.callAuthenticator = callAuthenticator
         self.webRTCAuthenticator = webRTCAuthenticator
         self.sfuStack = sfuStack
+        let mockAudioDeviceModule = MockRTCAudioDeviceModule()
+        self.mockAudioDeviceModule = mockAudioDeviceModule
+        self.peerConenctionFactory = .build(
+            audioProcessingModule: videoConfig.audioProcessingModule,
+            audioDeviceModuleSource: mockAudioDeviceModule
+        )
+        let rtcPeerConnectionCoordinatorFactory: MockRTCPeerConnectionCoordinatorFactory = rtcPeerConnectionCoordinatorFactory ??
+            .init(peerConnectionFactory: peerConenctionFactory)
         self.rtcPeerConnectionCoordinatorFactory = rtcPeerConnectionCoordinatorFactory
         self.internetConnection = internetConnection
         coordinator = .init(
