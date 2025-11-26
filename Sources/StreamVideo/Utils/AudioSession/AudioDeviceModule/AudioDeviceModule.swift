@@ -181,7 +181,6 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
             ", isVoiceProcessingAGCEnabled:\(isVoiceProcessingAGCEnabled)" +
             ", audioLevel:\(audioLevel)" +
             ", source:\(source)" +
-            ", engineOutput: \(engine?.outputDescription ?? "-")" +
             " }"
     }
 
@@ -319,10 +318,6 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
     /// Forces the ADM to recompute whether stereo output is supported.
     func refreshStereoPlayoutState() {
         source.refreshStereoPlayoutState()
-    }
-
-    func setVoiceProcessingBypassed(_ value: Bool) {
-        source.isVoiceProcessingBypassed = value
     }
 
     // MARK: - RTCAudioDeviceModuleDelegate
@@ -567,34 +562,5 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
             file,
             line
         )
-    }
-}
-
-extension AVAudioEngine {
-
-    /// Human-readable description of the current output node format, used in
-    /// logs when debugging device routing issues.
-    var outputDescription: String {
-        guard let remoteIO = outputNode.audioUnit else {
-            return "not available"
-        }
-
-        var asbd = AudioStreamBasicDescription()
-        var size = UInt32(MemoryLayout<AudioStreamBasicDescription>.size)
-
-        let status = AudioUnitGetProperty(
-            remoteIO,
-            kAudioUnitProperty_StreamFormat,
-            kAudioUnitScope_Output,
-            0,
-            &asbd,
-            &size
-        )
-
-        guard status == noErr else {
-            return "failed to fetch information"
-        }
-
-        return "\(asbd.mChannelsPerFrame) ch @ \(asbd.mSampleRate) Hz"
     }
 }
