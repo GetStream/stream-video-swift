@@ -50,7 +50,7 @@ final class Store_Tests: XCTestCase, @unchecked Sendable {
         }
     }
 
-    func test_dispatch_allReduceresWereCalled() async {
+    func test_dispatch_allReducersWereCalled() async {
         subject.dispatch(.callReducersWithStep)
 
         await fulfillment {
@@ -79,6 +79,40 @@ final class Store_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(reducerA.timesCalled, 0)
         XCTAssertEqual(reducerB.timesCalled, 0)
         XCTAssertEqual(subject.state.reducersCalled, 0)
+    }
+
+    // MARK: - Effects
+
+    func test_addEffect_configuresDependenciesAndReceivesStateUpdates() async {
+        let effect = TestStoreEffect()
+        subject.add(effect)
+
+        await fulfillment(timeout: 2) {
+            effect.didReceivePublisher
+                && effect.dispatcher != nil
+                && effect.state != nil
+        }
+
+        subject.dispatch(.callReducersWithStep)
+
+        await fulfillment(timeout: 2) {
+            effect.receivedStates.contains { $0.reducersCalled == 2 }
+        }
+    }
+
+    func test_removeEffect_clearsDependencies() async {
+        let effect = TestStoreEffect()
+        subject.add(effect)
+
+        await fulfillment(timeout: 2) { effect.didReceivePublisher }
+
+        subject.remove(effect)
+
+        await fulfillment(timeout: 2) {
+            effect.dispatcher == nil
+                && effect.stateProvider == nil
+                && effect.didReceiveNilPublisher
+        }
     }
 }
 
@@ -143,4 +177,32 @@ private enum TestStoreNamespace: StoreNamespace, Sendable {
     typealias Action = TestStoreAction
 
     static let identifier: String = .unique
+}
+
+private final class TestStoreEffect: StoreEffect<TestStoreNamespace>, @unchecked Sendable {
+
+    private var cancellable: AnyCancellable?
+
+    private(set) var receivedStates: [TestStoreState] = []
+    private(set) var didReceivePublisher = false
+    private(set) var didReceiveNilPublisher = false
+
+    override func set(
+        statePublisher: AnyPublisher<TestStoreState, Never>?
+    ) {
+        cancellable?.cancel()
+        guard let statePublisher else {
+            didReceiveNilPublisher = true
+            didReceivePublisher = false
+            cancellable = nil
+            return
+        }
+
+        didReceivePublisher = true
+        didReceiveNilPublisher = false
+        cancellable = statePublisher
+            .sink { [weak self] state in
+                self?.receivedStates.append(state)
+            }
+    }
 }

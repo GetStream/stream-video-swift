@@ -127,4 +127,13 @@ final class AVAudioSessionCategoryOptionsTests: XCTestCase, @unchecked Sendable 
     func test_playback_whenAccessed_thenReturnsEmptyOptions() {
         XCTAssertEqual(AVAudioSession.CategoryOptions.playback, [])
     }
+
+    #if !canImport(AVFoundation, _version: 2360.61.4.11)
+    func test_allowBluetoothHFPAliasesBluetoothOnLegacySDKs() {
+        XCTAssertEqual(
+            AVAudioSession.CategoryOptions.allowBluetoothHFP,
+            AVAudioSession.CategoryOptions.allowBluetooth
+        )
+    }
+    #endif
 }

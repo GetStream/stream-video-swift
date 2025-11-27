@@ -193,6 +193,139 @@ final class CallAudioSession_Tests: XCTestCase, @unchecked Sendable {
         }
     }
 
+    func test_activate_setsStereoPreference_whenPolicyPrefersStereoPlayout() async {
+        let callSettingsSubject = PassthroughSubject<CallSettings, Never>()
+        let capabilitiesSubject = PassthroughSubject<Set<OwnCapability>, Never>()
+        let delegate = SpyAudioSessionAdapterDelegate()
+        subject = .init(policy: LivestreamAudioSessionPolicy())
+
+        subject.activate(
+            callSettingsPublisher: callSettingsSubject.eraseToAnyPublisher(),
+            ownCapabilitiesPublisher: capabilitiesSubject.eraseToAnyPublisher(),
+            delegate: delegate,
+            statsAdapter: nil,
+            shouldSetActive: true
+        )
+
+        await fulfillment {
+            self.mockAudioStore.audioStore.state.stereoConfiguration.playout.preferred
+        }
+    }
+
+    func test_routeChangeWithMatchingSpeaker_reappliesPolicy() async {
+        let callSettingsSubject = PassthroughSubject<CallSettings, Never>()
+        let capabilitiesSubject = PassthroughSubject<Set<OwnCapability>, Never>()
+        let delegate = SpyAudioSessionAdapterDelegate()
+        let policy = MockAudioSessionPolicy()
+        let policyConfiguration = AudioSessionConfiguration(
+            isActive: true,
+            category: .playAndRecord,
+            mode: .voiceChat,
+            options: [.allowBluetoothHFP],
+            overrideOutputAudioPort: .speaker
+        )
+        policy.stub(for: .configuration, with: policyConfiguration)
+
+        subject = .init(policy: policy)
+        subject.activate(
+            callSettingsPublisher: callSettingsSubject.eraseToAnyPublisher(),
+            ownCapabilitiesPublisher: capabilitiesSubject.eraseToAnyPublisher(),
+            delegate: delegate,
+            statsAdapter: nil,
+            shouldSetActive: true
+        )
+
+        callSettingsSubject.send(CallSettings(audioOn: true, speakerOn: true))
+        capabilitiesSubject.send([.sendAudio])
+
+        await fulfillment {
+            (policy.stubbedFunctionInput[.configuration]?.count ?? 0) == 1
+        }
+
+        let initialCount = policy.stubbedFunctionInput[.configuration]?.count ?? 0
+        mockAudioStore.audioStore.dispatch(
+            .setCurrentRoute(
+                makeRoute(reason: .oldDeviceUnavailable, speakerOn: true)
+            )
+        )
+
+        await fulfillment {
+            (policy.stubbedFunctionInput[.configuration]?.count ?? 0) == initialCount + 1
+        }
+    }
+
+    func test_routeChangeWithDifferentSpeaker_notifiesDelegate() async {
+        let callSettingsSubject = PassthroughSubject<CallSettings, Never>()
+        let capabilitiesSubject = PassthroughSubject<Set<OwnCapability>, Never>()
+        let delegate = SpyAudioSessionAdapterDelegate()
+        let policy = MockAudioSessionPolicy()
+        subject = .init(policy: policy)
+        subject.activate(
+            callSettingsPublisher: callSettingsSubject.eraseToAnyPublisher(),
+            ownCapabilitiesPublisher: capabilitiesSubject.eraseToAnyPublisher(),
+            delegate: delegate,
+            statsAdapter: nil,
+            shouldSetActive: true
+        )
+
+        callSettingsSubject.send(CallSettings(audioOn: true, speakerOn: true))
+        capabilitiesSubject.send([.sendAudio])
+
+        await fulfillment {
+            (policy.stubbedFunctionInput[.configuration]?.count ?? 0) == 1
+        }
+
+        mockAudioStore.audioStore.dispatch(
+            .setCurrentRoute(
+                makeRoute(reason: .oldDeviceUnavailable, speakerOn: false)
+            )
+        )
+
+        await fulfillment {
+            delegate.speakerUpdates.contains(false)
+        }
+
+        XCTAssertEqual(policy.stubbedFunctionInput[.configuration]?.count ?? 0, 1)
+    }
+
+    func test_callOptionsCleared_reappliesLastOptions() async {
+        let callSettingsSubject = PassthroughSubject<CallSettings, Never>()
+        let capabilitiesSubject = PassthroughSubject<Set<OwnCapability>, Never>()
+        let delegate = SpyAudioSessionAdapterDelegate()
+        let policy = MockAudioSessionPolicy()
+        let policyConfiguration = AudioSessionConfiguration(
+            isActive: true,
+            category: .playAndRecord,
+            mode: .voiceChat,
+            options: [.allowBluetoothHFP]
+        )
+        policy.stub(for: .configuration, with: policyConfiguration)
+
+        subject = .init(policy: policy)
+        subject.activate(
+            callSettingsPublisher: callSettingsSubject.eraseToAnyPublisher(),
+            ownCapabilitiesPublisher: capabilitiesSubject.eraseToAnyPublisher(),
+            delegate: delegate,
+            statsAdapter: nil,
+            shouldSetActive: true
+        )
+
+        callSettingsSubject.send(CallSettings(audioOn: true, speakerOn: true))
+        capabilitiesSubject.send([.sendAudio])
+
+        await fulfillment {
+            self.mockAudioStore.audioStore.state.audioSessionConfiguration.options == policyConfiguration.options
+        }
+
+        mockAudioStore.audioStore.dispatch(
+            .avAudioSession(.systemSetCategoryOptions([]))
+        )
+
+        await fulfillment {
+            self.mockAudioStore.audioStore.state.audioSessionConfiguration.options == policyConfiguration.options
+        }
+    }
+
     func test_currentRouteIsExternal_matchesAudioStoreState() async {
         let policy = MockAudioSessionPolicy()
         subject = .init(policy: policy)
@@ -222,4 +355,26 @@ private final class SpyAudioSessionAdapterDelegate: StreamAudioSessionAdapterDel
     ) {
         speakerUpdates.append(speakerOn)
     }
+}
+
+// MARK: - Helpers
+
+private func makeRoute(
+    reason: AVAudioSession.RouteChangeReason,
+    speakerOn: Bool
+) -> RTCAudioStore.StoreState.AudioRoute {
+    let port = RTCAudioStore.StoreState.AudioRoute.Port(
+        type: speakerOn ? AVAudioSession.Port.builtInSpeaker.rawValue : AVAudioSession.Port.builtInReceiver.rawValue,
+        name: speakerOn ? "speaker" : "receiver",
+        id: UUID().uuidString,
+        isExternal: !speakerOn,
+        isSpeaker: speakerOn,
+        isReceiver: !speakerOn,
+        channels: speakerOn ? 2 : 1
+    )
+    return .init(
+        inputs: [],
+        outputs: [port],
+        reason: reason
+    )
 }

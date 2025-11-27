@@ -28,7 +28,6 @@ final class RTCAudioSessionPublisher: NSObject, RTCAudioSessionDelegate, @unchec
 
     private let source: RTCAudioSession
     private let subject: PassthroughSubject<Event, Never> = .init()
-    private let disposableBag = DisposableBag()
 
     /// Creates a publisher for the provided WebRTC audio session.
     /// - Parameter source: The session to observe.

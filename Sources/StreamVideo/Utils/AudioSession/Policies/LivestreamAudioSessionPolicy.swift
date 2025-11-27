@@ -11,8 +11,9 @@ public struct LivestreamAudioSessionPolicy: AudioSessionPolicy {
     public init() {}
 
     /// Builds the configuration used when a call toggles livestream mode.
-    /// Stereo playout is preferred, but the policy falls back to playback if
-    /// the current user cannot transmit audio.
+    /// Stereo playout is preferred (thus the category and the options), but the policy falls back to playback
+    /// category if the current user cannot transmit audio. A2DP is required to allow external devices
+    /// to play stereo.
     public func configuration(
         for callSettings: CallSettings,
         ownCapabilities: Set<OwnCapability>

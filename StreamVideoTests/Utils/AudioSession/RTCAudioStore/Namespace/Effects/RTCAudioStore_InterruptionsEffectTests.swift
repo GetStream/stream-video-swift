@@ -6,13 +6,13 @@
 import StreamWebRTC
 import XCTest
 
-final class RTCAudioStore_InterruptionsMiddlewareTests: XCTestCase, @unchecked Sendable {
+final class RTCAudioStore_InterruptionsEffectTests: XCTestCase, @unchecked Sendable {
 
     private enum TestError: Error { case stub }
 
     private var session: RTCAudioSession!
     private var publisher: RTCAudioSessionPublisher!
-    private var subject: RTCAudioStore.InterruptionsMiddleware!
+    private var subject: RTCAudioStore.InterruptionsEffect!
     private var dispatched: [[StoreActionBox<RTCAudioStore.Namespace.Action>]]!
 
     override func setUp() {

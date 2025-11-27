@@ -21,6 +21,8 @@ extension RTCAudioStore {
         ) {
             audioDeviceModuleCancellable?.cancel()
             audioDeviceModuleCancellable = nil
+            processingQueue.cancelAllOperations()
+            disposableBag.removeAll()
 
             guard let statePublisher else {
                 return

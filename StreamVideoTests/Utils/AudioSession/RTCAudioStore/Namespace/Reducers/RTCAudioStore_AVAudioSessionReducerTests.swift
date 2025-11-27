@@ -193,6 +193,53 @@ final class RTCAudioStore_AVAudioSessionReducerTests: XCTestCase, @unchecked Sen
         XCTAssertEqual(session.timesCalled(.setConfiguration), 1)
     }
 
+    func test_reduce_systemSetCategory_updatesStateWithoutCallingSession() async throws {
+        let state = makeState(
+            category: .playback,
+            mode: .default,
+            options: []
+        )
+
+        let result = try await subject.reduce(
+            state: state,
+            action: .avAudioSession(.systemSetCategory(.playAndRecord)),
+            file: #file,
+            function: #function,
+            line: #line
+        )
+
+        XCTAssertEqual(result.audioSessionConfiguration.category, .playAndRecord)
+        XCTAssertEqual(session.timesCalled(.setConfiguration), 0)
+    }
+
+    func test_reduce_setCurrentRoute_updatesOverridePort() async throws {
+        let state = makeState(overrideOutput: .none)
+        let speakerRoute = RTCAudioStore.StoreState.AudioRoute(
+            inputs: [],
+            outputs: [
+                .init(
+                    type: .unique,
+                    name: .unique,
+                    id: .unique,
+                    isExternal: false,
+                    isSpeaker: true,
+                    isReceiver: false,
+                    channels: 2
+                )
+            ]
+        )
+
+        let result = try await subject.reduce(
+            state: state,
+            action: .setCurrentRoute(speakerRoute),
+            file: #file,
+            function: #function,
+            line: #line
+        )
+
+        XCTAssertEqual(result.audioSessionConfiguration.overrideOutputAudioPort, .speaker)
+    }
+
     // MARK: - Helpers
 
     private func makeState(

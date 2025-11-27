@@ -95,6 +95,26 @@ final class RTCAudioStore_DefaultReducerTests: XCTestCase, @unchecked Sendable {
         }
     }
 
+    func test_reduce_setActive_updatesAudioDeviceModulePlayout() async throws {
+        session.isActive = false
+        let (audioDeviceModule, mockModule) = makeAudioDeviceModule()
+        mockModule.stub(for: \.isPlayoutInitialized, with: false)
+        let state = makeState(
+            isActive: false,
+            audioDeviceModule: audioDeviceModule
+        )
+
+        _ = try await subject.reduce(
+            state: state,
+            action: .setActive(true),
+            file: #file,
+            function: #function,
+            line: #line
+        )
+
+        XCTAssertEqual(mockModule.timesCalled(.initAndStartPlayout), 1)
+    }
+
     // MARK: - setAudioDeviceModule
 
     func test_reduce_setAudioDeviceModule_nil_resetsRecordingFlags() async throws {
@@ -140,6 +160,28 @@ final class RTCAudioStore_DefaultReducerTests: XCTestCase, @unchecked Sendable {
         XCTAssertTrue(result.isMicrophoneMuted)
     }
 
+    func test_reduce_setAudioDeviceModule_nil_resetsStereoConfiguration() async throws {
+        let module = AudioDeviceModule(MockRTCAudioDeviceModule())
+        let stereoConfiguration = RTCAudioStore.StoreState.StereoConfiguration(
+            playout: .init(preferred: true, enabled: true)
+        )
+        let state = makeState(
+            audioDeviceModule: module,
+            stereoConfiguration: stereoConfiguration
+        )
+
+        let result = try await subject.reduce(
+            state: state,
+            action: .setAudioDeviceModule(nil),
+            file: #file,
+            function: #function,
+            line: #line
+        )
+
+        XCTAssertFalse(result.stereoConfiguration.playout.preferred)
+        XCTAssertFalse(result.stereoConfiguration.playout.enabled)
+    }
+
     // MARK: - Passthrough actions
 
     func test_reduce_avAudioSessionAction_returnsUnchangedState() async throws {
@@ -176,6 +218,12 @@ final class RTCAudioStore_DefaultReducerTests: XCTestCase, @unchecked Sendable {
             isAudioEnabled: false,
             useManualAudio: false,
             prefersNoInterruptionsFromSystemAlerts: false
+        ),
+        stereoConfiguration: RTCAudioStore.StoreState.StereoConfiguration = .init(
+            playout: .init(
+                preferred: false,
+                enabled: false
+            )
         )
     ) -> RTCAudioStore.StoreState {
         .init(
@@ -188,7 +236,13 @@ final class RTCAudioStore_DefaultReducerTests: XCTestCase, @unchecked Sendable {
             currentRoute: currentRoute,
             audioSessionConfiguration: audioSessionConfiguration,
             webRTCAudioSessionConfiguration: webRTCAudioSessionConfiguration,
-            stereoConfiguration: .init(playout: .init(preferred: false, enabled: false))
+            stereoConfiguration: stereoConfiguration
         )
+    }
+
+    private func makeAudioDeviceModule() -> (AudioDeviceModule, MockRTCAudioDeviceModule) {
+        let mock = MockRTCAudioDeviceModule()
+        let module = AudioDeviceModule(mock)
+        return (module, mock)
     }
 }
