@@ -34,7 +34,6 @@ extension RTCSessionDescription: Encodable {}
 extension RTCConfiguration: Encodable {}
 extension RTCIceServer: Encodable {}
 extension RTCCryptoOptions: Encodable {}
-extension RTCCryptoOptions: Encodable {}
 extension AVAudioSession.RouteChangeReason: Encodable {}
 #endif
 
