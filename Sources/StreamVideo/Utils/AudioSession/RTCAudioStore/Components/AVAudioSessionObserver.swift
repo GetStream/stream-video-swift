@@ -21,7 +21,6 @@ extension AVAudioSession {
         var prefersEchoCancelledInput: Bool
         var isEchoCancelledInputEnabled: Bool
         var isEchoCancelledInputAvailable: Bool
-        var outputMuted: Bool
         var maximumOutputNumberOfChannels: Int
         var outputNumberOfChannels: Int
         var preferredOutputNumberOfChannels: Int
@@ -40,7 +39,6 @@ extension AVAudioSession {
             result += ", prefersEchoCancelledInput:\(prefersEchoCancelledInput)"
             result += ", isEchoCancelledInputEnabled:\(isEchoCancelledInputEnabled)"
             result += ", isEchoCancelledInputAvailable:\(isEchoCancelledInputAvailable)"
-            result += ", outputMuted:\(outputMuted)"
             result += ", maximumOutputNumberOfChannels:\(maximumOutputNumberOfChannels)"
             result += ", outputNumberOfChannels:\(outputNumberOfChannels)"
             result += ", preferredOutputNumberOfChannels:\(preferredOutputNumberOfChannels)"
@@ -65,8 +63,6 @@ extension AVAudioSession {
             } else { self.isEchoCancelledInputEnabled = false }
             if #available(iOS 18.2, *) { self.isEchoCancelledInputAvailable = source.isEchoCancelledInputAvailable
             } else { self.isEchoCancelledInputAvailable = false }
-            if #available(iOS 26.0, *) { self.outputMuted = source.isOutputMuted
-            } else { self.outputMuted = false }
             self.maximumOutputNumberOfChannels = source.maximumOutputNumberOfChannels
             self.outputNumberOfChannels = source.outputNumberOfChannels
             self.preferredOutputNumberOfChannels = source.preferredOutputNumberOfChannels
