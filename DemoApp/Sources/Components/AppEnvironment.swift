@@ -620,7 +620,7 @@ extension AppEnvironment {
     }
 
     static var proximityPolicies: Set<ProximityPolicyDebugConfiguration> = {
-        []
+        [.video, .speaker]
     }()
 }
 
