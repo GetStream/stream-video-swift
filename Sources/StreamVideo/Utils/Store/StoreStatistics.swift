@@ -10,7 +10,7 @@ final class StoreStatistics<Namespace: StoreNamespace> {
     typealias Reporter = (Int, TimeInterval) -> Void
 
     private let processingQueue = UnfairQueue()
-    private var actions: [Namespace.Action] = []
+    private var actions: [String] = []
     private var cancellable: AnyCancellable?
 
     private var interval: TimeInterval = 0
@@ -31,7 +31,7 @@ final class StoreStatistics<Namespace: StoreNamespace> {
     }
 
     func record(_ action: Namespace.Action) {
-        processingQueue.sync { actions.append(action) }
+        processingQueue.sync { actions.append("\(action)") }
     }
 
     private func flush() {

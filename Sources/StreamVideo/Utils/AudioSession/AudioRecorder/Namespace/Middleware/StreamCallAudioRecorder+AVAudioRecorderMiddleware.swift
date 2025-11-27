@@ -60,11 +60,18 @@ extension StreamCallAudioRecorder.Namespace {
                 .publisher(\.audioDeviceModule)
                 .receive(on: processingQueue)
                 .sink { [weak self] in
+                    if self?.updateMetersCancellable != nil {
+                        self?.stopRecording()
+                        self?.startRecording()
+                    }
+
                     if let audioDeviceModule = $0 {
                         self?.mode = .audioDeviceModule(audioDeviceModule)
-                        if self?.updateMetersCancellable != nil {
-                            self?.stopRecording()
-                            self?.startRecording()
+                    } else {
+                        if let audioRecorder = try? AVAudioRecorder.build() {
+                            self?.mode = .audioRecorder(audioRecorder)
+                        } else {
+                            self?.mode = .invalid
                         }
                     }
                 }
