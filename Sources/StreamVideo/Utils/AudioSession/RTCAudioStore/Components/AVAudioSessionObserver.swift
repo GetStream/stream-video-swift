@@ -55,14 +55,33 @@ extension AVAudioSession {
             self.routeSharingPolicy = source.routeSharingPolicy
             self.availableModes = source.availableModes
             self.preferredInput = source.preferredInput.map { .init($0) } ?? nil
+            #if compiler(>=6.0)
             if #available(iOS 17.2, *) { self.renderingMode = "\(source.renderingMode)" }
             else { self.renderingMode = "" }
+            #else
+            self.renderingMode = ""
+            #endif
+
+            #if compiler(>=6.0)
             if #available(iOS 18.2, *) { self.prefersEchoCancelledInput = source.prefersEchoCancelledInput
             } else { self.prefersEchoCancelledInput = false }
+            #else
+            self.prefersEchoCancelledInput = false
+            #endif
+
+            #if compiler(>=6.0)
             if #available(iOS 18.2, *) { self.isEchoCancelledInputEnabled = source.isEchoCancelledInputEnabled
             } else { self.isEchoCancelledInputEnabled = false }
+            #else
+            self.isEchoCancelledInputEnabled = false
+            #endif
+
+            #if compiler(>=6.0)
             if #available(iOS 18.2, *) { self.isEchoCancelledInputAvailable = source.isEchoCancelledInputAvailable
             } else { self.isEchoCancelledInputAvailable = false }
+            #else
+            self.isEchoCancelledInputAvailable = false
+            #endif
             self.maximumOutputNumberOfChannels = source.maximumOutputNumberOfChannels
             self.outputNumberOfChannels = source.outputNumberOfChannels
             self.preferredOutputNumberOfChannels = source.preferredOutputNumberOfChannels

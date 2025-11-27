@@ -359,7 +359,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
             try Task.checkCancellation()
 
             if !isFastReconnecting {
-                try await withThrowingTaskGroup { [context] group in
+                try await withThrowingTaskGroup(of: Void.self) { [context] group in
                     group.addTask { [context] in
                         /// Configures the audio session for the current call using the provided
                         /// join source. This ensures the session setup reflects whether the
