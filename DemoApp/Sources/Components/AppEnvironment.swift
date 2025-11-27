@@ -638,6 +638,19 @@ extension ClientCapability: Debuggable {
     }
 }
 
+extension Logger.WebRTC.LogMode: Debuggable {
+    var title: String {
+        switch self {
+        case .none:
+            return "None"
+        case .validFilesOnly:
+            return "Valid Files only"
+        case .all:
+            return "All"
+        }
+    }
+}
+
 extension String: Debuggable {
     var title: String {
         self

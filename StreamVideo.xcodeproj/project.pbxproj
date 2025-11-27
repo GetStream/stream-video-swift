@@ -871,7 +871,6 @@
 		40E363752D0A2C6B0028C52A /* CGSize+Adapt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E363742D0A2C6B0028C52A /* CGSize+Adapt.swift */; };
 		40E363772D0A2E320028C52A /* BroadcastBufferReaderKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E363762D0A2E320028C52A /* BroadcastBufferReaderKey.swift */; };
 		40E741FF2D553ACD0044C955 /* CurrentDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E741FE2D553ACD0044C955 /* CurrentDevice.swift */; };
-		40E7A45B2E29495500E8AB8B /* WebRTCLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E7A4582E29487700E8AB8B /* WebRTCLogger.swift */; };
 		40E9B3B12BCD755F00ACF18F /* MemberResponse+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E9B3B02BCD755F00ACF18F /* MemberResponse+Dummy.swift */; };
 		40E9B3B32BCD93AE00ACF18F /* JoinCallResponse+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E9B3B22BCD93AE00ACF18F /* JoinCallResponse+Dummy.swift */; };
 		40E9B3B52BCD93F500ACF18F /* Credentials+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E9B3B42BCD93F500ACF18F /* Credentials+Dummy.swift */; };
@@ -906,6 +905,7 @@
 		40EF61B72ED8917100ED1F04 /* RTCAudioStoreState+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40EF61B62ED8917100ED1F04 /* RTCAudioStoreState+Dummy.swift */; };
 		40EF61B82ED8917100ED1F04 /* RTCAudioStoreState+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40EF61B62ED8917100ED1F04 /* RTCAudioStoreState+Dummy.swift */; };
 		40EF61BA2ED893A400ED1F04 /* MockStoreDispatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40EF61B92ED893A400ED1F04 /* MockStoreDispatcher.swift */; };
+		40EF61BE2ED8B01300ED1F04 /* Logger+WebRTC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40EF61BD2ED8B01300ED1F04 /* Logger+WebRTC.swift */; };
 		40F017392BBEAF6400E89FD1 /* MockCallKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F017382BBEAF6400E89FD1 /* MockCallKitService.swift */; };
 		40F0173B2BBEB1A900E89FD1 /* CallKitAdapterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F0173A2BBEB1A900E89FD1 /* CallKitAdapterTests.swift */; };
 		40F0173E2BBEB86800E89FD1 /* TestsAuthenticationProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F0173D2BBEB86800E89FD1 /* TestsAuthenticationProvider.swift */; };
@@ -2541,7 +2541,6 @@
 		40E363742D0A2C6B0028C52A /* CGSize+Adapt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGSize+Adapt.swift"; sourceTree = "<group>"; };
 		40E363762D0A2E320028C52A /* BroadcastBufferReaderKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastBufferReaderKey.swift; sourceTree = "<group>"; };
 		40E741FE2D553ACD0044C955 /* CurrentDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentDevice.swift; sourceTree = "<group>"; };
-		40E7A4582E29487700E8AB8B /* WebRTCLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebRTCLogger.swift; sourceTree = "<group>"; };
 		40E9B3B02BCD755F00ACF18F /* MemberResponse+Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MemberResponse+Dummy.swift"; sourceTree = "<group>"; };
 		40E9B3B22BCD93AE00ACF18F /* JoinCallResponse+Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JoinCallResponse+Dummy.swift"; sourceTree = "<group>"; };
 		40E9B3B42BCD93F500ACF18F /* Credentials+Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Credentials+Dummy.swift"; sourceTree = "<group>"; };
@@ -2574,6 +2573,7 @@
 		40EF61B12ED8859500ED1F04 /* RTCAudioStore_StereoPlayoutEffectTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RTCAudioStore_StereoPlayoutEffectTests.swift; sourceTree = "<group>"; };
 		40EF61B62ED8917100ED1F04 /* RTCAudioStoreState+Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCAudioStoreState+Dummy.swift"; sourceTree = "<group>"; };
 		40EF61B92ED893A400ED1F04 /* MockStoreDispatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockStoreDispatcher.swift; sourceTree = "<group>"; };
+		40EF61BD2ED8B01300ED1F04 /* Logger+WebRTC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Logger+WebRTC.swift"; sourceTree = "<group>"; };
 		40F017382BBEAF6400E89FD1 /* MockCallKitService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockCallKitService.swift; sourceTree = "<group>"; };
 		40F0173A2BBEB1A900E89FD1 /* CallKitAdapterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitAdapterTests.swift; sourceTree = "<group>"; };
 		40F0173D2BBEB86800E89FD1 /* TestsAuthenticationProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestsAuthenticationProvider.swift; sourceTree = "<group>"; };
@@ -6824,10 +6824,10 @@
 		8456E6C7287EC343004E180E /* Logger */ = {
 			isa = PBXGroup;
 			children = (
-				40E7A4582E29487700E8AB8B /* WebRTCLogger.swift */,
 				40BBC4A92C6270F5002AEF92 /* Array+Logger.swift */,
 				40AB34E02C5E73F900B5B6B3 /* Publisher+Logger.swift */,
 				8456E6C8287EC343004E180E /* Logger.swift */,
+				40EF61BD2ED8B01300ED1F04 /* Logger+WebRTC.swift */,
 				40E1C8982EA1080100AC3647 /* Logger+ThrowingExecution.swift */,
 				406568932E05515700A67EAC /* Signposting.swift */,
 				8456E6C9287EC343004E180E /* Destination */,
@@ -8583,6 +8583,7 @@
 				40DFA8902CC11146003DCE05 /* APIKey.swift in Sources */,
 				40DFA88F2CC11137003DCE05 /* UpdateCallResponse.swift in Sources */,
 				40EE9D2B2E969F010000EA92 /* AudioDeviceModule.swift in Sources */,
+				40EF61BE2ED8B01300ED1F04 /* Logger+WebRTC.swift in Sources */,
 				40EE9D2C2E969F010000EA92 /* AudioEngineLevelNodeAdapter.swift in Sources */,
 				40DFA88E2CC1111E003DCE05 /* CallState.swift in Sources */,
 				403793C72D3670BC00C752DF /* ApplicationLifecycleVideoMuteAdapter.swift in Sources */,
@@ -9233,7 +9234,6 @@
 				40151FA02E7446FC00326540 /* AudioProcessingStore+CapturedChannelsMiddleware.swift in Sources */,
 				843DAB9929E695CF00E0EB63 /* CreateGuestResponse.swift in Sources */,
 				84DC389229ADFCFD00946713 /* RequestPermissionRequest.swift in Sources */,
-				40E7A45B2E29495500E8AB8B /* WebRTCLogger.swift in Sources */,
 				84C28C922A84D16A00742E33 /* GoLiveRequest.swift in Sources */,
 				84FC2C1328ACDF3A00181490 /* ProtoModel.swift in Sources */,
 				40BBC4CE2C639054002AEF92 /* WebRTCCoordinator+Error.swift in Sources */,

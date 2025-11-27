@@ -151,6 +151,7 @@ public enum LogConfig {
     public nonisolated(unsafe) static var level: LogLevel = .error {
         didSet {
             invalidateLogger()
+            Logger.WebRTC.severity = .init(level)
         }
     }
     
@@ -298,8 +299,8 @@ public enum LogConfig {
     }
 
     public static var webRTCLogsEnabled: Bool {
-        get { WebRTCLogger.default.enabled }
-        set { WebRTCLogger.default.enabled = newValue }
+        get { Logger.WebRTC.mode != .none }
+        set { Logger.WebRTC.mode = newValue ? .all : .none }
     }
 
     /// Invalidates the current logger instance so it can be recreated.
