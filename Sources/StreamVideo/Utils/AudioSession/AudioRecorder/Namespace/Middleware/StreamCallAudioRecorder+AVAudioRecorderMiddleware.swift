@@ -54,6 +54,8 @@ extension StreamCallAudioRecorder.Namespace {
                 mode = .invalid
             }
 
+            let initialMode = self.mode
+
             super.init()
 
             audioDeviceModuleCancellable = audioStore
@@ -65,14 +67,11 @@ extension StreamCallAudioRecorder.Namespace {
                         self?.startRecording()
                     }
 
+                    // We restore the mode to whatever we had before the call.
                     if let audioDeviceModule = $0 {
                         self?.mode = .audioDeviceModule(audioDeviceModule)
                     } else {
-                        if let audioRecorder = try? AVAudioRecorder.build() {
-                            self?.mode = .audioRecorder(audioRecorder)
-                        } else {
-                            self?.mode = .invalid
-                        }
+                        self?.mode = initialMode
                     }
                 }
         }

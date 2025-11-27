@@ -477,7 +477,6 @@
 		4097B3832BF4E37B0057992D /* OnChangeViewModifier_iOS13.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4097B3822BF4E37B0057992D /* OnChangeViewModifier_iOS13.swift */; };
 		40986C3A2CCB6D2F00510F88 /* RTCRtpEncodingParameters_Test.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40986C392CCB6D2F00510F88 /* RTCRtpEncodingParameters_Test.swift */; };
 		40986C3C2CCB6E4B00510F88 /* RTCRtpTransceiverInit_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40986C3B2CCB6E4B00510F88 /* RTCRtpTransceiverInit_Tests.swift */; };
-		40986C3E2CD1148F00510F88 /* AudioSession_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40986C3D2CD1148F00510F88 /* AudioSession_Tests.swift */; };
 		409AF6E62DAFAC4700EE7BF6 /* PictureInPictureReconnectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409AF6E52DAFAC4700EE7BF6 /* PictureInPictureReconnectionView.swift */; };
 		409AF6E82DAFC80200EE7BF6 /* PictureInPictureContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409AF6E72DAFC80200EE7BF6 /* PictureInPictureContent.swift */; };
 		409AF6EA2DAFE1B000EE7BF6 /* PictureInPictureContentProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409AF6E92DAFE1B000EE7BF6 /* PictureInPictureContentProviderTests.swift */; };
@@ -2208,7 +2207,6 @@
 		4097B3822BF4E37B0057992D /* OnChangeViewModifier_iOS13.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnChangeViewModifier_iOS13.swift; sourceTree = "<group>"; };
 		40986C392CCB6D2F00510F88 /* RTCRtpEncodingParameters_Test.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RTCRtpEncodingParameters_Test.swift; sourceTree = "<group>"; };
 		40986C3B2CCB6E4B00510F88 /* RTCRtpTransceiverInit_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RTCRtpTransceiverInit_Tests.swift; sourceTree = "<group>"; };
-		40986C3D2CD1148F00510F88 /* AudioSession_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioSession_Tests.swift; sourceTree = "<group>"; };
 		409AF6E52DAFAC4700EE7BF6 /* PictureInPictureReconnectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PictureInPictureReconnectionView.swift; sourceTree = "<group>"; };
 		409AF6E72DAFC80200EE7BF6 /* PictureInPictureContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PictureInPictureContent.swift; sourceTree = "<group>"; };
 		409AF6E92DAFE1B000EE7BF6 /* PictureInPictureContentProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PictureInPictureContentProviderTests.swift; sourceTree = "<group>"; };
@@ -7311,7 +7309,6 @@
 				845E31042A7121BE004DC470 /* Screensharing */,
 				8414081229F28B5600FF2D7C /* RTCConfiguration_Tests.swift */,
 				8446AF902A4D84F4002AB07B /* Retries_Tests.swift */,
-				40986C3D2CD1148F00510F88 /* AudioSession_Tests.swift */,
 				400C9FCC2D9D648100DB26DC /* RTCConfiguration_DefaultsTests.swift */,
 			);
 			path = WebRTC;
@@ -9386,7 +9383,6 @@
 				40F017392BBEAF6400E89FD1 /* MockCallKitService.swift in Sources */,
 				40D2873B2DB12CAD006AD8C7 /* DefaultAudioSessionPolicyTests.swift in Sources */,
 				40F017402BBEBC6500E89FD1 /* MockCallKitPushNotificationAdapter.swift in Sources */,
-				40986C3E2CD1148F00510F88 /* AudioSession_Tests.swift in Sources */,
 				403FB1512BFE1AA90047A696 /* CallStateMachine_Tests.swift in Sources */,
 				406B3C532C92007900FC93A1 /* WebRTCCoordinatorStateMachine_ConnectedStageTests.swift in Sources */,
 				40B48C172D14C97F002C4EAB /* CGSize_DefaultValuesTests.swift in Sources */,
