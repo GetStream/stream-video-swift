@@ -554,7 +554,7 @@ extension AppEnvironment {
 extension AppEnvironment {
 
     enum AudioSessionPolicyDebugConfiguration: Hashable, Debuggable, Sendable {
-        case `default`, ownCapabilities
+        case `default`, ownCapabilities, livestream
 
         var title: String {
             switch self {
@@ -562,6 +562,8 @@ extension AppEnvironment {
                 return "Default"
             case .ownCapabilities:
                 return "OwnCapabilities"
+            case .livestream:
+                return "Livestream"
             }
         }
 
@@ -571,12 +573,14 @@ extension AppEnvironment {
                 return DefaultAudioSessionPolicy()
             case .ownCapabilities:
                 return OwnCapabilitiesAudioSessionPolicy()
+            case .livestream:
+                return LivestreamAudioSessionPolicy()
             }
         }
     }
 
     static var audioSessionPolicy: AudioSessionPolicyDebugConfiguration = {
-        .default
+        .livestream
     }()
 }
 
@@ -616,7 +620,7 @@ extension AppEnvironment {
     }
 
     static var proximityPolicies: Set<ProximityPolicyDebugConfiguration> = {
-        [.speaker, .video]
+        [.video, .speaker]
     }()
 }
 
@@ -630,6 +634,19 @@ extension ClientCapability: Debuggable {
         switch self {
         case .subscriberVideoPause:
             "Subscriber video pause"
+        }
+    }
+}
+
+extension Logger.WebRTC.LogMode: Debuggable {
+    var title: String {
+        switch self {
+        case .none:
+            return "None"
+        case .validFilesOnly:
+            return "Valid Files only"
+        case .all:
+            return "All"
         }
     }
 }

@@ -13,9 +13,27 @@ extension RTCAudioStore {
     /// via middleware responsible for requesting permissions.
     public enum StoreAction: Sendable, Equatable, StoreActionBoxProtocol, CustomStringConvertible {
 
+        enum StereoAction: Equatable, Sendable, CustomStringConvertible {
+            case setPlayoutPreferred(Bool)
+            case setPlayoutEnabled(Bool)
+
+            var description: String {
+                switch self {
+                case .setPlayoutPreferred(let value):
+                    return ".setPlayoutPreferred(\(value))"
+                    
+                case .setPlayoutEnabled(let value):
+                    return ".setPlayoutEnabled(\(value))"
+                }
+            }
+        }
+
         enum AVAudioSessionAction: Equatable, Sendable, CustomStringConvertible {
+            case systemSetCategory(AVAudioSession.Category)
             case setCategory(AVAudioSession.Category)
+            case systemSetMode(AVAudioSession.Mode)
             case setMode(AVAudioSession.Mode)
+            case systemSetCategoryOptions(AVAudioSession.CategoryOptions)
             case setCategoryOptions(AVAudioSession.CategoryOptions)
 
             case setCategoryAndMode(AVAudioSession.Category, mode: AVAudioSession.Mode)
@@ -36,11 +54,20 @@ extension RTCAudioStore {
 
             var description: String {
                 switch self {
+                case .systemSetCategory(let category):
+                    return ".systemSetCategory(\(category))"
+
                 case .setCategory(let category):
                     return ".setCategory(\(category))"
 
+                case .systemSetMode(let mode):
+                    return ".systemSetMode(\(mode))"
+
                 case .setMode(let mode):
                     return ".setMode(\(mode))"
+
+                case .systemSetCategoryOptions(let categoryOptions):
+                    return ".systemSetCategoryOptions(\(categoryOptions))"
 
                 case .setCategoryOptions(let categoryOptions):
                     return ".setCategoryOptions(\(categoryOptions))"
@@ -99,7 +126,6 @@ extension RTCAudioStore {
 
         case setActive(Bool)
         case setInterrupted(Bool)
-        case setShouldRecord(Bool)
         case setRecording(Bool)
         case setMicrophoneMuted(Bool)
         case setHasRecordingPermission(Bool)
@@ -109,6 +135,7 @@ extension RTCAudioStore {
 
         case avAudioSession(AVAudioSessionAction)
         case webRTCAudioSession(WebRTCAudioSessionAction)
+        case stereo(StereoAction)
         case callKit(CallKitAction)
 
         var description: String {
@@ -118,9 +145,6 @@ extension RTCAudioStore {
 
             case .setInterrupted(let value):
                 return ".setInterrupted(\(value))"
-
-            case .setShouldRecord(let value):
-                return ".setShouldRecord(\(value))"
 
             case .setRecording(let value):
                 return ".setRecording(\(value))"
@@ -142,6 +166,9 @@ extension RTCAudioStore {
 
             case .webRTCAudioSession(let value):
                 return ".webRTCAudioSession(\(value))"
+
+            case .stereo(let value):
+                return ".stereo(\(value))"
 
             case .callKit(let value):
                 return ".callKit(\(value))"

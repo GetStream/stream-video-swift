@@ -33,6 +33,8 @@ extension StreamCallAudioRecorder.Namespace {
 
             // Monitor for category changes that are incompatible with recording
             cancellable = audioStore
+                // Observe the derived configuration so system-driven category
+                // changes also stop the local recorder.
                 .publisher(\.audioSessionConfiguration.category)
                 .filter { $0 != .playAndRecord && $0 != .record }
                 .sink { [weak self] _ in

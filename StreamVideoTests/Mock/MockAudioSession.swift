@@ -21,6 +21,7 @@ final class MockAudioSession: AudioSessionProtocol, Mockable, @unchecked Sendabl
         case setActive
         case overrideOutputAudioPort
         case setConfiguration
+        case setPreferredOutputNumberOfChannels
     }
 
     enum MockFunctionInputKey: Payloadable {
@@ -33,6 +34,7 @@ final class MockAudioSession: AudioSessionProtocol, Mockable, @unchecked Sendabl
         case setActive(Bool)
         case overrideOutputAudioPort(AVAudioSession.PortOverride)
         case setConfiguration(RTCAudioSessionConfiguration)
+        case setPreferredOutputNumberOfChannels(Int)
 
         var payload: Any {
             switch self {
@@ -62,6 +64,9 @@ final class MockAudioSession: AudioSessionProtocol, Mockable, @unchecked Sendabl
 
             case let .setConfiguration(configuration):
                 return configuration
+
+            case let .setPreferredOutputNumberOfChannels(value):
+                return value
             }
         }
     }
@@ -182,5 +187,14 @@ final class MockAudioSession: AudioSessionProtocol, Mockable, @unchecked Sendabl
         category = configuration.category
         mode = configuration.mode
         categoryOptions = configuration.categoryOptions
+    }
+
+    func setPreferredOutputNumberOfChannels(_ noOfChannels: Int) throws {
+        stubbedFunctionInput[.setPreferredOutputNumberOfChannels]?
+            .append(.setPreferredOutputNumberOfChannels(noOfChannels))
+
+        if let error = stubbedFunction[.setPreferredOutputNumberOfChannels] as? Error {
+            throw error
+        }
     }
 }

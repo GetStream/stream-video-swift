@@ -231,7 +231,7 @@ struct DebugMenu: View {
             }
 
             makeMenu(
-                for: [.default, .ownCapabilities],
+                for: [.default, .ownCapabilities, .livestream],
                 currentValue: audioSessionPolicy,
                 label: "AudioSession policy"
             ) { self.audioSessionPolicy = $0 }
@@ -302,10 +302,10 @@ struct DebugMenu: View {
             ) { LogConfig.level = $0 }
 
             makeMenu(
-                for: [true, false],
-                currentValue: LogConfig.webRTCLogsEnabled,
+                for: [.none, .validFilesOnly, .all],
+                currentValue: Logger.WebRTC.mode,
                 label: "WebRTC Logs"
-            ) { LogConfig.webRTCLogsEnabled = $0 }
+            ) { Logger.WebRTC.mode = $0 }
 
             Button {
                 isLogsViewerVisible = true

@@ -138,11 +138,11 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
                 }
 
                 var updatedCallSettings = callSettings
-                if callSettings.audioOn, !permissions.hasMicrophonePermission {
+                if callSettings.audioOn, permissions.state.microphonePermission != .granted {
                     updatedCallSettings = updatedCallSettings.withUpdatedAudioState(false)
                 }
 
-                if callSettings.videoOn, !permissions.hasCameraPermission {
+                if callSettings.videoOn, permissions.state.cameraPermission != .granted {
                     updatedCallSettings = updatedCallSettings.withUpdatedVideoState(false)
                 }
 

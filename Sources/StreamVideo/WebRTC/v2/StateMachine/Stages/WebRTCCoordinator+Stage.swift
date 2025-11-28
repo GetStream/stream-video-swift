@@ -9,7 +9,7 @@ extension WebRTCCoordinator.StateMachine {
     class Stage: StreamStateMachineStage, @unchecked Sendable {
 
         /// Context holding the state and dependencies for the stage.
-        struct Context {
+        struct Context: @unchecked Sendable {
             weak var coordinator: WebRTCCoordinator?
             var authenticator: WebRTCAuthenticating = WebRTCAuthenticator()
             var sfuEventObserver: SFUEventAdapter?

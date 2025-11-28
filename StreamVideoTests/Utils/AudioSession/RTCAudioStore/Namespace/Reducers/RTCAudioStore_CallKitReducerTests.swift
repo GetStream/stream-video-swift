@@ -109,14 +109,14 @@ final class RTCAudioStore_CallKitReducerTests: XCTestCase, @unchecked Sendable {
         .init(
             isActive: isActive,
             isInterrupted: isInterrupted,
-            shouldRecord: shouldRecord,
             isRecording: isRecording,
             isMicrophoneMuted: isMicrophoneMuted,
             hasRecordingPermission: hasRecordingPermission,
             audioDeviceModule: audioDeviceModule,
             currentRoute: currentRoute,
             audioSessionConfiguration: audioSessionConfiguration,
-            webRTCAudioSessionConfiguration: webRTCAudioSessionConfiguration
+            webRTCAudioSessionConfiguration: webRTCAudioSessionConfiguration,
+            stereoConfiguration: .init(playout: .init(preferred: false, enabled: false))
         )
     }
 }

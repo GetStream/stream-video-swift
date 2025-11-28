@@ -52,12 +52,18 @@ class StoreLogger<Namespace: StoreNamespace> {
     /// throughput.
     let statistics: StoreStatistics<Namespace> = .init()
 
+    let logSkipped: Bool
+
     /// Initializes a new store logger.
     ///
     /// - Parameter logSubsystem: The subsystem for categorizing logs.
     ///   Defaults to `.other`.
-    init(logSubsystem: LogSubsystem = .other) {
+    init(
+        logSubsystem: LogSubsystem = .other,
+        logSkipped: Bool = true
+    ) {
         self.logSubsystem = logSubsystem
+        self.logSkipped = logSkipped
 
         #if DEBUG
         statistics.enable(interval: 60) {
@@ -119,6 +125,9 @@ class StoreLogger<Namespace: StoreNamespace> {
         line: UInt
     ) {
         defer { statistics.record(action) }
+
+        guard logSkipped else { return }
+
         log.debug(
             "Store identifier:\(identifier) skipped action:\(action).",
             subsystems: logSubsystem,

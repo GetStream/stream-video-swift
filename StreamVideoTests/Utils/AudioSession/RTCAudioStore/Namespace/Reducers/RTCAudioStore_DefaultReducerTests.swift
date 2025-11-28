@@ -95,12 +95,31 @@ final class RTCAudioStore_DefaultReducerTests: XCTestCase, @unchecked Sendable {
         }
     }
 
+    func test_reduce_setActive_updatesAudioDeviceModulePlayout() async throws {
+        session.isActive = false
+        let (audioDeviceModule, mockModule) = makeAudioDeviceModule()
+        mockModule.stub(for: \.isPlayoutInitialized, with: false)
+        let state = makeState(
+            isActive: false,
+            audioDeviceModule: audioDeviceModule
+        )
+
+        _ = try await subject.reduce(
+            state: state,
+            action: .setActive(true),
+            file: #file,
+            function: #function,
+            line: #line
+        )
+
+        XCTAssertEqual(mockModule.timesCalled(.initAndStartPlayout), 1)
+    }
+
     // MARK: - setAudioDeviceModule
 
     func test_reduce_setAudioDeviceModule_nil_resetsRecordingFlags() async throws {
         let module = AudioDeviceModule(MockRTCAudioDeviceModule())
         let state = makeState(
-            shouldRecord: true,
             isRecording: true,
             isMicrophoneMuted: true,
             audioDeviceModule: module
@@ -115,16 +134,14 @@ final class RTCAudioStore_DefaultReducerTests: XCTestCase, @unchecked Sendable {
         )
 
         XCTAssertNil(result.audioDeviceModule)
-        XCTAssertFalse(result.shouldRecord)
         XCTAssertFalse(result.isRecording)
-        XCTAssertFalse(result.isMicrophoneMuted)
+        XCTAssertTrue(result.isMicrophoneMuted)
     }
 
     func test_reduce_setAudioDeviceModule_nonNil_preservesRecordingFlags() async throws {
         let currentModule = AudioDeviceModule(MockRTCAudioDeviceModule())
         let replacement = AudioDeviceModule(MockRTCAudioDeviceModule())
         let state = makeState(
-            shouldRecord: true,
             isRecording: true,
             isMicrophoneMuted: true,
             audioDeviceModule: currentModule
@@ -139,9 +156,30 @@ final class RTCAudioStore_DefaultReducerTests: XCTestCase, @unchecked Sendable {
         )
 
         XCTAssertTrue(result.audioDeviceModule === replacement)
-        XCTAssertTrue(result.shouldRecord)
         XCTAssertTrue(result.isRecording)
         XCTAssertTrue(result.isMicrophoneMuted)
+    }
+
+    func test_reduce_setAudioDeviceModule_nil_resetsStereoConfiguration() async throws {
+        let module = AudioDeviceModule(MockRTCAudioDeviceModule())
+        let stereoConfiguration = RTCAudioStore.StoreState.StereoConfiguration(
+            playout: .init(preferred: true, enabled: true)
+        )
+        let state = makeState(
+            audioDeviceModule: module,
+            stereoConfiguration: stereoConfiguration
+        )
+
+        let result = try await subject.reduce(
+            state: state,
+            action: .setAudioDeviceModule(nil),
+            file: #file,
+            function: #function,
+            line: #line
+        )
+
+        XCTAssertFalse(result.stereoConfiguration.playout.preferred)
+        XCTAssertFalse(result.stereoConfiguration.playout.enabled)
     }
 
     // MARK: - Passthrough actions
@@ -165,7 +203,6 @@ final class RTCAudioStore_DefaultReducerTests: XCTestCase, @unchecked Sendable {
     private func makeState(
         isActive: Bool = false,
         isInterrupted: Bool = false,
-        shouldRecord: Bool = false,
         isRecording: Bool = false,
         isMicrophoneMuted: Bool = false,
         hasRecordingPermission: Bool = false,
@@ -181,19 +218,31 @@ final class RTCAudioStore_DefaultReducerTests: XCTestCase, @unchecked Sendable {
             isAudioEnabled: false,
             useManualAudio: false,
             prefersNoInterruptionsFromSystemAlerts: false
+        ),
+        stereoConfiguration: RTCAudioStore.StoreState.StereoConfiguration = .init(
+            playout: .init(
+                preferred: false,
+                enabled: false
+            )
         )
     ) -> RTCAudioStore.StoreState {
         .init(
             isActive: isActive,
             isInterrupted: isInterrupted,
-            shouldRecord: shouldRecord,
             isRecording: isRecording,
             isMicrophoneMuted: isMicrophoneMuted,
             hasRecordingPermission: hasRecordingPermission,
             audioDeviceModule: audioDeviceModule,
             currentRoute: currentRoute,
             audioSessionConfiguration: audioSessionConfiguration,
-            webRTCAudioSessionConfiguration: webRTCAudioSessionConfiguration
+            webRTCAudioSessionConfiguration: webRTCAudioSessionConfiguration,
+            stereoConfiguration: stereoConfiguration
         )
+    }
+
+    private func makeAudioDeviceModule() -> (AudioDeviceModule, MockRTCAudioDeviceModule) {
+        let mock = MockRTCAudioDeviceModule()
+        let module = AudioDeviceModule(mock)
+        return (module, mock)
     }
 }

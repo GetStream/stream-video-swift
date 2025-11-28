@@ -106,16 +106,16 @@ final class RTCAudioStore_AVAudioSessionReducerTests: XCTestCase, @unchecked Sen
         let state = makeState(
             category: .playAndRecord,
             mode: .voiceChat,
-            options: [.allowBluetooth]
+            options: [.allowBluetoothHFP]
         )
         session.category = AVAudioSession.Category.playAndRecord.rawValue
         session.mode = AVAudioSession.Mode.voiceChat.rawValue
-        session.categoryOptions = [.allowBluetooth]
+        session.categoryOptions = [.allowBluetoothHFP]
         session.isActive = true
 
         let result = try await subject.reduce(
             state: state,
-            action: .avAudioSession(.setCategoryOptions([.allowBluetooth, .defaultToSpeaker])),
+            action: .avAudioSession(.setCategoryOptions([.allowBluetoothHFP, .defaultToSpeaker])),
             file: #file,
             function: #function,
             line: #line
@@ -193,12 +193,58 @@ final class RTCAudioStore_AVAudioSessionReducerTests: XCTestCase, @unchecked Sen
         XCTAssertEqual(session.timesCalled(.setConfiguration), 1)
     }
 
+    func test_reduce_systemSetCategory_updatesStateWithoutCallingSession() async throws {
+        let state = makeState(
+            category: .playback,
+            mode: .default,
+            options: []
+        )
+
+        let result = try await subject.reduce(
+            state: state,
+            action: .avAudioSession(.systemSetCategory(.playAndRecord)),
+            file: #file,
+            function: #function,
+            line: #line
+        )
+
+        XCTAssertEqual(result.audioSessionConfiguration.category, .playAndRecord)
+        XCTAssertEqual(session.timesCalled(.setConfiguration), 0)
+    }
+
+    func test_reduce_setCurrentRoute_updatesOverridePort() async throws {
+        let state = makeState(overrideOutput: .none)
+        let speakerRoute = RTCAudioStore.StoreState.AudioRoute(
+            inputs: [],
+            outputs: [
+                .init(
+                    type: .unique,
+                    name: .unique,
+                    id: .unique,
+                    isExternal: false,
+                    isSpeaker: true,
+                    isReceiver: false,
+                    channels: 2
+                )
+            ]
+        )
+
+        let result = try await subject.reduce(
+            state: state,
+            action: .setCurrentRoute(speakerRoute),
+            file: #file,
+            function: #function,
+            line: #line
+        )
+
+        XCTAssertEqual(result.audioSessionConfiguration.overrideOutputAudioPort, .speaker)
+    }
+
     // MARK: - Helpers
 
     private func makeState(
         isActive: Bool = false,
         isInterrupted: Bool = false,
-        shouldRecord: Bool = false,
         isRecording: Bool = false,
         isMicrophoneMuted: Bool = false,
         hasRecordingPermission: Bool = false,
@@ -217,7 +263,6 @@ final class RTCAudioStore_AVAudioSessionReducerTests: XCTestCase, @unchecked Sen
         .init(
             isActive: isActive,
             isInterrupted: isInterrupted,
-            shouldRecord: shouldRecord,
             isRecording: isRecording,
             isMicrophoneMuted: isMicrophoneMuted,
             hasRecordingPermission: hasRecordingPermission,
@@ -229,7 +274,8 @@ final class RTCAudioStore_AVAudioSessionReducerTests: XCTestCase, @unchecked Sen
                 options: options,
                 overrideOutputAudioPort: overrideOutput
             ),
-            webRTCAudioSessionConfiguration: webRTCAudioSessionConfiguration
+            webRTCAudioSessionConfiguration: webRTCAudioSessionConfiguration,
+            stereoConfiguration: .init(playout: .init(preferred: false, enabled: false))
         )
     }
 }

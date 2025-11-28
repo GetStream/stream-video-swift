@@ -118,13 +118,49 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         videoCaptureSessionProvider: VideoCaptureSessionProvider = .init(),
         screenShareSessionProvider: ScreenShareSessionProvider = .init()
     ) {
+        self.init(
+            user: user,
+            apiKey: apiKey,
+            callCid: callCid,
+            videoConfig: videoConfig,
+            peerConnectionFactory: PeerConnectionFactory.build(
+                audioProcessingModule: videoConfig.audioProcessingModule
+            ),
+            rtcPeerConnectionCoordinatorFactory: rtcPeerConnectionCoordinatorFactory,
+            videoCaptureSessionProvider: videoCaptureSessionProvider,
+            screenShareSessionProvider: screenShareSessionProvider
+        )
+    }
+
+    /// Initializes the WebRTC state adapter with user details and connection
+    /// configurations.
+    ///
+    /// - Parameters:
+    ///   - user: The user participating in the call.
+    ///   - apiKey: The API key for authenticating WebRTC calls.
+    ///   - callCid: The call identifier (callCid).
+    ///   - videoConfig: Configuration for video settings.
+    ///   - peerConnectionFactory: The factory to use when constructing peerConnection and for the
+    ///   audioSession..
+    ///   - rtcPeerConnectionCoordinatorFactory: Factory for peer connection
+    ///     creation.
+    ///   - videoCaptureSessionProvider: Provides sessions for video capturing.
+    ///   - screenShareSessionProvider: Provides sessions for screen sharing.
+    init(
+        user: User,
+        apiKey: String,
+        callCid: String,
+        videoConfig: VideoConfig,
+        peerConnectionFactory: PeerConnectionFactory,
+        rtcPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinatorProviding,
+        videoCaptureSessionProvider: VideoCaptureSessionProvider = .init(),
+        screenShareSessionProvider: ScreenShareSessionProvider = .init()
+    ) {
         self.user = user
         self.apiKey = apiKey
         self.callCid = callCid
         self.videoConfig = videoConfig
-        let peerConnectionFactory = PeerConnectionFactory.build(
-            audioProcessingModule: videoConfig.audioProcessingModule
-        )
+        let peerConnectionFactory = peerConnectionFactory
         self.peerConnectionFactory = peerConnectionFactory
         self.rtcPeerConnectionCoordinatorFactory = rtcPeerConnectionCoordinatorFactory
         self.videoCaptureSessionProvider = videoCaptureSessionProvider
@@ -681,10 +717,9 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
 
     func configureAudioSession(source: JoinSource?) async throws {
         try await audioStore.dispatch([
-            .setRecording(peerConnectionFactory.audioDeviceModule.isRecording),
-            .setMicrophoneMuted(peerConnectionFactory.audioDeviceModule.isMicrophoneMuted),
             .setAudioDeviceModule(peerConnectionFactory.audioDeviceModule)
         ]).result()
+        
         audioSession.activate(
             callSettingsPublisher: $callSettings.removeDuplicates().eraseToAnyPublisher(),
             ownCapabilitiesPublisher: $ownCapabilities.removeDuplicates().eraseToAnyPublisher(),

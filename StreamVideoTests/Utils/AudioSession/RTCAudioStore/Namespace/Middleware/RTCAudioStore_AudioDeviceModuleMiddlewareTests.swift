@@ -23,11 +23,12 @@ final class RTCAudioStore_AudioDeviceModuleMiddlewareTests: XCTestCase, @uncheck
         super.tearDown()
     }
 
-    func test_setInterrupted_whenActiveAndShouldRecordTrue_stopsRecording() {
+    // MARK: - setInterrupted
+
+    func test_setInterrupted_whenActiveAndRecordingTrue_nothingHappens() {
         let (module, mock) = makeModule(isRecording: true)
         let state = makeState(
             isActive: true,
-            shouldRecord: true,
             isRecording: true,
             audioDeviceModule: module
         )
@@ -40,7 +41,7 @@ final class RTCAudioStore_AudioDeviceModuleMiddlewareTests: XCTestCase, @uncheck
             line: #line
         )
 
-        XCTAssertEqual(mock.timesCalled(.stopRecording), 1)
+        XCTAssertEqual(mock.timesCalled(.stopRecording), 0)
         XCTAssertEqual(mock.timesCalled(.initAndStartRecording), 0)
     }
 
@@ -48,7 +49,6 @@ final class RTCAudioStore_AudioDeviceModuleMiddlewareTests: XCTestCase, @uncheck
         let (module, mock) = makeModule(isRecording: true)
         let state = makeState(
             isActive: true,
-            shouldRecord: true,
             isRecording: true,
             audioDeviceModule: module
         )
@@ -65,17 +65,18 @@ final class RTCAudioStore_AudioDeviceModuleMiddlewareTests: XCTestCase, @uncheck
         XCTAssertEqual(mock.timesCalled(.initAndStartRecording), 1)
     }
 
-    func test_setShouldRecord_whenEnabled_startsRecording() {
+    // MARK: - setRecording
+
+    func test_setRecording_whenEnabled_startsRecording() {
         let (module, mock) = makeModule(isRecording: false)
         let state = makeState(
-            shouldRecord: false,
             isRecording: false,
             audioDeviceModule: module
         )
 
         subject.apply(
             state: state,
-            action: .setShouldRecord(true),
+            action: .setRecording(true),
             file: #file,
             function: #function,
             line: #line
@@ -84,17 +85,16 @@ final class RTCAudioStore_AudioDeviceModuleMiddlewareTests: XCTestCase, @uncheck
         XCTAssertEqual(mock.timesCalled(.initAndStartRecording), 1)
     }
 
-    func test_setShouldRecord_whenDisabled_stopsRecording() {
+    func test_setRecording_whenDisabled_stopsRecording() {
         let (module, mock) = makeModule(isRecording: true)
         let state = makeState(
-            shouldRecord: true,
             isRecording: true,
             audioDeviceModule: module
         )
 
         subject.apply(
             state: state,
-            action: .setShouldRecord(false),
+            action: .setRecording(false),
             file: #file,
             function: #function,
             line: #line
@@ -103,15 +103,37 @@ final class RTCAudioStore_AudioDeviceModuleMiddlewareTests: XCTestCase, @uncheck
         XCTAssertEqual(mock.timesCalled(.stopRecording), 1)
     }
 
-    func test_setMicrophoneMuted_whenShouldRecordTrue_updatesModule() {
+    // MARK: - setMicrophoneMuted
+
+    func test_setMicrophoneMuted_whenRecordingTrue_updatesModule() {
         let (module, mock) = makeModule(
             isRecording: true,
             isMicrophoneMuted: false
         )
         let state = makeState(
-            shouldRecord: true,
             isRecording: true,
             isMicrophoneMuted: false,
+            audioDeviceModule: module
+        )
+
+        subject.apply(
+            state: state,
+            action: .setMicrophoneMuted(true),
+            file: #file,
+            function: #function,
+            line: #line
+        )
+
+        XCTAssertEqual(mock.timesCalled(.initAndStartRecording), 0)
+        XCTAssertEqual(mock.timesCalled(.setMicrophoneMuted), 1)
+    }
+
+    func test_setMicrophoneMuted_whenRecordingFalse_updatesModule() {
+        let (module, mock) = makeModule(
+            isRecording: false,
+            isMicrophoneMuted: false
+        )
+        let state = makeState(
             audioDeviceModule: module
         )
 
@@ -126,48 +148,72 @@ final class RTCAudioStore_AudioDeviceModuleMiddlewareTests: XCTestCase, @uncheck
         XCTAssertEqual(mock.timesCalled(.setMicrophoneMuted), 1)
     }
 
-    func test_setMicrophoneMuted_whenShouldRecordFalse_noInteraction() {
+    func test_setMicrophoneUnMuted_whenRecordingTrue_updatesModule() {
         let (module, mock) = makeModule(
-            isRecording: false,
-            isMicrophoneMuted: false
+            isRecording: true,
+            isMicrophoneMuted: true
         )
         let state = makeState(
-            shouldRecord: false,
+            isRecording: true,
+            isMicrophoneMuted: true,
             audioDeviceModule: module
         )
 
         subject.apply(
             state: state,
-            action: .setMicrophoneMuted(true),
+            action: .setMicrophoneMuted(false),
             file: #file,
             function: #function,
             line: #line
         )
 
-        XCTAssertEqual(mock.timesCalled(.setMicrophoneMuted), 0)
+        XCTAssertEqual(mock.timesCalled(.initAndStartRecording), 0)
+        XCTAssertEqual(mock.timesCalled(.setMicrophoneMuted), 1)
     }
 
-    func test_setAudioDeviceModule_replacesModuleAndDispatchesPublishers() throws {
-        let (currentModule, currentMock) = makeModule(isRecording: true)
-        let (replacementModule, _) = makeModule(isRecording: false)
+    func test_setMicrophoneUnMuted_whenRecordingFalse_updatesModule() {
+        let (module, mock) = makeModule(
+            isRecording: false,
+            isMicrophoneMuted: true
+        )
+        let state = makeState(
+            isRecording: false,
+            isMicrophoneMuted: true,
+            audioDeviceModule: module
+        )
 
-        let dispatchExpectation = expectation(description: "Dispatched expected actions")
-        dispatchExpectation.expectedFulfillmentCount = 2
+        subject.apply(
+            state: state,
+            action: .setMicrophoneMuted(false),
+            file: #file,
+            function: #function,
+            line: #line
+        )
 
+        XCTAssertEqual(mock.timesCalled(.initAndStartRecording), 1)
+        XCTAssertEqual(mock.timesCalled(.setMicrophoneMuted), 1)
+    }
+
+    // MARK: - setAudioDeviceModule
+
+    func test_setAudioDeviceModule_updatesModule() throws {
+        let (currentModule, currentMock) = makeModule(
+            isRecording: true,
+            isMicrophoneMuted: false
+        )
+
+        let setRecordingExpectation = expectation(description: "setRecording called from AudioDeviceModule value.")
+        let setMicrophoneMutedExpectation = expectation(description: "setMicrophoneMuted called from AudioDeviceModule value.")
         subject.dispatcher = .init { actions, _, _, _ in
             actions
                 .map(\.wrappedValue)
                 .forEach { action in
                     switch action {
                     case .setRecording(true):
-                        guard self.recordedSetRecording == false else { return }
-                        self.recordedSetRecording = true
-                        dispatchExpectation.fulfill()
+                        setRecordingExpectation.fulfill()
 
-                    case .setMicrophoneMuted(true):
-                        guard self.recordedSetMicrophoneMuted == false else { return }
-                        self.recordedSetMicrophoneMuted = true
-                        dispatchExpectation.fulfill()
+                    case .setMicrophoneMuted(false):
+                        setMicrophoneMutedExpectation.fulfill()
 
                     default:
                         break
@@ -175,8 +221,26 @@ final class RTCAudioStore_AudioDeviceModuleMiddlewareTests: XCTestCase, @uncheck
                 }
         }
 
+        subject.apply(
+            state: makeState(),
+            action: .setAudioDeviceModule(currentModule),
+            file: #file,
+            function: #function,
+            line: #line
+        )
+
+        XCTAssertEqual(currentMock.timesCalled(.reset), 0)
+        XCTAssertEqual(currentMock.timesCalled(.setMuteMode), 1)
+        XCTAssertEqual(currentMock.timesCalled(.setRecordingAlwaysPreparedMode), 1)
+
+        wait(for: [setRecordingExpectation, setMicrophoneMutedExpectation], timeout: 1)
+    }
+
+    func test_setAudioDeviceModule_replacesModuleAndDispatchesPublishers() throws {
+        let (currentModule, currentMock) = makeModule(isRecording: true)
+        let (replacementModule, replacementMock) = makeModule(isRecording: false)
+
         let state = makeState(
-            shouldRecord: true,
             isRecording: true,
             isMicrophoneMuted: false,
             audioDeviceModule: currentModule
@@ -190,35 +254,94 @@ final class RTCAudioStore_AudioDeviceModuleMiddlewareTests: XCTestCase, @uncheck
             line: #line
         )
 
-        XCTAssertEqual(currentMock.timesCalled(.stopRecording), 1)
+        XCTAssertEqual(currentMock.timesCalled(.reset), 1)
+        XCTAssertEqual(replacementMock.timesCalled(.reset), 0)
+        XCTAssertEqual(replacementMock.timesCalled(.setMuteMode), 1)
+        XCTAssertEqual(replacementMock.timesCalled(.setRecordingAlwaysPreparedMode), 1)
+    }
 
-        // Trigger publisher output.
-        let engine = AVAudioEngine()
-        _ = replacementModule.audioDeviceModule(
-            .init(),
-            willEnableEngine: engine,
-            isPlayoutEnabled: false,
-            isRecordingEnabled: true
+    // MARK: - setPlayoutPreferred
+
+    func test_setPlayoutPreferred_updatesModule() throws {
+        let (module, mock) = makeModule(isRecording: false)
+
+        subject.apply(
+            state: makeState(audioDeviceModule: module),
+            action: .stereo(.setPlayoutPreferred(true)),
+            file: #file,
+            function: #function,
+            line: #line
         )
 
-        try replacementModule.setMuted(true)
+        XCTAssertTrue(mock.prefersStereoPlayout)
+    }
 
-        wait(for: [dispatchExpectation], timeout: 1)
+    func test_setPlayoutPreferred_false_updatesModule() throws {
+        let (module, mock) = makeModule(isRecording: false)
+
+        subject.apply(
+            state: makeState(audioDeviceModule: module),
+            action: .stereo(.setPlayoutPreferred(false)),
+            file: #file,
+            function: #function,
+            line: #line
+        )
+
+        XCTAssertFalse(mock.prefersStereoPlayout)
+    }
+
+    // MARK: - setAudioEnabled
+
+    func test_setAudioEnabled_whenEnabled_updatesModule() throws {
+        let (module, mock) = makeModule(isRecording: false)
+        let state = makeState(
+            isRecording: false,
+            audioDeviceModule: module
+        )
+
+        subject.apply(
+            state: state,
+            action: .webRTCAudioSession(.setAudioEnabled(true)),
+            file: #file,
+            function: #function,
+            line: #line
+        )
+
+        XCTAssertEqual(mock.timesCalled(.initAndStartPlayout), 1)
+    }
+
+    func test_setAudioEnabled_whenDisabled_updatesModule() throws {
+        let (module, mock) = makeModule(isRecording: false, isPlaying: true)
+        let state = makeState(
+            isRecording: false,
+            audioDeviceModule: module
+        )
+
+        subject.apply(
+            state: state,
+            action: .webRTCAudioSession(.setAudioEnabled(false)),
+            file: #file,
+            function: #function,
+            line: #line
+        )
+
+        XCTAssertEqual(mock.timesCalled(.stopPlayout), 1)
     }
 
     // MARK: - Helpers
 
     private func makeModule(
         isRecording: Bool,
-        isMicrophoneMuted: Bool = false
+        isMicrophoneMuted: Bool = false,
+        isPlaying: Bool = false
     ) -> (AudioDeviceModule, MockRTCAudioDeviceModule) {
         let source = MockRTCAudioDeviceModule()
-        source.microphoneMutedSubject.send(isMicrophoneMuted)
+        source.stub(for: \.isRecording, with: isRecording)
+        source.stub(for: \.isPlaying, with: isPlaying)
+        source.stub(for: \.isMicrophoneMuted, with: isMicrophoneMuted)
 
         let module = AudioDeviceModule(
-            source,
-            isRecording: isRecording,
-            isMicrophoneMuted: isMicrophoneMuted
+            source
         )
         return (module, source)
     }
@@ -226,7 +349,6 @@ final class RTCAudioStore_AudioDeviceModuleMiddlewareTests: XCTestCase, @uncheck
     private func makeState(
         isActive: Bool = false,
         isInterrupted: Bool = false,
-        shouldRecord: Bool = false,
         isRecording: Bool = false,
         isMicrophoneMuted: Bool = false,
         hasRecordingPermission: Bool = false,
@@ -247,14 +369,14 @@ final class RTCAudioStore_AudioDeviceModuleMiddlewareTests: XCTestCase, @uncheck
         .init(
             isActive: isActive,
             isInterrupted: isInterrupted,
-            shouldRecord: shouldRecord,
             isRecording: isRecording,
             isMicrophoneMuted: isMicrophoneMuted,
             hasRecordingPermission: hasRecordingPermission,
             audioDeviceModule: audioDeviceModule,
             currentRoute: currentRoute,
             audioSessionConfiguration: audioSessionConfiguration,
-            webRTCAudioSessionConfiguration: webRTCAudioSessionConfiguration
+            webRTCAudioSessionConfiguration: webRTCAudioSessionConfiguration,
+            stereoConfiguration: .init(playout: .init(preferred: false, enabled: false))
         )
     }
 }

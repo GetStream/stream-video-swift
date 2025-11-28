@@ -145,7 +145,6 @@ final class RTCAudioStore_WebRTCAudioSessionReducerTests: XCTestCase, @unchecked
     private func makeState(
         isActive: Bool = false,
         isInterrupted: Bool = false,
-        shouldRecord: Bool = false,
         isRecording: Bool = false,
         isMicrophoneMuted: Bool = false,
         hasRecordingPermission: Bool = false,
@@ -166,14 +165,14 @@ final class RTCAudioStore_WebRTCAudioSessionReducerTests: XCTestCase, @unchecked
         .init(
             isActive: isActive,
             isInterrupted: isInterrupted,
-            shouldRecord: shouldRecord,
             isRecording: isRecording,
             isMicrophoneMuted: isMicrophoneMuted,
             hasRecordingPermission: hasRecordingPermission,
             audioDeviceModule: audioDeviceModule,
             currentRoute: currentRoute,
             audioSessionConfiguration: audioSessionConfiguration,
-            webRTCAudioSessionConfiguration: webRTCAudioSessionConfiguration
+            webRTCAudioSessionConfiguration: webRTCAudioSessionConfiguration,
+            stereoConfiguration: .init(playout: .init(preferred: false, enabled: false))
         )
     }
 }

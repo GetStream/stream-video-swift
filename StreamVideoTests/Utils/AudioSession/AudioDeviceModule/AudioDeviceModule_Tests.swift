@@ -11,550 +11,382 @@ import XCTest
 
 final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
 
-    private lazy var source: MockRTCAudioDeviceModule! = .init()
-    private lazy var audioEngineNodeAdapter: MockAudioEngineNodeAdapter! = .init()
-    private lazy var subject: AudioDeviceModule! = .init(source, audioLevelsNodeAdapter: audioEngineNodeAdapter)
+    private var source: MockRTCAudioDeviceModule!
+    private var audioEngineNodeAdapter: MockAudioEngineNodeAdapter!
+    private var subject: AudioDeviceModule!
+    private var cancellables: Set<AnyCancellable>!
+
+    override func setUp() {
+        super.setUp()
+        source = .init()
+        audioEngineNodeAdapter = .init()
+        cancellables = []
+    }
 
     override func tearDown() {
+        cancellables = nil
         subject = nil
-        source = nil
         audioEngineNodeAdapter = nil
+        source = nil
         super.tearDown()
     }
 
-    // MARK: - init
+    // MARK: - setPlayout
 
-    func test_init_subscribesOnMicrophoneMutePublisher() {
-        _ = subject
+    func test_setPlayout_whenActivatingInitialized_callsStartPlayout() throws {
+        makeSubject()
+        source.stub(for: \.isPlayoutInitialized, with: true)
 
-        XCTAssertEqual(source.timesCalled(.microphoneMutedPublisher), 1)
+        try subject.setPlayout(true)
+
+        XCTAssertEqual(source.timesCalled(.startPlayout), 1)
+        XCTAssertEqual(source.timesCalled(.initAndStartPlayout), 0)
     }
 
-    // MARK: setRecording
+    func test_setPlayout_whenActivatingNotInitialized_callsInitAndStartPlayout() throws {
+        makeSubject()
+        source.stub(for: \.isPlayoutInitialized, with: false)
 
-    func test_setRecording_isEnabledTrueIsRecordingTrue_noAction() throws {
-        subject = .init(source, isRecording: true)
+        try subject.setPlayout(true)
+
+        XCTAssertEqual(source.timesCalled(.initAndStartPlayout), 1)
+        XCTAssertEqual(source.timesCalled(.startPlayout), 0)
+    }
+
+    func test_setPlayout_whenDeactivating_callsStopPlayout() throws {
+        source.stub(for: \.isPlaying, with: true)
+        makeSubject()
+
+        try subject.setPlayout(false)
+
+        XCTAssertEqual(source.timesCalled(.stopPlayout), 1)
+    }
+
+    func test_setPlayout_whenAlreadyPlaying_doesNothing() throws {
+        source.stub(for: \.isPlaying, with: true)
+        makeSubject()
+
+        try subject.setPlayout(true)
+
+        XCTAssertEqual(source.timesCalled(.startPlayout), 0)
+        XCTAssertEqual(source.timesCalled(.initAndStartPlayout), 0)
+    }
+
+    func test_setPlayout_whenOperationFails_throwsClientError() {
+        makeSubject()
+        source.stub(for: \.isPlayoutInitialized, with: true)
+        source.stub(for: .startPlayout, with: -1)
+
+        XCTAssertThrowsError(try subject.setPlayout(true)) { error in
+            XCTAssertTrue(error is ClientError)
+        }
+    }
+
+    // MARK: - setRecording
+
+    func test_setRecording_whenActivatingInitialized_callsStartRecording() throws {
+        makeSubject()
+        source.stub(for: \.isRecordingInitialized, with: true)
 
         try subject.setRecording(true)
 
+        XCTAssertEqual(source.timesCalled(.startRecording), 1)
         XCTAssertEqual(source.timesCalled(.initAndStartRecording), 0)
-        XCTAssertEqual(source.timesCalled(.setMicrophoneMuted), 0)
-        XCTAssertEqual(source.timesCalled(.stopRecording), 0)
     }
 
-    func test_setRecording_isEnabledTrueIsRecordingFalseIsMicrophoneMutedFalse_initAndStartRecording() throws {
-        subject = .init(source, isRecording: false)
+    func test_setRecording_whenActivatingNotInitialized_callsInitAndStartRecording() throws {
+        makeSubject()
+        source.stub(for: \.isRecordingInitialized, with: false)
 
         try subject.setRecording(true)
 
         XCTAssertEqual(source.timesCalled(.initAndStartRecording), 1)
-        XCTAssertEqual(source.timesCalled(.setMicrophoneMuted), 0)
-        XCTAssertEqual(source.timesCalled(.stopRecording), 0)
+        XCTAssertEqual(source.timesCalled(.startRecording), 0)
     }
 
-    func test_setRecording_isEnabledTrueIsRecordingFalseIsMicrophoneMutedTrue_initAndStartRecordingAndSetMicrophoneMuted() throws {
-        subject = .init(source, isRecording: false)
-        source.stub(for: \.isMicrophoneMuted, with: true)
-
-        try subject.setRecording(true)
-
-        XCTAssertEqual(source.timesCalled(.initAndStartRecording), 1)
-        XCTAssertEqual(source.timesCalled(.setMicrophoneMuted), 1)
-        XCTAssertEqual(source.timesCalled(.stopRecording), 0)
-    }
-
-    func test_setRecording_isEnabledFalseIsRecordingFalse_noAction() throws {
-        subject = .init(source, isRecording: false)
+    func test_setRecording_whenDeactivating_callsStopRecording() throws {
+        source.stub(for: \.isRecording, with: true)
+        makeSubject()
 
         try subject.setRecording(false)
 
+        XCTAssertEqual(source.timesCalled(.stopRecording), 1)
+    }
+
+    func test_setRecording_whenAlreadyRecording_doesNothing() throws {
+        source.stub(for: \.isRecording, with: true)
+        makeSubject()
+
+        try subject.setRecording(true)
+
+        XCTAssertEqual(source.timesCalled(.startRecording), 0)
         XCTAssertEqual(source.timesCalled(.initAndStartRecording), 0)
-        XCTAssertEqual(source.timesCalled(.setMicrophoneMuted), 0)
         XCTAssertEqual(source.timesCalled(.stopRecording), 0)
     }
 
     // MARK: - setMuted
 
-    func test_setMuted_isMutedTrueIsMicrophoneMutedTrue_noAction() throws {
-        source.microphoneMutedSubject.send(true)
-        subject = .init(source, isMicrophoneMuted: true)
+    func test_setMuted_whenStateUnchanged_doesNothing() throws {
+        source.stub(for: \.isMicrophoneMuted, with: true)
+        makeSubject()
 
         try subject.setMuted(true)
 
         XCTAssertEqual(source.timesCalled(.setMicrophoneMuted), 0)
     }
 
-    func test_setMuted_isMutedTrueIsMicrophoneMutedFalse_setMicrophoneMutedAndSubjectSend() async throws {
-        source.microphoneMutedSubject.send(false)
-        subject = .init(source, isMicrophoneMuted: false)
-
-        let sinkExpectation = expectation(description: "Sink was called.")
-        let cancellable = subject
-            .isMicrophoneMutedPublisher
-            .filter { $0 == true }
-            .sink { _ in sinkExpectation.fulfill() }
+    func test_setMuted_whenMuting_updatesStateAndPublisher() throws {
+        source.stub(for: \.isMicrophoneMuted, with: false)
+        makeSubject()
 
         try subject.setMuted(true)
 
         XCTAssertEqual(source.timesCalled(.setMicrophoneMuted), 1)
-        await safeFulfillment(of: [sinkExpectation])
-        cancellable.cancel()
+        XCTAssertTrue(subject.isMicrophoneMuted)
     }
 
-    func test_setMuted_isMutedFalseIsMicrophoneMutedTrue_setMicrophoneMutedAndSubjectSend() async throws {
-        source.microphoneMutedSubject.send(true)
-        subject = .init(source, isMicrophoneMuted: true)
-
-        let sinkExpectation = expectation(description: "Sink was called.")
-        let cancellable = subject
-            .isMicrophoneMutedPublisher
-            .filter { $0 == false }
-            .sink { _ in sinkExpectation.fulfill() }
+    func test_setMuted_whenUnmutingWhileRecordingStopped_startsRecordingBeforeUnmuting() throws {
+        source.stub(for: \.isMicrophoneMuted, with: true)
+        source.stub(for: \.isRecordingInitialized, with: false)
+        makeSubject()
 
         try subject.setMuted(false)
 
+        XCTAssertEqual(source.timesCalled(.initAndStartRecording), 1)
         XCTAssertEqual(source.timesCalled(.setMicrophoneMuted), 1)
-        await safeFulfillment(of: [sinkExpectation])
-        cancellable.cancel()
+        XCTAssertFalse(subject.isMicrophoneMuted)
     }
 
-    func test_setMuted_isMutedFalseIsMicrophoneMutedFalse_noAction() throws {
-        source.microphoneMutedSubject.send(false)
-        subject = .init(source, isMicrophoneMuted: false)
+    // MARK: - Stereo playout
 
-        try subject.setMuted(false)
+    func test_setStereoPlayoutPreference_updatesMuteModeAndPreference() {
+        makeSubject()
 
-        XCTAssertEqual(source.timesCalled(.setMicrophoneMuted), 0)
+        subject.setStereoPlayoutPreference(true)
+        XCTAssertTrue(source.prefersStereoPlayout)
+
+        subject.setStereoPlayoutPreference(false)
+        XCTAssertFalse(source.prefersStereoPlayout)
+
+        let recordedModes = source.recordedInputPayload(RTCAudioEngineMuteMode.self, for: .setMuteMode)
+        XCTAssertEqual(recordedModes, [.inputMixer, .voiceProcessing])
+
+        let recordedPreparedFlags = source.recordedInputPayload(Bool.self, for: .setRecordingAlwaysPreparedMode)
+        XCTAssertEqual(recordedPreparedFlags, [false, false])
     }
 
-    // MARK: - didReceiveSpeechActivityEvent
+    func test_refreshStereoPlayoutState_invokesUnderlyingModule() {
+        makeSubject()
 
-    func test_didReceiveSpeechActivityEvent_speechActivityStarted_publishesEvent() async throws {
-        try await assertEvent(.speechActivityStarted) {
+        subject.refreshStereoPlayoutState()
+
+        XCTAssertEqual(source.timesCalled(.refreshStereoPlayoutState), 1)
+    }
+
+    // MARK: - Reset
+
+    func test_reset_invokesUnderlyingModule() {
+        makeSubject()
+
+        subject.reset()
+
+        XCTAssertEqual(source.timesCalled(.reset), 1)
+    }
+
+    // MARK: - Delegate callbacks
+
+    func test_didReceiveSpeechActivityEvent_started_emitsEvent() async {
+        makeSubject()
+        await expectEvent(.speechActivityStarted) {
             subject.audioDeviceModule($0, didReceiveSpeechActivityEvent: .started)
         }
     }
 
-    func test_didReceiveSpeechActivityEvent_speechActivityEnded_publishesEvent() async throws {
-        try await assertEvent(.speechActivityEnded) {
+    func test_didReceiveSpeechActivityEvent_ended_emitsEvent() async {
+        makeSubject()
+        await expectEvent(.speechActivityEnded) {
             subject.audioDeviceModule($0, didReceiveSpeechActivityEvent: .ended)
         }
     }
 
-    // MARK: - didCreateEngine
-
-    func test_didCreateEngine_publishesEvent() async throws {
-        let audioEngine = AVAudioEngine()
-        try await assertEvent(.didCreateAudioEngine(audioEngine)) {
-            _ = subject.audioDeviceModule($0, didCreateEngine: audioEngine)
-        }
-    }
-
-    // MARK: - willEnableAudioEngine
-
-    func test_willEnableEngine_isPlayoutEnabledFalse_isRecordingEnabledFalse_publishesEvent() async throws {
-        let audioEngine = AVAudioEngine()
-        let isPlayoutEnabled = false
-        let isRecordingEnabled = false
-        try await assertEvent(
-            .willEnableAudioEngine(audioEngine),
-            isPlayoutEnabled: isPlayoutEnabled,
-            isRecordingEnabled: isRecordingEnabled
-        ) {
-            _ = subject.audioDeviceModule(
-                $0,
-                willEnableEngine: audioEngine,
-                isPlayoutEnabled: isPlayoutEnabled,
-                isRecordingEnabled: isRecordingEnabled
-            )
-        }
-    }
-
-    func test_willEnableEngine_isPlayoutEnabledTrue_isRecordingEnabledFalse_publishesEvent() async throws {
-        let audioEngine = AVAudioEngine()
-        let isPlayoutEnabled = true
-        let isRecordingEnabled = false
-        try await assertEvent(
-            .willEnableAudioEngine(audioEngine),
-            isPlayoutEnabled: isPlayoutEnabled,
-            isRecordingEnabled: isRecordingEnabled
-        ) {
-            _ = subject.audioDeviceModule(
-                $0,
-                willEnableEngine: audioEngine,
-                isPlayoutEnabled: isPlayoutEnabled,
-                isRecordingEnabled: isRecordingEnabled
-            )
-        }
-    }
-
-    func test_willEnableEngine_isPlayoutEnabledFalse_isRecordingEnabledTrue_publishesEvent() async throws {
-        let audioEngine = AVAudioEngine()
-        let isPlayoutEnabled = false
-        let isRecordingEnabled = true
-        try await assertEvent(
-            .willEnableAudioEngine(audioEngine),
-            isPlayoutEnabled: isPlayoutEnabled,
-            isRecordingEnabled: isRecordingEnabled
-        ) {
-            _ = subject.audioDeviceModule(
-                $0,
-                willEnableEngine: audioEngine,
-                isPlayoutEnabled: isPlayoutEnabled,
-                isRecordingEnabled: isRecordingEnabled
-            )
-        }
-    }
-
-    func test_willEnableEngine_isPlayoutEnabledTrue_isRecordingEnabledTrue_publishesEvent() async throws {
-        let audioEngine = AVAudioEngine()
-        let isPlayoutEnabled = true
-        let isRecordingEnabled = true
-        try await assertEvent(
-            .willEnableAudioEngine(audioEngine),
-            isPlayoutEnabled: isPlayoutEnabled,
-            isRecordingEnabled: isRecordingEnabled
-        ) {
-            _ = subject.audioDeviceModule(
-                $0,
-                willEnableEngine: audioEngine,
-                isPlayoutEnabled: isPlayoutEnabled,
-                isRecordingEnabled: isRecordingEnabled
-            )
-        }
-    }
-
-    // MARK: - willStartEngine
-
-    func test_willStartEngine_isPlayoutEnabledFalse_isRecordingEnabledFalse_publishesEvent() async throws {
-        let audioEngine = AVAudioEngine()
-        let isPlayoutEnabled = false
-        let isRecordingEnabled = false
-        try await assertEvent(
-            .willStartAudioEngine(audioEngine),
-            isPlayoutEnabled: isPlayoutEnabled,
-            isRecordingEnabled: isRecordingEnabled
-        ) {
-            _ = subject.audioDeviceModule(
-                $0,
-                willStartEngine: audioEngine,
-                isPlayoutEnabled: isPlayoutEnabled,
-                isRecordingEnabled: isRecordingEnabled
-            )
-        }
-    }
-
-    func test_willStartEngine_isPlayoutEnabledTrue_isRecordingEnabledFalse_publishesEvent() async throws {
-        let audioEngine = AVAudioEngine()
-        let isPlayoutEnabled = true
-        let isRecordingEnabled = false
-        try await assertEvent(
-            .willStartAudioEngine(audioEngine),
-            isPlayoutEnabled: isPlayoutEnabled,
-            isRecordingEnabled: isRecordingEnabled
-        ) {
-            _ = subject.audioDeviceModule(
-                $0,
-                willStartEngine: audioEngine,
-                isPlayoutEnabled: isPlayoutEnabled,
-                isRecordingEnabled: isRecordingEnabled
-            )
-        }
-    }
-
-    func test_willStartEngine_isPlayoutEnabledFalse_isRecordingEnabledTrue_publishesEvent() async throws {
-        let audioEngine = AVAudioEngine()
-        let isPlayoutEnabled = false
-        let isRecordingEnabled = true
-        try await assertEvent(
-            .willStartAudioEngine(audioEngine),
-            isPlayoutEnabled: isPlayoutEnabled,
-            isRecordingEnabled: isRecordingEnabled
-        ) {
-            _ = subject.audioDeviceModule(
-                $0,
-                willStartEngine: audioEngine,
-                isPlayoutEnabled: isPlayoutEnabled,
-                isRecordingEnabled: isRecordingEnabled
-            )
-        }
-    }
-
-    func test_willStartEngine_isPlayoutEnabledTrue_isRecordingEnabledTrue_publishesEvent() async throws {
-        let audioEngine = AVAudioEngine()
-        let isPlayoutEnabled = true
-        let isRecordingEnabled = true
-        try await assertEvent(
-            .willStartAudioEngine(audioEngine),
-            isPlayoutEnabled: isPlayoutEnabled,
-            isRecordingEnabled: isRecordingEnabled
-        ) {
-            _ = subject.audioDeviceModule(
-                $0,
-                willStartEngine: audioEngine,
-                isPlayoutEnabled: isPlayoutEnabled,
-                isRecordingEnabled: isRecordingEnabled
-            )
-        }
-    }
-
-    // MARK: - didStopEngine
-
-    func test_didStopEngine_isPlayoutEnabledFalse_isRecordingEnabledFalse_publishesEvent() async throws {
-        let audioEngine = AVAudioEngine()
-        let isPlayoutEnabled = false
-        let isRecordingEnabled = false
-        try await assertEvent(
-            .didStopAudioEngine(audioEngine),
-            isPlayoutEnabled: isPlayoutEnabled,
-            isRecordingEnabled: isRecordingEnabled
-        ) {
-            _ = subject.audioDeviceModule(
-                $0,
-                didStopEngine: audioEngine,
-                isPlayoutEnabled: isPlayoutEnabled,
-                isRecordingEnabled: isRecordingEnabled
-            )
-        }
-    }
-
-    func test_didStopEngine_isPlayoutEnabledTrue_isRecordingEnabledFalse_publishesEvent() async throws {
-        let audioEngine = AVAudioEngine()
-        let isPlayoutEnabled = true
-        let isRecordingEnabled = false
-        try await assertEvent(
-            .didStopAudioEngine(audioEngine),
-            isPlayoutEnabled: isPlayoutEnabled,
-            isRecordingEnabled: isRecordingEnabled
-        ) {
-            _ = subject.audioDeviceModule(
-                $0,
-                didStopEngine: audioEngine,
-                isPlayoutEnabled: isPlayoutEnabled,
-                isRecordingEnabled: isRecordingEnabled
-            )
-        }
-    }
-
-    func test_didStopEngine_isPlayoutEnabledFalse_isRecordingEnabledTrue_publishesEvent() async throws {
-        let audioEngine = AVAudioEngine()
-        let isPlayoutEnabled = false
-        let isRecordingEnabled = true
-        try await assertEvent(
-            .didStopAudioEngine(audioEngine),
-            isPlayoutEnabled: isPlayoutEnabled,
-            isRecordingEnabled: isRecordingEnabled
-        ) {
-            _ = subject.audioDeviceModule(
-                $0,
-                didStopEngine: audioEngine,
-                isPlayoutEnabled: isPlayoutEnabled,
-                isRecordingEnabled: isRecordingEnabled
-            )
-        }
-    }
-
-    func test_didStopEngine_isPlayoutEnabledTrue_isRecordingEnabledTrue_publishesEvent() async throws {
-        let audioEngine = AVAudioEngine()
-        let isPlayoutEnabled = true
-        let isRecordingEnabled = true
-        try await assertEvent(
-            .didStopAudioEngine(audioEngine),
-            isPlayoutEnabled: isPlayoutEnabled,
-            isRecordingEnabled: isRecordingEnabled
-        ) {
-            _ = subject.audioDeviceModule(
-                $0,
-                didStopEngine: audioEngine,
-                isPlayoutEnabled: isPlayoutEnabled,
-                isRecordingEnabled: isRecordingEnabled
-            )
-        }
-    }
-
-    func test_didStopEngine_uninstallWasCalled() async throws {
-        _ = subject.audioDeviceModule(
-            .init(),
-            didStopEngine: .init(),
-            isPlayoutEnabled: false,
+    func test_willEnableEngine_emitsEventAndUpdatesState() async {
+        makeSubject()
+        let engine = AVAudioEngine()
+        let expectedEvent = AudioDeviceModule.Event.willEnableAudioEngine(
+            engine,
+            isPlayoutEnabled: true,
             isRecordingEnabled: false
         )
 
-        XCTAssertEqual(audioEngineNodeAdapter.timesCalled(.uninstall), 1)
-        XCTAssertEqual(audioEngineNodeAdapter.recordedInputPayload(Int.self, for: .uninstall)?.first, 0)
-    }
-
-    // MARK: - didDisableEngine
-
-    func test_didDisableEngine_isPlayoutEnabledFalse_isRecordingEnabledFalse_publishesEvent() async throws {
-        let audioEngine = AVAudioEngine()
-        let isPlayoutEnabled = false
-        let isRecordingEnabled = false
-        try await assertEvent(
-            .didDisableAudioEngine(audioEngine),
-            isPlayoutEnabled: isPlayoutEnabled,
-            isRecordingEnabled: isRecordingEnabled
-        ) {
-            _ = subject.audioDeviceModule(
-                $0,
-                didDisableEngine: audioEngine,
-                isPlayoutEnabled: isPlayoutEnabled,
-                isRecordingEnabled: isRecordingEnabled
-            )
-        }
-    }
-
-    func test_didDisableEngine_isPlayoutEnabledTrue_isRecordingEnabledFalse_publishesEvent() async throws {
-        let audioEngine = AVAudioEngine()
-        let isPlayoutEnabled = true
-        let isRecordingEnabled = false
-        try await assertEvent(
-            .didDisableAudioEngine(audioEngine),
-            isPlayoutEnabled: isPlayoutEnabled,
-            isRecordingEnabled: isRecordingEnabled
-        ) {
-            _ = subject.audioDeviceModule(
-                $0,
-                didDisableEngine: audioEngine,
-                isPlayoutEnabled: isPlayoutEnabled,
-                isRecordingEnabled: isRecordingEnabled
-            )
-        }
-    }
-
-    func test_didDisableEngine_isPlayoutEnabledFalse_isRecordingEnabledTrue_publishesEvent() async throws {
-        let audioEngine = AVAudioEngine()
-        let isPlayoutEnabled = false
-        let isRecordingEnabled = true
-        try await assertEvent(
-            .didDisableAudioEngine(audioEngine),
-            isPlayoutEnabled: isPlayoutEnabled,
-            isRecordingEnabled: isRecordingEnabled
-        ) {
-            _ = subject.audioDeviceModule(
-                $0,
-                didDisableEngine: audioEngine,
-                isPlayoutEnabled: isPlayoutEnabled,
-                isRecordingEnabled: isRecordingEnabled
-            )
-        }
-    }
-
-    func test_didDisableEngine_isPlayoutEnabledTrue_isRecordingEnabledTrue_publishesEvent() async throws {
-        let audioEngine = AVAudioEngine()
-        let isPlayoutEnabled = true
-        let isRecordingEnabled = true
-        try await assertEvent(
-            .didDisableAudioEngine(audioEngine),
-            isPlayoutEnabled: isPlayoutEnabled,
-            isRecordingEnabled: isRecordingEnabled
-        ) {
-            _ = subject.audioDeviceModule(
-                $0,
-                didDisableEngine: audioEngine,
-                isPlayoutEnabled: isPlayoutEnabled,
-                isRecordingEnabled: isRecordingEnabled
-            )
-        }
-    }
-
-    func test_didDisableEngine_uninstallWasCalled() async throws {
-        _ = subject.audioDeviceModule(
-            .init(),
-            didDisableEngine: .init(),
-            isPlayoutEnabled: false,
+        await expectEvent(
+            expectedEvent,
+            isPlayoutEnabled: true,
             isRecordingEnabled: false
-        )
-
-        XCTAssertEqual(audioEngineNodeAdapter.timesCalled(.uninstall), 1)
-        XCTAssertEqual(audioEngineNodeAdapter.recordedInputPayload(Int.self, for: .uninstall)?.first, 0)
-    }
-
-    // MARK: - willReleaseEngine
-
-    func test_willReleaseEngine_publishesEvent() async throws {
-        let audioEngine = AVAudioEngine()
-        try await assertEvent(.willReleaseAudioEngine(audioEngine)) {
-            _ = subject.audioDeviceModule($0, willReleaseEngine: audioEngine)
+        ) {
+            subject.audioDeviceModule(
+                $0,
+                willEnableEngine: engine,
+                isPlayoutEnabled: true,
+                isRecordingEnabled: false
+            )
         }
+
+        XCTAssertTrue(subject.isPlaying)
+        XCTAssertFalse(subject.isRecording)
     }
 
-    func test_willReleaseEngine_uninstallWasCalled() async throws {
-        _ = subject.audioDeviceModule(.init(), willReleaseEngine: .init())
+    func test_willReleaseEngine_emitsEventAndUninstallsTap() async {
+        makeSubject()
+        let engine = AVAudioEngine()
+
+        await expectEvent(.willReleaseAudioEngine(engine)) {
+            _ = subject.audioDeviceModule($0, willReleaseEngine: engine)
+        }
 
         XCTAssertEqual(audioEngineNodeAdapter.timesCalled(.uninstall), 1)
         XCTAssertEqual(audioEngineNodeAdapter.recordedInputPayload(Int.self, for: .uninstall)?.first, 0)
     }
 
-    // MARK: - configureInputFromSource
+    func test_configureInputFromSource_installsTap() {
+        makeSubject()
+        let engine = AVAudioEngine()
+        let destination = AVAudioMixerNode()
+        let format = AVAudioFormat(
+            commonFormat: .pcmFormatFloat32,
+            sampleRate: 48000,
+            channels: 1,
+            interleaved: false
+        )!
 
-    func test_configureInputFromSource_installWasCalled() async throws {
         _ = subject.audioDeviceModule(
             .init(),
-            engine: .init(),
+            engine: engine,
             configureInputFromSource: nil,
-            toDestination: .init(),
-            format: .init(),
+            toDestination: destination,
+            format: format,
             context: [:]
         )
 
         XCTAssertEqual(audioEngineNodeAdapter.timesCalled(.installInputTap), 1)
-        let rawInput = try XCTUnwrap(
-            audioEngineNodeAdapter.recordedInputPayload(
-                Any.self,
-                for: .installInputTap
-            )?.first
-        )
-        let input = try XCTUnwrap(rawInput as? (Int, UInt32))
-        XCTAssertEqual(input.0, 0)
-        XCTAssertEqual(input.1, 1024)
+        let payload = audioEngineNodeAdapter
+            .recordedInputPayload((Int, UInt32).self, for: .installInputTap)?
+            .first
+        XCTAssertEqual(payload?.0, 0)
+        XCTAssertEqual(payload?.1, 1024)
     }
 
-    // MARK: - Private Helpers
+    func test_configureOutputFromSource_emitsEvent() async {
+        makeSubject()
+        let engine = AVAudioEngine()
+        let sourceNode = AVAudioPlayerNode()
+        let destination = AVAudioMixerNode()
+        let format = AVAudioFormat(
+            commonFormat: .pcmFormatFloat32,
+            sampleRate: 48000,
+            channels: 2,
+            interleaved: false
+        )!
+        let expectedEvent = AudioDeviceModule.Event.configureOutputFromSource(
+            engine,
+            source: sourceNode,
+            destination: destination,
+            format: format
+        )
 
-    private func assertEvent(
-        _ event: AudioDeviceModule.Event,
+        await expectEvent(expectedEvent) {
+            _ = subject.audioDeviceModule(
+                $0,
+                engine: engine,
+                configureOutputFromSource: sourceNode,
+                toDestination: destination,
+                format: format,
+                context: [:]
+            )
+        }
+    }
+
+    func test_didUpdateAudioProcessingState_updatesPublishersAndEmitsEvent() async {
+        makeSubject()
+        let expectedEvent = AudioDeviceModule.Event.didUpdateAudioProcessingState(
+            voiceProcessingEnabled: true,
+            voiceProcessingBypassed: false,
+            voiceProcessingAGCEnabled: true,
+            stereoPlayoutEnabled: true
+        )
+
+        await expectEvent(expectedEvent) {
+            subject.audioDeviceModule(
+                $0,
+                didUpdateAudioProcessingState: RTCAudioProcessingState(
+                    voiceProcessingEnabled: true,
+                    voiceProcessingBypassed: false,
+                    voiceProcessingAGCEnabled: true,
+                    stereoPlayoutEnabled: true
+                )
+            )
+        }
+
+        XCTAssertTrue(subject.isVoiceProcessingEnabled)
+        XCTAssertFalse(subject.isVoiceProcessingBypassed)
+        XCTAssertTrue(subject.isVoiceProcessingAGCEnabled)
+        XCTAssertTrue(subject.isStereoPlayoutEnabled)
+    }
+
+    // MARK: - Helpers
+
+    @discardableResult
+    private func makeSubject() -> AudioDeviceModule {
+        let module = AudioDeviceModule(
+            source,
+            audioLevelsNodeAdapter: audioEngineNodeAdapter
+        )
+        subject = module
+        return module
+    }
+
+    private func expectEvent(
+        _ expectedEvent: AudioDeviceModule.Event,
         isPlayoutEnabled: Bool? = nil,
         isRecordingEnabled: Bool? = nil,
         operation: (RTCAudioDeviceModule) -> Void,
         file: StaticString = #file,
-        function: StaticString = #function,
         line: UInt = #line
-    ) async throws {
-        let sinkExpectation = expectation(description: "Sink was called.")
-        let disposableBag = DisposableBag()
-        subject
-            .publisher
-            .filter { $0 == event }
-            .sink { _ in sinkExpectation.fulfill() }
-            .store(in: disposableBag)
+    ) async {
+        guard subject != nil else {
+            XCTFail("Subject not initialized", file: file, line: line)
+            return
+        }
 
-        var expectations = [sinkExpectation]
+        let eventExpectation = expectation(description: "Expect \(expectedEvent)")
+        subject.publisher
+            .filter { $0 == expectedEvent }
+            .sink { _ in eventExpectation.fulfill() }
+            .store(in: &cancellables)
+
+        var expectations = [eventExpectation]
 
         if let isPlayoutEnabled {
-            let isPlayoutExpectation = expectation(description: "isPlayout:\(isPlayoutEnabled) failed.")
-            subject
-                .isPlayingPublisher
+            let playoutExpectation = expectation(description: "isPlaying updated")
+            subject.isPlayingPublisher
                 .dropFirst()
                 .filter { $0 == isPlayoutEnabled }
-                .sink { _ in isPlayoutExpectation.fulfill() }
-                .store(in: disposableBag)
-            expectations.append(isPlayoutExpectation)
+                .sink { _ in playoutExpectation.fulfill() }
+                .store(in: &cancellables)
+            expectations.append(playoutExpectation)
         }
 
         if let isRecordingEnabled {
-            let isRecordingEnabledExpectation = expectation(description: "isRecording:\(isRecordingEnabled) failed.")
-            subject
-                .isRecordingPublisher
+            let recordingExpectation = expectation(description: "isRecording updated")
+            subject.isRecordingPublisher
                 .dropFirst()
                 .filter { $0 == isRecordingEnabled }
-                .sink { _ in isRecordingEnabledExpectation.fulfill() }
-                .store(in: disposableBag)
-            expectations.append(isRecordingEnabledExpectation)
+                .sink { _ in recordingExpectation.fulfill() }
+                .store(in: &cancellables)
+            expectations.append(recordingExpectation)
         }
 
         operation(.init())
         await safeFulfillment(of: expectations, file: file, line: line)
-        disposableBag.removeAll()
+        cancellables.removeAll()
     }
 }

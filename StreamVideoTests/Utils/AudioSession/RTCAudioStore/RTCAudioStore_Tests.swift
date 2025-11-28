@@ -52,13 +52,11 @@ final class RTCAudioStore_Tests: XCTestCase, @unchecked Sendable {
 
     func test_dispatch_multipleActions_updatesState() async {
         subject.dispatch([
-            .setInterrupted(true),
-            .setShouldRecord(true)
+            .setInterrupted(true)
         ])
 
         await fulfillment {
             self.subject.state.isInterrupted
-                && self.subject.state.shouldRecord
         }
     }
 

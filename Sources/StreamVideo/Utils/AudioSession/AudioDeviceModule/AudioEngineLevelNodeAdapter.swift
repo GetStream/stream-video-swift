@@ -32,7 +32,6 @@ final class AudioEngineLevelNodeAdapter: AudioEngineNodeAdapting {
 
     var subject: CurrentValueSubject<Float, Never>?
 
-//    private let publisher: (Float) -> Void
     private var inputTap: AVAudioMixerNode?
 
     /// Installs a tap on the supplied audio node to monitor input levels.

@@ -39,17 +39,13 @@ extension RTCAudioStore {
                     }
                 }
 
-            case .setShouldRecord(let value):
+            case .setRecording(let value):
                 if let audioDeviceModule = state.audioDeviceModule {
                     log.throwing(
-                        "Unable to process setShouldRecord:\(value).",
+                        "Unable to process setRecording:\(value).",
                         subsystems: .audioSession
                     ) {
-                        try didSetShouldRecord(
-                            value,
-                            state: state,
-                            audioDeviceModule: audioDeviceModule
-                        )
+                        try audioDeviceModule.setRecording(value)
                     }
                 }
 
@@ -78,19 +74,18 @@ extension RTCAudioStore {
                     )
                 }
 
-            case .setActive:
-                break
-            case .setRecording:
-                break
-            case .setHasRecordingPermission:
-                break
-            case .setCurrentRoute:
-                break
-            case .avAudioSession:
-                break
-            case .webRTCAudioSession:
-                break
-            case .callKit:
+            case .stereo(.setPlayoutPreferred(let value)):
+                state.audioDeviceModule?.setStereoPlayoutPreference(value)
+
+            case let .webRTCAudioSession(.setAudioEnabled(value)):
+                log.throwing(
+                    "Unable to process setPlayout:\(value).",
+                    subsystems: .audioSession
+                ) {
+                    try state.audioDeviceModule?.setPlayout(value)
+                }
+
+            default:
                 break
             }
         }
@@ -105,32 +100,16 @@ extension RTCAudioStore {
             audioDeviceModule: AudioDeviceModule
         ) throws {
             guard
+                !value,
                 state.isActive,
-                state.shouldRecord
+                state.isRecording
             else {
                 return
             }
 
-            if value {
-                try audioDeviceModule.setRecording(false)
-            } else {
-                // Restart the ADM
-                try audioDeviceModule.setRecording(false)
-                try audioDeviceModule.setRecording(true)
-            }
-        }
-
-        /// Starts or stops ADM recording when `shouldRecord` changes.
-        private func didSetShouldRecord(
-            _ value: Bool,
-            state: RTCAudioStore.StoreState,
-            audioDeviceModule: AudioDeviceModule
-        ) throws {
-            guard audioDeviceModule.isRecording != value else {
-                return
-            }
-
-            try audioDeviceModule.setRecording(value)
+            // Restart the ADM
+            try audioDeviceModule.setRecording(false)
+            try audioDeviceModule.setRecording(true)
         }
 
         /// Applies the store's microphone muted state to the ADM.
@@ -139,12 +118,6 @@ extension RTCAudioStore {
             state: RTCAudioStore.StoreState,
             audioDeviceModule: AudioDeviceModule
         ) throws {
-            guard
-                state.shouldRecord
-            else {
-                return
-            }
-
             try audioDeviceModule.setMuted(value)
         }
 
@@ -154,13 +127,17 @@ extension RTCAudioStore {
             _ audioDeviceModule: AudioDeviceModule?,
             state: RTCAudioStore.StoreState
         ) throws {
-            try state.audioDeviceModule?.setRecording(false)
+            state.audioDeviceModule?.reset()
 
             disposableBag.removeAll()
 
             guard let audioDeviceModule else {
                 return
             }
+
+            audioDeviceModule.setStereoPlayoutPreference(
+                state.stereoConfiguration.playout.preferred
+            )
 
             audioDeviceModule
                 .isRecordingPublisher
@@ -171,7 +148,6 @@ extension RTCAudioStore {
             audioDeviceModule
                 .isMicrophoneMutedPublisher
                 .removeDuplicates()
-                .log(.debug) { "ADM sent isMicrophoneMuted:\($0)." }
                 .sink { [weak self] in self?.dispatcher?.dispatch(.setMicrophoneMuted($0)) }
                 .store(in: disposableBag)
         }

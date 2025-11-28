@@ -10,7 +10,7 @@ extension RTCAudioStore {
 
     /// Converts audio session interruption callbacks into store actions so the
     /// audio pipeline can gracefully pause and resume.
-    final class InterruptionsMiddleware: Middleware<RTCAudioStore.Namespace>, @unchecked Sendable {
+    final class InterruptionsEffect: StoreEffect<RTCAudioStore.Namespace>, @unchecked Sendable {
 
         private let audioSessionObserver: RTCAudioSessionPublisher
         private let disposableBag = DisposableBag()
@@ -61,7 +61,7 @@ extension RTCAudioStore {
                 }
                 dispatcher?.dispatch(actions.map(\.box))
 
-            case .didChangeRoute:
+            default:
                 break
             }
         }

@@ -28,9 +28,8 @@ final class RTCAudioStore: @unchecked Sendable {
             initialState: .init(
                 isActive: false,
                 isInterrupted: false,
-                shouldRecord: false,
                 isRecording: false,
-                isMicrophoneMuted: false,
+                isMicrophoneMuted: true,
                 hasRecordingPermission: false,
                 audioDeviceModule: nil,
                 currentRoute: .init(audioSession.currentRoute),
@@ -44,10 +43,17 @@ final class RTCAudioStore: @unchecked Sendable {
                     isAudioEnabled: false,
                     useManualAudio: false,
                     prefersNoInterruptionsFromSystemAlerts: false
+                ),
+                stereoConfiguration: .init(
+                    playout: .init(
+                        preferred: false,
+                        enabled: false
+                    )
                 )
             ),
             reducers: Namespace.reducers(audioSession: audioSession),
-            middleware: Namespace.middleware(audioSession: audioSession)
+            middleware: Namespace.middleware(audioSession: audioSession),
+            effects: Namespace.effects(audioSession: audioSession)
         )
 
         store.dispatch([

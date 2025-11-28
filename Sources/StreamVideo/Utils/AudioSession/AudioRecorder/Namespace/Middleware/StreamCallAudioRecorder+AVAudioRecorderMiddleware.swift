@@ -22,6 +22,8 @@ extension StreamCallAudioRecorder.Namespace {
     /// ensure thread safety when accessing the recorder instance.
     final class AVAudioRecorderMiddleware: Middleware<StreamCallAudioRecorder.Namespace>, @unchecked Sendable {
 
+        /// Tracks which metering backend is active so we can flip between
+        /// `AVAudioRecorder` and the audio device module seamlessly.
         enum Mode: Equatable {
             case invalid
             case audioRecorder(AVAudioRecorder)
@@ -39,6 +41,8 @@ extension StreamCallAudioRecorder.Namespace {
         
         /// Subscription for publishing meter updates at refresh rate.
         private var updateMetersCancellable: AnyCancellable?
+        /// Listens for ADM availability and pivots the metering source on the
+        /// fly when stereo playout is enabled.
         private var audioDeviceModuleCancellable: AnyCancellable?
 
         init(audioRecorder: AVAudioRecorder? = nil) {
@@ -50,18 +54,24 @@ extension StreamCallAudioRecorder.Namespace {
                 mode = .invalid
             }
 
+            let initialMode = self.mode
+
             super.init()
 
             audioDeviceModuleCancellable = audioStore
                 .publisher(\.audioDeviceModule)
                 .receive(on: processingQueue)
                 .sink { [weak self] in
+                    if self?.updateMetersCancellable != nil {
+                        self?.stopRecording()
+                        self?.startRecording()
+                    }
+
+                    // We restore the mode to whatever we had before the call.
                     if let audioDeviceModule = $0 {
                         self?.mode = .audioDeviceModule(audioDeviceModule)
-                        if self?.updateMetersCancellable != nil {
-                            self?.stopRecording()
-                            self?.startRecording()
-                        }
+                    } else {
+                        self?.mode = initialMode
                     }
                 }
         }

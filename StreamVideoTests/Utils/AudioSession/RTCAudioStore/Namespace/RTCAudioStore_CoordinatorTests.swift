@@ -78,7 +78,15 @@ final class RTCAudioStore_CoordinatorTests: XCTestCase, @unchecked Sendable {
 
     func test_setCurrentRoute_differentValue_returnsTrue() {
         let route = RTCAudioStore.StoreState.AudioRoute(
-            inputs: [.init(type: .unique, name: .unique, id: .unique, isExternal: false, isSpeaker: true, isReceiver: false)],
+            inputs: [.init(
+                type: .unique,
+                name: .unique,
+                id: .unique,
+                isExternal: false,
+                isSpeaker: true,
+                isReceiver: false,
+                channels: 1
+            )],
             outputs: []
         )
         let state = makeState(currentRoute: .empty)
@@ -195,12 +203,59 @@ final class RTCAudioStore_CoordinatorTests: XCTestCase, @unchecked Sendable {
         )
     }
 
+    func test_stereo_setPlayoutPreferred_sameValue_returnsFalse() {
+        let stereoConfiguration = makeStereoConfiguration(preferred: true, enabled: false)
+        let state = makeState(stereoConfiguration: stereoConfiguration)
+
+        XCTAssertFalse(
+            subject.shouldExecute(
+                action: .stereo(.setPlayoutPreferred(true)),
+                state: state
+            )
+        )
+    }
+
+    func test_stereo_setPlayoutPreferred_differentValue_returnsTrue() {
+        let stereoConfiguration = makeStereoConfiguration(preferred: false, enabled: false)
+        let state = makeState(stereoConfiguration: stereoConfiguration)
+
+        XCTAssertTrue(
+            subject.shouldExecute(
+                action: .stereo(.setPlayoutPreferred(true)),
+                state: state
+            )
+        )
+    }
+
+    func test_stereo_setPlayoutEnabled_sameValue_returnsFalse() {
+        let stereoConfiguration = makeStereoConfiguration(preferred: false, enabled: true)
+        let state = makeState(stereoConfiguration: stereoConfiguration)
+
+        XCTAssertFalse(
+            subject.shouldExecute(
+                action: .stereo(.setPlayoutEnabled(true)),
+                state: state
+            )
+        )
+    }
+
+    func test_stereo_setPlayoutEnabled_differentValue_returnsTrue() {
+        let stereoConfiguration = makeStereoConfiguration(preferred: false, enabled: false)
+        let state = makeState(stereoConfiguration: stereoConfiguration)
+
+        XCTAssertTrue(
+            subject.shouldExecute(
+                action: .stereo(.setPlayoutEnabled(true)),
+                state: state
+            )
+        )
+    }
+
     // MARK: - Helpers
 
     private func makeState(
         isActive: Bool = false,
         isInterrupted: Bool = false,
-        shouldRecord: Bool = false,
         isRecording: Bool = false,
         isMicrophoneMuted: Bool = false,
         hasRecordingPermission: Bool = false,
@@ -216,19 +271,22 @@ final class RTCAudioStore_CoordinatorTests: XCTestCase, @unchecked Sendable {
             isAudioEnabled: false,
             useManualAudio: false,
             prefersNoInterruptionsFromSystemAlerts: false
+        ),
+        stereoConfiguration: RTCAudioStore.StoreState.StereoConfiguration = .init(
+            playout: .init(preferred: false, enabled: false)
         )
     ) -> RTCAudioStore.StoreState {
         .init(
             isActive: isActive,
             isInterrupted: isInterrupted,
-            shouldRecord: shouldRecord,
             isRecording: isRecording,
             isMicrophoneMuted: isMicrophoneMuted,
             hasRecordingPermission: hasRecordingPermission,
             audioDeviceModule: audioDeviceModule,
             currentRoute: currentRoute,
             audioSessionConfiguration: audioSessionConfiguration,
-            webRTCAudioSessionConfiguration: webRTCAudioSessionConfiguration
+            webRTCAudioSessionConfiguration: webRTCAudioSessionConfiguration,
+            stereoConfiguration: stereoConfiguration
         )
     }
 
@@ -255,6 +313,18 @@ final class RTCAudioStore_CoordinatorTests: XCTestCase, @unchecked Sendable {
             isAudioEnabled: isAudioEnabled,
             useManualAudio: useManualAudio,
             prefersNoInterruptionsFromSystemAlerts: prefersNoInterruptionsFromSystemAlerts
+        )
+    }
+
+    private func makeStereoConfiguration(
+        preferred: Bool,
+        enabled: Bool
+    ) -> RTCAudioStore.StoreState.StereoConfiguration {
+        .init(
+            playout: .init(
+                preferred: preferred,
+                enabled: enabled
+            )
         )
     }
 }

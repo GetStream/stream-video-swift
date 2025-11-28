@@ -38,12 +38,10 @@ extension RTCAudioStore.Namespace {
                     }
                 }
                 updatedState.isActive = value
+                try updatedState.audioDeviceModule?.setPlayout(value)
 
             case let .setInterrupted(value):
                 updatedState.isInterrupted = value
-
-            case let .setShouldRecord(value):
-                updatedState.shouldRecord = value
 
             case let .setRecording(value):
                 updatedState.isRecording = value
@@ -57,18 +55,32 @@ extension RTCAudioStore.Namespace {
             case let .setAudioDeviceModule(value):
                 updatedState.audioDeviceModule = value
                 if value == nil {
-                    updatedState.shouldRecord = false
                     updatedState.isRecording = false
-                    updatedState.isMicrophoneMuted = false
+                    updatedState.isMicrophoneMuted = true
+                    updatedState.stereoConfiguration = .init(
+                        playout: .init(
+                            preferred: false,
+                            enabled: false
+                        )
+                    )
                 }
 
             case let .setCurrentRoute(value):
                 updatedState.currentRoute = value
 
+            case let .stereo(.setPlayoutPreferred(value)):
+                updatedState.stereoConfiguration.playout.preferred = value
+
+            case let .stereo(.setPlayoutEnabled(value)):
+                updatedState.stereoConfiguration.playout.enabled = value
+
             case .avAudioSession:
                 break
 
             case .webRTCAudioSession:
+                break
+
+            case .stereo:
                 break
 
             case .callKit:
