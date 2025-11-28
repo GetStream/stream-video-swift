@@ -127,6 +127,8 @@ extension RTCAudioStore {
         case setActive(Bool)
         case setInterrupted(Bool)
         case setRecording(Bool)
+        /// Used to signal from ADM to the store that the recording state has changed.
+        case audioDeviceModuleSetRecording(Bool)
         case setMicrophoneMuted(Bool)
         case setHasRecordingPermission(Bool)
 
@@ -148,6 +150,9 @@ extension RTCAudioStore {
 
             case .setRecording(let value):
                 return ".setRecording(\(value))"
+
+            case .audioDeviceModuleSetRecording(let value):
+                return ".audioDeviceModuleSetRecording(\(value))"
 
             case .setMicrophoneMuted(let value):
                 return ".setMicrophoneMuted(\(value))"

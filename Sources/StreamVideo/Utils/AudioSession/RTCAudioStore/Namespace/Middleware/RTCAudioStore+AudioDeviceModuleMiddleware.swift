@@ -142,7 +142,7 @@ extension RTCAudioStore {
             audioDeviceModule
                 .isRecordingPublisher
                 .removeDuplicates()
-                .sink { [weak self] in self?.dispatcher?.dispatch(.setRecording($0)) }
+                .sink { [weak self] in self?.dispatcher?.dispatch(.audioDeviceModuleSetRecording($0)) }
                 .store(in: disposableBag)
 
             audioDeviceModule

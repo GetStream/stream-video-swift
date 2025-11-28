@@ -25,6 +25,9 @@ extension RTCAudioStore {
             case let .setRecording(value):
                 return value != state.isRecording
 
+            case let .audioDeviceModuleSetRecording(value):
+                return value != state.isRecording
+
             case let .setMicrophoneMuted(value):
                 return value != state.isMicrophoneMuted
 

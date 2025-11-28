@@ -46,6 +46,9 @@ extension RTCAudioStore.Namespace {
             case let .setRecording(value):
                 updatedState.isRecording = value
 
+            case let .audioDeviceModuleSetRecording(value):
+                updatedState.isRecording = value
+
             case let .setMicrophoneMuted(value):
                 updatedState.isMicrophoneMuted = value
 

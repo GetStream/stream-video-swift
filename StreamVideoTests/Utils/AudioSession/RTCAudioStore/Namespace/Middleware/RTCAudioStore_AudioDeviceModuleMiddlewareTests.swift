@@ -202,14 +202,14 @@ final class RTCAudioStore_AudioDeviceModuleMiddlewareTests: XCTestCase, @uncheck
             isMicrophoneMuted: false
         )
 
-        let setRecordingExpectation = expectation(description: "setRecording called from AudioDeviceModule value.")
+        let setRecordingExpectation = expectation(description: "audioDeviceModuleSetRecording called from AudioDeviceModule value.")
         let setMicrophoneMutedExpectation = expectation(description: "setMicrophoneMuted called from AudioDeviceModule value.")
         subject.dispatcher = .init { actions, _, _, _ in
             actions
                 .map(\.wrappedValue)
                 .forEach { action in
                     switch action {
-                    case .setRecording(true):
+                    case .audioDeviceModuleSetRecording(true):
                         setRecordingExpectation.fulfill()
 
                     case .setMicrophoneMuted(false):
