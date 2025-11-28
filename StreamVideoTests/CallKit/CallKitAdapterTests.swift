@@ -11,18 +11,18 @@ final class CallKitAdapterTests: XCTestCase, @unchecked Sendable {
     private lazy var callKitService: MockCallKitService! = .init()
     private lazy var subject: CallKitAdapter! = .init()
 
-    override func setUp() {
-        super.setUp()
+    @MainActor
+    override func setUp() async throws {
+        try await super.setUp()
         InjectedValues[\.callKitPushNotificationAdapter] = callKitPushNotificationAdapter
         InjectedValues[\.callKitService] = callKitService
-        InjectedValues[\.currentDevice] = CurrentDevice(currentDeviceProvider: { .phone })
+        CurrentDevice.currentValue.didUpdate(.phone)
     }
 
     override func tearDown() {
         callKitPushNotificationAdapter = nil
         callKitService = nil
         subject = nil
-        InjectedValues[\.currentDevice] = CurrentDevice.currentValue
         super.tearDown()
     }
 

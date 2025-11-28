@@ -20,6 +20,7 @@ import Foundation
 public struct OwnCapabilitiesAudioSessionPolicy: AudioSessionPolicy {
 
     @Injected(\.applicationStateAdapter) private var applicationStateAdapter
+    @Injected(\.currentDevice) private var currentDevice
 
     /// Initializes a new `OwnCapabilitiesAudioSessionPolicy` instance.
     public init() {}

@@ -56,7 +56,7 @@ final class ProximityMonitor_Tests: XCTestCase, @unchecked Sendable {
 
     @MainActor
     func test_stopObservation_isActiveBecomesFalse() async {
-        CurrentDevice.currentValue = .dummy { .phone }
+        CurrentDevice.currentValue.didUpdate(.phone)
         await fulfillment { CurrentDevice.currentValue.deviceType == .phone }
 
         subject.startObservation()
@@ -76,7 +76,7 @@ final class ProximityMonitor_Tests: XCTestCase, @unchecked Sendable {
         function: StaticString = #function,
         line: UInt = #line
     ) async {
-        CurrentDevice.currentValue = .dummy { deviceType }
+        CurrentDevice.currentValue.didUpdate(deviceType)
         await fulfillment { CurrentDevice.currentValue.deviceType == deviceType }
         _ = subject
 
