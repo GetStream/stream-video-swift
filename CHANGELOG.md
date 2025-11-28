@@ -4,7 +4,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
-### 🔄 Changed
+### ✅ Added
+- A Livestream focused AudioSessionPolicy that has support for stereo playout. [#975](https://github.com/GetStream/stream-video-swift/pull/975)
 
 # [1.36.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.36.0)
 _November 19, 2025_
