@@ -13,9 +13,11 @@ final class Store_Tests: XCTestCase, @unchecked Sendable {
     private lazy var middlewareB: MockMiddleware<TestStoreNamespace>! = .init()
     private lazy var reducerA: TestStoreReducer! = .init()
     private lazy var reducerB: TestStoreReducer! = .init()
+    private lazy var coordinator: TestStoreCoordinator! = .init()
 
     private lazy var subject: Store<TestStoreNamespace>! = TestStoreNamespace.store(
-        initialState: .init()
+        initialState: .init(),
+        coordinator: coordinator
     )
 
     override func setUp() {
@@ -48,7 +50,7 @@ final class Store_Tests: XCTestCase, @unchecked Sendable {
         }
     }
 
-    func test_dispatch_allReduceresWereCalled() async {
+    func test_dispatch_allReducersWereCalled() async {
         subject.dispatch(.callReducersWithStep)
 
         await fulfillment {
@@ -66,6 +68,50 @@ final class Store_Tests: XCTestCase, @unchecked Sendable {
 
         await fulfillment {
             self.subject.state.reducersAccessVerification == "A_B"
+        }
+    }
+
+    func test_dispatch_coordinatorSkipsUnnecessaryAction() async {
+        coordinator.shouldExecuteNextAction = false
+        subject.dispatch(.callReducersWithStep)
+        await wait(for: 1)
+
+        XCTAssertEqual(reducerA.timesCalled, 0)
+        XCTAssertEqual(reducerB.timesCalled, 0)
+        XCTAssertEqual(subject.state.reducersCalled, 0)
+    }
+
+    // MARK: - Effects
+
+    func test_addEffect_configuresDependenciesAndReceivesStateUpdates() async {
+        let effect = TestStoreEffect()
+        subject.add(effect)
+
+        await fulfillment(timeout: 2) {
+            effect.didReceivePublisher
+                && effect.dispatcher != nil
+                && effect.state != nil
+        }
+
+        subject.dispatch(.callReducersWithStep)
+
+        await fulfillment(timeout: 2) {
+            effect.receivedStates.contains { $0.reducersCalled == 2 }
+        }
+    }
+
+    func test_removeEffect_clearsDependencies() async {
+        let effect = TestStoreEffect()
+        subject.add(effect)
+
+        await fulfillment(timeout: 2) { effect.didReceivePublisher }
+
+        subject.remove(effect)
+
+        await fulfillment(timeout: 2) {
+            effect.dispatcher == nil
+                && effect.stateProvider == nil
+                && effect.didReceiveNilPublisher
         }
     }
 }
@@ -114,10 +160,49 @@ private final class TestStoreReducer: Reducer<TestStoreNamespace>, @unchecked Se
     }
 }
 
+private final class TestStoreCoordinator: StoreCoordinator<TestStoreNamespace>, @unchecked Sendable {
+    var shouldExecuteNextAction = true
+
+    override func shouldExecute(
+        action: TestStoreAction,
+        state: TestStoreState
+    ) -> Bool {
+        shouldExecuteNextAction
+    }
+}
+
 private enum TestStoreNamespace: StoreNamespace, Sendable {
     typealias State = TestStoreState
 
     typealias Action = TestStoreAction
 
     static let identifier: String = .unique
+}
+
+private final class TestStoreEffect: StoreEffect<TestStoreNamespace>, @unchecked Sendable {
+
+    private var cancellable: AnyCancellable?
+
+    private(set) var receivedStates: [TestStoreState] = []
+    private(set) var didReceivePublisher = false
+    private(set) var didReceiveNilPublisher = false
+
+    override func set(
+        statePublisher: AnyPublisher<TestStoreState, Never>?
+    ) {
+        cancellable?.cancel()
+        guard let statePublisher else {
+            didReceiveNilPublisher = true
+            didReceivePublisher = false
+            cancellable = nil
+            return
+        }
+
+        didReceivePublisher = true
+        didReceiveNilPublisher = false
+        cancellable = statePublisher
+            .sink { [weak self] state in
+                self?.receivedStates.append(state)
+            }
+    }
 }

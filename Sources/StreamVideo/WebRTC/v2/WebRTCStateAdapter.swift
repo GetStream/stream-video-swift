@@ -35,6 +35,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     }
 
     @Injected(\.permissions) private var permissions
+    @Injected(\.audioStore) private var audioStore
 
     // Properties for user, API key, call ID, video configuration, and factories.
     let unifiedSessionId: String = UUID().uuidString
@@ -51,7 +52,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     /// Published properties that represent different parts of the WebRTC state.
     @Published private(set) var sessionID: String = UUID().uuidString
     @Published private(set) var token: String = ""
-    @Published private(set) var callSettings: CallSettings = .init()
+    @Published private(set) var callSettings: CallSettings = .default
     @Published private(set) var audioSettings: AudioSettings = .init()
 
     /// Published property to track video options and update them.
@@ -117,13 +118,49 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         videoCaptureSessionProvider: VideoCaptureSessionProvider = .init(),
         screenShareSessionProvider: ScreenShareSessionProvider = .init()
     ) {
+        self.init(
+            user: user,
+            apiKey: apiKey,
+            callCid: callCid,
+            videoConfig: videoConfig,
+            peerConnectionFactory: PeerConnectionFactory.build(
+                audioProcessingModule: videoConfig.audioProcessingModule
+            ),
+            rtcPeerConnectionCoordinatorFactory: rtcPeerConnectionCoordinatorFactory,
+            videoCaptureSessionProvider: videoCaptureSessionProvider,
+            screenShareSessionProvider: screenShareSessionProvider
+        )
+    }
+
+    /// Initializes the WebRTC state adapter with user details and connection
+    /// configurations.
+    ///
+    /// - Parameters:
+    ///   - user: The user participating in the call.
+    ///   - apiKey: The API key for authenticating WebRTC calls.
+    ///   - callCid: The call identifier (callCid).
+    ///   - videoConfig: Configuration for video settings.
+    ///   - peerConnectionFactory: The factory to use when constructing peerConnection and for the
+    ///   audioSession..
+    ///   - rtcPeerConnectionCoordinatorFactory: Factory for peer connection
+    ///     creation.
+    ///   - videoCaptureSessionProvider: Provides sessions for video capturing.
+    ///   - screenShareSessionProvider: Provides sessions for screen sharing.
+    init(
+        user: User,
+        apiKey: String,
+        callCid: String,
+        videoConfig: VideoConfig,
+        peerConnectionFactory: PeerConnectionFactory,
+        rtcPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinatorProviding,
+        videoCaptureSessionProvider: VideoCaptureSessionProvider = .init(),
+        screenShareSessionProvider: ScreenShareSessionProvider = .init()
+    ) {
         self.user = user
         self.apiKey = apiKey
         self.callCid = callCid
         self.videoConfig = videoConfig
-        let peerConnectionFactory = PeerConnectionFactory.build(
-            audioProcessingModule: videoConfig.audioProcessingModule
-        )
+        let peerConnectionFactory = peerConnectionFactory
         self.peerConnectionFactory = peerConnectionFactory
         self.rtcPeerConnectionCoordinatorFactory = rtcPeerConnectionCoordinatorFactory
         self.videoCaptureSessionProvider = videoCaptureSessionProvider
@@ -509,6 +546,13 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
             }
 
             await set(callSettings: updatedCallSettings)
+            log.debug(
+                "CallSettings updated \(currentCallSettings) -> \(updatedCallSettings)",
+                subsystems: .webRTC,
+                functionName: functionName,
+                fileName: fileName,
+                lineNumber: lineNumber
+            )
 
             guard
                 let publisher = await self.publisher
@@ -672,6 +716,10 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     }
 
     func configureAudioSession(source: JoinSource?) async throws {
+        try await audioStore.dispatch([
+            .setAudioDeviceModule(peerConnectionFactory.audioDeviceModule)
+        ]).result()
+        
         audioSession.activate(
             callSettingsPublisher: $callSettings.removeDuplicates().eraseToAnyPublisher(),
             ownCapabilitiesPublisher: $ownCapabilities.removeDuplicates().eraseToAnyPublisher(),
@@ -700,19 +748,32 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
 
     // MARK: - AudioSessionDelegate
 
-    nonisolated func audioSessionAdapterDidUpdateSpeakerOn(_ speakerOn: Bool) {
+    nonisolated func audioSessionAdapterDidUpdateSpeakerOn(
+        _ speakerOn: Bool,
+        file: StaticString,
+        function: StaticString,
+        line: UInt
+
+    ) {
         Task(disposableBag: disposableBag) { [weak self] in
             guard let self else {
                 return
             }
-            await self.enqueueCallSettings {
+            await self.enqueueCallSettings(
+                functionName: function,
+                fileName: file,
+                lineNumber: line
+            ) {
                 $0.withUpdatedSpeakerState(speakerOn)
             }
-            log.debug(
-                "AudioSession delegated updated speakerOn:\(speakerOn).",
-                subsystems: .audioSession
-            )
         }
+        log.debug(
+            "AudioSession delegated updated speakerOn:\(speakerOn).",
+            subsystems: .audioSession,
+            functionName: function,
+            fileName: file,
+            lineNumber: line
+        )
     }
 
     // MARK: - WebRTCPermissionsAdapterDelegate

@@ -14,6 +14,7 @@ final class WebRTCPermissionsAdapter_Tests: StreamVideoTestCase, @unchecked Send
     private lazy var subject: WebRTCPermissionsAdapter! = .init(delegate)
 
     override func tearDown() {
+        mockAppStateAdapter?.dismante()
         mockPermissions?.dismantle()
         mockAppStateAdapter = nil
         mockPermissions = nil
@@ -48,6 +49,7 @@ final class WebRTCPermissionsAdapter_Tests: StreamVideoTestCase, @unchecked Send
 
     func test_willSet_audioOnTrue_unknownMic_inForeground_requestsPermission_andKeepsAudioOnWhenGranted() async {
         mockAppStateAdapter.makeShared()
+        defer { mockAppStateAdapter.dismante() }
         mockAppStateAdapter.stubbedState = .foreground
         mockPermissions.stubMicrophonePermission(.unknown)
         await fulfillment { self.mockPermissions.mockStore.state.microphonePermission == .unknown }
@@ -79,6 +81,12 @@ final class WebRTCPermissionsAdapter_Tests: StreamVideoTestCase, @unchecked Send
 
         await withTaskGroup(of: Void.self) { group in
             group.addTask {
+                await self.fulfillment { self.mockPermissions.timesCalled(.requestCameraPermission) == 1 }
+                self.mockPermissions.stubCameraPermission(.granted)
+            }
+
+            group.addTask {
+                await self.wait(for: 0.5)
                 let input = CallSettings(audioOn: false, videoOn: true)
                 let output = await self.subject.willSet(callSettings: input)
                 XCTAssertEqual(output.videoOn, true)
@@ -86,13 +94,10 @@ final class WebRTCPermissionsAdapter_Tests: StreamVideoTestCase, @unchecked Send
                 await self.fulfillment { self.delegate.videoOnValues.contains(true) }
             }
 
-            group.addTask {
-                await self.fulfillment { self.mockPermissions.timesCalled(.requestCameraPermission) == 1 }
-                self.mockPermissions.stubCameraPermission(.granted)
-                await self.wait(for: 0.5)
-            }
-
             await group.waitForAll()
         }
+
+        mockAppStateAdapter?.dismante()
+        mockPermissions?.dismantle()
     }
 }

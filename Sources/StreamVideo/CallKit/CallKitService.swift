@@ -11,11 +11,17 @@ import StreamWebRTC
 /// Manages CallKit integration for VoIP calls.
 open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
 
+    struct MuteRequest: Equatable {
+        var callUUID: UUID
+        var isMuted: Bool
+    }
+
     @Injected(\.callCache) private var callCache
     @Injected(\.uuidFactory) private var uuidFactory
     @Injected(\.currentDevice) private var currentDevice
     @Injected(\.audioStore) private var audioStore
     @Injected(\.permissions) private var permissions
+    @Injected(\.applicationStateAdapter) private var applicationStateAdapter
     private let disposableBag = DisposableBag()
 
     /// Represents a call that is being managed by the service.
@@ -91,17 +97,17 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
 
     private var _storage: [UUID: CallEntry] = [:]
     private let storageAccessQueue: UnfairQueue = .init()
-    private var active: UUID? {
-        didSet { observeCallSettings(active) }
-    }
+    private var active: UUID?
 
     var callCount: Int { storageAccessQueue.sync { _storage.count } }
 
     private var callEndedNotificationCancellable: AnyCancellable?
     private var ringingTimerCancellable: AnyCancellable?
 
-    /// Handles audio session changes triggered by CallKit.
-    private lazy var callKitAudioReducer = CallKitAudioSessionReducer(store: audioStore)
+    private let muteActionSubject = PassthroughSubject<MuteRequest, Never>()
+    private var muteActionCancellable: AnyCancellable?
+    private let muteProcessingQueue = OperationQueue(maxConcurrentOperationCount: 1)
+    private var isMuted: Bool?
 
     /// Initialize.
     override public init() {
@@ -113,6 +119,18 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             .publisher(for: Notification.Name(CallNotification.callEnded))
             .compactMap { $0.object as? Call }
             .sink { [weak self] in self?.callEnded($0.cId, ringingTimedOut: false) }
+
+        /// - Important:
+        /// It used to debounce System's attempts to mute/unmute the call. It seems that the system
+        /// performs rapid mute/unmute attempts when the call is being joined or moving to foreground.
+        /// The observation below is in place to guard and normalise those attempts to avoid
+        /// - rapid speaker and mic toggles
+        /// - unnecessary attempts to mute/unmute the mic
+        muteActionCancellable = muteActionSubject
+            .removeDuplicates()
+            .filter { [weak self] _ in self?.applicationStateAdapter.state != .foreground }
+            .debounce(for: 0.5, scheduler: DispatchQueue.global(qos: .userInteractive))
+            .sink { [weak self] in self?.performMuteRequest($0) }
     }
 
     /// Report an incoming call to CallKit.
@@ -394,6 +412,8 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         ///
         /// of the audio session during a call.
         audioStore.dispatch(.callKit(.activate(audioSession)))
+
+        observeCallSettings(active)
     }
 
     public func provider(
@@ -462,27 +482,6 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 set(nil, for: action.callUUID)
                 log.error(error, subsystems: .callKit)
                 action.fail()
-            }
-
-            let callSettings = callToJoinEntry.call.state.callSettings
-            do {
-                if callSettings.audioOn == false {
-                    try await requestTransaction(
-                        CXSetMutedCallAction(
-                            call: callToJoinEntry.callUUID,
-                            muted: true
-                        )
-                    )
-                }
-            } catch {
-                log.error(
-                    """
-                    While joining call id:\(callToJoinEntry.call.cId) we failed to mute the microphone.
-                    \(callSettings)
-                    """,
-                    subsystems: .callKit,
-                    error: error
-                )
             }
         }
     }
@@ -555,33 +554,23 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             action.fail()
             return
         }
-        Task(disposableBag: disposableBag) { [permissions] in
-            guard permissions.hasMicrophonePermission else {
-                if action.isMuted {
-                    action.fulfill()
-                } else {
-                    action.fail()
-                }
-                return
-            }
 
-            do {
-                if action.isMuted {
-                    stackEntry.call.didPerform(.performSetMutedCall)
-                    try await stackEntry.call.microphone.disable()
-                } else {
-                    stackEntry.call.didPerform(.performSetMutedCall)
-                    try await stackEntry.call.microphone.enable()
-                }
-            } catch {
-                log.error(
-                    "Unable to perform muteCallAction isMuted:\(action.isMuted).",
-                    subsystems: .callKit,
-                    error: error
-                )
+        guard permissions.hasMicrophonePermission else {
+            if action.isMuted {
+                action.fulfill()
+            } else {
+                action.fail()
             }
-            action.fulfill()
+            return
         }
+
+        muteActionSubject.send(
+            .init(
+                callUUID: stackEntry.callUUID,
+                isMuted: action.isMuted
+            )
+        )
+        action.fulfill()
     }
 
     // MARK: - Helpers
@@ -639,12 +628,6 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     /// Called when `StreamVideo` changes. Adds/removes the audio reducer and
     /// subscribes to events on real devices.
     open func didUpdate(_ streamVideo: StreamVideo?) {
-        if streamVideo != nil {
-            audioStore.add(callKitAudioReducer)
-        } else {
-            audioStore.remove(callKitAudioReducer)
-        }
-
         guard currentDevice.deviceType != .simulator else {
             return
         }
@@ -796,17 +779,61 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 .call
                 .state
                 .$callSettings
-                .map { !$0.audioOn }
+                .map { $0.audioOn == false }
                 .removeDuplicates()
                 .log(.debug, subsystems: .callKit) { "Will perform SetMutedCallAction with muted:\($0). " }
-                .sinkTask(storeIn: disposableBag) { [weak self] in
-                    do {
-                        try await self?.requestTransaction(CXSetMutedCallAction(call: callUUID, muted: $0))
-                    } catch {
-                        log.warning("Unable to apply CallSettings.audioOn:\(!$0).", subsystems: .callKit)
-                    }
-                }
+                .sink { [weak self] in self?.performCallSettingMuteRequest($0, callUUID: callUUID) }
                 .store(in: disposableBag, key: key)
+        }
+    }
+
+    private func performCallSettingMuteRequest(
+        _ muted: Bool,
+        callUUID: UUID
+    ) {
+        muteProcessingQueue.addTaskOperation { [weak self] in
+            guard
+                let self,
+                callUUID == active,
+                isMuted != muted
+            else {
+                return
+            }
+            do {
+                try await requestTransaction(CXSetMutedCallAction(call: callUUID, muted: muted))
+                isMuted = muted
+            } catch {
+                log.warning("Unable to apply CallSettings.audioOn:\(!muted).", subsystems: .callKit)
+            }
+        }
+    }
+
+    private func performMuteRequest(_ request: MuteRequest) {
+        muteProcessingQueue.addTaskOperation { [weak self] in
+            guard
+                let self,
+                request.callUUID == active,
+                isMuted != request.isMuted,
+                let stackEntry = callEntry(for: request.callUUID)
+            else {
+                return
+            }
+
+            do {
+                if request.isMuted {
+                    stackEntry.call.didPerform(.performSetMutedCall)
+                    try await stackEntry.call.microphone.disable()
+                } else {
+                    stackEntry.call.didPerform(.performSetMutedCall)
+                    try await stackEntry.call.microphone.enable()
+                }
+                isMuted = request.isMuted
+            } catch {
+                log.error(
+                    "Unable to set call uuid:\(request.callUUID) muted:\(request.isMuted) state.",
+                    error: error
+                )
+            }
         }
     }
 }

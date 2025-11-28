@@ -27,11 +27,19 @@ extension AVAudioSession.CategoryOptions {
             options.append(".duckOthers")
         }
 
+        #if canImport(AVFoundation, _version: 2360.61.4.11)
+        // Adds ".allowBluetooth" if present, permitting audio playback through
+        // Bluetooth devices.
+        if contains(.allowBluetoothHFP) {
+            options.append(".allowBluetoothHFP")
+        }
+        #else
         // Adds ".allowBluetooth" if present, permitting audio playback through
         // Bluetooth devices.
         if contains(.allowBluetooth) {
             options.append(".allowBluetooth")
         }
+        #endif
 
         // Adds ".defaultToSpeaker" if present, enabling speaker output by default.
         if contains(.defaultToSpeaker) {

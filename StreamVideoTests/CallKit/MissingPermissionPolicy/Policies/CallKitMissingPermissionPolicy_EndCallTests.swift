@@ -18,6 +18,7 @@ final class CallKitMissingPermissionPolicy_EndCallTests: XCTestCase, @unchecked 
     }
 
     override func tearDown() {
+        mockApplicationStateAdapter.dismante()
         subject = nil
         mockApplicationStateAdapter = nil
         mockPermissions = nil

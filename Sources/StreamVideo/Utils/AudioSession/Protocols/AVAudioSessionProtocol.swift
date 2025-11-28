@@ -11,7 +11,7 @@ protocol AVAudioSessionProtocol {
     /// - Parameters:
     ///   - category: The audio category (e.g., `.playAndRecord`).
     ///   - mode: The audio mode (e.g., `.voiceChat`).
-    ///   - categoryOptions: The options for the category (e.g., `.allowBluetooth`).
+    ///   - categoryOptions: The options for the category (e.g., `.allowBluetoothHFP`).
     /// - Throws: An error if setting the category fails.
     func setCategory(
         _ category: AVAudioSession.Category,

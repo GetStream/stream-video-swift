@@ -247,7 +247,7 @@ open class CallViewModel: ObservableObject {
         callSettings: CallSettings? = nil
     ) {
         self.participantsLayout = participantsLayout
-        self.callSettings = callSettings ?? CallSettings()
+        self.callSettings = callSettings ?? .default
         localCallSettingsChange = callSettings != nil
 
         subscribeToCallEvents()
@@ -785,7 +785,7 @@ open class CallViewModel: ObservableObject {
 
         // Reset the CallSettings so that the next Call will be joined
         // with either new overrides or the values provided from the API.
-        callSettings = .init()
+        callSettings = .default
         localCallSettingsChange = false
     }
 

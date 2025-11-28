@@ -7,6 +7,8 @@ import Foundation
 
 /// Represents the settings for a call.
 public final class CallSettings: ObservableObject, Sendable, Equatable, CustomStringConvertible {
+    public static let `default` = CallSettings()
+
     /// Whether the audio is on for the current user.
     public let audioOn: Bool
     /// Whether the video is on for the current user.

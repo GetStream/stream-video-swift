@@ -74,6 +74,8 @@ protocol StoreNamespace: Sendable {
     /// - Returns: Array of middleware for this store.
     static func middleware() -> [Middleware<Self>]
 
+    static func effects() -> Set<StoreEffect<Self>>
+
     /// Creates the logger for this store.
     ///
     /// Override to provide custom logging behavior.
@@ -89,20 +91,34 @@ protocol StoreNamespace: Sendable {
     /// - Returns: An executor instance for this store.
     static func executor() -> StoreExecutor<Self>
 
+    /// Creates the coordinator for evaluating actions before execution.
+    ///
+    /// Override to provide custom logic that skips redundant actions.
+    ///
+    /// - Returns: A coordinator instance for this store.
+    static func coordinator() -> StoreCoordinator<Self>
+
     /// Creates a configured store instance.
     ///
     /// This method assembles all components into a functioning store.
     /// The default implementation should work for most cases.
     ///
-    /// - Parameter initialState: The initial state for the store.
-    ///
+    /// - Parameters:
+    ///   - initialState: The initial state for the store.
+    ///   - reducers: Reducers used to transform state.
+    ///   - middleware: Middleware that handle side effects.
+    ///   - logger: Logger responsible for diagnostics.
+    ///   - executor: Executor that runs the action pipeline.
+    ///   - coordinator: Coordinator that can skip redundant actions.
     /// - Returns: A fully configured store instance.
     static func store(
         initialState: State,
         reducers: [Reducer<Self>],
         middleware: [Middleware<Self>],
+        effects: Set<StoreEffect<Self>>,
         logger: StoreLogger<Self>,
-        executor: StoreExecutor<Self>
+        executor: StoreExecutor<Self>,
+        coordinator: StoreCoordinator<Self>
     ) -> Store<Self>
 }
 
@@ -116,11 +132,16 @@ extension StoreNamespace {
     /// Default implementation returns empty array.
     static func middleware() -> [Middleware<Self>] { [] }
 
+    static func effects() -> Set<StoreEffect<Self>> { [] }
+
     /// Default implementation returns basic logger.
     static func logger() -> StoreLogger<Self> { .init() }
 
     /// Default implementation returns basic executor.
     static func executor() -> StoreExecutor<Self> { .init() }
+
+    /// Default implementation returns a coordinator with no skip logic.
+    static func coordinator() -> StoreCoordinator<Self> { .init() }
 
     /// Default implementation creates a store with all components.
     ///
@@ -131,20 +152,25 @@ extension StoreNamespace {
     /// 4. Adds middleware from `middleware()`
     /// 5. Uses logger from `logger()`
     /// 6. Uses executor from `executor()`
+    /// 7. Uses coordinator from `coordinator()`
     static func store(
         initialState: State,
         reducers: [Reducer<Self>] = Self.reducers(),
         middleware: [Middleware<Self>] = Self.middleware(),
+        effects: Set<StoreEffect<Self>> = Self.effects(),
         logger: StoreLogger<Self> = Self.logger(),
-        executor: StoreExecutor<Self> = Self.executor()
+        executor: StoreExecutor<Self> = Self.executor(),
+        coordinator: StoreCoordinator<Self> = Self.coordinator()
     ) -> Store<Self> {
         .init(
             identifier: Self.identifier,
             initialState: initialState,
             reducers: reducers,
             middleware: middleware,
+            effects: effects,
             logger: logger,
-            executor: executor
+            executor: executor,
+            coordinator: coordinator
         )
     }
 }

@@ -12,7 +12,34 @@ final class CallAudioSession: @unchecked Sendable {
 
     @Injected(\.audioStore) private var audioStore
 
-    var currentRoute: AVAudioSessionRouteDescription { audioStore.session.currentRoute }
+    /// Bundles the reactive inputs we need to evaluate whenever call
+    /// capabilities or settings change, keeping log context attached.
+    private struct Input {
+        var callSettings: CallSettings
+        var ownCapabilities: Set<OwnCapability>
+        var currentRoute: RTCAudioStore.StoreState.AudioRoute?
+        var file: StaticString
+        var function: StaticString
+        var line: UInt
+
+        init(
+            callSettings: CallSettings,
+            ownCapabilities: Set<OwnCapability>,
+            currentRoute: RTCAudioStore.StoreState.AudioRoute? = nil,
+            file: StaticString = #file,
+            function: StaticString = #function,
+            line: UInt = #line
+        ) {
+            self.callSettings = callSettings
+            self.ownCapabilities = ownCapabilities
+            self.currentRoute = currentRoute
+            self.file = file
+            self.function = function
+            self.line = line
+        }
+    }
+
+    var currentRouteIsExternal: Bool { audioStore.state.currentRoute.isExternal }
 
     private(set) weak var delegate: StreamAudioSessionAdapterDelegate?
     private(set) var statsAdapter: WebRTCStatsAdapting?
@@ -23,16 +50,31 @@ final class CallAudioSession: @unchecked Sendable {
     @Atomic private(set) var policy: AudioSessionPolicy
 
     private let disposableBag = DisposableBag()
+    private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
 
-    private var interruptionEffect: RTCAudioStore.InterruptionEffect?
-    private var routeChangeEffect: RTCAudioStore.RouteChangeEffect?
+    /// Serialises policy evaluations so the AVAudioSession only receives one
+    /// configuration at a time even when upstream publishers fire in bursts.
+    private let processingPipeline = PassthroughSubject<Input, Never>()
 
-    init(
-        policy: AudioSessionPolicy = DefaultAudioSessionPolicy()
-    ) {
+    private var lastAppliedConfiguration: AudioSessionConfiguration?
+    private var lastCallSettings: CallSettings?
+    private var lastOwnCapabilities: Set<OwnCapability>?
+
+    init(policy: AudioSessionPolicy = DefaultAudioSessionPolicy()) {
         self.policy = policy
 
-        initialAudioSessionConfiguration()
+        /// - Important: This runs whenever an CallAudioSession is created and ensures that
+        /// the configuration is correctly for calling. This is quite important for CallKit as if the category and
+        /// mode aren't set correctly it won't activate the audioSession.
+        audioStore.dispatch(
+            .avAudioSession(
+                .setCategoryAndModeAndCategoryOptions(
+                    .playAndRecord,
+                    mode: .voiceChat,
+                    categoryOptions: [.allowBluetoothHFP, .allowBluetoothA2DP]
+                )
+            )
+        )
     }
 
     func activate(
@@ -44,39 +86,25 @@ final class CallAudioSession: @unchecked Sendable {
     ) {
         disposableBag.removeAll()
 
+        processingPipeline
+            .debounce(for: .milliseconds(250), scheduler: processingQueue)
+            .receive(on: processingQueue)
+            .sink { [weak self] in self?.process($0) }
+            .store(in: disposableBag)
+
         self.delegate = delegate
         self.statsAdapter = statsAdapter
 
-        Publishers
-            .CombineLatest(callSettingsPublisher, ownCapabilitiesPublisher)
-            .compactMap { [policy] in policy.configuration(for: $0, ownCapabilities: $1) }
-            .removeDuplicates()
-            // We add a little debounce delay to avoid multiple requests to
-            // overwhelm the AVAudioSession. The value has been set empirically
-            // and it can be adapter if required.
-            .debounce(for: .seconds(0.5), scheduler: DispatchQueue.global(qos: .userInteractive))
-            .log(.debug, subsystems: .audioSession) { "Updated configuration: \($0)" }
-            .sinkTask(storeIn: disposableBag) { [weak self] in await self?.didUpdateConfiguration($0) }
-            .store(in: disposableBag)
+        // Expose the policy's stereo preference so the audio device module can
+        // reconfigure itself before WebRTC starts playout.
+        audioStore.dispatch(.stereo(.setPlayoutPreferred(policy is LivestreamAudioSessionPolicy)))
 
-        audioStore.dispatch(.audioSession(.isAudioEnabled(true)))
-
-        if shouldSetActive {
-            audioStore.dispatch(.audioSession(.isActive(true)))
-        } else {
-            // In this codepath it means that we are being activated from CallKit.
-            // As CallKit is taking over the audioSession we perform a quick
-            // restart to ensure that our configuration has been activated
-            // and respected.
-            audioStore.restartAudioSession()
-        }
-
-        interruptionEffect = .init(audioStore)
-        routeChangeEffect = .init(
-            audioStore,
+        configureCallSettingsAndCapabilitiesObservation(
             callSettingsPublisher: callSettingsPublisher,
-            delegate: delegate
+            ownCapabilitiesPublisher: ownCapabilitiesPublisher
         )
+        configureCurrentRouteObservation()
+        configureCallOptionsObservation()
 
         statsAdapter?.trace(.init(audioSession: traceRepresentation))
     }
@@ -88,9 +116,13 @@ final class CallAudioSession: @unchecked Sendable {
 
         disposableBag.removeAll()
         delegate = nil
-        interruptionEffect = nil
-        routeChangeEffect = nil
-        audioStore.dispatch(.audioSession(.isActive(false)))
+
+        audioStore.dispatch([
+            .webRTCAudioSession(.setAudioEnabled(false)),
+            .setAudioDeviceModule(nil),
+            .setActive(false)
+        ])
+
         statsAdapter?.trace(.init(audioSession: traceRepresentation))
     }
 
@@ -100,130 +132,197 @@ final class CallAudioSession: @unchecked Sendable {
         ownCapabilities: Set<OwnCapability>
     ) {
         self.policy = policy
-        Task(disposableBag: disposableBag) { [weak self] in
-            guard let self else { return }
-            await didUpdateConfiguration(
-                policy.configuration(for: callSettings, ownCapabilities: ownCapabilities)
-            )
+
+        guard delegate != nil else {
+            return
         }
+
+        processingPipeline.send(
+            .init(
+                callSettings: callSettings,
+                ownCapabilities: ownCapabilities,
+                currentRoute: audioStore.state.currentRoute
+            )
+        )
     }
 
     // MARK: - Private Helpers
 
-    private func didUpdateConfiguration(
-        _ configuration: AudioSessionConfiguration
-    ) async {
-        defer { statsAdapter?.trace(.init(audioSession: traceRepresentation)) }
+    private func process(
+        _ input: Input
+    ) {
+        log.debug(
+            "⚙️ Processing input:\(input).",
+            functionName: input.function,
+            fileName: input.file,
+            lineNumber: input.line
+        )
+        didUpdate(
+            callSettings: input.callSettings,
+            ownCapabilities: input.ownCapabilities,
+            currentRoute: input.currentRoute ?? audioStore.state.currentRoute,
+            file: input.file,
+            function: input.function,
+            line: input.line
+        )
+    }
 
-        guard
-            !Task.isCancelled
-        else {
-            return
-        }
+    /// Wires call setting and capability updates into the processing queue so
+    /// downstream work always executes serially.
+    private func configureCallSettingsAndCapabilitiesObservation(
+        callSettingsPublisher: AnyPublisher<CallSettings, Never>,
+        ownCapabilitiesPublisher: AnyPublisher<Set<OwnCapability>, Never>
+    ) {
+        Publishers
+            .CombineLatest(callSettingsPublisher, ownCapabilitiesPublisher)
+            .receive(on: processingQueue)
+            .sink { [weak self] in
+                guard let self else {
+                    return
+                }
 
-        do {
-            if configuration.isActive {
-                try await audioStore.dispatchAsync(
-                    .audioSession(
-                        .setCategory(
-                            configuration.category,
-                            mode: configuration.mode,
-                            options: configuration.options
+                processingPipeline.send(
+                    .init(
+                        callSettings: $0,
+                        ownCapabilities: $1
+                    )
+                )
+            }
+            .store(in: disposableBag)
+    }
+
+    /// Reapplies the last known category options when the system clears them,
+    /// which happens after some CallKit activations.
+    private func configureCallOptionsObservation() {
+        audioStore
+            .publisher(\.audioSessionConfiguration.options)
+            .removeDuplicates()
+            .filter { $0.isEmpty }
+            .receive(on: processingQueue)
+            .compactMap { [weak self] _ in self?.lastAppliedConfiguration?.options }
+            .sink { [weak self] in self?.audioStore.dispatch(.avAudioSession(.setCategoryOptions($0))) }
+            .store(in: disposableBag)
+    }
+
+    /// Keeps the delegate informed of hardware flips while also re-evaluating
+    /// the policy when we detect a reconfiguration-worthy route change.
+    private func configureCurrentRouteObservation() {
+        audioStore
+            .publisher(\.currentRoute)
+            .removeDuplicates()
+            .filter { $0.reason.requiresReconfiguration }
+            .receive(on: processingQueue)
+            .sink { [weak self] in
+                guard let self, let lastCallSettings, let lastOwnCapabilities else { return }
+                if lastCallSettings.speakerOn != $0.isSpeaker {
+                    self.delegate?.audioSessionAdapterDidUpdateSpeakerOn(
+                        $0.isSpeaker,
+                        file: #file,
+                        function: #function,
+                        line: #line
+                    )
+                } else {
+                    processingPipeline.send(
+                        .init(
+                            callSettings: lastCallSettings,
+                            ownCapabilities: lastOwnCapabilities,
+                            currentRoute: $0
                         )
                     )
-                )
+                }
             }
-        } catch {
-            log.error(
-                "Unable to apply configuration category:\(configuration.category) mode:\(configuration.mode) options:\(configuration.options).",
-                subsystems: .audioSession,
-                error: error
-            )
-        }
+            .store(in: disposableBag)
+    }
 
-        if configuration.isActive, let overrideOutputAudioPort = configuration.overrideOutputAudioPort {
-            do {
-                try await audioStore.dispatchAsync(
-                    .audioSession(
-                        .setOverrideOutputPort(overrideOutputAudioPort)
+    private func didUpdate(
+        callSettings: CallSettings,
+        ownCapabilities: Set<OwnCapability>,
+        currentRoute: RTCAudioStore.StoreState.AudioRoute,
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line
+    ) {
+        defer { statsAdapter?.trace(.init(audioSession: traceRepresentation)) }
+
+        applyConfiguration(
+            policy.configuration(
+                for: callSettings,
+                ownCapabilities: ownCapabilities
+            ),
+            callSettings: callSettings,
+            ownCapabilities: ownCapabilities,
+            file: file,
+            function: function,
+            line: line
+        )
+    }
+
+    /// Breaks the configuration into store actions so reducers update the
+    /// audio session and our own bookkeeping in a single dispatch.
+    private func applyConfiguration(
+        _ configuration: AudioSessionConfiguration,
+        callSettings: CallSettings,
+        ownCapabilities: Set<OwnCapability>,
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line
+    ) {
+        log.debug(
+            "CallAudioSession will apply configuration:\(configuration)",
+            subsystems: .audioSession,
+            functionName: function,
+            fileName: file,
+            lineNumber: line
+        )
+
+        var actions: [StoreActionBox<RTCAudioStore.Namespace.Action>] = []
+
+        actions.append(.normal(.setMicrophoneMuted(!callSettings.audioOn || !ownCapabilities.contains(.sendAudio))))
+
+        actions.append(
+            .normal(
+                .avAudioSession(
+                    .setCategoryAndModeAndCategoryOptions(
+                        configuration.category,
+                        mode: configuration.mode,
+                        categoryOptions: configuration.options
                     )
-                )
-            } catch {
-                log.error(
-                    "Unable to apply configuration overrideOutputAudioPort:\(overrideOutputAudioPort).",
-                    subsystems: .audioSession,
-                    error: error
-                )
-            }
-        }
-        
-        await handleAudioOutputUpdateIfRequired(configuration)
-    }
-
-    private func handleAudioOutputUpdateIfRequired(
-        _ configuration: AudioSessionConfiguration
-    ) async {
-        guard
-            configuration.isActive != audioStore.state.isActive
-        else {
-            return
-        }
-        do {
-            try await audioStore.dispatchAsync(
-                .audioSession(
-                    .setAVAudioSessionActive(configuration.isActive)
-                )
-            )
-        } catch {
-            log.error(
-                "Failed while to applying AudioSession isActive:\(configuration.isActive) in order to match CallSettings.audioOutputOn.",
-                subsystems: .audioSession,
-                error: error
-            )
-        }
-    }
-
-    /// - Important: This method runs whenever an CallAudioSession is created and ensures that
-    /// the configuration is correctly for calling. This is quite important for CallKit as if the category and
-    /// mode aren't set correctly it won't activate the audioSession.
-    private func initialAudioSessionConfiguration() {
-        let state = audioStore.state
-        let requiresCategoryUpdate = state.category != .playAndRecord
-        let requiresModeUpdate = state.mode != .voiceChat
-
-        guard requiresCategoryUpdate || requiresModeUpdate else {
-            log.info(
-                "AudioSession initial configuration isn't required.",
-                subsystems: .audioSession
-            )
-            return
-        }
-
-        audioStore.dispatch(
-            .audioSession(
-                .setCategory(
-                    .playAndRecord,
-                    mode: .voiceChat,
-                    options: .allowBluetooth
                 )
             )
         )
+
+        actions.append(contentsOf: [
+            // Setting only the audioEnabled doesn't stop the audio playout
+            // as if a new track gets added later on WebRTC will try to restart
+            // the playout. However, the combination of audioEnabled:false
+            // and AVAudioSession.active:false seems to work.
+            .normal(.webRTCAudioSession(.setAudioEnabled(configuration.isActive))),
+            .normal(.setActive(configuration.isActive)),
+            .normal(.avAudioSession(.setOverrideOutputAudioPort(configuration.overrideOutputAudioPort ?? .none)))
+        ])
+
+        audioStore.dispatch(
+            actions,
+            file: file,
+            function: function,
+            line: line
+        )
+
+        lastAppliedConfiguration = configuration
+        lastCallSettings = callSettings
+        lastOwnCapabilities = ownCapabilities
     }
 }
 
 extension CallAudioSession {
     struct TraceRepresentation: Encodable {
-        var state: RTCAudioStore.State
+        var state: RTCAudioStore.StoreState
         var hasDelegate: Bool
-        var hasInterruptionEffect: Bool
-        var hasRouteChangeEffect: Bool
         var policy: String
 
         init(_ source: CallAudioSession) {
             state = source.audioStore.state
             hasDelegate = source.delegate != nil
-            hasInterruptionEffect = source.interruptionEffect != nil
-            hasRouteChangeEffect = source.routeChangeEffect != nil
             policy = String(describing: source.policy)
         }
     }

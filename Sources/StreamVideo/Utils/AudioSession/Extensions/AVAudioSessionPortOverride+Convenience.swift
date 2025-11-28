@@ -9,11 +9,11 @@ extension AVAudioSession.PortOverride {
     public var description: String {
         switch self {
         case .none:
-            return "None"
+            return ".none"
         case .speaker:
-            return "Speaker"
+            return ".speaker"
         @unknown default:
-            return "Unknown"
+            return ".unknown"
         }
     }
 }
