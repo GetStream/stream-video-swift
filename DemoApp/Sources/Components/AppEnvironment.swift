@@ -580,7 +580,7 @@ extension AppEnvironment {
     }
 
     static var audioSessionPolicy: AudioSessionPolicyDebugConfiguration = {
-        .livestream
+        .default
     }()
 }
 
