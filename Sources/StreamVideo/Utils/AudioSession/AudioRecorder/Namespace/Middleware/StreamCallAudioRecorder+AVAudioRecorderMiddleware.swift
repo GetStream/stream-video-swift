@@ -61,19 +61,7 @@ extension StreamCallAudioRecorder.Namespace {
             audioDeviceModuleCancellable = audioStore
                 .publisher(\.audioDeviceModule)
                 .receive(on: processingQueue)
-                .sink { [weak self] in
-                    if self?.updateMetersCancellable != nil {
-                        self?.stopRecording()
-                        self?.startRecording()
-                    }
-
-                    // We restore the mode to whatever we had before the call.
-                    if let audioDeviceModule = $0 {
-                        self?.mode = .audioDeviceModule(audioDeviceModule)
-                    } else {
-                        self?.mode = initialMode
-                    }
-                }
+                .sink { [weak self] in self?.didUpdate($0, initialMode: initialMode) }
         }
 
         // MARK: - Middleware
@@ -241,6 +229,28 @@ extension StreamCallAudioRecorder.Namespace {
                     .log(.debug, subsystems: .audioRecording) { "AVAudioDeviceModule audioLevel observation value:\($0)." }
                     .sink { [weak self] in self?.dispatcher?.dispatch(.setMeter($0)) }
                 log.debug("AVAudioDeviceModule audioLevel observation started...", subsystems: .audioRecording)
+            }
+        }
+
+        private func didUpdate(
+            _ audioDeviceModule: AudioDeviceModule?,
+            initialMode: Mode
+        ) {
+            stopRecording()
+
+            let newMode: Mode = {
+                if let audioDeviceModule {
+                    return .audioDeviceModule(audioDeviceModule)
+                } else {
+                    return initialMode
+                }
+            }()
+
+            processingQueue.addTaskOperation { [weak self] in
+                self?.mode = newMode
+                if self?.state?.shouldRecord == true, self?.state?.isRecording == true {
+                    self?.startRecording()
+                }
             }
         }
     }
