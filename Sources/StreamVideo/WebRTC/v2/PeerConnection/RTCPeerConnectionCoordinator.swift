@@ -53,8 +53,6 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
 
     private var callSettings: CallSettings
 
-    private let mungeSubscriberStereo = true
-
     /// A publisher that we use to observe setUp status. Once the setUp has been completed we expect
     /// a `true` value to be sent. After that, any subsequent observations will rely on the `currentValue`
     /// to know that the setUp completed, without having to wait for it.
@@ -811,20 +809,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             )
 
             var answer = try await createAnswer()
-            if mungeSubscriberStereo {
-                let munger = SDPParser()
-                let visitor = StereoEnableVisitor()
-                munger.registerVisitor(visitor)
-                await munger.parse(sdp: answer.sdp)
-                let munged = visitor.applyStereoUpdates(to: answer.sdp)
-                let mungedAnswer = RTCSessionDescription(type: answer.type, sdp: munged)
-                try await setLocalDescription(mungedAnswer)
-                log.debug("Munged Subscriber offer: \(mungedAnswer)", subsystems: subsystem)
-
-                answer = mungedAnswer
-            } else {
-                try await setLocalDescription(answer)
-            }
+            try await setLocalDescription(answer)
 
             try await sfuAdapter.sendAnswer(
                 sessionDescription: answer.sdp,
