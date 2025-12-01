@@ -5,7 +5,7 @@
 import Foundation
 import StreamWebRTC
 
-open class VideoFilter: @unchecked Sendable {
+open class VideoFilter: @unchecked Sendable, Equatable {
 
     /// An object which encapsulates the required input for a Video filter.
     public struct Input {
@@ -42,6 +42,10 @@ open class VideoFilter: @unchecked Sendable {
         self.name = name
         self.filter = filter
     }
+
+    public static func == (lhs: VideoFilter, rhs: VideoFilter) -> Bool {
+        lhs.id == rhs.id && lhs.name == rhs.name
+    }
 }
 
 extension VideoFilter {
@@ -50,7 +54,7 @@ extension VideoFilter {
     @available(iOS 15.0, *)
     public static let blurredBackground: VideoFilter = BlurBackgroundVideoFilter()
 
-    /// Applies the provided image as a background on which, overlays the person in the image (video frame).
+    /// Replaces the background with a provided image while keeping people.
     @available(iOS 15.0, *)
     public static func imageBackground(
         _ backgroundImage: CIImage,
@@ -58,4 +62,10 @@ extension VideoFilter {
     ) -> VideoFilter {
         ImageBackgroundVideoFilter(backgroundImage, id: id)
     }
+
+    /// Applies a pixelation effect over the entire frame.
+    public static let pixelate: VideoFilter = ModerationPixelateVideoFilter()
+
+    /// Applies a blur effect over the entire frame.
+    public static let blur: VideoFilter = ModerationBlurVideoFilter()
 }

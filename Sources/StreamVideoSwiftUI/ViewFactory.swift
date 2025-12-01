@@ -273,7 +273,6 @@ extension ViewFactory {
             customData: customData,
             call: call
         )
-        .moderationBlur(call: call, participant: participant)
     }
 
     public func makeVideoCallParticipantModifier(

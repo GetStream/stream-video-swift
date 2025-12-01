@@ -37,7 +37,11 @@ struct DemoEffectButton: View {
         switch effect {
         case .none:
             return appState.videoFilter == nil
+        case .pixelate:
+            return appState.videoFilter?.id == VideoFilter.pixelate.id
         case .blur:
+            return appState.videoFilter?.id == VideoFilter.blur.id
+        case .blurBackground:
             return appState.videoFilter?.id == VideoFilter.blurredBackground.id
         default:
             return appState.videoFilter?.id == effect.rawValue
@@ -70,6 +74,8 @@ struct DemoEffectButton: View {
 enum BackgroundEffect: String, CaseIterable, Identifiable {
     case none
     case blur
+    case pixelate
+    case blurBackground
     case amsterdam1 = "amsterdam-1"
     case amsterdam2 = "amsterdam-2"
     case boulder1 = "boulder-1"
@@ -84,7 +90,11 @@ enum BackgroundEffect: String, CaseIterable, Identifiable {
         switch self {
         case .none:
             return nil
+        case .pixelate:
+            return .pixelate
         case .blur:
+            return .blur
+        case .blurBackground:
             return .blurredBackground
         default:
             guard
@@ -101,8 +111,12 @@ enum BackgroundEffect: String, CaseIterable, Identifiable {
         switch self {
         case .none:
             return Image(systemName: "circle.slash")
+        case .pixelate:
+            return Image(systemName: "square.grid.3x3.square")
         case .blur:
             return Image(systemName: "square.stack.3d.forward.dottedline.fill")
+        case .blurBackground:
+            return Image(systemName: "square.stack.3d.forward.dottedline")
         default:
             return Image(rawValue)
         }
@@ -112,7 +126,7 @@ enum BackgroundEffect: String, CaseIterable, Identifiable {
         switch self {
         case .none:
             return 10
-        case .blur:
+        case .pixelate, .blur, .blurBackground:
             return 10
         default:
             return 0

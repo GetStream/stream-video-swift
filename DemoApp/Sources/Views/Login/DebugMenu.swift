@@ -134,6 +134,13 @@ struct DebugMenu: View {
         didSet { AppEnvironment.clientCapabilities = preferredClientCapabilities }
     }
 
+    @State private var moderationVideoPolicy = AppEnvironment.moderationVideoPolicy {
+        didSet { AppEnvironment.moderationVideoPolicy = moderationVideoPolicy }
+    }
+
+    @State private var customModerationVideoPolicyDuration: TimeInterval = 20
+    @State private var presentsCustomModerationVideoPolicyDuration = false
+
     var body: some View {
         Menu {
             makeMenu(
@@ -253,6 +260,13 @@ struct DebugMenu: View {
                 currentValue: autoLeavePolicy,
                 label: "Auto Leave policy"
             ) { self.autoLeavePolicy = $0 }
+
+            makeMenu(
+                for: [.blur(customModerationVideoPolicyDuration), .pixelate(customModerationVideoPolicyDuration)],
+                currentValue: moderationVideoPolicy,
+                additionalItems: { customModerationVideoView },
+                label: "Moderation Video Policy"
+            ) { self.moderationVideoPolicy = $0 }
 
             makeMenu(
                 for: [.never, .twoMinutes],
@@ -384,6 +398,21 @@ struct DebugMenu: View {
                 self.preferredCallType = customPreferredCallType
             }
         )
+        .alertWithTextField(
+            title: "Enter moderation policy duration in seconds",
+            placeholder: "Duration",
+            presentationBinding: $presentsCustomModerationVideoPolicyDuration,
+            valueBinding: $customModerationVideoPolicyDuration,
+            transformer: { TimeInterval($0) ?? 0 },
+            action: {
+                switch moderationVideoPolicy {
+                case .blur:
+                    moderationVideoPolicy = .blur(customModerationVideoPolicyDuration)
+                case .pixelate:
+                    moderationVideoPolicy = .pixelate(customModerationVideoPolicyDuration)
+                }
+            }
+        )
     }
 
     @ViewBuilder
@@ -495,6 +524,19 @@ struct DebugMenu: View {
                 Text("Add")
             } icon: {
                 Image(systemName: "plus")
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var customModerationVideoView: some View {
+        Button {
+            presentsCustomModerationVideoPolicyDuration = true
+        } label: {
+            Label {
+                Text("Duration")
+            } icon: {
+                EmptyView()
             }
         }
     }

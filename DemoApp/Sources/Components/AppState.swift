@@ -221,6 +221,8 @@ final class AppState: ObservableObject {
         AppEnvironment
             .proximityPolicies
             .forEach { try? activeCall.addProximityPolicy($0.value) }
+
+        activeCall.moderation.setVideoPolicy(AppEnvironment.moderationVideoPolicy.value)
     }
 }
 

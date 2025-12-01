@@ -625,6 +625,41 @@ extension AppEnvironment {
 }
 
 extension AppEnvironment {
+    enum ModerationVideoPolicy: Hashable, Debuggable, Sendable {
+
+        case blur(TimeInterval), pixelate(TimeInterval)
+
+        var title: String {
+            switch self {
+            case let .blur(duration):
+                if duration > 0 {
+                    return "Blur (\(duration)s)"
+                } else {
+                    return "Blur"
+                }
+            case let .pixelate(duration):
+                if duration > 0 {
+                    return "Pixelate (\(duration)s)"
+                } else {
+                    return "Pixelate"
+                }
+            }
+        }
+
+        var value: ModerationManager.VideoPolicy {
+            switch self {
+            case .blur(let duration):
+                return ModerationManager.VideoPolicy(duration: duration, videoFilter: .blur)
+            case .pixelate(let duration):
+                return ModerationManager.VideoPolicy(duration: duration, videoFilter: .pixelate)
+            }
+        }
+    }
+
+    static var moderationVideoPolicy: ModerationVideoPolicy = .blur(20)
+}
+
+extension AppEnvironment {
 
     static var clientCapabilities: Set<ClientCapability>?
 }

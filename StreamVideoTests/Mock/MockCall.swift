@@ -2,6 +2,7 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import Foundation
 @testable import StreamVideo
 
@@ -19,6 +20,7 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
         case updateTrackSize
         case callKitActivated
         case ring
+        case setVideoFilter
     }
 
     enum MockCallFunctionInputKey: Payloadable {
@@ -38,6 +40,8 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
 
         case ring(request: RingCallRequest)
 
+        case setVideoFilter(videoFilter: VideoFilter?)
+
         var payload: Any {
             switch self {
             case let .join(create, options, ring, notify, callSettings):
@@ -54,6 +58,9 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
 
             case let .ring(request):
                 return request
+
+            case let .setVideoFilter(videoFilter):
+                return videoFilter
             }
         }
     }
@@ -66,6 +73,14 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
     override var state: CallState {
         get { self[dynamicMember: \.state] }
         set { stub(for: \.state, with: newValue) }
+    }
+
+    override var eventPublisher: AnyPublisher<VideoEvent, Never> {
+        if containsStub(for: \.eventPublisher) {
+            return self[dynamicMember: \.eventPublisher]
+        } else {
+            return super.eventPublisher
+        }
     }
 
     @MainActor
@@ -193,5 +208,13 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
             // Default to a benign response if not stubbed to simplify tests
             return RingCallResponse(duration: "0", membersIds: request.membersIds ?? [])
         }
+    }
+
+    override func setVideoFilter(_ videoFilter: VideoFilter?) {
+        stubbedFunctionInput[.setVideoFilter]?.append(
+            .setVideoFilter(
+                videoFilter: videoFilter
+            )
+        )
     }
 }
