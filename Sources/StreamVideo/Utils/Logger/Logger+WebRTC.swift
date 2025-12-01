@@ -8,7 +8,7 @@ import StreamWebRTC
 extension Logger {
 
     public enum WebRTC {
-        public enum LogMode { case none, validFilesOnly, all }
+        public enum LogMode: Sendable { case none, validFilesOnly, all }
 
         public nonisolated(unsafe) static var mode: LogMode = .all {
             didSet { RTCLogger.default.didUpdate(mode: mode) }
@@ -69,6 +69,8 @@ extension Logger.WebRTC {
                 }
 
                 guard mode != .none else {
+                    logger.stop()
+                    isRunning = false
                     return
                 }
 

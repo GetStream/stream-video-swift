@@ -616,7 +616,6 @@
 		40B31AA82D10594F005FB448 /* PublishOptions+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B31AA72D10594F005FB448 /* PublishOptions+Dummy.swift */; };
 		40B31AA92D10594F005FB448 /* PublishOptions+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B31AA72D10594F005FB448 /* PublishOptions+Dummy.swift */; };
 		40B3E53C2DBBAF9500DE8F50 /* ProximityMonitor_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B3E53B2DBBAF9500DE8F50 /* ProximityMonitor_Tests.swift */; };
-		40B3E53E2DBBB0AB00DE8F50 /* CurrentDevice+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B3E53D2DBBB0AB00DE8F50 /* CurrentDevice+Dummy.swift */; };
 		40B3E5402DBBB6D900DE8F50 /* MockProximityMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B3E53F2DBBB6D900DE8F50 /* MockProximityMonitor.swift */; };
 		40B3E5422DBBB83A00DE8F50 /* ProximityManager_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B3E5412DBBB83A00DE8F50 /* ProximityManager_Tests.swift */; };
 		40B3E5442DBBB99200DE8F50 /* MockProximityPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B3E5432DBBB99200DE8F50 /* MockProximityPolicy.swift */; };
@@ -2299,7 +2298,6 @@
 		40B284E22D52423B0064C1FE /* AVAudioSessionCategory+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AVAudioSessionCategory+Convenience.swift"; sourceTree = "<group>"; };
 		40B31AA72D10594F005FB448 /* PublishOptions+Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PublishOptions+Dummy.swift"; sourceTree = "<group>"; };
 		40B3E53B2DBBAF9500DE8F50 /* ProximityMonitor_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProximityMonitor_Tests.swift; sourceTree = "<group>"; };
-		40B3E53D2DBBB0AB00DE8F50 /* CurrentDevice+Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CurrentDevice+Dummy.swift"; sourceTree = "<group>"; };
 		40B3E53F2DBBB6D900DE8F50 /* MockProximityMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockProximityMonitor.swift; sourceTree = "<group>"; };
 		40B3E5412DBBB83A00DE8F50 /* ProximityManager_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProximityManager_Tests.swift; sourceTree = "<group>"; };
 		40B3E5432DBBB99200DE8F50 /* MockProximityPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockProximityPolicy.swift; sourceTree = "<group>"; };
@@ -7077,7 +7075,6 @@
 				40FAAC8A2DDCB488007BF93A /* MockConsumableBucketItemTransformer.swift */,
 				40AAD1902D2EF18A00D10330 /* MockCaptureDevice.swift */,
 				40F1017F2D5D078800C49481 /* MockAudioSessionPolicy.swift */,
-				40B3E53D2DBBB0AB00DE8F50 /* CurrentDevice+Dummy.swift */,
 				40D75C5B2E438633000E0438 /* AVAudioSessionRouteDescription+Dummy.swift */,
 				4019A2862E43565A00CE70A4 /* MockAudioSession.swift */,
 				4019A2882E4357B200CE70A4 /* MockRTCAudioStore.swift */,
@@ -9412,7 +9409,6 @@
 				40B31AA92D10594F005FB448 /* PublishOptions+Dummy.swift in Sources */,
 				842747F129EED88800E063AD /* InternetConnection_Tests.swift in Sources */,
 				40C9E4552C988CE100802B28 /* WebRTCJoinRequestFactory_Tests.swift in Sources */,
-				40B3E53E2DBBB0AB00DE8F50 /* CurrentDevice+Dummy.swift in Sources */,
 				84F58B9329EEB53E00010C4C /* EventMiddleware_Mock.swift in Sources */,
 				40FAAC892DDC9F88007BF93A /* ConsumableBucket_Tests.swift in Sources */,
 				40B48C2E2D14D15E002C4EAB /* StreamVideoSfuModelsPublishOption_VideoLayersTests.swift in Sources */,
