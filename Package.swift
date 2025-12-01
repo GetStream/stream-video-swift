@@ -31,6 +31,9 @@ let package = Package(
             dependencies: [
                 .product(name: "SwiftProtobuf", package: "swift-protobuf"),
                 .product(name: "StreamWebRTC", package: "stream-video-swift-webrtc")
+            ],
+            swiftSettings: [
+                .unsafeFlags(["-Osize"], .when(configuration: .release))
             ]
         ),
         .target(
