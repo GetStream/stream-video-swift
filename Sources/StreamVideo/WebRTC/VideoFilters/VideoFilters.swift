@@ -63,9 +63,6 @@ extension VideoFilter {
         ImageBackgroundVideoFilter(backgroundImage, id: id)
     }
 
-    /// Applies a pixelation effect over the entire frame.
-    public static let pixelate: VideoFilter = ModerationPixelateVideoFilter()
-
     /// Applies a blur effect over the entire frame.
     public static let blur: VideoFilter = ModerationBlurVideoFilter()
 }

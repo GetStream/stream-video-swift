@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		27293A6712944001B2C5E10D /* LoggerConcurrency_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD04B38CCAB544BBA6FEF29C /* LoggerConcurrency_Tests.swift */; };
 		400062792EDDF19A0086E14B /* ModerationBlurFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 400062782EDDF19A0086E14B /* ModerationBlurFilter.swift */; };
-		4000627D2EDDF9A40086E14B /* ModerationPixelateVideoFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4000627C2EDDF9A40086E14B /* ModerationPixelateVideoFilter.swift */; };
 		400062902EDEFA570086E14B /* ModerationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4000628E2EDEFA570086E14B /* ModerationManager.swift */; };
 		400062912EDEFA570086E14B /* ModerationManager+VideoPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4000628B2EDEFA570086E14B /* ModerationManager+VideoPolicy.swift */; };
 		400062922EDEFA570086E14B /* ModerationManager+VideoAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4000628A2EDEFA570086E14B /* ModerationManager+VideoAdapter.swift */; };
@@ -17,6 +16,7 @@
 		400062992EDEFD8F0086E14B /* VideoFilter+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 400062982EDEFD8F0086E14B /* VideoFilter+Dummy.swift */; };
 		4000629A2EDEFD8F0086E14B /* VideoFilter+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 400062982EDEFD8F0086E14B /* VideoFilter+Dummy.swift */; };
 		4000629D2EDEFF6A0086E14B /* ModerationManager+VideoAdapterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4000629C2EDEFF6A0086E14B /* ModerationManager+VideoAdapterTests.swift */; };
+		4000629F2EDF0D020086E14B /* ModerationPixelateVideoFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4000627C2EDDF9A40086E14B /* ModerationPixelateVideoFilter.swift */; };
 		40034C202CFDABE600A318B1 /* PublishOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40034C1F2CFDABE600A318B1 /* PublishOptions.swift */; };
 		40034C262CFE155C00A318B1 /* CallKitAvailabilityPolicyProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40034C252CFE155C00A318B1 /* CallKitAvailabilityPolicyProtocol.swift */; };
 		40034C282CFE156800A318B1 /* CallKitAvailabilityPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40034C272CFE156800A318B1 /* CallKitAvailabilityPolicy.swift */; };
@@ -1848,8 +1848,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		400062732EDDE4A60086E14B /* VideoFilterProcessing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoFilterProcessing.swift; sourceTree = "<group>"; };
-		400062752EDDE52B0086E14B /* VideoFilterProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoFilterProcessor.swift; sourceTree = "<group>"; };
 		400062782EDDF19A0086E14B /* ModerationBlurFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModerationBlurFilter.swift; sourceTree = "<group>"; };
 		4000627C2EDDF9A40086E14B /* ModerationPixelateVideoFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModerationPixelateVideoFilter.swift; sourceTree = "<group>"; };
 		4000628A2EDEFA570086E14B /* ModerationManager+VideoAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ModerationManager+VideoAdapter.swift"; sourceTree = "<group>"; };
@@ -3405,15 +3403,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		400062722EDDE49C0086E14B /* Processors */ = {
-			isa = PBXGroup;
-			children = (
-				400062732EDDE4A60086E14B /* VideoFilterProcessing.swift */,
-				400062752EDDE52B0086E14B /* VideoFilterProcessor.swift */,
-			);
-			path = Processors;
-			sourceTree = "<group>";
-		};
 		400062772EDDF18C0086E14B /* BlurVideoFilter */ = {
 			isa = PBXGroup;
 			children = (
@@ -3426,7 +3415,6 @@
 			isa = PBXGroup;
 			children = (
 				400062772EDDF18C0086E14B /* BlurVideoFilter */,
-				4000627B2EDDF9990086E14B /* PixelateVideoFilter */,
 			);
 			path = Moderation;
 			sourceTree = "<group>";
@@ -3480,6 +3468,14 @@
 				4000629C2EDEFF6A0086E14B /* ModerationManager+VideoAdapterTests.swift */,
 			);
 			path = Adapters;
+			sourceTree = "<group>";
+		};
+		4000629E2EDF0CB90086E14B /* VideoFilters */ = {
+			isa = PBXGroup;
+			children = (
+				4000627B2EDDF9990086E14B /* PixelateVideoFilter */,
+			);
+			path = VideoFilters;
 			sourceTree = "<group>";
 		};
 		40034C212CFE116200A318B1 /* AvailabilityPolicy */ = {
@@ -4032,6 +4028,7 @@
 		4030E5962A9DF48C003E8CBA /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				4000629E2EDF0CB90086E14B /* VideoFilters */,
 				4014F1042D8C2EFE004E7EFD /* Gleap */,
 				845C098F2C0E0B6B00F725B3 /* SessionTimer */,
 				403EFC9D2BDBFDEE0057C248 /* Feedback */,
@@ -4361,7 +4358,6 @@
 		406583832B87694B00B4F979 /* VideoFilters */ = {
 			isa = PBXGroup;
 			children = (
-				400062722EDDE49C0086E14B /* Processors */,
 				4065839E2B877BC400B4F979 /* Filters */,
 				406583952B877A4000B4F979 /* Extensions */,
 				406583932B877A1900B4F979 /* Utilities */,
@@ -8496,6 +8492,7 @@
 				84093811288A90390089A35B /* DetailedCallingView.swift in Sources */,
 				84ED240D286C9515002A3186 /* DemoCallContainerView.swift in Sources */,
 				40F445B22A9DFFBB004BE3DA /* User+Demo.swift in Sources */,
+				4000629F2EDF0D020086E14B /* ModerationPixelateVideoFilter.swift in Sources */,
 				40D946452AA5F67E00C8861B /* DemoCallingTopView.swift in Sources */,
 				847B47B72A260CF1000714CE /* CustomCallView.swift in Sources */,
 				40F445CC2A9E1FC9004BE3DA /* DemoChatViewFactory.swift in Sources */,
@@ -8902,7 +8899,6 @@
 				40C4DF492C1C2C210035DBC2 /* Publisher+WeakAssign.swift in Sources */,
 				4157FF912C9AC9EC0093D839 /* RTMPBroadcastRequest.swift in Sources */,
 				844982472C738A830029734D /* DeleteRecordingResponse.swift in Sources */,
-				4000627D2EDDF9A40086E14B /* ModerationPixelateVideoFilter.swift in Sources */,
 				40AB34DA2C5D5A7B00B5B6B3 /* WebRTCStatsReporter.swift in Sources */,
 				408679F72BD12F1000D027E0 /* AudioFilter.swift in Sources */,
 				8456E6D2287EC343004E180E /* ConsoleLogDestination.swift in Sources */,

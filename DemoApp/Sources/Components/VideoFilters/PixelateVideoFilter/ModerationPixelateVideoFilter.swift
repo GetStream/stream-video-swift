@@ -5,9 +5,10 @@
 import CoreGraphics
 import CoreImage
 import Foundation
+import StreamVideo
 
 /// Applies a pixelation effect to fully obfuscate a frame.
-public final class ModerationPixelateVideoFilter: VideoFilter, @unchecked Sendable {
+final class ModerationPixelateVideoFilter: VideoFilter, @unchecked Sendable {
     @available(*, unavailable)
     override public init(
         id: String,
@@ -19,7 +20,7 @@ public final class ModerationPixelateVideoFilter: VideoFilter, @unchecked Sendab
     /// - Parameters:
     ///   - pixelBlockFactor: Larger values create bigger pixel blocks.
     ///   - downscaleFactor: Downscale before pixelation to boost performance.
-    public init(
+    init(
         pixelBlockFactor: CGFloat = 40,
         downscaleFactor: CGFloat = 0.5
     ) {
@@ -60,7 +61,7 @@ public final class ModerationPixelateVideoFilter: VideoFilter, @unchecked Sendab
                     return srcImage
                 }
 
-                // If we downscaled, scale back up to original size.
+                // If we downscaled, scale back up to original size. t
                 if clampedDownscale < 1 {
                     let scaleBack = 1 / clampedDownscale
                     out = out.transformed(
@@ -76,4 +77,10 @@ public final class ModerationPixelateVideoFilter: VideoFilter, @unchecked Sendab
             }
         )
     }
+}
+
+extension VideoFilter {
+
+    /// Applies a pixelation effect over the entire frame.
+    static let pixelate: VideoFilter = ModerationPixelateVideoFilter()
 }
