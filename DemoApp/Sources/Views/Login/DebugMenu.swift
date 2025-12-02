@@ -431,11 +431,7 @@ struct DebugMenu: View {
             Button {
                 presentsCustomEnvironmentSetup = true
             } label: {
-                Label {
-                    Text("Custom")
-                } icon: {
-                    EmptyView()
-                }
+                Text("Custom")
             }
         }
     }
@@ -456,11 +452,7 @@ struct DebugMenu: View {
             Button {
                 presentsCustomTokenExpiration = true
             } label: {
-                Label {
-                    Text("Custom")
-                } icon: {
-                    EmptyView()
-                }
+                Text("Custom")
             }
         }
     }
@@ -481,11 +473,7 @@ struct DebugMenu: View {
             Button {
                 presentsCustomCallExpiration = true
             } label: {
-                Label {
-                    Text("Custom")
-                } icon: {
-                    EmptyView()
-                }
+                Text("Custom")
             }
         }
     }
@@ -506,11 +494,7 @@ struct DebugMenu: View {
             Button {
                 presentsCustomDisconnectionTimeout = true
             } label: {
-                Label {
-                    Text("Custom")
-                } icon: {
-                    EmptyView()
-                }
+                Text("Custom")
             }
         }
     }
@@ -533,11 +517,7 @@ struct DebugMenu: View {
         Button {
             presentsCustomModerationVideoPolicyDuration = true
         } label: {
-            Label {
-                Text("Duration")
-            } icon: {
-                EmptyView()
-            }
+            Text("Duration")
         }
     }
 

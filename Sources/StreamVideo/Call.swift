@@ -54,7 +54,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         activeCallPublisher: streamVideo.state.$activeCall.eraseToAnyPublisher()
     )
     /// Provides access to moderation.
-    public lazy var moderation = ModerationManager(self)
+    public lazy var moderation = Moderation.Manager(self)
 
     private let disposableBag = DisposableBag()
     internal let callController: CallController

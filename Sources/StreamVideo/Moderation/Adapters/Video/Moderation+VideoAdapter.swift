@@ -5,7 +5,7 @@
 import Combine
 import Foundation
 
-extension ModerationManager {
+extension Moderation {
 
     /// Moderates outgoing video by applying policies to an active call.
     final class VideoAdapter: @unchecked Sendable {

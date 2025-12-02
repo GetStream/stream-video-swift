@@ -4,7 +4,7 @@
 
 import Foundation
 
-extension ModerationManager {
+extension Moderation {
 
     /// Policy describing what filter to apply and for how long.
     public struct VideoPolicy: Sendable {
