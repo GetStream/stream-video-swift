@@ -636,7 +636,7 @@ final class Call_Tests: StreamVideoTestCase {
 
     // MARK: - setVideoFilter
 
-    func test_setVideoFilter_moderationVideoAdapterWasUpdated() {
+    func test_setVideoFilter_moderationVideoAdapterWasUpdated() async {
         let mockCallController = MockCallController()
         let call = MockCall(.dummy(callController: mockCallController))
         call.stub(for: \.state, with: .init())
@@ -644,10 +644,7 @@ final class Call_Tests: StreamVideoTestCase {
 
         call.setVideoFilter(mockVideoFilter)
 
-        XCTAssertEqual(
-            call.moderation.video.unmoderatedVideoFilter?.id,
-            mockVideoFilter.id
-        )
+        XCTAssertEqual(call.recordedInputPayload(VideoFilter.self, for: .setVideoFilter)?.first, mockVideoFilter)
     }
 
     // MARK: - Private helpers

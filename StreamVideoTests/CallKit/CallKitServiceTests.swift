@@ -41,6 +41,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
     override func setUp() {
         super.setUp()
         _ = mockPermissions
+        _ = mockedStreamVideo
         InjectedValues[\.uuidFactory] = uuidFactory
         mockAudioStore.makeShared()
         mockApplicationStateAdapter.makeShared()
