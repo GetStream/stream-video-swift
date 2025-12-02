@@ -7,9 +7,9 @@ import Foundation
 import XCTest
 
 @MainActor
-final class ModerationManager_Tests: XCTestCase, @unchecked Sendable {
+final class Moderation_ManagerTests: XCTestCase, @unchecked Sendable {
     private var mockedStreamVideo: MockStreamVideo! = MockStreamVideo()
-    private lazy var subject: ModerationManager! = .init(MockCall())
+    private lazy var subject: Moderation.Manager! = .init(MockCall())
 
     override func tearDown() async throws {
         subject = nil

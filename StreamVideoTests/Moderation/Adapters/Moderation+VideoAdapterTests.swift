@@ -8,10 +8,10 @@ import Foundation
 import XCTest
 
 @MainActor
-final class ModerationManager_VideoAdapterTests: XCTestCase, @unchecked Sendable {
+final class Moderation_VideoAdapterTests: XCTestCase, @unchecked Sendable {
     private var mockedStreamVideo: MockStreamVideo! = MockStreamVideo()
     private lazy var call: MockCall! = .init()
-    private lazy var subject: ModerationManager.VideoAdapter! = .init(call)
+    private lazy var subject: Moderation.VideoAdapter! = .init(call)
 
     override func tearDown() async throws {
         subject = nil

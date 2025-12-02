@@ -646,12 +646,12 @@ extension AppEnvironment {
             }
         }
 
-        var value: ModerationManager.VideoPolicy {
+        var value: Moderation.VideoPolicy {
             switch self {
             case .blur(let duration):
-                return ModerationManager.VideoPolicy(duration: duration, videoFilter: .blur)
+                return Moderation.VideoPolicy(duration: duration, videoFilter: .blur)
             case .pixelate(let duration):
-                return ModerationManager.VideoPolicy(duration: duration, videoFilter: .pixelate)
+                return Moderation.VideoPolicy(duration: duration, videoFilter: .pixelate)
             }
         }
     }
