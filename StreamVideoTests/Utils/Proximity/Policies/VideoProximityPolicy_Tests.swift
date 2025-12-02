@@ -9,6 +9,7 @@ import XCTest
 @MainActor
 final class VideoProximityPolicy_Tests: XCTestCase, @unchecked Sendable {
 
+    private var mockStreamVideo: MockStreamVideo! = .init()
     private lazy var mockCallController: MockCallController! = .init()
     private lazy var mockCall: MockCall! = .init(.dummy(callController: mockCallController))
     private lazy var subject: VideoProximityPolicy! = .init()
@@ -24,6 +25,7 @@ final class VideoProximityPolicy_Tests: XCTestCase, @unchecked Sendable {
     override func tearDown() async throws {
         subject = nil
         mockCall = nil
+        mockStreamVideo = nil
         mockCallController = nil
         try await super.tearDown()
     }

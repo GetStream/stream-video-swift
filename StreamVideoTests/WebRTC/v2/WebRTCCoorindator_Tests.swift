@@ -339,7 +339,9 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
 
         try await subject.stopScreensharing()
 
-        XCTAssertEqual(mockPublisher.timesCalled(.stopScreenSharing), 1)
+        await fulfillment {
+            mockPublisher.timesCalled(.stopScreenSharing) == 1
+        }
     }
 
     // MARK: - changePinState
