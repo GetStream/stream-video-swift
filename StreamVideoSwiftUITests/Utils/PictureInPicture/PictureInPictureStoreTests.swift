@@ -11,12 +11,14 @@ import XCTest
 @MainActor
 final class PictureInPictureStoreTests: XCTestCase, @unchecked Sendable {
 
+    private var mockStreamVideo: MockStreamVideo! = .init()
     private var subject: PictureInPictureStore! = .init()
     private var disposableBag: DisposableBag! = .init()
 
     override func tearDown() async throws {
         subject = nil
         disposableBag = nil
+        mockStreamVideo = nil
         try await super.tearDown()
     }
 

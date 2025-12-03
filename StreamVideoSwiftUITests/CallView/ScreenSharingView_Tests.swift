@@ -10,6 +10,13 @@ import XCTest
 
 final class ScreenSharingView_Tests: StreamVideoUITestCase, @unchecked Sendable {
 
+    private var mockStreamVideo: MockStreamVideo! = .init()
+
+    override func tearDown() async throws {
+        mockStreamVideo = nil
+        try await super.tearDown()
+    }
+
     @MainActor
     func test_screenSharingView_snapshot() async throws {
         let viewModel = MockCallViewModel()

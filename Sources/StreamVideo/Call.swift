@@ -461,7 +461,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             stateMachine.transition(
                 .rejecting(
                     self,
-                    input: .rejecting(.init(deliverySubject: deliverySubject))
+                    input: .rejecting(.init(reason: reason, deliverySubject: deliverySubject))
                 )
             )
             return try await deliverySubject.nextValue(timeout: CallConfiguration.timeout.reject)
