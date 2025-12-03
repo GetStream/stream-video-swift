@@ -10,6 +10,7 @@ import XCTest
 @MainActor
 final class ProximityManager_Tests: XCTestCase, @unchecked Sendable {
 
+    private var mockedStreamVideo: MockStreamVideo! = .init()
     private lazy var mockProximityMonitor: MockProximityMonitor! = .init()
     private lazy var mockCall: MockCall! = .init(.dummy())
     private lazy var mockActiveCallSubject: PassthroughSubject<Call?, Never>! = .init()
@@ -29,6 +30,7 @@ final class ProximityManager_Tests: XCTestCase, @unchecked Sendable {
 
     override func tearDown() async throws {
         subject = nil
+        mockedStreamVideo = nil
         mockCall = nil
         mockActiveCallSubject = nil
         mockProximityMonitor = nil

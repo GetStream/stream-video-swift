@@ -14,16 +14,12 @@ import Vision
 /// background image using the mask. This allows for effects like background
 /// replacement or blurring.
 @available(iOS 15.0, *)
-final class BackgroundImageFilterProcessor {
+final class BackgroundImageFilterProcessor: @unchecked Sendable {
     private let requestHandler = VNSequenceRequestHandler()
     private let request: VNGeneratePersonSegmentationRequest
 
-    /// Initializes a new `BackgroundImageFilterProcessor` instance.
-    ///
-    /// - Parameters:
-    ///   - qualityLevel: The quality level for segmentation, defaults to
-    ///     `.balanced` if a neural engine is available, otherwise `.fast` for
-    ///     performance.
+    /// Creates a processor configured with a Vision segmentation quality level.
+    /// - Parameter qualityLevel: Person-mask fidelity to request from Vision.
     init(
         _ qualityLevel: VNGeneratePersonSegmentationRequest.QualityLevel = neuralEngineExists ? .balanced : .fast
     ) {
@@ -33,12 +29,11 @@ final class BackgroundImageFilterProcessor {
         self.request = request
     }
 
-    /// Applies the filter to a video frame using a background image.
-    ///
+    /// Applies the filter to a frame and blends it with a background image.
     /// - Parameters:
-    ///   - buffer: The video frame to process as a `CVPixelBuffer`.
-    ///   - backgroundImage: The background image to blend with the foreground.
-    /// - Returns: A new `CIImage` with the processed frame, or `nil` if an error occurs.
+    ///   - buffer: Video frame buffer to process.
+    ///   - backgroundImage: Background image used when compositing.
+    /// - Returns: Processed `CIImage` or `nil` on failure.
     func applyFilter(
         _ buffer: CVPixelBuffer,
         backgroundImage: CIImage

@@ -53,6 +53,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         self,
         activeCallPublisher: streamVideo.state.$activeCall.eraseToAnyPublisher()
     )
+    /// Provides access to moderation.
+    public lazy var moderation = Moderation.Manager(self)
 
     private let disposableBag = DisposableBag()
     internal let callController: CallController
@@ -123,6 +125,9 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         }
 
         _ = closedCaptionsAdapter
+        _ = moderation
+        _ = proximity
+
         callController.call = self
         speaker.call = self
         // It's important to instantiate the stateMachine as soon as possible
@@ -527,14 +532,15 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         await callController.updateTrackSize(trackSize, for: participant)
     }
 
-    /// Sets a `videoFilter` for the current call.
-    /// - Parameter videoFilter: A `VideoFilter` instance representing the video filter to set.
+    /// Sets a `VideoFilter` for the current call.
+    /// - Parameter videoFilter: Desired filter; pass `nil` to clear it.
     public func setVideoFilter(_ videoFilter: VideoFilter?) {
+        moderation.setVideoFilter(videoFilter)
         callController.setVideoFilter(videoFilter)
     }
 
-    /// Sets an`audioFilter` for the current call.
-    /// - Parameter audioFilter: An `AudioFilter` instance representing the audio filter to set.
+    /// Sets an `AudioFilter` for the current call.
+    /// - Parameter audioFilter: Desired filter; pass `nil` to clear it.
     public func setAudioFilter(_ audioFilter: AudioFilter?) {
         streamVideo.videoConfig.audioProcessingModule.setAudioFilter(audioFilter)
     }
@@ -550,7 +556,12 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         try await callController.stopScreensharing()
     }
 
-    public func eventPublisher<WSEvent: Event>(for event: WSEvent.Type) -> AnyPublisher<WSEvent, Never> {
+    /// Publishes web socket events filtered by the provided type.
+    /// - Parameter event: Event type to observe.
+    /// - Returns: Publisher emitting instances of `WSEvent`.
+    public func eventPublisher<WSEvent: Event>(
+        for event: WSEvent.Type
+    ) -> AnyPublisher<WSEvent, Never> {
         eventPublisher
             .compactMap { $0.rawValue as? WSEvent }
             .eraseToAnyPublisher()

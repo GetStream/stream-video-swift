@@ -2,6 +2,7 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+import CoreGraphics
 import CoreImage
 import Foundation
 
@@ -15,9 +16,6 @@ import Foundation
 /// This filter is available on iOS 15.0 and later.
 @available(iOS 15.0, *)
 public final class BlurBackgroundVideoFilter: VideoFilter, @unchecked Sendable {
-
-    private let backgroundImageFilterProcessor = BackgroundImageFilterProcessor()
-
     @available(*, unavailable)
     override public init(
         id: String,
@@ -25,24 +23,45 @@ public final class BlurBackgroundVideoFilter: VideoFilter, @unchecked Sendable {
         filter: @escaping (Input) async -> CIImage
     ) { fatalError() }
 
-    init() {
+    /// Creates a filter that applies a Gaussian blur to the background.
+    /// - Parameters:
+    ///   - blurRadius: Radius used by the Gaussian blur.
+    ///   - downscaleFactor: Downscales before blur to improve performance.
+    public init(
+        blurRadius: CGFloat = 20,
+        downscaleFactor: CGFloat = 0.5
+    ) {
+        let clampedDownscale = max(min(downscaleFactor, 1), 0.1)
+        let radius = blurRadius
+        let backgroundImageFilterProcessor = BackgroundImageFilterProcessor()
         let name = String(describing: type(of: self)).lowercased()
+
         super.init(
             id: "io.getstream.\(name)",
             name: name,
-            filter: \.originalImage
+            filter: { [backgroundImageFilterProcessor] input in
+                let srcImage = input.originalImage
+                let extent = srcImage.extent
+                let workingImage: CIImage
+                if clampedDownscale < 1 {
+                    let scaleTransform = CGAffineTransform(scaleX: clampedDownscale, y: clampedDownscale)
+                    workingImage = srcImage.transformed(by: scaleTransform)
+                } else {
+                    workingImage = srcImage
+                }
+                let clampedImage = workingImage.clampedToExtent()
+                var blurredImage = clampedImage.applyingFilter("CIGaussianBlur", parameters: [kCIInputRadiusKey: radius])
+                if clampedDownscale < 1 {
+                    let scaleUpTransform = CGAffineTransform(scaleX: 1 / clampedDownscale, y: 1 / clampedDownscale)
+                    blurredImage = blurredImage.transformed(by: scaleUpTransform)
+                }
+                let backgroundImage = blurredImage.cropped(to: extent)
+                return backgroundImageFilterProcessor
+                    .applyFilter(
+                        input.originalPixelBuffer,
+                        backgroundImage: backgroundImage
+                    ) ?? input.originalImage
+            }
         )
-
-        filter = { [backgroundImageFilterProcessor] input in
-            let backgroundImage = input
-                .originalImage
-                .applyingFilter("CIGaussianBlur")
-
-            return backgroundImageFilterProcessor
-                .applyFilter(
-                    input.originalPixelBuffer,
-                    backgroundImage: backgroundImage
-                ) ?? input.originalImage
-        }
     }
 }

@@ -10,6 +10,7 @@ import XCTest
 @MainActor
 final class SpeakerProximityPolicy_Tests: XCTestCase, @unchecked Sendable {
 
+    private var mockStreamVideo: MockStreamVideo! = .init()
     private lazy var mockCall: MockCall! = .init(.dummy())
     private lazy var peerConnectionFactory: PeerConnectionFactory! = .mock()
     private lazy var subject: SpeakerProximityPolicy! = .init()
@@ -22,6 +23,7 @@ final class SpeakerProximityPolicy_Tests: XCTestCase, @unchecked Sendable {
 
     override func tearDown() async throws {
         subject = nil
+        mockStreamVideo = nil
         mockCall = nil
         peerConnectionFactory = nil
         try await super.tearDown()

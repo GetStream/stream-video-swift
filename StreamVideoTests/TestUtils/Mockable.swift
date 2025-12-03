@@ -53,6 +53,10 @@ extension Mockable {
     mutating func resetRecords(for key: FunctionKey) {
         stubbedFunctionInput[key] = []
     }
+
+    func containsStub<T>(for keyPath: KeyPath<Self, T>) -> Bool {
+        stubbedProperty[propertyKey(for: keyPath)] != nil
+    }
 }
 
 final class StubVariantResultProvider<Value> {
