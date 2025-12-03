@@ -9,18 +9,17 @@ import XCTest
 
 @MainActor
 final class LobbyViewModelTests: XCTestCase, @unchecked Sendable {
-    private lazy var mockStreamVideo: MockStreamVideo! = .init()
     private lazy var subject: LobbyViewModel! = .init(callType: .default, callId: .unique)
 
     override func tearDown() async throws {
         subject = nil
-        mockStreamVideo = nil
         try await super.tearDown()
     }
 
     // MARK: - Join Events Tests
 
     func test_subscribeForCallJoinUpdates_addsNewParticipant() async throws {
+        let mockStreamVideo: MockStreamVideo! = .init()
         let mockCall = MockCall()
         mockCall.stub(
             for: .get,
@@ -55,6 +54,7 @@ final class LobbyViewModelTests: XCTestCase, @unchecked Sendable {
     // MARK: - Leave Events Tests
 
     func test_subscribeForCallLeaveUpdates_removesParticipant() async throws {
+        let mockStreamVideo: MockStreamVideo! = .init()
         let mockCall = MockCall()
         mockCall.stub(
             for: .get,
@@ -87,6 +87,7 @@ final class LobbyViewModelTests: XCTestCase, @unchecked Sendable {
     }
 
     func test_subscribeForCallLeaveUpdates_doesNotRemoveWrongParticipant() async throws {
+        let mockStreamVideo: MockStreamVideo! = .init()
         let mockCall = MockCall()
         mockCall.stub(
             for: .get,

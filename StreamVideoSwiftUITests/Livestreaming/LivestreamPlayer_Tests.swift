@@ -12,7 +12,13 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
     
     private let callId = "test"
     private let callType = "livestream"
-    
+    private var mockStreamVideo: MockStreamVideo! = .init()
+
+    override func tearDown() async throws {
+        mockStreamVideo = nil
+        try await super.tearDown()
+    }
+
     @MainActor
     func test_livestreamPlayer_snapshot() async throws {
         // Given

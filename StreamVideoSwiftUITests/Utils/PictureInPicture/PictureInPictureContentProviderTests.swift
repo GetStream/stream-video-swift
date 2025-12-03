@@ -13,6 +13,7 @@ final class PictureInPictureContentProviderTests: XCTestCase, @unchecked Sendabl
 
     private nonisolated(unsafe) static var videoConfig: VideoConfig! = .dummy()
 
+    private var mockStreamVideo: MockStreamVideo! = .init()
     private lazy var store: PictureInPictureStore! = .init()
     private lazy var mockPeerConnectionFactory: PeerConnectionFactory! = .mock()
     private lazy var subject: PictureInPictureContentProvider! = .init(store: store)
@@ -25,6 +26,7 @@ final class PictureInPictureContentProviderTests: XCTestCase, @unchecked Sendabl
     override func tearDown() async throws {
         store = nil
         mockPeerConnectionFactory = nil
+        mockStreamVideo = nil
         subject = nil
         try await super.tearDown()
     }

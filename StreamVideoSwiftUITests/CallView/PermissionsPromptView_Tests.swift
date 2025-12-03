@@ -12,6 +12,13 @@ import XCTest
 @MainActor
 final class PermissionsPromptView_Tests: StreamVideoUITestCase, @unchecked Sendable {
 
+    private var mockStreamVideo: MockStreamVideo! = .init()
+
+    override func tearDown() async throws {
+        mockStreamVideo = nil
+        try await super.tearDown()
+    }
+
     // MARK: - Rendering
 
     // MARK: iPhone

@@ -11,6 +11,7 @@ import XCTest
 @MainActor
 final class PictureInPictureTrackStateAdapterTests: XCTestCase, @unchecked Sendable {
 
+    private var mockStreamVideo: MockStreamVideo! = .init()
     private lazy var factory: PeerConnectionFactory! = .build(audioProcessingModule: MockAudioProcessingModule.shared)
     private lazy var store: PictureInPictureStore! = .init()
     private lazy var mockCall: MockCall! = .init()
@@ -39,6 +40,7 @@ final class PictureInPictureTrackStateAdapterTests: XCTestCase, @unchecked Senda
         factory = nil
         participantA = nil
         participantB = nil
+        mockStreamVideo = nil
         mockCall = nil
         try await super.tearDown()
     }

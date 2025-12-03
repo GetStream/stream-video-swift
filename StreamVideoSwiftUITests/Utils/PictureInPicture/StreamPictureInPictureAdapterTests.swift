@@ -10,7 +10,14 @@ import XCTest
 @available(iOS 15.0, *)
 final class StreamPictureInPictureAdapterTests: XCTestCase, @unchecked Sendable {
 
+    private var mockStreamVideo: MockStreamVideo! = .init()
     private lazy var subject: StreamPictureInPictureAdapter! = .init()
+
+    override func tearDown() async throws {
+        mockStreamVideo = nil
+        subject = nil
+        try await super.tearDown()
+    }
 
     // MARK: - Call updated
 

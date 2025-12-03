@@ -16,7 +16,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
     private lazy var callType: String! = .default
     private lazy var callId: String! = UUID().uuidString
     private lazy var participants: [Member]! = [firstUser, secondUser]
-    private var streamVideo: MockStreamVideo!
+    private var streamVideo: MockStreamVideo! = .init()
     private lazy var mockCoordinatorClient: MockDefaultAPI! = .init()
     private lazy var mockCall: MockCall! = .init(
         .dummy(
