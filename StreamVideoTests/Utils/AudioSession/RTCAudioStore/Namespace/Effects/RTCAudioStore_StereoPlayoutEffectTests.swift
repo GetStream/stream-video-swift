@@ -13,13 +13,15 @@ final class RTCAudioStore_StereoPlayoutEffectTests: XCTestCase, @unchecked Senda
     func test_stereoPlayoutChanges_dispatchesStereoAction() async throws {
         let expectation = self.expectation(description: "Expected action dispatched.")
         let subject = RTCAudioStore.StereoPlayoutEffect()
-
-        let mockDispatcher = MockStoreDispatcher<RTCAudioStore.Namespace>()
-        subject.dispatcher = .init { actions, _, _, _ in mockDispatcher.handle(actions: actions) }
-
         let mockAudioDeviceModule = MockRTCAudioDeviceModule()
         let audioDeviceModule = AudioDeviceModule(mockAudioDeviceModule)
         let stateSubject = CurrentValueSubject<RTCAudioStore.Namespace.State, Never>(.dummy(audioDeviceModule: audioDeviceModule))
+        subject.set(statePublisher: stateSubject.eraseToAnyPublisher())
+        // We wait for the configuration on the effect to be completed.
+        await wait(for: 0.5)
+
+        let mockDispatcher = MockStoreDispatcher<RTCAudioStore.Namespace>()
+        subject.dispatcher = .init { actions, _, _, _ in mockDispatcher.handle(actions: actions) }
 
         let cancellable = mockDispatcher
             .publisher
@@ -36,7 +38,6 @@ final class RTCAudioStore_StereoPlayoutEffectTests: XCTestCase, @unchecked Senda
             }
             .sink { _ in expectation.fulfill() }
 
-        subject.set(statePublisher: stateSubject.eraseToAnyPublisher())
         audioDeviceModule.audioDeviceModule(
             .init(),
             didUpdateAudioProcessingState: RTCAudioProcessingState(
