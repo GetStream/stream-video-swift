@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🐞 Fixed
 - Pass the missing rejection reason to API calls. [#1003](https://github.com/GetStream/stream-video-swift/pull/1003)
+- Mic and camera prompts showing up when not necessary. [#1005](https://github.com/GetStream/stream-video-swift/pull/1005)
 
 # [1.37.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.37.0)
 _November 28, 2025_

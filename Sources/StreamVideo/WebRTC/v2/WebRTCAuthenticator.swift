@@ -95,6 +95,15 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
             if audioStore.state.currentRoute.isExternal, result.speakerOn {
                 result = result.withUpdatedSpeakerState(false)
             }
+
+            if result.audioOn, !response.ownCapabilities.contains(.sendAudio) {
+                result = result.withUpdatedAudioState(false)
+            }
+
+            if result.videoOn, !response.ownCapabilities.contains(.sendVideo) {
+                result = result.withUpdatedVideoState(false)
+            }
+
             return result
         }()
 
