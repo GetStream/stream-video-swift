@@ -27,7 +27,7 @@ open class CallKitAdapter {
         set { callKitService.ringtoneSound = newValue }
     }
 
-    /// The icon data used as the template for CallKit.
+    /// Configure whether calls should appear in the Recents app.
     open var includesCallsInRecents: Bool {
         get { callKitService.includesCallsInRecents }
         set { callKitService.includesCallsInRecents = newValue }
