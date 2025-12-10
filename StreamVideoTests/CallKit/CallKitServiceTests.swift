@@ -138,6 +138,35 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
     }
 
     @MainActor
+    func test_reportIncomingCall_withIncludesCallsInRecents_callUpdateWasConfiguredCorrectly() throws {
+        subject = .init()
+
+        subject.reportIncomingCall(
+            cid,
+            localizedCallerName: localizedCallerName,
+            callerId: callerId,
+            hasVideo: false
+        ) { _ in }
+
+        XCTAssertTrue(subject.callProvider.configuration.includesCallsInRecents)
+    }
+
+    @MainActor
+    func test_reportIncomingCall_withoutIncludesCallsInRecents_callUpdateWasConfiguredCorrectly() throws {
+        subject = .init()
+        subject.includesCallsInRecents = false
+
+        subject.reportIncomingCall(
+            cid,
+            localizedCallerName: localizedCallerName,
+            callerId: callerId,
+            hasVideo: false
+        ) { _ in }
+
+        XCTAssertFalse(subject.callProvider.configuration.includesCallsInRecents)
+    }
+
+    @MainActor
     func test_reportIncomingCall_callProviderWasCalledWithExpectedValues() {
         // Given
         let expectation = self.expectation(description: "Report Incoming Call")

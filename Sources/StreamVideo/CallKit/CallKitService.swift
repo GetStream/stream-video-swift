@@ -83,6 +83,8 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     /// Whether video is supported. If true, CallKit push titles add "Video";
     /// otherwise "Audio". Default is `false`.
     open var supportsVideo: Bool = false
+    /// Whether calls received will be showing in Recents app.
+    open var includesCallsInRecents: Bool = true
 
     /// Policy for handling calls when mic permission is missing while the app
     /// runs in the background. See `CallKitMissingPermissionPolicy`.
@@ -692,6 +694,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         configuration.supportedHandleTypes = supportedHandleTypes
         configuration.iconTemplateImageData = iconTemplateImageData
         configuration.ringtoneSound = ringtoneSound
+        configuration.includesCallsInRecents = includesCallsInRecents
 
         if supportsHolding {
             // Holding a call isn't supported yet.
