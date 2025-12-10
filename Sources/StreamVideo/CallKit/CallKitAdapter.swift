@@ -27,6 +27,12 @@ open class CallKitAdapter {
         set { callKitService.ringtoneSound = newValue }
     }
 
+    /// The icon data used as the template for CallKit.
+    open var includesCallsInRecents: Bool {
+        get { callKitService.includesCallsInRecents }
+        set { callKitService.includesCallsInRecents = newValue }
+    }
+
     /// The callSettings to use when joining a call (after accepting it on CallKit)
     /// default: nil
     open var callSettings: CallSettings? {

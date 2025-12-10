@@ -154,6 +154,11 @@ private func content() {
     }
 
     container {
+        @Injected(\.callKitAdapter) var callKitAdapter
+        callKitAdapter.includesCallsInRecents = false
+    }
+
+    container {
         class IntentHandler: INExtension, INStartCallIntentHandling {
             override func handler(for intent: INIntent) -> Any {
                 return self
