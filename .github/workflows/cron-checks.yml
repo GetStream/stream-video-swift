@@ -61,7 +61,7 @@ jobs:
     env:
       GITHUB_EVENT: ${{ toJson(github.event) }}
       ALLURE_TOKEN: ${{ secrets.ALLURE_TOKEN }}
-      XCODE_VERSION: "26.1"
+      XCODE_VERSION: "26.1.1"
       IOS_SIMULATOR_DEVICE: "${{ matrix.device }} (${{ matrix.ios }})"
     steps:
     - uses: actions/checkout@v4.1.1
@@ -137,7 +137,7 @@ jobs:
       fail-fast: false
     runs-on: macos-15
     env:
-      XCODE_VERSION: "26.1"
+      XCODE_VERSION: "26.1.1"
       IOS_SIMULATOR_DEVICE: "${{ matrix.device }} (${{ matrix.ios }})"
     steps:
     - uses: actions/checkout@v4.1.1
