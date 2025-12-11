@@ -4,6 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### 🔄 Changed
+
+# [1.38.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.38.0)
+_December 09, 2025_
+
 ### ✅ Added
 - Improved support for moderation events handling. [#1004](https://github.com/GetStream/stream-video-swift/pull/1004)
 
