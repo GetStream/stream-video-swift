@@ -148,7 +148,11 @@ final class Store_PerformanceTests: XCTestCase, @unchecked Sendable {
     /// Measures performance with complex state updates.
     func test_measureComplexStateUpdates() {
         let iterations = 1000
-        
+        let publisher = store
+            .statePublisher
+            .map { ($0.counter, $0.array.endIndex, $0.dictionary["key\(iterations - 1)"] != nil) }
+            .filter { $0.0 == iterations && $0.1 == iterations && $0.2 }
+
         measure {
             for i in 0..<iterations {
                 store.dispatch([
@@ -159,21 +163,15 @@ final class Store_PerformanceTests: XCTestCase, @unchecked Sendable {
             }
             
             // Wait for completion
-            let expectation = XCTestExpectation(description: "Complex updates")
+            let sinkExpectation = XCTestExpectation(description: "Sink was called.")
+            let cancellable = publisher
+                .sink { _ in sinkExpectation.fulfill() }
             
-            Task {
-                await fulfillment(timeout: 10) {
-                    self.store.state.counter == iterations
-                        && self.store.state.array.count == iterations
-                        && self.store.state.dictionary.count == iterations
-                }
-                expectation.fulfill()
-            }
-            
-            wait(for: [expectation], timeout: 10)
-            
+            wait(for: [sinkExpectation], timeout: 5)
+
             // Reset
             store.dispatch(.reset)
+            cancellable.cancel()
         }
     }
     

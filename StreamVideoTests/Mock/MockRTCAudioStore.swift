@@ -4,25 +4,36 @@
 
 import Foundation
 @testable import StreamVideo
+import StreamWebRTC
 
-final class MockRTCAudioStore {
+final class MockRTCAudioStore: @unchecked Sendable {
 
+    let audioSession: RTCAudioSession
     let audioStore: RTCAudioStore
-    let session: MockAudioSession
 
-    init() {
-        let session = MockAudioSession()
-        self.session = session
-        audioStore = RTCAudioStore(session: session)
+    private var previousStore: RTCAudioStore?
+    private var previousCurrentValue: RTCAudioStore?
+
+    init(audioSession: RTCAudioSession = .sharedInstance()) {
+        self.audioSession = audioSession
+        self.audioStore = RTCAudioStore(audioSession: audioSession)
+    }
+
+    func makeShared() {
+        previousStore = InjectedValues[\.audioStore]
+        previousCurrentValue = RTCAudioStore.currentValue
+
+        InjectedValues[\.audioStore] = audioStore
+        RTCAudioStore.currentValue = audioStore
     }
 
     func dismantle() {
-        InjectedValues[\.audioStore] = .init()
-    }
+        if let previousStore {
+            InjectedValues[\.audioStore] = previousStore
+        }
 
-    /// We call this just before the object that needs to use the mock is about to be created.
-    func makeShared() {
-        RTCAudioStore.currentValue = audioStore
-        InjectedValues[\.audioStore] = audioStore
+        if let previousCurrentValue {
+            RTCAudioStore.currentValue = previousCurrentValue
+        }
     }
 }

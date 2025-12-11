@@ -4,7 +4,33 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
-### 🔄 Changed
+### ✅ Added
+- Configuration in `CallKitAdapter` to skip calls from showing in the `Recents` app. [#1008](https://github.com/GetStream/stream-video-swift/pull/1008)
+
+# [1.38.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.38.0)
+_December 09, 2025_
+
+### ✅ Added
+- Improved support for moderation events handling. [#1004](https://github.com/GetStream/stream-video-swift/pull/1004)
+
+### 🐞 Fixed
+- Pass the missing rejection reason to API calls. [#1003](https://github.com/GetStream/stream-video-swift/pull/1003)
+- Mic and camera prompts showing up when not necessary. [#1005](https://github.com/GetStream/stream-video-swift/pull/1005)
+
+# [1.37.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.37.0)
+_November 28, 2025_
+
+### ✅ Added
+- A Livestream focused AudioSessionPolicy that has support for stereo playout. [#975](https://github.com/GetStream/stream-video-swift/pull/975)
+
+# [1.36.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.36.0)
+_November 19, 2025_
+
+### ✅ Added
+- Add support for ringing individual members. [#995](https://github.com/GetStream/stream-video-swift/pull/995)
+
+### 🐞 Fixed
+- Ensure SFU track and participant updates create missing participants. [#996](https://github.com/GetStream/stream-video-swift/pull/996)
 
 # [1.35.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.35.0)
 _November 05, 2025_

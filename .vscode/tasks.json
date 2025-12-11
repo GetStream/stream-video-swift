@@ -1,23 +1,6 @@
 {
 	"version": "2.0.0",
 	"tasks": [
-		{
-			"type": "shell",
-			"label": "Fastlane: Build SwiftUI Demo",
-			"command": "bundle exec fastlane build_swiftui_demo",
-			"group": {
-				"kind": "build",
-				"isDefault": true
-			}
-		},
-		{
-			"type": "shell",
-			"label": "Fastlane: Test StreamVideo",
-			"command": "bundle exec fastlane test",
-			"group": {
-				"kind": "test",
-				"isDefault": true
-			}
-		},
+		
 	]
 }

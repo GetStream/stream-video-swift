@@ -152,8 +152,18 @@ class CallController: @unchecked Sendable {
 
     /// Changes the audio state for the current user.
     /// - Parameter isEnabled: whether audio should be enabled.
-    func changeAudioState(isEnabled: Bool) async throws {
-        await webRTCCoordinator.changeAudioState(isEnabled: isEnabled)
+    func changeAudioState(
+        isEnabled: Bool,
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line
+    ) async throws {
+        await webRTCCoordinator.changeAudioState(
+            isEnabled: isEnabled,
+            file: file,
+            function: function,
+            line: line
+        )
     }
 
     /// Changes the video state for the current user.

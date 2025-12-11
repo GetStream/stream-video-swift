@@ -53,6 +53,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         self,
         activeCallPublisher: streamVideo.state.$activeCall.eraseToAnyPublisher()
     )
+    /// Provides access to moderation.
+    public lazy var moderation = Moderation.Manager(self)
 
     private let disposableBag = DisposableBag()
     internal let callController: CallController
@@ -123,6 +125,9 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         }
 
         _ = closedCaptionsAdapter
+        _ = moderation
+        _ = proximity
+
         callController.call = self
         speaker.call = self
         // It's important to instantiate the stateMachine as soon as possible
@@ -174,11 +179,11 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 currentStage.id == .joining {
                 return stateMachine
                     .publisher
-                    .tryCompactMap {
-                        switch $0.id {
+                    .tryMap { (stage) -> JoinCallResponse? in
+                        switch stage.id {
                         case .joined:
                             guard
-                                let stage = $0 as? Call.StateMachine.Stage.JoinedStage
+                                let stage = stage as? Call.StateMachine.Stage.JoinedStage
                             else {
                                 throw ClientError()
                             }
@@ -190,7 +195,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                             }
                         case .error:
                             guard
-                                let stage = $0 as? Call.StateMachine.Stage.ErrorStage
+                                let stage = stage as? Call.StateMachine.Stage.ErrorStage
                             else {
                                 throw ClientError()
                             }
@@ -201,7 +206,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                     }
                     .eraseToAnyPublisher()
             } else {
-                let deliverySubject = PassthroughSubject<JoinCallResponse, Error>()
+                let deliverySubject = CurrentValueSubject<JoinCallResponse?, Error>(nil)
                 transitionHandler(
                     .joining(
                         self,
@@ -224,8 +229,11 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
         if let joinResponse = result as? JoinCallResponse {
             return joinResponse
-        } else if let publisher = result as? AnyPublisher<JoinCallResponse, Error> {
-            return try await publisher.nextValue(timeout: CallConfiguration.timeout.join)
+        } else if let publisher = result as? AnyPublisher<JoinCallResponse?, Error> {
+            let result = try await publisher
+                .compactMap { $0 }
+                .nextValue(timeout: CallConfiguration.timeout.join)
+            return result
         } else {
             throw ClientError("Call was unable to join call.")
         }
@@ -362,6 +370,20 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         }
         return response.call
     }
+    
+    /// Initiates a ring action for the current call.
+    /// - Parameter request: The `RingCallRequest` containing ring configuration, such as member ids and whether it's a video call.
+    /// - Returns: A `RingCallResponse` with information about the ring operation.
+    /// - Throws: An error if the coordinator request fails or the call cannot be rung.
+    @discardableResult
+    public func ring(request: RingCallRequest) async throws -> RingCallResponse {
+        let response = try await coordinatorClient.ringCall(
+            type: callType,
+            id: callId,
+            ringCallRequest: request
+        )
+        return response
+    }
 
     /// Updates an existing call with the specified parameters.
     /// - Parameters:
@@ -439,7 +461,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             stateMachine.transition(
                 .rejecting(
                     self,
-                    input: .rejecting(.init(deliverySubject: deliverySubject))
+                    input: .rejecting(.init(reason: reason, deliverySubject: deliverySubject))
                 )
             )
             return try await deliverySubject.nextValue(timeout: CallConfiguration.timeout.reject)
@@ -510,14 +532,15 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         await callController.updateTrackSize(trackSize, for: participant)
     }
 
-    /// Sets a `videoFilter` for the current call.
-    /// - Parameter videoFilter: A `VideoFilter` instance representing the video filter to set.
+    /// Sets a `VideoFilter` for the current call.
+    /// - Parameter videoFilter: Desired filter; pass `nil` to clear it.
     public func setVideoFilter(_ videoFilter: VideoFilter?) {
+        moderation.setVideoFilter(videoFilter)
         callController.setVideoFilter(videoFilter)
     }
 
-    /// Sets an`audioFilter` for the current call.
-    /// - Parameter audioFilter: An `AudioFilter` instance representing the audio filter to set.
+    /// Sets an `AudioFilter` for the current call.
+    /// - Parameter audioFilter: Desired filter; pass `nil` to clear it.
     public func setAudioFilter(_ audioFilter: AudioFilter?) {
         streamVideo.videoConfig.audioProcessingModule.setAudioFilter(audioFilter)
     }
@@ -533,7 +556,12 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         try await callController.stopScreensharing()
     }
 
-    public func eventPublisher<WSEvent: Event>(for event: WSEvent.Type) -> AnyPublisher<WSEvent, Never> {
+    /// Publishes web socket events filtered by the provided type.
+    /// - Parameter event: Event type to observe.
+    /// - Returns: Publisher emitting instances of `WSEvent`.
+    public func eventPublisher<WSEvent: Event>(
+        for event: WSEvent.Type
+    ) -> AnyPublisher<WSEvent, Never> {
         eventPublisher
             .compactMap { $0.rawValue as? WSEvent }
             .eraseToAnyPublisher()

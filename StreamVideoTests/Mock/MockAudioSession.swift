@@ -21,6 +21,7 @@ final class MockAudioSession: AudioSessionProtocol, Mockable, @unchecked Sendabl
         case setActive
         case overrideOutputAudioPort
         case setConfiguration
+        case setPreferredOutputNumberOfChannels
     }
 
     enum MockFunctionInputKey: Payloadable {
@@ -33,6 +34,7 @@ final class MockAudioSession: AudioSessionProtocol, Mockable, @unchecked Sendabl
         case setActive(Bool)
         case overrideOutputAudioPort(AVAudioSession.PortOverride)
         case setConfiguration(RTCAudioSessionConfiguration)
+        case setPreferredOutputNumberOfChannels(Int)
 
         var payload: Any {
             switch self {
@@ -62,6 +64,9 @@ final class MockAudioSession: AudioSessionProtocol, Mockable, @unchecked Sendabl
 
             case let .setConfiguration(configuration):
                 return configuration
+
+            case let .setPreferredOutputNumberOfChannels(value):
+                return value
             }
         }
     }
@@ -98,6 +103,8 @@ final class MockAudioSession: AudioSessionProtocol, Mockable, @unchecked Sendabl
         if let error = stubbedFunction[.setPrefersNoInterruptionsFromSystemAlerts] as? Error {
             throw error
         }
+
+        prefersNoInterruptionsFromSystemAlerts = newValue
     }
 
     var isActive: Bool = false
@@ -146,6 +153,12 @@ final class MockAudioSession: AudioSessionProtocol, Mockable, @unchecked Sendabl
     func setActive(_ isActive: Bool) throws {
         stubbedFunctionInput[.setActive]?
             .append(.setActive(isActive))
+
+        if let error = stubbedFunction[.setActive] as? Error {
+            throw error
+        }
+
+        self.isActive = isActive
     }
 
     func perform(
@@ -168,6 +181,19 @@ final class MockAudioSession: AudioSessionProtocol, Mockable, @unchecked Sendabl
             .append(.setConfiguration(configuration))
 
         if let error = stubbedFunction[.setConfiguration] as? Error {
+            throw error
+        }
+
+        category = configuration.category
+        mode = configuration.mode
+        categoryOptions = configuration.categoryOptions
+    }
+
+    func setPreferredOutputNumberOfChannels(_ noOfChannels: Int) throws {
+        stubbedFunctionInput[.setPreferredOutputNumberOfChannels]?
+            .append(.setPreferredOutputNumberOfChannels(noOfChannels))
+
+        if let error = stubbedFunction[.setPreferredOutputNumberOfChannels] as? Error {
             throw error
         }
     }

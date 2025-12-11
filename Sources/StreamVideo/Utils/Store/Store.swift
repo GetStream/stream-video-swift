@@ -51,6 +51,8 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
     /// For observing changes, use ``publisher(_:)`` instead.
     var state: Namespace.State { stateSubject.value }
 
+    let statePublisher: AnyPublisher<Namespace.State, Never>
+
     /// Unique identifier for this store instance.
     private let identifier: String
     
@@ -59,7 +61,10 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
     
     /// Executor that processes actions through the pipeline.
     private let executor: StoreExecutor<Namespace>
-    
+
+    /// Coordinator that can skip redundant actions before execution.
+    private let coordinator: StoreCoordinator<Namespace>
+
     /// Publisher that holds and emits the current state.
     private let stateSubject: CurrentValueSubject<Namespace.State, Never>
     
@@ -72,6 +77,8 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
     /// Array of middleware that handle side effects.
     private var middleware: [Middleware<Namespace>]
 
+    private var effects: Set<StoreEffect<Namespace>>
+
     /// Initializes a new store with the specified configuration.
     ///
     /// - Parameters:
@@ -81,22 +88,31 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
     ///   - middleware: Array of middleware for side effects.
     ///   - logger: Logger for recording store operations.
     ///   - executor: Executor for processing the action pipeline.
+    ///   - coordinator: Coordinator that validates actions before execution.
     init(
         identifier: String,
         initialState: Namespace.State,
         reducers: [Reducer<Namespace>],
         middleware: [Middleware<Namespace>],
+        effects: Set<StoreEffect<Namespace>>,
         logger: StoreLogger<Namespace>,
-        executor: StoreExecutor<Namespace>
+        executor: StoreExecutor<Namespace>,
+        coordinator: StoreCoordinator<Namespace>
     ) {
         self.identifier = identifier
-        stateSubject = .init(initialState)
-        self.reducers = reducers
+        let stateSubject = CurrentValueSubject<Namespace.State, Never>(initialState)
+        self.stateSubject = stateSubject
+        self.statePublisher = stateSubject.eraseToAnyPublisher()
+        self.reducers = []
         self.middleware = []
+        self.effects = []
         self.logger = logger
         self.executor = executor
+        self.coordinator = coordinator
 
+        reducers.forEach { add($0) }
         middleware.forEach { add($0) }
+        effects.forEach { add($0) }
     }
 
     // MARK: - Middleware Management
@@ -158,6 +174,7 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
                 return
             }
             reducers.append(value)
+            value.dispatcher = .init(self)
         }
     }
 
@@ -172,6 +189,45 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
                 return
             }
             reducers = reducers.filter { $0 !== value }
+            value.dispatcher = nil
+        }
+    }
+
+    // MARK: - Effects Management
+
+    /// Adds an effect to respond to state changes.
+    ///
+    /// Effects are executed every time the store's state gets updated.
+    ///
+    /// - Parameter value: The effect to add.
+    func add<T: StoreEffect<Namespace>>(_ value: T) {
+        processingQueue.addOperation { [weak self] in
+            guard
+                let self
+            else {
+                return
+            }
+            effects.insert(value)
+            value.dispatcher = .init(self)
+            value.set(statePublisher: statePublisher)
+            value.stateProvider = { [weak self] in self?.state }
+        }
+    }
+
+    /// Removes a previously added reducer.
+    ///
+    /// - Parameter value: The reducer to remove.
+    func remove<T: StoreEffect<Namespace>>(_ value: T) {
+        processingQueue.addOperation { [weak self] in
+            guard
+                let self
+            else {
+                return
+            }
+            effects.remove(value)
+            value.dispatcher = nil
+            value.set(statePublisher: nil)
+            value.stateProvider = nil
         }
     }
 
@@ -241,17 +297,17 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
     ///     logger.error("Action failed: \(error)")
     /// }
     /// ```
-
+    ///
+    /// - Returns: A ``StoreTask`` that can be awaited or ignored for
+    ///   fire-and-forget semantics.
     @discardableResult
-    /// - Returns: A ``StoreTask`` that can be awaited for completion
-    ///   or ignored for fire-and-forget semantics.
     func dispatch(
         _ actions: [StoreActionBox<Namespace.Action>],
         file: StaticString = #file,
         function: StaticString = #function,
         line: UInt = #line
     ) -> StoreTask<Namespace> {
-        let task = StoreTask(executor: executor)
+        let task = StoreTask(executor: executor, coordinator: coordinator)
         processingQueue.addTaskOperation { [weak self] in
             guard let self else {
                 return
@@ -272,9 +328,13 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
         return task
     }
 
+    /// Dispatches a single boxed action asynchronously.
+    ///
+    /// Wraps the action in an array and forwards to
+    /// ``dispatch(_:file:function:line:)``.
+    ///
+    /// - Returns: A ``StoreTask`` that can be awaited or ignored.
     @discardableResult
-    /// - Returns: A ``StoreTask`` that can be awaited for completion
-    ///   or ignored for fire-and-forget semantics.
     func dispatch(
         _ action: StoreActionBox<Namespace.Action>,
         file: StaticString = #file,
@@ -289,9 +349,13 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
         )
     }
 
+    /// Dispatches multiple unboxed actions asynchronously.
+    ///
+    /// Actions are boxed automatically before being forwarded to
+    /// ``dispatch(_:file:function:line:)``.
+    ///
+    /// - Returns: A ``StoreTask`` that can be awaited or ignored.
     @discardableResult
-    /// - Returns: A ``StoreTask`` that can be awaited for completion
-    ///   or ignored for fire-and-forget semantics.
     func dispatch(
         _ actions: [Namespace.Action],
         file: StaticString = #file,
@@ -306,9 +370,13 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
         )
     }
 
+    /// Dispatches a single unboxed action asynchronously.
+    ///
+    /// The action is boxed automatically and forwarded to
+    /// ``dispatch(_:file:function:line:)``.
+    ///
+    /// - Returns: A ``StoreTask`` that can be awaited or ignored.
     @discardableResult
-    /// - Returns: A ``StoreTask`` that can be awaited for completion
-    ///   or ignored for fire-and-forget semantics.
     func dispatch(
         _ action: Namespace.Action,
         file: StaticString = #file,

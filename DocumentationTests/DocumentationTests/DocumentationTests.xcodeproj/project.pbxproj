@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		400062A42EDF390D0086E14B /* 27-moderation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 400062A32EDF390D0086E14B /* 27-moderation.swift */; };
 		400D91B62B63D88100EBA47D /* DocumentationTests.h in Headers */ = {isa = PBXBuildFile; fileRef = 400D91B52B63D88100EBA47D /* DocumentationTests.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		400D91C72B63D96800EBA47D /* 03-quickstart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 400D91C62B63D96800EBA47D /* 03-quickstart.swift */; };
 		400D91C92B63DB3700EBA47D /* 01-client-auth.swift in Sources */ = {isa = PBXBuildFile; fileRef = 400D91C82B63DB3700EBA47D /* 01-client-auth.swift */; };
@@ -90,6 +91,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		400062A32EDF390D0086E14B /* 27-moderation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "27-moderation.swift"; sourceTree = "<group>"; };
 		400D91B22B63D88100EBA47D /* DocumentationTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = DocumentationTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		400D91B52B63D88100EBA47D /* DocumentationTests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DocumentationTests.h; sourceTree = "<group>"; };
 		400D91C62B63D96800EBA47D /* 03-quickstart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "03-quickstart.swift"; sourceTree = "<group>"; };
@@ -292,6 +294,7 @@
 				401C1EF32D494CED00304609 /* 24-closed-captions.swift */,
 				40895E612E264BB000D3049D /* 25-incoming-video-state.swift */,
 				4050725C2E5F416A003D2109 /* 26-permissions-prompt-customization.swift */,
+				400062A32EDF390D0086E14B /* 27-moderation.swift */,
 			);
 			path = "05-ui-cookbook";
 			sourceTree = "<group>";
@@ -481,6 +484,7 @@
 				400D91D52B63E27300EBA47D /* 07-dependency-injection.swift in Sources */,
 				40FFDC512B63EF58004DA7A2 /* 05-call-controls.swift in Sources */,
 				400D91D32B63DFA500EBA47D /* 06-querying-calls.swift in Sources */,
+				400062A42EDF390D0086E14B /* 27-moderation.swift in Sources */,
 				401C1EF42D494CED00304609 /* 24-closed-captions.swift in Sources */,
 				845494D72DB9039000211413 /* 13-livestreaming.swift in Sources */,
 				40FFDC922B63FF70004DA7A2 /* 06-lobby-preview.swift in Sources */,

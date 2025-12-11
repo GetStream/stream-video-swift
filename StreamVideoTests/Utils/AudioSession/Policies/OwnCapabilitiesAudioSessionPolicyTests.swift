@@ -10,21 +10,16 @@ final class OwnCapabilitiesAudioSessionPolicyTests: XCTestCase, @unchecked Senda
 
     private lazy var stubbedAppStateAdapter: MockAppStateAdapter! = .init()
     private lazy var subject: OwnCapabilitiesAudioSessionPolicy! = .init()
-    private lazy var currentDeviceType: CurrentDevice.DeviceType! = CurrentDevice.DeviceType.phone
-    private lazy var currentDevice: CurrentDevice! = .init { self.currentDeviceType }
 
     override func setUp() {
         super.setUp()
         AppStateProviderKey.currentValue = stubbedAppStateAdapter
-        InjectedValues[\.currentDevice] = currentDevice
         _ = subject
     }
 
     override func tearDown() {
         subject = nil
         stubbedAppStateAdapter = nil
-        currentDevice = nil
-        InjectedValues[\.currentDevice] = CurrentDevice.currentValue
         super.tearDown()
     }
 
@@ -32,8 +27,7 @@ final class OwnCapabilitiesAudioSessionPolicyTests: XCTestCase, @unchecked Senda
 
     func testConfiguration_WhenUserCannotSendAudio_ReturnsPlaybackConfiguration() async {
         // Given
-        currentDeviceType = .phone
-        await fulfilmentInMainActor { self.currentDevice.deviceType == self.currentDeviceType }
+        CurrentDevice.currentValue.didUpdate(.phone)
         let callSettings = CallSettings(audioOn: true, videoOn: true, speakerOn: true)
         let ownCapabilities: Set<OwnCapability> = [.sendVideo]
 
@@ -54,8 +48,7 @@ final class OwnCapabilitiesAudioSessionPolicyTests: XCTestCase, @unchecked Senda
 
     func testConfiguration_WhenUserCanSendAudioAndAudioOn_ReturnsPlayAndRecordConfiguration() async {
         // Given
-        currentDeviceType = .phone
-        await fulfilmentInMainActor { self.currentDevice.deviceType == self.currentDeviceType }
+        CurrentDevice.currentValue.didUpdate(.phone)
         let callSettings = CallSettings(audioOn: true, videoOn: true, speakerOn: false)
         let ownCapabilities: Set<OwnCapability> = [.sendAudio, .sendVideo]
 
@@ -71,7 +64,7 @@ final class OwnCapabilitiesAudioSessionPolicyTests: XCTestCase, @unchecked Senda
         XCTAssertEqual(
             configuration.options,
             [
-                .allowBluetooth,
+                .allowBluetoothHFP,
                 .allowBluetoothA2DP
             ]
         )
@@ -80,8 +73,7 @@ final class OwnCapabilitiesAudioSessionPolicyTests: XCTestCase, @unchecked Senda
 
     func testConfiguration_WhenUserCanSendAudioAndSpeakerOnWithEarpiece_ReturnsPlayAndRecordConfiguration() async {
         // Given
-        currentDeviceType = .phone
-        await fulfilmentInMainActor { self.currentDevice.deviceType == self.currentDeviceType }
+        CurrentDevice.currentValue.didUpdate(.phone)
         let callSettings = CallSettings(audioOn: false, videoOn: true, speakerOn: true)
         let ownCapabilities: Set<OwnCapability> = [.sendAudio, .sendVideo]
 
@@ -97,7 +89,7 @@ final class OwnCapabilitiesAudioSessionPolicyTests: XCTestCase, @unchecked Senda
         XCTAssertEqual(
             configuration.options,
             [
-                .allowBluetooth,
+                .allowBluetoothHFP,
                 .allowBluetoothA2DP
             ]
         )
@@ -106,8 +98,7 @@ final class OwnCapabilitiesAudioSessionPolicyTests: XCTestCase, @unchecked Senda
 
     func testConfiguration_WhenUserCanSendAudioAndSpeakerOnWithoutEarpiece_ReturnsPlaybackAndRecordConfiguration() async {
         // Given
-        currentDeviceType = .pad
-        await fulfilmentInMainActor { self.currentDevice.deviceType == self.currentDeviceType }
+        CurrentDevice.currentValue.didUpdate(.pad)
         let callSettings = CallSettings(audioOn: false, videoOn: true, speakerOn: true)
         let ownCapabilities: Set<OwnCapability> = [.sendAudio, .sendVideo]
 
@@ -126,8 +117,7 @@ final class OwnCapabilitiesAudioSessionPolicyTests: XCTestCase, @unchecked Senda
 
     func testConfiguration_WhenUserCanSendAudioAndAudioOff_ReturnsPlaybackConfiguration() async {
         // Given
-        currentDeviceType = .phone
-        await fulfilmentInMainActor { self.currentDevice.deviceType == self.currentDeviceType }
+        CurrentDevice.currentValue.didUpdate(.phone)
         let callSettings = CallSettings(audioOn: false, videoOn: true, speakerOn: false)
         let ownCapabilities: Set<OwnCapability> = [.sendAudio, .sendVideo]
 
@@ -148,8 +138,7 @@ final class OwnCapabilitiesAudioSessionPolicyTests: XCTestCase, @unchecked Senda
 
     func testConfiguration_WhenVideoOffSpeakerOnBackgroundFalse_ReturnsVoiceChatMode() async {
         // Given
-        currentDeviceType = .phone
-        await fulfilmentInMainActor { self.currentDevice.deviceType == self.currentDeviceType }
+        CurrentDevice.currentValue.didUpdate(.phone)
         let callSettings = CallSettings(audioOn: true, videoOn: false, speakerOn: true)
         let ownCapabilities: Set<OwnCapability> = [.sendAudio, .sendVideo]
 
@@ -164,7 +153,7 @@ final class OwnCapabilitiesAudioSessionPolicyTests: XCTestCase, @unchecked Senda
         XCTAssertEqual(
             configuration.options,
             [
-                .allowBluetooth,
+                .allowBluetoothHFP,
                 .allowBluetoothA2DP
             ]
         )
@@ -172,8 +161,7 @@ final class OwnCapabilitiesAudioSessionPolicyTests: XCTestCase, @unchecked Senda
 
     func testConfiguration_WhenVideoOffSpeakerFalseBackgroundFalse_ReturnsVoiceChatMode() async {
         // Given
-        currentDeviceType = .phone
-        await fulfilmentInMainActor { self.currentDevice.deviceType == self.currentDeviceType }
+        CurrentDevice.currentValue.didUpdate(.phone)
         let callSettings = CallSettings(audioOn: true, videoOn: false, speakerOn: false)
         let ownCapabilities: Set<OwnCapability> = [.sendAudio, .sendVideo]
 
@@ -188,7 +176,7 @@ final class OwnCapabilitiesAudioSessionPolicyTests: XCTestCase, @unchecked Senda
         XCTAssertEqual(
             configuration.options,
             [
-                .allowBluetooth,
+                .allowBluetoothHFP,
                 .allowBluetoothA2DP
             ]
         )
@@ -196,8 +184,7 @@ final class OwnCapabilitiesAudioSessionPolicyTests: XCTestCase, @unchecked Senda
 
     func testConfiguration_WhenVideoOffSpeakerOnBackgroundTrue_ReturnsVoiceChatMode() async {
         // Given
-        currentDeviceType = .phone
-        await fulfilmentInMainActor { self.currentDevice.deviceType == self.currentDeviceType }
+        CurrentDevice.currentValue.didUpdate(.phone)
         stubbedAppStateAdapter.stubbedState = .background
         let callSettings = CallSettings(audioOn: true, videoOn: false, speakerOn: true)
         let ownCapabilities: Set<OwnCapability> = [.sendAudio, .sendVideo]
@@ -213,7 +200,7 @@ final class OwnCapabilitiesAudioSessionPolicyTests: XCTestCase, @unchecked Senda
         XCTAssertEqual(
             configuration.options,
             [
-                .allowBluetooth,
+                .allowBluetoothHFP,
                 .allowBluetoothA2DP
             ]
         )
@@ -221,8 +208,7 @@ final class OwnCapabilitiesAudioSessionPolicyTests: XCTestCase, @unchecked Senda
 
     func testConfiguration_WhenVideoOffSpeakerFalseBackgroundTrue_ReturnsVoiceChatMode() async {
         // Given
-        currentDeviceType = .phone
-        await fulfilmentInMainActor { self.currentDevice.deviceType == self.currentDeviceType }
+        CurrentDevice.currentValue.didUpdate(.phone)
         stubbedAppStateAdapter.stubbedState = .background
         let callSettings = CallSettings(audioOn: true, videoOn: false, speakerOn: false)
         let ownCapabilities: Set<OwnCapability> = [.sendAudio, .sendVideo]
@@ -238,7 +224,7 @@ final class OwnCapabilitiesAudioSessionPolicyTests: XCTestCase, @unchecked Senda
         XCTAssertEqual(
             configuration.options,
             [
-                .allowBluetooth,
+                .allowBluetoothHFP,
                 .allowBluetoothA2DP
             ]
         )

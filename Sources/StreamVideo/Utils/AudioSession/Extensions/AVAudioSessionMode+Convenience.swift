@@ -11,4 +11,16 @@ extension AVAudioSession.Mode {
     public var description: String {
         rawValue
     }
+
+    /// Indicates whether the mode keeps stereo playout active or if WebRTC
+    /// should fall back to mono because of voice-processing constraints.
+    var supportsStereoPlayout: Bool {
+        switch self {
+        case .videoChat, .voiceChat, .gameChat:
+            return false
+
+        default:
+            return true
+        }
+    }
 }

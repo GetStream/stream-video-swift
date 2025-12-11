@@ -28,7 +28,7 @@ public struct DefaultAudioSessionPolicy: AudioSessionPolicy {
             category: .playAndRecord,
             mode: .voiceChat,
             options: [
-                .allowBluetooth,
+                .allowBluetoothHFP,
                 .allowBluetoothA2DP
             ],
             overrideOutputAudioPort: callSettings.speakerOn

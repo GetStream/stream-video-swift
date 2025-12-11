@@ -48,6 +48,13 @@ final class Router: ObservableObject {
         appState.unsecureRepository.save(configuration: AppEnvironment.configuration)
         appState.unsecureRepository.save(baseURL: AppEnvironment.baseURL)
 
+        switch AppEnvironment.baseURL {
+        case let .custom(_, apiKey, _):
+            appState.apiKey = apiKey
+        default:
+            break
+        }
+
         Task {
             do {
                 try await loadLoggedInUser()

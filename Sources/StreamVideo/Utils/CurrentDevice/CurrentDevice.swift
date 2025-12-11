@@ -109,6 +109,10 @@ public final class CurrentDevice: @unchecked Sendable {
             self.deviceType = currentDeviceProvider()
         }
     }
+
+    func didUpdate(_ deviceType: DeviceType) {
+        self.deviceType = deviceType
+    }
 }
 
 extension CurrentDevice: InjectionKey {

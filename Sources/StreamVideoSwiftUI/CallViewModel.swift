@@ -84,7 +84,24 @@ open class CallViewModel: ObservableObject {
 
     /// Tracks the current state of a call. It should be used to show different UI in your views.
     @Published public var callingState: CallingState = .idle {
-        didSet { handleRingingEvents() }
+        didSet {
+            // When we join a call and then ring, we need to disable the speaker.
+            // If the dashboard settings have the speaker on, we need to enable it
+            // again when we transition into a call.
+            if let temporaryCallSettings, oldValue == .outgoing && callingState == .inCall {
+                if temporaryCallSettings.speakerOn {
+                    Task {
+                        do {
+                            try await call?.speaker.enableSpeakerPhone()
+                        } catch {
+                            log.error("Error enabling the speaker: \(error.localizedDescription)")
+                        }
+                    }
+                }
+                self.temporaryCallSettings = nil
+            }
+            handleRingingEvents()
+        }
     }
 
     /// Optional, has a value if there was an error. You can use it to display more detailed error messages to the users.
@@ -193,6 +210,8 @@ open class CallViewModel: ObservableObject {
     private(set) var localCallSettingsChange = false
 
     private var hasAcceptedCall = false
+    private var skipCallStateUpdates = false
+    private var temporaryCallSettings: CallSettings?
 
     public var participants: [CallParticipant] {
         let updateParticipants = call?.state.participants ?? []
@@ -228,7 +247,7 @@ open class CallViewModel: ObservableObject {
         callSettings: CallSettings? = nil
     ) {
         self.participantsLayout = participantsLayout
-        self.callSettings = callSettings ?? CallSettings()
+        self.callSettings = callSettings ?? .default
         localCallSettingsChange = callSettings != nil
 
         subscribeToCallEvents()
@@ -431,7 +450,97 @@ open class CallViewModel: ObservableObject {
             customData: customData
         )
     }
+    
+    /// Joins a call and then rings the specified members.
+    /// - Parameters:
+    ///   - callType: The type of the call to join (for example, "default").
+    ///   - callId: The unique identifier of the call.
+    ///   - members: The members who should be rung for this call.
+    ///   - team: An optional team identifier to associate with the call.
+    ///   - maxDuration: The maximum duration of the call in seconds.
+    ///   - maxParticipants: The maximum number of participants allowed in the call.
+    ///   - startsAt: An optional scheduled start time for the call.
+    ///   - customData: Optional custom payload to associate with the call on creation.
+    ///   - video: Optional flag indicating whether the ring should suggest a video call.
+    public func joinAndRingCall(
+        callType: String,
+        callId: String,
+        members: [Member],
+        team: String? = nil,
+        maxDuration: Int? = nil,
+        maxParticipants: Int? = nil,
+        startsAt: Date? = nil,
+        customData: [String: RawJSON]? = nil,
+        video: Bool? = nil
+    ) {
+        outgoingCallMembers = members
+        skipCallStateUpdates = true
+        setCallingState(.outgoing)
+        let membersRequest: [MemberRequest]? = members.isEmpty
+            ? nil
+            : members.map(\.toMemberRequest)
+        
+        if enteringCallTask != nil || callingState == .inCall {
+            return
+        }
+        enteringCallTask = Task(disposableBag: disposableBag, priority: .userInitiated) { [weak self] in
+            guard let self else { return }
+            do {
+                log.debug("Starting call")
+                let call = call ?? streamVideo.call(
+                    callType: callType,
+                    callId: callId,
+                    callSettings: callSettings
+                )
+                var settingsRequest: CallSettingsRequest?
+                var limits: LimitsSettingsRequest?
+                if maxDuration != nil || maxParticipants != nil {
+                    limits = .init(maxDurationSeconds: maxDuration, maxParticipants: maxParticipants)
+                }
+                settingsRequest = .init(limits: limits)
+                let options = CreateCallOptions(
+                    members: membersRequest,
+                    custom: customData,
+                    settings: settingsRequest,
+                    startsAt: startsAt,
+                    team: team
+                )
+                let settings = localCallSettingsChange ? callSettings : nil
 
+                call.updateParticipantsSorting(with: participantsSortComparators)
+
+                let joinResponse = try await call.join(
+                    create: true,
+                    options: options,
+                    ring: false,
+                    callSettings: settings
+                )
+                
+                temporaryCallSettings = call.state.callSettings
+                try? await call.speaker.disableSpeakerPhone()
+
+                try await call.ring(
+                    request: .init(membersIds: members.map(\.id).filter { $0 != self.streamVideo.user.id }, video: video)
+                )
+                
+                let autoCancelTimeoutMs = call.state.settings?.ring.autoCancelTimeoutMs
+                    ?? joinResponse.call.settings.ring.autoCancelTimeoutMs
+                let timeoutSeconds = TimeInterval(autoCancelTimeoutMs) / 1000
+                startTimer(timeout: timeoutSeconds)
+                save(call: call)
+                enteringCallTask = nil
+                hasAcceptedCall = false
+            } catch {
+                hasAcceptedCall = false
+                log.error("Error starting a call", error: error)
+                self.error = error
+                setCallingState(.idle)
+                audioRecorder.stopRecording()
+                enteringCallTask = nil
+            }
+        }
+    }
+    
     /// Enters into a lobby before joining a call.
     /// - Parameters:
     ///  - callType: the type of the call.
@@ -593,7 +702,9 @@ open class CallViewModel: ObservableObject {
             lineNumber: line
         )
         if let call, (callingState != .inCall || self.call?.cId != call.cId) {
-            setCallingState(.inCall)
+            if !skipCallStateUpdates {
+                setCallingState(.inCall)
+            }
             self.call = call
         } else if call == nil, callingState != .idle {
             setCallingState(.idle)
@@ -656,6 +767,8 @@ open class CallViewModel: ObservableObject {
         screenSharingUpdates = nil
         recordingUpdates?.cancel()
         recordingUpdates = nil
+        skipCallStateUpdates = false
+        temporaryCallSettings = nil
         call?.leave()
 
         pictureInPictureAdapter.call = nil
@@ -672,7 +785,7 @@ open class CallViewModel: ObservableObject {
 
         // Reset the CallSettings so that the next Call will be joined
         // with either new overrides or the values provided from the API.
-        callSettings = .init()
+        callSettings = .default
         localCallSettingsChange = false
     }
 
@@ -769,6 +882,9 @@ open class CallViewModel: ObservableObject {
     }
 
     private func handleCallHangUp(ringTimeout: Bool = false) {
+        if skipCallStateUpdates {
+            skipCallStateUpdates = false
+        }
         guard
             let call,
             callingState == .outgoing
@@ -887,6 +1003,7 @@ open class CallViewModel: ObservableObject {
                 setActiveCall(call)
             }
         case .outgoing where call?.cId == event.callCid:
+            skipCallStateUpdates = false
             enterCall(
                 call: call,
                 callType: event.type,
@@ -929,6 +1046,10 @@ open class CallViewModel: ObservableObject {
             }()
             let accepted = outgoingCall.state.session?.acceptedBy.count ?? 0
             if accepted == 0, rejections >= outgoingMembersCount {
+                if skipCallStateUpdates {
+                    skipCallStateUpdates = false
+                    setCallingState(.idle)
+                }
                 Task(disposableBag: disposableBag, priority: .userInitiated) { [weak self] in
                     _ = try? await outgoingCall.reject(
                         reason: "Call rejected by all \(outgoingMembersCount) outgoing call members."
@@ -942,6 +1063,7 @@ open class CallViewModel: ObservableObject {
     }
 
     private func updateCallStateIfNeeded() {
+        guard !skipCallStateUpdates else { return }
         if callingState == .outgoing {
             if !callParticipants.isEmpty {
                 setCallingState(.inCall)

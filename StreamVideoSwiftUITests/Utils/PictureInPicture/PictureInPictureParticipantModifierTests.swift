@@ -11,6 +11,13 @@ import XCTest
 @MainActor
 final class PictureInPictureParticipantModifierTests: StreamVideoUITestCase, @unchecked Sendable {
 
+    private var mockStreamVideo: MockStreamVideo! = .init()
+
+    override func tearDown() async throws {
+        mockStreamVideo = nil
+        try await super.tearDown()
+    }
+
     func test_modifier_participant_hasVideoFalse_hasAudioFalse() {
         AssertSnapshot(
             makeView(hasAudio: false, hasVideo: false),

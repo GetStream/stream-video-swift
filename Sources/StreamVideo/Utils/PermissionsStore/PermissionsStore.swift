@@ -67,7 +67,9 @@ public final class PermissionStore: ObservableObject, @unchecked Sendable {
 
         $hasMicrophonePermission
             .removeDuplicates()
-            .sink { [weak self] in self?.audioStore.dispatch(.audioSession(.setHasRecordingPermission($0))) }
+            .sink { [weak self] in
+                self?.audioStore.dispatch(.setHasRecordingPermission($0))
+            }
             .store(in: disposableBag)
     }
 

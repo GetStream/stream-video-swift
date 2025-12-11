@@ -19,6 +19,7 @@ extension RTCSessionDescription: @retroactive Encodable {}
 extension RTCConfiguration: @retroactive Encodable {}
 extension RTCIceServer: @retroactive Encodable {}
 extension RTCCryptoOptions: @retroactive Encodable {}
+extension AVAudioSession.RouteChangeReason: @retroactive Encodable {}
 #else
 extension RTCSignalingState: Encodable {}
 extension RTCMediaStream: Encodable {}
@@ -33,6 +34,7 @@ extension RTCSessionDescription: Encodable {}
 extension RTCConfiguration: Encodable {}
 extension RTCIceServer: Encodable {}
 extension RTCCryptoOptions: Encodable {}
+extension AVAudioSession.RouteChangeReason: Encodable {}
 #endif
 
 extension RTCSignalingState {

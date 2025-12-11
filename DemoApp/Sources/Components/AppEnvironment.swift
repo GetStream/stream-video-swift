@@ -554,7 +554,7 @@ extension AppEnvironment {
 extension AppEnvironment {
 
     enum AudioSessionPolicyDebugConfiguration: Hashable, Debuggable, Sendable {
-        case `default`, ownCapabilities
+        case `default`, ownCapabilities, livestream
 
         var title: String {
             switch self {
@@ -562,6 +562,8 @@ extension AppEnvironment {
                 return "Default"
             case .ownCapabilities:
                 return "OwnCapabilities"
+            case .livestream:
+                return "Livestream"
             }
         }
 
@@ -571,6 +573,8 @@ extension AppEnvironment {
                 return DefaultAudioSessionPolicy()
             case .ownCapabilities:
                 return OwnCapabilitiesAudioSessionPolicy()
+            case .livestream:
+                return LivestreamAudioSessionPolicy()
             }
         }
     }
@@ -616,8 +620,43 @@ extension AppEnvironment {
     }
 
     static var proximityPolicies: Set<ProximityPolicyDebugConfiguration> = {
-        [.speaker, .video]
+        [.video, .speaker]
     }()
+}
+
+extension AppEnvironment {
+    enum ModerationVideoPolicy: Hashable, Debuggable, Sendable {
+
+        case blur(TimeInterval), pixelate(TimeInterval)
+
+        var title: String {
+            switch self {
+            case let .blur(duration):
+                if duration > 0 {
+                    return "Blur (\(duration)s)"
+                } else {
+                    return "Blur"
+                }
+            case let .pixelate(duration):
+                if duration > 0 {
+                    return "Pixelate (\(duration)s)"
+                } else {
+                    return "Pixelate"
+                }
+            }
+        }
+
+        var value: Moderation.VideoPolicy {
+            switch self {
+            case .blur(let duration):
+                return Moderation.VideoPolicy(duration: duration, videoFilter: .blur)
+            case .pixelate(let duration):
+                return Moderation.VideoPolicy(duration: duration, videoFilter: .pixelate)
+            }
+        }
+    }
+
+    static var moderationVideoPolicy: ModerationVideoPolicy = .blur(20)
 }
 
 extension AppEnvironment {
@@ -630,6 +669,19 @@ extension ClientCapability: Debuggable {
         switch self {
         case .subscriberVideoPause:
             "Subscriber video pause"
+        }
+    }
+}
+
+extension Logger.WebRTC.LogMode: Debuggable {
+    var title: String {
+        switch self {
+        case .none:
+            return "None"
+        case .validFilesOnly:
+            return "Valid Files only"
+        case .all:
+            return "All"
         }
     }
 }

@@ -40,7 +40,7 @@ public struct StatelessMicrophoneIconView: View {
     @MainActor
     public init(
         call: Call?,
-        callSettings: CallSettings = .init(),
+        callSettings: CallSettings = .default,
         size: CGFloat = 44,
         controlStyle: ToggleControlStyle = .init(
             enabled: .init(icon: Appearance.default.images.micTurnOn, iconStyle: .transparent),

@@ -1,6 +1,6 @@
 Pod::Spec.new do |spec|
   spec.name = 'StreamVideo'
-  spec.version = '1.35.0'
+  spec.version = '1.38.0'
   spec.summary = 'StreamVideo iOS Video Client'
   spec.description = 'StreamVideo is the official Swift client for Stream Video, a service for building video applications.'
 
@@ -25,7 +25,7 @@ Pod::Spec.new do |spec|
 
   spec.prepare_command = <<-CMD
     mkdir -p Frameworks/
-    curl -sL "https://github.com/GetStream/stream-video-swift-webrtc/releases/download/137.0.43/StreamWebRTC.xcframework.zip" -o Frameworks/StreamWebRTC.zip
+    curl -sL "https://github.com/GetStream/stream-video-swift-webrtc/releases/download/137.0.54/StreamWebRTC.xcframework.zip" -o Frameworks/StreamWebRTC.zip
     unzip -o Frameworks/StreamWebRTC.zip -d Frameworks/
     rm Frameworks/StreamWebRTC.zip
   CMD

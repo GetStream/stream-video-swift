@@ -812,7 +812,7 @@ private_lane :frameworks_sizes do
   }
 end
 
-desc "Updates WebRTC dependency locally. Usage: `bundle exec fastlane update_stream_chat version:125.6422.070`"
+desc "Updates WebRTC dependency locally. Usage: `bundle exec fastlane update_stream_chat version:125.6422.070 skip_pr:true`"
 lane :update_webrtc do |options|
   raise UI.user_error!('Provide a version.') unless options[:version]
 
@@ -834,12 +834,18 @@ lane :update_webrtc do |options|
     end
   end
 
-  pr_create(
-    title: "Update WebRTC dependency to #{options[:version]}",
-    base_branch: 'develop',
-    head_branch: "ci/update-webrtc-dependency-#{Time.now.to_i}",
-    github_repo: github_repo
-  )
+  skip_pr = %w[true 1].include?(options[:skip_pr].to_s.downcase)
+
+  if skip_pr
+    UI.message('Skipping PR creation as requested.')
+  else
+    pr_create(
+      title: "Update WebRTC dependency to #{options[:version]}",
+      base_branch: 'develop',
+      head_branch: "ci/update-webrtc-dependency-#{Time.now.to_i}",
+      github_repo: github_repo
+    )
+  end
 end
 
 lane :size_analyze do

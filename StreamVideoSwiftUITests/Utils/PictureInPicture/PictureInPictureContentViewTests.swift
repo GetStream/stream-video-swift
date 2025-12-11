@@ -13,7 +13,13 @@ import XCTest
 @MainActor
 final class PictureInPictureContentViewTests: StreamVideoUITestCase, @unchecked Sendable {
 
+    private var mockStreamVideo: MockStreamVideo! = .init()
     private lazy var targetSize: CGSize = .init(width: 400, height: 200)
+
+    override func tearDown() async throws {
+        mockStreamVideo = nil
+        try await super.tearDown()
+    }
 
     func test_content_inactive() async {
         AssertSnapshot(

@@ -24,7 +24,8 @@ class CallController_Mock: CallController, @unchecked Sendable {
         mockResponseBuilder.makeJoinCallResponse(cid: super.call?.cId ?? "default:\(String.unique)")
     }
 
-    override func changeAudioState(isEnabled: Bool) async throws { /* no op */ }
+    override func changeAudioState(isEnabled: Bool, file: StaticString, function: StaticString, line: UInt) async throws {
+    /* no op */ }
 
     override func changeVideoState(isEnabled: Bool) async throws { /* no op */ }
 

@@ -22,20 +22,46 @@ extension StreamCallAudioRecorder.Namespace {
     /// ensure thread safety when accessing the recorder instance.
     final class AVAudioRecorderMiddleware: Middleware<StreamCallAudioRecorder.Namespace>, @unchecked Sendable {
 
+        /// Tracks which metering backend is active so we can flip between
+        /// `AVAudioRecorder` and the audio device module seamlessly.
+        enum Mode: Equatable {
+            case invalid
+            case audioRecorder(AVAudioRecorder)
+            case audioDeviceModule(AudioDeviceModule)
+        }
+
         /// The audio store for managing permissions and session state.
         @Injected(\.permissions) private var permissions
+        @Injected(\.audioStore) private var audioStore
 
-        /// Builder for creating and caching the audio recorder instance.
-        private var audioRecorder: AVAudioRecorder?
+        private var mode: Mode
 
         /// Serial queue for recorder operations to ensure thread safety.
         private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
         
         /// Subscription for publishing meter updates at refresh rate.
         private var updateMetersCancellable: AnyCancellable?
+        /// Listens for ADM availability and pivots the metering source on the
+        /// fly when stereo playout is enabled.
+        private var audioDeviceModuleCancellable: AnyCancellable?
 
         init(audioRecorder: AVAudioRecorder? = nil) {
-            self.audioRecorder = audioRecorder
+            if let audioRecorder {
+                mode = .audioRecorder(audioRecorder)
+            } else if let audioRecorder = try? AVAudioRecorder.build() {
+                mode = .audioRecorder(audioRecorder)
+            } else {
+                mode = .invalid
+            }
+
+            let initialMode = self.mode
+
+            super.init()
+
+            audioDeviceModuleCancellable = audioStore
+                .publisher(\.audioDeviceModule)
+                .receive(on: processingQueue)
+                .sink { [weak self] in self?.didUpdate($0, initialMode: initialMode) }
         }
 
         // MARK: - Middleware
@@ -107,53 +133,23 @@ extension StreamCallAudioRecorder.Namespace {
                     return
                 }
 
-                if audioRecorder == nil {
-                    do {
-                        self.audioRecorder = try AVAudioRecorder.build()
-                    } catch {
-                        log.error(error, subsystems: .audioRecording)
-                        return
-                    }
-                }
-
-                guard let audioRecorder else {
+                guard mode != .invalid else {
+                    log.warning(
+                        "Unable to start meters observation as mode set to .none",
+                        subsystems: .audioRecording
+                    )
                     return
                 }
 
-                if updateMetersCancellable != nil {
-                    // In order for AVAudioRecorder to keep receive metering updates
-                    // we need to stop and start everytime there is a change in the
-                    // AVAudioSession configuration.
-                    audioRecorder.stop()
-                    audioRecorder.isMeteringEnabled = false
+                let mode = self.mode
+                stopObservation(for: mode)
+
+                guard await checkRequiredPermissions() else {
+                    dispatcher?.dispatch(.setIsRecording(false))
+                    return
                 }
 
-                updateMetersCancellable?.cancel()
-                updateMetersCancellable = nil
-
-                do {
-                    let hasPermission = try await permissions.requestMicrophonePermission()
-                    audioRecorder.isMeteringEnabled = true
-
-                    guard
-                        hasPermission,
-                        audioRecorder.record()
-                    else {
-                        dispatcher?.dispatch(.setIsRecording(false))
-                        audioRecorder.isMeteringEnabled = false
-                        return
-                    }
-
-                    updateMetersCancellable = DefaultTimer
-                        .publish(every: ScreenPropertiesAdapter.currentValue.refreshRate)
-                        .map { [weak audioRecorder] _ in audioRecorder?.updateMeters() }
-                        .compactMap { [weak audioRecorder] in audioRecorder?.averagePower(forChannel: 0) }
-                        .sink { [weak self] in self?.dispatcher?.dispatch(.setMeter($0)) }
-
-                    log.debug("AVAudioRecorder started...", subsystems: .audioRecording)
-                } catch {
-                    log.error(error, subsystems: .audioRecording)
-                }
+                startObservation(for: mode)
             }
         }
 
@@ -165,21 +161,96 @@ extension StreamCallAudioRecorder.Namespace {
         /// 3. Cancels the meter update timer
         private func stopRecording() {
             processingQueue.addOperation { [weak self] in
-                guard
-                    let self,
-                    updateMetersCancellable != nil,
-                    let audioRecorder
-                else {
-                    self?.updateMetersCancellable?.cancel()
-                    self?.updateMetersCancellable = nil
-                    return
-                }
+                guard let self else { return }
+                stopObservation(for: mode)
+            }
+        }
 
+        private func checkRequiredPermissions() async -> Bool {
+            do {
+                return try await permissions.requestMicrophonePermission()
+            } catch {
+                log.error(error, subsystems: .audioRecording)
+                return false
+            }
+        }
+
+        private func stopObservation(for mode: Mode) {
+            guard updateMetersCancellable != nil else {
+                return
+            }
+
+            updateMetersCancellable?.cancel()
+            updateMetersCancellable = nil
+
+            switch mode {
+            case .invalid:
+                break
+            case .audioRecorder(let audioRecorder):
+                // In order for AVAudioRecorder to keep receive metering updates
+                // we need to stop and start everytime there is a change in the
+                // AVAudioSession configuration.
                 audioRecorder.stop()
                 audioRecorder.isMeteringEnabled = false
-                updateMetersCancellable?.cancel()
-                updateMetersCancellable = nil
                 log.debug("AVAudioRecorder stopped.", subsystems: .audioRecording)
+
+            case .audioDeviceModule:
+                log.debug("AVAudioDeviceModule audioLevel observation stopped.", subsystems: .audioRecording)
+            }
+        }
+
+        private func startObservation(for mode: Mode) {
+            guard updateMetersCancellable == nil else {
+                return
+            }
+
+            switch mode {
+            case .invalid:
+                break
+
+            case .audioRecorder(let audioRecorder):
+                let isRecording = audioRecorder.record()
+                if isRecording {
+                    audioRecorder.isMeteringEnabled = true
+                    updateMetersCancellable = DefaultTimer
+                        .publish(every: ScreenPropertiesAdapter.currentValue.refreshRate)
+                        .map { [weak audioRecorder] _ in audioRecorder?.updateMeters() }
+                        .compactMap { [weak audioRecorder] in audioRecorder?.averagePower(forChannel: 0) }
+                        .sink { [weak self] in self?.dispatcher?.dispatch(.setMeter($0)) }
+                    log.debug("AVAudioRecorder started...", subsystems: .audioRecording)
+                } else {
+                    audioRecorder.isMeteringEnabled = false
+                    dispatcher?.dispatch(.setIsRecording(false))
+                }
+
+            case .audioDeviceModule(let audioDeviceModule):
+                updateMetersCancellable = audioDeviceModule
+                    .audioLevelPublisher
+                    .log(.debug, subsystems: .audioRecording) { "AVAudioDeviceModule audioLevel observation value:\($0)." }
+                    .sink { [weak self] in self?.dispatcher?.dispatch(.setMeter($0)) }
+                log.debug("AVAudioDeviceModule audioLevel observation started...", subsystems: .audioRecording)
+            }
+        }
+
+        private func didUpdate(
+            _ audioDeviceModule: AudioDeviceModule?,
+            initialMode: Mode
+        ) {
+            stopRecording()
+
+            let newMode: Mode = {
+                if let audioDeviceModule {
+                    return .audioDeviceModule(audioDeviceModule)
+                } else {
+                    return initialMode
+                }
+            }()
+
+            processingQueue.addTaskOperation { [weak self] in
+                self?.mode = newMode
+                if self?.state?.shouldRecord == true, self?.state?.isRecording == true {
+                    self?.startRecording()
+                }
             }
         }
     }

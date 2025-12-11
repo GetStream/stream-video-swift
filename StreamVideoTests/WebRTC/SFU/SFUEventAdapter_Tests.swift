@@ -406,6 +406,22 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
         }
     }
 
+    func test_handleTrackPublished_givenAudioEvent_participantDoesNotExist_whenPublished_thenAddsAndUpdatesParticipantAudioStatus(
+    ) async throws {
+        let participant = CallParticipant.dummy()
+        var event = Stream_Video_Sfu_Event_TrackPublished()
+        event.sessionID = participant.sessionId
+        event.type = .audio
+
+        try await assert(
+            event,
+            wrappedEvent: .sfuEvent(.trackPublished(event)),
+            initialState: [:]
+        ) {
+            $0.count == 1 && $0[participant.sessionId]?.hasAudio == true
+        }
+    }
+
     // MARK: trackUnpublished
 
     func test_handleTrackUnpublished_givenAudioEvent_whenPublished_thenUpdatesParticipantAudioStatus() async throws {
@@ -507,6 +523,22 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
         }
     }
 
+    func test_handleTrackUnpublished_givenAudioEvent_participantDoesNotExist_whenPublished_thenAddsAndUpdatesParticipantAudioStatus(
+    ) async throws {
+        let participant = CallParticipant.dummy(hasAudio: true)
+        var event = Stream_Video_Sfu_Event_TrackUnpublished()
+        event.sessionID = participant.sessionId
+        event.type = .audio
+
+        try await assert(
+            event,
+            wrappedEvent: .sfuEvent(.trackUnpublished(event)),
+            initialState: [:]
+        ) {
+            $0.count == 1 && $0[participant.sessionId]?.hasAudio == false
+        }
+    }
+
     // MARK: pinsChanged
 
     func test_handlePinsChanged_givenEvent_whenPublished_thenUpdatesPinnedParticipants() async throws {
@@ -582,6 +614,23 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
             event,
             wrappedEvent: .sfuEvent(.participantUpdated(event)),
             initialState: [participant].reduce(into: [String: CallParticipant]()) { $0[$1.sessionId] = $1 }
+        ) {
+            $0.count == 1 && $0[expectedParticipant.sessionId] == expectedParticipant
+        }
+    }
+
+    func test_handleParticipantUpdated_givenEvent_participantDoesNotExist_whenPublished_thenUAddsAndpdatesParticipant(
+    ) async throws {
+        var event = Stream_Video_Sfu_Event_ParticipantUpdated()
+        // We add the showTrack and audioLevels to match what the `event.participant.toCallParticipant()`
+        // does (defaults to showTrack:True and uses the audioLevel to create an array for the audioLevels.)
+        let expectedParticipant = CallParticipant.dummy(showTrack: true, audioLevels: [0])
+        event.participant = .init(expectedParticipant)
+
+        try await assert(
+            event,
+            wrappedEvent: .sfuEvent(.participantUpdated(event)),
+            initialState: [:]
         ) {
             $0.count == 1 && $0[expectedParticipant.sessionId] == expectedParticipant
         }

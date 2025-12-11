@@ -9,124 +9,72 @@ import XCTest
 
 final class RTCAudioStore_Tests: XCTestCase, @unchecked Sendable {
 
-    private final class SpyReducer: RTCAudioStoreReducer, @unchecked Sendable {
-        var reduceError: Error?
-        private(set) var reduceWasCalled: (state: RTCAudioStore.State, action: RTCAudioStoreAction, calledAt: DispatchTime)?
-        func reduce(
-            state: RTCAudioStore.State,
-            action: RTCAudioStoreAction,
-            file: StaticString,
-            function: StaticString,
-            line: UInt
-        ) throws -> RTCAudioStore.State {
-            reduceWasCalled = (state, action, DispatchTime.now())
-            guard let reduceError else {
-                return state
-            }
-            throw reduceError
-        }
+    private var session: RTCAudioSession!
+    private var subject: RTCAudioStore!
+    private var cancellables: Set<AnyCancellable>!
+
+    override func setUp() {
+        super.setUp()
+        session = .sharedInstance()
+        subject = .init(audioSession: session)
+        cancellables = []
     }
-
-    private final class SpyMiddleware: RTCAudioStoreMiddleware, @unchecked Sendable {
-        private(set) var applyWasCalled: (state: RTCAudioStore.State, action: RTCAudioStoreAction, calledAt: DispatchTime)?
-        func apply(
-            state: RTCAudioStore.State,
-            action: RTCAudioStoreAction,
-            file: StaticString,
-            function: StaticString,
-            line: UInt
-        ) {
-            applyWasCalled = (state, action, DispatchTime.now())
-        }
-    }
-
-    // MARK: - Properties
-
-    private lazy var subject: RTCAudioStore! = .init()
-
-    // MARK: - Lifecycle
 
     override func tearDown() {
+        cancellables = nil
         subject = nil
+        session = nil
         super.tearDown()
     }
 
-    // MARK: - init
-
-    func test_init_RTCAudioSessionReducerHasBeenAdded() {
-        _ = subject
-
-        XCTAssertNotNil(subject.reducers.first(where: { $0 is RTCAudioSessionReducer }))
+    func test_init_appliesInitialWebRTCConfiguration() async {
+        await fulfillment {
+            let configuration = self.subject.state.webRTCAudioSessionConfiguration
+            return configuration.prefersNoInterruptionsFromSystemAlerts
+                && configuration.useManualAudio
+                && configuration.isAudioEnabled == false
+        }
     }
 
-    func test_init_stateWasUpdatedCorrectly() async {
-        _ = subject
+    func test_dispatch_singleAction_updatesState() async {
+        subject.dispatch(.setInterrupted(true))
 
         await fulfillment {
-            self.subject.state.prefersNoInterruptionsFromSystemAlerts == true
-                && self.subject.state.useManualAudio == true
-                && self.subject.state.isAudioEnabled == false
+            self.subject.state.isInterrupted
+        }
+
+        subject.dispatch(.setInterrupted(false))
+
+        await fulfillment {
+            self.subject.state.isInterrupted == false
         }
     }
 
-    // MARK: - dispatch
+    func test_dispatch_multipleActions_updatesState() async {
+        subject.dispatch([
+            .setInterrupted(true)
+        ])
 
-    func test_dispatch_middlewareWasCalledBeforeReducer() async throws {
-        let reducer = SpyReducer()
-        let middleware = SpyMiddleware()
-        subject.add(reducer)
-        subject.add(middleware)
-
-        subject.dispatch(.audioSession(.isActive(true)))
-        await fulfillment { middleware.applyWasCalled != nil && reducer.reduceWasCalled != nil }
-
-        let middlewareWasCalledAt = try XCTUnwrap(middleware.applyWasCalled?.calledAt)
-        let reducerWasCalledAt = try XCTUnwrap(reducer.reduceWasCalled?.calledAt)
-        let diff = middlewareWasCalledAt.distance(to: reducerWasCalledAt)
-        switch diff {
-        case .never:
-            XCTFail()
-        case let .nanoseconds(value):
-            return XCTAssertTrue(value > 0)
-        default:
-            XCTFail("It shouldn't be that long.")
+        await fulfillment {
+            self.subject.state.isInterrupted
         }
     }
 
-    // MARK: - dispatchAsync
+    func test_publisher_emitsDistinctValues() async {
+        let expectation = expectation(description: "Publisher emitted value")
 
-    func test_dispatchAsync_middlewareWasCalledBeforeReducer() async throws {
-        let reducer = SpyReducer()
-        let middleware = SpyMiddleware()
-        subject.add(reducer)
-        subject.add(middleware)
+        subject
+            .publisher(\.isInterrupted)
+            .dropFirst()
+            .sink { value in
+                if value {
+                    expectation.fulfill()
+                }
+            }
+            .store(in: &cancellables)
 
-        try await subject.dispatchAsync(.audioSession(.isActive(true)))
+        subject.dispatch(.setInterrupted(true))
 
-        let middlewareWasCalledAt = try XCTUnwrap(middleware.applyWasCalled?.calledAt)
-        let reducerWasCalledAt = try XCTUnwrap(reducer.reduceWasCalled?.calledAt)
-        let diff = middlewareWasCalledAt.distance(to: reducerWasCalledAt)
-        switch diff {
-        case .never:
-            XCTFail()
-        case let .nanoseconds(value):
-            return XCTAssertTrue(value > 0)
-        default:
-            XCTFail("It shouldn't be that long.")
-        }
-    }
-
-    func test_dispatchAsync_reducerThrowsError_rethrowsError() async throws {
-        let expected = ClientError(.unique)
-        let reducer = SpyReducer()
-        reducer.reduceError = expected
-        subject.add(reducer)
-
-        do {
-            try await subject.dispatchAsync(.audioSession(.isActive(true)))
-            XCTFail()
-        } catch {
-            XCTAssertEqual((error as? ClientError)?.localizedDescription, expected.localizedDescription)
-        }
+        await safeFulfillment(of: [expectation])
     }
 }

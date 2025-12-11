@@ -38,6 +38,8 @@ protocol WebRTCAuthenticating {
 /// Concrete implementation of WebRTCAuthenticating.
 struct WebRTCAuthenticator: WebRTCAuthenticating {
 
+    @Injected(\.audioStore) private var audioStore
+
     /// Authenticates the WebRTC connection.
     /// - Parameters:
     ///   - coordinator: The WebRTC coordinator.
@@ -90,11 +92,18 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
         let remoteCallSettings = CallSettings(response.call.settings)
         let callSettings = {
             var result = initialCallSettings ?? remoteCallSettings
-            if
-                coordinator.stateAdapter.audioSession.currentRoute.isExternal,
-                result.speakerOn {
+            if audioStore.state.currentRoute.isExternal, result.speakerOn {
                 result = result.withUpdatedSpeakerState(false)
             }
+
+            if result.audioOn, !response.ownCapabilities.contains(.sendAudio) {
+                result = result.withUpdatedAudioState(false)
+            }
+
+            if result.videoOn, !response.ownCapabilities.contains(.sendVideo) {
+                result = result.withUpdatedVideoState(false)
+            }
+
             return result
         }()
 

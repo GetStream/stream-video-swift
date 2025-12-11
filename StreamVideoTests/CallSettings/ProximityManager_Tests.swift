@@ -10,7 +10,7 @@ import XCTest
 @MainActor
 final class ProximityManager_Tests: XCTestCase, @unchecked Sendable {
 
-    private var mockCurrentDevice: CurrentDevice! = .dummy { .phone }
+    private var mockedStreamVideo: MockStreamVideo! = .init()
     private lazy var mockProximityMonitor: MockProximityMonitor! = .init()
     private lazy var mockCall: MockCall! = .init(.dummy())
     private lazy var mockActiveCallSubject: PassthroughSubject<Call?, Never>! = .init()
@@ -19,21 +19,20 @@ final class ProximityManager_Tests: XCTestCase, @unchecked Sendable {
         activeCallPublisher: mockActiveCallSubject.eraseToAnyPublisher()
     )
 
+    @MainActor
     override func setUp() async throws {
         try await super.setUp()
-        CurrentDevice.currentValue = mockCurrentDevice
-        await fulfillment { CurrentDevice.currentValue.deviceType == .phone }
+        CurrentDevice.currentValue.didUpdate(.phone)
         _ = mockProximityMonitor
-        _ = mockCurrentDevice
         _ = mockCall
         _ = subject
     }
 
     override func tearDown() async throws {
         subject = nil
+        mockedStreamVideo = nil
         mockCall = nil
         mockActiveCallSubject = nil
-        mockCurrentDevice = nil
         mockProximityMonitor = nil
         CurrentDevice.currentValue = .init()
         try await super.tearDown()

@@ -107,116 +107,531 @@ final class WebRTCAuthenticator_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(sfuAdapter.connectURL.absoluteString, "wss://getstream.io")
     }
 
-    func test_authenticate_withCreateTrueAndInitialCallSettings_shouldSetInitialCallSettings() async throws {
-        let create = true
-        let ring = true
-        let notify = true
-        let options = CreateCallOptions()
-        let expected = JoinCallResponse.dummy(call: .dummy(settings: .dummy(audio: .dummy(micDefaultOn: false))))
-        mockCoordinatorStack.callAuthenticator.authenticateResult = .success(expected)
-        let initialCallSettings = CallSettings(
-            audioOn: true,
-            videoOn: true,
-            speakerOn: true
-        )
-        await mockCoordinatorStack
-            .coordinator
-            .stateAdapter
-            .set(initialCallSettings: initialCallSettings)
+    // MARK: with sendAudio and sendVideo capabilities
 
-        _ = try await subject.authenticate(
-            coordinator: mockCoordinatorStack.coordinator,
-            currentSFU: nil,
-            create: create,
-            ring: ring,
-            notify: notify,
-            options: options
+    func test_authenticate_withCreateTrueAndInitialCallSettings_withSendAudioAndVideoCapabilities_shouldSetInitialCallSettings(
+    ) async throws {
+        try await assertCallSettings(
+            initialCallSettings: CallSettings(audioOn: true, videoOn: true, speakerOn: true),
+            result: .success(
+                .dummy(
+                    call: .dummy(settings: .dummy(audio: .dummy(micDefaultOn: false))),
+                    ownCapabilities: [.sendAudio, .sendVideo]
+                )
+            ),
+            expected: CallSettings(audioOn: true, videoOn: true, speakerOn: true)
         )
-
-        let callSettings = await mockCoordinatorStack
-            .coordinator
-            .stateAdapter
-            .callSettings
-        XCTAssertEqual(callSettings, initialCallSettings)
     }
 
-    func test_authenticate_withCreateTrueWithoutInitialCallSettings_shouldSetCallSettingsFromResponse() async throws {
-        let create = true
-        let ring = true
-        let notify = true
-        let options = CreateCallOptions()
-        let expected = JoinCallResponse.dummy(call: .dummy(settings: .dummy(audio: .dummy(micDefaultOn: true))))
-        mockCoordinatorStack.callAuthenticator.authenticateResult = .success(expected)
-
-        _ = try await subject.authenticate(
-            coordinator: mockCoordinatorStack.coordinator,
-            currentSFU: nil,
-            create: create,
-            ring: ring,
-            notify: notify,
-            options: options
+    func test_authenticate_withCreateTrueWithoutInitialCallSettings_withSendAudioAndVideoCapabilities_videoOnSpeakerFalse_shouldSetCallSettingsFromResponse(
+    ) async throws {
+        try await assertCallSettings(
+            initialCallSettings: nil,
+            result: .success(
+                .dummy(
+                    call: .dummy(
+                        settings: .dummy(
+                            // Because videoOn:true speaker will default to true.
+                            audio: .dummy(micDefaultOn: true, speakerDefaultOn: false),
+                            video: .dummy(cameraDefaultOn: true)
+                        )
+                    ),
+                    ownCapabilities: [.sendAudio, .sendVideo]
+                )
+            ),
+            expected: .init(audioOn: true, videoOn: true, speakerOn: true)
         )
-
-        await fulfillment {
-            let callSettings = await self.mockCoordinatorStack.coordinator.stateAdapter.callSettings
-            return callSettings == .init(expected.call.settings)
-        }
     }
 
-    func test_authenticate_withCreateFalseAndInitialCallSettings_shouldSetInitialCallSettings() async throws {
-        let create = true
-        let ring = true
-        let notify = true
-        let options = CreateCallOptions()
-        let expected = JoinCallResponse.dummy(call: .dummy(settings: .dummy(audio: .dummy(micDefaultOn: false))))
-        mockCoordinatorStack.callAuthenticator.authenticateResult = .success(expected)
-        let initialCallSettings = CallSettings(
-            audioOn: false,
-            videoOn: true,
-            speakerOn: true
+    func test_authenticate_withCreateTrueWithoutInitialCallSettings_withSendAudioAndVideoCapabilities_videoOffSpeakerTrue_shouldSetCallSettingsFromResponse(
+    ) async throws {
+        try await assertCallSettings(
+            initialCallSettings: nil,
+            result: .success(
+                .dummy(
+                    call: .dummy(
+                        settings: .dummy(
+                            // Because videoOn:false we respect the value of speakerDefaultOn.
+                            audio: .dummy(micDefaultOn: true, speakerDefaultOn: true),
+                            video: .dummy(cameraDefaultOn: false)
+                        )
+                    ),
+                    ownCapabilities: [.sendAudio, .sendVideo]
+                )
+            ),
+            expected: .init(audioOn: true, videoOn: false, speakerOn: true)
         )
-        await mockCoordinatorStack
-            .coordinator
-            .stateAdapter
-            .set(initialCallSettings: initialCallSettings)
-
-        _ = try await subject.authenticate(
-            coordinator: mockCoordinatorStack.coordinator,
-            currentSFU: nil,
-            create: create,
-            ring: ring,
-            notify: notify,
-            options: options
-        )
-
-        await fulfillment {
-            let callSettings = await self.mockCoordinatorStack.coordinator.stateAdapter.callSettings
-            return callSettings == initialCallSettings
-        }
     }
 
-    func test_authenticate_withCreateFalseWithoutInitialCallSettings_shouldSetCallSettingsFromResponse() async throws {
-        let create = false
-        let ring = true
-        let notify = true
-        let options = CreateCallOptions()
-        let expected = JoinCallResponse.dummy(call: .dummy(settings: .dummy(audio: .dummy(micDefaultOn: true))))
-        mockCoordinatorStack.callAuthenticator.authenticateResult = .success(expected)
-
-        _ = try await subject.authenticate(
-            coordinator: mockCoordinatorStack.coordinator,
-            currentSFU: nil,
-            create: create,
-            ring: ring,
-            notify: notify,
-            options: options
+    func test_authenticate_withCreateTrueWithoutInitialCallSettings_withSendAudioAndVideoCapabilities_videoOffSpeakerFalseDefaultDeviceSpeaker_shouldSetCallSettingsFromResponse(
+    ) async throws {
+        try await assertCallSettings(
+            initialCallSettings: nil,
+            result: .success(
+                .dummy(
+                    call: .dummy(
+                        settings: .dummy(
+                            // Because videoOn:false we respect the value of speakerDefaultOn.
+                            audio: .dummy(defaultDevice: .speaker, micDefaultOn: true, speakerDefaultOn: false),
+                            video: .dummy(cameraDefaultOn: false)
+                        )
+                    ),
+                    ownCapabilities: [.sendAudio, .sendVideo]
+                )
+            ),
+            expected: .init(audioOn: true, videoOn: false, speakerOn: true)
         )
-
-        await fulfillment {
-            let callSettings = await self.mockCoordinatorStack.coordinator.stateAdapter.callSettings
-            return callSettings == .init(expected.call.settings)
-        }
     }
+
+    func test_authenticate_withCreateTrueWithoutInitialCallSettings_withSendAudioAndVideoCapabilities_videoOffSpeakerFalseDefaultDeviceNonSpeakershouldSetCallSettingsFromResponse(
+    ) async throws {
+        try await assertCallSettings(
+            initialCallSettings: nil,
+            result: .success(
+                .dummy(
+                    call: .dummy(
+                        settings: .dummy(
+                            // Because videoOn:false we respect the value of speakerDefaultOn.
+                            audio: .dummy(defaultDevice: .earpiece, micDefaultOn: true, speakerDefaultOn: false),
+                            video: .dummy(cameraDefaultOn: false)
+                        )
+                    ),
+                    ownCapabilities: [.sendAudio, .sendVideo]
+                )
+            ),
+            expected: .init(audioOn: true, videoOn: false, speakerOn: false)
+        )
+    }
+
+    func test_authenticate_withCreateFalseAndInitialCallSettings_withSendAudioAndVideoCapabilities_shouldSetInitialCallSettings(
+    ) async throws {
+        try await assertCallSettings(
+            create: false,
+            initialCallSettings: CallSettings(audioOn: true, videoOn: true, speakerOn: true),
+            result: .success(
+                .dummy(
+                    call: .dummy(settings: .dummy(audio: .dummy(micDefaultOn: false))),
+                    ownCapabilities: [.sendAudio, .sendVideo]
+                )
+            ),
+            expected: CallSettings(audioOn: true, videoOn: true, speakerOn: true)
+        )
+    }
+
+    func test_authenticate_withCreateFalseWithoutInitialCallSettings_withSendAudioAndVideoCapabilities_shouldSetCallSettingsFromResponse(
+    ) async throws {
+        try await assertCallSettings(
+            create: false,
+            initialCallSettings: nil,
+            result: .success(
+                .dummy(
+                    call: .dummy(
+                        settings: .dummy(
+                            // Because videoOn:true speaker will default to true.
+                            audio: .dummy(micDefaultOn: true, speakerDefaultOn: false),
+                            video: .dummy(cameraDefaultOn: true)
+                        )
+                    ),
+                    ownCapabilities: [.sendAudio, .sendVideo]
+                )
+            ),
+            expected: .init(audioOn: true, videoOn: true, speakerOn: true)
+        )
+    }
+
+    // MARK: with sendAudio capability
+
+    func test_authenticate_withCreateTrueAndInitialCallSettings_withSendAudioCapability_shouldSetInitialCallSettings() async throws {
+        try await assertCallSettings(
+            initialCallSettings: CallSettings(audioOn: true, videoOn: true, speakerOn: true),
+            result: .success(
+                .dummy(
+                    call: .dummy(settings: .dummy(audio: .dummy(micDefaultOn: false))),
+                    ownCapabilities: [.sendAudio]
+                )
+            ),
+            expected: CallSettings(audioOn: true, videoOn: false, speakerOn: true)
+        )
+    }
+
+    func test_authenticate_withCreateTrueWithoutInitialCallSettings_withSendAudioCapability_videoOnSpeakerFalse_shouldSetCallSettingsFromResponse(
+    ) async throws {
+        try await assertCallSettings(
+            initialCallSettings: nil,
+            result: .success(
+                .dummy(
+                    call: .dummy(
+                        settings: .dummy(
+                            // Because videoOn:true speaker will default to true.
+                            audio: .dummy(micDefaultOn: true, speakerDefaultOn: false),
+                            video: .dummy(cameraDefaultOn: true)
+                        )
+                    ),
+                    ownCapabilities: [.sendAudio]
+                )
+            ),
+            expected: .init(audioOn: true, videoOn: false, speakerOn: true)
+        )
+    }
+
+    func test_authenticate_withCreateTrueWithoutInitialCallSettings_withSendAudioCapability_videoOffSpeakerTrue_shouldSetCallSettingsFromResponse(
+    ) async throws {
+        try await assertCallSettings(
+            initialCallSettings: nil,
+            result: .success(
+                .dummy(
+                    call: .dummy(
+                        settings: .dummy(
+                            // Because videoOn:false we respect the value of speakerDefaultOn.
+                            audio: .dummy(micDefaultOn: true, speakerDefaultOn: true),
+                            video: .dummy(cameraDefaultOn: false)
+                        )
+                    ),
+                    ownCapabilities: [.sendAudio]
+                )
+            ),
+            expected: .init(audioOn: true, videoOn: false, speakerOn: true)
+        )
+    }
+
+    func test_authenticate_withCreateTrueWithoutInitialCallSettings_withSendAudioCapability_videoOffSpeakerFalseDefaultDeviceSpeaker_shouldSetCallSettingsFromResponse(
+    ) async throws {
+        try await assertCallSettings(
+            initialCallSettings: nil,
+            result: .success(
+                .dummy(
+                    call: .dummy(
+                        settings: .dummy(
+                            // Because videoOn:false we respect the value of speakerDefaultOn.
+                            audio: .dummy(defaultDevice: .speaker, micDefaultOn: true, speakerDefaultOn: false),
+                            video: .dummy(cameraDefaultOn: false)
+                        )
+                    ),
+                    ownCapabilities: [.sendAudio]
+                )
+            ),
+            expected: .init(audioOn: true, videoOn: false, speakerOn: true)
+        )
+    }
+
+    func test_authenticate_withCreateTrueWithoutInitialCallSettings_withSendAudioCapability_videoOffSpeakerFalseDefaultDeviceNonSpeakershouldSetCallSettingsFromResponse(
+    ) async throws {
+        try await assertCallSettings(
+            initialCallSettings: nil,
+            result: .success(
+                .dummy(
+                    call: .dummy(
+                        settings: .dummy(
+                            // Because videoOn:false we respect the value of speakerDefaultOn.
+                            audio: .dummy(defaultDevice: .earpiece, micDefaultOn: true, speakerDefaultOn: false),
+                            video: .dummy(cameraDefaultOn: false)
+                        )
+                    ),
+                    ownCapabilities: [.sendAudio]
+                )
+            ),
+            expected: .init(audioOn: true, videoOn: false, speakerOn: false)
+        )
+    }
+
+    func test_authenticate_withCreateFalseAndInitialCallSettings_withSendAudioCapability_shouldSetInitialCallSettings(
+    ) async throws {
+        try await assertCallSettings(
+            create: false,
+            initialCallSettings: CallSettings(audioOn: true, videoOn: true, speakerOn: true),
+            result: .success(
+                .dummy(
+                    call: .dummy(settings: .dummy(audio: .dummy(micDefaultOn: false))),
+                    ownCapabilities: [.sendAudio]
+                )
+            ),
+            expected: CallSettings(audioOn: true, videoOn: false, speakerOn: true)
+        )
+    }
+
+    func test_authenticate_withCreateFalseWithoutInitialCallSettings_withSendAudioCapability_shouldSetCallSettingsFromResponse(
+    ) async throws {
+        try await assertCallSettings(
+            create: false,
+            initialCallSettings: nil,
+            result: .success(
+                .dummy(
+                    call: .dummy(
+                        settings: .dummy(
+                            // Because videoOn:true speaker will default to true.
+                            audio: .dummy(micDefaultOn: true, speakerDefaultOn: false),
+                            video: .dummy(cameraDefaultOn: true)
+                        )
+                    ),
+                    ownCapabilities: [.sendAudio]
+                )
+            ),
+            expected: .init(audioOn: true, videoOn: false, speakerOn: true)
+        )
+    }
+
+    // MARK: with sendVideo capability
+
+    func test_authenticate_withCreateTrueAndInitialCallSettings_withSendVideoCapability_shouldSetInitialCallSettings() async throws {
+        try await assertCallSettings(
+            initialCallSettings: CallSettings(audioOn: true, videoOn: true, speakerOn: true),
+            result: .success(
+                .dummy(
+                    call: .dummy(settings: .dummy(audio: .dummy(micDefaultOn: false))),
+                    ownCapabilities: [.sendVideo]
+                )
+            ),
+            expected: CallSettings(audioOn: false, videoOn: true, speakerOn: true)
+        )
+    }
+
+    func test_authenticate_withCreateTrueWithoutInitialCallSettings_withSendVideoCapability_videoOnSpeakerFalse_shouldSetCallSettingsFromResponse(
+    ) async throws {
+        try await assertCallSettings(
+            initialCallSettings: nil,
+            result: .success(
+                .dummy(
+                    call: .dummy(
+                        settings: .dummy(
+                            // Because videoOn:true speaker will default to true.
+                            audio: .dummy(micDefaultOn: true, speakerDefaultOn: false),
+                            video: .dummy(cameraDefaultOn: true)
+                        )
+                    ),
+                    ownCapabilities: [.sendVideo]
+                )
+            ),
+            expected: .init(audioOn: false, videoOn: true, speakerOn: true)
+        )
+    }
+
+    func test_authenticate_withCreateTrueWithoutInitialCallSettings_withSendVideoCapability_videoOffSpeakerTrue_shouldSetCallSettingsFromResponse(
+    ) async throws {
+        try await assertCallSettings(
+            initialCallSettings: nil,
+            result: .success(
+                .dummy(
+                    call: .dummy(
+                        settings: .dummy(
+                            // Because videoOn:false we respect the value of speakerDefaultOn.
+                            audio: .dummy(micDefaultOn: true, speakerDefaultOn: true),
+                            video: .dummy(cameraDefaultOn: false)
+                        )
+                    ),
+                    ownCapabilities: [.sendVideo]
+                )
+            ),
+            expected: .init(audioOn: false, videoOn: false, speakerOn: true)
+        )
+    }
+
+    func test_authenticate_withCreateTrueWithoutInitialCallSettings_withSendVideoCapability_videoOffSpeakerFalseDefaultDeviceSpeaker_shouldSetCallSettingsFromResponse(
+    ) async throws {
+        try await assertCallSettings(
+            initialCallSettings: nil,
+            result: .success(
+                .dummy(
+                    call: .dummy(
+                        settings: .dummy(
+                            // Because videoOn:false we respect the value of speakerDefaultOn.
+                            audio: .dummy(defaultDevice: .speaker, micDefaultOn: true, speakerDefaultOn: false),
+                            video: .dummy(cameraDefaultOn: false)
+                        )
+                    ),
+                    ownCapabilities: [.sendVideo]
+                )
+            ),
+            expected: .init(audioOn: false, videoOn: false, speakerOn: true)
+        )
+    }
+
+    func test_authenticate_withCreateTrueWithoutInitialCallSettings_withSendVideoCapability_videoOffSpeakerFalseDefaultDeviceNonSpeakershouldSetCallSettingsFromResponse(
+    ) async throws {
+        try await assertCallSettings(
+            initialCallSettings: nil,
+            result: .success(
+                .dummy(
+                    call: .dummy(
+                        settings: .dummy(
+                            // Because videoOn:false we respect the value of speakerDefaultOn.
+                            audio: .dummy(defaultDevice: .earpiece, micDefaultOn: true, speakerDefaultOn: false),
+                            video: .dummy(cameraDefaultOn: false)
+                        )
+                    ),
+                    ownCapabilities: [.sendVideo]
+                )
+            ),
+            expected: .init(audioOn: false, videoOn: false, speakerOn: false)
+        )
+    }
+
+    func test_authenticate_withCreateFalseAndInitialCallSettings_withSendVideoCapability_shouldSetInitialCallSettings(
+    ) async throws {
+        try await assertCallSettings(
+            create: false,
+            initialCallSettings: CallSettings(audioOn: true, videoOn: true, speakerOn: true),
+            result: .success(
+                .dummy(
+                    call: .dummy(settings: .dummy(audio: .dummy(micDefaultOn: false))),
+                    ownCapabilities: [.sendVideo]
+                )
+            ),
+            expected: CallSettings(audioOn: false, videoOn: true, speakerOn: true)
+        )
+    }
+
+    func test_authenticate_withCreateFalseWithoutInitialCallSettings_withSendVideoCapability_shouldSetCallSettingsFromResponse(
+    ) async throws {
+        try await assertCallSettings(
+            create: false,
+            initialCallSettings: nil,
+            result: .success(
+                .dummy(
+                    call: .dummy(
+                        settings: .dummy(
+                            // Because videoOn:true speaker will default to true.
+                            audio: .dummy(micDefaultOn: true, speakerDefaultOn: false),
+                            video: .dummy(cameraDefaultOn: true)
+                        )
+                    ),
+                    ownCapabilities: [.sendVideo]
+                )
+            ),
+            expected: .init(audioOn: false, videoOn: true, speakerOn: true)
+        )
+    }
+
+    // MARK: without audio or video capabilities
+
+    func test_authenticate_withCreateTrueAndInitialCallSettings_withoutCapabilities_shouldSetInitialCallSettings() async throws {
+        try await assertCallSettings(
+            initialCallSettings: CallSettings(audioOn: true, videoOn: true, speakerOn: true),
+            result: .success(
+                .dummy(
+                    call: .dummy(settings: .dummy(audio: .dummy(micDefaultOn: false))),
+                    ownCapabilities: []
+                )
+            ),
+            expected: CallSettings(audioOn: false, videoOn: false, speakerOn: true)
+        )
+    }
+
+    func test_authenticate_withCreateTrueWithoutInitialCallSettings_withoutCapabilities_videoOnSpeakerFalse_shouldSetCallSettingsFromResponse(
+    ) async throws {
+        try await assertCallSettings(
+            initialCallSettings: nil,
+            result: .success(
+                .dummy(
+                    call: .dummy(
+                        settings: .dummy(
+                            // Because videoOn:true speaker will default to true.
+                            audio: .dummy(micDefaultOn: true, speakerDefaultOn: false),
+                            video: .dummy(cameraDefaultOn: true)
+                        )
+                    ),
+                    ownCapabilities: []
+                )
+            ),
+            expected: .init(audioOn: false, videoOn: false, speakerOn: true)
+        )
+    }
+
+    func test_authenticate_withCreateTrueWithoutInitialCallSettings_withoutCapabilities_videoOffSpeakerTrue_shouldSetCallSettingsFromResponse(
+    ) async throws {
+        try await assertCallSettings(
+            initialCallSettings: nil,
+            result: .success(
+                .dummy(
+                    call: .dummy(
+                        settings: .dummy(
+                            // Because videoOn:false we respect the value of speakerDefaultOn.
+                            audio: .dummy(micDefaultOn: true, speakerDefaultOn: true),
+                            video: .dummy(cameraDefaultOn: false)
+                        )
+                    ),
+                    ownCapabilities: []
+                )
+            ),
+            expected: .init(audioOn: false, videoOn: false, speakerOn: true)
+        )
+    }
+
+    func test_authenticate_withCreateTrueWithoutInitialCallSettings_withoutCapabilities_videoOffSpeakerFalseDefaultDeviceSpeaker_shouldSetCallSettingsFromResponse(
+    ) async throws {
+        try await assertCallSettings(
+            initialCallSettings: nil,
+            result: .success(
+                .dummy(
+                    call: .dummy(
+                        settings: .dummy(
+                            // Because videoOn:false we respect the value of speakerDefaultOn.
+                            audio: .dummy(defaultDevice: .speaker, micDefaultOn: true, speakerDefaultOn: false),
+                            video: .dummy(cameraDefaultOn: false)
+                        )
+                    ),
+                    ownCapabilities: []
+                )
+            ),
+            expected: .init(audioOn: false, videoOn: false, speakerOn: true)
+        )
+    }
+
+    func test_authenticate_withCreateTrueWithoutInitialCallSettings_withoutCapabilities_videoOffSpeakerFalseDefaultDeviceNonSpeakershouldSetCallSettingsFromResponse(
+    ) async throws {
+        try await assertCallSettings(
+            initialCallSettings: nil,
+            result: .success(
+                .dummy(
+                    call: .dummy(
+                        settings: .dummy(
+                            // Because videoOn:false we respect the value of speakerDefaultOn.
+                            audio: .dummy(defaultDevice: .earpiece, micDefaultOn: true, speakerDefaultOn: false),
+                            video: .dummy(cameraDefaultOn: false)
+                        )
+                    ),
+                    ownCapabilities: []
+                )
+            ),
+            expected: .init(audioOn: false, videoOn: false, speakerOn: false)
+        )
+    }
+
+    func test_authenticate_withCreateFalseAndInitialCallSettings_withoutCapabilities_shouldSetInitialCallSettings() async throws {
+        try await assertCallSettings(
+            create: false,
+            initialCallSettings: CallSettings(audioOn: true, videoOn: true, speakerOn: true),
+            result: .success(
+                .dummy(
+                    call: .dummy(settings: .dummy(audio: .dummy(micDefaultOn: false))),
+                    ownCapabilities: []
+                )
+            ),
+            expected: CallSettings(audioOn: false, videoOn: false, speakerOn: true)
+        )
+    }
+
+    func test_authenticate_withCreateFalseWithoutInitialCallSettings_withoutCapabilities_shouldSetCallSettingsFromResponse(
+    ) async throws {
+        try await assertCallSettings(
+            create: false,
+            initialCallSettings: nil,
+            result: .success(
+                .dummy(
+                    call: .dummy(
+                        settings: .dummy(
+                            // Because videoOn:true speaker will default to true.
+                            audio: .dummy(micDefaultOn: true, speakerDefaultOn: false),
+                            video: .dummy(cameraDefaultOn: true)
+                        )
+                    ),
+                    ownCapabilities: []
+                )
+            ),
+            expected: .init(audioOn: false, videoOn: false, speakerOn: true)
+        )
+    }
+
+    // MARK: -
 
     func test_authenticate_updatesVideoOptions() async throws {
         let create = false
@@ -277,6 +692,8 @@ final class WebRTCAuthenticator_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(statsReporter?.deliveryInterval, 12)
     }
 
+    // MARK: with only sendAudio capability
+
     // MARK: - waitForAuthentication
 
     func test_waitForAuthentication_shouldThrowErrorIfTimeout() async throws {
@@ -331,5 +748,44 @@ final class WebRTCAuthenticator_Tests: XCTestCase, @unchecked Sendable {
 
             try await group.waitForAll()
         }
+    }
+
+    // MARK: - Private Helpers
+
+    private func assertCallSettings(
+        create: Bool = true,
+        ring: Bool = true,
+        notify: Bool = true,
+        options: CreateCallOptions = .init(),
+        initialCallSettings: CallSettings? = nil,
+        result: Result<JoinCallResponse, Error>,
+        expected: CallSettings,
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line
+    ) async throws {
+        mockCoordinatorStack.callAuthenticator.authenticateResult = result
+
+        if let initialCallSettings {
+            await mockCoordinatorStack
+                .coordinator
+                .stateAdapter
+                .set(initialCallSettings: initialCallSettings)
+        }
+
+        _ = try await subject.authenticate(
+            coordinator: mockCoordinatorStack.coordinator,
+            currentSFU: nil,
+            create: create,
+            ring: ring,
+            notify: notify,
+            options: options
+        )
+
+        let callSettings = await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .callSettings
+        XCTAssertEqual(callSettings, expected, file: file, line: line)
     }
 }

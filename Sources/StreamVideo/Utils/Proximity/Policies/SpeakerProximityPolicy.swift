@@ -36,7 +36,7 @@ public final class SpeakerProximityPolicy: ProximityPolicy, @unchecked Sendable 
             guard
                 let self,
                 let call,
-                audioStore.session.currentRoute.isExternal == false
+                audioStore.state.currentRoute.isExternal == false
             else {
                 return
             }
