@@ -62,21 +62,21 @@ extension AVAudioSession {
             self.renderingMode = ""
             #endif
 
-            #if compiler(>=6.0)
+            #if compiler(>=6.1)
             if #available(iOS 18.2, *) { self.prefersEchoCancelledInput = source.prefersEchoCancelledInput
             } else { self.prefersEchoCancelledInput = false }
             #else
             self.prefersEchoCancelledInput = false
             #endif
 
-            #if compiler(>=6.0)
+            #if compiler(>=6.1)
             if #available(iOS 18.2, *) { self.isEchoCancelledInputEnabled = source.isEchoCancelledInputEnabled
             } else { self.isEchoCancelledInputEnabled = false }
             #else
             self.isEchoCancelledInputEnabled = false
             #endif
 
-            #if compiler(>=6.0)
+            #if compiler(>=6.1)
             if #available(iOS 18.2, *) { self.isEchoCancelledInputAvailable = source.isEchoCancelledInputAvailable
             } else { self.isEchoCancelledInputAvailable = false }
             #else
