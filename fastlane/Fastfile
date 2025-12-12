@@ -244,7 +244,7 @@ lane :test do |options|
   begin
     scan(scan_options)
   rescue StandardError => e
-    UI.user_error!(e)
+    UI.user_error!(e) unless options[:cron]
 
     failed_tests = retreive_failed_tests
     UI.important("Re-running #{failed_tests.size} failed tests ⌛️")
