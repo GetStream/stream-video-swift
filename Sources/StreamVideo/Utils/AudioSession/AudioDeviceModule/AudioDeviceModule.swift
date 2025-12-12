@@ -216,8 +216,6 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
 
         audioLevelsAdapter.subject = audioLevelSubject
         source.observer = self
-
-        source.isVoiceProcessingBypassed = true
     }
 
     // MARK: - Recording
@@ -242,6 +240,7 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         /// sendAudio capability.
         _ = source.setRecordingAlwaysPreparedMode(false)
         source.prefersStereoPlayout = isPreferred
+        source.isVoiceProcessingBypassed = isPreferred
     }
 
     /// Starts or stops speaker playout on the ADM, retrying transient failures.
