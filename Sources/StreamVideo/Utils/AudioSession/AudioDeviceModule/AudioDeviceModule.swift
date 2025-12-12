@@ -216,11 +216,6 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
 
         audioLevelsAdapter.subject = audioLevelSubject
         source.observer = self
-
-        audioLevelPublisher
-            .log(.debug, subsystems: .audioRecording) { "AudioDeviceModule updated audioLevel:\($0)" }
-            .sink { _ in }
-            .store(in: disposableBag)
     }
 
     // MARK: - Recording
