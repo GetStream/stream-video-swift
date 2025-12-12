@@ -1,4 +1,4 @@
-// swift-tools-version:5.9
+// swift-tools-version:5.10
 
 import Foundation
 import PackageDescription
@@ -31,6 +31,9 @@ let package = Package(
             dependencies: [
                 .product(name: "SwiftProtobuf", package: "swift-protobuf"),
                 .product(name: "StreamWebRTC", package: "stream-video-swift-webrtc")
+            ],
+            swiftSettings: [
+                .unsafeFlags(["-Osize"], .when(configuration: .release))
             ]
         ),
         .target(

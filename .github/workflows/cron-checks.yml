@@ -41,33 +41,28 @@ jobs:
     strategy:
       matrix:
         include:
-          - ios: 18.5
-            xcode: 16.3
-            os: macos-15
+          - ios: "26.1"
+            device: "iPhone 17 Pro"
+            setup_runtime: false
+          - ios: "18.5"
             device: "iPhone 16 Pro"
             setup_runtime: false
-          - ios: 17.5
-            xcode: 15.4
-            os: macos-14
+          - ios: "17.5"
             device: "iPhone 15 Pro"
-            setup_runtime: false
-          - ios: 16.4
-            xcode: 15.3
-            os: macos-14
-            device: "iPhone 14"
             setup_runtime: true
-          - ios: 15.5
-            xcode: 15.4
-            os: macos-14
+          - ios: "16.4"
+            device: "iPhone 14 Pro"
+            setup_runtime: true
+          - ios: "15.5"
             device: "iPhone 13 Pro"
             setup_runtime: true
       fail-fast: false
-    runs-on: ${{ matrix.os }}
+    runs-on: macos-15
     env:
       GITHUB_EVENT: ${{ toJson(github.event) }}
       ALLURE_TOKEN: ${{ secrets.ALLURE_TOKEN }}
-      XCODE_VERSION: ${{ matrix.xcode }}
-      IOS_SIMULATOR_DEVICE: "${{ matrix.device }} (${{ matrix.ios }})" # For the Allure report
+      XCODE_VERSION: "26.1.1"
+      IOS_SIMULATOR_DEVICE: "${{ matrix.device }} (${{ matrix.ios }})"
     steps:
     - uses: actions/checkout@v4.1.1
     - uses: actions/download-artifact@v4
@@ -90,7 +85,7 @@ jobs:
     - name: Launch Allure TestOps
       run: bundle exec fastlane allure_launch cron:true
     - name: Run UI Tests (Debug)
-      run: bundle exec fastlane test_e2e device:"${{ matrix.device }} (${{ matrix.ios }})" cron:true test_without_building:true
+      run: bundle exec fastlane test_e2e device:"${{ env.IOS_SIMULATOR_DEVICE }}" cron:true test_without_building:true
       timeout-minutes: 90
       env:
         STREAM_SDK_TEST_APP: ${{ secrets.STREAM_SDK_TEST_APP }}
@@ -124,30 +119,26 @@ jobs:
     strategy:
       matrix:
         include:
-          - ios: 18.5
-            xcode: 16.3
-            os: macos-15
+          - ios: "26.1"
+            device: "iPhone 17 Pro"
+            setup_runtime: false
+          - ios: "18.5"
             device: "iPhone 16 Pro"
             setup_runtime: false
-          - ios: 17.5
-            xcode: 15.4
-            os: macos-14
+          - ios: "17.5"
             device: "iPhone 15 Pro"
-            setup_runtime: false
-          - ios: 16.4
-            xcode: 15.3
-            os: macos-14
+            setup_runtime: true
+          - ios: "16.4"
             device: "iPhone 14 Pro"
             setup_runtime: true
-          - ios: 15.5
-            xcode: 15.3
-            os: macos-14
+          - ios: "15.5"
             device: "iPhone 13 Pro"
             setup_runtime: true
       fail-fast: false
-    runs-on: ${{ matrix.os }}
+    runs-on: macos-15
     env:
-      XCODE_VERSION: ${{ matrix.xcode }}
+      XCODE_VERSION: "26.1.1"
+      IOS_SIMULATOR_DEVICE: "${{ matrix.device }} (${{ matrix.ios }})"
     steps:
     - uses: actions/checkout@v4.1.1
     - uses: ./.github/actions/bootstrap
@@ -161,7 +152,7 @@ jobs:
         version: ${{ matrix.ios }}
         device: ${{ matrix.device }}
     - name: Run LLC Tests (Debug)
-      run: bundle exec fastlane test device:"${{ matrix.device }} (${{ matrix.ios }})" cron:true
+      run: bundle exec fastlane test device:"${{ env.IOS_SIMULATOR_DEVICE }}" cron:true
       timeout-minutes: 60
     - name: Parse xcresult
       if: failure()
@@ -196,17 +187,18 @@ jobs:
       run: bundle exec fastlane build_docs_test
 
   build-old-xcode:
-    name: Build SDKs (Xcode 15)
+    name: Build SDKs (Old Xcode)
     runs-on: macos-14
     if: ${{ github.event_name != 'push' && github.event.inputs.snapshots != 'true' }}
     env:
-      XCODE_VERSION: "15.4"
+      XCODE_VERSION: "16.1"
     steps:
     - name: Connect Bot
       uses: webfactory/ssh-agent@v0.7.0
       with:
         ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
     - uses: actions/checkout@v3.1.0
+    - uses: ./.github/actions/xcode-cache
     - uses: ./.github/actions/ruby-cache
     - name: List Xcode versions
       run: mdfind "kMDItemCFBundleIdentifier = 'com.apple.dt.Xcode'"
@@ -229,7 +221,7 @@ jobs:
     name: Automated Code Review
     runs-on: macos-14
     env:
-      XCODE_VERSION: "15.4"
+      XCODE_VERSION: "16.1"
     steps:
     - uses: actions/checkout@v4.1.1
     - uses: ./.github/actions/bootstrap
