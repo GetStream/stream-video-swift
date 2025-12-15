@@ -82,10 +82,6 @@ extension AudioProcessingStore.Namespace {
             }
 
             capturePostProcessingDelegate.processingHandler = { [weak self] in
-                log
-                    .debug(
-                        "AudioFilter:\(audioFilter.id) will receive captured audioBuffer with channels:\($0.channels) frames:\($0.frames)."
-                    )
                 self?.process($0, on: audioFilter)
             }
         }
