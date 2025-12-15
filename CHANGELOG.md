@@ -12,6 +12,9 @@ _December 15, 2025_
 ### ✅ Added
 - Configuration in `CallKitAdapter` to skip calls from showing in the `Recents` app. [#1008](https://github.com/GetStream/stream-video-swift/pull/1008)
 
+### 🐞 Fixed
+- An issue causing the local participant waveform to activate while the local participant wasn't speaking. [#1009](https://github.com/GetStream/stream-video-swift/pull/1009)
+
 # [1.38.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.38.0)
 _December 09, 2025_
 
