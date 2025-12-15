@@ -13,8 +13,6 @@ extension AudioProcessingStore.Namespace {
 
     final class AudioFilterMiddleware: Middleware<AudioProcessingStore.Namespace>, @unchecked Sendable {
 
-        private var cancellable: AnyCancellable?
-
         override func apply(
             state: AudioProcessingStore.Namespace.StoreState,
             action: AudioProcessingStore.Namespace.StoreAction,
@@ -58,22 +56,16 @@ extension AudioProcessingStore.Namespace {
             _ audioFilter: AudioFilter?,
             capturePostProcessingDelegate: AudioCustomProcessingModule
         ) {
-            cancellable?.cancel()
-            cancellable = nil
+            capturePostProcessingDelegate.processingHandler = nil
 
             guard let audioFilter else {
                 return
             }
 
-            cancellable = capturePostProcessingDelegate
-                .publisher
-                .compactMap {
-                    guard case let .audioProcessingProcess(buffer) = $0 else {
-                        return nil
-                    }
-                    return buffer
-                }
-                .sink { [weak self, audioFilter] in self?.process($0, on: audioFilter) }
+            capturePostProcessingDelegate.processingHandler = { [weak self] in
+                log.debug("AudioFilter:\(audioFilter.id) will receive captured audioBuffer:\($0).")
+                self?.process($0, on: audioFilter)
+            }
         }
 
         private func process(
