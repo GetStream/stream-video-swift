@@ -4,6 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### 🔄 Changed
+
+# [1.38.1](https://github.com/GetStream/stream-video-swift/releases/tag/1.38.1)
+_December 15, 2025_
+
 ### ✅ Added
 - Configuration in `CallKitAdapter` to skip calls from showing in the `Recents` app. [#1008](https://github.com/GetStream/stream-video-swift/pull/1008)
 
