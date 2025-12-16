@@ -37,7 +37,9 @@ final class Store_PerformanceTests: XCTestCase, @unchecked Sendable {
     func test_measureDispatchThroughput() {
         let iterations = 10000
         
-        measure {
+        measure(
+            baseline: .init(1.1, stringTransformer: { String(format: "%.4fs", $0) })
+        ) {
             for _ in 0..<iterations {
                 store.dispatch(.increment)
             }
@@ -61,7 +63,9 @@ final class Store_PerformanceTests: XCTestCase, @unchecked Sendable {
     
     /// Measures synchronous dispatch latency.
     func test_measureSyncDispatchLatency() {
-        measure {
+        measure(
+            baseline: .init(local: 0.005, ci: 0.01, stringTransformer: { String(format: "%.4fs", $0) })
+        ) {
             let expectation = XCTestExpectation(description: "Sync dispatch")
             
             Task {
@@ -81,7 +85,9 @@ final class Store_PerformanceTests: XCTestCase, @unchecked Sendable {
     func test_measureDispatchWithDelaysThroughput() {
         let iterations = 100
         
-        measure {
+        measure(
+            baseline: .init(1.1, stringTransformer: { String(format: "%.4fs", $0) })
+        ) {
             for i in 0..<iterations {
                 // Small delay to simulate debouncing
                 let delay = StoreDelay(
@@ -119,7 +125,9 @@ final class Store_PerformanceTests: XCTestCase, @unchecked Sendable {
                 .store(in: &cancellables)
         }
         
-        measure {
+        measure(
+            baseline: .init(1.1, stringTransformer: { String(format: "%.4fs", $0) })
+        ) {
             receivedCount = 0
             
             for _ in 0..<iterations {
@@ -153,7 +161,9 @@ final class Store_PerformanceTests: XCTestCase, @unchecked Sendable {
             .map { ($0.counter, $0.array.endIndex, $0.dictionary["key\(iterations - 1)"] != nil) }
             .filter { $0.0 == iterations && $0.1 == iterations && $0.2 }
 
-        measure {
+        measure(
+            baseline: .init(local: 1.6, ci: 2.5, stringTransformer: { String(format: "%.4fs", $0) })
+        ) {
             for i in 0..<iterations {
                 store.dispatch([
                     .increment,
@@ -161,12 +171,12 @@ final class Store_PerformanceTests: XCTestCase, @unchecked Sendable {
                     .updateDictionary(key: "key\(i)", value: i)
                 ])
             }
-            
+
             // Wait for completion
             let sinkExpectation = XCTestExpectation(description: "Sink was called.")
             let cancellable = publisher
                 .sink { _ in sinkExpectation.fulfill() }
-            
+
             wait(for: [sinkExpectation], timeout: 5)
 
             // Reset
@@ -188,7 +198,9 @@ final class Store_PerformanceTests: XCTestCase, @unchecked Sendable {
         
         let iterations = 1000
         
-        measure {
+        measure(
+            baseline: .init(1.1, stringTransformer: { String(format: "%.4fs", $0) })
+        ) {
             for _ in 0..<iterations {
                 store.dispatch(.increment)
             }
@@ -219,9 +231,10 @@ final class Store_PerformanceTests: XCTestCase, @unchecked Sendable {
     func test_memoryUsageWithLargeState() {
         let iterations = 10000
 
-        let options = XCTMeasureOptions()
-        options.iterationCount = 2
-        measure(options: options) {
+        measure(
+            baseline: .init(local: 13, ci: 24, stringTransformer: { String(format: "%.4fs", $0) }),
+            iterations: 2
+        ) {
             // Wait for completion
             let expectation = XCTestExpectation(description: "Large state")
             let cancellable = store

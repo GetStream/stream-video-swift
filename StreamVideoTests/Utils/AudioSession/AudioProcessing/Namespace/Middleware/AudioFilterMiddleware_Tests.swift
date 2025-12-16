@@ -16,7 +16,7 @@ final class AudioFilterMiddleware_Tests: XCTestCase, @unchecked Sendable {
         super.tearDown()
     }
 
-    func test_setInitializedConfiguration_initializesExistingFilter() {
+    func test_setInitializedConfiguration_initializesExistingFilter() async {
         let filter = MockAudioFilter(id: "f")
         var state = AudioProcessingStore.Namespace.StoreState.initial
         state.audioFilter = filter
@@ -27,11 +27,13 @@ final class AudioFilterMiddleware_Tests: XCTestCase, @unchecked Sendable {
             file: #file, function: #function, line: #line
         )
 
-        XCTAssertEqual(filter.initializedParams?.sampleRate, 48000)
-        XCTAssertEqual(filter.initializedParams?.channels, 2)
+        await fulfillment {
+            filter.initializedParams?.sampleRate == 48000
+                && filter.initializedParams?.channels == 2
+        }
     }
 
-    func test_setAudioFilter_initializesWhenFormatKnown() {
+    func test_setAudioFilter_initializesWhenFormatKnown() async {
         let filter = MockAudioFilter(id: "g")
         var state = AudioProcessingStore.Namespace.StoreState.initial
         state.initializedSampleRate = 44100
@@ -43,7 +45,9 @@ final class AudioFilterMiddleware_Tests: XCTestCase, @unchecked Sendable {
             file: #file, function: #function, line: #line
         )
 
-        XCTAssertEqual(filter.initializedParams?.sampleRate, 44100)
-        XCTAssertEqual(filter.initializedParams?.channels, 1)
+        await fulfillment {
+            filter.initializedParams?.sampleRate == 44100
+                && filter.initializedParams?.channels == 1
+        }
     }
 }
