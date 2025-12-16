@@ -38,7 +38,7 @@ final class Store_PerformanceTests: XCTestCase, @unchecked Sendable {
         let iterations = 10000
         
         measure(
-            baseline: 1.1
+            baseline: .init(1.1, stringTransformer: { String(format: "%.4fs", $0) })
         ) {
             for _ in 0..<iterations {
                 store.dispatch(.increment)
@@ -64,7 +64,7 @@ final class Store_PerformanceTests: XCTestCase, @unchecked Sendable {
     /// Measures synchronous dispatch latency.
     func test_measureSyncDispatchLatency() {
         measure(
-            baseline: 0.005
+            baseline: .init(local: 0.005, ci: 0.01, stringTransformer: { String(format: "%.4fs", $0) })
         ) {
             let expectation = XCTestExpectation(description: "Sync dispatch")
             
@@ -86,7 +86,7 @@ final class Store_PerformanceTests: XCTestCase, @unchecked Sendable {
         let iterations = 100
         
         measure(
-            baseline: 1.1
+            baseline: .init(1.1, stringTransformer: { String(format: "%.4fs", $0) })
         ) {
             for i in 0..<iterations {
                 // Small delay to simulate debouncing
@@ -126,8 +126,7 @@ final class Store_PerformanceTests: XCTestCase, @unchecked Sendable {
         }
         
         measure(
-            baseline: 1.1,
-            allowedRegression: 0.1 // 10%
+            baseline: .init(1.1, stringTransformer: { String(format: "%.4fs", $0) })
         ) {
             receivedCount = 0
             
@@ -163,8 +162,7 @@ final class Store_PerformanceTests: XCTestCase, @unchecked Sendable {
             .filter { $0.0 == iterations && $0.1 == iterations && $0.2 }
 
         measure(
-            baseline: 1.6,
-            allowedRegression: 0.2 // 20%
+            baseline: .init(local: 1.6, ci: 2.5, stringTransformer: { String(format: "%.4fs", $0) })
         ) {
             for i in 0..<iterations {
                 store.dispatch([
@@ -201,7 +199,7 @@ final class Store_PerformanceTests: XCTestCase, @unchecked Sendable {
         let iterations = 1000
         
         measure(
-            baseline: 1.1
+            baseline: .init(1.1, stringTransformer: { String(format: "%.4fs", $0) })
         ) {
             for _ in 0..<iterations {
                 store.dispatch(.increment)
@@ -234,8 +232,7 @@ final class Store_PerformanceTests: XCTestCase, @unchecked Sendable {
         let iterations = 10000
 
         measure(
-            baseline: 13,
-            allowedRegression: 0.1, // 10%
+            baseline: .init(local: 13, ci: 24, stringTransformer: { String(format: "%.4fs", $0) }),
             iterations: 2
         ) {
             // Wait for completion

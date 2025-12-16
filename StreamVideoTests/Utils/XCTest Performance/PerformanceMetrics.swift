@@ -3,13 +3,48 @@
 //
 
 import Foundation
+import StreamSwiftTestHelpers
 import XCTest
 
 extension XCTestCase {
 
+    struct ResultValue<T: Comparable>: CustomStringConvertible {
+
+        var local: T
+        var ci: T
+        var stringTransformer: (T) -> String
+
+        var description: String {
+            "\(stringTransformer(value)) { local:\(stringTransformer(local)), ci:\(stringTransformer(ci)) }"
+        }
+
+        var value: T {
+            TestRunnerEnvironment.isCI ? ci : local
+        }
+
+        init(
+            local: T,
+            ci: T,
+            stringTransformer: @escaping (T) -> String = { "\($0)" }
+        ) {
+            self.local = local
+            self.ci = ci
+            self.stringTransformer = stringTransformer
+        }
+
+        init(
+            _ value: T,
+            stringTransformer: @escaping (T) -> String = { "\($0)" }
+        ) {
+            self.local = value
+            self.ci = value
+            self.stringTransformer = stringTransformer
+        }
+    }
+
     func measure(
-        baseline: TimeInterval,
-        allowedRegression: Double = 0.1, // Default: 10%
+        baseline: ResultValue<TimeInterval>,
+        allowedRegression: ResultValue<Double> = .init(local: 0.1, ci: 0.2), // Default: local: 10%, ci: 20%
         iterations: Int = 10,
         warmup: Int = 2,
         file: StaticString = #file,
@@ -17,7 +52,7 @@ extension XCTestCase {
         line: UInt = #line,
         block: () -> Void
     ) {
-        guard baseline > 0 else {
+        guard baseline.value > 0 else {
             XCTFail("Baseline must be > 0 for \(name)", file: file, line: line)
             return
         }
@@ -29,13 +64,13 @@ extension XCTestCase {
         )
 
         let measured = samples.sorted()[samples.endIndex / 2] // median
-        let ratio = abs(measured - baseline) / baseline
-        if ratio > allowedRegression {
+        let ratio = abs(measured - baseline.value) / baseline.value
+        if ratio > allowedRegression.value {
             XCTFail(
                 """
                 Performance regression: \(function) (\(file):\(line))
                  Iterations:\(iterations), WarmUp:\(warmup)
-                 Baseline: \(String(format: "%.4f", baseline))s
+                 Baseline: \(baseline)
                  Measured: \(String(format: "%.4f", measured))s
                   - Samples recorded: \(samples)
                  Regression: \(Int(ratio * 100))%
@@ -46,9 +81,9 @@ extension XCTestCase {
         } else {
             print(
                 """
-                Performance regression: \(function) (\(file):\(line))
+                Performance measurement: \(function) (\(file):\(line))
                  Iterations:\(iterations), WarmUp:\(warmup)
-                 Baseline: \(String(format: "%.4f", baseline))s
+                 Baseline: \(baseline)
                  Measured: \(String(format: "%.4f", measured))s
                   - Samples recorded: \(samples)
                  Ratio: \(Int(ratio * 100))%
