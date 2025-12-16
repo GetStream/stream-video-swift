@@ -28,4 +28,6 @@ Pod::Spec.new do |spec|
     unzip -o Frameworks/StreamWebRTC.zip -d Frameworks/
     rm Frameworks/StreamWebRTC.zip
   CMD
+
+  spec.pod_target_xcconfig = { 'SWIFT_OPTIMIZATION_LEVEL' => '-Osize' }
 end
