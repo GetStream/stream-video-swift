@@ -32,6 +32,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
         private let disposableBag = DisposableBag()
         private var updateSubscriptionsAdapter: WebRTCUpdateSubscriptionsAdapter?
+        private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
 
         /// Initializes a new instance of `JoinedStage`.
         /// - Parameter context: The context for the joined stage.
@@ -209,6 +210,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         return nil
                     }
                 }
+                .receive(on: processingQueue)
                 .sink { [weak self] (source: WebSocketConnectionState.DisconnectionSource) in
                     guard let self else { return }
                     context.disconnectionSource = source
@@ -248,6 +250,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
             sfuAdapter?
                 .publisher(eventType: Stream_Video_Sfu_Event_CallEnded.self)
                 .log(.debug, subsystems: .sfu) { "Call ended with reason: \($0.reason)." }
+                .receive(on: processingQueue)
                 .sink { [weak self] _ in
                     guard let self else { return }
                     transitionOrError(.leaving(context))
@@ -264,6 +267,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
             sfuAdapter?
                 .publisher(eventType: Stream_Video_Sfu_Event_Error.self)
                 .filter { $0.reconnectStrategy == .migrate }
+                .receive(on: processingQueue)
                 .sink { [weak self] _ in
                     guard let self else { return }
                     context.reconnectionStrategy = .migrate
@@ -277,6 +281,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
             sfuAdapter?
                 .publisher(eventType: Stream_Video_Sfu_Event_GoAway.self)
+                .receive(on: processingQueue)
                 .sink { [weak self] _ in
                     guard let self else { return }
                     context.reconnectionStrategy = .migrate
@@ -300,6 +305,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
             sfuAdapter?
                 .publisher(eventType: Stream_Video_Sfu_Event_Error.self)
                 .filter { $0.reconnectStrategy == .disconnect }
+                .receive(on: processingQueue)
                 .sink { [weak self] _ in
                     guard let self else { return }
                     transitionOrError(.leaving(context))
@@ -314,6 +320,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
             sfuAdapter?
                 .publisher(eventType: Stream_Video_Sfu_Event_Error.self)
                 .filter { $0.error.code == .participantSignalLost }
+                .receive(on: processingQueue)
                 .sink { [weak self] _ in
                     guard let self else { return }
                     context.reconnectionStrategy = .fast(
@@ -332,6 +339,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
             let sfuAdapter = await context.coordinator?.stateAdapter.sfuAdapter
             sfuAdapter?
                 .publisher(eventType: Stream_Video_Sfu_Event_HealthCheckResponse.self)
+                .receive(on: processingQueue)
                 .sink { [weak self] _ in
                     self?.context.lastHealthCheckReceivedAt = .init()
                 }
@@ -348,6 +356,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     }
                     return abs($0.timeIntervalSinceNow) > timeout
                 }
+                .receive(on: processingQueue)
                 .sink { [weak self] lastHealthCheckReceivedAt in
                     guard let self else {
                         return
@@ -377,6 +386,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     )
                 }
                 .log(.debug, subsystems: .webRTC) { "Reconnection strategy updated to \($0)." }
+                .receive(on: processingQueue)
                 .sink { [weak self] in self?.context.reconnectionStrategy = $0 }
                 .store(in: disposableBag)
         }
@@ -396,6 +406,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
             publisher
                 .disconnectedPublisher
                 .log(.debug, subsystems: .webRTC) { "PeerConnection of type: .publisher was disconnected. Will attempt rejoin." }
+                .receive(on: processingQueue)
                 .sink { [weak self] in
                     guard let self else { return }
                     context.reconnectionStrategy = .rejoin
@@ -406,6 +417,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
             subscriber
                 .disconnectedPublisher
                 .log(.debug, subsystems: .webRTC) { "PeerConnection of type: .subscriber was disconnected. Will attempt rejoin." }
+                .receive(on: processingQueue)
                 .sink { [weak self] in
                     guard let self else { return }
                     context.reconnectionStrategy = .rejoin
@@ -467,11 +479,11 @@ extension WebRTCCoordinator.StateMachine.Stage {
         private func observeInternetConnection() {
             internetConnectionObserver
                 .statusPublisher
-                .receive(on: DispatchQueue.main)
                 .filter { $0 != .unknown }
                 .log(.debug, subsystems: .webRTC) { "Internet connection status updated to \($0)" }
                 .filter { !$0.isAvailable }
                 .removeDuplicates()
+                .receive(on: processingQueue)
                 .sinkTask(storeIn: disposableBag) { [weak self] in
                     guard let self else { return }
 

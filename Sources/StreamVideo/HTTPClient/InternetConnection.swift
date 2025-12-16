@@ -30,10 +30,6 @@ final class InternetConnection: @unchecked Sendable {
     /// The current Internet connection status.
     @Published private(set) var status: InternetConnectionStatus {
         didSet {
-            guard oldValue != status else { return }
-
-            log.info("Internet Connection: \(status)", subsystems: .httpRequests)
-
             postNotification(.internetConnectionStatusDidChange, with: status)
 
             guard oldValue.isAvailable != status.isAvailable else { return }
@@ -41,6 +37,9 @@ final class InternetConnection: @unchecked Sendable {
             postNotification(.internetConnectionAvailabilityDidChange, with: status)
         }
     }
+
+    private let subject: PassthroughSubject<InternetConnectionStatus, Never> = .init()
+    private var processingCancellable: AnyCancellable?
 
     /// The notification center that posts notifications when connection state changes..
     let notificationCenter: NotificationCenter
@@ -56,8 +55,14 @@ final class InternetConnection: @unchecked Sendable {
     ) {
         self.notificationCenter = notificationCenter
         self.monitor = monitor
+        self.status = monitor.status
 
-        status = monitor.status
+        processingCancellable = subject
+            .removeDuplicates()
+            .log(.debug) { "Internet Connection: \($0)" }
+            .receive(on: DispatchQueue.main)
+            .assign(to: \.status, onWeak: self)
+
         monitor.delegate = self
         monitor.start()
     }
@@ -69,7 +74,7 @@ final class InternetConnection: @unchecked Sendable {
 
 extension InternetConnection: InternetConnectionDelegate {
     func internetConnectionStatusDidChange(status: InternetConnectionStatus) {
-        self.status = status
+        subject.send(status)
     }
 }
 
@@ -211,6 +216,8 @@ extension InternetConnection {
 
 /// A protocol defining the interface for internet connection monitoring.
 public protocol InternetConnectionProtocol {
+    var status: InternetConnectionStatus { get }
+
     /// A publisher that emits the current internet connection status.
     ///
     /// This publisher never fails and continuously updates with the latest
@@ -226,7 +233,10 @@ extension InternetConnection: InternetConnectionProtocol {
     ///
     /// - Note: The publisher won't publish any duplicates.
     public var statusPublisher: AnyPublisher<InternetConnectionStatus, Never> {
-        $status.removeDuplicates().eraseToAnyPublisher()
+        $status
+            .debounce(for: .seconds(0.1), scheduler: DispatchQueue.main)
+            .removeDuplicates()
+            .eraseToAnyPublisher()
     }
 }
 
