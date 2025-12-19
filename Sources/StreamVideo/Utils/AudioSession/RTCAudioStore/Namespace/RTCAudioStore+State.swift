@@ -164,6 +164,16 @@ extension RTCAudioStore {
                     self.channels = channels
                     self.source = nil
                 }
+
+                static func == (lhs: Port, rhs: Port) -> Bool {
+                    lhs.type == rhs.type
+                        && lhs.name == rhs.name
+                        && lhs.id == rhs.id
+                        && lhs.isExternal == rhs.isExternal
+                        && lhs.isSpeaker == rhs.isSpeaker
+                        && lhs.isReceiver == rhs.isReceiver
+                        && lhs.channels == rhs.channels
+                }
             }
 
             let inputs: [Port]
