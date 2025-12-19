@@ -9,6 +9,8 @@ final class MockInternetConnection: InternetConnectionProtocol, @unchecked Senda
 
     let subject: CurrentValueSubject<InternetConnectionStatus, Never> = .init(.available(.great))
 
+    var status: InternetConnectionStatus { subject.value }
+
     var statusPublisher: AnyPublisher<InternetConnectionStatus, Never> {
         subject.eraseToAnyPublisher()
     }

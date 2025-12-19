@@ -33,6 +33,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
         private var internetObservationCancellable: AnyCancellable?
         private var timeInStageCancellable: AnyCancellable?
         private var disposableBag = DisposableBag()
+        private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
 
         /// Initializes a new instance of `DisconnectedStage`.
         /// - Parameter context: The context for the disconnected stage.
@@ -180,10 +181,11 @@ extension WebRTCCoordinator.StateMachine.Stage {
             internetObservationCancellable?.cancel()
             internetObservationCancellable = internetConnectionObserver
                 .statusPublisher
-                .receive(on: DispatchQueue.main)
                 .filter { $0 != .unknown }
                 .log(.debug, subsystems: .webRTC) { "Internet connection status updated to \($0)" }
+                .debounce(for: 1, scheduler: processingQueue)
                 .removeDuplicates()
+                .receive(on: processingQueue)
                 .sinkTask(storeIn: disposableBag) { [weak self] in
                     /// Trace internet connection changes
                     await self?
@@ -223,6 +225,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
             }
             timeInStageCancellable = DefaultTimer
                 .publish(every: context.disconnectionTimeout)
+                .receive(on: processingQueue)
                 .sink { [weak self] _ in self?.didTimeInStageExpired() }
         }
 

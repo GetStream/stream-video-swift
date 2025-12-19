@@ -76,8 +76,10 @@ final class ProximityMonitor_Tests: XCTestCase, @unchecked Sendable {
         function: StaticString = #function,
         line: UInt = #line
     ) async {
+        _ = CurrentDevice.currentValue
+        await wait(for: 0.5)
         CurrentDevice.currentValue.didUpdate(deviceType)
-        await fulfillment { CurrentDevice.currentValue.deviceType == deviceType }
+        await fulfilmentInMainActor { CurrentDevice.currentValue.deviceType == deviceType }
         _ = subject
 
         await subject.startObservation()
