@@ -169,9 +169,13 @@ public extension ReflectiveStringConvertible {
     ///
     /// - Returns: A string representation of the object.
     var description: String {
+        #if STREAM_TESTS
+        // During tests we allow full error logging.
+        #else
         guard LogConfig.level == .debug else {
             return "\(type(of: self))"
         }
+        #endif
         let mirror = Mirror(reflecting: self)
         var output: [String] = ["Type: \(type(of: self))"]
 

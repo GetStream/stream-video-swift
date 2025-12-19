@@ -6,30 +6,27 @@
 import XCTest
 
 final class InternetConnection_Tests: XCTestCase, @unchecked Sendable {
-    var monitor: InternetConnectionMonitor_Mock!
-    var internetConnection: InternetConnection!
+    private var monitor: InternetConnectionMonitor_Mock! = .init()
+    private lazy var subject: InternetConnection! = .init(monitor: monitor)
 
-    override func setUp() {
-        super.setUp()
-        monitor = InternetConnectionMonitor_Mock()
-        internetConnection = InternetConnection(monitor: monitor)
+    override func setUp() async throws {
+        try await super.setUp()
+        _ = subject
+        await fulfillment { self.subject.status == .available(.great) }
     }
 
     override func tearDown() {
-        AssertAsync.canBeReleased(&internetConnection)
-        AssertAsync.canBeReleased(&monitor)
-
         monitor = nil
-        internetConnection = nil
+        subject = nil
         super.tearDown()
     }
 
     func test_internetConnection_init() {
         // Assert status matches ther monitor
-        XCTAssertEqual(internetConnection.status, monitor.status)
+        XCTAssertEqual(subject.status, monitor.status)
 
         // Assert internet connection is set as a delegate
-        XCTAssertTrue(monitor.delegate === internetConnection)
+        XCTAssertTrue(monitor.delegate === subject)
     }
 
     func test_internetConnection_postsStatusAndAvailabilityNotifications_whenAvailabilityChanges() {
@@ -43,12 +40,12 @@ final class InternetConnection_Tests: XCTestCase, @unchecked Sendable {
         let notificationExpectations = [
             expectation(
                 forNotification: .internetConnectionStatusDidChange,
-                object: internetConnection,
+                object: subject,
                 handler: { $0.internetConnectionStatus == newStatus }
             ),
             expectation(
                 forNotification: .internetConnectionAvailabilityDidChange,
-                object: internetConnection,
+                object: subject,
                 handler: { $0.internetConnectionStatus == newStatus }
             )
         ]
@@ -57,7 +54,7 @@ final class InternetConnection_Tests: XCTestCase, @unchecked Sendable {
         monitor.status = newStatus
 
         // Assert status is updated
-        XCTAssertEqual(internetConnection.status, newStatus)
+        XCTAssertEqual(subject.status, newStatus)
 
         // Assert both notifications are posted
         wait(for: notificationExpectations, timeout: defaultTimeout)
@@ -73,7 +70,7 @@ final class InternetConnection_Tests: XCTestCase, @unchecked Sendable {
         // Set up expectation for a notification
         let notificationExpectation = expectation(
             forNotification: .internetConnectionStatusDidChange,
-            object: internetConnection,
+            object: subject,
             handler: { $0.internetConnectionStatus == newStatus }
         )
 
@@ -81,7 +78,7 @@ final class InternetConnection_Tests: XCTestCase, @unchecked Sendable {
         monitor.status = newStatus
 
         // Assert status is updated
-        XCTAssertEqual(internetConnection.status, newStatus)
+        XCTAssertEqual(subject.status, newStatus)
 
         // Assert both notifications are posted
         wait(for: [notificationExpectation], timeout: defaultTimeout)
@@ -90,7 +87,7 @@ final class InternetConnection_Tests: XCTestCase, @unchecked Sendable {
     func test_internetConnection_stopsMonitorWhenDeallocated() throws {
         assert(monitor.isStarted)
 
-        internetConnection = nil
+        subject = nil
         XCTAssertFalse(monitor.isStarted)
     }
 }

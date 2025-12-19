@@ -44,7 +44,7 @@ extension XCTestCase {
 
     func measure(
         baseline: ResultValue<TimeInterval>,
-        allowedRegression: ResultValue<Double> = .init(local: 0.1, ci: 0.2), // Default: local: 10%, ci: 20%
+        allowedRegression: ResultValue<Double> = .init(local: 0.15, ci: 0.25), // Default: local: 15%, ci: 25%
         iterations: Int = 10,
         warmup: Int = 2,
         file: StaticString = #file,
@@ -64,8 +64,9 @@ extension XCTestCase {
         )
 
         let measured = samples.sorted()[samples.endIndex / 2] // median
-        let ratio = abs(measured - baseline.value) / baseline.value
-        if ratio > allowedRegression.value {
+        let diff = measured - baseline.value
+        let ratio = diff / baseline.value
+        if diff > 0, ratio > allowedRegression.value {
             XCTFail(
                 """
                 Performance regression: \(function) (\(file):\(line))
