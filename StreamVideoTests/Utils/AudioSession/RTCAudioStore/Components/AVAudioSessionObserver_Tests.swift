@@ -4,9 +4,9 @@
 
 import AVFoundation
 import Combine
+import StreamSwiftTestHelpers
 @testable import StreamVideo
 import XCTest
-import StreamSwiftTestHelpers
 
 final class AVAudioSessionObserver_Tests: XCTestCase, @unchecked Sendable {
 
@@ -42,7 +42,10 @@ final class AVAudioSessionObserver_Tests: XCTestCase, @unchecked Sendable {
     }
 
     func test_stopObserving_preventsFurtherEmissions() async throws {
-        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://linear.app/stream/issue/IOS-1326/cifix-failing-test-on-ios-15-and-16-only-which-passes-locally")
+        try XCTSkipIf(
+            TestRunnerEnvironment.isCI,
+            "https://linear.app/stream/issue/IOS-1326/cifix-failing-test-on-ios-15-and-16-only-which-passes-locally"
+        )
         let observer = AVAudioSessionObserver()
         let firstTwo = expectation(description: "first snapshots")
         let noMoreSnapshots = expectation(description: "no extra snapshots")
