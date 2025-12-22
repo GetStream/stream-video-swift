@@ -1,6 +1,6 @@
 Pod::Spec.new do |spec|
   spec.name = 'StreamVideoUIKit-XCFramework'
-  spec.version = '1.38.1'
+  spec.version = '1.38.2'
   spec.summary = 'StreamVideo UIKit Video Components'
   spec.description = 'StreamVideoUIKit SDK offers flexible UIKit components able to display data provided by StreamVideo SDK.'
 
