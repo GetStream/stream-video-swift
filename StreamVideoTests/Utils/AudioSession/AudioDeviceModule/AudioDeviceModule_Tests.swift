@@ -225,7 +225,7 @@ final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
             isPlayoutEnabled: true,
             isRecordingEnabled: false
         ) {
-            subject.audioDeviceModule(
+            _ = subject.audioDeviceModule(
                 $0,
                 willEnableEngine: engine,
                 isPlayoutEnabled: true,

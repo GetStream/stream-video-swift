@@ -353,7 +353,11 @@ final class WebRTCCoordinatorStateMachine_DisconnectedStageTests: XCTestCase, @u
                     .send(.available(.great))
             }
         ) { _ in
-            XCTAssertEqual(statsAdapter.timesCalled(.trace), 1)
+            XCTAssertEqual(
+                statsAdapter.recordedInputPayload(WebRTCTrace.self, for: .trace)?.filter { $0.tag.hasPrefix("network.state") }
+                    .count,
+                1
+            )
         }
     }
 

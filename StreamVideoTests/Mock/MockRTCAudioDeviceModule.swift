@@ -98,13 +98,41 @@ final class MockRTCAudioDeviceModule: RTCAudioDeviceModuleControlling, Mockable,
         stubbedFunction[function] = value
     }
 
+    func propertyKey<T>(
+        for keyPath: KeyPath<MockRTCAudioDeviceModule, T>
+    ) -> String {
+        switch keyPath {
+        case \MockRTCAudioDeviceModule.isMicrophoneMuted:
+            "isMicrophoneMuted"
+        case \MockRTCAudioDeviceModule.isPlaying:
+            "isPlaying"
+        case \MockRTCAudioDeviceModule.isRecording:
+            "isRecording"
+        case \MockRTCAudioDeviceModule.isPlayoutInitialized:
+            "isPlayoutInitialized"
+        case \MockRTCAudioDeviceModule.isRecordingInitialized:
+            "isRecordingInitialized"
+        case \MockRTCAudioDeviceModule.isStereoPlayoutEnabled:
+            "isStereoPlayoutEnabled"
+        case \MockRTCAudioDeviceModule.isVoiceProcessingBypassed:
+            "isVoiceProcessingBypassed"
+        case \MockRTCAudioDeviceModule.isVoiceProcessingEnabled:
+            "isVoiceProcessingEnabled"
+        case \MockRTCAudioDeviceModule.isVoiceProcessingAGCEnabled:
+            "isVoiceProcessingAGCEnabled"
+        case \MockRTCAudioDeviceModule.prefersStereoPlayout:
+            "prefersStereoPlayout"
+        default:
+            "\(self)"
+        }
+    }
+
     init() {
         stub(for: \.isMicrophoneMuted, with: false)
         stub(for: \.isPlaying, with: false)
         stub(for: \.isRecording, with: false)
         stub(for: \.isPlayoutInitialized, with: false)
         stub(for: \.isRecordingInitialized, with: false)
-        stub(for: \.isMicrophoneMuted, with: false)
         stub(for: \.isStereoPlayoutEnabled, with: false)
         stub(for: \.isVoiceProcessingBypassed, with: false)
         stub(for: \.isVoiceProcessingEnabled, with: false)
