@@ -77,6 +77,8 @@ struct DemoMoreControlsViewModifier: ViewModifier {
                             VStack {
                                 Divider()
 
+                                DemoAudioTrackButtonView()
+
                                 DemoMoreLogsAndGleapButtonView()
 
                                 DemoBroadcastMoreControlsListButtonView(

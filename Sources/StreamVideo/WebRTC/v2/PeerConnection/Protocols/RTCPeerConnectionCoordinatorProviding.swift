@@ -27,6 +27,7 @@ protocol RTCPeerConnectionCoordinatorProviding: Sendable {
     ///   - screenShareSessionProvider: Provider for screen sharing functionality.
     ///   - clientCapabilities: A set of client capabilities that affect how the
     ///     coordinator behaves (e.g., enabling paused tracks support).
+    ///   - audioDeviceModule: The audio device module used by media adapters.
     ///
     /// This parameter affects features such as support for paused tracks.
     /// - Returns: An initialized `RTCPeerConnectionCoordinator` instance.
@@ -43,7 +44,8 @@ protocol RTCPeerConnectionCoordinatorProviding: Sendable {
         sfuAdapter: SFUAdapter,
         videoCaptureSessionProvider: VideoCaptureSessionProvider,
         screenShareSessionProvider: ScreenShareSessionProvider,
-        clientCapabilities: Set<ClientCapability>
+        clientCapabilities: Set<ClientCapability>,
+        audioDeviceModule: AudioDeviceModule
     ) -> RTCPeerConnectionCoordinator
 }
 
@@ -69,6 +71,7 @@ final class StreamRTCPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordina
     ///   - screenShareSessionProvider: Provider for screen sharing functionality.
     ///   - clientCapabilities: A set of client capabilities that affect how the
     ///     coordinator behaves (e.g., enabling paused tracks support).
+    ///   - audioDeviceModule: The audio device module used by media adapters.
     ///
     /// This parameter affects features such as support for paused tracks.
     /// - Returns: A newly created `RTCPeerConnectionCoordinator` instance.
@@ -85,7 +88,8 @@ final class StreamRTCPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordina
         sfuAdapter: SFUAdapter,
         videoCaptureSessionProvider: VideoCaptureSessionProvider,
         screenShareSessionProvider: ScreenShareSessionProvider,
-        clientCapabilities: Set<ClientCapability>
+        clientCapabilities: Set<ClientCapability>,
+        audioDeviceModule: AudioDeviceModule
     ) -> RTCPeerConnectionCoordinator {
         RTCPeerConnectionCoordinator(
             sessionId: sessionId,
@@ -100,7 +104,8 @@ final class StreamRTCPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordina
             sfuAdapter: sfuAdapter,
             videoCaptureSessionProvider: videoCaptureSessionProvider,
             screenShareSessionProvider: screenShareSessionProvider,
-            clientCapabilities: clientCapabilities
+            clientCapabilities: clientCapabilities,
+            audioDeviceModule: audioDeviceModule
         )
     }
 }

@@ -26,9 +26,10 @@ final class CameraCaptureHandler: StreamVideoCapturerActionHandler, @unchecked S
 
     // MARK: - StreamVideoCapturerActionHandler
 
+    /// Handles camera capture actions.
     func handle(_ action: StreamVideoCapturer.Action) async throws {
         switch action {
-        case let .startCapture(position, dimensions, frameRate, videoSource, videoCapturer, videoCapturerDelegate):
+        case let .startCapture(position, dimensions, frameRate, videoSource, videoCapturer, videoCapturerDelegate, _):
             guard let cameraCapturer = videoCapturer as? RTCCameraVideoCapturer else {
                 return
             }

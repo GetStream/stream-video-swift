@@ -22,9 +22,10 @@ final class BroadcastCaptureHandler: StreamVideoCapturerActionHandler, @unchecke
 
     // MARK: - StreamVideoCapturerActionHandler
 
+    /// Handles broadcast capture actions.
     func handle(_ action: StreamVideoCapturer.Action) async throws {
         switch action {
-        case let .startCapture(_, dimensions, _, videoSource, videoCapturer, videoCapturerDelegate):
+        case let .startCapture(_, dimensions, _, videoSource, videoCapturer, videoCapturerDelegate, _):
             try await execute(
                 dimensions: dimensions,
                 videoSource: videoSource,

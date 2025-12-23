@@ -18,6 +18,7 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable 
     private lazy var spySubject: PassthroughSubject<TrackEvent, Never>! = .init()
     private lazy var publishOptions: [PublishOptions.VideoPublishOptions] = [.dummy(codec: .h264)]
     private lazy var screenShareSessionProvider: ScreenShareSessionProvider! = .init()
+    private lazy var mockAudioDeviceModule: MockRTCAudioDeviceModule! = .init()
     private var temporaryPeerConnection: RTCPeerConnection?
     private lazy var subject: LocalScreenShareMediaAdapter! = .init(
         sessionID: sessionId,
@@ -27,7 +28,8 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable 
         publishOptions: publishOptions,
         subject: spySubject,
         screenShareSessionProvider: screenShareSessionProvider,
-        capturerFactory: mockCapturerFactory
+        capturerFactory: mockCapturerFactory,
+        audioDeviceModule: .init(mockAudioDeviceModule)
     )
 
     override func tearDown() {
@@ -40,6 +42,7 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable 
         screenShareSessionProvider = nil
         temporaryPeerConnection = nil
         disposableBag = nil
+        mockAudioDeviceModule = nil
         super.tearDown()
     }
 
@@ -52,8 +55,11 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable 
             screenSharingType: .broadcast,
             capturer: mockCapturerFactory.buildScreenCapturer(
                 .broadcast,
-                source: track.source
-            )
+                source: track.source,
+                audioDeviceModule: .init(mockAudioDeviceModule),
+                includeAudio: true
+            ),
+            includeAudio: true
         )
 
         XCTAssertTrue(subject.primaryTrack.source === track.source)
@@ -83,7 +89,8 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable 
         screenShareSessionProvider.activeSession = .init(
             localTrack: subject.primaryTrack,
             screenSharingType: .inApp,
-            capturer: MockStreamVideoCapturer()
+            capturer: MockStreamVideoCapturer(),
+            includeAudio: true
         )
         subject.primaryTrack.isEnabled = true
 
@@ -99,7 +106,8 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable 
         screenShareSessionProvider.activeSession = .init(
             localTrack: subject.primaryTrack,
             screenSharingType: .inApp,
-            capturer: MockStreamVideoCapturer()
+            capturer: MockStreamVideoCapturer(),
+            includeAudio: true
         )
         subject.primaryTrack.isEnabled = true
 
@@ -119,7 +127,8 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable 
         screenShareSessionProvider.activeSession = .init(
             localTrack: subject.primaryTrack,
             screenSharingType: .inApp,
-            capturer: MockStreamVideoCapturer()
+            capturer: MockStreamVideoCapturer(),
+            includeAudio: true
         )
         subject.primaryTrack.isEnabled = false
         subject.publish()
@@ -142,7 +151,8 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable 
         screenShareSessionProvider.activeSession = .init(
             localTrack: subject.primaryTrack,
             screenSharingType: .inApp,
-            capturer: MockStreamVideoCapturer()
+            capturer: MockStreamVideoCapturer(),
+            includeAudio: true
         )
         subject.primaryTrack.isEnabled = false
         subject.publish()
@@ -171,7 +181,8 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable 
         } operation: { subject in
             try await subject.beginScreenSharing(
                 of: .inApp,
-                ownCapabilities: [.screenshare]
+                ownCapabilities: [.screenshare],
+                includeAudio: true
             )
         } validation: { [sessionId] id, trackType, track in
             XCTAssertEqual(id, sessionId)
@@ -182,7 +193,11 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable 
 
     func test_beginScreenSharing_withoutCapabilityWithActiveSession_stopsCapturingAndSession() async throws {
         try await assertStopCapturing {
-            try await subject.beginScreenSharing(of: .inApp, ownCapabilities: [])
+            try await subject.beginScreenSharing(
+                of: .inApp,
+                ownCapabilities: [],
+                includeAudio: true
+            )
         }
     }
 
@@ -201,11 +216,13 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable 
 
         try await subject.beginScreenSharing(
             of: screensharingType,
-            ownCapabilities: [.screenshare]
+            ownCapabilities: [.screenshare],
+            includeAudio: true
         )
         try await subject.beginScreenSharing(
             of: screensharingType,
-            ownCapabilities: [.screenshare]
+            ownCapabilities: [.screenshare],
+            includeAudio: true
         )
 
         XCTAssertEqual(mockCapturerFactory.timesCalled(.buildScreenCapturer), 1)
@@ -219,7 +236,8 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable 
 
         try await subject.beginScreenSharing(
             of: screensharingType,
-            ownCapabilities: [.screenshare]
+            ownCapabilities: [.screenshare],
+            includeAudio: true
         )
 
         await fulfillment { capturer.timesCalled(.startCapture) == 1 }
@@ -228,7 +246,8 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable 
     func test_beginScreenSharing_withCapability_updateMuteStateOnSFU() async throws {
         try await subject.beginScreenSharing(
             of: .inApp,
-            ownCapabilities: [.screenshare]
+            ownCapabilities: [.screenshare],
+            includeAudio: true
         )
 
         let request = try XCTUnwrap(mockSFUStack.service.updateMuteStatesWasCalledWithRequest)
@@ -244,7 +263,8 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable 
 
         try await subject.beginScreenSharing(
             of: .inApp,
-            ownCapabilities: [.screenshare]
+            ownCapabilities: [.screenshare],
+            includeAudio: true
         )
 
         await fulfillment { capturer.timesCalled(.startCapture) == 1 }
@@ -267,7 +287,8 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable 
         mockCapturerFactory.stub(for: .buildScreenCapturer, with: capturer)
         try await subject.beginScreenSharing(
             of: .inApp,
-            ownCapabilities: [.screenshare]
+            ownCapabilities: [.screenshare],
+            includeAudio: true
         )
         await fulfillment { capturer.timesCalled(.startCapture) == 1 }
 
@@ -293,7 +314,11 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable 
             .dummy(codec: .h264, fmtp: "a"),
             .dummy(codec: .av1, fmtp: "b")
         ]
-        try await subject.beginScreenSharing(of: .inApp, ownCapabilities: [.screenshare])
+        try await subject.beginScreenSharing(
+            of: .inApp,
+            ownCapabilities: [.screenshare],
+            includeAudio: true
+        )
         await fulfillment { self.mockPeerConnection.timesCalled(.addTransceiver) == 2 }
 
         let trackInfo = subject.trackInfo(for: .allAvailable)
@@ -319,7 +344,11 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable 
             $0 == 1 ? h264Transceiver : av1Transceiver
         })
         publishOptions = [.dummy(codec: .h264, fmtp: "a")]
-        try await subject.beginScreenSharing(of: .inApp, ownCapabilities: [.screenshare])
+        try await subject.beginScreenSharing(
+            of: .inApp,
+            ownCapabilities: [.screenshare],
+            includeAudio: true
+        )
         await fulfillment { self.mockPeerConnection.timesCalled(.addTransceiver) == 1 }
 
         try await subject.didUpdatePublishOptions(
@@ -350,7 +379,11 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable 
             $0 == 1 ? h264Transceiver : av1Transceiver
         })
         publishOptions = [.dummy(codec: .h264)]
-        try await subject.beginScreenSharing(of: .inApp, ownCapabilities: [.screenshare])
+        try await subject.beginScreenSharing(
+            of: .inApp,
+            ownCapabilities: [.screenshare],
+            includeAudio: true
+        )
         await fulfillment { self.mockPeerConnection.timesCalled(.addTransceiver) == 1 }
         try await subject.didUpdatePublishOptions(
             .dummy(screenShare: [.dummy(codec: .av1, fmtp: "b")])
@@ -380,7 +413,8 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable 
         screenShareSessionProvider.activeSession = .init(
             localTrack: subject.primaryTrack,
             screenSharingType: .inApp,
-            capturer: capturer
+            capturer: capturer,
+            includeAudio: true
         )
 
         subject.publish()
@@ -397,7 +431,8 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable 
         screenShareSessionProvider.activeSession = .init(
             localTrack: subject.primaryTrack,
             screenSharingType: .inApp,
-            capturer: capturer
+            capturer: capturer,
+            includeAudio: true
         )
 
         subject.publish()
@@ -415,7 +450,11 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable 
         mockCapturerFactory.stub(for: .buildScreenCapturer, with: capturer)
         let mockTransceiver = try makeTransceiver(of: .video, videoOptions: .dummy(codec: .h264))
         mockPeerConnection.stub(for: .addTransceiver, with: mockTransceiver)
-        try await subject.beginScreenSharing(of: .inApp, ownCapabilities: [.screenshare])
+        try await subject.beginScreenSharing(
+            of: .inApp,
+            ownCapabilities: [.screenshare],
+            includeAudio: true
+        )
         await fulfillment { capturer.timesCalled(.startCapture) == 1 }
         XCTAssertTrue(subject.primaryTrack.isEnabled)
 
@@ -433,7 +472,11 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable 
             for: .addTransceiver,
             with: try makeTransceiver(of: .video, videoOptions: .dummy(codec: .h264))
         )
-        try await subject.beginScreenSharing(of: .inApp, ownCapabilities: [.screenshare])
+        try await subject.beginScreenSharing(
+            of: .inApp,
+            ownCapabilities: [.screenshare],
+            includeAudio: true
+        )
         await fulfillment { capturer.timesCalled(.startCapture) == 1 }
 
         subject.unpublish()
@@ -519,7 +562,8 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable 
         screenShareSessionProvider.activeSession = .init(
             localTrack: peerConnectionFactory.mockVideoTrack(forScreenShare: true),
             screenSharingType: .inApp,
-            capturer: capturer
+            capturer: capturer,
+            includeAudio: true
         )
 
         try await operation()
@@ -542,13 +586,15 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable 
             screenShareSessionProvider.activeSession = .init(
                 localTrack: subject.primaryTrack,
                 screenSharingType: screensharingType == .inApp ? .broadcast : .inApp,
-                capturer: capturerA
+                capturer: capturerA,
+                includeAudio: true
             )
         }
 
         try await subject.beginScreenSharing(
             of: screensharingType,
-            ownCapabilities: [.screenshare]
+            ownCapabilities: [.screenshare],
+            includeAudio: true
         )
 
         await fulfillment(file: file, line: line) {
@@ -559,7 +605,7 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable 
         let input = try XCTUnwrap(
             mockCapturerFactory
                 .recordedInputPayload(
-                    (ScreensharingType, RTCVideoSource).self,
+                    (ScreensharingType, RTCVideoSource, AudioDeviceModule, Bool).self,
                     for: .buildScreenCapturer
                 )?.first
         )

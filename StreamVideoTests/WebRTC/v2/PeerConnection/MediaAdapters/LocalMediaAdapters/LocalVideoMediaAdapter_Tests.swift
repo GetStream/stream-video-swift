@@ -18,6 +18,7 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
     private lazy var videoCaptureSessionProvider: VideoCaptureSessionProvider! = .init()
     private lazy var mockVideoCapturer: MockStreamVideoCapturer! = .init()
     private lazy var mockCaptureDeviceProvider: MockCaptureDeviceProvider! = .init()
+    private lazy var mockAudioDeviceModule: MockRTCAudioDeviceModule! = .init()
     private lazy var subject: LocalVideoMediaAdapter! = .init(
         sessionID: sessionId,
         peerConnection: mockPeerConnection,
@@ -28,7 +29,8 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         publishOptions: publishOptions,
         subject: spySubject,
         capturerFactory: mockCapturerFactory,
-        videoCaptureSessionProvider: videoCaptureSessionProvider
+        videoCaptureSessionProvider: videoCaptureSessionProvider,
+        audioDeviceModule: .init(mockAudioDeviceModule)
     )
     private var temporaryPeerConnection: RTCPeerConnection?
     private var disposableBag: DisposableBag! = .init()
@@ -58,6 +60,7 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         videoCaptureSessionProvider = nil
         mockVideoCapturer = nil
         mockCaptureDeviceProvider = nil
+        mockAudioDeviceModule = nil
         super.tearDown()
     }
 

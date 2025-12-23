@@ -546,9 +546,18 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     }
 
     /// Starts screensharing from the device.
-    /// - Parameter type: The screensharing type (in-app or broadcasting).
-    public func startScreensharing(type: ScreensharingType) async throws {
-        try await callController.startScreensharing(type: type)
+    /// - Parameters:
+    ///   - type: The screensharing type (in-app or broadcasting).
+    ///   - includeAudio: Whether to capture app audio during screensharing.
+    ///     Only valid for `.inApp`; ignored otherwise.
+    public func startScreensharing(
+        type: ScreensharingType,
+        includeAudio: Bool = true
+    ) async throws {
+        try await callController.startScreensharing(
+            type: type,
+            includeAudio: includeAudio
+        )
     }
 
     /// Stops screensharing from the current device.

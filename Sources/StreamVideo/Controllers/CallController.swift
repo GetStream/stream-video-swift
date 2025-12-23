@@ -211,8 +211,19 @@ class CallController: @unchecked Sendable {
         }
     }
 
-    func startScreensharing(type: ScreensharingType) async throws {
-        try await webRTCCoordinator.startScreensharing(type: type)
+    /// Starts screensharing for the current call.
+    /// - Parameters:
+    ///   - type: The screensharing type (in-app or broadcasting).
+    ///   - includeAudio: Whether to capture app audio during screensharing.
+    ///     Only valid for `.inApp`; ignored otherwise.
+    func startScreensharing(
+        type: ScreensharingType,
+        includeAudio: Bool
+    ) async throws {
+        try await webRTCCoordinator.startScreensharing(
+            type: type,
+            includeAudio: includeAudio
+        )
     }
 
     func stopScreensharing() async throws {

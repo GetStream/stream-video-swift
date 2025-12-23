@@ -237,13 +237,18 @@ final class WebRTCCoordinator: @unchecked Sendable {
 
     /// Starts screensharing of the specified type.
     ///
-    /// - Parameter type: The type of screensharing.
+    /// - Parameters:
+    ///   - type: The type of screensharing.
+    ///   - includeAudio: Whether to capture app audio during screensharing.
+    ///     Only valid for `.inApp`; ignored otherwise.
     func startScreensharing(
-        type: ScreensharingType
+        type: ScreensharingType,
+        includeAudio: Bool
     ) async throws {
         try await stateAdapter.publisher?.beginScreenSharing(
             of: type,
-            ownCapabilities: Array(stateAdapter.ownCapabilities)
+            ownCapabilities: Array(stateAdapter.ownCapabilities),
+            includeAudio: includeAudio
         )
     }
 

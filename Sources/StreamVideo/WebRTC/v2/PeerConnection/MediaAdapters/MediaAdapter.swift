@@ -42,7 +42,9 @@ final class MediaAdapter {
     ///   - publishOptions: The publishOptions to use for creating the initial tracks
     ///   - audioSession: The audio session manager.
     ///   - videoCaptureSessionProvider: Provides access to the active video capturing session.
-    ///   - screenShareSessionProvider: Provides access to the active screen sharing session.
+    ///   - screenShareSessionProvider: Provides access to the active screen
+    ///     sharing session.
+    ///   - audioDeviceModule: The audio device module shared with capturers.
     convenience init(
         sessionID: String,
         peerConnectionType: PeerConnectionType,
@@ -53,7 +55,8 @@ final class MediaAdapter {
         videoConfig: VideoConfig,
         publishOptions: PublishOptions,
         videoCaptureSessionProvider: VideoCaptureSessionProvider,
-        screenShareSessionProvider: ScreenShareSessionProvider
+        screenShareSessionProvider: ScreenShareSessionProvider,
+        audioDeviceModule: AudioDeviceModule
     ) {
         let subject = PassthroughSubject<TrackEvent, Never>()
         
@@ -104,7 +107,8 @@ final class MediaAdapter {
                     videoConfig: videoConfig,
                     publishOptions: publishOptions.video,
                     subject: subject,
-                    videoCaptureSessionProvider: videoCaptureSessionProvider
+                    videoCaptureSessionProvider: videoCaptureSessionProvider,
+                    audioDeviceModule: audioDeviceModule
                 ),
                 screenShareMediaAdapter: .init(
                     sessionID: sessionID,
@@ -113,7 +117,8 @@ final class MediaAdapter {
                     sfuAdapter: sfuAdapter,
                     publishOptions: publishOptions.screenShare,
                     subject: subject,
-                    screenShareSessionProvider: screenShareSessionProvider
+                    screenShareSessionProvider: screenShareSessionProvider,
+                    audioDeviceModule: audioDeviceModule
                 )
             )
         }
@@ -339,13 +344,17 @@ final class MediaAdapter {
     /// - Parameters:
     ///   - type: The type of screen sharing to begin.
     ///   - ownCapabilities: The capabilities of the local participant.
+    ///   - includeAudio: Whether to capture app audio during screen sharing.
+    ///     Only valid for `.inApp`; ignored otherwise.
     func beginScreenSharing(
         of type: ScreensharingType,
-        ownCapabilities: [OwnCapability]
+        ownCapabilities: [OwnCapability],
+        includeAudio: Bool
     ) async throws {
         try await screenShareMediaAdapter.beginScreenSharing(
             of: type,
-            ownCapabilities: ownCapabilities
+            ownCapabilities: ownCapabilities,
+            includeAudio: includeAudio
         )
     }
     

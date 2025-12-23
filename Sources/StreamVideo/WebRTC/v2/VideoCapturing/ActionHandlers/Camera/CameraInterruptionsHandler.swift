@@ -25,10 +25,11 @@ final class CameraInterruptionsHandler: StreamVideoCapturerActionHandler, @unche
     // MARK: - StreamVideoCapturerActionHandler
 
     /// Handles camera-related actions triggered by the video capturer.
+    /// Handles camera interruption actions.
     func handle(_ action: StreamVideoCapturer.Action) async throws {
         switch action {
         /// Handle start capture event and register for interruption notifications.
-        case let .startCapture(_, _, _, _, videoCapturer, _):
+        case let .startCapture(_, _, _, _, videoCapturer, _, _):
             if let cameraCapturer = videoCapturer as? RTCCameraVideoCapturer {
                 didStartCapture(session: cameraCapturer.captureSession)
             } else {

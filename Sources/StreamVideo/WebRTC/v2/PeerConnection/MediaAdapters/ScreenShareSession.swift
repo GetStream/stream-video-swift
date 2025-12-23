@@ -15,6 +15,9 @@ struct ScreenShareSession {
 
     /// The video capturer for the screen share.
     var capturer: StreamVideoCapturing
+
+    /// Whether app audio is captured alongside the screen share.
+    var includeAudio: Bool
 }
 
 /// A class that provides and manages the active screen sharing session.

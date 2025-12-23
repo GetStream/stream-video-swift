@@ -10,6 +10,7 @@ import XCTest
 final class IdleTimerAdapter_Tests: XCTestCase, @unchecked Sendable {
 
     private var activeCallSubject: CurrentValueSubject<Call?, Never>! = .init(nil)
+    private var mockStreamVideo: MockStreamVideo! = .init()
     private lazy var subject: IdleTimerAdapter! = .init(activeCallSubject.eraseToAnyPublisher())
 
     override func setUp() {
@@ -19,6 +20,7 @@ final class IdleTimerAdapter_Tests: XCTestCase, @unchecked Sendable {
 
     override func tearDown() {
         subject = nil
+        mockStreamVideo = nil
         activeCallSubject.send(nil)
         activeCallSubject = nil
         super.tearDown()
