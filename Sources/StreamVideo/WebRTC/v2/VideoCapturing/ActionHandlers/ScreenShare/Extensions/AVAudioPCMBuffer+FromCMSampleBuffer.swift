@@ -20,13 +20,11 @@ extension AVAudioPCMBuffer {
             )
         else {
             // Format description is required to interpret the sample buffer.
-            log.error("2")
             return nil
         }
 
         // Only linear PCM can be copied into AVAudioPCMBuffer.
         guard asbd.pointee.mFormatID == kAudioFormatLinearPCM else {
-            log.error("3")
             return nil
         }
 
@@ -55,7 +53,6 @@ extension AVAudioPCMBuffer {
             commonFormat = .pcmFormatInt16
         } else {
             // Unsupported bit depth or type cannot be represented.
-            log.error("4")
             return nil
         }
 
@@ -69,7 +66,6 @@ extension AVAudioPCMBuffer {
             )
         else {
             // Format construction failure prevents buffer allocation.
-            log.error("4")
             return nil
         }
 
@@ -85,7 +81,6 @@ extension AVAudioPCMBuffer {
             )
         else {
             // Frame count must be positive and buffer allocation must succeed.
-            log.error("5")
             return nil
         }
 
@@ -95,7 +90,6 @@ extension AVAudioPCMBuffer {
         // Bytes per frame are needed to calculate copy sizes.
         let bytesPerFrame = Int(asbd.pointee.mBytesPerFrame)
         guard bytesPerFrame > 0 else {
-            log.error("6")
             return nil
         }
 
@@ -121,7 +115,6 @@ extension AVAudioPCMBuffer {
         )
         guard status == noErr else {
             // Report copy failures with the OSStatus.
-            log.error("7:\(status)")
             return nil
         }
 
