@@ -4,7 +4,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
-### 🔄 Changed
+### ✅ Added
+- Support for capture inApp audio during ScreenSharing sessions. [#1020](https://github.com/GetStream/stream-video-swift/pull/1020)
 
 # [1.38.2](https://github.com/GetStream/stream-video-swift/releases/tag/1.38.2)
 _December 22, 2025_

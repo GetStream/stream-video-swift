@@ -19,6 +19,14 @@ private func content() {
 
     asyncContainer {
         Task {
+            let call = streamVideo.call(callType: "default", callId: "123")
+            try await call.join()
+            try await call.startScreensharing(type: .inApp, includeAudio: true)
+        }
+    }
+
+    asyncContainer {
+        Task {
             try await call.stopScreensharing()
         }
     }

@@ -130,6 +130,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     ///   - audioSession: The audio session to be used.
     ///   - videoCaptureSessionProvider: Provider for video capturing sessions.
     ///   - screenShareSessionProvider: Provider for screen sharing sessions.
+    ///   - audioDeviceModule: The audio device module used by media adapters.
     ///   - tracesAdapter: The adapter used to enqueue traces
     convenience init(
         sessionId: String,
@@ -144,7 +145,8 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         sfuAdapter: SFUAdapter,
         videoCaptureSessionProvider: VideoCaptureSessionProvider,
         screenShareSessionProvider: ScreenShareSessionProvider,
-        clientCapabilities: Set<ClientCapability>
+        clientCapabilities: Set<ClientCapability>,
+        audioDeviceModule: AudioDeviceModule
     ) {
         self.init(
             sessionId: sessionId,
@@ -165,7 +167,8 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
                 videoConfig: videoConfig,
                 publishOptions: publishOptions,
                 videoCaptureSessionProvider: videoCaptureSessionProvider,
-                screenShareSessionProvider: screenShareSessionProvider
+                screenShareSessionProvider: screenShareSessionProvider,
+                audioDeviceModule: audioDeviceModule
             ),
             iceAdapter: .init(
                 sessionID: sessionId,
@@ -696,14 +699,18 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     /// - Parameters:
     ///   - type: The type of screen sharing to begin.
     ///   - ownCapabilities: The capabilities of the local participant.
+    ///   - includeAudio: Whether to capture app audio during screen sharing.
+    ///     Only valid for `.inApp`; ignored otherwise.
     /// - Throws: An error if starting screen sharing fails.
     func beginScreenSharing(
         of type: ScreensharingType,
-        ownCapabilities: [OwnCapability]
+        ownCapabilities: [OwnCapability],
+        includeAudio: Bool
     ) async throws {
         try await mediaAdapter.beginScreenSharing(
             of: type,
-            ownCapabilities: ownCapabilities
+            ownCapabilities: ownCapabilities,
+            includeAudio: includeAudio
         )
     }
 

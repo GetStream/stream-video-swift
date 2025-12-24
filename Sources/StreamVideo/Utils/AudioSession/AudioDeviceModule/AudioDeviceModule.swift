@@ -96,6 +96,14 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         }
     }
 
+    private struct AudioBufferInjectionPreState {
+        var isAdvancedDuckingEnabled: Bool
+        var duckingLevel: Int
+        var isVoiceProcessingBypassed: Bool
+        var isVoiceProcessingEnabled: Bool
+        var isVoiceProcessingAGCEnabled: Bool
+    }
+
     /// Tracks whether WebRTC is currently playing back audio.
     private let isPlayingSubject: CurrentValueSubject<Bool, Never>
     /// `true` while audio playout is active.
@@ -168,6 +176,13 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
 
     /// Strong reference to the current engine so we can introspect it if needed.
     private var engine: AVAudioEngine?
+    @Atomic private var engineInputContext: AVAudioEngine.InputContext? {
+        didSet { audioBufferRenderer.configure(with: engineInputContext) }
+    }
+
+    private let audioBufferRenderer: AudioBufferRenderer = .init()
+
+    private var preAudioBufferInjectionSnapshot: AudioBufferInjectionPreState?
 
     /// Textual diagnostics for logging and debugging.
     override var description: String {
@@ -317,6 +332,13 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         source.refreshStereoPlayoutState()
     }
 
+    // MARK: - Audio Buffer injection
+
+    /// Enqueues a screen share audio sample buffer for playback.
+    func enqueue(_ sampleBuffer: CMSampleBuffer) {
+        audioBufferRenderer.enqueue(sampleBuffer)
+    }
+
     // MARK: - RTCAudioDeviceModuleDelegate
 
     /// Receives speech activity notifications emitted by WebRTC VAD.
@@ -403,6 +425,7 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         )
         isPlayingSubject.send(isPlayoutEnabled)
         isRecordingSubject.send(isRecordingEnabled)
+        audioBufferRenderer.reset()
         return Constant.successResult
     }
 
@@ -423,6 +446,8 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         )
         isPlayingSubject.send(isPlayoutEnabled)
         isRecordingSubject.send(isRecordingEnabled)
+        audioBufferRenderer.reset()
+        engineInputContext = nil
         return Constant.successResult
     }
 
@@ -434,6 +459,8 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         self.engine = nil
         subject.send(.willReleaseAudioEngine(engine))
         audioLevelsAdapter.uninstall(on: 0)
+        audioBufferRenderer.reset()
+        engineInputContext = nil
         return Constant.successResult
     }
 
@@ -447,6 +474,13 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         format: AVAudioFormat,
         context: [AnyHashable: Any]
     ) -> Int {
+        engineInputContext = .init(
+            engine: engine,
+            source: source,
+            destination: destination,
+            format: format
+        )
+
         subject.send(
             .configureInputFromSource(
                 engine,
@@ -455,12 +489,14 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
                 format: format
             )
         )
+
         audioLevelsAdapter.installInputTap(
             on: destination,
             format: format,
             bus: 0,
             bufferSize: 1024
         )
+
         return Constant.successResult
     }
 

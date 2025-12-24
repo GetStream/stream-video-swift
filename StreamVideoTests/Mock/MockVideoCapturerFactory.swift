@@ -27,19 +27,22 @@ final class MockVideoCapturerFactory: VideoCapturerProviding, Mockable, @uncheck
 
     enum MockFunctionInputKey: Payloadable {
         case buildCameraCapturer(
-            source: RTCVideoSource
+            source: RTCVideoSource,
+            audioDeviceModule: AudioDeviceModule
         )
         case buildScreenCapturer(
             type: ScreensharingType,
-            source: RTCVideoSource
+            source: RTCVideoSource,
+            audioDeviceModule: AudioDeviceModule,
+            includeAudio: Bool
         )
 
         var payload: Any {
             switch self {
-            case let .buildCameraCapturer(source):
-                return (source)
-            case let .buildScreenCapturer(type, source):
-                return (type, source)
+            case let .buildCameraCapturer(source, audioDeviceModule):
+                return (source, audioDeviceModule)
+            case let .buildScreenCapturer(type, source, audioDeviceModule, includeAudio):
+                return (type, source, audioDeviceModule, includeAudio)
             }
         }
     }
@@ -52,12 +55,14 @@ final class MockVideoCapturerFactory: VideoCapturerProviding, Mockable, @uncheck
     // MARK: - VideoCapturerProviding
 
     func buildCameraCapturer(
-        source: RTCVideoSource
+        source: RTCVideoSource,
+        audioDeviceModule: AudioDeviceModule
     ) -> StreamVideoCapturing {
         stubbedFunctionInput[.buildCameraCapturer]?
             .append(
                 .buildCameraCapturer(
-                    source: source
+                    source: source,
+                    audioDeviceModule: audioDeviceModule
                 )
             )
         return stubbedFunction[.buildCameraCapturer] as! StreamVideoCapturing
@@ -65,13 +70,17 @@ final class MockVideoCapturerFactory: VideoCapturerProviding, Mockable, @uncheck
     
     func buildScreenCapturer(
         _ type: ScreensharingType,
-        source: RTCVideoSource
+        source: RTCVideoSource,
+        audioDeviceModule: AudioDeviceModule,
+        includeAudio: Bool
     ) -> StreamVideoCapturing {
         stubbedFunctionInput[.buildScreenCapturer]?
             .append(
                 .buildScreenCapturer(
                     type: type,
-                    source: source
+                    source: source,
+                    audioDeviceModule: audioDeviceModule,
+                    includeAudio: includeAudio
                 )
             )
         return stubbedFunction[.buildScreenCapturer] as! StreamVideoCapturing

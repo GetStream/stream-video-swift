@@ -2,24 +2,41 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+import AudioToolbox
+import AVFoundation
 import Foundation
 import ReplayKit
 import StreamWebRTC
 
 final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandler, RPScreenRecorderDelegate, @unchecked Sendable {
 
+    @Injected(\.audioFilterProcessingModule) private var audioFilterProcessingModule
+
     @Atomic private var isRecording: Bool = false
     private var activeSession: Session?
     private let recorder: RPScreenRecorder
+    private let includeAudio: Bool
     private let disposableBag = DisposableBag()
+    private let audioProcessingQueue = DispatchQueue(
+        label: "io.getstream.screenshare.audio.processing",
+        qos: .userInitiated
+    )
+    private var audioFilterBeforeScreensharingAudio: AudioFilter?
 
     private struct Session {
         var videoCapturer: RTCVideoCapturer
         var videoCapturerDelegate: RTCVideoCapturerDelegate
+        var audioDeviceModule: AudioDeviceModule
     }
 
-    init(recorder: RPScreenRecorder = .shared()) {
+    /// Creates a screen share capture handler.
+    /// - Parameters:
+    ///   - recorder: The ReplayKit recorder to use. Defaults to `.shared()`.
+    ///   - includeAudio: Whether to capture app audio during screen sharing.
+    ///     Only valid for `.inApp`; ignored otherwise.
+    init(recorder: RPScreenRecorder = .shared(), includeAudio: Bool) {
         self.recorder = recorder
+        self.includeAudio = includeAudio
         super.init()
         recorder.delegate = self
     }
@@ -54,10 +71,19 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
 
     func handle(_ action: StreamVideoCapturer.Action) async throws {
         switch action {
-        case let .startCapture(_, _, _, _, videoCapturer, videoCapturerDelegate):
+        case let .startCapture(
+            _,
+            _,
+            _,
+            _,
+            videoCapturer,
+            videoCapturerDelegate,
+            audioDeviceModule
+        ):
             try await execute(
                 videoCapturer: videoCapturer,
-                videoCapturerDelegate: videoCapturerDelegate
+                videoCapturerDelegate: videoCapturerDelegate,
+                audioDeviceModule: audioDeviceModule
             )
         case .stopCapture:
             try await stop()
@@ -70,7 +96,8 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
 
     private func execute(
         videoCapturer: RTCVideoCapturer,
-        videoCapturerDelegate: RTCVideoCapturerDelegate
+        videoCapturerDelegate: RTCVideoCapturerDelegate,
+        audioDeviceModule: AudioDeviceModule
     ) async throws {
 
         guard recorder.isAvailable else {
@@ -85,21 +112,26 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
         recorder.isMicrophoneEnabled = false
         recorder.isCameraEnabled = false
 
-        try await recorder.startCapture { [weak self] sampleBuffer, sampleBufferType, error in
-            if let error {
-                log.error(error, subsystems: .videoCapturer)
-            } else {
-                self?.didReceive(
-                    sampleBuffer: sampleBuffer,
-                    sampleBufferType: sampleBufferType,
-                    error: error
-                )
+        audioFilterBeforeScreensharingAudio = audioFilterProcessingModule.activeAudioFilter
+        audioFilterProcessingModule.setAudioFilter(nil)
+
+        try await Task { @MainActor in
+            try await recorder.startCapture { [weak self] sampleBuffer, sampleBufferType, error in
+                if let error {
+                    log.error(error, subsystems: .videoCapturer)
+                } else {
+                    self?.didReceive(
+                        sampleBuffer: sampleBuffer,
+                        sampleBufferType: sampleBufferType
+                    )
+                }
             }
-        }
+        }.value
 
         activeSession = .init(
             videoCapturer: videoCapturer,
-            videoCapturerDelegate: videoCapturerDelegate
+            videoCapturerDelegate: videoCapturerDelegate,
+            audioDeviceModule: audioDeviceModule
         )
 
         isRecording = true
@@ -112,24 +144,41 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
 
     private func didReceive(
         sampleBuffer: CMSampleBuffer,
-        sampleBufferType: RPSampleBufferType,
-        error: Error?
+        sampleBufferType: RPSampleBufferType
+    ) {
+        switch sampleBufferType {
+        case .video:
+            processVideoBuffer(sampleBuffer: sampleBuffer)
+
+        case .audioMic:
+            log.warning(
+                "\(type(of: self)) only video and appAudio sample buffers are supported. Received \(sampleBufferType).",
+                subsystems: .videoCapturer
+            )
+
+        case .audioApp:
+            if includeAudio {
+                processAudioAppBuffer(sampleBuffer: sampleBuffer)
+            } else {
+                // We don't process any audio buffers for this session.
+            }
+
+        @unknown default:
+            log.warning(
+                "\(type(of: self)) received unknown sample buffer type: \(sampleBufferType).",
+                subsystems: .videoCapturer
+            )
+        }
+    }
+
+    private func processVideoBuffer(
+        sampleBuffer: CMSampleBuffer
     ) {
         guard
             let activeSession = self.activeSession
         else {
             log.warning(
                 "\(type(of: self)) received sample buffer but no active session was found.",
-                subsystems: .videoCapturer
-            )
-            return
-        }
-
-        guard
-            sampleBufferType == .video
-        else {
-            log.warning(
-                "\(type(of: self)) only video sample buffers are supported. Received \(sampleBufferType).",
                 subsystems: .videoCapturer
             )
             return
@@ -173,12 +222,33 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
         )
     }
 
+    private func processAudioAppBuffer(
+        sampleBuffer: CMSampleBuffer
+    ) {
+        guard
+            let audioDeviceModule = activeSession?.audioDeviceModule,
+            isRecording
+        else {
+            log.warning(
+                "\(type(of: self)) received sample buffer but no active session was found.",
+                subsystems: .videoCapturer
+            )
+            return
+        }
+
+        audioDeviceModule.enqueue(sampleBuffer)
+    }
+
     private func stop() async throws {
         guard
             isRecording == true
         else {
             return
         }
+
+        // Restore the previously disabled filter
+        audioFilterProcessingModule.setAudioFilter(audioFilterBeforeScreensharingAudio)
+        audioFilterBeforeScreensharingAudio = nil
 
         try await recorder.stopCapture()
         activeSession = nil

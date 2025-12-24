@@ -40,15 +40,29 @@ struct DemoBroadcastMoreControlsListButtonView: View {
 
     @ViewBuilder
     private var inAppScreenshareButtonView: some View {
-        DemoMoreControlListButtonView(
-            action: {
-                viewModel.startScreensharing(type: .inApp)
+        Menu {
+            Button {
+                viewModel.startScreensharing(type: .inApp, includeAudio: false)
                 selection = .inApp
-            },
-            label: "Screenshare"
-        ) {
-            Image(systemName: "record.circle")
-                .foregroundColor(appearance.colors.text)
+            } label: {
+                Text("Without audio")
+            }
+
+            Button {
+                viewModel.startScreensharing(type: .inApp, includeAudio: true)
+                selection = .inApp
+            } label: {
+                Text("With audio")
+            }
+
+        } label: {
+            DemoMoreControlListButtonView(
+                action: {},
+                label: "Screenshare"
+            ) {
+                Image(systemName: "record.circle")
+                    .foregroundColor(appearance.colors.text)
+            }
         }
     }
 

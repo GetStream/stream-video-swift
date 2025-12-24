@@ -626,6 +626,29 @@
 		40B284DF2D5241FA0064C1FE /* AVAudioSessionMode+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B284DE2D5241FA0064C1FE /* AVAudioSessionMode+Convenience.swift */; };
 		40B284E12D52422A0064C1FE /* AVAudioSessionPortOverride+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B284E02D52422A0064C1FE /* AVAudioSessionPortOverride+Convenience.swift */; };
 		40B284E32D52423B0064C1FE /* AVAudioSessionCategory+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B284E22D52423B0064C1FE /* AVAudioSessionCategory+Convenience.swift */; };
+		40B2F3CC2EFA91FF0067BACE /* AVAudioPCMBuffer+FromCMSampleBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B2F3CB2EFA91FF0067BACE /* AVAudioPCMBuffer+FromCMSampleBuffer.swift */; };
+		40B2F3CE2EFA94170067BACE /* AVAudioConverter+Convert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B2F3CD2EFA94170067BACE /* AVAudioConverter+Convert.swift */; };
+		40B2F3D12EFA94E20067BACE /* AudioConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B2F3D02EFA94E20067BACE /* AudioConverter.swift */; };
+		40B2F3D32EFA95400067BACE /* AVAudioFormat+Equality.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B2F3D22EFA95400067BACE /* AVAudioFormat+Equality.swift */; };
+		40B2F3D52EFA97490067BACE /* AudioBufferRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B2F3D42EFA97490067BACE /* AudioBufferRenderer.swift */; };
+		40B2F3D82EFA97BB0067BACE /* AVAudioEngine+InputContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B2F3D72EFA97BB0067BACE /* AVAudioEngine+InputContext.swift */; };
+		40B2F3DD2EFAA3C00067BACE /* track_2.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 40B2F3DC2EFAA3C00067BACE /* track_2.mp3 */; };
+		40B2F3DE2EFAA3C00067BACE /* track_1.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 40B2F3DB2EFAA3C00067BACE /* track_1.mp3 */; };
+		40B2F3E12EFAA3E20067BACE /* AudioTrackPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B2F3E02EFAA3E20067BACE /* AudioTrackPlayer.swift */; };
+		40B2F3E22EFAA3E20067BACE /* AudioTrackPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B2F3E02EFAA3E20067BACE /* AudioTrackPlayer.swift */; };
+		40B2F3F42EFAD43C0067BACE /* AVAudioPCMBuffer+Info.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B2F3F32EFAD43C0067BACE /* AVAudioPCMBuffer+Info.swift */; };
+		40B2F3F72EFAD65F0067BACE /* AVAudioPCMBuffer+CustomStringConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B2F3F62EFAD65F0067BACE /* AVAudioPCMBuffer+CustomStringConvertible.swift */; };
+		40B2F3FA2EFAD8AB0067BACE /* CMSampleBuffer+Info.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B2F3F92EFAD8AB0067BACE /* CMSampleBuffer+Info.swift */; };
+		40B2F3FD2EFBF4790067BACE /* DemoAudioTrackButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B2F3FC2EFBF4790067BACE /* DemoAudioTrackButtonView.swift */; };
+		40B2F3FE2EFBF4790067BACE /* DemoAudioTrackButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B2F3FC2EFBF4790067BACE /* DemoAudioTrackButtonView.swift */; };
+		40B2F4032EFC0F310067BACE /* CMSampleBuffer_Info_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B2F4012EFC0F310067BACE /* CMSampleBuffer_Info_Tests.swift */; };
+		40B2F4042EFC0F310067BACE /* AVAudioPCMBuffer_Info_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B2F4002EFC0F310067BACE /* AVAudioPCMBuffer_Info_Tests.swift */; };
+		40B2F4052EFC0F310067BACE /* AVAudioEngine_InputContext_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B2F3FF2EFC0F310067BACE /* AVAudioEngine_InputContext_Tests.swift */; };
+		40B2F40E2EFC0F660067BACE /* AVAudioConverter_Convert_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B2F4072EFC0F660067BACE /* AVAudioConverter_Convert_Tests.swift */; };
+		40B2F40F2EFC0F660067BACE /* AVAudioPCMBuffer_FromCMSampleBuffer_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B2F4092EFC0F660067BACE /* AVAudioPCMBuffer_FromCMSampleBuffer_Tests.swift */; };
+		40B2F4102EFC0F660067BACE /* AVAudioFormat_Equality_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B2F4082EFC0F660067BACE /* AVAudioFormat_Equality_Tests.swift */; };
+		40B2F4112EFC0F660067BACE /* AudioConverter_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B2F4062EFC0F660067BACE /* AudioConverter_Tests.swift */; };
+		40B2F4142EFC0FE40067BACE /* AudioBufferRenderer_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B2F4122EFC0FE40067BACE /* AudioBufferRenderer_Tests.swift */; };
 		40B31AA82D10594F005FB448 /* PublishOptions+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B31AA72D10594F005FB448 /* PublishOptions+Dummy.swift */; };
 		40B31AA92D10594F005FB448 /* PublishOptions+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B31AA72D10594F005FB448 /* PublishOptions+Dummy.swift */; };
 		40B3E53C2DBBAF9500DE8F50 /* ProximityMonitor_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B3E53B2DBBAF9500DE8F50 /* ProximityMonitor_Tests.swift */; };
@@ -2318,6 +2341,27 @@
 		40B284DE2D5241FA0064C1FE /* AVAudioSessionMode+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AVAudioSessionMode+Convenience.swift"; sourceTree = "<group>"; };
 		40B284E02D52422A0064C1FE /* AVAudioSessionPortOverride+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AVAudioSessionPortOverride+Convenience.swift"; sourceTree = "<group>"; };
 		40B284E22D52423B0064C1FE /* AVAudioSessionCategory+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AVAudioSessionCategory+Convenience.swift"; sourceTree = "<group>"; };
+		40B2F3CB2EFA91FF0067BACE /* AVAudioPCMBuffer+FromCMSampleBuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AVAudioPCMBuffer+FromCMSampleBuffer.swift"; sourceTree = "<group>"; };
+		40B2F3CD2EFA94170067BACE /* AVAudioConverter+Convert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AVAudioConverter+Convert.swift"; sourceTree = "<group>"; };
+		40B2F3D02EFA94E20067BACE /* AudioConverter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AudioConverter.swift; path = Sources/StreamVideo/WebRTC/v2/VideoCapturing/ActionHandlers/ScreenShare/Extensions/AudioConverter.swift; sourceTree = SOURCE_ROOT; };
+		40B2F3D22EFA95400067BACE /* AVAudioFormat+Equality.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AVAudioFormat+Equality.swift"; sourceTree = "<group>"; };
+		40B2F3D42EFA97490067BACE /* AudioBufferRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioBufferRenderer.swift; sourceTree = "<group>"; };
+		40B2F3D72EFA97BB0067BACE /* AVAudioEngine+InputContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AVAudioEngine+InputContext.swift"; sourceTree = "<group>"; };
+		40B2F3DB2EFAA3C00067BACE /* track_1.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = track_1.mp3; sourceTree = "<group>"; };
+		40B2F3DC2EFAA3C00067BACE /* track_2.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = track_2.mp3; sourceTree = "<group>"; };
+		40B2F3E02EFAA3E20067BACE /* AudioTrackPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioTrackPlayer.swift; sourceTree = "<group>"; };
+		40B2F3F32EFAD43C0067BACE /* AVAudioPCMBuffer+Info.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AVAudioPCMBuffer+Info.swift"; sourceTree = "<group>"; };
+		40B2F3F62EFAD65F0067BACE /* AVAudioPCMBuffer+CustomStringConvertible.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AVAudioPCMBuffer+CustomStringConvertible.swift"; sourceTree = "<group>"; };
+		40B2F3F92EFAD8AB0067BACE /* CMSampleBuffer+Info.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CMSampleBuffer+Info.swift"; sourceTree = "<group>"; };
+		40B2F3FC2EFBF4790067BACE /* DemoAudioTrackButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoAudioTrackButtonView.swift; sourceTree = "<group>"; };
+		40B2F3FF2EFC0F310067BACE /* AVAudioEngine_InputContext_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AVAudioEngine_InputContext_Tests.swift; sourceTree = "<group>"; };
+		40B2F4002EFC0F310067BACE /* AVAudioPCMBuffer_Info_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AVAudioPCMBuffer_Info_Tests.swift; sourceTree = "<group>"; };
+		40B2F4012EFC0F310067BACE /* CMSampleBuffer_Info_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CMSampleBuffer_Info_Tests.swift; sourceTree = "<group>"; };
+		40B2F4062EFC0F660067BACE /* AudioConverter_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioConverter_Tests.swift; sourceTree = "<group>"; };
+		40B2F4072EFC0F660067BACE /* AVAudioConverter_Convert_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AVAudioConverter_Convert_Tests.swift; sourceTree = "<group>"; };
+		40B2F4082EFC0F660067BACE /* AVAudioFormat_Equality_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AVAudioFormat_Equality_Tests.swift; sourceTree = "<group>"; };
+		40B2F4092EFC0F660067BACE /* AVAudioPCMBuffer_FromCMSampleBuffer_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AVAudioPCMBuffer_FromCMSampleBuffer_Tests.swift; sourceTree = "<group>"; };
+		40B2F4122EFC0FE40067BACE /* AudioBufferRenderer_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioBufferRenderer_Tests.swift; sourceTree = "<group>"; };
 		40B31AA72D10594F005FB448 /* PublishOptions+Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PublishOptions+Dummy.swift"; sourceTree = "<group>"; };
 		40B3E53B2DBBAF9500DE8F50 /* ProximityMonitor_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProximityMonitor_Tests.swift; sourceTree = "<group>"; };
 		40B3E53F2DBBB6D900DE8F50 /* MockProximityMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockProximityMonitor.swift; sourceTree = "<group>"; };
@@ -3968,6 +4012,7 @@
 		4030E5912A9DF3E6003E8CBA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				40B2F3DA2EFAA3B90067BACE /* audio-tracks */,
 				406AF2042AF3DE4000ED4D0C /* test.mp4 */,
 				4030E5932A9DF439003E8CBA /* Assets */,
 				4030E5922A9DF3ED003E8CBA /* Entitlements */,
@@ -4035,6 +4080,7 @@
 		4030E5962A9DF48C003E8CBA /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				40B2F3DF2EFAA3D40067BACE /* AudioTrackPlayer */,
 				4000629E2EDF0CB90086E14B /* VideoFilters */,
 				4014F1042D8C2EFE004E7EFD /* Gleap */,
 				845C098F2C0E0B6B00F725B3 /* SessionTimer */,
@@ -4499,6 +4545,7 @@
 		406B3C072C8F602D00FC93A1 /* v2 */ = {
 			isa = PBXGroup;
 			children = (
+				40B2F40D2EFC0F660067BACE /* VideoCapturing */,
 				40D36AC12DDDF0F400972D75 /* WebRTCTrackStorage_Tests.swift */,
 				40FAAC952DDCCFD4007BF93A /* Stats */,
 				402B34C12DCDF96500574663 /* UpdateSubscriptions */,
@@ -4704,6 +4751,7 @@
 		409145F12B68FEF0007F3C17 /* MoreControls */ = {
 			isa = PBXGroup;
 			children = (
+				40B2F3FC2EFBF4790067BACE /* DemoAudioTrackButtonView.swift */,
 				408722382E13CD9D006A68CB /* DemoMoreThermalStateButtonView.swift */,
 				40BBC47A2C6227DF002AEF92 /* Extensions */,
 				409145F22B68FEF0007F3C17 /* DemoMoreControlsViewModifier.swift */,
@@ -5234,6 +5282,113 @@
 				40AUDIO0B2E74490000A11AF1 /* MockAudioFilter.swift */,
 			);
 			path = Audio;
+			sourceTree = "<group>";
+		};
+		40B2F3CA2EFA91E30067BACE /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				40B2F3CB2EFA91FF0067BACE /* AVAudioPCMBuffer+FromCMSampleBuffer.swift */,
+				40B2F3CD2EFA94170067BACE /* AVAudioConverter+Convert.swift */,
+				40B2F3D22EFA95400067BACE /* AVAudioFormat+Equality.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		40B2F3CF2EFA94DB0067BACE /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				40B2F3D02EFA94E20067BACE /* AudioConverter.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		40B2F3D62EFA97AB0067BACE /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				40B2F3D72EFA97BB0067BACE /* AVAudioEngine+InputContext.swift */,
+				40B2F3F32EFAD43C0067BACE /* AVAudioPCMBuffer+Info.swift */,
+				40B2F3F62EFAD65F0067BACE /* AVAudioPCMBuffer+CustomStringConvertible.swift */,
+				40B2F3F92EFAD8AB0067BACE /* CMSampleBuffer+Info.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		40B2F3D92EFA9D150067BACE /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				40B2F3D42EFA97490067BACE /* AudioBufferRenderer.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		40B2F3DA2EFAA3B90067BACE /* audio-tracks */ = {
+			isa = PBXGroup;
+			children = (
+				40B2F3DB2EFAA3C00067BACE /* track_1.mp3 */,
+				40B2F3DC2EFAA3C00067BACE /* track_2.mp3 */,
+			);
+			path = "audio-tracks";
+			sourceTree = "<group>";
+		};
+		40B2F3DF2EFAA3D40067BACE /* AudioTrackPlayer */ = {
+			isa = PBXGroup;
+			children = (
+				40B2F3E02EFAA3E20067BACE /* AudioTrackPlayer.swift */,
+			);
+			path = AudioTrackPlayer;
+			sourceTree = "<group>";
+		};
+		40B2F4022EFC0F310067BACE /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				40B2F3FF2EFC0F310067BACE /* AVAudioEngine_InputContext_Tests.swift */,
+				40B2F4002EFC0F310067BACE /* AVAudioPCMBuffer_Info_Tests.swift */,
+				40B2F4012EFC0F310067BACE /* CMSampleBuffer_Info_Tests.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		40B2F40A2EFC0F660067BACE /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				40B2F4062EFC0F660067BACE /* AudioConverter_Tests.swift */,
+				40B2F4072EFC0F660067BACE /* AVAudioConverter_Convert_Tests.swift */,
+				40B2F4082EFC0F660067BACE /* AVAudioFormat_Equality_Tests.swift */,
+				40B2F4092EFC0F660067BACE /* AVAudioPCMBuffer_FromCMSampleBuffer_Tests.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		40B2F40B2EFC0F660067BACE /* ScreenShare */ = {
+			isa = PBXGroup;
+			children = (
+				40B2F40A2EFC0F660067BACE /* Extensions */,
+			);
+			path = ScreenShare;
+			sourceTree = "<group>";
+		};
+		40B2F40C2EFC0F660067BACE /* ActionHandlers */ = {
+			isa = PBXGroup;
+			children = (
+				40B2F40B2EFC0F660067BACE /* ScreenShare */,
+			);
+			path = ActionHandlers;
+			sourceTree = "<group>";
+		};
+		40B2F40D2EFC0F660067BACE /* VideoCapturing */ = {
+			isa = PBXGroup;
+			children = (
+				40B2F40C2EFC0F660067BACE /* ActionHandlers */,
+			);
+			path = VideoCapturing;
+			sourceTree = "<group>";
+		};
+		40B2F4132EFC0FE40067BACE /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				40B2F4122EFC0FE40067BACE /* AudioBufferRenderer_Tests.swift */,
+			);
+			path = Components;
 			sourceTree = "<group>";
 		};
 		40B3E5392DBBAF8B00DE8F50 /* Proximity */ = {
@@ -5892,6 +6047,8 @@
 		40E1C89E2EA1176200AC3647 /* AudioDeviceModule */ = {
 			isa = PBXGroup;
 			children = (
+				40B2F4132EFC0FE40067BACE /* Components */,
+				40B2F4022EFC0F310067BACE /* Extensions */,
 				40EF61A22ED876FF00ED1F04 /* AudioEngineLevelNodeAdapter_Tests.swift */,
 				40E1C89F2EA1176C00AC3647 /* AudioDeviceModule_Tests.swift */,
 			);
@@ -6036,6 +6193,8 @@
 		40E3636A2D0A24280028C52A /* ScreenShare */ = {
 			isa = PBXGroup;
 			children = (
+				40B2F3CF2EFA94DB0067BACE /* Components */,
+				40B2F3CA2EFA91E30067BACE /* Extensions */,
 				40E3636B2D0A24310028C52A /* ScreenShareCaptureHandler.swift */,
 			);
 			path = ScreenShare;
@@ -6060,6 +6219,8 @@
 		40EE9D2A2E969F010000EA92 /* AudioDeviceModule */ = {
 			isa = PBXGroup;
 			children = (
+				40B2F3D92EFA9D150067BACE /* Components */,
+				40B2F3D62EFA97AB0067BACE /* Extensions */,
 				40E1C89A2EA1156600AC3647 /* RTCAudioDeviceModuleControlling.swift */,
 				40EE9D282E969F010000EA92 /* AudioDeviceModule.swift */,
 				40EE9D292E969F010000EA92 /* AudioEngineLevelNodeAdapter.swift */,
@@ -8310,6 +8471,8 @@
 				842C7EBF28A2B3FA00C2AB7F /* Assets.xcassets in Resources */,
 				844ADA672AD3F21000769F6A /* GoogleSignIn.plist in Resources */,
 				4046DEE92A9E381F00CA6D2F /* AppIntentVocabulary.plist in Resources */,
+				40B2F3DD2EFAA3C00067BACE /* track_2.mp3 in Resources */,
+				40B2F3DE2EFAA3C00067BACE /* track_1.mp3 in Resources */,
 				842D8BDB2865B37800801910 /* Assets.xcassets in Resources */,
 				40ED6D4B2B14F0E600FB5F69 /* Launch Screen.storyboard in Resources */,
 			);
@@ -8472,6 +8635,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				40B2F3E22EFAA3E20067BACE /* AudioTrackPlayer.swift in Sources */,
 				40AB353B2B738B5700E465CC /* DemoSnapshotViewModel.swift in Sources */,
 				4091460D2B690AC9007F3C17 /* DemoParticipantOptionsButton.swift in Sources */,
 				8456E6C4287EB43A004E180E /* LoginViewModel.swift in Sources */,
@@ -8527,6 +8691,7 @@
 				409145FD2B68FEF0007F3C17 /* DemoLocalViewModifier.swift in Sources */,
 				409145FF2B68FEF0007F3C17 /* ChangeEnvironmentViewModifier.swift in Sources */,
 				401A64B12A9DF83200534ED1 /* TokenResponse.swift in Sources */,
+				40B2F3FE2EFBF4790067BACE /* DemoAudioTrackButtonView.swift in Sources */,
 				409145FA2B68FEF0007F3C17 /* ThermalStateViewModifier.swift in Sources */,
 				40F445DB2A9E2276004BE3DA /* DemoCallContentView.swift in Sources */,
 				4091460B2B690AA4007F3C17 /* CallButtonView.swift in Sources */,
@@ -8600,6 +8765,7 @@
 				405687AE2D78A0E700093B98 /* QRCodeView.swift in Sources */,
 				4029A6272AB069320065DAFB /* DemoChatViewFactory.swift in Sources */,
 				40AB354A2B738C5100E465CC /* ThermalStateViewModifier.swift in Sources */,
+				40B2F3E12EFAA3E20067BACE /* AudioTrackPlayer.swift in Sources */,
 				406A8E952AA1D7CB001F598A /* AddUserView.swift in Sources */,
 				406A8EB02AA1D80C001F598A /* DeeplinkAdapter.swift in Sources */,
 				40AB354E2B738C5A00E465CC /* DemoLocalViewModifier.swift in Sources */,
@@ -8610,6 +8776,7 @@
 				845C09952C10A7D700F725B3 /* SessionTimer.swift in Sources */,
 				8493224F2908378A0013C029 /* AppDelegate.swift in Sources */,
 				40AB354D2B738C5A00E465CC /* DemoVideoCallParticipantModifier.swift in Sources */,
+				40B2F3FD2EFBF4790067BACE /* DemoAudioTrackButtonView.swift in Sources */,
 				84E4F7922947476400DD4CE3 /* CallViewHelper.swift in Sources */,
 				406A8EA92AA1D80C001F598A /* ReactionsAdapter.swift in Sources */,
 				4029A6262AB0692C0065DAFB /* DemoChatViewModel+Injection.swift in Sources */,
@@ -8706,6 +8873,7 @@
 				40C2B5B62C2B605A00EC2C2D /* DisposableBag.swift in Sources */,
 				4159F1802C86FA41002B94D3 /* PushNotificationSettingsResponse.swift in Sources */,
 				84F73858287C1A3400A363F4 /* ConnectionState.swift in Sources */,
+				40B2F3D52EFA97490067BACE /* AudioBufferRenderer.swift in Sources */,
 				841BAA3F2BD15CDE000C73E4 /* QueryCallStatsRequest.swift in Sources */,
 				8478EB13288A054B00525538 /* VideoConfig.swift in Sources */,
 				841BAA372BD15CDE000C73E4 /* Coordinates.swift in Sources */,
@@ -8793,6 +8961,7 @@
 				40C9E4482C94743800802B28 /* Stream_Video_Sfu_Signal_TrackSubscriptionDetails+Convenience.swift in Sources */,
 				4045D9D92DAD4BD50077A660 /* CallSettingsResponse+SettingsPriority.swift in Sources */,
 				40034C282CFE156800A318B1 /* CallKitAvailabilityPolicy.swift in Sources */,
+				40B2F3F72EFAD65F0067BACE /* AVAudioPCMBuffer+CustomStringConvertible.swift in Sources */,
 				40F1016C2D5A654300C49481 /* DefaultAudioSessionPolicy.swift in Sources */,
 				840042C92A6FF9A200917B30 /* BroadcastConstants.swift in Sources */,
 				84F73854287C1A2D00A363F4 /* InjectedValuesExtensions.swift in Sources */,
@@ -8810,6 +8979,7 @@
 				8456E6D6287EC343004E180E /* LogFormatter.swift in Sources */,
 				43217A0C2A44A28B002B5857 /* ConnectionErrorEvent.swift in Sources */,
 				40151F932E74410400326540 /* AudioProcessingStore+Namespace.swift in Sources */,
+				40B2F3D32EFA95400067BACE /* AVAudioFormat+Equality.swift in Sources */,
 				40BBC49E2C623D03002AEF92 /* RTCIceConnectionState+CustomStringConvertible.swift in Sources */,
 				84A7E18C288363AC00526C98 /* EventNotificationCenter.swift in Sources */,
 				40E363492D09F6BB0028C52A /* StreamVideoCapturer.swift in Sources */,
@@ -8821,6 +8991,7 @@
 				842E70D02B91BE1700D2D68B /* ClosedCaptionEvent.swift in Sources */,
 				40E3632E2D09DBFA0028C52A /* Int+DefaultValues.swift in Sources */,
 				4039088D2EC2311A00B19FA1 /* StoreEffect.swift in Sources */,
+				40B2F3CC2EFA91FF0067BACE /* AVAudioPCMBuffer+FromCMSampleBuffer.swift in Sources */,
 				40E363382D09E6560028C52A /* Array+Prepare.swift in Sources */,
 				842D3B5829F667660051698A /* CreateDeviceRequest.swift in Sources */,
 				84BBF62B28AFC24000387A02 /* PeerConnectionFactory.swift in Sources */,
@@ -8984,6 +9155,8 @@
 				8458872E28A4EC1F002A81BF /* CallSettings.swift in Sources */,
 				84DC389829ADFCFD00946713 /* VideoSettingsRequest.swift in Sources */,
 				404098C92DDF45ED00D7BEC5 /* Protobuf+SelectiveEncodable.swift in Sources */,
+				40B2F3FA2EFAD8AB0067BACE /* CMSampleBuffer+Info.swift in Sources */,
+				40B2F3CE2EFA94170067BACE /* AVAudioConverter+Convert.swift in Sources */,
 				846E4AE429CDE0B0003733AB /* OwnCapability.swift in Sources */,
 				840042C72A6FF20B00917B30 /* BroadcastObserver.swift in Sources */,
 				40944D292E532D4100088AF0 /* StoreDelay.swift in Sources */,
@@ -9040,6 +9213,7 @@
 				40E18AAD2CD51E5900A65C9F /* RecursiveQueue.swift in Sources */,
 				842B8E242A2DFED900863A87 /* CallSessionParticipantJoinedEvent.swift in Sources */,
 				40AD64B82DC16AB10077AE15 /* WebRTCTracesAdapter.swift in Sources */,
+				40B2F3D12EFA94E20067BACE /* AudioConverter.swift in Sources */,
 				40BBC4D42C639371002AEF92 /* WebRTCCoordinator+Connected.swift in Sources */,
 				40D36AC02DDDB88200972D75 /* WebRTCStatsAdapting.swift in Sources */,
 				848CCCE62AB8ED8F002E83A2 /* BroadcastSettingsResponse.swift in Sources */,
@@ -9115,6 +9289,7 @@
 				842B8E2F2A2DFED900863A87 /* StopRecordingResponse.swift in Sources */,
 				40BBC4C92C639027002AEF92 /* WebRTCCoordinator+StateMachine.swift in Sources */,
 				84D6494329E9AD08002CA428 /* RTMPIngress.swift in Sources */,
+				40B2F3D82EFA97BB0067BACE /* AVAudioEngine+InputContext.swift in Sources */,
 				84F73853287C1A2900A363F4 /* InjectedValues.swift in Sources */,
 				8406266B2A379CC5004B8748 /* WSEventsMiddleware.swift in Sources */,
 				4159F1842C86FA41002B94D3 /* Count.swift in Sources */,
@@ -9281,6 +9456,7 @@
 				844982492C738A830029734D /* StartRTMPBroadcastsRequest.swift in Sources */,
 				401A0F032AB1C1B600BE2DBD /* ThermalStateObserver.swift in Sources */,
 				84D2E37929DC856D001D2118 /* CallMemberAddedEvent.swift in Sources */,
+				40B2F3F42EFAD43C0067BACE /* AVAudioPCMBuffer+Info.swift in Sources */,
 				40D36AD02DDDF97500972D75 /* AVAudioRecorder+Sendable.swift in Sources */,
 				40FB8FFA2D661F3F00F4390A /* CustomStringConvertible+Retroactive.swift in Sources */,
 				403CA9B42CC7BAF0001A88C2 /* VideoCodec.swift in Sources */,
@@ -9422,6 +9598,9 @@
 				84F58B7629EE92BF00010C4C /* UniqueValues.swift in Sources */,
 				40B48C512D14F7AE002C4EAB /* SDPParser_Tests.swift in Sources */,
 				40C4E83F2E65B6E300FC29BC /* MockDefaultAPIEndpoints.swift in Sources */,
+				40B2F4032EFC0F310067BACE /* CMSampleBuffer_Info_Tests.swift in Sources */,
+				40B2F4042EFC0F310067BACE /* AVAudioPCMBuffer_Info_Tests.swift in Sources */,
+				40B2F4052EFC0F310067BACE /* AVAudioEngine_InputContext_Tests.swift in Sources */,
 				400062952EDEFD2D0086E14B /* Moderation+ManagerTests.swift in Sources */,
 				84F58B9529EEBA3900010C4C /* EquatableEvent.swift in Sources */,
 				40A0E9682B88E04D0089E8D3 /* CIImage_Resize_Tests.swift in Sources */,
@@ -9510,6 +9689,7 @@
 				84F58B8129EE9C4900010C4C /* WebSocketPingController_Delegate.swift in Sources */,
 				400C9FCD2D9D648100DB26DC /* RTCConfiguration_DefaultsTests.swift in Sources */,
 				40AB34D02C5D443F00B5B6B3 /* MockWebSocketEngine.swift in Sources */,
+				40B2F4142EFC0FE40067BACE /* AudioBufferRenderer_Tests.swift in Sources */,
 				40B48C322D14D361002C4EAB /* StreamVideoSfuModelsVideoLayer_ConvenienceTests.swift in Sources */,
 				406B3C0F2C8F866100FC93A1 /* MockStreamCallAudioRecorder.swift in Sources */,
 				40C71B702E53644300733BF6 /* StreamCallAudioRecorder_ShouldRecordMiddlewareTests.swift in Sources */,
@@ -9687,6 +9867,10 @@
 				8469593229BB3D7500134EA0 /* SignalServer_Tests.swift in Sources */,
 				409CA7992BEE21720045F7AA /* XCTestCase+PredicateFulfillment.swift in Sources */,
 				40FAAC982DDCCFDC007BF93A /* WebRTCStatsCollector_Tests.swift in Sources */,
+				40B2F40E2EFC0F660067BACE /* AVAudioConverter_Convert_Tests.swift in Sources */,
+				40B2F40F2EFC0F660067BACE /* AVAudioPCMBuffer_FromCMSampleBuffer_Tests.swift in Sources */,
+				40B2F4102EFC0F660067BACE /* AVAudioFormat_Equality_Tests.swift in Sources */,
+				40B2F4112EFC0F660067BACE /* AudioConverter_Tests.swift in Sources */,
 				40D2873D2DB12E46006AD8C7 /* OwnCapabilitiesAudioSessionPolicyTests.swift in Sources */,
 				40AAD1832D2816ED00D10330 /* Stream_Video_Sfu_Event_ChangePublishQuality+Dummy.swift in Sources */,
 				40D36ACE2DDDF6BB00972D75 /* WebRTCTrace_Tests.swift in Sources */,
