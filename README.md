@@ -263,13 +263,19 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 
 ### 1.7.0 milestone - December
 
-- [] Hifi Audio
-- [] Screensharing Audio
+- [x] Hifi Audio
+- [x] Screensharing Audio
+- [x] Video call moderation
+- [x] Ringing individual members
+- [x] Distinguish between WebRTC users and ingest sources (RTMP or SIP)
+
+### 1.8.0 milestone - March
+
 - [] Battery usage improvements
 - [] Swift 6.2 support
 - [] RTMP streaming from device
 
-### After 1.5.0
+### After 1.8.0
 
 - Query call session endpoint + better missed calls support
 - SIP
