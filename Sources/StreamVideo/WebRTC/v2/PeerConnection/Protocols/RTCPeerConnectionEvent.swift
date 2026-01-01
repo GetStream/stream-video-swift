@@ -1,5 +1,5 @@
 //
-// Copyright © 2025 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
 /// A protocol describing a traceable event emitted by an RTCPeerConnection.
