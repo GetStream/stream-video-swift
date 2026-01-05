@@ -9,7 +9,7 @@ Pod::Spec.new do |spec|
   spec.author = { 'getstream.io' => 'support@getstream.io' }
   spec.social_media_url = 'https://getstream.io'
 
-  spec.swift_version = '5.9'
+  spec.swift_version = '5.10'
   spec.platform = :ios, '13.0'
   spec.requires_arc = true
 
@@ -20,5 +20,5 @@ Pod::Spec.new do |spec|
   spec.exclude_files = ["Sources/#{spec.name}/**/*_Tests.swift", "Sources/#{spec.name}/**/*_Mock.swift"]
   spec.resource_bundles = { spec.name => ["Sources/#{spec.name}/Resources/**/*"] }
 
-  spec.dependency('StreamVideo', "#{spec.version}")
+  spec.dependency('StreamVideo', spec.version.to_s)
 end
