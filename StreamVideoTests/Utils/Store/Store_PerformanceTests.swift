@@ -1,5 +1,5 @@
 //
-// Copyright © 2025 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
 import Combine
@@ -232,8 +232,8 @@ final class Store_PerformanceTests: XCTestCase, @unchecked Sendable {
         let iterations = 10000
 
         measure(
-            baseline: .init(local: 13, ci: 24, stringTransformer: { String(format: "%.4fs", $0) }),
-            allowedRegression: .init(local: 0.25, ci: 0.35),
+            baseline: .init(24, stringTransformer: { String(format: "%.4fs", $0) }),
+            allowedRegression: .init(local: 0.1, ci: 0.35),
             iterations: 2
         ) {
             // Wait for completion

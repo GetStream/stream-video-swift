@@ -1,5 +1,5 @@
 //
-// Copyright © 2025 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
 import AVFoundation
@@ -22,6 +22,7 @@ extension RTCSignalingState: @retroactive CustomStringConvertible {}
 extension RTCDataChannelState: @retroactive CustomStringConvertible {}
 extension RTCBundlePolicy: @retroactive CustomStringConvertible {}
 extension RTCContinualGatheringPolicy: @retroactive CustomStringConvertible {}
+extension CMSampleBuffer: @retroactive CustomStringConvertible {}
 #else
 extension AVAudioSession.Category: CustomStringConvertible {}
 extension AVAudioSession.CategoryOptions: CustomStringConvertible {}
@@ -38,4 +39,5 @@ extension RTCSignalingState: CustomStringConvertible {}
 extension RTCDataChannelState: CustomStringConvertible {}
 extension RTCBundlePolicy: CustomStringConvertible {}
 extension RTCContinualGatheringPolicy: CustomStringConvertible {}
+extension CMSampleBuffer: CustomStringConvertible {}
 #endif

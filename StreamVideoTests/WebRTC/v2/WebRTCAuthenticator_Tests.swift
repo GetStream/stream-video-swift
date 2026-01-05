@@ -1,5 +1,5 @@
 //
-// Copyright © 2025 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
 @testable import StreamVideo
@@ -782,10 +782,12 @@ final class WebRTCAuthenticator_Tests: XCTestCase, @unchecked Sendable {
             options: options
         )
 
-        let callSettings = await mockCoordinatorStack
-            .coordinator
-            .stateAdapter
-            .callSettings
-        XCTAssertEqual(callSettings, expected, file: file, line: line)
+        await fulfillment(file: file, line: line) {
+            let callSettings = await self.mockCoordinatorStack
+                .coordinator
+                .stateAdapter
+                .callSettings
+            return callSettings == expected
+        }
     }
 }

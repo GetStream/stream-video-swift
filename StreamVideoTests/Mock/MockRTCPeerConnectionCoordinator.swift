@@ -1,5 +1,5 @@
 //
-// Copyright © 2025 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
 import Combine
@@ -49,7 +49,7 @@ final class MockRTCPeerConnectionCoordinator:
         case setVideoFilter(videoFilter: VideoFilter?)
         case ensureSetUpHasBeenCompleted
         case setUp(settings: CallSettings, ownCapabilities: [OwnCapability])
-        case beginScreenSharing(type: ScreensharingType, ownCapabilities: [OwnCapability])
+        case beginScreenSharing(type: ScreensharingType, ownCapabilities: [OwnCapability], includeAudio: Bool)
         case stopScreenSharing
         case focus(point: CGPoint)
         case addCapturePhotoOutput(capturePhotoOutput: AVCapturePhotoOutput)
@@ -82,8 +82,8 @@ final class MockRTCPeerConnectionCoordinator:
                 return ()
             case let .setUp(settings, ownCapabilities):
                 return (settings, ownCapabilities)
-            case let .beginScreenSharing(type, ownCapabilities):
-                return (type, ownCapabilities)
+            case let .beginScreenSharing(type, ownCapabilities, includeAudio):
+                return (type, ownCapabilities, includeAudio)
             case .stopScreenSharing:
                 return ()
             case let .focus(point):
@@ -155,7 +155,8 @@ final class MockRTCPeerConnectionCoordinator:
         videoCaptureSessionProvider: VideoCaptureSessionProvider = .init(),
         screenShareSessionProvider: ScreenShareSessionProvider = .init(),
         iceAdapter: ICEAdapter? = nil,
-        iceConnectionStateAdapter: ICEConnectionStateAdapter? = nil
+        iceConnectionStateAdapter: ICEConnectionStateAdapter? = nil,
+        audioDeviceModule: AudioDeviceModule = .init(MockRTCAudioDeviceModule())
     ) throws {
         let peerConnectionFactory = PeerConnectionFactory.build(
             audioProcessingModule: MockAudioProcessingModule.shared
@@ -182,7 +183,8 @@ final class MockRTCPeerConnectionCoordinator:
                 videoConfig: videoConfig,
                 publishOptions: publishOptions,
                 videoCaptureSessionProvider: videoCaptureSessionProvider,
-                screenShareSessionProvider: screenShareSessionProvider
+                screenShareSessionProvider: screenShareSessionProvider,
+                audioDeviceModule: audioDeviceModule
             ),
             iceAdapter: iceAdapter ?? .init(
                 sessionID: sessionId,
@@ -261,10 +263,15 @@ final class MockRTCPeerConnectionCoordinator:
 
     override func beginScreenSharing(
         of type: ScreensharingType,
-        ownCapabilities: [OwnCapability]
+        ownCapabilities: [OwnCapability],
+        includeAudio: Bool
     ) async throws {
         stubbedFunctionInput[.beginScreenSharing]?.append(
-            .beginScreenSharing(type: type, ownCapabilities: ownCapabilities)
+            .beginScreenSharing(
+                type: type,
+                ownCapabilities: ownCapabilities,
+                includeAudio: includeAudio
+            )
         )
     }
 

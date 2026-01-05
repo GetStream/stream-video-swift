@@ -9,7 +9,7 @@
   <a href="https://swift.org"><img src="https://img.shields.io/badge/Swift-5.9%2B-orange.svg" /></a>
 </p>
 <p align="center">
-  <img id="stream-video-label" alt="StreamVideo" src="https://img.shields.io/badge/StreamVideo-9.0%20MB-blue"/>
+  <img id="stream-video-label" alt="StreamVideo" src="https://img.shields.io/badge/StreamVideo-9.07%20MB-blue"/>
   <img id="stream-video-swiftui-label" alt="StreamVideoSwiftUI" src="https://img.shields.io/badge/StreamVideoSwiftUI-2.38%20MB-blue"/>
   <img id="stream-video-uikit-label" alt="StreamVideoUIKit" src="https://img.shields.io/badge/StreamVideoUIKit-2.5%20MB-blue"/>
   <img id="stream-web-rtc-label" alt="StreamWebRTC" src="https://img.shields.io/badge/StreamWebRTC-11.02%20MB-blue"/>
@@ -263,13 +263,19 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 
 ### 1.7.0 milestone - December
 
-- [] Hifi Audio
-- [] Screensharing Audio
+- [x] Hifi Audio
+- [x] Screensharing Audio
+- [x] Video call moderation
+- [x] Ringing individual members
+- [x] Distinguish between WebRTC users and ingest sources (RTMP or SIP)
+
+### 1.8.0 milestone - March
+
 - [] Battery usage improvements
 - [] Swift 6.2 support
 - [] RTMP streaming from device
 
-### After 1.5.0
+### After 1.8.0
 
 - Query call session endpoint + better missed calls support
 - SIP

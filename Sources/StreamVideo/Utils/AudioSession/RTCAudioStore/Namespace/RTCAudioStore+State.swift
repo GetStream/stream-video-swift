@@ -1,5 +1,5 @@
 //
-// Copyright © 2025 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
 import AVFoundation
@@ -163,6 +163,16 @@ extension RTCAudioStore {
                     self.isReceiver = isReceiver
                     self.channels = channels
                     self.source = nil
+                }
+
+                static func == (lhs: Port, rhs: Port) -> Bool {
+                    lhs.type == rhs.type
+                        && lhs.name == rhs.name
+                        && lhs.id == rhs.id
+                        && lhs.isExternal == rhs.isExternal
+                        && lhs.isSpeaker == rhs.isSpeaker
+                        && lhs.isReceiver == rhs.isReceiver
+                        && lhs.channels == rhs.channels
                 }
             }
 

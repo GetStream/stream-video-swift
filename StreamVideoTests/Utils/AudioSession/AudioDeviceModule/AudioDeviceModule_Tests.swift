@@ -1,5 +1,5 @@
 //
-// Copyright © 2025 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
 import AVFoundation
@@ -225,7 +225,7 @@ final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
             isPlayoutEnabled: true,
             isRecordingEnabled: false
         ) {
-            subject.audioDeviceModule(
+            _ = subject.audioDeviceModule(
                 $0,
                 willEnableEngine: engine,
                 isPlayoutEnabled: true,
@@ -275,6 +275,36 @@ final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
             .first
         XCTAssertEqual(payload?.0, 0)
         XCTAssertEqual(payload?.1, 1024)
+    }
+
+    func test_configureInputFromSource_emitsEvent() async {
+        makeSubject()
+        let engine = AVAudioEngine()
+        let sourceNode = AVAudioPlayerNode()
+        let destination = AVAudioMixerNode()
+        let format = AVAudioFormat(
+            commonFormat: .pcmFormatFloat32,
+            sampleRate: 48000,
+            channels: 1,
+            interleaved: false
+        )!
+        let expectedEvent = AudioDeviceModule.Event.configureInputFromSource(
+            engine,
+            source: sourceNode,
+            destination: destination,
+            format: format
+        )
+
+        await expectEvent(expectedEvent) {
+            _ = subject.audioDeviceModule(
+                $0,
+                engine: engine,
+                configureInputFromSource: sourceNode,
+                toDestination: destination,
+                format: format,
+                context: [:]
+            )
+        }
     }
 
     func test_configureOutputFromSource_emitsEvent() async {

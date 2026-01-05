@@ -1,5 +1,5 @@
 //
-// Copyright © 2025 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
 import Combine
@@ -48,6 +48,7 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
     ///   - subject: A subject for publishing track events.
     ///   - videoCaptureSessionProvider: The provider for video capture
     ///     sessions.
+    ///   - audioDeviceModule: The audio device module used by video capture.
     convenience init(
         sessionID: String,
         peerConnection: StreamRTCPeerConnectionProtocol,
@@ -57,7 +58,8 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
         videoConfig: VideoConfig,
         publishOptions: [PublishOptions.VideoPublishOptions],
         subject: PassthroughSubject<TrackEvent, Never>,
-        videoCaptureSessionProvider: VideoCaptureSessionProvider
+        videoCaptureSessionProvider: VideoCaptureSessionProvider,
+        audioDeviceModule: AudioDeviceModule
     ) {
         self.init(
             sessionID: sessionID,
@@ -72,7 +74,8 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
                 videoConfig: videoConfig,
                 publishOptions: publishOptions,
                 subject: subject,
-                videoCaptureSessionProvider: videoCaptureSessionProvider
+                videoCaptureSessionProvider: videoCaptureSessionProvider,
+                audioDeviceModule: audioDeviceModule
             ),
             subject: subject
         )

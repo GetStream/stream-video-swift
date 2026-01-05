@@ -1,5 +1,5 @@
 //
-// Copyright © 2025 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
 @testable import StreamVideo
@@ -446,7 +446,8 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         screenShareSessionProvider.activeSession = .init(
             localTrack: await subject.peerConnectionFactory.mockVideoTrack(forScreenShare: true),
             screenSharingType: .inApp,
-            capturer: MockStreamVideoCapturer()
+            capturer: MockStreamVideoCapturer(),
+            includeAudio: true
         )
         let ownCapabilities = Set<OwnCapability>([OwnCapability.blockUsers])
         await subject.set(ownCapabilities: ownCapabilities)
@@ -456,17 +457,23 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
 
         XCTAssertEqual(
             mockPublisher.recordedInputPayload(
-                (ScreensharingType, [OwnCapability]).self,
+                (ScreensharingType, [OwnCapability], Bool).self,
                 for: .beginScreenSharing
             )?.first?.0,
             .inApp
         )
         XCTAssertEqual(
             mockPublisher.recordedInputPayload(
-                (ScreensharingType, [OwnCapability]).self,
+                (ScreensharingType, [OwnCapability], Bool).self,
                 for: .beginScreenSharing
             )?.first?.1,
             [.blockUsers]
+        )
+        XCTAssertTrue(
+            mockPublisher.recordedInputPayload(
+                (ScreensharingType, [OwnCapability], Bool).self,
+                for: .beginScreenSharing
+            )?.first?.2 ?? false
         )
     }
 
@@ -566,7 +573,8 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         screenShareSessionProvider.activeSession = .init(
             localTrack: PeerConnectionFactory.mock().mockVideoTrack(forScreenShare: true),
             screenSharingType: .inApp,
-            capturer: mockVideoCapturer
+            capturer: mockVideoCapturer,
+            includeAudio: true
         )
 
         await subject.cleanUp()

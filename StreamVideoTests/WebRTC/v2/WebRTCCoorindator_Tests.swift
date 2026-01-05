@@ -1,5 +1,5 @@
 //
-// Copyright © 2025 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
 import Combine
@@ -293,12 +293,12 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
                 .publisher as? MockRTCPeerConnectionCoordinator
         )
 
-        try await subject.startScreensharing(type: .inApp)
+        try await subject.startScreensharing(type: .inApp, includeAudio: true)
         await fulfillment { mockPublisher.timesCalled(.beginScreenSharing) == 1 }
 
         let actual = try XCTUnwrap(
             mockPublisher.recordedInputPayload(
-                (ScreensharingType, [OwnCapability]).self,
+                (ScreensharingType, [OwnCapability], Bool).self,
                 for: .beginScreenSharing
             )?.first
         )
@@ -316,12 +316,12 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
                 .publisher as? MockRTCPeerConnectionCoordinator
         )
 
-        try await subject.startScreensharing(type: .broadcast)
+        try await subject.startScreensharing(type: .broadcast, includeAudio: true)
         await fulfillment { mockPublisher.timesCalled(.beginScreenSharing) == 1 }
 
         let actual = try XCTUnwrap(
             mockPublisher.recordedInputPayload(
-                (ScreensharingType, [OwnCapability]).self,
+                (ScreensharingType, [OwnCapability], Bool).self,
                 for: .beginScreenSharing
             )?.first
         )

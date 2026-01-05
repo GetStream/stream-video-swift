@@ -1,5 +1,5 @@
 //
-// Copyright © 2025 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
 import Combine
@@ -14,6 +14,14 @@ private func content() {
             let call = streamVideo.call(callType: "default", callId: "123")
             try await call.join()
             try await call.startScreensharing(type: .inApp)
+        }
+    }
+
+    asyncContainer {
+        Task {
+            let call = streamVideo.call(callType: "default", callId: "123")
+            try await call.join()
+            try await call.startScreensharing(type: .inApp, includeAudio: true)
         }
     }
 

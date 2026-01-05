@@ -1,5 +1,5 @@
 //
-// Copyright © 2025 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
 import Combine
@@ -43,6 +43,8 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
 
     private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
 
+    private let audioDeviceModule: AudioDeviceModule
+
     /// The primary video track used for screen sharing.
     let primaryTrack: RTCVideoTrack
 
@@ -63,7 +65,9 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
     ///   - publishOptions: Initial publishing options for video tracks.
     ///   - subject: A subject for publishing track-related events.
     ///   - screenShareSessionProvider: Provider for managing screen sharing sessions.
-    ///   - capturerFactory: Factory for creating video capturers. Defaults to `StreamVideoCapturerFactory`.
+    ///   - capturerFactory: Factory for creating video capturers. Defaults to
+    ///     `StreamVideoCapturerFactory`.
+    ///   - audioDeviceModule: The audio device module used for screen share audio.
     init(
         sessionID: String,
         peerConnection: StreamRTCPeerConnectionProtocol,
@@ -72,7 +76,8 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
         publishOptions: [PublishOptions.VideoPublishOptions],
         subject: PassthroughSubject<TrackEvent, Never>,
         screenShareSessionProvider: ScreenShareSessionProvider,
-        capturerFactory: VideoCapturerProviding = StreamVideoCapturerFactory()
+        capturerFactory: VideoCapturerProviding = StreamVideoCapturerFactory(),
+        audioDeviceModule: AudioDeviceModule
     ) {
         self.sessionID = sessionID
         self.peerConnection = peerConnection
@@ -82,6 +87,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
         self.subject = subject
         self.screenShareSessionProvider = screenShareSessionProvider
         self.capturerFactory = capturerFactory
+        self.audioDeviceModule = audioDeviceModule
 
         // Initialize the primary track, using the existing session's local track if available.
         primaryTrack = {
@@ -325,9 +331,12 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
     /// - Parameters:
     ///   - type: The type of screen sharing to begin.
     ///   - ownCapabilities: The capabilities of the local participant.
+    ///   - includeAudio: Whether to capture app audio during screen sharing.
+    ///     Only valid for `.inApp`; ignored otherwise.
     func beginScreenSharing(
         of type: ScreensharingType,
-        ownCapabilities: [OwnCapability]
+        ownCapabilities: [OwnCapability],
+        includeAudio: Bool
     ) async throws {
         guard ownCapabilities.contains(.screenshare) else {
             try await stopScreenShareCapturingSession()
@@ -336,7 +345,8 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
 
         try await configureActiveScreenShareSession(
             screenSharingType: type,
-            track: primaryTrack
+            track: primaryTrack,
+            includeAudio: includeAudio
         )
 
         try await startScreenShareCapturingSession()
@@ -407,21 +417,27 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
     /// - Parameters:
     ///   - screenSharingType: The type of screen sharing.
     ///   - track: The video track to use for the session.
+    ///   - includeAudio: Whether to capture app audio during screen sharing.
+    ///     Only valid for `.inApp`; ignored otherwise.
     private func configureActiveScreenShareSession(
         screenSharingType: ScreensharingType,
-        track: RTCVideoTrack
+        track: RTCVideoTrack,
+        includeAudio: Bool
     ) async throws {
         if screenShareSessionProvider.activeSession == nil {
             let videoCapturer = capturerFactory.buildScreenCapturer(
                 screenSharingType,
-                source: track.source
+                source: track.source,
+                audioDeviceModule: audioDeviceModule,
+                includeAudio: includeAudio
             )
             capturer = videoCapturer
 
             screenShareSessionProvider.activeSession = .init(
                 localTrack: track,
                 screenSharingType: screenSharingType,
-                capturer: videoCapturer
+                capturer: videoCapturer,
+                includeAudio: includeAudio
             )
         } else if
             let activeSession = screenShareSessionProvider.activeSession,
@@ -430,14 +446,17 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
 
             let videoCapturer = capturerFactory.buildScreenCapturer(
                 screenSharingType,
-                source: track.source
+                source: track.source,
+                audioDeviceModule: audioDeviceModule,
+                includeAudio: includeAudio
             )
             capturer = videoCapturer
 
             screenShareSessionProvider.activeSession = .init(
                 localTrack: track,
                 screenSharingType: screenSharingType,
-                capturer: videoCapturer
+                capturer: videoCapturer,
+                includeAudio: includeAudio
             )
         }
     }

@@ -1,5 +1,5 @@
 //
-// Copyright © 2025 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
 import Combine
@@ -46,6 +46,7 @@ final class ScreenShareMediaAdapter: MediaAdapting, @unchecked Sendable {
     ///   - subject: A subject for publishing track events.
     ///   - screenShareSessionProvider: Provides access to the active screen
     ///     sharing session.
+    ///   - audioDeviceModule: The audio device module used for screen share audio.
     convenience init(
         sessionID: String,
         peerConnection: StreamRTCPeerConnectionProtocol,
@@ -53,7 +54,8 @@ final class ScreenShareMediaAdapter: MediaAdapting, @unchecked Sendable {
         sfuAdapter: SFUAdapter,
         publishOptions: [PublishOptions.VideoPublishOptions],
         subject: PassthroughSubject<TrackEvent, Never>,
-        screenShareSessionProvider: ScreenShareSessionProvider
+        screenShareSessionProvider: ScreenShareSessionProvider,
+        audioDeviceModule: AudioDeviceModule
     ) {
         self.init(
             sessionID: sessionID,
@@ -66,7 +68,8 @@ final class ScreenShareMediaAdapter: MediaAdapting, @unchecked Sendable {
                 sfuAdapter: sfuAdapter,
                 publishOptions: publishOptions,
                 subject: subject,
-                screenShareSessionProvider: screenShareSessionProvider
+                screenShareSessionProvider: screenShareSessionProvider,
+                audioDeviceModule: audioDeviceModule
             ),
             subject: subject
         )
@@ -170,9 +173,12 @@ final class ScreenShareMediaAdapter: MediaAdapting, @unchecked Sendable {
     /// - Parameters:
     ///   - type: The type of screen sharing to begin.
     ///   - ownCapabilities: The capabilities of the local participant.
+    ///   - includeAudio: Whether to capture app audio during screen sharing.
+    ///     Only valid for `.inApp`; ignored otherwise.
     func beginScreenSharing(
         of type: ScreensharingType,
-        ownCapabilities: [OwnCapability]
+        ownCapabilities: [OwnCapability],
+        includeAudio: Bool
     ) async throws {
         guard
             let localScreenShareMediaManager = localMediaManager as? LocalScreenShareMediaAdapter
@@ -182,7 +188,8 @@ final class ScreenShareMediaAdapter: MediaAdapting, @unchecked Sendable {
         
         try await localScreenShareMediaManager.beginScreenSharing(
             of: type,
-            ownCapabilities: ownCapabilities
+            ownCapabilities: ownCapabilities,
+            includeAudio: includeAudio
         )
     }
     

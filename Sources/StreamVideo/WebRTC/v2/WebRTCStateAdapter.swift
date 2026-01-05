@@ -1,5 +1,5 @@
 //
-// Copyright © 2025 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
 import Combine
@@ -308,7 +308,8 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
             sfuAdapter: sfuAdapter,
             videoCaptureSessionProvider: videoCaptureSessionProvider,
             screenShareSessionProvider: screenShareSessionProvider,
-            clientCapabilities: clientCapabilities
+            clientCapabilities: clientCapabilities,
+            audioDeviceModule: peerConnectionFactory.audioDeviceModule
         )
 
         let subscriber = rtcPeerConnectionCoordinatorFactory.buildCoordinator(
@@ -327,7 +328,8 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
             sfuAdapter: sfuAdapter,
             videoCaptureSessionProvider: videoCaptureSessionProvider,
             screenShareSessionProvider: screenShareSessionProvider,
-            clientCapabilities: clientCapabilities
+            clientCapabilities: clientCapabilities,
+            audioDeviceModule: peerConnectionFactory.audioDeviceModule
         )
 
         publisher
@@ -425,6 +427,8 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
 
     /// Restores screen sharing if an active session exists.
     ///
+    /// Restores app audio capture when the active session requests it.
+    ///
     /// - Throws: Throws an error if the screen sharing session cannot be
     ///   restored.
     func restoreScreenSharing() async throws {
@@ -433,7 +437,8 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         }
         try await publisher?.beginScreenSharing(
             of: activeSession.screenSharingType,
-            ownCapabilities: Array(ownCapabilities)
+            ownCapabilities: Array(ownCapabilities),
+            includeAudio: activeSession.includeAudio
         )
     }
 

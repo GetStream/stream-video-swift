@@ -1,5 +1,5 @@
 //
-// Copyright © 2025 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
@@ -76,6 +76,8 @@ struct DemoMoreControlsViewModifier: ViewModifier {
                         if AppEnvironment.configuration != .release {
                             VStack {
                                 Divider()
+
+                                DemoAudioTrackButtonView()
 
                                 DemoMoreLogsAndGleapButtonView()
 

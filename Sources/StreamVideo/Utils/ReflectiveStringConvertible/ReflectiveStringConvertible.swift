@@ -1,5 +1,5 @@
 //
-// Copyright © 2025 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
@@ -127,7 +127,7 @@ public extension ReflectiveStringConvertible {
     /// The default separator used to join different parts of the string representation.
     ///
     /// By default, this is set to a newline character ("\n").
-    var separator: String { "\n" }
+    var separator: String { ", " }
 
     /// The default set of properties to be excluded from the string representation.
     ///
@@ -177,7 +177,8 @@ public extension ReflectiveStringConvertible {
         }
         #endif
         let mirror = Mirror(reflecting: self)
-        var output: [String] = ["Type: \(type(of: self))"]
+        var result = "\(type(of: self))"
+        var components: [String] = []
 
         let excludedProperties = self.excludedProperties
         mirror
@@ -192,9 +193,14 @@ public extension ReflectiveStringConvertible {
                 }
             }
             .forEach { (child: (label: String, value: Any)) in
-                output.append(" - \(child.label): \(child.value)")
+                components.append("\(child.label):\(child.value)")
             }
 
-        return output.joined(separator: separator)
+        if !components.isEmpty {
+            result += " { "
+            result += components.joined(separator: separator)
+            result += " }"
+        }
+        return result
     }
 }

@@ -1,5 +1,5 @@
 //
-// Copyright © 2025 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
 import AVFoundation
@@ -221,7 +221,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
 
     // MARK: - startScreensharing
 
-    func test_startScreensharing_typeIsInApp_shouldBeginScreenSharing() async throws {
+    func test_startScreensharing_typeIsInApp_includeAudioTrue_shouldBeginScreenSharing() async throws {
         try await prepareAsConnected()
         let ownCapabilities = [OwnCapability.createReaction]
         await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.set(ownCapabilities: Set(ownCapabilities))
@@ -233,19 +233,20 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
                 .publisher as? MockRTCPeerConnectionCoordinator
         )
 
-        try await subject.startScreensharing(type: .inApp)
+        try await subject.startScreensharing(type: .inApp, includeAudio: true)
 
         let actual = try XCTUnwrap(
             mockPublisher.recordedInputPayload(
-                (ScreensharingType, [OwnCapability]).self,
+                (ScreensharingType, [OwnCapability], Bool).self,
                 for: .beginScreenSharing
             )?.first
         )
         XCTAssertEqual(actual.0, .inApp)
         XCTAssertEqual(actual.1, ownCapabilities)
+        XCTAssertTrue(actual.2)
     }
 
-    func test_startScreensharing_typeIsBroadcast_shouldBeginScreenSharing() async throws {
+    func test_startScreensharing_typeIsInApp_includeAudioFalse_shouldBeginScreenSharing() async throws {
         try await prepareAsConnected()
         let ownCapabilities = [OwnCapability.createReaction]
         await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.set(ownCapabilities: Set(ownCapabilities))
@@ -257,16 +258,67 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
                 .publisher as? MockRTCPeerConnectionCoordinator
         )
 
-        try await subject.startScreensharing(type: .broadcast)
+        try await subject.startScreensharing(type: .inApp, includeAudio: false)
 
         let actual = try XCTUnwrap(
             mockPublisher.recordedInputPayload(
-                (ScreensharingType, [OwnCapability]).self,
+                (ScreensharingType, [OwnCapability], Bool).self,
+                for: .beginScreenSharing
+            )?.first
+        )
+        XCTAssertEqual(actual.0, .inApp)
+        XCTAssertEqual(actual.1, ownCapabilities)
+        XCTAssertFalse(actual.2)
+    }
+
+    func test_startScreensharing_typeIsBroadcast_includeAudioTrue_shouldBeginScreenSharing() async throws {
+        try await prepareAsConnected()
+        let ownCapabilities = [OwnCapability.createReaction]
+        await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.set(ownCapabilities: Set(ownCapabilities))
+        let mockPublisher = try await XCTAsyncUnwrap(
+            await mockWebRTCCoordinatorFactory
+                .mockCoordinatorStack
+                .coordinator
+                .stateAdapter
+                .publisher as? MockRTCPeerConnectionCoordinator
+        )
+
+        try await subject.startScreensharing(type: .broadcast, includeAudio: true)
+
+        let actual = try XCTUnwrap(
+            mockPublisher.recordedInputPayload(
+                (ScreensharingType, [OwnCapability], Bool).self,
                 for: .beginScreenSharing
             )?.first
         )
         XCTAssertEqual(actual.0, .broadcast)
         XCTAssertEqual(actual.1, ownCapabilities)
+        XCTAssertTrue(actual.2)
+    }
+
+    func test_startScreensharing_typeIsBroadcast_includeAudioFalse_shouldBeginScreenSharing() async throws {
+        try await prepareAsConnected()
+        let ownCapabilities = [OwnCapability.createReaction]
+        await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.set(ownCapabilities: Set(ownCapabilities))
+        let mockPublisher = try await XCTAsyncUnwrap(
+            await mockWebRTCCoordinatorFactory
+                .mockCoordinatorStack
+                .coordinator
+                .stateAdapter
+                .publisher as? MockRTCPeerConnectionCoordinator
+        )
+
+        try await subject.startScreensharing(type: .broadcast, includeAudio: false)
+
+        let actual = try XCTUnwrap(
+            mockPublisher.recordedInputPayload(
+                (ScreensharingType, [OwnCapability], Bool).self,
+                for: .beginScreenSharing
+            )?.first
+        )
+        XCTAssertEqual(actual.0, .broadcast)
+        XCTAssertEqual(actual.1, ownCapabilities)
+        XCTAssertFalse(actual.2)
     }
 
     // MARK: - stopScreensharing

@@ -1,5 +1,5 @@
 //
-// Copyright © 2025 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
 import Combine
@@ -648,12 +648,17 @@ open class CallViewModel: ObservableObject {
         }
     }
 
-    public func startScreensharing(type: ScreensharingType) {
+    /// Starts screensharing for the current call.
+    /// - Parameters:
+    ///   - type: The screensharing type (in-app or broadcasting).
+    ///   - includeAudio: Whether to capture app audio during screensharing.
+    ///     Only valid for `.inApp`; ignored otherwise.
+    public func startScreensharing(type: ScreensharingType, includeAudio: Bool = true) {
         Task(disposableBag: disposableBag, priority: .userInitiated) { [weak self] in
             guard let self else { return }
             do {
                 await disablePictureInPictureIfRequired(type)
-                try await call?.startScreensharing(type: type)
+                try await call?.startScreensharing(type: type, includeAudio: includeAudio)
             } catch {
                 log.error(error)
             }

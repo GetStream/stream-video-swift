@@ -1,5 +1,5 @@
 //
-// Copyright © 2025 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
 import AVFoundation
@@ -58,6 +58,8 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     /// The capturer responsible for capturing video frames.
     private var capturer: StreamVideoCapturing?
 
+    private let audioDeviceModule: AudioDeviceModule
+
     /// A publisher that emits events related to video track changes.
     let subject: PassthroughSubject<TrackEvent, Never>
 
@@ -81,7 +83,9 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     ///   - publishOptions: Initial publish options for the video track.
     ///   - subject: A publisher for track-related events.
     ///   - capturerFactory: A factory for creating video capturers. Defaults to `StreamVideoCapturerFactory`.
-    ///   - videoCaptureSessionProvider: A provider for managing video capture sessions.
+    ///   - videoCaptureSessionProvider: A provider for managing video capture
+    ///     sessions.
+    ///   - audioDeviceModule: The audio device module used by video capture.
     init(
         sessionID: String,
         peerConnection: StreamRTCPeerConnectionProtocol,
@@ -92,7 +96,8 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         publishOptions: [PublishOptions.VideoPublishOptions],
         subject: PassthroughSubject<TrackEvent, Never>,
         capturerFactory: VideoCapturerProviding = StreamVideoCapturerFactory(),
-        videoCaptureSessionProvider: VideoCaptureSessionProvider
+        videoCaptureSessionProvider: VideoCaptureSessionProvider,
+        audioDeviceModule: AudioDeviceModule
     ) {
         self.sessionID = sessionID
         self.peerConnection = peerConnection
@@ -104,6 +109,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         self.subject = subject
         self.capturerFactory = capturerFactory
         self.videoCaptureSessionProvider = videoCaptureSessionProvider
+        self.audioDeviceModule = audioDeviceModule
         backgroundMuteAdapter = .init(sessionID: sessionID, sfuAdapter: sfuAdapter)
 
         // Initialize the primary video track, either from the active session or a new source.
@@ -623,7 +629,8 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     ) async throws {
         if videoCaptureSessionProvider.activeSession == nil {
             let cameraCapturer = capturerFactory.buildCameraCapturer(
-                source: track.source
+                source: track.source,
+                audioDeviceModule: audioDeviceModule
             )
             capturer = cameraCapturer
 

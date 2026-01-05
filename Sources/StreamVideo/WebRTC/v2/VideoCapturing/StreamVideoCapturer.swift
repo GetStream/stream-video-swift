@@ -1,5 +1,5 @@
 //
-// Copyright © 2025 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
@@ -13,9 +13,15 @@ final class StreamVideoCapturer: StreamVideoCapturing {
 
     // MARK: - Convenience Initialisers
 
+    /// Creates a camera capturer for the provided video source.
+    /// - Parameters:
+    ///   - videoSource: The video source receiving captured frames.
+    ///   - videoCaptureSession: The capture session used for camera input.
+    ///   - audioDeviceModule: The audio device module for capture coordination.
     static func cameraCapturer(
         with videoSource: RTCVideoSource,
-        videoCaptureSession: AVCaptureSession = .init()
+        videoCaptureSession: AVCaptureSession = .init(),
+        audioDeviceModule: AudioDeviceModule
     ) -> StreamVideoCapturer {
         let videoCapturerDelegate = StreamVideoCaptureHandler(source: videoSource)
 
@@ -34,6 +40,7 @@ final class StreamVideoCapturer: StreamVideoCapturing {
             videoSource: videoSource,
             videoCapturer: videoCapturer,
             videoCapturerDelegate: videoCapturerDelegate,
+            audioDeviceModule: audioDeviceModule,
             actionHandlers: [
                 SimulatorCaptureHandler()
             ]
@@ -46,6 +53,7 @@ final class StreamVideoCapturer: StreamVideoCapturing {
                 captureSession: videoCaptureSession
             ),
             videoCapturerDelegate: videoCapturerDelegate,
+            audioDeviceModule: audioDeviceModule,
             actionHandlers: [
                 CameraBackgroundAccessHandler(),
                 CameraCaptureHandler(),
@@ -59,26 +67,41 @@ final class StreamVideoCapturer: StreamVideoCapturing {
         #endif
     }
 
+    /// Creates a screen sharing capturer for the provided video source.
+    /// - Parameters:
+    ///   - videoSource: The video source receiving captured frames.
+    ///   - audioDeviceModule: The audio device module for capture coordination.
+    ///   - includeAudio: Whether to capture app audio during screen sharing.
+    ///     Only valid for `.inApp`; ignored otherwise.
     static func screenShareCapturer(
-        with videoSource: RTCVideoSource
+        with videoSource: RTCVideoSource,
+        audioDeviceModule: AudioDeviceModule,
+        includeAudio: Bool
     ) -> StreamVideoCapturer {
         .init(
             videoSource: videoSource,
             videoCapturer: RTCVideoCapturer(delegate: videoSource),
             videoCapturerDelegate: videoSource,
+            audioDeviceModule: audioDeviceModule,
             actionHandlers: [
-                ScreenShareCaptureHandler()
+                ScreenShareCaptureHandler(includeAudio: includeAudio)
             ]
         )
     }
 
+    /// Creates a broadcast capturer for the provided video source.
+    /// - Parameters:
+    ///   - videoSource: The video source receiving captured frames.
+    ///   - audioDeviceModule: The audio device module for capture coordination.
     static func broadcastCapturer(
-        with videoSource: RTCVideoSource
+        with videoSource: RTCVideoSource,
+        audioDeviceModule: AudioDeviceModule
     ) -> StreamVideoCapturer {
         .init(
             videoSource: videoSource,
             videoCapturer: RTCVideoCapturer(delegate: videoSource),
             videoCapturerDelegate: videoSource,
+            audioDeviceModule: audioDeviceModule,
             actionHandlers: [
                 BroadcastCaptureHandler()
             ]
@@ -95,7 +118,8 @@ final class StreamVideoCapturer: StreamVideoCapturing {
             frameRate: Int,
             videoSource: RTCVideoSource,
             videoCapturer: RTCVideoCapturer,
-            videoCapturerDelegate: RTCVideoCapturerDelegate
+            videoCapturerDelegate: RTCVideoCapturerDelegate,
+            audioDeviceModule: AudioDeviceModule
         )
         case stopCapture(videoCapturer: RTCVideoCapturer)
         case setCameraPosition(
@@ -141,8 +165,25 @@ final class StreamVideoCapturer: StreamVideoCapturing {
             case let .checkBackgroundCameraAccess(videoCaptureSession):
                 return ".checkBackgroundCameraAccess(videoCaptureSession:\(customString(for: videoCaptureSession)))"
 
-            case let .startCapture(position, dimensions, frameRate, videoSource, videoCapturer, videoCapturerDelegate):
-                return ".startCapture(position:\(position), dimensions:\(dimensions), frameRate:\(frameRate), videoSource:\(customString(for: videoSource)), videoCapturer:\(customString(for: videoCapturer)), videoCapturerDelegate:\(customString(for: videoCapturerDelegate)))"
+            case let .startCapture(
+                position,
+                dimensions,
+                frameRate,
+                videoSource,
+                videoCapturer,
+                videoCapturerDelegate,
+                audioDeviceModule
+            ):
+                var result = ".startCapture {"
+                result += " position:\(position)"
+                result += ", dimensions:\(dimensions)"
+                result += ", frameRate:\(frameRate)"
+                result += ", videoSource:\(customString(for: videoSource))"
+                result += ", videoCapturer:\(customString(for: videoCapturer))"
+                result += ", videoCapturerDelegate:\(customString(for: videoCapturerDelegate))"
+                result += ", audioDeviceModule:\(audioDeviceModule))"
+                result += " }"
+                return result
 
             case let .stopCapture(videoCapturer):
                 return ".stopCapture(videoCapturer:\(customString(for: videoCapturer)))"
@@ -179,6 +220,7 @@ final class StreamVideoCapturer: StreamVideoCapturing {
     private let videoSource: RTCVideoSource
     private let videoCapturer: RTCVideoCapturer
     private let videoCapturerDelegate: RTCVideoCapturerDelegate
+    private let audioDeviceModule: AudioDeviceModule
     private let actionHandlers: [StreamVideoCapturerActionHandler]
     private let disposableBag = DisposableBag()
     private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
@@ -198,11 +240,13 @@ final class StreamVideoCapturer: StreamVideoCapturing {
         videoSource: RTCVideoSource,
         videoCapturer: RTCVideoCapturer,
         videoCapturerDelegate: RTCVideoCapturerDelegate,
+        audioDeviceModule: AudioDeviceModule,
         actionHandlers: [StreamVideoCapturerActionHandler]
     ) {
         self.videoSource = videoSource
         self.videoCapturer = videoCapturer
         self.videoCapturerDelegate = videoCapturerDelegate
+        self.audioDeviceModule = audioDeviceModule
         self.actionHandlers = actionHandlers
     }
 
@@ -240,7 +284,8 @@ final class StreamVideoCapturer: StreamVideoCapturing {
                 frameRate: frameRate,
                 videoSource: videoSource,
                 videoCapturer: videoCapturer,
-                videoCapturerDelegate: videoCapturerDelegate
+                videoCapturerDelegate: videoCapturerDelegate,
+                audioDeviceModule: audioDeviceModule
             )
         )
     }

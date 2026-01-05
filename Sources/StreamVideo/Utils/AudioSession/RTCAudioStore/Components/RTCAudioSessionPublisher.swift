@@ -1,5 +1,5 @@
 //
-// Copyright © 2025 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
 import Combine
@@ -21,6 +21,24 @@ final class RTCAudioSessionPublisher: NSObject, RTCAudioSessionDelegate, @unchec
             from: AVAudioSessionRouteDescription,
             to: AVAudioSessionRouteDescription
         )
+
+        static func == (lhs: Event, rhs: Event) -> Bool {
+            switch (lhs, rhs) {
+            case (.didBeginInterruption, .didBeginInterruption):
+                return true
+
+            case (let .didEndInterruption(lhsValue), let .didEndInterruption(rhsValue)):
+                return lhsValue == rhsValue
+
+            case (let .didChangeRoute(lReason, lFrom, lTo), let .didChangeRoute(rReason, rFrom, rTo)):
+                return lReason == rReason
+                    && RTCAudioStore.StoreState.AudioRoute(lFrom) == RTCAudioStore.StoreState.AudioRoute(rFrom)
+                    && RTCAudioStore.StoreState.AudioRoute(lTo) == RTCAudioStore.StoreState.AudioRoute(rTo)
+
+            default:
+                return false
+            }
+        }
     }
 
     /// The Combine publisher that emits session events.
