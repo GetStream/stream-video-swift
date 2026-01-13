@@ -52,7 +52,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     /// Published properties that represent different parts of the WebRTC state.
     @Published private(set) var sessionID: String = UUID().uuidString
     @Published private(set) var token: String = ""
-    @Published private(set) var callSettings: CallSettings = .default
+    @Published private(set) var callSettings: CallSettings
     @Published private(set) var audioSettings: AudioSettings = .init()
 
     /// Published property to track video options and update them.
@@ -114,6 +114,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         apiKey: String,
         callCid: String,
         videoConfig: VideoConfig,
+        callSettings: CallSettings,
         rtcPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinatorProviding,
         videoCaptureSessionProvider: VideoCaptureSessionProvider = .init(),
         screenShareSessionProvider: ScreenShareSessionProvider = .init()
@@ -123,6 +124,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
             apiKey: apiKey,
             callCid: callCid,
             videoConfig: videoConfig,
+            callSettings: callSettings,
             peerConnectionFactory: PeerConnectionFactory.build(
                 audioProcessingModule: videoConfig.audioProcessingModule
             ),
@@ -151,6 +153,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         apiKey: String,
         callCid: String,
         videoConfig: VideoConfig,
+        callSettings: CallSettings,
         peerConnectionFactory: PeerConnectionFactory,
         rtcPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinatorProviding,
         videoCaptureSessionProvider: VideoCaptureSessionProvider = .init(),
@@ -160,6 +163,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         self.apiKey = apiKey
         self.callCid = callCid
         self.videoConfig = videoConfig
+        self._callSettings = .init(initialValue: callSettings)
         let peerConnectionFactory = peerConnectionFactory
         self.peerConnectionFactory = peerConnectionFactory
         self.rtcPeerConnectionCoordinatorFactory = rtcPeerConnectionCoordinatorFactory

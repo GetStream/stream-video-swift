@@ -28,6 +28,7 @@ final class MockWebRTCCoordinatorStack: @unchecked Sendable {
         apiKey: String = .unique,
         callCid: String = "default:\(String.unique)",
         videoConfig: VideoConfig,
+        callSettings: CallSettings = .default,
         callAuthenticator: MockCallAuthenticator = .init(),
         webRTCAuthenticator: MockWebRTCAuthenticator = .init(),
         sfuStack: MockSFUStack = .init(),
@@ -56,6 +57,7 @@ final class MockWebRTCCoordinatorStack: @unchecked Sendable {
             apiKey: apiKey,
             callCid: callCid,
             videoConfig: videoConfig,
+            callSettings: callSettings,
             rtcPeerConnectionCoordinatorFactory: rtcPeerConnectionCoordinatorFactory,
             webRTCAuthenticator: webRTCAuthenticator,
             callAuthentication: callAuthenticator.authenticate

@@ -49,6 +49,7 @@ extension CallController_Mock {
             callType: "default",
             apiKey: "key1",
             videoConfig: .dummy(),
+            initialCallSettings: .default,
             cachedLocation: nil
         )
     }
@@ -77,6 +78,7 @@ extension CallController {
         callType: String = .default,
         apiKey: String = .unique,
         videoConfig: VideoConfig = .init(),
+        initialCallSettings: CallSettings = .default,
         cachedLocation: String? = nil
     ) -> CallController {
         .init(
@@ -86,6 +88,7 @@ extension CallController {
             callType: callType,
             apiKey: apiKey,
             videoConfig: videoConfig,
+            initialCallSettings: initialCallSettings,
             cachedLocation: cachedLocation
         )
     }

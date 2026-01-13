@@ -506,6 +506,7 @@
 		409CA7992BEE21720045F7AA /* XCTestCase+PredicateFulfillment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409CA7982BEE21720045F7AA /* XCTestCase+PredicateFulfillment.swift */; };
 		409D2A522D88704D006A55EF /* DemoBroadcastMoreControlsListButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409D2A512D88704D006A55EF /* DemoBroadcastMoreControlsListButtonView.swift */; };
 		409D2A532D88704D006A55EF /* DemoBroadcastMoreControlsListButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409D2A512D88704D006A55EF /* DemoBroadcastMoreControlsListButtonView.swift */; };
+		409FD4862F17AF3200C4769B /* DetailedCallingView+CallSettingsMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409FD4852F17AF3200C4769B /* DetailedCallingView+CallSettingsMenuView.swift */; };
 		40A0E9602B88ABC80089E8D3 /* DemoBackgroundEffectSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A0E95F2B88ABC80089E8D3 /* DemoBackgroundEffectSelector.swift */; };
 		40A0E9622B88D3DC0089E8D3 /* UIInterfaceOrientation+CGOrientation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A0E9612B88D3DC0089E8D3 /* UIInterfaceOrientation+CGOrientation.swift */; };
 		40A0E9682B88E04D0089E8D3 /* CIImage_Resize_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A0E9672B88E04D0089E8D3 /* CIImage_Resize_Tests.swift */; };
@@ -2263,6 +2264,7 @@
 		409AF6FC2DAFF86800EE7BF6 /* PictureInPictureVideoParticipantViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PictureInPictureVideoParticipantViewTests.swift; sourceTree = "<group>"; };
 		409CA7982BEE21720045F7AA /* XCTestCase+PredicateFulfillment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "XCTestCase+PredicateFulfillment.swift"; sourceTree = "<group>"; };
 		409D2A512D88704D006A55EF /* DemoBroadcastMoreControlsListButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoBroadcastMoreControlsListButtonView.swift; sourceTree = "<group>"; };
+		409FD4852F17AF3200C4769B /* DetailedCallingView+CallSettingsMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DetailedCallingView+CallSettingsMenuView.swift"; sourceTree = "<group>"; };
 		40A0E95F2B88ABC80089E8D3 /* DemoBackgroundEffectSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoBackgroundEffectSelector.swift; sourceTree = "<group>"; };
 		40A0E9612B88D3DC0089E8D3 /* UIInterfaceOrientation+CGOrientation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIInterfaceOrientation+CGOrientation.swift"; sourceTree = "<group>"; };
 		40A0E9672B88E04D0089E8D3 /* CIImage_Resize_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CIImage_Resize_Tests.swift; sourceTree = "<group>"; };
@@ -5001,6 +5003,7 @@
 		409BFA442A9F7E92003341EF /* CallingView */ = {
 			isa = PBXGroup;
 			children = (
+				409FD4842F17AF1500C4769B /* Components */,
 				84093810288A90390089A35B /* DetailedCallingView.swift */,
 				40F445DF2A9E22EA004BE3DA /* SimpleCallingView.swift */,
 				40AB356C2B73B7A400E465CC /* DemoCallingViewModifier.swift */,
@@ -5017,6 +5020,14 @@
 				409CA7982BEE21720045F7AA /* XCTestCase+PredicateFulfillment.swift */,
 			);
 			path = Extensions;
+			sourceTree = "<group>";
+		};
+		409FD4842F17AF1500C4769B /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				409FD4852F17AF3200C4769B /* DetailedCallingView+CallSettingsMenuView.swift */,
+			);
+			path = Components;
 			sourceTree = "<group>";
 		};
 		40A0E9652B88E03B0089E8D3 /* VideoFilters */ = {
@@ -8645,6 +8656,7 @@
 				40F445B42A9E01B2004BE3DA /* AuthenticationProvider.swift in Sources */,
 				4093861C2AA0A11500FF5AF4 /* LogQueue.swift in Sources */,
 				4014F1062D8C2F07004E7EFD /* GleapAdapter.swift in Sources */,
+				409FD4862F17AF3200C4769B /* DetailedCallingView+CallSettingsMenuView.swift in Sources */,
 				844ADA6D2AD443AC00769F6A /* DemoCallsViewModel.swift in Sources */,
 				845C09912C0E0B7600F725B3 /* SessionTimer.swift in Sources */,
 				401C1EE72D48F20F00304609 /* DemoClosedCaptionsView.swift in Sources */,

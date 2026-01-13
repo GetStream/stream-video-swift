@@ -13,6 +13,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
     private lazy var user: User! = .dummy()
     private lazy var apiKey: String! = .unique
     private lazy var callCid: String! = .unique
+    private lazy var callSettings: CallSettings! = .default
     private lazy var mockPeerConnectionFactory: PeerConnectionFactory! = .build(
         audioProcessingModule: Self.videoConfig.audioProcessingModule,
         audioDeviceModuleSource: MockRTCAudioDeviceModule()
@@ -26,6 +27,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         apiKey: apiKey,
         callCid: callCid,
         videoConfig: Self.videoConfig,
+        callSettings: callSettings,
         peerConnectionFactory: mockPeerConnectionFactory,
         rtcPeerConnectionCoordinatorFactory: rtcPeerConnectionCoordinatorFactory
     )
@@ -43,6 +45,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         mockAudioStore.dismantle()
         mockPermissions.dismantle()
         subject = nil
+        callSettings = nil
         mockPermissions = nil
         callCid = nil
         apiKey = nil
@@ -54,6 +57,24 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
     override class func tearDown() {
         videoConfig = nil
         super.tearDown()
+    }
+
+    // MARK: - init
+
+    func test_init_callSettingsWereSetCorrectly() async {
+        let callSettings = CallSettings(
+            audioOn: false,
+            videoOn: false,
+            cameraPosition: .back
+        )
+        self.callSettings = callSettings
+
+        _ = subject
+
+        await assertEqualAsync(
+            await subject.callSettings,
+            callSettings
+        )
     }
 
     // MARK: - setSessionID

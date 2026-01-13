@@ -12,11 +12,12 @@ final class MockWebRTCCoordinatorFactory: WebRTCCoordinatorProviding, @unchecked
         mockCoordinatorStack = .init(videoConfig: videoConfig)
     }
 
-    private var buildCoordinatorWasCalled: (
+    private(set) var buildCoordinatorWasCalled: (
         user: User,
         apiKey: String,
         callCid: String,
         videoConfig: VideoConfig,
+        callSettings: CallSettings,
         callAuthentication: WebRTCCoordinator.AuthenticationHandler
     )?
 
@@ -25,9 +26,17 @@ final class MockWebRTCCoordinatorFactory: WebRTCCoordinatorProviding, @unchecked
         apiKey: String,
         callCid: String,
         videoConfig: VideoConfig,
+        callSettings: CallSettings,
         callAuthentication: @escaping WebRTCCoordinator.AuthenticationHandler
     ) -> WebRTCCoordinator {
-        buildCoordinatorWasCalled = (user, apiKey, callCid, videoConfig, callAuthentication)
+        buildCoordinatorWasCalled = (
+            user,
+            apiKey,
+            callCid,
+            videoConfig,
+            callSettings,
+            callAuthentication
+        )
         return mockCoordinatorStack.coordinator
     }
 }

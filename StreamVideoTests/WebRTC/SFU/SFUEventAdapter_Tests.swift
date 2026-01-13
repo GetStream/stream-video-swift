@@ -22,6 +22,7 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
         apiKey: .unique,
         callCid: .unique,
         videoConfig: Self.videoConfig,
+        callSettings: .default,
         rtcPeerConnectionCoordinatorFactory: MockRTCPeerConnectionCoordinatorFactory()
     )
     private lazy var subject: SFUEventAdapter! = .init(
