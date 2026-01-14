@@ -144,7 +144,7 @@ struct DebugMenu: View {
     var body: some View {
         Menu {
             makeMenu(
-                for: [.demo, .pronto, .prontoStaging, .prontoFrankfurtC2],
+                for: AppEnvironment.BaseURL.allCases,
                 currentValue: baseURL,
                 additionalItems: { customEnvironmentView },
                 label: "Environment",
