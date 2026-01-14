@@ -5,6 +5,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 # Upcoming
 
 ### 🔄 Changed
+- The initiliser of `AudioSessionConfiguration` is now marked as `public` in order to allow custom `AudioSessionPolicy` implementations. [#1025](https://github.com/GetStream/stream-video-swift/pull/1025)
 
 # [1.39.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.39.0)
 _December 24, 2025_
