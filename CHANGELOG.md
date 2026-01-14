@@ -4,7 +4,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
-### 🔄 Changed
+### 🐞 Fixed
+- CallSettings not propagating correctly when were set using the CallViewModel **before** joining a call. [#1023](https://github.com/GetStream/stream-video-swift/pull/1023)
 
 # [1.39.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.39.0)
 _December 24, 2025_
