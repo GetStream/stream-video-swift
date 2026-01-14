@@ -5,6 +5,10 @@
 import Combine
 import Foundation
 
+private struct UncheckedSendableBox<Value>: @unchecked Sendable {
+    let value: Value
+}
+
 public extension Publisher where Output: Sendable {
 
     /// Converts the current publisher into an `AsyncStream` of its output.
