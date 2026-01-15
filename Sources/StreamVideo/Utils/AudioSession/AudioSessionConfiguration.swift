@@ -27,6 +27,28 @@ public struct AudioSessionConfiguration: CustomStringConvertible, Equatable, Sen
         return result
     }
 
+    /// Creates a new audio session configuration.
+    ///
+    /// - Parameters:
+    ///   - isActive: Whether the audio session should be active.
+    ///   - category: The audio session category.
+    ///   - mode: The audio session mode.
+    ///   - options: The audio session category options.
+    ///   - overrideOutputAudioPort: The audio session port override.
+    public init(
+        isActive: Bool,
+        category: AVAudioSession.Category,
+        mode: AVAudioSession.Mode,
+        options: AVAudioSession.CategoryOptions,
+        overrideOutputAudioPort: AVAudioSession.PortOverride? = nil
+    ) {
+        self.isActive = isActive
+        self.category = category
+        self.mode = mode
+        self.options = options
+        self.overrideOutputAudioPort = overrideOutputAudioPort
+    }
+
     /// Compares two `AudioSessionConfiguration` instances for equality.
     public static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.isActive == rhs.isActive &&
