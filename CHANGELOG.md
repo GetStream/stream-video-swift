@@ -4,7 +4,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
-### 🔄 Changed
+### 🐞 Fixed
+- An issue causing microphone to stop recording when screen was locked and `always-display-on` was enabled. [#1026](https://github.com/GetStream/stream-video-swift/pull/1026)
 
 # [1.39.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.39.0)
 _December 24, 2025_

@@ -55,13 +55,17 @@ final class RTCAudioStore_InterruptionsEffectTests: XCTestCase, @unchecked Senda
         }
     }
 
-    func test_didEndInterruption_shouldResumeFalse_dispatchesSetInterruptedFalseOnly() {
+    func test_didEndInterruption_isInterrupted_shouldResumeFalse_dispatchesSetInterruptedFalseOnly() {
         let dispatcherExpectation = expectation(description: "Dispatcher called")
         dispatcherExpectation.assertForOverFulfill = false
 
         subject.dispatcher = .init { [weak self] actions, _, _, _ in
             self?.dispatched.append(actions)
             dispatcherExpectation.fulfill()
+        }
+
+        subject.stateProvider = { [weak self] in
+            self?.makeState(isInterrupted: true)
         }
 
         publisher.audioSessionDidEndInterruption(session, shouldResumeSession: false)
@@ -78,7 +82,7 @@ final class RTCAudioStore_InterruptionsEffectTests: XCTestCase, @unchecked Senda
         }
     }
 
-    func test_didEndInterruption_shouldResumeTrue_withoutAudioDeviceModule_dispatchesSetInterruptedFalse() {
+    func test_didEndInterruption_isInterrupted_shouldResumeTrue_withoutAudioDeviceModule_dispatchesSetInterruptedFalse() {
         let dispatcherExpectation = expectation(description: "Dispatcher called")
         dispatcherExpectation.assertForOverFulfill = false
 
@@ -88,7 +92,10 @@ final class RTCAudioStore_InterruptionsEffectTests: XCTestCase, @unchecked Senda
         }
 
         subject.stateProvider = { [weak self] in
-            self?.makeState(audioDeviceModule: nil)
+            self?.makeState(
+                isInterrupted: true,
+                audioDeviceModule: nil
+            )
         }
 
         publisher.audioSessionDidEndInterruption(session, shouldResumeSession: true)
@@ -105,7 +112,7 @@ final class RTCAudioStore_InterruptionsEffectTests: XCTestCase, @unchecked Senda
         }
     }
 
-    func test_didEndInterruption_shouldResumeTrue_withAudioDeviceModule_dispatchesRecoveryActions() {
+    func test_didEndInterruption_isInterrupted_shouldResumeTrue_withAudioDeviceModule_dispatchesRecoveryActions() {
         let dispatcherExpectation = expectation(description: "Dispatcher called")
         dispatcherExpectation.assertForOverFulfill = false
 
@@ -117,6 +124,7 @@ final class RTCAudioStore_InterruptionsEffectTests: XCTestCase, @unchecked Senda
         let module = AudioDeviceModule(MockRTCAudioDeviceModule())
         subject.stateProvider = { [weak self] in
             self?.makeState(
+                isInterrupted: true,
                 isRecording: true,
                 isMicrophoneMuted: true,
                 audioDeviceModule: module
