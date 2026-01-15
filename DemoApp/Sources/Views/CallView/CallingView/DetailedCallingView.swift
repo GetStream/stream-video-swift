@@ -230,6 +230,7 @@ struct DetailedCallingView<Factory: ViewFactory>: View {
                         AppUserView(user: participant)
                     }
                     .foregroundColor(appearance.colors.text)
+                    .accessibilityIdentifier("participantItem")
                 }
             } header: {
                 HStack {
