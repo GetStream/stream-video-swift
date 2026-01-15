@@ -70,8 +70,7 @@ final class Store_ConcurrencyTests: XCTestCase, @unchecked Sendable {
     func test_concurrentDispatchSync_blocksAndMaintainsOrder() async throws {
         // Given
         let iterations = 100
-        nonisolated(unsafe) var results: [Int] = []
-        let lock = UnfairQueue()
+        let results = Atomic<[Int]>(wrappedValue: [])
 
         // When: Dispatch sync actions concurrently
         await withTaskGroup(of: Int.self) { group in
@@ -83,7 +82,11 @@ final class Store_ConcurrencyTests: XCTestCase, @unchecked Sendable {
 
                     // Capture the state after sync dispatch
                     let value = self.store.state.value
-                    lock.sync { results.append(value) }
+                    results.mutate { values in
+                        var values = values
+                        values.append(value)
+                        return values
+                    }
                     return value
                 }
             }
@@ -102,8 +105,9 @@ final class Store_ConcurrencyTests: XCTestCase, @unchecked Sendable {
         )
         
         // All results should be valid
-        XCTAssertEqual(results.count, iterations)
-        results.forEach { value in
+        let capturedResults = results.wrappedValue
+        XCTAssertEqual(capturedResults.count, iterations)
+        capturedResults.forEach { value in
             XCTAssertTrue(
                 (0..<iterations).contains(value),
                 "Each result should be a valid value"

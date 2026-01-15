@@ -415,6 +415,9 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
 
         try await subject.focus(at: .init(x: 10, y: 20))
 
+        await fulfillment {
+            mockPublisher.recordedInputPayload(CGPoint.self, for: .focus)?.first == .init(x: 10, y: 20)
+        }
         XCTAssertEqual(
             mockPublisher.recordedInputPayload(CGPoint.self, for: .focus)?.first,
             .init(x: 10, y: 20)

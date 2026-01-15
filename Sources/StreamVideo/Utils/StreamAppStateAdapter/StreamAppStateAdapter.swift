@@ -50,22 +50,22 @@ final class StreamAppStateAdapter: AppStateProviding, ObservableObject, @uncheck
             /// Observes app state changes to update the `state` property.
             notificationCenter
                 .publisher(for: UIApplication.willEnterForegroundNotification)
-                .map { _ in ApplicationState.foreground }
                 .receive(on: DispatchQueue.main)
+                .map { _ in ApplicationState.foreground }
                 .assign(to: \.state, onWeak: self)
                 .store(in: disposableBag)
 
             notificationCenter
                 .publisher(for: UIApplication.didBecomeActiveNotification)
-                .map { _ in ApplicationState.foreground }
                 .receive(on: DispatchQueue.main)
+                .map { _ in ApplicationState.foreground }
                 .assign(to: \.state, onWeak: self)
                 .store(in: disposableBag)
 
             notificationCenter
                 .publisher(for: UIApplication.didEnterBackgroundNotification)
-                .map { _ in ApplicationState.background }
                 .receive(on: DispatchQueue.main)
+                .map { _ in ApplicationState.background }
                 .assign(to: \.state, onWeak: self)
                 .store(in: disposableBag)
 

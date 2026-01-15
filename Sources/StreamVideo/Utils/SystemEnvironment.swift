@@ -39,9 +39,9 @@ enum SystemEnvironment {
 
     static var isTests: Bool {
         #if STREAM_TESTS
-        return NSClassFromString("XCTest") != nil
+        return true
         #else
-        return false
+        return NSClassFromString("XCTest") != nil
         #endif
     }
 

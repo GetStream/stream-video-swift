@@ -80,10 +80,14 @@ extension Call.StateMachine.Stage {
                         id: call.callId
                     )
 
-                    input.send(response)
+                    await MainActor.run {
+                        input.send(response)
+                    }
                     transitionOrError(.accepted(context, response: response))
                 } catch {
-                    input.send(completion: .failure(error))
+                    await MainActor.run {
+                        input.send(completion: .failure(error))
+                    }
                     transitionErrorOrLog(error)
                 }
             }
