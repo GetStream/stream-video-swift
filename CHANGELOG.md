@@ -5,8 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 # Upcoming
 
 ### 🔄 Changed
-- The initiliser of `AudioSessionConfiguration` is now marked as `public` in order to allow custom `AudioSessionPolicy` implementations. [#1025](https://github.com/GetStream/stream-video-swift/pull/1025)
-- 
+- The initiliazer of `AudioSessionConfiguration` is now marked as `public` in order to allow custom `AudioSessionPolicy` implementations. [#1025](https://github.com/GetStream/stream-video-swift/pull/1025)
+
 ### 🐞 Fixed
 - An issue causing microphone to stop recording when screen was locked and `always-display-on` was enabled. [#1026](https://github.com/GetStream/stream-video-swift/pull/1026)
 

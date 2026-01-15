@@ -27,6 +27,14 @@ public struct AudioSessionConfiguration: CustomStringConvertible, Equatable, Sen
         return result
     }
 
+    /// Creates a new audio session configuration.
+    ///
+    /// - Parameters:
+    ///   - isActive: Whether the audio session should be active.
+    ///   - category: The audio session category.
+    ///   - mode: The audio session mode.
+    ///   - options: The audio session category options.
+    ///   - overrideOutputAudioPort: The audio session port override.
     public init(
         isActive: Bool,
         category: AVAudioSession.Category,
