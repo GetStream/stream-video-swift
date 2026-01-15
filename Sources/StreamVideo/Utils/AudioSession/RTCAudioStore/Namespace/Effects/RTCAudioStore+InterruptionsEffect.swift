@@ -41,6 +41,12 @@ extension RTCAudioStore {
                 dispatcher?.dispatch(.setInterrupted(true))
 
             case .didEndInterruption(let shouldResumeSession):
+                guard
+                    state?.isInterrupted == true
+                else {
+                    return
+                }
+
                 var actions: [Namespace.Action] = [
                     .setInterrupted(false)
                 ]
@@ -60,7 +66,6 @@ extension RTCAudioStore {
                     actions.append(.setMicrophoneMuted(isMicrophoneMuted))
                 }
                 dispatcher?.dispatch(actions.map(\.box))
-
             default:
                 break
             }
