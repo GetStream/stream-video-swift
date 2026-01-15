@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🐞 Fixed
 - CallSettings not propagating correctly when were set using the CallViewModel **before** joining a call. [#1023](https://github.com/GetStream/stream-video-swift/pull/1023)
+- An issue causing microphone to stop recording when screen was locked and `always-display-on` was enabled. [#1026](https://github.com/GetStream/stream-video-swift/pull/1026)
+
+### 🔄 Changed
+- The initiliazer of `AudioSessionConfiguration` is now marked as `public` in order to allow custom `AudioSessionPolicy` implementations. [#1025](https://github.com/GetStream/stream-video-swift/pull/1025)
 
 # [1.39.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.39.0)
 _December 24, 2025_
