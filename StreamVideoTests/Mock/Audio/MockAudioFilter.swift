@@ -6,7 +6,7 @@ import Foundation
 @testable import StreamVideo
 import StreamWebRTC
 
-final class MockAudioFilter: AudioFilter, Mockable {
+final class MockAudioFilter: AudioFilter, Mockable, @unchecked Sendable {
 
     // MARK: - Mockable
 

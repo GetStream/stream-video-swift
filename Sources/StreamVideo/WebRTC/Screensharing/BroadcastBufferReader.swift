@@ -160,14 +160,13 @@ final class BroadcastBufferReader: NSObject {
         if message == nil {
             message = Message()
             readLength = BroadcastConstants.bufferMaxLength
-            
-            weak let weakSelf = self
-            message?.onComplete = { success, message in
+
+            message?.onComplete = { [weak self] success, message in
                 if success {
-                    weakSelf?.didCaptureVideoFrame(message.imageBuffer, with: message.imageOrientation)
+                    self?.didCaptureVideoFrame(message.imageBuffer, with: message.imageOrientation)
                 }
                 
-                weakSelf?.message = nil
+                self?.message = nil
             }
         }
         

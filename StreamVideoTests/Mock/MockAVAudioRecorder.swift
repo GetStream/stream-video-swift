@@ -44,6 +44,8 @@ final class MockAVAudioRecorder: AVAudioRecorder, Mockable, @unchecked Sendable 
         }
     }
 
+    @Atomic private var isMeteringEnabledStorage: Bool = false
+
     static func build() throws -> MockAVAudioRecorder {
         let url = URL(fileURLWithPath: "/dev/null")
         let result = try MockAVAudioRecorder(url: url, settings: [:])
@@ -56,8 +58,17 @@ final class MockAVAudioRecorder: AVAudioRecorder, Mockable, @unchecked Sendable 
         return (stubbedFunction[.record] as? Bool) ?? super.record()
     }
 
+    override var isMeteringEnabled: Bool {
+        get { isMeteringEnabledStorage }
+        set { isMeteringEnabledStorage = newValue }
+    }
+
     override func updateMeters() {
         stubbedFunctionInput[.updateMeters]?.append(.updateMeters)
+    }
+
+    override func averagePower(forChannel channelNumber: Int) -> Float {
+        0
     }
 
     override func stop() {
