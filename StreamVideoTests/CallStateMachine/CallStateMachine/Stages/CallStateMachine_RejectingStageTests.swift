@@ -3,6 +3,7 @@
 //
 
 import Combine
+import Dispatch
 @testable import StreamVideo
 @preconcurrency import XCTest
 
@@ -62,10 +63,12 @@ final class CallStateMachineStageRejectingStage_Tests: StreamVideoTestCase, @unc
 
     func test_execute_rejectCallSucceeds_deliverySubjectDeliversResponse() async {
         let deliveryExpectation = expectation(description: "DeliverySubject delivered value.")
-        let cancellable = deliverySubject.sink { _ in XCTFail() } receiveValue: {
-            XCTAssertEqual($0, self.response)
-            deliveryExpectation.fulfill()
-        }
+        let cancellable = deliverySubject
+            .receive(on: DispatchQueue.main)
+            .sink { _ in XCTFail() } receiveValue: {
+                XCTAssertEqual($0, self.response)
+                deliveryExpectation.fulfill()
+            }
         mockDefaultAPI.stub(for: .rejectCall, with: response)
         subject.transition = { self.transitionedToStage = $0 }
 
@@ -79,15 +82,17 @@ final class CallStateMachineStageRejectingStage_Tests: StreamVideoTestCase, @unc
 
     func test_execute_rejectCallFails_deliverySubjectDeliversError() async {
         let deliveryExpectation = expectation(description: "DeliverySubject delivered value.")
-        let cancellable = deliverySubject.sink {
-            switch $0 {
-            case .finished:
-                XCTFail()
-            case let .failure(error):
-                XCTAssertTrue(error is ClientError)
-                deliveryExpectation.fulfill()
-            }
-        } receiveValue: { _ in XCTFail() }
+        let cancellable = deliverySubject
+            .receive(on: DispatchQueue.main)
+            .sink {
+                switch $0 {
+                case .finished:
+                    XCTFail()
+                case let .failure(error):
+                    XCTAssertTrue(error is ClientError)
+                    deliveryExpectation.fulfill()
+                }
+            } receiveValue: { _ in XCTFail() }
         mockDefaultAPI.stub(for: .rejectCall, with: ClientError())
         subject.transition = { self.transitionedToStage = $0 }
 

@@ -5,6 +5,12 @@
 import CallKit
 import Foundation
 
+#if compiler(>=6.0)
+extension CXAction: @retroactive @unchecked Sendable {}
+#else
+extension CXAction: @unchecked Sendable {}
+#endif
+
 final class MockCXCallController: CXCallController, @unchecked Sendable {
     private(set) var requestWasCalledWith: (CXTransaction, (Error?) -> Void)?
 

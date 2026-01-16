@@ -31,8 +31,8 @@ extension StreamCallAudioRecorder.Namespace {
         }
 
         /// The audio store for managing permissions and session state.
-        @Injected(\.permissions) private var permissions
-        @Injected(\.audioStore) private var audioStore
+        private let permissions: PermissionStore
+        private let audioStore: RTCAudioStore
 
         private var mode: Mode
 
@@ -45,7 +45,13 @@ extension StreamCallAudioRecorder.Namespace {
         /// fly when stereo playout is enabled.
         private var audioDeviceModuleCancellable: AnyCancellable?
 
-        init(audioRecorder: AVAudioRecorder? = nil) {
+        init(
+            audioRecorder: AVAudioRecorder? = nil,
+            permissions: PermissionStore = InjectedValues[\.permissions],
+            audioStore: RTCAudioStore = InjectedValues[\.audioStore]
+        ) {
+            self.permissions = permissions
+            self.audioStore = audioStore
             if let audioRecorder {
                 mode = .audioRecorder(audioRecorder)
             } else if let audioRecorder = try? AVAudioRecorder.build() {
@@ -212,6 +218,7 @@ extension StreamCallAudioRecorder.Namespace {
                 let isRecording = audioRecorder.record()
                 if isRecording {
                     audioRecorder.isMeteringEnabled = true
+                    dispatchInitialMeterUpdates(from: audioRecorder)
                     updateMetersCancellable = DefaultTimer
                         .publish(every: ScreenPropertiesAdapter.currentValue.refreshRate)
                         .map { [weak audioRecorder] _ in audioRecorder?.updateMeters() }
@@ -229,6 +236,15 @@ extension StreamCallAudioRecorder.Namespace {
                     .log(.debug, subsystems: .audioRecording) { "AVAudioDeviceModule audioLevel observation value:\($0)." }
                     .sink { [weak self] in self?.dispatcher?.dispatch(.setMeter($0)) }
                 log.debug("AVAudioDeviceModule audioLevel observation started...", subsystems: .audioRecording)
+            }
+        }
+
+        private func dispatchInitialMeterUpdates(from audioRecorder: AVAudioRecorder) {
+            for _ in 0..<3 {
+                audioRecorder.updateMeters()
+                dispatcher?.dispatch(
+                    .setMeter(audioRecorder.averagePower(forChannel: 0))
+                )
             }
         }
 

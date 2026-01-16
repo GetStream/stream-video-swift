@@ -99,11 +99,15 @@ extension Call.StateMachine.Stage {
 
                     callCache.remove(for: call.cId)
 
-                    input.deliverySubject.send(response)
+                    await MainActor.run {
+                        input.deliverySubject.send(response)
+                    }
 
                     transitionOrError(.rejected(context, response: response))
                 } catch {
-                    input.deliverySubject.send(completion: .failure(error))
+                    await MainActor.run {
+                        input.deliverySubject.send(completion: .failure(error))
+                    }
                     transitionErrorOrLog(error)
                 }
             }

@@ -31,13 +31,27 @@ final class MockPermissionsStore: @unchecked Sendable {
             middleware: [mockMiddleware]
         )
 
-    init() {
-        _ = mockStore
-        InjectedValues[\.permissions] = .init(store: mockStore)
+    private(set) lazy var permissionsStore: PermissionStore = .init(store: mockStore)
+    private let didInject: Bool
+    private var previousStore: PermissionStore?
+
+    init(inject: Bool = true) {
+        didInject = inject
+        if inject {
+            previousStore = InjectedValues[\.permissions]
+            InjectedValues[\.permissions] = permissionsStore
+        }
     }
 
     func dismantle() {
-        InjectedValues[\.permissions] = .shared
+        guard didInject else {
+            return
+        }
+        if let previousStore {
+            InjectedValues[\.permissions] = previousStore
+        } else {
+            InjectedValues[\.permissions] = .shared
+        }
     }
 
     func timesCalled(_ function: Function) -> Int {

@@ -101,29 +101,33 @@ final class MockRTCAudioDeviceModule: RTCAudioDeviceModuleControlling, Mockable,
     func propertyKey<T>(
         for keyPath: KeyPath<MockRTCAudioDeviceModule, T>
     ) -> String {
+        propertyKey(for: keyPath as AnyKeyPath)
+    }
+
+    private func propertyKey(for keyPath: AnyKeyPath) -> String {
         switch keyPath {
         case \MockRTCAudioDeviceModule.isMicrophoneMuted:
-            "isMicrophoneMuted"
+            return "isMicrophoneMuted"
         case \MockRTCAudioDeviceModule.isPlaying:
-            "isPlaying"
+            return "isPlaying"
         case \MockRTCAudioDeviceModule.isRecording:
-            "isRecording"
+            return "isRecording"
         case \MockRTCAudioDeviceModule.isPlayoutInitialized:
-            "isPlayoutInitialized"
+            return "isPlayoutInitialized"
         case \MockRTCAudioDeviceModule.isRecordingInitialized:
-            "isRecordingInitialized"
+            return "isRecordingInitialized"
         case \MockRTCAudioDeviceModule.isStereoPlayoutEnabled:
-            "isStereoPlayoutEnabled"
+            return "isStereoPlayoutEnabled"
         case \MockRTCAudioDeviceModule.isVoiceProcessingBypassed:
-            "isVoiceProcessingBypassed"
+            return "isVoiceProcessingBypassed"
         case \MockRTCAudioDeviceModule.isVoiceProcessingEnabled:
-            "isVoiceProcessingEnabled"
+            return "isVoiceProcessingEnabled"
         case \MockRTCAudioDeviceModule.isVoiceProcessingAGCEnabled:
-            "isVoiceProcessingAGCEnabled"
+            return "isVoiceProcessingAGCEnabled"
         case \MockRTCAudioDeviceModule.prefersStereoPlayout:
-            "prefersStereoPlayout"
+            return "prefersStereoPlayout"
         default:
-            "\(self)"
+            return "\(self)"
         }
     }
 

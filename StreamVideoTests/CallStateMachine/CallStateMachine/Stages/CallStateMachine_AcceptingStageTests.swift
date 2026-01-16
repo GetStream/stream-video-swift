@@ -3,6 +3,7 @@
 //
 
 import Combine
+import Dispatch
 @testable import StreamVideo
 @preconcurrency import XCTest
 
@@ -63,10 +64,12 @@ final class StreamCallStateMachineStageAcceptingStage_Tests: StreamVideoTestCase
     func test_execute_acceptCallSucceeds_deliverySubjectDeliversResponse() async {
         let expected = AcceptCallResponse(duration: "10")
         let deliveryExpectation = expectation(description: "DeliverySubject delivered value.")
-        let cancellable = deliverySubject.sink { _ in XCTFail() } receiveValue: {
-            XCTAssertEqual($0, expected)
-            deliveryExpectation.fulfill()
-        }
+        let cancellable = deliverySubject
+            .receive(on: DispatchQueue.main)
+            .sink { _ in XCTFail() } receiveValue: {
+                XCTAssertEqual($0, expected)
+                deliveryExpectation.fulfill()
+            }
         mockDefaultAPI.stub(for: .acceptCall, with: expected)
         subject.transition = { self.transitionedToStage = $0 }
 
@@ -80,15 +83,17 @@ final class StreamCallStateMachineStageAcceptingStage_Tests: StreamVideoTestCase
 
     func test_execute_acceptCallFails_deliverySubjectDeliversError() async {
         let deliveryExpectation = expectation(description: "DeliverySubject delivered value.")
-        let cancellable = deliverySubject.sink {
-            switch $0 {
-            case .finished:
-                XCTFail()
-            case let .failure(error):
-                XCTAssertTrue(error is ClientError)
-                deliveryExpectation.fulfill()
-            }
-        } receiveValue: { _ in XCTFail() }
+        let cancellable = deliverySubject
+            .receive(on: DispatchQueue.main)
+            .sink {
+                switch $0 {
+                case .finished:
+                    XCTFail()
+                case let .failure(error):
+                    XCTAssertTrue(error is ClientError)
+                    deliveryExpectation.fulfill()
+                }
+            } receiveValue: { _ in XCTFail() }
         mockDefaultAPI.stub(for: .acceptCall, with: ClientError())
         subject.transition = { self.transitionedToStage = $0 }
 

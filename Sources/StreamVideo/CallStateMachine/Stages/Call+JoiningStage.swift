@@ -98,7 +98,9 @@ extension Call.StateMachine.Stage {
                         try? await Task.sleep(nanoseconds: delay)
                         transitionOrError(.joining(call, input: .join(input)))
                     } else {
-                        input.deliverySubject.send(completion: .failure(error))
+                        await MainActor.run {
+                            input.deliverySubject.send(completion: .failure(error))
+                        }
                         transitionErrorOrLog(error)
                     }
                 }
@@ -150,7 +152,9 @@ extension Call.StateMachine.Stage {
 
             try Task.checkCancellation()
 
-            input.deliverySubject.send(response)
+            await MainActor.run {
+                input.deliverySubject.send(response)
+            }
 
             call.callController.observeWebRTCStateUpdated()
 
