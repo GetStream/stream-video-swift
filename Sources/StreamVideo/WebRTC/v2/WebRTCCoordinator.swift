@@ -59,6 +59,7 @@ final class WebRTCCoordinator: @unchecked Sendable {
         apiKey: String,
         callCid: String,
         videoConfig: VideoConfig,
+        callSettings: CallSettings,
         rtcPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinatorProviding = StreamRTCPeerConnectionCoordinatorFactory(),
         webRTCAuthenticator: WebRTCAuthenticating = WebRTCAuthenticator(),
         callAuthentication: @escaping AuthenticationHandler
@@ -68,6 +69,7 @@ final class WebRTCCoordinator: @unchecked Sendable {
             apiKey: apiKey,
             callCid: callCid,
             videoConfig: videoConfig,
+            callSettings: callSettings,
             rtcPeerConnectionCoordinatorFactory: rtcPeerConnectionCoordinatorFactory
         )
         self.callAuthentication = callAuthentication

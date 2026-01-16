@@ -24,6 +24,7 @@ protocol WebRTCCoordinatorProviding {
         apiKey: String,
         callCid: String,
         videoConfig: VideoConfig,
+        callSettings: CallSettings,
         callAuthentication: @escaping WebRTCCoordinator.AuthenticationHandler
     ) -> WebRTCCoordinator
 }
@@ -50,6 +51,7 @@ struct WebRTCCoordinatorFactory: WebRTCCoordinatorProviding {
         apiKey: String,
         callCid: String,
         videoConfig: VideoConfig,
+        callSettings: CallSettings,
         callAuthentication: @escaping WebRTCCoordinator.AuthenticationHandler
     ) -> WebRTCCoordinator {
         .init(
@@ -57,6 +59,7 @@ struct WebRTCCoordinatorFactory: WebRTCCoordinatorProviding {
             apiKey: apiKey,
             callCid: callCid,
             videoConfig: videoConfig,
+            callSettings: callSettings,
             callAuthentication: callAuthentication
         )
     }

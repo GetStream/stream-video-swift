@@ -20,6 +20,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
     private lazy var callId: String! = .unique
     private lazy var callType: String! = .default
     private lazy var apiKey: String! = .unique
+    private lazy var initialCallSettings: CallSettings! = .default
     private lazy var cachedLocation: String? = .unique
     private lazy var mockWebRTCCoordinatorFactory: MockWebRTCCoordinatorFactory! = .init(
         videoConfig: Self.videoConfig
@@ -31,6 +32,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         callType: callType,
         apiKey: apiKey,
         videoConfig: Self.videoConfig,
+        initialCallSettings: initialCallSettings,
         cachedLocation: cachedLocation,
         webRTCCoordinatorFactory: mockWebRTCCoordinatorFactory
     )
@@ -54,6 +56,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         mockWebRTCCoordinatorFactory = nil
         cachedLocation = nil
         apiKey = nil
+        initialCallSettings = nil
         callType = nil
         callId = nil
         user = nil
@@ -61,6 +64,24 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         httpClient = nil
         mockPermissions = nil
         super.tearDown()
+    }
+
+    // MARK: - init
+
+    func test_init_propagatesInitialCallSettingsToWebRTCCoordinator() {
+        let callSettings = CallSettings(
+            audioOn: false,
+            videoOn: false,
+            cameraPosition: .back
+        )
+        self.initialCallSettings = callSettings
+
+        _ = subject
+
+        XCTAssertEqual(
+            mockWebRTCCoordinatorFactory.buildCoordinatorWasCalled?.callSettings,
+            callSettings
+        )
     }
 
     // MARK: - setCall

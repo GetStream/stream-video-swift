@@ -199,6 +199,13 @@ struct DetailedCallingView<Factory: ViewFactory>: View {
         }
     }
 
+    // MARK: - Private Helpers
+
+    @ViewBuilder
+    private var callSettingsView: some View {
+        CallSettingsMenuView(viewModel)
+    }
+
     @ViewBuilder
     private var participantsListView: some View {
         List {
@@ -223,15 +230,19 @@ struct DetailedCallingView<Factory: ViewFactory>: View {
                         AppUserView(user: participant)
                     }
                     .foregroundColor(appearance.colors.text)
+                    .accessibilityIdentifier("participantItem")
                 }
             } header: {
                 HStack {
                     Text("Built-In")
                     Spacer()
-                    Button {
-                        addUserShown = true
-                    } label: {
-                        Image(systemName: "plus")
+                    HStack {
+                        callSettingsView
+                        Button {
+                            addUserShown = true
+                        } label: {
+                            Image(systemName: "plus")
+                        }
                     }
                     .foregroundColor(appearance.colors.text)
                 }
@@ -246,7 +257,11 @@ struct DetailedCallingView<Factory: ViewFactory>: View {
     }
 
     private func setPreferredVideoCodec(for callId: String) async {
-        let call = streamVideo.call(callType: callType, callId: callId)
+        let call = streamVideo.call(
+            callType: callType,
+            callId: callId,
+            callSettings: viewModel.callSettings
+        )
         await call.updatePublishOptions(
             preferredVideoCodec: AppEnvironment.preferredVideoCodec.videoCodec
         )

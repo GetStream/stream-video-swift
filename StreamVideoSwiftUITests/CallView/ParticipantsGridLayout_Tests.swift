@@ -27,6 +27,7 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase, @unchecked Send
         callType: callType,
         apiKey: "123",
         videoConfig: .dummy(),
+        initialCallSettings: .default,
         cachedLocation: nil
     )
 

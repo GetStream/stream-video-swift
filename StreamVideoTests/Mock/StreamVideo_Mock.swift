@@ -42,7 +42,7 @@ extension StreamVideo {
         _ callController: CallController? = nil
     ) -> Environment {
         Environment(
-            callControllerBuilder: { defaultAPI, user, callId, callType, apiKey, videoConfig, cachedLocation in
+            callControllerBuilder: { defaultAPI, user, callId, callType, apiKey, videoConfig, initialCallSettings, cachedLocation in
                 callController ?? CallController_Mock(
                     defaultAPI: defaultAPI,
                     user: user,
@@ -50,6 +50,7 @@ extension StreamVideo {
                     callType: callType,
                     apiKey: apiKey,
                     videoConfig: videoConfig,
+                    initialCallSettings: initialCallSettings,
                     cachedLocation: cachedLocation
                 )
             }

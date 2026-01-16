@@ -59,11 +59,11 @@ open class CallViewModel: ObservableObject {
                     }
                     self?.lastScreenSharingParticipant = screenSharingSession?.participant
                 })
-            callSettingsUpdates = call?.state.$callSettings
-                .receive(on: RunLoop.main)
-                .sink(receiveValue: { [weak self] settings in
-                    self?.callSettings = settings
-                })
+            callSettingsUpdates = call?
+                .state
+                .$callSettings
+                .receive(on: DispatchQueue.main)
+                .assign(to: \.callSettings, onWeak: self)
 
             // We only update the outgoingCallMembers if they are empty (which
             // means that the call was created externally)
@@ -76,9 +76,6 @@ open class CallViewModel: ObservableObject {
                 }
                 .receive(on: RunLoop.main)
                 .assign(to: \.outgoingCallMembers, onWeak: self)
-            if let callSettings = call?.state.callSettings {
-                self.callSettings = callSettings
-            }
         }
     }
 

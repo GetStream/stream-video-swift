@@ -32,6 +32,7 @@ extension StreamVideo {
             _ callType: String,
             _ apiKey: String,
             _ videoConfig: VideoConfig,
+            _ initialCallSettings: CallSettings,
             _ cachedLocation: String?
         ) -> CallController = {
             CallController(
@@ -41,7 +42,8 @@ extension StreamVideo {
                 callType: $3,
                 apiKey: $4,
                 videoConfig: $5,
-                cachedLocation: $6
+                initialCallSettings: $6,
+                cachedLocation: $7
             )
         }
         

@@ -25,7 +25,10 @@ enum CallDetailsPage {
         }
     }
 
-    static var participants: XCUIElementQuery { participantList.buttons }
+    static var participants: XCUIElementQuery {
+        participantList.buttons.matching(NSPredicate(format: "identifier == %@", "participantItem"))
+    }
+
     static var connectionErrorAlert: XCUIElement {
         app.staticTexts.matching(NSPredicate(format: "label CONTAINS 'failed with error'")).firstMatch
     }

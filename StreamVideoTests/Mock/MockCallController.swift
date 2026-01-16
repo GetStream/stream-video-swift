@@ -68,6 +68,7 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
             callType: .unique,
             apiKey: .unique,
             videoConfig: .dummy(),
+            initialCallSettings: .default,
             cachedLocation: nil
         )
     }

@@ -16,6 +16,7 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
     private lazy var user: User! = .dummy()
     private lazy var apiKey: String! = .unique
     private lazy var callCid: String! = .unique
+    private lazy var callSettings: CallSettings! = .default
     private lazy var mockCallAuthenticator: MockCallAuthenticator! = .init()
     private lazy var mockWebRTCAuthenticator: MockWebRTCAuthenticator! = .init()
     private lazy var mockPeerConnectionFactory: PeerConnectionFactory! = .build(
@@ -30,6 +31,7 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
         apiKey: apiKey,
         callCid: callCid,
         videoConfig: Self.videoConfig,
+        callSettings: callSettings,
         rtcPeerConnectionCoordinatorFactory: rtcPeerConnectionCoordinatorFactory,
         webRTCAuthenticator: mockWebRTCAuthenticator,
         callAuthentication: mockCallAuthenticator.authenticate
@@ -47,11 +49,30 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
         mockSFUStack = nil
         rtcPeerConnectionCoordinatorFactory = nil
         mockCallAuthenticator = nil
+        callSettings = nil
         callCid = nil
         apiKey = nil
         user = nil
         mockPeerConnectionFactory = nil
         try await super.tearDown()
+    }
+
+    // MARK: - init
+
+    func test_init_propagatesCallSettingsToStateAdapter() async {
+        let callSettings = CallSettings(
+            audioOn: false,
+            videoOn: false,
+            cameraPosition: .back
+        )
+        self.callSettings = callSettings
+
+        _ = subject
+
+        await assertEqualAsync(
+            await subject.stateAdapter.callSettings,
+            callSettings
+        )
     }
 
     // MARK: - connect

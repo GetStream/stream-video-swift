@@ -261,7 +261,11 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             function: function,
             line: line
         ) {
-            let callController = makeCallController(callType: callType, callId: callId)
+            let callController = makeCallController(
+                callType: callType,
+                callId: callId,
+                callSettings: callSettings ?? .default
+            )
             let call = Call(
                 callType: callType,
                 callId: callId,
@@ -429,7 +433,8 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             response.calls.map {
                 let callController = makeCallController(
                     callType: $0.call.type,
-                    callId: $0.call.id
+                    callId: $0.call.id,
+                    callSettings: .default
                 )
                 let call = Call(
                     from: $0,
@@ -501,7 +506,8 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     /// - Returns: `CallController`
     private func makeCallController(
         callType: String,
-        callId: String
+        callId: String,
+        callSettings: CallSettings
     ) -> CallController {
         let controller = environment.callControllerBuilder(
             coordinatorClient,
@@ -510,6 +516,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             callType,
             apiKey.apiKeyString,
             videoConfig,
+            callSettings,
             cachedLocation
         )
         return controller

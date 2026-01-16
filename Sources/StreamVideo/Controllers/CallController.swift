@@ -17,7 +17,8 @@ class CallController: @unchecked Sendable {
         user: user,
         apiKey: apiKey,
         callCid: callCid(from: callId, callType: callType),
-        videoConfig: videoConfig
+        videoConfig: videoConfig,
+        callSettings: initialCallSettings
     ) {
         [weak self, callId] create, ring, migratingFrom, notify, options in
         if let self {
@@ -54,6 +55,7 @@ class CallController: @unchecked Sendable {
     private let videoConfig: VideoConfig
     private let webRTCCoordinatorFactory: WebRTCCoordinatorProviding
     private var cachedLocation: String?
+    private let initialCallSettings: CallSettings
 
     private var joinCallResponseSubject = CurrentValueSubject<JoinCallResponse?, Error>(nil)
     private var joinCallResponseFetchObserver: AnyCancellable?
@@ -71,6 +73,7 @@ class CallController: @unchecked Sendable {
         callType: String,
         apiKey: String,
         videoConfig: VideoConfig,
+        initialCallSettings: CallSettings,
         cachedLocation: String?,
         webRTCCoordinatorFactory: WebRTCCoordinatorProviding = WebRTCCoordinatorFactory()
     ) {
@@ -79,6 +82,7 @@ class CallController: @unchecked Sendable {
         self.callType = callType
         self.apiKey = apiKey
         self.videoConfig = videoConfig
+        self.initialCallSettings = initialCallSettings
         self.defaultAPI = defaultAPI
         self.cachedLocation = cachedLocation
         self.webRTCCoordinatorFactory = webRTCCoordinatorFactory

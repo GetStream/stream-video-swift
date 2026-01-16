@@ -132,6 +132,7 @@ final class Call_Tests: StreamVideoTestCase {
             callType: callType,
             apiKey: "key1",
             videoConfig: videoConfig,
+            initialCallSettings: .default,
             cachedLocation: nil
         )
         let call = Call(
