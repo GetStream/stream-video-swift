@@ -4,6 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### 🔄 Changed
+
+# [1.40.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.40.0)
+_January 16, 2026_
+
 ### 🐞 Fixed
 - CallSettings not propagating correctly when were set using the CallViewModel **before** joining a call. [#1023](https://github.com/GetStream/stream-video-swift/pull/1023)
 - An issue causing microphone to stop recording when screen was locked and `always-display-on` was enabled. [#1026](https://github.com/GetStream/stream-video-swift/pull/1026)
