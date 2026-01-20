@@ -294,7 +294,6 @@
 		4051A2742D673430000C3167 /* CustomStringConvertible+Conformances.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4051A2722D673430000C3167 /* CustomStringConvertible+Conformances.swift */; };
 		4052BF552DBA830D0085AFA5 /* MockAppStateAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4052BF542DBA830D0085AFA5 /* MockAppStateAdapter.swift */; };
 		405616F32E0C0E7200442FF2 /* ICEConnectionStateAdapter_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 405616F22E0C0E7200442FF2 /* ICEConnectionStateAdapter_Tests.swift */; };
-		405674F62F1F941F006C6540 /* SendableBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 405674F42F1F92DD006C6540 /* SendableBox.swift */; };
 		405687AE2D78A0E700093B98 /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 405687AD2D78A0E700093B98 /* QRCodeView.swift */; };
 		405687AF2D78A0E700093B98 /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 405687AD2D78A0E700093B98 /* QRCodeView.swift */; };
 		405997AD2E71818600AB62BA /* StoreActionBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 405997AC2E71818600AB62BA /* StoreActionBox.swift */; };
@@ -9437,7 +9436,6 @@
 				40382F332C89A66000C2D00F /* RTCPeerConnectionCoordinatorProviding.swift in Sources */,
 				40944CB82E4CBB5300088AF0 /* StreamCallAudioRecorder+InterruptionMiddleware.swift in Sources */,
 				84A7E1892883638200526C98 /* WebSocketEngine.swift in Sources */,
-				405674F62F1F941F006C6540 /* SendableBox.swift in Sources */,
 				40BBC48B2C623C6E002AEF92 /* ICEAdapter.swift in Sources */,
 				40EE9D352E97B3370000EA92 /* RTCAudioStore.swift in Sources */,
 				4065838A2B87695500B4F979 /* BlurBackgroundVideoFilter.swift in Sources */,
