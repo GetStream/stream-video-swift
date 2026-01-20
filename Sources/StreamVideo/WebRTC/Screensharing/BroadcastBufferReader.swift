@@ -9,11 +9,7 @@ import StreamWebRTC
 
 /// Accumulates framed broadcast bytes and produces a pixel buffer payload.
 private class Message {
-    #if compiler(>=6.2)
     static let imageContextVar: CIContext? = CIContext(options: nil)
-    #else
-    nonisolated(unsafe) static let imageContextVar: CIContext? = CIContext(options: nil)
-    #endif
 
     var imageBuffer: CVImageBuffer?
     var onComplete: ((_ success: Bool, _ message: Message) -> Void)?
