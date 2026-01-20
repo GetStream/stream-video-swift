@@ -7,19 +7,23 @@ import CoreVideo
 import Foundation
 import StreamWebRTC
 
+/// Accumulates framed broadcast bytes and produces a pixel buffer payload.
 private class Message {
-    static let imageContextVar: CIContext? = {
-        var imageContext = CIContext(options: nil)
-        return imageContext
-    }()
-    
+    #if compiler(>=6.2)
+    static let imageContextVar: CIContext? = CIContext(options: nil)
+    #else
+    static nonisolated(unsafe) let imageContextVar: CIContext? = CIContext(options: nil)
+    #endif
+
     var imageBuffer: CVImageBuffer?
     var onComplete: ((_ success: Bool, _ message: Message) -> Void)?
     var imageOrientation: CGImagePropertyOrientation = .up
     private var framedMessage: CFHTTPMessage?
     
+    /// Creates a new message buffer.
     init() {}
     
+    /// Appends bytes and returns how many bytes are still missing.
     func appendBytes(buffer: [UInt8], length: Int) -> Int {
         if framedMessage == nil {
             framedMessage = CFHTTPMessageCreateEmpty(kCFAllocatorDefault, false).takeRetainedValue()
@@ -56,10 +60,12 @@ private class Message {
         return missingBytesCount
     }
     
+    /// Returns a shared Core Image context for buffer rendering.
     private func imageContext() -> CIContext? {
         Message.imageContextVar
     }
     
+    /// Extracts metadata and image data from a framed HTTP message.
     private func unwrapMessage(_ framedMessage: CFHTTPMessage) -> Bool {
         guard
             let widthStr = CFHTTPMessageCopyHeaderFieldValue(
@@ -103,6 +109,7 @@ private class Message {
         return true
     }
     
+    /// Renders image data into the provided pixel buffer.
     private func copyImageData(_ data: Data?, to pixelBuffer: CVPixelBuffer?) {
         if let pixelBuffer = pixelBuffer {
             CVPixelBufferLockBaseAddress(pixelBuffer, [])
@@ -122,6 +129,7 @@ private class Message {
     }
 }
 
+/// Reads screen share data from a stream and emits decoded video frames.
 final class BroadcastBufferReader: NSObject {
     private var readLength = 0
     
@@ -134,10 +142,13 @@ final class BroadcastBufferReader: NSObject {
     }
     
     private var message: Message?
+    /// Called when a decoded frame is ready for delivery to WebRTC.
     var onCapture: ((CVPixelBuffer, RTCVideoRotation) -> Void)?
     
+    /// Creates a broadcast buffer reader.
     override init() {}
     
+    /// Starts reading frames from the provided connection.
     func startCapturing(with connection: BroadcastBufferReaderConnection) {
         self.connection = connection
         message = nil
@@ -147,6 +158,7 @@ final class BroadcastBufferReader: NSObject {
         }
     }
     
+    /// Stops reading frames and closes the connection.
     func stopCapturing() {
         connection?.close()
         connection = nil
@@ -154,6 +166,7 @@ final class BroadcastBufferReader: NSObject {
     
     // MARK: private
     
+    /// Reads available bytes from the stream and assembles frames.
     func readBytes(from stream: InputStream) {
         guard stream.hasBytesAvailable else { return }
         
@@ -185,6 +198,7 @@ final class BroadcastBufferReader: NSObject {
         }
     }
     
+    /// Converts the message orientation into WebRTC rotation and emits it.
     func didCaptureVideoFrame(
         _ pixelBuffer: CVPixelBuffer?,
         with orientation: CGImagePropertyOrientation
@@ -210,6 +224,7 @@ final class BroadcastBufferReader: NSObject {
 }
 
 extension BroadcastBufferReader: StreamDelegate {
+    /// Handles stream events and drives frame assembly.
     func stream(_ aStream: Stream, handle eventCode: Stream.Event) {
         switch eventCode {
         case .openCompleted:
