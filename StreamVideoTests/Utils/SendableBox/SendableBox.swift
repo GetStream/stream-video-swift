@@ -1,8 +1,5 @@
 //
-//  SendableBox.swift
-//  StreamVideo
-//
-//  Created by Ilias Pavlidakis on 20/1/26.
+// Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
@@ -21,6 +18,7 @@ extension SendableBox {
             self.value = value
         }
     }
+
     /// A sendable wrapper for a two-argument closure.
     struct Closure2<A, B, Output>: @unchecked Sendable {
         typealias ValueType = (A, B) -> Output
@@ -31,6 +29,7 @@ extension SendableBox {
             self.value = value
         }
     }
+
     /// A sendable wrapper for a three-argument closure.
     struct Closure3<A, B, C, Output>: @unchecked Sendable {
         typealias ValueType = (A, B, C) -> Output

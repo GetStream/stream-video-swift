@@ -12,7 +12,7 @@ private class Message {
     #if compiler(>=6.2)
     static let imageContextVar: CIContext? = CIContext(options: nil)
     #else
-    static nonisolated(unsafe) let imageContextVar: CIContext? = CIContext(options: nil)
+    nonisolated(unsafe) static let imageContextVar: CIContext? = CIContext(options: nil)
     #endif
 
     var imageBuffer: CVImageBuffer?
