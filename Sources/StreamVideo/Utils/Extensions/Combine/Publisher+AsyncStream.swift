@@ -5,10 +5,6 @@
 import Combine
 import Foundation
 
-private struct UncheckedSendableBox<Value>: @unchecked Sendable {
-    let value: Value
-}
-
 public extension Publisher where Output: Sendable {
 
     /// Converts the current publisher into an `AsyncStream` of its output.
@@ -59,7 +55,7 @@ public extension Publisher where Output: Sendable {
     ) async throws -> Output {
         // Invariant: publisher used read-only in this async path.
         // TODO: replace with Sendable constraint when possible.
-        let boxedPublisher = UncheckedSendableBox(value: eraseToAnyPublisher())
+        let boxedPublisher = SendableBox.Value(eraseToAnyPublisher())
         return try await Task(
             timeoutInSeconds: timeoutInSeconds,
             file: file,

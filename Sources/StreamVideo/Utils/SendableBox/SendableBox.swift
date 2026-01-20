@@ -8,6 +8,17 @@ import Foundation
 enum SendableBox {}
 
 extension SendableBox {
+    struct Value<ValueType>: @unchecked Sendable {
+        let value: ValueType
+
+        /// Creates a boxed closure for cross-actor use in tests.
+        init(_ value: ValueType) {
+            self.value = value
+        }
+    }
+}
+
+extension SendableBox {
     /// A sendable wrapper for a single-argument closure.
     struct Closure<A, Output>: @unchecked Sendable {
         typealias ValueType = (A) -> Output
