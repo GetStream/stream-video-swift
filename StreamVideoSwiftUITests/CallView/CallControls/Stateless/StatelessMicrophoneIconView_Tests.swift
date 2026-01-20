@@ -68,7 +68,7 @@ final class StatelessMicrophoneIconView_Tests: StreamVideoUITestCase, @unchecked
         hasPermission: Bool = true,
         canRequestPermission: Bool = true,
         actionHandler: (() -> Void)? = nil,
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) async throws -> StatelessMicrophoneIconView {
         let mockPermissions = MockPermissionsStore()

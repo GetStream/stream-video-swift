@@ -50,7 +50,7 @@ final class ParticipantListButton_Tests: StreamVideoUITestCase, @unchecked Senda
     private func assertSubject(
         record: Bool = false,
         @ViewBuilder _ subject: () -> some View,
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         function: String = #function,
         line: UInt = #line
     ) {

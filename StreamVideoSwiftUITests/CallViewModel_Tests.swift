@@ -1266,7 +1266,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         isLocalScreenSharing: Bool,
         isRemoteScreenSharing: Bool,
         expectedCount: Int,
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) async throws {
         await prepare(file: file, line: line)

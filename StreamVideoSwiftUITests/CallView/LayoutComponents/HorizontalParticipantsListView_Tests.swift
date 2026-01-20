@@ -40,7 +40,7 @@ final class HorizontalParticipantsListView_Tests: StreamVideoUITestCase, @unchec
         withAudio: Bool = true,
         showAllInfo: Bool = false,
         thumbnailSize: CGFloat = 240,
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         function: String = #function,
         line: UInt = #line
     ) {
