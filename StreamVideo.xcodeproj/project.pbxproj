@@ -224,6 +224,7 @@
 		40382F502C8B3DAE00C2D00F /* StreamRTCPeerConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40382F4F2C8B3DA800C2D00F /* StreamRTCPeerConnection.swift */; };
 		4039088D2EC2311A00B19FA1 /* StoreEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4039088C2EC2311A00B19FA1 /* StoreEffect.swift */; };
 		403908AC2EC2A99C00B19FA1 /* RTCAudioStore+StereoPlayoutEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403908AB2EC2A99C00B19FA1 /* RTCAudioStore+StereoPlayoutEffect.swift */; };
+		4039B6852F1FA91D00134397 /* SendableBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4039B6832F1FA91D00134397 /* SendableBox.swift */; };
 		4039F0C02D0099E40078159E /* RTCRtpCodecCapability+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4039F0BF2D0099E40078159E /* RTCRtpCodecCapability+Convenience.swift */; };
 		4039F0CA2D0222E40078159E /* Stream_Video_Sfu_Models_PublishOption+VideoLayers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4039F0C92D0222E40078159E /* Stream_Video_Sfu_Models_PublishOption+VideoLayers.swift */; };
 		4039F0CC2D0241120078159E /* AudioCodec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4039F0CB2D0241120078159E /* AudioCodec.swift */; };
@@ -294,7 +295,6 @@
 		4051A2742D673430000C3167 /* CustomStringConvertible+Conformances.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4051A2722D673430000C3167 /* CustomStringConvertible+Conformances.swift */; };
 		4052BF552DBA830D0085AFA5 /* MockAppStateAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4052BF542DBA830D0085AFA5 /* MockAppStateAdapter.swift */; };
 		405616F32E0C0E7200442FF2 /* ICEConnectionStateAdapter_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 405616F22E0C0E7200442FF2 /* ICEConnectionStateAdapter_Tests.swift */; };
-		405674F62F1F941F006C6540 /* SendableBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 405674F42F1F92DD006C6540 /* SendableBox.swift */; };
 		405687AE2D78A0E700093B98 /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 405687AD2D78A0E700093B98 /* QRCodeView.swift */; };
 		405687AF2D78A0E700093B98 /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 405687AD2D78A0E700093B98 /* QRCodeView.swift */; };
 		405997AD2E71818600AB62BA /* StoreActionBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 405997AC2E71818600AB62BA /* StoreActionBox.swift */; };
@@ -2030,6 +2030,7 @@
 		40382F4F2C8B3DA800C2D00F /* StreamRTCPeerConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamRTCPeerConnection.swift; sourceTree = "<group>"; };
 		4039088C2EC2311A00B19FA1 /* StoreEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreEffect.swift; sourceTree = "<group>"; };
 		403908AB2EC2A99C00B19FA1 /* RTCAudioStore+StereoPlayoutEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCAudioStore+StereoPlayoutEffect.swift"; sourceTree = "<group>"; };
+		4039B6832F1FA91D00134397 /* SendableBox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendableBox.swift; sourceTree = "<group>"; };
 		4039F0BF2D0099E40078159E /* RTCRtpCodecCapability+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCRtpCodecCapability+Convenience.swift"; sourceTree = "<group>"; };
 		4039F0C92D0222E40078159E /* Stream_Video_Sfu_Models_PublishOption+VideoLayers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Stream_Video_Sfu_Models_PublishOption+VideoLayers.swift"; sourceTree = "<group>"; };
 		4039F0CB2D0241120078159E /* AudioCodec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioCodec.swift; sourceTree = "<group>"; };
@@ -4205,6 +4206,14 @@
 				402C5C622ECB988A0096F212 /* RTCAudioStore+AVAudioSessionEffect.swift */,
 			);
 			path = Effects;
+			sourceTree = "<group>";
+		};
+		4039B6842F1FA91D00134397 /* SendableBox */ = {
+			isa = PBXGroup;
+			children = (
+				4039B6832F1FA91D00134397 /* SendableBox.swift */,
+			);
+			path = SendableBox;
 			sourceTree = "<group>";
 		};
 		4039F0CD2D024DCE0078159E /* Utilities */ = {
@@ -7467,6 +7476,7 @@
 		84AF64D3287C79220012A503 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				4039B6842F1FA91D00134397 /* SendableBox */,
 				40B8FFB52EC3949F0061E3F6 /* Battery */,
 				40C8F0042E55D21D00A0CC87 /* PermissionsStore */,
 				40944D132E4E2D8800088AF0 /* Store */,
@@ -9194,6 +9204,7 @@
 				40B8FFB72EC3949F0061E3F6 /* BatteryStore+Action.swift in Sources */,
 				40B8FFB82EC3949F0061E3F6 /* BatteryStore+Namespace.swift in Sources */,
 				40B8FFB92EC3949F0061E3F6 /* BatteryStore+State.swift in Sources */,
+				4039B6852F1FA91D00134397 /* SendableBox.swift in Sources */,
 				40B8FFBA2EC3949F0061E3F6 /* BatteryStore+ObservationMiddleware.swift in Sources */,
 				40B8FFBB2EC3949F0061E3F6 /* BatteryStore+DefaultReducer.swift in Sources */,
 				84FC2C2828AD350100181490 /* WebRTCEvents.swift in Sources */,
@@ -9447,7 +9458,6 @@
 				40382F332C89A66000C2D00F /* RTCPeerConnectionCoordinatorProviding.swift in Sources */,
 				40944CB82E4CBB5300088AF0 /* StreamCallAudioRecorder+InterruptionMiddleware.swift in Sources */,
 				84A7E1892883638200526C98 /* WebSocketEngine.swift in Sources */,
-				405674F62F1F941F006C6540 /* SendableBox.swift in Sources */,
 				40BBC48B2C623C6E002AEF92 /* ICEAdapter.swift in Sources */,
 				40EE9D352E97B3370000EA92 /* RTCAudioStore.swift in Sources */,
 				4065838A2B87695500B4F979 /* BlurBackgroundVideoFilter.swift in Sources */,

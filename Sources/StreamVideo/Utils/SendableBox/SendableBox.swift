@@ -5,7 +5,7 @@
 import Foundation
 
 /// Namespace for wrapping non-sendable closures in tests.
-public enum SendableBox {}
+enum SendableBox {}
 
 extension SendableBox {
     /// A sendable wrapper for a single-argument closure.
