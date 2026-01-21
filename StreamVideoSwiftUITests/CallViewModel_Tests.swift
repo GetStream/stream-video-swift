@@ -1301,6 +1301,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         await fulfilmentInMainActor(file: file, line: line) { self.subject.participants.count == expectedCount }
     }
 
+    @MainActor
     private func assertCallingState(
         _ expected: CallingState,
         delay: TimeInterval? = nil,
