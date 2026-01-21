@@ -6,7 +6,7 @@ import Foundation
 
 extension RawJSON {
     #if compiler(>=6.0)
-    public nonisolated(unsafe) static let double = number
+    public static let double = number
     #else
     public nonisolated(unsafe) static let double = number
     #endif

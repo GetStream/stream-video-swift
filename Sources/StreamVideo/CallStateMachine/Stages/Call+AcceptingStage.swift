@@ -81,6 +81,7 @@ extension Call.StateMachine.Stage {
                     )
 
                     input.send(response)
+
                     transitionOrError(.accepted(context, response: response))
                 } catch {
                     input.send(completion: .failure(error))
