@@ -19,6 +19,7 @@ final class PictureInPictureTrackStateAdapter: @unchecked Sendable {
 
     private let store: PictureInPictureStore
     private let disposableBag = DisposableBag()
+    private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
     private var content: PictureInPictureContent {
         didSet { didUpdate(content, oldValue: oldValue) }
     }
@@ -35,7 +36,7 @@ final class PictureInPictureTrackStateAdapter: @unchecked Sendable {
         store
             .publisher(for: \.isActive)
             .removeDuplicates()
-            .receive(on: DispatchQueue.global(qos: .userInteractive))
+            .receive(on: processingQueue)
             .sinkTask(storeIn: disposableBag) { [weak self] in await self?.didUpdate($0) }
             .store(in: disposableBag)
 
