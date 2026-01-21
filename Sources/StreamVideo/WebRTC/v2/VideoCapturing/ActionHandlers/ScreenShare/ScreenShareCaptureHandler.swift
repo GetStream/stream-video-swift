@@ -121,7 +121,18 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
         audioFilterProcessingModule.setAudioFilter(nil)
 
         try await Task { @MainActor [weak self] in
-            try await self?.startCapture()
+            try await self?.startCapture { [weak self] sampleBuffer,
+                sampleBufferType,
+                error in
+                if let error {
+                    log.error(error, subsystems: .videoCapturer)
+                } else {
+                    self?.didReceive(
+                        sampleBuffer: sampleBuffer,
+                        sampleBufferType: sampleBufferType
+                    )
+                }
+            }
         }.value
 
         activeSession = .init(
@@ -257,19 +268,9 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
 
     @MainActor
     /// Starts ReplayKit capture and binds the sample buffer handler.
-    private func startCapture() async throws {
-        let closure: (CMSampleBuffer, RPSampleBufferType, Error?) -> Void = { [weak self] sampleBuffer,
-            sampleBufferType,
-            error in
-            if let error {
-                log.error(error, subsystems: .videoCapturer)
-            } else {
-                self?.didReceive(
-                    sampleBuffer: sampleBuffer,
-                    sampleBufferType: sampleBufferType
-                )
-            }
-        }
+    private func startCapture(
+        _ closure: @Sendable @escaping (CMSampleBuffer, RPSampleBufferType, Error?) -> Void
+    ) async throws {
         try await recorder.startCapture(handler: closure)
     }
 }
