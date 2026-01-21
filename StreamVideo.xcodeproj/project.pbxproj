@@ -224,7 +224,6 @@
 		40382F502C8B3DAE00C2D00F /* StreamRTCPeerConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40382F4F2C8B3DA800C2D00F /* StreamRTCPeerConnection.swift */; };
 		4039088D2EC2311A00B19FA1 /* StoreEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4039088C2EC2311A00B19FA1 /* StoreEffect.swift */; };
 		403908AC2EC2A99C00B19FA1 /* RTCAudioStore+StereoPlayoutEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403908AB2EC2A99C00B19FA1 /* RTCAudioStore+StereoPlayoutEffect.swift */; };
-		4039B6852F1FA91D00134397 /* SendableBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4039B6832F1FA91D00134397 /* SendableBox.swift */; };
 		4039F0C02D0099E40078159E /* RTCRtpCodecCapability+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4039F0BF2D0099E40078159E /* RTCRtpCodecCapability+Convenience.swift */; };
 		4039F0CA2D0222E40078159E /* Stream_Video_Sfu_Models_PublishOption+VideoLayers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4039F0C92D0222E40078159E /* Stream_Video_Sfu_Models_PublishOption+VideoLayers.swift */; };
 		4039F0CC2D0241120078159E /* AudioCodec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4039F0CB2D0241120078159E /* AudioCodec.swift */; };
@@ -2030,7 +2029,6 @@
 		40382F4F2C8B3DA800C2D00F /* StreamRTCPeerConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamRTCPeerConnection.swift; sourceTree = "<group>"; };
 		4039088C2EC2311A00B19FA1 /* StoreEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreEffect.swift; sourceTree = "<group>"; };
 		403908AB2EC2A99C00B19FA1 /* RTCAudioStore+StereoPlayoutEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCAudioStore+StereoPlayoutEffect.swift"; sourceTree = "<group>"; };
-		4039B6832F1FA91D00134397 /* SendableBox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendableBox.swift; sourceTree = "<group>"; };
 		4039F0BF2D0099E40078159E /* RTCRtpCodecCapability+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCRtpCodecCapability+Convenience.swift"; sourceTree = "<group>"; };
 		4039F0C92D0222E40078159E /* Stream_Video_Sfu_Models_PublishOption+VideoLayers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Stream_Video_Sfu_Models_PublishOption+VideoLayers.swift"; sourceTree = "<group>"; };
 		4039F0CB2D0241120078159E /* AudioCodec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioCodec.swift; sourceTree = "<group>"; };
@@ -2094,7 +2092,6 @@
 		4051A2722D673430000C3167 /* CustomStringConvertible+Conformances.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CustomStringConvertible+Conformances.swift"; sourceTree = "<group>"; };
 		4052BF542DBA830D0085AFA5 /* MockAppStateAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAppStateAdapter.swift; sourceTree = "<group>"; };
 		405616F22E0C0E7200442FF2 /* ICEConnectionStateAdapter_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ICEConnectionStateAdapter_Tests.swift; sourceTree = "<group>"; };
-		405674F42F1F92DD006C6540 /* SendableBox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendableBox.swift; sourceTree = "<group>"; };
 		405687AD2D78A0E700093B98 /* QRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeView.swift; sourceTree = "<group>"; };
 		405997AC2E71818600AB62BA /* StoreActionBox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreActionBox.swift; sourceTree = "<group>"; };
 		4059C3412AAF0CE40006928E /* DemoChatViewModel+Injection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DemoChatViewModel+Injection.swift"; sourceTree = "<group>"; };
@@ -4208,14 +4205,6 @@
 			path = Effects;
 			sourceTree = "<group>";
 		};
-		4039B6842F1FA91D00134397 /* SendableBox */ = {
-			isa = PBXGroup;
-			children = (
-				4039B6832F1FA91D00134397 /* SendableBox.swift */,
-			);
-			path = SendableBox;
-			sourceTree = "<group>";
-		};
 		4039F0CD2D024DCE0078159E /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
@@ -4374,14 +4363,6 @@
 				4051A2722D673430000C3167 /* CustomStringConvertible+Conformances.swift */,
 			);
 			path = Swift6Migration;
-			sourceTree = "<group>";
-		};
-		405674F32F1F92DA006C6540 /* SendableBox */ = {
-			isa = PBXGroup;
-			children = (
-				405674F42F1F92DD006C6540 /* SendableBox.swift */,
-			);
-			path = SendableBox;
 			sourceTree = "<group>";
 		};
 		4061287F2CF32FE4007F5CDC /* SDP Parsing */ = {
@@ -6942,7 +6923,6 @@
 		842747F429EEDACB00E063AD /* Utils */ = {
 			isa = PBXGroup;
 			children = (
-				405674F32F1F92DA006C6540 /* SendableBox */,
 				40A481452EF1705A00369D6E /* XCTest Performance */,
 				40B8FFCC2EC394D30061E3F6 /* Battery */,
 				40064BD72E5C88DC007CDB33 /* PermissionStore */,
@@ -7476,7 +7456,6 @@
 		84AF64D3287C79220012A503 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
-				4039B6842F1FA91D00134397 /* SendableBox */,
 				40B8FFB52EC3949F0061E3F6 /* Battery */,
 				40C8F0042E55D21D00A0CC87 /* PermissionsStore */,
 				40944D132E4E2D8800088AF0 /* Store */,
@@ -9204,7 +9183,6 @@
 				40B8FFB72EC3949F0061E3F6 /* BatteryStore+Action.swift in Sources */,
 				40B8FFB82EC3949F0061E3F6 /* BatteryStore+Namespace.swift in Sources */,
 				40B8FFB92EC3949F0061E3F6 /* BatteryStore+State.swift in Sources */,
-				4039B6852F1FA91D00134397 /* SendableBox.swift in Sources */,
 				40B8FFBA2EC3949F0061E3F6 /* BatteryStore+ObservationMiddleware.swift in Sources */,
 				40B8FFBB2EC3949F0061E3F6 /* BatteryStore+DefaultReducer.swift in Sources */,
 				84FC2C2828AD350100181490 /* WebRTCEvents.swift in Sources */,

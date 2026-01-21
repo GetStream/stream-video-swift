@@ -258,7 +258,7 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
     @MainActor
     /// Starts ReplayKit capture and binds the sample buffer handler.
     private func startCapture() async throws {
-        let closureBox: SendableBox.Closure3<CMSampleBuffer, RPSampleBufferType, Error?, Void> = .init { [weak self] sampleBuffer,
+        let closure: (CMSampleBuffer, RPSampleBufferType, Error?) -> Void = { [weak self] sampleBuffer,
             sampleBufferType,
             error in
             if let error {
@@ -270,8 +270,7 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
                 )
             }
         }
-
-        try await recorder.startCapture(handler: closureBox.value)
+        try await recorder.startCapture(handler: closure)
     }
 }
 

@@ -54,15 +54,14 @@ public extension Publisher where Output: Sendable {
         line: UInt = #line
     ) async throws -> Output {
         // Invariant: publisher used read-only in this async path.
-        // TODO: replace with Sendable constraint when possible.
-        let boxedPublisher = SendableBox.Value(eraseToAnyPublisher())
+        let erasedPublisher = eraseToAnyPublisher()
         return try await Task(
             timeoutInSeconds: timeoutInSeconds,
             file: file,
             function: function,
             line: line
         ) {
-            try await boxedPublisher.value.firstValue(file: file, line: line)
+            try await erasedPublisher.firstValue(file: file, line: line)
         }.value
     }
 
