@@ -34,6 +34,7 @@ extension AnyPublisher: @retroactive @unchecked Sendable {}
 extension Publishers.Filter: @retroactive @unchecked Sendable {}
 /// Allows audio buffers to cross concurrency boundaries.
 extension AVAudioPCMBuffer: @retroactive @unchecked Sendable {}
+extension CIImage: @retroactive @unchecked Sendable {}
 #else
 extension AnyCancellable: @unchecked Sendable {}
 extension AVCaptureDevice: @unchecked Sendable {}
@@ -57,4 +58,5 @@ extension Publishers.Filter: @unchecked Sendable {}
 /// Allows audio buffers to cross concurrency boundaries.
 extension AVAudioPCMBuffer: @unchecked Sendable {}
 extension CIContext: @unchecked Sendable {}
+extension CIImage: @unchecked Sendable {}
 #endif
