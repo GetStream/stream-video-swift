@@ -25,7 +25,7 @@ final class StatelessHangUpIconView_Tests: StreamVideoUITestCase, @unchecked Sen
 
     @MainActor
     private func makeSubject(
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) throws -> StatelessHangUpIconView {
         let call = try XCTUnwrap(

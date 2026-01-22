@@ -25,7 +25,7 @@ final class StatelessToggleCameraIconView_Tests: StreamVideoUITestCase, @uncheck
 
     @MainActor
     private func makeSubject(
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) throws -> StatelessToggleCameraIconView {
         let call = try XCTUnwrap(

@@ -68,7 +68,7 @@ final class StatelessVideoIconView_Tests: StreamVideoUITestCase, @unchecked Send
         hasPermission: Bool = true,
         canRequestPermission: Bool = true,
         actionHandler: (() -> Void)? = nil,
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) async throws -> StatelessVideoIconView {
         let mockPermissions = MockPermissionsStore()

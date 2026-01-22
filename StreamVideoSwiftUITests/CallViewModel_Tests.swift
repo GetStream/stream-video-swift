@@ -1266,7 +1266,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         isLocalScreenSharing: Bool,
         isRemoteScreenSharing: Bool,
         expectedCount: Int,
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) async throws {
         await prepare(file: file, line: line)
@@ -1301,6 +1301,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         await fulfilmentInMainActor(file: file, line: line) { self.subject.participants.count == expectedCount }
     }
 
+    @MainActor
     private func assertCallingState(
         _ expected: CallingState,
         delay: TimeInterval? = nil,

@@ -74,7 +74,7 @@ final class StatelessSpeakerIconView_Tests: StreamVideoUITestCase, @unchecked Se
         cameraOn: Bool = false,
         audioDefaultDevice: AudioSettings.DefaultDevice = .unknown,
         actionHandler: (() -> Void)? = nil,
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) throws -> StatelessSpeakerIconView {
         let call = try XCTUnwrap(

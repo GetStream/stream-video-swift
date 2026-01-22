@@ -40,7 +40,7 @@ final class StatelessAudioOutputIconView_Tests: StreamVideoUITestCase, @unchecke
     private func makeSubject(
         _ audioOutputOn: Bool,
         actionHandler: (() -> Void)? = nil,
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) throws -> StatelessAudioOutputIconView {
         let call = try XCTUnwrap(
