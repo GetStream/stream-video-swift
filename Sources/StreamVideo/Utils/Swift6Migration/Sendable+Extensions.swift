@@ -11,6 +11,7 @@ import StreamWebRTC
 
 #if compiler(<6.2)
 extension CIContext: @retroactive @unchecked Sendable {}
+extension CIImage: @retroactive @unchecked Sendable {}
 #endif
 
 #if compiler(>=6.0)
@@ -34,7 +35,6 @@ extension AnyPublisher: @retroactive @unchecked Sendable {}
 extension Publishers.Filter: @retroactive @unchecked Sendable {}
 /// Allows audio buffers to cross concurrency boundaries.
 extension AVAudioPCMBuffer: @retroactive @unchecked Sendable {}
-extension CIImage: @retroactive @unchecked Sendable {}
 #else
 extension AnyCancellable: @unchecked Sendable {}
 extension AVCaptureDevice: @unchecked Sendable {}
