@@ -47,6 +47,25 @@ final class VideoRendererPool: @unchecked Sendable {
     func releaseRenderer(_ renderer: VideoRenderer) {
         pool.release(renderer)
     }
+
+    /// Configures the global video renderer pool with the specified initial capacity.
+    /// This method is intended for internal use by StreamVideo.
+    ///
+    /// - Parameter initialCapacity: The number of video renderers to pre-create.
+    @MainActor
+    static func configure(initialCapacity: Int) async {
+        // Create pool with 0 initial capacity first
+        currentValue = VideoRendererPool(initialCapacity: 0)
+        
+        // Then add renderers one by one with yielding
+        for _ in 0..<initialCapacity {
+            let renderer = VideoRenderer(frame: CGRect(origin: .zero, size: .zero))
+            currentValue.pool.addToAvailable(renderer)
+            
+            // Yield to allow other main thread work between renderer creations
+            await Task.yield()
+        }
+    }
 }
 
 /// - Note: I have no other way of satisfying the compiler here.
