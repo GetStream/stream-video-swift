@@ -131,7 +131,8 @@ import SwiftUI
             )
         }
     }
-    
+
+    @MainActor
     deinit {
         timer?.invalidate()
         sessionEndCountdown?.invalidate()

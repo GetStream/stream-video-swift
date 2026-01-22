@@ -5,7 +5,7 @@
 import Combine
 import StreamVideo
 
-final class DemoStatsAdapter {
+final class DemoStatsAdapter: @unchecked Sendable {
 
     @Injected(\.streamVideo) private var streamVideo
 
@@ -43,7 +43,7 @@ final class DemoStatsAdapter {
 }
 
 extension DemoStatsAdapter: InjectionKey {
-    static var currentValue: DemoStatsAdapter = .init()
+    nonisolated(unsafe) static var currentValue: DemoStatsAdapter = .init()
 }
 
 extension InjectedValues {

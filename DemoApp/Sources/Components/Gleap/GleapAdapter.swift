@@ -63,7 +63,7 @@ final class GleapAdapter {
 }
 
 extension GleapAdapter: InjectionKey {
-    static var currentValue = GleapAdapter()
+    nonisolated(unsafe) static var currentValue = GleapAdapter()
 }
 
 extension InjectedValues {

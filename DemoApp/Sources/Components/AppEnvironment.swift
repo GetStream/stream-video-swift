@@ -21,7 +21,7 @@ extension AppEnvironment {
         var isTest: Bool { self == .test }
     }
 
-    static var configuration: Configuration = {
+    nonisolated(unsafe) static var configuration: Configuration = {
         #if STREAM_RELEASE
         return .release
         #elseif STREAM_E2E_TESTS
@@ -110,7 +110,7 @@ extension AppEnvironment {
             }
         }
 
-        static var allCases: [BaseURL] = [
+        nonisolated(unsafe) static var allCases: [BaseURL] = [
             .pronto,
             .prontoStaging,
             .staging,
@@ -120,7 +120,7 @@ extension AppEnvironment {
         ]
     }
 
-    static var baseURL: BaseURL = {
+    nonisolated(unsafe) static var baseURL: BaseURL = {
         switch configuration {
         case .test:
             return .demo
@@ -138,7 +138,7 @@ extension AppEnvironment {
         case universal = "streamvideo"
     }
 
-    static var appURLScheme: String = { AppURLScheme.universal.rawValue }()
+    nonisolated(unsafe) static var appURLScheme: String = { AppURLScheme.universal.rawValue }()
 }
 
 extension AppEnvironment {
@@ -149,7 +149,7 @@ extension AppEnvironment {
         var url: URL { URL(string: rawValue)! }
     }
 
-    static var authBaseURL: URL = { AuthBaseURL.universal.url }()
+    nonisolated(unsafe) static var authBaseURL: URL = { AuthBaseURL.universal.url }()
 }
 
 extension AppEnvironment {
@@ -204,7 +204,7 @@ extension AppEnvironment {
         }
     }
 
-    static var loggedInView: LoggedInView = {
+    nonisolated(unsafe) static var loggedInView: LoggedInView = {
         switch configuration {
         case .test:
             return .detailed
@@ -235,7 +235,7 @@ extension AppEnvironment {
         }
     }
 
-    static var performanceTrackerVisibility: PerformanceTrackerVisibility = {
+    nonisolated(unsafe) static var performanceTrackerVisibility: PerformanceTrackerVisibility = {
         .hidden
     }()
 }
@@ -255,7 +255,7 @@ extension AppEnvironment {
         }
     }
 
-    static var chatIntegration: ChatIntegration = {
+    nonisolated(unsafe) static var chatIntegration: ChatIntegration = {
         .enabled
     }()
 }
@@ -300,7 +300,7 @@ extension AppEnvironment {
         }
     }
 
-    static var supportedDeeplinks: [SupportedDeeplink] = {
+    nonisolated(unsafe) static var supportedDeeplinks: [SupportedDeeplink] = {
         switch configuration {
         case .debug:
             return [.pronto, .demo, .staging, .legacy, .livestream]
@@ -327,7 +327,7 @@ extension AppEnvironment {
         }
     }
 
-    static var pictureInPictureIntegration: PictureInPictureIntegration = {
+    nonisolated(unsafe) static var pictureInPictureIntegration: PictureInPictureIntegration = {
         .enabled
     }()
 }
@@ -377,7 +377,7 @@ extension AppEnvironment {
         }
     }
 
-    static var tokenExpiration: TokenExpiration = {
+    nonisolated(unsafe) static var tokenExpiration: TokenExpiration = {
         switch configuration {
         case .debug:
             return .never
@@ -429,7 +429,7 @@ extension AppEnvironment {
         }
     }
 
-    static var callExpiration: CallExpiration = .never
+    nonisolated(unsafe) static var callExpiration: CallExpiration = .never
 }
 
 extension AppEnvironment {
@@ -457,7 +457,7 @@ extension AppEnvironment {
         }
     }
 
-    static var autoLeavePolicy: AutoLeavePolicy = .default
+    nonisolated(unsafe) static var autoLeavePolicy: AutoLeavePolicy = .default
 }
 
 extension AppEnvironment {
@@ -490,7 +490,7 @@ extension AppEnvironment {
         }
     }
 
-    static var disconnectionTimeout: DisconnectionTimeout = .never
+    nonisolated(unsafe) static var disconnectionTimeout: DisconnectionTimeout = .never
 }
 
 extension AppEnvironment {
@@ -528,7 +528,7 @@ extension AppEnvironment {
         }
     }
 
-    static var preferredVideoCodec: PreferredVideoCodec = .h264
+    nonisolated(unsafe) static var preferredVideoCodec: PreferredVideoCodec = .h264
 }
 
 extension AppEnvironment {
@@ -546,7 +546,7 @@ extension AppEnvironment {
         }
     }
 
-    static var closedCaptionsIntegration: ClosedCaptionsIntegration = {
+    nonisolated(unsafe) static var closedCaptionsIntegration: ClosedCaptionsIntegration = {
         .disabled
     }()
 }
@@ -579,20 +579,20 @@ extension AppEnvironment {
         }
     }
 
-    static var audioSessionPolicy: AudioSessionPolicyDebugConfiguration = {
+    nonisolated(unsafe) static var audioSessionPolicy: AudioSessionPolicyDebugConfiguration = {
         .default
     }()
 }
 
 extension AppEnvironment {
 
-    static var availableCallTypes: [String] = [
+    nonisolated(unsafe) static var availableCallTypes: [String] = [
         .development,
         .default,
         .audioRoom,
         .livestream
     ]
-    static var preferredCallType: String?
+    nonisolated(unsafe) static var preferredCallType: String?
 }
 
 extension AppEnvironment {
@@ -619,7 +619,7 @@ extension AppEnvironment {
         }
     }
 
-    static var proximityPolicies: Set<ProximityPolicyDebugConfiguration> = {
+    nonisolated(unsafe) static var proximityPolicies: Set<ProximityPolicyDebugConfiguration> = {
         [.video, .speaker]
     }()
 }
@@ -656,12 +656,12 @@ extension AppEnvironment {
         }
     }
 
-    static var moderationVideoPolicy: ModerationVideoPolicy = .blur(20)
+    nonisolated(unsafe) static var moderationVideoPolicy: ModerationVideoPolicy = .blur(20)
 }
 
 extension AppEnvironment {
 
-    static var clientCapabilities: Set<ClientCapability>?
+    nonisolated(unsafe) static var clientCapabilities: Set<ClientCapability>?
 }
 
 extension ClientCapability: Debuggable {

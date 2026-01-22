@@ -9,22 +9,22 @@ import StreamVideoSwiftUI
 import StreamWebRTC
 import SwiftUI
 
-var apiKey = ""
-var user = User(id: "")
-var token = UserToken(stringLiteral: "")
-var callId = ""
-var tokenProvider: UserTokenProvider = { _ in }
-var streamVideo = StreamVideo(apiKey: apiKey, user: user, token: token)
-var streamVideoUI = StreamVideoUI(streamVideo: streamVideo)
-var call = streamVideo.call(callType: "default", callId: UUID().uuidString)
-var utils = Utils()
+nonisolated(unsafe) var apiKey = ""
+nonisolated(unsafe) var user = User(id: "")
+nonisolated(unsafe) var token = UserToken(stringLiteral: "")
+nonisolated(unsafe) var callId = ""
+nonisolated(unsafe) var tokenProvider: UserTokenProvider = { _ in }
+nonisolated(unsafe) var streamVideo = StreamVideo(apiKey: apiKey, user: user, token: token)
+nonisolated(unsafe) var streamVideoUI = StreamVideoUI(streamVideo: streamVideo)
+nonisolated(unsafe) var call = streamVideo.call(callType: "default", callId: UUID().uuidString)
+nonisolated(unsafe) var utils = Utils()
 @MainActor var viewModel = CallViewModel()
 @MainActor var viewFactory = DefaultViewFactory.shared
-var availableFrame = CGRect.zero
-var availableSize = CGSize.zero
-var videoSize = CGSize.zero
-var rating: Int = 0
-var participant = CallParticipant(
+nonisolated(unsafe) var availableFrame = CGRect.zero
+nonisolated(unsafe) var availableSize = CGSize.zero
+nonisolated(unsafe) var videoSize = CGSize.zero
+nonisolated(unsafe) var rating: Int = 0
+nonisolated(unsafe) var participant = CallParticipant(
     id: "",
     userId: "",
     roles: [],
@@ -44,19 +44,19 @@ var participant = CallParticipant(
     pin: nil,
     pausedTracks: []
 )
-var contentMode = UIView.ContentMode.scaleAspectFit
-var id = ""
-var customData = [String: RawJSON]()
-var ratio: CGFloat = 0
-var onChangeTrackVisibility: @MainActor (CallParticipant, Bool) -> Void = { _, _ in }
-var orientation: UIInterfaceOrientation = .unknown
-var localParticipant = participant
-var reader: GeometryProxy!
-var participants = [participant]
-var imageURL: URL!
-var members: [MemberRequest] = []
-var memberIds: [String] = []
-var callMembers: [Member] = []
+nonisolated(unsafe) var contentMode = UIView.ContentMode.scaleAspectFit
+nonisolated(unsafe) var id = ""
+nonisolated(unsafe) var customData = [String: RawJSON]()
+nonisolated(unsafe) var ratio: CGFloat = 0
+nonisolated(unsafe) var onChangeTrackVisibility: @MainActor (CallParticipant, Bool) -> Void = { _, _ in }
+nonisolated(unsafe) var orientation: UIInterfaceOrientation = .unknown
+nonisolated(unsafe) var localParticipant = participant
+nonisolated(unsafe) var reader: GeometryProxy!
+nonisolated(unsafe) var participants = [participant]
+nonisolated(unsafe) var imageURL: URL!
+nonisolated(unsafe) var members: [MemberRequest] = []
+nonisolated(unsafe) var memberIds: [String] = []
+nonisolated(unsafe) var callMembers: [Member] = []
 
 func container(_ content: () throws -> Void) {}
 func asyncContainer(_ content: () async throws -> Void) {}
@@ -87,7 +87,7 @@ class CustomType {
 }
 
 struct CustomInjectionKey: InjectionKey {
-    static var currentValue: CustomType = CustomType()
+    nonisolated(unsafe) static var currentValue: CustomType = CustomType()
 }
 
 extension InjectedValues {
@@ -108,7 +108,7 @@ final class VideoWithChatViewFactory: ViewFactory {
 }
 
 struct YourRootView: View { @ViewBuilder var body: some View { EmptyView() } }
-var outgoingCallMembers = [Member]()
+nonisolated(unsafe) var outgoingCallMembers = [Member]()
 @MainActor var callControls = CallControlsView(viewModel: viewModel)
 @MainActor var callTopView = CallTopView(viewModel: viewModel)
 struct CustomOutgoingCallView: View {
@@ -252,7 +252,7 @@ final class AppState: ObservableObject {
 
     let unsecureRepository = UnsecureRepository()
 
-    static var shared = AppState()
+    nonisolated(unsafe) static var shared = AppState()
 }
 
 final class UnsecureRepository: VoIPTokenHandler {
@@ -263,7 +263,7 @@ final class UnsecureRepository: VoIPTokenHandler {
     }
 }
 
-var appState = AppState()
+nonisolated(unsafe) var appState = AppState()
 
 extension URL {
 
@@ -302,11 +302,10 @@ final class StreamSnapshotTrigger: SnapshotTriggering {
     func capture() {}
 }
 
-var snapshotTrigger = StreamSnapshotTrigger()
+nonisolated(unsafe) var snapshotTrigger = StreamSnapshotTrigger()
 /// Provides the default value of the `StreamSnapshotTrigger` class.
 struct StreamSnapshotTriggerKey: InjectionKey {
-    @MainActor
-    static var currentValue: StreamSnapshotTrigger = .init()
+    nonisolated(unsafe) static var currentValue: StreamSnapshotTrigger = .init()
 }
 
 extension InjectedValues {
@@ -341,7 +340,7 @@ class FiltersService: ObservableObject {
     static let supportedFilters = [sepia]
 }
 
-let filtersService = FiltersService()
+nonisolated(unsafe) let filtersService = FiltersService()
 let size: CGFloat = 0
 let streamLogo = UIImage()
 
@@ -411,7 +410,7 @@ extension Image {
     }
 }
 
-var otherParticipant = CallParticipant(
+nonisolated(unsafe) var otherParticipant = CallParticipant(
     id: "",
     userId: "",
     roles: [],
@@ -437,5 +436,5 @@ enum UserManager {
         var isPremium: Bool
     }
 
-    static var currentUser: AppUser?
+    nonisolated(unsafe) static var currentUser: AppUser?
 }

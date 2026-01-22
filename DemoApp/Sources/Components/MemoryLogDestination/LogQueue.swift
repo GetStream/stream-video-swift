@@ -11,7 +11,7 @@ enum LogQueue {
     #else
     private static let queueCapaity = 1000
     #endif
-    static let queue: Queue<LogDetails> = .init(maxCount: queueCapaity)
+    nonisolated(unsafe) static let queue: Queue<LogDetails> = .init(maxCount: queueCapaity)
 
     static func insert(_ element: LogDetails) { queue.insert(element) }
 
