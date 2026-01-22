@@ -284,6 +284,7 @@ private struct DemoStatsSection<Content: View>: View {
 
 private struct DemoStatView<Value: Comparable>: View {
 
+    @MainActor
     private final class DemoStatViewModel: ObservableObject {
 
         @ObservedObject private var viewModel: CallViewModel

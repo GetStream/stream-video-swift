@@ -8,7 +8,7 @@ import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
 
-final class StreamSnapshotTrigger: SnapshotTriggering {
+final class StreamSnapshotTrigger: SnapshotTriggering, @unchecked Sendable {
     lazy var binding: Binding<Bool> = Binding<Bool>(
         get: { [weak self] in
             self?.currentValueSubject.value ?? false
@@ -31,8 +31,7 @@ final class StreamSnapshotTrigger: SnapshotTriggering {
 
 /// Provides the default value of the `StreamSnapshotTrigger` class.
 struct StreamSnapshotTriggerKey: InjectionKey {
-    @MainActor
-    static var currentValue: StreamSnapshotTrigger = .init()
+    nonisolated(unsafe) static var currentValue: StreamSnapshotTrigger = .init()
 }
 
 extension InjectedValues {

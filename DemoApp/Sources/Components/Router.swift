@@ -247,7 +247,7 @@ final class Router: ObservableObject {
 
     private nonisolated func refreshToken(
         for userId: String,
-        _ completionHandler: @escaping (Result<UserToken, Error>) -> Void
+        _ completionHandler: @Sendable @escaping (Result<UserToken, Error>) -> Void
     ) {
         Task {
             do {
