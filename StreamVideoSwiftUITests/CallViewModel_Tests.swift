@@ -1312,8 +1312,9 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
             await wait(for: delay)
         }
         #if compiler(>=6.0)
+        let message = "CallViewModel.callingState expected:\(expected) actual: \(subject.callingState)"
         await fulfilmentInMainActor(
-            "CallViewModel.callingState expected:\(expected) actual: \(subject.callingState)",
+            message,
             file: file,
             line: line
         ) { self.subject.callingState == expected }
