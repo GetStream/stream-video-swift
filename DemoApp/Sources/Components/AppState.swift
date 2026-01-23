@@ -121,6 +121,7 @@ final class AppState: ObservableObject {
             do {
                 loading = true
                 try await streamVideo?.connect()
+                userState = .loggedIn
                 if let currentUser = self.currentUser {
                     gleap.login(currentUser)
                 }
