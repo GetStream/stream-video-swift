@@ -250,16 +250,16 @@ final class Router: ObservableObject {
             return
         }
 
-        Task { [deeplinkInfo] in
+        Task { @MainActor [deeplinkInfo] in
             do {
-                _ = try await AppState.shared
+                _ = try await AppState
+                    .shared
                     .$userState
+                    .receive(on: DispatchQueue.main)
                     .filter { $0 == .loggedIn }
                     .timeout(5, scheduler: DispatchQueue.main)
                     .nextValue()
-                await MainActor.run {
-                    AppState.shared.deeplinkInfo = deeplinkInfo
-                }
+                AppState.shared.deeplinkInfo = deeplinkInfo
             } catch {
                 log.error("Unable to handle deeplink: \(deeplinkInfo)")
             }
