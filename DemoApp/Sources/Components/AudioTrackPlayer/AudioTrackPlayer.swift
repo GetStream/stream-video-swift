@@ -6,7 +6,7 @@ import AVFoundation
 import Foundation
 import StreamVideo
 
-final class AudioTrackPlayer: NSObject, AVAudioPlayerDelegate {
+final class AudioTrackPlayer: NSObject, AVAudioPlayerDelegate, @unchecked Sendable {
     enum Track: String, Equatable, CaseIterable {
         case track1 = "track_1"
         case track2 = "track_2"
@@ -72,7 +72,7 @@ final class AudioTrackPlayer: NSObject, AVAudioPlayerDelegate {
 }
 
 extension AudioTrackPlayer: InjectionKey {
-    static var currentValue: AudioTrackPlayer = .init()
+    nonisolated(unsafe) static var currentValue: AudioTrackPlayer = .init()
 }
 
 extension InjectedValues {

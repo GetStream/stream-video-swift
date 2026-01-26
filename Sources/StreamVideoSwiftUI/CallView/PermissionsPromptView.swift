@@ -99,8 +99,11 @@ public struct PermissionsPromptView: View {
                 }
                 .minimumScaleFactor(0.7)
             } else {
-                Text("\(Image(systemName: "gear")) \(Text(L10n.Call.Permissions.Missing.Cta.title))")
-                    .minimumScaleFactor(0.7)
+                HStack(alignment: .center, spacing: 4) {
+                    Image(systemName: "gear")
+                    Text(L10n.Call.Permissions.Missing.Cta.title)
+                }
+                .minimumScaleFactor(0.7)
             }
         }
         .padding(.vertical, 4)

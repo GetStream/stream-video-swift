@@ -921,6 +921,7 @@ open class CallViewModel: ObservableObject {
     private func subscribeToCallEvents() {
         streamVideo
             .eventPublisher()
+            .receive(on: DispatchQueue.main) // Required because CallViewModel is isolated on MainActor
             .sink { [weak self] event in
                 guard let self else { return }
                 if let callEvent = callEventsHandler.checkForCallEvents(from: event) {

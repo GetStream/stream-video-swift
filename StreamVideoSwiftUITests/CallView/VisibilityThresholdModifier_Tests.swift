@@ -99,7 +99,7 @@ final class VisibilityThresholdModifier_Tests: XCTestCase, @unchecked Sendable {
         threshold: CGFloat,
         viewRect: CGRect,
         expected: (Bool, Bool),
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) {
         let modifier = VisibilityThresholdModifier(in: bounds, threshold: threshold) { _ in }

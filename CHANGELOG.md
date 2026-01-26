@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🔄 Changed
 
+# [1.41.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.41.0)
+_January 26, 2026_
+
+### ✅ Added
+- Swift 6 support [#1031](https://github.com/GetStream/stream-video-swift/pull/1031)
+
 # [1.40.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.40.0)
 _January 16, 2026_
 

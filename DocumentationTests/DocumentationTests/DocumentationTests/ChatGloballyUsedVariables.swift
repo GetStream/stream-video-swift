@@ -12,5 +12,5 @@ final class ChatViewFactory: ViewFactory {
         self.chatClient = chatClient
     }
 
-    static let shared = ChatViewFactory(chatClient: .init(config: .init(apiKey: .init(""))))
+    @MainActor static let shared = ChatViewFactory(chatClient: .init(config: .init(apiKey: .init(""))))
 }

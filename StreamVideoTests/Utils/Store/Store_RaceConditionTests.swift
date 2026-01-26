@@ -37,14 +37,17 @@ final class Store_RaceConditionTests: XCTestCase, @unchecked Sendable {
     func test_stateReadDuringWrite_isConsistent() async throws {
         // Given
         let iterations = 1000
-        nonisolated(unsafe) var capturedStates: [RaceTestState] = []
-        let lock = UnfairQueue()
+        let capturedStates = Atomic<[RaceTestState]>(wrappedValue: [])
 
         // Start reading state continuously
         let readTask = Task {
             for _ in 0..<iterations * 10 {
                 let state = store.state
-                lock.sync { capturedStates.append(state) }
+                capturedStates.mutate { values in
+                    var values = values
+                    values.append(state)
+                    return values
+                }
 
                 // Small delay to interleave with writes
                 try? await Task.sleep(nanoseconds: 100)
@@ -67,7 +70,7 @@ final class Store_RaceConditionTests: XCTestCase, @unchecked Sendable {
         readTask.cancel()
         
         // Then: All captured states should be valid
-        for state in capturedStates {
+        for state in capturedStates.wrappedValue {
             // Check internal consistency
             for (key, value) in state.data {
                 XCTAssertEqual(
@@ -119,17 +122,20 @@ final class Store_RaceConditionTests: XCTestCase, @unchecked Sendable {
     func test_publisher_withRapidStateChanges() async throws {
         // Given
         let iterations = 1000
-        nonisolated(unsafe) var receivedValues: [Int] = []
-        let lock = UnfairQueue()
-        var isCompleted = false
+        let receivedValues = Atomic<[Int]>(wrappedValue: [])
+        let isCompleted = Atomic(wrappedValue: false)
         
         // Subscribe to counter
         store.publisher(\.counter)
             .handleEvents(receiveCompletion: { _ in
-                lock.sync { isCompleted = true }
+                isCompleted.wrappedValue = true
             })
             .sink { value in
-                lock.sync { receivedValues.append(value) }
+                receivedValues.mutate { values in
+                    var values = values
+                    values.append(value)
+                    return values
+                }
             }
             .store(in: &cancellables)
         
@@ -140,18 +146,19 @@ final class Store_RaceConditionTests: XCTestCase, @unchecked Sendable {
         
         // Wait for final value
         await fulfillment(timeout: 5) {
-            lock.sync { receivedValues.last == iterations - 1 }
+            receivedValues.wrappedValue.last == iterations - 1
         }
         
         // Then: Verify publisher behavior
-        XCTAssertFalse(isCompleted, "Publisher should not complete")
-        XCTAssertGreaterThan(receivedValues.count, 0)
+        XCTAssertFalse(isCompleted.wrappedValue, "Publisher should not complete")
+        XCTAssertGreaterThan(receivedValues.wrappedValue.count, 0)
         
         // Values should be in ascending order (though some may be skipped)
-        for i in 1..<receivedValues.count {
+        let orderedValues = receivedValues.wrappedValue
+        for i in 1..<orderedValues.count {
             XCTAssertGreaterThanOrEqual(
-                receivedValues[i],
-                receivedValues[i - 1],
+                orderedValues[i],
+                orderedValues[i - 1],
                 "Values should be monotonically increasing"
             )
         }
@@ -161,8 +168,7 @@ final class Store_RaceConditionTests: XCTestCase, @unchecked Sendable {
     func test_creatingPublisher_duringStateUpdate() async throws {
         // Given
         let iterations = 100
-        nonisolated(unsafe) var publishers: [AnyCancellable] = []
-        let lock = UnfairQueue()
+        let publishers = Atomic<[AnyCancellable]>(wrappedValue: [])
 
         // When: Create publishers while updating state
         await withTaskGroup(of: Void.self) { group in
@@ -181,13 +187,17 @@ final class Store_RaceConditionTests: XCTestCase, @unchecked Sendable {
                     let cancellable = self.store.publisher(\.counter)
                         .sink { _ in }
                     
-                    lock.sync { publishers.append(cancellable) }
+                    publishers.mutate { values in
+                        var values = values
+                        values.append(cancellable)
+                        return values
+                    }
                 }
             }
         }
         
         // Then: All publishers should be valid
-        XCTAssertEqual(publishers.count, iterations)
+        XCTAssertEqual(publishers.wrappedValue.count, iterations)
         
         // Store should still be functional
         let finalValue = 999
@@ -203,22 +213,22 @@ final class Store_RaceConditionTests: XCTestCase, @unchecked Sendable {
     /// Tests store cleanup while operations are active.
     func test_storeCleanup_withActiveOperations() async throws {
         // Given
-        nonisolated(unsafe) var localStore: Store<RaceTestNamespace>? = RaceTestNamespace.store(
+        let localStore = Atomic<Store<RaceTestNamespace>?>(wrappedValue: RaceTestNamespace.store(
             initialState: .initial
-        )
+        ))
         
         let iterations = 100
         
         // When: Start operations and deallocate store
         let task = Task {
-            guard let store = localStore else { return }
+            guard let store = localStore.wrappedValue else { return }
             
             for i in 0..<iterations {
                 store.dispatch(.setCounter(i))
                 
                 // Deallocate store mid-operation
                 if i == iterations / 2 {
-                    localStore = nil
+                    localStore.wrappedValue = nil
                 }
             }
         }
@@ -227,7 +237,7 @@ final class Store_RaceConditionTests: XCTestCase, @unchecked Sendable {
         _ = await task.result
         
         // Then: No crash should occur
-        XCTAssertNil(localStore, "Store should be deallocated")
+        XCTAssertNil(localStore.wrappedValue, "Store should be deallocated")
     }
     
     /// Tests publisher cleanup during active notifications.
@@ -323,7 +333,7 @@ private final class RaceTestReducer: Reducer<RaceTestNamespace>, @unchecked Send
             
         case .slowOperation:
             // Simulate slow operation
-            Thread.sleep(forTimeInterval: 0.01)
+            try? await Task.sleep(nanoseconds: 10_000_000)
             newState.slowOperationComplete = true
         }
         

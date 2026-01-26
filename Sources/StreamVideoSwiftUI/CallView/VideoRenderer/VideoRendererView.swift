@@ -144,9 +144,13 @@ extension VideoRendererView {
                 .map { $0 != nil }
                 .removeDuplicates()
                 .receive(on: DispatchQueue.main)
-                .sinkTask(storeIn: disposableBag) { [weak self] in
-                    guard let self else { return }
-                    if $0 { handleRendering?(renderer) }
+                .sink { [weak self] in
+                    guard
+                        $0,
+                        let handleRendering = self?.handleRendering,
+                        let renderer = self?.renderer
+                    else { return }
+                    handleRendering(renderer)
                 }
                 .store(in: disposableBag)
 
@@ -155,9 +159,13 @@ extension VideoRendererView {
                 .map { $0 != nil }
                 .removeDuplicates()
                 .receive(on: DispatchQueue.main)
-                .sinkTask(storeIn: disposableBag) { [weak self] in
-                    guard let self else { return }
-                    if $0 { handleRendering?(renderer) }
+                .sink { [weak self] in
+                    guard
+                        $0,
+                        let handleRendering = self?.handleRendering,
+                        let renderer = self?.renderer
+                    else { return }
+                    handleRendering(renderer)
                 }
                 .store(in: disposableBag)
         }

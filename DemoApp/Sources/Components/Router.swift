@@ -156,7 +156,6 @@ final class Router: ObservableObject {
         appState.currentUser = userCredentials.userInfo
         // First we sign in and then update the loggedIn state and the UI
         try await handleLoggedInUserCredentials(userCredentials, deeplinkInfo: .empty)
-        appState.userState = .loggedIn
     }
 
     private func handleGuestUser(
@@ -227,7 +226,6 @@ final class Router: ObservableObject {
         deeplinkInfo: DeeplinkInfo,
         user: User?
     ) {
-        appState.deeplinkInfo = deeplinkInfo
         appState.currentUser = user
         appState.userState = .loggedIn
         appState.streamVideo = streamVideo
@@ -238,6 +236,8 @@ final class Router: ObservableObject {
         utils.userListProvider = appState
         streamVideoUI = StreamVideoUI(streamVideo: streamVideo, utils: utils)
 
+        handleDeeplinkIfRequired(deeplinkInfo)
+        
         if user?.type != .anonymous {
             appState.connectUser()
         } else {
@@ -245,9 +245,30 @@ final class Router: ObservableObject {
         }
     }
 
+    private func handleDeeplinkIfRequired(_ deeplinkInfo: DeeplinkInfo) {
+        guard deeplinkInfo != .empty else {
+            return
+        }
+
+        Task { @MainActor [deeplinkInfo] in
+            do {
+                _ = try await AppState
+                    .shared
+                    .$userState
+                    .receive(on: DispatchQueue.main)
+                    .filter { $0 == .loggedIn }
+                    .timeout(5, scheduler: DispatchQueue.main)
+                    .nextValue()
+                AppState.shared.deeplinkInfo = deeplinkInfo
+            } catch {
+                log.error("Unable to handle deeplink: \(deeplinkInfo)")
+            }
+        }
+    }
+
     private nonisolated func refreshToken(
         for userId: String,
-        _ completionHandler: @escaping (Result<UserToken, Error>) -> Void
+        _ completionHandler: @Sendable @escaping (Result<UserToken, Error>) -> Void
     ) {
         Task {
             do {

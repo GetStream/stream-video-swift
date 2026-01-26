@@ -7,7 +7,7 @@ import StreamVideo
 import SwiftUI
 import UIKit
 
-class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
+class AppDelegate: NSObject, UIApplicationDelegate, @MainActor UNUserNotificationCenterDelegate {
 
     @Injected(\.streamVideo) var streamVideo
     @Injected(\.permissions) var permissions
