@@ -38,7 +38,7 @@ final class ControlBadgeView_Tests: StreamVideoUITestCase, @unchecked Sendable {
 
     private func assertSubject(
         @ViewBuilder _ subject: () -> some View,
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         function: String = #function,
         line: UInt = #line
     ) {

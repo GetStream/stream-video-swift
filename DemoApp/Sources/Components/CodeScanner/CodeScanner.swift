@@ -112,8 +112,10 @@ struct CodeScannerView_Previews: PreviewProvider {
     }
 }
 
-final class ScannerViewController: UIViewController, UINavigationControllerDelegate, AVCaptureMetadataOutputObjectsDelegate,
-    UIAdaptivePresentationControllerDelegate {
+@MainActor
+final class ScannerViewController: UIViewController, UINavigationControllerDelegate,
+    @MainActor AVCaptureMetadataOutputObjectsDelegate,
+    UIAdaptivePresentationControllerDelegate, @MainActor AVCapturePhotoCaptureDelegate {
     private let photoOutput = AVCapturePhotoOutput()
     private var isCapturing = false
     private var handler: ((UIImage) -> Void)?
@@ -214,7 +216,7 @@ final class ScannerViewController: UIViewController, UINavigationControllerDeleg
         reset()
 
         if (captureSession.isRunning == false) {
-            DispatchQueue.global(qos: .userInteractive).async {
+            DispatchQueue.main.async {
                 self.captureSession?.startRunning()
             }
         }
@@ -242,13 +244,15 @@ final class ScannerViewController: UIViewController, UINavigationControllerDeleg
         }
     }
 
-    private func requestCameraAccess(completion: (() -> Void)?) {
+    private func requestCameraAccess(completion: (@MainActor @Sendable () -> Void)?) {
         AVCaptureDevice.requestAccess(for: .video) { [weak self] status in
-            guard status else {
-                self?.didFail(reason: .permissionDenied)
-                return
+            Task { @MainActor in
+                guard status else {
+                    self?.didFail(reason: .permissionDenied)
+                    return
+                }
+                completion?()
             }
-            completion?()
         }
     }
 
@@ -322,7 +326,7 @@ final class ScannerViewController: UIViewController, UINavigationControllerDeleg
         super.viewDidDisappear(animated)
 
         if (captureSession?.isRunning == true) {
-            DispatchQueue.global(qos: .userInteractive).async {
+            DispatchQueue.main.async {
                 self.captureSession?.stopRunning()
             }
         }
@@ -489,9 +493,8 @@ final class ScannerViewController: UIViewController, UINavigationControllerDeleg
     func didFail(reason: ScanError) {
         parentView.completion(.failure(reason))
     }
-}
 
-extension ScannerViewController: AVCapturePhotoCaptureDelegate {
+    // MARK: - AVCapturePhotoCaptureDelegate
 
     func photoOutput(
         _ output: AVCapturePhotoOutput,

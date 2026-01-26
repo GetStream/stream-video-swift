@@ -135,7 +135,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             user: user,
             token: token,
             videoConfig: videoConfig,
-            tokenProvider: tokenProvider ?? { _ in },
+            tokenProvider: tokenProvider ?? { $0(.success(token)) }, // Without this change the tokenProvider is leaking
             pushNotificationsConfig: pushNotificationsConfig,
             environment: Environment(),
             autoConnectOnInit: true

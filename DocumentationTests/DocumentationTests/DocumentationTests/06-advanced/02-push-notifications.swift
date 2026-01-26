@@ -14,7 +14,7 @@ typealias VoIPPushHandler = ((PKPushPayload, PKPushType, () -> Void)) -> Void
 @MainActor
 private func content() {
     container {
-        class VoIPPushService: NSObject, PKPushRegistryDelegate {
+        final class VoIPPushService: NSObject, PKPushRegistryDelegate, @unchecked Sendable {
 
             @Injected(\.streamVideo) var streamVideo
 
@@ -72,7 +72,7 @@ private func content() {
             }
         }
 
-        final class CallService {
+        final class CallService: @unchecked Sendable {
 
             static let shared = CallService()
 

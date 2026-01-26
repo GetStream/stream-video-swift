@@ -280,11 +280,15 @@ public extension Assert {
         file: StaticString = #filePath,
         line: UInt = #line
     ) -> Assertion {
-        weak var weakObject: T? = object
+        let weakBox = WeakBox(value: object)
         object = nil
-        
-        return willBeNil(weakObject, message: "Failed to be released from the memory.", file: file, line: line)
+
+        return willBeNil(weakBox.value, message: "Failed to be released from the memory.", file: file, line: line)
     }
+}
+
+private struct WeakBox<T: AnyObject> {
+    weak var value: T?
 }
 
 // MARK: - Async runner

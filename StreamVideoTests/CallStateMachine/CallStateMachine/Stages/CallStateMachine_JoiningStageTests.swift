@@ -3,6 +3,7 @@
 //
 
 import Combine
+import Dispatch
 @testable import StreamVideo
 @preconcurrency import XCTest
 
@@ -224,10 +225,13 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
         let deliverySubject = CurrentValueSubject<JoinCallResponse?, Error>(nil)
         let joinCallResponse = JoinCallResponse.dummy(ownCapabilities: [.changeMaxDuration])
         let deliveryExpectation = expectation(description: "DeliverySubject delivered value.")
-        let cancellable = deliverySubject.compactMap { $0 }.sink { _ in XCTFail() } receiveValue: {
-            XCTAssertEqual($0, joinCallResponse)
-            deliveryExpectation.fulfill()
-        }
+        let cancellable = deliverySubject
+            .receive(on: DispatchQueue.main)
+            .compactMap { $0 }
+            .sink { _ in XCTFail() } receiveValue: {
+                XCTAssertEqual($0, joinCallResponse)
+                deliveryExpectation.fulfill()
+            }
 
         let context = Call.StateMachine.Stage.Context(
             call: call,
@@ -312,15 +316,18 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
     ) async throws {
         let deliverySubject = CurrentValueSubject<JoinCallResponse?, Error>(nil)
         let deliveryExpectation = expectation(description: "DeliverySubject delivered value.")
-        let cancellable = deliverySubject.compactMap { $0 }.sink {
-            switch $0 {
-            case .finished:
-                XCTFail()
-            case let .failure(error):
-                XCTAssertTrue(error is ClientError)
-                deliveryExpectation.fulfill()
-            }
-        } receiveValue: { _ in XCTFail() }
+        let cancellable = deliverySubject
+            .receive(on: DispatchQueue.main)
+            .compactMap { $0 }
+            .sink {
+                switch $0 {
+                case .finished:
+                    XCTFail()
+                case let .failure(error):
+                    XCTAssertTrue(error is ClientError)
+                    deliveryExpectation.fulfill()
+                }
+            } receiveValue: { _ in XCTFail() }
 
         let context = Call.StateMachine.Stage.Context(
             call: call,

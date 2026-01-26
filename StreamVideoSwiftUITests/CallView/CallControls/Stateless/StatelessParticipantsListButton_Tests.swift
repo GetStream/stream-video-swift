@@ -90,7 +90,7 @@ final class StatelessParticipantsListButton_Tests: StreamVideoUITestCase, @unche
     private func makeSubject(
         _ participantsCount: Int = 0,
         isActive: Bool = false,
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) throws -> StatelessParticipantsListButton {
         let call = try XCTUnwrap(

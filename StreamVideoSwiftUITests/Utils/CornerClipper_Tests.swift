@@ -75,7 +75,7 @@ final class CornerClipper_Tests: StreamVideoUITestCase, @unchecked Sendable {
     private func assertCornerRadius(
         _ radius: CGFloat = 24,
         corners: UIRectCorner,
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         function: String = #function,
         line: UInt = #line
     ) {

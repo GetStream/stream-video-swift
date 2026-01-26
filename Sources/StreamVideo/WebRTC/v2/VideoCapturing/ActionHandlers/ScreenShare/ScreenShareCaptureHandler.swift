@@ -8,6 +8,7 @@ import Foundation
 import ReplayKit
 import StreamWebRTC
 
+/// Handles ReplayKit screen capture and forwards frames to WebRTC.
 final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandler, RPScreenRecorderDelegate, @unchecked Sendable {
 
     @Injected(\.audioFilterProcessingModule) private var audioFilterProcessingModule
@@ -43,6 +44,7 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
 
     // MARK: - RPScreenRecorderDelegate
 
+    /// Logs availability changes for the ReplayKit screen recorder.
     func screenRecorderDidChangeAvailability(_ screenRecorder: RPScreenRecorder) {
         log.debug(
             "\(type(of: self)) availability changed to isAvailable:\(screenRecorder.isAvailable).",
@@ -50,6 +52,7 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
         )
     }
 
+    /// Handles ReplayKit stop events and tears down capture on error.
     func screenRecorder(
         _ screenRecorder: RPScreenRecorder,
         didStopRecordingWith previewViewController: RPPreviewViewController?,
@@ -69,6 +72,7 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
 
     // MARK: - StreamVideoCapturerActionHandler
 
+    /// Executes a capture action for screen sharing.
     func handle(_ action: StreamVideoCapturer.Action) async throws {
         switch action {
         case let .startCapture(
@@ -94,6 +98,7 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
 
     // MARK: Private
 
+    /// Starts screen capture and wires the active capture session.
     private func execute(
         videoCapturer: RTCVideoCapturer,
         videoCapturerDelegate: RTCVideoCapturerDelegate,
@@ -115,8 +120,10 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
         audioFilterBeforeScreensharingAudio = audioFilterProcessingModule.activeAudioFilter
         audioFilterProcessingModule.setAudioFilter(nil)
 
-        try await Task { @MainActor in
-            try await recorder.startCapture { [weak self] sampleBuffer, sampleBufferType, error in
+        try await Task { @MainActor [weak self] in
+            try await self?.startCapture { [weak self] sampleBuffer,
+                sampleBufferType,
+                error in
                 if let error {
                     log.error(error, subsystems: .videoCapturer)
                 } else {
@@ -142,6 +149,7 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
         )
     }
 
+    /// Routes incoming sample buffers to video or audio processing.
     private func didReceive(
         sampleBuffer: CMSampleBuffer,
         sampleBufferType: RPSampleBufferType
@@ -171,6 +179,7 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
         }
     }
 
+    /// Converts a video sample buffer into a WebRTC video frame.
     private func processVideoBuffer(
         sampleBuffer: CMSampleBuffer
     ) {
@@ -222,6 +231,7 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
         )
     }
 
+    /// Enqueues app audio buffers into the audio device module.
     private func processAudioAppBuffer(
         sampleBuffer: CMSampleBuffer
     ) {
@@ -239,6 +249,7 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
         audioDeviceModule.enqueue(sampleBuffer)
     }
 
+    /// Stops ReplayKit capture and restores audio filters.
     private func stop() async throws {
         guard
             isRecording == true
@@ -254,10 +265,19 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
         activeSession = nil
         isRecording = false
     }
+
+    @MainActor
+    /// Starts ReplayKit capture and binds the sample buffer handler.
+    private func startCapture(
+        _ closure: @Sendable @escaping (CMSampleBuffer, RPSampleBufferType, Error?) -> Void
+    ) async throws {
+        try await recorder.startCapture(handler: closure)
+    }
 }
 
 extension RPScreenRecorder {
 
+    /// Bridges the closure-based stop capture API to async/await.
     fileprivate func stopCapture() async throws {
         try await withCheckedThrowingContinuation { [weak self] continuation in
             guard let self else {

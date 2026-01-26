@@ -8,7 +8,8 @@ import StreamChatSwiftUI
 import class StreamVideoSwiftUI.CallViewModel
 import SwiftUI
 
-final class DemoChatViewFactory: ViewFactory {
+@MainActor
+final class DemoChatViewFactory: @MainActor ViewFactory {
 
     @Injected(\.chatClient) var chatClient: ChatClient
 

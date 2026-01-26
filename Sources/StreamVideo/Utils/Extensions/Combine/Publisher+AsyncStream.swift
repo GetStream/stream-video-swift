@@ -53,13 +53,15 @@ public extension Publisher where Output: Sendable {
         function: StaticString = #function,
         line: UInt = #line
     ) async throws -> Output {
-        try await Task(
+        // Invariant: publisher used read-only in this async path.
+        let erasedPublisher = eraseToAnyPublisher()
+        return try await Task(
             timeoutInSeconds: timeoutInSeconds,
             file: file,
             function: function,
             line: line
-        ) { [self] in
-            try await self.firstValue(file: file, line: line)
+        ) {
+            try await erasedPublisher.firstValue(file: file, line: line)
         }.value
     }
 

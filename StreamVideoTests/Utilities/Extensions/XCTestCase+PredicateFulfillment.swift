@@ -17,8 +17,9 @@ extension XCTestCase {
     @MainActor
     func fulfilmentInMainActor(
         timeout: TimeInterval = defaultTimeout,
-        _ message: @MainActor @autoclosure () -> String = "",
+        _ message: @MainActor @Sendable @autoclosure () -> String = "",
         file: StaticString = #file,
+        filePath: StaticString = #filePath,
         line: UInt = #line,
         block: @MainActor @Sendable @escaping () -> Bool
     ) async {
@@ -35,13 +36,14 @@ extension XCTestCase {
             line: line
         )
 
-        XCTAssertTrue(block(), message(), file: file, line: line)
+        XCTAssertTrue(block(), message(), file: filePath, line: line)
     }
 
     func fulfillment(
         timeout: TimeInterval = defaultTimeout,
         _ message: @Sendable @autoclosure () -> String = "",
         file: StaticString = #file,
+        filePath: StaticString = #filePath,
         line: UInt = #line,
         block: @Sendable @escaping () -> Bool
     ) async {
@@ -58,13 +60,14 @@ extension XCTestCase {
             line: line
         )
 
-        XCTAssertTrue(block(), message(), file: file, line: line)
+        XCTAssertTrue(block(), message(), file: filePath, line: line)
     }
 
     func fulfillment(
         timeout: TimeInterval = defaultTimeout,
         _ message: @autoclosure () -> String = "",
         file: StaticString = #file,
+        filePath: StaticString = #filePath,
         line: UInt = #line,
         block: @Sendable @escaping () async -> Bool
     ) async {
@@ -100,7 +103,7 @@ extension XCTestCase {
         )
         store.cancellable?.cancel()
         let value = await block()
-        XCTAssertTrue(value, message(), file: file, line: line)
+        XCTAssertTrue(value, message(), file: filePath, line: line)
     }
 
     func safeFulfillment(

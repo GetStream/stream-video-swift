@@ -46,7 +46,7 @@ private func content() {
     }
 
     container {
-        final class CustomObject {
+        final class CustomObject: @unchecked Sendable {
 
             var recordings: [CallRecording] = []
 

@@ -19,6 +19,7 @@ final class PictureInPictureTrackStateAdapter: @unchecked Sendable {
 
     private let store: PictureInPictureStore
     private let disposableBag = DisposableBag()
+    private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
     private var content: PictureInPictureContent {
         didSet { didUpdate(content, oldValue: oldValue) }
     }
@@ -35,7 +36,8 @@ final class PictureInPictureTrackStateAdapter: @unchecked Sendable {
         store
             .publisher(for: \.isActive)
             .removeDuplicates()
-            .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in self?.didUpdate($0) }
+            .receive(on: processingQueue)
+            .sinkTask(storeIn: disposableBag) { [weak self] in await self?.didUpdate($0) }
             .store(in: disposableBag)
 
         store
@@ -50,8 +52,7 @@ final class PictureInPictureTrackStateAdapter: @unchecked Sendable {
     /// Updates track state based on Picture-in-Picture activation.
     ///
     /// - Parameter isActive: Whether Picture-in-Picture is active
-    @MainActor
-    private func didUpdate(_ isActive: Bool) {
+    private func didUpdate(_ isActive: Bool) async {
         disposableBag.remove(DisposableKey.timePublisher.rawValue)
 
         guard isActive else {
@@ -61,16 +62,18 @@ final class PictureInPictureTrackStateAdapter: @unchecked Sendable {
             return
         }
 
-        if
-            let activeTracksBeforePiP = store
-            .state
-            .call?
-            .state
-            .participants
-            .filter({ $0.track?.isEnabled == true })
-            .compactMap(\.track) {
-            self.activeTracksBeforePiP = activeTracksBeforePiP
-        }
+        await Task { @MainActor in
+            if
+                let activeTracksBeforePiP = store
+                .state
+                .call?
+                .state
+                .participants
+                .filter({ $0.track?.isEnabled == true })
+                .compactMap(\.track) {
+                self.activeTracksBeforePiP = activeTracksBeforePiP
+            }
+        }.value
 
         DefaultTimer
             .publish(every: screenProperties.refreshRate)
