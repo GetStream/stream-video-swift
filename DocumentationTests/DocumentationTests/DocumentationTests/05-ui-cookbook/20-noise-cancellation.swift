@@ -65,4 +65,34 @@ private func content() {
             }
         }
     }
+
+    asyncContainer {
+        // Start noise cancellation
+        try await call.startNoiseCancellation()
+
+        // Stop noise cancellation
+        try await call.stopNoiseCancellation()
+    }
+
+    viewContainer {
+        // Example of integrating noise cancellation button in custom call controls
+        HStack(spacing: 16) {
+            // Other call controls...
+
+            // Add noise cancellation toggle button
+            Button {
+                Task {
+                    if call.state.settings?.audio.noiseCancellation?.mode == .autoOn {
+                        try await call.stopNoiseCancellation()
+                    } else {
+                        try await call.startNoiseCancellation()
+                    }
+                }
+            } label: {
+                Image(systemName: "waveform.path")
+            }
+
+            // More controls...
+        }
+    }
 }

@@ -34,7 +34,21 @@ private func content() {
             user: user,
             token: token,
             videoConfig: videoConfig,
-            tokenProvider: { _ in }
+            tokenProvider: { _ in
+                // Handle token refresh
+            }
         )
+    }
+
+    asyncContainer {
+        // Start noise cancellation
+        try await call.startNoiseCancellation()
+
+        // Stop noise cancellation
+        try await call.stopNoiseCancellation()
+    }
+
+    container {
+        let isNoiseCancellationActive = call.state.settings?.audio.noiseCancellation?.mode == .autoOn
     }
 }

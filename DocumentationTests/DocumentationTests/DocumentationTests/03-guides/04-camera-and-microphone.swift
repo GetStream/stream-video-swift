@@ -29,4 +29,20 @@ private func content() {
         try await call.microphone.enable() // enable the microphone
         try await call.microphone.disable() // disable the microphone
     }
+
+    asyncContainer {
+        try await call.microphone.toggle()
+    }
+
+    asyncContainer {
+        try await call.speaker.toggleSpeakerPhone()
+    }
+
+    asyncContainer {
+        // Focus on a specific point (normalized coordinates 0-1)
+        try await call.focus(at: CGPoint(x: 0.5, y: 0.5))
+
+        // Zoom the camera (factor relative to current zoom level)
+        try await call.zoom(by: 2.0)
+    }
 }

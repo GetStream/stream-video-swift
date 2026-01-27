@@ -8,6 +8,7 @@ import PushKit
 import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
+import UserNotifications
 
 typealias VoIPPushHandler = ((PKPushPayload, PKPushType, () -> Void)) -> Void
 
@@ -120,6 +121,31 @@ private func content() {
                     }
                 }
             }
+        }
+    }
+
+    container {
+        func userNotificationCenter(
+            _ center: UNUserNotificationCenter,
+            didReceive response: UNNotificationResponse,
+            withCompletionHandler completionHandler: @escaping () -> Void
+        ) {
+            let userInfo = response.notification.request.content.userInfo
+
+            // Extract call information from the payload
+            if let streamDict = userInfo["stream"] as? [String: Any],
+               let callCid = streamDict["call_cid"] as? String {
+                // Parse call type and id from cid (format: "type:id")
+                let components = callCid.split(separator: ":")
+                if components.count == 2 {
+                    let callType = String(components[0])
+                    let callId = String(components[1])
+                    // Navigate to the call
+                    _ = (callType, callId)
+                }
+            }
+
+            completionHandler()
         }
     }
 }

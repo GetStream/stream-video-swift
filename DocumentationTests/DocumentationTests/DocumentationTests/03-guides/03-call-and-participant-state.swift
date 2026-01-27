@@ -2,6 +2,7 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import StreamVideo
 import StreamVideoSwiftUI
 
@@ -31,5 +32,37 @@ private func content() {
 
     container {
         let state = streamVideo.state
+    }
+
+    container {
+        @MainActor
+        class CallObserver {
+            private var cancellables = Set<AnyCancellable>()
+
+            func observeCallState(call: Call) {
+                // Observe participants
+                call.state.$participants
+                    .sink { participants in
+                        print("Participants updated: \(participants.count)")
+                    }
+                    .store(in: &cancellables)
+
+                // Observe recording state
+                call.state.$recordingState
+                    .sink { state in
+                        print("Recording state: \(state)")
+                    }
+                    .store(in: &cancellables)
+
+                // Observe connection quality
+                call.state.$reconnectionStatus
+                    .sink { status in
+                        if status == .disconnected {
+                            print("Connection lost")
+                        }
+                    }
+                    .store(in: &cancellables)
+            }
+        }
     }
 }

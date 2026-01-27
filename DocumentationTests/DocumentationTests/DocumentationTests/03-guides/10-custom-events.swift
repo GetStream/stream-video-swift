@@ -75,4 +75,57 @@ private func content() {
             // perform actions with the custom data.
         }
     }
+
+    container {
+        @MainActor
+        func observeCallEvents(call: Call) {
+            Task {
+                for await event in call.subscribe() {
+                    switch event {
+                    case .typeCallSessionParticipantJoinedEvent(let e):
+                        print("\(e.participant.user.name ?? "Someone") joined")
+
+                    case .typeCallSessionParticipantLeftEvent(let e):
+                        print("\(e.participant.user.name ?? "Someone") left")
+
+                    case .typeCallRecordingStartedEvent:
+                        print("Recording started")
+
+                    case .typeCallRecordingStoppedEvent:
+                        print("Recording stopped")
+
+                    case .typeCallReactionEvent(let e):
+                        print("Reaction: \(e.reaction)")
+
+                    case .typeCustomVideoEvent(let e):
+                        print("Custom event: \(e.custom)")
+
+                    default:
+                        break
+                    }
+                }
+            }
+        }
+    }
+
+    container {
+        @MainActor
+        class CallObserver {
+            private var eventTask: Task<Void, Never>?
+
+            func startObserving(call: Call) {
+                eventTask = Task {
+                    for await event in call.subscribe() {
+                        // Handle events
+                        _ = event
+                    }
+                }
+            }
+
+            func stopObserving() {
+                eventTask?.cancel()
+                eventTask = nil
+            }
+        }
+    }
 }
