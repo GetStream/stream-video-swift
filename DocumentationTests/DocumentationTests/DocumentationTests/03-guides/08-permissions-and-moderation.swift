@@ -114,7 +114,7 @@ private func content() {
                         .padding()
                 }
                 .alert("Moderation", isPresented: $showAlert) {
-                    Button("OK") { }
+                    Button("OK") {}
                 } message: {
                     Text(alertMessage)
                 }

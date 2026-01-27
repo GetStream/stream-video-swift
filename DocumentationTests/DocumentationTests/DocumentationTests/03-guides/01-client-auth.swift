@@ -9,7 +9,7 @@ private enum First {
         apiKey: apiKey,
         user: user,
         token: token,
-        tokenProvider: { result in
+        tokenProvider: { _ in
             // Called when the token expires. Fetch a new token from your backend.
             // Call result(.success(newToken)) or result(.failure(error))
         }

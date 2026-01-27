@@ -34,7 +34,7 @@ private func content() {
             user: user,
             token: token,
             videoConfig: videoConfig,
-            tokenProvider: { result in
+            tokenProvider: { _ in
                 // Handle token refresh
             }
         )
