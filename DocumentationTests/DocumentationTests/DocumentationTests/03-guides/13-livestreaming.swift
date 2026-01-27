@@ -2,6 +2,7 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import AVKit
 import Combine
 import StreamVideo
 import StreamVideoSwiftUI
@@ -10,6 +11,21 @@ import SwiftUI
 
 @MainActor
 private func content() {
+    container {
+        struct HLSPlayerView: View {
+            let hlsURL: URL
+
+            var body: some View {
+                VideoPlayer(player: AVPlayer(url: hlsURL))
+            }
+        }
+    }
+
+    asyncContainer {
+        let response = try await call.startHLS()
+        let hlsPlaylistURL = response.playlistUrl
+    }
+
     container {
         struct LivestreamApp: App {
             @State var streamVideo: StreamVideo

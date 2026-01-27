@@ -9,8 +9,22 @@ private enum First {
         apiKey: apiKey,
         user: user,
         token: token,
-        tokenProvider: { _ in }
+        tokenProvider: { result in
+            // Called when the token expires. Fetch a new token from your backend.
+            // Call result(.success(newToken)) or result(.failure(error))
+        }
     )
+}
+
+@MainActor
+private func content() {
+    asyncContainer {
+        try await streamVideo.connect()
+    }
+
+    asyncContainer {
+        await streamVideo.disconnect()
+    }
 }
 
 private enum Second {
