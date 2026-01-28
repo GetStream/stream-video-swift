@@ -4,6 +4,7 @@
 
 import Foundation
 import StreamVideo
+import StreamWebRTC
 
 protocol Debuggable: Hashable {
     var title: String { get }
@@ -662,6 +663,69 @@ extension AppEnvironment {
 extension AppEnvironment {
 
     nonisolated(unsafe) static var clientCapabilities: Set<ClientCapability>?
+}
+
+extension AppEnvironment {
+
+    enum RenderingBackend: Hashable, Debuggable, Sendable, CaseIterable {
+        case `default`
+        case sharedMetal
+
+        var rawBackend: RTCVideoRenderingBackend {
+            switch self {
+            case .default:
+                return .default
+            case .sharedMetal:
+                return .sharedMetal
+            }
+        }
+
+        var title: String {
+            switch self {
+            case .default:
+                "Default"
+            case .sharedMetal:
+                "Shared Metal Pipeline"
+            }
+        }
+    }
+
+    nonisolated(unsafe) static var renderingBackend: RenderingBackend = .default
+
+    enum RenderingBufferPolicy: Hashable, Debuggable, Sendable, CaseIterable {
+        case none
+        case wrapOnlyExistingNV12
+        case copyToNV12
+        case convertWithPoolToNV12
+
+        var rawPolicy: RTCFrameBufferPolicy {
+            switch self {
+            case .none:
+                return .none
+            case .wrapOnlyExistingNV12:
+                return .wrapOnlyExistingNV12
+            case .copyToNV12:
+                return .copyToNV12
+            case .convertWithPoolToNV12:
+                return .convertWithPoolToNV12
+            }
+        }
+
+        var title: String {
+            switch self {
+            case .none:
+                "None"
+            case .wrapOnlyExistingNV12:
+                "Wrap Only"
+            case .copyToNV12:
+                "Copy"
+            case .convertWithPoolToNV12:
+                "Conver & Copy"
+            }
+        }
+    }
+
+    nonisolated(unsafe) static var renderingBufferPolicy: RenderingBufferPolicy = .none
 }
 
 extension ClientCapability: Debuggable {
