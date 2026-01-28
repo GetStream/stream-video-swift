@@ -3,15 +3,17 @@
 //
 
 import Combine
+import Foundation
 import MetalKit
 import StreamVideo
 import StreamWebRTC
 import SwiftUI
 
 /// A custom video renderer based on RTCMTLVideoView for rendering RTCVideoTrack objects.
-public class VideoRenderer: RTCMTLVideoView, @unchecked Sendable {
+public class VideoRenderer: RTCVideoRenderingView, @unchecked Sendable {
 
     @Injected(\.thermalStateObserver) private var thermalStateObserver
+    @Injected(\.videoRenderingOptions) private var videoRenderingOptions
 
     private let _windowSubject: PassthroughSubject<UIWindow?, Never> = .init()
     private let _superviewSubject: PassthroughSubject<UIView?, Never> = .init()
@@ -58,6 +60,19 @@ public class VideoRenderer: RTCMTLVideoView, @unchecked Sendable {
     /// - Parameter frame: The frame rectangle for the video renderer's view.
     override public init(frame: CGRect) {
         super.init(frame: frame)
+
+        self.renderingBackend = videoRenderingOptions.renderingBackend
+        self.maxInFlightFrames = videoRenderingOptions.maxInFlightFrames
+        if let rotation = videoRenderingOptions.rotationOverride {
+            self.rotationOverride = NSNumber(value: rotation.rawValue)
+        } else {
+            self.rotationOverride = nil
+        }
+
+        log.debug(
+            "VideoRenderer updated with renderingOptions: \(videoRenderingOptions)",
+            subsystems: .other
+        )
 
         // Subscribe to thermal state changes to adjust rendering performance.
         cancellable = thermalStateObserver
