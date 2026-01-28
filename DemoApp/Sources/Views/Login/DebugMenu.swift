@@ -268,6 +268,8 @@ struct DebugMenu: View {
                 label: "Moderation Video Policy"
             ) { self.moderationVideoPolicy = $0 }
 
+            RenderingOptions()
+
             makeMenu(
                 for: [.never, .twoMinutes],
                 currentValue: disconnectionTimeout,
@@ -525,11 +527,20 @@ struct DebugMenu: View {
     private func makeMenu<Item: Debuggable>(
         for items: [Item],
         currentValue: Item,
-        @ViewBuilder additionalItems: () -> some View = { EmptyView() },
+        @ViewBuilder additionalItems: @escaping () -> some View = { EmptyView() },
         label: String,
         availableAfterLogin: Bool = true,
         updater: @escaping (Item) -> Void
     ) -> some View {
+        DebugMenuItemView(
+            label: label,
+            availableAfterLogin: availableAfterLogin,
+            items: items,
+            currentValue: currentValue,
+            additionalItems: additionalItems,
+            updater: updater
+        )
+
         if !availableAfterLogin, appState.userState == .loggedIn {
             EmptyView()
         } else {

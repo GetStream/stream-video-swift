@@ -3,7 +3,6 @@
 //
 
 import AVFoundation
-import Combine
 import CoreMedia
 import Foundation
 import StreamWebRTC
@@ -62,7 +61,7 @@ final class CameraCaptureHandler: StreamVideoCapturerActionHandler, @unchecked S
                 videoCapturerDelegate: videoCapturerDelegate
             )
 
-        case let .updateCaptureQuality(dimensions, device, videoSource, videoCapturer, videoCapturerDelegate):
+        case let .updateCaptureQuality(dimensions, device, videoSource, videoCapturer, videoCapturerDelegate, _):
             guard
                 let cameraCapturer = videoCapturer as? RTCCameraVideoCapturer,
                 let activeConfiguration

@@ -73,6 +73,7 @@ struct DemoCallingViewModifier: ViewModifier {
                 guard !isAnonymous else { return }
                 callKitAdapter.registerForIncomingCalls()
                 callKitAdapter.iconTemplateImageData = UIImage(named: "logo")?.pngData()
+                configureVideoRenderingOptions()
                 joinCallIfNeeded(with: text.wrappedValue, callType: callType)
             }
             .onReceive(appState.$activeCall) { call in
@@ -112,5 +113,12 @@ struct DemoCallingViewModifier: ViewModifier {
             }
             AppState.shared.deeplinkInfo = .empty
         }
+    }
+
+    private func configureVideoRenderingOptions() {
+        InjectedValues[\.videoRenderingOptions] = .init(
+            renderingBackend: AppEnvironment.renderingBackend.rawBackend,
+            bufferPolicy: AppEnvironment.renderingBufferPolicy.rawPolicy
+        )
     }
 }
