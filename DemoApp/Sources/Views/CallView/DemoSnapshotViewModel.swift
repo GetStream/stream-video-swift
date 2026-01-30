@@ -31,16 +31,12 @@ final class DemoSnapshotViewModel: ObservableObject {
 
         cancellable = call
             .eventPublisher(for: CustomVideoEvent.self)
-            .compactMap {
-                guard
-                    let imageBase64Data = $0.custom["snapshot"]?.stringValue,
-                    let imageData = Data(base64Encoded: imageBase64Data),
-                    let image = UIImage(data: imageData)
-                else {
-                    return nil
-                }
-                return image
-            }
+            .receive(on: DispatchQueue.main)
+            .compactMap { $0.custom["snapshot"]?.stringValue }
+            .compactMap { Data(base64Encoded: $0) }
+            .removeDuplicates()
+            .log(.debug) { "Snapshot received with data:\($0)" }
+            .compactMap { UIImage(data: $0) }
             .map {
                 Toast(
                     style: .custom(
@@ -57,5 +53,21 @@ final class DemoSnapshotViewModel: ObservableObject {
                 )
             }
             .assign(to: \.toast, on: self)
+    }
+}
+
+struct DemoSnapshotContainerViewModifier: ViewModifier {
+    private let viewModel: DemoSnapshotViewModel
+
+    @State private var toast: Toast?
+
+    init(_ callViewModel: CallViewModel) {
+        self.viewModel = .init(callViewModel)
+    }
+
+    func body(content: Content) -> some View {
+        content
+            .onReceive(viewModel.$toast.debounce(for: 0.5, scheduler: DispatchQueue.main)) { toast = $0 }
+            .toastView(toast: $toast)
     }
 }

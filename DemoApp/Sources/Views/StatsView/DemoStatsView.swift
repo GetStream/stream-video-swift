@@ -310,18 +310,16 @@ private struct DemoStatView<Value: Comparable>: View {
                 .call?
                 .state
                 .$statsReport
-                .receive(on: DispatchQueue.global(qos: .utility))
-                .map(titleTransformer)
                 .receive(on: DispatchQueue.main)
+                .map(titleTransformer)
                 .assign(to: \.title, onWeak: self)
 
             cancellable = viewModel
                 .call?
                 .state
                 .$statsReport
-                .receive(on: DispatchQueue.global(qos: .utility))
-                .map(valueTransformer)
                 .receive(on: DispatchQueue.main)
+                .map(valueTransformer)
                 .sink { [weak self] value in
                     guard let self else { return }
                     self.previousValue = self.value
