@@ -19,7 +19,6 @@ struct DemoCallView<ViewFactory: DemoAppViewFactory>: View {
     @ObservedObject var reactionsAdapter = InjectedValues[\.reactionsAdapter]
 
     @State var mutedIndicatorShown = false
-    @StateObject var snapshotViewModel: DemoSnapshotViewModel
     @StateObject var sessionTimer: SessionTimer
     
     private let viewFactory: ViewFactory
@@ -32,7 +31,6 @@ struct DemoCallView<ViewFactory: DemoAppViewFactory>: View {
         self.viewFactory = viewFactory
         self.microphoneChecker = microphoneChecker
         self.viewModel = viewModel
-        _snapshotViewModel = .init(wrappedValue: .init(viewModel))
         _sessionTimer = .init(wrappedValue: .init(call: viewModel.call, alertInterval: 60))
     }
 
@@ -76,6 +74,6 @@ struct DemoCallView<ViewFactory: DemoAppViewFactory>: View {
             )
             .presentsMoreControls(viewModel: viewModel)
             .chat(viewModel: viewModel, chatViewModel: chatViewModel)
-            .toastView(toast: $snapshotViewModel.toast)
+            .modifier(DemoSnapshotContainerViewModifier(viewModel))
     }
 }
