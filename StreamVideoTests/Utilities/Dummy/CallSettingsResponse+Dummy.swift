@@ -10,8 +10,14 @@ extension CallSettingsResponse {
         audio: AudioSettings = AudioSettings.dummy(),
         backstage: BackstageSettings = BackstageSettings.dummy(),
         broadcasting: BroadcastSettingsResponse = BroadcastSettingsResponse.dummy(),
+        frameRecording: FrameRecordingSettingsResponse =
+            FrameRecordingSettingsResponse.dummy(),
         geofencing: GeofenceSettings = GeofenceSettings.dummy(),
+        individualRecording: IndividualRecordingSettingsResponse =
+            IndividualRecordingSettingsResponse.dummy(),
         limits: LimitsSettingsResponse = LimitsSettingsResponse.dummy(),
+        rawRecording: RawRecordingSettingsResponse =
+            RawRecordingSettingsResponse.dummy(),
         recording: RecordSettingsResponse = RecordSettingsResponse.dummy(),
         ring: RingSettings = RingSettings.dummy(),
         screensharing: ScreensharingSettings = ScreensharingSettings.dummy(),
@@ -24,8 +30,11 @@ extension CallSettingsResponse {
             audio: audio,
             backstage: backstage,
             broadcasting: broadcasting,
+            frameRecording: frameRecording,
             geofencing: geofencing,
+            individualRecording: individualRecording,
             limits: limits,
+            rawRecording: rawRecording,
             recording: recording,
             ring: ring,
             screensharing: screensharing,
