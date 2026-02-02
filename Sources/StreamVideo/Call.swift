@@ -852,10 +852,11 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
     /// Starts recording for the call.
     @discardableResult
-    public func startRecording() async throws -> StartRecordingResponse {
+    public func startRecording(recordingType: CallRecordingType = .composite) async throws -> StartRecordingResponse {
         let response = try await coordinatorClient.startRecording(
             type: callType,
             id: callId,
+            recordingType: recordingType.rawValue,
             startRecordingRequest: StartRecordingRequest()
         )
         update(recordingState: .requested)
@@ -864,8 +865,12 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
     /// Stops recording a call.
     @discardableResult
-    public func stopRecording() async throws -> StopRecordingResponse {
-        try await coordinatorClient.stopRecording(type: callType, id: callId)
+    public func stopRecording(recordingType: CallRecordingType = .composite) async throws -> StopRecordingResponse {
+        try await coordinatorClient.stopRecording(
+            type: callType,
+            id: callId,
+            recordingType: recordingType.rawValue
+        )
     }
 
     /// Lists recordings for the call.

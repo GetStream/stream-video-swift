@@ -444,6 +444,7 @@ final class MockDefaultAPIEndpoints: DefaultAPIEndpoints, Mockable, @unchecked S
     func startRecording(
         type: String,
         id: String,
+        recordingType: String,
         startRecordingRequest: StartRecordingRequest
     ) async throws -> StartRecordingResponse {
         stubbedFunctionInput[.startRecording]?.append(
@@ -484,7 +485,7 @@ final class MockDefaultAPIEndpoints: DefaultAPIEndpoints, Mockable, @unchecked S
         return try stubbedResult(for: .stopLive)
     }
 
-    func stopRecording(type: String, id: String) async throws -> StopRecordingResponse {
+    func stopRecording(type: String, id: String, recordingType: String) async throws -> StopRecordingResponse {
         stubbedFunctionInput[.stopRecording]?.append(.stopRecording(type: type, id: id))
         return try stubbedResult(for: .stopRecording)
     }

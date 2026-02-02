@@ -1562,6 +1562,11 @@
 		84D935152F30EB3B007A1878 /* IndividualRecordingSettingsResponse+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D935102F30EB3B007A1878 /* IndividualRecordingSettingsResponse+Dummy.swift */; };
 		84D935162F30EB3B007A1878 /* FrameRecordingSettingsResponse+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D9350F2F30EB3B007A1878 /* FrameRecordingSettingsResponse+Dummy.swift */; };
 		84D935172F30EB3B007A1878 /* RawRecordingSettingsResponse+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D935112F30EB3B007A1878 /* RawRecordingSettingsResponse+Dummy.swift */; };
+		84D9351C2F310104007A1878 /* FrameRecordingResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D935192F310104007A1878 /* FrameRecordingResponse.swift */; };
+		84D9351D2F310104007A1878 /* IndividualRecordingResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D9351A2F310104007A1878 /* IndividualRecordingResponse.swift */; };
+		84D9351E2F310104007A1878 /* CompositeRecordingResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D935182F310104007A1878 /* CompositeRecordingResponse.swift */; };
+		84D9351F2F310104007A1878 /* RawRecordingResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D9351B2F310104007A1878 /* RawRecordingResponse.swift */; };
+		84D935212F3105BD007A1878 /* CallRecordingType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D935202F3105BD007A1878 /* CallRecordingType.swift */; };
 		84DC382D29A8B9EC00946713 /* CallParticipantMenuAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DC382C29A8B9EC00946713 /* CallParticipantMenuAction.swift */; };
 		84DC382F29A8BB8D00946713 /* CallParticipantsInfoViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DC382E29A8BB8D00946713 /* CallParticipantsInfoViewModel.swift */; };
 		84DC388F29ADFCFD00946713 /* CodableHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DC383D29ADFCFB00946713 /* CodableHelper.swift */; };
@@ -3226,6 +3231,11 @@
 		84D9350F2F30EB3B007A1878 /* FrameRecordingSettingsResponse+Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FrameRecordingSettingsResponse+Dummy.swift"; sourceTree = "<group>"; };
 		84D935102F30EB3B007A1878 /* IndividualRecordingSettingsResponse+Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IndividualRecordingSettingsResponse+Dummy.swift"; sourceTree = "<group>"; };
 		84D935112F30EB3B007A1878 /* RawRecordingSettingsResponse+Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RawRecordingSettingsResponse+Dummy.swift"; sourceTree = "<group>"; };
+		84D935182F310104007A1878 /* CompositeRecordingResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompositeRecordingResponse.swift; sourceTree = "<group>"; };
+		84D935192F310104007A1878 /* FrameRecordingResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameRecordingResponse.swift; sourceTree = "<group>"; };
+		84D9351A2F310104007A1878 /* IndividualRecordingResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndividualRecordingResponse.swift; sourceTree = "<group>"; };
+		84D9351B2F310104007A1878 /* RawRecordingResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RawRecordingResponse.swift; sourceTree = "<group>"; };
+		84D935202F3105BD007A1878 /* CallRecordingType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallRecordingType.swift; sourceTree = "<group>"; };
 		84DC382C29A8B9EC00946713 /* CallParticipantMenuAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallParticipantMenuAction.swift; sourceTree = "<group>"; };
 		84DC382E29A8BB8D00946713 /* CallParticipantsInfoViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallParticipantsInfoViewModel.swift; sourceTree = "<group>"; };
 		84DC383D29ADFCFB00946713 /* CodableHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CodableHelper.swift; sourceTree = "<group>"; };
@@ -7212,6 +7222,7 @@
 				40034C1F2CFDABE600A318B1 /* PublishOptions.swift */,
 				4039F0CB2D0241120078159E /* AudioCodec.swift */,
 				40895E5F2E25538E00D3049D /* ClientCapability.swift */,
+				84D935202F3105BD007A1878 /* CallRecordingType.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -7636,6 +7647,10 @@
 		84DC383E29ADFCFC00946713 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				84D935182F310104007A1878 /* CompositeRecordingResponse.swift */,
+				84D935192F310104007A1878 /* FrameRecordingResponse.swift */,
+				84D9351A2F310104007A1878 /* IndividualRecordingResponse.swift */,
+				84D9351B2F310104007A1878 /* RawRecordingResponse.swift */,
 				84D935072F30E695007A1878 /* IngressSourceRequest.swift */,
 				84D935082F30E695007A1878 /* IngressSourceResponse.swift */,
 				84D935092F30E695007A1878 /* IngressVideoLayerRequest.swift */,
@@ -8997,6 +9012,7 @@
 				84A7E1802883629700526C98 /* WebSocketClient.swift in Sources */,
 				40BBC4B12C6276A7002AEF92 /* LocalAudioMediaAdapter.swift in Sources */,
 				406B3C3C2C9197FF00FC93A1 /* WebRTCConfiguration.swift in Sources */,
+				84D935212F3105BD007A1878 /* CallRecordingType.swift in Sources */,
 				40064BEF2E5CA3C5007CDB33 /* PushNotificationsPermissionProvider.swift in Sources */,
 				84D2E37829DC856D001D2118 /* CallMemberUpdatedPermissionEvent.swift in Sources */,
 				84F3B0E0289150B10088751D /* CallParticipant.swift in Sources */,
@@ -9225,6 +9241,10 @@
 				40EE9D572E97FC980000EA92 /* RTCAudioStore+AudioDeviceModuleMiddleware.swift in Sources */,
 				40429D5B2C779ADB00AC7FFF /* SFUEventAdapter.swift in Sources */,
 				404098C62DDF444B00D7BEC5 /* SelectiveEncodable.swift in Sources */,
+				84D9351C2F310104007A1878 /* FrameRecordingResponse.swift in Sources */,
+				84D9351D2F310104007A1878 /* IndividualRecordingResponse.swift in Sources */,
+				84D9351E2F310104007A1878 /* CompositeRecordingResponse.swift in Sources */,
+				84D9351F2F310104007A1878 /* RawRecordingResponse.swift in Sources */,
 				4028FEB32DC7CCA8001F9DC3 /* SFUAdapter+Events.swift in Sources */,
 				8458872E28A4EC1F002A81BF /* CallSettings.swift in Sources */,
 				84DC389829ADFCFD00946713 /* VideoSettingsRequest.swift in Sources */,

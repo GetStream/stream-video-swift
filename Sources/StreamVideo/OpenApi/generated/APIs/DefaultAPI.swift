@@ -760,17 +760,21 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     open func startRecording(
         type: String,
         id: String,
+        recordingType: String,
         startRecordingRequest: StartRecordingRequest
     ) async throws -> StartRecordingResponse {
-        var path = "/video/call/{type}/{id}/start_recording"
-        
+        var path = "/video/call/{type}/{id}/recordings/{recording_type}/start"
+
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
         let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         path = path.replacingOccurrences(of: String(format: "{%@}", "type"), with: typePostEscape, options: .literal, range: nil)
         let idPreEscape = "\(APIHelper.mapValueToPathItem(id))"
         let idPostEscape = idPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         path = path.replacingOccurrences(of: String(format: "{%@}", "id"), with: idPostEscape, options: .literal, range: nil)
-        
+        let recordingTypePreEscape = "\(APIHelper.mapValueToPathItem(recordingType))"
+        let recordingTypePostEscape = recordingTypePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        path = path.replacingOccurrences(of: String(format: "{%@}", "recording_type"), with: recordingTypePostEscape, options: .literal, range: nil)
+
         let urlRequest = try makeRequest(
             uriPath: path,
             httpMethod: "POST",
@@ -887,16 +891,23 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         }
     }
 
-    open func stopRecording(type: String, id: String) async throws -> StopRecordingResponse {
-        var path = "/video/call/{type}/{id}/stop_recording"
-        
+    open func stopRecording(
+        type: String,
+        id: String,
+        recordingType: String
+    ) async throws -> StopRecordingResponse {
+        var path = "/video/call/{type}/{id}/recordings/{recording_type}/stop"
+
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
         let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         path = path.replacingOccurrences(of: String(format: "{%@}", "type"), with: typePostEscape, options: .literal, range: nil)
         let idPreEscape = "\(APIHelper.mapValueToPathItem(id))"
         let idPostEscape = idPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         path = path.replacingOccurrences(of: String(format: "{%@}", "id"), with: idPostEscape, options: .literal, range: nil)
-        
+        let recordingTypePreEscape = "\(APIHelper.mapValueToPathItem(recordingType))"
+        let recordingTypePostEscape = recordingTypePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+                    path = path.replacingOccurrences(of: String(format: "{%@}", "recording_type"), with: recordingTypePostEscape, options: .literal, range: nil)
+
         let urlRequest = try makeRequest(
             uriPath: path,
             httpMethod: "POST"
@@ -1257,8 +1268,12 @@ protocol DefaultAPIEndpoints {
     func startClosedCaptions(type: String, id: String, startClosedCaptionsRequest: StartClosedCaptionsRequest) async throws
         -> StartClosedCaptionsResponse
         
-    func startRecording(type: String, id: String, startRecordingRequest: StartRecordingRequest) async throws
-        -> StartRecordingResponse
+    func startRecording(
+        type: String,
+        id: String,
+        recordingType: String,
+        startRecordingRequest: StartRecordingRequest
+    ) async throws -> StartRecordingResponse
         
     func startTranscription(type: String, id: String, startTranscriptionRequest: StartTranscriptionRequest) async throws
         -> StartTranscriptionResponse
@@ -1270,7 +1285,7 @@ protocol DefaultAPIEndpoints {
         
     func stopLive(type: String, id: String, stopLiveRequest: StopLiveRequest) async throws -> StopLiveResponse
         
-    func stopRecording(type: String, id: String) async throws -> StopRecordingResponse
+    func stopRecording(type: String, id: String, recordingType: String) async throws -> StopRecordingResponse
         
     func stopTranscription(type: String, id: String, stopTranscriptionRequest: StopTranscriptionRequest) async throws
         -> StopTranscriptionResponse
