@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class CallRecordingStartedEvent: @unchecked Sendable,  Event, Codable, JSONEncodable, Hashable, WSCallEvent {
+public final class CallRecordingStartedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
     
     public enum CallRecordingStartedEventRecordingType: String, Sendable, Codable, CaseIterable {
         case composite = "composite"
@@ -35,13 +35,13 @@ public final class CallRecordingStartedEvent: @unchecked Sendable,  Event, Codab
         self.recordingType = recordingType
     }
 
-public enum CodingKeys: String, CodingKey, CaseIterable {
-    case callCid = "call_cid"
-    case createdAt = "created_at"
-    case egressId = "egress_id"
-    case recordingType = "recording_type"
-    case type
-}
+    public enum CodingKeys: String, CodingKey, CaseIterable {
+        case callCid = "call_cid"
+        case createdAt = "created_at"
+        case egressId = "egress_id"
+        case recordingType = "recording_type"
+        case type
+    }
 
     public static func == (lhs: CallRecordingStartedEvent, rhs: CallRecordingStartedEvent) -> Bool {
         lhs.callCid == rhs.callCid &&

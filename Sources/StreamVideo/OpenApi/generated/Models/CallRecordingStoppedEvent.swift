@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class CallRecordingStoppedEvent: @unchecked Sendable,  Event, Codable, JSONEncodable, Hashable, WSCallEvent {
+public final class CallRecordingStoppedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
     
     public enum CallRecordingStoppedEventRecordingType: String, Sendable, Codable, CaseIterable {
         case composite = "composite"

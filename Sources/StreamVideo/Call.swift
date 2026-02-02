@@ -851,6 +851,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     // MARK: - Recording
 
     /// Starts recording for the call.
+    /// - Parameter recordingType: the type of the recording.
     @discardableResult
     public func startRecording(recordingType: CallRecordingType = .composite) async throws -> StartRecordingResponse {
         let response = try await coordinatorClient.startRecording(
@@ -864,6 +865,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     }
 
     /// Stops recording a call.
+    /// - Parameter recordingType: the type of the recording.
     @discardableResult
     public func stopRecording(recordingType: CallRecordingType = .composite) async throws -> StopRecordingResponse {
         try await coordinatorClient.stopRecording(
