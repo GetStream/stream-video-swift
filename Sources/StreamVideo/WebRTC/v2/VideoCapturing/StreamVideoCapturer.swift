@@ -9,7 +9,7 @@ protocol StreamVideoCapturerActionHandler: Sendable {
     func handle(_ action: StreamVideoCapturer.Action) async throws
 }
 
-final class StreamVideoCapturer: StreamVideoCapturing {
+public final class StreamVideoCapturer: StreamVideoCapturing {
 
     // MARK: - Convenience Initialisers
 
@@ -104,6 +104,24 @@ final class StreamVideoCapturer: StreamVideoCapturing {
             audioDeviceModule: audioDeviceModule,
             actionHandlers: [
                 BroadcastCaptureHandler()
+            ]
+        )
+    }
+
+    /// Creates a capturer for an external video source (e.g. wearable). No device camera or broadcast extension is used.
+    /// When video is enabled, `sessionReadyCallback` is invoked with a frame sink; push frames at your desired rate.
+    static func externalSourceCapturer(
+        with videoSource: RTCVideoSource,
+        audioDeviceModule: AudioDeviceModule,
+        sessionReadyCallback: @escaping @Sendable (ExternalFrameSink) -> Void
+    ) -> StreamVideoCapturer {
+        .init(
+            videoSource: videoSource,
+            videoCapturer: RTCVideoCapturer(delegate: videoSource),
+            videoCapturerDelegate: videoSource,
+            audioDeviceModule: audioDeviceModule,
+            actionHandlers: [
+                ExternalSourceCaptureHandler(sessionReadyCallback: sessionReadyCallback)
             ]
         )
     }
@@ -256,7 +274,7 @@ final class StreamVideoCapturer: StreamVideoCapturing {
         actionHandlers.first { $0 is T } as? T
     }
 
-    func supportsBackgrounding() -> Bool {
+    public func supportsBackgrounding() -> Bool {
         if #available(iOS 16.0, *) {
             return videoCaptureSession?.isMultitaskingCameraAccessSupported ?? false
         } else {
@@ -266,7 +284,7 @@ final class StreamVideoCapturer: StreamVideoCapturing {
 
     // MARK: - Actions
 
-    func startCapture(
+    public func startCapture(
         position: AVCaptureDevice.Position = .front,
         dimensions: CGSize,
         frameRate: Int
@@ -290,7 +308,7 @@ final class StreamVideoCapturer: StreamVideoCapturing {
         )
     }
 
-    func stopCapture() async throws {
+    public func stopCapture() async throws {
         try await enqueueOperation(
             for: .stopCapture(
                 videoCapturer: videoCapturer
@@ -298,7 +316,7 @@ final class StreamVideoCapturer: StreamVideoCapturing {
         )
     }
 
-    func setCameraPosition(_ position: AVCaptureDevice.Position) async throws {
+    public func setCameraPosition(_ position: AVCaptureDevice.Position) async throws {
         guard videoCaptureSession != nil else { return }
         try await enqueueOperation(
             for: .setCameraPosition(
@@ -310,7 +328,7 @@ final class StreamVideoCapturer: StreamVideoCapturing {
         )
     }
 
-    func setVideoFilter(_ videoFilter: VideoFilter?) {
+    public func setVideoFilter(_ videoFilter: VideoFilter?) {
         guard
             let videoCapturerDelegate = videoCapturerDelegate as? StreamVideoCaptureHandler
         else {
@@ -319,7 +337,7 @@ final class StreamVideoCapturer: StreamVideoCapturing {
         videoCapturerDelegate.selectedFilter = videoFilter
     }
 
-    func updateCaptureQuality(
+    public func updateCaptureQuality(
         _ dimensions: CGSize
     ) async throws {
         guard let device = videoCaptureSession?.activeVideoCaptureDevice else { return }
@@ -334,7 +352,7 @@ final class StreamVideoCapturer: StreamVideoCapturing {
         )
     }
 
-    func focus(at point: CGPoint) async throws {
+    public func focus(at point: CGPoint) async throws {
         guard let videoCaptureSession else { return }
         try await enqueueOperation(
             for: .focus(
@@ -344,7 +362,7 @@ final class StreamVideoCapturer: StreamVideoCapturing {
         )
     }
 
-    func zoom(by factor: CGFloat) async throws {
+    public func zoom(by factor: CGFloat) async throws {
         guard let videoCaptureSession else { return }
         try await enqueueOperation(
             for: .zoom(
@@ -354,7 +372,7 @@ final class StreamVideoCapturer: StreamVideoCapturing {
         )
     }
 
-    func addCapturePhotoOutput(
+    public func addCapturePhotoOutput(
         _ capturePhotoOutput: AVCapturePhotoOutput
     ) async throws {
         guard let videoCaptureSession else { return }
@@ -366,7 +384,7 @@ final class StreamVideoCapturer: StreamVideoCapturing {
         )
     }
 
-    func removeCapturePhotoOutput(
+    public func removeCapturePhotoOutput(
         _ capturePhotoOutput: AVCapturePhotoOutput
     ) async throws {
         guard let videoCaptureSession else { return }
@@ -378,7 +396,7 @@ final class StreamVideoCapturer: StreamVideoCapturing {
         )
     }
 
-    func addVideoOutput(
+    public func addVideoOutput(
         _ videoOutput: AVCaptureVideoDataOutput
     ) async throws {
         guard let videoCaptureSession else { return }
@@ -390,7 +408,7 @@ final class StreamVideoCapturer: StreamVideoCapturing {
         )
     }
 
-    func removeVideoOutput(
+    public func removeVideoOutput(
         _ videoOutput: AVCaptureVideoDataOutput
     ) async throws {
         guard let videoCaptureSession else { return }
