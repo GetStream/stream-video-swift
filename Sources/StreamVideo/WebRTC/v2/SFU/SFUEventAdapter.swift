@@ -285,10 +285,12 @@ final class SFUEventAdapter: @unchecked Sendable {
             await stateAdapter.didRemoveTrack(for: trackLookupPrefix)
         }
 
-        postNotification(
-            with: CallNotification.participantLeft,
-            userInfo: ["id": participant.id]
-        )
+        Task { @MainActor in
+            postNotification(
+                with: CallNotification.participantLeft,
+                userInfo: ["id": participant.id]
+            )
+        }
     }
 
     /// Handles a DominantSpeakerChanged event.

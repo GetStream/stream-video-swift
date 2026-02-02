@@ -48,8 +48,10 @@ open class BroadcastSampleHandler: RPBroadcastSampleHandler, @unchecked Sendable
     ///
     /// - Parameter setupInfo: Information passed during setup.
     override public func broadcastStarted(withSetupInfo setupInfo: [String: NSObject]?) {
-        postNotification(BroadcastConstants.broadcastStartedNotification)
-        openConnection()
+        Task { @MainActor [weak self] in
+            self?.postNotification(BroadcastConstants.broadcastStartedNotification)
+            self?.openConnection()
+        }
     }
 
     /// Placeholder method for handling broadcast pause event.
@@ -64,8 +66,10 @@ open class BroadcastSampleHandler: RPBroadcastSampleHandler, @unchecked Sendable
 
     /// Handles the broadcast end event.
     override public func broadcastFinished() {
-        postNotification(BroadcastConstants.broadcastStoppedNotification)
-        clientConnection?.close()
+        Task { @MainActor [weak self] in
+            self?.postNotification(BroadcastConstants.broadcastStoppedNotification)
+            self?.clientConnection?.close()
+        }
     }
 
     /// Processes the sample buffer.
