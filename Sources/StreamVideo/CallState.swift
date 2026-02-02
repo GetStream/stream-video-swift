@@ -219,13 +219,17 @@ public class CallState: ObservableObject {
             } else if event.recordingType == .raw {
                 rawRecordingStatus = true
             }
-        case .typeCallRecordingStoppedEvent:
+        case let .typeCallRecordingStoppedEvent(event):
             if recordingState != .noRecording {
                 recordingState = .noRecording
             }
-            compositeRecordingStatus = false
-            individualRecordingStatus = false
-            rawRecordingStatus = false
+            if event.recordingType == .composite {
+                compositeRecordingStatus = false
+            } else if event.recordingType == .individual {
+                individualRecordingStatus = false
+            } else if event.recordingType == .raw {
+                rawRecordingStatus = false
+            }
         case let .typeCallRejectedEvent(event):
             update(from: event.call)
         case let .typeCallRingEvent(event):

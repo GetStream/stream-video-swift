@@ -112,7 +112,12 @@ final class Call_Tests: StreamVideoTestCase {
     func test_updateState_fromRecordingStoppedEvent() {
         // Given
         let call = streamVideo?.call(callType: callType, callId: callId)
-        let event = CallRecordingStoppedEvent(callCid: callCid, createdAt: Date())
+        let event = CallRecordingStoppedEvent(
+            callCid: callCid,
+            createdAt: Date(),
+            egressId: "123",
+            recordingType: .composite
+        )
 
         // When
         call?.state.updateState(from: .typeCallRecordingStoppedEvent(event))
