@@ -591,7 +591,9 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
     /// Leave the current call.
     public func leave() {
-        postNotification(with: CallNotification.callEnded, object: self)
+        Task { @MainActor [weak self] in
+            postNotification(with: CallNotification.callEnded, object: self)
+        }
 
         disposableBag.removeAll()
         callController.leave()
