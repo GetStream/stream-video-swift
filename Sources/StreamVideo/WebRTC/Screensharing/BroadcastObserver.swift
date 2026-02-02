@@ -23,12 +23,16 @@ public class BroadcastObserver: ObservableObject {
 
     /// Callback function triggered when the broadcast starts.
     lazy var broadcastStarted: CFNotificationCallback = { _, _, _, _, _ in
-        postNotification(with: BroadcastConstants.broadcastStartedNotification)
+        Task { @MainActor in
+            postNotification(with: BroadcastConstants.broadcastStartedNotification)
+        }
     }
 
     /// Callback function triggered when the broadcast stops.
     lazy var broadcastStopped: CFNotificationCallback = { _, _, _, _, _ in
-        postNotification(with: BroadcastConstants.broadcastStoppedNotification)
+        Task { @MainActor in
+            postNotification(with: BroadcastConstants.broadcastStoppedNotification)
+        }
     }
 
     /// Initiates the observation of broadcast notifications.
