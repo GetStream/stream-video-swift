@@ -15,7 +15,10 @@ public final class VideoConfig: Sendable {
 
     /// The audio processing module that handles the audio streams provided by WebRTC.
     public let audioProcessingModule: AudioProcessingModule
-        
+
+    /// Optional custom video capturer provider (e.g. for external/wearable video source). When set, the call uses this instead of the device camera.
+    public let customVideoCapturerProvider: ExternalVideoCapturerProvider?
+
     /// Initializes a new instance of `VideoConfig` with the specified parameters.
     /// - Parameters:
     ///   - videoFilters: An array of `VideoFilter` objects representing the filters to apply to the video.
@@ -23,14 +26,17 @@ public final class VideoConfig: Sendable {
     ///   noiseCancellationFilter, that the SDK will use whenever noiseCancellation handling requires
     ///   automatic actions (e.g. when the NoiseCancellationSettings.mode is set to `autoOn`).
     ///   - audioProcessingModule: Provide your own audio processing or fallback to the default one..
+    ///   - customVideoCapturerProvider: Optional custom provider for video capture (e.g. wearable/external source). When set, the device camera is not used for the call.
     /// - Returns: A new instance of `VideoConfig`.
     public init(
         videoFilters: [VideoFilter] = [],
         noiseCancellationFilter: NoiseCancellationFilter? = nil,
-        audioProcessingModule: AudioProcessingModule? = nil
+        audioProcessingModule: AudioProcessingModule? = nil,
+        customVideoCapturerProvider: ExternalVideoCapturerProvider? = nil
     ) {
         self.videoFilters = videoFilters
         self.noiseCancellationFilter = noiseCancellationFilter
         self.audioProcessingModule = audioProcessingModule ?? InjectedValues[\.audioFilterProcessingModule]
+        self.customVideoCapturerProvider = customVideoCapturerProvider
     }
 }

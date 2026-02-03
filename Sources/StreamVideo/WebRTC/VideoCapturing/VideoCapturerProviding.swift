@@ -9,7 +9,7 @@ import StreamWebRTC
 /// `VideoCapturerProviding` enables the creation of video capturers for camera
 /// and screen sharing. Implementations can define how capturers are configured
 /// and initialized, supporting custom sources and optional filters.
-protocol VideoCapturerProviding {
+protocol VideoCapturerProviding: Sendable {
 
     /// Builds a camera capturer with the specified source.
     ///
@@ -53,7 +53,7 @@ protocol VideoCapturerProviding {
 /// `StreamVideoCapturerFactory` provides capturers for both camera and screen sharing
 /// scenarios. It supports flexible configurations and integrates with the WebRTC stack
 /// to manage video capturing effectively.
-final class StreamVideoCapturerFactory: VideoCapturerProviding {
+final class StreamVideoCapturerFactory: VideoCapturerProviding, Sendable {
 
     /// Creates a camera capturer using the specified video source.
     ///
