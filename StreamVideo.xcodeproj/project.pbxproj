@@ -38,7 +38,6 @@
 		8423B7562950BB0B00012F8D /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = 8423B7552950BB0B00012F8D /* Sentry */; };
 		8427FF642A03D1D100AFD2C3 /* Intents.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8427FF632A03D1D100AFD2C3 /* Intents.framework */; };
 		8427FF6B2A03D1D100AFD2C3 /* CallIntent.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 8427FF622A03D1D100AFD2C3 /* CallIntent.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		843DAB9C29E6FFCD00E0EB63 /* StreamVideo_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843DAB9B29E6FFCD00E0EB63 /* StreamVideo_Tests.swift */; };
 		844ADA652AD3F1AB00769F6A /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 844ADA642AD3F1AB00769F6A /* GoogleSignInSwift */; };
 		848A8058290A808A00F3079B /* StreamVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F737ED287C13AC00A363F4 /* StreamVideo.framework */; };
 		848A8059290A808A00F3079B /* StreamVideo.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 84F737ED287C13AC00A363F4 /* StreamVideo.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -50,8 +49,6 @@
 		848C46AB2A6ABF7E00E5AC09 /* ScreenSharing.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 848C46A22A6ABF7E00E5AC09 /* ScreenSharing.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		84BAD7712A6AE33700733156 /* StreamVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F737ED287C13AC00A363F4 /* StreamVideo.framework */; };
 		84BE8A5628BE314000B34D2F /* SwiftProtobuf in Frameworks */ = {isa = PBXBuildFile; productRef = 84BE8A5528BE314000B34D2F /* SwiftProtobuf */; };
-		84CBBE0B29228BA900D0DA61 /* StreamVideoTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8492B8722908024800006649 /* StreamVideoTestCase.swift */; };
-		84DCA20C2A38300C000C3411 /* StreamVideoTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8492B8722908024800006649 /* StreamVideoTestCase.swift */; };
 		84F737F5287C13AD00A363F4 /* StreamVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F737ED287C13AC00A363F4 /* StreamVideo.framework */; };
 		84F7380F287C141000A363F4 /* StreamVideoSwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F73807287C141000A363F4 /* StreamVideoSwiftUI.framework */; };
 		84F7381A287C141000A363F4 /* StreamVideoSwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F73807287C141000A363F4 /* StreamVideoSwiftUI.framework */; };
@@ -243,11 +240,8 @@
 		8427FF622A03D1D100AFD2C3 /* CallIntent.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = CallIntent.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		8427FF632A03D1D100AFD2C3 /* Intents.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Intents.framework; path = System/Library/Frameworks/Intents.framework; sourceTree = SDKROOT; };
 		842D8BC32865B31B00801910 /* StreamVideoCallApp-Debug.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "StreamVideoCallApp-Debug.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		843DAB9B29E6FFCD00E0EB63 /* StreamVideo_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamVideo_Tests.swift; sourceTree = "<group>"; };
 		848C46A22A6ABF7E00E5AC09 /* ScreenSharing.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ScreenSharing.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		848C46A32A6ABF7E00E5AC09 /* ReplayKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ReplayKit.framework; path = System/Library/Frameworks/ReplayKit.framework; sourceTree = SDKROOT; };
-		8492B8722908024800006649 /* StreamVideoTestCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamVideoTestCase.swift; sourceTree = "<group>"; };
-		84932245290831DB0013C029 /* StreamVideo.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = StreamVideo.xctestplan; sourceTree = "<group>"; };
 		8493224C290837890013C029 /* DemoAppUIKit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DemoAppUIKit.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		84F737ED287C13AC00A363F4 /* StreamVideo.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = StreamVideo.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		84F737F4287C13AD00A363F4 /* StreamVideoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StreamVideoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -265,111 +259,127 @@
 			);
 			target = 82392D502993C9E100941435 /* SwiftUIDemoAppUITests */;
 		};
-		82A00A6B2F321ABA00C57834 /* Exceptions for "Mock" folder in "StreamVideoTests" target */ = {
+		82A047382F321B7400C57834 /* Exceptions for "StreamVideoTests" folder in "StreamVideoTests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				CallCoordinatorController_Mock.swift,
+				Mock/CallCoordinatorController_Mock.swift,
+				StreamVideo.xctestplan,
 			);
 			target = 84F737F3287C13AD00A363F4 /* StreamVideoTests */;
 		};
-		82A00A6C2F321ABA00C57834 /* Exceptions for "Mock" folder in "StreamVideoSwiftUITests" target */ = {
+		82A047392F321B7400C57834 /* Exceptions for "StreamVideoTests" folder in "StreamVideoSwiftUITests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				CallController_Mock.swift,
-				CallParticipant_Mock.swift,
-				EventBatcher_Mock.swift,
-				EventDecoder_Mock.swift,
-				HTTPClient_Mock.swift,
-				MockAppStateAdapter.swift,
-				MockCall.swift,
-				MockDefaultAPI.swift,
-				MockDefaultAPIEndpoints.swift,
-				MockFunc.swift,
-				MockInternetConnection.swift,
-				MockPermissionsStore.swift,
-				MockResponseBuilder.swift,
-				MockStreamCallAudioRecorder.swift,
-				MockStreamVideo.swift,
-				MockThermalStateObserver.swift,
-				"PeerConnectionFactory+Mock.swift",
-				Store/MockMiddleware.swift,
-				Store/MockReducer.swift,
-				StreamVideo_Mock.swift,
-				"VideoConfig+Dummy.swift",
-				WebSocketClientEnvironment_Mock.swift,
-				WebSocketEngine_Mock.swift,
-				WebSocketPingController_Mock.swift,
+				Mock/CallController_Mock.swift,
+				Mock/CallParticipant_Mock.swift,
+				Mock/EventBatcher_Mock.swift,
+				Mock/EventDecoder_Mock.swift,
+				Mock/HTTPClient_Mock.swift,
+				Mock/MockAppStateAdapter.swift,
+				Mock/MockCall.swift,
+				Mock/MockDefaultAPI.swift,
+				Mock/MockDefaultAPIEndpoints.swift,
+				Mock/MockFunc.swift,
+				Mock/MockInternetConnection.swift,
+				Mock/MockPermissionsStore.swift,
+				Mock/MockResponseBuilder.swift,
+				Mock/MockStreamCallAudioRecorder.swift,
+				Mock/MockStreamVideo.swift,
+				Mock/MockThermalStateObserver.swift,
+				"Mock/PeerConnectionFactory+Mock.swift",
+				Mock/Store/MockMiddleware.swift,
+				Mock/Store/MockReducer.swift,
+				Mock/StreamVideo_Mock.swift,
+				"Mock/VideoConfig+Dummy.swift",
+				Mock/WebSocketClientEnvironment_Mock.swift,
+				Mock/WebSocketEngine_Mock.swift,
+				Mock/WebSocketPingController_Mock.swift,
+				StreamVideoTestCase.swift,
+				TestUtils/AssertAsync.swift,
+				TestUtils/AssertDelay.swift,
+				TestUtils/EquatableEvent.swift,
+				TestUtils/Mockable.swift,
+				TestUtils/UniqueValues.swift,
+				TestUtils/VirtualTime/VirtualTime.swift,
+				TestUtils/VirtualTime/VirtualTimer.swift,
+				"TestUtils/XCTestCase+Wait.swift",
+				"Utilities/Dummy/AudioSettings+Dummy.swift",
+				"Utilities/Dummy/BackstageSettings+Dummy.swift",
+				"Utilities/Dummy/BroadcastSettingsResponse+Dummy.swift",
+				"Utilities/Dummy/CallAcceptedEvent+Dummy.swift",
+				"Utilities/Dummy/CallIngressResponse+Dummy.swift",
+				"Utilities/Dummy/CallParticipantResponse+Dummy.swift",
+				"Utilities/Dummy/CallRejectedEvent+Dummy.swift",
+				"Utilities/Dummy/CallResponse+Dummy.swift",
+				"Utilities/Dummy/CallSessionParticipantLeftEvent+Dummy.swift",
+				"Utilities/Dummy/CallSessionResponse+Dummy.swift",
+				"Utilities/Dummy/CallSettingsResponse+Dummy.swift",
+				"Utilities/Dummy/Credentials+Dummy.swift",
+				"Utilities/Dummy/EgressHLSResponse+Dummy.swift",
+				"Utilities/Dummy/EgressResponse+Dummy.swift",
+				"Utilities/Dummy/EgressRTMPResponse+Dummy.swift",
+				"Utilities/Dummy/GeofenceSettings+Dummy.swift",
+				"Utilities/Dummy/GetCallResponse+Dummy.swift",
+				"Utilities/Dummy/HLSSettingsResponse+Dummy.swift",
+				"Utilities/Dummy/JoinCallResponse+Dummy.swift",
+				"Utilities/Dummy/LimitsSettingsResponse+Dummy.swift",
+				"Utilities/Dummy/PublishOptions+Dummy.swift",
+				"Utilities/Dummy/RecordSettingsResponse+Dummy.swift",
+				"Utilities/Dummy/RingSettings+Dummy.swift",
+				"Utilities/Dummy/RTCAudioStoreState+Dummy.swift",
+				"Utilities/Dummy/RTCMediaStreamTrack+dummy.swift",
+				"Utilities/Dummy/RTMPIngress+Dummy.swift",
+				"Utilities/Dummy/ScreensharingSettings+Dummy.swift",
+				"Utilities/Dummy/SessionSettingsResponse+Dummy.swift",
+				"Utilities/Dummy/SFUResponse+Dummy.swift",
+				"Utilities/Dummy/Stream_Video_Sfu_Event_ChangePublishQuality+Dummy.swift",
+				"Utilities/Dummy/Stream_Video_Sfu_Event_SubscriberOffer+Dummy.swift",
+				"Utilities/Dummy/Stream_Video_Sfu_Event_VideoLayerSetting+Dummy.swift",
+				"Utilities/Dummy/Stream_Video_Sfu_Event_VideoSender+Dummy.swift",
+				"Utilities/Dummy/Stream_Video_Sfu_Models_Codec+Dummy.swift",
+				"Utilities/Dummy/Stream_Video_Sfu_Models_TrackInfo+Dummy.swift",
+				"Utilities/Dummy/TargetResolution+Dummy.swift",
+				"Utilities/Dummy/ThumbnailResponse+Dummy.swift",
+				"Utilities/Dummy/ThumbnailsSettings+Dummy.swift",
+				"Utilities/Dummy/TranscriptionSettings+Dummy.swift",
+				"Utilities/Dummy/UserResponse+Dummy.swift",
+				"Utilities/Dummy/VideoFilter+Dummy.swift",
+				"Utilities/Dummy/VideoSettings+Dummy.swift",
+				"Utilities/Dummy/WebRTCTrace+Dummy.swift",
+				"Utilities/Extensions/CVPixelBuffer+Convenience.swift",
+				"Utilities/Extensions/Stream_Video_Sfu_Models_ConnectionQuality+Convenience.swift",
+				"Utilities/Extensions/Stream_Video_Sfu_Models_Participant+Convenience.swift",
+				"Utilities/Extensions/XCTestCase+PredicateFulfillment.swift",
 			);
 			target = 84F7380D287C141000A363F4 /* StreamVideoSwiftUITests */;
 		};
-		82A00A6D2F321ABA00C57834 /* Exceptions for "Mock" folder in "StreamVideoUIKitTests" target */ = {
+		82A0473A2F321B7400C57834 /* Exceptions for "StreamVideoTests" folder in "StreamVideoUIKitTests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				CallController_Mock.swift,
-				CallParticipant_Mock.swift,
-				EventBatcher_Mock.swift,
-				EventDecoder_Mock.swift,
-				HTTPClient_Mock.swift,
-				MockDefaultAPIEndpoints.swift,
-				MockFunc.swift,
-				MockResponseBuilder.swift,
-				StreamVideo_Mock.swift,
-				"VideoConfig+Dummy.swift",
-				WebSocketClientEnvironment_Mock.swift,
-				WebSocketEngine_Mock.swift,
-				WebSocketPingController_Mock.swift,
-			);
-			target = 84F7382E287C146D00A363F4 /* StreamVideoUIKitTests */;
-		};
-		82A00AA32F321ABD00C57834 /* Exceptions for "TestUtils" folder in "StreamVideoSwiftUITests" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				AssertJSONEqual.swift,
-				AssertTestQueue.swift,
-				"Calendar+GMT.swift",
-				EventLogger.swift,
-				TestError.swift,
-				WebSocketPingController_Delegate.swift,
-				XCTAsyncUnwrap.swift,
-			);
-			target = 84F7380D287C141000A363F4 /* StreamVideoSwiftUITests */;
-		};
-		82A00AA42F321ABD00C57834 /* Exceptions for "TestUtils" folder in "StreamVideoUIKitTests" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				AssertAsync.swift,
-				EquatableEvent.swift,
-				Mockable.swift,
-				UniqueValues.swift,
-				VirtualTime/VirtualTime.swift,
-				VirtualTime/VirtualTimer.swift,
-			);
-			target = 84F7382E287C146D00A363F4 /* StreamVideoUIKitTests */;
-		};
-		82A00C8C2F321AED00C57834 /* Exceptions for "Utilities" folder in "StreamVideoSwiftUITests" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				"Dummy/AggregatedStatsReport+Dummy.swift",
-				"Dummy/BaseStats+Dummy.swift",
-				"Dummy/CallStatsReport+Dummy.swift",
-				"Dummy/MemberResponse+Dummy.swift",
-				"Dummy/ParticipantsStats+Dummy.swift",
-				"Dummy/StreamRTCStatisticsReport+Dummy.swift",
-				Mocks/MockCallKitPushNotificationAdapter.swift,
-				Mocks/MockCallKitService.swift,
-				Mocks/MockCXProvider.swift,
-				TestsAuthenticationProvider.swift,
-			);
-			target = 84F7380D287C141000A363F4 /* StreamVideoSwiftUITests */;
-		};
-		82A00C8D2F321AED00C57834 /* Exceptions for "Utilities" folder in "StreamVideoUIKitTests" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				"Dummy/LimitsSettingsResponse+Dummy.swift",
-				"Extensions/CVPixelBuffer+Convenience.swift",
-				"Extensions/Stream_Video_Sfu_Models_ConnectionQuality+Convenience.swift",
-				"Extensions/Stream_Video_Sfu_Models_Participant+Convenience.swift",
-				"Extensions/XCTestCase+PredicateFulfillment.swift",
+				Mock/CallController_Mock.swift,
+				Mock/CallParticipant_Mock.swift,
+				Mock/EventBatcher_Mock.swift,
+				Mock/EventDecoder_Mock.swift,
+				Mock/HTTPClient_Mock.swift,
+				Mock/MockDefaultAPIEndpoints.swift,
+				Mock/MockFunc.swift,
+				Mock/MockResponseBuilder.swift,
+				Mock/StreamVideo_Mock.swift,
+				"Mock/VideoConfig+Dummy.swift",
+				Mock/WebSocketClientEnvironment_Mock.swift,
+				Mock/WebSocketEngine_Mock.swift,
+				Mock/WebSocketPingController_Mock.swift,
+				TestUtils/AssertAsync.swift,
+				TestUtils/EquatableEvent.swift,
+				TestUtils/Mockable.swift,
+				TestUtils/UniqueValues.swift,
+				TestUtils/VirtualTime/VirtualTime.swift,
+				TestUtils/VirtualTime/VirtualTimer.swift,
+				"Utilities/Dummy/LimitsSettingsResponse+Dummy.swift",
+				"Utilities/Extensions/CVPixelBuffer+Convenience.swift",
+				"Utilities/Extensions/Stream_Video_Sfu_Models_ConnectionQuality+Convenience.swift",
+				"Utilities/Extensions/Stream_Video_Sfu_Models_Participant+Convenience.swift",
+				"Utilities/Extensions/XCTestCase+PredicateFulfillment.swift",
 			);
 			target = 84F7382E287C146D00A363F4 /* StreamVideoUIKitTests */;
 		};
@@ -862,112 +872,14 @@
 			path = SwiftUIDemoAppUITests;
 			sourceTree = "<group>";
 		};
-		82A009FD2F321ABA00C57834 /* Mock */ = {
+		82A045652F321B7400C57834 /* StreamVideoTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				82A00A6B2F321ABA00C57834 /* Exceptions for "Mock" folder in "StreamVideoTests" target */,
-				82A00A6C2F321ABA00C57834 /* Exceptions for "Mock" folder in "StreamVideoSwiftUITests" target */,
-				82A00A6D2F321ABA00C57834 /* Exceptions for "Mock" folder in "StreamVideoUIKitTests" target */,
+				82A047382F321B7400C57834 /* Exceptions for "StreamVideoTests" folder in "StreamVideoTests" target */,
+				82A047392F321B7400C57834 /* Exceptions for "StreamVideoTests" folder in "StreamVideoSwiftUITests" target */,
+				82A0473A2F321B7400C57834 /* Exceptions for "StreamVideoTests" folder in "StreamVideoUIKitTests" target */,
 			);
-			path = Mock;
-			sourceTree = "<group>";
-		};
-		82A00A7E2F321ABD00C57834 /* TestUtils */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				82A00AA32F321ABD00C57834 /* Exceptions for "TestUtils" folder in "StreamVideoSwiftUITests" target */,
-				82A00AA42F321ABD00C57834 /* Exceptions for "TestUtils" folder in "StreamVideoUIKitTests" target */,
-			);
-			path = TestUtils;
-			sourceTree = "<group>";
-		};
-		82A00AA62F321AC000C57834 /* protobuf */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = protobuf;
-			sourceTree = "<group>";
-		};
-		82A00AA92F321AC600C57834 /* HTTPClient */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = HTTPClient;
-			sourceTree = "<group>";
-		};
-		82A00AB12F321AC800C57834 /* Models */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Models;
-			sourceTree = "<group>";
-		};
-		82A00ABA2F321ACB00C57834 /* Errors */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Errors;
-			sourceTree = "<group>";
-		};
-		82A00AC02F321ACD00C57834 /* Controllers */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Controllers;
-			sourceTree = "<group>";
-		};
-		82A00B482F321AD000C57834 /* WebRTC */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = WebRTC;
-			sourceTree = "<group>";
-		};
-		82A00BA72F321ADA00C57834 /* WebSocketClient */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = WebSocketClient;
-			sourceTree = "<group>";
-		};
-		82A00BB12F321ADD00C57834 /* CallSettings */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = CallSettings;
-			sourceTree = "<group>";
-		};
-		82A00BB72F321AE100C57834 /* Call */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Call;
-			sourceTree = "<group>";
-		};
-		82A00BBB2F321AE400C57834 /* IntegrationTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = IntegrationTests;
-			sourceTree = "<group>";
-		};
-		82A00BC22F321AE600C57834 /* WebSockets */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = WebSockets;
-			sourceTree = "<group>";
-		};
-		82A00BC62F321AE800C57834 /* CallState */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = CallState;
-			sourceTree = "<group>";
-		};
-		82A00BD12F321AEA00C57834 /* CallKit */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = CallKit;
-			sourceTree = "<group>";
-		};
-		82A00C142F321AEC00C57834 /* Utilities */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				82A00C8C2F321AED00C57834 /* Exceptions for "Utilities" folder in "StreamVideoSwiftUITests" target */,
-				82A00C8D2F321AED00C57834 /* Exceptions for "Utilities" folder in "StreamVideoUIKitTests" target */,
-			);
-			path = Utilities;
-			sourceTree = "<group>";
-		};
-		82A00C912F321AEF00C57834 /* Moderation */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Moderation;
-			sourceTree = "<group>";
-		};
-		82A00CA22F321AF100C57834 /* CallStateMachine */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = CallStateMachine;
-			sourceTree = "<group>";
-		};
-		82A043352F321B6D00C57834 /* Utils */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Utils;
+			path = StreamVideoTests;
 			sourceTree = "<group>";
 		};
 		82A097ED2F32106F00C57834 /* CallIntent */ = {
@@ -1175,7 +1087,7 @@
 				82A0B3FD2F32109000C57834 /* ScreenSharing */,
 				82A0DB572F32192C00C57834 /* Sources */,
 				82A0B4912F3210D100C57834 /* StreamVideoSwiftUITests */,
-				84F737F8287C13AD00A363F4 /* StreamVideoTests */,
+				82A045652F321B7400C57834 /* StreamVideoTests */,
 				82A0B4D32F3210D500C57834 /* StreamVideoUIKitTests */,
 				82A0099F2F321A9D00C57834 /* SwiftUIDemoAppUITests */,
 				82A0B4172F3210AB00C57834 /* TestTools */,
@@ -1198,35 +1110,6 @@
 				848C46A22A6ABF7E00E5AC09 /* ScreenSharing.appex */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		84F737F8287C13AD00A363F4 /* StreamVideoTests */ = {
-			isa = PBXGroup;
-			children = (
-				82A00C912F321AEF00C57834 /* Moderation */,
-				82A00CA22F321AF100C57834 /* CallStateMachine */,
-				82A00C142F321AEC00C57834 /* Utilities */,
-				82A00BD12F321AEA00C57834 /* CallKit */,
-				82A00BC62F321AE800C57834 /* CallState */,
-				82A00BC22F321AE600C57834 /* WebSockets */,
-				82A00BBB2F321AE400C57834 /* IntegrationTests */,
-				84932245290831DB0013C029 /* StreamVideo.xctestplan */,
-				82A00BB72F321AE100C57834 /* Call */,
-				82A00BB12F321ADD00C57834 /* CallSettings */,
-				82A00BA72F321ADA00C57834 /* WebSocketClient */,
-				82A00B482F321AD000C57834 /* WebRTC */,
-				82A00AC02F321ACD00C57834 /* Controllers */,
-				82A00ABA2F321ACB00C57834 /* Errors */,
-				82A00AB12F321AC800C57834 /* Models */,
-				82A00AA92F321AC600C57834 /* HTTPClient */,
-				82A043352F321B6D00C57834 /* Utils */,
-				82A00AA62F321AC000C57834 /* protobuf */,
-				82A00A7E2F321ABD00C57834 /* TestUtils */,
-				82A009FD2F321ABA00C57834 /* Mock */,
-				8492B8722908024800006649 /* StreamVideoTestCase.swift */,
-				843DAB9B29E6FFCD00E0EB63 /* StreamVideo_Tests.swift */,
-			);
-			path = StreamVideoTests;
 			sourceTree = "<group>";
 		};
 		84F73842287C195600A363F4 /* Frameworks */ = {
@@ -1437,25 +1320,7 @@
 				84F737F7287C13AD00A363F4 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				82A009FD2F321ABA00C57834 /* Mock */,
-				82A00A7E2F321ABD00C57834 /* TestUtils */,
-				82A00AA62F321AC000C57834 /* protobuf */,
-				82A00AA92F321AC600C57834 /* HTTPClient */,
-				82A00AB12F321AC800C57834 /* Models */,
-				82A00ABA2F321ACB00C57834 /* Errors */,
-				82A00AC02F321ACD00C57834 /* Controllers */,
-				82A00B482F321AD000C57834 /* WebRTC */,
-				82A00BA72F321ADA00C57834 /* WebSocketClient */,
-				82A00BB12F321ADD00C57834 /* CallSettings */,
-				82A00BB72F321AE100C57834 /* Call */,
-				82A00BBB2F321AE400C57834 /* IntegrationTests */,
-				82A00BC22F321AE600C57834 /* WebSockets */,
-				82A00BC62F321AE800C57834 /* CallState */,
-				82A00BD12F321AEA00C57834 /* CallKit */,
-				82A00C142F321AEC00C57834 /* Utilities */,
-				82A00C912F321AEF00C57834 /* Moderation */,
-				82A00CA22F321AF100C57834 /* CallStateMachine */,
-				82A043352F321B6D00C57834 /* Utils */,
+				82A045652F321B7400C57834 /* StreamVideoTests */,
 			);
 			name = StreamVideoTests;
 			packageProductDependencies = (
@@ -1501,8 +1366,6 @@
 				84F73811287C141000A363F4 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				82A00A7E2F321ABD00C57834 /* TestUtils */,
-				82A00C142F321AEC00C57834 /* Utilities */,
 				82A0B4172F3210AB00C57834 /* TestTools */,
 				82A0B4912F3210D100C57834 /* StreamVideoSwiftUITests */,
 			);
@@ -1803,8 +1666,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				84CBBE0B29228BA900D0DA61 /* StreamVideoTestCase.swift in Sources */,
-				843DAB9C29E6FFCD00E0EB63 /* StreamVideo_Tests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1820,7 +1681,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				84DCA20C2A38300C000C3411 /* StreamVideoTestCase.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
