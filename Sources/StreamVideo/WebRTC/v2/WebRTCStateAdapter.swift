@@ -172,9 +172,11 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         self.audioSession = .init()
 
         peerConnectionFactory
-            .setFrameBufferPolicy(
-                InjectedValues[\.videoRenderingOptions].bufferPolicy
-            )
+            .setFrameBufferPolicy(videoConfig.renderingOptions.bufferPolicy)
+        
+        // We directly set the value because the InjectValues[\.videoRenderingOptions]
+        // is read-only.
+        VideoRenderingOptionsKey.currentValue = videoConfig.renderingOptions
 
         Task { [weak self] in
             _ = await self?.permissionsAdapter

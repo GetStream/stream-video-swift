@@ -540,30 +540,6 @@ struct DebugMenu: View {
             additionalItems: additionalItems,
             updater: updater
         )
-
-        if !availableAfterLogin, appState.userState == .loggedIn {
-            EmptyView()
-        } else {
-            Menu {
-                ForEach(items, id: \.self) { item in
-                    Button {
-                        updater(item)
-                    } label: {
-                        Label {
-                            Text(item.title)
-                        } icon: {
-                            currentValue == item
-                                ? AnyView(Image(systemName: "checkmark"))
-                                : AnyView(EmptyView())
-                        }
-                    }
-                }
-
-                additionalItems()
-            } label: {
-                Text(label)
-            }
-        }
     }
 
     @ViewBuilder

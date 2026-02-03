@@ -15,7 +15,9 @@ public final class VideoConfig: Sendable {
 
     /// The audio processing module that handles the audio streams provided by WebRTC.
     public let audioProcessingModule: AudioProcessingModule
-        
+
+    public let renderingOptions: VideoRenderingOptions
+
     /// Initializes a new instance of `VideoConfig` with the specified parameters.
     /// - Parameters:
     ///   - videoFilters: An array of `VideoFilter` objects representing the filters to apply to the video.
@@ -25,10 +27,12 @@ public final class VideoConfig: Sendable {
     ///   - audioProcessingModule: Provide your own audio processing or fallback to the default one..
     /// - Returns: A new instance of `VideoConfig`.
     public init(
+        renderingOptions: VideoRenderingOptions = .init(),
         videoFilters: [VideoFilter] = [],
         noiseCancellationFilter: NoiseCancellationFilter? = nil,
         audioProcessingModule: AudioProcessingModule? = nil
     ) {
+        self.renderingOptions = renderingOptions
         self.videoFilters = videoFilters
         self.noiseCancellationFilter = noiseCancellationFilter
         self.audioProcessingModule = audioProcessingModule ?? InjectedValues[\.audioFilterProcessingModule]

@@ -192,7 +192,15 @@ final class Router: ObservableObject {
             process: processor.process,
             release: processor.release
         )
-        videoConfig = .init(noiseCancellationFilter: noiseCancellationFilter)
+        videoConfig = .init(
+            renderingOptions: .init(
+                renderingBackend: AppEnvironment.renderingBackend.rawBackend,
+                bufferPolicy: AppEnvironment.renderingBufferPolicy.rawPolicy,
+                maxInFlightFrames: InjectedValues[\.videoRenderingOptions].maxInFlightFrames,
+                rotationOverride: InjectedValues[\.videoRenderingOptions].rotationOverride
+            ),
+            noiseCancellationFilter: noiseCancellationFilter
+        )
         #else
         videoConfig = .init()
         #endif

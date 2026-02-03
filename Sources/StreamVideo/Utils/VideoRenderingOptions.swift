@@ -5,9 +5,7 @@
 import Foundation
 import StreamWebRTC
 
-public struct VideoRenderingOptions: InjectionKey, Sendable, CustomStringConvertible {
-    public nonisolated(unsafe) static var currentValue: Self = .init()
-
+public struct VideoRenderingOptions: Sendable, CustomStringConvertible {
     public let renderingBackend: RTCVideoRenderingBackend
     public let bufferPolicy: RTCFrameBufferPolicy
     public let maxInFlightFrames: Int
@@ -36,10 +34,14 @@ public struct VideoRenderingOptions: InjectionKey, Sendable, CustomStringConvert
     }
 }
 
+enum VideoRenderingOptionsKey: InjectionKey {
+    nonisolated(unsafe) static var currentValue: VideoRenderingOptions = .init()
+}
+
 extension InjectedValues {
     public var videoRenderingOptions: VideoRenderingOptions {
-        get { Self[VideoRenderingOptions.self] }
-        set { Self[VideoRenderingOptions.self] = newValue }
+        get { Self[VideoRenderingOptionsKey.self] }
+        set { _ = newValue }
     }
 }
 

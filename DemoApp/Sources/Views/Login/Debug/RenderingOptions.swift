@@ -77,24 +77,12 @@ extension DebugMenu {
         @State private var renderingBackend: AppEnvironment.RenderingBackend = AppEnvironment.renderingBackend {
             didSet {
                 AppEnvironment.renderingBackend = renderingBackend
-                InjectedValues[\.videoRenderingOptions] = .init(
-                    renderingBackend: renderingBackend.rawBackend,
-                    bufferPolicy: InjectedValues[\.videoRenderingOptions].bufferPolicy,
-                    maxInFlightFrames: InjectedValues[\.videoRenderingOptions].maxInFlightFrames,
-                    rotationOverride: InjectedValues[\.videoRenderingOptions].rotationOverride
-                )
             }
         }
 
         @State private var renderingBufferPolicy: AppEnvironment.RenderingBufferPolicy = AppEnvironment.renderingBufferPolicy {
             didSet {
                 AppEnvironment.renderingBufferPolicy = renderingBufferPolicy
-                InjectedValues[\.videoRenderingOptions] = .init(
-                    renderingBackend: InjectedValues[\.videoRenderingOptions].renderingBackend,
-                    bufferPolicy: renderingBufferPolicy.rawPolicy,
-                    maxInFlightFrames: InjectedValues[\.videoRenderingOptions].maxInFlightFrames,
-                    rotationOverride: InjectedValues[\.videoRenderingOptions].rotationOverride
-                )
             }
         }
 

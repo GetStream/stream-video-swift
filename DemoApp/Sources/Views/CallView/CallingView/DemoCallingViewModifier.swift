@@ -100,6 +100,7 @@ struct DemoCallingViewModifier: ViewModifier {
                 await call.updatePublishOptions(
                     preferredVideoCodec: AppEnvironment.preferredVideoCodec.videoCodec
                 )
+
                 _ = await Task { @MainActor in
                     viewModel.update(
                         participantsSortComparators: callType == .livestream
