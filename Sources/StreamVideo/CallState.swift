@@ -63,6 +63,9 @@ public class CallState: ObservableObject {
     }
 
     @Published public internal(set) var recordingState: RecordingState = .noRecording
+    @Published public internal(set) var compositeRecordingStatus: Bool?
+    @Published public internal(set) var individualRecordingStatus: Bool?
+    @Published public internal(set) var rawRecordingStatus: Bool?
     @Published public internal(set) var blockedUserIds: Set<String> = []
     @Published public internal(set) var settings: CallSettingsResponse?
     @Published public internal(set) var ownCapabilities: [OwnCapability] = [] {
@@ -205,13 +208,27 @@ public class CallState: ObservableObject {
             update(from: event.call)
         case .typeCallReactionEvent:
             break
-        case .typeCallRecordingStartedEvent:
+        case let .typeCallRecordingStartedEvent(event):
             if recordingState != .recording {
                 recordingState = .recording
             }
-        case .typeCallRecordingStoppedEvent:
+            if event.recordingType == .composite {
+                compositeRecordingStatus = true
+            } else if event.recordingType == .individual {
+                individualRecordingStatus = true
+            } else if event.recordingType == .raw {
+                rawRecordingStatus = true
+            }
+        case let .typeCallRecordingStoppedEvent(event):
             if recordingState != .noRecording {
                 recordingState = .noRecording
+            }
+            if event.recordingType == .composite {
+                compositeRecordingStatus = false
+            } else if event.recordingType == .individual {
+                individualRecordingStatus = false
+            } else if event.recordingType == .raw {
+                rawRecordingStatus = false
             }
         case let .typeCallRejectedEvent(event):
             update(from: event.call)
@@ -514,6 +531,10 @@ public class CallState: ObservableObject {
     
     private func didUpdate(_ egress: EgressResponse?) {
         broadcasting = egress?.broadcasting ?? false
+        let runningStatus = "running"
+        rawRecordingStatus = egress?.rawRecording?.status == runningStatus
+        individualRecordingStatus = egress?.individualRecording?.status == runningStatus
+        compositeRecordingStatus = egress?.compositeRecording?.status == runningStatus
     }
     
     private func didUpdate(_ session: CallSessionResponse?) {

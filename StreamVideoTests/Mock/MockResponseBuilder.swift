@@ -131,10 +131,21 @@ class MockResponseBuilder: @unchecked Sendable {
             rtmp: .init(enabled: true, quality: "good")
         )
         let geofenceSettings = GeofenceSettings(names: [])
+        let frameRecordingSettings = FrameRecordingSettingsResponse(
+            captureIntervalInSeconds: 10,
+            mode: .available,
+            quality: nil
+        )
+        let individualRecordingSettings = IndividualRecordingSettingsResponse(
+            mode: .available
+        )
         let recordSettings = RecordSettingsResponse(
             audioOnly: false,
             mode: "disabled",
             quality: "1080p"
+        )
+        let rawRecordingSettings = RawRecordingSettingsResponse(
+            mode: .available
         )
         let ringSettings = RingSettings(
             autoCancelTimeoutMs: 15000,
@@ -164,8 +175,11 @@ class MockResponseBuilder: @unchecked Sendable {
             audio: audioSettings,
             backstage: backstageSettings,
             broadcasting: broadcastSettings,
+            frameRecording: frameRecordingSettings,
             geofencing: geofenceSettings,
+            individualRecording: individualRecordingSettings,
             limits: .dummy(),
+            rawRecording: rawRecordingSettings,
             recording: recordSettings,
             ring: ringSettings,
             screensharing: screensharingSettings,

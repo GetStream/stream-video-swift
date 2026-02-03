@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class KickedUserEvent: @unchecked Sendable,  Event, Codable, JSONEncodable, Hashable, WSCallEvent {
+public final class KickedUserEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
     public var callCid: String
     public var createdAt: Date
     public var kickedByUser: UserResponse?

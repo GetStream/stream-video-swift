@@ -95,7 +95,12 @@ final class Call_Tests: StreamVideoTestCase {
     func test_updateState_fromRecordingStartedEvent() {
         // Given
         let call = streamVideo?.call(callType: callType, callId: callId)
-        let event = CallRecordingStartedEvent(callCid: callCid, createdAt: Date())
+        let event = CallRecordingStartedEvent(
+            callCid: callCid,
+            createdAt: Date(),
+            egressId: "123",
+            recordingType: .composite
+        )
 
         // When
         call?.state.updateState(from: .typeCallRecordingStartedEvent(event))
@@ -107,7 +112,12 @@ final class Call_Tests: StreamVideoTestCase {
     func test_updateState_fromRecordingStoppedEvent() {
         // Given
         let call = streamVideo?.call(callType: callType, callId: callId)
-        let event = CallRecordingStoppedEvent(callCid: callCid, createdAt: Date())
+        let event = CallRecordingStoppedEvent(
+            callCid: callCid,
+            createdAt: Date(),
+            egressId: "123",
+            recordingType: .composite
+        )
 
         // When
         call?.state.updateState(from: .typeCallRecordingStoppedEvent(event))
@@ -434,7 +444,12 @@ final class Call_Tests: StreamVideoTestCase {
     func test_coordinatorEventReceived_startedRecording_updatesStateCorrectly() async throws {
         try await assertCoordinatorEventReceived(
             .typeCallRecordingStartedEvent(
-                CallRecordingStartedEvent(callCid: callCid, createdAt: Date())
+                CallRecordingStartedEvent(
+                    callCid: callCid,
+                    createdAt: Date(),
+                    egressId: "123",
+                    recordingType: .composite
+                )
             )
         ) { call in await fulfilmentInMainActor { call.state.recordingState == .recording } }
     }
@@ -442,7 +457,12 @@ final class Call_Tests: StreamVideoTestCase {
     func test_coordinatorEventReceived_startedRecordingForAnotherCall_doesNotUpdateState() async throws {
         try await assertCoordinatorEventReceived(
             .typeCallRecordingStartedEvent(
-                CallRecordingStartedEvent(callCid: .unique, createdAt: Date())
+                CallRecordingStartedEvent(
+                    callCid: .unique,
+                    createdAt: Date(),
+                    egressId: "123",
+                    recordingType: .composite
+                )
             )
         ) { @MainActor call in
             await wait(for: 1)
