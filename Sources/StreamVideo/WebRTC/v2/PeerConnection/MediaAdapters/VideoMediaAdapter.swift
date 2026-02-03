@@ -74,6 +74,7 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
                 videoConfig: videoConfig,
                 publishOptions: publishOptions,
                 subject: subject,
+                capturerFactory: videoConfig.customVideoCapturerProvider ?? StreamVideoCapturerFactory(),
                 videoCaptureSessionProvider: videoCaptureSessionProvider,
                 audioDeviceModule: audioDeviceModule
             ),

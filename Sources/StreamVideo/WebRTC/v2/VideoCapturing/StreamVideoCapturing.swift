@@ -5,7 +5,7 @@
 import AVFoundation
 import Foundation
 
-protocol StreamVideoCapturing: AnyObject, Sendable {
+public protocol StreamVideoCapturing: AnyObject, Sendable {
     func supportsBackgrounding() async -> Bool
 
     func startCapture(
