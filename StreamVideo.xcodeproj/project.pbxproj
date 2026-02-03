@@ -1360,7 +1360,6 @@
 			);
 			fileSystemSynchronizedGroups = (
 				82A0B4172F3210AB00C57834 /* TestTools */,
-				82A0B4912F3210D100C57834 /* StreamVideoSwiftUITests */,
 			);
 			name = StreamVideoSwiftUITests;
 			packageProductDependencies = (
