@@ -252,13 +252,6 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		821BE2D02F3276180028583F /* Exceptions for "StreamVideoSwiftUITests" folder in "StreamVideoUIKitTests" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				StreamVideoUITestCase.swift,
-			);
-			target = 84F7382E287C146D00A363F4 /* StreamVideoUIKitTests */;
-		};
 		82A009B22F321A9D00C57834 /* Exceptions for "SwiftUIDemoAppUITests" folder in "SwiftUIDemoAppUITests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -922,7 +915,6 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				82A0B4CF2F3210D200C57834 /* Exceptions for "StreamVideoSwiftUITests" folder in "StreamVideoSwiftUITests" target */,
-				821BE2D02F3276180028583F /* Exceptions for "StreamVideoSwiftUITests" folder in "StreamVideoUIKitTests" target */,
 			);
 			path = StreamVideoSwiftUITests;
 			sourceTree = "<group>";
