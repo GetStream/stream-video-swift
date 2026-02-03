@@ -458,7 +458,7 @@ final class Call_Tests: StreamVideoTestCase {
         try await assertCoordinatorEventReceived(
             .typeCallRecordingStartedEvent(
                 CallRecordingStartedEvent(
-                    callCid: callCid,
+                    callCid: .unique,
                     createdAt: Date(),
                     egressId: "123",
                     recordingType: .composite
