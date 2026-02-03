@@ -1446,6 +1446,8 @@
 		8490DD1F298D39D9007E53D2 /* JsonEventDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8490DD1E298D39D9007E53D2 /* JsonEventDecoder.swift */; };
 		8490DD21298D4ADF007E53D2 /* StreamJsonDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8490DD20298D4ADF007E53D2 /* StreamJsonDecoder.swift */; };
 		8490DD23298D5330007E53D2 /* Data+Gzip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8490DD22298D5330007E53D2 /* Data+Gzip.swift */; };
+		84921D9B2F32524600A4AA30 /* DemoStartRecordingButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84921D9A2F32524600A4AA30 /* DemoStartRecordingButtonView.swift */; };
+		84921D9C2F32524600A4AA30 /* DemoStartRecordingButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84921D9A2F32524600A4AA30 /* DemoStartRecordingButtonView.swift */; };
 		8492B875290808AE00006649 /* StreamVideoEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8492B874290808AE00006649 /* StreamVideoEnvironment.swift */; };
 		8492B87829081D1600006649 /* HTTPClient_Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8492B87729081D1600006649 /* HTTPClient_Mock.swift */; };
 		8492B87A29081E6600006649 /* StreamVideo_Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8492B87929081E6600006649 /* StreamVideo_Mock.swift */; };
@@ -3110,6 +3112,7 @@
 		8490DD1E298D39D9007E53D2 /* JsonEventDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JsonEventDecoder.swift; sourceTree = "<group>"; };
 		8490DD20298D4ADF007E53D2 /* StreamJsonDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamJsonDecoder.swift; sourceTree = "<group>"; };
 		8490DD22298D5330007E53D2 /* Data+Gzip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Data+Gzip.swift"; sourceTree = "<group>"; };
+		84921D9A2F32524600A4AA30 /* DemoStartRecordingButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoStartRecordingButtonView.swift; sourceTree = "<group>"; };
 		8492B8722908024800006649 /* StreamVideoTestCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamVideoTestCase.swift; sourceTree = "<group>"; };
 		8492B874290808AE00006649 /* StreamVideoEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamVideoEnvironment.swift; sourceTree = "<group>"; };
 		8492B87729081D1600006649 /* HTTPClient_Mock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPClient_Mock.swift; sourceTree = "<group>"; };
@@ -4131,6 +4134,7 @@
 		4030E5962A9DF48C003E8CBA /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				84921D992F3251E300A4AA30 /* Recording */,
 				40B2F3DF2EFAA3D40067BACE /* AudioTrackPlayer */,
 				4000629E2EDF0CB90086E14B /* VideoFilters */,
 				4014F1042D8C2EFE004E7EFD /* Gleap */,
@@ -7341,6 +7345,14 @@
 			path = TestUtils;
 			sourceTree = "<group>";
 		};
+		84921D992F3251E300A4AA30 /* Recording */ = {
+			isa = PBXGroup;
+			children = (
+				84921D9A2F32524600A4AA30 /* DemoStartRecordingButtonView.swift */,
+			);
+			path = Recording;
+			sourceTree = "<group>";
+		};
 		8492B87629081CE700006649 /* Mock */ = {
 			isa = PBXGroup;
 			children = (
@@ -8759,6 +8771,7 @@
 				84ED240D286C9515002A3186 /* DemoCallContainerView.swift in Sources */,
 				40F445B22A9DFFBB004BE3DA /* User+Demo.swift in Sources */,
 				4000629F2EDF0D020086E14B /* ModerationPixelateVideoFilter.swift in Sources */,
+				84921D9B2F32524600A4AA30 /* DemoStartRecordingButtonView.swift in Sources */,
 				40D946452AA5F67E00C8861B /* DemoCallingTopView.swift in Sources */,
 				847B47B72A260CF1000714CE /* CustomCallView.swift in Sources */,
 				40F445CC2A9E1FC9004BE3DA /* DemoChatViewFactory.swift in Sources */,
@@ -8887,6 +8900,7 @@
 				40382F232C889E6500C2D00F /* DemoReconnectionButtonView.swift in Sources */,
 				40AB354B2B738C5400E465CC /* DemoCallModifier.swift in Sources */,
 				40EDA17C2C13792D00583A65 /* View+AlertWithTextField.swift in Sources */,
+				84921D9C2F32524600A4AA30 /* DemoStartRecordingButtonView.swift in Sources */,
 				40AB35422B738C3700E465CC /* CallViewModel+Snapshot.swift in Sources */,
 				406A8E9D2AA1D7E9001F598A /* String+Unique.swift in Sources */,
 				409795402DC11381000C6E39 /* DemoVideoViewOverlay.swift in Sources */,

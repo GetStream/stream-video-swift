@@ -135,6 +135,10 @@ struct DemoMoreControlsViewModifier: ViewModifier {
                                     DemoReconnectionButtonView { viewModel.moreControlsShown = false }
                                 }
                                 #endif
+
+                                DemoStartRecordingButtonView(
+                                    viewModel: viewModel
+                                ) { viewModel.moreControlsShown = false }
                             }
                         }
                     }
