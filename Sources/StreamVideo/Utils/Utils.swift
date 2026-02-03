@@ -9,6 +9,7 @@ internal extension DispatchQueue {
     static let sdk = DispatchQueue(label: "StreamVideoSDK", qos: .userInitiated)
 }
 
+@MainActor
 func postNotification(
     with name: String,
     object: Any? = nil,
