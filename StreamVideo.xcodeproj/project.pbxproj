@@ -470,6 +470,7 @@
 				CallView/CallDurationView_Tests.swift,
 				CallView/ControlBadgeView_Tests.swift,
 				CallView/LayoutComponents/HorizontalParticipantsListView_Tests.swift,
+				"CallView/LayoutComponents/mock-profile-image.jpg",
 				CallView/LayoutComponents/SpotlightSpeakerView_Tests.swift,
 				CallView/ParticipantListButton_Tests.swift,
 				CallView/ParticipantsFullScreenLayout_Tests.swift,
