@@ -453,6 +453,13 @@
 			);
 			target = 84F7380D287C141000A363F4 /* StreamVideoSwiftUITests */;
 		};
+		82A0B4D02F3210D200C57834 /* Exceptions for "StreamVideoSwiftUITests" folder in "StreamVideoUIKitTests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				StreamVideoUITestCase.swift,
+			);
+			target = 84F7382E287C146D00A363F4 /* StreamVideoUIKitTests */;
+		};
 		82A0B4D52F3210D500C57834 /* Exceptions for "StreamVideoUIKitTests" folder in "StreamVideoUIKitTests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -915,6 +922,7 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				82A0B4CF2F3210D200C57834 /* Exceptions for "StreamVideoSwiftUITests" folder in "StreamVideoSwiftUITests" target */,
+				82A0B4D02F3210D200C57834 /* Exceptions for "StreamVideoSwiftUITests" folder in "StreamVideoUIKitTests" target */,
 			);
 			path = StreamVideoSwiftUITests;
 			sourceTree = "<group>";
