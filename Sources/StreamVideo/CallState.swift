@@ -533,7 +533,7 @@ public class CallState: ObservableObject {
         broadcasting = egress?.broadcasting ?? false
         let runningStatus = "running"
         rawRecordingStatus = egress?.rawRecording?.status == runningStatus
-        individualRecordingStatus = egress?.rawRecording?.status == runningStatus
+        individualRecordingStatus = egress?.individualRecording?.status == runningStatus
         compositeRecordingStatus = egress?.compositeRecording?.status == runningStatus
     }
     
