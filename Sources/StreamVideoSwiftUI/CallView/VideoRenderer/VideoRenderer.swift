@@ -3,15 +3,17 @@
 //
 
 import Combine
+import Foundation
 import MetalKit
 import StreamVideo
 import StreamWebRTC
 import SwiftUI
 
 /// A custom video renderer based on RTCMTLVideoView for rendering RTCVideoTrack objects.
-public class VideoRenderer: RTCMTLVideoView, @unchecked Sendable {
+public class VideoRenderer: RTCVideoRenderingView, @unchecked Sendable {
 
     @Injected(\.thermalStateObserver) private var thermalStateObserver
+    @Injected(\.videoRenderingOptions) private var videoRenderingOptions
 
     private let _windowSubject: PassthroughSubject<UIWindow?, Never> = .init()
     private let _superviewSubject: PassthroughSubject<UIView?, Never> = .init()
@@ -75,6 +77,14 @@ public class VideoRenderer: RTCMTLVideoView, @unchecked Sendable {
                     self.preferredFramesPerSecond = UIScreen.main.maximumFramesPerSecond
                 }
             }
+        
+        self.renderingBackend = videoRenderingOptions.backend
+        self.maxInFlightFrames = videoRenderingOptions.maxInFlightFrames
+
+        log.debug(
+            "VideoRenderer updated with renderingOptions: \(videoRenderingOptions)",
+            subsystems: .other
+        )
     }
 
     /// Cleans up resources when the VideoRenderer instance is deallocated.

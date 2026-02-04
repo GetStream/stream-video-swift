@@ -504,6 +504,10 @@
 		40999B952F339C7200F0659A /* CameraSystemPressureHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40999B942F339C7200F0659A /* CameraSystemPressureHandler.swift */; };
 		40999B962F339C7200F0659A /* CameraCaptureSessionConfigurationHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40999B932F339C7200F0659A /* CameraCaptureSessionConfigurationHandler.swift */; };
 		40999BA02F33A38400F0659A /* CameraCaptureSessionConfigurationHandler_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40999B9F2F33A38400F0659A /* CameraCaptureSessionConfigurationHandler_Tests.swift */; };
+		40999B8B2F33963F00F0659A /* VideoRenderingOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40999B8A2F33963F00F0659A /* VideoRenderingOptions.swift */; };
+		40999B8D2F33969600F0659A /* VideoRedenderingOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40999B8C2F33969600F0659A /* VideoRedenderingOptions.swift */; };
+		40999B8E2F33969600F0659A /* VideoRedenderingOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40999B8C2F33969600F0659A /* VideoRedenderingOptions.swift */; };
+		40999B912F339A0C00F0659A /* VideoRenderingOptions_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40999B902F339A0C00F0659A /* VideoRenderingOptions_Tests.swift */; };
 		409AF6E62DAFAC4700EE7BF6 /* PictureInPictureReconnectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409AF6E52DAFAC4700EE7BF6 /* PictureInPictureReconnectionView.swift */; };
 		409AF6E82DAFC80200EE7BF6 /* PictureInPictureContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409AF6E72DAFC80200EE7BF6 /* PictureInPictureContent.swift */; };
 		409AF6EA2DAFE1B000EE7BF6 /* PictureInPictureContentProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409AF6E92DAFE1B000EE7BF6 /* PictureInPictureContentProviderTests.swift */; };
@@ -2306,6 +2310,9 @@
 		40999B932F339C7200F0659A /* CameraCaptureSessionConfigurationHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraCaptureSessionConfigurationHandler.swift; sourceTree = "<group>"; };
 		40999B942F339C7200F0659A /* CameraSystemPressureHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraSystemPressureHandler.swift; sourceTree = "<group>"; };
 		40999B9F2F33A38400F0659A /* CameraCaptureSessionConfigurationHandler_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraCaptureSessionConfigurationHandler_Tests.swift; sourceTree = "<group>"; };
+		40999B8A2F33963F00F0659A /* VideoRenderingOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoRenderingOptions.swift; sourceTree = "<group>"; };
+		40999B8C2F33969600F0659A /* VideoRedenderingOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoRedenderingOptions.swift; sourceTree = "<group>"; };
+		40999B902F339A0C00F0659A /* VideoRenderingOptions_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoRenderingOptions_Tests.swift; sourceTree = "<group>"; };
 		409AF6E52DAFAC4700EE7BF6 /* PictureInPictureReconnectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PictureInPictureReconnectionView.swift; sourceTree = "<group>"; };
 		409AF6E72DAFC80200EE7BF6 /* PictureInPictureContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PictureInPictureContent.swift; sourceTree = "<group>"; };
 		409AF6E92DAFE1B000EE7BF6 /* PictureInPictureContentProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PictureInPictureContentProviderTests.swift; sourceTree = "<group>"; };
@@ -7122,6 +7129,7 @@
 				40E18AB02CD51FB900A65C9F /* Queues */,
 				40C2B5C42C2D7ADE00EC2C2D /* RejectionReasonProvider */,
 				408721F82E127A10006A68CB /* Timers */,
+				40999B902F339A0C00F0659A /* VideoRenderingOptions_Tests.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -7637,6 +7645,7 @@
 		84AF64D3287C79220012A503 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				40999B8A2F33963F00F0659A /* VideoRenderingOptions.swift */,
 				40B8FFB52EC3949F0061E3F6 /* Battery */,
 				40C8F0042E55D21D00A0CC87 /* PermissionsStore */,
 				40944D132E4E2D8800088AF0 /* Store */,
@@ -8904,6 +8913,7 @@
 				844ADA692AD3F78F00769F6A /* GoogleHelper.swift in Sources */,
 				409145FD2B68FEF0007F3C17 /* DemoLocalViewModifier.swift in Sources */,
 				409145FF2B68FEF0007F3C17 /* ChangeEnvironmentViewModifier.swift in Sources */,
+				40999B8E2F33969600F0659A /* VideoRedenderingOptions.swift in Sources */,
 				401A64B12A9DF83200534ED1 /* TokenResponse.swift in Sources */,
 				40B2F3FE2EFBF4790067BACE /* DemoAudioTrackButtonView.swift in Sources */,
 				409145FA2B68FEF0007F3C17 /* ThermalStateViewModifier.swift in Sources */,
@@ -9032,6 +9042,7 @@
 				849322512908378A0013C029 /* SceneDelegate.swift in Sources */,
 				40AB35542B738C6C00E465CC /* ShareActivityView.swift in Sources */,
 				406A8EB12AA1D80C001F598A /* UnsecureRepository.swift in Sources */,
+				40999B8D2F33969600F0659A /* VideoRedenderingOptions.swift in Sources */,
 				4031D7F62B801D8A002EC6E4 /* LocalParticipantSnapshotViewModel.swift in Sources */,
 				40AB35472B738C4800E465CC /* DemoModalNavigationBarViewModifier.swift in Sources */,
 				40AB35522B738C6600E465CC /* DemoWaitingLocalUserView.swift in Sources */,
@@ -9690,6 +9701,7 @@
 				84DC38B829ADFCFD00946713 /* UpdateUserPermissionsResponse.swift in Sources */,
 				40EE9D402E97B3970000EA92 /* RTCAudioStore+State.swift in Sources */,
 				84DC38C029ADFCFD00946713 /* UserRequest.swift in Sources */,
+				40999B8B2F33963F00F0659A /* VideoRenderingOptions.swift in Sources */,
 				400062902EDEFA570086E14B /* Moderation+Manager.swift in Sources */,
 				400062912EDEFA570086E14B /* Moderation+VideoPolicy.swift in Sources */,
 				400062922EDEFA570086E14B /* Moderation+VideoAdapter.swift in Sources */,
@@ -10018,6 +10030,7 @@
 				40FE5EBD2C9C82A6006B0881 /* MockRTCVideoCapturerDelegate.swift in Sources */,
 				40B48C4C2D14F721002C4EAB /* RTPMapVisitorTests.swift in Sources */,
 				40E1C8BF2EA1992500AC3647 /* CallAudioSession_Tests.swift in Sources */,
+				40999B912F339A0C00F0659A /* VideoRenderingOptions_Tests.swift in Sources */,
 				40B48C152D14C93B002C4EAB /* CGSize_AdaptTests.swift in Sources */,
 				40382F3D2C89C11D00C2D00F /* MockRTCPeerConnectionCoordinatorFactory.swift in Sources */,
 				4013A8EF2D81E98C00F81C15 /* WebRTCCoordinatorStateMachine_BlockedStageTests.swift in Sources */,
