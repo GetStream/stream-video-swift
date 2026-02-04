@@ -69,3 +69,48 @@ extension InjectedValues {
         set { Self[CaptureDeviceProviderKey.self] = newValue }
     }
 }
+
+/// A provider that supplies capture devices for system pressure monitoring.
+protocol SystemPressureCaptureDeviceProviding {
+    /// Returns a capture device for system pressure monitoring.
+    func device(
+        for cameraCapturer: RTCCameraVideoCapturer,
+        position: AVCaptureDevice.Position
+    ) -> SystemPressureCaptureDevice?
+}
+
+/// Default provider that uses the active camera device if available.
+final class StreamSystemPressureCaptureDeviceProvider:
+    SystemPressureCaptureDeviceProviding {
+
+    @Injected(\.captureDeviceProvider) private var captureDeviceProvider
+
+    func device(
+        for cameraCapturer: RTCCameraVideoCapturer,
+        position: AVCaptureDevice.Position
+    ) -> SystemPressureCaptureDevice? {
+        if let activeDevice = cameraCapturer
+            .captureSession
+            .activeVideoCaptureDevice {
+            return activeDevice
+        }
+        return captureDeviceProvider
+            .device(for: position) as? SystemPressureCaptureDevice
+    }
+}
+
+/// Injection key for the system pressure device provider.
+enum SystemPressureCaptureDeviceProviderKey: InjectionKey {
+    nonisolated(unsafe) static var currentValue:
+        SystemPressureCaptureDeviceProviding =
+        StreamSystemPressureCaptureDeviceProvider()
+}
+
+extension InjectedValues {
+    /// Accessor for the system pressure device provider.
+    var systemPressureCaptureDeviceProvider:
+        SystemPressureCaptureDeviceProviding {
+        get { Self[SystemPressureCaptureDeviceProviderKey.self] }
+        set { Self[SystemPressureCaptureDeviceProviderKey.self] = newValue }
+    }
+}

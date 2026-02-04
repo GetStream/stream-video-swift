@@ -5,11 +5,42 @@
 import Foundation
 @preconcurrency import StreamWebRTC
 
+/// Describes why a capture quality change is being applied.
+///
+/// Use this to distinguish user-driven or configuration-driven changes from
+/// automatic system pressure adjustments. This is especially useful for
+/// logging and to avoid feedback loops where an internal adjustment triggers
+/// another adjustment unintentionally.
+enum CaptureQualityUpdateReason {
+    case external
+    case systemPressure
+}
+
+/// Handles capture actions dispatched by ``StreamVideoCapturer``.
+///
+/// Action handlers are small, focused components that encapsulate a single
+/// responsibility (e.g., focusing, zooming, or reacting to system pressure).
+/// The capturer forwards every action to each handler in order, allowing each
+/// handler to react, ignore, or throw an error.
+///
+/// Concurrency:
+/// - ``handle(_:)`` is `async` and may be called from multiple tasks.
+/// - Conformers must be `Sendable`; internal mutation should be synchronized
+///   (for example, with dedicated queues or locks).
+///
+/// Error handling:
+/// - Throw to signal a failure that should be surfaced to the capturer.
+/// - Avoid throwing for expected "no-op" situations (e.g., action types you
+///   do not handle).
 protocol StreamVideoCapturerActionHandler: Sendable {
+    /// Handles a capture action emitted by ``StreamVideoCapturer``.
+    ///
+    /// - Parameter action: The action to handle. Conformers should inspect the
+    ///   case and respond only to the actions they support.
     func handle(_ action: StreamVideoCapturer.Action) async throws
 }
 
-final class StreamVideoCapturer: StreamVideoCapturing {
+final class StreamVideoCapturer: StreamVideoCapturing, @unchecked Sendable {
 
     // MARK: - Convenience Initialisers
 
@@ -23,7 +54,8 @@ final class StreamVideoCapturer: StreamVideoCapturing {
         with videoSource: RTCVideoSource,
         videoCaptureSession: AVCaptureSession = .init(),
         audioDeviceModule: AudioDeviceModule,
-        usesProcessingPipeline: Bool
+        usesProcessingPipeline: Bool,
+        usesNewCapturingPipeline: Bool
     ) -> StreamVideoCapturer {
         // Route frames through the processing pipeline when enabled.
         let videoCapturerDelegate: RTCVideoCapturerDelegate = usesProcessingPipeline
@@ -53,7 +85,23 @@ final class StreamVideoCapturer: StreamVideoCapturing {
             ]
         )
         #else
-        return .init(
+        var actionHandlers: [StreamVideoCapturerActionHandler] = [
+            CameraBackgroundAccessHandler(),
+            CameraCaptureHandler(),
+            CameraFocusHandler(),
+            CameraCapturePhotoHandler(),
+            CameraVideoOutputHandler(),
+            CameraZoomHandler(),
+            CameraInterruptionsHandler()
+        ]
+
+        let systemPressureHandler = CameraSystemPressureHandler()
+        if usesNewCapturingPipeline {
+            actionHandlers.append(systemPressureHandler)
+            actionHandlers.append(CameraCaptureSessionConfigurationHandler())
+        }
+
+        let streamCapturer = StreamVideoCapturer(
             videoSource: videoSource,
             videoCapturer: RTCCameraVideoCapturer(
                 delegate: videoCapturerDelegate,
@@ -61,16 +109,24 @@ final class StreamVideoCapturer: StreamVideoCapturing {
             ),
             videoCapturerDelegate: videoCapturerDelegate,
             audioDeviceModule: audioDeviceModule,
-            actionHandlers: [
-                CameraBackgroundAccessHandler(),
-                CameraCaptureHandler(),
-                CameraFocusHandler(),
-                CameraCapturePhotoHandler(),
-                CameraVideoOutputHandler(),
-                CameraZoomHandler(),
-                CameraInterruptionsHandler()
-            ]
+            actionHandlers: actionHandlers
         )
+
+        if usesNewCapturingPipeline {
+            systemPressureHandler.actionDispatcher = { [weak streamCapturer] action in
+                guard let streamCapturer else { return }
+                do {
+                    try await streamCapturer.dispatch(action)
+                } catch {
+                    log.error(
+                        "Failed to dispatch system pressure action: \(error).",
+                        subsystems: .videoCapturer
+                    )
+                }
+            }
+        }
+
+        return streamCapturer
         #endif
     }
 
@@ -137,10 +193,11 @@ final class StreamVideoCapturer: StreamVideoCapturing {
         )
         case updateCaptureQuality(
             dimensions: CGSize,
-            device: AVCaptureDevice,
+            device: CaptureDeviceProtocol,
             videoSource: RTCVideoSource,
             videoCapturer: RTCVideoCapturer,
-            videoCapturerDelegate: RTCVideoCapturerDelegate
+            videoCapturerDelegate: RTCVideoCapturerDelegate,
+            reason: CaptureQualityUpdateReason
         )
         case focus(
             point: CGPoint,
@@ -198,8 +255,15 @@ final class StreamVideoCapturer: StreamVideoCapturing {
             case let .setCameraPosition(position, videoSource, videoCapturer, videoCapturerDelegate):
                 return ".startCapture(position:\(position), videoSource:\(customString(for: videoSource)), videoCapturer:\(customString(for: videoCapturer)), videoCapturerDelegate:\(customString(for: videoCapturerDelegate)))"
 
-            case let .updateCaptureQuality(dimensions, device, videoSource, videoCapturer, videoCapturerDelegate):
-                return ".startCapture(dimensions:\(dimensions), device:\(customString(for: device)), videoSource:\(customString(for: videoSource)), videoCapturer:\(customString(for: videoCapturer)), videoCapturerDelegate:\(customString(for: videoCapturerDelegate)))"
+            case let .updateCaptureQuality(
+                dimensions,
+                device,
+                videoSource,
+                videoCapturer,
+                videoCapturerDelegate,
+                reason
+            ):
+                return ".updateCaptureQuality(dimensions:\(dimensions), device:\(customString(for: device)), videoSource:\(customString(for: videoSource)), videoCapturer:\(customString(for: videoCapturer)), videoCapturerDelegate:\(customString(for: videoCapturerDelegate)), reason:\(reason))"
 
             case let .focus(point, videoCaptureSession):
                 return ".focus(point:\(point), videoCaptureSession:\(customString(for: videoCaptureSession)))"
@@ -328,6 +392,13 @@ final class StreamVideoCapturer: StreamVideoCapturing {
     func updateCaptureQuality(
         _ dimensions: CGSize
     ) async throws {
+        try await updateCaptureQuality(dimensions, reason: .external)
+    }
+
+    private func updateCaptureQuality(
+        _ dimensions: CGSize,
+        reason: CaptureQualityUpdateReason
+    ) async throws {
         guard let device = videoCaptureSession?.activeVideoCaptureDevice else { return }
         try await enqueueOperation(
             for: .updateCaptureQuality(
@@ -335,7 +406,8 @@ final class StreamVideoCapturer: StreamVideoCapturing {
                 device: device,
                 videoSource: videoSource,
                 videoCapturer: videoCapturer,
-                videoCapturerDelegate: videoCapturerDelegate
+                videoCapturerDelegate: videoCapturerDelegate,
+                reason: reason
             )
         )
     }
@@ -426,6 +498,10 @@ final class StreamVideoCapturer: StreamVideoCapturing {
                 subsystems: .videoCapturer
             )
         }
+    }
+
+    func dispatch(_ action: Action) async throws {
+        try await enqueueOperation(for: action)
     }
 }
 

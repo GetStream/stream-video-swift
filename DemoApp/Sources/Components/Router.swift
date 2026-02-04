@@ -199,7 +199,8 @@ final class Router: ObservableObject {
 
         let videoConfig = VideoConfig(
             noiseCancellationFilter: noiseCancellationFilter,
-            usesProcessingPipeline: AppEnvironment.usesVideoProcessingPipeline == .enabled
+            usesProcessingPipeline: AppEnvironment.usesVideoProcessingPipeline == .enabled,
+            usesNewCapturingPipeline: AppEnvironment.usesNewCapturingPipeline == .enabled,
         )
 
         let streamVideo = StreamVideo(

@@ -19,6 +19,9 @@ Agents should optimize for media quality, API stability, backwards compatibility
 - CI: GitHub Actions (assume PR validation for build + tests + lint)
 - Apple docs helper: Use https://sosumi.ai/ (MCP or direct) for up-to-date
   Apple platform APIs, Swift/Objective-C references, and UI design guidance.
+- Xcode MCP: Agents may use the Xcode MCP to build, test, and interact with
+  apps on simulators and real devices. See
+  `https://developer.apple.com/documentation/xcode/giving-agentic-coding-tools-access-to-xcode`.
 
 ## Project Structure & Module Organization
 - Root: `Package.swift` (SPM entry).
@@ -68,6 +71,7 @@ Agents should optimize for media quality, API stability, backwards compatibility
 - Add/extend tests for call lifecycle, state/view models, media toggles, and SwiftUI layout logic (use fakes/mocks).
 - Run both `StreamVideo` and `StreamVideoSwiftUI` tests locally; keep/raise coverage.
 - Only add tests for .swift files.
+- Do not test private methods or add test-only hooks to expose them; test through public or internal behavior instead.
 
 ## Comments
 - Use docC for non-private APIs.
