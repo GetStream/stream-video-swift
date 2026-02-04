@@ -18,12 +18,19 @@ final class StreamVideoCapturer: StreamVideoCapturing {
     ///   - videoSource: The video source receiving captured frames.
     ///   - videoCaptureSession: The capture session used for camera input.
     ///   - audioDeviceModule: The audio device module for capture coordination.
+    ///   - usesProcessingPipeline: Whether to process frames through pipeline nodes.
     static func cameraCapturer(
         with videoSource: RTCVideoSource,
         videoCaptureSession: AVCaptureSession = .init(),
-        audioDeviceModule: AudioDeviceModule
+        audioDeviceModule: AudioDeviceModule,
+        usesProcessingPipeline: Bool
     ) -> StreamVideoCapturer {
-        let videoCapturerDelegate = StreamVideoCaptureHandler(source: videoSource)
+        // Route frames through the processing pipeline when enabled.
+        let videoCapturerDelegate: RTCVideoCapturerDelegate = usesProcessingPipeline
+            ? StreamVideoProcessPipeline(source: videoSource, nodes: [
+                StreamVideoProcessPipeline.FilterNode()
+            ])
+            : StreamVideoCaptureHandler(source: videoSource)
 
         #if targetEnvironment(simulator)
         let videoCapturer: RTCVideoCapturer = {
@@ -311,12 +318,11 @@ final class StreamVideoCapturer: StreamVideoCapturing {
     }
 
     func setVideoFilter(_ videoFilter: VideoFilter?) {
-        guard
-            let videoCapturerDelegate = videoCapturerDelegate as? StreamVideoCaptureHandler
-        else {
-            return
+        if let videoCapturerDelegate = videoCapturerDelegate as? StreamVideoCaptureHandler {
+            videoCapturerDelegate.selectedFilter = videoFilter
+        } else if let processingPipeline = videoCapturerDelegate as? StreamVideoProcessPipeline {
+            processingPipeline.didUpdate(videoFilter)
         }
-        videoCapturerDelegate.selectedFilter = videoFilter
     }
 
     func updateCaptureQuality(

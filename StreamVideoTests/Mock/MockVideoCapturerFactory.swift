@@ -28,7 +28,8 @@ final class MockVideoCapturerFactory: VideoCapturerProviding, Mockable, @uncheck
     enum MockFunctionInputKey: Payloadable {
         case buildCameraCapturer(
             source: RTCVideoSource,
-            audioDeviceModule: AudioDeviceModule
+            audioDeviceModule: AudioDeviceModule,
+            usesProcessingPipeline: Bool
         )
         case buildScreenCapturer(
             type: ScreensharingType,
@@ -39,8 +40,8 @@ final class MockVideoCapturerFactory: VideoCapturerProviding, Mockable, @uncheck
 
         var payload: Any {
             switch self {
-            case let .buildCameraCapturer(source, audioDeviceModule):
-                return (source, audioDeviceModule)
+            case let .buildCameraCapturer(source, audioDeviceModule, usesProcessingPipeline):
+                return (source, audioDeviceModule, usesProcessingPipeline)
             case let .buildScreenCapturer(type, source, audioDeviceModule, includeAudio):
                 return (type, source, audioDeviceModule, includeAudio)
             }
@@ -56,13 +57,15 @@ final class MockVideoCapturerFactory: VideoCapturerProviding, Mockable, @uncheck
 
     func buildCameraCapturer(
         source: RTCVideoSource,
-        audioDeviceModule: AudioDeviceModule
+        audioDeviceModule: AudioDeviceModule,
+        usesProcessingPipeline: Bool
     ) -> StreamVideoCapturing {
         stubbedFunctionInput[.buildCameraCapturer]?
             .append(
                 .buildCameraCapturer(
                     source: source,
-                    audioDeviceModule: audioDeviceModule
+                    audioDeviceModule: audioDeviceModule,
+                    usesProcessingPipeline: usesProcessingPipeline
                 )
             )
         return stubbedFunction[.buildCameraCapturer] as! StreamVideoCapturing
