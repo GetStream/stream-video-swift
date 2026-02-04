@@ -315,6 +315,9 @@ struct DebugMenu: View {
                 label: "Log Level"
             ) { LogConfig.level = $0 }
 
+            // Surface debug feature flags registered in AppEnvironment.
+            FeatureFlagsView()
+
             makeMenu(
                 for: [.none, .validFilesOnly, .all],
                 currentValue: Logger.WebRTC.mode,
