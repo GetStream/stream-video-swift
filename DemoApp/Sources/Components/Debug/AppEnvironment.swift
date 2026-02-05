@@ -5,10 +5,12 @@
 import Foundation
 import StreamVideo
 
+/// Conforms debug-menu items to a stable label shown in UI.
 protocol Debuggable: Hashable {
     var title: String { get }
 }
 
+/// Centralized configuration and debug overrides for the demo app.
 enum AppEnvironment {}
 
 extension AppEnvironment {
