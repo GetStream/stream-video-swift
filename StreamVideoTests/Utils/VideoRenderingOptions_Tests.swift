@@ -36,7 +36,7 @@ final class VideoRenderingOptions_Tests: XCTestCase, @unchecked Sendable {
 
         XCTAssertEqual(
             subject.description,
-            "{ renderingBackend:.sharedMetal, bufferPolicy:copyToNV12, maxInFlightFrames:3 }"
+            "{ backend:.sharedMetal, bufferPolicy:copyToNV12, maxInFlightFrames:3 }"
         )
     }
 }
