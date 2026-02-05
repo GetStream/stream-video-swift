@@ -50,6 +50,10 @@ open class VideoFilter: @unchecked Sendable, Equatable {
 
 extension VideoFilter {
 
+    /// Clears the background behind the person in the image (video frame).
+    @available(iOS 15.0, *)
+    public static let clearBackground: VideoFilter = ClearBackgroundVideoFilter()
+
     /// Blurs the background behind the person in the image (video frame).
     @available(iOS 15.0, *)
     public static let blurredBackground: VideoFilter = BlurBackgroundVideoFilter()

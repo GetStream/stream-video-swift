@@ -41,6 +41,8 @@ struct DemoEffectButton: View {
             return appState.videoFilter?.id == VideoFilter.pixelate.id
         case .blur:
             return appState.videoFilter?.id == VideoFilter.blur.id
+        case .clearBackground:
+            return appState.videoFilter?.id == VideoFilter.clearBackground.id
         case .blurBackground:
             return appState.videoFilter?.id == VideoFilter.blurredBackground.id
         default:
@@ -75,6 +77,7 @@ enum BackgroundEffect: String, CaseIterable, Identifiable {
     case none
     case blur
     case pixelate
+    case clearBackground
     case blurBackground
     case amsterdam1 = "amsterdam-1"
     case amsterdam2 = "amsterdam-2"
@@ -94,6 +97,8 @@ enum BackgroundEffect: String, CaseIterable, Identifiable {
             return .pixelate
         case .blur:
             return .blur
+        case .clearBackground:
+            return .clearBackground
         case .blurBackground:
             return .blurredBackground
         default:
@@ -115,6 +120,8 @@ enum BackgroundEffect: String, CaseIterable, Identifiable {
             return Image(systemName: "square.grid.3x3.square")
         case .blur:
             return Image(systemName: "square.stack.3d.forward.dottedline.fill")
+        case .clearBackground:
+            return Image(systemName: "square.2.layers.3d.top.filled")
         case .blurBackground:
             return Image(systemName: "square.stack.3d.forward.dottedline")
         default:
@@ -126,7 +133,7 @@ enum BackgroundEffect: String, CaseIterable, Identifiable {
         switch self {
         case .none:
             return 10
-        case .pixelate, .blur, .blurBackground:
+        case .pixelate, .blur, .blurBackground, .clearBackground:
             return 10
         default:
             return 0
