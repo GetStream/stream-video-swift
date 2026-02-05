@@ -13,19 +13,15 @@ extension FileScreenCapturer {
             case idle
 
             case running(
-                audioTrackOutput: AVAssetReaderTrackOutput,
-                basePTS: CMTime?,
-                startHostTime: CMTime
+                audioTrackOutput: AVAssetReaderTrackOutput
             )
 
             static func == (lhs: Self, rhs: Self) -> Bool {
                 switch (lhs, rhs) {
                 case (.idle, .idle):
                     return true
-                case (let .running(lvto, lBasePTS, lStartHostTime), let .running(rvto, rBasePTS, rStartHostTime)):
+                case (let .running(lvto), let .running(rvto)):
                     return lvto == rvto
-                        && lBasePTS == rBasePTS
-                        && lStartHostTime == rStartHostTime
                 default:
                     return false
                 }
@@ -33,51 +29,49 @@ extension FileScreenCapturer {
         }
 
         private let source: AudioDeviceModule
-        private let queue = OperationQueue(maxConcurrentOperationCount: 1)
 
-        private var state: State = .idle
+        @Atomic private var state: State = .idle
 
         init(_ source: AudioDeviceModule) {
             self.source = source
         }
 
-        func start(with assetReader: AVAssetReader) {
-            queue.addOperation { [weak self] in
-                guard
-                    let self,
-                    state == .idle,
-                    let track = assetReader.asset.tracks(withMediaType: .audio).first
-                else {
-                    return
-                }
-
-                let trackOutput = configureTrackOutput(
-                    assetReader: assetReader,
-                    track: track
-                )
-
-                state = .running(
-                    audioTrackOutput: trackOutput,
-                    basePTS: nil,
-                    startHostTime: CMClockGetTime(CMClockGetHostTimeClock())
-                )
-
-                readNext()
+        func prepareToStart(with assetReader: AVAssetReader) {
+            guard
+                state == .idle,
+                let track = assetReader.asset.tracks(withMediaType: .audio).first
+            else {
+                return
             }
+
+            let trackOutput = configureTrackOutput(
+                assetReader: assetReader,
+                track: track
+            )
+
+            state = .running(
+                audioTrackOutput: trackOutput
+            )
         }
 
         func stop() {
-            queue.addOperation { [weak self] in
-                guard let self else { return }
+            state = .idle
+        }
 
-                switch state {
-                case .idle:
-                    break
-
-                case .running:
-                    state = .idle
-                }
+        func copyNextSampleBuffer() -> CMSampleBuffer? {
+            guard case let .running(trackOutput) = state else {
+                return nil
             }
+
+            return trackOutput.copyNextSampleBuffer()
+        }
+
+        func consume(_ sampleBuffer: CMSampleBuffer) {
+            guard CMSampleBufferIsValid(sampleBuffer) else {
+                return
+            }
+
+            source.enqueue(sampleBuffer)
         }
 
         // MARK: - Private Helpers
@@ -101,59 +95,6 @@ extension FileScreenCapturer {
             assetReader.add(trackOutput)
 
             return trackOutput
-        }
-
-        private func readNext() {
-            queue.addTaskOperation { [weak self] in
-                guard
-                    let self,
-                    case var .running(
-                        trackOutput,
-                        basePTS,
-                        startHostTime
-                    ) = state
-                else {
-                    return
-                }
-
-                guard
-                    let sampleBuffer = trackOutput.copyNextSampleBuffer(),
-                    CMSampleBufferIsValid(sampleBuffer)
-                else {
-                    state = .idle
-                    return
-                }
-
-                let pts = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
-                if basePTS == nil {
-                    basePTS = pts
-                }
-
-                state = .running(
-                    audioTrackOutput: trackOutput,
-                    basePTS: basePTS,
-                    startHostTime: startHostTime
-                )
-
-                let relative = pts - (basePTS ?? .zero)
-                let targetHost = startHostTime + relative
-                let now = CMClockGetTime(CMClockGetHostTimeClock())
-                let delay = max(0, CMTimeGetSeconds(targetHost - now))
-
-                if delay > 0 {
-                    try? await Task.sleep(
-                        nanoseconds: UInt64(delay * 1_000_000_000)
-                    )
-                }
-
-                guard case .running = state else {
-                    return
-                }
-
-                source.enqueue(sampleBuffer)
-
-                readNext()
-            }
         }
     }
 }

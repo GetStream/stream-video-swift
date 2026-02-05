@@ -104,10 +104,18 @@ final class StreamVideoCapturerFactory: VideoCapturerProviding {
                 audioDeviceModule: audioDeviceModule,
                 includeAudio: includeAudio
             )
+
         case .broadcast:
             return StreamVideoCapturer.broadcastCapturer(
                 with: source,
                 audioDeviceModule: audioDeviceModule
+            )
+
+        case let .custom(fileURL):
+            return StreamVideoCapturer.fileCapturer(
+                with: source,
+                audioDeviceModule: audioDeviceModule,
+                fileURL: fileURL
             )
         }
     }

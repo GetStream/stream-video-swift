@@ -314,6 +314,7 @@
 		406576F92F34E5C900E9786A /* FileScreenCapturer+VideoOutputReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406576F82F34E5C900E9786A /* FileScreenCapturer+VideoOutputReader.swift */; };
 		406576FB2F34EAE300E9786A /* FileScreenCapturer+AudioOutputReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406576FA2F34EAE300E9786A /* FileScreenCapturer+AudioOutputReader.swift */; };
 		406576FD2F34F2BF00E9786A /* FileCaptureHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406576FC2F34F2BF00E9786A /* FileCaptureHandler.swift */; };
+		406576FF2F34FBAA00E9786A /* test.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 406576FE2F34FBAA00E9786A /* test.mp4 */; };
 		4065838A2B87695500B4F979 /* BlurBackgroundVideoFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406583852B87694B00B4F979 /* BlurBackgroundVideoFilter.swift */; };
 		4065838B2B87695500B4F979 /* VideoFilters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406583872B87694B00B4F979 /* VideoFilters.swift */; };
 		406583902B877A0500B4F979 /* ImageBackgroundVideoFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4065838E2B877A0000B4F979 /* ImageBackgroundVideoFilter.swift */; };
@@ -349,7 +350,6 @@
 		406A8EB52AA1D91E001F598A /* JoinCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445C12A9E1449004BE3DA /* JoinCallView.swift */; };
 		406A8EB62AA1D922001F598A /* DebugMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4046DEF12A9F510C00CA6D2F /* DebugMenu.swift */; };
 		406AF2012AF3D98F00ED4D0C /* SimulatorScreenCapturer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406AF2002AF3D98F00ED4D0C /* SimulatorScreenCapturer.swift */; };
-		406AF2052AF3DE4300ED4D0C /* test.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 406AF2042AF3DE4000ED4D0C /* test.mp4 */; };
 		406B3BD72C8F332200FC93A1 /* RTCVideoTrack+Sendable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406B3BD62C8F331F00FC93A1 /* RTCVideoTrack+Sendable.swift */; };
 		406B3BD92C8F337000FC93A1 /* MediaAdapting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406B3BD82C8F337000FC93A1 /* MediaAdapting.swift */; };
 		406B3BDB2C8F346200FC93A1 /* RTCRtpEncodingParameters+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406B3BDA2C8F346200FC93A1 /* RTCRtpEncodingParameters+Convenience.swift */; };
@@ -2144,6 +2144,7 @@
 		406576F82F34E5C900E9786A /* FileScreenCapturer+VideoOutputReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FileScreenCapturer+VideoOutputReader.swift"; sourceTree = "<group>"; };
 		406576FA2F34EAE300E9786A /* FileScreenCapturer+AudioOutputReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FileScreenCapturer+AudioOutputReader.swift"; sourceTree = "<group>"; };
 		406576FC2F34F2BF00E9786A /* FileCaptureHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileCaptureHandler.swift; sourceTree = "<group>"; };
+		406576FE2F34FBAA00E9786A /* test.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = test.mp4; sourceTree = "<group>"; };
 		406583852B87694B00B4F979 /* BlurBackgroundVideoFilter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlurBackgroundVideoFilter.swift; sourceTree = "<group>"; };
 		406583872B87694B00B4F979 /* VideoFilters.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VideoFilters.swift; sourceTree = "<group>"; };
 		4065838E2B877A0000B4F979 /* ImageBackgroundVideoFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageBackgroundVideoFilter.swift; sourceTree = "<group>"; };
@@ -2158,7 +2159,6 @@
 		4067F30E2CDA3394002E28BD /* AVAudioSessionCategoryOptions+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AVAudioSessionCategoryOptions+Convenience.swift"; sourceTree = "<group>"; };
 		4067F3122CDA33C4002E28BD /* AVAudioSession.CategoryOptions+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AVAudioSession.CategoryOptions+Convenience.swift"; sourceTree = "<group>"; };
 		406AF2002AF3D98F00ED4D0C /* SimulatorScreenCapturer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimulatorScreenCapturer.swift; sourceTree = "<group>"; };
-		406AF2042AF3DE4000ED4D0C /* test.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = test.mp4; sourceTree = "<group>"; };
 		406B3BD62C8F331F00FC93A1 /* RTCVideoTrack+Sendable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCVideoTrack+Sendable.swift"; sourceTree = "<group>"; };
 		406B3BD82C8F337000FC93A1 /* MediaAdapting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaAdapting.swift; sourceTree = "<group>"; };
 		406B3BDA2C8F346200FC93A1 /* RTCRtpEncodingParameters+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCRtpEncodingParameters+Convenience.swift"; sourceTree = "<group>"; };
@@ -4079,8 +4079,8 @@
 		4030E5912A9DF3E6003E8CBA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				406576FE2F34FBAA00E9786A /* test.mp4 */,
 				40B2F3DA2EFAA3B90067BACE /* audio-tracks */,
-				406AF2042AF3DE4000ED4D0C /* test.mp4 */,
 				4030E5932A9DF439003E8CBA /* Assets */,
 				4030E5922A9DF3ED003E8CBA /* Entitlements */,
 				4046DEE82A9E381F00CA6D2F /* AppIntentVocabulary.plist */,
@@ -8638,12 +8638,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				842D8BDC2865B37800801910 /* Preview Assets.xcassets in Resources */,
-				406AF2052AF3DE4300ED4D0C /* test.mp4 in Resources */,
 				842C7EBF28A2B3FA00C2AB7F /* Assets.xcassets in Resources */,
 				844ADA672AD3F21000769F6A /* GoogleSignIn.plist in Resources */,
 				4046DEE92A9E381F00CA6D2F /* AppIntentVocabulary.plist in Resources */,
 				40B2F3DD2EFAA3C00067BACE /* track_2.mp3 in Resources */,
 				40B2F3DE2EFAA3C00067BACE /* track_1.mp3 in Resources */,
+				406576FF2F34FBAA00E9786A /* test.mp4 in Resources */,
 				842D8BDB2865B37800801910 /* Assets.xcassets in Resources */,
 				40ED6D4B2B14F0E600FB5F69 /* Launch Screen.storyboard in Resources */,
 			);

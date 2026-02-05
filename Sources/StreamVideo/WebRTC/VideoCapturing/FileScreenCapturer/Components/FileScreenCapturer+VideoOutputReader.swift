@@ -11,73 +11,64 @@ extension FileScreenCapturer {
 
         private enum State: Equatable {
             case idle
-
-            case running(
-                displayLink: CADisplayLink,
-                videoTrackOutput: AVAssetReaderTrackOutput
-            )
-
-            static func == (lhs: Self, rhs: Self) -> Bool {
-                switch (lhs, rhs) {
-                case (.idle, .idle):
-                    return true
-                case (let .running(ldl, lvto), let .running(rdl, rvto)):
-                    return ldl === rdl && lvto == rvto
-                default:
-                    return false
-                }
-            }
+            case running(videoTrackOutput: AVAssetReaderTrackOutput)
         }
 
         private weak var source: RTCVideoCapturerDelegate?
-        private let queue = OperationQueue(maxConcurrentOperationCount: 1)
 
-        private var state: State = .idle
+        @Atomic private var state: State = .idle
 
         init(_ source: RTCVideoCapturerDelegate) {
             self.source = source
             super.init()
         }
 
-        func start(with assetReader: AVAssetReader) {
-            queue.addOperation { [weak self] in
-                guard
-                    let self,
-                    state == .idle,
-                    let track = assetReader.asset.tracks(withMediaType: .video).first
-                else {
-                    return
-                }
-                do {
-                    let videoTrackOutput = configureVideoTrackOutput(
-                        assetReader: assetReader,
-                        track: track
-                    )
-                    let displayLink = configureDisplayLink()
-
-                    state = .running(
-                        displayLink: displayLink,
-                        videoTrackOutput: videoTrackOutput
-                    )
-                } catch {
-                    log.error(error)
-                }
+        func prepareToStart(with assetReader: AVAssetReader) {
+            guard
+                state == .idle,
+                let track = assetReader.asset.tracks(withMediaType: .video).first
+            else {
+                return
             }
+
+            let videoTrackOutput = configureVideoTrackOutput(
+                assetReader: assetReader,
+                track: track
+            )
+
+            state = .running(videoTrackOutput: videoTrackOutput)
         }
 
         func stop() {
-            queue.addOperation { [weak self] in
-                guard let self else { return }
+            state = .idle
+        }
 
-                switch state {
-                case .idle:
-                    break
-
-                case let .running(displayLink, _):
-                    displayLink.invalidate()
-                    state = .idle
-                }
+        func copyNextSampleBuffer() -> CMSampleBuffer? {
+            guard case let .running(videoTrackOutput) = state else {
+                return nil
             }
+
+            return videoTrackOutput.copyNextSampleBuffer()
+        }
+
+        func consume(_ sampleBuffer: CMSampleBuffer) {
+            guard
+                CMSampleBufferIsValid(sampleBuffer),
+                let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer)
+            else {
+                return
+            }
+
+            let frameTime = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
+            let videoFrame = RTCCVPixelBuffer(pixelBuffer: pixelBuffer)
+
+            let rtcVideoFrame = RTCVideoFrame(
+                buffer: videoFrame,
+                rotation: ._0,
+                timeStampNs: Int64(CMTimeGetSeconds(frameTime) * 1e9)
+            )
+
+            source?.capturer(self, didCapture: rtcVideoFrame)
         }
 
         // MARK: - Private Helpers
@@ -89,50 +80,15 @@ extension FileScreenCapturer {
             let videoTrackOutput = AVAssetReaderTrackOutput(
                 track: track,
                 outputSettings: [
-                    kCVPixelBufferPixelFormatTypeKey as String: NSNumber(value: kCVPixelFormatType_32BGRA)
+                    kCVPixelBufferPixelFormatTypeKey as String: NSNumber(
+                        value: kCVPixelFormatType_32BGRA
+                    )
                 ]
             )
 
             assetReader.add(videoTrackOutput)
 
             return videoTrackOutput
-        }
-
-        private func configureDisplayLink() -> CADisplayLink {
-            let displayLink = CADisplayLink(
-                target: self,
-                selector: #selector(self.readFrame)
-            )
-            displayLink.preferredFramesPerSecond = 30 // Assuming 30 fps video
-            displayLink.add(to: .main, forMode: .common)
-
-            return displayLink
-        }
-
-        @objc
-        private func readFrame() {
-            queue.addOperation { [weak self] in
-                guard
-                    let self,
-                    case let .running(_, videoTrackOutput) = state,
-                    let sampleBuffer = videoTrackOutput.copyNextSampleBuffer(),
-                    CMSampleBufferIsValid(sampleBuffer)
-                else {
-                    return
-                }
-
-                let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer)!
-                let frameTime = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
-                let videoFrame = RTCCVPixelBuffer(pixelBuffer: pixelBuffer)
-
-                let rtcVideoFrame = RTCVideoFrame(
-                    buffer: videoFrame,
-                    rotation: ._0,
-                    timeStampNs: Int64(CMTimeGetSeconds(frameTime) * 1e9)
-                )
-
-                source?.capturer(self, didCapture: rtcVideoFrame)
-            }
         }
     }
 }

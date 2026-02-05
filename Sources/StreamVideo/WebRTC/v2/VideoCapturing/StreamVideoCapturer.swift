@@ -108,6 +108,26 @@ final class StreamVideoCapturer: StreamVideoCapturing {
         )
     }
 
+    static func fileCapturer(
+        with videoSource: RTCVideoSource,
+        audioDeviceModule: AudioDeviceModule,
+        fileURL: URL
+    ) -> StreamVideoCapturer {
+        .init(
+            videoSource: videoSource,
+            videoCapturer: FileScreenCapturer(
+                source: videoSource,
+                audioDeviceModule: audioDeviceModule,
+                fileURL: fileURL
+            ),
+            videoCapturerDelegate: videoSource,
+            audioDeviceModule: audioDeviceModule,
+            actionHandlers: [
+                FileCaptureHandler()
+            ]
+        )
+    }
+
     // MARK: - Nested Types
 
     enum Action: @unchecked Sendable, CustomStringConvertible {

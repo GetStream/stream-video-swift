@@ -106,16 +106,16 @@ extension InjectedValues {
 
     public var simulatorStreamFile: URL? {
         get {
-            #if targetEnvironment(simulator)
+//            #if targetEnvironment(simulator)
             Self[SimulatorStreamFileKey.self]
-            #else
-            return nil
-            #endif
+//            #else
+//            return nil
+//            #endif
         }
         set {
-            #if targetEnvironment(simulator)
+//            #if targetEnvironment(simulator)
             Self[SimulatorStreamFileKey.self] = newValue
-            #endif
+//            #endif
         }
     }
 }

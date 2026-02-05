@@ -55,6 +55,14 @@ struct DemoBroadcastMoreControlsListButtonView: View {
                 Text("With audio")
             }
 
+            if let url = InjectedValues[\.simulatorStreamFile] {
+                Button {
+                    viewModel.startScreensharing(type: .custom(url), includeAudio: true)
+                    selection = .inApp
+                } label: {
+                    Text("From file")
+                }
+            }
         } label: {
             DemoMoreControlListButtonView(
                 action: {},
