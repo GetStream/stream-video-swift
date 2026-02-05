@@ -87,8 +87,7 @@ final class CameraSystemPressureHandler:
     /// when pressure-based adjustments require a new capture configuration.
     /// The dispatcher is assigned by ``StreamVideoCapturer`` when the new
     /// capture pipeline is enabled.
-    var actionDispatcher:
-        (@Sendable (StreamVideoCapturer.Action) async -> Void)?
+    var actionDispatcher: ((StreamVideoCapturer.Action) async -> Void)?
     /// Retains capture objects required to dispatch quality updates.
     private struct CaptureContext {
         var videoSource: RTCVideoSource
