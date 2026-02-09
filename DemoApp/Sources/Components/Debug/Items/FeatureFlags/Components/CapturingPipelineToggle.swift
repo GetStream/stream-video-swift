@@ -7,7 +7,7 @@ import SwiftUI
 
 extension AppEnvironment {
 
-    /// Debug-only toggle for enabling the video processing pipeline path.
+    /// Debug-only toggle for enabling the new capturing pipeline path.
     enum CapturingPipelineToggle: Hashable, Debuggable {
         case enabled, disabled
 

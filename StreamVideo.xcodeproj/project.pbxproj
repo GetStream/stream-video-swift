@@ -868,8 +868,8 @@
 		40D946412AA5ECEF00C8861B /* CodeScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D946402AA5ECEF00C8861B /* CodeScanner.swift */; };
 		40D946432AA5F65300C8861B /* DemoQRCodeScannerButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D946422AA5F65300C8861B /* DemoQRCodeScannerButton.swift */; };
 		40D946452AA5F67E00C8861B /* DemoCallingTopView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D946442AA5F67E00C8861B /* DemoCallingTopView.swift */; };
-		40DDDB8F2F3A19FF0072578E /* CaputringPipelineToggle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40DDDB8E2F3A19FF0072578E /* CaputringPipelineToggle.swift */; };
-		40DDDB902F3A19FF0072578E /* CaputringPipelineToggle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40DDDB8E2F3A19FF0072578E /* CaputringPipelineToggle.swift */; };
+		40DDDB8F2F3A19FF0072578E /* CapturingPipelineToggle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40DDDB8E2F3A19FF0072578E /* CapturingPipelineToggle.swift */; };
+		40DDDB902F3A19FF0072578E /* CapturingPipelineToggle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40DDDB8E2F3A19FF0072578E /* CapturingPipelineToggle.swift */; };
 		40DE867D2BBEAA8600E88D8A /* CallKitPushNotificationAdapterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40DE867C2BBEAA8600E88D8A /* CallKitPushNotificationAdapterTests.swift */; };
 		40DFA88D2CC10FF3003DCE05 /* Stream_Video_Sfu_Models_AppleThermalState+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40DFA88C2CC10FEF003DCE05 /* Stream_Video_Sfu_Models_AppleThermalState+Convenience.swift */; };
 		40DFA88E2CC1111E003DCE05 /* CallState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84530C6B2A3C4E0700F2678E /* CallState.swift */; };
@@ -2612,7 +2612,7 @@
 		40D946402AA5ECEF00C8861B /* CodeScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeScanner.swift; sourceTree = "<group>"; };
 		40D946422AA5F65300C8861B /* DemoQRCodeScannerButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoQRCodeScannerButton.swift; sourceTree = "<group>"; };
 		40D946442AA5F67E00C8861B /* DemoCallingTopView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoCallingTopView.swift; sourceTree = "<group>"; };
-		40DDDB8E2F3A19FF0072578E /* CaputringPipelineToggle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaputringPipelineToggle.swift; sourceTree = "<group>"; };
+		40DDDB8E2F3A19FF0072578E /* CapturingPipelineToggle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CapturingPipelineToggle.swift; sourceTree = "<group>"; };
 		40DE867C2BBEAA8600E88D8A /* CallKitPushNotificationAdapterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitPushNotificationAdapterTests.swift; sourceTree = "<group>"; };
 		40DFA88C2CC10FEF003DCE05 /* Stream_Video_Sfu_Models_AppleThermalState+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Stream_Video_Sfu_Models_AppleThermalState+Convenience.swift"; sourceTree = "<group>"; };
 		40E110462B5A9DF4007DF492 /* CallDurationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallDurationView.swift; sourceTree = "<group>"; };
@@ -5120,7 +5120,7 @@
 		40999B7C2F3392F500F0659A /* Components */ = {
 			isa = PBXGroup;
 			children = (
-				40DDDB8E2F3A19FF0072578E /* CaputringPipelineToggle.swift */,
+				40DDDB8E2F3A19FF0072578E /* CapturingPipelineToggle.swift */,
 				40999B7B2F3392F500F0659A /* VideoProcessingPipelineFeatureFlag.swift */,
 			);
 			path = Components;
@@ -8935,7 +8935,7 @@
 				409146002B68FEF0007F3C17 /* LongPressToFocusViewModifier.swift in Sources */,
 				4093861A2AA09E4A00FF5AF4 /* MemoryLogDestination.swift in Sources */,
 				40D946432AA5F65300C8861B /* DemoQRCodeScannerButton.swift in Sources */,
-				40DDDB8F2F3A19FF0072578E /* CaputringPipelineToggle.swift in Sources */,
+				40DDDB8F2F3A19FF0072578E /* CapturingPipelineToggle.swift in Sources */,
 				40AB356D2B73B7A400E465CC /* DemoCallingViewModifier.swift in Sources */,
 				409145FB2B68FEF0007F3C17 /* DemoCallModifier.swift in Sources */,
 				40F446062A9E2CB8004BE3DA /* CallViewModel+CallSettingsPublisher.swift in Sources */,
@@ -9030,7 +9030,7 @@
 				40AB354B2B738C5400E465CC /* DemoCallModifier.swift in Sources */,
 				40EDA17C2C13792D00583A65 /* View+AlertWithTextField.swift in Sources */,
 				84921D9C2F32524600A4AA30 /* DemoStartRecordingButtonView.swift in Sources */,
-				40DDDB902F3A19FF0072578E /* CaputringPipelineToggle.swift in Sources */,
+				40DDDB902F3A19FF0072578E /* CapturingPipelineToggle.swift in Sources */,
 				40AB35422B738C3700E465CC /* CallViewModel+Snapshot.swift in Sources */,
 				406A8E9D2AA1D7E9001F598A /* String+Unique.swift in Sources */,
 				409795402DC11381000C6E39 /* DemoVideoViewOverlay.swift in Sources */,

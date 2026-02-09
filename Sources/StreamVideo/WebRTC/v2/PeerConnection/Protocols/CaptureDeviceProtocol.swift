@@ -64,10 +64,15 @@ extension AVCaptureDevice: SystemPressureCaptureDevice {
     }
 
     func applyFixedFrameRate(_ fps: Int) throws {
+        let boundedFPS = min(
+            max(fps, activeFormatFrameRateRange.lowerBound),
+            activeFormatFrameRateRange.upperBound
+        )
+        let clampedFPS = max(1, boundedFPS)
         try lockForConfiguration()
-        let duration = CMTime(value: 1, timescale: CMTimeScale(fps))
+        defer { unlockForConfiguration() }
+        let duration = CMTime(value: 1, timescale: CMTimeScale(clampedFPS))
         activeVideoMinFrameDuration = duration
         activeVideoMaxFrameDuration = duration
-        unlockForConfiguration()
     }
 }
