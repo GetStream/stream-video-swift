@@ -6178,13 +6178,6 @@
 			path = CodeScanner;
 			sourceTree = "<group>";
 		};
-		40DDDB8D2F3A190F0072578E /* Recovered References */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = "Recovered References";
-			sourceTree = "<group>";
-		};
 		40DE867A2BBEAA6900E88D8A /* CallKit */ = {
 			isa = PBXGroup;
 			children = (
@@ -7158,7 +7151,6 @@
 				84F73833287C146D00A363F4 /* StreamVideoUIKitTests */,
 				82392D522993C9E100941435 /* SwiftUIDemoAppUITests */,
 				82392D5C2993CBE200941435 /* TestTools */,
-				40DDDB8D2F3A190F0072578E /* Recovered References */,
 			);
 			sourceTree = "<group>";
 		};
