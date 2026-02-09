@@ -628,9 +628,11 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         track: RTCVideoTrack
     ) async throws {
         if videoCaptureSessionProvider.activeSession == nil {
+            // Create the capturer once and honor the configured processing pipeline flag.
             let cameraCapturer = capturerFactory.buildCameraCapturer(
                 source: track.source,
-                audioDeviceModule: audioDeviceModule
+                audioDeviceModule: audioDeviceModule,
+                usesProcessingPipeline: videoConfig.usesProcessingPipeline
             )
             capturer = cameraCapturer
 

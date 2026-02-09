@@ -183,19 +183,24 @@ final class Router: ObservableObject {
         deeplinkInfo: DeeplinkInfo,
         tokenProvider: @escaping UserTokenProvider
     ) {
-        let videoConfig: VideoConfig
-        #if canImport(StreamVideoNoiseCancellation)
-        let processor = NoiseCancellationProcessor()
-        let noiseCancellationFilter = NoiseCancellationFilter(
-            name: "noise-cancellation",
-            initialize: processor.initialize,
-            process: processor.process,
-            release: processor.release
+        let noiseCancellationFilter: NoiseCancellationFilter? = {
+            #if canImport(StreamVideoNoiseCancellation)
+            let processor = NoiseCancellationProcessor()
+            return NoiseCancellationFilter(
+                name: "noise-cancellation",
+                initialize: processor.initialize,
+                process: processor.process,
+                release: processor.release
+            )
+            #else
+            return nil
+            #endif
+        }()
+
+        let videoConfig = VideoConfig(
+            noiseCancellationFilter: noiseCancellationFilter,
+            usesProcessingPipeline: AppEnvironment.usesVideoProcessingPipeline == .enabled
         )
-        videoConfig = .init(noiseCancellationFilter: noiseCancellationFilter)
-        #else
-        videoConfig = .init()
-        #endif
 
         let streamVideo = StreamVideo(
             apiKey: AppState.shared.apiKey,

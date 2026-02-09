@@ -17,6 +17,7 @@ protocol VideoCapturerProviding {
     ///   - source: The video source for the capturer, responsible for
     ///     providing captured frames.
     ///   - audioDeviceModule: The audio device module used by the capturer.
+    ///   - usesProcessingPipeline: Whether to enable capture-time processing nodes.
     /// - Returns: An instance of `StreamVideoCapturer` for managing camera-based
     ///   video capturing.
     ///
@@ -24,7 +25,8 @@ protocol VideoCapturerProviding {
     /// which can be further configured to process video frames.
     func buildCameraCapturer(
         source: RTCVideoSource,
-        audioDeviceModule: AudioDeviceModule
+        audioDeviceModule: AudioDeviceModule,
+        usesProcessingPipeline: Bool
     ) -> StreamVideoCapturing
 
     /// Builds a screen capturer based on the specified type and source.
@@ -67,11 +69,13 @@ final class StreamVideoCapturerFactory: VideoCapturerProviding {
     /// where a camera is the video input source.
     func buildCameraCapturer(
         source: RTCVideoSource,
-        audioDeviceModule: AudioDeviceModule
+        audioDeviceModule: AudioDeviceModule,
+        usesProcessingPipeline: Bool
     ) -> StreamVideoCapturing {
         StreamVideoCapturer.cameraCapturer(
             with: source,
-            audioDeviceModule: audioDeviceModule
+            audioDeviceModule: audioDeviceModule,
+            usesProcessingPipeline: usesProcessingPipeline
         )
     }
 
