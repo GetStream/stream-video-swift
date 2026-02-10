@@ -303,12 +303,15 @@ final class CameraSystemPressureHandler:
     ///
     /// Upgrades are delayed longer than downgrades to avoid flapping.
     private func refreshQualityTier(immediate: Bool) {
+        // Always cancel any pending tier transition. This prevents stale
+        // downgrades/upgrades from applying after pressure has already recovered.
+        pendingQualityWorkItem?.cancel()
+        pendingQualityWorkItem = nil
+
         guard baselineCaptureDimensions != nil else { return }
 
         let targetTier = qualityTier(for: currentPressureLevel)
         guard targetTier != currentQualityTier else { return }
-
-        pendingQualityWorkItem?.cancel()
         let delay = delayForTierChange(to: targetTier, immediate: immediate)
 
         pendingQualityWorkItem = Task { [weak self] in

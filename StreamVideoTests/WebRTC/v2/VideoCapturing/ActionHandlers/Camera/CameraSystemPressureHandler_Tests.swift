@@ -175,6 +175,40 @@ final class CameraSystemPressureHandler_Tests: XCTestCase, @unchecked Sendable {
             frontDevice.lastAppliedFrameRate == 15
         }
     }
+
+    func test_handle_pressureRecovers_cancelsPendingTierChange() async throws {
+        let noDispatchExpectation = expectation(
+            description: "Expected pending tier changes to be cancelled."
+        )
+        noDispatchExpectation.isInverted = true
+        subject.actionDispatcher = { _ in
+            noDispatchExpectation.fulfill()
+        }
+
+        try await subject.handle(
+            .startCapture(
+                position: .back,
+                dimensions: CGSize(width: 1280, height: 720),
+                frameRate: 30,
+                videoSource: videoSource,
+                videoCapturer: videoCapturer,
+                videoCapturerDelegate: videoCapturerDelegate,
+                audioDeviceModule: audioDeviceModule
+            )
+        )
+
+        mockDevice.sendPressureLevel(.critical)
+        // Recover immediately, before the downgrade debounce elapses.
+        mockDevice.sendPressureLevel(.nominal)
+
+        await fulfillment("Expected frame rate to be restored after recovery.") {
+            self.mockDevice.lastAppliedFrameRate == 30
+        }
+
+        // `critical` downgrade is debounced by ~1s. If the pending work item isn't
+        // cancelled on recovery, we'd still see a `.systemPressure` quality update.
+        await safeFulfillment(of: [noDispatchExpectation], timeout: 1.5)
+    }
 }
 
 private final class MockSystemPressureCaptureDevice:
