@@ -22,9 +22,7 @@ extension AppEnvironment {
     }
 
     /// Default to enabled in debug builds so the pipeline is exercised during development.
-    nonisolated(unsafe) static var usesVideoProcessingPipeline: VideProcessingPipelineToggle = {
-        AppEnvironment.configuration == .debug ? .enabled : .disabled
-    }()
+    nonisolated(unsafe) static var usesVideoProcessingPipeline: VideProcessingPipelineToggle = .disabled
 }
 
 extension DebugMenu {

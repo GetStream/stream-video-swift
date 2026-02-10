@@ -36,7 +36,7 @@ extension AppEnvironment {
     }
 
     /// Active override for the renderer backend used by the demo app.
-    nonisolated(unsafe) static var videoRenderingBackend: VideoRenderingBackend = .sharedMetal
+    nonisolated(unsafe) static var videoRenderingBackend: VideoRenderingBackend = .default
 
     /// Debug menu options for the WebRTC frame buffer policy.
     enum VideoRenderingBufferPolicy: Hashable, Debuggable, Sendable, CaseIterable {
@@ -75,7 +75,7 @@ extension AppEnvironment {
     }
 
     /// Active override for how renderer buffers are produced.
-    nonisolated(unsafe) static var videoRenderingBufferPolicy: VideoRenderingBufferPolicy = .convertWithPoolToNV12
+    nonisolated(unsafe) static var videoRenderingBufferPolicy: VideoRenderingBufferPolicy = .none
 }
 
 extension DebugMenu {
