@@ -33,6 +33,8 @@ extension Published.Publisher: @retroactive @unchecked Sendable {}
 extension RTCVideoFrame: @retroactive @unchecked Sendable {}
 extension AnyPublisher: @retroactive @unchecked Sendable {}
 extension Publishers.Filter: @retroactive @unchecked Sendable {}
+extension RTCVideoCapturer: @retroactive @unchecked Sendable {}
+extension RTCVideoSource: @retroactive @unchecked Sendable {}
 /// Allows audio buffers to cross concurrency boundaries.
 extension AVAudioPCMBuffer: @retroactive @unchecked Sendable {}
 extension AVCaptureDevice.Format: @retroactive @unchecked Sendable {}
@@ -57,6 +59,8 @@ extension Published.Publisher: @unchecked Sendable {}
 extension RTCVideoFrame: @unchecked Sendable {}
 extension AnyPublisher: @unchecked Sendable {}
 extension Publishers.Filter: @unchecked Sendable {}
+extension RTCVideoCapturer: @unchecked Sendable {}
+extension RTCVideoSource: @unchecked Sendable {}
 /// Allows audio buffers to cross concurrency boundaries.
 extension AVAudioPCMBuffer: @unchecked Sendable {}
 extension CIContext: @unchecked Sendable {}

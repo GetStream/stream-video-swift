@@ -55,9 +55,7 @@ final class CameraSystemPressureHandler:
     }
 
     /// Serial queue used to process pressure updates and debounce work.
-    private let pressureQueue = DispatchQueue(
-        label: "io.getstream.CameraSystemPressureHandler.systemPressure"
-    )
+    private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
     /// Subscription for `systemPressureState` changes.
     private var systemPressureCancellable: AnyCancellable?
     /// Current device whose pressure state is being observed.
@@ -76,7 +74,7 @@ final class CameraSystemPressureHandler:
     /// Dimensions currently applied because of pressure changes.
     private var appliedCaptureDimensions: CGSize?
     /// Pending debounced tier adjustment.
-    private var pendingQualityWorkItem: DispatchWorkItem?
+    private var pendingQualityWorkItem: Task<Void, Never>?
 
     @Injected(\.systemPressureCaptureDeviceProvider)
     private var systemPressureCaptureDeviceProvider
@@ -89,7 +87,7 @@ final class CameraSystemPressureHandler:
     /// capture pipeline is enabled.
     var actionDispatcher: ((StreamVideoCapturer.Action) async -> Void)?
     /// Retains capture objects required to dispatch quality updates.
-    private struct CaptureContext {
+    private struct CaptureContext: @unchecked Sendable {
         var videoSource: RTCVideoSource
         var videoCapturer: RTCVideoCapturer
         var videoCapturerDelegate: RTCVideoCapturerDelegate
@@ -119,19 +117,25 @@ final class CameraSystemPressureHandler:
             videoCapturerDelegate,
             _
         ):
-            guard let cameraCapturer = videoCapturer as?
-                RTCCameraVideoCapturer else {
-                return
-            }
-            configuredFrameRate = frameRate
-            captureContext = .init(
+            let captureContext = CaptureContext(
                 videoSource: videoSource,
                 videoCapturer: videoCapturer,
                 videoCapturerDelegate: videoCapturerDelegate
             )
-            updateBaselineDimensions(dimensions)
-            bindSystemPressure(for: cameraCapturer, position: position)
-            refreshQualityTier(immediate: true)
+
+            try await processingQueue.addSynchronousTaskOperation { [weak self] in
+                guard
+                    let self,
+                    let cameraCapturer = videoCapturer as? RTCCameraVideoCapturer
+                else {
+                    return
+                }
+                configuredFrameRate = frameRate
+                self.captureContext = captureContext
+                updateBaselineDimensions(dimensions)
+                bindSystemPressure(for: cameraCapturer, position: position)
+                refreshQualityTier(immediate: true)
+            }
 
         case let .setCameraPosition(
             position,
@@ -139,30 +143,50 @@ final class CameraSystemPressureHandler:
             videoCapturer,
             videoCapturerDelegate
         ):
-            guard let cameraCapturer = videoCapturer as?
-                RTCCameraVideoCapturer else {
-                return
-            }
-            captureContext = .init(
+            let captureContext = CaptureContext(
                 videoSource: videoSource,
                 videoCapturer: videoCapturer,
                 videoCapturerDelegate: videoCapturerDelegate
             )
-            // Preserve the current quality tier when switching devices.
-            bindSystemPressure(for: cameraCapturer, position: position)
-            refreshQualityTier(immediate: true)
 
-        case let .updateCaptureQuality(dimensions, device, _, _, _, reason):
-            if reason == .external {
-                updateBaselineDimensions(dimensions)
+            try await processingQueue.addSynchronousTaskOperation { [weak self] in
+                guard
+                    let self,
+                    let cameraCapturer = videoCapturer as? RTCCameraVideoCapturer
+                else {
+                    return
+                }
+                self.captureContext = captureContext
+                // Preserve the current quality tier when switching devices.
+                bindSystemPressure(for: cameraCapturer, position: position)
                 refreshQualityTier(immediate: true)
             }
-            if currentDevice == nil {
-                bindSystemPressure(for: device as? SystemPressureCaptureDevice)
+        case let .updateCaptureQuality(dimensions, device, _, _, _, reason):
+            try await processingQueue.addSynchronousTaskOperation { [weak self] in
+                guard
+                    let self
+                else {
+                    return
+                }
+
+                if reason == .external {
+                    updateBaselineDimensions(dimensions)
+                    refreshQualityTier(immediate: true)
+                }
+                if currentDevice == nil {
+                    bindSystemPressure(for: device as? SystemPressureCaptureDevice)
+                }
             }
 
         case .stopCapture:
-            reset()
+            try await processingQueue.addSynchronousTaskOperation { [weak self] in
+                guard
+                    let self
+                else {
+                    return
+                }
+                reset()
+            }
         default:
             break
         }
@@ -193,7 +217,7 @@ final class CameraSystemPressureHandler:
         let deviceIdentifier = ObjectIdentifier(device)
         systemPressureCancellable = device
             .systemPressureLevelPublisher
-            .receive(on: pressureQueue)
+            .receive(on: processingQueue)
             .sink { [weak self] level in
                 guard
                     let self,
@@ -281,13 +305,17 @@ final class CameraSystemPressureHandler:
 
         pendingQualityWorkItem?.cancel()
         let delay = delayForTierChange(to: targetTier, immediate: immediate)
-        let workItem = DispatchWorkItem { [weak self] in
-            guard let self else { return }
-            self.currentQualityTier = targetTier
-            self.applyPreferredCaptureDimensions()
+
+        pendingQualityWorkItem = Task { [weak self] in
+            try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+            if !Task.isCancelled {
+                self?.processingQueue.addOperation { [weak self] in
+                    guard let self else { return }
+                    self.currentQualityTier = targetTier
+                    self.applyPreferredCaptureDimensions()
+                }
+            }
         }
-        pendingQualityWorkItem = workItem
-        pressureQueue.asyncAfter(deadline: .now() + delay, execute: workItem)
     }
 
     /// Returns the debounce delay for a requested tier transition.

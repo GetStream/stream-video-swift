@@ -24,11 +24,11 @@ final class CameraSystemPressureHandler_Tests: XCTestCase, @unchecked Sendable {
 
     override func setUp() {
         super.setUp()
-        subject = .init()
         mockDevice = .init(frameRateRange: 5...60)
         mockProvider = .init(device: mockDevice)
         previousProvider = InjectedValues[\.systemPressureCaptureDeviceProvider]
         InjectedValues[\.systemPressureCaptureDeviceProvider] = mockProvider
+        subject = .init()
 
         videoSource = PeerConnectionFactory
             .mock()
