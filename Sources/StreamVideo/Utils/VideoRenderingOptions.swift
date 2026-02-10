@@ -35,8 +35,7 @@ public struct VideoRenderingOptions: InjectionKey, Sendable, CustomStringConvert
     public init(
         backend: RTCVideoRenderingBackend = .default,
         bufferPolicy: RTCFrameBufferPolicy = .none,
-        maxInFlightFrames: Int = 0,
-        rotationOverride: RTCVideoRotation? = nil
+        maxInFlightFrames: Int = 0
     ) {
         self.backend = backend
         self.bufferPolicy = bufferPolicy
@@ -75,7 +74,7 @@ extension RTCFrameBufferPolicy: @retroactive CustomStringConvertible {
         case .wrapOnlyExistingNV12:
             return ".wrapOnlyExistingNV12"
         case .copyToNV12:
-            return "copyToNV12"
+            return ".copyToNV12"
         case .convertWithPoolToNV12:
             return ".convertWithPoolToNV12"
         @unknown default:

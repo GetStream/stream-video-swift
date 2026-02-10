@@ -501,13 +501,11 @@
 		40999B872F3392F500F0659A /* DebugMenu+FeatureFlagsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40999B7D2F3392F500F0659A /* DebugMenu+FeatureFlagsView.swift */; };
 		40999B882F3392F500F0659A /* DebugMenu+BoolValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40999B792F3392F500F0659A /* DebugMenu+BoolValue.swift */; };
 		40999B892F3392F500F0659A /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40999B802F3392F500F0659A /* AppEnvironment.swift */; };
+		40999B8B2F33963F00F0659A /* VideoRenderingOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40999B8A2F33963F00F0659A /* VideoRenderingOptions.swift */; };
+		40999B912F339A0C00F0659A /* VideoRenderingOptions_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40999B902F339A0C00F0659A /* VideoRenderingOptions_Tests.swift */; };
 		40999B952F339C7200F0659A /* CameraSystemPressureHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40999B942F339C7200F0659A /* CameraSystemPressureHandler.swift */; };
 		40999B962F339C7200F0659A /* CameraCaptureSessionConfigurationHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40999B932F339C7200F0659A /* CameraCaptureSessionConfigurationHandler.swift */; };
 		40999BA02F33A38400F0659A /* CameraCaptureSessionConfigurationHandler_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40999B9F2F33A38400F0659A /* CameraCaptureSessionConfigurationHandler_Tests.swift */; };
-		40999B8B2F33963F00F0659A /* VideoRenderingOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40999B8A2F33963F00F0659A /* VideoRenderingOptions.swift */; };
-		40999B8D2F33969600F0659A /* VideoRedenderingOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40999B8C2F33969600F0659A /* VideoRedenderingOptions.swift */; };
-		40999B8E2F33969600F0659A /* VideoRedenderingOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40999B8C2F33969600F0659A /* VideoRedenderingOptions.swift */; };
-		40999B912F339A0C00F0659A /* VideoRenderingOptions_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40999B902F339A0C00F0659A /* VideoRenderingOptions_Tests.swift */; };
 		409AF6E62DAFAC4700EE7BF6 /* PictureInPictureReconnectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409AF6E52DAFAC4700EE7BF6 /* PictureInPictureReconnectionView.swift */; };
 		409AF6E82DAFC80200EE7BF6 /* PictureInPictureContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409AF6E72DAFC80200EE7BF6 /* PictureInPictureContent.swift */; };
 		409AF6EA2DAFE1B000EE7BF6 /* PictureInPictureContentProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409AF6E92DAFE1B000EE7BF6 /* PictureInPictureContentProviderTests.swift */; };
@@ -776,6 +774,8 @@
 		40BBC4E62C63A619002AEF92 /* WebRTCCoordinator+Rejoining.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC4E52C63A619002AEF92 /* WebRTCCoordinator+Rejoining.swift */; };
 		40BBC4E82C63A64E002AEF92 /* WebRTCCoordinator+Migrating.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC4E72C63A64E002AEF92 /* WebRTCCoordinator+Migrating.swift */; };
 		40BBC4EA2C63A665002AEF92 /* WebRTCCoordinator+Migrated.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC4E92C63A665002AEF92 /* WebRTCCoordinator+Migrated.swift */; };
+		40C147A22F3B599F004BC976 /* VideoRedenderingOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C147A12F3B599F004BC976 /* VideoRedenderingOptions.swift */; };
+		40C147A32F3B599F004BC976 /* VideoRedenderingOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C147A12F3B599F004BC976 /* VideoRedenderingOptions.swift */; };
 		40C2B5B62C2B605A00EC2C2D /* DisposableBag.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C2B5B52C2B605A00EC2C2D /* DisposableBag.swift */; };
 		40C2B5BB2C2C41DA00EC2C2D /* RejectCallRequest+Reason.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C2B5BA2C2C41DA00EC2C2D /* RejectCallRequest+Reason.swift */; };
 		40C2B5BE2C2C448200EC2C2D /* RejectionReasonProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C2B5BD2C2C448200EC2C2D /* RejectionReasonProvider.swift */; };
@@ -2307,12 +2307,11 @@
 		40999B7B2F3392F500F0659A /* VideoProcessingPipelineFeatureFlag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoProcessingPipelineFeatureFlag.swift; sourceTree = "<group>"; };
 		40999B7D2F3392F500F0659A /* DebugMenu+FeatureFlagsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DebugMenu+FeatureFlagsView.swift"; sourceTree = "<group>"; };
 		40999B802F3392F500F0659A /* AppEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEnvironment.swift; sourceTree = "<group>"; };
+		40999B8A2F33963F00F0659A /* VideoRenderingOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoRenderingOptions.swift; sourceTree = "<group>"; };
+		40999B902F339A0C00F0659A /* VideoRenderingOptions_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoRenderingOptions_Tests.swift; sourceTree = "<group>"; };
 		40999B932F339C7200F0659A /* CameraCaptureSessionConfigurationHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraCaptureSessionConfigurationHandler.swift; sourceTree = "<group>"; };
 		40999B942F339C7200F0659A /* CameraSystemPressureHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraSystemPressureHandler.swift; sourceTree = "<group>"; };
 		40999B9F2F33A38400F0659A /* CameraCaptureSessionConfigurationHandler_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraCaptureSessionConfigurationHandler_Tests.swift; sourceTree = "<group>"; };
-		40999B8A2F33963F00F0659A /* VideoRenderingOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoRenderingOptions.swift; sourceTree = "<group>"; };
-		40999B8C2F33969600F0659A /* VideoRedenderingOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoRedenderingOptions.swift; sourceTree = "<group>"; };
-		40999B902F339A0C00F0659A /* VideoRenderingOptions_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoRenderingOptions_Tests.swift; sourceTree = "<group>"; };
 		409AF6E52DAFAC4700EE7BF6 /* PictureInPictureReconnectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PictureInPictureReconnectionView.swift; sourceTree = "<group>"; };
 		409AF6E72DAFC80200EE7BF6 /* PictureInPictureContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PictureInPictureContent.swift; sourceTree = "<group>"; };
 		409AF6E92DAFE1B000EE7BF6 /* PictureInPictureContentProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PictureInPictureContentProviderTests.swift; sourceTree = "<group>"; };
@@ -2530,6 +2529,7 @@
 		40BBC4E52C63A619002AEF92 /* WebRTCCoordinator+Rejoining.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WebRTCCoordinator+Rejoining.swift"; sourceTree = "<group>"; };
 		40BBC4E72C63A64E002AEF92 /* WebRTCCoordinator+Migrating.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WebRTCCoordinator+Migrating.swift"; sourceTree = "<group>"; };
 		40BBC4E92C63A665002AEF92 /* WebRTCCoordinator+Migrated.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WebRTCCoordinator+Migrated.swift"; sourceTree = "<group>"; };
+		40C147A12F3B599F004BC976 /* VideoRedenderingOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoRedenderingOptions.swift; sourceTree = "<group>"; };
 		40C2B5B52C2B605A00EC2C2D /* DisposableBag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisposableBag.swift; sourceTree = "<group>"; };
 		40C2B5BA2C2C41DA00EC2C2D /* RejectCallRequest+Reason.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RejectCallRequest+Reason.swift"; sourceTree = "<group>"; };
 		40C2B5BD2C2C448200EC2C2D /* RejectionReasonProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RejectionReasonProvider.swift; sourceTree = "<group>"; };
@@ -5127,6 +5127,7 @@
 		40999B7C2F3392F500F0659A /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				40C147A12F3B599F004BC976 /* VideoRedenderingOptions.swift */,
 				40DDDB8E2F3A19FF0072578E /* CapturingPipelineToggle.swift */,
 				40999B7B2F3392F500F0659A /* VideoProcessingPipelineFeatureFlag.swift */,
 			);
@@ -8913,9 +8914,9 @@
 				844ADA692AD3F78F00769F6A /* GoogleHelper.swift in Sources */,
 				409145FD2B68FEF0007F3C17 /* DemoLocalViewModifier.swift in Sources */,
 				409145FF2B68FEF0007F3C17 /* ChangeEnvironmentViewModifier.swift in Sources */,
-				40999B8E2F33969600F0659A /* VideoRedenderingOptions.swift in Sources */,
 				401A64B12A9DF83200534ED1 /* TokenResponse.swift in Sources */,
 				40B2F3FE2EFBF4790067BACE /* DemoAudioTrackButtonView.swift in Sources */,
+				40C147A32F3B599F004BC976 /* VideoRedenderingOptions.swift in Sources */,
 				409145FA2B68FEF0007F3C17 /* ThermalStateViewModifier.swift in Sources */,
 				40F445DB2A9E2276004BE3DA /* DemoCallContentView.swift in Sources */,
 				4091460B2B690AA4007F3C17 /* CallButtonView.swift in Sources */,
@@ -8983,6 +8984,7 @@
 				406A8E972AA1D7DC001F598A /* User+Demo.swift in Sources */,
 				40AB35552B738C6E00E465CC /* LoadingView.swift in Sources */,
 				40AB35402B738C2B00E465CC /* DemoAppViewFactory.swift in Sources */,
+				40C147A22F3B599F004BC976 /* VideoRedenderingOptions.swift in Sources */,
 				40AB35432B738C3D00E465CC /* DemoControls.swift in Sources */,
 				40AB353E2B738C1300E465CC /* OSLogDestination.swift in Sources */,
 				40AB35482B738C4C00E465CC /* DragIndicatorViewModifier.swift in Sources */,
@@ -9042,7 +9044,6 @@
 				849322512908378A0013C029 /* SceneDelegate.swift in Sources */,
 				40AB35542B738C6C00E465CC /* ShareActivityView.swift in Sources */,
 				406A8EB12AA1D80C001F598A /* UnsecureRepository.swift in Sources */,
-				40999B8D2F33969600F0659A /* VideoRedenderingOptions.swift in Sources */,
 				4031D7F62B801D8A002EC6E4 /* LocalParticipantSnapshotViewModel.swift in Sources */,
 				40AB35472B738C4800E465CC /* DemoModalNavigationBarViewModifier.swift in Sources */,
 				40AB35522B738C6600E465CC /* DemoWaitingLocalUserView.swift in Sources */,
