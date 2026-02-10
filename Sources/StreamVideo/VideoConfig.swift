@@ -35,8 +35,8 @@ public final class VideoConfig: Sendable {
         videoFilters: [VideoFilter] = [],
         noiseCancellationFilter: NoiseCancellationFilter? = nil,
         audioProcessingModule: AudioProcessingModule? = nil,
-        usesProcessingPipeline: Bool = false,
-        usesNewCapturingPipeline: Bool = false
+        usesProcessingPipeline: Bool = true,
+        usesNewCapturingPipeline: Bool = true
     ) {
         self.videoFilters = videoFilters
         self.noiseCancellationFilter = noiseCancellationFilter
