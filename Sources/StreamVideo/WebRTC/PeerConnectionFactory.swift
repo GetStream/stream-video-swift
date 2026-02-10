@@ -210,4 +210,10 @@ final class PeerConnectionFactory: @unchecked Sendable {
             .codecs
             .baseline(for: videoCodec)
     }
+
+    // MARK: - Frame Buffer Policy
+
+    func setFrameBufferPolicy(_ policy: RTCFrameBufferPolicy) {
+        factory.frameBufferPolicy = policy
+    }
 }
