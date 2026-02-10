@@ -26,7 +26,8 @@ protocol VideoCapturerProviding {
     func buildCameraCapturer(
         source: RTCVideoSource,
         audioDeviceModule: AudioDeviceModule,
-        usesProcessingPipeline: Bool
+        usesProcessingPipeline: Bool,
+        usesNewCapturingPipeline: Bool
     ) -> StreamVideoCapturing
 
     /// Builds a screen capturer based on the specified type and source.
@@ -70,12 +71,14 @@ final class StreamVideoCapturerFactory: VideoCapturerProviding {
     func buildCameraCapturer(
         source: RTCVideoSource,
         audioDeviceModule: AudioDeviceModule,
-        usesProcessingPipeline: Bool
+        usesProcessingPipeline: Bool,
+        usesNewCapturingPipeline: Bool
     ) -> StreamVideoCapturing {
         StreamVideoCapturer.cameraCapturer(
             with: source,
             audioDeviceModule: audioDeviceModule,
-            usesProcessingPipeline: usesProcessingPipeline
+            usesProcessingPipeline: usesProcessingPipeline,
+            usesNewCapturingPipeline: usesNewCapturingPipeline
         )
     }
 

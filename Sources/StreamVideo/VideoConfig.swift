@@ -19,6 +19,7 @@ public final class VideoConfig: Sendable {
     /// Enables the capture-time processing pipeline for video filters.
     /// Enables the capture-time processing pipeline (e.g., filter nodes).
     public let usesProcessingPipeline: Bool
+    public let usesNewCapturingPipeline: Bool
 
     /// Initializes a new instance of `VideoConfig` with the specified parameters.
     /// - Parameters:
@@ -34,11 +35,13 @@ public final class VideoConfig: Sendable {
         videoFilters: [VideoFilter] = [],
         noiseCancellationFilter: NoiseCancellationFilter? = nil,
         audioProcessingModule: AudioProcessingModule? = nil,
-        usesProcessingPipeline: Bool = false
+        usesProcessingPipeline: Bool = false,
+        usesNewCapturingPipeline: Bool = false
     ) {
         self.videoFilters = videoFilters
         self.noiseCancellationFilter = noiseCancellationFilter
         self.audioProcessingModule = audioProcessingModule ?? InjectedValues[\.audioFilterProcessingModule]
         self.usesProcessingPipeline = usesProcessingPipeline
+        self.usesNewCapturingPipeline = usesNewCapturingPipeline
     }
 }
