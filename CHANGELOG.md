@@ -4,6 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### 🔄 Changed
+
+# [1.42.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.42.0)
+_February 10, 2026_
+
 ### ✅ Added
 - Added support for raw and individual recording. [#1043](https://github.com/GetStream/stream-video-swift/pull/1043)
 
