@@ -9,7 +9,7 @@ import StreamVideo
 import StreamWebRTC
 import SwiftUI
 
-/// A custom video renderer based on RTCMTLVideoView for rendering RTCVideoTrack objects.
+/// A custom video renderer based on RTCVideoRenderingView for rendering RTCVideoTrack objects.
 public class VideoRenderer: RTCVideoRenderingView, @unchecked Sendable {
 
     @Injected(\.thermalStateObserver) private var thermalStateObserver

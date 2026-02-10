@@ -29,7 +29,7 @@ public struct VideoRenderingOptions: InjectionKey, Sendable, CustomStringConvert
 
     /// Creates rendering options with the specified configuration.
     /// - Parameters:
-    ///   - renderingBackend: The WebRTC rendering backend to use.
+    ///   - backend: The WebRTC rendering backend to use.
     ///   - bufferPolicy: The frame buffer policy used by the renderer.
     ///   - maxInFlightFrames: Maximum number of in-flight frames (0 uses default).
     public init(
@@ -92,7 +92,7 @@ extension RTCVideoRotation: @retroactive CustomStringConvertible {
         case ._90:
             return "._90"
         case ._180:
-            return "_180"
+            return "._180"
         case ._270:
             return "._270"
         @unknown default:
