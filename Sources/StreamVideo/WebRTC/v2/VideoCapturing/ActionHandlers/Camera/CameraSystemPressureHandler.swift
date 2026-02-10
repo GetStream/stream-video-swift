@@ -212,6 +212,11 @@ final class CameraSystemPressureHandler:
     /// at a time.
     private func bindSystemPressure(for device: SystemPressureCaptureDevice?) {
         guard let device else { return }
+        if let currentDevice, ObjectIdentifier(currentDevice) != ObjectIdentifier(device) {
+            // `appliedFrameRate` is not device-specific. Reset it so the first
+            // pressure event for the newly-bound device re-applies FPS.
+            appliedFrameRate = nil
+        }
         currentDevice = device
         systemPressureCancellable?.cancel()
         let deviceIdentifier = ObjectIdentifier(device)

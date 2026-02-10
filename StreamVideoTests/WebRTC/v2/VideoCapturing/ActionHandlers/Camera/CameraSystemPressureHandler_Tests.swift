@@ -131,6 +131,50 @@ final class CameraSystemPressureHandler_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertTrue(device === mockDevice)
         XCTAssertEqual(reason, .systemPressure)
     }
+
+    func test_handle_setCameraPosition_rebindsAndAppliesFrameRateOnNewDevice() async throws {
+        let backDevice = MockSystemPressureCaptureDevice(frameRateRange: 5...60)
+        let frontDevice = MockSystemPressureCaptureDevice(frameRateRange: 5...60)
+        let provider = MultiDeviceSystemPressureCaptureDeviceProvider(
+            back: backDevice,
+            front: frontDevice
+        )
+        InjectedValues[\.systemPressureCaptureDeviceProvider] = provider
+        subject = .init()
+
+        try await subject.handle(
+            .startCapture(
+                position: .back,
+                dimensions: CGSize(width: 1280, height: 720),
+                frameRate: 30,
+                videoSource: videoSource,
+                videoCapturer: videoCapturer,
+                videoCapturerDelegate: videoCapturerDelegate,
+                audioDeviceModule: audioDeviceModule
+            )
+        )
+
+        backDevice.sendPressureLevel(.serious)
+
+        await fulfillment("Expected frame rate to be applied on the back device.") {
+            backDevice.lastAppliedFrameRate == 15
+        }
+
+        try await subject.handle(
+            .setCameraPosition(
+                position: .front,
+                videoSource: videoSource,
+                videoCapturer: videoCapturer,
+                videoCapturerDelegate: videoCapturerDelegate
+            )
+        )
+
+        frontDevice.sendPressureLevel(.serious)
+
+        await fulfillment("Expected frame rate to be applied on the front device.") {
+            frontDevice.lastAppliedFrameRate == 15
+        }
+    }
 }
 
 private final class MockSystemPressureCaptureDevice:
@@ -188,5 +232,30 @@ private final class MockSystemPressureCaptureDeviceProvider:
         position: AVCaptureDevice.Position
     ) -> SystemPressureCaptureDevice? {
         device
+    }
+}
+
+private final class MultiDeviceSystemPressureCaptureDeviceProvider:
+    SystemPressureCaptureDeviceProviding,
+    @unchecked Sendable {
+
+    private let backDevice: SystemPressureCaptureDevice
+    private let frontDevice: SystemPressureCaptureDevice
+
+    init(back: SystemPressureCaptureDevice, front: SystemPressureCaptureDevice) {
+        backDevice = back
+        frontDevice = front
+    }
+
+    func device(
+        for cameraCapturer: RTCCameraVideoCapturer,
+        position: AVCaptureDevice.Position
+    ) -> SystemPressureCaptureDevice? {
+        switch position {
+        case .front:
+            return frontDevice
+        default:
+            return backDevice
+        }
     }
 }

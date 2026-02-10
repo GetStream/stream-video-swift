@@ -14,7 +14,8 @@ extension AppEnvironment {
     }
 
     nonisolated(unsafe) static var featureFlags: [FeatureFlag] = [
-        .init { .init(DebugMenu.VideoProcessingPipelineToggleView()) }
+        .init { .init(DebugMenu.VideoProcessingPipelineToggleView()) },
+        .init { .init(DebugMenu.CapturingPipelineToggleView()) }
     ]
 }
 
