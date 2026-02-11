@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamVideo
 import SwiftUI
 
 extension AppEnvironment {
@@ -22,7 +23,9 @@ extension AppEnvironment {
     }
 
     /// Default to enabled in debug builds so the pipeline is exercised during development.
-    nonisolated(unsafe) static var usesVideoProcessingPipeline: VideProcessingPipelineToggle = .disabled
+    nonisolated(unsafe) static var usesVideoProcessingPipeline: VideProcessingPipelineToggle = {
+        VideoConfig().usesProcessingPipeline ? .enabled : .disabled
+    }()
 }
 
 extension DebugMenu {

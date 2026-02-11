@@ -22,8 +22,8 @@ final class VideoRenderingOptions_Tests: XCTestCase, @unchecked Sendable {
     func test_init_defaults_setsExpectedValues() {
         subject = .init()
 
-        XCTAssertEqual(subject.backend, .default)
-        XCTAssertEqual(subject.bufferPolicy, .none)
+        XCTAssertEqual(subject.backend, .sharedMetal)
+        XCTAssertEqual(subject.bufferPolicy, .convertWithPoolToNV12)
         XCTAssertEqual(subject.maxInFlightFrames, 0)
     }
 
