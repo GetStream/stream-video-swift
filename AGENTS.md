@@ -31,6 +31,9 @@ Agents should optimize for media quality, API stability, backwards compatibility
 - Documentation tests: `DocumentationTests/DocumentationTests/`.
 - Mirror nearby module patterns; keep file names aligned with the primary type (e.g., `CallViewModel.swift`).
 
+### New files & target membership
+- When creating new source or resource files, add them to the correct Xcode target(s). Update the project (e.g. project.pbxproj) so each new file is included in the appropriate target's "Compile Sources" (or "Copy Bundle Resources" for assets). Match the target(s) used by sibling files in the same directory (e.g. Sources/StreamVideo/ → StreamVideo; Sources/StreamVideoSwiftUI/ → StreamVideoSwiftUI; Sources/StreamVideoUIKit/ → StreamVideoUIKit; Tests/StreamVideoTests/ → StreamVideoTests; Tests/StreamVideoSwiftUITests/ → StreamVideoSwiftUITests; Tests/StreamVideoUIKitTests/ → StreamVideoUIKitTests). Omitting target membership will cause build failures or unused files.
+
 ## Build, Test, and Development Commands
 - Open in Xcode 15+ via `Package.swift` and build for an iOS Simulator (e.g., iPhone 15).
 - Build (CLI):
@@ -67,7 +70,7 @@ Agents should optimize for media quality, API stability, backwards compatibility
 - Keep tests as simple as possible. Keep their scope as small as possible.
 - If you see a pattern in test cases, group the testing logic in a method and use this in the test cases that need it.
 - Use `subject` as the name of the subject under test.
-- Prefer instance properties that are explicitly unwrapped which you nullify on tearDown. 
+- Prefer instance properties that are explicitly unwrapped which you nullify on tearDown.
 - Add/extend tests for call lifecycle, state/view models, media toggles, and SwiftUI layout logic (use fakes/mocks).
 - Run both `StreamVideo` and `StreamVideoSwiftUI` tests locally; keep/raise coverage.
 - Only add tests for .swift files.
