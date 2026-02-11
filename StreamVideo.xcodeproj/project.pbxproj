@@ -379,6 +379,71 @@
 			);
 			target = 84F7382E287C146D00A363F4 /* StreamVideoUIKitTests */;
 		};
+		8269355A2F3CD87C00231585 /* Exceptions for "StreamVideoSwiftUITests" folder in "StreamVideoSwiftUITests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Assets.xcassets,
+				CallingViews/CallConnectingView_Tests.swift,
+				CallingViews/CallingGroupView_Tests.swift,
+				CallingViews/CallingParticipantView_Tests.swift,
+				CallingViews/IncomingCallView_Tests.swift,
+				CallingViews/JoiningCallView_Tests.swift,
+				CallingViews/LobbyView_Tests.swift,
+				CallingViews/LobbyViewModel_Tests.swift,
+				CallingViews/MicrophoneChecker_Tests.swift,
+				CallingViews/MicrophoneCheckView_Tests.swift,
+				CallingViews/OutgoingCallView_Tests.swift,
+				CallView/CallControls/Stateful/CallControlsView_Tests.swift,
+				CallView/CallControls/Stateless/StatelessAudioOutputIconView_Tests.swift,
+				CallView/CallControls/Stateless/StatelessHangUpIconView_Tests.swift,
+				CallView/CallControls/Stateless/StatelessMicrophoneIconView_Tests.swift,
+				CallView/CallControls/Stateless/StatelessParticipantsListButton_Tests.swift,
+				CallView/CallControls/Stateless/StatelessSpeakerIconView_Tests.swift,
+				CallView/CallControls/Stateless/StatelessToggleCameraIconView_Tests.swift,
+				CallView/CallControls/Stateless/StatelessVideoIconView_Tests.swift,
+				CallView/CallDurationView_Tests.swift,
+				CallView/ControlBadgeView_Tests.swift,
+				CallView/LayoutComponents/HorizontalParticipantsListView_Tests.swift,
+				"CallView/LayoutComponents/mock-profile-image.jpg",
+				CallView/LayoutComponents/SpotlightSpeakerView_Tests.swift,
+				CallView/ParticipantListButton_Tests.swift,
+				CallView/ParticipantsFullScreenLayout_Tests.swift,
+				CallView/ParticipantsGridLayout_Tests.swift,
+				CallView/ParticipantsSpotlightLayout_Tests.swift,
+				CallView/PermissionsPromptView_Tests.swift,
+				CallView/ReconnectionView_Tests.swift,
+				CallView/RecordingView_Tests.swift,
+				CallView/ScreenSharingView_Tests.swift,
+				CallView/VideoRenderer_Tests.swift,
+				CallView/VisibilityThresholdModifier_Tests.swift,
+				CallViewModel_Tests.swift,
+				Livestreaming/LivestreamPlayer_Tests.swift,
+				StreamVideoUITestCase.swift,
+				Utils/AudioValuePercentageNormaliser_Tests.swift,
+				Utils/CallEventsHandler_Tests.swift,
+				Utils/CornerClipper_Tests.swift,
+				Utils/ParticipantEventResetAdapter/ParticipantEventResetAdapter_Tests.swift,
+				Utils/PictureInPicture/MockAVPictureInPictureController.swift,
+				Utils/PictureInPicture/PictureInPictureContentProviderTests.swift,
+				Utils/PictureInPicture/PictureInPictureContentViewTests.swift,
+				Utils/PictureInPicture/PictureInPictureEnforcedStopAdapterTests.swift,
+				Utils/PictureInPicture/PictureInPictureParticipantModifierTests.swift,
+				Utils/PictureInPicture/PictureInPictureReconnectionViewTests.swift,
+				Utils/PictureInPicture/PictureInPictureScreenSharingViewTests.swift,
+				Utils/PictureInPicture/PictureInPictureStoreTests.swift,
+				Utils/PictureInPicture/PictureInPictureVideoCallViewControllerTests.swift,
+				Utils/PictureInPicture/PictureInPictureVideoParticipantViewTests.swift,
+				Utils/PictureInPicture/StreamBufferTransformerTests.swift,
+				Utils/PictureInPicture/StreamPictureInPictureAdapterTests.swift,
+				Utils/PictureInPicture/StreamPictureInPictureTrackStateAdapterTests.swift,
+				Utils/Resource_Tests.swift,
+				Utils/ReusePool_Tests.swift,
+				Utils/StreamAppStateAdapter/StreamAppStateAdapter_Tests.swift,
+				Utils/StreamMediaDurationFormatter_Tests.swift,
+				Utils/ToastView_Tests.swift,
+			);
+			target = 84F7380D287C141000A363F4 /* StreamVideoSwiftUITests */;
+		};
 		8269A8BC2F3CCE3B00231585 /* Exceptions for "CallIntent" folder in "CallIntent" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -399,13 +464,6 @@
 				SampleHandler.swift,
 			);
 			target = 848C46A12A6ABF7E00E5AC09 /* ScreenSharing */;
-		};
-		8269A95E2F3CCEA900231585 /* Exceptions for "StreamVideoSwiftUITests" folder in "StreamVideoSwiftUITests" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				StreamVideoSwiftUI.xctestplan,
-			);
-			target = 84F7380D287C141000A363F4 /* StreamVideoSwiftUITests */;
 		};
 		8269A95F2F3CCEA900231585 /* Exceptions for "StreamVideoSwiftUITests" folder in "StreamVideoUIKitTests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
@@ -904,7 +962,7 @@
 		8269A9202F3CCEA800231585 /* StreamVideoSwiftUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				8269A95E2F3CCEA900231585 /* Exceptions for "StreamVideoSwiftUITests" folder in "StreamVideoSwiftUITests" target */,
+				8269355A2F3CD87C00231585 /* Exceptions for "StreamVideoSwiftUITests" folder in "StreamVideoSwiftUITests" target */,
 				8269A95F2F3CCEA900231585 /* Exceptions for "StreamVideoSwiftUITests" folder in "StreamVideoUIKitTests" target */,
 			);
 			path = StreamVideoSwiftUITests;
@@ -1369,7 +1427,6 @@
 				84F73811287C141000A363F4 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				8269A9202F3CCEA800231585 /* StreamVideoSwiftUITests */,
 				8269A97C2F3CCEB800231585 /* TestTools */,
 			);
 			name = StreamVideoSwiftUITests;
