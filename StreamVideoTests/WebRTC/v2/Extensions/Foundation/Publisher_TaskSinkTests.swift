@@ -80,4 +80,34 @@ final class PublisherTaskSinkTests: XCTestCase, @unchecked Sendable {
 
         wait(for: [expectation], timeout: 1.0)
     }
+
+    // MARK: - sinkTask(on:storeIn:)
+
+    func test_sinkTaskOnActor_ownerReleased_disposableBagReleased() {
+        var owner: SubscriptionOwner? = .init()
+        weak var disposableBag = owner?.disposableBag
+
+        owner?.configure()
+        owner = nil
+
+        AssertAsync.willBeNil(disposableBag)
+    }
+}
+
+private final class SubscriptionOwner {
+    let disposableBag: DisposableBag = .init()
+    private let actor = TestActor()
+    private let publisher = PassthroughSubject<Int, Never>()
+
+    func configure() {
+        publisher
+            .sinkTask(on: actor, storeIn: disposableBag) { actor, value in
+                await actor.consume(value)
+            }
+            .store(in: disposableBag)
+    }
+}
+
+private actor TestActor {
+    func consume(_ value: Int) {}
 }

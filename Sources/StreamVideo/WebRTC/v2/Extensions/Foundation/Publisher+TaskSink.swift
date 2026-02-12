@@ -124,8 +124,9 @@ extension Publisher where Output: Sendable {
         line: UInt = #line,
         handler: @escaping @Sendable (ActorType, Output) async -> Void
     ) -> AnyCancellable {
-        sink(receiveCompletion: { _ in }) { @Sendable [weak actor] input in
-            guard let actor else {
+        sink(receiveCompletion: { _ in }) {
+            @Sendable [weak actor, weak disposableBag] input in
+            guard let actor, let disposableBag else {
                 return
             }
             Task(

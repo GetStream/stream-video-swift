@@ -35,7 +35,6 @@ final class DemoSnapshotViewModel: ObservableObject {
             .compactMap { $0.custom["snapshot"]?.stringValue }
             .compactMap { Data(base64Encoded: $0) }
             .removeDuplicates()
-            .log(.debug) { "Snapshot received with data:\($0)" }
             .compactMap { UIImage(data: $0) }
             .map {
                 Toast(
