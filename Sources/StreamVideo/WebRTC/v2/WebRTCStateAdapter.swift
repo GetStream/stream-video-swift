@@ -171,6 +171,11 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         self.screenShareSessionProvider = screenShareSessionProvider
         self.audioSession = .init()
 
+        peerConnectionFactory
+            .setFrameBufferPolicy(
+                InjectedValues[\.videoRenderingOptions].bufferPolicy
+            )
+
         Task { [weak self] in
             _ = await self?.permissionsAdapter
             await self?.configureBatteryObservation()

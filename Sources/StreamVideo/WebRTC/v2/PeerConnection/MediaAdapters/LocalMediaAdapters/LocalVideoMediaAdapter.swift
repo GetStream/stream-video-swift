@@ -632,7 +632,8 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             let cameraCapturer = capturerFactory.buildCameraCapturer(
                 source: track.source,
                 audioDeviceModule: audioDeviceModule,
-                usesProcessingPipeline: videoConfig.usesProcessingPipeline
+                usesProcessingPipeline: videoConfig.usesProcessingPipeline,
+                usesNewCapturingPipeline: videoConfig.usesNewCapturingPipeline
             )
             capturer = cameraCapturer
 
