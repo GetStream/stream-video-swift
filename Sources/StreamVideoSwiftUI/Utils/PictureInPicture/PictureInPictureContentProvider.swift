@@ -91,31 +91,20 @@ final class PictureInPictureContentProvider: @unchecked Sendable {
                 store.dispatch(.setContent(.screenSharing(call, session.participant, track)))
             } else if
                 let participant = otherParticipants.first(where: { $0.isDominantSpeaker }) {
-                updatePreferredContentSizeIfRequired(for: participant)
                 store.dispatch(.setContent(.participant(call, participant, participant.hasVideo ? participant.track : nil)))
             } else if
                 let participant = otherParticipants.first(where: { $0.hasVideo && $0.track != nil }),
                 let track = participant.track {
-                updatePreferredContentSizeIfRequired(for: participant)
                 store.dispatch(.setContent(.participant(call, participant, track)))
             } else if
                 let participant = otherParticipants.first {
                 store.dispatch(.setContent(.participant(call, participant, nil)))
             } else if
                 let localParticipant = call.state.localParticipant {
-                updatePreferredContentSizeIfRequired(for: localParticipant)
                 store.dispatch(.setContent(.participant(call, localParticipant, localParticipant.track)))
             } else {
                 store.dispatch(.setContent(.inactive))
             }
         }
-    }
-
-    /// Updates the preferred content size for Picture-in-Picture if needed.
-    private func updatePreferredContentSizeIfRequired(for participant: CallParticipant) {
-        guard participant.hasVideo, participant.trackSize != .zero else {
-            return
-        }
-        store.dispatch(.setPreferredContentSize(participant.trackSize))
     }
 }
