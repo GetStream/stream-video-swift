@@ -745,11 +745,13 @@ class CallController: @unchecked Sendable {
             .stateAdapter
             .$statsAdapter
             .compactMap { $0 }
-            .sink { [disposableBag, weak self] statsReporter in
-                statsReporter
-                    .latestReportPublisher
-                    .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in self?.call?.state.statsReport = $0 }
-                    .store(in: disposableBag)
+            .sink { [weak disposableBag, weak self] statsReporter in
+                if let disposableBag {
+                    statsReporter
+                        .latestReportPublisher
+                        .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in self?.call?.state.statsReport = $0 }
+                        .store(in: disposableBag)
+                }
             }
             .store(in: disposableBag)
     }
