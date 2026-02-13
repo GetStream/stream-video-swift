@@ -771,6 +771,7 @@ open class CallViewModel: ObservableObject {
         recordingUpdates = nil
         skipCallStateUpdates = false
         temporaryCallSettings = nil
+        lastScreenSharingParticipant = nil
         call?.leave()
 
         pictureInPictureAdapter.call = nil
