@@ -15,33 +15,32 @@ final class PeerConnectionFactory: @unchecked Sendable {
     /// Lazy-loaded RTCPeerConnectionFactory instance.
     private(set) lazy var factory: RTCPeerConnectionFactory = {
         let encoderFactory = RTCVideoEncoderFactorySimulcast(
-            primary: defaultEncoder,
-            fallback: defaultEncoder
+            primary: Self.defaultEncoder,
+            fallback: Self.defaultEncoder
         )
-        let decoderFactory = RTCDefaultVideoDecoderFactory()
         return RTCPeerConnectionFactory(
             audioDeviceModuleType: .audioEngine,
             bypassVoiceProcessing: false,
             encoderFactory: encoderFactory,
-            decoderFactory: decoderFactory,
+            decoderFactory: Self.defaultDecoder,
             audioProcessingModule: audioProcessingModule
         )
     }()
     
     /// Lazy-loaded default video encoder factory.
-    private lazy var defaultEncoder = RTCDefaultVideoEncoderFactory()
-    
+    private nonisolated(unsafe) static let defaultEncoder = RTCDefaultVideoEncoderFactory()
+
     /// Lazy-loaded default video decoder factory.
-    private lazy var defaultDecoder = RTCDefaultVideoDecoderFactory()
-    
+    private nonisolated(unsafe) static let defaultDecoder = RTCDefaultVideoDecoderFactory()
+
     /// Array of supported video codec information for encoding.
     var supportedVideoCodecEncoding: [RTCVideoCodecInfo] {
-        defaultEncoder.supportedCodecs()
+        Self.defaultEncoder.supportedCodecs()
     }
     
     /// Array of supported video codec information for decoding.
     var supportedVideoCodecDecoding: [RTCVideoCodecInfo] {
-        defaultDecoder.supportedCodecs()
+        Self.defaultDecoder.supportedCodecs()
     }
 
     private(set) lazy var audioDeviceModule: AudioDeviceModule = .init(factory.audioDeviceModule)
@@ -83,7 +82,7 @@ final class PeerConnectionFactory: @unchecked Sendable {
         log.debug(
             """
             VideoSource was created \(Unmanaged.passUnretained(result).toOpaque())
-            Encoder preferredCodec: \(defaultEncoder.preferredCodec)
+            Encoder preferredCodec: \(Self.defaultEncoder.preferredCodec)
             """,
             subsystems: .webRTC
         )
