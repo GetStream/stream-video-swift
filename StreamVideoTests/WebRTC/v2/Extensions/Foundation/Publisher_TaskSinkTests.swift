@@ -85,7 +85,8 @@ final class PublisherTaskSinkTests: XCTestCase, @unchecked Sendable {
 
     func test_sinkTaskOnActor_ownerReleased_disposableBagReleased() {
         var owner: SubscriptionOwner? = .init()
-        weak var disposableBag = owner?.disposableBag
+        weak var disposableBag: DisposableBag?
+        disposableBag = owner?.disposableBag
 
         owner?.configure()
         owner = nil
@@ -93,6 +94,8 @@ final class PublisherTaskSinkTests: XCTestCase, @unchecked Sendable {
         AssertAsync.willBeNil(disposableBag)
     }
 }
+
+// MARK: - Private Helpers
 
 private final class SubscriptionOwner {
     let disposableBag: DisposableBag = .init()
