@@ -7,7 +7,7 @@ require 'net/http'
 import 'Sonarfile'
 import 'Allurefile'
 
-xcode_version = ENV['XCODE_VERSION'] || '26.1.1'
+xcode_version = ENV['XCODE_VERSION'] || '26.2'
 xcode_project = 'StreamVideo.xcodeproj'
 sdk_names = ['StreamVideo', 'StreamVideoSwiftUI', 'StreamVideoUIKit']
 podspec_names = ['StreamVideo', 'StreamVideo-XCFramework', 'StreamVideoSwiftUI', 'StreamVideoSwiftUI-XCFramework', 'StreamVideoUIKit', 'StreamVideoUIKit-XCFramework']
@@ -694,16 +694,16 @@ end
 
 lane :sources_matrix do
   {
-    e2e: ['Sources', 'DemoApp', 'SwiftUIDemoAppUITests', xcode_project],
-    llc: ['Sources/StreamVideo', 'StreamVideoTests', xcode_project],
-    swiftui: ['Sources', 'StreamVideoSwiftUITests', xcode_project],
-    uikit: ['Sources', 'StreamVideoUIKitTests', xcode_project],
-    swiftui_sample_apps: ['Sources', 'DemoApp', xcode_project],
-    uikit_sample_apps: ['Sources', 'DemoAppUIKit', xcode_project],
-    documentation_tests: ['Sources', 'DocumentationTests', xcode_project],
-    size: ['Sources', xcode_project],
-    public_interface: ['Sources'],
-    ruby: ['fastlane']
+    e2e: ['Sources', 'DemoApp', 'SwiftUIDemoAppUITests', '.github/workflows/smoke-checks.yml', xcode_project],
+    llc: ['Sources/StreamVideo', 'StreamVideoTests', '.github/workflows/smoke-checks.yml', xcode_project],
+    swiftui: ['Sources', 'StreamVideoSwiftUITests', '.github/workflows/smoke-checks.yml', xcode_project],
+    uikit: ['Sources', 'StreamVideoUIKitTests', '.github/workflows/smoke-checks.yml', xcode_project],
+    swiftui_sample_apps: ['Sources', 'DemoApp', '.github/workflows/smoke-checks.yml', xcode_project],
+    uikit_sample_apps: ['Sources', 'DemoAppUIKit', '.github/workflows/smoke-checks.yml', xcode_project],
+    documentation_tests: ['Sources', 'DocumentationTests', '.github/workflows/smoke-checks.yml', xcode_project],
+    size: ['Sources', '.github/workflows/smoke-checks.yml', xcode_project],
+    public_interface: ['Sources', '.github/workflows/smoke-checks.yml'],
+    ruby: ['fastlane', 'Gemfile', 'Gemfile.lock', '.github/workflows/smoke-checks.yml']
   }
 end
 

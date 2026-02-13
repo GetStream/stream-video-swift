@@ -41,7 +41,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - ios: "26.1"
+          - ios: "26.2"
             device: "iPhone 17 Pro"
             setup_runtime: false
           - ios: "18.5"
@@ -50,9 +50,6 @@ jobs:
           - ios: "17.5"
             device: "iPhone 15 Pro"
             setup_runtime: true
-          # - ios: "16.4" # XCTest runner hangs most of the time on iOS 16
-          #   device: "iPhone 14 Pro"
-          #   setup_runtime: true
           - ios: "15.5"
             device: "iPhone 13 Pro"
             setup_runtime: true
@@ -119,7 +116,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - ios: "26.1"
+          - ios: "26.2"
             device: "iPhone 17 Pro"
             setup_runtime: false
           - ios: "18.5"
@@ -137,7 +134,7 @@ jobs:
       fail-fast: false
     runs-on: macos-15
     env:
-      XCODE_VERSION: "26.1.1"
+      XCODE_VERSION: "26.2"
       IOS_SIMULATOR_DEVICE: "${{ matrix.device }} (${{ matrix.ios }})"
     steps:
     - uses: actions/checkout@v4.1.1
