@@ -110,6 +110,11 @@ final class PictureInPictureController: @unchecked Sendable {
         guard let contentViewController else {
             return
         }
+        // Force view loading once PiP infrastructure is ready, so SwiftUI can
+        // instantiate the renderer early and receive track size callbacks
+        // before the first PiP activation.
+        contentViewController.loadViewIfNeeded()
+
         let contentSource = AVPictureInPictureController.ContentSource(
             activeVideoCallSourceView: sourceView,
             contentViewController: contentViewController
