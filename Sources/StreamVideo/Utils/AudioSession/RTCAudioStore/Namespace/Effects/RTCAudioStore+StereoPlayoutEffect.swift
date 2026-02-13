@@ -16,6 +16,8 @@ extension RTCAudioStore {
         private let disposableBag = DisposableBag()
         private var audioDeviceModuleCancellable: AnyCancellable?
 
+        @Atomic private var hasAudioDeviceModule = false
+
         override func set(
             statePublisher: AnyPublisher<RTCAudioStore.StoreState, Never>?
         ) {
@@ -43,6 +45,8 @@ extension RTCAudioStore {
         ) {
             disposableBag.removeAll()
 
+            hasAudioDeviceModule = audioDeviceModule != nil
+
             guard let audioDeviceModule else {
                 return
             }
@@ -54,7 +58,10 @@ extension RTCAudioStore {
                 .map(\.currentRoute)
                 .removeDuplicates()
                 .debounce(for: .seconds(2), scheduler: processingQueue)
-                .sink { [weak audioDeviceModule] _ in audioDeviceModule?.refreshStereoPlayoutState() }
+                .compactMap { [weak self] _ in self?.state?.audioDeviceModule }
+                .receive(on: processingQueue)
+                .filter { [weak self] _ in self?.hasAudioDeviceModule == true }
+                .sink { $0.refreshStereoPlayoutState() }
                 .store(in: disposableBag)
 
             audioDeviceModule
