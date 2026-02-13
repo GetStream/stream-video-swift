@@ -54,7 +54,8 @@ extension RTCAudioStore {
                 .map(\.currentRoute)
                 .removeDuplicates()
                 .debounce(for: .seconds(2), scheduler: processingQueue)
-                .sink { [weak audioDeviceModule] _ in audioDeviceModule?.refreshStereoPlayoutState() }
+                .compactMap { [weak self] _ in self?.state?.audioDeviceModule }
+                .sink { $0.refreshStereoPlayoutState() }
                 .store(in: disposableBag)
 
             audioDeviceModule

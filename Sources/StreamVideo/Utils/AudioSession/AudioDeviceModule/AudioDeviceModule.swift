@@ -182,7 +182,7 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
 
     private let audioBufferRenderer: AudioBufferRenderer = .init()
 
-    private var preAudioBufferInjectionSnapshot: AudioBufferInjectionPreState?
+    @Atomic private var isBeingDismantled = false
 
     /// Textual diagnostics for logging and debugging.
     override var description: String {
@@ -233,10 +233,15 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         source.observer = self
     }
 
+    func dismantle() {
+        isBeingDismantled = true
+    }
+
     // MARK: - Recording
 
     /// Reinitializes the ADM, clearing its internal audio graph state.
     func reset() {
+        guard !isBeingDismantled else { return }
         _ = source.reset()
     }
 
@@ -244,6 +249,7 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
     /// state consistent across reinitializations.
     /// - Parameter isPreferred: `true` when stereo output should be used.
     func setStereoPlayoutPreference(_ isPreferred: Bool) {
+        guard !isBeingDismantled else { return }
         /// - Important: `.voiceProcessing` requires VP to be enabled in order to mute and
         /// `.restartEngine` rebuilds the whole graph. Each of them has different issues:
         /// - `.voiceProcessing`: as it requires VP to be enabled in order to mute/unmute that
@@ -262,6 +268,7 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
     /// - Parameter isActive: `true` to start playout, `false` to stop.
     /// - Throws: `ClientError` when WebRTC returns a non-zero status.
     func setPlayout(_ isActive: Bool) throws {
+        guard !isBeingDismantled else { return }
         guard isActive != isPlaying else {
             return
         }
@@ -286,6 +293,7 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
     /// - Parameter isEnabled: When `true` recording starts, otherwise stops.
     /// - Throws: `ClientError` when the underlying module reports a failure.
     func setRecording(_ isEnabled: Bool) throws {
+        guard !isBeingDismantled else { return }
         guard isEnabled != isRecording else {
             return
         }
@@ -312,6 +320,7 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
     /// - Parameter isMuted: `true` to mute the microphone, `false` to unmute.
     /// - Throws: `ClientError` when the underlying module reports a failure.
     func setMuted(_ isMuted: Bool) throws {
+        guard !isBeingDismantled else { return }
         guard isMuted != source.isMicrophoneMuted else {
             return
         }
@@ -329,6 +338,7 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
 
     /// Forces the ADM to recompute whether stereo output is supported.
     func refreshStereoPlayoutState() {
+        guard !isBeingDismantled else { return }
         source.refreshStereoPlayoutState()
     }
 
