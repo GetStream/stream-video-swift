@@ -94,6 +94,7 @@ final class RTCAudioStore_AVAudioSessionEffectTests: XCTestCase, @unchecked Send
             isRecording: false,
             isMicrophoneMuted: false,
             hasRecordingPermission: true,
+            hasSoftwareNoiseCancellation: false,
             audioDeviceModule: audioDeviceModule,
             currentRoute: .empty,
             audioSessionConfiguration: .init(

@@ -240,6 +240,12 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         _ = source.reset()
     }
 
+    /// Sets whether voice processing bypass is enabled on the wrapped module.
+    /// - Parameter isBypassed: `true` to disable built-in voice processing.
+    func setVoiceProcessingBypassed(_ isBypassed: Bool) {
+        source.isVoiceProcessingBypassed = isBypassed
+    }
+
     /// Switches between stereo and mono playout while keeping the recording
     /// state consistent across reinitializations.
     /// - Parameter isPreferred: `true` when stereo output should be used.
@@ -255,7 +261,6 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         /// sendAudio capability.
         _ = source.setRecordingAlwaysPreparedMode(false)
         source.prefersStereoPlayout = isPreferred
-        source.isVoiceProcessingBypassed = isPreferred
     }
 
     /// Starts or stops speaker playout on the ADM, retrying transient failures.

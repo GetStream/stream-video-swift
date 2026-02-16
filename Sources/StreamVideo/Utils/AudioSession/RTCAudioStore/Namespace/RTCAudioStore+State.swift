@@ -232,6 +232,8 @@ extension RTCAudioStore {
         var isRecording: Bool
         var isMicrophoneMuted: Bool
         var hasRecordingPermission: Bool
+        /// Indicates whether software-based noise-cancellation is currently enabled.
+        var hasSoftwareNoiseCancellation: Bool
 
         var audioDeviceModule: AudioDeviceModule?
         var currentRoute: AudioRoute
@@ -247,6 +249,7 @@ extension RTCAudioStore {
                 ", isRecording:\(isRecording)" +
                 ", isMicrophoneMuted:\(isMicrophoneMuted)" +
                 ", hasRecordingPermission:\(hasRecordingPermission)" +
+                ", hasSoftwareNoiseCancellation:\(hasSoftwareNoiseCancellation)" +
                 ", audioSessionConfiguration:\(audioSessionConfiguration)" +
                 ", webRTCAudioSessionConfiguration:\(webRTCAudioSessionConfiguration)" +
                 ", stereoConfiguration:\(stereoConfiguration)" +
@@ -261,6 +264,7 @@ extension RTCAudioStore {
             case isRecording
             case isMicrophoneMuted
             case hasRecordingPermission
+            case hasSoftwareNoiseCancellation
             case audioSessionConfiguration
             case webRTCAudioSessionConfiguration
             case stereoConfiguration
@@ -277,6 +281,10 @@ extension RTCAudioStore {
             try container.encode(
                 hasRecordingPermission,
                 forKey: .hasRecordingPermission
+            )
+            try container.encode(
+                hasSoftwareNoiseCancellation,
+                forKey: .hasSoftwareNoiseCancellation
             )
             try container.encode(
                 audioSessionConfiguration,
@@ -303,6 +311,7 @@ extension RTCAudioStore {
                 && lhs.isRecording == rhs.isRecording
                 && lhs.isMicrophoneMuted == rhs.isMicrophoneMuted
                 && lhs.hasRecordingPermission == rhs.hasRecordingPermission
+                && lhs.hasSoftwareNoiseCancellation == rhs.hasSoftwareNoiseCancellation
                 && lhs.audioSessionConfiguration == rhs.audioSessionConfiguration
                 && lhs.webRTCAudioSessionConfiguration == rhs.webRTCAudioSessionConfiguration
                 && lhs.stereoConfiguration == rhs.stereoConfiguration
@@ -316,6 +325,7 @@ extension RTCAudioStore {
             hasher.combine(isRecording)
             hasher.combine(isMicrophoneMuted)
             hasher.combine(hasRecordingPermission)
+            hasher.combine(hasSoftwareNoiseCancellation)
             hasher.combine(audioSessionConfiguration)
             hasher.combine(webRTCAudioSessionConfiguration)
             hasher.combine(stereoConfiguration)

@@ -77,6 +77,9 @@ extension RTCAudioStore {
             case .stereo(.setPlayoutPreferred(let value)):
                 state.audioDeviceModule?.setStereoPlayoutPreference(value)
 
+            case .setSoftwareNoiseCancellation(let value):
+                state.audioDeviceModule?.setVoiceProcessingBypassed(value)
+
             case let .webRTCAudioSession(.setAudioEnabled(value)):
                 log.throwing(
                     "Unable to process setPlayout:\(value).",
