@@ -188,7 +188,18 @@ final class MockRTCAudioDeviceModule: RTCAudioDeviceModuleControlling, Mockable,
 
     var isVoiceProcessingBypassed: Bool {
         get { self[dynamicMember: \.isVoiceProcessingBypassed] }
-        set { stub(for: \.isVoiceProcessingBypassed, with: newValue) }
+        set {
+            stub(for: \.isVoiceProcessingBypassed, with: newValue)
+            self.observer?.audioDeviceModule(
+                .init(),
+                didUpdateAudioProcessingState: .init(
+                    voiceProcessingEnabled: isVoiceProcessingEnabled,
+                    voiceProcessingBypassed: isVoiceProcessingBypassed,
+                    voiceProcessingAGCEnabled: isVoiceProcessingAGCEnabled,
+                    stereoPlayoutEnabled: isStereoPlayoutEnabled
+                )
+            )
+        }
     }
 
     var isVoiceProcessingEnabled: Bool {
