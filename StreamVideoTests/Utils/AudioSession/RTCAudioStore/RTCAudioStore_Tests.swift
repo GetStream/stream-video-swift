@@ -36,6 +36,10 @@ final class RTCAudioStore_Tests: XCTestCase, @unchecked Sendable {
         }
     }
 
+    func test_init_hasSoftwareNoiseCancellationFalse() {
+        XCTAssertFalse(subject.state.hasSoftwareNoiseCancellation)
+    }
+
     func test_dispatch_singleAction_updatesState() async {
         subject.dispatch(.setInterrupted(true))
 
@@ -57,6 +61,14 @@ final class RTCAudioStore_Tests: XCTestCase, @unchecked Sendable {
 
         await fulfillment {
             self.subject.state.isInterrupted
+        }
+    }
+
+    func test_dispatch_setSoftwareNoiseCancellation_updatesState() async {
+        subject.dispatch(.setSoftwareNoiseCancellation(true))
+
+        await fulfillment {
+            self.subject.state.hasSoftwareNoiseCancellation
         }
     }
 

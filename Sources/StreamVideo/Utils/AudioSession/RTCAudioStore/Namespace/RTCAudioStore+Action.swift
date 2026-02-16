@@ -131,6 +131,8 @@ extension RTCAudioStore {
         case audioDeviceModuleSetRecording(Bool)
         case setMicrophoneMuted(Bool)
         case setHasRecordingPermission(Bool)
+        /// Tracks whether software noise-cancellation is currently active.
+        case setSoftwareNoiseCancellation(Bool)
 
         case setAudioDeviceModule(AudioDeviceModule?)
         case setCurrentRoute(RTCAudioStore.StoreState.AudioRoute)
@@ -159,6 +161,9 @@ extension RTCAudioStore {
 
             case .setHasRecordingPermission(let value):
                 return ".setHasRecordingPermission(\(value))"
+
+            case .setSoftwareNoiseCancellation(let value):
+                return ".setSoftwareNoiseCancellation(\(value))"
 
             case .setAudioDeviceModule(let value):
                 return ".setAudioDeviceModule(\(value))"

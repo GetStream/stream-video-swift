@@ -182,6 +182,20 @@ final class RTCAudioStore_DefaultReducerTests: XCTestCase, @unchecked Sendable {
         XCTAssertFalse(result.stereoConfiguration.playout.enabled)
     }
 
+    func test_reduce_setSoftwareNoiseCancellation_updatesState() async throws {
+        let state = makeState(hasSoftwareNoiseCancellation: false)
+
+        let result = try await subject.reduce(
+            state: state,
+            action: .setSoftwareNoiseCancellation(true),
+            file: #file,
+            function: #function,
+            line: #line
+        )
+
+        XCTAssertTrue(result.hasSoftwareNoiseCancellation)
+    }
+
     // MARK: - Passthrough actions
 
     func test_reduce_avAudioSessionAction_returnsUnchangedState() async throws {
@@ -206,6 +220,7 @@ final class RTCAudioStore_DefaultReducerTests: XCTestCase, @unchecked Sendable {
         isRecording: Bool = false,
         isMicrophoneMuted: Bool = false,
         hasRecordingPermission: Bool = false,
+        hasSoftwareNoiseCancellation: Bool = false,
         audioDeviceModule: AudioDeviceModule? = nil,
         currentRoute: RTCAudioStore.StoreState.AudioRoute = .empty,
         audioSessionConfiguration: RTCAudioStore.StoreState.AVAudioSessionConfiguration = .init(
@@ -232,6 +247,7 @@ final class RTCAudioStore_DefaultReducerTests: XCTestCase, @unchecked Sendable {
             isRecording: isRecording,
             isMicrophoneMuted: isMicrophoneMuted,
             hasRecordingPermission: hasRecordingPermission,
+            hasSoftwareNoiseCancellation: hasSoftwareNoiseCancellation,
             audioDeviceModule: audioDeviceModule,
             currentRoute: currentRoute,
             audioSessionConfiguration: audioSessionConfiguration,

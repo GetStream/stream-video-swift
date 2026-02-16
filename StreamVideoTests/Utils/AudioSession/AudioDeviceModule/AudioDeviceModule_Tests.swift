@@ -159,22 +159,33 @@ final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
 
     // MARK: - Stereo playout
 
-    func test_setStereoPlayoutPreference_updatesMuteModePreferenceAndVPBypassed() {
+    func test_setStereoPlayoutPreference_updatesMuteModePreference() {
         makeSubject()
 
         subject.setStereoPlayoutPreference(true)
         XCTAssertTrue(source.prefersStereoPlayout)
-        XCTAssertTrue(source.isVoiceProcessingBypassed)
 
         subject.setStereoPlayoutPreference(false)
         XCTAssertFalse(source.prefersStereoPlayout)
-        XCTAssertFalse(source.isVoiceProcessingBypassed)
 
         let recordedModes = source.recordedInputPayload(RTCAudioEngineMuteMode.self, for: .setMuteMode)
         XCTAssertEqual(recordedModes, [.inputMixer, .voiceProcessing])
 
         let recordedPreparedFlags = source.recordedInputPayload(Bool.self, for: .setRecordingAlwaysPreparedMode)
         XCTAssertEqual(recordedPreparedFlags, [false, false])
+    }
+
+    func test_setVoiceProcessingBypassed_updatesUnderlyingModule() {
+        makeSubject()
+        source.stub(for: \.isVoiceProcessingBypassed, with: false)
+
+        subject.setVoiceProcessingBypassed(true)
+
+        XCTAssertTrue(source.isVoiceProcessingBypassed)
+
+        subject.setVoiceProcessingBypassed(false)
+
+        XCTAssertFalse(source.isVoiceProcessingBypassed)
     }
 
     func test_refreshStereoPlayoutState_invokesUnderlyingModule() {
