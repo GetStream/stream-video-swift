@@ -94,7 +94,14 @@ public final class CallSettings: ObservableObject, Sendable, Equatable, CustomSt
     }
 
     public var description: String {
-        "<CallSettings audioOn:\(audioOn) videoOn:\(videoOn) speakerOn:\(speakerOn) audioOutputOn:\(audioOutputOn) cameraPosition:\(cameraPosition)/>"
+        var result = "{"
+        result += "audioOn:\(audioOn)"
+        result += ", videoOn:\(videoOn)"
+        result += ", speakerOn:\(speakerOn)"
+        result += ", audioOutputOn:\(audioOutputOn)"
+        result += ", cameraPosition:\(cameraPosition)"
+        result += " }"
+        return result
     }
 }
 

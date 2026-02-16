@@ -502,7 +502,16 @@ open class CallViewModel: ObservableObject {
                     startsAt: startsAt,
                     team: team
                 )
-                let settings = localCallSettingsChange ? callSettings : nil
+
+                // 1. Fetch the current callSettings (local or the Call's default)
+                // 2. Store the current callSettings so we can apply the correct
+                // speaker state after joining the call.
+                // 3. Disable the speaker. As we override the initial CallSettings
+                // whatever the server sends us will be ignored/overriden.
+                var settings = localCallSettingsChange ? callSettings : call.state.callSettings
+                temporaryCallSettings = call.state.callSettings
+                try? await call.speaker.disableSpeakerPhone()
+                settings = settings.withUpdatedSpeakerState(false)
 
                 call.updateParticipantsSorting(with: participantsSortComparators)
 
@@ -512,9 +521,6 @@ open class CallViewModel: ObservableObject {
                     ring: false,
                     callSettings: settings
                 )
-                
-                temporaryCallSettings = call.state.callSettings
-                try? await call.speaker.disableSpeakerPhone()
 
                 try await call.ring(
                     request: .init(membersIds: members.map(\.id).filter { $0 != self.streamVideo.user.id }, video: video)
