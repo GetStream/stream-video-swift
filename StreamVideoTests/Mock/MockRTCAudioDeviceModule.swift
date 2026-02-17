@@ -188,7 +188,10 @@ final class MockRTCAudioDeviceModule: RTCAudioDeviceModuleControlling, Mockable,
 
     var isVoiceProcessingBypassed: Bool {
         get { self[dynamicMember: \.isVoiceProcessingBypassed] }
-        set { stub(for: \.isVoiceProcessingBypassed, with: newValue) }
+        set {
+            stub(for: \.isVoiceProcessingBypassed, with: newValue)
+            updateObserverForProcessingState()
+        }
     }
 
     var isVoiceProcessingEnabled: Bool {
@@ -273,5 +276,19 @@ final class MockRTCAudioDeviceModule: RTCAudioDeviceModuleControlling, Mockable,
         stubbedFunctionInput[.setRecordingAlwaysPreparedMode]?
             .append(.setRecordingAlwaysPreparedMode(alwaysPreparedRecording))
         return stubbedFunction[.setRecordingAlwaysPreparedMode] as! Int
+    }
+
+    // MARK: - Private Helpers
+
+    private func updateObserverForProcessingState() {
+        observer?.audioDeviceModule(
+            .init(),
+            didUpdateAudioProcessingState: RTCAudioProcessingState(
+                voiceProcessingEnabled: self.isVoiceProcessingEnabled,
+                voiceProcessingBypassed: self.isVoiceProcessingBypassed,
+                voiceProcessingAGCEnabled: self.isVoiceProcessingAGCEnabled,
+                stereoPlayoutEnabled: self.isStereoPlayoutEnabled
+            )
+        )
     }
 }
