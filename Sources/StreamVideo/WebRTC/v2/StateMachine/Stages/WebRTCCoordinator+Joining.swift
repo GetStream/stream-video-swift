@@ -411,11 +411,32 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 joinResponse.fastReconnectDeadlineSeconds
             )
 
+            try Task.checkCancellation()
+
+            reportJoinCompletion()
+
+            try Task.checkCancellation()
+
             reportTelemetry(
                 sessionId: await coordinator.stateAdapter.sessionID,
                 unifiedSessionId: coordinator.stateAdapter.unifiedSessionId,
                 sfuAdapter: sfuAdapter
             )
+        }
+
+        private func reportJoinCompletion() {
+            guard
+                let joinCallResponse = context.initialJoinCallResponse,
+                let joinResponseHandler = context.joinResponseHandler
+            else {
+                return
+            }
+
+            joinResponseHandler.send(joinCallResponse)
+
+            // Clean up
+            context.initialJoinCallResponse = nil
+            context.joinResponseHandler = nil
         }
 
         /// Reports telemetry data to the SFU (Selective Forwarding Unit) to monitor and analyze the

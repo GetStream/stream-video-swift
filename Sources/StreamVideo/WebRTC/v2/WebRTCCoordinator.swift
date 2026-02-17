@@ -95,10 +95,17 @@ final class WebRTCCoordinator: @unchecked Sendable {
         options: CreateCallOptions?,
         ring: Bool,
         notify: Bool,
-        source: JoinSource
+        source: JoinSource,
+        joinResponseHandler: PassthroughSubject<JoinCallResponse, Error>
     ) async throws {
+        // We update the initial CallSettings so that we have a reference
+        // on what CallSettings the caller wants to have after the user joins
+        // the call.
         await stateAdapter.set(initialCallSettings: callSettings)
+
         stateMachine.currentStage.context.joinSource = source
+        stateMachine.currentStage.context.joinResponseHandler = joinResponseHandler
+
         stateMachine.transition(
             .connecting(
                 stateMachine.currentStage.context,
