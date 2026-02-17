@@ -135,6 +135,47 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         }
     }
 
+    func test_joinCall_whenAuthenticationFails_throwsUnableToConnectError() async {
+        mockWebRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .webRTCAuthenticator
+            .stub(
+                for: .authenticate,
+                with: Result<
+                    (SFUAdapter, JoinCallResponse),
+                    Error
+                >.failure(ClientError("auth failed"))
+            )
+
+        do {
+            _ = try await subject.joinCall(
+                create: true,
+                callSettings: nil,
+                options: nil,
+                ring: false,
+                notify: false,
+                source: .inApp
+            )
+            XCTFail("Expected joinCall to throw when authentication fails.")
+        } catch {
+            if let error = error as? ClientError {
+                XCTAssertEqual(
+                    error.localizedDescription,
+                    "Unable to connect to call callId:\(callId)."
+                )
+            } else {
+                XCTFail("Expected ClientError to be thrown.")
+            }
+        }
+        XCTAssertEqual(
+            mockWebRTCCoordinatorFactory
+                .mockCoordinatorStack
+                .webRTCAuthenticator
+                .timesCalled(.authenticate),
+            1
+        )
+    }
+
     // MARK: - cleanUp
 
     func test_cleanUp_callIsNil() async throws {

@@ -198,6 +198,29 @@ final class CallState_Tests: XCTestCase, @unchecked Sendable {
         }
     }
 
+    func test_update_fromJoinCallResponse_doesNotOverwriteCallSettings() {
+        _ = MockStreamVideo()
+        let subject = CallState()
+        let initialCallSettings = CallSettings(
+            audioOn: true,
+            videoOn: false,
+            speakerOn: false,
+            audioOutputOn: false,
+            cameraPosition: .back
+        )
+        subject.update(callSettings: initialCallSettings)
+
+        let remoteCallResponse = CallResponse.dummy(
+            settings: .dummy(
+                audio: .dummy(micDefaultOn: false),
+                video: .dummy(cameraFacing: .front)
+            )
+        )
+        subject.update(from: JoinCallResponse.dummy(call: remoteCallResponse))
+
+        XCTAssertEqual(subject.callSettings, initialCallSettings)
+    }
+
     // MARK: - Private helpers
 
     private func assertParticipantsUpdate(

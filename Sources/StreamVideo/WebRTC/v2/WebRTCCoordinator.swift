@@ -87,8 +87,13 @@ final class WebRTCCoordinator: @unchecked Sendable {
     /// Connects to a call with the specified settings and whether to ring.
     ///
     /// - Parameters:
-    ///   - callSettings: Optional call settings.
-    ///   - ring: Boolean flag indicating if a ring tone should be played.
+    ///   - callSettings: Optional initial `CallSettings` to apply on join.
+    ///   - options: Optional settings to pass to the join/create request.
+    ///   - ring: Whether a ring tone should be played.
+    ///   - notify: Whether users should be notified about call join.
+    ///   - source: Source that initiated the join.
+    ///   - joinResponseHandler: A subject that receives the join completion
+    ///     result once the flow finishes.
     func connect(
         create: Bool = true,
         callSettings: CallSettings?,
