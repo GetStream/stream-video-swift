@@ -70,7 +70,10 @@ public struct VideoIconView: View {
     }
 
     public var body: some View {
-        StatelessVideoIconView(call: viewModel.call) { [weak viewModel] in
+        StatelessVideoIconView(
+            call: viewModel.call,
+            callSettings: viewModel.callSettings
+        ) { [weak viewModel] in
             viewModel?.toggleCameraEnabled()
         }
     }
@@ -94,7 +97,10 @@ public struct MicrophoneIconView: View {
     }
 
     public var body: some View {
-        StatelessMicrophoneIconView(call: viewModel.call) { [weak viewModel] in
+        StatelessMicrophoneIconView(
+            call: viewModel.call,
+            callSettings: viewModel.callSettings
+        ) { [weak viewModel] in
             viewModel?.toggleMicrophoneEnabled()
         }
     }
@@ -167,7 +173,9 @@ public struct AudioOutputIconView: View {
     }
 
     public var body: some View {
-        StatelessAudioOutputIconView(call: viewModel.call) { [weak viewModel] in
+        StatelessAudioOutputIconView(
+            call: viewModel.call
+        ) { [weak viewModel] in
             viewModel?.toggleAudioOutput()
         }
     }

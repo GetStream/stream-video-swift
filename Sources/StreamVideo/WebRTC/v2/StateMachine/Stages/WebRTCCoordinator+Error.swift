@@ -61,6 +61,11 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     }
 
                     try Task.checkCancellation()
+                    if let joinResponseHandler = context.joinResponseHandler {
+                        joinResponseHandler.send(completion: .failure(error))
+                    }
+
+                    try Task.checkCancellation()
                     log.error(error, subsystems: .webRTC)
 
                     try Task.checkCancellation()

@@ -126,12 +126,6 @@ extension Call.StateMachine.Stage {
                 source: input.source
             )
 
-            if let callSettings = input.callSettings {
-                try Task.checkCancellation()
-
-                await call.state.update(callSettings: callSettings)
-            }
-
             try Task.checkCancellation()
 
             await call.state.update(from: response)
