@@ -100,6 +100,10 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
             )
         )
 
+        if let callSettings {
+            await call?.state.update(callSettings: callSettings)
+        }
+
         if let stub = stubbedFunction[.join] as? JoinCallResponse {
             return stub
         } else if let joinError = stubbedFunction[.join] as? Error {

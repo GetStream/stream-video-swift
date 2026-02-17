@@ -116,13 +116,16 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
         }
     }
 
-    func test_execute_withoutRetries_callStateCallSettingsUpdatedWithInput() async throws {
+    func test_execute_withoutRetries_callStateCallSettingsPreservedFromBeforeJoin() async throws {
+        let expectedCallSettings = CallSettings(audioOn: false)
+        self.call?.state.callSettings = expectedCallSettings
+
         let context = Call.StateMachine.Stage.Context(
             call: call,
             input: .join(
                 .init(
                     create: true,
-                    callSettings: .init(audioOn: false),
+                    callSettings: expectedCallSettings,
                     options: .init(memberIds: [.unique]),
                     ring: true,
                     notify: false,
@@ -137,8 +140,9 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
             joinResponse: JoinCallResponse.dummy(),
             expectedTransition: .joined
         ) { @MainActor in
+            let call = try XCTUnwrap(self.call)
             XCTAssertEqual(self.callController.timesCalled(.join), 1)
-            await self.fulfilmentInMainActor { self.call!.state.callSettings == context.input.join?.callSettings }
+            XCTAssertEqual(call.state.callSettings, expectedCallSettings)
         }
     }
 

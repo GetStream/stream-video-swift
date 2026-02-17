@@ -253,6 +253,37 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
         }
     }
 
+    func test_transition_fromIdle_successfulAuthenticationStoresInitialJoinCallResponse() async throws {
+        let expectedJoinResponse = JoinCallResponse.dummy(call: .dummy(cid: "test-cid"))
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.authenticator = mockCoordinatorStack.webRTCAuthenticator
+        mockCoordinatorStack.webRTCAuthenticator.stub(
+            for: .authenticate,
+            with: Result<
+                (SFUAdapter, JoinCallResponse),
+                Error
+            >
+            .success(
+                (
+                    mockCoordinatorStack.sfuStack.adapter,
+                    expectedJoinResponse
+                )
+            )
+        )
+        mockCoordinatorStack.webRTCAuthenticator.stub(
+            for: .waitForAuthentication,
+            with: Result<Void, Error>.success(())
+        )
+
+        try await assertTransition(
+            from: .idle,
+            expectedTarget: .connected,
+            subject: subject
+        ) { target in
+            XCTAssertEqual(target.context.initialJoinCallResponse?.call.cid, expectedJoinResponse.call.cid)
+        }
+    }
+
     // MARK: - transition from `.rejoining`
 
     func test_transition_fromRejoiningWithoutCoordinator_transitionsToDisconnected() async throws {
