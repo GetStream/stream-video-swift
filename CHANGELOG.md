@@ -33,6 +33,12 @@ _February 10, 2026_
 ### ✅ Added
 - Added support for raw and individual recording. [#1043](https://github.com/GetStream/stream-video-swift/pull/1043)
 
+### 🔄 Changed
+- Join flow now is aligned with the internal SFU connection state. [#1059](https://github.com/GetStream/stream-video-swift/pull/1059)
+
+### 🐞 Fixed
+- Speaker will now be disabled while ringing during the ringAndJoin flow. [#1059](https://github.com/GetStream/stream-video-swift/pull/1059)
+
 # [1.41.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.41.0)
 _February 02, 2026_
 
