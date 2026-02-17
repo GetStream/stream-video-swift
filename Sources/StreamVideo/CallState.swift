@@ -446,6 +446,8 @@ public class CallState: ObservableObject {
         ingress = Ingress(rtmp: rtmp)
     }
     
+    /// Updates the current `CallSettings` if they differ from the stored value.
+    /// - Parameter callSettings: The new `CallSettings` value to apply.
     internal func update(callSettings: CallSettings) {
         guard callSettings != self.callSettings else {
             return

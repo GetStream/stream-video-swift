@@ -2,6 +2,7 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 @testable import StreamVideo
 import XCTest
 
@@ -49,5 +50,40 @@ final class WebRTCCoordinatorStateMachine_ErrorStageTests: XCTestCase, @unchecke
         _ = subject.transition(from: .joining(subject.context))
 
         await fulfillment(of: [transitionExpectation])
+    }
+
+    func test_transition_sendsErrorToJoinResponseHandler() async {
+        let handler = PassthroughSubject<JoinCallResponse, Error>()
+        let expectation = expectation(description: "Join response handler receives failure")
+        let expectedError = ClientError("Join failed")
+        var receivedError: Error?
+        let cancellable = handler.sink(
+            receiveCompletion: { completion in
+                switch completion {
+                case .finished:
+                    return
+                case let .failure(error):
+                    receivedError = error
+                    expectation.fulfill()
+                }
+            },
+            receiveValue: { _ in
+                XCTFail("No value expected before failure")
+            }
+        )
+        subject = .error(.init(), error: expectedError)
+        subject.context.joinResponseHandler = handler
+
+        let transitionExpectation = self.expectation(description: "Will transition to id:.cleanUp")
+        subject.transition = {
+            if $0.id == .cleanUp {
+                transitionExpectation.fulfill()
+            }
+        }
+        _ = subject.transition(from: .joining(subject.context))
+
+        await fulfillment(of: [transitionExpectation, expectation])
+        XCTAssertTrue(receivedError is ClientError)
+        cancellable.cancel()
     }
 }

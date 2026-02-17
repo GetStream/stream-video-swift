@@ -424,6 +424,9 @@ extension WebRTCCoordinator.StateMachine.Stage {
             )
         }
 
+        /// Notifies any pending ``Call.join()`` caller with the initial join
+        /// response
+        /// and clears pending completion state.
         private func reportJoinCompletion() {
             guard
                 let joinCallResponse = context.initialJoinCallResponse,
