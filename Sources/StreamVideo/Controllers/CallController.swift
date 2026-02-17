@@ -110,6 +110,8 @@ class CallController: @unchecked Sendable {
     }
 
     /// Joins a call with the provided information and join source.
+    /// The returned `JoinCallResponse` is emitted only after the call flow has
+    /// reached the connected state.
     ///
     /// - Parameters:
     ///   - callType: The type of the call.
@@ -124,6 +126,7 @@ class CallController: @unchecked Sendable {
     ///            Use this to indicate if the call was joined from in-app UI or
     ///            via CallKit.
     /// - Returns: A newly created `JoinCallResponse`.
+    /// - Throws: If authentication, API call, or SFU connection fails.
     @discardableResult
     func joinCall(
         create: Bool = true,

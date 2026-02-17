@@ -106,11 +106,13 @@ extension Call.StateMachine.Stage {
         }
 
         /// Executes the join call operation with retry logic.
+        /// The call result is returned both as a stage-local response and through the
+        /// shared `join` completion channel.
         ///
         /// - Parameters:
-        ///   - call: The call to join
-        ///   - input: The join parameters
-        /// - Returns: The join call response
+        ///   - call: The call to join.
+        ///   - input: The join parameters.
+        /// - Returns: The join call response.
         private func executeJoin(
             call: Call,
             input: Context.JoinInput
