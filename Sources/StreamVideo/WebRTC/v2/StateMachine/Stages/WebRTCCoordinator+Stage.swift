@@ -2,6 +2,7 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import Foundation
 
 extension WebRTCCoordinator.StateMachine {
@@ -37,6 +38,11 @@ extension WebRTCCoordinator.StateMachine {
             var healthCheckInterval: TimeInterval = 5
             var webSocketHealthTimeout: TimeInterval = 15
             var lastHealthCheckReceivedAt: Date?
+
+            // Use to inform the Call.join invocation that the call join
+            // succeeded/failed.
+            var initialJoinCallResponse: JoinCallResponse?
+            var joinResponseHandler: PassthroughSubject<JoinCallResponse, Error>?
 
             /// Determines the next reconnection strategy based on the current one.
             /// - Returns: The next reconnection strategy.

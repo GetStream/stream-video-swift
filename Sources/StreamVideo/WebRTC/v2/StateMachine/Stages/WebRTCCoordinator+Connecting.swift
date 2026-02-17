@@ -156,6 +156,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
                             options: options
                         )
 
+                    context.initialJoinCallResponse = response
+
                     try Task.checkCancellation()
 
                     /// We provide the ``SFUAdapter`` to the authenticator which will ensure

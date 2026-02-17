@@ -57,7 +57,7 @@ class CallController: @unchecked Sendable {
     private var cachedLocation: String?
     private let initialCallSettings: CallSettings
 
-    private var joinCallResponseSubject = CurrentValueSubject<JoinCallResponse?, Error>(nil)
+    private var joinCallResponseSubject = PassthroughSubject<JoinCallResponse, Error>()
     private var joinCallResponseFetchObserver: AnyCancellable?
     private var webRTCClientSessionIDObserver: AnyCancellable?
     private var webRTCClientStateObserver: AnyCancellable?
@@ -133,20 +133,19 @@ class CallController: @unchecked Sendable {
         notify: Bool = false,
         source: JoinSource
     ) async throws -> JoinCallResponse {
-        joinCallResponseSubject = .init(nil)
-
         try await webRTCCoordinator.connect(
             create: create,
             callSettings: callSettings,
             options: options,
             ring: ring,
             notify: notify,
-            source: source
+            source: source,
+            joinResponseHandler: joinCallResponseSubject
         )
         
         guard
-            let response = try await joinCallResponseSubject
-            .nextValue(dropFirst: 1, timeout: WebRTCConfiguration.timeout.join)
+            let response = try? await joinCallResponseSubject
+            .nextValue(timeout: WebRTCConfiguration.timeout.join)
         else {
             await webRTCCoordinator.cleanUp()
             throw ClientError("Unable to connect to call callId:\(callId).")
@@ -582,44 +581,37 @@ class CallController: @unchecked Sendable {
         notify: Bool,
         options: CreateCallOptions?
     ) async throws -> JoinCallResponse {
-        do {
-            let location = try await getLocation()
-            var membersRequest = [MemberRequest]()
-            options?.memberIds?.forEach {
-                membersRequest.append(.init(userId: $0))
-            }
-            options?.members?.forEach {
-                membersRequest.append($0)
-            }
-            let callRequest = CallRequest(
-                custom: options?.custom,
-                members: membersRequest,
-                settingsOverride: options?.settings,
-                startsAt: options?.startsAt,
-                team: options?.team
-            )
-            let joinCall = JoinCallRequest(
-                create: create,
-                data: callRequest,
-                location: location,
-                migratingFrom: migratingFrom,
-                notify: notify,
-                ring: ring
-            )
-            let response = try await defaultAPI.joinCall(
-                type: callType,
-                id: callId,
-                joinCallRequest: joinCall
-            )
-            
-            // We allow the CallController to manage its state.
-            joinCallResponseSubject.send(response)
-            
-            return response
-        } catch {
-            joinCallResponseSubject.send(completion: .failure(error))
-            throw error
+        let location = try await getLocation()
+        var membersRequest = [MemberRequest]()
+        
+        options?.memberIds?.forEach {
+            membersRequest.append(.init(userId: $0))
         }
+        options?.members?.forEach {
+            membersRequest.append($0)
+        }
+
+        let callRequest = CallRequest(
+            custom: options?.custom,
+            members: membersRequest,
+            settingsOverride: options?.settings,
+            startsAt: options?.startsAt,
+            team: options?.team
+        )
+        let joinCall = JoinCallRequest(
+            create: create,
+            data: callRequest,
+            location: location,
+            migratingFrom: migratingFrom,
+            notify: notify,
+            ring: ring
+        )
+
+        return try await defaultAPI.joinCall(
+            type: callType,
+            id: callId,
+            joinCallRequest: joinCall
+        )
     }
 
     private func prefetchLocation() {
@@ -763,7 +755,7 @@ class CallController: @unchecked Sendable {
             .stateAdapter
             .$callSettings
             .removeDuplicates()
-            .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in self?.call?.state.callSettings = $0 }
+            .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in self?.call?.state.update(callSettings: $0) }
             .store(in: disposableBag)
     }
 }
