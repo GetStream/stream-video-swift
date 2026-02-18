@@ -65,6 +65,28 @@ final class RTCAudioStore_CoordinatorTests: XCTestCase, @unchecked Sendable {
         )
     }
 
+    func test_setSoftwareNoiseCancellation_sameValue_returnsFalse() {
+        let state = makeState(hasSoftwareNoiseCancellation: true)
+
+        XCTAssertFalse(
+            subject.shouldExecute(
+                action: .setSoftwareNoiseCancellation(true),
+                state: state
+            )
+        )
+    }
+
+    func test_setSoftwareNoiseCancellation_differentValue_returnsTrue() {
+        let state = makeState(hasSoftwareNoiseCancellation: false)
+
+        XCTAssertTrue(
+            subject.shouldExecute(
+                action: .setSoftwareNoiseCancellation(true),
+                state: state
+            )
+        )
+    }
+
     func test_setCurrentRoute_sameValue_returnsFalse() {
         let state = makeState(currentRoute: .empty)
 
@@ -259,6 +281,7 @@ final class RTCAudioStore_CoordinatorTests: XCTestCase, @unchecked Sendable {
         isRecording: Bool = false,
         isMicrophoneMuted: Bool = false,
         hasRecordingPermission: Bool = false,
+        hasSoftwareNoiseCancellation: Bool = false,
         audioDeviceModule: AudioDeviceModule? = nil,
         currentRoute: RTCAudioStore.StoreState.AudioRoute = .empty,
         audioSessionConfiguration: RTCAudioStore.StoreState.AVAudioSessionConfiguration = .init(
@@ -282,6 +305,7 @@ final class RTCAudioStore_CoordinatorTests: XCTestCase, @unchecked Sendable {
             isRecording: isRecording,
             isMicrophoneMuted: isMicrophoneMuted,
             hasRecordingPermission: hasRecordingPermission,
+            hasSoftwareNoiseCancellation: hasSoftwareNoiseCancellation,
             audioDeviceModule: audioDeviceModule,
             currentRoute: currentRoute,
             audioSessionConfiguration: audioSessionConfiguration,

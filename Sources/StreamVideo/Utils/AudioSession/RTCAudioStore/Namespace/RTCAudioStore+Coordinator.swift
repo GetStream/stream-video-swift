@@ -34,6 +34,9 @@ extension RTCAudioStore {
             case let .setHasRecordingPermission(value):
                 return value != state.hasRecordingPermission
 
+            case let .setSoftwareNoiseCancellation(value):
+                return value != state.hasSoftwareNoiseCancellation
+
             case let .setAudioDeviceModule(value):
                 return value !== state.audioDeviceModule
 

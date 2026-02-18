@@ -162,6 +162,7 @@ final class RTCAudioStore_InterruptionsEffectTests: XCTestCase, @unchecked Senda
         isRecording: Bool = false,
         isMicrophoneMuted: Bool = false,
         hasRecordingPermission: Bool = false,
+        hasSoftwareNoiseCancellation: Bool = false,
         audioDeviceModule: AudioDeviceModule? = nil,
         currentRoute: RTCAudioStore.StoreState.AudioRoute = .empty,
         audioSessionConfiguration: RTCAudioStore.StoreState.AVAudioSessionConfiguration = .init(
@@ -182,6 +183,7 @@ final class RTCAudioStore_InterruptionsEffectTests: XCTestCase, @unchecked Senda
             isRecording: isRecording,
             isMicrophoneMuted: isMicrophoneMuted,
             hasRecordingPermission: hasRecordingPermission,
+            hasSoftwareNoiseCancellation: hasSoftwareNoiseCancellation,
             audioDeviceModule: audioDeviceModule,
             currentRoute: currentRoute,
             audioSessionConfiguration: audioSessionConfiguration,
