@@ -642,6 +642,7 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
         file: StaticString = #file,
         line: UInt = #line
     ) async rethrows {
+        _ = subject
         let transitionExpectation = expectation(description: "WebRTCCoordinator is expected to transition to stage id:\(id).")
 
         try await withThrowingTaskGroup(of: Void.self) { group in

@@ -67,6 +67,7 @@ extension StreamCallAudioRecorder.Namespace {
             audioDeviceModuleCancellable = audioStore
                 .publisher(\.audioDeviceModule)
                 .receive(on: processingQueue)
+                .removeDuplicates()
                 .sink { [weak self] in self?.didUpdate($0, initialMode: initialMode) }
         }
 

@@ -60,7 +60,9 @@ final class MockAVAudioRecorder: AVAudioRecorder, Mockable, @unchecked Sendable 
 
     override var isMeteringEnabled: Bool {
         get { isMeteringEnabledStorage }
-        set { isMeteringEnabledStorage = newValue }
+        set {
+            isMeteringEnabledStorage = newValue
+        }
     }
 
     override func updateMeters() {
