@@ -52,7 +52,11 @@ final class CallAudioSession_Tests: XCTestCase, @unchecked Sendable {
         }
     }
 
-    func test_activate_enablesAudioAndAppliesPolicy() async {
+    // MARK: - activate
+
+    // MARK: shouldSetActive = true
+
+    func test_activate_shouldSetActiveTrue_enablesAudioAndAppliesPolicy() async {
         let callSettingsSubject = PassthroughSubject<CallSettings, Never>()
         let capabilitiesSubject = PassthroughSubject<Set<OwnCapability>, Never>()
         let delegate = SpyAudioSessionAdapterDelegate()
@@ -101,6 +105,139 @@ final class CallAudioSession_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(traces.count, 2)
     }
 
+    func test_activate_shouldSetActiveTrue_setsStereoPreference_whenPolicyPrefersStereoPlayout() async {
+        let callSettingsSubject = PassthroughSubject<CallSettings, Never>()
+        let capabilitiesSubject = PassthroughSubject<Set<OwnCapability>, Never>()
+        let delegate = SpyAudioSessionAdapterDelegate()
+        subject = .init(policy: LivestreamAudioSessionPolicy())
+
+        subject.activate(
+            callSettingsPublisher: callSettingsSubject.eraseToAnyPublisher(),
+            ownCapabilitiesPublisher: capabilitiesSubject.eraseToAnyPublisher(),
+            delegate: delegate,
+            statsAdapter: nil,
+            shouldSetActive: true
+        )
+
+        await fulfillment {
+            self.mockAudioStore.audioStore.state.stereoConfiguration.playout.preferred
+        }
+    }
+
+    // MARK: shouldSetActive = false
+
+    func test_activate_shouldSetActiveFalse_isActiveOnStoreIsTrue_dropsFirstValueAndActivatesCorrectly() async {
+        mockAudioStore.audioStore.dispatch(.setActive(true))
+        let callSettingsSubject = CurrentValueSubject<CallSettings, Never>(.default)
+        let capabilitiesSubject = CurrentValueSubject<Set<OwnCapability>, Never>([.sendAudio])
+        let delegate = SpyAudioSessionAdapterDelegate()
+        let policy = MockAudioSessionPolicy()
+        let policyConfiguration = AudioSessionConfiguration(
+            isActive: true,
+            category: .playAndRecord,
+            mode: .voiceChat,
+            options: [.allowBluetoothHFP, .allowBluetoothA2DP],
+            overrideOutputAudioPort: .speaker
+        )
+        policy.stub(for: .configuration, with: policyConfiguration)
+        subject = .init(policy: policy)
+
+        subject.activate(
+            callSettingsPublisher: callSettingsSubject.eraseToAnyPublisher(),
+            ownCapabilitiesPublisher: capabilitiesSubject.eraseToAnyPublisher(),
+            delegate: delegate,
+            statsAdapter: nil,
+            shouldSetActive: false
+        )
+        mockAudioStore.audioStore.dispatch(.setActive(true))
+
+        await fulfilmentInMainActor {
+            let state = self.mockAudioStore.audioStore.state
+            return state.audioSessionConfiguration.category == policyConfiguration.category
+                && state.audioSessionConfiguration.mode == policyConfiguration.mode
+                && state.audioSessionConfiguration.options == policyConfiguration.options
+                && state.isMicrophoneMuted == false
+                && state.webRTCAudioSessionConfiguration.isAudioEnabled
+        }
+    }
+
+    func test_activate_shouldSetActiveFalse_enablesAudioAndAppliesPolicy() async {
+        let callSettingsSubject = PassthroughSubject<CallSettings, Never>()
+        let capabilitiesSubject = PassthroughSubject<Set<OwnCapability>, Never>()
+        let delegate = SpyAudioSessionAdapterDelegate()
+        let statsAdapter = MockWebRTCStatsAdapter()
+        let policy = MockAudioSessionPolicy()
+        let mockAudioDeviceModule = MockRTCAudioDeviceModule()
+        mockAudioDeviceModule.stub(for: \.isRecording, with: true)
+        mockAudioDeviceModule.stub(for: \.isMicrophoneMuted, with: false)
+        mockAudioStore.audioStore.dispatch(.setAudioDeviceModule(.init(mockAudioDeviceModule)))
+        let policyConfiguration = AudioSessionConfiguration(
+            isActive: true,
+            category: .playAndRecord,
+            mode: .voiceChat,
+            options: [.allowBluetoothHFP, .allowBluetoothA2DP],
+            overrideOutputAudioPort: .speaker
+        )
+        policy.stub(for: .configuration, with: policyConfiguration)
+
+        subject = .init(policy: policy)
+        subject.activate(
+            callSettingsPublisher: callSettingsSubject.eraseToAnyPublisher(),
+            ownCapabilitiesPublisher: capabilitiesSubject.eraseToAnyPublisher(),
+            delegate: delegate,
+            statsAdapter: statsAdapter,
+            shouldSetActive: false
+        )
+
+        mockAudioStore.audioStore.dispatch(.setActive(true))
+        await fulfilmentInMainActor {
+            self.mockAudioStore.audioStore.state.isActive
+        }
+
+        // Provide call settings to trigger policy application.
+        callSettingsSubject.send(CallSettings(audioOn: true, speakerOn: true))
+        capabilitiesSubject.send([.sendAudio])
+
+        await fulfillment {
+            let state = self.mockAudioStore.audioStore.state
+            return state.audioSessionConfiguration.category == policyConfiguration.category
+                && state.audioSessionConfiguration.mode == policyConfiguration.mode
+                && state.audioSessionConfiguration.options == policyConfiguration.options
+                && state.isRecording
+                && state.isMicrophoneMuted == false
+                && state.webRTCAudioSessionConfiguration.isAudioEnabled
+        }
+
+        let traces = statsAdapter.stubbedFunctionInput[.trace]?.compactMap { input -> WebRTCTrace? in
+            guard case let .trace(trace) = input else { return nil }
+            return trace
+        } ?? []
+        XCTAssertEqual(traces.count, 2)
+    }
+
+    func test_activate_shouldSetActiveFalse_setsStereoPreference_whenPolicyPrefersStereoPlayout() async {
+        let callSettingsSubject = PassthroughSubject<CallSettings, Never>()
+        let capabilitiesSubject = PassthroughSubject<Set<OwnCapability>, Never>()
+        let delegate = SpyAudioSessionAdapterDelegate()
+        subject = .init(policy: LivestreamAudioSessionPolicy())
+
+        subject.activate(
+            callSettingsPublisher: callSettingsSubject.eraseToAnyPublisher(),
+            ownCapabilitiesPublisher: capabilitiesSubject.eraseToAnyPublisher(),
+            delegate: delegate,
+            statsAdapter: nil,
+            shouldSetActive: false
+        )
+
+        mockAudioStore.audioStore.dispatch(.setActive(true))
+
+        await fulfillment {
+            self.mockAudioStore.audioStore.state.stereoConfiguration.playout.preferred
+        }
+    }
+
+    // MARK: - deactivate
+
     func test_deactivate_clearsDelegateAndDisablesAudio() async {
         let callSettingsSubject = PassthroughSubject<CallSettings, Never>()
         let capabilitiesSubject = PassthroughSubject<Set<OwnCapability>, Never>()
@@ -134,6 +271,8 @@ final class CallAudioSession_Tests: XCTestCase, @unchecked Sendable {
 
         XCTAssertNil(subject.delegate)
     }
+
+    // MARK: - didUpdatePolicy
 
     func test_didUpdatePolicy_reconfiguresWhenActive() async {
         let callSettingsSubject = PassthroughSubject<CallSettings, Never>()
@@ -193,24 +332,7 @@ final class CallAudioSession_Tests: XCTestCase, @unchecked Sendable {
         }
     }
 
-    func test_activate_setsStereoPreference_whenPolicyPrefersStereoPlayout() async {
-        let callSettingsSubject = PassthroughSubject<CallSettings, Never>()
-        let capabilitiesSubject = PassthroughSubject<Set<OwnCapability>, Never>()
-        let delegate = SpyAudioSessionAdapterDelegate()
-        subject = .init(policy: LivestreamAudioSessionPolicy())
-
-        subject.activate(
-            callSettingsPublisher: callSettingsSubject.eraseToAnyPublisher(),
-            ownCapabilitiesPublisher: capabilitiesSubject.eraseToAnyPublisher(),
-            delegate: delegate,
-            statsAdapter: nil,
-            shouldSetActive: true
-        )
-
-        await fulfillment {
-            self.mockAudioStore.audioStore.state.stereoConfiguration.playout.preferred
-        }
-    }
+    // MARK: - routeChange
 
     func test_routeChangeWithMatchingSpeaker_reappliesPolicy() async {
         let callSettingsSubject = PassthroughSubject<CallSettings, Never>()
@@ -288,6 +410,25 @@ final class CallAudioSession_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(policy.stubbedFunctionInput[.configuration]?.count ?? 0, 1)
     }
 
+    func test_currentRouteIsExternal_matchesAudioStoreState() async {
+        let policy = MockAudioSessionPolicy()
+        subject = .init(policy: policy)
+
+        let externalRoute = RTCAudioStore.StoreState.AudioRoute(
+            MockAVAudioSessionRouteDescription(
+                outputs: [MockAVAudioSessionPortDescription(portType: .bluetoothHFP)]
+            )
+        )
+
+        mockAudioStore.audioStore.dispatch(.setCurrentRoute(externalRoute))
+
+        await fulfillment {
+            self.subject.currentRouteIsExternal == true
+        }
+    }
+
+    // MARK: - callOptionsCleared
+
     func test_callOptionsCleared_reappliesLastOptions() async {
         let callSettingsSubject = PassthroughSubject<CallSettings, Never>()
         let capabilitiesSubject = PassthroughSubject<Set<OwnCapability>, Never>()
@@ -323,23 +464,6 @@ final class CallAudioSession_Tests: XCTestCase, @unchecked Sendable {
 
         await fulfillment {
             self.mockAudioStore.audioStore.state.audioSessionConfiguration.options == policyConfiguration.options
-        }
-    }
-
-    func test_currentRouteIsExternal_matchesAudioStoreState() async {
-        let policy = MockAudioSessionPolicy()
-        subject = .init(policy: policy)
-
-        let externalRoute = RTCAudioStore.StoreState.AudioRoute(
-            MockAVAudioSessionRouteDescription(
-                outputs: [MockAVAudioSessionPortDescription(portType: .bluetoothHFP)]
-            )
-        )
-
-        mockAudioStore.audioStore.dispatch(.setCurrentRoute(externalRoute))
-
-        await fulfillment {
-            self.subject.currentRouteIsExternal == true
         }
     }
 }

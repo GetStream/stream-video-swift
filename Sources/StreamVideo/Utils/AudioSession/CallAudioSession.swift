@@ -12,6 +12,8 @@ final class CallAudioSession: @unchecked Sendable {
 
     @Injected(\.audioStore) private var audioStore
 
+    private enum DisposableKey: String { case deferredActivation }
+
     /// Bundles the reactive inputs we need to evaluate whenever call
     /// capabilities or settings change, keeping log context attached.
     private struct Input {
@@ -95,18 +97,18 @@ final class CallAudioSession: @unchecked Sendable {
         self.delegate = delegate
         self.statsAdapter = statsAdapter
 
-        // Expose the policy's stereo preference so the audio device module can
-        // reconfigure itself before WebRTC starts playout.
-        audioStore.dispatch(.stereo(.setPlayoutPreferred(policy is LivestreamAudioSessionPolicy)))
+        guard shouldSetActive else {
+            scheduleDeferredActivation(
+                callSettingsPublisher: callSettingsPublisher,
+                ownCapabilitiesPublisher: ownCapabilitiesPublisher
+            )
+            return
+        }
 
-        configureCallSettingsAndCapabilitiesObservation(
+        performActivation(
             callSettingsPublisher: callSettingsPublisher,
             ownCapabilitiesPublisher: ownCapabilitiesPublisher
         )
-        configureCurrentRouteObservation()
-        configureCallOptionsObservation()
-
-        statsAdapter?.trace(.init(audioSession: traceRepresentation))
     }
 
     func deactivate() {
@@ -147,6 +149,49 @@ final class CallAudioSession: @unchecked Sendable {
     }
 
     // MARK: - Private Helpers
+
+    private func scheduleDeferredActivation(
+        callSettingsPublisher: AnyPublisher<CallSettings, Never>,
+        ownCapabilitiesPublisher: AnyPublisher<Set<OwnCapability>, Never>
+    ) {
+        disposableBag.remove(DisposableKey.deferredActivation.rawValue)
+        audioStore
+            .publisher(\.isActive)
+            /// We drop the first value in case the AudioSession is already active (e.g. because AVAudioSession
+            /// has been used for other media playing).
+            /// We only want to catch the first session activation that will happen **after** our subscription
+            /// here,
+            .dropFirst()
+            .filter { $0 == true }
+            .receive(on: processingQueue)
+            .sink { [weak self] _ in
+                self?.performActivation(
+                    callSettingsPublisher: callSettingsPublisher,
+                    ownCapabilitiesPublisher: ownCapabilitiesPublisher
+                )
+            }
+            .store(in: disposableBag, key: DisposableKey.deferredActivation.rawValue)
+    }
+
+    private func performActivation(
+        callSettingsPublisher: AnyPublisher<CallSettings, Never>,
+        ownCapabilitiesPublisher: AnyPublisher<Set<OwnCapability>, Never>
+    ) {
+        disposableBag.remove(DisposableKey.deferredActivation.rawValue)
+
+        // Expose the policy's stereo preference so the audio device module can
+        // reconfigure itself before WebRTC starts playout.
+        audioStore.dispatch(.stereo(.setPlayoutPreferred(policy is LivestreamAudioSessionPolicy)))
+
+        configureCallSettingsAndCapabilitiesObservation(
+            callSettingsPublisher: callSettingsPublisher,
+            ownCapabilitiesPublisher: ownCapabilitiesPublisher
+        )
+        configureCurrentRouteObservation()
+        configureCallOptionsObservation()
+
+        statsAdapter?.trace(.init(audioSession: traceRepresentation))
+    }
 
     private func process(
         _ input: Input
