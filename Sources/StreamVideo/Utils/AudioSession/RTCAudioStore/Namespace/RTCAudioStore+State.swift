@@ -336,5 +336,17 @@ extension RTCAudioStore {
             }
             hasher.combine(currentRoute)
         }
+
+        func asDictionary() throws -> [String: String] {
+            let data = try JSONEncoder().encode(self)
+            let obj = try JSONSerialization.jsonObject(with: data, options: [])
+            guard let dict = obj as? [String: Any] else {
+                throw ClientError()
+            }
+
+            var result = [String: String]()
+            dict.forEach { result[$0.key] = "\($0.value)" }
+            return result
+        }
     }
 }
