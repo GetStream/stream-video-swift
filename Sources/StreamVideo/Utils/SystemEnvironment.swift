@@ -4,7 +4,7 @@
 
 import Foundation
 
-enum SystemEnvironment {
+public enum SystemEnvironment {
     static var sdkName: String { "stream-ios" }
 
     static var deviceModelName: String {
