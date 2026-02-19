@@ -446,6 +446,51 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
         }
     }
 
+    func test_transition_fromConnected_reportsJoinCompletionToHandler() async throws {
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.reconnectAttempts = 11
+        let expectedJoinCallResponse = JoinCallResponse.dummy(call: .dummy(cid: "expected-call-id"))
+        subject.context.initialJoinCallResponse = expectedJoinCallResponse
+
+        let completionSubject = PassthroughSubject<JoinCallResponse, Error>()
+        let completionExpectation = expectation(description: "JoinResponseHandler should receive response")
+        var receivedCallID: String?
+        let completionCancellable = completionSubject.sink(
+            receiveCompletion: { _ in },
+            receiveValue: { response in
+                receivedCallID = response.call.cid
+                completionExpectation.fulfill()
+            }
+        )
+        subject.context.joinResponseHandler = completionSubject
+
+        await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
+        mockCoordinatorStack.webRTCAuthenticator.stubbedFunction[.waitForConnect] = Result<Void, Error>.success(())
+
+        let eventCancellable = receiveEvent(
+            .sfuEvent(.joinResponse(Stream_Video_Sfu_Event_JoinResponse())),
+            every: 0.3
+        )
+
+        try await assertTransition(
+            from: .connected,
+            expectedTarget: .joined,
+            subject: subject
+        ) { target in
+            XCTAssertNil(target.context.initialJoinCallResponse)
+            XCTAssertNil(target.context.joinResponseHandler)
+        }
+
+        await fulfillment(of: [completionExpectation], timeout: defaultTimeout)
+        XCTAssertEqual(receivedCallID, expectedJoinCallResponse.call.cid)
+
+        completionCancellable.cancel()
+        eventCancellable.cancel()
+    }
+
     // MARK: - transition from connected with isRejoiningFromSessionID != nil
 
     func test_transition_fromConnectedWithRejoinWithoutCoordinator_transitionsToDisconnected() async throws {

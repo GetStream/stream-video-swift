@@ -2,6 +2,7 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import Foundation
 
 extension WebRTCCoordinator.StateMachine {
@@ -37,6 +38,14 @@ extension WebRTCCoordinator.StateMachine {
             var healthCheckInterval: TimeInterval = 5
             var webSocketHealthTimeout: TimeInterval = 15
             var lastHealthCheckReceivedAt: Date?
+
+            /// Stores the initial join response so the pending ``Call.join()``
+            /// completion can be finished once the SFU handshake succeeds.
+            var initialJoinCallResponse: JoinCallResponse?
+
+            /// Completes the pending ``Call.join()`` continuation with either
+            /// success or failure depending on stage flow outcome.
+            var joinResponseHandler: PassthroughSubject<JoinCallResponse, Error>?
 
             /// Determines the next reconnection strategy based on the current one.
             /// - Returns: The next reconnection strategy.
