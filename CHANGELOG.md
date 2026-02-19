@@ -5,6 +5,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 # Upcoming
 
 ### 🔄 Changed
+- Expose `SystemEnvironment` so that version information are publically available. [#1060](https://github.com/GetStream/stream-video-swift/pull/1060)
 
 # [1.42.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.42.0)
 _February 10, 2026_
