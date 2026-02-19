@@ -2,6 +2,7 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import Foundation
 import StreamVideo
 import SwiftUI
@@ -10,36 +11,62 @@ import SwiftUI
 /// very weird if the sourceView isn't in the ViewHierarchy or doesn't have an appropriate size.
 struct PictureInPictureSourceView: UIViewRepresentable {
 
-    @Injected(\.pictureInPictureAdapter) private var pictureInPictureAdapter
-
     var isActive: Bool
 
+    static func dismantleUIView(
+        _ uiView: UIView,
+        coordinator: Coordinator
+    ) {
+        coordinator.dismantle()
+    }
+
     func makeUIView(context: Context) -> UIView {
-        let view = UIView()
-        view.backgroundColor = .clear
-        if #available(iOS 15.0, *), isActive {
-            // Once the view has been created/updated make sure to assign it to
-            // the `StreamPictureInPictureAdapter` in order to allow usage for
-            // picture-in-picture.
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                pictureInPictureAdapter.sourceView = view
-            }
-        } else {
-            pictureInPictureAdapter.sourceView = nil
-        }
-        return view
+        context.coordinator.view.backgroundColor = .clear
+        return context.coordinator.view
     }
 
     func updateUIView(_ uiView: UIView, context: Context) {
-        if #available(iOS 15.0, *), isActive {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                // Once the view has been created/updated make sure to assign it to
-                // the `StreamPictureInPictureAdapter` in order to allow usage for
-                // picture-in-picture.
-                pictureInPictureAdapter.sourceView = uiView
+        /* No-op */
+    }
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(isActive: isActive)
+    }
+
+    // MARK: - Private Helpers
+
+    @MainActor
+    final class Coordinator {
+        @Injected(\.pictureInPictureAdapter) private var pictureInPictureAdapter
+
+        let view: WindowObservingView = .init()
+        private var cancellable: AnyCancellable?
+
+        func dismantle() {
+            cancellable?.cancel()
+        }
+
+        init(isActive: Bool) {
+            if #available(iOS 15.0, *), isActive {
+                cancellable = view
+                    .publisher
+                    .receive(on: DispatchQueue.main)
+                    .sink { [weak self] in self?.publishUpdate($0) }
             }
-        } else {
-            pictureInPictureAdapter.sourceView = nil
+        }
+
+        private func publishUpdate(_ hasWindow: Bool) {
+            pictureInPictureAdapter.store?.dispatch(.setSourceView(hasWindow ? view : nil))
+        }
+    }
+
+    final class WindowObservingView: UIView {
+        private let windowSubject: CurrentValueSubject<Bool, Never> = .init(false)
+        var publisher: AnyPublisher<Bool, Never> { windowSubject.eraseToAnyPublisher() }
+
+        override func willMove(toWindow newWindow: UIWindow?) {
+            super.willMove(toWindow: newWindow)
+            windowSubject.send(newWindow != nil)
         }
     }
 }
