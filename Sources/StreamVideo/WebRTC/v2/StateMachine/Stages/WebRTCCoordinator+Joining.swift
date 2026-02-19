@@ -2,6 +2,7 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import Foundation
 import StreamWebRTC
 
@@ -27,6 +28,9 @@ extension WebRTCCoordinator.StateMachine.Stage {
     final class JoiningStage:
         WebRTCCoordinator.StateMachine.Stage,
         @unchecked Sendable {
+
+        @Injected(\.audioStore) private var audioStore
+
         private enum FlowType { case regular, fast, rejoin, migrate }
         private let disposableBag = DisposableBag()
         private let startTime = Date()
@@ -359,7 +363,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
             try Task.checkCancellation()
 
             if !isFastReconnecting {
-                try await withThrowingTaskGroup(of: Void.self) { [context] group in
+                try await withThrowingTaskGroup(of: Void.self) { [weak self, context] group in
                     group.addTask { [context] in
                         /// Configures the audio session for the current call using the provided
                         /// join source. This ensures the session setup reflects whether the
@@ -370,7 +374,13 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         )
                     }
 
-                    group.addTask {
+                    group.addTask { [weak self] in
+                        /// Before we move on configuring the PeerConnections we need to ensure
+                        /// that the audioSession has been:
+                        /// - released from CallKit (if our source was CallKit)
+                        /// - activated and configured correctly
+                        try await self?.ensureAudioSessionIsReady()
+
                         /// Configures all peer connections after the audio session is ready.
                         /// Ensures signaling, media, and routing are correctly established for
                         /// all tracks as part of the join process.
@@ -422,6 +432,37 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 unifiedSessionId: coordinator.stateAdapter.unifiedSessionId,
                 sfuAdapter: sfuAdapter
             )
+        }
+
+        /// Waits until the audio session is fully ready for call setup.
+        ///
+        /// The function waits in parallel for:
+        /// - `audioStore` to report `isActive == true`
+        /// - `audioStore` to report a non-empty `currentRoute`
+        /// within the provided `timeout`.
+        ///
+        /// - Parameter timeout: Maximum number of seconds to wait for both
+        ///   conditions before failing.
+        /// - Throws: If either readiness condition does not arrive before
+        ///   `timeout`.
+        private func ensureAudioSessionIsReady() async throws {
+            try await withThrowingTaskGroup(of: Void.self) { [audioStore] group in
+                group.addTask {
+                    _ = try await audioStore
+                        .publisher(\.isActive)
+                        .filter { $0 }
+                        .nextValue(timeout: WebRTCConfiguration.timeout.audioSessionConfigurationCompletion)
+                }
+
+                group.addTask {
+                    _ = try await audioStore
+                        .publisher(\.currentRoute)
+                        .filter { $0 != .empty }
+                        .nextValue(timeout: WebRTCConfiguration.timeout.audioSessionConfigurationCompletion)
+                }
+
+                try await group.waitForAll()
+            }
         }
 
         /// Notifies any pending ``Call.join()`` caller with the initial join
