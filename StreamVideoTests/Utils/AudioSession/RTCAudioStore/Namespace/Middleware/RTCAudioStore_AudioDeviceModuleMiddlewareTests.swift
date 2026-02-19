@@ -328,6 +328,36 @@ final class RTCAudioStore_AudioDeviceModuleMiddlewareTests: XCTestCase, @uncheck
         XCTAssertEqual(mock.timesCalled(.stopPlayout), 1)
     }
 
+    // MARK: - setSoftwareNoiseCancellation
+
+    func test_setSoftwareNoiseCancellation_updatesModule() throws {
+        let (module, _) = makeModule(isRecording: false)
+
+        subject.apply(
+            state: makeState(audioDeviceModule: module),
+            action: .setSoftwareNoiseCancellation(true),
+            file: #file,
+            function: #function,
+            line: #line
+        )
+
+        XCTAssertTrue(module.isVoiceProcessingBypassed)
+
+        subject.apply(
+            state: makeState(
+                isMicrophoneMuted: false,
+                hasSoftwareNoiseCancellation: true,
+                audioDeviceModule: module
+            ),
+            action: .setSoftwareNoiseCancellation(false),
+            file: #file,
+            function: #function,
+            line: #line
+        )
+
+        XCTAssertFalse(module.isVoiceProcessingBypassed)
+    }
+
     // MARK: - Helpers
 
     private func makeModule(
@@ -352,6 +382,7 @@ final class RTCAudioStore_AudioDeviceModuleMiddlewareTests: XCTestCase, @uncheck
         isRecording: Bool = false,
         isMicrophoneMuted: Bool = false,
         hasRecordingPermission: Bool = false,
+        hasSoftwareNoiseCancellation: Bool = false,
         audioDeviceModule: AudioDeviceModule? = nil,
         currentRoute: RTCAudioStore.StoreState.AudioRoute = .empty,
         audioSessionConfiguration: RTCAudioStore.StoreState.AVAudioSessionConfiguration = .init(
@@ -372,6 +403,7 @@ final class RTCAudioStore_AudioDeviceModuleMiddlewareTests: XCTestCase, @uncheck
             isRecording: isRecording,
             isMicrophoneMuted: isMicrophoneMuted,
             hasRecordingPermission: hasRecordingPermission,
+            hasSoftwareNoiseCancellation: hasSoftwareNoiseCancellation,
             audioDeviceModule: audioDeviceModule,
             currentRoute: currentRoute,
             audioSessionConfiguration: audioSessionConfiguration,

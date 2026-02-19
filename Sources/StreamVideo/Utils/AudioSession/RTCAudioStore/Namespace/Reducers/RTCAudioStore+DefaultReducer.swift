@@ -55,6 +55,9 @@ extension RTCAudioStore.Namespace {
             case let .setHasRecordingPermission(value):
                 updatedState.hasRecordingPermission = value
 
+            case let .setSoftwareNoiseCancellation(value):
+                updatedState.hasSoftwareNoiseCancellation = value
+
             case let .setAudioDeviceModule(value):
                 updatedState.audioDeviceModule = value
                 if value == nil {

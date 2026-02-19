@@ -77,6 +77,12 @@ extension AudioProcessingStore.Namespace {
         ) {
             capturePostProcessingDelegate.processingHandler = nil
 
+            let isNoiseCancellationAudioFilter = {
+                guard let audioFilter else { return false }
+                return audioFilter is NoiseCancellationFilter
+            }()
+            audioStore.dispatch(.setSoftwareNoiseCancellation(isNoiseCancellationAudioFilter))
+
             guard let audioFilter else {
                 return
             }
