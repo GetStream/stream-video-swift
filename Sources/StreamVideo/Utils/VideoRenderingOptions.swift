@@ -34,8 +34,8 @@ public struct VideoRenderingOptions: InjectionKey, Sendable, CustomStringConvert
     ///   - maxInFlightFrames: Maximum number of in-flight frames (0 uses default).
     public init(
         backend: RTCVideoRenderingBackend = .sharedMetal,
-        bufferPolicy: RTCFrameBufferPolicy = .convertWithPoolToNV12,
-        maxInFlightFrames: Int = 0
+        bufferPolicy: RTCFrameBufferPolicy = .copyToNV12,
+        maxInFlightFrames: Int = 2
     ) {
         self.backend = backend
         self.bufferPolicy = bufferPolicy
