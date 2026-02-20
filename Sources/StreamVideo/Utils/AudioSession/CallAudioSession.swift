@@ -316,12 +316,12 @@ final class CallAudioSession: @unchecked Sendable {
 
 extension CallAudioSession {
     struct TraceRepresentation: Encodable {
-        var state: RTCAudioStore.StoreState
+        var state: [String: String]
         var hasDelegate: Bool
         var policy: String
 
         init(_ source: CallAudioSession) {
-            state = source.audioStore.state
+            state = (try? source.audioStore.state.asDictionary()) ?? ["error": "-"]
             hasDelegate = source.delegate != nil
             policy = String(describing: source.policy)
         }
