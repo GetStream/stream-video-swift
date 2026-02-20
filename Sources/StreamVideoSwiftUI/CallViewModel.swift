@@ -945,13 +945,8 @@ open class CallViewModel: ObservableObject {
                         handleAcceptedEvent(callEvent)
                     case .rejected:
                         handleRejectedEvent(callEvent)
-                    case let .ended(event) where event.callCid == call?.cId:
-                        Task { @MainActor [weak self] in
-                            self?.leaveCall()
-                        }
                     case .ended:
-                        // Another call ended. No action is required.
-                        break
+                        handleEndedEvent(callEvent)
                     case let .userBlocked(callEventInfo):
                         if
                             callEventInfo.user?.id == streamVideo.user.id,
@@ -1063,6 +1058,37 @@ open class CallViewModel: ObservableObject {
             }
         default:
             break
+        }
+    }
+
+    /// Handles a call end event and updates the VM state.
+    ///
+    /// Incoming events for the currently presented incoming call call `setActiveCall`,
+    /// while any event whose `callCid` matches the active call id triggers `leaveCall()`.
+    ///
+    /// - Parameter callEvent: The received call event payload.
+    private func handleEndedEvent(_ callEvent: CallEvent) {
+        guard
+            case let .ended(event) = callEvent
+        else {
+            return
+        }
+
+        switch callingState {
+        case .incoming(let incomingCall):
+            let incomingCallCID = callCid(
+                from: incomingCall.id,
+                callType: incomingCall.type
+            )
+
+            if incomingCallCID == event.callCid {
+                setActiveCall(call)
+            }
+
+        default:
+            if call?.cId == event.callCid {
+                leaveCall()
+            }
         }
     }
 
