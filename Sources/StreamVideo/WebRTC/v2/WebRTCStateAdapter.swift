@@ -176,6 +176,11 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
                 InjectedValues[\.videoRenderingOptions].bufferPolicy
             )
 
+        log.debug(
+            "Active videoRenderingOptions: \(InjectedValues[\.videoRenderingOptions])",
+            subsystems: .webRTC
+        )
+
         Task { [weak self] in
             _ = await self?.permissionsAdapter
             await self?.configureBatteryObservation()

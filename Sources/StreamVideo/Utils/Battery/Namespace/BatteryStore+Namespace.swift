@@ -31,5 +31,11 @@ extension BatteryStore {
                 ObservationMiddleware()
             ]
         }
+
+        static func effects() -> Set<StoreEffect<BatteryStore.Namespace>> {
+            [
+                ObserverEffect()
+            ]
+        }
     }
 }

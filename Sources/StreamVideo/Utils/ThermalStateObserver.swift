@@ -47,10 +47,14 @@ final class ThermalStateObserver: ObservableObject, ThermalStateObserving {
             @unknown default:
                 logLevel = .debug
             }
+
+            let now = Date()
+            let timeDiff = now.timeIntervalSince(lastTransition)
+            lastTransition = now
             // Log the thermal state change with the calculated log level
             log.log(
                 logLevel,
-                message: "Thermal state changed \(oldValue) → \(state).",
+                message: "Thermal state changed \(oldValue) → \(state). (\(timeDiff) seconds since last transition)",
                 subsystems: .thermalState,
                 error: nil
             )
@@ -62,6 +66,7 @@ final class ThermalStateObserver: ObservableObject, ThermalStateObserving {
     /// Cancellable object to manage notifications
     private var notificationCenterCancellable: AnyCancellable?
     private var thermalStateProvider: () -> ProcessInfo.ThermalState
+    private var lastTransition: Date = .init()
 
     convenience init() {
         self.init { ProcessInfo.processInfo.thermalState }
@@ -71,6 +76,8 @@ final class ThermalStateObserver: ObservableObject, ThermalStateObserving {
         // Initialize the thermal state with the current process's thermal state
         state = thermalStateProvider()
         self.thermalStateProvider = thermalStateProvider
+
+        log.debug("Thermal state initial \(state).", subsystems: .thermalState)
 
         // Set up a publisher to monitor thermal state changes
         notificationCenterCancellable = NotificationCenter

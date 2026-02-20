@@ -82,8 +82,8 @@ public class VideoRenderer: RTCVideoRenderingView, @unchecked Sendable {
         self.maxInFlightFrames = videoRenderingOptions.maxInFlightFrames
 
         log.debug(
-            "VideoRenderer updated with renderingOptions: \(videoRenderingOptions)",
-            subsystems: .other
+            "Active videoRenderingOptions: \(videoRenderingOptions)",
+            subsystems: .webRTC
         )
     }
 
