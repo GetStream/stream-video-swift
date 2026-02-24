@@ -123,7 +123,7 @@ final class CallAudioSession_Tests: XCTestCase, @unchecked Sendable {
             self.mockAudioStore.audioStore.state.webRTCAudioSessionConfiguration.isAudioEnabled
         }
 
-        subject.deactivate()
+        await subject.deactivate()
 
         await fulfillment {
             let state = self.mockAudioStore.audioStore.state

@@ -393,6 +393,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         videoCaptureSessionProvider.activeSession = nil
         peerConnectionsDisposableBag.removeAll()
         disposableBag.removeAll()
+        await audioSession.deactivate()
         await publisher?.close()
         await subscriber?.close()
         self.publisher = nil
@@ -408,7 +409,6 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         set(anonymousCount: 0)
         set(participantPins: [])
         trackStorage.removeAll()
-        audioSession.deactivate()
         permissionsAdapter.cleanUp()
     }
 
@@ -424,6 +424,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
 
         peerConnectionsDisposableBag.removeAll()
         disposableBag.removeAll()
+        await audioSession.deactivate()
         await publisher?.prepareForClosing()
         await subscriber?.prepareForClosing()
         publisher = nil
@@ -436,7 +437,6 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         /// We set the initialCallSettings to the last activated CallSettings, in order to maintain the state
         /// during reconnects.
         initialCallSettings = callSettings
-        audioSession.deactivate()
     }
 
     /// Restores screen sharing if an active session exists.
