@@ -11,6 +11,19 @@ final class PeerConnectionFactory: @unchecked Sendable {
     
     /// The audio processing module associated with this factory.
     private let audioProcessingModule: RTCAudioProcessingModule
+    /// Backing storage for the audio device module.
+    ///
+    /// Kept optional so we can release it explicitly in `deinit` before
+    /// `factory` is torn down.
+    private var audioDeviceModuleStorage: AudioDeviceModule?
+
+    /// Wrapper around WebRTC's audio device module.
+    var audioDeviceModule: AudioDeviceModule {
+        guard let audioDeviceModuleStorage else {
+            preconditionFailure("AudioDeviceModule unavailable.")
+        }
+        return audioDeviceModuleStorage
+    }
     
     /// Lazy-loaded RTCPeerConnectionFactory instance.
     private(set) lazy var factory: RTCPeerConnectionFactory = {
@@ -43,8 +56,6 @@ final class PeerConnectionFactory: @unchecked Sendable {
         Self.defaultDecoder.supportedCodecs()
     }
 
-    private(set) lazy var audioDeviceModule: AudioDeviceModule = .init(factory.audioDeviceModule)
-
     /// Creates or retrieves a PeerConnectionFactory instance for a given
     /// audio processing module.
     /// - Parameter audioProcessingModule: The RTCAudioProcessingModule to use.
@@ -66,10 +77,17 @@ final class PeerConnectionFactory: @unchecked Sendable {
         _ = factory
 
         if let audioDeviceModuleSource {
-            audioDeviceModule = .init(audioDeviceModuleSource)
+            audioDeviceModuleStorage = .init(audioDeviceModuleSource)
         } else {
-            _ = audioDeviceModule
+            audioDeviceModuleStorage = .init(factory.audioDeviceModule)
         }
+    }
+
+    deinit {
+        /// `RTCAudioDeviceModule` keeps a raw pointer to WebRTC's worker
+        /// thread. Releasing it while `factory` is still alive prevents
+        /// dangling-pointer dereferences during module deallocation.
+        audioDeviceModuleStorage = nil
     }
 
     // MARK: - Builders
