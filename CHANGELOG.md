@@ -7,6 +7,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### 🔄 Changed
 - Expose `SystemEnvironment` so that version information are publically available. [#1060](https://github.com/GetStream/stream-video-swift/pull/1060)
 
+### 🐞 Fixed
+- Ensure ringing calls are dismissed when a matching `call.ended` event is received. [#1061](https://github.com/GetStream/stream-video-swift/pull/1061)
+
 # [1.42.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.42.0)
 _February 10, 2026_
 

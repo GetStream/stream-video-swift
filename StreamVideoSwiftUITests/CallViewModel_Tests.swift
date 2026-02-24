@@ -376,6 +376,22 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         await assertCallingState(.idle)
     }
 
+    func test_outgoingCall_ringTimeout() async throws {
+        // Given
+        let ringTimeoutSeconds = 3
+        await prepare(ringTimeOut: ringTimeoutSeconds * 1000)
+        subject.startCall(
+            callType: .default,
+            callId: callId,
+            members: participants,
+            ring: true
+        )
+        await assertCallingState(.outgoing)
+
+        // Then
+        await assertCallingState(.idle, timeout: TimeInterval(ringTimeoutSeconds + 1 * 1000))
+    }
+
     // MARK: - Incoming
 
     func test_incomingCall_acceptCall() async throws {
@@ -483,7 +499,29 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         // Then
         await assertCallingState(.idle)
     }
-    
+
+    func test_incomingCall_endCall() async throws {
+        // Given
+        await prepareIncomingCallScenario()
+
+        // When
+        streamVideo.process(
+            .coordinatorEvent(
+                .typeCallEndedEvent(
+                    .init(
+                        call: .dummy(cid: cId),
+                        callCid: cId,
+                        createdAt: .init(),
+                        user: .dummy()
+                    )
+                )
+            )
+        )
+
+        // Then
+        await assertCallingState(.idle)
+    }
+
     // MARK: - Join
 
     func test_joinCall_success() async throws {
@@ -1133,22 +1171,32 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
     // MARK: - Private helpers
 
     private func prepare(
+        ringTimeOut: Int = (Int(defaultTimeout) + 1) * 1000,
         file: StaticString = #file,
         line: UInt = #line
     ) async {
         mockCall.stub(
             for: .join,
             with: JoinCallResponse.dummy(
-                call: .dummy(id: callId, type: callType)
+                call: .dummy(
+                    cid: cId,
+                    id: callId,
+                    settings: .dummy(
+                        ring: .dummy(autoCancelTimeoutMs: ringTimeOut)
+                    ),
+                    type: callType
+                )
             )
         )
         mockCall.stub(
             for: .create,
             with: CallResponse.dummy(
                 cid: cId,
+                id: callId,
                 settings: .dummy(
-                    ring: .dummy(autoCancelTimeoutMs: 5000)
-                )
+                    ring: .dummy(autoCancelTimeoutMs: ringTimeOut)
+                ),
+                type: callType
             )
         )
         mockCall.stub(
@@ -1156,9 +1204,11 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
             with: GetCallResponse.dummy(
                 call: CallResponse.dummy(
                     cid: cId,
+                    id: callId,
                     settings: .dummy(
-                        ring: .dummy(autoCancelTimeoutMs: 5000)
-                    )
+                        ring: .dummy(autoCancelTimeoutMs: ringTimeOut)
+                    ),
+                    type: callType
                 )
             )
         )
@@ -1304,6 +1354,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
     @MainActor
     private func assertCallingState(
         _ expected: CallingState,
+        timeout: TimeInterval = defaultTimeout,
         delay: TimeInterval? = nil,
         file: StaticString = #file,
         line: UInt = #line
@@ -1314,12 +1365,14 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         #if compiler(>=6.0)
         let message = "CallViewModel.callingState expected:\(expected) actual: \(subject.callingState)"
         await fulfilmentInMainActor(
+            timeout: timeout,
             message,
             file: file,
             line: line
         ) { self.subject.callingState == expected }
         #else
         await fulfilmentInMainActor(
+            timeout: timeout,
             file: file,
             line: line
         ) { self.subject.callingState == expected }
