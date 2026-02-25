@@ -443,6 +443,8 @@ enum Stream_Video_Sfu_Models_SdkType: SwiftProtobuf.Enum {
   case unity // = 7
   case go // = 8
   case plainJavascript // = 9
+  case python // = 10
+  case visionAgents // = 11
   case UNRECOGNIZED(Int)
 
   init() {
@@ -461,6 +463,8 @@ enum Stream_Video_Sfu_Models_SdkType: SwiftProtobuf.Enum {
     case 7: self = .unity
     case 8: self = .go
     case 9: self = .plainJavascript
+    case 10: self = .python
+    case 11: self = .visionAgents
     default: self = .UNRECOGNIZED(rawValue)
     }
   }
@@ -477,6 +481,8 @@ enum Stream_Video_Sfu_Models_SdkType: SwiftProtobuf.Enum {
     case .unity: return 7
     case .go: return 8
     case .plainJavascript: return 9
+    case .python: return 10
+    case .visionAgents: return 11
     case .UNRECOGNIZED(let i): return i
     }
   }
@@ -498,6 +504,8 @@ extension Stream_Video_Sfu_Models_SdkType: CaseIterable {
     .unity,
     .go,
     .plainJavascript,
+    .python,
+    .visionAgents,
   ]
 }
 
@@ -854,6 +862,9 @@ enum Stream_Video_Sfu_Models_ClientCapability: SwiftProtobuf.Enum {
 
   /// Enables SFU pausing inbound video
   case subscriberVideoPause // = 1
+
+  /// Instructs SFU that stats will be sent to the coordinator
+  case coordinatorStats // = 2
   case UNRECOGNIZED(Int)
 
   init() {
@@ -864,6 +875,7 @@ enum Stream_Video_Sfu_Models_ClientCapability: SwiftProtobuf.Enum {
     switch rawValue {
     case 0: self = .unspecified
     case 1: self = .subscriberVideoPause
+    case 2: self = .coordinatorStats
     default: self = .UNRECOGNIZED(rawValue)
     }
   }
@@ -872,6 +884,7 @@ enum Stream_Video_Sfu_Models_ClientCapability: SwiftProtobuf.Enum {
     switch self {
     case .unspecified: return 0
     case .subscriberVideoPause: return 1
+    case .coordinatorStats: return 2
     case .UNRECOGNIZED(let i): return i
     }
   }
@@ -885,6 +898,7 @@ extension Stream_Video_Sfu_Models_ClientCapability: CaseIterable {
   static let allCases: [Stream_Video_Sfu_Models_ClientCapability] = [
     .unspecified,
     .subscriberVideoPause,
+    .coordinatorStats,
   ]
 }
 
@@ -1332,6 +1346,8 @@ struct Stream_Video_Sfu_Models_ClientDetails {
   /// Clears the value of `device`. Subsequent reads from it will return its default value.
   mutating func clearDevice() {self._device = nil}
 
+  var webrtcVersion: String = String()
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
@@ -1595,6 +1611,178 @@ struct Stream_Video_Sfu_Models_PerformanceStats {
   fileprivate var _videoDimension: Stream_Video_Sfu_Models_VideoDimension? = nil
 }
 
+/// ===================================================================
+/// BASE (shared by all RTP directions)
+/// ===================================================================
+struct Stream_Video_Sfu_Models_RtpBase {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// raw stat["ssrc"]
+  var ssrc: UInt32 = 0
+
+  /// stat["kind"] ("audio","video")
+  var kind: String = String()
+
+  /// stat["timestamp"] in milliseconds
+  var timestampMs: Double = 0
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
+/// ===================================================================
+/// INBOUND (SUBSCRIBER RECEIVING MEDIA)
+/// ===================================================================
+struct Stream_Video_Sfu_Models_InboundRtp {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var base: Stream_Video_Sfu_Models_RtpBase {
+    get {return _base ?? Stream_Video_Sfu_Models_RtpBase()}
+    set {_base = newValue}
+  }
+  /// Returns true if `base` has been explicitly set.
+  var hasBase: Bool {return self._base != nil}
+  /// Clears the value of `base`. Subsequent reads from it will return its default value.
+  mutating func clearBase() {self._base = nil}
+
+  /// stat["jitter"]
+  var jitterSeconds: Double = 0
+
+  /// stat["packetsReceived"]
+  var packetsReceived: UInt64 = 0
+
+  /// stat["packetsLost"]
+  var packetsLost: UInt64 = 0
+
+  /// (packets_lost / (packets_received + packets_lost)) * 100;skip if denominator <= 0 or counters decreased
+  var packetLossPercent: Double = 0
+
+  /// -------- AUDIO METRICS --------
+  var concealmentEvents: UInt32 = 0
+
+  /// (concealedSamples / totalSamplesReceived) * 100 when totalSamplesReceived >= 96_000 (≈2 s @ 48 kHz)
+  var concealmentPercent: Double = 0
+
+  /// -------- VIDEO METRICS --------
+  var fps: Double = 0
+
+  /// stat["totalFreezesDuration"]
+  var freezeDurationSeconds: Double = 0
+
+  /// stat["totalDecodeTime"] / max(1, stat["framesDecoded"])
+  var avgDecodeTimeSeconds: Double = 0
+
+  /// min(stat["frameWidth"], stat["frameHeight"]) for video-like tracks
+  var minDimensionPx: UInt32 = 0
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+
+  fileprivate var _base: Stream_Video_Sfu_Models_RtpBase? = nil
+}
+
+/// ===================================================================
+/// OUTBOUND (PUBLISHER SENDING MEDIA)
+/// ===================================================================
+struct Stream_Video_Sfu_Models_OutboundRtp {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var base: Stream_Video_Sfu_Models_RtpBase {
+    get {return _base ?? Stream_Video_Sfu_Models_RtpBase()}
+    set {_base = newValue}
+  }
+  /// Returns true if `base` has been explicitly set.
+  var hasBase: Bool {return self._base != nil}
+  /// Clears the value of `base`. Subsequent reads from it will return its default value.
+  mutating func clearBase() {self._base = nil}
+
+  /// delta(framesEncoded)/delta(time) if missing
+  var fps: Double = 0
+
+  /// stat["totalEncodeTime"] / max(1, stat["framesEncoded"])
+  var avgEncodeTimeSeconds: Double = 0
+
+  /// delta(bytesSent)*8 / delta(timeSeconds); requires prev bytes/timestamp; ignore if delta<=0
+  var bitrateBps: Double = 0
+
+  /// min(stat["frameWidth"], stat["frameHeight"])
+  var minDimensionPx: UInt32 = 0
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+
+  fileprivate var _base: Stream_Video_Sfu_Models_RtpBase? = nil
+}
+
+/// ===================================================================
+/// SFU FEEDBACK: REMOTE-INBOUND (Publisher receives feedback)
+/// ===================================================================
+struct Stream_Video_Sfu_Models_RemoteInboundRtp {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var base: Stream_Video_Sfu_Models_RtpBase {
+    get {return _base ?? Stream_Video_Sfu_Models_RtpBase()}
+    set {_base = newValue}
+  }
+  /// Returns true if `base` has been explicitly set.
+  var hasBase: Bool {return self._base != nil}
+  /// Clears the value of `base`. Subsequent reads from it will return its default value.
+  mutating func clearBase() {self._base = nil}
+
+  /// stat["jitter"]
+  var jitterSeconds: Double = 0
+
+  /// stat["roundTripTime"]
+  var roundTripTimeS: Double = 0
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+
+  fileprivate var _base: Stream_Video_Sfu_Models_RtpBase? = nil
+}
+
+/// ===================================================================
+/// SFU FEEDBACK: REMOTE-OUTBOUND (Subscriber receives feedback)
+/// ===================================================================
+struct Stream_Video_Sfu_Models_RemoteOutboundRtp {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var base: Stream_Video_Sfu_Models_RtpBase {
+    get {return _base ?? Stream_Video_Sfu_Models_RtpBase()}
+    set {_base = newValue}
+  }
+  /// Returns true if `base` has been explicitly set.
+  var hasBase: Bool {return self._base != nil}
+  /// Clears the value of `base`. Subsequent reads from it will return its default value.
+  mutating func clearBase() {self._base = nil}
+
+  /// stat["jitter"] if provided
+  var jitterSeconds: Double = 0
+
+  /// stat["roundTripTime"]
+  var roundTripTimeS: Double = 0
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+
+  fileprivate var _base: Stream_Video_Sfu_Models_RtpBase? = nil
+}
+
 #if swift(>=5.5) && canImport(_Concurrency)
 extension Stream_Video_Sfu_Models_PeerType: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_ConnectionQuality: @unchecked Sendable {}
@@ -1637,6 +1825,11 @@ extension Stream_Video_Sfu_Models_InputDevices: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_AndroidState: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_AppleState: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_PerformanceStats: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_RtpBase: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_InboundRtp: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_OutboundRtp: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_RemoteInboundRtp: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_RemoteOutboundRtp: @unchecked Sendable {}
 #endif  // swift(>=5.5) && canImport(_Concurrency)
 
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
@@ -1736,6 +1929,8 @@ extension Stream_Video_Sfu_Models_SdkType: SwiftProtobuf._ProtoNameProviding {
     7: .same(proto: "SDK_TYPE_UNITY"),
     8: .same(proto: "SDK_TYPE_GO"),
     9: .same(proto: "SDK_TYPE_PLAIN_JAVASCRIPT"),
+    10: .same(proto: "SDK_TYPE_PYTHON"),
+    11: .same(proto: "SDK_TYPE_VISION_AGENTS"),
   ]
 }
 
@@ -1803,6 +1998,7 @@ extension Stream_Video_Sfu_Models_ClientCapability: SwiftProtobuf._ProtoNameProv
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     0: .same(proto: "CLIENT_CAPABILITY_UNSPECIFIED"),
     1: .same(proto: "CLIENT_CAPABILITY_SUBSCRIBER_VIDEO_PAUSE"),
+    2: .same(proto: "CLIENT_CAPABILITY_COORDINATOR_STATS"),
   ]
 }
 
@@ -2593,6 +2789,7 @@ extension Stream_Video_Sfu_Models_ClientDetails: SwiftProtobuf.Message, SwiftPro
     2: .same(proto: "os"),
     3: .same(proto: "browser"),
     4: .same(proto: "device"),
+    5: .standard(proto: "webrtc_version"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -2605,6 +2802,7 @@ extension Stream_Video_Sfu_Models_ClientDetails: SwiftProtobuf.Message, SwiftPro
       case 2: try { try decoder.decodeSingularMessageField(value: &self._os) }()
       case 3: try { try decoder.decodeSingularMessageField(value: &self._browser) }()
       case 4: try { try decoder.decodeSingularMessageField(value: &self._device) }()
+      case 5: try { try decoder.decodeSingularStringField(value: &self.webrtcVersion) }()
       default: break
       }
     }
@@ -2627,6 +2825,9 @@ extension Stream_Video_Sfu_Models_ClientDetails: SwiftProtobuf.Message, SwiftPro
     try { if let v = self._device {
       try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
     } }()
+    if !self.webrtcVersion.isEmpty {
+      try visitor.visitSingularStringField(value: self.webrtcVersion, fieldNumber: 5)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -2635,6 +2836,7 @@ extension Stream_Video_Sfu_Models_ClientDetails: SwiftProtobuf.Message, SwiftPro
     if lhs._os != rhs._os {return false}
     if lhs._browser != rhs._browser {return false}
     if lhs._device != rhs._device {return false}
+    if lhs.webrtcVersion != rhs.webrtcVersion {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -3175,6 +3377,302 @@ extension Stream_Video_Sfu_Models_PerformanceStats: SwiftProtobuf.Message, Swift
     if lhs.avgFps != rhs.avgFps {return false}
     if lhs._videoDimension != rhs._videoDimension {return false}
     if lhs.targetBitrate != rhs.targetBitrate {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Stream_Video_Sfu_Models_RtpBase: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".RtpBase"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "ssrc"),
+    2: .same(proto: "kind"),
+    3: .standard(proto: "timestamp_ms"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularUInt32Field(value: &self.ssrc) }()
+      case 2: try { try decoder.decodeSingularStringField(value: &self.kind) }()
+      case 3: try { try decoder.decodeSingularDoubleField(value: &self.timestampMs) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if self.ssrc != 0 {
+      try visitor.visitSingularUInt32Field(value: self.ssrc, fieldNumber: 1)
+    }
+    if !self.kind.isEmpty {
+      try visitor.visitSingularStringField(value: self.kind, fieldNumber: 2)
+    }
+    if self.timestampMs != 0 {
+      try visitor.visitSingularDoubleField(value: self.timestampMs, fieldNumber: 3)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Stream_Video_Sfu_Models_RtpBase, rhs: Stream_Video_Sfu_Models_RtpBase) -> Bool {
+    if lhs.ssrc != rhs.ssrc {return false}
+    if lhs.kind != rhs.kind {return false}
+    if lhs.timestampMs != rhs.timestampMs {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Stream_Video_Sfu_Models_InboundRtp: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".InboundRtp"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "base"),
+    2: .standard(proto: "jitter_seconds"),
+    3: .standard(proto: "packets_received"),
+    4: .standard(proto: "packets_lost"),
+    5: .standard(proto: "packet_loss_percent"),
+    10: .standard(proto: "concealment_events"),
+    11: .standard(proto: "concealment_percent"),
+    20: .same(proto: "fps"),
+    21: .standard(proto: "freeze_duration_seconds"),
+    22: .standard(proto: "avg_decode_time_seconds"),
+    23: .standard(proto: "min_dimension_px"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularMessageField(value: &self._base) }()
+      case 2: try { try decoder.decodeSingularDoubleField(value: &self.jitterSeconds) }()
+      case 3: try { try decoder.decodeSingularUInt64Field(value: &self.packetsReceived) }()
+      case 4: try { try decoder.decodeSingularUInt64Field(value: &self.packetsLost) }()
+      case 5: try { try decoder.decodeSingularDoubleField(value: &self.packetLossPercent) }()
+      case 10: try { try decoder.decodeSingularUInt32Field(value: &self.concealmentEvents) }()
+      case 11: try { try decoder.decodeSingularDoubleField(value: &self.concealmentPercent) }()
+      case 20: try { try decoder.decodeSingularDoubleField(value: &self.fps) }()
+      case 21: try { try decoder.decodeSingularDoubleField(value: &self.freezeDurationSeconds) }()
+      case 22: try { try decoder.decodeSingularDoubleField(value: &self.avgDecodeTimeSeconds) }()
+      case 23: try { try decoder.decodeSingularUInt32Field(value: &self.minDimensionPx) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._base {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+    } }()
+    if self.jitterSeconds != 0 {
+      try visitor.visitSingularDoubleField(value: self.jitterSeconds, fieldNumber: 2)
+    }
+    if self.packetsReceived != 0 {
+      try visitor.visitSingularUInt64Field(value: self.packetsReceived, fieldNumber: 3)
+    }
+    if self.packetsLost != 0 {
+      try visitor.visitSingularUInt64Field(value: self.packetsLost, fieldNumber: 4)
+    }
+    if self.packetLossPercent != 0 {
+      try visitor.visitSingularDoubleField(value: self.packetLossPercent, fieldNumber: 5)
+    }
+    if self.concealmentEvents != 0 {
+      try visitor.visitSingularUInt32Field(value: self.concealmentEvents, fieldNumber: 10)
+    }
+    if self.concealmentPercent != 0 {
+      try visitor.visitSingularDoubleField(value: self.concealmentPercent, fieldNumber: 11)
+    }
+    if self.fps != 0 {
+      try visitor.visitSingularDoubleField(value: self.fps, fieldNumber: 20)
+    }
+    if self.freezeDurationSeconds != 0 {
+      try visitor.visitSingularDoubleField(value: self.freezeDurationSeconds, fieldNumber: 21)
+    }
+    if self.avgDecodeTimeSeconds != 0 {
+      try visitor.visitSingularDoubleField(value: self.avgDecodeTimeSeconds, fieldNumber: 22)
+    }
+    if self.minDimensionPx != 0 {
+      try visitor.visitSingularUInt32Field(value: self.minDimensionPx, fieldNumber: 23)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Stream_Video_Sfu_Models_InboundRtp, rhs: Stream_Video_Sfu_Models_InboundRtp) -> Bool {
+    if lhs._base != rhs._base {return false}
+    if lhs.jitterSeconds != rhs.jitterSeconds {return false}
+    if lhs.packetsReceived != rhs.packetsReceived {return false}
+    if lhs.packetsLost != rhs.packetsLost {return false}
+    if lhs.packetLossPercent != rhs.packetLossPercent {return false}
+    if lhs.concealmentEvents != rhs.concealmentEvents {return false}
+    if lhs.concealmentPercent != rhs.concealmentPercent {return false}
+    if lhs.fps != rhs.fps {return false}
+    if lhs.freezeDurationSeconds != rhs.freezeDurationSeconds {return false}
+    if lhs.avgDecodeTimeSeconds != rhs.avgDecodeTimeSeconds {return false}
+    if lhs.minDimensionPx != rhs.minDimensionPx {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Stream_Video_Sfu_Models_OutboundRtp: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".OutboundRtp"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "base"),
+    10: .same(proto: "fps"),
+    11: .standard(proto: "avg_encode_time_seconds"),
+    12: .standard(proto: "bitrate_bps"),
+    13: .standard(proto: "min_dimension_px"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularMessageField(value: &self._base) }()
+      case 10: try { try decoder.decodeSingularDoubleField(value: &self.fps) }()
+      case 11: try { try decoder.decodeSingularDoubleField(value: &self.avgEncodeTimeSeconds) }()
+      case 12: try { try decoder.decodeSingularDoubleField(value: &self.bitrateBps) }()
+      case 13: try { try decoder.decodeSingularUInt32Field(value: &self.minDimensionPx) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._base {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+    } }()
+    if self.fps != 0 {
+      try visitor.visitSingularDoubleField(value: self.fps, fieldNumber: 10)
+    }
+    if self.avgEncodeTimeSeconds != 0 {
+      try visitor.visitSingularDoubleField(value: self.avgEncodeTimeSeconds, fieldNumber: 11)
+    }
+    if self.bitrateBps != 0 {
+      try visitor.visitSingularDoubleField(value: self.bitrateBps, fieldNumber: 12)
+    }
+    if self.minDimensionPx != 0 {
+      try visitor.visitSingularUInt32Field(value: self.minDimensionPx, fieldNumber: 13)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Stream_Video_Sfu_Models_OutboundRtp, rhs: Stream_Video_Sfu_Models_OutboundRtp) -> Bool {
+    if lhs._base != rhs._base {return false}
+    if lhs.fps != rhs.fps {return false}
+    if lhs.avgEncodeTimeSeconds != rhs.avgEncodeTimeSeconds {return false}
+    if lhs.bitrateBps != rhs.bitrateBps {return false}
+    if lhs.minDimensionPx != rhs.minDimensionPx {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Stream_Video_Sfu_Models_RemoteInboundRtp: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".RemoteInboundRtp"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "base"),
+    2: .standard(proto: "jitter_seconds"),
+    3: .standard(proto: "round_trip_time_s"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularMessageField(value: &self._base) }()
+      case 2: try { try decoder.decodeSingularDoubleField(value: &self.jitterSeconds) }()
+      case 3: try { try decoder.decodeSingularDoubleField(value: &self.roundTripTimeS) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._base {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+    } }()
+    if self.jitterSeconds != 0 {
+      try visitor.visitSingularDoubleField(value: self.jitterSeconds, fieldNumber: 2)
+    }
+    if self.roundTripTimeS != 0 {
+      try visitor.visitSingularDoubleField(value: self.roundTripTimeS, fieldNumber: 3)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Stream_Video_Sfu_Models_RemoteInboundRtp, rhs: Stream_Video_Sfu_Models_RemoteInboundRtp) -> Bool {
+    if lhs._base != rhs._base {return false}
+    if lhs.jitterSeconds != rhs.jitterSeconds {return false}
+    if lhs.roundTripTimeS != rhs.roundTripTimeS {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Stream_Video_Sfu_Models_RemoteOutboundRtp: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".RemoteOutboundRtp"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "base"),
+    2: .standard(proto: "jitter_seconds"),
+    3: .standard(proto: "round_trip_time_s"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularMessageField(value: &self._base) }()
+      case 2: try { try decoder.decodeSingularDoubleField(value: &self.jitterSeconds) }()
+      case 3: try { try decoder.decodeSingularDoubleField(value: &self.roundTripTimeS) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._base {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+    } }()
+    if self.jitterSeconds != 0 {
+      try visitor.visitSingularDoubleField(value: self.jitterSeconds, fieldNumber: 2)
+    }
+    if self.roundTripTimeS != 0 {
+      try visitor.visitSingularDoubleField(value: self.roundTripTimeS, fieldNumber: 3)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Stream_Video_Sfu_Models_RemoteOutboundRtp, rhs: Stream_Video_Sfu_Models_RemoteOutboundRtp) -> Bool {
+    if lhs._base != rhs._base {return false}
+    if lhs.jitterSeconds != rhs.jitterSeconds {return false}
+    if lhs.roundTripTimeS != rhs.roundTripTimeS {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

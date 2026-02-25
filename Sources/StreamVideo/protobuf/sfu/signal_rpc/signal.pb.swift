@@ -152,6 +152,38 @@ struct Stream_Video_Sfu_Signal_Telemetry {
   init() {}
 }
 
+struct Stream_Video_Sfu_Signal_SendMetricsRequest {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var sessionID: String = String()
+
+  var unifiedSessionID: String = String()
+
+  var inbounds: [Stream_Video_Sfu_Models_InboundRtp] = []
+
+  var outbounds: [Stream_Video_Sfu_Models_OutboundRtp] = []
+
+  var remoteInbounds: [Stream_Video_Sfu_Models_RemoteInboundRtp] = []
+
+  var remoteOutbounds: [Stream_Video_Sfu_Models_RemoteOutboundRtp] = []
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
+struct Stream_Video_Sfu_Signal_SendMetricsResponse {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
 struct Stream_Video_Sfu_Signal_SendStatsRequest {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
@@ -612,6 +644,8 @@ extension Stream_Video_Sfu_Signal_StopNoiseCancellationResponse: @unchecked Send
 extension Stream_Video_Sfu_Signal_Reconnection: @unchecked Sendable {}
 extension Stream_Video_Sfu_Signal_Telemetry: @unchecked Sendable {}
 extension Stream_Video_Sfu_Signal_Telemetry.OneOf_Data: @unchecked Sendable {}
+extension Stream_Video_Sfu_Signal_SendMetricsRequest: @unchecked Sendable {}
+extension Stream_Video_Sfu_Signal_SendMetricsResponse: @unchecked Sendable {}
 extension Stream_Video_Sfu_Signal_SendStatsRequest: @unchecked Sendable {}
 extension Stream_Video_Sfu_Signal_SendStatsRequest.OneOf_DeviceState: @unchecked Sendable {}
 extension Stream_Video_Sfu_Signal_SendStatsResponse: @unchecked Sendable {}
@@ -870,6 +904,87 @@ extension Stream_Video_Sfu_Signal_Telemetry: SwiftProtobuf.Message, SwiftProtobu
 
   static func ==(lhs: Stream_Video_Sfu_Signal_Telemetry, rhs: Stream_Video_Sfu_Signal_Telemetry) -> Bool {
     if lhs.data != rhs.data {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Stream_Video_Sfu_Signal_SendMetricsRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".SendMetricsRequest"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "session_id"),
+    2: .standard(proto: "unified_session_id"),
+    3: .same(proto: "inbounds"),
+    4: .same(proto: "outbounds"),
+    5: .standard(proto: "remote_inbounds"),
+    6: .standard(proto: "remote_outbounds"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularStringField(value: &self.sessionID) }()
+      case 2: try { try decoder.decodeSingularStringField(value: &self.unifiedSessionID) }()
+      case 3: try { try decoder.decodeRepeatedMessageField(value: &self.inbounds) }()
+      case 4: try { try decoder.decodeRepeatedMessageField(value: &self.outbounds) }()
+      case 5: try { try decoder.decodeRepeatedMessageField(value: &self.remoteInbounds) }()
+      case 6: try { try decoder.decodeRepeatedMessageField(value: &self.remoteOutbounds) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.sessionID.isEmpty {
+      try visitor.visitSingularStringField(value: self.sessionID, fieldNumber: 1)
+    }
+    if !self.unifiedSessionID.isEmpty {
+      try visitor.visitSingularStringField(value: self.unifiedSessionID, fieldNumber: 2)
+    }
+    if !self.inbounds.isEmpty {
+      try visitor.visitRepeatedMessageField(value: self.inbounds, fieldNumber: 3)
+    }
+    if !self.outbounds.isEmpty {
+      try visitor.visitRepeatedMessageField(value: self.outbounds, fieldNumber: 4)
+    }
+    if !self.remoteInbounds.isEmpty {
+      try visitor.visitRepeatedMessageField(value: self.remoteInbounds, fieldNumber: 5)
+    }
+    if !self.remoteOutbounds.isEmpty {
+      try visitor.visitRepeatedMessageField(value: self.remoteOutbounds, fieldNumber: 6)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Stream_Video_Sfu_Signal_SendMetricsRequest, rhs: Stream_Video_Sfu_Signal_SendMetricsRequest) -> Bool {
+    if lhs.sessionID != rhs.sessionID {return false}
+    if lhs.unifiedSessionID != rhs.unifiedSessionID {return false}
+    if lhs.inbounds != rhs.inbounds {return false}
+    if lhs.outbounds != rhs.outbounds {return false}
+    if lhs.remoteInbounds != rhs.remoteInbounds {return false}
+    if lhs.remoteOutbounds != rhs.remoteOutbounds {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Stream_Video_Sfu_Signal_SendMetricsResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".SendMetricsResponse"
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap()
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let _ = try decoder.nextFieldNumber() {
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Stream_Video_Sfu_Signal_SendMetricsResponse, rhs: Stream_Video_Sfu_Signal_SendMetricsResponse) -> Bool {
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
