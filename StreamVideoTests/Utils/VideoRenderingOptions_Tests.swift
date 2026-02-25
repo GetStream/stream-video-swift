@@ -23,8 +23,8 @@ final class VideoRenderingOptions_Tests: XCTestCase, @unchecked Sendable {
         subject = .init()
 
         XCTAssertEqual(subject.backend, .sharedMetal)
-        XCTAssertEqual(subject.bufferPolicy, .convertWithPoolToNV12)
-        XCTAssertEqual(subject.maxInFlightFrames, 0)
+        XCTAssertEqual(subject.bufferPolicy, .copyToNV12)
+        XCTAssertEqual(subject.maxInFlightFrames, 2)
     }
 
     func test_description_includesConfiguredValues() {
