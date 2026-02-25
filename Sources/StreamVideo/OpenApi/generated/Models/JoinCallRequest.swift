@@ -15,7 +15,16 @@ public final class JoinCallRequest: @unchecked Sendable, Codable, JSONEncodable,
     public var ring: Bool?
     public var video: Bool?
 
-    public init(create: Bool? = nil, data: CallRequest? = nil, location: String, membersLimit: Int? = nil, migratingFrom: String? = nil, migratingFromList: [String]? = nil, notify: Bool? = nil, ring: Bool? = nil, video: Bool? = nil) {
+    public init(
+        create: Bool? = nil,
+        data: CallRequest? = nil,
+        location: String, membersLimit: Int? = nil,
+        migratingFrom: String? = nil,
+        migratingFromList: [String]? = nil,
+        notify: Bool? = nil,
+        ring: Bool? = nil,
+        video: Bool? = nil
+    ) {
         self.create = create
         self.data = data
         self.location = location
