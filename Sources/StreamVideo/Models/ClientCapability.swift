@@ -29,6 +29,8 @@ public enum ClientCapability: Hashable, Sendable, CaseIterable {
             return nil
         case .UNRECOGNIZED:
             return nil
+        case .coordinatorStats:
+            return nil
         }
     }
 
