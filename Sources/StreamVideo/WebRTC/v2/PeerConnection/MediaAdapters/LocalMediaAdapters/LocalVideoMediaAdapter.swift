@@ -207,6 +207,14 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         }
     }
 
+    func didUpdateOwnCapabilities(
+        _ ownCapabilities: Set<OwnCapability>
+    ) async throws {
+        processingQueue.addOperation { [weak self] in
+            self?.ownCapabilities = Array(ownCapabilities)
+        }
+    }
+
     /// Starts publishing the local video track.
     func publish() {
         processingQueue.addTaskOperation { @MainActor [weak self] in

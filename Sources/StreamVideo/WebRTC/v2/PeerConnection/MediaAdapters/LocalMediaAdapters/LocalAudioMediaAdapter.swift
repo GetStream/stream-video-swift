@@ -124,71 +124,66 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     /// This enables the primary track and creates additional transceivers based
     /// on the current publish options. It also starts the audio recorder.
     func publish() {
-        processingQueue.addTaskOperation { @MainActor [weak self] in
-            guard
-                let self,
-                !primaryTrack.isEnabled
-            else {
-                return
-            }
+        guard
+            !primaryTrack.isEnabled
+        else {
+            return
+        }
 
-            primaryTrack.isEnabled = true
+        primaryTrack.isEnabled = true
 
-            publishOptions.forEach {
-                self.addTransceiverIfRequired(
-                    for: $0,
-                    with: self.primaryTrack.clone(from: self.peerConnectionFactory)
-                )
-            }
-
-            let activePublishOptions = Set(self.publishOptions)
-            transceiverStorage
-                .forEach {
-                    if activePublishOptions.contains($0.key) {
-                        $0.value.track.isEnabled = true
-                        $0.value.transceiver.sender.track = $0.value.track
-                    } else {
-                        $0.value.track.isEnabled = false
-                        $0.value.transceiver.sender.track = nil
-                    }
-                }
-
-            audioRecorder.startRecording()
-
-            log.debug(
-                """
-                Local audio tracks are now published:
-                    primary: \(primaryTrack.trackId) isEnabled:\(primaryTrack.isEnabled)
-                    clones: \(transceiverStorage.map(\.value.track.trackId).joined(separator: ","))
-                """,
-                subsystems: .webRTC
+        publishOptions.forEach {
+            self.addTransceiverIfRequired(
+                for: $0,
+                with: self.primaryTrack.clone(from: self.peerConnectionFactory)
             )
         }
+
+        let activePublishOptions = Set(self.publishOptions)
+        transceiverStorage
+            .forEach {
+                if activePublishOptions.contains($0.key) {
+                    $0.value.track.isEnabled = true
+                    $0.value.transceiver.sender.track = $0.value.track
+                } else {
+                    $0.value.track.isEnabled = false
+                    $0.value.transceiver.sender.track = nil
+                }
+            }
+
+        audioRecorder.startRecording()
+
+        log.debug(
+            """
+            Local audio tracks are now published:
+                primary: \(primaryTrack.trackId) isEnabled:\(primaryTrack.isEnabled)
+                clones: \(transceiverStorage.map(\.value.track.trackId).joined(separator: ","))
+            """,
+            subsystems: .webRTC
+        )
     }
 
     /// Stops publishing the local audio track.
     ///
     /// This disables the primary track and all associated transceivers.
     func unpublish() {
-        processingQueue.addOperation { [weak self] in
-            guard let self, primaryTrack.isEnabled else { return }
+        guard primaryTrack.isEnabled else { return }
 
-            primaryTrack.isEnabled = false
+        primaryTrack.isEnabled = false
 
-            transceiverStorage
-                .forEach { $0.value.track.isEnabled = false }
+        transceiverStorage
+            .forEach { $0.value.track.isEnabled = false }
 
-            audioRecorder.stopRecording()
+        audioRecorder.stopRecording()
 
-            log.debug(
-                """
-                Local audio tracks are now unpublished:
-                    primary: \(primaryTrack.trackId) isEnabled:\(primaryTrack.isEnabled)
-                    clones: \(transceiverStorage.map(\.value.track.trackId).joined(separator: ","))
-                """,
-                subsystems: .webRTC
-            )
-        }
+        log.debug(
+            """
+            Local audio tracks are now unpublished:
+                primary: \(primaryTrack.trackId) isEnabled:\(primaryTrack.isEnabled)
+                clones: \(transceiverStorage.map(\.value.track.trackId).joined(separator: ","))
+            """,
+            subsystems: .webRTC
+        )
     }
 
     /// Updates the local audio media based on new call settings.
@@ -221,6 +216,14 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             }
             
             lastUpdatedCallSettings = settings.audio
+        }
+    }
+
+    func didUpdateOwnCapabilities(
+        _ ownCapabilities: Set<OwnCapability>
+    ) async throws {
+        processingQueue.addOperation { [weak self] in
+            self?.ownCapabilities = Array(ownCapabilities)
         }
     }
 

@@ -44,5 +44,7 @@ protocol LocalMediaAdapting {
     /// - Throws: An error if the update process fails.
     func didUpdateCallSettings(_ settings: CallSettings) async throws
 
+    func didUpdateOwnCapabilities(_ ownCapabilities: Set<OwnCapability>) async throws
+
     func didUpdatePublishOptions(_ publishOptions: PublishOptions) async throws
 }

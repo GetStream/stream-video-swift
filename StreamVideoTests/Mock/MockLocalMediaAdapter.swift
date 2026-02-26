@@ -25,6 +25,7 @@ final class MockLocalMediaAdapter: LocalMediaAdapting, Mockable, @unchecked Send
     enum MockFunctionKey: Hashable, CaseIterable {
         case setUp
         case didUpdateCallSettings
+        case didUpdateOwnCapabilities
         case publish
         case unpublish
         case trackInfo
@@ -35,6 +36,7 @@ final class MockLocalMediaAdapter: LocalMediaAdapting, Mockable, @unchecked Send
     enum MockFunctionInputKey: Payloadable {
         case setUp(settings: CallSettings, ownCapabilities: [OwnCapability])
         case didUpdateCallSettings(settings: CallSettings)
+        case didUpdateOwnCapabilities(ownCapabilities: Set<OwnCapability>)
         case publish
         case unpublish
         case trackInfo(collectionType: RTCPeerConnectionTrackInfoCollectionType)
@@ -46,6 +48,8 @@ final class MockLocalMediaAdapter: LocalMediaAdapting, Mockable, @unchecked Send
                 return (settings, ownCapabilities)
             case let .didUpdateCallSettings(settings):
                 return settings
+            case let .didUpdateOwnCapabilities(ownCapabilities):
+                return ownCapabilities
             case .publish:
                 return ()
             case .unpublish:
@@ -81,6 +85,11 @@ final class MockLocalMediaAdapter: LocalMediaAdapting, Mockable, @unchecked Send
     func didUpdateCallSettings(_ settings: CallSettings) async throws {
         stubbedFunctionInput[.didUpdateCallSettings]?
             .append(.didUpdateCallSettings(settings: settings))
+    }
+
+    func didUpdateOwnCapabilities(_ ownCapabilities: Set<OwnCapability>) async throws {
+        stubbedFunctionInput[.didUpdateOwnCapabilities]?
+            .append(.didUpdateOwnCapabilities(ownCapabilities: ownCapabilities))
     }
 
     func trackInfo(for collectionType: RTCPeerConnectionTrackInfoCollectionType) -> [Stream_Video_Sfu_Models_TrackInfo] {

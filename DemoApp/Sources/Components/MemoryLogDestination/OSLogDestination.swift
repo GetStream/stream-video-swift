@@ -6,7 +6,29 @@ import Foundation
 import OSLog
 import StreamVideo
 
+@available(iOS 14.0, *)
 final class OSLogDestination: BaseLogDestination, @unchecked Sendable {
+    private struct LogMessage {
+        var message: String
+        var expandedMessage: String?
+
+        init(
+            _ source: String,
+            maxOSLogMessageBytes: Int = 850
+        ) {
+            if source.utf8.count > maxOSLogMessageBytes {
+                message = "\(source.prefix(100)) ---- (truncated)"
+                expandedMessage = """
+                ---- [Expanded Message - Begin] ----
+                \(source)
+                ---- [Expanded Message - End  ] ----
+                """
+            } else {
+                message = source
+                expandedMessage = nil
+            }
+        }
+    }
 
     private let loggers: [String: os.Logger] = LogSubsystem
         .allCases
@@ -48,19 +70,28 @@ final class OSLogDestination: BaseLogDestination, @unchecked Sendable {
         if let error = logDetails.error {
             extendedMessage += "[Error: \(error)]"
         }
-        let formattedMessage = LogConfig
-            .formatters
-            .reduce(extendedMessage) { $1.format(logDetails: logDetails, message: $0) }
+        let formattedMessage = LogMessage(
+            LogConfig
+                .formatters
+                .reduce(extendedMessage) { $1.format(logDetails: logDetails, message: $0) }
+        )
 
-        switch logDetails.level {
+        log(formattedMessage.message, level: logDetails.level, logger: logger)
+        if let expandedMessage = formattedMessage.expandedMessage {
+            print(expandedMessage)
+        }
+    }
+
+    private func log(_ message: String, level: LogLevel, logger: os.Logger) {
+        switch level {
         case .debug:
-            logger.debug("\(formattedMessage, privacy: .public)")
+            logger.debug("\(message, privacy: .public)")
         case .info:
-            logger.notice("\(formattedMessage, privacy: .public)")
+            logger.notice("\(message, privacy: .public)")
         case .warning:
-            logger.warning("\(formattedMessage, privacy: .public)")
+            logger.warning("\(message, privacy: .public)")
         case .error:
-            logger.critical("\(formattedMessage, privacy: .public)")
+            logger.critical("\(message, privacy: .public)")
         }
     }
 }

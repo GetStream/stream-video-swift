@@ -66,7 +66,10 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     }
 
     @Published private(set) var connectOptions: ConnectOptions = .init(iceServers: [])
-    @Published private(set) var ownCapabilities: Set<OwnCapability> = []
+    @Published private(set) var ownCapabilities: Set<OwnCapability> = [] {
+        didSet { didUpdate(ownCapabilities: ownCapabilities) }
+    }
+
     @Published private(set) var sfuAdapter: SFUAdapter?
     @Published private(set) var publisher: RTCPeerConnectionCoordinator?
     @Published private(set) var subscriber: RTCPeerConnectionCoordinator?
@@ -705,6 +708,10 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     /// Updates the publish options and notifies the publisher.
     private func didUpdate(publishOptions: PublishOptions) {
         publisher?.publishOptions = publishOptions
+    }
+
+    private func didUpdate(ownCapabilities: Set<OwnCapability>) {
+        publisher?.didUpdateOwnCapabilities(ownCapabilities)
     }
 
     // MARK: Participant Operations

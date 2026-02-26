@@ -140,6 +140,12 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
         try await localMediaManager.didUpdateCallSettings(settings)
     }
 
+    func didUpdateOwnCapabilities(
+        _ ownCapabilities: Set<OwnCapability>
+    ) async throws {
+        try await localMediaManager.didUpdateOwnCapabilities(ownCapabilities)
+    }
+
     /// Updates the publish options asynchronously.
     ///
     /// - Parameter publishOptions: The new publish options to be applied.

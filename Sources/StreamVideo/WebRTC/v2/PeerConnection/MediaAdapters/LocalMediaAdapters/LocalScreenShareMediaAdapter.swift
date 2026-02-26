@@ -224,6 +224,12 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
         /* No-op */
     }
 
+    func didUpdateOwnCapabilities(
+        _ ownCapabilities: Set<OwnCapability>
+    ) async throws {
+        /* No-op */
+    }
+
     /// Updates the publishing options for the screen sharing track.
     ///
     /// - Parameter publishOptions: The new publishing options to apply.

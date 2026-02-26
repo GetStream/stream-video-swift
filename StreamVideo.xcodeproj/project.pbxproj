@@ -252,6 +252,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		40A239B62F519FE300B79DBB /* Exceptions for "DemoApp" folder in "StreamVideoTests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Sources/Components/MemoryLogDestination/OSLogDestination.swift,
+			);
+			target = 84F737F3287C13AD00A363F4 /* StreamVideoTests */;
+		};
 		82690ED32F3CD64C00231585 /* Exceptions for "StreamVideoTests" folder in "StreamVideoTests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -1009,6 +1016,7 @@
 		8269DE572F3CD35F00231585 /* DemoApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
+				40A239B62F519FE300B79DBB /* Exceptions for "DemoApp" folder in "StreamVideoTests" target */,
 				8269DF422F3CD35F00231585 /* Exceptions for "DemoApp" folder in "DemoApp" target */,
 				8269DF432F3CD35F00231585 /* Exceptions for "DemoApp" folder in "DemoAppUIKit" target */,
 				8269DF442F3CD35F00231585 /* Exceptions for "DemoApp" folder in "SwiftUIDemoAppUITests" target */,

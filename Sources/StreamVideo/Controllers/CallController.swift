@@ -102,6 +102,7 @@ class CallController: @unchecked Sendable {
             await observeSessionIDUpdates()
             await observeStatsReporterUpdates()
             await observeCallSettingsUpdates()
+            await observeOwnCapabilitiesUpdates()
         }
 
         joinCallResponseFetchObserver = joinCallResponseSubject
@@ -762,6 +763,15 @@ class CallController: @unchecked Sendable {
             .$callSettings
             .removeDuplicates()
             .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in self?.call?.state.callSettings = $0 }
+            .store(in: disposableBag)
+    }
+
+    private func observeOwnCapabilitiesUpdates() async {
+        await webRTCCoordinator
+            .stateAdapter
+            .$ownCapabilities
+            .removeDuplicates()
+            .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in self?.call?.state.ownCapabilities = Array($0) }
             .store(in: disposableBag)
     }
 }
