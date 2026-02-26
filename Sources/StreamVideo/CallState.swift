@@ -338,16 +338,21 @@ public class CallState: ObservableObject {
                 permission: $0,
                 user: user,
                 requestedAt: requestedAt,
-                onReject: self.removePermissionRequest
+                onReject: { [weak self] request in
+                    Task { @MainActor [weak self, request] in
+                        self?.removePermissionRequest(request: request)
+                    }
+                }
             )
         }
         permissionRequests.append(contentsOf: requests)
     }
     
     internal func removePermissionRequest(request: PermissionRequest) {
-        permissionRequests = permissionRequests.filter {
+        let newPermissionRequests = permissionRequests.filter {
             $0.id != request.id
         }
+        self.permissionRequests = newPermissionRequests
     }
     
     internal func blockUser(id: String) {
