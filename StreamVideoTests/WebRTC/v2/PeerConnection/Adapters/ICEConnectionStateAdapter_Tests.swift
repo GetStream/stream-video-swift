@@ -49,9 +49,10 @@ final class ICEConnectionStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         mockRTCPeerConnectionCoordinator
             .stubEventSubject
             .send(StreamRTCPeerConnection.ICEConnectionChangedEvent(state: .disconnected))
-        await wait(for: 1)
 
-        XCTAssertEqual(mockRTCPeerConnectionCoordinator.timesCalled(.restartICE), 1)
+        await fulfillment {
+            self.mockRTCPeerConnectionCoordinator.timesCalled(.restartICE) == 1
+        }
     }
 
     func test_didUpdate_givenStateIsFailed_whenInvoked_thenRestartsICEImmediately() async {

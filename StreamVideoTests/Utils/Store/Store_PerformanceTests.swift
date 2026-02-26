@@ -62,14 +62,13 @@ final class Store_PerformanceTests: XCTestCase, @unchecked Sendable {
     }
     
     /// Measures synchronous dispatch latency.
-    func test_measureSyncDispatchLatency() {
+    func test_measureSyncDispatchLatency() async {
         measure(
             baseline: .init(0.1, stringTransformer: { String(format: "%.4fs", $0) })
         ) {
             let expectation = XCTestExpectation(description: "Sync dispatch")
             
             Task {
-                
                 for i in 0..<100 {
                     try? await store.dispatch(.setValue(i)).result()
                 }
@@ -77,7 +76,7 @@ final class Store_PerformanceTests: XCTestCase, @unchecked Sendable {
                 expectation.fulfill()
             }
             
-            wait(for: [expectation], timeout: 5)
+            wait(for: [expectation], timeout: defaultTimeout)
         }
     }
     
