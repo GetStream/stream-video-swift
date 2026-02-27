@@ -109,7 +109,7 @@ final class CallAudioSession: @unchecked Sendable {
         statsAdapter?.trace(.init(audioSession: traceRepresentation))
     }
 
-    func deactivate() {
+    func deactivate() async {
         guard delegate != nil else {
             return
         }
@@ -117,11 +117,18 @@ final class CallAudioSession: @unchecked Sendable {
         disposableBag.removeAll()
         delegate = nil
 
-        audioStore.dispatch([
-            .webRTCAudioSession(.setAudioEnabled(false)),
-            .setAudioDeviceModule(nil),
-            .setActive(false)
-        ])
+        do {
+            try await audioStore.dispatch([
+                .setAudioDeviceModule(nil),
+                .webRTCAudioSession(.setAudioEnabled(false)),
+                .setActive(false)
+            ]).result()
+        } catch {
+            log.error(
+                "Failed to deactivate audio session: \(error).",
+                subsystems: .audioSession
+            )
+        }
 
         statsAdapter?.trace(.init(audioSession: traceRepresentation))
     }
@@ -316,12 +323,12 @@ final class CallAudioSession: @unchecked Sendable {
 
 extension CallAudioSession {
     struct TraceRepresentation: Encodable {
-        var state: RTCAudioStore.StoreState
+        var state: [String: String]
         var hasDelegate: Bool
         var policy: String
 
         init(_ source: CallAudioSession) {
-            state = source.audioStore.state
+            state = (try? source.audioStore.state.asDictionary()) ?? ["error": "-"]
             hasDelegate = source.delegate != nil
             policy = String(describing: source.policy)
         }

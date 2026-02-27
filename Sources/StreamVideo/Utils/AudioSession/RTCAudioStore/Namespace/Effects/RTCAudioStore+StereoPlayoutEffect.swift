@@ -21,6 +21,7 @@ extension RTCAudioStore {
         ) {
             audioDeviceModuleCancellable?.cancel()
             audioDeviceModuleCancellable = nil
+            processingQueue.isSuspended = true
             processingQueue.cancelAllOperations()
             disposableBag.removeAll()
 
@@ -28,6 +29,7 @@ extension RTCAudioStore {
                 return
             }
 
+            processingQueue.isSuspended = false
             audioDeviceModuleCancellable = statePublisher
                 .map(\.audioDeviceModule)
                 .removeDuplicates()
@@ -54,7 +56,9 @@ extension RTCAudioStore {
                 .map(\.currentRoute)
                 .removeDuplicates()
                 .debounce(for: .seconds(2), scheduler: processingQueue)
-                .sink { [weak audioDeviceModule] _ in audioDeviceModule?.refreshStereoPlayoutState() }
+                .compactMap { [weak self] _ in self?.state?.audioDeviceModule }
+                .receive(on: processingQueue)
+                .sink { $0.refreshStereoPlayoutState() }
                 .store(in: disposableBag)
 
             audioDeviceModule

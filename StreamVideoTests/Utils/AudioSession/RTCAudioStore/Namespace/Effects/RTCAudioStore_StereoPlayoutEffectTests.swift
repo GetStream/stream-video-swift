@@ -58,7 +58,12 @@ final class RTCAudioStore_StereoPlayoutEffectTests: XCTestCase, @unchecked Senda
 
         let mockAudioDeviceModule = MockRTCAudioDeviceModule()
         let audioDeviceModule = AudioDeviceModule(mockAudioDeviceModule)
-        let stateSubject = CurrentValueSubject<RTCAudioStore.Namespace.State, Never>(.dummy(audioDeviceModule: audioDeviceModule))
+        let stateSubject = CurrentValueSubject<RTCAudioStore.Namespace.State, Never>(
+            .dummy(
+                audioDeviceModule: audioDeviceModule
+            )
+        )
+        subject.stateProvider = { stateSubject.value }
 
         subject.set(statePublisher: stateSubject.eraseToAnyPublisher())
         audioDeviceModule.audioDeviceModule(
@@ -70,7 +75,12 @@ final class RTCAudioStore_StereoPlayoutEffectTests: XCTestCase, @unchecked Senda
                 stereoPlayoutEnabled: true
             )
         )
-        stateSubject.send(.dummy(audioDeviceModule: audioDeviceModule, currentRoute: .dummy(inputs: [.dummy()])))
+        stateSubject.send(
+            .dummy(
+                audioDeviceModule: audioDeviceModule,
+                currentRoute: .dummy(inputs: [.dummy()])
+            )
+        )
 
         await fulfillment { mockAudioDeviceModule.timesCalled(.refreshStereoPlayoutState) == 1 }
     }
