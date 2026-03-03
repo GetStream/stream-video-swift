@@ -307,7 +307,7 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
     func test_startScreensharing_typeIsInApp_shouldBeginScreenSharing() async throws {
         try await prepareAsConnected()
         let ownCapabilities = [OwnCapability.createReaction]
-        await subject.stateAdapter.set(ownCapabilities: Set(ownCapabilities))
+        await subject.stateAdapter.enqueueOwnCapabilities { Set(ownCapabilities) }
         let mockPublisher = try await XCTAsyncUnwrap(
             await subject
                 .stateAdapter
@@ -330,7 +330,7 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
     func test_startScreensharing_typeIsBroadcast_shouldBeginScreenSharing() async throws {
         try await prepareAsConnected()
         let ownCapabilities = [OwnCapability.createReaction]
-        await subject.stateAdapter.set(ownCapabilities: Set(ownCapabilities))
+        await subject.stateAdapter.enqueueOwnCapabilities { Set(ownCapabilities) }
         let mockPublisher = try await XCTAsyncUnwrap(
             await subject
                 .stateAdapter
@@ -696,7 +696,7 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
         if let videoFilter {
             await subject.stateAdapter.set(videoFilter: videoFilter)
         }
-        await subject.stateAdapter.set(ownCapabilities: ownCapabilities)
+        await subject.stateAdapter.enqueueOwnCapabilities { ownCapabilities }
         await subject.stateAdapter.enqueueCallSettings { _ in callSettings }
         await subject.stateAdapter.set(sessionID: .unique)
         await subject.stateAdapter.set(token: .unique)

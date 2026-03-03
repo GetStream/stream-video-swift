@@ -207,6 +207,18 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         }
     }
 
+    /// Updates cached local participant capabilities for the local video adapter.
+    ///
+    /// The adapter uses this cache in call-setting updates to gate video
+    /// registration and publishing when `.sendVideo` is not present.
+    func didUpdateOwnCapabilities(
+        _ ownCapabilities: Set<OwnCapability>
+    ) {
+        processingQueue.addOperation { [weak self] in
+            self?.ownCapabilities = Array(ownCapabilities)
+        }
+    }
+
     /// Starts publishing the local video track.
     func publish() {
         processingQueue.addTaskOperation { @MainActor [weak self] in

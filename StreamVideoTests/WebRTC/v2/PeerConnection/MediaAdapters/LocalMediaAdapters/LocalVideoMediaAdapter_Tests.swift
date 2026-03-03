@@ -276,6 +276,66 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         await fulfillment { self.subject.primaryTrack.isEnabled == true }
     }
 
+    // MARK: - didUpdateOwnCapabilities
+
+    func test_didUpdateOwnCapabilities_addsVideoCapability_trackCanBeRegistered() async throws {
+        let expectedSessionID = sessionId
+        try await assertTrackEvent(
+            isInverted: true
+        ) { subject in
+            try await subject.setUp(
+                with: .init(videoOn: true),
+                ownCapabilities: []
+            )
+        }
+
+        subject.didUpdateOwnCapabilities([.sendVideo])
+
+        try await assertTrackEvent {
+            switch $0 {
+            case let .added(id, trackType, track):
+                return (id, trackType, track)
+            default:
+                return nil
+            }
+        } operation: { subject in
+            try await subject.didUpdateCallSettings(.init(videoOn: true))
+        } validation: { id, trackType, track in
+            XCTAssertEqual(id, expectedSessionID)
+            XCTAssertEqual(trackType, .video)
+            XCTAssertTrue(track is RTCVideoTrack)
+        }
+
+        await fulfillment { self.subject.primaryTrack.isEnabled }
+        await fulfillment {
+            self.mockSFUStack.service.updateMuteStatesWasCalledWithRequest != nil
+        }
+        let request = try XCTUnwrap(
+            mockSFUStack.service.updateMuteStatesWasCalledWithRequest
+        )
+        XCTAssertEqual(request.sessionID, self.sessionId)
+        XCTAssertFalse(request.muteStates[0].muted)
+    }
+
+    func test_didUpdateOwnCapabilities_removesVideoCapability_blocksMuteUpdate() async throws {
+        try await subject.setUp(
+            with: .init(videoOn: true),
+            ownCapabilities: [.sendVideo]
+        )
+        try await subject.didUpdateCallSettings(.init(videoOn: true))
+        await fulfillment { self.subject.primaryTrack.isEnabled }
+
+        mockSFUStack.service.updateMuteStatesWasCalledWithRequest = nil
+        subject.didUpdateOwnCapabilities([])
+        try await subject.didUpdateCallSettings(.init(videoOn: false))
+
+        await fulfillment {
+            self.mockSFUStack.service.updateMuteStatesWasCalledWithRequest == nil
+        }
+        XCTAssertNil(mockSFUStack.service.updateMuteStatesWasCalledWithRequest)
+        XCTAssertTrue(subject.primaryTrack.isEnabled)
+    }
+
     // MARK: - didUpdatePublishOptions
 
     func test_didUpdatePublishOptions_primaryTrackIsNotEnabled_nothingHappens() async throws {

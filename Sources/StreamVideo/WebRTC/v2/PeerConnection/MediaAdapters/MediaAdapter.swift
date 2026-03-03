@@ -190,10 +190,18 @@ final class MediaAdapter {
                 try await screenShareMediaAdapter.didUpdateCallSettings(settings)
             }
             
-            while try await group.next() != nil {}
+            try await group.waitForAll()
         }
     }
-    
+
+    func didUpdateOwnCapabilities(
+        _ ownCapabilities: Set<OwnCapability>
+    ) {
+        audioMediaAdapter.didUpdateOwnCapabilities(ownCapabilities)
+        videoMediaAdapter.didUpdateOwnCapabilities(ownCapabilities)
+        screenShareMediaAdapter.didUpdateOwnCapabilities(ownCapabilities)
+    }
+
     /// Retrieves track information for a specified track type and collection type.
     ///
     /// - Parameters:
