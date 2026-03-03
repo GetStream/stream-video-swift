@@ -406,7 +406,11 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
                 """,
                 subsystems: subsystem
             )
-            try await mediaAdapter.didUpdateOwnCapabilities(ownCapabilities)
+            do {
+                try await mediaAdapter.didUpdateOwnCapabilities(ownCapabilities)
+            } catch {
+                log.error(error, subsystems: subsystem)
+            }
         }
     }
 
@@ -420,10 +424,11 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         _ publishOptions: PublishOptions
     ) {
         Task(disposableBag: disposableBag) { [weak self] in
+            guard let self else { return }
             do {
-                try await self?.mediaAdapter.didUpdatePublishOptions(publishOptions)
+                try await mediaAdapter.didUpdatePublishOptions(publishOptions)
             } catch {
-                log.error(error)
+                log.error(error, subsystems: subsystem)
             }
         }
     }
