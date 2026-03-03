@@ -615,7 +615,11 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
 
         publisher?.didUpdateOwnCapabilities(newValue)
 
-        enqueueCallSettings { [newValue] callSettings in
+        enqueueCallSettings(
+            functionName: functionName,
+            fileName: fileName,
+            lineNumber: lineNumber
+        ) { [newValue] callSettings in
             var updatedCallSettings = callSettings
 
             if !newValue.contains(.sendAudio), callSettings.audioOn {
