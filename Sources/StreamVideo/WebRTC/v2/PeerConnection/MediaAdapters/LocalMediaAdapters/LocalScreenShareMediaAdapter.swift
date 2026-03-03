@@ -136,6 +136,10 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
     ///
     /// This method enables the primary screen sharing track and creates
     /// transceivers based on the specified publish options.
+    ///
+    /// This method is intended to be triggered by local adapter flow (for example,
+    /// through call settings updates) and not called directly by external
+    /// consumers.
     func publish() async throws {
         try await processingQueue.addSynchronousTaskOperation { @MainActor [weak self] in
             guard
@@ -184,6 +188,10 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
     ///
     /// This method disables the primary screen sharing track and all associated
     /// transceivers, and stops the screen sharing capturing session.
+    ///
+    /// This method is intended to be triggered by local adapter flow (for example,
+    /// through call settings updates) and not called directly by external
+    /// consumers.
     func unpublish() async throws {
         try await processingQueue.addSynchronousTaskOperation { @MainActor [weak self] in
             guard

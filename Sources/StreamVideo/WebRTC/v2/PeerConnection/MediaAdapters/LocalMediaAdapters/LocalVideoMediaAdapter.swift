@@ -208,78 +208,80 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     }
 
     /// Starts publishing the local video track.
+    ///
+    /// This method is intended to be triggered by local adapter flow (for example,
+    /// through call settings updates) and not called directly by external
+    /// consumers.
     func publish() async throws {
-        try await processingQueue.addSynchronousTaskOperation { @MainActor [weak self] in
-            guard
-                let self,
-                !primaryTrack.isEnabled
-            else {
-                return
-            }
-            try await startVideoCapturingSession()
-
-            primaryTrack.isEnabled = true
-
-            publishOptions
-                .forEach {
-                    self.addTransceiverIfRequired(
-                        for: $0,
-                        with: self
-                            .primaryTrack
-                            .clone(from: self.peerConnectionFactory)
-                    )
-                }
-
-            let activePublishOptions = Set(self.publishOptions)
-
-            transceiverStorage
-                .forEach {
-                    if activePublishOptions.contains($0.key) {
-                        $0.value.track.isEnabled = true
-                        $0.value.transceiver.sender.track = $0.value.track
-                    } else {
-                        $0.value.track.isEnabled = false
-                        $0.value.transceiver.sender.track = nil
-                    }
-                }
-
-            log.debug(
-                """
-                Local videoTracks are now published
-                    primary: \(primaryTrack.trackId) isEnabled:\(primaryTrack.isEnabled)
-                    clones: \(transceiverStorage.map(\.value.track.trackId).joined(separator: ","))
-                """,
-                subsystems: .webRTC
-            )
+        guard
+            !primaryTrack.isEnabled
+        else {
+            return
         }
+        try await startVideoCapturingSession()
+
+        primaryTrack.isEnabled = true
+
+        publishOptions
+            .forEach {
+                self.addTransceiverIfRequired(
+                    for: $0,
+                    with: self
+                        .primaryTrack
+                        .clone(from: self.peerConnectionFactory)
+                )
+            }
+
+        let activePublishOptions = Set(self.publishOptions)
+
+        transceiverStorage
+            .forEach {
+                if activePublishOptions.contains($0.key) {
+                    $0.value.track.isEnabled = true
+                    $0.value.transceiver.sender.track = $0.value.track
+                } else {
+                    $0.value.track.isEnabled = false
+                    $0.value.transceiver.sender.track = nil
+                }
+            }
+
+        log.debug(
+            """
+            Local videoTracks are now published
+                primary: \(primaryTrack.trackId) isEnabled:\(primaryTrack.isEnabled)
+                clones: \(transceiverStorage.map(\.value.track.trackId).joined(separator: ","))
+            """,
+            subsystems: .webRTC
+        )
     }
 
     /// Stops publishing the local video track.
+    ///
+    /// This method is intended to be triggered by local adapter flow (for example,
+    /// through call settings updates) and not called directly by external
+    /// consumers.
     func unpublish() async throws {
-        try await processingQueue.addSynchronousTaskOperation { [weak self] in
-            guard
-                let self,
-                primaryTrack.isEnabled
-            else {
-                return
-            }
-
-            try await stopVideoCapturingSession()
-
-            primaryTrack.isEnabled = false
-
-            transceiverStorage
-                .forEach { $0.value.track.isEnabled = false }
-
-            log.debug(
-                """
-                Local videoTracks are now unpublished:
-                    primary: \(primaryTrack.trackId) isEnabled:\(primaryTrack.isEnabled)
-                    clones: \(transceiverStorage.map(\.value.track.trackId).joined(separator: ","))
-                """,
-                subsystems: .webRTC
-            )
+        guard
+            primaryTrack.isEnabled
+        else {
+            return
         }
+
+        try await stopVideoCapturingSession()
+
+        primaryTrack.isEnabled = false
+
+        transceiverStorage
+            .forEach { $0.value.track.isEnabled = false }
+
+        log.debug(
+            """
+            Local videoTracks are now unpublished:
+                primary: \(primaryTrack.trackId) isEnabled:\(primaryTrack.isEnabled)
+                clones: \(transceiverStorage.map(\.value.track.trackId).joined(separator: ","))
+            """,
+            subsystems: .webRTC
+        )
     }
 
     /// Updates the publish options for the video track.

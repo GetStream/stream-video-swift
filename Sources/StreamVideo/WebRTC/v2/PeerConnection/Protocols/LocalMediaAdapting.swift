@@ -28,6 +28,8 @@ protocol LocalMediaAdapting {
     /// Starts publishing local media tracks.
     ///
     /// This method should be called when the local participant wants to share their media with others.
+    /// Implementations are expected to be invoked internally by the owning media
+    /// adapter flow (for example, via call setting updates), not by external callers.
     ///
     /// - Throws: Throws when publishing fails, for example if capture setup or track
     ///   publishing fails.
@@ -36,6 +38,8 @@ protocol LocalMediaAdapting {
     /// Stops publishing local media tracks.
     ///
     /// This method should be called when the local participant wants to stop sharing their media.
+    /// Implementations are expected to be invoked internally by the owning media
+    /// adapter flow (for example, via call setting updates), not by external callers.
     ///
     /// - Throws: Throws when unpublishing fails, for example if capture teardown
     ///   fails.
