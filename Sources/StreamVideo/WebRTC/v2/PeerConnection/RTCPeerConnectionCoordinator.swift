@@ -391,7 +391,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     ) {
         log.debug(
             """
-            PeerConnection will setUp:
+            PeerConnection will update ownCapabilities:
             Identifier: \(identifier)
             Session ID: \(sessionId)
             Connection type: \(peerType)
