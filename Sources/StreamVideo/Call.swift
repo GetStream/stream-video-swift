@@ -591,10 +591,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
     /// Leave the current call.
     public func leave() {
-        Task { @MainActor [weak self] in
-            postNotification(with: CallNotification.callEnded, object: self)
-        }
-
         disposableBag.removeAll()
         callController.leave()
         closedCaptionsAdapter.stop()
@@ -611,12 +607,15 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             guard let self else {
                 return
             }
+
             if streamVideo.state.ringingCall?.cId == cId {
                 streamVideo.state.ringingCall = nil
             }
             if streamVideo.state.activeCall?.cId == cId {
                 streamVideo.state.activeCall = nil
             }
+
+            postNotification(with: CallNotification.callEnded, object: self)
         }
     }
 
