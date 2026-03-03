@@ -88,7 +88,7 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
         _ source: Call = .dummy()
     ) {
         stubbedProperty = [
-            MockCall.propertyKey(for: \.state): CallState()
+            MockCall.propertyKey(for: \.state): CallState(.dummy())
         ]
 
         super.init(

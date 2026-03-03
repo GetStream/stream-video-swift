@@ -16,7 +16,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     private lazy var stateMachine: StateMachine = .init(self)
 
     @MainActor
-    public internal(set) var state = CallState()
+    public internal(set) var state: CallState
 
     /// The call id.
     public let callId: String
@@ -73,6 +73,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         callController: CallController,
         callSettings: CallSettings? = nil
     ) {
+        self.state = .init(InjectedValues[\.streamVideo].callSession)
         self.callId = callId
         self.callType = callType
         self.coordinatorClient = coordinatorClient
@@ -590,6 +591,9 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     }
 
     /// Leave the current call.
+    ///
+    /// The cleanup sequence clears active/ringing call references from
+    /// `StreamVideo` state before emitting `CallNotification.callEnded`.
     public func leave() {
         disposableBag.removeAll()
         callController.leave()

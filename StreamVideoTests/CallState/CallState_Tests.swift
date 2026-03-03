@@ -177,7 +177,7 @@ final class CallState_Tests: XCTestCase, @unchecked Sendable {
 
     /// Test the execution time of `didUpdate` with many merge/add/remove operations.
     func test_didUpdate_performanceWithManyParticipants_timeExecutionIsLessThanMaxDuration() {
-        let subject = CallState()
+        let subject = CallState(.dummy())
         let cycleCount = 250
 
         assertDuration(maxDuration: 5) {
@@ -207,7 +207,7 @@ final class CallState_Tests: XCTestCase, @unchecked Sendable {
         file: StaticString = #file,
         line: UInt = #line
     ) {
-        let subject = CallState()
+        let subject = CallState(.dummy())
         subject.participantsMap = initial.reduce([String: CallParticipant]()) {
             var mutated = $0
             mutated[$1.id] = $1
