@@ -44,5 +44,11 @@ protocol LocalMediaAdapting {
     /// - Throws: An error if the update process fails.
     func didUpdateCallSettings(_ settings: CallSettings) async throws
 
+    /// Updates the adapter with the latest local participant capabilities.
+    ///
+    /// - Parameter ownCapabilities: The set of capabilities owned by the local user.
+    ///
+    func didUpdateOwnCapabilities(_ ownCapabilities: Set<OwnCapability>)
+
     func didUpdatePublishOptions(_ publishOptions: PublishOptions) async throws
 }

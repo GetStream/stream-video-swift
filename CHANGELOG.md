@@ -3,8 +3,8 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
-
-### 🔄 Changed
+### 🐞 Fixed
+- Fix local mediaAdapters not reacting to changed own capabilities. [#1070](https://github.com/GetStream/stream-video-swift/pull/1070)
 
 # [1.43.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.43.0)
 _February 27, 2026_

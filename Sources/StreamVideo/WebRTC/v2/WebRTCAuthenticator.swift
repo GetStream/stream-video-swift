@@ -68,7 +68,7 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
         await coordinator.stateAdapter.set(
             token: response.credentials.token
         )
-        await coordinator.stateAdapter.set(ownCapabilities: Set(response.ownCapabilities))
+        await coordinator.stateAdapter.enqueueOwnCapabilities { Set(response.ownCapabilities) }
         await coordinator.stateAdapter.set(audioSettings: response.call.settings.audio)
         await coordinator.stateAdapter.set(
             connectOptions: ConnectOptions(

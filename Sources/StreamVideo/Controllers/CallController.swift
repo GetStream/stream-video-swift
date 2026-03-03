@@ -273,7 +273,9 @@ class CallController: @unchecked Sendable {
             return
         }
 
-        await webRTCCoordinator.stateAdapter.set(ownCapabilities: .init(ownCapabilities))
+        await webRTCCoordinator
+            .stateAdapter
+            .enqueueOwnCapabilities { .init(ownCapabilities) }
     }
 
     /// Initiates a focus operation at a specific point on the camera's view.

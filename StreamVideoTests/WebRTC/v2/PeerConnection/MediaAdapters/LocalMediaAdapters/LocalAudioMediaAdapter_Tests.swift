@@ -197,6 +197,63 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         await fulfillment { self.subject.primaryTrack.isEnabled == true }
     }
 
+    // MARK: - didUpdateOwnCapabilities
+
+    func test_didUpdateOwnCapabilities_addsAudioCapability_trackCanBeRegistered() async throws {
+        try await assertTrackEvent(
+            isInverted: true
+        ) { subject in
+            try await subject.setUp(
+                with: .init(audioOn: true),
+                ownCapabilities: []
+            )
+        }
+
+        subject.didUpdateOwnCapabilities([.sendAudio])
+
+        try await assertTrackEvent {
+            switch $0 {
+            case let .added(id, trackType, track):
+                return (id, trackType, track)
+            default:
+                return nil
+            }
+        } operation: { subject in
+            try await subject.didUpdateCallSettings(.init(audioOn: true))
+        } validation: { id, trackType, track in
+            XCTAssertEqual(id, self.sessionId)
+            XCTAssertEqual(trackType, .audio)
+            XCTAssertTrue(track is RTCAudioTrack)
+        }
+
+        await fulfillment { self.subject.primaryTrack.isEnabled }
+        await fulfillment {
+            self.mockSFUStack.service.updateMuteStatesWasCalledWithRequest != nil
+        }
+        let request = try XCTUnwrap(
+            mockSFUStack.service.updateMuteStatesWasCalledWithRequest
+        )
+        XCTAssertEqual(request.sessionID, sessionId)
+        XCTAssertFalse(request.muteStates[0].muted)
+    }
+
+    func test_didUpdateOwnCapabilities_removesAudioCapability_blocksMuteUpdate() async throws {
+        try await subject.setUp(
+            with: .init(audioOn: true),
+            ownCapabilities: [.sendAudio]
+        )
+        try await subject.didUpdateCallSettings(.init(audioOn: true))
+        await fulfillment { self.subject.primaryTrack.isEnabled }
+
+        mockSFUStack.service.updateMuteStatesWasCalledWithRequest = nil
+        subject.didUpdateOwnCapabilities([])
+        try await subject.didUpdateCallSettings(.init(audioOn: false))
+
+        await fulfillment { self.mockSFUStack.service.updateMuteStatesWasCalledWithRequest == nil }
+        XCTAssertNil(mockSFUStack.service.updateMuteStatesWasCalledWithRequest)
+        XCTAssertTrue(subject.primaryTrack.isEnabled)
+    }
+
     // MARK: - didUpdatePublishOptions
 
     func test_didUpdatePublishOptions_primaryTrackIsNotEnabled_nothingHappens() async throws {

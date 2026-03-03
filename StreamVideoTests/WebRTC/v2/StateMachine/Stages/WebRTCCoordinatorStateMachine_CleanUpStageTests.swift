@@ -86,7 +86,7 @@ final class WebRTCCoordinatorStateMachine_CleanUpStageTests: XCTestCase, @unchec
         await mockCoordinatorStack
             .coordinator
             .stateAdapter
-            .set(ownCapabilities: [OwnCapability.blockUsers])
+            .enqueueOwnCapabilities { [OwnCapability.blockUsers] }
         await mockCoordinatorStack
             .coordinator
             .stateAdapter
