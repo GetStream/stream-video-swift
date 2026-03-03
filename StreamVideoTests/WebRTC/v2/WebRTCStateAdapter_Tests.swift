@@ -773,6 +773,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
             participantPins: pins
         )
         await subject.enqueueCallSettings { _ in .init(cameraPosition: .back) }
+        await fulfillment { await self.subject.callSettings.cameraPosition == .back }
 
         await subject.cleanUpForReconnection()
 
