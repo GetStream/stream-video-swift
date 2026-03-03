@@ -60,7 +60,7 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
                 return request
 
             case let .setVideoFilter(videoFilter):
-                return videoFilter
+                return videoFilter ?? NSNull()
             }
         }
     }

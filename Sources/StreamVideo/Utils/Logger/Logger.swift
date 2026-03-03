@@ -2,6 +2,7 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import Foundation
 
 public var log: Logger {
@@ -317,10 +318,10 @@ public class Logger: @unchecked Sendable {
     
     /// Destinations for this logger.
     /// See `LogDestination` protocol for details.
-    @Atomic private var _destinations: [LogDestination]
+    private var _destinations: CurrentValueSubject<[LogDestination], Never>
     public var destinations: [LogDestination] {
-        get { _destinations }
-        set { _destinations = newValue }
+        get { _destinations.value }
+        set { _destinations.send(newValue) }
     }
 
     private let loggerQueue = DispatchQueue(label: "LoggerQueue \(UUID())")
@@ -328,7 +329,7 @@ public class Logger: @unchecked Sendable {
     /// Init a logger with a given identifier and destinations.
     public init(identifier: String = "", destinations: [LogDestination] = []) {
         self.identifier = identifier
-        _destinations = destinations
+        _destinations = .init(destinations)
     }
     
     /// Allows logger to be called as function.
