@@ -289,7 +289,7 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
             )
         }
 
-        try await subject.didUpdateOwnCapabilities([.sendVideo])
+        subject.didUpdateOwnCapabilities([.sendVideo])
 
         try await assertTrackEvent {
             switch $0 {
@@ -326,7 +326,7 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         await fulfillment { self.subject.primaryTrack.isEnabled }
 
         mockSFUStack.service.updateMuteStatesWasCalledWithRequest = nil
-        try await subject.didUpdateOwnCapabilities([])
+        subject.didUpdateOwnCapabilities([])
         try await subject.didUpdateCallSettings(.init(videoOn: false))
 
         await fulfillment {

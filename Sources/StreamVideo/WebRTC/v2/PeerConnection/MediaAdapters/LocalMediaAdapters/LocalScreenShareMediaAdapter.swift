@@ -230,7 +230,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
     /// screen sharing, so no adapter state is cached here.
     func didUpdateOwnCapabilities(
         _ ownCapabilities: Set<OwnCapability>
-    ) async throws {
+    ) {
         /* No-op */
     }
 

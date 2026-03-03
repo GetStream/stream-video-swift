@@ -209,7 +209,7 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
             )
         }
 
-        try await subject.didUpdateOwnCapabilities([.sendAudio])
+        subject.didUpdateOwnCapabilities([.sendAudio])
 
         try await assertTrackEvent {
             switch $0 {
@@ -246,7 +246,7 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         await fulfillment { self.subject.primaryTrack.isEnabled }
 
         mockSFUStack.service.updateMuteStatesWasCalledWithRequest = nil
-        try await subject.didUpdateOwnCapabilities([])
+        subject.didUpdateOwnCapabilities([])
         try await subject.didUpdateCallSettings(.init(audioOn: false))
 
         await fulfillment { self.mockSFUStack.service.updateMuteStatesWasCalledWithRequest == nil }

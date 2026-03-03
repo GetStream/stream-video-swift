@@ -213,7 +213,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     /// registration and publishing when `.sendVideo` is not present.
     func didUpdateOwnCapabilities(
         _ ownCapabilities: Set<OwnCapability>
-    ) async throws {
+    ) {
         processingQueue.addOperation { [weak self] in
             self?.ownCapabilities = Array(ownCapabilities)
         }

@@ -87,7 +87,7 @@ final class MockLocalMediaAdapter: LocalMediaAdapting, Mockable, @unchecked Send
             .append(.didUpdateCallSettings(settings: settings))
     }
 
-    func didUpdateOwnCapabilities(_ ownCapabilities: Set<OwnCapability>) async throws {
+    func didUpdateOwnCapabilities(_ ownCapabilities: Set<OwnCapability>) {
         stubbedFunctionInput[.didUpdateOwnCapabilities]?
             .append(.didUpdateOwnCapabilities(ownCapabilities: ownCapabilities))
     }

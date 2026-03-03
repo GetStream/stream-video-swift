@@ -230,7 +230,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     /// publishing is currently permitted for the participant.
     func didUpdateOwnCapabilities(
         _ ownCapabilities: Set<OwnCapability>
-    ) async throws {
+    ) {
         processingQueue.addOperation { [weak self] in
             self?.ownCapabilities = Array(ownCapabilities)
         }

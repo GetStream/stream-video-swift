@@ -389,29 +389,22 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     func didUpdateOwnCapabilities(
         _ ownCapabilities: Set<OwnCapability>
     ) {
-        Task(disposableBag: disposableBag) { [weak self] in
-            guard let self else { return }
-            log.debug(
-                """
-                PeerConnection will setUp:
-                Identifier: \(identifier)
-                Session ID: \(sessionId)
-                Connection type: \(peerType)
-                SFU: \(sfuAdapter.hostname)
-                
-                ownCapabilities:
-                    hasAudio: \(ownCapabilities.contains(.sendAudio))
-                    hasVideo: \(ownCapabilities.contains(.sendVideo))
-                    hasScreenShare: \(ownCapabilities.contains(.screenshare))
-                """,
-                subsystems: subsystem
-            )
-            do {
-                try await mediaAdapter.didUpdateOwnCapabilities(ownCapabilities)
-            } catch {
-                log.error(error, subsystems: subsystem)
-            }
-        }
+        log.debug(
+            """
+            PeerConnection will setUp:
+            Identifier: \(identifier)
+            Session ID: \(sessionId)
+            Connection type: \(peerType)
+            SFU: \(sfuAdapter.hostname)
+            
+            ownCapabilities:
+                hasAudio: \(ownCapabilities.contains(.sendAudio))
+                hasVideo: \(ownCapabilities.contains(.sendVideo))
+                hasScreenShare: \(ownCapabilities.contains(.screenshare))
+            """,
+            subsystems: subsystem
+        )
+        mediaAdapter.didUpdateOwnCapabilities(ownCapabilities)
     }
 
     /// Updates the publish options for the peer connection.

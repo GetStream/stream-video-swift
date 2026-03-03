@@ -196,22 +196,10 @@ final class MediaAdapter {
 
     func didUpdateOwnCapabilities(
         _ ownCapabilities: Set<OwnCapability>
-    ) async throws {
-        try await withThrowingTaskGroup(of: Void.self) { [audioMediaAdapter, videoMediaAdapter, screenShareMediaAdapter] group in
-            group.addTask {
-                try await audioMediaAdapter.didUpdateOwnCapabilities(ownCapabilities)
-            }
-
-            group.addTask {
-                try await videoMediaAdapter.didUpdateOwnCapabilities(ownCapabilities)
-            }
-
-            group.addTask {
-                try await screenShareMediaAdapter.didUpdateOwnCapabilities(ownCapabilities)
-            }
-
-            try await group.waitForAll()
-        }
+    ) {
+        audioMediaAdapter.didUpdateOwnCapabilities(ownCapabilities)
+        videoMediaAdapter.didUpdateOwnCapabilities(ownCapabilities)
+        screenShareMediaAdapter.didUpdateOwnCapabilities(ownCapabilities)
     }
 
     /// Retrieves track information for a specified track type and collection type.

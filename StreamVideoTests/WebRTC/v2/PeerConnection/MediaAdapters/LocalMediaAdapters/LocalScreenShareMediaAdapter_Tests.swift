@@ -78,7 +78,7 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable 
         )
         await fulfillment { capturer.timesCalled(.startCapture) == 1 }
 
-        try await subject.didUpdateOwnCapabilities([.screenshare])
+        subject.didUpdateOwnCapabilities([.screenshare])
 
         XCTAssertNotNil(screenShareSessionProvider.activeSession)
         XCTAssertTrue(subject.primaryTrack.isEnabled)

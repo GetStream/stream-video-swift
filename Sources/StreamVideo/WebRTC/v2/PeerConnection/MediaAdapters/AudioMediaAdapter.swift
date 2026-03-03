@@ -135,8 +135,8 @@ final class AudioMediaAdapter: MediaAdapting, @unchecked Sendable {
         try await localMediaManager.didUpdateCallSettings(settings)
     }
 
-    func didUpdateOwnCapabilities(_ ownCapabilities: Set<OwnCapability>) async throws {
-        try await localMediaManager.didUpdateOwnCapabilities(ownCapabilities)
+    func didUpdateOwnCapabilities(_ ownCapabilities: Set<OwnCapability>) {
+        localMediaManager.didUpdateOwnCapabilities(ownCapabilities)
     }
 
     /// Updates the publish options for the audio media adapter.

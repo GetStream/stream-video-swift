@@ -48,8 +48,7 @@ protocol LocalMediaAdapting {
     ///
     /// - Parameter ownCapabilities: The set of capabilities owned by the local user.
     ///
-    /// - Throws: An error if the update process fails.
-    func didUpdateOwnCapabilities(_ ownCapabilities: Set<OwnCapability>) async throws
+    func didUpdateOwnCapabilities(_ ownCapabilities: Set<OwnCapability>)
 
     func didUpdatePublishOptions(_ publishOptions: PublishOptions) async throws
 }

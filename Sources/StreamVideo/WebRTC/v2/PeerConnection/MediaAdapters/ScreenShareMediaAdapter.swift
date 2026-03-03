@@ -138,8 +138,8 @@ final class ScreenShareMediaAdapter: MediaAdapting, @unchecked Sendable {
 
     func didUpdateOwnCapabilities(
         _ ownCapabilities: Set<OwnCapability>
-    ) async throws {
-        try await localMediaManager.didUpdateOwnCapabilities(ownCapabilities)
+    ) {
+        localMediaManager.didUpdateOwnCapabilities(ownCapabilities)
     }
 
     /// Updates the publish options asynchronously.
