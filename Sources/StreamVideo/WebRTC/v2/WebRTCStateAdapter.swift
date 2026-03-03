@@ -66,9 +66,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     }
 
     @Published private(set) var connectOptions: ConnectOptions = .init(iceServers: [])
-    @Published private(set) var ownCapabilities: Set<OwnCapability> = [] {
-        didSet { didUpdate(ownCapabilities: ownCapabilities) }
-    }
+    @Published private(set) var ownCapabilities: Set<OwnCapability> = []
 
     @Published private(set) var sfuAdapter: SFUAdapter?
     @Published private(set) var publisher: RTCPeerConnectionCoordinator?
@@ -219,7 +217,12 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     func set(connectOptions value: ConnectOptions) { self.connectOptions = value }
 
     /// Sets the own capabilities of the current user.
-    func set(ownCapabilities value: Set<OwnCapability>) { self.ownCapabilities = value }
+    /// - Note: Capability changes may force local call settings to be downgraded (for
+    ///   missing `sendAudio`/`sendVideo`) and can stop an active screenshare session.
+    func set(ownCapabilities value: Set<OwnCapability>) async {
+        self.ownCapabilities = value
+        await didUpdate(ownCapabilities: value)
+    }
 
     /// Sets the WebRTC stats reporter.
     func set(statsAdapter value: WebRTCStatsAdapting?) {
@@ -407,7 +410,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         set(sfuAdapter: nil)
         set(token: "")
         set(sessionID: "")
-        set(ownCapabilities: [])
+        await set(ownCapabilities: [])
         set(participantsCount: 0)
         set(anonymousCount: 0)
         set(participantPins: [])
@@ -710,8 +713,37 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         publisher?.publishOptions = publishOptions
     }
 
-    private func didUpdate(ownCapabilities: Set<OwnCapability>) {
+    /// Propagates capability updates to media publishers and enforces local setting
+    /// limits derived from removed capabilities:
+    /// - Missing `.sendAudio` disables `callSettings.audioOn`.
+    /// - Missing `.sendVideo` disables `callSettings.videoOn`.
+    /// - Missing `.screenshare` stops any active screen sharing session.
+    private func didUpdate(ownCapabilities: Set<OwnCapability>) async {
         publisher?.didUpdateOwnCapabilities(ownCapabilities)
+
+        enqueueCallSettings { [ownCapabilities] callSettings in
+            var updatedCallSettings = callSettings
+
+            if !ownCapabilities.contains(.sendAudio), callSettings.audioOn {
+                updatedCallSettings = updatedCallSettings
+                    .withUpdatedAudioState(false)
+            }
+
+            if !ownCapabilities.contains(.sendVideo), callSettings.videoOn {
+                updatedCallSettings = updatedCallSettings
+                    .withUpdatedVideoState(false)
+            }
+
+            return updatedCallSettings
+        }
+
+        if !ownCapabilities.contains(.screenshare), screenShareSessionProvider.activeSession != nil {
+            do {
+                try await publisher?.stopScreenSharing()
+            } catch {
+                log.error(error, subsystems: .webRTC)
+            }
+        }
     }
 
     // MARK: Participant Operations

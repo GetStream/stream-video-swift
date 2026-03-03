@@ -209,6 +209,61 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         await assertEqualAsync(await subject.ownCapabilities, expected)
     }
 
+    func test_setOwnCapabilities_withoutSendAudioCapability_turnsAudioOff() async throws {
+        await subject.enqueueCallSettings { _ in CallSettings(audioOn: true, videoOn: true) }
+
+        await fulfillment {
+            let currentSettings = await self.subject.callSettings
+            return currentSettings.audioOn && currentSettings.videoOn
+        }
+
+        await subject.set(ownCapabilities: [.sendVideo])
+
+        await fulfillment {
+            let currentSettings = await self.subject.callSettings
+            return currentSettings.audioOn == false && currentSettings.videoOn
+        }
+    }
+
+    func test_setOwnCapabilities_withoutSendVideoCapability_turnsVideoOff() async throws {
+        await subject.enqueueCallSettings { _ in CallSettings(audioOn: true, videoOn: true) }
+
+        await fulfillment {
+            let currentSettings = await self.subject.callSettings
+            return currentSettings.audioOn && currentSettings.videoOn
+        }
+
+        await subject.set(ownCapabilities: [.sendAudio])
+
+        await fulfillment {
+            let currentSettings = await self.subject.callSettings
+            return currentSettings.audioOn && currentSettings.videoOn == false
+        }
+    }
+
+    func test_setOwnCapabilities_withoutScreenshareCapability_stopsScreenSharing() async throws {
+        let sfuStack = MockSFUStack()
+        sfuStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
+        await subject.set(sfuAdapter: sfuStack.adapter)
+        await subject.set(ownCapabilities: [.sendAudio, .sendVideo, .screenshare])
+        try await subject.configurePeerConnections()
+        let mockPublisher = try await XCTAsyncUnwrap(await subject.publisher as? MockRTCPeerConnectionCoordinator)
+
+        let screenShareSessionProvider = await subject.screenShareSessionProvider
+        screenShareSessionProvider.activeSession = .init(
+            localTrack: await subject.peerConnectionFactory.mockVideoTrack(forScreenShare: true),
+            screenSharingType: .inApp,
+            capturer: MockStreamVideoCapturer(),
+            includeAudio: true
+        )
+
+        await subject.set(ownCapabilities: [.sendAudio, .sendVideo])
+
+        await fulfillment {
+            mockPublisher.timesCalled(.stopScreenSharing) == 1
+        }
+    }
+
     // MARK: - setStatsAdapter
 
     func test_setStatsReporter_shouldUpdateStatsAdapter() async throws {
