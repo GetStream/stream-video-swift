@@ -176,7 +176,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     func didUpdateCallSettings(
         _ settings: CallSettings
     ) async throws {
-        processingQueue.addTaskOperation { [weak self] in
+        try await processingQueue.addSynchronousTaskOperation { [weak self] in
             guard let self, ownCapabilities.contains(.sendVideo) else { return }
             callSettings = settings
             registerPrimaryTrackIfPossible(settings)
@@ -200,29 +200,25 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             )
 
             if isMuted, primaryTrack.isEnabled {
-                unpublish()
+                try await unpublish()
             } else if !isMuted {
-                publish()
+                try await publish()
             }
         }
     }
 
     /// Starts publishing the local video track.
-    func publish() {
-        processingQueue.addTaskOperation { @MainActor [weak self] in
+    func publish() async throws {
+        try await processingQueue.addSynchronousTaskOperation { @MainActor [weak self] in
             guard
                 let self,
                 !primaryTrack.isEnabled
             else {
                 return
             }
-            primaryTrack.isEnabled = true
+            try await startVideoCapturingSession()
 
-            do {
-                try await startVideoCapturingSession()
-            } catch {
-                log.error(error)
-            }
+            primaryTrack.isEnabled = true
 
             publishOptions
                 .forEach {
@@ -259,8 +255,8 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     }
 
     /// Stops publishing the local video track.
-    func unpublish() {
-        processingQueue.addTaskOperation { [weak self] in
+    func unpublish() async throws {
+        try await processingQueue.addSynchronousTaskOperation { [weak self] in
             guard
                 let self,
                 primaryTrack.isEnabled
@@ -268,18 +264,12 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                 return
             }
 
+            try await stopVideoCapturingSession()
+
             primaryTrack.isEnabled = false
 
             transceiverStorage
                 .forEach { $0.value.track.isEnabled = false }
-
-            _ = await Task(disposableBag: disposableBag) { @MainActor [weak self] in
-                do {
-                    try await self?.stopVideoCapturingSession()
-                } catch {
-                    log.error(error, subsystems: .webRTC)
-                }
-            }.result
 
             log.debug(
                 """

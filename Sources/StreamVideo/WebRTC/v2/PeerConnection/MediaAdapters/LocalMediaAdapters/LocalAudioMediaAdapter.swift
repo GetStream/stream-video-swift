@@ -123,8 +123,8 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     ///
     /// This enables the primary track and creates additional transceivers based
     /// on the current publish options. It also starts the audio recorder.
-    func publish() {
-        processingQueue.addTaskOperation { @MainActor [weak self] in
+    func publish() async throws {
+        try await processingQueue.addSynchronousTaskOperation { @MainActor [weak self] in
             guard
                 let self,
                 !primaryTrack.isEnabled
@@ -169,8 +169,8 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     /// Stops publishing the local audio track.
     ///
     /// This disables the primary track and all associated transceivers.
-    func unpublish() {
-        processingQueue.addOperation { [weak self] in
+    func unpublish() async throws {
+        try await processingQueue.addSynchronousTaskOperation { [weak self] in
             guard let self, primaryTrack.isEnabled else { return }
 
             primaryTrack.isEnabled = false
@@ -197,7 +197,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     func didUpdateCallSettings(
         _ settings: CallSettings
     ) async throws {
-        processingQueue.addTaskOperation { [weak self] in
+        try await processingQueue.addSynchronousTaskOperation { [weak self] in
             guard let self, ownCapabilities.contains(.sendAudio) else { return }
             registerPrimaryTrackIfPossible(settings)
 
@@ -215,9 +215,9 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             }
             
             if isMuted, primaryTrack.isEnabled {
-                unpublish()
+                try await unpublish()
             } else if !isMuted {
-                publish()
+                try await publish()
             }
             
             lastUpdatedCallSettings = settings.audio

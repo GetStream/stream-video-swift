@@ -41,12 +41,16 @@ final class LocalNoOpMediaAdapter: LocalMediaAdapting {
     }
 
     /// A no-op implementation of the publish method.
-    func publish() {
+    ///
+    /// - Throws: No thrown errors are expected.
+    func publish() async throws {
         /* No-op */
     }
 
     /// A no-op implementation of the unpublish method.
-    func unpublish() {
+    ///
+    /// - Throws: No thrown errors are expected.
+    func unpublish() async throws {
         /* No-op */
     }
 

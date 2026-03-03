@@ -136,8 +136,8 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
     ///
     /// This method enables the primary screen sharing track and creates
     /// transceivers based on the specified publish options.
-    func publish() {
-        processingQueue.addTaskOperation { @MainActor [weak self] in
+    func publish() async throws {
+        try await processingQueue.addSynchronousTaskOperation { @MainActor [weak self] in
             guard
                 let self,
                 !primaryTrack.isEnabled,
@@ -184,34 +184,30 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
     ///
     /// This method disables the primary screen sharing track and all associated
     /// transceivers, and stops the screen sharing capturing session.
-    func unpublish() {
-        processingQueue.addTaskOperation { @MainActor [weak self] in
-            do {
-                guard
-                    let self,
-                    primaryTrack.isEnabled,
-                    screenShareSessionProvider.activeSession != nil
-                else {
-                    return
-                }
-
-                primaryTrack.isEnabled = false
-
-                transceiverStorage.forEach { $0.value.track.isEnabled = false }
-
-                try await stopScreenShareCapturingSession()
-
-                log.debug(
-                    """
-                    Local screenShareTracks are now unpublished:
-                        primary: \(primaryTrack.trackId) isEnabled:\(primaryTrack.isEnabled)
-                        clones: \(transceiverStorage.map(\.value.track.trackId).joined(separator: ","))
-                    """,
-                    subsystems: .webRTC
-                )
-            } catch {
-                log.error(error, subsystems: .webRTC)
+    func unpublish() async throws {
+        try await processingQueue.addSynchronousTaskOperation { @MainActor [weak self] in
+            guard
+                let self,
+                primaryTrack.isEnabled,
+                screenShareSessionProvider.activeSession != nil
+            else {
+                return
             }
+
+            primaryTrack.isEnabled = false
+
+            transceiverStorage.forEach { $0.value.track.isEnabled = false }
+
+            try await stopScreenShareCapturingSession()
+
+            log.debug(
+                """
+                Local screenShareTracks are now unpublished:
+                    primary: \(primaryTrack.trackId) isEnabled:\(primaryTrack.isEnabled)
+                    clones: \(transceiverStorage.map(\.value.track.trackId).joined(separator: ","))
+                """,
+                subsystems: .webRTC
+            )
         }
     }
 
@@ -363,7 +359,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
             for: sessionID
         )
 
-        publish()
+        try await publish()
     }
 
     /// Stops the current screen sharing session.
@@ -374,7 +370,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
             for: sessionID
         )
 
-        unpublish()
+        try await unpublish()
     }
 
     // MARK: - Private Helpers
