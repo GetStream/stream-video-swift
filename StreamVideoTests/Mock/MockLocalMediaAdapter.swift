@@ -30,6 +30,7 @@ final class MockLocalMediaAdapter: LocalMediaAdapting, Mockable, @unchecked Send
         case trackInfo
         case didUpdatePublishOptions
         case changePublishQuality
+        case didUpdateOwnCapabilities
     }
 
     enum MockFunctionInputKey: Payloadable {
@@ -39,6 +40,7 @@ final class MockLocalMediaAdapter: LocalMediaAdapting, Mockable, @unchecked Send
         case unpublish
         case trackInfo(collectionType: RTCPeerConnectionTrackInfoCollectionType)
         case didUpdatePublishOptions(publishOptions: PublishOptions)
+        case didUpdateOwnCapabilities(ownCapabilities: Set<OwnCapability>)
 
         var payload: Any {
             switch self {
@@ -46,6 +48,8 @@ final class MockLocalMediaAdapter: LocalMediaAdapting, Mockable, @unchecked Send
                 return (settings, ownCapabilities)
             case let .didUpdateCallSettings(settings):
                 return settings
+            case let .didUpdateOwnCapabilities(ownCapabilities):
+                return ownCapabilities
             case .publish:
                 return ()
             case .unpublish:
@@ -81,6 +85,11 @@ final class MockLocalMediaAdapter: LocalMediaAdapting, Mockable, @unchecked Send
     func didUpdateCallSettings(_ settings: CallSettings) async throws {
         stubbedFunctionInput[.didUpdateCallSettings]?
             .append(.didUpdateCallSettings(settings: settings))
+    }
+
+    func didUpdateOwnCapabilities(_ ownCapabilities: Set<OwnCapability>) async throws {
+        stubbedFunctionInput[.didUpdateOwnCapabilities]?
+            .append(.didUpdateOwnCapabilities(ownCapabilities: ownCapabilities))
     }
 
     func trackInfo(for collectionType: RTCPeerConnectionTrackInfoCollectionType) -> [Stream_Video_Sfu_Models_TrackInfo] {

@@ -62,6 +62,10 @@ final class LocalNoOpMediaAdapter: LocalMediaAdapting {
         /* No-op */
     }
 
+    func didUpdateOwnCapabilities(
+        _ ownCapabilities: Set<OwnCapability>
+    ) async throws { /* No-op */ }
+
     /// A no-op implementation of the method to handle updated publish options.
     ///
     /// - Parameter settings: Ignored in this implementation.

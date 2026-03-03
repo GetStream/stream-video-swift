@@ -382,6 +382,34 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         try await mediaAdapter.didUpdateCallSettings(settings)
     }
 
+    /// Propagates local capability updates to all media adapters.
+    ///
+    /// - Parameter ownCapabilities: The latest capabilities of the local
+    ///   participant.
+    func didUpdateOwnCapabilities(
+        _ ownCapabilities: Set<OwnCapability>
+    ) {
+        Task(disposableBag: disposableBag) { [weak self] in
+            guard let self else { return }
+            log.debug(
+                """
+                PeerConnection will setUp:
+                Identifier: \(identifier)
+                Session ID: \(sessionId)
+                Connection type: \(peerType)
+                SFU: \(sfuAdapter.hostname)
+                
+                ownCapabilities:
+                    hasAudio: \(ownCapabilities.contains(.sendAudio))
+                    hasVideo: \(ownCapabilities.contains(.sendVideo))
+                    hasScreenShare: \(ownCapabilities.contains(.screenshare))
+                """,
+                subsystems: subsystem
+            )
+            try await mediaAdapter.didUpdateOwnCapabilities(ownCapabilities)
+        }
+    }
+
     /// Updates the publish options for the peer connection.
     ///
     /// This method applies the new publish options to all media adapters including
