@@ -217,12 +217,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     func set(connectOptions value: ConnectOptions) { self.connectOptions = value }
 
     /// Sets the own capabilities of the current user.
-    /// - Note: Capability changes may force local call settings to be downgraded (for
-    ///   missing `sendAudio`/`sendVideo`) and can stop an active screenshare session.
-    func set(ownCapabilities value: Set<OwnCapability>) async {
-        self.ownCapabilities = value
-        await didUpdate(ownCapabilities: value)
-    }
+    private func set(ownCapabilities value: Set<OwnCapability>) { self.ownCapabilities = value }
 
     /// Sets the WebRTC stats reporter.
     func set(statsAdapter value: WebRTCStatsAdapting?) {
@@ -410,7 +405,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         set(sfuAdapter: nil)
         set(token: "")
         set(sessionID: "")
-        await set(ownCapabilities: [])
+        set(ownCapabilities: [])
         set(participantsCount: 0)
         set(anonymousCount: 0)
         set(participantPins: [])
@@ -603,6 +598,48 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         }
     }
 
+    /// Enqueues an own capabilities update that is applied on the actor’s
+    /// serial queue.
+    ///
+    /// The provided closure returns the new capability set. The updated set is
+    /// propagated to media adapters, updates call settings when needed, and
+    /// stops active screen sharing when the screenshare capability is removed.
+    func enqueueOwnCapabilities(
+        functionName: StaticString = #function,
+        fileName: StaticString = #fileID,
+        lineNumber: UInt = #line,
+        _ operation: @Sendable @escaping () -> Set<OwnCapability>
+    ) async {
+        let newValue = operation()
+        set(ownCapabilities: newValue)
+
+        publisher?.didUpdateOwnCapabilities(newValue)
+
+        enqueueCallSettings { [newValue] callSettings in
+            var updatedCallSettings = callSettings
+
+            if !newValue.contains(.sendAudio), callSettings.audioOn {
+                updatedCallSettings = updatedCallSettings
+                    .withUpdatedAudioState(false)
+            }
+
+            if !newValue.contains(.sendVideo), callSettings.videoOn {
+                updatedCallSettings = updatedCallSettings
+                    .withUpdatedVideoState(false)
+            }
+
+            return updatedCallSettings
+        }
+
+        if !newValue.contains(.screenshare), screenShareSessionProvider.activeSession != nil {
+            do {
+                try await publisher?.stopScreenSharing()
+            } catch {
+                log.error(error, subsystems: .webRTC)
+            }
+        }
+    }
+
     func trace(_ trace: WebRTCTrace) {
         if let statsAdapter {
             statsAdapter.trace(trace)
@@ -711,39 +748,6 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     /// Updates the publish options and notifies the publisher.
     private func didUpdate(publishOptions: PublishOptions) {
         publisher?.publishOptions = publishOptions
-    }
-
-    /// Propagates capability updates to media publishers and enforces local setting
-    /// limits derived from removed capabilities:
-    /// - Missing `.sendAudio` disables `callSettings.audioOn`.
-    /// - Missing `.sendVideo` disables `callSettings.videoOn`.
-    /// - Missing `.screenshare` stops any active screen sharing session.
-    private func didUpdate(ownCapabilities: Set<OwnCapability>) async {
-        publisher?.didUpdateOwnCapabilities(ownCapabilities)
-
-        enqueueCallSettings { [ownCapabilities] callSettings in
-            var updatedCallSettings = callSettings
-
-            if !ownCapabilities.contains(.sendAudio), callSettings.audioOn {
-                updatedCallSettings = updatedCallSettings
-                    .withUpdatedAudioState(false)
-            }
-
-            if !ownCapabilities.contains(.sendVideo), callSettings.videoOn {
-                updatedCallSettings = updatedCallSettings
-                    .withUpdatedVideoState(false)
-            }
-
-            return updatedCallSettings
-        }
-
-        if !ownCapabilities.contains(.screenshare), screenShareSessionProvider.activeSession != nil {
-            do {
-                try await publisher?.stopScreenSharing()
-            } catch {
-                log.error(error, subsystems: .webRTC)
-            }
-        }
     }
 
     // MARK: Participant Operations

@@ -245,7 +245,9 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
     func test_startScreensharing_typeIsInApp_includeAudioTrue_shouldBeginScreenSharing() async throws {
         try await prepareAsConnected()
         let ownCapabilities = [OwnCapability.createReaction]
-        await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.set(ownCapabilities: Set(ownCapabilities))
+        await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.enqueueOwnCapabilities {
+            Set(ownCapabilities)
+        }
         let mockPublisher = try await XCTAsyncUnwrap(
             await mockWebRTCCoordinatorFactory
                 .mockCoordinatorStack
@@ -270,7 +272,9 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
     func test_startScreensharing_typeIsInApp_includeAudioFalse_shouldBeginScreenSharing() async throws {
         try await prepareAsConnected()
         let ownCapabilities = [OwnCapability.createReaction]
-        await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.set(ownCapabilities: Set(ownCapabilities))
+        await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.enqueueOwnCapabilities {
+            Set(ownCapabilities)
+        }
         let mockPublisher = try await XCTAsyncUnwrap(
             await mockWebRTCCoordinatorFactory
                 .mockCoordinatorStack
@@ -295,7 +299,9 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
     func test_startScreensharing_typeIsBroadcast_includeAudioTrue_shouldBeginScreenSharing() async throws {
         try await prepareAsConnected()
         let ownCapabilities = [OwnCapability.createReaction]
-        await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.set(ownCapabilities: Set(ownCapabilities))
+        await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.enqueueOwnCapabilities {
+            Set(ownCapabilities)
+        }
         let mockPublisher = try await XCTAsyncUnwrap(
             await mockWebRTCCoordinatorFactory
                 .mockCoordinatorStack
@@ -320,7 +326,9 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
     func test_startScreensharing_typeIsBroadcast_includeAudioFalse_shouldBeginScreenSharing() async throws {
         try await prepareAsConnected()
         let ownCapabilities = [OwnCapability.createReaction]
-        await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.set(ownCapabilities: Set(ownCapabilities))
+        await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.enqueueOwnCapabilities {
+            Set(ownCapabilities)
+        }
         let mockPublisher = try await XCTAsyncUnwrap(
             await mockWebRTCCoordinatorFactory
                 .mockCoordinatorStack
@@ -870,7 +878,9 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         if let videoFilter {
             await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.set(videoFilter: videoFilter)
         }
-        await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.set(ownCapabilities: ownCapabilities)
+        await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.enqueueOwnCapabilities {
+            ownCapabilities
+        }
         await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.enqueueCallSettings { _ in callSettings }
         await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.set(sessionID: .unique)
         await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.set(token: .unique)

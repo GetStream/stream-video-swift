@@ -199,17 +199,17 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         )
     }
 
-    // MARK: - setOwnCapabilities
+    // MARK: - enqueueOwnCapabilities
 
-    func test_setOwnCapabilities_shouldUpdateOwnCapabilities() async throws {
+    func test_enqueueOwnCapabilities_shouldUpdateOwnCapabilities() async throws {
         let expected = Set<OwnCapability>([OwnCapability.blockUsers, .removeCallMember])
 
-        await subject.set(ownCapabilities: expected)
+        await subject.enqueueOwnCapabilities { expected }
 
         await assertEqualAsync(await subject.ownCapabilities, expected)
     }
 
-    func test_setOwnCapabilities_withoutSendAudioCapability_turnsAudioOff() async throws {
+    func test_enqueueOwnCapabilities_withoutSendAudioCapability_turnsAudioOff() async throws {
         await subject.enqueueCallSettings { _ in CallSettings(audioOn: true, videoOn: true) }
 
         await fulfillment {
@@ -217,7 +217,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
             return currentSettings.audioOn && currentSettings.videoOn
         }
 
-        await subject.set(ownCapabilities: [.sendVideo])
+        await subject.enqueueOwnCapabilities { [.sendVideo] }
 
         await fulfillment {
             let currentSettings = await self.subject.callSettings
@@ -225,7 +225,8 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         }
     }
 
-    func test_setOwnCapabilities_withoutSendVideoCapability_turnsVideoOff() async throws {
+    func test_enqueueOwnCapabilities_revokesSendAudioCapability_turnsAudioOff() async throws {
+        await subject.enqueueOwnCapabilities { [.sendAudio, .sendVideo] }
         await subject.enqueueCallSettings { _ in CallSettings(audioOn: true, videoOn: true) }
 
         await fulfillment {
@@ -233,7 +234,23 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
             return currentSettings.audioOn && currentSettings.videoOn
         }
 
-        await subject.set(ownCapabilities: [.sendAudio])
+        await subject.enqueueOwnCapabilities { [.sendVideo] }
+
+        await fulfillment {
+            let currentSettings = await self.subject.callSettings
+            return currentSettings.audioOn == false && currentSettings.videoOn
+        }
+    }
+
+    func test_enqueueOwnCapabilities_withoutSendVideoCapability_turnsVideoOff() async throws {
+        await subject.enqueueCallSettings { _ in CallSettings(audioOn: true, videoOn: true) }
+
+        await fulfillment {
+            let currentSettings = await self.subject.callSettings
+            return currentSettings.audioOn && currentSettings.videoOn
+        }
+
+        await subject.enqueueOwnCapabilities { [.sendAudio] }
 
         await fulfillment {
             let currentSettings = await self.subject.callSettings
@@ -241,11 +258,44 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         }
     }
 
-    func test_setOwnCapabilities_withoutScreenshareCapability_stopsScreenSharing() async throws {
+    func test_enqueueOwnCapabilities_revokesSendVideoCapability_turnsVideoOff() async throws {
+        await subject.enqueueOwnCapabilities { [.sendAudio, .sendVideo] }
+        await subject.enqueueCallSettings { _ in CallSettings(audioOn: true, videoOn: true) }
+
+        await fulfillment {
+            let currentSettings = await self.subject.callSettings
+            return currentSettings.audioOn && currentSettings.videoOn
+        }
+
+        await subject.enqueueOwnCapabilities { [.sendAudio] }
+
+        await fulfillment {
+            let currentSettings = await self.subject.callSettings
+            return currentSettings.audioOn && currentSettings.videoOn == false
+        }
+    }
+
+    func test_enqueueOwnCapabilities_revokeBothAudioAndVideoCapabilities_turnsAudioVideoOff() async throws {
+        await subject.enqueueCallSettings { _ in CallSettings(audioOn: true, videoOn: true) }
+
+        await fulfillment {
+            let currentSettings = await self.subject.callSettings
+            return currentSettings.audioOn && currentSettings.videoOn
+        }
+
+        await subject.enqueueOwnCapabilities { [] }
+
+        await fulfillment {
+            let currentSettings = await self.subject.callSettings
+            return currentSettings.audioOn == false && currentSettings.videoOn == false
+        }
+    }
+
+    func test_enqueueOwnCapabilities_withoutScreenshareCapability_stopsScreenSharing() async throws {
         let sfuStack = MockSFUStack()
         sfuStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
         await subject.set(sfuAdapter: sfuStack.adapter)
-        await subject.set(ownCapabilities: [.sendAudio, .sendVideo, .screenshare])
+        await subject.enqueueOwnCapabilities { [.sendAudio, .sendVideo, .screenshare] }
         try await subject.configurePeerConnections()
         let mockPublisher = try await XCTAsyncUnwrap(await subject.publisher as? MockRTCPeerConnectionCoordinator)
 
@@ -257,7 +307,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
             includeAudio: true
         )
 
-        await subject.set(ownCapabilities: [.sendAudio, .sendVideo])
+        await subject.enqueueOwnCapabilities { [.sendAudio, .sendVideo] }
 
         await fulfillment {
             mockPublisher.timesCalled(.stopScreenSharing) == 1
@@ -426,7 +476,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         )
         await subject.set(videoFilter: videoFilter)
         let ownCapabilities = Set([OwnCapability.blockUsers, .changeMaxDuration])
-        await subject.set(ownCapabilities: ownCapabilities)
+        await subject.enqueueOwnCapabilities { ownCapabilities }
         let callSettings = CallSettings(cameraPosition: .back)
         await subject.enqueueCallSettings { _ in callSettings }
         await fulfillment {
@@ -492,7 +542,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         )
         await subject.set(videoFilter: videoFilter)
         let ownCapabilities = Set([OwnCapability.blockUsers, .changeMaxDuration])
-        await subject.set(ownCapabilities: ownCapabilities)
+        await subject.enqueueOwnCapabilities { ownCapabilities }
         let callSettings = CallSettings(cameraPosition: .back)
         await subject.enqueueCallSettings { _ in callSettings }
 
@@ -526,7 +576,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
             includeAudio: true
         )
         let ownCapabilities = Set<OwnCapability>([OwnCapability.blockUsers])
-        await subject.set(ownCapabilities: ownCapabilities)
+        await subject.enqueueOwnCapabilities { ownCapabilities }
 
         try await subject.configurePeerConnections()
         let mockPublisher = try await XCTAsyncUnwrap(await subject.publisher as? MockRTCPeerConnectionCoordinator)
@@ -558,7 +608,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         sfuStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
         await subject.set(sfuAdapter: sfuStack.adapter)
         let ownCapabilities = Set<OwnCapability>([OwnCapability.blockUsers])
-        await subject.set(ownCapabilities: ownCapabilities)
+        await subject.enqueueOwnCapabilities { ownCapabilities }
 
         try await subject.configurePeerConnections()
         let mockPublisher = try await XCTAsyncUnwrap(await subject.publisher as? MockRTCPeerConnectionCoordinator)
@@ -579,7 +629,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         )
         await subject.set(statsAdapter: statsAdapter)
         let ownCapabilities = Set<OwnCapability>([OwnCapability.blockUsers])
-        await subject.set(ownCapabilities: ownCapabilities)
+        await subject.enqueueOwnCapabilities { ownCapabilities }
 
         try await subject.configureAudioSession(source: .inApp)
 
@@ -1126,7 +1176,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         await fulfillment { await self.subject.sessionID.isEmpty == false }
         await subject.set(sfuAdapter: sfuStack.adapter)
         await subject.set(videoFilter: videoFilter)
-        await subject.set(ownCapabilities: ownCapabilities)
+        await subject.enqueueOwnCapabilities { ownCapabilities }
         await subject.enqueueCallSettings { _ in callSettings }
         await subject.set(token: .unique)
         await subject.set(participantsCount: 12)
