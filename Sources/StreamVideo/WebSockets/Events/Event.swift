@@ -38,7 +38,7 @@ extension Event {
 }
 
 /// An internal object that we use to wrap the kind of events that are handled by WS: SFU and coordinator events
-internal enum WrappedEvent: Event, Sendable {
+internal enum WrappedEvent: Event, Sendable, CustomStringConvertible {
     case internalEvent(Event)
     case coordinatorEvent(VideoEvent)
     case sfuEvent(Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload)
@@ -88,11 +88,22 @@ internal enum WrappedEvent: Event, Sendable {
     var name: String {
         switch self {
         case let .coordinatorEvent(event):
-            return "Coordinator:\(event.type)"
+            return "coordinator: \(event.type)"
         case let .sfuEvent(event):
-            return "SFU:\(event.name)"
+            return "sfu: \(event.name)"
         case let .internalEvent(event):
-            return "Internal:\(event.name)"
+            return "internal: \(event.name)"
+        }
+    }
+
+    var description: String {
+        switch self {
+        case let .coordinatorEvent(event):
+            return "coordinator: \(event)"
+        case let .sfuEvent(event):
+            return "sfu: \(event)"
+        case let .internalEvent(event):
+            return "internal: \(event)"
         }
     }
 }
