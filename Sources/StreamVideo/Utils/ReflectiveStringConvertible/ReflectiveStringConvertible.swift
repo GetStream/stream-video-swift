@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import protocol SwiftProtobuf.Message
 
 /// An enumeration representing rules for skipping properties during reflective
 /// string conversion.
@@ -169,6 +170,25 @@ public extension ReflectiveStringConvertible {
     ///
     /// - Returns: A string representation of the object.
     var description: String {
+        if let message = self as? Message {
+            #if STREAM_TESTS
+            // During tests we allow full logging.
+            #else
+            guard LogConfig.level == .debug else {
+                return "\(type(of: self))"
+            }
+            #endif
+
+            let textFormat = message.textFormatString()
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+
+            guard !textFormat.isEmpty else {
+                return "\(type(of: self))"
+            }
+
+            return "\(type(of: self)) { \(textFormat) }"
+        }
+
         #if STREAM_TESTS
         // During tests we allow full error logging.
         #else
@@ -176,6 +196,10 @@ public extension ReflectiveStringConvertible {
             return "\(type(of: self))"
         }
         #endif
+        return reflectiveDescription
+    }
+
+    private var reflectiveDescription: String {
         let mirror = Mirror(reflecting: self)
         var result = "\(type(of: self))"
         var components: [String] = []

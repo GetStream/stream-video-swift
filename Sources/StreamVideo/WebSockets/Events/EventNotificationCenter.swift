@@ -23,11 +23,10 @@ class EventNotificationCenter: NotificationCenter, @unchecked Sendable {
         postNotifications: Bool = true,
         completion: (@Sendable () -> Void)? = nil
     ) {
-        let processingEventsDebugMessage: () -> String = {
-            let eventNames = events.map(\.name)
-            return "Processing webSocket events: \(eventNames)"
-        }
-        log.debug(processingEventsDebugMessage(), subsystems: .webSocket)
+        log.debug(
+            "Processing webSocket events: \(events)",
+            subsystems: .webSocket
+        )
 
         let eventsToPost = events.compactMap {
             self.middlewares.process(event: $0)
