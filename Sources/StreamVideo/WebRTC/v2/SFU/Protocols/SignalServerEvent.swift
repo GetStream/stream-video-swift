@@ -3,14 +3,8 @@
 //
 
 import Foundation
-import protocol SwiftProtobuf.Message
 
 protocol SignalServerEvent: ReflectiveStringConvertible {}
-extension SignalServerEvent where Self: SwiftProtobuf.Message {
-    func textFormatString() -> String {
-        description
-    }
-}
 
 // MARK: - Shared SFU Models
 
