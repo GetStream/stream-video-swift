@@ -2,9 +2,14 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import Foundation
+import protocol SwiftProtobuf.Message
+
 protocol SignalServerEvent: ReflectiveStringConvertible {}
-extension SignalServerEvent {
-    var debugDescription: String { description }
+extension SignalServerEvent where Self: SwiftProtobuf.Message {
+    func textFormatString() -> String {
+        description
+    }
 }
 
 // MARK: - Shared SFU Models
