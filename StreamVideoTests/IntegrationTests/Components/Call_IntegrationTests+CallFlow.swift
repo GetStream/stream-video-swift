@@ -63,7 +63,6 @@ extension Call_IntegrationTests {
         ) async throws -> CallFlow<Error> {
             do {
                 _ = try await operation(self)
-                throw ClientError("Flow is expected to fail", file, line)
             } catch {
                 return .init(
                     client: client,
@@ -71,6 +70,7 @@ extension Call_IntegrationTests {
                     value: error
                 )
             }
+            throw ClientError("Flow is expected to fail", file, line)
         }
 
         @discardableResult

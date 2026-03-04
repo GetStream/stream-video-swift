@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+@testable import StreamVideo
 import XCTest
 
 extension Call_IntegrationTests {
@@ -43,7 +44,7 @@ extension Call_IntegrationTests {
             }
         }
 
-        static func assertFromAsyncStream<Element>(
+        static func assertFromAsyncStream<Element: Sendable>(
             timeout: TimeInterval = defaultTimeout,
             interval: TimeInterval = 0.1,
             file: StaticString = #filePath,
@@ -52,20 +53,28 @@ extension Call_IntegrationTests {
             stream: AsyncStream<Element>,
             operation: @Sendable @escaping (Element) async throws -> Bool
         ) async throws {
-            let deadline = Date().timeIntervalSince1970 + timeout
-            let iterator = stream.makeAsyncIterator()
-
-            var current = iterator
-            while Date().timeIntervalSince1970 < deadline {
-                if let element = await current.next() {
+            let timeout = max(0, timeout)
+            let interval = max(0, interval)
+            let result = try await Task(
+                timeoutInSeconds: timeout,
+                file: file,
+                line: line
+            ) {
+                for await element in stream {
                     if try await operation(element) {
-                        return
+                        return true
                     }
-                } else {
-                    // Stream ended before match -> fail fast
-                    break
+                    if interval > 0 {
+                        try await Task.sleep(
+                            nanoseconds: UInt64(interval * 1_000_000_000)
+                        )
+                    }
                 }
-                try await Task.sleep(nanoseconds: UInt64(interval * 1_000_000_000))
+                return false
+            }.value
+
+            guard !result else {
+                return
             }
 
             XCTAssertTrue(
@@ -88,6 +97,8 @@ extension Call_IntegrationTests {
             try await Self.assertFromAsyncStream(
                 timeout: timeout,
                 interval: interval,
+                file: file,
+                line: line,
                 message: message(),
                 stream: publisher.eraseAsAsyncStream(),
                 operation: operation

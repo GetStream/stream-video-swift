@@ -39,6 +39,8 @@ extension Call_IntegrationTests.Helpers {
 
                 await group.waitForAll()
             }
+
+            registeredClients = [:]
         }
 
         func buildClient(

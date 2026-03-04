@@ -12,6 +12,8 @@ extension Call_IntegrationTests {
 
         enum LoggingMode { case none, sdk, webrtc, all }
 
+        var duringDismantleObservedAllCallEnded = true
+
         var authentication: AuthenticationHelper
         var configuration: ConfigurationHelper
         var client: StreamVideoHelper
@@ -36,37 +38,43 @@ extension Call_IntegrationTests {
 
             switch loggingMode {
             case .none:
-                LogConfig.webRTCLogsEnabled = true
-                LogConfig.level = .debug
+                LogConfig.webRTCLogsEnabled = false
+                LogConfig.level = .error
             case .sdk:
                 LogConfig.webRTCLogsEnabled = false
                 LogConfig.level = .debug
             case .webrtc:
                 LogConfig.webRTCLogsEnabled = true
+                LogConfig.level = .error
             case .all:
                 LogConfig.webRTCLogsEnabled = true
                 LogConfig.level = .debug
             }
         }
 
-        func dismantle() async {
-            for call in registeredCalls.values {
-                _ = try? await NotificationCenter
-                    .default
-                    .publisher(for: .init(CallNotification.callEnded))
-                    .compactMap { ($0.object as? Call)?.cId }
-                    .filter { $0 == call.cId }
-                    .nextValue(timeout: 2)
+        mutating func dismantle() async throws {
+            if duringDismantleObservedAllCallEnded {
+                for call in registeredCalls.values {
+                    call.leave()
+                    _ = try await NotificationCenter
+                        .default
+                        .publisher(for: .init(CallNotification.callEnded))
+                        .compactMap { ($0.object as? Call)?.cId }
+                        .filter { $0 == call.cId }
+                        .nextValue(timeout: 2)
+                }
             }
+            registeredCalls = [:]
 
-            _ = try? await audioStore
+            audioStore
+                .dispatch(.setAudioDeviceModule(nil))
+
+            _ = try await audioStore
                 .publisher(\.audioDeviceModule)
                 .filter { $0 == nil }
                 .nextValue(timeout: 2)
 
             await client.dismantle()
-            LogConfig.webRTCLogsEnabled = false
-            LogConfig.level = .error
         }
 
         // MARK: - CallFlow

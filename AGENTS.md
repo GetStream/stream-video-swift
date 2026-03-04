@@ -128,7 +128,7 @@ Agents should optimize for media quality, API stability, backwards compatibility
       fixture-backed.
   - Execution:
     - Target only this suite:
-      `xcodebuild -project StreamVideo.xcodeproj -scheme StreamVide -testPlan StreamVideo test -only-testing:StreamVideoTests/Call_IntegrationTests`
+      `xcodebuild -project StreamVideo.xcodeproj -scheme StreamVideo -testPlan StreamVideo test -only-testing:StreamVideoTests/Call_IntegrationTests`
     - Full suite remains `bundle exec fastlane test`.
 
 ## Comments
