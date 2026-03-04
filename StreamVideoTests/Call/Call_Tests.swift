@@ -2,17 +2,20 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 @testable import StreamVideo
 @preconcurrency import XCTest
 
 @MainActor
-final class Call_Tests: StreamVideoTestCase {
+final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
 
     let callType = "default"
     let callId = "123"
     let callCid = "default:123"
     let userId = "test"
     let mockResponseBuilder = MockResponseBuilder()
+
+    // MARK: - UpdateState
 
     func test_updateState_fromCallAcceptedEvent() {
         // Given
@@ -164,6 +167,88 @@ final class Call_Tests: StreamVideoTestCase {
         // Then
         XCTAssert(call.currentUserHasCapability(.sendAudio) == true)
         XCTAssert(call.currentUserHasCapability(.sendVideo) == false)
+    }
+
+    func test_updateState_fromPermissionsEvent_fromDifferentUser_doesNotUpdateOwnCapabilities() {
+        let streamVideo = StreamVideo.mock(httpClient: HTTPClient_Mock())
+        self.streamVideo = streamVideo
+        let call = streamVideo.call(callType: callType, callId: callId)
+        call.state.ownCapabilities = [.sendVideo]
+        let userResponse = mockResponseBuilder.makeUserResponse(id: "other-user")
+        let event = UpdatedCallPermissionsEvent(
+            callCid: callCid,
+            createdAt: Date(),
+            ownCapabilities: [.sendAudio],
+            user: userResponse
+        )
+
+        // When
+        call.state.updateState(from: .typeUpdatedCallPermissionsEvent(event))
+
+        // Then
+        XCTAssert(call.state.ownCapabilities == [.sendVideo])
+    }
+
+    func test_updateState_fromPermissionsEvent_usesInitialStreamVideoSessionUser() {
+        let streamVideo = StreamVideo.mock(httpClient: HTTPClient_Mock())
+        self.streamVideo = streamVideo
+        let call = streamVideo.call(callType: callType, callId: callId)
+        let initialUserId = streamVideo.state.user.id
+        let updatedUserId = "updated-user-id"
+        streamVideo.state.user = User(id: updatedUserId)
+
+        call.state.ownCapabilities = [.sendVideo]
+        let userResponse = mockResponseBuilder.makeUserResponse(id: initialUserId)
+        let event = UpdatedCallPermissionsEvent(
+            callCid: callCid,
+            createdAt: Date(),
+            ownCapabilities: [.sendAudio],
+            user: userResponse
+        )
+
+        // When
+        call.state.updateState(from: .typeUpdatedCallPermissionsEvent(event))
+
+        // Then
+        XCTAssertEqual(call.state.ownCapabilities, [.sendAudio])
+    }
+
+    func test_updateState_fromCallResponse_usesTokenForRtmpStreamKey() {
+        let streamVideo = StreamVideo.mock(
+            httpClient: HTTPClient_Mock(),
+            callController: CallController.dummy()
+        )
+        self.streamVideo = streamVideo
+        let call = streamVideo.call(callType: callType, callId: callId)
+
+        call.state.update(from: mockResponseBuilder.makeCallResponse(cid: callCid))
+
+        XCTAssertEqual(call.state.ingress?.rtmp.streamKey, streamVideo.token.rawValue)
+    }
+
+    func test_updateState_fromCallResponse_usesUpdatedSessionTokenForRtmpStreamKey() {
+        let tokenSubject = CurrentValueSubject<UserToken, Never>(
+            UserToken(rawValue: "initial-stream-session-token")
+        )
+        let streamSession = StreamVideo.CallSession(
+            user: .dummy(),
+            token: UserToken(rawValue: "initial-stream-session-token"),
+            tokenPublisher: tokenSubject.eraseToAnyPublisher()
+        )
+        let state = CallState(streamSession)
+
+        state.update(from: mockResponseBuilder.makeCallResponse(cid: callCid))
+        XCTAssertEqual(
+            state.ingress?.rtmp.streamKey,
+            "initial-stream-session-token"
+        )
+
+        tokenSubject.send(UserToken(rawValue: "refreshed-stream-session-token"))
+        state.update(from: mockResponseBuilder.makeCallResponse(cid: callCid))
+        XCTAssertEqual(
+            state.ingress?.rtmp.streamKey,
+            "refreshed-stream-session-token"
+        )
     }
 
     func test_updateState_fromMemberAddedEvent() {
@@ -342,7 +427,7 @@ final class Call_Tests: StreamVideoTestCase {
     func test_setDisconnectionTimeout_setDisconnectionTimeoutOnCallController() async throws {
         let mockCallController = MockCallController()
         let call = MockCall(.dummy(callController: mockCallController))
-        call.stub(for: \.state, with: .init())
+        call.stub(for: \.state, with: .init(.dummy()))
 
         call.setDisconnectionTimeout(11)
 
@@ -475,7 +560,7 @@ final class Call_Tests: StreamVideoTestCase {
     func test_join_callControllerWasCalledOnlyOnce() async throws {
         let mockCallController = MockCallController()
         let call = MockCall(.dummy(callController: mockCallController))
-        call.stub(for: \.state, with: .init())
+        call.stub(for: \.state, with: .init(.dummy()))
         mockCallController.stub(for: .join, with: JoinCallResponse.dummy())
 
         let executionExpectation = expectation(description: "Iteration expectation")
@@ -500,7 +585,7 @@ final class Call_Tests: StreamVideoTestCase {
     func test_join_stateContainsJoinSource_joinSourceWasPassedToCallController() async throws {
         let mockCallController = MockCallController()
         let call = MockCall(.dummy(callController: mockCallController))
-        call.stub(for: \.state, with: .init())
+        call.stub(for: \.state, with: .init(.dummy()))
         mockCallController.stub(for: .join, with: JoinCallResponse.dummy())
 
         call.state.joinSource = .callKit
@@ -518,7 +603,7 @@ final class Call_Tests: StreamVideoTestCase {
     func test_join_stateDoesNotJoinSource_joinSourceDefaultsToInAppAndWasPassedToCallController() async throws {
         let mockCallController = MockCallController()
         let call = MockCall(.dummy(callController: mockCallController))
-        call.stub(for: \.state, with: .init())
+        call.stub(for: \.state, with: .init(.dummy()))
         mockCallController.stub(for: .join, with: JoinCallResponse.dummy())
 
         call.state.joinSource = nil
@@ -601,7 +686,7 @@ final class Call_Tests: StreamVideoTestCase {
     func test_enableClientCapabilities_correctlyUpdatesStateAdapter() async throws {
         let mockCallController = MockCallController()
         let call = MockCall(.dummy(callController: mockCallController))
-        call.stub(for: \.state, with: .init())
+        call.stub(for: \.state, with: .init(.dummy()))
 
         await call.enableClientCapabilities([.subscriberVideoPause])
 
@@ -619,7 +704,7 @@ final class Call_Tests: StreamVideoTestCase {
     func test_disableClientCapabilities_correctlyUpdatesStateAdapter() async throws {
         let mockCallController = MockCallController()
         let call = MockCall(.dummy(callController: mockCallController))
-        call.stub(for: \.state, with: .init())
+        call.stub(for: \.state, with: .init(.dummy()))
 
         await call.disableClientCapabilities([.subscriberVideoPause])
 
@@ -660,7 +745,7 @@ final class Call_Tests: StreamVideoTestCase {
     func test_setVideoFilter_moderationVideoAdapterWasUpdated() async {
         let mockCallController = MockCallController()
         let call = MockCall(.dummy(callController: mockCallController))
-        call.stub(for: \.state, with: .init())
+        call.stub(for: \.state, with: .init(.dummy()))
         let mockVideoFilter = VideoFilter(id: .unique, name: .unique, filter: \.originalImage)
 
         call.setVideoFilter(mockVideoFilter)
@@ -672,7 +757,7 @@ final class Call_Tests: StreamVideoTestCase {
 
     private func assertUpdateState(
         with steps: [UpdateStateStep],
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) async throws {
         let call = try XCTUnwrap(

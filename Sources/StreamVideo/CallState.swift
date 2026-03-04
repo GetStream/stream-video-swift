@@ -5,34 +5,13 @@
 import Combine
 import Foundation
 
-public struct PermissionRequest: @unchecked Sendable, Identifiable {
-    public let id: UUID = .init()
-    public let permission: String
-    public let user: User
-    public let requestedAt: Date
-    let onReject: (PermissionRequest) -> Void
-    
-    public init(
-        permission: String,
-        user: User,
-        requestedAt: Date,
-        onReject: @escaping (PermissionRequest) -> Void = { _ in }
-    ) {
-        self.permission = permission
-        self.user = user
-        self.requestedAt = requestedAt
-        self.onReject = onReject
-    }
-    
-    public func reject() {
-        onReject(self)
-    }
-}
-
 @MainActor
 public class CallState: ObservableObject {
 
-    @Injected(\.streamVideo) var streamVideo
+    /// Captured `StreamVideo` session details used for call-state operations.
+    /// The call user is captured for stability, while token changes are kept in
+    /// sync via the session token publisher.
+    private let streamVideoSession: StreamVideo.CallSession
 
     /// The id of the current session.
     /// When a call is started, a unique session identifier is assigned to the user in the call.
@@ -170,10 +149,17 @@ public class CallState: ObservableObject {
     private var durationCancellable: AnyCancellable?
     private nonisolated let disposableBag = DisposableBag()
 
-    /// We mark this one as `nonisolated` to allow us to initialise a state instance without isolation.
-    /// That's a safe operation because `MainActor` is only required to ensure that all `@Published`
-    /// properties, will publish changes on the main thread.
-    nonisolated init() {}
+    /// We mark this one as `nonisolated` to allow us to initialise a state
+    /// instance without isolation. That's a safe operation because `MainActor`
+    /// is only required to ensure that all `@Published` properties publish on
+    /// the main thread.
+    /// - Parameter callSession: Cached session context containing user and token values
+    ///   used by permission and stream-key updates.
+    nonisolated init(
+        _ callSession: StreamVideo.CallSession
+    ) {
+        self.streamVideoSession = callSession
+    }
 
     internal func updateState(from event: VideoEvent) {
         switch event {
@@ -447,7 +433,7 @@ public class CallState: ObservableObject {
         
         let rtmp = RTMP(
             address: response.ingress.rtmp.address,
-            streamKey: streamVideo.token.rawValue
+            streamKey: streamVideoSession.token.rawValue
         )
         ingress = Ingress(rtmp: rtmp)
         
@@ -476,7 +462,7 @@ public class CallState: ObservableObject {
 
     private func updateOwnCapabilities(_ event: UpdatedCallPermissionsEvent) {
         guard
-            event.user.id == streamVideo.user.id
+            event.user.id == streamVideoSession.user.id
         else {
             return
         }

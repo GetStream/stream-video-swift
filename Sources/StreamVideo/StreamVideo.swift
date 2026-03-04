@@ -70,7 +70,9 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
 
     private let eventSubject: PassthroughSubject<WrappedEvent, Never> = .init()
 
-    var token: UserToken
+    private let tokenSubject: CurrentValueSubject<UserToken, Never>
+    var tokenPublisher: AnyPublisher<UserToken, Never> { tokenSubject.eraseToAnyPublisher() }
+    var token: UserToken { tokenSubject.value }
 
     private var tokenProvider: UserTokenProvider
     private static let endpointConfig: EndpointConfig = .production
@@ -175,7 +177,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     ) {
         self.apiKey = APIKey(apiKey)
         state = State(user: user)
-        self.token = token
+        self.tokenSubject = .init(token)
         self.tokenProvider = tokenProvider
         self.videoConfig = videoConfig
         self.environment = environment
@@ -198,7 +200,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         callCache.removeAll()
 
         (apiTransport as? URLSessionTransport)?.setTokenUpdater { [weak self] userToken in
-            self?.token = userToken
+            self?.tokenSubject.send(userToken)
         }
 
         // Warm up
@@ -478,7 +480,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
                     let guestInfo = try await loadGuestUserInfo(for: user, apiKey: apiKey)
 
                     self.state.user = guestInfo.user
-                    self.token = guestInfo.token
+                    self.tokenSubject.send(guestInfo.token)
                     self.tokenProvider = guestInfo.tokenProvider
 
                     try Task.checkCancellation()
@@ -774,7 +776,7 @@ extension StreamVideo: ConnectionStateDelegate {
                         }
                         do {
                             guard let apiTransport = apiTransport as? URLSessionTransport else { return }
-                            self.token = try await apiTransport.refreshToken()
+                            self.tokenSubject.send(try await apiTransport.refreshToken())
                             log.debug("user token updated, will reconnect ws")
                             webSocketClient?.connect()
                         } catch {

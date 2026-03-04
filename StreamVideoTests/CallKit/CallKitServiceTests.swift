@@ -540,7 +540,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         let call = stubCall(response: defaultGetCallResponse)
         subject.streamVideo = mockedStreamVideo
         subject.missingPermissionPolicy = .none
-        let callStateWithMicOff = CallState()
+        let callStateWithMicOff = CallState(.dummy())
         callStateWithMicOff.callSettings = .init(audioOn: false)
         call.stub(for: \.state, with: callStateWithMicOff)
         mockPermissions.stubMicrophonePermission(.denied)
@@ -793,7 +793,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
             )
         )
 
-        let callState = CallState()
+        let callState = CallState(.dummy())
         callState.participants = [.dummy(), .dummy()]
         call.stub(for: \.state, with: callState)
         try await assertNotRequestTransaction(CXEndCallAction.self) {
@@ -832,7 +832,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
             )
         )
 
-        let callState = CallState()
+        let callState = CallState(.dummy())
         callState.participants = [.dummy()]
         call.stub(for: \.state, with: callState)
 
@@ -888,7 +888,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         let firstCallUUID = UUID()
         uuidFactory.getResult = firstCallUUID
         let call = stubCall(response: defaultGetCallResponse)
-        let callState = CallState()
+        let callState = CallState(.dummy())
         callState.callSettings = .init(audioOn: true)
         call.stub(for: \.state, with: callState)
         subject.streamVideo = mockedStreamVideo
@@ -1123,7 +1123,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         )
         call.stub(for: .accept, with: AcceptCallResponse(duration: "0"))
         call.stub(for: .reject, with: RejectCallResponse(duration: "0"))
-        call.stub(for: \.state, with: .init())
+        call.stub(for: \.state, with: .init(.dummy()))
         mockedStreamVideo.stub(for: .call, with: call)
         return call
     }

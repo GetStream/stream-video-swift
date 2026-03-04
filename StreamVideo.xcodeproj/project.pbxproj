@@ -283,6 +283,7 @@
 				Mock/Store/MockMiddleware.swift,
 				Mock/Store/MockReducer.swift,
 				Mock/StreamVideo_Mock.swift,
+				Mock/StreamVideoCallSession_Mock.swift,
 				"Mock/VideoConfig+Dummy.swift",
 				Mock/WebSocketClientEnvironment_Mock.swift,
 				Mock/WebSocketEngine_Mock.swift,

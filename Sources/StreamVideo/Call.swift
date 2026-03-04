@@ -16,7 +16,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     private lazy var stateMachine: StateMachine = .init(self)
 
     @MainActor
-    public internal(set) var state = CallState()
+    public internal(set) var state: CallState
 
     /// The call id.
     public let callId: String
@@ -73,6 +73,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         callController: CallController,
         callSettings: CallSettings? = nil
     ) {
+        self.state = .init(InjectedValues[\.streamVideo].callSession)
         self.callId = callId
         self.callType = callType
         self.coordinatorClient = coordinatorClient
@@ -590,33 +591,12 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     }
 
     /// Leave the current call.
+    ///
+    /// The cleanup sequence clears active/ringing call references from
+    /// `StreamVideo` state before emitting `CallNotification.callEnded`.
     public func leave() {
-        Task { @MainActor [weak self] in
-            postNotification(with: CallNotification.callEnded, object: self)
-        }
-
-        disposableBag.removeAll()
-        callController.leave()
-        closedCaptionsAdapter.stop()
-        stateMachine.transition(.idle(.init(call: self)))
-        /// Upon `Call.leave` we remove the call from the cache. Any further actions that are required
-        /// to happen on the call object (e.g. rejoin) will need to fetch a new instance from `StreamVideo`
-        /// client.
-        callCache.remove(for: cId)
-
-        // Reset the activeAudioFilter
-        setAudioFilter(nil)
-
         Task(disposableBag: disposableBag) { @MainActor [weak self] in
-            guard let self else {
-                return
-            }
-            if streamVideo.state.ringingCall?.cId == cId {
-                streamVideo.state.ringingCall = nil
-            }
-            if streamVideo.state.activeCall?.cId == cId {
-                streamVideo.state.activeCall = nil
-            }
+            self?.performLeave()
         }
     }
 
@@ -1561,6 +1541,30 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     }
 
     // MARK: - private
+
+    @MainActor
+    private func performLeave() {
+        disposableBag.removeAll()
+        callController.leave()
+        closedCaptionsAdapter.stop()
+        stateMachine.transition(.idle(.init(call: self)))
+        /// Upon `Call.leave` we remove the call from the cache. Any further actions that are required
+        /// to happen on the call object (e.g. rejoin) will need to fetch a new instance from `StreamVideo`
+        /// client.
+        callCache.remove(for: cId)
+
+        // Reset the activeAudioFilter
+        setAudioFilter(nil)
+
+        if streamVideo.state.ringingCall?.cId == cId {
+            streamVideo.state.ringingCall = nil
+        }
+        if streamVideo.state.activeCall?.cId == cId {
+            streamVideo.state.activeCall = nil
+        }
+
+        postNotification(with: CallNotification.callEnded, object: self)
+    }
 
     private func updatePermissions(
         for userId: String,
