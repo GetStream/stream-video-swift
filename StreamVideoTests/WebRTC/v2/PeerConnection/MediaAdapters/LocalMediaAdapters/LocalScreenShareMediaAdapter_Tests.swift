@@ -65,6 +65,34 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable 
         XCTAssertTrue(subject.primaryTrack.source === track.source)
     }
 
+    // MARK: - didUpdateOwnCapabilities
+
+    func test_didUpdateOwnCapabilities_whenActiveSessionExists_isNoOp() async throws {
+        let capturer = MockStreamVideoCapturer()
+        mockCapturerFactory.stub(for: .buildScreenCapturer, with: capturer)
+
+        try await subject.beginScreenSharing(
+            of: .inApp,
+            ownCapabilities: [.screenshare],
+            includeAudio: true
+        )
+        await fulfillment { capturer.timesCalled(.startCapture) == 1 }
+
+        subject.didUpdateOwnCapabilities([.screenshare])
+
+        XCTAssertNotNil(screenShareSessionProvider.activeSession)
+        XCTAssertTrue(subject.primaryTrack.isEnabled)
+        XCTAssertEqual(
+            screenShareSessionProvider.activeSession?.screenSharingType,
+            .inApp
+        )
+        XCTAssertEqual(
+            screenShareSessionProvider.activeSession?.localTrack.trackId,
+            subject.primaryTrack.trackId
+        )
+        XCTAssertTrue(capturer.timesCalled(.stopCapture) == 0)
+    }
+
     // MARK: - didUpdatePublishOptions
 
     func test_didUpdatePublishOptions_primaryTrackIsNotEnabled_nothingHappens() async throws {

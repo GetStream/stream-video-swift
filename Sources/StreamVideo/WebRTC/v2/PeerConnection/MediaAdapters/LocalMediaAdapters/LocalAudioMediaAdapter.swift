@@ -227,6 +227,18 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         }
     }
 
+    /// Updates cached local participant capabilities used by subsequent setting updates.
+    ///
+    /// The adapter uses this for media operations that depend on whether audio
+    /// publishing is currently permitted for the participant.
+    func didUpdateOwnCapabilities(
+        _ ownCapabilities: Set<OwnCapability>
+    ) {
+        processingQueue.addOperation { [weak self] in
+            self?.ownCapabilities = Array(ownCapabilities)
+        }
+    }
+
     /// Updates the publish options for the local audio track.
     ///
     /// - Parameter publishOptions: The new publish options.

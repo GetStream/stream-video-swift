@@ -80,6 +80,33 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
         XCTAssert(streamVideo.state.activeCall == nil)
     }
 
+    func test_streamVideo_callEndedNotificationIsPostedAfterCleanup() async throws {
+        let call = streamVideo.call(callType: callType, callId: callId)
+        streamVideo.state.activeCall = call
+        streamVideo.state.ringingCall = call
+
+        try await withThrowingTaskGroup(of: Void.self) { group in
+            group.addTask {
+                await self.wait(for: 0.5)
+                call.leave()
+            }
+
+            group.addTask {
+                _ = try await NotificationCenter
+                    .default
+                    .publisher(for: NSNotification.Name(CallNotification.callEnded))
+                    .compactMap { $0.object as? Call }
+                    .filter { $0.cId == call.cId }
+                    .nextValue(timeout: defaultTimeout)
+            }
+
+            try await group.waitForAll()
+        }
+
+        XCTAssertNil(streamVideo.state.activeCall)
+        XCTAssertNil(streamVideo.state.ringingCall)
+    }
+
     func test_streamVideo_ringCallAccept() async throws {
         let httpClient = httpClientWithGetCallResponse()
         let streamVideo = StreamVideo.mock(httpClient: httpClient)

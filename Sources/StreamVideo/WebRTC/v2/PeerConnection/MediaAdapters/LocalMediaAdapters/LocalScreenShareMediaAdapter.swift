@@ -228,6 +228,16 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
         /* No-op */
     }
 
+    /// Updates local capabilities for screen sharing operations.
+    ///
+    /// Screen-sharing capabilities are currently checked when starting
+    /// screen sharing, so no adapter state is cached here.
+    func didUpdateOwnCapabilities(
+        _ ownCapabilities: Set<OwnCapability>
+    ) {
+        /* No-op */
+    }
+
     /// Updates the publishing options for the screen sharing track.
     ///
     /// - Parameter publishOptions: The new publishing options to apply.

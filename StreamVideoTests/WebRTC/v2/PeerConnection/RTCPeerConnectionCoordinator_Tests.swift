@@ -154,6 +154,19 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
         }
     }
 
+    // MARK: - didUpdateOwnCapabilities(_:)
+
+    func test_didUpdateOwnCapabilities_setUpWasCalledOnAllMediaAdapters() async throws {
+        _ = subject
+        subject.didUpdateOwnCapabilities([.sendAudio, .sendVideo, .screenshare])
+
+        await fulfillment { [mockLocalMediaAdapterA, mockLocalMediaAdapterB, mockLocalMediaAdapterC] in
+            mockLocalMediaAdapterA?.timesCalled(.didUpdateOwnCapabilities) == 1
+                && mockLocalMediaAdapterB?.timesCalled(.didUpdateOwnCapabilities) == 1
+                && mockLocalMediaAdapterC?.timesCalled(.didUpdateOwnCapabilities) == 1
+        }
+    }
+
     // MARK: - createOffer(constraints:)
 
     func test_createOffer_peerConnectionWasCalled() async throws {

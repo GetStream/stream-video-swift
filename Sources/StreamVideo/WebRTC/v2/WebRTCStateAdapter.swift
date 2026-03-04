@@ -67,6 +67,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
 
     @Published private(set) var connectOptions: ConnectOptions = .init(iceServers: [])
     @Published private(set) var ownCapabilities: Set<OwnCapability> = []
+
     @Published private(set) var sfuAdapter: SFUAdapter?
     @Published private(set) var publisher: RTCPeerConnectionCoordinator?
     @Published private(set) var subscriber: RTCPeerConnectionCoordinator?
@@ -216,7 +217,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     func set(connectOptions value: ConnectOptions) { self.connectOptions = value }
 
     /// Sets the own capabilities of the current user.
-    func set(ownCapabilities value: Set<OwnCapability>) { self.ownCapabilities = value }
+    private func set(ownCapabilities value: Set<OwnCapability>) { self.ownCapabilities = value }
 
     /// Sets the WebRTC stats reporter.
     func set(statsAdapter value: WebRTCStatsAdapting?) {
@@ -594,6 +595,52 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
                 fileName: fileName,
                 lineNumber: lineNumber
             )
+        }
+    }
+
+    /// Enqueues an own capabilities update that is applied on the actor’s
+    /// serial queue.
+    ///
+    /// The provided closure returns the new capability set. The updated set is
+    /// propagated to media adapters, updates call settings when needed, and
+    /// stops active screen sharing when the screenshare capability is removed.
+    func enqueueOwnCapabilities(
+        functionName: StaticString = #function,
+        fileName: StaticString = #fileID,
+        lineNumber: UInt = #line,
+        _ operation: @Sendable @escaping () -> Set<OwnCapability>
+    ) async {
+        let newValue = operation()
+        set(ownCapabilities: newValue)
+
+        publisher?.didUpdateOwnCapabilities(newValue)
+
+        enqueueCallSettings(
+            functionName: functionName,
+            fileName: fileName,
+            lineNumber: lineNumber
+        ) { [newValue] callSettings in
+            var updatedCallSettings = callSettings
+
+            if !newValue.contains(.sendAudio), callSettings.audioOn {
+                updatedCallSettings = updatedCallSettings
+                    .withUpdatedAudioState(false)
+            }
+
+            if !newValue.contains(.sendVideo), callSettings.videoOn {
+                updatedCallSettings = updatedCallSettings
+                    .withUpdatedVideoState(false)
+            }
+
+            return updatedCallSettings
+        }
+
+        if !newValue.contains(.screenshare), screenShareSessionProvider.activeSession != nil {
+            do {
+                try await publisher?.stopScreenSharing()
+            } catch {
+                log.error(error, subsystems: .webRTC)
+            }
         }
     }
 
