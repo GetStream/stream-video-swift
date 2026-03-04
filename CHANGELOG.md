@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### 🔄 Changed
+- Propagated publish/unpublish failures from local video and screen-share capture
+  sessions instead of swallowing them after logging. [#1072](https://github.com/GetStream/stream-video-swift/pull/1072)
+
 ### 🐞 Fixed
 - Fix call teardown ordering by posting `callEnded` only after active/ringing cleanup
   and keep `CallSession` token values in sync with `StreamVideo` token updates. [#1071](https://github.com/GetStream/stream-video-swift/pull/1071)

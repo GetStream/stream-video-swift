@@ -72,12 +72,12 @@ final class MockLocalMediaAdapter: LocalMediaAdapting, Mockable, @unchecked Send
             .append(.setUp(settings: settings, ownCapabilities: ownCapabilities))
     }
 
-    func publish() {
+    func publish() async throws {
         stubbedFunctionInput[.publish]?
             .append(.publish)
     }
 
-    func unpublish() {
+    func unpublish() async throws {
         stubbedFunctionInput[.unpublish]?
             .append(.unpublish)
     }

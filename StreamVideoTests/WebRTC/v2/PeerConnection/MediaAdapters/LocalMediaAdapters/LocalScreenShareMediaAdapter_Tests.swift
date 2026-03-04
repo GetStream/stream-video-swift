@@ -159,7 +159,7 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable 
             includeAudio: true
         )
         subject.primaryTrack.isEnabled = false
-        subject.publish()
+        try await subject.publish()
         await fulfillment { self.mockPeerConnection.timesCalled(.addTransceiver) == 1 }
 
         try await subject.didUpdatePublishOptions(
@@ -183,7 +183,7 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable 
             includeAudio: true
         )
         subject.primaryTrack.isEnabled = false
-        subject.publish()
+        try await subject.publish()
         await fulfillment { h264Transceiver.sender.track != nil }
         mockPeerConnection.stub(for: .addTransceiver, with: av1Transceiver)
 
@@ -445,7 +445,7 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable 
             includeAudio: true
         )
 
-        subject.publish()
+        try await subject.publish()
 
         await fulfillment { self.subject.primaryTrack.isEnabled == true }
         XCTAssertEqual(mockPeerConnection.stubbedFunctionInput[.addTransceiver]?.count, 1)
@@ -463,7 +463,7 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable 
             includeAudio: true
         )
 
-        subject.publish()
+        try await subject.publish()
 
         await fulfillment { self.subject.primaryTrack.isEnabled == true }
         XCTAssertTrue(subject.primaryTrack.isEnabled)
@@ -486,7 +486,7 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable 
         await fulfillment { capturer.timesCalled(.startCapture) == 1 }
         XCTAssertTrue(subject.primaryTrack.isEnabled)
 
-        subject.unpublish()
+        try await subject.unpublish()
 
         await fulfillment {
             self.subject.primaryTrack.isEnabled == false && mockTransceiver.sender.track?.isEnabled == false
@@ -507,9 +507,28 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable 
         )
         await fulfillment { capturer.timesCalled(.startCapture) == 1 }
 
-        subject.unpublish()
+        try await subject.unpublish()
 
         await fulfillment { capturer.timesCalled(.stopCapture) >= 1 }
+    }
+
+    func test_unpublish_enabledLocalTrack_whenCaptureStopThrows_propagatesError() async {
+        screenShareSessionProvider.activeSession = .init(
+            localTrack: subject.primaryTrack,
+            screenSharingType: .inApp,
+            capturer: MockThrowingStreamVideoCapturer(shouldThrowOnStopCapture: true),
+            includeAudio: true
+        )
+        subject.primaryTrack.isEnabled = true
+
+        do {
+            try await subject.unpublish()
+            XCTFail("Expected unpublish() to throw when capture stop fails.")
+        } catch let error as MockThrowingStreamVideoCapturerError {
+            XCTAssertEqual(error, .stopCaptureFailed)
+        } catch {
+            XCTFail("Unexpected error: \(error)")
+        }
     }
 
     // MARK: - Private
@@ -603,7 +622,7 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable 
     private func assertActiveSessionConfiguration(
         _ screensharingType: ScreensharingType,
         assertStopCapture: Bool,
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) async throws {
         let capturerA = MockStreamVideoCapturer()
@@ -625,7 +644,7 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable 
             includeAudio: true
         )
 
-        await fulfillment(file: file, line: line) {
+        await fulfillment(filePath: file, line: line) {
             self.screenShareSessionProvider.activeSession != nil
         }
 
