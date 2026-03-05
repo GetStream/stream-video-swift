@@ -59,6 +59,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     private let disposableBag = DisposableBag()
     internal let callController: CallController
     internal let coordinatorClient: DefaultAPIEndpoints
+    private var outgoingRingingController: OutgoingRingingController?
 
     /// This adapter is used to manage closed captions for the
     /// call.
@@ -263,6 +264,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         )
         await state.update(from: response)
         if ring {
+            configureOutgoingRingingController()
+
             Task(disposableBag: disposableBag) { @MainActor [weak self] in
                 self?.streamVideo.state.ringingCall = self
             }
@@ -270,7 +273,12 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         return response
     }
 
-    /// Rings the call (sends call notification to members).
+    /// Rings the call and marks it as `StreamVideo.State.ringingCall`.
+    ///
+    /// The call stays in the ringing state until it is accepted,
+    /// rejected, ended, or joined. If the app moves to the background
+    /// before the ring completes, the SDK ends the outgoing ringing
+    /// call automatically.
     /// - Returns: The call's data.
     @discardableResult
     public func ring() async throws -> CallResponse {
@@ -295,7 +303,10 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     ///   - custom: An optional dictionary of custom data to include in the call request.
     ///   - startsAt: An optional `Date` indicating when the call should start.
     ///   - team: An optional string representing the team for the call.
-    ///   - ring: A boolean indicating whether to ring the call. Default is `false`.
+    ///   - ring: A boolean indicating whether to ring the call. When
+    ///     `true`, the call is exposed through
+    ///     `StreamVideo.State.ringingCall` until it is accepted,
+    ///     rejected, ended, or joined. Default is `false`.
     ///   - notify: A boolean indicating whether to send notifications. Default is `false`.
     ///   - maxDuration: An optional integer representing the maximum duration of the call in seconds.
     ///   - maxParticipants: An optional integer representing the maximum number of participants allowed in the call.
@@ -365,6 +376,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         )
         await state.update(from: response)
         if ring {
+            configureOutgoingRingingController()
+
             Task(disposableBag: disposableBag) { @MainActor [weak self] in
                 self?.streamVideo.state.ringingCall = self
             }
@@ -373,7 +386,9 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     }
     
     /// Initiates a ring action for the current call.
-    /// - Parameter request: The `RingCallRequest` containing ring configuration, such as member ids and whether it's a video call.
+    /// - Parameter request: The `RingCallRequest` containing ring
+    ///   configuration, such as member ids and whether it's a video
+    ///   call.
     /// - Returns: A `RingCallResponse` with information about the ring operation.
     /// - Throws: An error if the coordinator request fails or the call cannot be rung.
     @discardableResult
@@ -1552,6 +1567,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         /// to happen on the call object (e.g. rejoin) will need to fetch a new instance from `StreamVideo`
         /// client.
         callCache.remove(for: cId)
+        outgoingRingingController = nil
 
         // Reset the activeAudioFilter
         setAudioFilter(nil)
@@ -1767,5 +1783,12 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 log.error(error)
             }
         }
+    }
+
+    private func configureOutgoingRingingController() {
+        outgoingRingingController = .init(
+            streamVideo: streamVideo,
+            callCiD: cId
+        ) { [weak self] in try await self?.end() }
     }
 }

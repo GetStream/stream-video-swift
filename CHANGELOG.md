@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### 🔄 Changed
 - Propagated publish/unpublish failures from local video and screen-share capture
   sessions instead of swallowing them after logging. [#1072](https://github.com/GetStream/stream-video-swift/pull/1072)
+- The SDK will now end an outgoin call if the app moves to background while ringing. [#1078](https://github.com/GetStream/stream-video-swift/pull/1078)
 
 ### 🐞 Fixed
 - Fix call teardown ordering by posting `callEnded` only after active/ringing cleanup
