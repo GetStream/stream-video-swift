@@ -16,6 +16,7 @@ extension ObjectLifecycle {
         private var metadata: [String: String]
         private let dateProvider: @Sendable () -> Date
 
+        /// Internal designated initializer used by convenience initializers.
         fileprivate init(
             instanceId: String,
             observer: Observing,
@@ -109,6 +110,11 @@ extension ObjectLifecycle.Token {
         )
     }
 
+    /// Creates a token for a `Call` instance and emits `.initialized`.
+    /// - Parameters:
+    ///   - instance: Call instance to track.
+    ///   - observer: Observer receiving lifecycle events.
+    ///   - dateProvider: Date provider for deterministic tests.
     convenience init(
         _ instance: Call,
         observer: ObjectLifecycle.Observing = InjectedValues[\.objectLifecycleObserver],
@@ -127,6 +133,12 @@ extension ObjectLifecycle.Token {
         )
     }
 
+    /// Creates a token for a `StreamVideo` instance and emits `.initialized`.
+    /// - Parameters:
+    ///   - instance: StreamVideo instance to track.
+    ///   - observer: Observer receiving lifecycle events.
+    ///   - uuidFactory: UUID provider for deterministic tests.
+    ///   - dateProvider: Date provider for deterministic tests.
     convenience init(
         _ instance: StreamVideo,
         observer: ObjectLifecycle.Observing = InjectedValues[\.objectLifecycleObserver],
@@ -149,15 +161,22 @@ extension ObjectLifecycle.Token {
 
 extension ObjectLifecycle.Token {
 
-    func updateMetadata(for instance: Call) async {
-        await self.updateMetadata([
+    /// Updates metadata from the current `Call` snapshot and emits
+    /// `.metadataUpdated` when values changed.
+    /// - Parameter instance: Call instance to snapshot metadata from.
+    @MainActor
+    func updateMetadata(for instance: Call) {
+        self.updateMetadata([
             "session.id": instance.state.sessionId,
             "user.id": instance.streamVideo.user.id,
             "user.name": instance.streamVideo.user.name,
-            "stream.connection.id": instance.streamVideo.connectionId ?? "-",
+            "stream.connection.id": instance.streamVideo.connectionId ?? "-"
         ])
     }
 
+    /// Updates metadata from the current `StreamVideo` snapshot and emits
+    /// `.metadataUpdated` when values changed.
+    /// - Parameter instance: StreamVideo instance to snapshot metadata from.
     func updateMetadata(for instance: StreamVideo) {
         self.updateMetadata([
             "user.id": instance.user.id,

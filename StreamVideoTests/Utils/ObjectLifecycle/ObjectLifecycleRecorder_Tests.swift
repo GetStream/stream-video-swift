@@ -144,7 +144,7 @@ final class ObjectLifecycleRecorder_Tests: XCTestCase, @unchecked Sendable {
             .initialized,
             recorder: subject,
             for: StreamVideo.self,
-            metadata: ["userId": userId]
+            metadata: ["user.id": userId]
         )
 
         var call: Call? = streamVideo?.call(callType: callType, callId: callId)
@@ -153,7 +153,7 @@ final class ObjectLifecycleRecorder_Tests: XCTestCase, @unchecked Sendable {
             .initialized,
             recorder: subject,
             for: Call.self,
-            metadata: ["cId": cId]
+            instanceId: cId
         )
 
         InjectedValues[\.callCache].removeAll()
@@ -162,7 +162,7 @@ final class ObjectLifecycleRecorder_Tests: XCTestCase, @unchecked Sendable {
             .deinitialized,
             recorder: subject,
             for: Call.self,
-            metadata: ["cId": cId]
+            instanceId: cId
         )
 
         StreamVideoProviderKey.currentValue = nil
@@ -171,7 +171,7 @@ final class ObjectLifecycleRecorder_Tests: XCTestCase, @unchecked Sendable {
             .deinitialized,
             recorder: subject,
             for: StreamVideo.self,
-            metadata: ["userId": userId]
+            metadata: ["user.id": userId]
         )
     }
 

@@ -18,6 +18,9 @@ final class ObjectLifecycleToken_Tests: XCTestCase, @unchecked Sendable {
     }
 
     override func tearDown() {
+        StreamVideoProviderKey.currentValue = nil
+        InjectedValues[\.callCache].removeAll()
+
         subject = nil
         recorder = nil
         super.tearDown()
@@ -103,6 +106,62 @@ final class ObjectLifecycleToken_Tests: XCTestCase, @unchecked Sendable {
                 transition: .metadataUpdated
             ).isEmpty
         )
+    }
+
+    func test_updateMetadataForStreamVideo_whenCalled_recordsMetadataUpdatedEvent()
+    throws {
+        let fixedUUID = UUID(uuidString: "A5A2CEAE-8FD9-4C4D-913A-5A86D8F0979E")!
+        let streamVideo = StreamVideo.mock(httpClient: HTTPClient_Mock())
+        let expectedMetadata = [
+            "user.id": streamVideo.user.id,
+            "user.name": streamVideo.user.name,
+            "stream.connection.id": streamVideo.connectionId ?? "-"
+        ]
+
+        subject = .init(
+            type: TokenTrackedType.self,
+            observer: recorder,
+            uuidFactory: StaticUUIDFactory(fixedUUID)
+        )
+        subject?.updateMetadata(for: streamVideo)
+
+        let updatedEvent = try XCTUnwrap(
+            recorder.events(
+                for: TokenTrackedType.self,
+                transition: .metadataUpdated,
+                metadata: expectedMetadata
+            ).first
+        )
+        XCTAssertEqual(updatedEvent.instanceId, fixedUUID.uuidString)
+    }
+
+    @MainActor
+    func test_updateMetadataForCall_whenCalled_recordsMetadataUpdatedEvent() throws {
+        let fixedUUID = UUID(uuidString: "A5A2CEAE-8FD9-4C4D-913A-5A86D8F0979E")!
+        let streamVideo = StreamVideo.mock(httpClient: HTTPClient_Mock())
+        let call = streamVideo.call(callType: "default", callId: String.unique)
+        let expectedMetadata = [
+            "session.id": call.state.sessionId,
+            "user.id": streamVideo.user.id,
+            "user.name": streamVideo.user.name,
+            "stream.connection.id": streamVideo.connectionId ?? "-"
+        ]
+
+        subject = .init(
+            type: TokenTrackedType.self,
+            observer: recorder,
+            uuidFactory: StaticUUIDFactory(fixedUUID)
+        )
+        subject?.updateMetadata(for: call)
+
+        let updatedEvent = try XCTUnwrap(
+            recorder.events(
+                for: TokenTrackedType.self,
+                transition: .metadataUpdated,
+                metadata: expectedMetadata
+            ).first
+        )
+        XCTAssertEqual(updatedEvent.instanceId, fixedUUID.uuidString)
     }
 }
 

@@ -61,6 +61,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     public var user: User {
         state.user
     }
+    /// Active WebSocket connection identifier used by lifecycle diagnostics.
     private(set) var connectionId: String? {
         didSet { lifecycleToken.updateMetadata(for: self) }
     }
@@ -618,7 +619,6 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
 
         if self.connectionId != connectionId {
             self.connectionId = connectionId
-            lifecycleToken.updateMetadata(for: self)
         }
 
         return connectionId

@@ -138,6 +138,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         // to ensure it's uniqueness.
         _ = stateMachine
         subscribeToOwnCapabilitiesChanges()
+
+        // Keep lifecycle metadata in sync with call session changes.
         Task { @MainActor [weak self] in
             guard let self else { return }
             state
