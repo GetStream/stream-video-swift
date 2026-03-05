@@ -67,7 +67,7 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
         #else
         registry.delegate = nil
         registry.desiredPushTypes = []
-        deviceToken = ""
+        Task { @MainActor [weak self] in self?.deviceToken = "" }
         #endif
     }
 
@@ -77,9 +77,15 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
         didUpdate pushCredentials: PKPushCredentials,
         for type: PKPushType
     ) {
-        let deviceToken = pushCredentials.token.map { String(format: "%02x", $0) }.joined()
-        log.debug("Device token updated to: \(deviceToken)", subsystems: .callKit)
-        self.deviceToken = deviceToken
+        let deviceToken = pushCredentials
+            .token
+            .map { String(format: "%02x", $0) }
+            .joined()
+
+        Task { @MainActor [weak self] in
+            self?.deviceToken = deviceToken
+            log.debug("Device token updated to: \(deviceToken)", subsystems: .callKit)
+        }
     }
 
     /// Delegate method called when the push token becomes invalid for VoIP push notifications.
@@ -87,8 +93,10 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
         _ registry: PKPushRegistry,
         didInvalidatePushTokenFor type: PKPushType
     ) {
-        log.debug("Device token invalidated.", subsystems: .callKit)
-        deviceToken = ""
+        Task { @MainActor [weak self] in
+            self?.deviceToken = ""
+            log.debug("Device token invalidated.", subsystems: .callKit)
+        }
     }
 
     /// Delegate method called when the device receives a VoIP push notification.

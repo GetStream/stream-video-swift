@@ -130,7 +130,7 @@ final class CallKitPushNotificationAdapterTests: XCTestCase, @unchecked Sendable
         _ content: CallKitPushNotificationAdapter.Content? = nil,
         contentType: PKPushType = .voIP,
         displayName: String = "",
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) async {
         let pushPayload = MockPKPushPayload()
