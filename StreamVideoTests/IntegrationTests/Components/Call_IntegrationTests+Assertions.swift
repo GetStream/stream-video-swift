@@ -155,13 +155,21 @@ extension Call_IntegrationTests.Assertions {
             interval: TimeInterval = 0.1,
             operation: @Sendable () async throws -> Bool
         ) async throws {
+            let timeout = max(0, timeout)
+            let safeInterval = max(0, interval)
+            let sleepNanoseconds = UInt64(safeInterval * 1_000_000_000)
             let deadline = Date().timeIntervalSince1970 + timeout
+            
             while true {
                 if try await operation() { return }
                 if Date().timeIntervalSince1970 >= deadline {
                     throw FlowError.timeout("Condition not satisfied within \(timeout)s")
                 }
-                try await Task.sleep(nanoseconds: UInt64(interval * 1_000_000_000))
+                if sleepNanoseconds > 0 {
+                    try await Task.sleep(nanoseconds: sleepNanoseconds)
+                } else {
+                    await Task.yield()
+                }
             }
         }
     }
