@@ -42,6 +42,30 @@ final class ObjectLifecycleRecorder_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(subject.liveCount(for: TypeA.self), 1)
     }
 
+    func test_record_whenMetadataUpdated_doesNotChangeCountersOrLiveCount() {
+        subject.record(event(type: TypeA.self, id: "1", transition: .initialized))
+        subject.record(
+            event(
+                type: TypeA.self,
+                id: "1",
+                transition: .metadataUpdated,
+                metadata: ["label": "updated"]
+            )
+        )
+
+        XCTAssertEqual(subject.initializedCount(for: TypeA.self), 1)
+        XCTAssertEqual(subject.deinitializedCount(for: TypeA.self), 0)
+        XCTAssertEqual(subject.liveCount(for: TypeA.self), 1)
+        XCTAssertEqual(
+            subject.events(
+                for: TypeA.self,
+                transition: .metadataUpdated,
+                metadata: ["label": "updated"]
+            ).count,
+            1
+        )
+    }
+
     // MARK: - events(...)
 
     func test_events_whenFilteredByTypeTransitionAndMetadata_returnsMatches() {

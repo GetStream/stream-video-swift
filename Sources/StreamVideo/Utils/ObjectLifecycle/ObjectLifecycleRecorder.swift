@@ -66,9 +66,13 @@ extension ObjectLifecycle {
                             instanceId: event.instanceId
                         )
                     )
+                case .metadataUpdated:
+                    break
                 }
 
-                state.countsByType[event.typeName] = counts
+                if event.transition != .metadataUpdated {
+                    state.countsByType[event.typeName] = counts
+                }
                 append(event)
             }
         }

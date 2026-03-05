@@ -34,9 +34,9 @@ extension ObjectLifecycle {
             let pairs = metadata
                 .sorted(by: { $0.key < $1.key })
                 .map { "\($0.key)=\($0.value)" }
-                .joined(separator: ",")
+                .joined(separator: ", ")
 
-            return " metadata:\(pairs)"
+            return " metadata:{ \(pairs) }"
         }
     }
 }

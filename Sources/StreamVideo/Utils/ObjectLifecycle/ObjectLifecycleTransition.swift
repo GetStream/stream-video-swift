@@ -9,6 +9,8 @@ extension ObjectLifecycle {
     enum Transition: String, Sendable {
         /// Emitted when a tracked object is created.
         case initialized
+        /// Emitted when a tracked object's metadata changes.
+        case metadataUpdated
         /// Emitted when a tracked object is deallocated.
         case deinitialized
     }

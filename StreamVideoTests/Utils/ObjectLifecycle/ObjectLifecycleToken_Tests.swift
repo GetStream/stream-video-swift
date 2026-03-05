@@ -64,6 +64,46 @@ final class ObjectLifecycleToken_Tests: XCTestCase, @unchecked Sendable {
             instanceId: initializedId
         )
     }
+
+    func test_updateMetadata_whenMetadataChanges_recordsMetadataUpdatedEvent()
+    throws {
+        let fixedUUID = UUID(uuidString: "A5A2CEAE-8FD9-4C4D-913A-5A86D8F0979E")!
+
+        subject = .init(
+            type: TokenTrackedType.self,
+            metadata: ["key": "value-1"],
+            observer: recorder,
+            uuidFactory: StaticUUIDFactory(fixedUUID)
+        )
+
+        subject?.updateMetadata(["key": "value-2"])
+
+        let updatedEvent = try XCTUnwrap(
+            recorder.events(
+                for: TokenTrackedType.self,
+                transition: .metadataUpdated,
+                metadata: ["key": "value-2"]
+            ).first
+        )
+        XCTAssertEqual(updatedEvent.instanceId, fixedUUID.uuidString)
+    }
+
+    func test_updateMetadata_whenMetadataIsUnchanged_doesNotRecordEvent() {
+        subject = .init(
+            type: TokenTrackedType.self,
+            metadata: ["key": "value"],
+            observer: recorder
+        )
+
+        subject?.updateMetadata(["key": "value"])
+
+        XCTAssertTrue(
+            recorder.events(
+                for: TokenTrackedType.self,
+                transition: .metadataUpdated
+            ).isEmpty
+        )
+    }
 }
 
 private enum TokenTrackedType {}

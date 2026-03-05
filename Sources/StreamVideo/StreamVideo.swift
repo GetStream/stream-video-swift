@@ -61,6 +61,9 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     public var user: User {
         state.user
     }
+    private(set) var connectionId: String? {
+        didSet { lifecycleToken.updateMetadata(for: self) }
+    }
 
     /// Provides information regarding hardware-acceleration capabilities (neuralEngine) on device.
     public var isHardwareAccelerationAvailable: Bool { neuralEngineExists }
@@ -111,8 +114,8 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     private let apiKey: APIKey
     private let environment: Environment
     private let pushNotificationsConfig: PushNotificationsConfig
-    private let lifecycleToken: ObjectLifecycle.Token
     private let disposableBag = DisposableBag()
+    private lazy var lifecycleToken: ObjectLifecycle.Token = .init(self)
 
     private lazy var idleTimerAdapter = IdleTimerAdapter(self)
 
@@ -183,13 +186,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         self.videoConfig = videoConfig
         self.environment = environment
         self.pushNotificationsConfig = pushNotificationsConfig
-        lifecycleToken = .init(
-            type: Self.self,
-            metadata: [
-                "userId": user.id
-            ]
-        )
-        
+
         apiTransport = environment.apiTransportBuilder(tokenProvider)
         let defaultParams = DefaultParams(apiKey: apiKey)
         coordinatorClient = DefaultAPI(
@@ -210,6 +207,8 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             self?.tokenSubject.send(userToken)
         }
 
+        // Register creation
+        _ = lifecycleToken
         // Warm up
         _ = eventNotificationCenter
         _ = idleTimerAdapter
@@ -616,6 +615,12 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         else {
             return nil
         }
+
+        if self.connectionId != connectionId {
+            self.connectionId = connectionId
+            lifecycleToken.updateMetadata(for: self)
+        }
+
         return connectionId
     }
     

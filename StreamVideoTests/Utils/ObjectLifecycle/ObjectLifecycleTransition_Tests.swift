@@ -11,6 +11,13 @@ final class ObjectLifecycleTransition_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(ObjectLifecycle.Transition.initialized.rawValue, "initialized")
     }
 
+    func test_rawValue_whenMetadataUpdatedTransition_returnsMetadataUpdated() {
+        XCTAssertEqual(
+            ObjectLifecycle.Transition.metadataUpdated.rawValue,
+            "metadataUpdated"
+        )
+    }
+
     func test_rawValue_whenDeinitializedTransition_returnsDeinitialized() {
         XCTAssertEqual(
             ObjectLifecycle.Transition.deinitialized.rawValue,

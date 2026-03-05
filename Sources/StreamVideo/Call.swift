@@ -57,7 +57,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     public lazy var moderation = Moderation.Manager(self)
 
     private let disposableBag = DisposableBag()
-    private let lifecycleToken: ObjectLifecycle.Token
+    private lazy var lifecycleToken: ObjectLifecycle.Token = .init(self)
     internal let callController: CallController
     internal let coordinatorClient: DefaultAPIEndpoints
 
@@ -79,12 +79,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         self.callType = callType
         self.coordinatorClient = coordinatorClient
         self.callController = callController
-        lifecycleToken = .init(
-            type: Self.self,
-            metadata: [
-                "cId": callCid(from: callId, callType: callType)
-            ]
-        )
         microphone = MicrophoneManager(
             callController: callController,
             initialStatus: callSettings?.audioOn == false ? .disabled : .enabled
@@ -132,6 +126,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             }
         }
 
+        // Register creation
+        _ = lifecycleToken
         _ = closedCaptionsAdapter
         _ = moderation
         _ = proximity
@@ -142,6 +138,16 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         // to ensure it's uniqueness.
         _ = stateMachine
         subscribeToOwnCapabilitiesChanges()
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            state
+                .$sessionId
+                .sinkTask(storeIn: disposableBag) { [weak self] _ in
+                    guard let self else { return }
+                    await lifecycleToken.updateMetadata(for: self)
+                }
+                .store(in: disposableBag)
+        }
     }
 
     /// Joins the current call.
@@ -378,7 +384,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         }
         return response.call
     }
-    
+
     /// Initiates a ring action for the current call.
     /// - Parameter request: The `RingCallRequest` containing ring configuration, such as member ids and whether it's a video call.
     /// - Returns: A `RingCallResponse` with information about the ring operation.
@@ -638,10 +644,10 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 && callSettings.audio.accessRequestEnabled == false {
                 return false
             } else if permission.rawValue == Permission.sendVideo.rawValue
-                && callSettings.video.accessRequestEnabled == false {
+                        && callSettings.video.accessRequestEnabled == false {
                 return false
             } else if permission.rawValue == Permission.screenshare.rawValue
-                && callSettings.screensharing.accessRequestEnabled == false {
+                        && callSettings.screensharing.accessRequestEnabled == false {
                 return false
             }
         }
@@ -1698,7 +1704,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 setAudioFilter(nil)
             case .autoOn
                 where audioProcessingModule.activeAudioFilter?.id != noiseCancellationFilter.id && streamVideo
-                .isHardwareAccelerationAvailable:
+                    .isHardwareAccelerationAvailable:
                 /// Activate noiseCancellationFilter if mode is autoOn,  hardwareAcceleration is
                 /// available and the noiseCancellation audioFilter isn't already enabled.
                 log
