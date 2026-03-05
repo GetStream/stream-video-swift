@@ -144,20 +144,13 @@ extension ObjectLifecycle {
             let typeName = type.map(Self.typeName(for:))
 
             return queue.sync {
-                state.events.filter { event in
-                    guard typeName == nil || event.typeName == typeName else {
-                        return false
-                    }
-
-                    guard
-                        transition == nil || event.transition == transition
-                    else {
-                        return false
-                    }
-
-                    return metadata.allSatisfy { key, value in
-                        event.metadata[key] == value
-                    }
+                state.events.filter {
+                    Self.matches(
+                        $0,
+                        typeName: typeName,
+                        transition: transition,
+                        metadata: metadata
+                    )
                 }
             }
         }
@@ -220,6 +213,36 @@ extension ObjectLifecycle {
 
         private static func typeName(for type: Any.Type) -> String {
             String(reflecting: type)
+        }
+
+        private static func matches(
+            _ event: Event,
+            typeName: String?,
+            transition: Transition?,
+            metadata: [String: String]
+        ) -> Bool {
+            guard typeName == nil || event.typeName == typeName else {
+                return false
+            }
+
+            guard transition == nil || event.transition == transition else {
+                return false
+            }
+
+            return metadataMatches(event.metadata, required: metadata)
+        }
+
+        private static func metadataMatches(
+            _ metadata: [String: String],
+            required: [String: String]
+        ) -> Bool {
+            for (key, value) in required {
+                guard metadata[key] == value else {
+                    return false
+                }
+            }
+
+            return true
         }
     }
 }
