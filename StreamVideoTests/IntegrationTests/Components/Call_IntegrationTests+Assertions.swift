@@ -34,13 +34,15 @@ extension Call_IntegrationTests {
                     interval: interval,
                     operation: condition
                 )
-            } catch {
-                XCTAssertNoThrow(
-                    try { throw FlowError.assertionFailed("Timed out waiting for assertion") }(),
-                    message(),
+            } catch let FlowError.timeout(timeoutMessage) {
+                XCTAssertTrue(
+                    false,
+                    message().isEmpty ? timeoutMessage : message(),
                     file: file,
                     line: line
                 )
+            } catch {
+                throw error
             }
         }
 
