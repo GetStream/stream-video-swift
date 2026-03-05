@@ -56,7 +56,7 @@ extension Call_IntegrationTests {
             if duringDismantleObservedAllCallEnded {
                 for call in registeredCalls.values {
                     call.leave()
-                    _ = try await NotificationCenter
+                    _ = try? await NotificationCenter
                         .default
                         .publisher(for: .init(CallNotification.callEnded))
                         .compactMap { ($0.object as? Call)?.cId }

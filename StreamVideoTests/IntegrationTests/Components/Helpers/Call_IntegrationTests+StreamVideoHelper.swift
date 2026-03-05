@@ -27,18 +27,11 @@ extension Call_IntegrationTests.Helpers {
         }
 
         func dismantle() async {
-            await withTaskGroup(of: Void.self) { group in
-                for client in registeredClients.values {
-                    group.addTask {
-                        await client.disconnect()
-                        if StreamVideoProviderKey.currentValue === client {
-                            StreamVideoProviderKey.currentValue = nil
-                        }
-                    }
-                }
-
-                await group.waitForAll()
+            for client in registeredClients.values {
+                await client.disconnect()
             }
+
+            StreamVideoProviderKey.currentValue = nil
 
             registeredClients = [:]
         }

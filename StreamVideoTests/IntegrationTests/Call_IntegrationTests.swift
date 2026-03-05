@@ -362,38 +362,38 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
 
     // MARK: - End
 
-//    func test_end_whenCreatorEndsCall_thenParticipantAutomaticallyLeaves() async throws {
-//        let callId = String.unique
-//        let creatorUserId = String.unique
-//        let participantUserId = String.unique
-//        helpers.duringDismantleObservedAllCallEnded = false
-//
-//        let creatorUserFlow = try await helpers
-//            .callFlow(id: callId, type: .default, userId: creatorUserId)
-//
-//        let participantUserFlow = try await helpers
-//            .callFlow(id: callId, type: .default, userId: participantUserId)
-//
-//        let creatorFlow = try await creatorUserFlow
-//            .perform { try await $0.call.create(memberIds: [creatorUserId, participantUserId]) }
-//
-//        try await withThrowingTaskGroup(of: Void.self) { group in
-//            group.addTask {
-//                try await creatorFlow
-//                    .perform { try await $0.call.join() }
-//                    .assertEventuallyInMainActor { $0.call.state.participants.endIndex == 2 }
-//                    .perform { try await $0.call.end() }
-//            }
-//
-//            group.addTask {
-//                try await participantUserFlow
-//                    .perform { try await $0.call.join() }
-//                    .assertEventuallyInMainActor { $0.call.streamVideo.state.activeCall == nil }
-//            }
-//
-//            try await group.waitForAll()
-//        }
-//    }
+    func test_end_whenCreatorEndsCall_thenParticipantAutomaticallyLeaves() async throws {
+        let callId = String.unique
+        let creatorUserId = String.unique
+        let participantUserId = String.unique
+        helpers.duringDismantleObservedAllCallEnded = false
+
+        let creatorUserFlow = try await helpers
+            .callFlow(id: callId, type: .default, userId: creatorUserId)
+
+        let participantUserFlow = try await helpers
+            .callFlow(id: callId, type: .default, userId: participantUserId)
+
+        let creatorFlow = try await creatorUserFlow
+            .perform { try await $0.call.create(memberIds: [creatorUserId, participantUserId]) }
+
+        try await withThrowingTaskGroup(of: Void.self) { group in
+            group.addTask {
+                try await creatorFlow
+                    .perform { try await $0.call.join() }
+                    .assertEventuallyInMainActor { $0.call.state.participants.endIndex == 2 }
+                    .perform { try await $0.call.end() }
+            }
+
+            group.addTask {
+                try await participantUserFlow
+                    .perform { try await $0.call.join() }
+                    .assertEventuallyInMainActor { $0.call.streamVideo.state.activeCall == nil }
+            }
+
+            try await group.waitForAll()
+        }
+    }
 
     // MARK: - SendReactions
 
@@ -925,6 +925,8 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     // MARK: - MuteById
 
     func test_mute_whenUserGetsMuted_thenCallStateOfAllParticipantsIsUpdatedAsExpected() async throws {
+        throw XCTSkip("https://linear.app/stream/issue/IOS-1465/integration-testsre-enable-mute-related-test-cases")
+
         let callId = String.unique
         let user1 = String.unique
         let user2 = "shit-participant"
@@ -975,6 +977,8 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     // MARK: - MuteAll
 
     func test_mute_whenAllOtherUsersGetMuted_thenCallStateOfAllParticipantsIsUpdatedAsExpected() async throws {
+        throw XCTSkip("https://linear.app/stream/issue/IOS-1465/integration-testsre-enable-mute-related-test-cases")
+
         let callId = String.unique
         let user1 = String.unique
         let user2 = String.unique
