@@ -49,27 +49,22 @@ extension Call_IntegrationTests {
         static func assertFromAsyncStream<Element: Sendable>(
             timeout: TimeInterval = defaultTimeout,
             interval: TimeInterval = 0.1,
-            file: StaticString = #filePath,
+            fileID: StaticString = #fileID,
+            filePath: StaticString = #filePath,
             line: UInt = #line,
             message: @autoclosure () -> String = "",
             stream: AsyncStream<Element>,
             operation: @Sendable @escaping (Element) async throws -> Bool
         ) async throws {
             let timeout = max(0, timeout)
-            let interval = max(0, interval)
             let result = try await Task(
                 timeoutInSeconds: timeout,
-                file: file,
+                file: fileID,
                 line: line
             ) {
                 for await element in stream {
                     if try await operation(element) {
                         return true
-                    }
-                    if interval > 0 {
-                        try await Task.sleep(
-                            nanoseconds: UInt64(interval * 1_000_000_000)
-                        )
                     }
                 }
                 return false
@@ -82,15 +77,52 @@ extension Call_IntegrationTests {
             XCTAssertTrue(
                 false,
                 message(),
-                file: file,
+                file: filePath,
                 line: line
             )
         }
 
-        static func assertFromPublisher<Output: Sendable, Failure>(
+        static func assertFromAsyncStream<Element: Sendable>(
             timeout: TimeInterval = defaultTimeout,
             interval: TimeInterval = 0.1,
-            file: StaticString = #filePath,
+            fileID: StaticString = #fileID,
+            filePath: StaticString = #filePath,
+            line: UInt = #line,
+            message: @autoclosure () -> String = "",
+            stream: AsyncThrowingStream<Element, Error>,
+            operation: @Sendable @escaping (Element) async throws -> Bool
+        ) async throws {
+            let timeout = max(0, timeout)
+            let result = try await Task(
+                timeoutInSeconds: timeout,
+                file: fileID,
+                line: line
+            ) {
+                for try await element in stream {
+                    if try await operation(element) {
+                        return true
+                    }
+                }
+                return false
+            }.value
+
+            guard !result else {
+                return
+            }
+
+            XCTAssertTrue(
+                false,
+                message(),
+                file: filePath,
+                line: line
+            )
+        }
+
+        static func assertFromPublisher<Output: Sendable, Failure: Error>(
+            timeout: TimeInterval = defaultTimeout,
+            interval: TimeInterval = 0.1,
+            fileID: StaticString = #fileID,
+            filePath: StaticString = #filePath,
             line: UInt = #line,
             message: @autoclosure () -> String = "",
             publisher: AnyPublisher<Output, Failure>,
@@ -99,10 +131,11 @@ extension Call_IntegrationTests {
             try await Self.assertFromAsyncStream(
                 timeout: timeout,
                 interval: interval,
-                file: file,
+                fileID: fileID,
+                filePath: filePath,
                 line: line,
                 message: message(),
-                stream: publisher.eraseAsAsyncStream(),
+                stream: publisher.eraseAsAsyncThrowingStream(),
                 operation: operation
             )
         }
@@ -129,6 +162,31 @@ extension Call_IntegrationTests.Assertions {
                     throw FlowError.timeout("Condition not satisfied within \(timeout)s")
                 }
                 try await Task.sleep(nanoseconds: UInt64(interval * 1_000_000_000))
+            }
+        }
+    }
+}
+
+private extension Publisher where Output: Sendable {
+
+    func eraseAsAsyncThrowingStream() -> AsyncThrowingStream<Output, Error> {
+        AsyncThrowingStream { continuation in
+            let cancellable = sink(
+                receiveCompletion: {
+                    switch $0 {
+                    case .finished:
+                        continuation.finish()
+                    case let .failure(error):
+                        continuation.finish(throwing: error)
+                    }
+                },
+                receiveValue: {
+                    continuation.yield($0)
+                }
+            )
+
+            continuation.onTermination = { @Sendable _ in
+                cancellable.cancel()
             }
         }
     }
