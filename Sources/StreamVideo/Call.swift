@@ -57,6 +57,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     public lazy var moderation = Moderation.Manager(self)
 
     private let disposableBag = DisposableBag()
+    private let lifecycleToken: ObjectLifecycle.Token
     internal let callController: CallController
     internal let coordinatorClient: DefaultAPIEndpoints
 
@@ -78,6 +79,12 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         self.callType = callType
         self.coordinatorClient = coordinatorClient
         self.callController = callController
+        lifecycleToken = .init(
+            type: Self.self,
+            metadata: [
+                "cId": callCid(from: callId, callType: callType)
+            ]
+        )
         microphone = MicrophoneManager(
             callController: callController,
             initialStatus: callSettings?.audioOn == false ? .disabled : .enabled

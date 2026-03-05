@@ -2,6 +2,7 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+@testable import StreamVideo
 import XCTest
 
 /// The default timeout value used by the `willBe___` family of assertions.
@@ -574,5 +575,78 @@ public extension AssertAsync {
         AssertAsync {
             Assert.canBeReleased(&object, timeout: timeout, message: message(), file: file, line: line)
         }
+    }
+
+    /// Blocks the current test execution and checks the recorder live count for
+    /// a type.
+    static func willHaveTrackedLiveCount(
+        _ expectedCount: Int,
+        recorder: ObjectLifecycle.Recorder,
+        for type: Any.Type,
+        timeout: TimeInterval = defaultTimeout,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        willBeEqual(
+            recorder.liveCount(for: type),
+            expectedCount,
+            timeout: timeout,
+            message:
+                "Expected live count \(expectedCount) for \(String(reflecting: type)).",
+            file: file,
+            line: line
+        )
+    }
+
+    /// Blocks the current test execution and checks that a lifecycle event was
+    /// recorded for a type.
+    static func willTrackLifecycleEvent(
+        _ transition: ObjectLifecycle.Transition,
+        recorder: ObjectLifecycle.Recorder,
+        for type: Any.Type,
+        metadata: [String: String] = [:],
+        timeout: TimeInterval = defaultTimeout,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        willBeTrue(
+            recorder.containsEvent(
+                for: type,
+                transition: transition,
+                metadata: metadata
+            ),
+            timeout: timeout,
+            message:
+                "Expected \(transition.rawValue) for \(String(reflecting: type)) "
+                    + "with metadata \(metadata).",
+            file: file,
+            line: line
+        )
+    }
+
+    /// Blocks the current test execution and checks that a lifecycle event was
+    /// recorded for a specific instance id.
+    static func willTrackLifecycleEvent(
+        _ transition: ObjectLifecycle.Transition,
+        recorder: ObjectLifecycle.Recorder,
+        for type: Any.Type,
+        instanceId: String,
+        timeout: TimeInterval = defaultTimeout,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        willBeTrue(
+            recorder.containsEvent(
+                for: type,
+                transition: transition,
+                instanceId: instanceId
+            ),
+            timeout: timeout,
+            message:
+                "Expected \(transition.rawValue) for \(String(reflecting: type)) "
+                    + "instance id \(instanceId).",
+            file: file,
+            line: line
+        )
     }
 }

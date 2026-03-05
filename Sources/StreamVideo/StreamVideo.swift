@@ -111,6 +111,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     private let apiKey: APIKey
     private let environment: Environment
     private let pushNotificationsConfig: PushNotificationsConfig
+    private let lifecycleToken: ObjectLifecycle.Token
     private let disposableBag = DisposableBag()
 
     private lazy var idleTimerAdapter = IdleTimerAdapter(self)
@@ -182,6 +183,12 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         self.videoConfig = videoConfig
         self.environment = environment
         self.pushNotificationsConfig = pushNotificationsConfig
+        lifecycleToken = .init(
+            type: Self.self,
+            metadata: [
+                "userId": user.id
+            ]
+        )
         
         apiTransport = environment.apiTransportBuilder(tokenProvider)
         let defaultParams = DefaultParams(apiKey: apiKey)
