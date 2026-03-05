@@ -23,6 +23,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         var httpClient: HTTPClient = URLSessionClient(
             urlSession: StreamVideo.Environment.makeURLSession()
         )
+        var sessionId: String
     }
 
     /// Configuration for the WebSocket connection.
@@ -88,6 +89,8 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
     private let subjectSendEvent: PassthroughSubject<SFUAdapterEvent, Never> = .init()
     var publisherSendEvent: AnyPublisher<SFUAdapterEvent, Never> { subjectSendEvent.eraseToAnyPublisher() }
 
+    private let lifecycleToken: ObjectLifecycle.Token
+
     // MARK: - CustomStringConvertible
 
     var description: String {
@@ -125,18 +128,26 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
                 connectURL: webSocketConfiguration.url,
                 requiresAuth: false
             ),
-            webSocketFactory: webSocketFactory
+            webSocketFactory: webSocketFactory,
+            sessionId: serviceConfiguration.sessionId
         )
     }
 
     init(
         signalService: SFUSignalService,
         webSocket: WebSocketClient,
-        webSocketFactory: WebSocketClientProviding
+        webSocketFactory: WebSocketClientProviding,
+        sessionId: String
     ) {
         self.signalService = signalService
         self.webSocket = webSocket
         self.webSocketFactory = webSocketFactory
+        self.lifecycleToken = .init(
+            type: Self.self,
+            metadata: [
+                "session.id": sessionId
+            ]
+        )
 
         webSocket.connectionStateDelegate = self
 

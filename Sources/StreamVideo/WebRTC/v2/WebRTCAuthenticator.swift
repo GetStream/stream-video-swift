@@ -139,7 +139,8 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
                     errorMessage: "Server URL is invalid."
                 ),
                 apiKey: coordinator.stateAdapter.apiKey,
-                token: await coordinator.stateAdapter.token
+                token: await coordinator.stateAdapter.token,
+                sessionId: await coordinator.stateAdapter.sessionID
             ),
             webSocketConfiguration: .init(
                 url: try unwrap(

@@ -38,7 +38,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     @Injected(\.audioStore) private var audioStore
 
     // Properties for user, API key, call ID, video configuration, and factories.
-    let unifiedSessionId: String = UUID().uuidString
+    let unifiedSessionId: String
     let user: User
     let apiKey: String
     let callCid: String
@@ -92,6 +92,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     private let rtcPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinatorProviding
     private let disposableBag = DisposableBag()
     private let peerConnectionsDisposableBag = DisposableBag()
+    private let lifecycleToken: ObjectLifecycle.Token
 
     private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
     private let callSettingsProcessingQueue = OperationQueue(maxConcurrentOperationCount: 1)
@@ -160,6 +161,8 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         videoCaptureSessionProvider: VideoCaptureSessionProvider = .init(),
         screenShareSessionProvider: ScreenShareSessionProvider = .init()
     ) {
+        let unifiedSessionID = UUID().uuidString
+        self.unifiedSessionId = unifiedSessionID
         self.user = user
         self.apiKey = apiKey
         self.callCid = callCid
@@ -171,6 +174,15 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         self.videoCaptureSessionProvider = videoCaptureSessionProvider
         self.screenShareSessionProvider = screenShareSessionProvider
         self.audioSession = .init()
+        self.lifecycleToken = .init(
+            type: Self.self,
+            metadata: [
+                "unified.session.id": unifiedSessionID,
+                "user.id": user.id,
+                "user.name": user.name,
+                "call.id": callCid
+            ]
+        )
 
         peerConnectionFactory
             .setFrameBufferPolicy(
@@ -183,8 +195,20 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         )
 
         Task { [weak self] in
-            _ = await self?.permissionsAdapter
-            await self?.configureBatteryObservation()
+            guard let self else {
+                return
+            }
+
+            _ = await permissionsAdapter
+            await configureBatteryObservation()
+
+            await lifecycleToken.updateMetadata([
+                "unified.session.id": unifiedSessionID,
+                "user.id": user.id,
+                "user.name": user.name,
+                "call.id": callCid,
+                "session.id": sessionID
+            ])
         }
     }
 
