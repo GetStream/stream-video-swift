@@ -200,12 +200,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             from: .connected,
             expectedTarget: .disconnected,
             subject: subject
-        ) { target in
-            XCTAssertEqual(
-                (target.context.flowError as? ClientError)?.localizedDescription,
-                "Operation timed out"
-            )
-        }
+        ) { XCTAssertTrue($0.context.flowError is TimeOutError) }
     }
 
     func test_transition_fromConnectedReceivesJoinResponse_updatesCallSettingsOnStateAdapter() async throws {
@@ -684,12 +679,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             from: .connected,
             expectedTarget: .disconnected,
             subject: subject
-        ) { target in
-            XCTAssertEqual(
-                (target.context.flowError as? ClientError)?.localizedDescription,
-                "Operation timed out"
-            )
-        }
+        ) { XCTAssertTrue($0.context.flowError is TimeOutError) }
     }
 
     func test_transition_fromConnectedWithRejoinReceivesJoinResponse_updatesCallSettingsOnStateAdapter() async throws {
@@ -1334,12 +1324,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             from: .migrated,
             expectedTarget: .disconnected,
             subject: subject
-        ) { target in
-            XCTAssertEqual(
-                (target.context.flowError as? ClientError)?.localizedDescription,
-                "Operation timed out"
-            )
-        }
+        ) { XCTAssertTrue($0.context.flowError is TimeOutError) }
     }
 
     func test_transition_fromMigratedReceivesJoinResponse_updatesCallSettingsOnStateAdapter() async throws {

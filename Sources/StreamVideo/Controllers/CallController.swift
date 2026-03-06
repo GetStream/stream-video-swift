@@ -57,7 +57,6 @@ class CallController: @unchecked Sendable {
     private var cachedLocation: String?
     private let initialCallSettings: CallSettings
 
-    private var joinCallResponseSubject = PassthroughSubject<JoinCallResponse, Error>()
     private var joinCallResponseFetchObserver: AnyCancellable?
     private var webRTCClientSessionIDObserver: AnyCancellable?
     private var webRTCClientStateObserver: AnyCancellable?
@@ -103,10 +102,6 @@ class CallController: @unchecked Sendable {
             await observeStatsReporterUpdates()
             await observeCallSettingsUpdates()
         }
-
-        joinCallResponseFetchObserver = joinCallResponseSubject
-            .compactMap { $0 }
-            .sinkTask(storeIn: disposableBag) { [weak self] in await self?.didFetch($0) }
     }
 
     /// Joins a call with the provided information and join source.
@@ -136,6 +131,21 @@ class CallController: @unchecked Sendable {
         notify: Bool = false,
         source: JoinSource
     ) async throws -> JoinCallResponse {
+        joinCallResponseFetchObserver?.cancel()
+        joinCallResponseFetchObserver = nil
+
+        // Each join attempt uses a fresh delivery subject so a failed attempt
+        // cannot complete future retries on the same controller.
+        let joinCallResponseSubject = PassthroughSubject<JoinCallResponse, Error>()
+        joinCallResponseFetchObserver = joinCallResponseSubject
+            .compactMap { $0 }
+            .sinkTask(storeIn: disposableBag) { [weak self] in await self?.didFetch($0) }
+
+        defer {
+            joinCallResponseFetchObserver?.cancel()
+            joinCallResponseFetchObserver = nil
+        }
+
         try await webRTCCoordinator.connect(
             create: create,
             callSettings: callSettings,
@@ -145,15 +155,14 @@ class CallController: @unchecked Sendable {
             source: source,
             joinResponseHandler: joinCallResponseSubject
         )
-        
-        guard
-            let response = try? await joinCallResponseSubject
-            .nextValue(timeout: WebRTCConfiguration.timeout.join)
-        else {
+
+        do {
+            return try await joinCallResponseSubject
+                .nextValue(timeout: WebRTCConfiguration.timeout.join)
+        } catch {
             await webRTCCoordinator.cleanUp()
-            throw ClientError("Unable to connect to call callId:\(callId).")
+            throw error
         }
-        return response
     }
 
     /// Changes the audio state for the current user.

@@ -50,11 +50,8 @@ final class TaskTimeoutTests: XCTestCase, @unchecked Sendable {
         do {
             _ = try await task.value
             XCTFail("Expected timeout error but operation succeeded")
-        } catch let error as ClientError {
-            XCTAssertTrue(
-                error.localizedDescription.contains("timed out"),
-                "Error should indicate timeout"
-            )
+        } catch let error as TimeOutError {
+            XCTAssertEqual(error.localizedDescription, "Operation timed out")
         } catch {
             XCTFail("Unexpected error type: \(error)")
         }
@@ -223,8 +220,10 @@ final class TaskTimeoutTests: XCTestCase, @unchecked Sendable {
         do {
             _ = try await task.value
             XCTFail("Zero timeout should fail immediately")
+        } catch let error as TimeOutError {
+            XCTAssertEqual(error.localizedDescription, "Operation timed out")
         } catch {
-            // Expected timeout
+            XCTFail("Unexpected error type: \(error)")
         }
     }
     
@@ -239,8 +238,10 @@ final class TaskTimeoutTests: XCTestCase, @unchecked Sendable {
         do {
             _ = try await task.value
             XCTFail("Negative timeout should fail immediately")
+        } catch let error as TimeOutError {
+            XCTAssertEqual(error.localizedDescription, "Operation timed out")
         } catch {
-            // Expected timeout or immediate completion
+            XCTFail("Unexpected error type: \(error)")
         }
     }
 
