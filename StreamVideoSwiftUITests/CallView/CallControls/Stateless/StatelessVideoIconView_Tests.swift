@@ -94,15 +94,7 @@ final class StatelessVideoIconView_Tests: StreamVideoUITestCase, @unchecked Send
             file: file,
             line: line
         )
-        call.state.update(
-            from: .dummy(
-                settings: .dummy(
-                    video: .dummy(
-                        cameraDefaultOn: videoOn
-                    )
-                )
-            )
-        )
+        call.state.update(callSettings: .init(videoOn: videoOn))
 
         return .init(call: call, actionHandler: actionHandler)
     }
