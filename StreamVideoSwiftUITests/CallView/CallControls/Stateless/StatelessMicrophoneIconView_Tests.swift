@@ -94,13 +94,7 @@ final class StatelessMicrophoneIconView_Tests: StreamVideoUITestCase, @unchecked
             file: file,
             line: line
         )
-        call.state.update(
-            from: .dummy(
-                settings: .dummy(
-                    audio: .dummy(micDefaultOn: micOn)
-                )
-            )
-        )
+        call.state.update(callSettings: .init(audioOn: micOn))
 
         return .init(call: call, actionHandler: actionHandler)
     }
