@@ -135,7 +135,8 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         }
     }
 
-    func test_joinCall_whenAuthenticationFails_throwsUnableToConnectError() async {
+    func test_joinCall_whenAuthenticationFails_rethrowsOriginalError() async {
+        let expectedError = ClientError("auth failed")
         mockWebRTCCoordinatorFactory
             .mockCoordinatorStack
             .webRTCAuthenticator
@@ -144,7 +145,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
                 with: Result<
                     (SFUAdapter, JoinCallResponse),
                     Error
-                >.failure(ClientError("auth failed"))
+                >.failure(expectedError)
             )
 
         do {
@@ -161,7 +162,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
             if let error = error as? ClientError {
                 XCTAssertEqual(
                     error.localizedDescription,
-                    "Unable to connect to call callId:\(callId)."
+                    expectedError.localizedDescription
                 )
             } else {
                 XCTFail("Expected ClientError to be thrown.")
@@ -174,6 +175,106 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
                 .timesCalled(.authenticate),
             1
         )
+    }
+
+    func test_joinCall_whenPreviousAttemptFails_thenNextAttemptUsesFreshJoinResponseHandler() async throws {
+        let expectedError = ClientError("auth failed")
+        let expectedResponse = JoinCallResponse.dummy(call: .dummy(cid: "test-cid"))
+        let mockAudioStore = MockRTCAudioStore()
+        mockAudioStore.makeShared()
+        defer { mockAudioStore.dismantle() }
+
+        mockWebRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .webRTCAuthenticator
+            .stub(
+                for: .authenticate,
+                with: Result<
+                    (SFUAdapter, JoinCallResponse),
+                    Error
+                >.failure(expectedError)
+            )
+
+        do {
+            _ = try await subject.joinCall(
+                create: true,
+                callSettings: nil,
+                options: nil,
+                ring: false,
+                notify: false,
+                source: .inApp
+            )
+            XCTFail("Expected the first join attempt to fail.")
+        } catch let error as ClientError {
+            XCTAssertEqual(error.localizedDescription, expectedError.localizedDescription)
+        }
+
+        await fulfillment {
+            self
+                .mockWebRTCCoordinatorFactory
+                .mockCoordinatorStack
+                .coordinator
+                .stateMachine
+                .currentStage
+                .id == .idle
+        }
+
+        mockWebRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .coordinator
+            .stateMachine
+            .currentStage
+            .context
+            .authenticator = mockWebRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .webRTCAuthenticator
+
+        mockAudioStore.audioStore.dispatch(.setActive(true))
+        mockAudioStore.audioStore.dispatch(
+            .setCurrentRoute(
+                .dummy(outputs: [.dummy(isReceiver: true)])
+            )
+        )
+
+        mockWebRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .webRTCAuthenticator
+            .stub(
+                for: .authenticate,
+                with: Result<(SFUAdapter, JoinCallResponse), Error>
+                    .success((mockWebRTCCoordinatorFactory.mockCoordinatorStack.sfuStack.adapter, expectedResponse))
+            )
+        mockWebRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .webRTCAuthenticator
+            .stub(
+                for: .waitForAuthentication,
+                with: Result<Void, Error>.success(())
+            )
+        mockWebRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .webRTCAuthenticator
+            .stub(
+                for: .waitForConnect,
+                with: Result<Void, Error>.success(())
+            )
+
+        let joinTask = Task {
+            try await self.subject.joinCall(
+                create: true,
+                callSettings: nil,
+                options: nil,
+                ring: false,
+                notify: false,
+                source: .inApp
+            )
+        }
+
+        await wait(for: 0.5)
+        mockWebRTCCoordinatorFactory.mockCoordinatorStack.joinResponse([])
+
+        let result = try await joinTask.value
+        XCTAssertEqual(result.call.cid, expectedResponse.call.cid)
     }
 
     // MARK: - cleanUp

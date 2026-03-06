@@ -199,8 +199,8 @@ final class CallState_Tests: XCTestCase, @unchecked Sendable {
     }
 
     func test_update_fromJoinCallResponse_doesNotOverwriteCallSettings() {
-        _ = MockStreamVideo()
-        let subject = CallState()
+        let mockStreamVideo = MockStreamVideo()
+        let subject = CallState(mockStreamVideo.callSession)
         let initialCallSettings = CallSettings(
             audioOn: true,
             videoOn: false,
@@ -227,7 +227,7 @@ final class CallState_Tests: XCTestCase, @unchecked Sendable {
         initial: [CallParticipant],
         update: @escaping (_ initial: [CallParticipant]) -> [CallParticipant],
         expectedTransformer: @escaping ([CallParticipant]) -> [CallParticipant],
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) {
         let subject = CallState(.dummy())
@@ -278,7 +278,7 @@ final class CallState_Tests: XCTestCase, @unchecked Sendable {
     private func assertDuration(
         maxDuration: TimeInterval,
         block: () -> Void,
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) {
         let startDate = Date()
