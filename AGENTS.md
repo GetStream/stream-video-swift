@@ -75,6 +75,61 @@ Agents should optimize for media quality, API stability, backwards compatibility
 - Run both `StreamVideo` and `StreamVideoSwiftUI` tests locally; keep/raise coverage.
 - Only add tests for .swift files.
 - Do not test private methods or add test-only hooks to expose them; test through public or internal behavior instead.
+- Integration tests in `StreamVideoTests/IntegrationTests/Call_IntegrationTests`:
+  - Purpose: end-to-end call-path validation using real Stream API responses.
+  - Layout:
+    - `Call_IntegrationTests.swift`: scenarios.
+    - `Components/Call_IntegrationTests+CallFlow.swift`: flow DSL.
+    - `Components/Call_IntegrationTests+Assertions.swift`: async and eventual assertions.
+    - `Components/Helpers/*`: auth, client setup, permissions, users, configuration.
+  - Base flow:
+    - Keep `private var helpers: Call_IntegrationTests.Helpers! = .init()`.
+    - Build each scenario from `helpers.callFlow(...)`.
+    - Chain with `.perform`, `.performWithoutValueOverride`,
+      `.performWithErrorExpectation`, `.map`, `.tryMap`, `.assert`,
+      `.assertEventually`, and actor-specific variants.
+  - `defaultTimeout` is defined in `StreamVideoTests/TestUtils/AssertAsync.swift` and is used
+    by eventual assertions.
+  - Assertions:
+    - Use `.assert` for immediate checks.
+    - Use `.assertEventually` for event/state propagation and async streams.
+    - For expected failures, use `performWithErrorExpectation`,
+      cast through `APIError`, then check `code`/`message`.
+  - IDs and payloads:
+    - Use `String.unique` for call IDs, users, call types, and random values.
+    - Use `helpers.users.knownUser*` only when test logic requires stable identities.
+  - Permissions:
+    - Use `helpers.permissions.setMicrophonePermission(...)` and
+      `setCameraPermission(...)` for permission-gated flow setup.
+  - Concurrency:
+    - When testing multi-participant flows, use separate `callFlow` instances and
+      `withThrowingTaskGroup` to keep participant behavior explicit.
+    - For `memberIds` that use generated users (`String.unique`), first create each
+      participant `callFlow` first so their users are initialized before call creation:
+      - `let user1Flow = try await helpers.callFlow(..., userId: user1)`
+      - `let user2Flow = try await helpers.callFlow(..., userId: user2)`
+      - `let callFlowAfterCreate = try await user1Flow.perform { try await $0.call.create(memberIds: [user1, user2]) }`
+    - Prefer `.perform { ... }` for operations when the returned value should stay in
+      the chain for downstream assertions; use
+      `.performWithoutValueOverride` only when the returned value is intentionally
+      discarded.
+  - Event streams:
+    - Prefer `subscribe(for:)` + `.assertEventually` for event assertions.
+    - For end-to-end teardown coverage, you can also assert `call.streamVideo.state.activeCall == nil`
+      to confirm the participant instance has left when the call is ended by creator.
+    - Avoid arbitrary fixed sleeps except when explicitly stabilizing UI/test timing.
+  - Cleanup:
+    - Keep `helpers.dismantle()` in async `tearDown`.
+    - This disconnects clients and waits for call termination/audiostore cleanup.
+  - Environment/auth:
+    - `TestsAuthenticationProvider` calls `https://pronto.getstream.io/api/auth/create-token`.
+    - Default environment is `pronto`.
+    - Use `environment: "demo"` for livestream and audio room scenarios that are
+      fixture-backed.
+  - Execution:
+    - Target only this suite:
+      `xcodebuild -project StreamVideo.xcodeproj -scheme StreamVideo -testPlan StreamVideo test -only-testing:StreamVideoTests/Call_IntegrationTests`
+    - Full suite remains `bundle exec fastlane test`.
 
 ## Comments
 - Use docC for non-private APIs.

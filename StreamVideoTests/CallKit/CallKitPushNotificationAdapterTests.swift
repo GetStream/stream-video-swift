@@ -44,7 +44,7 @@ final class CallKitPushNotificationAdapterTests: XCTestCase, @unchecked Sendable
         XCTAssertTrue(subject.registry.desiredPushTypes?.isEmpty ?? false)
     }
 
-    func test_unregister_deviceTokenWasConfiguredCorrectly() {
+    func test_unregister_deviceTokenWasConfiguredCorrectly() async {
         let expectedDecodedToken = "test-device-token"
         subject.register()
         subject.pushRegistry(
@@ -53,15 +53,16 @@ final class CallKitPushNotificationAdapterTests: XCTestCase, @unchecked Sendable
             for: .voIP
         )
 
-        XCTAssertEqual(subject.deviceToken.decodedHex, expectedDecodedToken)
-        subject.unregister()
+        await fulfilmentInMainActor { self.subject.deviceToken.decodedHex == expectedDecodedToken }
 
-        XCTAssertTrue(subject.deviceToken.isEmpty)
+        subject.unregister()
+        await fulfilmentInMainActor { self.subject.deviceToken.decodedHex.isEmpty }
     }
 
     // MARK: - pushRegistry(_:didUpdate:for:)
 
-    func test_pushRegistryDidUpdatePushCredentials_deviceTokenWasConfiguredCorrectly() {
+    @MainActor
+    func test_pushRegistryDidUpdatePushCredentials_deviceTokenWasConfiguredCorrectly() async {
         let expected = "mock-device-token"
         subject.pushRegistry(
             subject.registry,
@@ -69,7 +70,7 @@ final class CallKitPushNotificationAdapterTests: XCTestCase, @unchecked Sendable
             for: .voIP
         )
 
-        XCTAssertEqual(subject.deviceToken.decodedHex, expected)
+        await fulfilmentInMainActor { self.subject.deviceToken.decodedHex == expected }
     }
 
     // MARK: - pushRegistry(_:didInvalidatePushTokenFor:)
@@ -130,7 +131,7 @@ final class CallKitPushNotificationAdapterTests: XCTestCase, @unchecked Sendable
         _ content: CallKitPushNotificationAdapter.Content? = nil,
         contentType: PKPushType = .voIP,
         displayName: String = "",
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) async {
         let pushPayload = MockPKPushPayload()
