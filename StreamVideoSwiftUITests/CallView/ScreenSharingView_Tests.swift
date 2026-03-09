@@ -6,6 +6,7 @@ import SnapshotTesting
 @preconcurrency import StreamSwiftTestHelpers
 @testable import StreamVideo
 @testable import StreamVideoSwiftUI
+import SwiftUI
 import XCTest
 
 final class ScreenSharingView_Tests: StreamVideoUITestCase, @unchecked Sendable {
@@ -25,12 +26,15 @@ final class ScreenSharingView_Tests: StreamVideoUITestCase, @unchecked Sendable 
             track: nil,
             participant: viewModel.participants[1]
         )
-        let view = ScreenSharingView(
-            viewModel: viewModel,
-            screenSharing: session,
-            availableFrame: .init(origin: .zero, size: defaultScreenSize),
-            isZoomEnabled: false
-        )
+        let view = ZStack {
+            Color.black.ignoresSafeArea(.all)
+            ScreenSharingView(
+                viewModel: viewModel,
+                screenSharing: session,
+                availableFrame: .init(origin: .zero, size: defaultScreenSize),
+                isZoomEnabled: false
+            )
+        }
         AssertSnapshot(view, variants: snapshotVariants)
     }
 }
