@@ -579,6 +579,11 @@ open class CallViewModel: ObservableObject {
             do {
                 hasAcceptedCall = true
                 try await call.accept()
+
+                // Mirror `joinCall` so the incoming UI is dismissed before
+                // `enterCall` finishes the async join flow.
+                await MainActor.run { self.setCallingState(.joining) }
+
                 enterCall(
                     call: call,
                     callType: callType,
