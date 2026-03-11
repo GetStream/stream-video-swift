@@ -21,7 +21,8 @@ final class WebRTCCoordinatorStateMachine_LeavingStageTests: XCTestCase, @unchec
         .disconnected,
         .connected,
         .connecting,
-        .joining
+        .joining,
+        .peerConnectionPreparing
     ]
     private lazy var subject: WebRTCCoordinator.StateMachine.Stage! = .leaving(.init())
     private lazy var mockCoordinatorStack: MockWebRTCCoordinatorStack! = .init(

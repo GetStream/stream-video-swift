@@ -23,6 +23,7 @@ extension WebRTCCoordinator.StateMachine {
             var disconnectionSource: WebSocketConnectionState.DisconnectionSource?
             var flowError: Error?
             var joinSource: JoinSource?
+            var joinPolicy: WebRTCJoinPolicy = .default
 
             var isRejoiningFromSessionID: String?
             var migratingFromSFU: String = ""
@@ -63,7 +64,7 @@ extension WebRTCCoordinator.StateMachine {
         enum ID: Hashable, CaseIterable {
             case idle, connecting, connected, joining, joined, leaving, cleanUp,
                  disconnected, fastReconnecting, fastReconnected, rejoining,
-                 migrating, migrated, error, blocked
+                 migrating, migrated, error, blocked, peerConnectionPreparing
         }
 
         /// The identifier for the current stage.
@@ -145,6 +146,24 @@ extension WebRTCCoordinator.StateMachine {
                 nextStage.context.flowError = initialError
                 transitionOrError(.disconnected(nextStage.context))
             }
+        }
+
+        /// Notifies any pending ``Call.join()`` caller with the initial join
+        /// response
+        /// and clears pending completion state.
+        func reportJoinCompletion() {
+            guard
+                let joinCallResponse = context.initialJoinCallResponse,
+                let joinResponseHandler = context.joinResponseHandler
+            else {
+                return
+            }
+
+            joinResponseHandler.send(joinCallResponse)
+
+            // Clean up
+            context.initialJoinCallResponse = nil
+            context.joinResponseHandler = nil
         }
     }
 

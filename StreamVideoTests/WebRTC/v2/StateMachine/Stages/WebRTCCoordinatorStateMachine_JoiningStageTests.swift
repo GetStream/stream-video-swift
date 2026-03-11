@@ -486,6 +486,36 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
         eventCancellable.cancel()
     }
 
+    func test_transition_fromConnected_withReadinessAwarePolicy_transitionsToPeerConnectionPreparing() async throws {
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.reconnectAttempts = 11
+        subject.context.joinPolicy = .peerConnectionReadinessAware(timeout: 5)
+        subject.context.initialJoinCallResponse = .dummy()
+        subject.context.joinResponseHandler = .init()
+
+        await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
+        mockCoordinatorStack.webRTCAuthenticator.stubbedFunction[.waitForConnect] = Result<Void, Error>.success(())
+
+        let eventCancellable = receiveEvent(
+            .sfuEvent(.joinResponse(Stream_Video_Sfu_Event_JoinResponse())),
+            every: 0.3
+        )
+
+        try await assertTransition(
+            from: .connected,
+            expectedTarget: .peerConnectionPreparing,
+            subject: subject
+        ) { target in
+            XCTAssertNotNil(target.context.initialJoinCallResponse)
+            XCTAssertNotNil(target.context.joinResponseHandler)
+        }
+
+        eventCancellable.cancel()
+    }
+
     // MARK: - transition from connected with isRejoiningFromSessionID != nil
 
     func test_transition_fromConnectedWithRejoinWithoutCoordinator_transitionsToDisconnected() async throws {

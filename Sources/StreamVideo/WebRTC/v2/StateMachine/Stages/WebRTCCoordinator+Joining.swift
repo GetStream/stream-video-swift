@@ -135,7 +135,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         await coordinator.stateAdapter.publisher?.restartICE()
                     }
 
-                    transitionOrDisconnect(.joined(context))
+                    transitionToNextStage(context)
                 } catch {
                     context.reconnectionStrategy = context
                         .reconnectionStrategy
@@ -196,7 +196,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         isFastReconnecting: false
                     )
 
-                    transitionOrDisconnect(.joined(context))
+                    transitionToNextStage(context)
                 } catch {
                     context.reconnectionStrategy = .rejoin
                     transitionDisconnectOrError(error)
@@ -255,7 +255,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         isFastReconnecting: false
                     )
 
-                    transitionOrDisconnect(.joined(context))
+                    transitionToNextStage(context)
                 } catch {
                     transitionDisconnectOrError(error)
                 }
@@ -423,10 +423,6 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
             try Task.checkCancellation()
 
-            reportJoinCompletion()
-
-            try Task.checkCancellation()
-
             reportTelemetry(
                 sessionId: await coordinator.stateAdapter.sessionID,
                 unifiedSessionId: coordinator.stateAdapter.unifiedSessionId,
@@ -463,24 +459,6 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
                 try await group.waitForAll()
             }
-        }
-
-        /// Notifies any pending ``Call.join()`` caller with the initial join
-        /// response
-        /// and clears pending completion state.
-        private func reportJoinCompletion() {
-            guard
-                let joinCallResponse = context.initialJoinCallResponse,
-                let joinResponseHandler = context.joinResponseHandler
-            else {
-                return
-            }
-
-            joinResponseHandler.send(joinCallResponse)
-
-            // Clean up
-            context.initialJoinCallResponse = nil
-            context.joinResponseHandler = nil
         }
 
         /// Reports telemetry data to the SFU (Selective Forwarding Unit) to monitor and analyze the
@@ -533,6 +511,16 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 } catch {
                     log.error(error)
                 }
+            }
+        }
+
+        private func transitionToNextStage(_ context: Context) {
+            switch context.joinPolicy {
+            case .default:
+                reportJoinCompletion()
+                transitionOrDisconnect(.joined(context))
+            case .peerConnectionReadinessAware(let timeout):
+                transitionOrDisconnect(.peerConnectionPreparing(context, timeout: timeout))
             }
         }
     }

@@ -465,7 +465,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(call.stubbedFunctionInput[.join]?.count, 1)
         let input = try XCTUnwrap(call.stubbedFunctionInput[.join]?.first)
         switch input {
-        case let .join(_, _, _, _, callSettings):
+        case let .join(_, _, _, _, callSettings, _):
             XCTAssertEqual(callSettings, customCallSettings)
         case .updateTrackSize:
             XCTFail()
@@ -509,7 +509,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(call.stubbedFunctionInput[.join]?.count, 1)
         let input = try XCTUnwrap(call.stubbedFunctionInput[.join]?.first)
         switch input {
-        case let .join(_, _, _, _, callSettings):
+        case let .join(_, _, _, _, callSettings, _):
             XCTAssertEqual(callSettings, customCallSettings)
         case .updateTrackSize:
             XCTFail()

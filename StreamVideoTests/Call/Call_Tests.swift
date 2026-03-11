@@ -593,7 +593,15 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
 
         XCTAssertEqual(
             mockCallController.recordedInputPayload(
-                (Bool, CallSettings?, CreateCallOptions?, Bool, Bool, JoinSource).self,
+                (
+                    Bool,
+                    CallSettings?,
+                    CreateCallOptions?,
+                    Bool,
+                    Bool,
+                    JoinSource,
+                    WebRTCJoinPolicy
+                ).self,
                 for: .join
             )?.first?.5,
             .callKit
@@ -611,11 +619,50 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
 
         XCTAssertEqual(
             mockCallController.recordedInputPayload(
-                (Bool, CallSettings?, CreateCallOptions?, Bool, Bool, JoinSource).self,
+                (
+                    Bool,
+                    CallSettings?,
+                    CreateCallOptions?,
+                    Bool,
+                    Bool,
+                    JoinSource,
+                    WebRTCJoinPolicy
+                ).self,
                 for: .join
             )?.first?.5,
             .inApp
         )
+    }
+
+    func test_join_withPolicy_policyWasPassedToCallController() async throws {
+        let mockCallController = MockCallController()
+        let call = MockCall(.dummy(callController: mockCallController))
+        call.stub(for: \.state, with: .init(.dummy()))
+        mockCallController.stub(for: .join, with: JoinCallResponse.dummy())
+
+        _ = try await call.join(policy: .peerConnectionReadinessAware(timeout: 2))
+
+        let recordedInput = try XCTUnwrap(
+            mockCallController.recordedInputPayload(
+                (
+                    Bool,
+                    CallSettings?,
+                    CreateCallOptions?,
+                    Bool,
+                    Bool,
+                    JoinSource,
+                    WebRTCJoinPolicy
+                ).self,
+                for: .join
+            )?.first
+        )
+
+        switch recordedInput.6 {
+        case .default:
+            XCTFail()
+        case let .peerConnectionReadinessAware(timeout):
+            XCTAssertEqual(timeout, 2)
+        }
     }
 
     // MARK: - updateParticipantsSorting

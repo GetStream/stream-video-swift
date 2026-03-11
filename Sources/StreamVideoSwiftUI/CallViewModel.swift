@@ -584,7 +584,8 @@ open class CallViewModel: ObservableObject {
                     callType: callType,
                     callId: callId,
                     members: [],
-                    customData: customData
+                    customData: customData,
+                    policy: .peerConnectionReadinessAware(timeout: 2)
                 )
             } catch {
                 hasAcceptedCall = false
@@ -803,7 +804,8 @@ open class CallViewModel: ObservableObject {
         maxParticipants: Int? = nil,
         startsAt: Date? = nil,
         backstage: BackstageSettingsRequest? = nil,
-        customData: [String: RawJSON]? = nil
+        customData: [String: RawJSON]? = nil,
+        policy: WebRTCJoinPolicy = .default
     ) {
         if enteringCallTask != nil || callingState == .inCall {
             return
@@ -838,7 +840,8 @@ open class CallViewModel: ObservableObject {
                     create: true,
                     options: options,
                     ring: ring,
-                    callSettings: settings
+                    callSettings: settings,
+                    policy: policy
                 )
                 save(call: call)
                 enteringCallTask = nil

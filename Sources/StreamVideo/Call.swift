@@ -144,6 +144,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     ///  - ring: whether the call should ring, `false` by default.
     ///  - notify: whether the participants should be notified about the call.
     ///  - callSettings: optional call settings.
+    ///  - policy: controls when the join request is considered complete.
     /// - Throws: An error if the call could not be joined.
     @discardableResult
     public func join(
@@ -151,7 +152,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         options: CreateCallOptions? = nil,
         ring: Bool = false,
         notify: Bool = false,
-        callSettings: CallSettings? = nil
+        callSettings: CallSettings? = nil,
+        policy: WebRTCJoinPolicy = .default
     ) async throws -> JoinCallResponse {
         /// Determines the source from which the join action was initiated.
         ///
@@ -219,7 +221,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                                 ring: ring,
                                 notify: notify,
                                 source: joinSource,
-                                deliverySubject: deliverySubject
+                                deliverySubject: deliverySubject,
+                                policy: policy
                             )
                         )
                     )
