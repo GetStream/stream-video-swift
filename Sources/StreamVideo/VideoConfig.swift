@@ -20,6 +20,7 @@ public final class VideoConfig: Sendable {
     /// Enables the capture-time processing pipeline (e.g., filter nodes).
     public let usesProcessingPipeline: Bool
     public let usesNewCapturingPipeline: Bool
+    public let simulcastSupport: Bool
 
     /// Initializes a new instance of `VideoConfig` with the specified parameters.
     /// - Parameters:
@@ -36,12 +37,14 @@ public final class VideoConfig: Sendable {
         noiseCancellationFilter: NoiseCancellationFilter? = nil,
         audioProcessingModule: AudioProcessingModule? = nil,
         usesProcessingPipeline: Bool = true,
-        usesNewCapturingPipeline: Bool = true
+        usesNewCapturingPipeline: Bool = true,
+        simulcastSupport: Bool = true
     ) {
         self.videoFilters = videoFilters
         self.noiseCancellationFilter = noiseCancellationFilter
         self.audioProcessingModule = audioProcessingModule ?? InjectedValues[\.audioFilterProcessingModule]
         self.usesProcessingPipeline = usesProcessingPipeline
         self.usesNewCapturingPipeline = usesNewCapturingPipeline
+        self.simulcastSupport = simulcastSupport
     }
 }

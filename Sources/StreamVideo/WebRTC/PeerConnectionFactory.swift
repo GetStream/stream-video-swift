@@ -8,7 +8,9 @@ import StreamWebRTC
 /// A factory class for creating WebRTC-related objects such as peer connections,
 /// video sources, and audio tracks.
 final class PeerConnectionFactory: @unchecked Sendable {
-    
+
+    private let simulcastSupport: Bool
+
     /// The audio processing module associated with this factory.
     private let audioProcessingModule: RTCAudioProcessingModule
     /// Backing storage for the audio device module.
@@ -27,10 +29,13 @@ final class PeerConnectionFactory: @unchecked Sendable {
     
     /// Lazy-loaded RTCPeerConnectionFactory instance.
     private(set) lazy var factory: RTCPeerConnectionFactory = {
-        let encoderFactory = RTCVideoEncoderFactorySimulcast(
-            primary: Self.defaultEncoder,
-            fallback: Self.defaultEncoder
-        )
+        let encoderFactory: RTCVideoEncoderFactory = simulcastSupport
+            ? RTCVideoEncoderFactorySimulcast(
+                primary: Self.defaultEncoder,
+                fallback: Self.defaultEncoder
+            )
+            : Self.defaultEncoder
+
         return RTCPeerConnectionFactory(
             audioDeviceModuleType: .audioEngine,
             bypassVoiceProcessing: false,
@@ -62,18 +67,25 @@ final class PeerConnectionFactory: @unchecked Sendable {
     /// - Returns: A PeerConnectionFactory instance.
     static func build(
         audioProcessingModule: RTCAudioProcessingModule,
-        audioDeviceModuleSource: RTCAudioDeviceModuleControlling? = nil
+        audioDeviceModuleSource: RTCAudioDeviceModuleControlling? = nil,
+        simulcastSupport: Bool
     ) -> PeerConnectionFactory {
-        return .init(audioProcessingModule, audioDeviceModuleSource: audioDeviceModuleSource)
+        return .init(
+            audioProcessingModule,
+            audioDeviceModuleSource: audioDeviceModuleSource,
+            simulcastSupport: simulcastSupport
+        )
     }
     
     /// Private initializer to ensure instances are created through the `build` method.
     /// - Parameter audioProcessingModule: The RTCAudioProcessingModule to use.
     private init(
         _ audioProcessingModule: RTCAudioProcessingModule,
-        audioDeviceModuleSource: RTCAudioDeviceModuleControlling?
+        audioDeviceModuleSource: RTCAudioDeviceModuleControlling?,
+        simulcastSupport: Bool
     ) {
         self.audioProcessingModule = audioProcessingModule
+        self.simulcastSupport = simulcastSupport
         _ = factory
 
         if let audioDeviceModuleSource {

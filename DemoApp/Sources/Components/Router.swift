@@ -200,7 +200,8 @@ final class Router: ObservableObject {
         let videoConfig = VideoConfig(
             noiseCancellationFilter: noiseCancellationFilter,
             usesProcessingPipeline: AppEnvironment.usesVideoProcessingPipeline == .enabled,
-            usesNewCapturingPipeline: AppEnvironment.usesNewCapturingPipeline == .enabled
+            usesNewCapturingPipeline: AppEnvironment.usesNewCapturingPipeline == .enabled,
+            simulcastSupport: AppEnvironment.simulcastSupport == .enabled
         )
 
         let streamVideo = StreamVideo(

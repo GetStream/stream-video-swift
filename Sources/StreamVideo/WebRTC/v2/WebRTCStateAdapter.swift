@@ -127,7 +127,8 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
             videoConfig: videoConfig,
             callSettings: callSettings,
             peerConnectionFactory: PeerConnectionFactory.build(
-                audioProcessingModule: videoConfig.audioProcessingModule
+                audioProcessingModule: videoConfig.audioProcessingModule,
+                simulcastSupport: videoConfig.simulcastSupport
             ),
             rtcPeerConnectionCoordinatorFactory: rtcPeerConnectionCoordinatorFactory,
             videoCaptureSessionProvider: videoCaptureSessionProvider,
