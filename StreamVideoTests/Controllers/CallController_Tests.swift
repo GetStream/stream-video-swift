@@ -99,6 +99,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
     func test_joinCall_coordinatorTransitionsToConnecting() async throws {
         let callSettings = CallSettings(cameraPosition: .back)
         let options = CreateCallOptions(team: .unique)
+        let expectedJoinSource = JoinSource.callKit(.init {})
 
         try await assertTransitionToStage(
             .connecting,
@@ -113,7 +114,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
                             options: options,
                             ring: true,
                             notify: true,
-                            source: .callKit
+                            source: expectedJoinSource
                         )
                 }
             }
@@ -122,7 +123,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
             XCTAssertEqual(expectedStage.options?.team, options.team)
             XCTAssertTrue(expectedStage.ring)
             XCTAssertTrue(expectedStage.notify)
-            XCTAssertEqual(expectedStage.context.joinSource, .callKit)
+            XCTAssertEqual(expectedStage.context.joinSource, expectedJoinSource)
             await self.assertEqualAsync(
                 await self
                     .mockWebRTCCoordinatorFactory

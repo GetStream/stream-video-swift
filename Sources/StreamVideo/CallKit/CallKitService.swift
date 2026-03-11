@@ -473,9 +473,14 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             }
 
             do {
-                /// Mark join source as `.callKit` for audio session.
-                ///
-                callToJoinEntry.call.state.joinSource = .callKit
+                // Pass a CallKit completion hook through the join flow so the
+                // WebRTC layer can release CallKit's audio session ownership as
+                // soon as it has configured the audio device module.
+                callToJoinEntry.call.state.joinSource = .callKit(.init {
+                    // Allow CallKit to hand audio session activation back to
+                    // the app before we continue configuring audio locally.
+                    action.fulfill()
+                })
 
                 try await callToJoinEntry.call.join(callSettings: callSettings)
                 action.fulfill()
