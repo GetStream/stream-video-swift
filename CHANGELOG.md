@@ -13,6 +13,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fix call teardown ordering by posting `callEnded` only after active/ringing cleanup
   and keep `CallSession` token values in sync with `StreamVideo` token updates. [#1071](https://github.com/GetStream/stream-video-swift/pull/1071)
 - Fix local mediaAdapters not reacting to changed own capabilities. [#1070](https://github.com/GetStream/stream-video-swift/pull/1070)
+- Fix label color when presenting. [#1077](https://github.com/GetStream/stream-video-swift/pull/1077)
+- Ensure CallKit push token updates and invalidation mutate `deviceToken` on the main actor to avoid Swift concurrency/actor-isolation issues. [#1076](https://github.com/GetStream/stream-video-swift/pull/1076)
 
 # [1.43.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.43.0)
 _February 27, 2026_

@@ -377,11 +377,9 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         await state.update(from: response)
         if ring {
             configureOutgoingRingingController()
-
-            Task(disposableBag: disposableBag) { @MainActor [weak self] in
-                self?.streamVideo.state.ringingCall = self
-            }
+            await MainActor.run { streamVideo.state.ringingCall = self }
         }
+
         return response.call
     }
     

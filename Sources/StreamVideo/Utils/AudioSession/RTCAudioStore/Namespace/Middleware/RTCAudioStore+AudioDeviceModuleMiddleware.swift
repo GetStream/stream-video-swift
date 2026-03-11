@@ -127,9 +127,9 @@ extension RTCAudioStore {
             _ audioDeviceModule: AudioDeviceModule?,
             state: RTCAudioStore.StoreState
         ) throws {
-            state.audioDeviceModule?.reset()
-
             disposableBag.removeAll()
+
+            state.audioDeviceModule?.reset()
 
             guard let audioDeviceModule else {
                 return
