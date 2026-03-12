@@ -14,7 +14,7 @@ final class CallStateMachineStageRejectingStage_Tests: StreamVideoTestCase, @unc
 
     private lazy var mockDefaultAPI: MockDefaultAPI! = .init()
     private lazy var call: MockCall! = .init(.dummy(coordinatorClient: mockDefaultAPI))
-    private lazy var deliverySubject: PassthroughSubject<RejectCallResponse, Error>! = .init()
+    private lazy var deliverySubject: CurrentValueSubject<RejectCallResponse?, Error>! = .init(nil)
     private lazy var allOtherStages: [Call.StateMachine.Stage]! = Call.StateMachine.Stage.ID
         .allCases
         .filter { $0 != subject.id }

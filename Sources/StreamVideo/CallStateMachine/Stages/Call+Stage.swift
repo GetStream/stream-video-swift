@@ -40,7 +40,7 @@ extension Call.StateMachine {
 
             struct RejectingInput {
                 var reason: String?
-                var deliverySubject: PassthroughSubject<RejectCallResponse, Error>
+                var deliverySubject: CurrentValueSubject<RejectCallResponse?, Error>
             }
 
             weak var call: Call?

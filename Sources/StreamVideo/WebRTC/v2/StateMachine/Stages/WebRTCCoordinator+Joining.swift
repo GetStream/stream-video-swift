@@ -518,9 +518,9 @@ extension WebRTCCoordinator.StateMachine.Stage {
             switch context.joinPolicy {
             case .default:
                 reportJoinCompletion()
-                transitionOrDisconnect(.joined(context))
+                transitionOrDisconnect(.joined(self.context))
             case .peerConnectionReadinessAware(let timeout):
-                transitionOrDisconnect(.peerConnectionPreparing(context, timeout: timeout))
+                transitionOrDisconnect(.peerConnectionPreparing(self.context, timeout: timeout))
             }
         }
     }

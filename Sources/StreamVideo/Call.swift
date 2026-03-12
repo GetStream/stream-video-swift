@@ -472,16 +472,21 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             case let .rejecting(input) = currentStage.context.input {
             return try await input
                 .deliverySubject
+                .compactMap { $0 }
                 .nextValue(timeout: CallConfiguration.timeout.reject)
         } else {
-            let deliverySubject = PassthroughSubject<RejectCallResponse, Error>()
+            let deliverySubject = CurrentValueSubject<RejectCallResponse?, Error>(nil)
+
             stateMachine.transition(
                 .rejecting(
                     self,
                     input: .rejecting(.init(reason: reason, deliverySubject: deliverySubject))
                 )
             )
-            return try await deliverySubject.nextValue(timeout: CallConfiguration.timeout.reject)
+
+            return try await deliverySubject
+                .compactMap { $0 }
+                .nextValue(timeout: CallConfiguration.timeout.reject)
         }
     }
 
