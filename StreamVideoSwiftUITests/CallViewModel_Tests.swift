@@ -114,28 +114,28 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
     func test_startCall_joiningState() {
         // Given
         let callViewModel = CallViewModel()
-        
+
         // When
         callViewModel.startCall(callType: .default, callId: callId, members: participants)
-        
+
         // Then
         XCTAssert(callViewModel.outgoingCallMembers == participants)
         XCTAssert(callViewModel.callingState == .joining)
     }
-    
+
     @MainActor
     func test_startCall_outgoingState() {
         // Given
         let callViewModel = CallViewModel()
-        
+
         // When
         callViewModel.startCall(callType: .default, callId: callId, members: participants, ring: true)
-        
+
         // Then
         XCTAssert(callViewModel.outgoingCallMembers == participants)
         XCTAssert(callViewModel.callingState == .outgoing)
     }
-    
+
     @MainActor
     func test_outgoingCall_rejectedEvent() async throws {
         // Given
@@ -432,7 +432,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         // Then
         await fulfillment(of: [joiningStateExpectation], timeout: defaultTimeout)
         await assertCallingState(.inCall)
-	}
+    }
 
     func test_incomingCall_acceptCall_usesPeerConnectionReadinessAwarePolicy() async throws {
         await prepareIncomingCallScenario()
@@ -767,7 +767,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         // Then
         await assertCallingState(.idle)
     }
-    
+
     // MARK: - Toggle media state
 
     func test_callSettings_toggleCamera() async throws {
@@ -805,7 +805,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         // Then
         await fulfilmentInMainActor { self.subject.callSettings.cameraPosition == .back }
     }
-    
+
     // MARK: - Events
 
     func test_inCall_participantEvents() async throws {
@@ -928,7 +928,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
             self.subject.participantsLayout == .fullScreen
         }
     }
-    
+
     // MARK: - Participants
 
     func test_participants_layoutIsGrid_validateAllVariants() async throws {
@@ -954,7 +954,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
                 isRemoteScreenSharing: true,
                 expectedCount: 1
             ),
-            
+
             .init(
                 callParticipantsCount: 3,
                 participantsLayout: .grid,
@@ -976,7 +976,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
                 isRemoteScreenSharing: true,
                 expectedCount: 2
             ),
-            
+
             .init(
                 callParticipantsCount: 4,
                 participantsLayout: .grid,
@@ -1024,7 +1024,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
                 isRemoteScreenSharing: true,
                 expectedCount: 2
             ),
-            
+
             .init(
                 callParticipantsCount: 3,
                 participantsLayout: .spotlight,
@@ -1046,7 +1046,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
                 isRemoteScreenSharing: true,
                 expectedCount: 3
             ),
-            
+
             .init(
                 callParticipantsCount: 4,
                 participantsLayout: .spotlight,
@@ -1094,7 +1094,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
                 isRemoteScreenSharing: true,
                 expectedCount: 2
             ),
-            
+
             .init(
                 callParticipantsCount: 3,
                 participantsLayout: .fullScreen,
@@ -1116,7 +1116,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
                 isRemoteScreenSharing: true,
                 expectedCount: 3
             ),
-            
+
             .init(
                 callParticipantsCount: 4,
                 participantsLayout: .fullScreen,
