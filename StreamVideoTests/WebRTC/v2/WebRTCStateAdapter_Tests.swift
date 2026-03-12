@@ -651,6 +651,25 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         }
     }
 
+    func test_configureAudioSession_callKitSource_completesActionCompletion() async throws {
+        let completionExpectation = expectation(
+            description: "CallKit action completion invoked."
+        )
+        let sfuStack = MockSFUStack()
+        sfuStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
+        await subject.set(sfuAdapter: sfuStack.adapter)
+        let ownCapabilities = Set<OwnCapability>([OwnCapability.blockUsers])
+        await subject.enqueueOwnCapabilities { ownCapabilities }
+
+        try await subject.configureAudioSession(
+            source: .callKit(.init {
+                completionExpectation.fulfill()
+            })
+        )
+
+        await safeFulfillment(of: [completionExpectation], timeout: 1)
+    }
+
     // MARK: - cleanUp
 
     func test_cleanUp_shouldResetProperties() async throws {

@@ -587,8 +587,9 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
         let call = MockCall(.dummy(callController: mockCallController))
         call.stub(for: \.state, with: .init(.dummy()))
         mockCallController.stub(for: .join, with: JoinCallResponse.dummy())
+        let expectedJoinSource = JoinSource.callKit(.init {})
 
-        call.state.joinSource = .callKit
+        call.state.joinSource = expectedJoinSource
         _ = try await call.join()
 
         XCTAssertEqual(
@@ -596,7 +597,7 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
                 (Bool, CallSettings?, CreateCallOptions?, Bool, Bool, JoinSource).self,
                 for: .join
             )?.first?.5,
-            .callKit
+            expectedJoinSource
         )
     }
 

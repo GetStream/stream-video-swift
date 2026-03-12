@@ -87,6 +87,7 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
             startsAt: .init(timeIntervalSince1970: 100),
             team: .unique
         )
+        let expectedJoinSource = JoinSource.callKit(.init {})
 
         try await assertTransitionToStage(
             .connecting,
@@ -98,7 +99,7 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
                         options: expectedOptions,
                         ring: true,
                         notify: true,
-                        source: .callKit
+                        source: expectedJoinSource
                     )
             }
         ) { stage in
@@ -111,7 +112,7 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
             XCTAssertEqual(expectedStage.options?.team, expectedOptions.team)
             XCTAssertTrue(expectedStage.ring)
             XCTAssertTrue(expectedStage.notify)
-            XCTAssertEqual(expectedStage.context.joinSource, .callKit)
+            XCTAssertEqual(expectedStage.context.joinSource, expectedJoinSource)
             await self.assertEqualAsync(
                 await self.subject.stateAdapter.initialCallSettings,
                 expectedCallSettings
