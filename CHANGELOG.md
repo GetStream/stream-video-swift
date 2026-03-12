@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fix label color when presenting. [#1077](https://github.com/GetStream/stream-video-swift/pull/1077)
 - Ensure CallKit push token updates and invalidation mutate `deviceToken` on the main actor to avoid Swift concurrency/actor-isolation issues. [#1076](https://github.com/GetStream/stream-video-swift/pull/1076)
 - Ensure CallKit joins keep the answer action completion alive until WebRTC has configured the audio device module. [#1081](https://github.com/GetStream/stream-video-swift/pull/1081)
+- Update incoming call acceptance to move `CallViewModel` into `.joining` before the call finishes entering, so the joining UI appears immediately. [#1079](https://github.com/GetStream/stream-video-swift/pull/1079)
 
 # [1.43.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.43.0)
 _February 27, 2026_

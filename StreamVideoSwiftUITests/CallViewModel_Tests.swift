@@ -2,6 +2,7 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 @testable import StreamVideo
 @testable import StreamVideoSwiftUI
 import StreamWebRTC
@@ -402,6 +403,34 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         subject.acceptCall(callType: callType, callId: callId)
 
         // Then
+        await assertCallingState(.inCall)
+    }
+
+    func test_incomingCall_acceptCall_updatesCallingStateToJoiningBeforeInCall() async throws {
+        // Given
+        await prepareIncomingCallScenario()
+        let joiningStateExpectation = expectation(
+            description: "CallingState becomes joining"
+        )
+        joiningStateExpectation.assertForOverFulfill = false
+        var cancellable: AnyCancellable?
+
+        // Capture the transient state because `acceptCall` continues into the
+        // async `enterCall` flow immediately after the acceptance request.
+        cancellable = subject.$callingState
+            .dropFirst()
+            .sink { state in
+                if state == .joining {
+                    joiningStateExpectation.fulfill()
+                }
+            }
+        defer { cancellable?.cancel() }
+
+        // When
+        subject.acceptCall(callType: callType, callId: callId)
+
+        // Then
+        await fulfillment(of: [joiningStateExpectation], timeout: defaultTimeout)
         await assertCallingState(.inCall)
     }
 
