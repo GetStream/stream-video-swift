@@ -17,7 +17,10 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         .allCases
         .filter { $0 != subject.id }
         .map { WebRTCCoordinator.StateMachine.Stage(id: $0, context: .init()) }
-    private lazy var validStages: Set<WebRTCCoordinator.StateMachine.Stage.ID>! = [.joining]
+    private lazy var validStages: Set<WebRTCCoordinator.StateMachine.Stage.ID>! = [
+        .joining,
+        .peerConnectionPreparing
+    ]
     private lazy var mockCoordinatorStack: MockWebRTCCoordinatorStack! = .init(
         videoConfig: Self.videoConfig
     )

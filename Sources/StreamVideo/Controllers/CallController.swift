@@ -129,7 +129,8 @@ class CallController: @unchecked Sendable {
         options: CreateCallOptions? = nil,
         ring: Bool = false,
         notify: Bool = false,
-        source: JoinSource
+        source: JoinSource,
+        policy: WebRTCJoinPolicy = .default
     ) async throws -> JoinCallResponse {
         joinCallResponseFetchObserver?.cancel()
         joinCallResponseFetchObserver = nil
@@ -153,7 +154,8 @@ class CallController: @unchecked Sendable {
             ring: ring,
             notify: notify,
             source: source,
-            joinResponseHandler: joinCallResponseSubject
+            joinResponseHandler: joinCallResponseSubject,
+            policy: policy
         )
 
         do {

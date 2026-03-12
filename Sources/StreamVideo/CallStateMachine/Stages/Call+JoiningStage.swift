@@ -125,7 +125,8 @@ extension Call.StateMachine.Stage {
                 options: input.options,
                 ring: input.ring,
                 notify: input.notify,
-                source: input.source
+                source: input.source,
+                policy: input.policy
             )
 
             try Task.checkCancellation()
