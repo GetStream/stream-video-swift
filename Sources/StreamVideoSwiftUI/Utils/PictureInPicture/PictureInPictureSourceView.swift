@@ -22,15 +22,18 @@ struct PictureInPictureSourceView: UIViewRepresentable {
 
     func makeUIView(context: Context) -> UIView {
         context.coordinator.view.backgroundColor = .clear
+        // Apply the initial state here so already-active PiP hosts start
+        // observing window changes as soon as the view is created.
+        context.coordinator.update(isActive: isActive)
         return context.coordinator.view
     }
 
     func updateUIView(_ uiView: UIView, context: Context) {
-        /* No-op */
+        context.coordinator.update(isActive: isActive)
     }
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(isActive: isActive)
+        Coordinator()
     }
 
     // MARK: - Private Helpers
@@ -40,23 +43,38 @@ struct PictureInPictureSourceView: UIViewRepresentable {
         @Injected(\.pictureInPictureAdapter) private var pictureInPictureAdapter
 
         let view: WindowObservingView = .init()
+        private var isActive = false
         private var cancellable: AnyCancellable?
 
         func dismantle() {
+            isActive = false
             cancellable?.cancel()
+            cancellable = nil
+            publishUpdate(false)
         }
 
-        init(isActive: Bool) {
-            if #available(iOS 15.0, *), isActive {
+        func update(isActive: Bool) {
+            guard self.isActive != isActive else { return }
+
+            if isActive {
+                cancellable?.cancel()
                 cancellable = view
                     .publisher
                     .receive(on: DispatchQueue.main)
                     .sink { [weak self] in self?.publishUpdate($0) }
+            } else {
+                // Clear the adapter immediately when PiP is turned off so it
+                // does not retain a stale source view reference.
+                dismantle()
             }
+
+            self.isActive = isActive
         }
 
         private func publishUpdate(_ hasWindow: Bool) {
-            pictureInPictureAdapter.store?.dispatch(.setSourceView(hasWindow ? view : nil))
+            pictureInPictureAdapter
+                .store?
+                .dispatch(.setSourceView(hasWindow ? view : nil))
         }
     }
 

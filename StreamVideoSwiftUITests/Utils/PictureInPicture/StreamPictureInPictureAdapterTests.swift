@@ -5,6 +5,7 @@
 import Foundation
 @testable import StreamVideo
 @testable import StreamVideoSwiftUI
+import UIKit
 import XCTest
 
 @available(iOS 15.0, *)
@@ -43,6 +44,45 @@ final class StreamPictureInPictureAdapterTests: XCTestCase, @unchecked Sendable 
         subject.sourceView = view
 
         await fulfilmentInMainActor { self.subject.store?.state.sourceView === view }
+    }
+
+    // MARK: - SourceView coordinator lifecycle
+
+    @MainActor
+    func test_sourceViewCoordinatorActivated_viewMovesToWindow_storeWasUpdated() async {
+        let previousPictureInPictureAdapter = InjectedValues[\.pictureInPictureAdapter]
+        InjectedValues[\.pictureInPictureAdapter] = subject
+        defer { InjectedValues[\.pictureInPictureAdapter] = previousPictureInPictureAdapter }
+
+        await fulfilmentInMainActor { self.subject.store != nil }
+        let coordinator = PictureInPictureSourceView.Coordinator()
+
+        coordinator.update(isActive: true)
+        coordinator.view.willMove(toWindow: UIWindow())
+
+        await fulfilmentInMainActor {
+            self.subject.store?.state.sourceView === coordinator.view
+        }
+    }
+
+    @MainActor
+    func test_sourceViewCoordinatorDeactivated_storeSourceViewCleared() async {
+        let previousPictureInPictureAdapter = InjectedValues[\.pictureInPictureAdapter]
+        InjectedValues[\.pictureInPictureAdapter] = subject
+        defer { InjectedValues[\.pictureInPictureAdapter] = previousPictureInPictureAdapter }
+
+        await fulfilmentInMainActor { self.subject.store != nil }
+        let coordinator = PictureInPictureSourceView.Coordinator()
+
+        coordinator.update(isActive: true)
+        coordinator.view.willMove(toWindow: UIWindow())
+        await fulfilmentInMainActor {
+            self.subject.store?.state.sourceView === coordinator.view
+        }
+
+        coordinator.update(isActive: false)
+
+        await fulfilmentInMainActor { self.subject.store?.state.sourceView == nil }
     }
 
     // MARK: - ViewFactory updated
