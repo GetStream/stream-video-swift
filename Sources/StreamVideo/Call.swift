@@ -145,6 +145,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     ///  - ring: whether the call should ring, `false` by default.
     ///  - notify: whether the participants should be notified about the call.
     ///  - callSettings: optional call settings.
+    ///  - policy: controls when the join request is considered complete.
     /// - Throws: An error if the call could not be joined.
     @discardableResult
     public func join(
@@ -152,7 +153,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         options: CreateCallOptions? = nil,
         ring: Bool = false,
         notify: Bool = false,
-        callSettings: CallSettings? = nil
+        callSettings: CallSettings? = nil,
+        policy: WebRTCJoinPolicy = .default
     ) async throws -> JoinCallResponse {
         /// Determines the source from which the join action was initiated.
         ///
@@ -220,7 +222,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                                 ring: ring,
                                 notify: notify,
                                 source: joinSource,
-                                deliverySubject: deliverySubject
+                                deliverySubject: deliverySubject,
+                                policy: policy
                             )
                         )
                     )
@@ -469,16 +472,21 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             case let .rejecting(input) = currentStage.context.input {
             return try await input
                 .deliverySubject
+                .compactMap { $0 }
                 .nextValue(timeout: CallConfiguration.timeout.reject)
         } else {
-            let deliverySubject = PassthroughSubject<RejectCallResponse, Error>()
+            let deliverySubject = CurrentValueSubject<RejectCallResponse?, Error>(nil)
+
             stateMachine.transition(
                 .rejecting(
                     self,
                     input: .rejecting(.init(reason: reason, deliverySubject: deliverySubject))
                 )
             )
-            return try await deliverySubject.nextValue(timeout: CallConfiguration.timeout.reject)
+
+            return try await deliverySubject
+                .compactMap { $0 }
+                .nextValue(timeout: CallConfiguration.timeout.reject)
         }
     }
 
@@ -608,8 +616,30 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// The cleanup sequence clears active/ringing call references from
     /// `StreamVideo` state before emitting `CallNotification.callEnded`.
     public func leave() {
-        Task(disposableBag: disposableBag) { @MainActor [weak self] in
-            self?.performLeave()
+        disposableBag.removeAll()
+        callController.leave()
+        closedCaptionsAdapter.stop()
+        stateMachine.transition(.idle(.init(call: self)))
+        /// Upon `Call.leave` we remove the call from the cache. Any further actions that are required
+        /// to happen on the call object (e.g. rejoin) will need to fetch a new instance from `StreamVideo`
+        /// client.
+        callCache.remove(for: cId)
+        outgoingRingingController = nil
+
+        // Reset the activeAudioFilter
+        setAudioFilter(nil)
+
+        let strongSelf = self
+        let cId = self.cId
+        Task(disposableBag: disposableBag) { @MainActor [strongSelf, streamVideo, cId] in
+            if streamVideo.state.ringingCall?.cId == cId {
+                streamVideo.state.ringingCall = nil
+            }
+            if streamVideo.state.activeCall?.cId == cId {
+                streamVideo.state.activeCall = nil
+            }
+
+            postNotification(with: CallNotification.callEnded, object: strongSelf)
         }
     }
 
@@ -1554,31 +1584,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     }
 
     // MARK: - private
-
-    @MainActor
-    private func performLeave() {
-        disposableBag.removeAll()
-        callController.leave()
-        closedCaptionsAdapter.stop()
-        stateMachine.transition(.idle(.init(call: self)))
-        /// Upon `Call.leave` we remove the call from the cache. Any further actions that are required
-        /// to happen on the call object (e.g. rejoin) will need to fetch a new instance from `StreamVideo`
-        /// client.
-        callCache.remove(for: cId)
-        outgoingRingingController = nil
-
-        // Reset the activeAudioFilter
-        setAudioFilter(nil)
-
-        if streamVideo.state.ringingCall?.cId == cId {
-            streamVideo.state.ringingCall = nil
-        }
-        if streamVideo.state.activeCall?.cId == cId {
-            streamVideo.state.activeCall = nil
-        }
-
-        postNotification(with: CallNotification.callEnded, object: self)
-    }
 
     private func updatePermissions(
         for userId: String,

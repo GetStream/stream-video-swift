@@ -9,7 +9,7 @@ extension Task where Failure == any Error {
     @discardableResult
     init(
         priority: TaskPriority? = nil,
-        /// New: a timeout property to configure how long a task may perform before failing with a timeout error.
+        /// The maximum time to wait before failing with `TimeOutError`.
         timeoutInSeconds: TimeInterval,
         file: StaticString = #fileID,
         function: StaticString = #function,
@@ -28,11 +28,11 @@ extension Task where Failure == any Error {
                     /// Add another task to trigger the timeout if it finishes earlier than our first task.
                     _ = group.addTaskUnlessCancelled { () -> Success in
                         try await Task<Never, Never>.sleep(nanoseconds: UInt64(timeoutInSeconds * 1_000_000_000))
-                        throw ClientError("Operation timed out", file, line)
+                        throw TimeOutError(file: file, line: line)
                     }
                 } else {
                     log.warning("Invalid timeout:\(timeoutInSeconds) was passed to Task.timeout. Task will timeout immediately.")
-                    throw ClientError("Operation timed out", file, line)
+                    throw TimeOutError(file: file, line: line)
                 }
 
                 /// We need to deal with an optional, even though we know it's not optional.

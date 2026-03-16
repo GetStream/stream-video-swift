@@ -468,8 +468,12 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
 
             do {
                 try await callToJoinEntry.call.accept()
+                // We need to fulfil here the action to allow CallKit to release
+                // the audioSession to the app, for activation.
+                action.fulfill()
             } catch {
                 log.error(error, subsystems: .callKit)
+                action.fail()
             }
 
             do {
@@ -482,13 +486,15 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                     action.fulfill()
                 })
 
+                // Before reach here we should fulfil the action to allow
+                // CallKit to release the audioSession, so that the SDK
+                // can configure and activate it and complete successfully the
+                // peerConnection configuration.
                 try await callToJoinEntry.call.join(callSettings: callSettings)
-                action.fulfill()
             } catch {
                 callToJoinEntry.call.leave()
                 set(nil, for: action.callUUID)
                 log.error(error, subsystems: .callKit)
-                action.fail()
             }
         }
     }

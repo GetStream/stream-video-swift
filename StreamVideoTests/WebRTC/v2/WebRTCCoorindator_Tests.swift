@@ -92,6 +92,7 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
         try await assertTransitionToStage(
             .connecting,
             operation: {
+                let joinResponseHandler = PassthroughSubject<JoinCallResponse, Error>()
                 try await self
                     .subject
                     .connect(
@@ -99,7 +100,8 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
                         options: expectedOptions,
                         ring: true,
                         notify: true,
-                        source: expectedJoinSource
+                        source: expectedJoinSource,
+                        joinResponseHandler: joinResponseHandler
                     )
             }
         ) { stage in
@@ -113,6 +115,7 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
             XCTAssertTrue(expectedStage.ring)
             XCTAssertTrue(expectedStage.notify)
             XCTAssertEqual(expectedStage.context.joinSource, expectedJoinSource)
+            XCTAssertNotNil(expectedStage.context.joinResponseHandler)
             await self.assertEqualAsync(
                 await self.subject.stateAdapter.initialCallSettings,
                 expectedCallSettings
@@ -177,7 +180,8 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
                         options: nil,
                         ring: true,
                         notify: true,
-                        source: .inApp
+                        source: .inApp,
+                        joinResponseHandler: .init()
                     )
             }
         ) { _ in

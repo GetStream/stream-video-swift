@@ -4,10 +4,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### ✅ Added
+- Added `WebRTCJoinPolicy` to `Call.join()` so applications can delay join
+  completion until publisher and subscriber peer connections are ready.
+
 ### 🔄 Changed
 - Propagated publish/unpublish failures from local video and screen-share capture
   sessions instead of swallowing them after logging. [#1072](https://github.com/GetStream/stream-video-swift/pull/1072)
 - The SDK will now end an outgoing call if the app moves to background while ringing. [#1078](https://github.com/GetStream/stream-video-swift/pull/1078)
+- `CallViewModel` now waits briefly for peer-connection readiness before an accepted ringing call is surfaced as joined. [#1080](https://github.com/GetStream/stream-video-swift/pull/1080)
 
 ### 🐞 Fixed
 - Fix call teardown ordering by posting `callEnded` only after active/ringing cleanup
@@ -32,6 +37,12 @@ _February 10, 2026_
 
 ### ✅ Added
 - Added support for raw and individual recording. [#1043](https://github.com/GetStream/stream-video-swift/pull/1043)
+
+### 🔄 Changed
+- Join flow now is aligned with the internal SFU connection state. [#1059](https://github.com/GetStream/stream-video-swift/pull/1059)
+
+### 🐞 Fixed
+- Speaker will now be disabled while ringing during the ringAndJoin flow. [#1059](https://github.com/GetStream/stream-video-swift/pull/1059)
 
 # [1.41.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.41.0)
 _February 02, 2026_

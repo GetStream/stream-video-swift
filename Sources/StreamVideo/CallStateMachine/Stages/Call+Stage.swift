@@ -32,6 +32,7 @@ extension Call.StateMachine {
                 var notify: Bool
                 var source: JoinSource
                 var deliverySubject: CurrentValueSubject<JoinCallResponse?, Error>
+                var policy: WebRTCJoinPolicy = .default
 
                 var currentNumberOfRetries = 0
                 var retryPolicy: RetryPolicy = .fastAndSimple
@@ -39,7 +40,7 @@ extension Call.StateMachine {
 
             struct RejectingInput {
                 var reason: String?
-                var deliverySubject: PassthroughSubject<RejectCallResponse, Error>
+                var deliverySubject: CurrentValueSubject<RejectCallResponse?, Error>
             }
 
             weak var call: Call?

@@ -786,6 +786,16 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
             .setAudioDeviceModule(peerConnectionFactory.audioDeviceModule)
         ]).result()
 
+        let sourceIsCallKit = {
+            guard
+                let source,
+                case .callKit = source
+            else {
+                return false
+            }
+            return true
+        }()
+
         if case let .callKit(completion) = source {
             // Let CallKit release its audio session ownership once WebRTC has
             // the audio device module it needs.
@@ -799,7 +809,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
             statsAdapter: statsAdapter,
             /// If we are joining from CallKit the AudioSession will be activated from it and we
             /// shouldn't attempt another activation.
-            shouldSetActive: source == .inApp
+            shouldSetActive: !sourceIsCallKit
         )
     }
 

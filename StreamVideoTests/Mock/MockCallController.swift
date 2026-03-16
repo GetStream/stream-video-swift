@@ -25,7 +25,8 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
             options: CreateCallOptions?,
             ring: Bool = false,
             notify: Bool = false,
-            source: JoinSource
+            source: JoinSource,
+            policy: WebRTCJoinPolicy
         )
 
         case observeWebRTCStateUpdated
@@ -40,8 +41,16 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
             switch self {
             case let .setDisconnectionTimeout(timeout):
                 return timeout
-            case let .join(create, callSettings, options, ring, notify, source):
-                return (create, callSettings, options, ring, notify, source)
+            case let .join(
+                create,
+                callSettings,
+                options,
+                ring,
+                notify,
+                source,
+                policy
+            ):
+                return (create, callSettings, options, ring, notify, source, policy)
             case .observeWebRTCStateUpdated:
                 return ()
             case let .changeVideoState(value):
@@ -87,7 +96,8 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
         options: CreateCallOptions? = nil,
         ring: Bool = false,
         notify: Bool = false,
-        source: JoinSource
+        source: JoinSource,
+        policy: WebRTCJoinPolicy = .default
     ) async throws -> JoinCallResponse {
         stubbedFunctionInput[.join]?.append(
             .join(
@@ -96,9 +106,14 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
                 options: options,
                 ring: ring,
                 notify: notify,
-                source: source
+                source: source,
+                policy: policy
             )
         )
+
+        if let callSettings {
+            await call?.state.update(callSettings: callSettings)
+        }
 
         if let stub = stubbedFunction[.join] as? JoinCallResponse {
             return stub
@@ -111,7 +126,8 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
                 options: options,
                 ring: ring,
                 notify: notify,
-                source: source
+                source: source,
+                policy: policy
             )
         }
     }

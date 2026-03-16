@@ -13,6 +13,7 @@ enum WebRTCConfiguration {
         var join: TimeInterval
         var migrationCompletion: TimeInterval
         var publisherSetUpBeforeNegotiation: TimeInterval
+        var audioSessionConfigurationCompletion: TimeInterval
 
         /// Timeout for authentication in production environment.
         static let production = Timeout(
@@ -20,7 +21,8 @@ enum WebRTCConfiguration {
             connect: 30,
             join: 30,
             migrationCompletion: 10,
-            publisherSetUpBeforeNegotiation: 2
+            publisherSetUpBeforeNegotiation: 2,
+            audioSessionConfigurationCompletion: 2
         )
 
         #if STREAM_TESTS
@@ -30,7 +32,8 @@ enum WebRTCConfiguration {
             connect: 5,
             join: 5,
             migrationCompletion: 5,
-            publisherSetUpBeforeNegotiation: 5
+            publisherSetUpBeforeNegotiation: 5,
+            audioSessionConfigurationCompletion: 5
         )
         #endif
     }

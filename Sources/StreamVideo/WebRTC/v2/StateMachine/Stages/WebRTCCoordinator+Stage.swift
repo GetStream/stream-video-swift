@@ -2,6 +2,7 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import Foundation
 
 extension WebRTCCoordinator.StateMachine {
@@ -22,6 +23,7 @@ extension WebRTCCoordinator.StateMachine {
             var disconnectionSource: WebSocketConnectionState.DisconnectionSource?
             var flowError: Error?
             var joinSource: JoinSource?
+            var joinPolicy: WebRTCJoinPolicy = .default
 
             var isRejoiningFromSessionID: String?
             var migratingFromSFU: String = ""
@@ -37,6 +39,14 @@ extension WebRTCCoordinator.StateMachine {
             var healthCheckInterval: TimeInterval = 5
             var webSocketHealthTimeout: TimeInterval = 15
             var lastHealthCheckReceivedAt: Date?
+
+            /// Stores the initial join response so the pending ``Call.join()``
+            /// completion can be finished once the SFU handshake succeeds.
+            var initialJoinCallResponse: JoinCallResponse?
+
+            /// Completes the pending ``Call.join()`` continuation with either
+            /// success or failure depending on stage flow outcome.
+            var joinResponseHandler: PassthroughSubject<JoinCallResponse, Error>?
 
             /// Determines the next reconnection strategy based on the current one.
             /// - Returns: The next reconnection strategy.
@@ -54,7 +64,7 @@ extension WebRTCCoordinator.StateMachine {
         enum ID: Hashable, CaseIterable {
             case idle, connecting, connected, joining, joined, leaving, cleanUp,
                  disconnected, fastReconnecting, fastReconnected, rejoining,
-                 migrating, migrated, error, blocked
+                 migrating, migrated, error, blocked, peerConnectionPreparing
         }
 
         /// The identifier for the current stage.
@@ -136,6 +146,24 @@ extension WebRTCCoordinator.StateMachine {
                 nextStage.context.flowError = initialError
                 transitionOrError(.disconnected(nextStage.context))
             }
+        }
+
+        /// Notifies any pending ``Call.join()`` caller with the initial join
+        /// response
+        /// and clears pending completion state.
+        func reportJoinCompletion() {
+            guard
+                let joinCallResponse = context.initialJoinCallResponse,
+                let joinResponseHandler = context.joinResponseHandler
+            else {
+                return
+            }
+
+            joinResponseHandler.send(joinCallResponse)
+
+            // Clean up
+            context.initialJoinCallResponse = nil
+            context.joinResponseHandler = nil
         }
     }
 

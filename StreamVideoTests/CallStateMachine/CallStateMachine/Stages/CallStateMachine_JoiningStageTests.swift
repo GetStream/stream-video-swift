@@ -116,13 +116,43 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
         }
     }
 
-    func test_execute_withoutRetries_callStateCallSettingsUpdatedWithInput() async throws {
+    func test_execute_withoutRetries_joinPolicyWasPassedToCallController() async throws {
         let context = Call.StateMachine.Stage.Context(
             call: call,
             input: .join(
                 .init(
                     create: true,
                     callSettings: .init(audioOn: false),
+                    options: .init(memberIds: [.unique]),
+                    ring: true,
+                    notify: false,
+                    source: .inApp,
+                    deliverySubject: .init(nil),
+                    policy: .peerConnectionReadinessAware(timeout: 2),
+                    retryPolicy: .init(maxRetries: 0, delay: { _ in 0 })
+                )
+            )
+        )
+
+        try await assertJoining(
+            context,
+            expectedTransition: .error
+        ) {
+            XCTAssertEqual(self.callController.timesCalled(.join), 1)
+            try self.validateCallControllerJoinCall(context: context)
+        }
+    }
+
+    func test_execute_withoutRetries_callStateCallSettingsPreservedFromBeforeJoin() async throws {
+        let expectedCallSettings = CallSettings(audioOn: false)
+        self.call?.state.callSettings = expectedCallSettings
+
+        let context = Call.StateMachine.Stage.Context(
+            call: call,
+            input: .join(
+                .init(
+                    create: true,
+                    callSettings: expectedCallSettings,
                     options: .init(memberIds: [.unique]),
                     ring: true,
                     notify: false,
@@ -137,8 +167,9 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
             joinResponse: JoinCallResponse.dummy(),
             expectedTransition: .joined
         ) { @MainActor in
+            let call = try XCTUnwrap(self.call)
             XCTAssertEqual(self.callController.timesCalled(.join), 1)
-            await self.fulfilmentInMainActor { self.call!.state.callSettings == context.input.join?.callSettings }
+            XCTAssertEqual(call.state.callSettings, expectedCallSettings)
         }
     }
 
@@ -394,7 +425,15 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
         iteration: Int = 0,
         context: Call.StateMachine.Stage.Context
     ) throws {
-        let joinInputType = (Bool, CallSettings?, CreateCallOptions?, Bool, Bool, JoinSource).self
+        let joinInputType = (
+            Bool,
+            CallSettings?,
+            CreateCallOptions?,
+            Bool,
+            Bool,
+            JoinSource,
+            WebRTCJoinPolicy
+        ).self
         let recordedInput = try XCTUnwrap(
             callController.recordedInputPayload(
                 joinInputType,
@@ -406,6 +445,19 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
         XCTAssertEqual(context.input.join?.options, recordedInput.2)
         XCTAssertEqual(context.input.join?.ring, recordedInput.3)
         XCTAssertEqual(context.input.join?.notify, recordedInput.4)
+        XCTAssertEqual(context.input.join?.source, recordedInput.5)
+
+        switch (context.input.join?.policy, recordedInput.6) {
+        case (.default, .default):
+            break
+        case let (
+            .peerConnectionReadinessAware(expectedTimeout)?,
+            .peerConnectionReadinessAware(recordedTimeout)
+        ):
+            XCTAssertEqual(expectedTimeout, recordedTimeout)
+        default:
+            XCTFail()
+        }
     }
 }
 
