@@ -26,7 +26,7 @@ final class WebRTCCoordinatorStateMachine_PeerConnectionPreparingStageTests:
         videoConfig: Self.videoConfig
     )
     private lazy var subject: WebRTCCoordinator.StateMachine.Stage! =
-        .peerConnectionPreparing(.init(), timeout: 0.01)
+        .peerConnectionPreparing(.init(), timeout: 0.01, telemetryReporter: .init())
 
     override class func tearDown() {
         Self.videoConfig = nil
@@ -78,7 +78,7 @@ final class WebRTCCoordinatorStateMachine_PeerConnectionPreparingStageTests:
             initialJoinCallResponse: expectedJoinCallResponse,
             joinResponseHandler: completionSubject
         )
-        subject = .peerConnectionPreparing(context, timeout: 0.01)
+        subject = .peerConnectionPreparing(context, timeout: 0.01, telemetryReporter: .init())
 
         await mockCoordinatorStack
             .coordinator

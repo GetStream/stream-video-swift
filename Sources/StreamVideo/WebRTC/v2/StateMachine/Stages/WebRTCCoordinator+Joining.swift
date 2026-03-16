@@ -31,10 +31,9 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
         @Injected(\.audioStore) private var audioStore
 
-        private enum FlowType { case regular, fast, rejoin, migrate }
         private let disposableBag = DisposableBag()
         private let startTime = Date()
-        private var flowType = FlowType.regular
+        private var telemetryReporter: JoinedStateTelemetryReporter = .init()
 
         /// Initializes a new instance of `JoiningStage`.
         /// - Parameter context: The context for the joining stage.
@@ -56,19 +55,19 @@ extension WebRTCCoordinator.StateMachine.Stage {
         ) -> Self? {
             switch previousStage.id {
             case .connected where context.isRejoiningFromSessionID != nil:
-                flowType = .rejoin
+                telemetryReporter.flowType = .rejoin
                 executeRejoining()
                 return self
             case .connected:
-                flowType = .regular
+                telemetryReporter.flowType = .regular
                 execute(isFastReconnecting: false)
                 return self
             case .fastReconnected:
-                flowType = .fast
+                telemetryReporter.flowType = .fast
                 execute(isFastReconnecting: true)
                 return self
             case .migrated:
-                flowType = .migrate
+                telemetryReporter.flowType = .migrate
                 executeMigration()
                 return self
             default:
@@ -135,7 +134,11 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         await coordinator.stateAdapter.publisher?.restartICE()
                     }
 
-                    transitionToNextStage(context)
+                    await transitionToNextStage(
+                        context,
+                        coordinator: coordinator,
+                        sfuAdapter: sfuAdapter
+                    )
                 } catch {
                     context.reconnectionStrategy = context
                         .reconnectionStrategy
@@ -196,7 +199,11 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         isFastReconnecting: false
                     )
 
-                    transitionToNextStage(context)
+                    await transitionToNextStage(
+                        context,
+                        coordinator: coordinator,
+                        sfuAdapter: sfuAdapter
+                    )
                 } catch {
                     context.reconnectionStrategy = .rejoin
                     transitionDisconnectOrError(error)
@@ -255,7 +262,11 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         isFastReconnecting: false
                     )
 
-                    transitionToNextStage(context)
+                    await transitionToNextStage(
+                        context,
+                        coordinator: coordinator,
+                        sfuAdapter: sfuAdapter
+                    )
                 } catch {
                     transitionDisconnectOrError(error)
                 }
@@ -422,12 +433,6 @@ extension WebRTCCoordinator.StateMachine.Stage {
             )
 
             try Task.checkCancellation()
-
-            reportTelemetry(
-                sessionId: await coordinator.stateAdapter.sessionID,
-                unifiedSessionId: coordinator.stateAdapter.unifiedSessionId,
-                sfuAdapter: sfuAdapter
-            )
         }
 
         /// Waits until the audio session is fully ready for call setup.
@@ -461,66 +466,29 @@ extension WebRTCCoordinator.StateMachine.Stage {
             }
         }
 
-        /// Reports telemetry data to the SFU (Selective Forwarding Unit) to monitor and analyze the
-        /// connection lifecycle.
-        ///
-        /// This method collects relevant metrics based on the flow type of the connection, such as
-        /// connection time or reconnection details, and sends them to the SFU for logging and diagnostics.
-        /// The telemetry data provides insights into the connection's performance and the strategies used
-        /// during rejoining, fast reconnecting, or migration.
-        ///
-        /// The reported data includes:
-        /// - Connection time in seconds for a regular flow.
-        /// - Reconnection strategies (e.g., fast reconnect, rejoin, or migration) and their duration.
-        private func reportTelemetry(
-            sessionId: String,
-            unifiedSessionId: String,
+        private func transitionToNextStage(
+            _ context: Context,
+            coordinator: WebRTCCoordinator,
             sfuAdapter: SFUAdapter
-        ) {
-            Task(disposableBag: disposableBag) { [weak self] in
-                guard let self else { return }
-                var telemetry = Stream_Video_Sfu_Signal_Telemetry()
-                let duration = Float(Date().timeIntervalSince(startTime))
-                var reconnection = Stream_Video_Sfu_Signal_Reconnection()
-                reconnection.timeSeconds = duration
-
-                telemetry.data = {
-                    switch self.flowType {
-                    case .regular:
-                        return .connectionTimeSeconds(duration)
-                    case .fast:
-                        var reconnection = Stream_Video_Sfu_Signal_Reconnection()
-                        reconnection.strategy = .fast
-                        return .reconnection(reconnection)
-                    case .rejoin:
-                        reconnection.strategy = .rejoin
-                        return .reconnection(reconnection)
-                    case .migrate:
-                        reconnection.strategy = .migrate
-                        return .reconnection(reconnection)
-                    }
-                }()
-
-                do {
-                    try await sfuAdapter.sendStats(
-                        for: sessionId,
-                        unifiedSessionId: unifiedSessionId,
-                        telemetry: telemetry
-                    )
-                    log.debug("Join call completed in \(duration) seconds.")
-                } catch {
-                    log.error(error)
-                }
-            }
-        }
-
-        private func transitionToNextStage(_ context: Context) {
+        ) async {
             switch context.joinPolicy {
             case .default:
+                await telemetryReporter.reportTelemetry(
+                    sessionId: await coordinator.stateAdapter.sessionID,
+                    unifiedSessionId: coordinator.stateAdapter.unifiedSessionId,
+                    sfuAdapter: sfuAdapter
+                )
                 reportJoinCompletion()
                 transitionOrDisconnect(.joined(self.context))
+
             case .peerConnectionReadinessAware(let timeout):
-                transitionOrDisconnect(.peerConnectionPreparing(self.context, timeout: timeout))
+                transitionOrDisconnect(
+                    .peerConnectionPreparing(
+                        self.context,
+                        timeout: timeout,
+                        telemetryReporter: telemetryReporter
+                    )
+                )
             }
         }
     }
