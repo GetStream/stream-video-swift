@@ -481,11 +481,10 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 reportJoinCompletion()
                 transitionOrDisconnect(.joined(self.context))
 
-            case .peerConnectionReadinessAware(let timeout):
+            case .peerConnectionReadinessAware:
                 transitionOrDisconnect(
                     .peerConnectionPreparing(
                         self.context,
-                        timeout: timeout,
                         telemetryReporter: telemetryReporter
                     )
                 )

@@ -12,12 +12,10 @@ extension WebRTCCoordinator.StateMachine.Stage {
     /// connections to report `.connected` before the join call completes.
     static func peerConnectionPreparing(
         _ context: Context,
-        timeout: TimeInterval,
         telemetryReporter: JoinedStateTelemetryReporter
     ) -> WebRTCCoordinator.StateMachine.Stage {
         PeerConnectionPreparingStage(
             context,
-            timeout: timeout,
             telemetryReporter: telemetryReporter
         )
     }
@@ -32,16 +30,14 @@ extension WebRTCCoordinator.StateMachine.Stage {
         @unchecked Sendable {
 
         private let disposableBag = DisposableBag()
-        private let timeout: TimeInterval
+        private let timeout: TimeInterval = WebRTCConfiguration.timeout.peerConnectionReadiness
         private let telemetryReporter: JoinedStateTelemetryReporter
 
         /// Initializes a new instance of `PeerConnectionPreparingStage`.
         init(
             _ context: Context,
-            timeout: TimeInterval,
             telemetryReporter: JoinedStateTelemetryReporter
         ) {
-            self.timeout = timeout
             self.telemetryReporter = telemetryReporter
             super.init(id: .peerConnectionPreparing, context: context)
         }
@@ -83,11 +79,11 @@ extension WebRTCCoordinator.StateMachine.Stage {
             async let publisherIsReady = try await publisher
                 .connectionStatePublisher
                 .filter { $0 == .connected }
-                .nextValue(timeout: WebRTCConfiguration.timeout.peerConnectionReadiness)
+                .nextValue(timeout: timeout)
             async let subscriberIsReady = try await subscriber
                 .connectionStatePublisher
                 .filter { $0 == .connected }
-                .nextValue(timeout: WebRTCConfiguration.timeout.peerConnectionReadiness)
+                .nextValue(timeout: timeout)
 
             do {
                 _ = try await [publisherIsReady, subscriberIsReady]

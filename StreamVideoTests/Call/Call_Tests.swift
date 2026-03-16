@@ -641,7 +641,7 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
         call.stub(for: \.state, with: .init(.dummy()))
         mockCallController.stub(for: .join, with: JoinCallResponse.dummy())
 
-        _ = try await call.join(policy: .peerConnectionReadinessAware(timeout: 2))
+        _ = try await call.join(policy: .peerConnectionReadinessAware)
 
         let recordedInput = try XCTUnwrap(
             mockCallController.recordedInputPayload(
@@ -661,8 +661,8 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
         switch recordedInput.6 {
         case .default:
             XCTFail()
-        case let .peerConnectionReadinessAware(timeout):
-            XCTAssertEqual(timeout, 2)
+        case .peerConnectionReadinessAware:
+            break
         }
     }
 
