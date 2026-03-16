@@ -91,8 +91,7 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
         do {
             return try await processingQueue.addSynchronousTaskOperation { [weak self] in
                 guard
-                    let self,
-                    (lastCallSettings?.videoOn != callSettings.videoOn || lastCallSettings?.audioOn != callSettings.audioOn)
+                    let self
                 else {
                     return callSettings
                 }
@@ -104,10 +103,18 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
                     return result
                 }()
 
+                // We cannot key this cache off `callSettings` alone because
+                // OS-level permission changes may invalidate the same desired
+                // media state between consecutive `willSet` calls.
                 guard
                     requiredPermissions != updatedRequiredPermissions
                 else {
-                    return callSettings
+                    if let lastCallSettings {
+                        return lastCallSettings
+                    } else {
+                        log.warning("RequiredPermissions were updated while lastCallSettings is nil.")
+                        return callSettings
+                    }
                 }
 
                 switch applicationStateAdapter.state {
@@ -146,12 +153,12 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
                     updatedCallSettings = updatedCallSettings.withUpdatedVideoState(false)
                 }
 
-                lastCallSettings = updatedCallSettings
+                self.lastCallSettings = updatedCallSettings
                 return updatedCallSettings
             }
         } catch {
             log.error(error, subsystems: .webRTC)
-            return callSettings
+            return self.lastCallSettings ?? callSettings
         }
     }
 

@@ -542,6 +542,48 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
 
     // MARK: - Join
 
+    // MARK: Ringing
+
+    func test_join_ringingFlow_whenAcceptingACallWhilePermissionsAreNotGranted_thenWeJoinTheCallCorrectly() async throws {
+        let callId = String.unique
+        let user1 = String.unique
+        let user2 = String.unique
+
+        let user1CallFlow = try await helpers
+            .callFlow(id: callId, type: .default, userId: user1)
+        let user2CallFlow = try await helpers
+            .callFlow(id: callId, type: .default, userId: user2)
+
+        // We are joining first to be able to mock the permissions only for the
+        // callee.
+        let use1CallFlowAfterCallCreation = try await user1CallFlow
+            .perform { try await $0.call.create(memberIds: [user1, user2]) }
+            .perform { try await $0.call.join() }
+
+        helpers.permissions.setCameraPermission(isGranted: false)
+        helpers.permissions.setMicrophonePermission(isGranted: false)
+
+        try await withThrowingTaskGroup(of: Void.self) { group in
+            group.addTask {
+                try await use1CallFlowAfterCallCreation
+                    .delay(0.5)
+                    .perform { try await $0.call.ring(request: .init(membersIds: [user2])) }
+            }
+
+            group.addTask {
+                try await user2CallFlow
+                    .perform { $0.client.subscribe(for: CallRingEvent.self) }
+                    .assertEventually { (event: CallRingEvent) in event.call.id == callId }
+                    .perform { try await $0.call.get() }
+                    .perform { try await $0.call.accept() }
+                    .perform { try await $0.call.join() }
+                    .assertEventuallyInMainActor { $0.call.state.reconnectionStatus == .connected }
+            }
+
+            try await group.waitForAll()
+        }
+    }
+
     // MARK: Livestream
 
     func test_join_livestream_whenCallIsInBackstageOnlyHostCanJoin_thenAnyOtherParticipantShouldFailToJoin() async throws {

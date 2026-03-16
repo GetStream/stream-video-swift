@@ -376,6 +376,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         try await restoreScreenSharing()
         publisher.setVideoFilter(videoFilter)
         publisher.completeSetUp()
+        try await publisher.didUpdateCallSettings(callSettings)
 
         try await subscriber.setUp(
             with: callSettings,
