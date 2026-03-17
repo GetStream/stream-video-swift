@@ -553,6 +553,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
             .callFlow(id: callId, type: .default, userId: user1)
         let user2CallFlow = try await helpers
             .callFlow(id: callId, type: .default, userId: user2)
+            .perform { $0.client.subscribe(for: CallRingEvent.self) }
 
         // We are joining first to be able to mock the permissions only for the
         // callee.
@@ -566,13 +567,11 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         try await withThrowingTaskGroup(of: Void.self) { group in
             group.addTask {
                 try await use1CallFlowAfterCallCreation
-                    .delay(0.5)
                     .perform { try await $0.call.ring(request: .init(membersIds: [user2])) }
             }
 
             group.addTask {
                 try await user2CallFlow
-                    .perform { $0.client.subscribe(for: CallRingEvent.self) }
                     .assertEventually { (event: CallRingEvent) in event.call.id == callId }
                     .perform { try await $0.call.get() }
                     .perform { try await $0.call.accept() }

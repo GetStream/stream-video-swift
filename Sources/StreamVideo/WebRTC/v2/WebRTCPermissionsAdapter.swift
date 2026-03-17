@@ -107,9 +107,10 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
                 }()
 
                 if requiredPermissions != updatedRequiredPermissions {
+                    self.requiredPermissions = updatedRequiredPermissions
+                    
                     switch applicationStateAdapter.state {
                     case .foreground where shouldPrompt(for: updatedRequiredPermissions):
-                        self.requiredPermissions = updatedRequiredPermissions
                         log.debug(
                             "Required permissions updated to:\(requiredPermissions)",
                             subsystems: .webRTC
@@ -123,7 +124,6 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
                     case .foreground:
                         break
                     default:
-                        self.requiredPermissions = updatedRequiredPermissions
                         log.debug(
                             "Required permissions updated to:\(requiredPermissions)",
                             subsystems: .webRTC
