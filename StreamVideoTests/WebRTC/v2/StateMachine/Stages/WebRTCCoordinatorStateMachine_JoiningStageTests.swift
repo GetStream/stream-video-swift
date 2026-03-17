@@ -513,6 +513,9 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             XCTAssertNotNil(target.context.joinResponseHandler)
         }
 
+        let mockSignalService = try XCTUnwrap(mockCoordinatorStack?.sfuStack.service)
+        XCTAssertNil(mockSignalService.sendStatsWasCalledWithRequest)
+
         eventCancellable.cancel()
     }
 

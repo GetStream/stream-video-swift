@@ -4,26 +4,27 @@
 
 import Foundation
 
+/// Builds and sends telemetry for a join flow once the state machine reaches
+/// the point where the flow outcome is known.
 struct JoinedStateTelemetryReporter {
 
+    /// Describes the join or reconnection path that completed.
     enum FlowType { case regular, fast, rejoin, migrate }
 
+    /// The join flow that should be encoded in the telemetry payload.
     var flowType: FlowType = .regular
 
     private let startTime = Date()
 
-    /// Reports telemetry data to the SFU (Selective Forwarding Unit) to monitor and analyze the
-    /// connection lifecycle.
+    /// Reports telemetry for the completed join flow.
     ///
-    /// This method collects relevant metrics based on the flow type of the connection, such as
-    /// connection time or reconnection details, and sends them to the SFU for logging and diagnostics.
-    /// The telemetry data provides insights into the connection's performance and the strategies used
-    /// during rejoin
-    /// ing, fast reconnecting, or migration.
+    /// Regular joins send the elapsed connection time. Reconnect flows send a
+    /// reconnection payload with the selected strategy and elapsed duration.
     ///
-    /// The reported data includes:
-    /// - Connection time in seconds for a regular flow.
-    /// - Reconnection strategies (e.g., fast reconnect, rejoin, or migration) and their duration.
+    /// - Parameters:
+    ///   - sessionId: The SFU session identifier for the active participant.
+    ///   - unifiedSessionId: The identifier shared across reconnect attempts.
+    ///   - sfuAdapter: The adapter that submits telemetry to the SFU.
     func reportTelemetry(
         sessionId: String,
         unifiedSessionId: String,

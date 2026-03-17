@@ -14,6 +14,8 @@ enum WebRTCConfiguration {
         var migrationCompletion: TimeInterval
         var publisherSetUpBeforeNegotiation: TimeInterval
         var audioSessionConfigurationCompletion: TimeInterval
+        /// Maximum time to wait for both peer connections to reach
+        /// `.connected` after the SFU join flow succeeds.
         var peerConnectionReadiness: TimeInterval
 
         /// Timeout for authentication in production environment.

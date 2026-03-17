@@ -10,6 +10,10 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
     /// Creates the stage that waits briefly for publisher and subscriber peer
     /// connections to report `.connected` before the join call completes.
+    ///
+    /// - Parameters:
+    ///   - context: The state machine context for the pending join flow.
+    ///   - telemetryReporter: Reports telemetry after the stage finishes.
     static func peerConnectionPreparing(
         _ context: Context,
         telemetryReporter: JoinedStateTelemetryReporter
@@ -34,6 +38,10 @@ extension WebRTCCoordinator.StateMachine.Stage {
         private let telemetryReporter: JoinedStateTelemetryReporter
 
         /// Initializes a new instance of `PeerConnectionPreparingStage`.
+        ///
+        /// - Parameters:
+        ///   - context: The state machine context for the pending join flow.
+        ///   - telemetryReporter: Reports telemetry after the stage finishes.
         init(
             _ context: Context,
             telemetryReporter: JoinedStateTelemetryReporter
