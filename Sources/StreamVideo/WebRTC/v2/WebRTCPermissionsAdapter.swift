@@ -51,7 +51,6 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
 
     private weak var delegate: WebRTCPermissionsAdapterDelegate?
     private var requiredPermissions: Set<RequiredPermission> = []
-    private var lastCallSettings: CallSettings?
 
     /// Creates an adapter and begins observing app/permission changes.
     ///
@@ -91,7 +90,11 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
         do {
             return try await processingQueue.addSynchronousTaskOperation { [weak self] in
                 guard
-                    let self
+                    let self,
+                    // We only need to check if any of the camera or mic
+                    // permissions are not granted. Otherwise we don't need
+                    // to perform any operation.
+                    !permissions.hasCameraPermission || !permissions.hasMicrophonePermission
                 else {
                     return callSettings
                 }
@@ -103,45 +106,33 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
                     return result
                 }()
 
-                // We cannot key this cache off `callSettings` alone because
-                // OS-level permission changes may invalidate the same desired
-                // media state between consecutive `willSet` calls.
-                guard
-                    requiredPermissions != updatedRequiredPermissions
-                else {
-                    if let lastCallSettings {
-                        return lastCallSettings
-                    } else {
-                        log.warning("RequiredPermissions were updated while lastCallSettings is nil.")
-                        return callSettings
+                if requiredPermissions != updatedRequiredPermissions {
+                    switch applicationStateAdapter.state {
+                    case .foreground where shouldPrompt(for: updatedRequiredPermissions):
+                        self.requiredPermissions = updatedRequiredPermissions
+                        log.debug(
+                            "Required permissions updated to:\(requiredPermissions)",
+                            subsystems: .webRTC
+                        )
+                        log.debug(
+                            "Application state is .foreground. Requesting permissions for:\(requiredPermissions)",
+                            subsystems: .webRTC
+                        )
+
+                        _ = try await requestRequiredPermissions()
+                    case .foreground:
+                        break
+                    default:
+                        self.requiredPermissions = updatedRequiredPermissions
+                        log.debug(
+                            "Required permissions updated to:\(requiredPermissions)",
+                            subsystems: .webRTC
+                        )
+                        log.debug(
+                            "Application state is \(applicationStateAdapter.state) but we won't request for permissions:\(requiredPermissions).",
+                            subsystems: .webRTC
+                        )
                     }
-                }
-
-                switch applicationStateAdapter.state {
-                case .foreground where shouldPrompt(for: updatedRequiredPermissions):
-                    self.requiredPermissions = updatedRequiredPermissions
-                    log.debug(
-                        "Required permissions updated to:\(requiredPermissions)",
-                        subsystems: .webRTC
-                    )
-                    log.debug(
-                        "Application state is .foreground. Requesting permissions for:\(requiredPermissions)",
-                        subsystems: .webRTC
-                    )
-
-                    _ = try await requestRequiredPermissions()
-                case .foreground:
-                    break
-                default:
-                    self.requiredPermissions = updatedRequiredPermissions
-                    log.debug(
-                        "Required permissions updated to:\(requiredPermissions)",
-                        subsystems: .webRTC
-                    )
-                    log.debug(
-                        "Application state is \(applicationStateAdapter.state) but we won't request for permissions:\(requiredPermissions).",
-                        subsystems: .webRTC
-                    )
                 }
 
                 var updatedCallSettings = callSettings
@@ -153,12 +144,11 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
                     updatedCallSettings = updatedCallSettings.withUpdatedVideoState(false)
                 }
 
-                self.lastCallSettings = updatedCallSettings
                 return updatedCallSettings
             }
         } catch {
             log.error(error, subsystems: .webRTC)
-            return self.lastCallSettings ?? callSettings
+            return callSettings
         }
     }
 

@@ -376,7 +376,6 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         try await restoreScreenSharing()
         publisher.setVideoFilter(videoFilter)
         publisher.completeSetUp()
-        try await publisher.didUpdateCallSettings(callSettings)
 
         try await subscriber.setUp(
             with: callSettings,
@@ -557,8 +556,9 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
             }
 
             let currentCallSettings = await callSettings
+            let newCallSettings = operation(currentCallSettings)
             let updatedCallSettings = await permissionsAdapter
-                .willSet(callSettings: operation(currentCallSettings))
+                .willSet(callSettings: newCallSettings)
 
             guard
                 updatedCallSettings != currentCallSettings
