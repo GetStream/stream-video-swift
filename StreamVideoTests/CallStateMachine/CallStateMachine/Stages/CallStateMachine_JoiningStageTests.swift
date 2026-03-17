@@ -128,7 +128,7 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
                     notify: false,
                     source: .inApp,
                     deliverySubject: .init(nil),
-                    policy: .peerConnectionReadinessAware(timeout: 2),
+                    policy: .peerConnectionReadinessAware,
                     retryPolicy: .init(maxRetries: 0, delay: { _ in 0 })
                 )
             )
@@ -450,11 +450,8 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
         switch (context.input.join?.policy, recordedInput.6) {
         case (.default, .default):
             break
-        case let (
-            .peerConnectionReadinessAware(expectedTimeout)?,
-            .peerConnectionReadinessAware(recordedTimeout)
-        ):
-            XCTAssertEqual(expectedTimeout, recordedTimeout)
+        case (.peerConnectionReadinessAware, .peerConnectionReadinessAware):
+            break
         default:
             XCTFail()
         }

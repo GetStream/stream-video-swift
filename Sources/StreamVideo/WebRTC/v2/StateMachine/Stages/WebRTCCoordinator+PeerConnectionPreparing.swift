@@ -10,13 +10,17 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
     /// Creates the stage that waits briefly for publisher and subscriber peer
     /// connections to report `.connected` before the join call completes.
+    ///
+    /// - Parameters:
+    ///   - context: The state machine context for the pending join flow.
+    ///   - telemetryReporter: Reports telemetry after the stage finishes.
     static func peerConnectionPreparing(
         _ context: Context,
-        timeout: TimeInterval
+        telemetryReporter: JoinedStateTelemetryReporter
     ) -> WebRTCCoordinator.StateMachine.Stage {
         PeerConnectionPreparingStage(
             context,
-            timeout: timeout
+            telemetryReporter: telemetryReporter
         )
     }
 }
@@ -30,14 +34,19 @@ extension WebRTCCoordinator.StateMachine.Stage {
         @unchecked Sendable {
 
         private let disposableBag = DisposableBag()
-        private let timeout: TimeInterval
+        private let timeout: TimeInterval = WebRTCConfiguration.timeout.peerConnectionReadiness
+        private let telemetryReporter: JoinedStateTelemetryReporter
 
         /// Initializes a new instance of `PeerConnectionPreparingStage`.
+        ///
+        /// - Parameters:
+        ///   - context: The state machine context for the pending join flow.
+        ///   - telemetryReporter: Reports telemetry after the stage finishes.
         init(
             _ context: Context,
-            timeout: TimeInterval
+            telemetryReporter: JoinedStateTelemetryReporter
         ) {
-            self.timeout = timeout
+            self.telemetryReporter = telemetryReporter
             super.init(id: .peerConnectionPreparing, context: context)
         }
 
@@ -67,8 +76,10 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
         private func execute() async {
             guard
-                let publisher = await context.coordinator?.stateAdapter.publisher,
-                let subscriber = await context.coordinator?.stateAdapter.subscriber
+                let coordinator = context.coordinator,
+                let sfuAdapter = await coordinator.stateAdapter.sfuAdapter,
+                let publisher = await coordinator.stateAdapter.publisher,
+                let subscriber = await coordinator.stateAdapter.subscriber
             else {
                 return
             }
@@ -90,6 +101,12 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     subsystems: .webRTC
                 )
             }
+
+            await telemetryReporter.reportTelemetry(
+                sessionId: await coordinator.stateAdapter.sessionID,
+                unifiedSessionId: coordinator.stateAdapter.unifiedSessionId,
+                sfuAdapter: sfuAdapter
+            )
 
             reportJoinCompletion()
 

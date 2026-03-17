@@ -12,5 +12,5 @@ public enum WebRTCJoinPolicy: Sendable {
 
     /// Waits until both peer connections report `.connected`, or until the
     /// timeout elapses, before completing the join request.
-    case peerConnectionReadinessAware(timeout: TimeInterval)
+    case peerConnectionReadinessAware
 }

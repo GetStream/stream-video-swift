@@ -489,7 +489,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
     func test_transition_fromConnected_withReadinessAwarePolicy_transitionsToPeerConnectionPreparing() async throws {
         subject.context.coordinator = mockCoordinatorStack.coordinator
         subject.context.reconnectAttempts = 11
-        subject.context.joinPolicy = .peerConnectionReadinessAware(timeout: 5)
+        subject.context.joinPolicy = .peerConnectionReadinessAware
         subject.context.initialJoinCallResponse = .dummy()
         subject.context.joinResponseHandler = .init()
 
@@ -512,6 +512,9 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             XCTAssertNotNil(target.context.initialJoinCallResponse)
             XCTAssertNotNil(target.context.joinResponseHandler)
         }
+
+        let mockSignalService = try XCTUnwrap(mockCoordinatorStack?.sfuStack.service)
+        XCTAssertNil(mockSignalService.sendStatsWasCalledWithRequest)
 
         eventCancellable.cancel()
     }

@@ -590,7 +590,7 @@ open class CallViewModel: ObservableObject {
                     callId: callId,
                     members: [],
                     customData: customData,
-                    policy: .peerConnectionReadinessAware(timeout: 2)
+                    policy: .peerConnectionReadinessAware
                 )
             } catch {
                 hasAcceptedCall = false

@@ -26,7 +26,7 @@ final class WebRTCCoordinatorStateMachine_PeerConnectionPreparingStageTests:
         videoConfig: Self.videoConfig
     )
     private lazy var subject: WebRTCCoordinator.StateMachine.Stage! =
-        .peerConnectionPreparing(.init(), timeout: 0.01)
+        .peerConnectionPreparing(.init(), telemetryReporter: .init())
 
     override class func tearDown() {
         Self.videoConfig = nil
@@ -55,7 +55,7 @@ final class WebRTCCoordinatorStateMachine_PeerConnectionPreparingStageTests:
         }
     }
 
-    func test_transition_whenPeerConnectionsDoNotBecomeReadyWithinTimeout_reportsJoinCompletionAndTransitionsToJoined(
+    func test_transition_whenPeerConnectionsDoNotBecomeReadyWithinTimeout_reportsTelemetryAndTransitionsToJoined(
     ) async throws {
         let expectedJoinCallResponse = JoinCallResponse.dummy(
             call: .dummy(cid: "expected-call-id")
@@ -78,7 +78,11 @@ final class WebRTCCoordinatorStateMachine_PeerConnectionPreparingStageTests:
             initialJoinCallResponse: expectedJoinCallResponse,
             joinResponseHandler: completionSubject
         )
-        subject = .peerConnectionPreparing(context, timeout: 0.01)
+        subject = .peerConnectionPreparing(context, telemetryReporter: .init())
+        let unifiedSessionId = await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .unifiedSessionId
 
         await mockCoordinatorStack
             .coordinator
@@ -106,6 +110,23 @@ final class WebRTCCoordinatorStateMachine_PeerConnectionPreparingStageTests:
             timeout: defaultTimeout
         )
         XCTAssertEqual(receivedCallID, expectedJoinCallResponse.call.cid)
+
+        let mockSignalService = try XCTUnwrap(mockCoordinatorStack?.sfuStack.service)
+        await fulfillment { mockSignalService.sendStatsWasCalledWithRequest?.telemetry != nil }
+        let telemetry = try XCTUnwrap(mockSignalService.sendStatsWasCalledWithRequest?.telemetry)
+        XCTAssertEqual(
+            mockSignalService.sendStatsWasCalledWithRequest?.unifiedSessionID,
+            unifiedSessionId
+        )
+
+        switch telemetry.data {
+        case .connectionTimeSeconds:
+            XCTAssertTrue(true)
+        case .reconnection:
+            XCTFail()
+        case .none:
+            XCTFail()
+        }
 
         completionCancellable.cancel()
     }
