@@ -1070,6 +1070,8 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
     // MARK: - enqueueCallSettings
 
     func test_enqueueCallSettings_withChanges_publisherWasUpdated() async throws {
+        mockPermissions.stubMicrophonePermission(.granted)
+        mockPermissions.stubCameraPermission(.granted)
         let sfuStack = MockSFUStack()
         await subject.set(sfuAdapter: sfuStack.adapter)
         try await subject.configurePeerConnections()
@@ -1144,7 +1146,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
 
     private func assertNilAsync<T>(
         _ expression: @autoclosure () async throws -> T?,
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) async rethrows {
         let value = try await expression()
@@ -1154,7 +1156,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
     private func assertEqualAsync<T: Equatable>(
         _ expression: @autoclosure () async throws -> T,
         _ expected: @autoclosure () async throws -> T,
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) async rethrows {
         let value = try await expression()
@@ -1164,7 +1166,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
 
     private func assertTrueAsync(
         _ expression: @autoclosure () async throws -> Bool,
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) async rethrows {
         let value = try await expression()
@@ -1173,7 +1175,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
 
     private func assertFalseAsync(
         _ expression: @autoclosure () async throws -> Bool,
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) async rethrows {
         let value = try await expression()

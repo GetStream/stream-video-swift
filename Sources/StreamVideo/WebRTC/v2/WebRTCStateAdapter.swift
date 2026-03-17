@@ -556,8 +556,9 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
             }
 
             let currentCallSettings = await callSettings
+            let newCallSettings = operation(currentCallSettings)
             let updatedCallSettings = await permissionsAdapter
-                .willSet(callSettings: operation(currentCallSettings))
+                .willSet(callSettings: newCallSettings)
 
             guard
                 updatedCallSettings != currentCallSettings

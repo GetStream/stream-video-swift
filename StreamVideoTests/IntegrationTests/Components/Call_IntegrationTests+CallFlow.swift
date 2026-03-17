@@ -129,11 +129,15 @@ extension Call_IntegrationTests {
         func assertEventually<Element: Sendable>(
             timeout: TimeInterval = defaultTimeout,
             interval: TimeInterval = 0.1,
+            filePath: StaticString = #filePath,
+            line: UInt = #line,
             _ condition: @Sendable @escaping (_ element: Element) async throws -> Bool
         ) async throws -> Self where Result == AsyncStream<Element> {
             try await Assertions.assertFromAsyncStream(
                 timeout: timeout,
                 interval: interval,
+                filePath: filePath,
+                line: line,
                 stream: value
             ) { try await condition($0) }
             return self
@@ -143,11 +147,15 @@ extension Call_IntegrationTests {
         func assertEventually<Output: Sendable, Failure>(
             timeout: TimeInterval = defaultTimeout,
             interval: TimeInterval = 0.1,
+            filePath: StaticString = #filePath,
+            line: UInt = #line,
             _ condition: @Sendable @escaping (_ element: Output) async throws -> Bool
         ) async throws -> Self where Result == AnyPublisher<Output, Failure> {
             try await Assertions.assertFromPublisher(
                 timeout: timeout,
                 interval: interval,
+                filePath: filePath,
+                line: line,
                 publisher: value
             ) { try await condition($0) }
             return self
@@ -182,11 +190,13 @@ extension Call_IntegrationTests {
 
         @discardableResult
         func tryMap<Next: Sendable>(
+            fileID: StaticString = #fileID,
+            line: UInt = #line,
             _ message: @autoclosure () -> String = "Flow value was nil",
             _ transformation: @Sendable (_ flow: CallFlow<Result>) async throws -> Next?
         ) async throws -> CallFlow<Next> {
             guard let nextValue = try await transformation(self) else {
-                throw ClientError(message())
+                throw ClientError(message(), fileID, line)
             }
             return .init(
                 client: client,
