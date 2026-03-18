@@ -4,6 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### 🔄 Changed
+
+# [1.44.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.44.0)
+_March 18, 2026_
+
 ### ✅ Added
 - Added `WebRTCJoinPolicy` to `Call.join()` so applications can delay join
   completion until publisher and subscriber peer connections are ready.
