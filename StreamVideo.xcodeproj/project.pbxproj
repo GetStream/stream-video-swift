@@ -347,6 +347,7 @@
 				"Utilities/Extensions/Stream_Video_Sfu_Models_ConnectionQuality+Convenience.swift",
 				"Utilities/Extensions/Stream_Video_Sfu_Models_Participant+Convenience.swift",
 				"Utilities/Extensions/XCTestCase+PredicateFulfillment.swift",
+				Utilities/Mocks/MockCallKitService.swift,
 			);
 			target = 84F7380D287C141000A363F4 /* StreamVideoSwiftUITests */;
 		};
@@ -639,6 +640,7 @@
 				StreamVideoSwiftUI/Utils/AsyncImage/StreamLazyImage.swift,
 				StreamVideoSwiftUI/Utils/AudioValuePercentageNormaliser.swift,
 				StreamVideoSwiftUI/Utils/BundleExtensions.swift,
+				StreamVideoSwiftUI/Utils/CallKitServiceObserver.swift,
 				StreamVideoSwiftUI/Utils/CallSoundsPlayer.swift,
 				StreamVideoSwiftUI/Utils/Camera.swift,
 				StreamVideoSwiftUI/Utils/ClipCorners.swift,
@@ -806,6 +808,7 @@
 				StreamVideoSwiftUI/Utils/AsyncImage/StreamLazyImage.swift,
 				StreamVideoSwiftUI/Utils/AudioValuePercentageNormaliser.swift,
 				StreamVideoSwiftUI/Utils/BundleExtensions.swift,
+				StreamVideoSwiftUI/Utils/CallKitServiceObserver.swift,
 				StreamVideoSwiftUI/Utils/CallSoundsPlayer.swift,
 				StreamVideoSwiftUI/Utils/Camera.swift,
 				StreamVideoSwiftUI/Utils/ClipCorners.swift,

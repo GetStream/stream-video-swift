@@ -924,6 +924,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         _ expectedReason: CXCallEndedReason,
         actionBlock: @MainActor @Sendable () -> Void,
         file: StaticString = #file,
+        filePath: StaticString = #filePath,
         line: UInt = #line
     ) async {
         callProvider.reset()
@@ -939,17 +940,17 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         }
 
         guard case let .reportCall(_, _, reason) = callProvider.invocations.last else {
-            XCTFail(file: file, line: line)
+            XCTFail(file: filePath, line: line)
             return
         }
 
-        XCTAssertEqual(expectedReason, reason, file: file, line: line)
+        XCTAssertEqual(expectedReason, reason, file: filePath, line: line)
     }
 
     @MainActor
     private func assertNoAction(
         actionBlock: @MainActor @Sendable () -> Void,
-        file: StaticString = #file,
+        filePath: StaticString = #filePath,
         line: UInt = #line
     ) async {
         callProvider.reset()
@@ -957,7 +958,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         actionBlock()
 
         await wait(for: 1)
-        XCTAssertTrue(callProvider.invocations.isEmpty, file: file, line: line)
+        XCTAssertTrue(callProvider.invocations.isEmpty, file: filePath, line: line)
     }
 
     @MainActor
@@ -965,6 +966,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         _ expected: T.Type,
         actionBlock: @MainActor @Sendable () -> Void,
         file: StaticString = #file,
+        filePath: StaticString = #filePath,
         line: UInt = #line
     ) async throws {
         callController.reset()
@@ -977,13 +979,13 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
 
         let action = try XCTUnwrap(
             callController.requestWasCalledWith?.0.actions.last,
-            file: file,
+            file: filePath,
             line: line
         )
         XCTAssertTrue(
             action is T,
             "Action type is \(String(describing: type(of: action))) instead of \(String(describing: T.self))",
-            file: file,
+            file: filePath,
             line: line
         )
 

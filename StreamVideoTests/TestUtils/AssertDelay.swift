@@ -10,7 +10,7 @@ func XCTAssertWithDelay(
     _ expression: @autoclosure () throws -> Bool,
     _ message: @autoclosure () -> String = "",
     nanoseconds: UInt64 = 500_000_000,
-    file: StaticString = #file,
+    file: StaticString = #filePath,
     line: UInt = #line
 ) async throws {
     try await Task.sleep(nanoseconds: nanoseconds)

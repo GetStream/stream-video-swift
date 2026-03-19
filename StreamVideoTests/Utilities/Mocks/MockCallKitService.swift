@@ -2,8 +2,9 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import Foundation
-import StreamVideo
+@testable import StreamVideo
 
 final class MockCallKitService: CallKitService, @unchecked Sendable {
     private(set) var reportIncomingCallWasCalled: (
@@ -24,5 +25,9 @@ final class MockCallKitService: CallKitService, @unchecked Sendable {
         completion: @escaping ((any Error)?) -> Void
     ) {
         reportIncomingCallWasCalled = (cid, localizedCallerName, callerId, hasVideo, completion)
+    }
+
+    func send(_ event: Event) {
+        eventPipelineSubject.send(event)
     }
 }
