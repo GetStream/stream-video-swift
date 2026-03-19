@@ -761,11 +761,19 @@ open class CallViewModel: ObservableObject {
                 }
             }
             self.call = call
-        } else if call == nil, callingState != .idle, callingState != .joining {
-            setCallingState(.idle)
-            Task { @MainActor in
-                self.call = nil
+        } else if call == nil, callingState != .idle {
+            guard case .joining = callKitServiceObserver.value else {
+                setCallingState(.idle)
+                Task { @MainActor in
+                    self.call = nil
+                }
+                return
             }
+
+            // During a CallKit cold start the UI can ask for the active call
+            // before `StreamVideo.state.activeCall` has caught up. Preserve the
+            // CallKit-driven `.joining` state until the regular WS/state
+            // pipeline catches up and drives the terminal transition.
         }
     }
 

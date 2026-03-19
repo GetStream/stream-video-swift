@@ -170,6 +170,22 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         await assertCallingState(.joining)
     }
 
+    func test_setActiveCallNil_whileCallKitJoinIsInProgress_keepsCallingStateJoining() async {
+        // Given
+        let callKitService = MockCallKitService()
+        InjectedValues[\.callKitService] = callKitService
+        callKitService.send(.joining(mockCall))
+        subject = .init()
+        await assertCallingState(.joining)
+
+        // When
+        subject.setActiveCall(nil)
+
+        // Then
+        await assertCallingState(.joining)
+        await fulfilmentInMainActor { self.subject.call?.cId == self.mockCall.cId }
+    }
+
     func test_reconnectionStatusMigratingThenConnected_keepsCallingStateJoining() async {
         // Given
         await prepareMediaScenario()
