@@ -77,4 +77,49 @@ final class RTCAudioStore_Tests: XCTestCase, @unchecked Sendable {
 
         await safeFulfillment(of: [expectation])
     }
+
+    func test_stateDescription_usesStableScalarAudioSessionValues() {
+        let configuration = subject.state.audioSessionConfiguration
+
+        let description = String(describing: subject.state)
+
+        XCTAssertTrue(
+            description.contains("category:\(configuration.category.description)")
+        )
+        XCTAssertTrue(
+            description.contains("mode:\(configuration.mode.description)")
+        )
+        XCTAssertTrue(
+            description.contains("options:\(configuration.options.description)")
+        )
+        XCTAssertTrue(
+            description.contains(
+                "overrideOutputAudioPort:\(configuration.overrideOutputAudioPort.description)"
+            )
+        )
+    }
+
+    func test_audioSessionConfigurationDescription_usesStableScalarValues() {
+        let subject = AudioSessionConfiguration(
+            isActive: true,
+            category: .playAndRecord,
+            mode: .videoChat,
+            options: [.defaultToSpeaker, .allowBluetoothA2DP],
+            overrideOutputAudioPort: .speaker
+        )
+
+        let description = subject.description
+
+        XCTAssertTrue(description.contains("isActive:true"))
+        XCTAssertTrue(
+            description.contains("category:\(subject.category.description)")
+        )
+        XCTAssertTrue(
+            description.contains("mode:\(subject.mode.description)")
+        )
+        XCTAssertTrue(description.contains("options:"))
+        XCTAssertTrue(description.contains(".defaultToSpeaker"))
+        XCTAssertTrue(description.contains(".allowBluetoothA2DP"))
+        XCTAssertTrue(description.contains("overrideOutputAudioPort:.speaker"))
+    }
 }

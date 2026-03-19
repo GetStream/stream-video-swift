@@ -5,7 +5,7 @@
 import Foundation
 
 /// Indicates that an asynchronous operation exceeded its configured timeout.
-public final class TimeOutError: ClientError, Sendable {
+public final class TimeOutError: ClientError, @unchecked Sendable {
 
     convenience init(
         file: StaticString = #fileID,

@@ -42,11 +42,25 @@ open class CallViewModel: ObservableObject {
                 .receive(on: RunLoop.main)
                 .sink(receiveValue: { [weak self] reconnectionStatus in
                     guard let self else { return }
+                    // Preserve transitional UI states while the call is still
+                    // negotiating or migrating. This avoids collapsing back to
+                    // .inCall before the user has actually finished joining.
                     switch reconnectionStatus {
-                    case .reconnecting where callingState != .reconnecting:
+                    case .reconnecting:
+                        if callingState != .reconnecting {
+                            setCallingState(.reconnecting)
+                        }
+                    case .disconnected:
+                        setCallingState(.inCall)
+                    case .migrating:
                         setCallingState(.reconnecting)
-                    default:
-                        if callingState != .inCall, callingState != .outgoing {
+                    case .connected:
+                        switch callingState {
+                        case .joining:
+                            break
+                        case .outgoing:
+                            break
+                        default:
                             setCallingState(.inCall)
                         }
                     }
@@ -199,6 +213,10 @@ open class CallViewModel: ObservableObject {
     private var participantsSortComparators = defaultSortPreset
     private let callEventsHandler = CallEventsHandler()
     private let disposableBag = DisposableBag()
+    /// Bridges CallKit events into the main-actor view model so a CallKit
+    /// accept that launches the app can keep the UI in sync until the regular
+    /// call state catches up.
+    private let callKitServiceObserver = CallKitServiceObserver()
 
     private lazy var participantEventResetAdapter = ParticipantEventResetAdapter(self)
 
@@ -256,6 +274,26 @@ open class CallViewModel: ObservableObject {
         participantAutoLeavePolicy.onPolicyTriggered = { [weak self] in self?.participantAutoLeavePolicyTriggered() }
 
         _ = participantEventResetAdapter
+
+        // Hop to the main queue before running operators defined inside this
+        // @MainActor type. This keeps the pipeline actor-safe and allows the
+        // joining screen to appear as soon as CallKit hands us the call.
+        callKitServiceObserver
+            .publisher
+            .receive(on: DispatchQueue.main)
+            .compactMap {
+                switch $0 {
+                case let .joining(call):
+                    return call
+                default:
+                    return nil
+                }
+            }
+            .sink { [weak self] in
+                self?.setCallingState(.joining)
+                self?.call = $0
+            }
+            .store(in: disposableBag)
     }
 
     deinit {
@@ -709,12 +747,21 @@ open class CallViewModel: ObservableObject {
             fileName: file,
             lineNumber: line
         )
+
         if let call, (callingState != .inCall || self.call?.cId != call.cId) {
-            if !skipCallStateUpdates {
-                setCallingState(.inCall)
+            // Preserve the explicit joining state while the CallKit-triggered
+            // join flow is still restoring. Without this, restoring activeCall
+            // can jump straight to .inCall and skip the joining screen.
+            switch callKitServiceObserver.value {
+            case .joining:
+                setCallingState(.joining)
+            default:
+                if !skipCallStateUpdates {
+                    setCallingState(.inCall)
+                }
             }
             self.call = call
-        } else if call == nil, callingState != .idle {
+        } else if call == nil, callingState != .idle, callingState != .joining {
             setCallingState(.idle)
             Task { @MainActor in
                 self.call = nil
@@ -1110,7 +1157,15 @@ open class CallViewModel: ObservableObject {
         }
         guard call != nil || !callParticipants.isEmpty else { return }
         if callingState != .reconnecting, callingState != .inCall {
-            setCallingState(.inCall)
+            // Participant updates can arrive before the CallKit-driven join
+            // flow finishes. Keep .joining visible until the observer reports
+            // that the temporary CallKit sync state has ended.
+            switch callKitServiceObserver.value {
+            case .joining:
+                setCallingState(.joining)
+            default:
+                setCallingState(.inCall)
+            }
         } else {
             let shouldGoInCall = callParticipants.count > 1
             if shouldGoInCall, callingState != .inCall {

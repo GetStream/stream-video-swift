@@ -32,6 +32,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
     private var cId: String { callCid(from: callId, callType: callType) }
 
     override func tearDown() async throws {
+        InjectedValues[\.callKitService] = .init()
         subject = nil
         participants = nil
         callId = nil
@@ -134,6 +135,56 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         // Then
         XCTAssert(callViewModel.outgoingCallMembers == participants)
         XCTAssert(callViewModel.callingState == .outgoing)
+    }
+
+    func test_callKitJoiningEventOnInit_setsCallingStateToJoiningAndAssignsCall() async {
+        // Given
+        let callKitService = MockCallKitService()
+        InjectedValues[\.callKitService] = callKitService
+        callKitService.send(.joining(mockCall))
+
+        // When
+        subject = .init()
+
+        // Then
+        await assertCallingState(.joining)
+        await fulfilmentInMainActor { self.subject.call?.cId == self.mockCall.cId }
+    }
+
+    func test_participantsUpdate_whileCallKitJoinIsInProgress_keepsCallingStateJoining() async {
+        // Given
+        let callKitService = MockCallKitService()
+        InjectedValues[\.callKitService] = callKitService
+        callKitService.send(.joining(mockCall))
+        subject = .init()
+        await assertCallingState(.joining)
+
+        // When
+        let remoteParticipant = CallParticipant.dummy(id: "remote-participant")
+        subject.call?.state.participantsMap = [remoteParticipant.id: remoteParticipant]
+
+        // Then
+        await fulfilmentInMainActor {
+            self.subject.callParticipants[remoteParticipant.id] != nil
+        }
+        await assertCallingState(.joining)
+    }
+
+    func test_reconnectionStatusMigratingThenConnected_keepsCallingStateJoining() async {
+        // Given
+        await prepareMediaScenario()
+
+        // When
+        subject.call?.state.reconnectionStatus = .migrating
+
+        // Then
+        await assertCallingState(.reconnecting)
+
+        // When
+        subject.call?.state.reconnectionStatus = .connected
+
+        // Then
+        await assertCallingState(.inCall)
     }
 
     @MainActor

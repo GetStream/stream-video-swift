@@ -19,10 +19,10 @@ public struct AudioSessionConfiguration: CustomStringConvertible, Equatable, Sen
     public var description: String {
         var result = "{ "
         result += "isActive:\(isActive)"
-        result += ", category:\(category)"
-        result += ", mode:\(mode)"
-        result += ", options:\(options)"
-        result += ", overrideOutputAudioPort:\(overrideOutputAudioPort)"
+        result += ", category:\(category.description)"
+        result += ", mode:\(mode.description)"
+        result += ", options:\(options.description)"
+        result += ", overrideOutputAudioPort:\(overrideOutputAudioPort?.description ?? ".none")"
         result += " }"
         return result
     }
