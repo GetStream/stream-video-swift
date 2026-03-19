@@ -63,6 +63,8 @@ open class CallViewModel: ObservableObject {
                         default:
                             setCallingState(.inCall)
                         }
+                    @unknown default:
+                        break
                     }
                 })
             screenSharingUpdates = call?.state.$screenSharingSession
