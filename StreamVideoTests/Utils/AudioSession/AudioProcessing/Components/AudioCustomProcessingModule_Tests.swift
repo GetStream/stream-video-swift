@@ -46,4 +46,19 @@ final class AudioCustomProcessingModule_Tests: XCTestCase, @unchecked Sendable {
             XCTFail("Expected release event")
         }
     }
+
+    func test_audioProcessingRelease_clearsProcessingHandler() {
+        let state = AudioProcessingStore.Namespace.StoreState.initial
+        let filter = MockAudioFilter(id: "release-check")
+        state.capturePostProcessingDelegate.processingHandler = { _ in
+            XCTFail("Should not be invoked in this test")
+        }
+
+        XCTAssertNotNil(state.capturePostProcessingDelegate.processingHandler)
+        _ = filter // Keep parity with real world setup where a filter exists.
+
+        state.capturePostProcessingDelegate.audioProcessingRelease()
+
+        XCTAssertNil(state.capturePostProcessingDelegate.processingHandler)
+    }
 }
