@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🔄 Changed
 
+- Picture-in-Picture participant views no longer show the speaking decoration. [#1090](https://github.com/GetStream/stream-video-swift/pull/1090)
+
 # [1.44.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.44.0)
 _March 19, 2026_
 
