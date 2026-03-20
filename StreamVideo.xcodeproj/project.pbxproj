@@ -3309,7 +3309,7 @@
 			repositoryURL = "https://github.com/GetStream/stream-video-noise-cancellation-swift";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.3;
+				minimumVersion = 1.0.4;
 			};
 		};
 		40B8FFA52EC393A80061E3F6 /* XCRemoteSwiftPackageReference "stream-video-swift-webrtc" */ = {

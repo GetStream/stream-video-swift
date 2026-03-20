@@ -36,8 +36,11 @@ final class AudioCustomProcessingModule: NSObject, RTCAudioCustomProcessingDeleg
     /// Event stream used by store middleware to react to audio callbacks.
     var publisher: AnyPublisher<Event, Never> { subject.eraseToAnyPublisher() }
 
-    /// Direct callback used for in-place filtering; must return within ~10 ms.
-    var processingHandler: ((RTCAudioBuffer) -> Void)?
+    /// Direct callback used for in-place filtering; must return within ~10 ms..
+    /// Synchronizes reads/writes of `processingHandler` across:
+    /// - WebRTC's real-time callback thread (`audioProcessingProcess`)
+    /// - Store/middleware queues that swap or clear filters during teardown.
+    @Atomic var processingHandler: ((RTCAudioBuffer) -> Void)?
 
     /// RTCAudioCustomProcessingDelegate
     func audioProcessingInitialize(
@@ -54,6 +57,8 @@ final class AudioCustomProcessingModule: NSObject, RTCAudioCustomProcessingDeleg
 
     /// RTCAudioCustomProcessingDelegate
     func audioProcessingProcess(audioBuffer: RTCAudioBuffer) {
+        let processingHandler = self.processingHandler
+
         // Synchronous filtering happens via `processingHandler` so we can finish
         // within WebRTC's ~10 ms processing budget; the native adapter wraps this
         // delegate in a trylock and simply drops the frame if we block. Running
@@ -68,6 +73,8 @@ final class AudioCustomProcessingModule: NSObject, RTCAudioCustomProcessingDeleg
 
     /// RTCAudioCustomProcessingDelegate
     func audioProcessingRelease() {
+        // Detach immediately so subsequent callbacks cannot enter a torn-down filter.
+        processingHandler = nil
         subject.send(.audioProcessingRelease)
     }
 }

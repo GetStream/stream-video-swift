@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🔄 Changed
 
+### 🐞 Fixed
+- Prevent crashes during audio filter teardown by detaching custom processing callbacks before filter release and synchronizing callback handler access. [#1089](https://github.com/GetStream/stream-video-swift/pull/1089)
+
 # [1.44.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.44.0)
 _March 19, 2026_
 
