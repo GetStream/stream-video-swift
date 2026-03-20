@@ -100,7 +100,7 @@ extension View {
                 participant: participant,
                 call: call,
                 showAllInfo: showAllInfo,
-                decorations: [VideoCallParticipantDecoration.speaking]
+                decorations: []
             )
         )
     }
