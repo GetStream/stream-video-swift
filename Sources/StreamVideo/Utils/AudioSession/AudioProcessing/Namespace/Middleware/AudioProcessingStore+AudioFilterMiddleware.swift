@@ -48,6 +48,12 @@ extension AudioProcessingStore.Namespace {
             case let .setAudioFilter(audioFilter):
                 processingQueue.addOperation { [weak self] in
                     guard let self else { return }
+                    // Break the real-time processing callback link before releasing
+                    // the old filter to reduce teardown races with in-flight frames.
+                    didUpdate(
+                        nil,
+                        capturePostProcessingDelegate: state.capturePostProcessingDelegate
+                    )
                     state.audioFilter?.release()
                     // Late filter selection: initialize if we already know format.
                     if state.initializedSampleRate > 0, state.initializedChannels > 0 {
@@ -63,6 +69,11 @@ extension AudioProcessingStore.Namespace {
                 }
 
             case .release:
+                // Ensure callback detachment also happens on full processing release.
+                didUpdate(
+                    nil,
+                    capturePostProcessingDelegate: state.capturePostProcessingDelegate
+                )
                 state.audioFilter?.release()
             default:
                 break
