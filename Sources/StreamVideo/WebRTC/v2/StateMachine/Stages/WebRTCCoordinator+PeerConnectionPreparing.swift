@@ -33,9 +33,15 @@ extension WebRTCCoordinator.StateMachine.Stage {
         WebRTCCoordinator.StateMachine.Stage,
         @unchecked Sendable {
 
+        private enum Configuration {
+            case publisherOnly
+            case publisherAndSubscriber
+        }
+
         private let disposableBag = DisposableBag()
         private let timeout: TimeInterval = WebRTCConfiguration.timeout.peerConnectionReadiness
         private let telemetryReporter: JoinedStateTelemetryReporter
+        private let configuration: Configuration
 
         /// Initializes a new instance of `PeerConnectionPreparingStage`.
         ///
@@ -47,6 +53,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
             telemetryReporter: JoinedStateTelemetryReporter
         ) {
             self.telemetryReporter = telemetryReporter
+            self.configuration = .publisherOnly
             super.init(id: .peerConnectionPreparing, context: context)
         }
 
@@ -81,50 +88,89 @@ extension WebRTCCoordinator.StateMachine.Stage {
         /// continuing join completion.
         private func execute() async {
             guard
+                let coordinator = context.coordinator
+            else {
+                return
+            }
+
+            await perform(for: configuration)
+
+            await reportTelemetryAndCompletion()
+
+            transitionOrDisconnect(.joined(context))
+        }
+
+        private func perform(for configuration: Configuration) async {
+            guard
                 let coordinator = context.coordinator,
-                let sfuAdapter = await coordinator.stateAdapter.sfuAdapter,
                 let publisher = await coordinator.stateAdapter.publisher,
                 let subscriber = await coordinator.stateAdapter.subscriber
             else {
                 return
             }
 
-            await withTaskGroup(of: Void.self) { [timeout] group in
-                group.addTask {
-                    do {
-                        _ = try await publisher
-                            .connectionStatePublisher
-                            .log(.debug) { "Publisher transitioned to \($0)" }
-                            .filter { $0 == .connected }
-                            .nextValue(timeout: timeout)
-                    } catch {
-                        log.warning(
-                            "Publisher wasn't ready in \(timeout) seconds. We continue joining and the connections should be ready after completing.",
-                            subsystems: .webRTC
+            switch configuration {
+            case .publisherOnly:
+                await waitForPeerConnectionToBePrepared(
+                    publisher,
+                    subsystem: .peerConnectionPublisher,
+                    timeout: timeout
+                )
+            case .publisherAndSubscriber:
+                await withTaskGroup(of: Void.self) { [timeout] group in
+                    group.addTask { [weak self] in
+                        await self?.waitForPeerConnectionToBePrepared(
+                            publisher,
+                            subsystem: .peerConnectionPublisher,
+                            timeout: timeout
                         )
                     }
-                }
 
-                group.addTask {
-                    do {
-                        _ = try await subscriber
-                            .connectionStatePublisher
-                            .log(.debug) { "Subscriber transitioned to \($0)" }
-                            .filter { $0 == .connected }
-                            .nextValue(timeout: timeout)
-                    } catch {
-                        log.warning(
-                            "Subscriber wasn't ready in \(timeout) seconds. We continue joining and the connections should be ready after completing.",
-                            subsystems: .webRTC
+                    group.addTask { [weak self] in
+                        await self?.waitForPeerConnectionToBePrepared(
+                            subscriber,
+                            subsystem: .peerConnectionSubscriber,
+                            timeout: timeout
                         )
                     }
-                }
 
-                await group.waitForAll()
+                    await group.waitForAll()
+                }
+            }
+        }
+
+        private func waitForPeerConnectionToBePrepared(
+            _ peerConnection: RTCPeerConnectionCoordinator,
+            subsystem: LogSubsystem,
+            timeout: TimeInterval
+        ) async {
+            do {
+                _ = try await peerConnection
+                    .connectionStatePublisher
+                    .log(.debug, subsystems: subsystem) { "PeerConnection transitioned to \($0)" }
+                    .filter { $0 == .connected }
+                    .nextValue(timeout: timeout)
+            } catch {
+                log.warning(
+                    "PeerConnection wasn't ready in \(timeout) seconds. We continue joining and the connections should be ready after completing.",
+                    subsystems: subsystem
+                )
+            }
+        }
+
+        private func reportTelemetryAndCompletion() async {
+            guard
+                let coordinator = context.coordinator,
+                let sfuAdapter = await coordinator.stateAdapter.sfuAdapter
+            else {
+                return
             }
 
             let sessionID = await coordinator.stateAdapter.sessionID
             let unifiedSessionId = coordinator.stateAdapter.unifiedSessionId
+
+            // We dispatch to a task to avoid blocking the call transition
+            // while the telemetry is being reported.
             Task { [sessionID, unifiedSessionId, sfuAdapter] in
                 await telemetryReporter.reportTelemetry(
                     sessionId: sessionID,
@@ -134,8 +180,6 @@ extension WebRTCCoordinator.StateMachine.Stage {
             }
 
             reportJoinCompletion()
-
-            transitionOrDisconnect(.joined(context))
         }
     }
 }
