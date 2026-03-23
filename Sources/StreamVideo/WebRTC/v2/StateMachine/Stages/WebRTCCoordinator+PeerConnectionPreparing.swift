@@ -84,22 +84,36 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 return
             }
 
-            async let publisherIsReady = try await publisher
-                .connectionStatePublisher
-                .filter { $0 == .connected }
-                .nextValue(timeout: timeout)
-            async let subscriberIsReady = try await subscriber
-                .connectionStatePublisher
-                .filter { $0 == .connected }
-                .nextValue(timeout: timeout)
+            await withTaskGroup(of: Void.self) { [timeout] group in
+                group.addTask {
+                    do {
+                        _ = try await publisher
+                            .connectionStatePublisher
+                            .filter { $0 == .connected }
+                            .nextValue(timeout: timeout)
+                    } catch {
+                        log.warning(
+                            "Publisher wasn't ready in \(timeout) seconds. We continue joining and the connections should be ready after completing.",
+                            subsystems: .webRTC
+                        )
+                    }
+                }
 
-            do {
-                _ = try await [publisherIsReady, subscriberIsReady]
-            } catch {
-                log.warning(
-                    "Publisher or subscriber weren't ready in \(timeout) seconds. We continue joining and the connections should be ready after completing.",
-                    subsystems: .webRTC
-                )
+                group.addTask {
+                    do {
+                        _ = try await subscriber
+                            .connectionStatePublisher
+                            .filter { $0 == .connected }
+                            .nextValue(timeout: timeout)
+                    } catch {
+                        log.warning(
+                            "Subscriber wasn't ready in \(timeout) seconds. We continue joining and the connections should be ready after completing.",
+                            subsystems: .webRTC
+                        )
+                    }
+                }
+
+                await group.waitForAll()
             }
 
             await telemetryReporter.reportTelemetry(
