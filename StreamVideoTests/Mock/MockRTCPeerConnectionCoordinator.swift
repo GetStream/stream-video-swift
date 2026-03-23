@@ -139,6 +139,16 @@ final class MockRTCPeerConnectionCoordinator:
         stubEventSubject.eraseToAnyPublisher()
     }
 
+    override var connectionStatePublisher: AnyPublisher<RTCPeerConnectionState, Never> {
+        if let stub = stubbedProperty[
+            propertyKey(for: \.connectionStatePublisher)
+        ] as? AnyPublisher<RTCPeerConnectionState, Never> {
+            return stub
+        } else {
+            return super.connectionStatePublisher
+        }
+    }
+
     override var isHealthy: Bool {
         self[dynamicMember: \.isHealthy]
     }

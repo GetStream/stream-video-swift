@@ -8,8 +8,8 @@ import StreamWebRTC
 
 extension WebRTCCoordinator.StateMachine.Stage {
 
-    /// Creates the stage that waits briefly for publisher and subscriber peer
-    /// connections to report `.connected` before the join call completes.
+    /// Creates the stage that waits briefly for the publisher peer connection
+    /// to report `.connected` before the join call completes.
     ///
     /// - Parameters:
     ///   - context: The state machine context for the pending join flow.
@@ -27,8 +27,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
 extension WebRTCCoordinator.StateMachine.Stage {
 
-    /// Delays join completion until both peer connections are ready, or until
-    /// the timeout is reached.
+    /// Delays join completion while waiting for the publisher peer connection
+    /// to report `.connected`.
     final class PeerConnectionPreparingStage:
         WebRTCCoordinator.StateMachine.Stage,
         @unchecked Sendable {
@@ -74,46 +74,30 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
         // MARK: - Private Helpers
 
+        /// Waits for publisher peer-connection readiness, reports join telemetry, then
+        /// transitions to `.joined`.
+        ///
+        /// The stage tolerates readiness timeouts by logging warnings and
+        /// continuing join completion.
         private func execute() async {
             guard
                 let coordinator = context.coordinator,
                 let sfuAdapter = await coordinator.stateAdapter.sfuAdapter,
-                let publisher = await coordinator.stateAdapter.publisher,
-                let subscriber = await coordinator.stateAdapter.subscriber
+                let publisher = await coordinator.stateAdapter.publisher
             else {
                 return
             }
 
-            await withTaskGroup(of: Void.self) { [timeout] group in
-                group.addTask {
-                    do {
-                        _ = try await publisher
-                            .connectionStatePublisher
-                            .filter { $0 == .connected }
-                            .nextValue(timeout: timeout)
-                    } catch {
-                        log.warning(
-                            "Publisher wasn't ready in \(timeout) seconds. We continue joining and the connections should be ready after completing.",
-                            subsystems: .webRTC
-                        )
-                    }
-                }
-
-                group.addTask {
-                    do {
-                        _ = try await subscriber
-                            .connectionStatePublisher
-                            .filter { $0 == .connected }
-                            .nextValue(timeout: timeout)
-                    } catch {
-                        log.warning(
-                            "Subscriber wasn't ready in \(timeout) seconds. We continue joining and the connections should be ready after completing.",
-                            subsystems: .webRTC
-                        )
-                    }
-                }
-
-                await group.waitForAll()
+            do {
+                _ = try await publisher
+                    .connectionStatePublisher
+                    .filter { $0 == .connected }
+                    .nextValue(timeout: timeout)
+            } catch {
+                log.warning(
+                    "Publisher wasn't ready in \(timeout) seconds. We continue joining and the connections should be ready after completing.",
+                    subsystems: .webRTC
+                )
             }
 
             await telemetryReporter.reportTelemetry(
