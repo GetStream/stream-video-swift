@@ -222,7 +222,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
 
         peerConnection
             .publisher
-            .receive(on: DispatchQueue.main)
+            .receive(on: DispatchQueue.global(qos: .utility))
             .sink { [identifier, subsystem] in
                 if let failedToGatherEvent = $0 as? StreamRTCPeerConnection.ICECandidateFailedToGatherEvent {
                     log.warning(

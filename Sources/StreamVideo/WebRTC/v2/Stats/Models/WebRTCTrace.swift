@@ -224,8 +224,24 @@ extension WebRTCTrace {
     ) {
         self.init(
             id: nil,
-            tag: "device.battery.\(battery.state.state)",
+            tag: "device.battery\(battery.state.state)",
             data: .init(battery)
+        )
+    }
+}
+
+extension WebRTCTrace {
+    init(
+        _ stage: WebRTCCoordinator.StateMachine.Stage,
+        enteredAt: Date
+    ) {
+        self.init(
+            id: nil,
+            tag: "call.stage.transition",
+            data: .init([
+                "transitionFrom": "\(stage.id)",
+                "timeAtStage": "\(Date().timeIntervalSince(enteredAt))s"
+            ])
         )
     }
 }

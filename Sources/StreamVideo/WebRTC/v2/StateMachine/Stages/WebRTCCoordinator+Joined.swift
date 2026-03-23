@@ -31,7 +31,6 @@ extension WebRTCCoordinator.StateMachine.Stage {
         @Injected(\.audioStore) private var audioStore
 
         private let disposableBag = DisposableBag()
-        private var updateSubscriptionsAdapter: WebRTCUpdateSubscriptionsAdapter?
         private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
 
         /// Initializes a new instance of `JoinedStage`.
@@ -521,29 +520,15 @@ extension WebRTCCoordinator.StateMachine.Stage {
         /// Configures the subscription adapter responsible for managing WebRTC
         /// track subscriptions.
         ///
-        /// This function initializes the `WebRTCUpdateSubscriptionsAdapter` using
-        /// the current participants and incoming video quality settings. It ensures
-        /// that subscription updates are properly set up for the active SFU adapter
-        /// and session.
+        /// The adapter is retained by `WebRTCStateAdapter` so it can be started
+        /// in earlier stages and continue operating across transitions.
         private func configureUpdateSubscriptions() async {
             guard
-                let stateAdapter = context.coordinator?.stateAdapter,
-                let sfuAdapter = await stateAdapter.sfuAdapter
+                let stateAdapter = context.coordinator?.stateAdapter
             else {
                 return
             }
-
-            updateSubscriptionsAdapter = .init(
-                participantsPublisher: await stateAdapter
-                    .$participants
-                    .eraseToAnyPublisher(),
-                incomingVideoQualitySettingsPublisher: await stateAdapter
-                    .$incomingVideoQualitySettings
-                    .eraseToAnyPublisher(),
-                sfuAdapter: sfuAdapter,
-                sessionID: await stateAdapter.sessionID,
-                clientCapabilities: await stateAdapter.clientCapabilities
-            )
+            await stateAdapter.configureUpdateSubscriptions()
         }
     }
 }

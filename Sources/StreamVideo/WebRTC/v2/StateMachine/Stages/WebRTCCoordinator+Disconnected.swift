@@ -49,6 +49,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
             timeInStageCancellable?.cancel()
             context.disconnectionSource = nil
             context.flowError = nil
+            super.willTransitionAway()
         }
 
         /// Performs the transition from a previous stage to this disconnected

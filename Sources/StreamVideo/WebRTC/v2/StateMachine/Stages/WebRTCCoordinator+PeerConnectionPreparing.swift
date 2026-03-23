@@ -83,28 +83,55 @@ extension WebRTCCoordinator.StateMachine.Stage {
             guard
                 let coordinator = context.coordinator,
                 let sfuAdapter = await coordinator.stateAdapter.sfuAdapter,
-                let publisher = await coordinator.stateAdapter.publisher
+                let publisher = await coordinator.stateAdapter.publisher,
+                let subscriber = await coordinator.stateAdapter.subscriber
             else {
                 return
             }
 
-            do {
-                _ = try await publisher
-                    .connectionStatePublisher
-                    .filter { $0 == .connected }
-                    .nextValue(timeout: timeout)
-            } catch {
-                log.warning(
-                    "Publisher wasn't ready in \(timeout) seconds. We continue joining and the connections should be ready after completing.",
-                    subsystems: .webRTC
-                )
+            await withTaskGroup(of: Void.self) { [timeout] group in
+                group.addTask {
+                    do {
+                        _ = try await publisher
+                            .connectionStatePublisher
+                            .log(.debug) { "Publisher transitioned to \($0)" }
+                            .filter { $0 == .connected }
+                            .nextValue(timeout: timeout)
+                    } catch {
+                        log.warning(
+                            "Publisher wasn't ready in \(timeout) seconds. We continue joining and the connections should be ready after completing.",
+                            subsystems: .webRTC
+                        )
+                    }
+                }
+
+                group.addTask {
+                    do {
+                        _ = try await subscriber
+                            .connectionStatePublisher
+                            .log(.debug) { "Subscriber transitioned to \($0)" }
+                            .filter { $0 == .connected }
+                            .nextValue(timeout: timeout)
+                    } catch {
+                        log.warning(
+                            "Subscriber wasn't ready in \(timeout) seconds. We continue joining and the connections should be ready after completing.",
+                            subsystems: .webRTC
+                        )
+                    }
+                }
+
+                await group.waitForAll()
             }
 
-            await telemetryReporter.reportTelemetry(
-                sessionId: await coordinator.stateAdapter.sessionID,
-                unifiedSessionId: coordinator.stateAdapter.unifiedSessionId,
-                sfuAdapter: sfuAdapter
-            )
+            let sessionID = await coordinator.stateAdapter.sessionID
+            let unifiedSessionId = coordinator.stateAdapter.unifiedSessionId
+            Task { [sessionID, unifiedSessionId, sfuAdapter] in
+                await telemetryReporter.reportTelemetry(
+                    sessionId: sessionID,
+                    unifiedSessionId: unifiedSessionId,
+                    sfuAdapter: sfuAdapter
+                )
+            }
 
             reportJoinCompletion()
 

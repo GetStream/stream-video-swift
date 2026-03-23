@@ -401,6 +401,10 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     try await group.waitForAll()
                 }
 
+                // Start subscription updates before entering joined/PC readiness
+                // so SFU can react with subscriber offers as early as possible.
+                await coordinator.stateAdapter.configureUpdateSubscriptions()
+
                 // Once our PeerConnection have been created we consume the
                 // eventBucket we created above in order to re-apply any event
                 // that our PeerConnections missed during the initialisation.

@@ -78,6 +78,8 @@ extension WebRTCCoordinator.StateMachine {
         /// The transition closure for the stage.
         var transition: Transition?
 
+        var enteredAt = Date()
+
         /// Initializes a new stage with the given identifier and context.
         /// - Parameters:
         ///   - id: The identifier for the stage.
@@ -88,7 +90,14 @@ extension WebRTCCoordinator.StateMachine {
         }
 
         /// Called before transitioning away from this stage.
-        func willTransitionAway() { /* No-op */ }
+        func willTransitionAway() {
+            if let stateAdapter = context.coordinator?.stateAdapter {
+                let trace = WebRTCTrace(self, enteredAt: enteredAt)
+                Task { [weak stateAdapter] in
+                    await stateAdapter?.trace(trace)
+                }
+            }
+        }
 
         /// Called after transitioning away from this stage.
         func didTransitionAway() { /* No-op */ }
