@@ -88,8 +88,9 @@ extension WebRTCCoordinator.StateMachine.Stage {
         /// continuing join completion.
         private func execute() async {
             guard
-                let coordinator = context.coordinator
+                context.coordinator != nil
             else {
+                transitionDisconnectOrError(ClientError())
                 return
             }
 

@@ -24,6 +24,7 @@ extension WebRTCCoordinator.StateMachine {
             var flowError: Error?
             var joinSource: JoinSource?
             var joinPolicy: WebRTCJoinPolicy = .default
+            var updateSubscriptionsAdapter: WebRTCUpdateSubscriptionsAdapter?
 
             var isRejoiningFromSessionID: String?
             var migratingFromSFU: String = ""

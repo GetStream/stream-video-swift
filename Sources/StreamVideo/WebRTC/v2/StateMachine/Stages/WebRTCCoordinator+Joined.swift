@@ -522,13 +522,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
         ///
         /// The adapter is retained by `WebRTCStateAdapter` so it can be started
         /// in earlier stages and continue operating across transitions.
-        private func configureUpdateSubscriptions() async {
-            guard
-                let stateAdapter = context.coordinator?.stateAdapter
-            else {
-                return
-            }
-            await stateAdapter.configureUpdateSubscriptions()
+        private func configureUpdateSubscriptions() {
+            context.updateSubscriptionsAdapter?.startObservation()
         }
     }
 }

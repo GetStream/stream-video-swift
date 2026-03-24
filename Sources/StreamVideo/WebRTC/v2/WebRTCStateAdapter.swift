@@ -92,7 +92,6 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     private let rtcPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinatorProviding
     private let disposableBag = DisposableBag()
     private let peerConnectionsDisposableBag = DisposableBag()
-    private var updateSubscriptionsAdapter: WebRTCUpdateSubscriptionsAdapter?
 
     private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
     private let callSettingsProcessingQueue = OperationQueue(maxConcurrentOperationCount: 1)
@@ -400,7 +399,6 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         await subscriber?.close()
         self.publisher = nil
         self.subscriber = nil
-        self.updateSubscriptionsAdapter = nil
         self.statsAdapter = nil
         await sfuAdapter?.disconnect()
         enqueue { _ in [:] }
@@ -432,7 +430,6 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         await subscriber?.prepareForClosing()
         publisher = nil
         subscriber = nil
-        updateSubscriptionsAdapter = nil
         set(sfuAdapter: nil)
         set(statsAdapter: nil)
         set(token: "")
@@ -814,26 +811,6 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
             /// If we are joining from CallKit the AudioSession will be activated from it and we
             /// shouldn't attempt another activation.
             shouldSetActive: !sourceIsCallKit
-        )
-    }
-
-    /// Configures the adapter responsible for updating track subscriptions.
-    ///
-    /// This can be invoked as soon as participant state and peer connections are
-    /// available. The adapter is retained by the state adapter so updates continue
-    /// across stage transitions.
-    func configureUpdateSubscriptions() async {
-        guard let sfuAdapter else {
-            return
-        }
-
-        updateSubscriptionsAdapter = .init(
-            participantsPublisher: $participants.eraseToAnyPublisher(),
-            incomingVideoQualitySettingsPublisher: $incomingVideoQualitySettings
-                .eraseToAnyPublisher(),
-            sfuAdapter: sfuAdapter,
-            sessionID: sessionID,
-            clientCapabilities: clientCapabilities
         )
     }
 
