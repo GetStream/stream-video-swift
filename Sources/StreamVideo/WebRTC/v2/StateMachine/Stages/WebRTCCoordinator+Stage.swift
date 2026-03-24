@@ -24,6 +24,8 @@ extension WebRTCCoordinator.StateMachine {
             var flowError: Error?
             var joinSource: JoinSource?
             var joinPolicy: WebRTCJoinPolicy = .default
+            /// Shared adapter handling SFU track subscriptions updates across
+            /// stage transitions.
             var updateSubscriptionsAdapter: WebRTCUpdateSubscriptionsAdapter?
 
             var isRejoiningFromSessionID: String?
@@ -79,6 +81,7 @@ extension WebRTCCoordinator.StateMachine {
         /// The transition closure for the stage.
         var transition: Transition?
 
+        /// Timestamp used to report how long this stage stayed active.
         var enteredAt = Date()
 
         /// Initializes a new stage with the given identifier and context.

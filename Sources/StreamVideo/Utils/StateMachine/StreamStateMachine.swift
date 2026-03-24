@@ -17,6 +17,7 @@ public final class StreamStateMachine<StageType: StreamStateMachineStage> {
     /// A queue to ensure thread-safe operations.
     private let queue: UnfairQueue = .init()
     private let logSubsystem: LogSubsystem
+    /// Timestamp of the latest successful stage transition.
     private var transitionToStageAt: Date?
 
     /// Initializes the state machine with an initial stage.

@@ -219,6 +219,7 @@ extension WebRTCTrace {
 }
 
 extension WebRTCTrace {
+    /// Creates a trace containing battery state information.
     init(
         _ battery: BatteryStore
     ) {
@@ -231,6 +232,11 @@ extension WebRTCTrace {
 }
 
 extension WebRTCTrace {
+    /// Creates a trace for a state-machine stage transition.
+    ///
+    /// - Parameters:
+    ///   - stage: The stage being exited.
+    ///   - enteredAt: The date when the stage was entered.
     init(
         _ stage: WebRTCCoordinator.StateMachine.Stage,
         enteredAt: Date

@@ -23,10 +23,9 @@ final class WebRTCUpdateSubscriptionsAdapter: @unchecked Sendable {
     private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
     /// A factory that builds subscription details for WebRTC tracks.
     private let tracksFactory: WebRTCJoinRequestFactory
-    /// A container for cancellable Combine subscriptions.
-    private let disposableBag = DisposableBag()
-    /// The active Combine subscription observing participants and settings.
+    /// Combined participants and quality-settings updates.
     private let publisher: AnyPublisher<(WebRTCStateAdapter.ParticipantsStorage, IncomingVideoQualitySettings), Never>
+    /// The active subscription observing ``publisher``.
     private var publisherCancellable: AnyCancellable?
 
     /// Stores the last set of track subscription details sent to the SFU.
@@ -70,6 +69,10 @@ final class WebRTCUpdateSubscriptionsAdapter: @unchecked Sendable {
 
     // MARK: - Observation
 
+    /// Starts observing participant and quality updates.
+    ///
+    /// Calling this method multiple times cancels any previous observation and
+    /// restarts from the latest values.
     func startObservation() {
         processingQueue.addOperation { [weak self] in
             guard let self else { return }
@@ -85,6 +88,7 @@ final class WebRTCUpdateSubscriptionsAdapter: @unchecked Sendable {
         }
     }
 
+    /// Stops observing participant and quality updates.
     func stopObservation() {
         processingQueue.addOperation { [weak self] in
             self?.publisherCancellable?.cancel()
@@ -94,6 +98,12 @@ final class WebRTCUpdateSubscriptionsAdapter: @unchecked Sendable {
 
     // MARK: - Specific participants subscriptions update
 
+    /// Updates subscriptions for an explicit participants list.
+    ///
+    /// - Parameters:
+    ///   - participants: Participants to evaluate for subscriptions.
+    ///   - incomingVideoQualitySettings: The currently active quality settings.
+    ///   - trackTypes: Track types to include in the update request.
     func updateSubscriptions(
         for participants: [CallParticipant],
         incomingVideoQualitySettings: IncomingVideoQualitySettings,
