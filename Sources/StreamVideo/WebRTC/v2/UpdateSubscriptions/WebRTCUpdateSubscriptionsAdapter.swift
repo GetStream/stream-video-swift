@@ -90,10 +90,8 @@ final class WebRTCUpdateSubscriptionsAdapter: @unchecked Sendable {
 
     /// Stops observing participant and quality updates.
     func stopObservation() {
-        processingQueue.addOperation { [weak self] in
-            self?.publisherCancellable?.cancel()
-            self?.publisherCancellable = nil
-        }
+        publisherCancellable?.cancel()
+        publisherCancellable = nil
     }
 
     // MARK: - Specific participants subscriptions update

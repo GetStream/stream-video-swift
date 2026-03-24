@@ -106,7 +106,7 @@ public final class StreamStateMachine<StageType: StreamStateMachineStage> {
         )
 
         transitionToStageAt = .init()
-        publisher.send(nextStage)
+        publisher.send(newStage)
     }
 }
 
