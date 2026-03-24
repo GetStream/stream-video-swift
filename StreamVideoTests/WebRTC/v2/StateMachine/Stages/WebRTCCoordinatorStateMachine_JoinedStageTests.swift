@@ -239,6 +239,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         await mockCoordinatorStack.coordinator.stateAdapter.set(
             sfuAdapter: mockCoordinatorStack.sfuStack.adapter
         )
+        await configureUpdateSubscriptionsAdapter()
 
         let sessionId = try await mockCoordinatorStack
             .coordinator
@@ -267,6 +268,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         await mockCoordinatorStack.coordinator.stateAdapter.set(
             sfuAdapter: mockCoordinatorStack.sfuStack.adapter
         )
+        await configureUpdateSubscriptionsAdapter()
 
         let sessionId = try await mockCoordinatorStack
             .coordinator
@@ -302,6 +304,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         await mockCoordinatorStack.coordinator.stateAdapter.set(
             sfuAdapter: mockCoordinatorStack.sfuStack.adapter
         )
+        await configureUpdateSubscriptionsAdapter()
         var response = Stream_Video_Sfu_Signal_UpdateSubscriptionsResponse()
         response.error = .init()
         response.error.code = .requestValidationFailed
@@ -757,6 +760,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         await mockCoordinatorStack.coordinator.stateAdapter.set(
             sfuAdapter: mockCoordinatorStack.sfuStack.adapter
         )
+        await configureUpdateSubscriptionsAdapter()
         let sessionId = try await mockCoordinatorStack
             .coordinator
             .stateAdapter
@@ -787,6 +791,24 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
     }
 
     // MARK: - Private helpers
+
+    private func configureUpdateSubscriptionsAdapter() async {
+        let stateAdapter = mockCoordinatorStack.coordinator.stateAdapter
+
+        guard let sfuAdapter = await stateAdapter.sfuAdapter else {
+            return
+        }
+
+        subject.context.updateSubscriptionsAdapter = await .init(
+            participantsPublisher: stateAdapter.$participants.eraseToAnyPublisher(),
+            incomingVideoQualitySettingsPublisher: stateAdapter
+                .$incomingVideoQualitySettings
+                .eraseToAnyPublisher(),
+            sfuAdapter: sfuAdapter,
+            sessionID: stateAdapter.sessionID,
+            clientCapabilities: stateAdapter.clientCapabilities
+        )
+    }
 
     private func assertTransitions(
         from: WebRTCCoordinator.StateMachine.Stage.ID,
