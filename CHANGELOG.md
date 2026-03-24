@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🐞 Fixed
 - Require only publisher peer-connection readiness before join completion so subscriber setup can continue without blocking join state. [#1091](https://github.com/GetStream/stream-video-swift/pull/1091)
+- Start SFU subscription updates earlier in the join flow and keep them active across stage transitions to improve subscriber warm-up and reduce delayed remote media on join. [#1091](https://github.com/GetStream/stream-video-swift/pull/1091)
+- Use peer-connection readiness-aware joining for CallKit accepted calls so incoming-call joins do not complete before WebRTC is ready. [#1091](https://github.com/GetStream/stream-video-swift/pull/1091)
 - Prevent crashes during audio filter teardown by detaching custom processing callbacks before filter release and synchronizing callback handler access. [#1089](https://github.com/GetStream/stream-video-swift/pull/1089)
 
 # [1.44.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.44.0)
