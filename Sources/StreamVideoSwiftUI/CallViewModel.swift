@@ -1072,7 +1072,8 @@ open class CallViewModel: ObservableObject {
                 call: call,
                 callType: event.type,
                 callId: event.callId,
-                members: []
+                members: [],
+                policy: .peerConnectionReadinessAware
             )
         default:
             break
