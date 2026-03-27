@@ -497,12 +497,13 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 clientCapabilities: stateAdapter.clientCapabilities
             )
 
-            // If there is a publishing participant we update subscriptions
-            // just for this user, to warm up the subscriber
+            // If there is a publishing participant (other than ourselves) we
+            // update subscription just for this user, to warm up the subscriber
             // peerConnection. In that way we try to make subscriber pc
             // ready as soon as possible when the call transitions to joined
+            let sessionID = await stateAdapter.sessionID
             if let firstPublishingParticipant = await stateAdapter.participants.values
-                .first(where: { $0.hasAudio || $0.hasVideo }) {
+                .first(where: { ($0.hasAudio || $0.hasVideo) && $0.sessionId != sessionID }) {
                 context.updateSubscriptionsAdapter?.updateSubscriptions(
                     for: [firstPublishingParticipant],
                     incomingVideoQualitySettings: .none,

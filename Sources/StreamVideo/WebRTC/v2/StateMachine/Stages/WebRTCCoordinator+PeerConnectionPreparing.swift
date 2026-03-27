@@ -33,8 +33,22 @@ extension WebRTCCoordinator.StateMachine.Stage {
         WebRTCCoordinator.StateMachine.Stage,
         @unchecked Sendable {
 
+        /// Defines which peer connections must report `.connected` before this
+        /// stage proceeds with join completion.
+        ///
+        /// The selected configuration controls the readiness strategy in
+        /// `perform(for:)`, including whether readiness checks run for one or
+        /// both peer connections.
         private enum Configuration {
+            /// Wait only for the publisher peer connection.
+            ///
+            /// This keeps join completion fast and guarantees the publishing
+            /// path is ready before transitioning to `.joined`.
             case publisherOnly
+            /// Wait for both publisher and subscriber peer connections.
+            ///
+            /// Both readiness checks run concurrently and the stage proceeds
+            /// only after both have completed (or timed out).
             case publisherAndSubscriber
         }
 
