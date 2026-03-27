@@ -401,6 +401,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     try await group.waitForAll()
                 }
 
+                try Task.checkCancellation()
+
                 // Once our PeerConnection have been created we consume the
                 // eventBucket we created above in order to re-apply any event
                 // that our PeerConnections missed during the initialisation.
@@ -413,6 +415,12 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     Stream_Video_Sfu_Event_SubscriberOffer.self,
                     bucket: subscriberEventBucket
                 )
+
+                try Task.checkCancellation()
+
+                // Start subscription updates before entering joined/PC readiness
+                // so SFU can react with subscriber offers as early as possible.
+                await configureUpdateSubscriptions(sfuAdapter)
             }
 
             try Task.checkCancellation()
@@ -463,6 +471,44 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 }
 
                 try await group.waitForAll()
+            }
+        }
+
+        /// Configures the adapter responsible for updating track subscriptions.
+        ///
+        /// This can be invoked as soon as participant state and peer connections are
+        /// available. The adapter is retained by the state adapter so updates continue
+        /// across stage transitions.
+        func configureUpdateSubscriptions(_ sfuAdapter: SFUAdapter) async {
+            guard let stateAdapter = context.coordinator?.stateAdapter else {
+                transitionDisconnectOrError(ClientError())
+                return
+            }
+
+            context.updateSubscriptionsAdapter?.stopObservation()
+            context.updateSubscriptionsAdapter = nil
+
+            context.updateSubscriptionsAdapter = await .init(
+                participantsPublisher: stateAdapter.$participants.eraseToAnyPublisher(),
+                incomingVideoQualitySettingsPublisher: stateAdapter.$incomingVideoQualitySettings
+                    .eraseToAnyPublisher(),
+                sfuAdapter: sfuAdapter,
+                sessionID: stateAdapter.sessionID,
+                clientCapabilities: stateAdapter.clientCapabilities
+            )
+
+            // If there is a publishing participant (other than ourselves) we
+            // update subscription just for this user, to warm up the subscriber
+            // peerConnection. In that way we try to make subscriber pc
+            // ready as soon as possible when the call transitions to joined
+            let sessionID = await stateAdapter.sessionID
+            if let firstPublishingParticipant = await stateAdapter.participants.values
+                .first(where: { ($0.hasAudio || $0.hasVideo) && $0.sessionId != sessionID }) {
+                context.updateSubscriptionsAdapter?.updateSubscriptions(
+                    for: [firstPublishingParticipant],
+                    incomingVideoQualitySettings: .none,
+                    trackTypes: [.audio, .video]
+                )
             }
         }
 

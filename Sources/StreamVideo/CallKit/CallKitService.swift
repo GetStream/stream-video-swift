@@ -535,7 +535,10 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 // CallKit to release the audioSession, so that the SDK
                 // can configure and activate it and complete successfully the
                 // peerConnection configuration.
-                try await callToJoinEntry.call.join(callSettings: callSettings)
+                try await callToJoinEntry.call.join(
+                    callSettings: callSettings,
+                    policy: .peerConnectionReadinessAware
+                )
                 // Once the call is joined, the regular call state can take
                 // over and the temporary CallKit bridge can stand down.
                 eventPipelineSubject.send(.joined)

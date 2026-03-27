@@ -17,6 +17,8 @@ public final class StreamStateMachine<StageType: StreamStateMachineStage> {
     /// A queue to ensure thread-safe operations.
     private let queue: UnfairQueue = .init()
     private let logSubsystem: LogSubsystem
+    /// Timestamp of the latest successful stage transition.
+    private var transitionToStageAt: Date?
 
     /// Initializes the state machine with an initial stage.
     ///
@@ -90,15 +92,21 @@ public final class StreamStateMachine<StageType: StreamStateMachineStage> {
         }
 
         transitioningFromStage.didTransitionAway()
+        var logMessage = "Transition \(currentStage.description) → \(newStage.description)"
 
+        if let transitionToStageAt {
+            logMessage += " after \(Date().timeIntervalSince(transitionToStageAt))s"
+        }
         log.debug(
-            "Transition \(currentStage.description) → \(newStage.description)",
+            logMessage,
             subsystems: logSubsystem,
             functionName: function,
             fileName: file,
             lineNumber: line
         )
-        publisher.send(nextStage)
+
+        transitionToStageAt = .init()
+        publisher.send(newStage)
     }
 }
 

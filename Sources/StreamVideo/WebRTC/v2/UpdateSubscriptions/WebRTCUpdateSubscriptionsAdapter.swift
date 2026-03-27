@@ -23,10 +23,10 @@ final class WebRTCUpdateSubscriptionsAdapter: @unchecked Sendable {
     private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
     /// A factory that builds subscription details for WebRTC tracks.
     private let tracksFactory: WebRTCJoinRequestFactory
-    /// A container for cancellable Combine subscriptions.
-    private let disposableBag = DisposableBag()
-    /// The active Combine subscription observing participants and settings.
-    private var observable: AnyCancellable?
+    /// Combined participants and quality-settings updates.
+    private let publisher: AnyPublisher<(WebRTCStateAdapter.ParticipantsStorage, IncomingVideoQualitySettings), Never>
+    /// The active subscription observing ``publisher``.
+    private var publisherCancellable: AnyCancellable?
 
     /// Stores the last set of track subscription details sent to the SFU.
     private var lastTrackSubscriptionDetails:
@@ -55,36 +55,80 @@ final class WebRTCUpdateSubscriptionsAdapter: @unchecked Sendable {
     ) {
         self.sessionID = sessionID
         self.sfuAdapter = sfuAdapter
-        tracksFactory = .init(capabilities: clientCapabilities.map(\.rawValue))
-        observable = Publishers.CombineLatest(
+        self.publisher = Publishers.CombineLatest(
             participantsPublisher,
             incomingVideoQualitySettingsPublisher
         )
-        .sinkTask(queue: processingQueue) { [weak self] in
-            try await self?.didUpdate(
-                participants: $0,
-                incomingVideoQualitySettings: $1
-            )
-        }
+        .eraseToAnyPublisher()
+        tracksFactory = .init(capabilities: clientCapabilities.map(\.rawValue))
     }
 
     deinit {
         processingQueue.cancelAllOperations()
     }
 
-    // MARK: - Private Helpers
+    // MARK: - Observation
 
-    /// Handles updates when participants or quality settings change.
+    /// Starts observing participant and quality updates.
     ///
-    /// This function builds the new subscription details, compares them to
-    /// the last known state, and triggers an update if they differ.
+    /// Calling this method multiple times cancels any previous observation and
+    /// restarts from the latest values.
+    func startObservation() {
+        processingQueue.addOperation { [weak self] in
+            guard let self else { return }
+            publisherCancellable?.cancel()
+            publisherCancellable = nil
+            publisherCancellable = publisher
+                .sinkTask(queue: processingQueue) { [weak self] in
+                    try await self?.process(
+                        participants: $0.0,
+                        incomingVideoQualitySettings: $0.1
+                    )
+                }
+        }
+    }
+
+    /// Stops observing participant and quality updates.
+    func stopObservation() {
+        publisherCancellable?.cancel()
+        publisherCancellable = nil
+    }
+
+    // MARK: - Specific participants subscriptions update
+
+    /// Updates subscriptions for an explicit participants list.
     ///
     /// - Parameters:
-    ///   - participants: The current storage of participants.
-    ///   - incomingVideoQualitySettings: The current video quality settings.
-    private func didUpdate(
+    ///   - participants: Participants to evaluate for subscriptions.
+    ///   - incomingVideoQualitySettings: The currently active quality settings.
+    ///   - trackTypes: Track types to include in the update request.
+    func updateSubscriptions(
+        for participants: [CallParticipant],
+        incomingVideoQualitySettings: IncomingVideoQualitySettings,
+        trackTypes: Set<Stream_Video_Sfu_Models_TrackType>
+    ) {
+        processingQueue.addTaskOperation { [weak self] in
+            guard let self else {
+                return
+            }
+            let tracks = tracksFactory.buildSubscriptionDetails(
+                nil,
+                sessionID: sessionID,
+                participants: participants,
+                incomingVideoQualitySettings: incomingVideoQualitySettings
+            )
+            .filter { trackTypes.contains($0.trackType) }
+
+            try await executeSubscriptionsUpdate(for: tracks)
+        }
+    }
+
+    // MARK: - Private Helpers
+
+    private func process(
         participants: WebRTCStateAdapter.ParticipantsStorage,
-        incomingVideoQualitySettings: IncomingVideoQualitySettings
+        incomingVideoQualitySettings: IncomingVideoQualitySettings,
+        trackTypes: Set<Stream_Video_Sfu_Models_TrackType> = [.video, .screenShare, .screenShareAudio]
     ) async throws {
         let tracks = tracksFactory.buildSubscriptionDetails(
             nil,
@@ -92,8 +136,14 @@ final class WebRTCUpdateSubscriptionsAdapter: @unchecked Sendable {
             participants: Array(participants.values),
             incomingVideoQualitySettings: incomingVideoQualitySettings
         )
-        .filter { $0.trackType != .audio }
+        .filter { trackTypes.contains($0.trackType) }
 
+        try await executeSubscriptionsUpdate(for: tracks)
+    }
+
+    private func executeSubscriptionsUpdate(
+        for tracks: [Stream_Video_Sfu_Signal_TrackSubscriptionDetails]
+    ) async throws {
         let setTracks = Set(tracks)
         let setLastTrackSubscriptionDetails =
             Set(lastTrackSubscriptionDetails)
@@ -102,18 +152,13 @@ final class WebRTCUpdateSubscriptionsAdapter: @unchecked Sendable {
             return
         }
 
-        do {
-            try Task.checkCancellation()
-            try await sfuAdapter.updateSubscriptions(
-                tracks: tracks,
-                for: sessionID
-            )
-            lastTrackSubscriptionDetails = tracks
-        } catch {
-            log.warning(
-                "UpdateSubscriptions failed with error:\(error).",
-                subsystems: .webRTC
-            )
-        }
+        try Task.checkCancellation()
+
+        try await sfuAdapter.updateSubscriptions(
+            tracks: tracks,
+            for: sessionID
+        )
+
+        lastTrackSubscriptionDetails = tracks
     }
 }

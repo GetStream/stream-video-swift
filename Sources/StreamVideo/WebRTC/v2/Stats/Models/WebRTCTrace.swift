@@ -219,13 +219,35 @@ extension WebRTCTrace {
 }
 
 extension WebRTCTrace {
+    /// Creates a trace containing battery state information.
     init(
         _ battery: BatteryStore
     ) {
         self.init(
             id: nil,
-            tag: "device.battery.\(battery.state.state)",
+            tag: "device.battery\(battery.state.state)",
             data: .init(battery)
+        )
+    }
+}
+
+extension WebRTCTrace {
+    /// Creates a trace for a state-machine stage transition.
+    ///
+    /// - Parameters:
+    ///   - stage: The stage being exited.
+    ///   - enteredAt: The date when the stage was entered.
+    init(
+        _ stage: WebRTCCoordinator.StateMachine.Stage,
+        enteredAt: Date
+    ) {
+        self.init(
+            id: nil,
+            tag: "call.stage.transition",
+            data: .init([
+                "transitionFrom": "\(stage.id)",
+                "timeAtStage": "\(Date().timeIntervalSince(enteredAt))s"
+            ])
         )
     }
 }
