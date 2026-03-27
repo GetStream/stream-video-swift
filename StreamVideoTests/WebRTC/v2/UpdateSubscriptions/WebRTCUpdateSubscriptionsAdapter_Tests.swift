@@ -123,8 +123,34 @@ final class WebRTCUpdateSubscriptionsAdapter_Tests: XCTestCase, @unchecked Senda
             trackTypes: [.video]
         )
 
-        await fulfillment { self.mockSFUStack.service.updateSubscriptionsWasCalledWithRequest != nil }
-        let request = try XCTUnwrap(mockSFUStack.service.updateSubscriptionsWasCalledWithRequest)
+        await fulfillment {
+            self
+                .mockSFUStack
+                .service
+                .stubbedFunctionInput[.updateSubscriptions]?
+                .contains { input in
+                    guard case let .updateSubscriptions(request) = input else {
+                        return false
+                    }
+                    return request.tracks.count == 1
+                        && request.tracks.first?.trackType == .video
+                } == true
+        }
+        let request = try XCTUnwrap(
+            mockSFUStack
+                .service
+                .stubbedFunctionInput[.updateSubscriptions]?
+                .compactMap { input -> Stream_Video_Sfu_Signal_UpdateSubscriptionsRequest? in
+                    guard case let .updateSubscriptions(request) = input else {
+                        return nil
+                    }
+                    return request.tracks.count == 1
+                        && request.tracks.first?.trackType == .video
+                        ? request
+                        : nil
+                }
+                .first
+        )
         XCTAssertEqual(request.tracks.count, 1)
         XCTAssertEqual(request.tracks.first?.trackType, .video)
     }
