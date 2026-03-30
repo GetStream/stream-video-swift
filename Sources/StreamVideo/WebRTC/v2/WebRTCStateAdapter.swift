@@ -566,6 +566,20 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
                 return
             }
 
+            let ownCapabilities = await self.ownCapabilities
+            guard
+                ownCapabilities.allows(callSettings: updatedCallSettings)
+            else {
+                log.warning(
+                    "Unable to update callSettings:\(updatedCallSettings) due to missing capabilities:\(ownCapabilities)",
+                    subsystems: .webRTC,
+                    functionName: functionName,
+                    fileName: fileName,
+                    lineNumber: lineNumber
+                )
+                return
+            }
+
             await set(callSettings: updatedCallSettings)
             log.debug(
                 "CallSettings updated \(currentCallSettings) -> \(updatedCallSettings)",
@@ -895,5 +909,17 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
                 subsystems: .audioSession
             )
         }
+    }
+}
+
+extension Set where Element == OwnCapability {
+    func allows(callSettings: CallSettings) -> Bool {
+        if callSettings.audioOn, !contains(.sendAudio) {
+            return false
+        } else if callSettings.videoOn, !contains(.sendVideo) {
+            return false
+        }
+
+        return true
     }
 }
