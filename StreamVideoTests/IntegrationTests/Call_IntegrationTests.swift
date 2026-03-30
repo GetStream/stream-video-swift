@@ -784,6 +784,212 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         }
     }
 
+    func test_join_audioRoom_whenParticipantWithoutSpeakPermissionTogglesMicrophone_thenAudioRemainsDisabled() async throws {
+        let callId = String.unique
+        let host = String.unique
+        let participant = String.unique
+
+        let hostCallFlow = try await helpers
+            .callFlow(id: callId, type: .audioRoom, userId: host, environment: "demo")
+            .perform { try await $0.call.create(memberIds: [host], backstage: .init(enabled: false)) }
+            .perform { try await $0.call.join(callSettings: .init(audioOn: true, videoOn: false)) }
+
+        try await withThrowingTaskGroup(of: Void.self) { group in
+            group.addTask {
+                try await hostCallFlow
+                    .assertEventuallyInMainActor { $0.call.state.participants.endIndex == 2 }
+                    .assertEventuallyInMainActor { $0.call.state.participants.first { $0.userId == participant }?.hasAudio == false
+                    }
+            }
+
+            group.addTask {
+                try await self
+                    .helpers
+                    .callFlow(id: callId, type: .audioRoom, userId: participant, environment: "demo")
+                    .perform { try await $0.call.join(callSettings: .init(audioOn: false, videoOn: false)) }
+                    .assertEventuallyInMainActor { $0.call.currentUserHasCapability(.sendAudio) == false }
+                    .assertEventuallyInMainActor { $0.call.state.callSettings.audioOn == false }
+                    .perform { try await $0.call.microphone.toggle() }
+                    .delay(0.5)
+                    .assertEventuallyInMainActor { $0.call.currentUserHasCapability(.sendAudio) == false }
+                    .assertEventuallyInMainActor { $0.call.state.callSettings.audioOn == false }
+            }
+
+            try await group.waitForAll()
+        }
+    }
+
+    func test_join_audioRoom_whenParticipantRequestsSpeakPermissionAndHostAccepts_thenParticipantCanToggleMicrophone() async throws {
+        helpers.permissions.setMicrophonePermission(isGranted: true)
+        let callId = String.unique
+        let host = String.unique
+        let participant = String.unique
+
+        let hostCallFlow = try await helpers
+            .callFlow(id: callId, type: .audioRoom, userId: host, environment: "demo")
+            .perform { try await $0.call.create(memberIds: [host], backstage: .init(enabled: false)) }
+            .perform { try await $0.call.join(callSettings: .init(audioOn: true, videoOn: false)) }
+
+        let participantCallFlow = try await self
+            .helpers
+            .callFlow(id: callId, type: .audioRoom, userId: participant, environment: "demo")
+
+        try await withThrowingTaskGroup(of: Void.self) { group in
+            group.addTask {
+                try await hostCallFlow
+                    .assertEventuallyInMainActor { $0.call.state.permissionRequests.endIndex == 1 }
+                    .tryMap { await $0.call.state.permissionRequests.first }
+                    .perform { try await $0.call.grant(request: $0.value) }
+            }
+
+            group.addTask {
+                try await participantCallFlow
+                    .perform { try await $0.call.join(callSettings: .init(audioOn: false, videoOn: false)) }
+                    .assertEventuallyInMainActor { $0.call.currentUserHasCapability(.sendAudio) == false }
+                    .assertEventuallyInMainActor { $0.call.state.callSettings.audioOn == false }
+                    .perform { try await $0.call.request(permissions: [.sendAudio]) }
+                    .assertEventuallyInMainActor { $0.call.currentUserHasCapability(.sendAudio) }
+                    .perform { try await $0.call.microphone.toggle() }
+                    .delay(0.5)
+                    .assertEventuallyInMainActor { $0.call.state.callSettings.audioOn }
+            }
+
+            try await group.waitForAll()
+        }
+    }
+
+    func test_join_audioRoom_whenParticipantRequestsSpeakPermissionAndHostRejects_thenParticipantCannotToggleMicrophone(
+    ) async throws {
+        helpers.permissions.setMicrophonePermission(isGranted: true)
+        let callId = String.unique
+        let host = String.unique
+        let participant = String.unique
+
+        let hostCallFlow = try await helpers
+            .callFlow(id: callId, type: .audioRoom, userId: host, environment: "demo")
+            .perform { try await $0.call.create(memberIds: [host], backstage: .init(enabled: false)) }
+            .perform { try await $0.call.join(callSettings: .init(audioOn: true, videoOn: false)) }
+
+        try await withThrowingTaskGroup(of: Void.self) { group in
+            group.addTask {
+                try await hostCallFlow
+                    .assertEventuallyInMainActor { $0.call.state.permissionRequests.endIndex == 1 }
+                    .tryMap { await $0.call.state.permissionRequests.first }
+                    .perform { $0.value.reject() }
+                    .assertEventuallyInMainActor {
+                        $0.call.state.participants.first {
+                            $0.userId == participant
+                        }?.hasAudio == false
+                    }
+            }
+
+            group.addTask {
+                try await self
+                    .helpers
+                    .callFlow(id: callId, type: .audioRoom, userId: participant, environment: "demo")
+                    .perform { try await $0.call.join(callSettings: .init(audioOn: false, videoOn: false)) }
+                    .assertEventuallyInMainActor { $0.call.currentUserHasCapability(.sendAudio) == false }
+                    .assertEventuallyInMainActor { $0.call.state.callSettings.audioOn == false }
+                    .perform { try await $0.call.request(permissions: [.sendAudio]) }
+                    .assertEventuallyInMainActor { $0.call.currentUserHasCapability(.sendAudio) == false }
+                    .perform { try await $0.call.microphone.toggle() }
+                    .delay(0.5)
+                    .assertEventuallyInMainActor { $0.call.currentUserHasCapability(.sendAudio) == false }
+                    .assertEventuallyInMainActor { $0.call.state.callSettings.audioOn == false }
+            }
+
+            try await group.waitForAll()
+        }
+    }
+
+    func test_join_audioRoom_whenHostRevokesSpeakPermission_thenParticipantGetsMutedAndCannotToggleMicrophone() async throws {
+        helpers.permissions.setMicrophonePermission(isGranted: true)
+        let callId = String.unique
+        let host = String.unique
+        let participant = String.unique
+
+        let hostCallFlow = try await helpers
+            .callFlow(id: callId, type: .audioRoom, userId: host, environment: "demo")
+            .perform { try await $0.call.create(memberIds: [host], backstage: .init(enabled: false)) }
+            .perform { try await $0.call.join(callSettings: .init(audioOn: true, videoOn: false)) }
+            .assertEventuallyInMainActor { $0.call.state.ownCapabilities.contains(.updateCallPermissions) }
+
+        let participantCallFlow = try await self
+            .helpers
+            .callFlow(id: callId, type: .audioRoom, userId: participant, environment: "demo")
+
+        try await withThrowingTaskGroup(of: Void.self) { group in
+            group.addTask {
+                try await hostCallFlow
+                    .assertEventuallyInMainActor { $0.call.state.permissionRequests.endIndex == 1 }
+                    .tryMap { await $0.call.state.permissionRequests.first }
+                    .perform { try await $0.call.grant(request: $0.value) }
+                    .delay(2)
+                    .perform { try await $0.call.revoke(permissions: [.sendAudio], for: participant) }
+            }
+
+            group.addTask {
+                try await participantCallFlow
+                    .perform { try await $0.call.join(callSettings: .init(audioOn: false, videoOn: false)) }
+                    .assertEventuallyInMainActor { $0.call.currentUserHasCapability(.sendAudio) == false }
+                    .perform { try await $0.call.request(permissions: [.sendAudio]) }
+                    .assertEventuallyInMainActor { $0.call.currentUserHasCapability(.sendAudio) }
+                    .delay(1) // Wait for the call state to be updated
+                    .perform { try await $0.call.microphone.toggle() }
+                    .assertEventuallyInMainActor { $0.call.state.callSettings.audioOn }
+                    .assertEventuallyInMainActor { $0.call.currentUserHasCapability(.sendAudio) == false }
+                    .assertEventuallyInMainActor { $0.call.state.callSettings.audioOn == false }
+                    .performWithoutValueOverride { $0.call.updateCallSettingsManagers(with: await $0.call.state.callSettings) }
+                    .assertEventuallyInMainActor { $0.call.microphone.status == .disabled }
+                    .perform { try await $0.call.microphone.toggle() }
+                    .delay(0.5)
+                    .assertEventuallyInMainActor { $0.call.currentUserHasCapability(.sendAudio) == false }
+                    .assertEventuallyInMainActor { $0.call.state.callSettings.audioOn == false }
+            }
+
+            try await group.waitForAll()
+        }
+    }
+
+    func test_join_audioRoom_whenParticipantWithoutVideoPermissionTogglesCamera_thenVideoRemainsDisabled() async throws {
+        helpers.permissions.setCameraPermission(isGranted: true)
+        let callId = String.unique
+        let host = String.unique
+        let participant = String.unique
+
+        let hostCallFlow = try await helpers
+            .callFlow(id: callId, type: .audioRoom, userId: host, environment: "demo")
+            .perform { try await $0.call.create(memberIds: [host], backstage: .init(enabled: false)) }
+            .perform { try await $0.call.join(callSettings: .init(audioOn: true, videoOn: false)) }
+
+        try await withThrowingTaskGroup(of: Void.self) { group in
+            group.addTask {
+                try await hostCallFlow
+                    .assertEventuallyInMainActor { $0.call.state.participants.endIndex == 2 }
+                    .assertEventuallyInMainActor {
+                        $0.call.state.participants.first {
+                            $0.userId == participant
+                        }?.hasVideo == false
+                    }
+            }
+
+            group.addTask {
+                try await self
+                    .helpers
+                    .callFlow(id: callId, type: .audioRoom, userId: participant, environment: "demo")
+                    .perform { try await $0.call.join(callSettings: .init(audioOn: false, videoOn: false)) }
+                    .assertEventuallyInMainActor { $0.call.currentUserHasCapability(.sendVideo) == false }
+                    .assertEventuallyInMainActor { $0.call.state.callSettings.videoOn == false }
+                    .perform { try await $0.call.camera.toggle() }
+                    .delay(0.5)
+                    .assertEventuallyInMainActor { $0.call.state.callSettings.videoOn == false }
+                    .assertEventuallyInMainActor { $0.call.currentUserHasCapability(.sendVideo) == false }
+            }
+
+            try await group.waitForAll()
+        }
+    }
+
     // MARK: - Pin
 
     func test_pin_whenUserGetsPinnedForEveryone_thenCallStateOfAllParticipantsUpdatesAsExpected() async throws {
