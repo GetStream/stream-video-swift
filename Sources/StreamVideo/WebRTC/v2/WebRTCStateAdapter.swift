@@ -566,6 +566,9 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
                 return
             }
 
+            /// Prevents local media from being enabled when the user has already
+            /// lost the relevant permissions. This keeps actor state aligned with
+            /// server-side capabilities for audio-room moderation flows.
             let ownCapabilities = await self.ownCapabilities
             guard
                 ownCapabilities.allows(callSettings: updatedCallSettings)
@@ -913,6 +916,18 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
 }
 
 extension Set where Element == OwnCapability {
+    /// Returns whether the capability set allows the given `CallSettings`.
+    ///
+    /// The check is intentionally strict:
+    /// - `audioOn == true` requires `.sendAudio`
+    /// - `videoOn == true` requires `.sendVideo`
+    ///
+    /// This helper is used as a guardrail before applying local call-settings
+    /// updates so UI and transport state cannot drift into an unauthorized
+    /// state.
+    ///
+    /// - Parameter callSettings: The candidate call settings to validate.
+    /// - Returns: `true` when all required capabilities are present.
     func allows(callSettings: CallSettings) -> Bool {
         if callSettings.audioOn, !contains(.sendAudio) {
             return false
