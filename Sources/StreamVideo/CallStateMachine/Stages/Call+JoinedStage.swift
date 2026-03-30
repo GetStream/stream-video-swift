@@ -97,6 +97,8 @@ extension Call.StateMachine.Stage {
                 call.state.$callSettings.eraseToAnyPublisher()
             }
             publisher
+                // Dispatching on main thread as the updateCallSettingsManagers updates @Published properties
+                .receive(on: DispatchQueue.main)
                 .sink { [weak call] in call?.updateCallSettingsManagers(with: $0) }
                 .store(in: disposableBag)
         }
