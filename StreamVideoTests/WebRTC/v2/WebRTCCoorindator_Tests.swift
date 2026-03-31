@@ -221,6 +221,7 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
     // MARK: - changeAudioState
 
     func test_changeAudioState_shouldUpdateAudioState() async throws {
+        await subject.stateAdapter.enqueueOwnCapabilities { [.sendAudio, .sendVideo] }
         await subject.changeAudioState(isEnabled: false)
 
         await fulfillment {
@@ -232,6 +233,7 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
     // MARK: - changeSoundState
 
     func test_changeSoundState_shouldUpdateAudioOutputState() async throws {
+        await subject.stateAdapter.enqueueOwnCapabilities { [.sendAudio, .sendVideo] }
         await subject.changeSoundState(isEnabled: false)
 
         await fulfillment {
@@ -243,6 +245,8 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
     // MARK: - changeSpeakerState
 
     func test_changeSpeakerState_shouldUpdateSpeakerState() async throws {
+        await subject.stateAdapter.enqueueOwnCapabilities { [.sendAudio, .sendVideo] }
+
         await subject.changeSpeakerState(isEnabled: false)
 
         await fulfillment {
@@ -534,8 +538,11 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
 
         try await subject.zoom(by: 32)
 
+        await fulfillment {
+            mockPublisher.recordedInputPayload(CGFloat.self, for: .zoom)?.last == 32
+        }
         XCTAssertEqual(
-            mockPublisher.recordedInputPayload(CGFloat.self, for: .zoom)?.first,
+            mockPublisher.recordedInputPayload(CGFloat.self, for: .zoom)?.last,
             32
         )
     }
@@ -695,7 +702,7 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
         )
     ) async throws {
         mockSFUStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
-        let ownCapabilities = Set([OwnCapability.blockUsers, .changeMaxDuration])
+        let ownCapabilities = Set([OwnCapability.blockUsers, .changeMaxDuration, .sendAudio, .sendVideo])
         let callSettings = CallSettings(cameraPosition: .back)
         await subject.stateAdapter.set(sfuAdapter: mockSFUStack.adapter)
         if let videoFilter {

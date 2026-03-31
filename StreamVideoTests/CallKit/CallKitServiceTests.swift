@@ -489,7 +489,23 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         subject.callSettings = customCallSettings
         let firstCallUUID = UUID()
         uuidFactory.getResult = firstCallUUID
-        let call = stubCall(response: defaultGetCallResponse)
+        let mockCallController = MockCallController()
+        let call = MockCall(.dummy(callId: callId, callController: mockCallController))
+        call.stub(for: .get, with: defaultGetCallResponse)
+        call.stub(
+            for: .join,
+            with: JoinCallResponse.dummy(
+                call: .dummy(
+                    cid: cid,
+                    id: callId,
+                    type: .default
+                )
+            )
+        )
+        call.stub(for: .accept, with: AcceptCallResponse(duration: "0"))
+        call.stub(for: .reject, with: RejectCallResponse(duration: "0"))
+        call.stub(for: \.state, with: .init(.dummy()))
+        mockedStreamVideo.stub(for: .call, with: call)
         subject.streamVideo = mockedStreamVideo
         subject.missingPermissionPolicy = .none
 
@@ -506,6 +522,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
             perform: CXAnswerCallAction(call: firstCallUUID)
         )
         await waitExpectation(timeout: 1)
+        await fulfillment { self.subject.callId == self.callId }
         XCTAssertEqual(call.stubbedFunctionInput[.join]?.count, 1)
         let input = try XCTUnwrap(call.stubbedFunctionInput[.join]?.first)
         switch input {
@@ -530,7 +547,13 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
             perform: CXSetMutedCallAction(call: firstCallUUID, muted: true)
         )
 
-        await fulfillment { call.microphone.status == .disabled }
+        await fulfillment {
+            mockCallController.timesCalled(.changeAudioState) == 1
+        }
+        XCTAssertEqual(
+            mockCallController.recordedInputPayload(Bool.self, for: .changeAudioState)?.last,
+            false
+        )
     }
 
     @MainActor
