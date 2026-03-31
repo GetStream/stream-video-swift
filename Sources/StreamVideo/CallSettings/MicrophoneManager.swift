@@ -80,7 +80,11 @@ public final class MicrophoneManager: ObservableObject, CallSettingsManager, @un
                 )
             },
             onUpdate: { _ in
-                self.status = status
+                // We don't optimistically update the status as it will be
+                // updated only when the CallSettings changed based on the
+                // requirements:
+                // 1) System permissions granted
+                // 2) OwnCapabilities support requested change
             }
         )
     }
