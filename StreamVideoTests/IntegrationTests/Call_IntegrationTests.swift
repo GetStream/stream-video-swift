@@ -784,7 +784,8 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         }
     }
 
-    func test_join_audioRoom_whenParticipantWithoutSpeakPermissionTogglesMicrophone_thenAudioRemainsDisabled() async throws {
+    func test_audioRoom_participantWithoutSpeakPermission_toggleMicrophone_audioRemainsDisabled() async throws {
+        helpers.permissions.setMicrophonePermission(isGranted: true)
         let callId = String.unique
         let host = String.unique
         let participant = String.unique
@@ -819,7 +820,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         }
     }
 
-    func test_join_audioRoom_whenParticipantRequestsSpeakPermissionAndHostAccepts_thenParticipantCanToggleMicrophone() async throws {
+    func test_audioRoom_participantRequestsSpeakPermission_hostAccepts_participantCanToggleMicrophone() async throws {
         helpers.permissions.setMicrophonePermission(isGranted: true)
         let callId = String.unique
         let host = String.unique
@@ -858,7 +859,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         }
     }
 
-    func test_join_audioRoom_whenParticipantRequestsSpeakPermissionAndHostRejects_thenParticipantCannotToggleMicrophone(
+    func test_audioRoom_participantRequestsSpeakPermission_hostRejects_participantCannotToggleMicrophone(
     ) async throws {
         helpers.permissions.setMicrophonePermission(isGranted: true)
         let callId = String.unique
@@ -902,7 +903,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         }
     }
 
-    func test_join_audioRoom_whenHostRevokesSpeakPermission_thenParticipantGetsMutedAndCannotToggleMicrophone() async throws {
+    func test_audioRoom_hostRevokesSpeakPermission_participantGetsMutedAndCannotToggleMicrophone() async throws {
         helpers.permissions.setMicrophonePermission(isGranted: true)
         let callId = String.unique
         let host = String.unique
@@ -951,7 +952,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         }
     }
 
-    func test_join_audioRoom_whenParticipantWithoutVideoPermissionTogglesCamera_thenVideoRemainsDisabled() async throws {
+    func test_audioRoom_participantWithoutVideoPermission_toggleCamera_videoRemainsDisabled() async throws {
         helpers.permissions.setCameraPermission(isGranted: true)
         let callId = String.unique
         let host = String.unique

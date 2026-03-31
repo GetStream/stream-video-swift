@@ -9,7 +9,7 @@ final class CameraManager_Tests: XCTestCase, @unchecked Sendable {
 
     // MARK: - toggle
 
-    func test_initialStatusEnabled_whenToggle_thenStatusDoesNotChangeUntilCallSettingsUpdate() async throws {
+    func test_initialStatusEnabled_toggle_statusDoesNotChangeUntilCallSettingsUpdate() async throws {
         let callController = MockCallController()
         let subject = CameraManager(
             callController: callController,
@@ -31,7 +31,7 @@ final class CameraManager_Tests: XCTestCase, @unchecked Sendable {
 
     // MARK: - enable
 
-    func test_initialStatusDisabled_whenEnable_thenStatusDoesNotChangeUntilCallSettingsUpdate() async throws {
+    func test_initialStatusDisabled_enable_statusDoesNotChangeUntilCallSettingsUpdate() async throws {
         let callController = MockCallController()
         let subject = CameraManager(
             callController: callController,
@@ -53,7 +53,7 @@ final class CameraManager_Tests: XCTestCase, @unchecked Sendable {
 
     // MARK: - disable
 
-    func test_initialStatusEnabled_whenDisable_thenStatusDoesNotChangeUntilCallSettingsUpdate() async throws {
+    func test_initialStatusEnabled_disable_statusDoesNotChangeUntilCallSettingsUpdate() async throws {
         let callController = MockCallController()
         let subject = CameraManager(
             callController: callController,
@@ -75,7 +75,7 @@ final class CameraManager_Tests: XCTestCase, @unchecked Sendable {
 
     // MARK: - flip
 
-    func test_initialDirectionFront_whenFlip_thenDirectionChangesAndControllerReceivesBack() async throws {
+    func test_initialDirectionFront_flip_directionChangesAndControllerReceivesBack() async throws {
         let callController = MockCallController()
         let subject = CameraManager(
             callController: callController,
@@ -95,7 +95,7 @@ final class CameraManager_Tests: XCTestCase, @unchecked Sendable {
         )
     }
 
-    func test_initialDirectionBack_whenFlip_thenDirectionChangesAndControllerReceivesFront() async throws {
+    func test_initialDirectionBack_flip_directionChangesAndControllerReceivesFront() async throws {
         let callController = MockCallController()
         let subject = CameraManager(
             callController: callController,

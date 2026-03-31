@@ -53,11 +53,15 @@ final class CallStateMachineStageJoinedStage_Tests: StreamVideoTestCase, @unchec
 
     // MARK: - CallSettings observation
 
-    func test_givenJoiningTransition_whenCallSettingsChange_thenManagersSynchronize() async {
+    func test_joiningTransition_callSettingsChange_managersSynchronize() async {
         _ = subject.transition(from: .init(id: .joining, context: .init(call: call)))
 
-        // Wait for observation to complete inside the stage
-        await wait(for: 0.5)
+        await MainActor.run {
+            call.state.ownCapabilities = [.sendAudio]
+        }
+        await fulfillment {
+            self.callController.timesCalled(.updateOwnCapabilities) > 0
+        }
 
         await MainActor.run {
             call.state.update(
@@ -80,7 +84,7 @@ final class CallStateMachineStageJoinedStage_Tests: StreamVideoTestCase, @unchec
 
     // MARK: - OwnCapabilities observation
 
-    func test_givenJoiningTransition_whenOwnCapabilitiesAlreadyChanged_thenControllerReceivesUpdate() async {
+    func test_joiningTransition_ownCapabilitiesChanged_controllerReceivesUpdate() async {
         await MainActor.run {
             call.state.ownCapabilities = [.sendAudio]
         }

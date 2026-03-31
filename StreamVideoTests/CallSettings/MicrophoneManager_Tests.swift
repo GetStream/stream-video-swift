@@ -10,7 +10,7 @@ final class MicrophoneManager_Tests: XCTestCase, @unchecked Sendable {
 
     // MARK: - toggle
 
-    func test_initialStatusEnabled_whenToggle_thenStatusDoesNotChangeUntilCallSettingsUpdate() async throws {
+    func test_initialStatusEnabled_toggle_statusDoesNotChangeUntilCallSettingsUpdate() async throws {
         let callController = MockCallController()
         let subject = MicrophoneManager(
             callController: callController,
@@ -31,7 +31,7 @@ final class MicrophoneManager_Tests: XCTestCase, @unchecked Sendable {
 
     // MARK: - enable
 
-    func test_initialStatusDisabled_whenEnable_thenStatusDoesNotChangeUntilCallSettingsUpdate() async throws {
+    func test_initialStatusDisabled_enable_statusDoesNotChangeUntilCallSettingsUpdate() async throws {
         let callController = MockCallController()
         let subject = MicrophoneManager(
             callController: callController,
@@ -50,7 +50,7 @@ final class MicrophoneManager_Tests: XCTestCase, @unchecked Sendable {
         )
     }
 
-    func test_initialStatusEnabled_whenEnable_thenControllerIsNotCalled() async throws {
+    func test_initialStatusEnabled_enable_controllerIsNotCalled() async throws {
         let callController = MockCallController()
         let subject = MicrophoneManager(
             callController: callController,
@@ -65,7 +65,7 @@ final class MicrophoneManager_Tests: XCTestCase, @unchecked Sendable {
 
     // MARK: - disable
 
-    func test_initialStatusEnabled_whenDisable_thenStatusDoesNotChangeUntilCallSettingsUpdate() async throws {
+    func test_initialStatusEnabled_disable_statusDoesNotChangeUntilCallSettingsUpdate() async throws {
         let callController = MockCallController()
         let subject = MicrophoneManager(
             callController: callController,
@@ -84,7 +84,7 @@ final class MicrophoneManager_Tests: XCTestCase, @unchecked Sendable {
         )
     }
 
-    func test_initialStatusDisabled_whenDisable_thenControllerIsNotCalled() async throws {
+    func test_initialStatusDisabled_disable_controllerIsNotCalled() async throws {
         let callController = MockCallController()
         let subject = MicrophoneManager(
             callController: callController,
