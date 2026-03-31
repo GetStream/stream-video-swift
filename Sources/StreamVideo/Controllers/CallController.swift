@@ -20,12 +20,13 @@ class CallController: @unchecked Sendable {
         videoConfig: videoConfig,
         callSettings: initialCallSettings
     ) {
-        [weak self, callId] create, ring, migratingFrom, notify, options in
+        [weak self, callId] create, ring, migratingFrom, migratingFromList, notify, options in
         if let self {
             return try await authenticateCall(
                 create: create,
                 ring: ring,
                 migratingFrom: migratingFrom,
+                migratingFromList: migratingFromList,
                 notify: notify,
                 options: options
             )
@@ -588,10 +589,23 @@ class CallController: @unchecked Sendable {
             .store(in: disposableBag)
     }
 
+    /// Authenticates a join request and forwards SFU migration metadata to the
+    /// backend.
+    ///
+    /// - Parameters:
+    ///   - create: Whether the backend should create the call if needed.
+    ///   - ring: Whether ringing side effects should be emitted.
+    ///   - migratingFrom: The immediate SFU edge this flow is migrating from.
+    ///   - migratingFromList: All exhausted SFU edges that should be avoided.
+    ///   - notify: Whether the backend should notify call members.
+    ///   - options: Additional call creation options.
+    /// - Returns: The backend join response used to continue the WebRTC flow.
+    /// - Throws: An error if location fetch or join request fails.
     private func authenticateCall(
         create: Bool,
         ring: Bool,
         migratingFrom: String?,
+        migratingFromList: [String]?,
         notify: Bool,
         options: CreateCallOptions?
     ) async throws -> JoinCallResponse {
@@ -617,6 +631,7 @@ class CallController: @unchecked Sendable {
             data: callRequest,
             location: location,
             migratingFrom: migratingFrom,
+            migratingFromList: migratingFromList?.isEmpty == false ? migratingFromList : nil,
             notify: notify,
             ring: ring
         )

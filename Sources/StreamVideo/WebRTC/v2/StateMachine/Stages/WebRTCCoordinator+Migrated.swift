@@ -75,11 +75,16 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         .authenticate(
                             coordinator: coordinator,
                             currentSFU: context.migratingFromSFU,
+                            migratingFromList: context.migratingFromList,
                             create: false,
                             ring: false,
                             notify: false,
                             options: nil
                         )
+
+                    // Start observing SFU-full errors on the newly assigned SFU
+                    // so chained migrations continue to work after this stage.
+                    context.sfuFullObserver = .init(sfuAdapter)
 
                     /// We provide the ``SFUAdapter`` to the authenticator which will ensure
                     /// that we will continue only when the WS `connectionState` on the

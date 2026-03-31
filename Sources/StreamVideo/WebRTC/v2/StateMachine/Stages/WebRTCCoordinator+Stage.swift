@@ -28,8 +28,15 @@ extension WebRTCCoordinator.StateMachine {
             /// stage transitions.
             var updateSubscriptionsAdapter: WebRTCUpdateSubscriptionsAdapter?
 
+            /// Observes SFU-full events for the active adapter so we can force
+            /// migration immediately when the current SFU has no capacity.
+            var sfuFullObserver: WebRTCSFUFullObserver?
+
             var isRejoiningFromSessionID: String?
             var migratingFromSFU: String = ""
+            /// Tracks all SFUs rejected during migration attempts so retries can
+            /// explicitly avoid already exhausted edges.
+            var migratingFromList: [String] = []
             var migrationStatusObserver: WebRTCMigrationStatusObserver?
             var previousSessionPublisher: RTCPeerConnectionCoordinator?
             var previousSessionSubscriber: RTCPeerConnectionCoordinator?

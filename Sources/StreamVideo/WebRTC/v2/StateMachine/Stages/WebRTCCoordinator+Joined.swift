@@ -134,7 +134,11 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
                     try Task.checkCancellation()
 
-                    await configureUpdateSubscriptions()
+                    configureUpdateSubscriptions()
+
+                    try Task.checkCancellation()
+
+                    observeSFUFullError()
                 } catch {
                     await cleanUpPreviousSessionIfRequired()
                     transitionDisconnectOrError(error)
@@ -524,6 +528,37 @@ extension WebRTCCoordinator.StateMachine.Stage {
         /// in earlier stages and continue operating across transitions.
         private func configureUpdateSubscriptions() {
             context.updateSubscriptionsAdapter?.startObservation()
+        }
+
+        /// Observes SFU full errors and applies the reconnect strategy provided
+        /// by the event while tracking rejected SFU edges for migration retries.
+        private func observeSFUFullError() {
+            context
+                .sfuFullObserver?
+                .publisher
+                .receive(on: processingQueue)
+                .log(.warning, subsystems: .sfu) { _ in
+                    "Will disconnect because the current SFU is full."
+                }
+                .sink { [weak self] in
+                    guard let self else { return }
+
+                    // SFU-full means this edge rejected the join path. Respect
+                    // the backend-provided reconnect strategy and keep track of
+                    // the rejected edge for the next authenticate request.
+                    context.reconnectionStrategy = .init(
+                        from: $0.reconnectStrategy,
+                        fastReconnectDeadlineSeconds: context.fastReconnectDeadlineSeconds
+                    )
+                    if
+                        context.currentSFU.isEmpty == false,
+                        context.migratingFromList.contains(context.currentSFU) == false {
+                        context.migratingFromList = context.migratingFromList + [context.currentSFU]
+                    }
+
+                    transitionOrDisconnect(.disconnected(context))
+                }
+                .store(in: disposableBag)
         }
     }
 }
