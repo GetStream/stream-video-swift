@@ -1098,6 +1098,68 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(updatedCallSettings, newCallSettings)
     }
 
+    func test_givenMissingSendVideoCapability_whenEnqueueCallSettings_thenUnauthorizedUpdateIsRejected() async throws {
+        mockPermissions.stubMicrophonePermission(.granted)
+        mockPermissions.stubCameraPermission(.granted)
+        let sfuStack = MockSFUStack()
+        await subject.set(sfuAdapter: sfuStack.adapter)
+        try await subject.configurePeerConnections()
+        await subject.enqueueOwnCapabilities { [.sendAudio] }
+        await fulfillment {
+            let callSettings = await self.subject.callSettings
+            return callSettings.audioOn == true && callSettings.videoOn == false
+        }
+
+        await subject.enqueueCallSettings { _ in .init(videoOn: true) }
+
+        let mockPublisher = try await XCTAsyncUnwrap(
+            await subject.publisher as? MockRTCPeerConnectionCoordinator
+        )
+        await fulfillment {
+            mockPublisher.timesCalled(.didUpdateCallSettings) == 1
+        }
+
+        let lastUpdatedCallSettings = try XCTUnwrap(
+            mockPublisher.recordedInputPayload(
+                CallSettings.self,
+                for: .didUpdateCallSettings
+            )?.last
+        )
+        XCTAssertTrue(lastUpdatedCallSettings.audioOn)
+        XCTAssertFalse(lastUpdatedCallSettings.videoOn)
+    }
+
+    func test_givenMissingSendAudioCapability_whenEnqueueCallSettings_thenUnauthorizedUpdateIsRejected() async throws {
+        mockPermissions.stubMicrophonePermission(.granted)
+        mockPermissions.stubCameraPermission(.granted)
+        let sfuStack = MockSFUStack()
+        await subject.set(sfuAdapter: sfuStack.adapter)
+        try await subject.configurePeerConnections()
+        await subject.enqueueOwnCapabilities { [.sendVideo] }
+        await fulfillment {
+            let callSettings = await self.subject.callSettings
+            return callSettings.audioOn == false && callSettings.videoOn == true
+        }
+
+        await subject.enqueueCallSettings { _ in .init(audioOn: true) }
+
+        let mockPublisher = try await XCTAsyncUnwrap(
+            await subject.publisher as? MockRTCPeerConnectionCoordinator
+        )
+        await fulfillment {
+            mockPublisher.timesCalled(.didUpdateCallSettings) == 1
+        }
+
+        let lastUpdatedCallSettings = try XCTUnwrap(
+            mockPublisher.recordedInputPayload(
+                CallSettings.self,
+                for: .didUpdateCallSettings
+            )?.last
+        )
+        XCTAssertFalse(lastUpdatedCallSettings.audioOn)
+        XCTAssertTrue(lastUpdatedCallSettings.videoOn)
+    }
+
     // MARK: - permissionsAdapter(_:audioOn:)
 
     func test_permissionsAdapter_audioOn_valueWasUpdated_publisherWasUpdated() async throws {
