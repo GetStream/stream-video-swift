@@ -119,6 +119,8 @@ private final class TaskOperation<Output: Sendable>: Operation, @unchecked Senda
     private let continuation: CheckedContinuation<Output, Error>?
     private var task: Task<Void, Never>?
 
+    override var isAsynchronous: Bool { true }
+
     @Atomic private var _isExecuting: Bool = false
     override var isExecuting: Bool {
         get { _isExecuting }
@@ -136,16 +138,6 @@ private final class TaskOperation<Output: Sendable>: Operation, @unchecked Senda
             willChangeValue(forKey: "isFinished")
             _isFinished = newValue
             didChangeValue(forKey: "isFinished")
-        }
-    }
-
-    @Atomic private var _isCancelled: Bool = false
-    override var isCancelled: Bool {
-        get { _isCancelled }
-        set {
-            willChangeValue(forKey: "isCancelled")
-            _isCancelled = newValue
-            didChangeValue(forKey: "isCancelled")
         }
     }
 
@@ -184,9 +176,15 @@ private final class TaskOperation<Output: Sendable>: Operation, @unchecked Senda
         task = nil
     }
 
+    private func finish() {
+        isExecuting = false
+        isFinished = true
+    }
+
     override func start() {
         guard !isCancelled else {
-            isFinished = true
+            continuation?.resume(throwing: CancellationError())
+            finish()
             return
         }
         isExecuting = true
@@ -205,15 +203,16 @@ private final class TaskOperation<Output: Sendable>: Operation, @unchecked Senda
                 if let continuation {
                     continuation.resume(throwing: error)
                 }
-                log.error(
-                    error,
-                    functionName: function,
-                    fileName: file,
-                    lineNumber: line
-                )
+                if !(error is CancellationError) {
+                    log.error(
+                        error,
+                        functionName: function,
+                        fileName: file,
+                        lineNumber: line
+                    )
+                }
             }
-            isExecuting = false
-            isFinished = true
+            finish()
         }
         // swiftlint:enable discourage_task_init
     }
