@@ -81,6 +81,25 @@ final class OperationQueue_Tests: XCTestCase, @unchecked Sendable {
 
     // MARK: - cancelAll
 
+    func test_addSynchronousTaskOperation_whenCancelledBeforeStart_thenThrowsCancellationError() async {
+        subject.isSuspended = true
+
+        let task = Task {
+            try await self.subject.addSynchronousTaskOperation {
+                "value"
+            }
+        }
+
+        await fulfillment { self.subject.operationCount == 1 }
+        subject.cancelAllOperations()
+        subject.isSuspended = false
+
+        let error = await XCTAssertThrowsErrorAsync {
+            _ = try await task.value
+        }
+        XCTAssertTrue(error is CancellationError)
+    }
+
     func test_cancelAll_cancelsAllInFlightTasks() async throws {
         subject.addTaskOperation {
             await self.wait(for: 0.5)
