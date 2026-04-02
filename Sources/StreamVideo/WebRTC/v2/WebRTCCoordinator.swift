@@ -16,13 +16,17 @@ final class WebRTCCoordinator: @unchecked Sendable {
     ///   - create: Whether the call should be created on the backend side.
     ///   - ring: Whether the call is a ringing call.
     ///   - migratingFrom: If migrating, where are we migrating from.
-    ///   - notify:
-    ///   - options:
+    ///   - migratingFromList: Previously rejected SFU edge names. This lets the
+    ///     backend avoid assigning an SFU that has already failed with
+    ///     capacity-related errors during the same join flow.
+    ///   - notify: Whether users should receive notification side effects.
+    ///   - options: Additional call creation options.
     /// - Returns: A `JoinCallResponse` wrapped in an async throw.
     typealias AuthenticationHandler = (
         Bool,
         Bool,
         String?,
+        [String]?,
         Bool,
         CreateCallOptions?
     ) async throws -> JoinCallResponse

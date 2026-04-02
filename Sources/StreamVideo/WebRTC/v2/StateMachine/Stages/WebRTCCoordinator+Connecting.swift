@@ -154,6 +154,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         .authenticate(
                             coordinator: coordinator,
                             currentSFU: nil,
+                            migratingFromList: nil,
                             create: create,
                             ring: ring,
                             notify: notify,
@@ -161,6 +162,10 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         )
 
                     context.initialJoinCallResponse = response
+
+                    // Start observing SFU full events before the WS handshake
+                    // progresses so early server-side rejections are not lost.
+                    context.sfuFullObserver = .init(sfuAdapter)
 
                     try Task.checkCancellation()
 

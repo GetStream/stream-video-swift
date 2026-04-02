@@ -541,6 +541,92 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         }
     }
 
+    // MARK: observeSFUFullError
+
+    func test_transition_sfuFullObserved_landsOnDisconnectedWithMigrationContextUpdated() async {
+        subject.context.currentSFU = "edge-1"
+        subject.context.migratingFromList = ["edge-0"]
+        subject.context.sfuFullObserver = .init(mockCoordinatorStack.sfuStack.adapter)
+
+        await assertTransitionAfterTrigger(
+            expectedTarget: .disconnected,
+            trigger: { [mockCoordinatorStack] in
+                var error = Stream_Video_Sfu_Event_Error()
+                error.error.code = .sfuFull
+                error.reconnectStrategy = .migrate
+                mockCoordinatorStack?
+                    .sfuStack
+                    .receiveEvent(.sfuEvent(.error(error)))
+            }
+        ) { stage in
+            XCTAssertEqual(stage.context.reconnectionStrategy, .migrate)
+            XCTAssertEqual(stage.context.migratingFromList, ["edge-0", "edge-1"])
+        }
+    }
+
+    func test_transition_sfuFullObserved_withDuplicateCurrentSFU_keepsUniqueMigratingFromList() async {
+        subject.context.currentSFU = "edge-1"
+        subject.context.migratingFromList = ["edge-0", "edge-1"]
+        subject.context.sfuFullObserver = .init(mockCoordinatorStack.sfuStack.adapter)
+
+        await assertTransitionAfterTrigger(
+            expectedTarget: .disconnected,
+            trigger: { [mockCoordinatorStack] in
+                var error = Stream_Video_Sfu_Event_Error()
+                error.error.code = .sfuFull
+                error.reconnectStrategy = .migrate
+                mockCoordinatorStack?
+                    .sfuStack
+                    .receiveEvent(.sfuEvent(.error(error)))
+            }
+        ) { stage in
+            XCTAssertEqual(stage.context.reconnectionStrategy, .migrate)
+            XCTAssertEqual(stage.context.migratingFromList, ["edge-0", "edge-1"])
+        }
+    }
+
+    func test_transition_sfuFullObserved_withEmptyCurrentSFU_doesNotAppendToMigratingFromList() async {
+        subject.context.currentSFU = ""
+        subject.context.migratingFromList = ["edge-0"]
+        subject.context.sfuFullObserver = .init(mockCoordinatorStack.sfuStack.adapter)
+
+        await assertTransitionAfterTrigger(
+            expectedTarget: .disconnected,
+            trigger: { [mockCoordinatorStack] in
+                var error = Stream_Video_Sfu_Event_Error()
+                error.error.code = .sfuFull
+                error.reconnectStrategy = .migrate
+                mockCoordinatorStack?
+                    .sfuStack
+                    .receiveEvent(.sfuEvent(.error(error)))
+            }
+        ) { stage in
+            XCTAssertEqual(stage.context.reconnectionStrategy, .migrate)
+            XCTAssertEqual(stage.context.migratingFromList, ["edge-0"])
+        }
+    }
+
+    func test_transition_sfuFullObserved_withRejoinStrategy_usesStrategyFromErrorPayload() async {
+        subject.context.currentSFU = "edge-1"
+        subject.context.migratingFromList = []
+        subject.context.sfuFullObserver = .init(mockCoordinatorStack.sfuStack.adapter)
+
+        await assertTransitionAfterTrigger(
+            expectedTarget: .disconnected,
+            trigger: { [mockCoordinatorStack] in
+                var error = Stream_Video_Sfu_Event_Error()
+                error.error.code = .sfuFull
+                error.reconnectStrategy = .rejoin
+                mockCoordinatorStack?
+                    .sfuStack
+                    .receiveEvent(.sfuEvent(.error(error)))
+            }
+        ) { stage in
+            XCTAssertEqual(stage.context.reconnectionStrategy, .rejoin)
+            XCTAssertEqual(stage.context.migratingFromList, ["edge-1"])
+        }
+    }
+
     // MARK: - observeHealthCheckResponses
 
     func test_transition_hasNotReceivedHealthCheckResponseForTheRequiredTime_landsOnDisconnectedWithReconenctionStrategyFastReconnect(
