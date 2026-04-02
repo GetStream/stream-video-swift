@@ -444,6 +444,29 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         await assertCallingState(.idle)
     }
 
+    func test_outgoingCall_hangUpWithReason_forwardsReasonToCallLeave() async throws {
+        // Given
+        await prepare()
+        subject.startCall(
+            callType: .default,
+            callId: callId,
+            members: participants,
+            ring: true
+        )
+        await assertCallingState(.outgoing)
+        let expectedReason = "user-ended"
+
+        // When
+        subject.hangUp(reason: expectedReason)
+
+        // Then
+        await assertCallingState(.idle)
+        XCTAssertEqual(
+            mockCall.recordedInputPayload(String.self, for: .leave)?.first,
+            expectedReason
+        )
+    }
+
     func test_outgoingCall_ringTimeout() async throws {
         // Given
         let ringTimeoutSeconds = 3

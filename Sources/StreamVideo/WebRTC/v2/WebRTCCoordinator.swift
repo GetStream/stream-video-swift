@@ -134,9 +134,9 @@ final class WebRTCCoordinator: @unchecked Sendable {
     }
 
     /// Leaves the call and transitions the state machine to the `leaving` stage.
-    func leave() {
+    func leave(reason: String?) {
         stateMachine.transition(
-            .leaving(stateMachine.currentStage.context)
+            .leaving(stateMachine.currentStage.context, reason: reason)
         )
     }
 

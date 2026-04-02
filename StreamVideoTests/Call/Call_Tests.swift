@@ -666,6 +666,25 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
         }
     }
 
+    // MARK: - leave
+
+    func test_leave_withReason_reasonWasPassedToCallController() {
+        let mockCallController = MockCallController()
+        let call = MockCall(.dummy(callController: mockCallController))
+        call.stub(for: \.state, with: .init(.dummy()))
+        let expectedReason = "manual-hangup"
+
+        call.leave(reason: expectedReason)
+
+        XCTAssertEqual(
+            mockCallController.recordedInputPayload(
+                String.self,
+                for: .leave
+            )?.first,
+            expectedReason
+        )
+    }
+
     // MARK: - updateParticipantsSorting
 
     func test_call_customSorting() async throws {

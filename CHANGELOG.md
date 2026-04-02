@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🔄 Changed
 
+- Added optional leave reasons to `Call.leave` and `CallViewModel.hangUp`, and propagated them through the WebRTC leave flow so SFU leave requests include explicit end-of-call context. [#1100](https://github.com/GetStream/stream-video-swift/pull/1100)
+
 # [1.45.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.45.0)
 _March 31, 2026_
 
