@@ -8,8 +8,6 @@ import XCTest
 
 extension Call_IntegrationTests {
     struct Helpers: Sendable {
-        @Injected(\.audioStore) private var audioStore
-
         enum LoggingMode { case none, sdk, webrtc, all }
 
         var duringDismantleObservedAllCallEnded = true
@@ -19,6 +17,7 @@ extension Call_IntegrationTests {
         var client: StreamVideoHelper
         var users: UserHelper
         var permissions: PermissionsHelper
+        var audioStoreHelper: AudioStoreHelper
 
         private var registeredCalls: [String: Call] = [:]
 
@@ -28,28 +27,17 @@ extension Call_IntegrationTests {
             authentication: AuthenticationHelper = .init(),
             client: StreamVideoHelper = .init(),
             user: UserHelper = .init(),
-            permissions: PermissionsHelper = .init()
+            permissions: PermissionsHelper = .init(),
+            audioStoreHelper: AudioStoreHelper = .init()
         ) {
             self.configuration = configuration
             self.authentication = authentication
             self.client = client
             self.users = user
             self.permissions = permissions
+            self.audioStoreHelper = audioStoreHelper
 
-            switch loggingMode {
-            case .none:
-                LogConfig.webRTCLogsEnabled = false
-                LogConfig.level = .error
-            case .sdk:
-                LogConfig.webRTCLogsEnabled = false
-                LogConfig.level = .debug
-            case .webrtc:
-                LogConfig.webRTCLogsEnabled = true
-                LogConfig.level = .error
-            case .all:
-                LogConfig.webRTCLogsEnabled = true
-                LogConfig.level = .debug
-            }
+            setLoggingMode(loggingMode)
         }
 
         mutating func dismantle() async throws {
@@ -66,13 +54,7 @@ extension Call_IntegrationTests {
             }
             registeredCalls = [:]
 
-            audioStore
-                .dispatch(.setAudioDeviceModule(nil))
-
-            _ = try await audioStore
-                .publisher(\.audioDeviceModule)
-                .filter { $0 == nil }
-                .nextValue(timeout: 2)
+            try await audioStoreHelper.dismantle()
 
             await client.dismantle()
         }
@@ -123,6 +105,23 @@ extension Call_IntegrationTests {
                 clientRegisterMode: .auto
             )
             return client.call(callType: type, callId: id)
+        }
+
+        func setLoggingMode(_ mode: LoggingMode) {
+            switch mode {
+            case .none:
+                LogConfig.webRTCLogsEnabled = false
+                LogConfig.level = .error
+            case .sdk:
+                LogConfig.webRTCLogsEnabled = false
+                LogConfig.level = .debug
+            case .webrtc:
+                LogConfig.webRTCLogsEnabled = true
+                LogConfig.level = .error
+            case .all:
+                LogConfig.webRTCLogsEnabled = true
+                LogConfig.level = .debug
+            }
         }
     }
 }

@@ -162,9 +162,9 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
         try await subject.setUp(with: .init(), ownCapabilities: [])
         subject.completeSetUp()
 
-        let didStartCallSettingsUpdate = expectation(description: "didUpdateCallSettings did not start.")
+        let didStartCallSettingsUpdate = Atomic(wrappedValue: false)
         mockLocalMediaAdapterA.onDidUpdateCallSettings = { _ in
-            didStartCallSettingsUpdate.fulfill()
+            didStartCallSettingsUpdate.wrappedValue = true
             try await Task.sleep(nanoseconds: 700_000_000)
         }
 
@@ -172,7 +172,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
             try await subject?.didUpdateCallSettings(.init(audioOutputOn: false))
         }
 
-        await safeFulfillment(of: [didStartCallSettingsUpdate])
+        await fulfillment { didStartCallSettingsUpdate.wrappedValue }
 
         subject.restartICE()
 

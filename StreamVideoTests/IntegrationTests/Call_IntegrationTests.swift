@@ -2,8 +2,10 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import AVFoundation
 import Foundation
 @testable import StreamVideo
+import StreamWebRTC
 import XCTest
 
 final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
@@ -14,7 +16,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
 
     // MARK: - Properties
 
-    private var helpers: Call_IntegrationTests.Helpers! = .init(loggingMode: .sdk)
+    private var helpers: Call_IntegrationTests.Helpers! = .init()
 
     // MARK: - Lifecycle
 
@@ -580,6 +582,71 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
             }
 
             try await group.waitForAll()
+        }
+    }
+
+    /// Stress coverage: this validates that joining remains stable while rapid
+    /// call-settings churn happens around the join window. It is not intended
+    /// to deterministically reproduce a specific negotiation race.
+    func test_join_ringingFlow_whenCallSettingsChurnDuringJoin_thenJoinRemainsConnected() async throws {
+        let callId = String.unique
+        let userA = String.unique
+        let userB = String.unique
+
+        let calleeFlow = try await helpers
+            .callFlow(id: callId, type: .default, userId: userB)
+            .perform { $0.client.subscribe(for: CallRingEvent.self) }
+
+        let callerFlow = try await helpers
+            .callFlow(id: callId, type: .default, userId: userA)
+            .perform { try await $0.call.create(memberIds: [userA, userB]) }
+            .perform { try await $0.call.join(callSettings: .init(audioOn: false, videoOn: false)) }
+
+        try await withThrowingTaskGroup(of: Void.self) { group in
+            group.addTask {
+                try await callerFlow
+                    .perform { try await $0.call.ring(request: .init(membersIds: [userB])) }
+            }
+
+            group.addTask {
+                try await calleeFlow
+                    .assertEventually { (event: CallRingEvent) in event.call.id == callId }
+            }
+
+            try await group.waitForAll()
+
+            group.addTask {
+                try await calleeFlow
+                    .perform { try await $0.call.get() }
+                    .perform { try await $0.call.accept() }
+                    .perform {
+                        try await $0.call.join(
+                            callSettings: .init(
+                                audioOn: true,
+                                videoOn: true,
+                                speakerOn: false,
+                                audioOutputOn: true
+                            )
+                        )
+                    }
+                    .assertEventuallyInMainActor {
+                        $0.call.state.reconnectionStatus == .connected
+                    }
+                    .delay(2)
+            }
+
+            group.addTask {
+                var index = 0
+                while !Task.isCancelled {
+                    try? await calleeFlow.call.callController.changeAudioState(isEnabled: index % 2 == 0)
+                    index += 1
+                    await self.wait(for: 0.16)
+                }
+            }
+
+            try await group.next()
+
+            group.cancelAll()
         }
     }
 
