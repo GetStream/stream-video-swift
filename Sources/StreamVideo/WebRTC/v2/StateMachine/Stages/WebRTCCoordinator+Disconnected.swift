@@ -112,6 +112,9 @@ extension WebRTCCoordinator.StateMachine.Stage {
             context.sfuEventObserver = nil
             context.disconnectionSource = nil
             context.lastHealthCheckReceivedAt = nil
+            // Drop the observer while disconnected so stale SFU instances
+            // cannot leak migration signals into the next session.
+            context.sfuFullObserver = nil
 
             // Stop participants subscriptions observation while we reconnect
             context.updateSubscriptionsAdapter?.stopObservation()

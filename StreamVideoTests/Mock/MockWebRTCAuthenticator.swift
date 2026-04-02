@@ -14,6 +14,7 @@ final class MockWebRTCAuthenticator: WebRTCAuthenticating, Mockable, @unchecked 
         case authenticate(
             coordinator: WebRTCCoordinator,
             currentSFU: String?,
+            migratingFromList: [String]?,
             create: Bool,
             ring: Bool,
             notify: Bool,
@@ -25,8 +26,16 @@ final class MockWebRTCAuthenticator: WebRTCAuthenticating, Mockable, @unchecked 
 
         var payload: Any {
             switch self {
-            case let .authenticate(coordinator, currentSFU, create, ring, notify, options):
-                return (coordinator, currentSFU, create, ring, notify, options)
+            case let .authenticate(
+                coordinator,
+                currentSFU,
+                migratingFromList,
+                create,
+                ring,
+                notify,
+                options
+            ):
+                return (coordinator, currentSFU, migratingFromList, create, ring, notify, options)
             case let .waitForAuthentication(sfuAdapter):
                 return sfuAdapter
             case let .waitForConnect(sfuAdapter):
@@ -65,6 +74,7 @@ final class MockWebRTCAuthenticator: WebRTCAuthenticating, Mockable, @unchecked 
     func authenticate(
         coordinator: WebRTCCoordinator,
         currentSFU: String?,
+        migratingFromList: [String]?,
         create: Bool,
         ring: Bool,
         notify: Bool,
@@ -75,6 +85,7 @@ final class MockWebRTCAuthenticator: WebRTCAuthenticating, Mockable, @unchecked 
                 .authenticate(
                     coordinator: coordinator,
                     currentSFU: currentSFU,
+                    migratingFromList: migratingFromList,
                     create: create,
                     ring: ring,
                     notify: notify,

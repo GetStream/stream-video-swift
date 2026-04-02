@@ -79,6 +79,7 @@ final class WebRTCCoordinatorStateMachine_MigratedStageTests: XCTestCase, @unche
             let callType = (
                 coordinator: WebRTCCoordinator,
                 currentSFU: String?,
+                migratingFromList: [String]?,
                 create: Bool,
                 ring: Bool,
                 notify: Bool,
@@ -92,11 +93,42 @@ final class WebRTCCoordinatorStateMachine_MigratedStageTests: XCTestCase, @unche
             )
             XCTAssertTrue(input.coordinator === mockCoordinatorStack?.coordinator)
             XCTAssertEqual(input.currentSFU, migratingFromSFU)
+            XCTAssertEqual(input.migratingFromList, [])
             XCTAssertFalse(input.create)
             XCTAssertFalse(input.ring)
             XCTAssertFalse(input.notify)
             XCTAssertNil(input.options)
             XCTAssertTrue(target.context.flowError is ClientError)
+        }
+    }
+
+    func test_transition_authenticationReceivesMigratingFromList() async throws {
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.authenticator = mockCoordinatorStack.webRTCAuthenticator
+        subject.context.migratingFromSFU = String.unique
+        subject.context.migratingFromList = [String.unique, String.unique]
+
+        try await assertTransition(
+            from: .migrating,
+            expectedTarget: .disconnected,
+            subject: subject
+        ) { [mockCoordinatorStack] _ in
+            let callType = (
+                coordinator: WebRTCCoordinator,
+                currentSFU: String?,
+                migratingFromList: [String]?,
+                create: Bool,
+                ring: Bool,
+                notify: Bool,
+                options: CreateCallOptions?
+            ).self
+            let input = try XCTUnwrap(
+                mockCoordinatorStack?.webRTCAuthenticator.recordedInputPayload(
+                    callType,
+                    for: .authenticate
+                )?.first
+            )
+            XCTAssertEqual(input.migratingFromList, self.subject.context.migratingFromList)
         }
     }
 
@@ -148,6 +180,31 @@ final class WebRTCCoordinatorStateMachine_MigratedStageTests: XCTestCase, @unche
             let stateAdapter = try XCTUnwrap(mockCoordinatorStack?.coordinator.stateAdapter)
             let sfuAdapter = await stateAdapter.sfuAdapter
             XCTAssertTrue(sfuAdapter === mockCoordinatorStack?.sfuStack.adapter)
+        }
+    }
+
+    func test_transition_SFUConnected_createsSFUFullObserverForNewAdapter() async throws {
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.authenticator = mockCoordinatorStack.webRTCAuthenticator
+        mockCoordinatorStack.webRTCAuthenticator.stub(
+            for: .authenticate,
+            with: Result<(SFUAdapter, JoinCallResponse), Error>
+                .success((mockCoordinatorStack.sfuStack.adapter, .dummy()))
+        )
+        mockCoordinatorStack.webRTCAuthenticator.stub(
+            for: .waitForAuthentication,
+            with: Result<Void, Error>.success(())
+        )
+
+        try await assertTransition(
+            from: .migrating,
+            expectedTarget: .joining,
+            subject: subject
+        ) { [mockCoordinatorStack] target in
+            XCTAssertEqual(
+                target.context.sfuFullObserver?.hostname,
+                mockCoordinatorStack?.sfuStack.adapter.hostname
+            )
         }
     }
 
