@@ -998,6 +998,8 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         file: StaticString = #file,
         line: UInt = #line
     ) async throws {
+        await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter
+            .enqueueOwnCapabilities { [.sendAudio, .sendVideo] }
         try await operation()
         await fulfillment(file: file, line: line) {
             let callSettings = await self.mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.callSettings
@@ -1022,7 +1024,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         )
     ) async throws {
         mockWebRTCCoordinatorFactory.mockCoordinatorStack.sfuStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
-        let ownCapabilities = Set([OwnCapability.blockUsers, .changeMaxDuration])
+        let ownCapabilities = Set([OwnCapability.blockUsers, .changeMaxDuration, .sendAudio, .sendVideo])
         let callSettings = CallSettings(cameraPosition: .back)
         await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter
             .set(sfuAdapter: mockWebRTCCoordinatorFactory.mockCoordinatorStack.sfuStack.adapter)

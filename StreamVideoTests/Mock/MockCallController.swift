@@ -11,7 +11,10 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
         case join
         case setDisconnectionTimeout
         case observeWebRTCStateUpdated
+        case changeAudioState
         case changeVideoState
+        case changeCameraMode
+        case updateOwnCapabilities
         case enableClientCapabilities
         case disableClientCapabilities
     }
@@ -31,7 +34,13 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
 
         case observeWebRTCStateUpdated
 
+        case changeAudioState(Bool)
+
         case changeVideoState(Bool)
+
+        case changeCameraMode(CameraPosition)
+
+        case updateOwnCapabilities([OwnCapability])
 
         case enableClientCapabilities(Set<ClientCapability>)
 
@@ -53,7 +62,13 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
                 return (create, callSettings, options, ring, notify, source, policy)
             case .observeWebRTCStateUpdated:
                 return ()
+            case let .changeAudioState(value):
+                return value
             case let .changeVideoState(value):
+                return value
+            case let .changeCameraMode(value):
+                return value
+            case let .updateOwnCapabilities(value):
                 return value
             case let .enableClientCapabilities(value):
                 return value
@@ -145,6 +160,26 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
     override func changeVideoState(isEnabled: Bool) async throws {
         stubbedFunctionInput[.changeVideoState]?
             .append(.changeVideoState(isEnabled))
+    }
+
+    override func changeAudioState(
+        isEnabled: Bool,
+        file: StaticString,
+        function: StaticString,
+        line: UInt
+    ) async throws {
+        stubbedFunctionInput[.changeAudioState]?
+            .append(.changeAudioState(isEnabled))
+    }
+
+    override func changeCameraMode(position: CameraPosition) async throws {
+        stubbedFunctionInput[.changeCameraMode]?
+            .append(.changeCameraMode(position))
+    }
+
+    override func updateOwnCapabilities(ownCapabilities: [OwnCapability]) async {
+        stubbedFunctionInput[.updateOwnCapabilities]?
+            .append(.updateOwnCapabilities(ownCapabilities))
     }
 
     override func enableClientCapabilities(

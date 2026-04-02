@@ -110,6 +110,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
 
     func test_setCallSettings_shouldUpdateCallSettings() async throws {
         let expected = CallSettings(cameraPosition: .back)
+        await subject.enqueueOwnCapabilities { [.sendAudio, .sendVideo] }
 
         await subject.enqueueCallSettings { _ in expected }
 
@@ -475,7 +476,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
             filter: { _ in fatalError() }
         )
         await subject.set(videoFilter: videoFilter)
-        let ownCapabilities = Set([OwnCapability.blockUsers, .changeMaxDuration])
+        let ownCapabilities = Set([OwnCapability.blockUsers, .changeMaxDuration, .sendAudio, .sendVideo])
         await subject.enqueueOwnCapabilities { ownCapabilities }
         let callSettings = CallSettings(cameraPosition: .back)
         await subject.enqueueCallSettings { _ in callSettings }
@@ -541,7 +542,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
             filter: { _ in fatalError() }
         )
         await subject.set(videoFilter: videoFilter)
-        let ownCapabilities = Set([OwnCapability.blockUsers, .changeMaxDuration])
+        let ownCapabilities = Set([OwnCapability.blockUsers, .changeMaxDuration, .sendAudio, .sendVideo])
         await subject.enqueueOwnCapabilities { ownCapabilities }
         let callSettings = CallSettings(cameraPosition: .back)
         await subject.enqueueCallSettings { _ in callSettings }
@@ -731,7 +732,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
 
     func test_cleanUpForReconnection_shouldResetPropertiesForReconnection() async throws {
         let sfuStack = MockSFUStack()
-        let ownCapabilities = Set([OwnCapability.blockUsers])
+        let ownCapabilities = Set([OwnCapability.blockUsers, .sendAudio, .sendVideo])
         let pins = [PinInfo(isLocal: true, pinnedAt: .init())]
         let userId = String.unique
         let currentParticipant = await CallParticipant.dummy(id: subject.sessionID)
@@ -777,7 +778,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
 
     func test_cleanUpForReconnection_setsInitialCallSettingsToCallSettings() async throws {
         let sfuStack = MockSFUStack()
-        let ownCapabilities = Set([OwnCapability.blockUsers])
+        let ownCapabilities = Set([OwnCapability.blockUsers, .sendAudio, .sendVideo])
         let pins = [PinInfo(isLocal: true, pinnedAt: .init())]
         let userId = String.unique
         let currentParticipant = await CallParticipant.dummy(id: subject.sessionID)
@@ -1036,6 +1037,9 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
     }
 
     func test_updateCallSettings_withChangesInAudio_callSettingsDidUpdate() async {
+        mockPermissions.stubMicrophonePermission(.granted)
+        mockPermissions.stubCameraPermission(.granted)
+        await subject.enqueueOwnCapabilities { [.sendAudio, .sendVideo] }
         let sessionID = await subject.sessionID
         await subject.enqueueCallSettings { _ in .init(audioOn: true, videoOn: true) }
         var event = Stream_Video_Sfu_Event_TrackUnpublished()
@@ -1052,6 +1056,9 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
     }
 
     func test_updateCallSettings_withChangesInVideo_callSettingsDidUpdate() async {
+        mockPermissions.stubMicrophonePermission(.granted)
+        mockPermissions.stubCameraPermission(.granted)
+        await subject.enqueueOwnCapabilities { [.sendAudio, .sendVideo] }
         let sessionID = await subject.sessionID
         await subject.enqueueCallSettings { _ in .init(audioOn: true, videoOn: true) }
         var event = Stream_Video_Sfu_Event_TrackUnpublished()
@@ -1074,6 +1081,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         mockPermissions.stubCameraPermission(.granted)
         let sfuStack = MockSFUStack()
         await subject.set(sfuAdapter: sfuStack.adapter)
+        await subject.enqueueOwnCapabilities { [.sendAudio, .sendVideo] }
         try await subject.configurePeerConnections()
 
         let newCallSettings = CallSettings(
@@ -1098,11 +1106,74 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(updatedCallSettings, newCallSettings)
     }
 
+    func test_givenMissingSendVideoCapability_whenEnqueueCallSettings_thenUnauthorizedUpdateIsRejected() async throws {
+        mockPermissions.stubMicrophonePermission(.granted)
+        mockPermissions.stubCameraPermission(.granted)
+        let sfuStack = MockSFUStack()
+        await subject.set(sfuAdapter: sfuStack.adapter)
+        try await subject.configurePeerConnections()
+        await subject.enqueueOwnCapabilities { [.sendAudio] }
+        await fulfillment {
+            let callSettings = await self.subject.callSettings
+            return callSettings.audioOn == true && callSettings.videoOn == false
+        }
+
+        await subject.enqueueCallSettings { _ in .init(videoOn: true) }
+
+        let mockPublisher = try await XCTAsyncUnwrap(
+            await subject.publisher as? MockRTCPeerConnectionCoordinator
+        )
+        await fulfillment {
+            mockPublisher.timesCalled(.didUpdateCallSettings) == 1
+        }
+
+        let lastUpdatedCallSettings = try XCTUnwrap(
+            mockPublisher.recordedInputPayload(
+                CallSettings.self,
+                for: .didUpdateCallSettings
+            )?.last
+        )
+        XCTAssertTrue(lastUpdatedCallSettings.audioOn)
+        XCTAssertFalse(lastUpdatedCallSettings.videoOn)
+    }
+
+    func test_givenMissingSendAudioCapability_whenEnqueueCallSettings_thenUnauthorizedUpdateIsRejected() async throws {
+        mockPermissions.stubMicrophonePermission(.granted)
+        mockPermissions.stubCameraPermission(.granted)
+        let sfuStack = MockSFUStack()
+        await subject.set(sfuAdapter: sfuStack.adapter)
+        try await subject.configurePeerConnections()
+        await subject.enqueueOwnCapabilities { [.sendVideo] }
+        await fulfillment {
+            let callSettings = await self.subject.callSettings
+            return callSettings.audioOn == false && callSettings.videoOn == true
+        }
+
+        await subject.enqueueCallSettings { _ in .init(audioOn: true) }
+
+        let mockPublisher = try await XCTAsyncUnwrap(
+            await subject.publisher as? MockRTCPeerConnectionCoordinator
+        )
+        await fulfillment {
+            mockPublisher.timesCalled(.didUpdateCallSettings) == 1
+        }
+
+        let lastUpdatedCallSettings = try XCTUnwrap(
+            mockPublisher.recordedInputPayload(
+                CallSettings.self,
+                for: .didUpdateCallSettings
+            )?.last
+        )
+        XCTAssertFalse(lastUpdatedCallSettings.audioOn)
+        XCTAssertTrue(lastUpdatedCallSettings.videoOn)
+    }
+
     // MARK: - permissionsAdapter(_:audioOn:)
 
     func test_permissionsAdapter_audioOn_valueWasUpdated_publisherWasUpdated() async throws {
         let sfuStack = MockSFUStack()
         await subject.set(sfuAdapter: sfuStack.adapter)
+        await subject.enqueueOwnCapabilities { [.sendAudio, .sendVideo] }
         try await subject.configurePeerConnections()
         await subject.enqueueCallSettings { _ in CallSettings(audioOn: false) }
 
@@ -1125,6 +1196,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
     func test_permissionsAdapter_videoOn_valueWasUpdated_publisherWasUpdated() async throws {
         let sfuStack = MockSFUStack()
         await subject.set(sfuAdapter: sfuStack.adapter)
+        await subject.enqueueOwnCapabilities { [.sendAudio, .sendVideo] }
         try await subject.configurePeerConnections()
         await subject.enqueueCallSettings { _ in CallSettings(videoOn: false) }
 
@@ -1184,7 +1256,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
 
     private func prepare(
         sfuStack: MockSFUStack = .init(),
-        ownCapabilities: Set<OwnCapability> = [.changeMaxDuration],
+        ownCapabilities: Set<OwnCapability> = [.changeMaxDuration, .sendAudio, .sendVideo],
         participants: [String: CallParticipant] = [.unique: .dummy()],
         participantPins: [PinInfo] = [.init(isLocal: true, pinnedAt: .init())]
     ) async throws {

@@ -566,6 +566,23 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
                 return
             }
 
+            /// Prevents local media from being enabled when the user has already
+            /// lost the relevant permissions. This keeps actor state aligned with
+            /// server-side capabilities for audio-room moderation flows.
+            let ownCapabilities = await self.ownCapabilities
+            guard
+                ownCapabilities.allows(callSettings: updatedCallSettings)
+            else {
+                log.warning(
+                    "Unable to update callSettings:\(updatedCallSettings) due to missing capabilities:\(ownCapabilities)",
+                    subsystems: .webRTC,
+                    functionName: functionName,
+                    fileName: fileName,
+                    lineNumber: lineNumber
+                )
+                return
+            }
+
             await set(callSettings: updatedCallSettings)
             log.debug(
                 "CallSettings updated \(currentCallSettings) -> \(updatedCallSettings)",

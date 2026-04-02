@@ -9,7 +9,8 @@ final class CallStateMachineStageJoinedStage_Tests: StreamVideoTestCase, @unchec
 
     private struct TestError: Error {}
 
-    private lazy var call: Call! = .dummy()
+    private lazy var callController: MockCallController! = .init()
+    private lazy var call: Call! = .dummy(callController: callController)
     private lazy var allOtherStages: [Call.StateMachine.Stage]! = Call.StateMachine.Stage.ID
         .allCases
         .filter { $0 != subject.id }
@@ -21,6 +22,7 @@ final class CallStateMachineStageJoinedStage_Tests: StreamVideoTestCase, @unchec
     private lazy var subject: Call.StateMachine.Stage! = .joined(.init(call: call), response: response)
 
     override func tearDown() {
+        callController = nil
         call = nil
         allOtherStages = nil
         validOtherStages = nil
@@ -46,6 +48,53 @@ final class CallStateMachineStageJoinedStage_Tests: StreamVideoTestCase, @unchec
             } else {
                 XCTAssertNil(subject.transition(from: nextStage), "No error was thrown for \(nextStage.id)")
             }
+        }
+    }
+
+    // MARK: - CallSettings observation
+
+    func test_joiningTransition_callSettingsChange_managersSynchronize() async {
+        _ = subject.transition(from: .init(id: .joining, context: .init(call: call)))
+
+        await MainActor.run {
+            call.state.ownCapabilities = [.sendAudio]
+        }
+        await fulfillment {
+            self.callController.timesCalled(.updateOwnCapabilities) > 0
+        }
+
+        await MainActor.run {
+            call.state.update(
+                callSettings: .init(
+                    audioOn: false,
+                    videoOn: false,
+                    speakerOn: false,
+                    audioOutputOn: false,
+                    cameraPosition: .back
+                )
+            )
+        }
+
+        await fulfilmentInMainActor {
+            self.call.microphone.status == .disabled
+                && self.call.camera.status == .disabled
+                && self.call.camera.direction == .back
+        }
+    }
+
+    // MARK: - OwnCapabilities observation
+
+    func test_joiningTransition_ownCapabilitiesChanged_controllerReceivesUpdate() async {
+        await MainActor.run {
+            call.state.ownCapabilities = [.sendAudio]
+        }
+
+        _ = subject.transition(from: .init(id: .joining, context: .init(call: call)))
+
+        await fulfillment {
+            self.callController
+                .recordedInputPayload([OwnCapability].self, for: .updateOwnCapabilities)?
+                .contains([.sendAudio]) ?? false
         }
     }
 }

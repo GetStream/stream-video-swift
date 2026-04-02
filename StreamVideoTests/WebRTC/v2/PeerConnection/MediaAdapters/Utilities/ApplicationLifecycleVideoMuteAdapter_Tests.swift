@@ -101,6 +101,13 @@ final class ApplicationLifecycleVideoMuteAdapterTests: XCTestCase, @unchecked Se
         // Reset after receiving the foreground initial state
         await fulfillment { self.mockSFUStack.service.updateMuteStatesWasCalledWithRequest != nil }
         mockSFUStack.service.updateMuteStatesWasCalledWithRequest = nil
+
+        // Move to background first so the subsequent foreground event causes an
+        // explicit unmute update.
+        mockMoveToBackground()
+        await fulfillment { self.mockSFUStack.service.updateMuteStatesWasCalledWithRequest != nil }
+        mockSFUStack.service.updateMuteStatesWasCalledWithRequest = nil
+
         // Move to foreground
         mockMoveToForeground()
 

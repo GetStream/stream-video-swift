@@ -17,6 +17,7 @@ _March 31, 2026_
 - Start SFU subscription updates earlier in the join flow and keep them active across stage transitions to improve subscriber warm-up and reduce delayed remote media on join. [#1091](https://github.com/GetStream/stream-video-swift/pull/1091)
 - Use peer-connection readiness-aware joining for CallKit accepted calls so incoming-call joins do not complete before WebRTC is ready. [#1091](https://github.com/GetStream/stream-video-swift/pull/1091)
 - Prevent crashes during audio filter teardown by detaching custom processing callbacks before filter release and synchronizing callback handler access. [#1089](https://github.com/GetStream/stream-video-swift/pull/1089)
+- Fixed audio-room permission handling to keep microphone/camera state synchronized with `ownCapabilities` after join, grant/reject, and revoke flows. [#1093](https://github.com/GetStream/stream-video-swift/pull/1093)
 
 # [1.44.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.44.0)
 _March 19, 2026_

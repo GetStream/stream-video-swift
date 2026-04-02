@@ -135,7 +135,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         // It's important to instantiate the stateMachine as soon as possible
         // to ensure it's uniqueness.
         _ = stateMachine
-        subscribeToOwnCapabilitiesChanges()
     }
 
     /// Joins the current call.
@@ -1620,20 +1619,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         )
         await state.mergeMembers(response.members)
         return response
-    }
-
-    private func subscribeToOwnCapabilitiesChanges() {
-        Task(disposableBag: disposableBag) { @MainActor [weak self] in
-            guard let self else { return }
-            self
-                .state
-                .$ownCapabilities
-                .removeDuplicates()
-                .sinkTask(storeIn: disposableBag) { [weak self] in
-                    await self?.callController.updateOwnCapabilities(ownCapabilities: $0)
-                }
-                .store(in: disposableBag)
-        }
     }
 
     private func subscribeToNoiseCancellationSettingsChanges() {
