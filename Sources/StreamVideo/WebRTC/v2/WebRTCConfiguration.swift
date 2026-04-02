@@ -36,7 +36,7 @@ enum WebRTCConfiguration {
             migrationCompletion: 10,
             publisherSetUpBeforeNegotiation: 2,
             audioSessionConfigurationCompletion: 2,
-            audioSessionReadinessWatchdog: 15,
+            audioSessionReadinessWatchdog: 10,
             peerConnectionReadiness: 5
         )
 
