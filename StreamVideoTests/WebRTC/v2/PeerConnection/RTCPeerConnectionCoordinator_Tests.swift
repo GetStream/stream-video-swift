@@ -8,6 +8,7 @@ import StreamWebRTC
 @preconcurrency import XCTest
 
 final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable {
+    private enum DummyError: Error { case transient }
 
     private lazy var sessionId: String! = .unique
     private lazy var peerType: PeerConnectionType! = .publisher
@@ -151,6 +152,36 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
             mockLocalMediaAdapterA?.timesCalled(.didUpdateCallSettings) == 1
                 && mockLocalMediaAdapterB?.timesCalled(.didUpdateCallSettings) == 1
                 && mockLocalMediaAdapterC?.timesCalled(.didUpdateCallSettings) == 1
+        }
+    }
+
+    func test_didUpdateCallSettings_subjectIsPublisher_serializesWithNegotiationRequests() async throws {
+        mockSFUStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
+        _ = subject
+        mockLocalMediaAdapterA.stub(for: .trackInfo, with: [Stream_Video_Sfu_Models_TrackInfo()])
+        try await subject.setUp(with: .init(), ownCapabilities: [])
+        subject.completeSetUp()
+
+        let didStartCallSettingsUpdate = expectation(description: "didUpdateCallSettings did not start.")
+        mockLocalMediaAdapterA.onDidUpdateCallSettings = { _ in
+            didStartCallSettingsUpdate.fulfill()
+            try await Task.sleep(nanoseconds: 700_000_000)
+        }
+
+        let callSettingsTask = Task { [subject] in
+            try await subject?.didUpdateCallSettings(.init(audioOutputOn: false))
+        }
+
+        await safeFulfillment(of: [didStartCallSettingsUpdate])
+
+        subject.restartICE()
+
+        await wait(for: 0.2)
+        XCTAssertEqual(mockPeerConnection?.timesCalled(.offer), 0)
+
+        try await callSettingsTask.value
+        await fulfillment { [mockPeerConnection] in
+            mockPeerConnection?.timesCalled(.offer) == 1
         }
     }
 
@@ -428,6 +459,47 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
                 for: .setRemoteDescription
             )?.first?.type,
             .answer
+        )
+    }
+
+    func test_negotiate_subjectIsPublisher_setPublisherFailsOnce_retriesAndSetsRemoteDescription() async throws {
+        mockSFUStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
+        _ = subject
+        mockPeerConnection.stub(
+            for: .offer,
+            with: RTCSessionDescription(type: .offer, sdp: .unique)
+        )
+
+        var response = Stream_Video_Sfu_Signal_SetPublisherResponse()
+        let expectedAnswer = String.unique
+        response.sdp = expectedAnswer
+        mockSFUStack.service.stub(
+            for: .setPublisher,
+            with: StubVariantResultProvider<Result<Stream_Video_Sfu_Signal_SetPublisherResponse, Error>> { iteration in
+                iteration == 0 ? .failure(DummyError.transient) : .success(response)
+            }
+        )
+
+        try await simulateConcurrentPeerConnectionSetUp {
+            self
+                .mockPeerConnection
+                .subject
+                .send(StreamRTCPeerConnection.ShouldNegotiateEvent())
+        }
+
+        await fulfillment { [mockSFUStack] in
+            mockSFUStack?.service.timesCalled(.setPublisher) == 2
+        }
+        await fulfillment { [mockPeerConnection] in
+            mockPeerConnection?.timesCalled(.setRemoteDescription) == 1
+        }
+
+        XCTAssertEqual(
+            mockPeerConnection.recordedInputPayload(
+                RTCSessionDescription.self,
+                for: .setRemoteDescription
+            )?.first?.sdp,
+            expectedAnswer
         )
     }
 

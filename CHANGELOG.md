@@ -10,6 +10,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Prevent abrupt call endings caused by audio-session readiness timing by
   hardening WebRTC watchdog behavior and coverage across joining/joined flows.
   [#1098](https://github.com/GetStream/stream-video-swift/pull/1098)
+- Fix a publisher negotiation race during join where frequent `CallSettings`
+  updates (for example audio output route changes) could cause `setPublisher`
+  to fail. [#1099](https://github.com/GetStream/stream-video-swift/pull/1099)
 
 # [1.45.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.45.0)
 _March 31, 2026_

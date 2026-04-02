@@ -38,9 +38,15 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     private let disposableBag: DisposableBag = .init()
     private let dispatchQueue = DispatchQueue(label: "io.getstream.peerconnection.serial.offer.queue")
 
-    /// `SetPublisher` and `HandleSubscriberOffer` are expected from the SFU to be sent/handled
-    /// in a serial manner. The processing queues below ensure that the respective tasks are being executed
-    /// serially.
+    /// `SetPublisher` and `HandleSubscriberOffer` are expected from the SFU to be
+    /// sent/handled in a serial manner. The processing queues below ensure that
+    /// the respective tasks are executed serially.
+    ///
+    /// For publisher flows, `setPublisherProcessingQueue` is also shared with
+    /// `didUpdateCallSettings(_:)` updates. This avoids a race observed during
+    /// join where frequent route-driven `CallSettings` mutations (for example
+    /// speaker/Bluetooth output toggles) could overlap with negotiation and make
+    /// `setPublisher` fail with a stale transceiver snapshot.
     private let setPublisherProcessingQueue = OperationQueue(maxConcurrentOperationCount: 1)
     private let subscriberOfferProcessingQueue = OperationQueue(maxConcurrentOperationCount: 1)
 
@@ -50,6 +56,16 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     private let iceAdapter: ICEAdapter
     private let sfuAdapter: SFUAdapter
     private let iceConnectionStateAdapter: ICEConnectionStateAdapter
+    private lazy var negotiationAdapter: NegotiationAdapter = .init(
+        self,
+        identifier: identifier,
+        peerConnection: peerConnection,
+        peerType: peerType,
+        sessionID: sessionId,
+        sfuAdapter: sfuAdapter,
+        clientCapabilities: clientCapabilities,
+        subsystem: subsystem
+    )
 
     private var callSettings: CallSettings
 
@@ -369,6 +385,13 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     ///
     /// - Parameter settings: The new call settings to apply.
     /// - Throws: An error if updating the settings fails.
+    ///
+    /// For publisher connections this update is serialized on
+    /// `setPublisherProcessingQueue`, the same queue used by negotiation.
+    /// Keeping these operations in order prevents a join-time race where many
+    /// consecutive `CallSettings` updates (for example due to audio route
+    /// changes) can mutate local transceivers while `setPublisher` is building
+    /// and sending tracks info.
     func didUpdateCallSettings(
         _ settings: CallSettings
     ) async throws {
@@ -388,8 +411,21 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             """,
             subsystems: subsystem
         )
-        callSettings = settings
-        try await mediaAdapter.didUpdateCallSettings(settings)
+
+        if peerType == .publisher {
+            // Serialize publisher settings mutations with negotiation/setPublisher
+            // to avoid announcing a stale track snapshot while route-driven
+            // callSettings updates are still mutating local transceivers.
+            try await setPublisherProcessingQueue
+                .addSynchronousTaskOperation { [weak self, settings] in
+                    guard let self else { return }
+                    callSettings = settings
+                    try await mediaAdapter.didUpdateCallSettings(settings)
+                }
+        } else {
+            callSettings = settings
+            try await mediaAdapter.didUpdateCallSettings(settings)
+        }
     }
 
     /// Propagates local capability updates to all media adapters.
@@ -766,62 +802,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         constraints: RTCMediaConstraints = .defaultConstraints
     ) async {
         do {
-            log.debug(
-                """
-                PeerConnection will negotiate
-                Identifier: \(identifier)
-                type:\(peerType)
-                sessionID: \(sessionId)
-                sfu: \(sfuAdapter.hostname)
-                """,
-                subsystems: subsystem
-            )
-
-            let offer = try await createOffer(constraints: constraints)
-
-            try await setLocalDescription(offer)
-
-            try await ensureSetUpHasBeenCompleted()
-
-            /// - Note: Capabilities aren't required at this point and thus it's ok to leave it empty.
-            let tracksInfo = WebRTCJoinRequestFactory(
-                capabilities: clientCapabilities.map(\.rawValue)
-            )
-            .buildAnnouncedTracks(self, collectionType: .allAvailable)
-
-            // This is only used for debugging and internal validation.
-            validateTracksAndTransceivers(.video, tracksInfo: tracksInfo)
-            validateTracksAndTransceivers(.screenshare, tracksInfo: tracksInfo)
-
-            log.debug(
-                """
-                PeerConnection will setPublisher
-                Identifier: \(identifier)
-                type:\(peerType)
-                sessionID: \(sessionId)
-                sfu: \(sfuAdapter.hostname)
-                tracksInfo:
-                    audio: 
-                        \(tracksInfo.filter { $0.trackType == .audio })
-                    video: 
-                        \(tracksInfo.filter { $0.trackType == .video })
-                    hasScreenSharing: \(tracksInfo.contains { $0.trackType == .screenShare })
-                """,
-                subsystems: subsystem
-            )
-
-            let sessionDescription = try await sfuAdapter.setPublisher(
-                sessionDescription: offer.sdp,
-                tracks: tracksInfo,
-                for: sessionId
-            )
-
-            try await setRemoteDescription(
-                .init(
-                    type: .answer,
-                    sdp: sessionDescription.sdp
-                )
-            )
+            try await negotiationAdapter.negotiate(constraints: constraints)
         } catch {
             log.error(error, subsystems: subsystem)
         }

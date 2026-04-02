@@ -63,6 +63,7 @@ final class MockLocalMediaAdapter: LocalMediaAdapting, Mockable, @unchecked Send
     }
 
     var subject: PassthroughSubject<TrackEvent, Never> = .init()
+    var onDidUpdateCallSettings: (@Sendable (CallSettings) async throws -> Void)?
 
     func setUp(
         with settings: CallSettings,
@@ -85,6 +86,7 @@ final class MockLocalMediaAdapter: LocalMediaAdapting, Mockable, @unchecked Send
     func didUpdateCallSettings(_ settings: CallSettings) async throws {
         stubbedFunctionInput[.didUpdateCallSettings]?
             .append(.didUpdateCallSettings(settings: settings))
+        try await onDidUpdateCallSettings?(settings)
     }
 
     func didUpdateOwnCapabilities(_ ownCapabilities: Set<OwnCapability>) {

@@ -35,10 +35,13 @@ final class MockSignalServer: SFUSignalService, Mockable, @unchecked Sendable {
     }
 
     enum MockFunctionInput: Payloadable {
+        case setPublisher(request: Stream_Video_Sfu_Signal_SetPublisherRequest)
         case updateSubscriptions(request: Stream_Video_Sfu_Signal_UpdateSubscriptionsRequest)
 
         var payload: Any {
             switch self {
+            case let .setPublisher(request):
+                return request
             case let .updateSubscriptions(request):
                 return request
             }
@@ -107,7 +110,21 @@ final class MockSignalServer: SFUSignalService, Mockable, @unchecked Sendable {
         setPublisherRequest: Stream_Video_Sfu_Signal_SetPublisherRequest
     ) async throws -> Stream_Video_Sfu_Signal_SetPublisherResponse {
         setPublisherWasCalledWithRequest = setPublisherRequest
-        return stubbedFunction[.setPublisher] as! Stream_Video_Sfu_Signal_SetPublisherResponse
+        stubbedFunctionInput[.setPublisher]?.append(.setPublisher(request: setPublisherRequest))
+
+        if let error = stubbedFunction[.setPublisher] as? Error {
+            throw error
+        } else if
+            let resultProvider = stubbedFunction[.setPublisher]
+            as? StubVariantResultProvider<Result<Stream_Video_Sfu_Signal_SetPublisherResponse, Error>> {
+            return try resultProvider.getResult(for: timesCalled(.setPublisher) - 1).get()
+        } else if
+            let resultProvider = stubbedFunction[.setPublisher]
+            as? StubVariantResultProvider<Stream_Video_Sfu_Signal_SetPublisherResponse> {
+            return resultProvider.getResult(for: timesCalled(.setPublisher) - 1)
+        } else {
+            return stubbedFunction[.setPublisher] as! Stream_Video_Sfu_Signal_SetPublisherResponse
+        }
     }
 
     override func updateSubscriptions(

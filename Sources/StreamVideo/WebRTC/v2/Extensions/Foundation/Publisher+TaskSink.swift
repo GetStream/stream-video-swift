@@ -65,7 +65,12 @@ extension Publisher where Output: Sendable {
                     }
                 } catch {
                     // Log any unexpected errors during task execution.
-                    LogConfig.logger.error(ClientError(with: error))
+                    LogConfig.logger.error(
+                        ClientError(with: error),
+                        functionName: function,
+                        fileName: file,
+                        lineNumber: line
+                    )
                 }
             }
         }
@@ -102,7 +107,12 @@ extension Publisher where Output: Sendable {
                     }
                 } catch {
                     // Log any unexpected errors during task execution.
-                    LogConfig.logger.error(error)
+                    LogConfig.logger.error(
+                        error,
+                        functionName: function,
+                        fileName: file,
+                        lineNumber: line
+                    )
                 }
             }
         }
@@ -143,7 +153,12 @@ extension Publisher where Output: Sendable {
                         LogConfig.logger.error(error)
                     }
                 } catch {
-                    LogConfig.logger.error(ClientError(with: error))
+                    LogConfig.logger.error(
+                        ClientError(with: error),
+                        functionName: function,
+                        fileName: file,
+                        lineNumber: line
+                    )
                 }
             }
         }
