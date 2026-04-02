@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🔄 Changed
 
+### 🐞 Fixed
+- Prevent abrupt call endings caused by audio-session readiness timing by
+  hardening WebRTC watchdog behavior and coverage across joining/joined flows.
+  [#1098](https://github.com/GetStream/stream-video-swift/pull/1098)
+
 # [1.45.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.45.0)
 _March 31, 2026_
 

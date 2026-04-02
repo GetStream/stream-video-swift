@@ -32,6 +32,8 @@ extension WebRTCCoordinator.StateMachine {
             /// migration immediately when the current SFU has no capacity.
             var sfuFullObserver: WebRTCSFUFullObserver?
 
+            var audioSessionWatchdog: WebRTCAudioSessionWatchdog = .init()
+
             var isRejoiningFromSessionID: String?
             var migratingFromSFU: String = ""
             /// Tracks all SFUs rejected during migration attempts so retries can

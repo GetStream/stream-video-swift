@@ -78,7 +78,7 @@ final class WebRTCUpdateSubscriptionsAdapter_Tests: XCTestCase, @unchecked Senda
         await fulfillment { self.mockSFUStack.service.timesCalled(.updateSubscriptions) == 2 }
     }
 
-    func test_startObservation_whenTracksDontChange_doesNotSendRequest() async throws {
+    func test_startObservation_whenTracksDoNotChange_doesNotSendRequest() async throws {
         participantsSubject.send([
             "1": .dummy(id: "1", hasVideo: true),
             "2": .dummy(id: "2", hasVideo: true),

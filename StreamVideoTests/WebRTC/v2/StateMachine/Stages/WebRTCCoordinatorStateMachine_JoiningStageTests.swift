@@ -519,6 +519,37 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
         eventCancellable.cancel()
     }
 
+    func test_transition_fromConnected_withShortAudioSessionReadinessTimeout_transitionsToJoined() async throws {
+        let previousTimeout = WebRTCConfiguration.timeout
+        let mockAudioStore = MockRTCAudioStore()
+        mockAudioStore.makeShared()
+        defer {
+            WebRTCConfiguration.timeout = previousTimeout
+            mockAudioStore.dismantle()
+        }
+        WebRTCConfiguration.timeout.audioSessionConfigurationCompletion = 0.1
+
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.reconnectAttempts = 11
+        await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
+        mockCoordinatorStack.webRTCAuthenticator.stubbedFunction[.waitForConnect] = Result<Void, Error>.success(())
+        let cancellable = receiveEvent(
+            .sfuEvent(.joinResponse(Stream_Video_Sfu_Event_JoinResponse())),
+            every: 0.3
+        )
+
+        try await assertTransition(
+            from: .connected,
+            expectedTarget: .joined,
+            subject: subject
+        ) { _ in }
+
+        cancellable.cancel()
+    }
+
     // MARK: - transition from connected with isRejoiningFromSessionID != nil
 
     func test_transition_fromConnectedWithRejoinWithoutCoordinator_transitionsToDisconnected() async throws {
