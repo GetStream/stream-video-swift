@@ -5,7 +5,7 @@
 import Foundation
 
 /// Enum representing the different types of recording.
-public enum CallRecordingType: String {
+public enum CallRecordingType: String, Sendable {
     case composite
     case raw
     case individual

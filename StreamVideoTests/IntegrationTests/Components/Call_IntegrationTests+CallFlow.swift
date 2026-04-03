@@ -49,7 +49,7 @@ extension Call_IntegrationTests {
         
         @discardableResult
         func performWithoutValueOverride(
-            _ operation: @Sendable (_ flow: Self) async throws -> Void
+            _ operation: @Sendable (_ flow: CallFlow<Result>) async throws -> Void
         ) async throws -> Self {
             try await operation(self)
             return self
