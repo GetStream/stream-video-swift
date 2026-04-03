@@ -672,6 +672,58 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         }
     }
 
+    // MARK: - observeAudioSessionReadiness
+
+    func test_transition_audioSessionNeverBecomesReadyBeforeWatchdog_transitionsToDisconnected() async {
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        let previousTimeout = WebRTCConfiguration.timeout
+        let mockAudioStore = MockRTCAudioStore()
+        mockAudioStore.makeShared()
+        defer {
+            WebRTCConfiguration.timeout = previousTimeout
+            mockAudioStore.dismantle()
+        }
+        WebRTCConfiguration.timeout.audioSessionReadinessWatchdog = 0.2
+        subject.context.audioSessionWatchdog = .init()
+
+        await assertTransitionAfterTrigger(
+            expectedTarget: .disconnected,
+            trigger: {}
+        ) { stage in
+            XCTAssertEqual(stage.context.reconnectionStrategy, .rejoin)
+        }
+    }
+
+    func test_transition_audioSessionBecomesReadyBeforeWatchdog_remainsOnJoined() async {
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        let previousTimeout = WebRTCConfiguration.timeout
+        let mockAudioStore = MockRTCAudioStore()
+        mockAudioStore.makeShared()
+        defer {
+            WebRTCConfiguration.timeout = previousTimeout
+            mockAudioStore.dismantle()
+        }
+        WebRTCConfiguration.timeout.audioSessionReadinessWatchdog = 1
+        subject.context.audioSessionWatchdog = .init()
+
+        let transitionExpectation = expectation(
+            description: "No transition should be triggered while joined."
+        )
+        transitionExpectation.isInverted = true
+        transitionExpectation.assertForOverFulfill = false
+
+        subject.transition = { _ in transitionExpectation.fulfill() }
+        _ = subject.transition(from: .joining(subject.context))
+
+        mockAudioStore.audioStore.dispatch(.setActive(true))
+        mockAudioStore.audioStore.dispatch(
+            .setCurrentRoute(.dummy(inputs: [.dummy()]))
+        )
+
+        await fulfillment(of: [transitionExpectation], timeout: 1.5)
+        XCTAssertEqual(subject.id, .joined)
+    }
+
     // MARK: observePreferredReconnectionStrategy
 
     func test_transition_sfuErrorWithReconnectionStrategyFastReceived_updatesContext() async {
@@ -943,6 +995,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
             )
             transitionExpectation.isInverted = true
         }
+        transitionExpectation.assertForOverFulfill = false
 
         subject.transition = { target in
             Task {

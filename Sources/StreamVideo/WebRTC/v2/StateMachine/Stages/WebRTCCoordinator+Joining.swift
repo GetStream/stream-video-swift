@@ -390,7 +390,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         /// that the audioSession has been:
                         /// - released from CallKit (if our source was CallKit)
                         /// - activated and configured correctly
-                        try await self?.ensureAudioSessionIsReady()
+                        await self?.ensureAudioSessionIsReady()
 
                         /// Configures all peer connections after the audio session is ready.
                         /// Ensures signaling, media, and routing are correctly established for
@@ -443,35 +443,45 @@ extension WebRTCCoordinator.StateMachine.Stage {
             try Task.checkCancellation()
         }
 
-        /// Waits until the audio session is fully ready for call setup.
+        /// Waits for early audio-session readiness before peer-connection setup.
         ///
-        /// The function waits in parallel for:
-        /// - `audioStore` to report `isActive == true`
-        /// - `audioStore` to report a non-empty `currentRoute`
-        /// within the provided `timeout`.
+        /// This method runs in `JoiningStage` right after audio-session
+        /// configuration and just before `configurePeerConnections()`.
         ///
-        /// - Parameter timeout: Maximum number of seconds to wait for both
-        ///   conditions before failing.
-        /// - Throws: If either readiness condition does not arrive before
-        ///   `timeout`.
-        private func ensureAudioSessionIsReady() async throws {
-            try await withThrowingTaskGroup(of: Void.self) { [audioStore] group in
-                group.addTask {
-                    _ = try await audioStore
-                        .publisher(\.isActive)
-                        .filter { $0 }
-                        .nextValue(timeout: WebRTCConfiguration.timeout.audioSessionConfigurationCompletion)
-                }
-
-                group.addTask {
-                    _ = try await audioStore
-                        .publisher(\.currentRoute)
-                        .filter { $0 != .empty }
-                        .nextValue(timeout: WebRTCConfiguration.timeout.audioSessionConfigurationCompletion)
-                }
-
-                try await group.waitForAll()
+        /// Why this exists:
+        /// - The join flow can race with audio-session activation/route
+        ///   propagation (especially when control is handed back from CallKit).
+        /// - Creating peer connections before audio is active and routed can
+        ///   increase the chance of stale/no-audio media setup.
+        ///
+        /// How it behaves:
+        /// - It waits for `context.audioSessionWatchdog.publisher` to emit
+        ///   `true` (audio session active and route non-empty).
+        /// - The wait is bounded by `timeout`; on timeout it logs a warning and
+        ///   intentionally continues the join flow.
+        /// - It always emits a trace with the watchdog's current readiness
+        ///   snapshot so diagnostics can distinguish "ready" vs "still
+        ///   preparing" join paths.
+        ///
+        /// This method is intentionally best-effort: we prefer joining with a
+        /// degraded readiness signal over blocking join completion indefinitely.
+        ///
+        /// - Parameter timeout: Maximum seconds to wait for the watchdog to
+        ///   report readiness before continuing.
+        private func ensureAudioSessionIsReady(
+            timeout: TimeInterval = WebRTCConfiguration.timeout.audioSessionConfigurationCompletion
+        ) async {
+            do {
+                _ = try await context
+                    .audioSessionWatchdog
+                    .publisher
+                    .filter { $0 }
+                    .nextValue(timeout: timeout)
+            } catch {
+                log.warning("AudioSession isn't ready after \(timeout) seconds. Will continue with the join flow.")
             }
+
+            await context.coordinator?.stateAdapter.trace(.init(context.audioSessionWatchdog))
         }
 
         /// Configures the adapter responsible for updating track subscriptions.

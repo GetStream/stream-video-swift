@@ -139,6 +139,10 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     try Task.checkCancellation()
 
                     observeSFUFullError()
+
+                    try Task.checkCancellation()
+
+                    observeAudioSessionReadiness()
                 } catch {
                     await cleanUpPreviousSessionIfRequired()
                     transitionDisconnectOrError(error)
@@ -557,6 +561,57 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     }
 
                     transitionOrDisconnect(.disconnected(context))
+                }
+                .store(in: disposableBag)
+        }
+
+        /// Starts a joined-stage watchdog for delayed audio-session readiness.
+        ///
+        /// This method runs after the call has already reached `JoinedStage`.
+        /// At this point media and signaling are active, but audio readiness can
+        /// still be pending in edge cases (for example delayed route activation
+        /// after interruptions or CallKit handoff timing).
+        ///
+        /// Behavior:
+        /// - Schedules a one-shot timer using
+        ///   `WebRTCConfiguration.timeout.audioSessionReadinessWatchdog`.
+        /// - If the timer fires first, it:
+        ///   - traces a timeout event (`audio.session.timeout`),
+        ///   - forces reconnection strategy to `.rejoin`,
+        ///   - transitions to `DisconnectedStage` to rebuild media state.
+        /// - In parallel, it listens to `context.audioSessionWatchdog.publisher`
+        ///   and cancels the timer as soon as readiness becomes `true`.
+        ///
+        /// The watchdog signal is effectively one-off/latching for this flow:
+        /// once readiness is observed and timer is cancelled, this stage does not
+        /// re-arm the watchdog again.
+        private func observeAudioSessionReadiness() {
+            let key = "audio-session-readiness"
+            let interval = WebRTCConfiguration.timeout.audioSessionReadinessWatchdog
+
+            DefaultTimer
+                .publish(every: interval)
+                .log(.warning, subsystems: .audioSession) { _ in "AudioSession isn't ready after \(interval) seconds." }
+                .sinkTask(storeIn: disposableBag) { [weak self] _ in
+                    guard let self else { return }
+                    await context.coordinator?.stateAdapter.trace(
+                        .init(
+                            context.audioSessionWatchdog,
+                            timeout: true
+                        )
+                    )
+                    context.reconnectionStrategy = .rejoin
+                    transitionOrDisconnect(.disconnected(context))
+                }
+                .store(in: disposableBag, key: key)
+
+            context
+                .audioSessionWatchdog
+                .publisher
+                .sink { [weak self] isReady in
+                    if isReady {
+                        self?.disposableBag.remove(key)
+                    }
                 }
                 .store(in: disposableBag)
         }
