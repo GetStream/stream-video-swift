@@ -163,7 +163,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
         subject.completeSetUp()
 
         let didStartCallSettingsUpdate = Atomic(wrappedValue: false)
-        mockLocalMediaAdapterA.onDidUpdateCallSettings = { _ in
+        mockLocalMediaAdapterA.onDidUpdateCallSettings = { @Sendable [self] _ in
             didStartCallSettingsUpdate.wrappedValue = true
             await self.wait(for: 2)
         }
