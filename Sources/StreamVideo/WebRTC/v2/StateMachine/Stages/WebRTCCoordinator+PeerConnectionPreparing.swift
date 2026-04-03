@@ -11,6 +11,10 @@ extension WebRTCCoordinator.StateMachine.Stage {
     /// Creates the stage that waits briefly for the publisher peer connection
     /// to report `.connected` before the join call completes.
     ///
+    /// If the publisher is joining with both audio and video disabled, the
+    /// stage skips the readiness wait because there is no local media to
+    /// negotiate yet.
+    ///
     /// - Parameters:
     ///   - context: The state machine context for the pending join flow.
     ///   - telemetryReporter: Reports telemetry after the stage finishes.
@@ -29,6 +33,9 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
     /// Delays join completion while waiting for the publisher peer connection
     /// to report `.connected`.
+    ///
+    /// Muted joins that do not publish local audio or video skip the
+    /// publisher wait and proceed directly to `.joined`.
     final class PeerConnectionPreparingStage:
         WebRTCCoordinator.StateMachine.Stage,
         @unchecked Sendable {
@@ -154,11 +161,39 @@ extension WebRTCCoordinator.StateMachine.Stage {
             }
         }
 
+        /// Returns whether the provided peer connection has work that can make
+        /// progress during the readiness wait.
+        ///
+        /// Subscriber connections always wait because they receive remote
+        /// media. Publisher connections only wait when the current
+        /// `CallSettings` indicate that local audio or video should be
+        /// published.
+        private func canWaitForPeerConnection(
+            _ peerConnection: RTCPeerConnectionCoordinator
+        ) async -> Bool {
+            switch peerConnection.peerType {
+            case .subscriber:
+                return true
+            case .publisher:
+                guard
+                    let callSettings = await context.coordinator?.stateAdapter.callSettings
+                else {
+                    return true
+                }
+
+                return callSettings.shouldPublish
+            }
+        }
+
         private func waitForPeerConnectionToBePrepared(
             _ peerConnection: RTCPeerConnectionCoordinator,
             subsystem: LogSubsystem,
             timeout: TimeInterval
         ) async {
+            guard await canWaitForPeerConnection(peerConnection) else {
+                return
+            }
+
             do {
                 _ = try await peerConnection
                     .connectionStatePublisher
