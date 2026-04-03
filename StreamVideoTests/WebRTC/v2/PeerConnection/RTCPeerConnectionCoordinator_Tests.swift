@@ -165,7 +165,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
         let didStartCallSettingsUpdate = Atomic(wrappedValue: false)
         mockLocalMediaAdapterA.onDidUpdateCallSettings = { _ in
             didStartCallSettingsUpdate.wrappedValue = true
-            try await Task.sleep(nanoseconds: 700_000_000)
+            await self.wait(for: 2)
         }
 
         let callSettingsTask = Task { [subject] in
