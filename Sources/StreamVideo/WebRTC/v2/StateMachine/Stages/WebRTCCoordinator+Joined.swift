@@ -258,9 +258,9 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .publisher(eventType: Stream_Video_Sfu_Event_CallEnded.self)
                 .log(.debug, subsystems: .sfu) { "Call ended with reason: \($0.reason)." }
                 .receive(on: processingQueue)
-                .sink { [weak self] _ in
+                .sink { [weak self] in
                     guard let self else { return }
-                    transitionOrError(.leaving(context))
+                    transitionOrError(.leaving(context, reason: "\($0.reason)"))
                 }
                 .store(in: disposableBag)
         }
@@ -315,7 +315,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .receive(on: processingQueue)
                 .sink { [weak self] _ in
                     guard let self else { return }
-                    transitionOrError(.leaving(context))
+                    transitionOrError(.leaving(context, reason: "error"))
                 }
                 .store(in: disposableBag)
         }

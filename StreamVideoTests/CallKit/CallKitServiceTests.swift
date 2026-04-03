@@ -473,6 +473,8 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
             XCTFail()
         case .reject:
             XCTFail()
+        case .leave:
+            XCTFail()
         case .ring:
             XCTFail()
         case .setVideoFilter(videoFilter: let videoFilter):
@@ -533,6 +535,8 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         case .callKitActivated:
             XCTFail()
         case .reject:
+            XCTFail()
+        case .leave:
             XCTFail()
         case .ring:
             XCTFail()
