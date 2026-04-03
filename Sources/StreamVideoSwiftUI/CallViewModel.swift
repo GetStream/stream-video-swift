@@ -212,6 +212,7 @@ open class CallViewModel: ObservableObject {
 
     private var lastLayoutChange = Date()
     private var enteringCallTask: Task<Void, Never>?
+    private var pendingCall: Call?
     private var participantsSortComparators = defaultSortPreset
     private let callEventsHandler = CallEventsHandler()
     private let disposableBag = DisposableBag()
@@ -822,6 +823,7 @@ open class CallViewModel: ObservableObject {
     /// Leaves the current call.
     private func leaveCall(reason: String?) {
         log.debug("Leaving call")
+        let callToLeave = pendingCall ?? call
         enteringCallTask?.cancel()
         enteringCallTask = nil
         participantUpdates?.cancel()
@@ -838,7 +840,8 @@ open class CallViewModel: ObservableObject {
         skipCallStateUpdates = false
         temporaryCallSettings = nil
         lastScreenSharingParticipant = nil
-        call?.leave(reason: reason)
+        callToLeave?.leave(reason: reason)
+        pendingCall = nil
 
         pictureInPictureAdapter.call = nil
         pictureInPictureAdapter.sourceView = nil
@@ -875,15 +878,16 @@ open class CallViewModel: ObservableObject {
         if enteringCallTask != nil || callingState == .inCall {
             return
         }
+        let resolvedCall = call ?? streamVideo.call(
+            callType: callType,
+            callId: callId,
+            callSettings: callSettings
+        )
+        pendingCall = resolvedCall
         enteringCallTask = Task(disposableBag: disposableBag, priority: .userInitiated) { [weak self] in
             guard let self else { return }
             do {
                 log.debug("Starting call")
-                let call = call ?? streamVideo.call(
-                    callType: callType,
-                    callId: callId,
-                    callSettings: callSettings
-                )
                 var settingsRequest: CallSettingsRequest?
                 var limits: LimitsSettingsRequest?
                 if maxDuration != nil || maxParticipants != nil {
@@ -899,30 +903,38 @@ open class CallViewModel: ObservableObject {
                 )
                 let settings = localCallSettingsChange ? callSettings : nil
 
-                call.updateParticipantsSorting(with: participantsSortComparators)
+                resolvedCall.updateParticipantsSorting(with: participantsSortComparators)
 
-                try await call.join(
+                try await resolvedCall.join(
                     create: true,
                     options: options,
                     ring: ring,
                     callSettings: settings,
                     policy: policy
                 )
-                save(call: call)
+                try Task.checkCancellation()
+                save(call: resolvedCall)
                 enteringCallTask = nil
                 hasAcceptedCall = false
             } catch {
                 hasAcceptedCall = false
+                if error is CancellationError {
+                    enteringCallTask = nil
+                    pendingCall = nil
+                    return
+                }
                 log.error("Error starting a call", error: error)
                 self.error = error
                 setCallingState(.idle)
                 audioRecorder.stopRecording()
                 enteringCallTask = nil
+                pendingCall = nil
             }
         }
     }
 
     private func save(call: Call) {
+        pendingCall = nil
         guard enteringCallTask != nil else {
             call.leave()
             self.call = nil
