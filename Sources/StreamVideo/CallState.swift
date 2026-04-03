@@ -145,7 +145,6 @@ public class CallState: ObservableObject {
     /// help customize logic, analytics, and UI based on how the call was started.
     var joinSource: JoinSource?
 
-    private var localCallSettingsUpdate = false
     private var durationCancellable: AnyCancellable?
     private nonisolated let disposableBag = DisposableBag()
 
@@ -436,20 +435,15 @@ public class CallState: ObservableObject {
             streamKey: streamVideoSession.token.rawValue
         )
         ingress = Ingress(rtmp: rtmp)
-        
-        if !localCallSettingsUpdate {
-            // All CallSettings updates go through the update method to ensure
-            // proper propagation.
-            update(callSettings: .init(response.settings))
-        }
     }
     
+    /// Updates the current `CallSettings` if they differ from the stored value.
+    /// - Parameter callSettings: The new `CallSettings` value to apply.
     internal func update(callSettings: CallSettings) {
         guard callSettings != self.callSettings else {
             return
         }
         self.callSettings = callSettings
-        localCallSettingsUpdate = true
     }
     
     internal func update(statsReport: CallStatsReport?) {

@@ -9,9 +9,13 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
 
     enum MockFunctionKey: Hashable, CaseIterable {
         case join
+        case leave
         case setDisconnectionTimeout
         case observeWebRTCStateUpdated
+        case changeAudioState
         case changeVideoState
+        case changeCameraMode
+        case updateOwnCapabilities
         case enableClientCapabilities
         case disableClientCapabilities
     }
@@ -25,12 +29,21 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
             options: CreateCallOptions?,
             ring: Bool = false,
             notify: Bool = false,
-            source: JoinSource
+            source: JoinSource,
+            policy: WebRTCJoinPolicy
         )
+
+        case leave(reason: String?)
 
         case observeWebRTCStateUpdated
 
+        case changeAudioState(Bool)
+
         case changeVideoState(Bool)
+
+        case changeCameraMode(CameraPosition)
+
+        case updateOwnCapabilities([OwnCapability])
 
         case enableClientCapabilities(Set<ClientCapability>)
 
@@ -40,11 +53,27 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
             switch self {
             case let .setDisconnectionTimeout(timeout):
                 return timeout
-            case let .join(create, callSettings, options, ring, notify, source):
-                return (create, callSettings, options, ring, notify, source)
+            case let .join(
+                create,
+                callSettings,
+                options,
+                ring,
+                notify,
+                source,
+                policy
+            ):
+                return (create, callSettings, options, ring, notify, source, policy)
+            case let .leave(reason):
+                return reason ?? ""
             case .observeWebRTCStateUpdated:
                 return ()
+            case let .changeAudioState(value):
+                return value
             case let .changeVideoState(value):
+                return value
+            case let .changeCameraMode(value):
+                return value
+            case let .updateOwnCapabilities(value):
                 return value
             case let .enableClientCapabilities(value):
                 return value
@@ -87,7 +116,8 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
         options: CreateCallOptions? = nil,
         ring: Bool = false,
         notify: Bool = false,
-        source: JoinSource
+        source: JoinSource,
+        policy: WebRTCJoinPolicy = .default
     ) async throws -> JoinCallResponse {
         stubbedFunctionInput[.join]?.append(
             .join(
@@ -96,9 +126,14 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
                 options: options,
                 ring: ring,
                 notify: notify,
-                source: source
+                source: source,
+                policy: policy
             )
         )
+
+        if let callSettings {
+            await call?.state.update(callSettings: callSettings)
+        }
 
         if let stub = stubbedFunction[.join] as? JoinCallResponse {
             return stub
@@ -111,7 +146,8 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
                 options: options,
                 ring: ring,
                 notify: notify,
-                source: source
+                source: source,
+                policy: policy
             )
         }
     }
@@ -119,6 +155,11 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
     override func setDisconnectionTimeout(_ timeout: TimeInterval) {
         stubbedFunctionInput[.setDisconnectionTimeout]?
             .append(.setDisconnectionTimeout(timeout: timeout))
+    }
+
+    override func leave(reason: String?) {
+        stubbedFunctionInput[.leave]?
+            .append(.leave(reason: reason))
     }
 
     override func observeWebRTCStateUpdated() {
@@ -129,6 +170,26 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
     override func changeVideoState(isEnabled: Bool) async throws {
         stubbedFunctionInput[.changeVideoState]?
             .append(.changeVideoState(isEnabled))
+    }
+
+    override func changeAudioState(
+        isEnabled: Bool,
+        file: StaticString,
+        function: StaticString,
+        line: UInt
+    ) async throws {
+        stubbedFunctionInput[.changeAudioState]?
+            .append(.changeAudioState(isEnabled))
+    }
+
+    override func changeCameraMode(position: CameraPosition) async throws {
+        stubbedFunctionInput[.changeCameraMode]?
+            .append(.changeCameraMode(position))
+    }
+
+    override func updateOwnCapabilities(ownCapabilities: [OwnCapability]) async {
+        stubbedFunctionInput[.updateOwnCapabilities]?
+            .append(.updateOwnCapabilities(ownCapabilities))
     }
 
     override func enableClientCapabilities(

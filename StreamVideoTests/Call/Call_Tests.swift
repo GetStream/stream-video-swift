@@ -587,16 +587,25 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
         let call = MockCall(.dummy(callController: mockCallController))
         call.stub(for: \.state, with: .init(.dummy()))
         mockCallController.stub(for: .join, with: JoinCallResponse.dummy())
+        let expectedJoinSource = JoinSource.callKit(.init {})
 
-        call.state.joinSource = .callKit
+        call.state.joinSource = expectedJoinSource
         _ = try await call.join()
 
         XCTAssertEqual(
             mockCallController.recordedInputPayload(
-                (Bool, CallSettings?, CreateCallOptions?, Bool, Bool, JoinSource).self,
+                (
+                    Bool,
+                    CallSettings?,
+                    CreateCallOptions?,
+                    Bool,
+                    Bool,
+                    JoinSource,
+                    WebRTCJoinPolicy
+                ).self,
                 for: .join
             )?.first?.5,
-            .callKit
+            expectedJoinSource
         )
     }
 
@@ -611,10 +620,68 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
 
         XCTAssertEqual(
             mockCallController.recordedInputPayload(
-                (Bool, CallSettings?, CreateCallOptions?, Bool, Bool, JoinSource).self,
+                (
+                    Bool,
+                    CallSettings?,
+                    CreateCallOptions?,
+                    Bool,
+                    Bool,
+                    JoinSource,
+                    WebRTCJoinPolicy
+                ).self,
                 for: .join
             )?.first?.5,
             .inApp
+        )
+    }
+
+    func test_join_withPolicy_policyWasPassedToCallController() async throws {
+        let mockCallController = MockCallController()
+        let call = MockCall(.dummy(callController: mockCallController))
+        call.stub(for: \.state, with: .init(.dummy()))
+        mockCallController.stub(for: .join, with: JoinCallResponse.dummy())
+
+        _ = try await call.join(policy: .peerConnectionReadinessAware)
+
+        let recordedInput = try XCTUnwrap(
+            mockCallController.recordedInputPayload(
+                (
+                    Bool,
+                    CallSettings?,
+                    CreateCallOptions?,
+                    Bool,
+                    Bool,
+                    JoinSource,
+                    WebRTCJoinPolicy
+                ).self,
+                for: .join
+            )?.first
+        )
+
+        switch recordedInput.6 {
+        case .default:
+            XCTFail()
+        case .peerConnectionReadinessAware:
+            break
+        }
+    }
+
+    // MARK: - leave
+
+    func test_leave_withReason_reasonWasPassedToCallController() {
+        let mockCallController = MockCallController()
+        let call = MockCall(.dummy(callController: mockCallController))
+        call.stub(for: \.state, with: .init(.dummy()))
+        let expectedReason = "manual-hangup"
+
+        call.leave(reason: expectedReason)
+
+        XCTAssertEqual(
+            mockCallController.recordedInputPayload(
+                String.self,
+                for: .leave
+            )?.first,
+            expectedReason
         )
     }
 

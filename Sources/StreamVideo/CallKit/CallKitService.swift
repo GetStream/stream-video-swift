@@ -55,6 +55,37 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         didSet { didUpdate(streamVideo) }
     }
 
+    /// Describes the CallKit-driven lifecycle that the UI mirrors while the
+    /// app is restoring after a system action.
+    public enum Event {
+        /// No CallKit transition currently needs to drive the UI.
+        case idle
+
+        /// CallKit accepted the call and the SDK is about to start joining it.
+        case accept
+
+        /// The SDK is joining a call that was accepted from CallKit.
+        ///
+        /// The associated `Call` lets the UI bind to the accepted call
+        /// immediately during a cold start, before the regular SDK state has
+        /// fully restored the active call.
+        case joining(Call)
+
+        /// The CallKit-triggered join flow completed successfully.
+        case joined
+
+        /// The CallKit-managed call was declined or ended before joining.
+        case reject
+    }
+
+    /// Stores the latest CallKit lifecycle event so late subscribers can align
+    /// their UI with an in-flight system action.
+    let eventPipelineSubject: CurrentValueSubject<Event, Never>
+
+    /// Publishes CallKit lifecycle events that temporarily drive UI state while
+    /// the SDK restores its regular call state.
+    public let eventPipeline: AnyPublisher<Event, Never>
+
     /// The unique identifier for the call.
     open var callId: String {
         if let active, let callEntry = callEntry(for: active) {
@@ -113,6 +144,12 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
 
     /// Initialize.
     override public init() {
+        // Start from an explicit idle state so observers can safely read the
+        // latest CallKit bridge state before any system action arrives.
+        let eventPipelineSubject = CurrentValueSubject<Event, Never>(.idle)
+        self.eventPipelineSubject = eventPipelineSubject
+        self.eventPipeline = eventPipelineSubject.eraseToAnyPublisher()
+
         super.init()
 
         // Subscribe to the call ended notification.
@@ -467,23 +504,51 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 )
 
             do {
+                // Mark the CallKit accept before the async join work starts so
+                // the UI can keep the call in a transitional state while the
+                // app is waking up.
+                eventPipelineSubject.send(.accept)
                 try await callToJoinEntry.call.accept()
+                // We need to fulfil here the action to allow CallKit to release
+                // the audioSession to the app, for activation.
+                action.fulfill()
             } catch {
                 log.error(error, subsystems: .callKit)
+                action.fail()
             }
 
             do {
-                /// Mark join source as `.callKit` for audio session.
-                ///
-                callToJoinEntry.call.state.joinSource = .callKit
+                // Publish the concrete call as soon as the join flow starts so
+                // CallViewModel can present the joining screen even when the
+                // app was launched from CallKit in the background.
+                eventPipelineSubject.send(.joining(callToJoinEntry.call))
+                // Pass a CallKit completion hook through the join flow so the
+                // WebRTC layer can release CallKit's audio session ownership as
+                // soon as it has configured the audio device module.
+                callToJoinEntry.call.state.joinSource = .callKit(.init {
+                    // Allow CallKit to hand audio session activation back to
+                    // the app before we continue configuring audio locally.
+                    action.fulfill()
+                })
 
-                try await callToJoinEntry.call.join(callSettings: callSettings)
-                action.fulfill()
+                // Before reach here we should fulfil the action to allow
+                // CallKit to release the audioSession, so that the SDK
+                // can configure and activate it and complete successfully the
+                // peerConnection configuration.
+                try await callToJoinEntry.call.join(
+                    callSettings: callSettings,
+                    policy: .peerConnectionReadinessAware
+                )
+                // Once the call is joined, the regular call state can take
+                // over and the temporary CallKit bridge can stand down.
+                eventPipelineSubject.send(.joined)
             } catch {
                 callToJoinEntry.call.leave()
                 set(nil, for: action.callUUID)
                 log.error(error, subsystems: .callKit)
-                action.fail()
+                // Reset the bridge if the CallKit-driven join flow aborts
+                // before the call becomes active.
+                eventPipelineSubject.send(.idle)
             }
         }
     }
@@ -516,6 +581,9 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 subsystems: .callKit
             )
             if currentCallWasEnded {
+                // Clear any transitional UI state when the current CallKit call
+                // is ended before or during the join flow.
+                eventPipelineSubject.send(.reject)
                 stackEntry.call.didPerform(.performEndCall)
                 stackEntry.call.leave()
             } else {
@@ -534,6 +602,9 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                         """,
                         subsystems: .callKit
                     )
+                    // Keep CallViewModel in sync when an incoming CallKit call
+                    // is rejected before it becomes the active call.
+                    eventPipelineSubject.send(.reject)
                     stackEntry.call.didPerform(.performRejectCall)
                     try await stackEntry.call.reject(reason: rejectionReason)
                 } catch {
@@ -543,6 +614,9 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             set(nil, for: actionCallUUID)
         }
 
+        // Always return to idle once CallKit has finished processing the
+        // action so future system actions start from a clean state.
+        eventPipelineSubject.send(.idle)
         action.fulfill()
     }
 

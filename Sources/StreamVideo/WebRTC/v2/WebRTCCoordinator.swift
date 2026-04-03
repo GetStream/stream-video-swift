@@ -16,13 +16,17 @@ final class WebRTCCoordinator: @unchecked Sendable {
     ///   - create: Whether the call should be created on the backend side.
     ///   - ring: Whether the call is a ringing call.
     ///   - migratingFrom: If migrating, where are we migrating from.
-    ///   - notify:
-    ///   - options:
+    ///   - migratingFromList: Previously rejected SFU edge names. This lets the
+    ///     backend avoid assigning an SFU that has already failed with
+    ///     capacity-related errors during the same join flow.
+    ///   - notify: Whether users should receive notification side effects.
+    ///   - options: Additional call creation options.
     /// - Returns: A `JoinCallResponse` wrapped in an async throw.
     typealias AuthenticationHandler = (
         Bool,
         Bool,
         String?,
+        [String]?,
         Bool,
         CreateCallOptions?
     ) async throws -> JoinCallResponse
@@ -87,18 +91,32 @@ final class WebRTCCoordinator: @unchecked Sendable {
     /// Connects to a call with the specified settings and whether to ring.
     ///
     /// - Parameters:
-    ///   - callSettings: Optional call settings.
-    ///   - ring: Boolean flag indicating if a ring tone should be played.
+    ///   - callSettings: Optional initial `CallSettings` to apply on join.
+    ///   - options: Optional settings to pass to the join/create request.
+    ///   - ring: Whether a ring tone should be played.
+    ///   - notify: Whether users should be notified about call join.
+    ///   - source: Source that initiated the join.
+    ///   - joinResponseHandler: A subject that receives the join completion
+    ///     result once the flow finishes.
     func connect(
         create: Bool = true,
         callSettings: CallSettings?,
         options: CreateCallOptions?,
         ring: Bool,
         notify: Bool,
-        source: JoinSource
+        source: JoinSource,
+        joinResponseHandler: PassthroughSubject<JoinCallResponse, Error>,
+        policy: WebRTCJoinPolicy = .default
     ) async throws {
+        // We update the initial CallSettings so that we have a reference
+        // on what CallSettings the caller wants to have after the user joins
+        // the call.
         await stateAdapter.set(initialCallSettings: callSettings)
+
         stateMachine.currentStage.context.joinSource = source
+        stateMachine.currentStage.context.joinResponseHandler = joinResponseHandler
+        stateMachine.currentStage.context.joinPolicy = policy
+
         stateMachine.transition(
             .connecting(
                 stateMachine.currentStage.context,
@@ -116,9 +134,9 @@ final class WebRTCCoordinator: @unchecked Sendable {
     }
 
     /// Leaves the call and transitions the state machine to the `leaving` stage.
-    func leave() {
+    func leave(reason: String?) {
         stateMachine.transition(
-            .leaving(stateMachine.currentStage.context)
+            .leaving(stateMachine.currentStage.context, reason: reason)
         )
     }
 

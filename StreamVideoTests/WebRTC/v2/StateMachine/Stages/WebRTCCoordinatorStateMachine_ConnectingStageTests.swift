@@ -113,6 +113,7 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
             let callType = (
                 coordinator: WebRTCCoordinator,
                 currentSFU: String?,
+                migratingFromList: [String]?,
                 create: Bool,
                 ring: Bool,
                 notify: Bool,
@@ -126,6 +127,7 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
             )
             XCTAssertTrue(input.coordinator === mockCoordinatorStack?.coordinator)
             XCTAssertNil(input.currentSFU)
+            XCTAssertNil(input.migratingFromList)
             XCTAssertFalse(input.create)
             XCTAssertTrue(input.ring)
             XCTAssertTrue(input.notify)
@@ -153,6 +155,7 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
             let callType = (
                 coordinator: WebRTCCoordinator,
                 currentSFU: String?,
+                migratingFromList: [String]?,
                 create: Bool,
                 ring: Bool,
                 notify: Bool,
@@ -166,6 +169,7 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
             )
             XCTAssertTrue(input.coordinator === mockCoordinatorStack?.coordinator)
             XCTAssertNil(input.currentSFU)
+            XCTAssertNil(input.migratingFromList)
             XCTAssertTrue(input.create)
             XCTAssertTrue(input.ring)
             XCTAssertTrue(input.notify)
@@ -253,6 +257,62 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
         }
     }
 
+    func test_transition_fromIdle_successfulAuthenticationCreatesSFUFullObserver() async throws {
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.authenticator = mockCoordinatorStack.webRTCAuthenticator
+        mockCoordinatorStack.webRTCAuthenticator.stub(
+            for: .authenticate,
+            with: Result<(SFUAdapter, JoinCallResponse), Error>
+                .success((mockCoordinatorStack.sfuStack.adapter, .dummy()))
+        )
+        mockCoordinatorStack.webRTCAuthenticator.stub(
+            for: .waitForAuthentication,
+            with: Result<Void, Error>.success(())
+        )
+
+        try await assertTransition(
+            from: .idle,
+            expectedTarget: .connected,
+            subject: subject
+        ) { target in
+            XCTAssertEqual(
+                target.context.sfuFullObserver?.hostname,
+                self.mockCoordinatorStack.sfuStack.adapter.hostname
+            )
+        }
+    }
+
+    func test_transition_fromIdle_successfulAuthenticationStoresInitialJoinCallResponse() async throws {
+        let expectedJoinResponse = JoinCallResponse.dummy(call: .dummy(cid: "test-cid"))
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.authenticator = mockCoordinatorStack.webRTCAuthenticator
+        mockCoordinatorStack.webRTCAuthenticator.stub(
+            for: .authenticate,
+            with: Result<
+                (SFUAdapter, JoinCallResponse),
+                Error
+            >
+            .success(
+                (
+                    mockCoordinatorStack.sfuStack.adapter,
+                    expectedJoinResponse
+                )
+            )
+        )
+        mockCoordinatorStack.webRTCAuthenticator.stub(
+            for: .waitForAuthentication,
+            with: Result<Void, Error>.success(())
+        )
+
+        try await assertTransition(
+            from: .idle,
+            expectedTarget: .connected,
+            subject: subject
+        ) { target in
+            XCTAssertEqual(target.context.initialJoinCallResponse?.call.cid, expectedJoinResponse.call.cid)
+        }
+    }
+
     // MARK: - transition from `.rejoining`
 
     func test_transition_fromRejoiningWithoutCoordinator_transitionsToDisconnected() async throws {
@@ -300,6 +360,7 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
             let callType = (
                 coordinator: WebRTCCoordinator,
                 currentSFU: String?,
+                migratingFromList: [String]?,
                 create: Bool,
                 ring: Bool,
                 notify: Bool,
@@ -313,6 +374,7 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
             )
             XCTAssertTrue(input.coordinator === mockCoordinatorStack?.coordinator)
             XCTAssertNil(input.currentSFU)
+            XCTAssertNil(input.migratingFromList)
             XCTAssertFalse(input.create)
             XCTAssertFalse(input.ring)
             XCTAssertFalse(input.notify)

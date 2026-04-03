@@ -46,8 +46,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
         }
 
         /// Handles the transition from the previous stage to this stage.
-        ///
-        /// This method defines valid transitions for the `ErrorStage`.
+        /// If a join is awaiting completion, this also notifies the caller with a
+        /// failure before entering cleanup.
         ///
         /// - Parameter previousStage: The previous stage.
         /// - Returns: The new stage if the transition is valid, otherwise `nil`.
@@ -58,6 +58,11 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 do {
                     guard let self else {
                         throw ClientError()
+                    }
+
+                    try Task.checkCancellation()
+                    if let joinResponseHandler = context.joinResponseHandler {
+                        joinResponseHandler.send(completion: .failure(error))
                     }
 
                     try Task.checkCancellation()

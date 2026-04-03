@@ -163,6 +163,12 @@ final class Store_PerformanceTests: XCTestCase, @unchecked Sendable {
         measure(
             baseline: .init(local: 1.6, ci: 2.5, stringTransformer: { String(format: "%.4fs", $0) })
         ) {
+            // Subscribe before dispatching to avoid missing the terminal state
+            // emission under high CI load.
+            let sinkExpectation = XCTestExpectation(description: "Sink was called.")
+            let cancellable = publisher
+                .sink { _ in sinkExpectation.fulfill() }
+
             for i in 0..<iterations {
                 store.dispatch([
                     .increment,
@@ -171,12 +177,7 @@ final class Store_PerformanceTests: XCTestCase, @unchecked Sendable {
                 ])
             }
 
-            // Wait for completion
-            let sinkExpectation = XCTestExpectation(description: "Sink was called.")
-            let cancellable = publisher
-                .sink { _ in sinkExpectation.fulfill() }
-
-            wait(for: [sinkExpectation], timeout: 5)
+            wait(for: [sinkExpectation], timeout: defaultTimeout)
 
             // Reset
             store.dispatch(.reset)

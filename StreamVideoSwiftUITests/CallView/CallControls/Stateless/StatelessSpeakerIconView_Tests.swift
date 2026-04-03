@@ -85,12 +85,10 @@ final class StatelessSpeakerIconView_Tests: StreamVideoUITestCase, @unchecked Se
             file: file,
             line: line
         )
+
         call.state.update(
-            from: .dummy(
-                settings: .dummy(
-                    audio: .dummy(defaultDevice: audioDefaultDevice),
-                    video: .dummy(cameraDefaultOn: cameraOn)
-                )
+            callSettings: .init(
+                speakerOn: audioDefaultDevice == .speaker || cameraOn
             )
         )
 

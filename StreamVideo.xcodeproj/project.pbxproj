@@ -347,6 +347,7 @@
 				"Utilities/Extensions/Stream_Video_Sfu_Models_ConnectionQuality+Convenience.swift",
 				"Utilities/Extensions/Stream_Video_Sfu_Models_Participant+Convenience.swift",
 				"Utilities/Extensions/XCTestCase+PredicateFulfillment.swift",
+				Utilities/Mocks/MockCallKitService.swift,
 			);
 			target = 84F7380D287C141000A363F4 /* StreamVideoSwiftUITests */;
 		};
@@ -639,6 +640,7 @@
 				StreamVideoSwiftUI/Utils/AsyncImage/StreamLazyImage.swift,
 				StreamVideoSwiftUI/Utils/AudioValuePercentageNormaliser.swift,
 				StreamVideoSwiftUI/Utils/BundleExtensions.swift,
+				StreamVideoSwiftUI/Utils/CallKitServiceObserver.swift,
 				StreamVideoSwiftUI/Utils/CallSoundsPlayer.swift,
 				StreamVideoSwiftUI/Utils/Camera.swift,
 				StreamVideoSwiftUI/Utils/ClipCorners.swift,
@@ -806,6 +808,7 @@
 				StreamVideoSwiftUI/Utils/AsyncImage/StreamLazyImage.swift,
 				StreamVideoSwiftUI/Utils/AudioValuePercentageNormaliser.swift,
 				StreamVideoSwiftUI/Utils/BundleExtensions.swift,
+				StreamVideoSwiftUI/Utils/CallKitServiceObserver.swift,
 				StreamVideoSwiftUI/Utils/CallSoundsPlayer.swift,
 				StreamVideoSwiftUI/Utils/Camera.swift,
 				StreamVideoSwiftUI/Utils/ClipCorners.swift,
@@ -3306,7 +3309,7 @@
 			repositoryURL = "https://github.com/GetStream/stream-video-noise-cancellation-swift";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.3;
+				minimumVersion = 1.0.4;
 			};
 		};
 		40B8FFA52EC393A80061E3F6 /* XCRemoteSwiftPackageReference "stream-video-swift-webrtc" */ = {
@@ -3314,7 +3317,7 @@
 			repositoryURL = "https://github.com/GetStream/stream-video-swift-webrtc.git";
 			requirement = {
 				kind = exactVersion;
-				version = 137.0.67;
+				version = 137.0.71;
 			};
 		};
 		40F445C32A9E1D91004BE3DA /* XCRemoteSwiftPackageReference "stream-chat-swift-test-helpers" */ = {

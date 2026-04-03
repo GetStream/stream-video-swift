@@ -12,6 +12,7 @@ final class MockCallAuthenticator: @unchecked Sendable {
         create: Bool,
         ring: Bool,
         migratingFrom: String?,
+        migratingFromList: [String]?,
         notify: Bool,
         options: CreateCallOptions?
     )] = []
@@ -20,6 +21,7 @@ final class MockCallAuthenticator: @unchecked Sendable {
         create: Bool,
         ring: Bool,
         migratingFrom: String?,
+        migratingFromList: [String]?,
         notify: Bool,
         options: CreateCallOptions?
     ) async throws -> JoinCallResponse {
@@ -28,6 +30,7 @@ final class MockCallAuthenticator: @unchecked Sendable {
                 create,
                 ring,
                 migratingFrom,
+                migratingFromList,
                 notify,
                 options
             )

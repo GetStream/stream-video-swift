@@ -2,6 +2,7 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 @testable import StreamVideo
 @testable import StreamVideoSwiftUI
 import StreamWebRTC
@@ -31,6 +32,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
     private var cId: String { callCid(from: callId, callType: callType) }
 
     override func tearDown() async throws {
+        InjectedValues[\.callKitService] = .init()
         subject = nil
         participants = nil
         callId = nil
@@ -113,28 +115,94 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
     func test_startCall_joiningState() {
         // Given
         let callViewModel = CallViewModel()
-        
+
         // When
         callViewModel.startCall(callType: .default, callId: callId, members: participants)
-        
+
         // Then
         XCTAssert(callViewModel.outgoingCallMembers == participants)
         XCTAssert(callViewModel.callingState == .joining)
     }
-    
+
     @MainActor
     func test_startCall_outgoingState() {
         // Given
         let callViewModel = CallViewModel()
-        
+
         // When
         callViewModel.startCall(callType: .default, callId: callId, members: participants, ring: true)
-        
+
         // Then
         XCTAssert(callViewModel.outgoingCallMembers == participants)
         XCTAssert(callViewModel.callingState == .outgoing)
     }
-    
+
+    func test_callKitJoiningEventOnInit_setsCallingStateToJoiningAndAssignsCall() async {
+        // Given
+        let callKitService = MockCallKitService()
+        InjectedValues[\.callKitService] = callKitService
+        callKitService.send(.joining(mockCall))
+
+        // When
+        subject = .init()
+
+        // Then
+        await assertCallingState(.joining)
+        await fulfilmentInMainActor { self.subject.call?.cId == self.mockCall.cId }
+    }
+
+    func test_participantsUpdate_whileCallKitJoinIsInProgress_keepsCallingStateJoining() async {
+        // Given
+        let callKitService = MockCallKitService()
+        InjectedValues[\.callKitService] = callKitService
+        callKitService.send(.joining(mockCall))
+        subject = .init()
+        await assertCallingState(.joining)
+
+        // When
+        let remoteParticipant = CallParticipant.dummy(id: "remote-participant")
+        subject.call?.state.participantsMap = [remoteParticipant.id: remoteParticipant]
+
+        // Then
+        await fulfilmentInMainActor {
+            self.subject.callParticipants[remoteParticipant.id] != nil
+        }
+        await assertCallingState(.joining)
+    }
+
+    func test_setActiveCallNil_whileCallKitJoinIsInProgress_keepsCallingStateJoining() async {
+        // Given
+        let callKitService = MockCallKitService()
+        InjectedValues[\.callKitService] = callKitService
+        callKitService.send(.joining(mockCall))
+        subject = .init()
+        await assertCallingState(.joining)
+
+        // When
+        subject.setActiveCall(nil)
+
+        // Then
+        await assertCallingState(.joining)
+        await fulfilmentInMainActor { self.subject.call?.cId == self.mockCall.cId }
+    }
+
+    func test_reconnectionStatusMigratingThenConnected_keepsCallingStateJoining() async {
+        // Given
+        await prepareMediaScenario()
+
+        // When
+        subject.call?.state.reconnectionStatus = .migrating
+
+        // Then
+        await assertCallingState(.reconnecting)
+
+        // When
+        subject.call?.state.reconnectionStatus = .connected
+
+        // Then
+        await assertCallingState(.inCall)
+    }
+
     @MainActor
     func test_outgoingCall_rejectedEvent() async throws {
         // Given
@@ -376,6 +444,29 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         await assertCallingState(.idle)
     }
 
+    func test_outgoingCall_hangUpWithReason_forwardsReasonToCallLeave() async throws {
+        // Given
+        await prepare()
+        subject.startCall(
+            callType: .default,
+            callId: callId,
+            members: participants,
+            ring: true
+        )
+        await assertCallingState(.outgoing)
+        let expectedReason = "user-ended"
+
+        // When
+        subject.hangUp(reason: expectedReason)
+
+        // Then
+        await assertCallingState(.idle)
+        XCTAssertEqual(
+            mockCall.recordedInputPayload(String.self, for: .leave)?.first,
+            expectedReason
+        )
+    }
+
     func test_outgoingCall_ringTimeout() async throws {
         // Given
         let ringTimeoutSeconds = 3
@@ -403,6 +494,55 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
 
         // Then
         await assertCallingState(.inCall)
+    }
+
+    func test_incomingCall_acceptCall_updatesCallingStateToJoiningBeforeInCall() async throws {
+        // Given
+        await prepareIncomingCallScenario()
+        let joiningStateExpectation = expectation(
+            description: "CallingState becomes joining"
+        )
+        joiningStateExpectation.assertForOverFulfill = false
+        var cancellable: AnyCancellable?
+
+        // Capture the transient state because `acceptCall` continues into the
+        // async `enterCall` flow immediately after the acceptance request.
+        cancellable = subject.$callingState
+            .dropFirst()
+            .sink { state in
+                if state == .joining {
+                    joiningStateExpectation.fulfill()
+                }
+            }
+        defer { cancellable?.cancel() }
+
+        // When
+        subject.acceptCall(callType: callType, callId: callId)
+
+        // Then
+        await fulfillment(of: [joiningStateExpectation], timeout: defaultTimeout)
+        await assertCallingState(.inCall)
+    }
+
+    func test_incomingCall_acceptCall_usesPeerConnectionReadinessAwarePolicy() async throws {
+        await prepareIncomingCallScenario()
+
+        subject.acceptCall(callType: callType, callId: callId)
+
+        await assertCallingState(.inCall)
+
+        let recordedInput = try XCTUnwrap(mockCall.stubbedFunctionInput[.join]?.first)
+        switch recordedInput {
+        case let .join(_, _, _, _, _, policy):
+            switch policy {
+            case .default:
+                XCTFail()
+            case .peerConnectionReadinessAware:
+                XCTAssertTrue(true)
+            }
+        default:
+            XCTFail()
+        }
     }
 
     func test_incomingCall_acceptedFromSameUserElsewhere_callingStateChangesToIdle() async throws {
@@ -580,10 +720,27 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         await fulfilmentInMainActor { self.mockCall.timesCalled(.join) == 1 }
         let joinPayload = try XCTUnwrap(
             mockCall
-                .recordedInputPayload((Bool, CreateCallOptions?, Bool, Bool, CallSettings?).self, for: .join)?
+                .recordedInputPayload(
+                    (
+                        Bool,
+                        CreateCallOptions?,
+                        Bool,
+                        Bool,
+                        CallSettings?,
+                        WebRTCJoinPolicy
+                    ).self,
+                    for: .join
+                )?
                 .last
         )
-        let (createFlag, options, ringFlag, notifyFlag, forwardedCallSettings) = joinPayload
+        let (
+            createFlag,
+            options,
+            ringFlag,
+            notifyFlag,
+            forwardedCallSettings,
+            _
+        ) = joinPayload
         XCTAssertTrue(createFlag)
         XCTAssertEqual(options, expectedOptions)
         XCTAssertFalse(ringFlag)
@@ -626,10 +783,20 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         await fulfilmentInMainActor { self.mockCall.timesCalled(.join) == 1 }
         let joinPayload = try XCTUnwrap(
             mockCall
-                .recordedInputPayload((Bool, CreateCallOptions?, Bool, Bool, CallSettings?).self, for: .join)?
+                .recordedInputPayload(
+                    (
+                        Bool,
+                        CreateCallOptions?,
+                        Bool,
+                        Bool,
+                        CallSettings?,
+                        WebRTCJoinPolicy
+                    ).self,
+                    for: .join
+                )?
                 .last
         )
-        let (_, _, _, _, forwardedCallSettings) = joinPayload
+        let (_, _, _, _, forwardedCallSettings, _) = joinPayload
         XCTAssertEqual(forwardedCallSettings, expectedCallSettings)
         XCTAssertEqual(
             joinPayload.1?.members,
@@ -690,7 +857,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         // Then
         await assertCallingState(.idle)
     }
-    
+
     // MARK: - Toggle media state
 
     func test_callSettings_toggleCamera() async throws {
@@ -728,7 +895,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         // Then
         await fulfilmentInMainActor { self.subject.callSettings.cameraPosition == .back }
     }
-    
+
     // MARK: - Events
 
     func test_inCall_participantEvents() async throws {
@@ -851,7 +1018,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
             self.subject.participantsLayout == .fullScreen
         }
     }
-    
+
     // MARK: - Participants
 
     func test_participants_layoutIsGrid_validateAllVariants() async throws {
@@ -877,7 +1044,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
                 isRemoteScreenSharing: true,
                 expectedCount: 1
             ),
-            
+
             .init(
                 callParticipantsCount: 3,
                 participantsLayout: .grid,
@@ -899,7 +1066,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
                 isRemoteScreenSharing: true,
                 expectedCount: 2
             ),
-            
+
             .init(
                 callParticipantsCount: 4,
                 participantsLayout: .grid,
@@ -947,7 +1114,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
                 isRemoteScreenSharing: true,
                 expectedCount: 2
             ),
-            
+
             .init(
                 callParticipantsCount: 3,
                 participantsLayout: .spotlight,
@@ -969,7 +1136,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
                 isRemoteScreenSharing: true,
                 expectedCount: 3
             ),
-            
+
             .init(
                 callParticipantsCount: 4,
                 participantsLayout: .spotlight,
@@ -1017,7 +1184,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
                 isRemoteScreenSharing: true,
                 expectedCount: 2
             ),
-            
+
             .init(
                 callParticipantsCount: 3,
                 participantsLayout: .fullScreen,
@@ -1039,7 +1206,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
                 isRemoteScreenSharing: true,
                 expectedCount: 3
             ),
-            
+
             .init(
                 callParticipantsCount: 4,
                 participantsLayout: .fullScreen,

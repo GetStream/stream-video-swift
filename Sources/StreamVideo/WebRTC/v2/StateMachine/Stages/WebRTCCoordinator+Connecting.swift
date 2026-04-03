@@ -116,6 +116,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
         ///   creating a call.
         ///   - updateSession: A Boolean indicating whether to update the
         ///     existing session.
+        ///   - onErrorDisconnect: If `true`, failures move to the disconnected
+        ///     stage instead of error stage.
         private func execute(
             create: Bool,
             ring: Bool,
@@ -143,18 +145,27 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
                     try Task.checkCancellation()
 
-                    /// The authenticator will fetch a ``JoinCallResponse`` and will use it to
-                    /// create an ``SFUAdapter`` instance that we can later use in our flow.
+                    /// The authenticator will fetch a ``JoinCallResponse`` and use it to
+                    /// create an ``SFUAdapter`` instance that we can later use in our
+                    /// flow. The initial response is preserved so ``Call.join()`` can be
+                    /// completed only once the handshake reaches the connected state.
                     let (sfuAdapter, response) = try await context
                         .authenticator
                         .authenticate(
                             coordinator: coordinator,
                             currentSFU: nil,
+                            migratingFromList: nil,
                             create: create,
                             ring: ring,
                             notify: notify,
                             options: options
                         )
+
+                    context.initialJoinCallResponse = response
+
+                    // Start observing SFU full events before the WS handshake
+                    // progresses so early server-side rejections are not lost.
+                    context.sfuFullObserver = .init(sfuAdapter)
 
                     try Task.checkCancellation()
 

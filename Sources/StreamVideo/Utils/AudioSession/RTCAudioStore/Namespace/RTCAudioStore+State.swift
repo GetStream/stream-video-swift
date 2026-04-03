@@ -36,10 +36,10 @@ extension RTCAudioStore {
 
             var description: String {
                 " { " +
-                    "category:\(category), " +
-                    "mode:\(mode), " +
-                    "options:\(options), " +
-                    "overrideOutputAudioPort:\(overrideOutputAudioPort)" +
+                    "category:\(category.description), " +
+                    "mode:\(mode.description), " +
+                    "options:\(options.description), " +
+                    "overrideOutputAudioPort:\(overrideOutputAudioPort.description)" +
                     " }"
             }
 

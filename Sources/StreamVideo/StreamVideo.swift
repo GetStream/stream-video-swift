@@ -28,6 +28,11 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             didSet { didUpdateActiveCall(activeCall, oldValue: oldValue) }
         }
 
+        /// The call that is currently ringing.
+        ///
+        /// This is set for both incoming calls and outgoing calls started
+        /// with `Call.ring()`. The value is cleared after the call is
+        /// joined, rejected, ended, or promoted to `activeCall`.
         @Published public internal(set) var ringingCall: Call?
 
         private nonisolated let disposableBag = DisposableBag()

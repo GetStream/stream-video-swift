@@ -17,6 +17,7 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
         case accept
         case reject
         case join
+        case leave
         case updateTrackSize
         case callKitActivated
         case ring
@@ -29,7 +30,8 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
             options: CreateCallOptions?,
             ring: Bool,
             notify: Bool,
-            callSettings: CallSettings?
+            callSettings: CallSettings?,
+            policy: WebRTCJoinPolicy
         )
 
         case updateTrackSize(trackSize: CGSize, participant: CallParticipant)
@@ -38,14 +40,16 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
 
         case reject(reason: String?)
 
+        case leave(reason: String?)
+
         case ring(request: RingCallRequest)
 
         case setVideoFilter(videoFilter: VideoFilter?)
 
         var payload: Any {
             switch self {
-            case let .join(create, options, ring, notify, callSettings):
-                return (create, options, ring, notify, callSettings)
+            case let .join(create, options, ring, notify, callSettings, policy):
+                return (create, options, ring, notify, callSettings, policy)
 
             case let .updateTrackSize(trackSize, participant):
                 return (trackSize, participant)
@@ -54,6 +58,9 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
                 return audioSession
 
             case let .reject(reason):
+                return reason ?? ""
+
+            case let .leave(reason):
                 return reason ?? ""
 
             case let .ring(request):
@@ -165,7 +172,8 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
         options: CreateCallOptions? = nil,
         ring: Bool = false,
         notify: Bool = false,
-        callSettings: CallSettings? = nil
+        callSettings: CallSettings? = nil,
+        policy: WebRTCJoinPolicy = .default
     ) async throws -> JoinCallResponse {
         stubbedFunctionInput[.join]?.append(
             .join(
@@ -173,7 +181,8 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
                 options: options,
                 ring: ring,
                 notify: notify,
-                callSettings: callSettings
+                callSettings: callSettings,
+                policy: policy
             )
         )
         if let stub = stubbedFunction[.join] as? JoinCallResponse {
@@ -184,9 +193,15 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
                 options: options,
                 ring: ring,
                 notify: notify,
-                callSettings: callSettings
+                callSettings: callSettings,
+                policy: policy
             )
         }
+    }
+
+    override func leave(reason: String? = nil) {
+        stubbedFunctionInput[.leave]?.append(.leave(reason: reason))
+        super.leave(reason: reason)
     }
 
     override func updateTrackSize(

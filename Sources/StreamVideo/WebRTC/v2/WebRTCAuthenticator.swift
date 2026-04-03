@@ -11,13 +11,19 @@ protocol WebRTCAuthenticating {
     /// - Parameters:
     ///   - coordinator: The WebRTC coordinator.
     ///   - currentSFU: The current SFU, if any.
+    ///   - migratingFromList: A list of SFU edge names that have already been
+    ///     rejected for this join flow. Passing this list lets the backend
+    ///     avoid assigning the same exhausted SFU again.
     ///   - create: Whether to create a new call.
     ///   - ring: Whether to ring the call.
+    ///   - notify: Whether notification side effects should be emitted.
+    ///   - options: Additional join/create options sent to the backend.
     /// - Returns: A tuple containing the SFU adapter and join call response.
     /// - Throws: An error if authentication fails.
     func authenticate(
         coordinator: WebRTCCoordinator,
         currentSFU: String?,
+        migratingFromList: [String]?,
         create: Bool,
         ring: Bool,
         notify: Bool,
@@ -44,13 +50,18 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
     /// - Parameters:
     ///   - coordinator: The WebRTC coordinator.
     ///   - currentSFU: The current SFU, if any.
+    ///   - migratingFromList: A list of SFU edge names already tried during
+    ///     migration retries.
     ///   - create: Whether to create a new call.
     ///   - ring: Whether to ring the call.
+    ///   - notify: Whether to notify other participants.
+    ///   - options: Additional call creation options for the join request.
     /// - Returns: A tuple containing the SFU adapter and join call response.
     /// - Throws: An error if authentication fails.
     func authenticate(
         coordinator: WebRTCCoordinator,
         currentSFU: String?,
+        migratingFromList: [String]?,
         create: Bool,
         ring: Bool,
         notify: Bool,
@@ -61,6 +72,7 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
                 create,
                 ring,
                 currentSFU,
+                migratingFromList,
                 notify,
                 options
             )

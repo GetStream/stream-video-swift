@@ -17,7 +17,10 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         .allCases
         .filter { $0 != subject.id }
         .map { WebRTCCoordinator.StateMachine.Stage(id: $0, context: .init()) }
-    private lazy var validStages: Set<WebRTCCoordinator.StateMachine.Stage.ID>! = [.joining]
+    private lazy var validStages: Set<WebRTCCoordinator.StateMachine.Stage.ID>! = [
+        .joining,
+        .peerConnectionPreparing
+    ]
     private lazy var mockCoordinatorStack: MockWebRTCCoordinatorStack! = .init(
         videoConfig: Self.videoConfig
     )
@@ -236,6 +239,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         await mockCoordinatorStack.coordinator.stateAdapter.set(
             sfuAdapter: mockCoordinatorStack.sfuStack.adapter
         )
+        await configureUpdateSubscriptionsAdapter()
 
         let sessionId = try await mockCoordinatorStack
             .coordinator
@@ -264,6 +268,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         await mockCoordinatorStack.coordinator.stateAdapter.set(
             sfuAdapter: mockCoordinatorStack.sfuStack.adapter
         )
+        await configureUpdateSubscriptionsAdapter()
 
         let sessionId = try await mockCoordinatorStack
             .coordinator
@@ -299,6 +304,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         await mockCoordinatorStack.coordinator.stateAdapter.set(
             sfuAdapter: mockCoordinatorStack.sfuStack.adapter
         )
+        await configureUpdateSubscriptionsAdapter()
         var response = Stream_Video_Sfu_Signal_UpdateSubscriptionsResponse()
         response.error = .init()
         response.error.code = .requestValidationFailed
@@ -535,6 +541,92 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         }
     }
 
+    // MARK: observeSFUFullError
+
+    func test_transition_sfuFullObserved_landsOnDisconnectedWithMigrationContextUpdated() async {
+        subject.context.currentSFU = "edge-1"
+        subject.context.migratingFromList = ["edge-0"]
+        subject.context.sfuFullObserver = .init(mockCoordinatorStack.sfuStack.adapter)
+
+        await assertTransitionAfterTrigger(
+            expectedTarget: .disconnected,
+            trigger: { [mockCoordinatorStack] in
+                var error = Stream_Video_Sfu_Event_Error()
+                error.error.code = .sfuFull
+                error.reconnectStrategy = .migrate
+                mockCoordinatorStack?
+                    .sfuStack
+                    .receiveEvent(.sfuEvent(.error(error)))
+            }
+        ) { stage in
+            XCTAssertEqual(stage.context.reconnectionStrategy, .migrate)
+            XCTAssertEqual(stage.context.migratingFromList, ["edge-0", "edge-1"])
+        }
+    }
+
+    func test_transition_sfuFullObserved_withDuplicateCurrentSFU_keepsUniqueMigratingFromList() async {
+        subject.context.currentSFU = "edge-1"
+        subject.context.migratingFromList = ["edge-0", "edge-1"]
+        subject.context.sfuFullObserver = .init(mockCoordinatorStack.sfuStack.adapter)
+
+        await assertTransitionAfterTrigger(
+            expectedTarget: .disconnected,
+            trigger: { [mockCoordinatorStack] in
+                var error = Stream_Video_Sfu_Event_Error()
+                error.error.code = .sfuFull
+                error.reconnectStrategy = .migrate
+                mockCoordinatorStack?
+                    .sfuStack
+                    .receiveEvent(.sfuEvent(.error(error)))
+            }
+        ) { stage in
+            XCTAssertEqual(stage.context.reconnectionStrategy, .migrate)
+            XCTAssertEqual(stage.context.migratingFromList, ["edge-0", "edge-1"])
+        }
+    }
+
+    func test_transition_sfuFullObserved_withEmptyCurrentSFU_doesNotAppendToMigratingFromList() async {
+        subject.context.currentSFU = ""
+        subject.context.migratingFromList = ["edge-0"]
+        subject.context.sfuFullObserver = .init(mockCoordinatorStack.sfuStack.adapter)
+
+        await assertTransitionAfterTrigger(
+            expectedTarget: .disconnected,
+            trigger: { [mockCoordinatorStack] in
+                var error = Stream_Video_Sfu_Event_Error()
+                error.error.code = .sfuFull
+                error.reconnectStrategy = .migrate
+                mockCoordinatorStack?
+                    .sfuStack
+                    .receiveEvent(.sfuEvent(.error(error)))
+            }
+        ) { stage in
+            XCTAssertEqual(stage.context.reconnectionStrategy, .migrate)
+            XCTAssertEqual(stage.context.migratingFromList, ["edge-0"])
+        }
+    }
+
+    func test_transition_sfuFullObserved_withRejoinStrategy_usesStrategyFromErrorPayload() async {
+        subject.context.currentSFU = "edge-1"
+        subject.context.migratingFromList = []
+        subject.context.sfuFullObserver = .init(mockCoordinatorStack.sfuStack.adapter)
+
+        await assertTransitionAfterTrigger(
+            expectedTarget: .disconnected,
+            trigger: { [mockCoordinatorStack] in
+                var error = Stream_Video_Sfu_Event_Error()
+                error.error.code = .sfuFull
+                error.reconnectStrategy = .rejoin
+                mockCoordinatorStack?
+                    .sfuStack
+                    .receiveEvent(.sfuEvent(.error(error)))
+            }
+        ) { stage in
+            XCTAssertEqual(stage.context.reconnectionStrategy, .rejoin)
+            XCTAssertEqual(stage.context.migratingFromList, ["edge-1"])
+        }
+    }
+
     // MARK: - observeHealthCheckResponses
 
     func test_transition_hasNotReceivedHealthCheckResponseForTheRequiredTime_landsOnDisconnectedWithReconenctionStrategyFastReconnect(
@@ -578,6 +670,58 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
             }
             expectation.fulfill()
         }
+    }
+
+    // MARK: - observeAudioSessionReadiness
+
+    func test_transition_audioSessionNeverBecomesReadyBeforeWatchdog_transitionsToDisconnected() async {
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        let previousTimeout = WebRTCConfiguration.timeout
+        let mockAudioStore = MockRTCAudioStore()
+        mockAudioStore.makeShared()
+        defer {
+            WebRTCConfiguration.timeout = previousTimeout
+            mockAudioStore.dismantle()
+        }
+        WebRTCConfiguration.timeout.audioSessionReadinessWatchdog = 0.2
+        subject.context.audioSessionWatchdog = .init()
+
+        await assertTransitionAfterTrigger(
+            expectedTarget: .disconnected,
+            trigger: {}
+        ) { stage in
+            XCTAssertEqual(stage.context.reconnectionStrategy, .rejoin)
+        }
+    }
+
+    func test_transition_audioSessionBecomesReadyBeforeWatchdog_remainsOnJoined() async {
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        let previousTimeout = WebRTCConfiguration.timeout
+        let mockAudioStore = MockRTCAudioStore()
+        mockAudioStore.makeShared()
+        defer {
+            WebRTCConfiguration.timeout = previousTimeout
+            mockAudioStore.dismantle()
+        }
+        WebRTCConfiguration.timeout.audioSessionReadinessWatchdog = 1
+        subject.context.audioSessionWatchdog = .init()
+
+        let transitionExpectation = expectation(
+            description: "No transition should be triggered while joined."
+        )
+        transitionExpectation.isInverted = true
+        transitionExpectation.assertForOverFulfill = false
+
+        subject.transition = { _ in transitionExpectation.fulfill() }
+        _ = subject.transition(from: .joining(subject.context))
+
+        mockAudioStore.audioStore.dispatch(.setActive(true))
+        mockAudioStore.audioStore.dispatch(
+            .setCurrentRoute(.dummy(inputs: [.dummy()]))
+        )
+
+        await fulfillment(of: [transitionExpectation], timeout: 1.5)
+        XCTAssertEqual(subject.id, .joined)
     }
 
     // MARK: observePreferredReconnectionStrategy
@@ -754,6 +898,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         await mockCoordinatorStack.coordinator.stateAdapter.set(
             sfuAdapter: mockCoordinatorStack.sfuStack.adapter
         )
+        await configureUpdateSubscriptionsAdapter()
         let sessionId = try await mockCoordinatorStack
             .coordinator
             .stateAdapter
@@ -784,6 +929,24 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
     }
 
     // MARK: - Private helpers
+
+    private func configureUpdateSubscriptionsAdapter() async {
+        let stateAdapter = mockCoordinatorStack.coordinator.stateAdapter
+
+        guard let sfuAdapter = await stateAdapter.sfuAdapter else {
+            return
+        }
+
+        subject.context.updateSubscriptionsAdapter = await .init(
+            participantsPublisher: stateAdapter.$participants.eraseToAnyPublisher(),
+            incomingVideoQualitySettingsPublisher: stateAdapter
+                .$incomingVideoQualitySettings
+                .eraseToAnyPublisher(),
+            sfuAdapter: sfuAdapter,
+            sessionID: stateAdapter.sessionID,
+            clientCapabilities: stateAdapter.clientCapabilities
+        )
+    }
 
     private func assertTransitions(
         from: WebRTCCoordinator.StateMachine.Stage.ID,
@@ -832,6 +995,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
             )
             transitionExpectation.isInverted = true
         }
+        transitionExpectation.assertForOverFulfill = false
 
         subject.transition = { target in
             Task {

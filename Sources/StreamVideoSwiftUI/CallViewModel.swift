@@ -42,13 +42,29 @@ open class CallViewModel: ObservableObject {
                 .receive(on: RunLoop.main)
                 .sink(receiveValue: { [weak self] reconnectionStatus in
                     guard let self else { return }
+                    // Preserve transitional UI states while the call is still
+                    // negotiating or migrating. This avoids collapsing back to
+                    // .inCall before the user has actually finished joining.
                     switch reconnectionStatus {
-                    case .reconnecting where callingState != .reconnecting:
+                    case .reconnecting:
+                        if callingState != .reconnecting {
+                            setCallingState(.reconnecting)
+                        }
+                    case .disconnected:
+                        setCallingState(.inCall)
+                    case .migrating:
                         setCallingState(.reconnecting)
-                    default:
-                        if callingState != .inCall, callingState != .outgoing {
+                    case .connected:
+                        switch callingState {
+                        case .joining:
+                            break
+                        case .outgoing:
+                            break
+                        default:
                             setCallingState(.inCall)
                         }
+                    @unknown default:
+                        break
                     }
                 })
             screenSharingUpdates = call?.state.$screenSharingSession
@@ -199,6 +215,10 @@ open class CallViewModel: ObservableObject {
     private var participantsSortComparators = defaultSortPreset
     private let callEventsHandler = CallEventsHandler()
     private let disposableBag = DisposableBag()
+    /// Bridges CallKit events into the main-actor view model so a CallKit
+    /// accept that launches the app can keep the UI in sync until the regular
+    /// call state catches up.
+    private let callKitServiceObserver = CallKitServiceObserver()
 
     private lazy var participantEventResetAdapter = ParticipantEventResetAdapter(self)
 
@@ -256,6 +276,26 @@ open class CallViewModel: ObservableObject {
         participantAutoLeavePolicy.onPolicyTriggered = { [weak self] in self?.participantAutoLeavePolicyTriggered() }
 
         _ = participantEventResetAdapter
+
+        // Hop to the main queue before running operators defined inside this
+        // @MainActor type. This keeps the pipeline actor-safe and allows the
+        // joining screen to appear as soon as CallKit hands us the call.
+        callKitServiceObserver
+            .publisher
+            .receive(on: DispatchQueue.main)
+            .compactMap {
+                switch $0 {
+                case let .joining(call):
+                    return call
+                default:
+                    return nil
+                }
+            }
+            .sink { [weak self] in
+                self?.setCallingState(.joining)
+                self?.call = $0
+            }
+            .store(in: disposableBag)
     }
 
     deinit {
@@ -579,12 +619,18 @@ open class CallViewModel: ObservableObject {
             do {
                 hasAcceptedCall = true
                 try await call.accept()
+
+                // Mirror `joinCall` so the incoming UI is dismissed before
+                // `enterCall` finishes the async join flow.
+                await MainActor.run { self.setCallingState(.joining) }
+
                 enterCall(
                     call: call,
                     callType: callType,
                     callId: callId,
                     members: [],
-                    customData: customData
+                    customData: customData,
+                    policy: .peerConnectionReadinessAware
                 )
             } catch {
                 hasAcceptedCall = false
@@ -674,8 +720,11 @@ open class CallViewModel: ObservableObject {
     }
 
     /// Hangs up from the active call.
-    public func hangUp() {
-        handleCallHangUp(ringTimeout: false)
+    ///
+    /// - Parameter reason: Optional reason forwarded to ``Call/leave(reason:)``
+    ///   so the SFU receives context about why the call ended.
+    public func hangUp(reason: String? = nil) {
+        handleCallHangUp(ringTimeout: false, reason: reason)
     }
 
     /// Sets a video filter for the current call.
@@ -703,16 +752,33 @@ open class CallViewModel: ObservableObject {
             fileName: file,
             lineNumber: line
         )
+
         if let call, (callingState != .inCall || self.call?.cId != call.cId) {
-            if !skipCallStateUpdates {
-                setCallingState(.inCall)
+            // Preserve the explicit joining state while the CallKit-triggered
+            // join flow is still restoring. Without this, restoring activeCall
+            // can jump straight to .inCall and skip the joining screen.
+            switch callKitServiceObserver.value {
+            case .joining:
+                setCallingState(.joining)
+            default:
+                if !skipCallStateUpdates {
+                    setCallingState(.inCall)
+                }
             }
             self.call = call
         } else if call == nil, callingState != .idle {
-            setCallingState(.idle)
-            Task { @MainActor in
-                self.call = nil
+            guard case .joining = callKitServiceObserver.value else {
+                setCallingState(.idle)
+                Task { @MainActor in
+                    self.call = nil
+                }
+                return
             }
+
+            // During a CallKit cold start the UI can ask for the active call
+            // before `StreamVideo.state.activeCall` has caught up. Preserve the
+            // CallKit-driven `.joining` state until the regular WS/state
+            // pipeline catches up and drives the terminal transition.
         }
     }
 
@@ -754,7 +820,7 @@ open class CallViewModel: ObservableObject {
     }
 
     /// Leaves the current call.
-    private func leaveCall() {
+    private func leaveCall(reason: String?) {
         log.debug("Leaving call")
         enteringCallTask?.cancel()
         enteringCallTask = nil
@@ -772,7 +838,7 @@ open class CallViewModel: ObservableObject {
         skipCallStateUpdates = false
         temporaryCallSettings = nil
         lastScreenSharingParticipant = nil
-        call?.leave()
+        call?.leave(reason: reason)
 
         pictureInPictureAdapter.call = nil
         pictureInPictureAdapter.sourceView = nil
@@ -803,7 +869,8 @@ open class CallViewModel: ObservableObject {
         maxParticipants: Int? = nil,
         startsAt: Date? = nil,
         backstage: BackstageSettingsRequest? = nil,
-        customData: [String: RawJSON]? = nil
+        customData: [String: RawJSON]? = nil,
+        policy: WebRTCJoinPolicy = .default
     ) {
         if enteringCallTask != nil || callingState == .inCall {
             return
@@ -838,7 +905,8 @@ open class CallViewModel: ObservableObject {
                     create: true,
                     options: options,
                     ring: ring,
-                    callSettings: settings
+                    callSettings: settings,
+                    policy: policy
                 )
                 save(call: call)
                 enteringCallTask = nil
@@ -884,7 +952,10 @@ open class CallViewModel: ObservableObject {
             }
     }
 
-    private func handleCallHangUp(ringTimeout: Bool = false) {
+    private func handleCallHangUp(
+        ringTimeout: Bool = false,
+        reason: String? = nil
+    ) {
         if skipCallStateUpdates {
             skipCallStateUpdates = false
         }
@@ -892,7 +963,7 @@ open class CallViewModel: ObservableObject {
             let call,
             callingState == .outgoing
         else {
-            leaveCall()
+            leaveCall(reason: reason)
             return
         }
 
@@ -915,7 +986,7 @@ open class CallViewModel: ObservableObject {
                 log.error(error)
             }
 
-            leaveCall()
+            leaveCall(reason: reason)
         }
     }
 
@@ -951,7 +1022,7 @@ open class CallViewModel: ObservableObject {
                         if
                             callEventInfo.user?.id == streamVideo.user.id,
                             callEventInfo.callCid == call?.cId {
-                            leaveCall()
+                            leaveCall(reason: "blocked")
                         }
                     case .userUnblocked:
                         break
@@ -1007,7 +1078,8 @@ open class CallViewModel: ObservableObject {
                 call: call,
                 callType: event.type,
                 callId: event.callId,
-                members: []
+                members: [],
+                policy: .peerConnectionReadinessAware
             )
         default:
             break
@@ -1053,7 +1125,7 @@ open class CallViewModel: ObservableObject {
                     _ = try? await outgoingCall.reject(
                         reason: "Call rejected by all \(outgoingMembersCount) outgoing call members."
                     )
-                    self?.leaveCall()
+                    self?.leaveCall(reason: "unanswered")
                 }
             }
         default:
@@ -1087,7 +1159,7 @@ open class CallViewModel: ObservableObject {
 
         default:
             if call?.cId == event.callCid {
-                leaveCall()
+                leaveCall(reason: "ended")
             }
         }
     }
@@ -1102,7 +1174,15 @@ open class CallViewModel: ObservableObject {
         }
         guard call != nil || !callParticipants.isEmpty else { return }
         if callingState != .reconnecting, callingState != .inCall {
-            setCallingState(.inCall)
+            // Participant updates can arrive before the CallKit-driven join
+            // flow finishes. Keep .joining visible until the observer reports
+            // that the temporary CallKit sync state has ended.
+            switch callKitServiceObserver.value {
+            case .joining:
+                setCallingState(.joining)
+            default:
+                setCallingState(.inCall)
+            }
         } else {
             let shouldGoInCall = callParticipants.count > 1
             if shouldGoInCall, callingState != .inCall {
@@ -1112,7 +1192,7 @@ open class CallViewModel: ObservableObject {
     }
 
     private func participantAutoLeavePolicyTriggered() {
-        leaveCall()
+        leaveCall(reason: "auto-leave")
     }
 
     private func subscribeToApplicationLifecycleEvents() {

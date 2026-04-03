@@ -24,6 +24,7 @@ final class WebRTCUpdateSubscriptionsAdapter_Tests: XCTestCase, @unchecked Senda
     override func setUp() {
         super.setUp()
         _ = subject
+        subject.startObservation()
     }
 
     override func tearDown() {
@@ -35,9 +36,9 @@ final class WebRTCUpdateSubscriptionsAdapter_Tests: XCTestCase, @unchecked Senda
         super.tearDown()
     }
 
-    // MARK: - didUpdate
+    // MARK: - Observation
 
-    func test_didUpdate_doesNotSubscribeToAudioTracks() async throws {
+    func test_startObservation_doesNotSubscribeToAudioTracks() async throws {
         participantsSubject.send([
             .unique: .dummy(hasAudio: true),
             .unique: .dummy(hasAudio: true),
@@ -49,7 +50,7 @@ final class WebRTCUpdateSubscriptionsAdapter_Tests: XCTestCase, @unchecked Senda
         XCTAssertNil(mockSFUStack.service.updateSubscriptionsWasCalledWithRequest)
     }
 
-    func test_didUpdate_participants_sendsToSFU() async throws {
+    func test_startObservation_whenParticipantsUpdated_sendsToSFU() async throws {
         participantsSubject.send([
             "1": .dummy(id: "1", hasVideo: true),
             "2": .dummy(id: "2", hasVideo: true),
@@ -63,7 +64,7 @@ final class WebRTCUpdateSubscriptionsAdapter_Tests: XCTestCase, @unchecked Senda
         XCTAssertEqual(request.tracks.filter { $0.trackType == .screenShare }.count, 2)
     }
 
-    func test_didUpdate_incomingVideoQualitySettings_sendsToSFU() async throws {
+    func test_startObservation_whenIncomingVideoQualityUpdates_sendsToSFU() async throws {
         participantsSubject.send([
             "1": .dummy(id: "1", hasVideo: true),
             "2": .dummy(id: "2", hasVideo: true),
@@ -77,7 +78,7 @@ final class WebRTCUpdateSubscriptionsAdapter_Tests: XCTestCase, @unchecked Senda
         await fulfillment { self.mockSFUStack.service.timesCalled(.updateSubscriptions) == 2 }
     }
 
-    func test_didUpdate_tracksHaveNoDifferenceWithLastReport_noRequestWasSent() async throws {
+    func test_startObservation_whenTracksDoNotChange_doesNotSendRequest() async throws {
         participantsSubject.send([
             "1": .dummy(id: "1", hasVideo: true),
             "2": .dummy(id: "2", hasVideo: true),
@@ -95,5 +96,62 @@ final class WebRTCUpdateSubscriptionsAdapter_Tests: XCTestCase, @unchecked Senda
         ])
 
         await fulfillment { self.mockSFUStack.service.timesCalled(.updateSubscriptions) == 1 }
+    }
+
+    func test_stopObservation_whenParticipantsUpdated_doesNotSendRequest() async throws {
+        participantsSubject.send(["1": .dummy(id: "1", hasVideo: true)])
+        await fulfillment { self.mockSFUStack.service.timesCalled(.updateSubscriptions) == 1 }
+
+        subject.stopObservation()
+        await wait(for: 0.5)
+
+        participantsSubject.send([
+            "1": .dummy(id: "1", hasVideo: true),
+            "2": .dummy(id: "2", hasVideo: true)
+        ])
+        await wait(for: 0.5)
+
+        XCTAssertEqual(mockSFUStack.service.timesCalled(.updateSubscriptions), 1)
+    }
+
+    // MARK: - Specific participants update
+
+    func test_updateSubscriptions_forSpecificParticipantAndTrackType_sendsFilteredTracks() async throws {
+        subject.updateSubscriptions(
+            for: [.dummy(id: "1", hasVideo: true, hasAudio: true)],
+            incomingVideoQualitySettings: .none,
+            trackTypes: [.video]
+        )
+
+        await fulfillment {
+            self
+                .mockSFUStack
+                .service
+                .stubbedFunctionInput[.updateSubscriptions]?
+                .contains { input in
+                    guard case let .updateSubscriptions(request) = input else {
+                        return false
+                    }
+                    return request.tracks.count == 1
+                        && request.tracks.first?.trackType == .video
+                } == true
+        }
+        let request = try XCTUnwrap(
+            mockSFUStack
+                .service
+                .stubbedFunctionInput[.updateSubscriptions]?
+                .compactMap { input -> Stream_Video_Sfu_Signal_UpdateSubscriptionsRequest? in
+                    guard case let .updateSubscriptions(request) = input else {
+                        return nil
+                    }
+                    return request.tracks.count == 1
+                        && request.tracks.first?.trackType == .video
+                        ? request
+                        : nil
+                }
+                .first
+        )
+        XCTAssertEqual(request.tracks.count, 1)
+        XCTAssertEqual(request.tracks.first?.trackType, .video)
     }
 }

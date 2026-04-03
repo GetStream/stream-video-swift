@@ -51,7 +51,6 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
 
     private weak var delegate: WebRTCPermissionsAdapterDelegate?
     private var requiredPermissions: Set<RequiredPermission> = []
-    private var lastCallSettings: CallSettings?
 
     /// Creates an adapter and begins observing app/permission changes.
     ///
@@ -92,7 +91,10 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
             return try await processingQueue.addSynchronousTaskOperation { [weak self] in
                 guard
                     let self,
-                    (lastCallSettings?.videoOn != callSettings.videoOn || lastCallSettings?.audioOn != callSettings.audioOn)
+                    // We only need to check if any of the camera or mic
+                    // permissions are not granted. Otherwise we don't need
+                    // to perform any operation.
+                    !permissions.hasCameraPermission || !permissions.hasMicrophonePermission
                 else {
                     return callSettings
                 }
@@ -104,37 +106,33 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
                     return result
                 }()
 
-                guard
-                    requiredPermissions != updatedRequiredPermissions
-                else {
-                    return callSettings
-                }
-
-                switch applicationStateAdapter.state {
-                case .foreground where shouldPrompt(for: updatedRequiredPermissions):
+                if requiredPermissions != updatedRequiredPermissions {
                     self.requiredPermissions = updatedRequiredPermissions
-                    log.debug(
-                        "Required permissions updated to:\(requiredPermissions)",
-                        subsystems: .webRTC
-                    )
-                    log.debug(
-                        "Application state is .foreground. Requesting permissions for:\(requiredPermissions)",
-                        subsystems: .webRTC
-                    )
+                    
+                    switch applicationStateAdapter.state {
+                    case .foreground where shouldPrompt(for: updatedRequiredPermissions):
+                        log.debug(
+                            "Required permissions updated to:\(requiredPermissions)",
+                            subsystems: .webRTC
+                        )
+                        log.debug(
+                            "Application state is .foreground. Requesting permissions for:\(requiredPermissions)",
+                            subsystems: .webRTC
+                        )
 
-                    _ = try await requestRequiredPermissions()
-                case .foreground:
-                    break
-                default:
-                    self.requiredPermissions = updatedRequiredPermissions
-                    log.debug(
-                        "Required permissions updated to:\(requiredPermissions)",
-                        subsystems: .webRTC
-                    )
-                    log.debug(
-                        "Application state is \(applicationStateAdapter.state) but we won't request for permissions:\(requiredPermissions).",
-                        subsystems: .webRTC
-                    )
+                        _ = try await requestRequiredPermissions()
+                    case .foreground:
+                        break
+                    default:
+                        log.debug(
+                            "Required permissions updated to:\(requiredPermissions)",
+                            subsystems: .webRTC
+                        )
+                        log.debug(
+                            "Application state is \(applicationStateAdapter.state) but we won't request for permissions:\(requiredPermissions).",
+                            subsystems: .webRTC
+                        )
+                    }
                 }
 
                 var updatedCallSettings = callSettings
@@ -146,7 +144,6 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
                     updatedCallSettings = updatedCallSettings.withUpdatedVideoState(false)
                 }
 
-                lastCallSettings = updatedCallSettings
                 return updatedCallSettings
             }
         } catch {

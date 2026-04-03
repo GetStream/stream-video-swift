@@ -49,6 +49,7 @@ final class WebRTCAuthenticator_Tests: XCTestCase, @unchecked Sendable {
         _ = try await subject.authenticate(
             coordinator: mockCoordinatorStack.coordinator,
             currentSFU: currentSFU,
+            migratingFromList: nil,
             create: create,
             ring: ring,
             notify: notify,
@@ -58,8 +59,28 @@ final class WebRTCAuthenticator_Tests: XCTestCase, @unchecked Sendable {
         let input = try XCTUnwrap(mockCoordinatorStack.callAuthenticator.authenticateCalledWithInput.first)
         XCTAssertTrue(input.create)
         XCTAssertTrue(input.ring)
+        XCTAssertNil(input.migratingFromList)
         XCTAssertTrue(input.notify)
         XCTAssertEqual(input.options?.team, options.team)
+    }
+
+    func test_authenticate_withMigratingFromList_callAuthenticationWasCalledWithExpectedInput() async throws {
+        let migratingFromList = [String.unique, String.unique]
+        let expected = JoinCallResponse.dummy()
+        mockCoordinatorStack.callAuthenticator.authenticateResult = .success(expected)
+
+        _ = try await subject.authenticate(
+            coordinator: mockCoordinatorStack.coordinator,
+            currentSFU: nil,
+            migratingFromList: migratingFromList,
+            create: false,
+            ring: false,
+            notify: false,
+            options: nil
+        )
+
+        let input = try XCTUnwrap(mockCoordinatorStack.callAuthenticator.authenticateCalledWithInput.first)
+        XCTAssertEqual(input.migratingFromList, migratingFromList)
     }
 
     func test_authenticate_withValidData_shouldReturnSFUAdapterAndJoinCallResponse() async throws {
@@ -74,6 +95,7 @@ final class WebRTCAuthenticator_Tests: XCTestCase, @unchecked Sendable {
         let (sfuAdapter, response) = try await subject.authenticate(
             coordinator: mockCoordinatorStack.coordinator,
             currentSFU: currentSFU,
+            migratingFromList: nil,
             create: create,
             ring: ring,
             notify: notify,
@@ -96,6 +118,7 @@ final class WebRTCAuthenticator_Tests: XCTestCase, @unchecked Sendable {
         let (sfuAdapter, response) = try await subject.authenticate(
             coordinator: mockCoordinatorStack.coordinator,
             currentSFU: nil,
+            migratingFromList: nil,
             create: create,
             ring: ring,
             notify: notify,
@@ -653,6 +676,7 @@ final class WebRTCAuthenticator_Tests: XCTestCase, @unchecked Sendable {
         _ = try await subject.authenticate(
             coordinator: mockCoordinatorStack.coordinator,
             currentSFU: nil,
+            migratingFromList: nil,
             create: create,
             ring: ring,
             notify: notify,
@@ -679,6 +703,7 @@ final class WebRTCAuthenticator_Tests: XCTestCase, @unchecked Sendable {
         _ = try await subject.authenticate(
             coordinator: mockCoordinatorStack.coordinator,
             currentSFU: nil,
+            migratingFromList: nil,
             create: create,
             ring: ring,
             notify: notify,
@@ -776,6 +801,7 @@ final class WebRTCAuthenticator_Tests: XCTestCase, @unchecked Sendable {
         _ = try await subject.authenticate(
             coordinator: mockCoordinatorStack.coordinator,
             currentSFU: nil,
+            migratingFromList: nil,
             create: create,
             ring: ring,
             notify: notify,

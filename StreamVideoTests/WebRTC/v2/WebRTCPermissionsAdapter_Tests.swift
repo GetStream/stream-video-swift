@@ -47,6 +47,56 @@ final class WebRTCPermissionsAdapter_Tests: StreamVideoTestCase, @unchecked Send
         XCTAssertEqual(output.videoOn, false)
     }
 
+    func test_micRevoked_sameAudioSettings_downgradesAudioOff() async {
+        mockAppStateAdapter.makeShared()
+        mockAppStateAdapter.stubbedState = .foreground
+        mockPermissions.stubMicrophonePermission(.granted)
+        await fulfillment {
+            self.mockPermissions.mockStore.state.microphonePermission == .granted
+        }
+
+        let input = CallSettings(audioOn: true, videoOn: false)
+        let initialOutput = await subject.willSet(callSettings: input)
+
+        XCTAssertEqual(initialOutput.audioOn, true)
+        XCTAssertEqual(initialOutput.videoOn, false)
+
+        mockPermissions.stubMicrophonePermission(.denied)
+        await fulfillment {
+            self.mockPermissions.mockStore.state.microphonePermission == .denied
+        }
+
+        let output = await subject.willSet(callSettings: input)
+
+        XCTAssertEqual(output.audioOn, false)
+        XCTAssertEqual(output.videoOn, false)
+    }
+
+    func test_cameraRevoked_sameVideoSettings_downgradesVideoOff() async {
+        mockAppStateAdapter.makeShared()
+        mockAppStateAdapter.stubbedState = .foreground
+        mockPermissions.stubCameraPermission(.granted)
+        await fulfillment {
+            self.mockPermissions.mockStore.state.cameraPermission == .granted
+        }
+
+        let input = CallSettings(audioOn: false, videoOn: true)
+        let initialOutput = await subject.willSet(callSettings: input)
+
+        XCTAssertEqual(initialOutput.audioOn, false)
+        XCTAssertEqual(initialOutput.videoOn, true)
+
+        mockPermissions.stubCameraPermission(.denied)
+        await fulfillment {
+            self.mockPermissions.mockStore.state.cameraPermission == .denied
+        }
+
+        let output = await subject.willSet(callSettings: input)
+
+        XCTAssertEqual(output.audioOn, false)
+        XCTAssertEqual(output.videoOn, false)
+    }
+
     func test_willSet_audioOnTrue_unknownMic_inForeground_requestsPermission_andKeepsAudioOnWhenGranted() async {
         mockAppStateAdapter.makeShared()
         defer { mockAppStateAdapter.dismante() }

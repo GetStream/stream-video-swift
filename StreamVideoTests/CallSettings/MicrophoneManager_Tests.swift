@@ -8,56 +8,92 @@ import XCTest
 
 final class MicrophoneManager_Tests: XCTestCase, @unchecked Sendable {
 
-    func test_microphoneManager_toggle() async throws {
-        try await assertStatus(
-            .disabled,
-            initialStatus: .enabled,
-            action: { try await $0.toggle() }
+    // MARK: - toggle
+
+    func test_initialStatusEnabled_toggle_statusDoesNotChangeUntilCallSettingsUpdate() async throws {
+        let callController = MockCallController()
+        let subject = MicrophoneManager(
+            callController: callController,
+            initialStatus: .enabled
+        )
+
+        try await subject.toggle()
+
+        XCTAssertEqual(subject.status, .enabled)
+        XCTAssertEqual(callController.timesCalled(.changeAudioState), 1)
+        XCTAssertEqual(
+            callController
+                .recordedInputPayload(Bool.self, for: .changeAudioState)?
+                .first,
+            false
         )
     }
 
-    func test_microphoneManager_enable() async throws {
-        try await assertStatus(
-            .enabled,
-            initialStatus: .disabled,
-            action: { try await $0.enable() }
+    // MARK: - enable
+
+    func test_initialStatusDisabled_enable_statusDoesNotChangeUntilCallSettingsUpdate() async throws {
+        let callController = MockCallController()
+        let subject = MicrophoneManager(
+            callController: callController,
+            initialStatus: .disabled
+        )
+
+        try await subject.enable()
+
+        XCTAssertEqual(subject.status, .disabled)
+        XCTAssertEqual(callController.timesCalled(.changeAudioState), 1)
+        XCTAssertEqual(
+            callController
+                .recordedInputPayload(Bool.self, for: .changeAudioState)?
+                .first,
+            true
         )
     }
 
-    func test_microphoneManager_disable() async throws {
-        try await assertStatus(
-            .disabled,
-            initialStatus: .enabled,
-            action: { try await $0.disable() }
+    func test_initialStatusEnabled_enable_controllerIsNotCalled() async throws {
+        let callController = MockCallController()
+        let subject = MicrophoneManager(
+            callController: callController,
+            initialStatus: .enabled
+        )
+
+        try await subject.enable()
+
+        XCTAssertEqual(subject.status, .enabled)
+        XCTAssertEqual(callController.timesCalled(.changeAudioState), 0)
+    }
+
+    // MARK: - disable
+
+    func test_initialStatusEnabled_disable_statusDoesNotChangeUntilCallSettingsUpdate() async throws {
+        let callController = MockCallController()
+        let subject = MicrophoneManager(
+            callController: callController,
+            initialStatus: .enabled
+        )
+
+        try await subject.disable()
+
+        XCTAssertEqual(subject.status, .enabled)
+        XCTAssertEqual(callController.timesCalled(.changeAudioState), 1)
+        XCTAssertEqual(
+            callController
+                .recordedInputPayload(Bool.self, for: .changeAudioState)?
+                .first,
+            false
         )
     }
 
-    func test_microphoneManager_sameState() async throws {
-        try await assertStatus(
-            .enabled,
-            initialStatus: .enabled,
-            action: { try await $0.enable() }
-        )
-    }
-
-    // MARK: - Private helpers
-
-    private func assertStatus(
-        _ expected: CallSettingsStatus,
-        initialStatus: CallSettingsStatus,
-        action: @escaping (MicrophoneManager) async throws -> Void,
-        file: StaticString = #file,
-        line: UInt = #line
-    ) async throws {
-        let microphoneManager = MicrophoneManager(
-            callController: CallController_Mock.make(),
-            initialStatus: initialStatus
+    func test_initialStatusDisabled_disable_controllerIsNotCalled() async throws {
+        let callController = MockCallController()
+        let subject = MicrophoneManager(
+            callController: callController,
+            initialStatus: .disabled
         )
 
-        // When
-        try await action(microphoneManager)
+        try await subject.disable()
 
-        // Then
-        XCTAssert(microphoneManager.status == expected)
+        XCTAssertEqual(subject.status, .disabled)
+        XCTAssertEqual(callController.timesCalled(.changeAudioState), 0)
     }
 }

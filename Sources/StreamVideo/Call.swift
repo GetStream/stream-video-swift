@@ -60,6 +60,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     private lazy var lifecycleToken: ObjectLifecycle.Token = .init(self)
     internal let callController: CallController
     internal let coordinatorClient: DefaultAPIEndpoints
+    private var outgoingRingingController: OutgoingRingingController?
 
     /// This adapter is used to manage closed captions for the
     /// call.
@@ -137,7 +138,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         // It's important to instantiate the stateMachine as soon as possible
         // to ensure it's uniqueness.
         _ = stateMachine
-        subscribeToOwnCapabilitiesChanges()
 
         // Keep lifecycle metadata in sync with call session changes.
         Task { @MainActor [weak self] in
@@ -159,6 +159,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     ///  - ring: whether the call should ring, `false` by default.
     ///  - notify: whether the participants should be notified about the call.
     ///  - callSettings: optional call settings.
+    ///  - policy: controls when the join request is considered complete.
     /// - Throws: An error if the call could not be joined.
     @discardableResult
     public func join(
@@ -166,7 +167,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         options: CreateCallOptions? = nil,
         ring: Bool = false,
         notify: Bool = false,
-        callSettings: CallSettings? = nil
+        callSettings: CallSettings? = nil,
+        policy: WebRTCJoinPolicy = .default
     ) async throws -> JoinCallResponse {
         /// Determines the source from which the join action was initiated.
         ///
@@ -234,7 +236,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                                 ring: ring,
                                 notify: notify,
                                 source: joinSource,
-                                deliverySubject: deliverySubject
+                                deliverySubject: deliverySubject,
+                                policy: policy
                             )
                         )
                     )
@@ -278,6 +281,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         )
         await state.update(from: response)
         if ring {
+            configureOutgoingRingingController()
+
             Task(disposableBag: disposableBag) { @MainActor [weak self] in
                 self?.streamVideo.state.ringingCall = self
             }
@@ -285,7 +290,12 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         return response
     }
 
-    /// Rings the call (sends call notification to members).
+    /// Rings the call and marks it as `StreamVideo.State.ringingCall`.
+    ///
+    /// The call stays in the ringing state until it is accepted,
+    /// rejected, ended, or joined. If the app moves to the background
+    /// before the ring completes, the SDK ends the outgoing ringing
+    /// call automatically.
     /// - Returns: The call's data.
     @discardableResult
     public func ring() async throws -> CallResponse {
@@ -310,7 +320,10 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     ///   - custom: An optional dictionary of custom data to include in the call request.
     ///   - startsAt: An optional `Date` indicating when the call should start.
     ///   - team: An optional string representing the team for the call.
-    ///   - ring: A boolean indicating whether to ring the call. Default is `false`.
+    ///   - ring: A boolean indicating whether to ring the call. When
+    ///     `true`, the call is exposed through
+    ///     `StreamVideo.State.ringingCall` until it is accepted,
+    ///     rejected, ended, or joined. Default is `false`.
     ///   - notify: A boolean indicating whether to send notifications. Default is `false`.
     ///   - maxDuration: An optional integer representing the maximum duration of the call in seconds.
     ///   - maxParticipants: An optional integer representing the maximum number of participants allowed in the call.
@@ -380,15 +393,17 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         )
         await state.update(from: response)
         if ring {
-            Task(disposableBag: disposableBag) { @MainActor [weak self] in
-                self?.streamVideo.state.ringingCall = self
-            }
+            configureOutgoingRingingController()
+            await MainActor.run { streamVideo.state.ringingCall = self }
         }
+
         return response.call
     }
 
     /// Initiates a ring action for the current call.
-    /// - Parameter request: The `RingCallRequest` containing ring configuration, such as member ids and whether it's a video call.
+    /// - Parameter request: The `RingCallRequest` containing ring
+    ///   configuration, such as member ids and whether it's a video
+    ///   call.
     /// - Returns: A `RingCallResponse` with information about the ring operation.
     /// - Throws: An error if the coordinator request fails or the call cannot be rung.
     @discardableResult
@@ -471,16 +486,21 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             case let .rejecting(input) = currentStage.context.input {
             return try await input
                 .deliverySubject
+                .compactMap { $0 }
                 .nextValue(timeout: CallConfiguration.timeout.reject)
         } else {
-            let deliverySubject = PassthroughSubject<RejectCallResponse, Error>()
+            let deliverySubject = CurrentValueSubject<RejectCallResponse?, Error>(nil)
+
             stateMachine.transition(
                 .rejecting(
                     self,
                     input: .rejecting(.init(reason: reason, deliverySubject: deliverySubject))
                 )
             )
-            return try await deliverySubject.nextValue(timeout: CallConfiguration.timeout.reject)
+
+            return try await deliverySubject
+                .compactMap { $0 }
+                .nextValue(timeout: CallConfiguration.timeout.reject)
         }
     }
 
@@ -609,9 +629,35 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     ///
     /// The cleanup sequence clears active/ringing call references from
     /// `StreamVideo` state before emitting `CallNotification.callEnded`.
-    public func leave() {
-        Task(disposableBag: disposableBag) { @MainActor [weak self] in
-            self?.performLeave()
+    ///
+    /// - Parameter reason: Optional reason forwarded to the SFU leave request.
+    ///   Pass a custom value when you want the backend to distinguish between
+    ///   different leave flows (for example, user action vs timeout).
+    public func leave(reason: String? = nil) {
+        disposableBag.removeAll()
+        callController.leave(reason: reason)
+        closedCaptionsAdapter.stop()
+        stateMachine.transition(.idle(.init(call: self)))
+        /// Upon `Call.leave` we remove the call from the cache. Any further actions that are required
+        /// to happen on the call object (e.g. rejoin) will need to fetch a new instance from `StreamVideo`
+        /// client.
+        callCache.remove(for: cId)
+        outgoingRingingController = nil
+
+        // Reset the activeAudioFilter
+        setAudioFilter(nil)
+
+        let strongSelf = self
+        let cId = self.cId
+        Task(disposableBag: disposableBag) { @MainActor [strongSelf, streamVideo, cId] in
+            if streamVideo.state.ringingCall?.cId == cId {
+                streamVideo.state.ringingCall = nil
+            }
+            if streamVideo.state.activeCall?.cId == cId {
+                streamVideo.state.activeCall = nil
+            }
+
+            postNotification(with: CallNotification.callEnded, object: strongSelf)
         }
     }
 
@@ -1557,30 +1603,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
     // MARK: - private
 
-    @MainActor
-    private func performLeave() {
-        disposableBag.removeAll()
-        callController.leave()
-        closedCaptionsAdapter.stop()
-        stateMachine.transition(.idle(.init(call: self)))
-        /// Upon `Call.leave` we remove the call from the cache. Any further actions that are required
-        /// to happen on the call object (e.g. rejoin) will need to fetch a new instance from `StreamVideo`
-        /// client.
-        callCache.remove(for: cId)
-
-        // Reset the activeAudioFilter
-        setAudioFilter(nil)
-
-        if streamVideo.state.ringingCall?.cId == cId {
-            streamVideo.state.ringingCall = nil
-        }
-        if streamVideo.state.activeCall?.cId == cId {
-            streamVideo.state.activeCall = nil
-        }
-
-        postNotification(with: CallNotification.callEnded, object: self)
-    }
-
     private func updatePermissions(
         for userId: String,
         granted: [String],
@@ -1616,20 +1638,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         )
         await state.mergeMembers(response.members)
         return response
-    }
-
-    private func subscribeToOwnCapabilitiesChanges() {
-        Task(disposableBag: disposableBag) { @MainActor [weak self] in
-            guard let self else { return }
-            self
-                .state
-                .$ownCapabilities
-                .removeDuplicates()
-                .sinkTask(storeIn: disposableBag) { [weak self] in
-                    await self?.callController.updateOwnCapabilities(ownCapabilities: $0)
-                }
-                .store(in: disposableBag)
-        }
     }
 
     private func subscribeToNoiseCancellationSettingsChanges() {
@@ -1782,5 +1790,12 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 log.error(error)
             }
         }
+    }
+
+    private func configureOutgoingRingingController() {
+        outgoingRingingController = .init(
+            streamVideo: streamVideo,
+            callCiD: cId
+        ) { [weak self] in try await self?.end() }
     }
 }

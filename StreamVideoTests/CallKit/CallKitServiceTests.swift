@@ -465,13 +465,15 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(call.stubbedFunctionInput[.join]?.count, 1)
         let input = try XCTUnwrap(call.stubbedFunctionInput[.join]?.first)
         switch input {
-        case let .join(_, _, _, _, callSettings):
+        case let .join(_, _, _, _, callSettings, _):
             XCTAssertEqual(callSettings, customCallSettings)
         case .updateTrackSize:
             XCTFail()
         case .callKitActivated:
             XCTFail()
         case .reject:
+            XCTFail()
+        case .leave:
             XCTFail()
         case .ring:
             XCTFail()
@@ -489,7 +491,23 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         subject.callSettings = customCallSettings
         let firstCallUUID = UUID()
         uuidFactory.getResult = firstCallUUID
-        let call = stubCall(response: defaultGetCallResponse)
+        let mockCallController = MockCallController()
+        let call = MockCall(.dummy(callId: callId, callController: mockCallController))
+        call.stub(for: .get, with: defaultGetCallResponse)
+        call.stub(
+            for: .join,
+            with: JoinCallResponse.dummy(
+                call: .dummy(
+                    cid: cid,
+                    id: callId,
+                    type: .default
+                )
+            )
+        )
+        call.stub(for: .accept, with: AcceptCallResponse(duration: "0"))
+        call.stub(for: .reject, with: RejectCallResponse(duration: "0"))
+        call.stub(for: \.state, with: .init(.dummy()))
+        mockedStreamVideo.stub(for: .call, with: call)
         subject.streamVideo = mockedStreamVideo
         subject.missingPermissionPolicy = .none
 
@@ -506,16 +524,19 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
             perform: CXAnswerCallAction(call: firstCallUUID)
         )
         await waitExpectation(timeout: 1)
+        await fulfillment { self.subject.callId == self.callId }
         XCTAssertEqual(call.stubbedFunctionInput[.join]?.count, 1)
         let input = try XCTUnwrap(call.stubbedFunctionInput[.join]?.first)
         switch input {
-        case let .join(_, _, _, _, callSettings):
+        case let .join(_, _, _, _, callSettings, _):
             XCTAssertEqual(callSettings, customCallSettings)
         case .updateTrackSize:
             XCTFail()
         case .callKitActivated:
             XCTFail()
         case .reject:
+            XCTFail()
+        case .leave:
             XCTFail()
         case .ring:
             XCTFail()
@@ -530,7 +551,13 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
             perform: CXSetMutedCallAction(call: firstCallUUID, muted: true)
         )
 
-        await fulfillment { call.microphone.status == .disabled }
+        await fulfillment {
+            mockCallController.timesCalled(.changeAudioState) == 1
+        }
+        XCTAssertEqual(
+            mockCallController.recordedInputPayload(Bool.self, for: .changeAudioState)?.last,
+            false
+        )
     }
 
     @MainActor
@@ -924,6 +951,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         _ expectedReason: CXCallEndedReason,
         actionBlock: @MainActor @Sendable () -> Void,
         file: StaticString = #file,
+        filePath: StaticString = #filePath,
         line: UInt = #line
     ) async {
         callProvider.reset()
@@ -939,17 +967,17 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         }
 
         guard case let .reportCall(_, _, reason) = callProvider.invocations.last else {
-            XCTFail(file: file, line: line)
+            XCTFail(file: filePath, line: line)
             return
         }
 
-        XCTAssertEqual(expectedReason, reason, file: file, line: line)
+        XCTAssertEqual(expectedReason, reason, file: filePath, line: line)
     }
 
     @MainActor
     private func assertNoAction(
         actionBlock: @MainActor @Sendable () -> Void,
-        file: StaticString = #file,
+        filePath: StaticString = #filePath,
         line: UInt = #line
     ) async {
         callProvider.reset()
@@ -957,7 +985,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         actionBlock()
 
         await wait(for: 1)
-        XCTAssertTrue(callProvider.invocations.isEmpty, file: file, line: line)
+        XCTAssertTrue(callProvider.invocations.isEmpty, file: filePath, line: line)
     }
 
     @MainActor
@@ -965,6 +993,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         _ expected: T.Type,
         actionBlock: @MainActor @Sendable () -> Void,
         file: StaticString = #file,
+        filePath: StaticString = #filePath,
         line: UInt = #line
     ) async throws {
         callController.reset()
@@ -977,13 +1006,13 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
 
         let action = try XCTUnwrap(
             callController.requestWasCalledWith?.0.actions.last,
-            file: file,
+            file: filePath,
             line: line
         )
         XCTAssertTrue(
             action is T,
             "Action type is \(String(describing: type(of: action))) instead of \(String(describing: T.self))",
-            file: file,
+            file: filePath,
             line: line
         )
 

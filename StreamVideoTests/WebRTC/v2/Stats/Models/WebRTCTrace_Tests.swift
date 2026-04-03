@@ -82,6 +82,21 @@ final class WebRTCTrace_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(trace.tag, "network.state.offline")
     }
 
+    func test_init_stageTransition() {
+        let stage = WebRTCCoordinator.StateMachine.Stage(
+            id: .joining,
+            context: .init()
+        )
+        let trace = WebRTCTrace(stage, enteredAt: Date(timeIntervalSinceNow: -1))
+
+        XCTAssertNil(trace.id)
+        XCTAssertEqual(trace.tag, "call.stage.transition")
+
+        let payload = trace.data?.value as? [String: String]
+        XCTAssertEqual(payload?["transitionFrom"], "joining")
+        XCTAssertNotNil(payload?["timeAtStage"])
+    }
+
     func test_equatable() throws {
         let trace1 = WebRTCTrace(id: "id", tag: "foo", data: .init("bar"), timestamp: 1)
         let trace2 = WebRTCTrace(id: "id", tag: "foo", data: .init("bar"), timestamp: 1)

@@ -12,10 +12,12 @@ extension WebRTCCoordinator.StateMachine.Stage {
     /// - Returns: A `LeavingStage` instance representing the leaving state of
     ///   the WebRTC coordinator.
     static func leaving(
-        _ context: Context
+        _ context: Context,
+        reason: String?
     ) -> WebRTCCoordinator.StateMachine.Stage {
         LeavingStage(
-            context
+            context,
+            reason: reason
         )
     }
 }
@@ -26,13 +28,16 @@ extension WebRTCCoordinator.StateMachine.Stage {
     final class LeavingStage:
         WebRTCCoordinator.StateMachine.Stage,
         @unchecked Sendable {
+        private let reason: String?
         private let disposableBag = DisposableBag()
 
         /// Initializes a new instance of `LeavingStage`.
         /// - Parameter context: The context for the leaving stage.
         init(
-            _ context: Context
+            _ context: Context,
+            reason: String?
         ) {
+            self.reason = reason
             super.init(id: .leaving, context: context)
         }
 
@@ -46,7 +51,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
             from previousStage: WebRTCCoordinator.StateMachine.Stage
         ) -> Self? {
             switch previousStage.id {
-            case .joined, .disconnected, .connecting, .connected, .joining:
+            case .joined, .disconnected, .connecting, .connected, .joining, .peerConnectionPreparing:
                 execute()
                 return self
             default:
@@ -70,6 +75,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     if let sfuAdapter = await coordinator.stateAdapter.sfuAdapter {
                         if case .connected = sfuAdapter.connectionState {
                             await sfuAdapter.sendLeaveRequest(
+                                reason: reason ?? "",
                                 for: coordinator.stateAdapter.sessionID
                             )
                         }

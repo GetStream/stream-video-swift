@@ -87,10 +87,12 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
             startsAt: .init(timeIntervalSince1970: 100),
             team: .unique
         )
+        let expectedJoinSource = JoinSource.callKit(.init {})
 
         try await assertTransitionToStage(
             .connecting,
             operation: {
+                let joinResponseHandler = PassthroughSubject<JoinCallResponse, Error>()
                 try await self
                     .subject
                     .connect(
@@ -98,7 +100,8 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
                         options: expectedOptions,
                         ring: true,
                         notify: true,
-                        source: .callKit
+                        source: expectedJoinSource,
+                        joinResponseHandler: joinResponseHandler
                     )
             }
         ) { stage in
@@ -111,7 +114,8 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
             XCTAssertEqual(expectedStage.options?.team, expectedOptions.team)
             XCTAssertTrue(expectedStage.ring)
             XCTAssertTrue(expectedStage.notify)
-            XCTAssertEqual(expectedStage.context.joinSource, .callKit)
+            XCTAssertEqual(expectedStage.context.joinSource, expectedJoinSource)
+            XCTAssertNotNil(expectedStage.context.joinResponseHandler)
             await self.assertEqualAsync(
                 await self.subject.stateAdapter.initialCallSettings,
                 expectedCallSettings
@@ -176,12 +180,13 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
                         options: nil,
                         ring: true,
                         notify: true,
-                        source: .inApp
+                        source: .inApp,
+                        joinResponseHandler: .init()
                     )
             }
         ) { _ in
             await self.assertTransitionToStage(.leaving) {
-                self.subject.leave()
+                self.subject.leave(reason: nil)
             } handler: { _ in }
         }
     }
@@ -216,6 +221,7 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
     // MARK: - changeAudioState
 
     func test_changeAudioState_shouldUpdateAudioState() async throws {
+        await subject.stateAdapter.enqueueOwnCapabilities { [.sendAudio, .sendVideo] }
         await subject.changeAudioState(isEnabled: false)
 
         await fulfillment {
@@ -227,6 +233,7 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
     // MARK: - changeSoundState
 
     func test_changeSoundState_shouldUpdateAudioOutputState() async throws {
+        await subject.stateAdapter.enqueueOwnCapabilities { [.sendAudio, .sendVideo] }
         await subject.changeSoundState(isEnabled: false)
 
         await fulfillment {
@@ -238,6 +245,8 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
     // MARK: - changeSpeakerState
 
     func test_changeSpeakerState_shouldUpdateSpeakerState() async throws {
+        await subject.stateAdapter.enqueueOwnCapabilities { [.sendAudio, .sendVideo] }
+
         await subject.changeSpeakerState(isEnabled: false)
 
         await fulfillment {
@@ -529,8 +538,11 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
 
         try await subject.zoom(by: 32)
 
+        await fulfillment {
+            mockPublisher.recordedInputPayload(CGFloat.self, for: .zoom)?.last == 32
+        }
         XCTAssertEqual(
-            mockPublisher.recordedInputPayload(CGFloat.self, for: .zoom)?.first,
+            mockPublisher.recordedInputPayload(CGFloat.self, for: .zoom)?.last,
             32
         )
     }
@@ -690,7 +702,7 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
         )
     ) async throws {
         mockSFUStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
-        let ownCapabilities = Set([OwnCapability.blockUsers, .changeMaxDuration])
+        let ownCapabilities = Set([OwnCapability.blockUsers, .changeMaxDuration, .sendAudio, .sendVideo])
         let callSettings = CallSettings(cameraPosition: .back)
         await subject.stateAdapter.set(sfuAdapter: mockSFUStack.adapter)
         if let videoFilter {

@@ -49,6 +49,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
             timeInStageCancellable?.cancel()
             context.disconnectionSource = nil
             context.flowError = nil
+            super.willTransitionAway()
         }
 
         /// Performs the transition from a previous stage to this disconnected
@@ -111,6 +112,13 @@ extension WebRTCCoordinator.StateMachine.Stage {
             context.sfuEventObserver = nil
             context.disconnectionSource = nil
             context.lastHealthCheckReceivedAt = nil
+            // Drop the observer while disconnected so stale SFU instances
+            // cannot leak migration signals into the next session.
+            context.sfuFullObserver = nil
+
+            // Stop participants subscriptions observation while we reconnect
+            context.updateSubscriptionsAdapter?.stopObservation()
+
             Task(disposableBag: disposableBag) { [weak self] in
                 guard let self else { return }
                 let statsAdapter = await context
@@ -161,10 +169,10 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         context.flowError = nil
                         try transition?(.error(context, error: error))
                     } else {
-                        try transition?(.leaving(context))
+                        try transition?(.leaving(context, reason: "error"))
                     }
                 case .disconnected:
-                    try transition?(.leaving(context))
+                    try transition?(.leaving(context, reason: "disconnected"))
                 }
             } catch let (blockError) {
                 if context.reconnectionStrategy == .disconnected {

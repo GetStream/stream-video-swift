@@ -33,6 +33,7 @@ final class SpeakerProximityPolicy_Tests: XCTestCase, @unchecked Sendable {
 
     func test_didUpdateProximity_near_currentRouteIsNotExternal_speakerOnTrue_callSettingsUpdatedToSpeakerOnFalse() async {
         mockCall.state.callSettings = .init(speakerOn: true)
+        await mockCall.callController.updateOwnCapabilities(ownCapabilities: [.sendAudio, .sendVideo])
 
         subject.didUpdateProximity(.near, on: mockCall)
 

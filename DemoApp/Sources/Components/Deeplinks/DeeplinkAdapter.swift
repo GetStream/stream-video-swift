@@ -11,7 +11,7 @@ struct DeeplinkInfo: Equatable {
     var callType: String
     var baseURL: AppEnvironment.BaseURL
 
-    static let empty = DeeplinkInfo(
+    nonisolated(unsafe) static let empty = DeeplinkInfo(
         url: nil,
         callId: "",
         callType: "",

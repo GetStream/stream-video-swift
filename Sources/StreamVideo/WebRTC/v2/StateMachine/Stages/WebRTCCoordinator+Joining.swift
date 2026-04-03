@@ -2,6 +2,7 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import Foundation
 import StreamWebRTC
 
@@ -27,10 +28,12 @@ extension WebRTCCoordinator.StateMachine.Stage {
     final class JoiningStage:
         WebRTCCoordinator.StateMachine.Stage,
         @unchecked Sendable {
-        private enum FlowType { case regular, fast, rejoin, migrate }
+
+        @Injected(\.audioStore) private var audioStore
+
         private let disposableBag = DisposableBag()
         private let startTime = Date()
-        private var flowType = FlowType.regular
+        private var telemetryReporter: JoinedStateTelemetryReporter = .init()
 
         /// Initializes a new instance of `JoiningStage`.
         /// - Parameter context: The context for the joining stage.
@@ -52,19 +55,19 @@ extension WebRTCCoordinator.StateMachine.Stage {
         ) -> Self? {
             switch previousStage.id {
             case .connected where context.isRejoiningFromSessionID != nil:
-                flowType = .rejoin
+                telemetryReporter.flowType = .rejoin
                 executeRejoining()
                 return self
             case .connected:
-                flowType = .regular
+                telemetryReporter.flowType = .regular
                 execute(isFastReconnecting: false)
                 return self
             case .fastReconnected:
-                flowType = .fast
+                telemetryReporter.flowType = .fast
                 execute(isFastReconnecting: true)
                 return self
             case .migrated:
-                flowType = .migrate
+                telemetryReporter.flowType = .migrate
                 executeMigration()
                 return self
             default:
@@ -131,7 +134,11 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         await coordinator.stateAdapter.publisher?.restartICE()
                     }
 
-                    transitionOrDisconnect(.joined(context))
+                    await transitionToNextStage(
+                        context,
+                        coordinator: coordinator,
+                        sfuAdapter: sfuAdapter
+                    )
                 } catch {
                     context.reconnectionStrategy = context
                         .reconnectionStrategy
@@ -192,7 +199,11 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         isFastReconnecting: false
                     )
 
-                    transitionOrDisconnect(.joined(context))
+                    await transitionToNextStage(
+                        context,
+                        coordinator: coordinator,
+                        sfuAdapter: sfuAdapter
+                    )
                 } catch {
                     context.reconnectionStrategy = .rejoin
                     transitionDisconnectOrError(error)
@@ -251,7 +262,11 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         isFastReconnecting: false
                     )
 
-                    transitionOrDisconnect(.joined(context))
+                    await transitionToNextStage(
+                        context,
+                        coordinator: coordinator,
+                        sfuAdapter: sfuAdapter
+                    )
                 } catch {
                     transitionDisconnectOrError(error)
                 }
@@ -359,7 +374,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
             try Task.checkCancellation()
 
             if !isFastReconnecting {
-                try await withThrowingTaskGroup(of: Void.self) { [context] group in
+                try await withThrowingTaskGroup(of: Void.self) { [weak self, context] group in
                     group.addTask { [context] in
                         /// Configures the audio session for the current call using the provided
                         /// join source. This ensures the session setup reflects whether the
@@ -370,7 +385,13 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         )
                     }
 
-                    group.addTask {
+                    group.addTask { [weak self] in
+                        /// Before we move on configuring the PeerConnections we need to ensure
+                        /// that the audioSession has been:
+                        /// - released from CallKit (if our source was CallKit)
+                        /// - activated and configured correctly
+                        await self?.ensureAudioSessionIsReady()
+
                         /// Configures all peer connections after the audio session is ready.
                         /// Ensures signaling, media, and routing are correctly established for
                         /// all tracks as part of the join process.
@@ -379,6 +400,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
                     try await group.waitForAll()
                 }
+
+                try Task.checkCancellation()
 
                 // Once our PeerConnection have been created we consume the
                 // eventBucket we created above in order to re-apply any event
@@ -392,6 +415,12 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     Stream_Video_Sfu_Event_SubscriberOffer.self,
                     bucket: subscriberEventBucket
                 )
+
+                try Task.checkCancellation()
+
+                // Start subscription updates before entering joined/PC readiness
+                // so SFU can react with subscriber offers as early as possible.
+                await configureUpdateSubscriptions(sfuAdapter)
             }
 
             try Task.checkCancellation()
@@ -411,63 +440,110 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 joinResponse.fastReconnectDeadlineSeconds
             )
 
-            reportTelemetry(
-                sessionId: await coordinator.stateAdapter.sessionID,
-                unifiedSessionId: coordinator.stateAdapter.unifiedSessionId,
-                sfuAdapter: sfuAdapter
-            )
+            try Task.checkCancellation()
         }
 
-        /// Reports telemetry data to the SFU (Selective Forwarding Unit) to monitor and analyze the
-        /// connection lifecycle.
+        /// Waits for early audio-session readiness before peer-connection setup.
         ///
-        /// This method collects relevant metrics based on the flow type of the connection, such as
-        /// connection time or reconnection details, and sends them to the SFU for logging and diagnostics.
-        /// The telemetry data provides insights into the connection's performance and the strategies used
-        /// during rejoining, fast reconnecting, or migration.
+        /// This method runs in `JoiningStage` right after audio-session
+        /// configuration and just before `configurePeerConnections()`.
         ///
-        /// The reported data includes:
-        /// - Connection time in seconds for a regular flow.
-        /// - Reconnection strategies (e.g., fast reconnect, rejoin, or migration) and their duration.
-        private func reportTelemetry(
-            sessionId: String,
-            unifiedSessionId: String,
+        /// Why this exists:
+        /// - The join flow can race with audio-session activation/route
+        ///   propagation (especially when control is handed back from CallKit).
+        /// - Creating peer connections before audio is active and routed can
+        ///   increase the chance of stale/no-audio media setup.
+        ///
+        /// How it behaves:
+        /// - It waits for `context.audioSessionWatchdog.publisher` to emit
+        ///   `true` (audio session active and route non-empty).
+        /// - The wait is bounded by `timeout`; on timeout it logs a warning and
+        ///   intentionally continues the join flow.
+        /// - It always emits a trace with the watchdog's current readiness
+        ///   snapshot so diagnostics can distinguish "ready" vs "still
+        ///   preparing" join paths.
+        ///
+        /// This method is intentionally best-effort: we prefer joining with a
+        /// degraded readiness signal over blocking join completion indefinitely.
+        ///
+        /// - Parameter timeout: Maximum seconds to wait for the watchdog to
+        ///   report readiness before continuing.
+        private func ensureAudioSessionIsReady(
+            timeout: TimeInterval = WebRTCConfiguration.timeout.audioSessionConfigurationCompletion
+        ) async {
+            do {
+                _ = try await context
+                    .audioSessionWatchdog
+                    .publisher
+                    .filter { $0 }
+                    .nextValue(timeout: timeout)
+            } catch {
+                log.warning("AudioSession isn't ready after \(timeout) seconds. Will continue with the join flow.")
+            }
+
+            await context.coordinator?.stateAdapter.trace(.init(context.audioSessionWatchdog))
+        }
+
+        /// Configures the adapter responsible for updating track subscriptions.
+        ///
+        /// This can be invoked as soon as participant state and peer connections are
+        /// available. The adapter is retained by the state adapter so updates continue
+        /// across stage transitions.
+        func configureUpdateSubscriptions(_ sfuAdapter: SFUAdapter) async {
+            guard let stateAdapter = context.coordinator?.stateAdapter else {
+                transitionDisconnectOrError(ClientError())
+                return
+            }
+
+            context.updateSubscriptionsAdapter?.stopObservation()
+            context.updateSubscriptionsAdapter = nil
+
+            context.updateSubscriptionsAdapter = await .init(
+                participantsPublisher: stateAdapter.$participants.eraseToAnyPublisher(),
+                incomingVideoQualitySettingsPublisher: stateAdapter.$incomingVideoQualitySettings
+                    .eraseToAnyPublisher(),
+                sfuAdapter: sfuAdapter,
+                sessionID: stateAdapter.sessionID,
+                clientCapabilities: stateAdapter.clientCapabilities
+            )
+
+            // If there is a publishing participant (other than ourselves) we
+            // update subscription just for this user, to warm up the subscriber
+            // peerConnection. In that way we try to make subscriber pc
+            // ready as soon as possible when the call transitions to joined
+            let sessionID = await stateAdapter.sessionID
+            if let firstPublishingParticipant = await stateAdapter.participants.values
+                .first(where: { ($0.hasAudio || $0.hasVideo) && $0.sessionId != sessionID }) {
+                context.updateSubscriptionsAdapter?.updateSubscriptions(
+                    for: [firstPublishingParticipant],
+                    incomingVideoQualitySettings: .none,
+                    trackTypes: [.audio, .video]
+                )
+            }
+        }
+
+        private func transitionToNextStage(
+            _ context: Context,
+            coordinator: WebRTCCoordinator,
             sfuAdapter: SFUAdapter
-        ) {
-            Task(disposableBag: disposableBag) { [weak self] in
-                guard let self else { return }
-                var telemetry = Stream_Video_Sfu_Signal_Telemetry()
-                let duration = Float(Date().timeIntervalSince(startTime))
-                var reconnection = Stream_Video_Sfu_Signal_Reconnection()
-                reconnection.timeSeconds = duration
+        ) async {
+            switch context.joinPolicy {
+            case .default:
+                await telemetryReporter.reportTelemetry(
+                    sessionId: await coordinator.stateAdapter.sessionID,
+                    unifiedSessionId: coordinator.stateAdapter.unifiedSessionId,
+                    sfuAdapter: sfuAdapter
+                )
+                reportJoinCompletion()
+                transitionOrDisconnect(.joined(self.context))
 
-                telemetry.data = {
-                    switch self.flowType {
-                    case .regular:
-                        return .connectionTimeSeconds(duration)
-                    case .fast:
-                        var reconnection = Stream_Video_Sfu_Signal_Reconnection()
-                        reconnection.strategy = .fast
-                        return .reconnection(reconnection)
-                    case .rejoin:
-                        reconnection.strategy = .rejoin
-                        return .reconnection(reconnection)
-                    case .migrate:
-                        reconnection.strategy = .migrate
-                        return .reconnection(reconnection)
-                    }
-                }()
-
-                do {
-                    try await sfuAdapter.sendStats(
-                        for: sessionId,
-                        unifiedSessionId: unifiedSessionId,
-                        telemetry: telemetry
+            case .peerConnectionReadinessAware:
+                transitionOrDisconnect(
+                    .peerConnectionPreparing(
+                        self.context,
+                        telemetryReporter: telemetryReporter
                     )
-                    log.debug("Join call completed in \(duration) seconds.")
-                } catch {
-                    log.error(error)
-                }
+                )
             }
         }
     }

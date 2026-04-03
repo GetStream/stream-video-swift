@@ -83,6 +83,9 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             .eraseToAnyPublisher()
     }
 
+    private let connectionStateSubject: CurrentValueSubject<RTCPeerConnectionState, Never> = .init(.new)
+    var connectionStatePublisher: AnyPublisher<RTCPeerConnectionState, Never> { connectionStateSubject.eraseToAnyPublisher() }
+
     /// A Boolean value indicating whether the peer connection is in a healthy state.
     ///
     /// The peer connection is considered healthy if its ICE connection state is not
@@ -219,7 +222,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
 
         peerConnection
             .publisher
-            .receive(on: DispatchQueue.main)
+            .receive(on: DispatchQueue.global(qos: .utility))
             .sink { [identifier, subsystem] in
                 if let failedToGatherEvent = $0 as? StreamRTCPeerConnection.ICECandidateFailedToGatherEvent {
                     log.warning(
@@ -247,6 +250,13 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
                     )
                 }
             }
+            .store(in: disposableBag)
+
+        peerConnection
+            .publisher
+            .compactMap { ($0 as? StreamRTCPeerConnection.PeerConnectionStateChangedEvent)?.state }
+            .receive(on: dispatchQueue)
+            .sink { [weak self] in self?.connectionStateSubject.send($0) }
             .store(in: disposableBag)
 
         if peerType == .publisher {
