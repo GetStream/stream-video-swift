@@ -100,6 +100,10 @@ final class MockStreamVideoCapturer: StreamVideoCapturing, Mockable, @unchecked 
                 frameRate: frameRate
             )
         )
+
+        if let error = stubbedFunction[.startCapture] as? Error {
+            throw error
+        }
     }
 
     func stopCapture() async throws {

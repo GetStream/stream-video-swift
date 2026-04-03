@@ -363,7 +363,19 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
             includeAudio: includeAudio
         )
 
-        try await startScreenShareCapturingSession()
+        // In case of failure (e.g. the user denied the prompt to capture screen)
+        // we stop screensharing and propagate higher the initial error.
+        do {
+            try await startScreenShareCapturingSession()
+        } catch {
+            let startError = error
+            do {
+                try await stopScreenShareCapturingSession()
+            } catch {
+                log.error("Failed to stop screenShare capturing session after startCapturing failure.", subsystems: .webRTC)
+            }
+            throw startError
+        }
 
         guard screenShareSessionProvider.activeSession != nil else {
             return
