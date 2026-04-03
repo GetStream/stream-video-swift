@@ -52,9 +52,9 @@ struct StreamRTCStatistics {
 
 /// A wrapper around RTCStatisticsReport that can be used to easily access its properties.
 struct StreamRTCStatisticsReport: @unchecked Sendable {
-    var statistics: [StreamRTCStatistics]
-    var timestamp: TimeInterval
-    var source: RTCStatisticsReport?
+    let statistics: [StreamRTCStatistics]
+    let timestamp: TimeInterval
+    let source: RTCStatisticsReport?
 
     init(_ source: RTCStatisticsReport?) {
         self.init(
