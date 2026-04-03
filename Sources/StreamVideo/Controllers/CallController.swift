@@ -433,10 +433,10 @@ class CallController: @unchecked Sendable {
         try await webRTCCoordinator.zoom(by: factor)
     }
 
-    func leave() {
+    func leave(reason: String?) {
         guard call != nil else { return }
         call = nil
-        webRTCCoordinator.leave()
+        webRTCCoordinator.leave(reason: reason)
     }
 
     /// Cleans up the call controller.

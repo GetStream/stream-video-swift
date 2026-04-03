@@ -720,8 +720,11 @@ open class CallViewModel: ObservableObject {
     }
 
     /// Hangs up from the active call.
-    public func hangUp() {
-        handleCallHangUp(ringTimeout: false)
+    ///
+    /// - Parameter reason: Optional reason forwarded to ``Call/leave(reason:)``
+    ///   so the SFU receives context about why the call ended.
+    public func hangUp(reason: String? = nil) {
+        handleCallHangUp(ringTimeout: false, reason: reason)
     }
 
     /// Sets a video filter for the current call.
@@ -817,7 +820,7 @@ open class CallViewModel: ObservableObject {
     }
 
     /// Leaves the current call.
-    private func leaveCall() {
+    private func leaveCall(reason: String?) {
         log.debug("Leaving call")
         enteringCallTask?.cancel()
         enteringCallTask = nil
@@ -835,7 +838,7 @@ open class CallViewModel: ObservableObject {
         skipCallStateUpdates = false
         temporaryCallSettings = nil
         lastScreenSharingParticipant = nil
-        call?.leave()
+        call?.leave(reason: reason)
 
         pictureInPictureAdapter.call = nil
         pictureInPictureAdapter.sourceView = nil
@@ -949,7 +952,10 @@ open class CallViewModel: ObservableObject {
             }
     }
 
-    private func handleCallHangUp(ringTimeout: Bool = false) {
+    private func handleCallHangUp(
+        ringTimeout: Bool = false,
+        reason: String? = nil
+    ) {
         if skipCallStateUpdates {
             skipCallStateUpdates = false
         }
@@ -957,7 +963,7 @@ open class CallViewModel: ObservableObject {
             let call,
             callingState == .outgoing
         else {
-            leaveCall()
+            leaveCall(reason: reason)
             return
         }
 
@@ -980,7 +986,7 @@ open class CallViewModel: ObservableObject {
                 log.error(error)
             }
 
-            leaveCall()
+            leaveCall(reason: reason)
         }
     }
 
@@ -1016,7 +1022,7 @@ open class CallViewModel: ObservableObject {
                         if
                             callEventInfo.user?.id == streamVideo.user.id,
                             callEventInfo.callCid == call?.cId {
-                            leaveCall()
+                            leaveCall(reason: "blocked")
                         }
                     case .userUnblocked:
                         break
@@ -1119,7 +1125,7 @@ open class CallViewModel: ObservableObject {
                     _ = try? await outgoingCall.reject(
                         reason: "Call rejected by all \(outgoingMembersCount) outgoing call members."
                     )
-                    self?.leaveCall()
+                    self?.leaveCall(reason: "unanswered")
                 }
             }
         default:
@@ -1153,7 +1159,7 @@ open class CallViewModel: ObservableObject {
 
         default:
             if call?.cId == event.callCid {
-                leaveCall()
+                leaveCall(reason: "ended")
             }
         }
     }
@@ -1186,7 +1192,7 @@ open class CallViewModel: ObservableObject {
     }
 
     private func participantAutoLeavePolicyTriggered() {
-        leaveCall()
+        leaveCall(reason: "auto-leave")
     }
 
     private func subscribeToApplicationLifecycleEvents() {

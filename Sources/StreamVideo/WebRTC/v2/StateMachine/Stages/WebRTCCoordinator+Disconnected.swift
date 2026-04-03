@@ -169,10 +169,10 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         context.flowError = nil
                         try transition?(.error(context, error: error))
                     } else {
-                        try transition?(.leaving(context))
+                        try transition?(.leaving(context, reason: "error"))
                     }
                 case .disconnected:
-                    try transition?(.leaving(context))
+                    try transition?(.leaving(context, reason: "disconnected"))
                 }
             } catch let (blockError) {
                 if context.reconnectionStrategy == .disconnected {

@@ -9,6 +9,7 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
 
     enum MockFunctionKey: Hashable, CaseIterable {
         case join
+        case leave
         case setDisconnectionTimeout
         case observeWebRTCStateUpdated
         case changeAudioState
@@ -31,6 +32,8 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
             source: JoinSource,
             policy: WebRTCJoinPolicy
         )
+
+        case leave(reason: String?)
 
         case observeWebRTCStateUpdated
 
@@ -60,6 +63,8 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
                 policy
             ):
                 return (create, callSettings, options, ring, notify, source, policy)
+            case let .leave(reason):
+                return reason ?? ""
             case .observeWebRTCStateUpdated:
                 return ()
             case let .changeAudioState(value):
@@ -150,6 +155,11 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
     override func setDisconnectionTimeout(_ timeout: TimeInterval) {
         stubbedFunctionInput[.setDisconnectionTimeout]?
             .append(.setDisconnectionTimeout(timeout: timeout))
+    }
+
+    override func leave(reason: String?) {
+        stubbedFunctionInput[.leave]?
+            .append(.leave(reason: reason))
     }
 
     override func observeWebRTCStateUpdated() {
