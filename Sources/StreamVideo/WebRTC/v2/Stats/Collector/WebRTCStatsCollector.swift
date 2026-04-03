@@ -104,15 +104,19 @@ final class WebRTCStatsCollector: WebRTCStatsCollecting, @unchecked Sendable {
             }
 
             do {
-                async let statsPublisher = publisher?.statsReport() ?? .init(nil)
-                async let statsSubscriber = subscriber?.statsReport() ?? .init(nil)
-
                 try Task.checkCancellation()
-                let result: [StreamRTCStatisticsReport] = try await [statsPublisher, statsSubscriber]
+                let (publisherReport, subscriberReport) = try await withConcurrentChildrenTask(
+                    { [publisher] in
+                        try await publisher?.statsReport() ?? .init(nil)
+                    },
+                    { [subscriber] in
+                        try await subscriber?.statsReport() ?? .init(nil)
+                    }
+                )
 
                 let report = callStatisticsReporter.buildReport(
-                    publisherReport: result.first ?? .init(nil),
-                    subscriberReport: result.last ?? .init(nil),
+                    publisherReport: publisherReport,
+                    subscriberReport: subscriberReport,
                     datacenter: hostname,
                     trackToKindMap: trackStorage.snapshot
                 )

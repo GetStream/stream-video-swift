@@ -991,6 +991,49 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         }
     }
 
+    // MARK: Simple
+
+    func test_join_whenLeavingWhileJoinIsInProgress_thenCallNeverBecomesActive() async throws {
+        let callId = String.unique
+        let flow = try await helpers
+            .callFlow(id: callId, type: .default, userId: .unique)
+        let activeCallFlow = try await flow.perform { flow in
+            flow.client
+                .state
+                .$activeCall
+                .compactMap { $0?.cId }
+                .filter { $0 == flow.call.cId }
+                .eraseToAnyPublisher()
+        }
+
+        try await withThrowingTaskGroup(of: Void.self) { group in
+            group.addTask {
+                try await flow
+                    .subscribe(for: CallCreatedEvent.self)
+                    .assertEventually { (event: CallCreatedEvent) in event.call.id == callId }
+                    .perform { $0.call.leave() }
+            }
+
+            group.addTask {
+                try await flow
+                    .performWithErrorExpectation { try await $0.call.join(create: true) }
+            }
+
+            group.addTask {
+                try await activeCallFlow
+                    .performWithErrorExpectation {
+                        try await $0.value.nextValue(timeout: defaultTimeout)
+                    }
+                    .assert { $0.value is TimeOutError }
+            }
+
+            try await group.waitForAll()
+        }
+
+        try await flow
+            .assertEventuallyInMainActor { $0.call.streamVideo.state.activeCall == nil }
+    }
+
     // MARK: - Pin
 
     func test_pin_whenUserGetsPinnedForEveryone_thenCallStateOfAllParticipantsUpdatesAsExpected() async throws {
