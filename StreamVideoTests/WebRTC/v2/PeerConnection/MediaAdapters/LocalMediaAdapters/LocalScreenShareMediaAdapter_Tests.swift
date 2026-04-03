@@ -315,6 +315,8 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable 
 
         XCTAssertEqual(thrownError as? ClientError, error)
         XCTAssertEqual(capturer.timesCalled(.startCapture), 1)
+        XCTAssertTrue(capturer.timesCalled(.stopCapture) >= 1)
+        XCTAssertNil(screenShareSessionProvider.activeSession)
     }
 
     // MARK: - stopScreenSharing

@@ -372,7 +372,11 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
             do {
                 try await stopScreenShareCapturingSession()
             } catch {
-                log.error("Failed to stop screenShare capturing session after startCapturing failure.", subsystems: .webRTC)
+                screenShareSessionProvider.activeSession = nil
+                log.error(
+                    "Failed to stop screenShare capturing session after startCapturing failure.",
+                    subsystems: .webRTC
+                )
             }
             throw startError
         }
