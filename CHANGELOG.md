@@ -9,8 +9,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🐞 Fixed
 - Prevent abrupt call endings caused by audio-session readiness timing. [#1098](https://github.com/GetStream/stream-video-swift/pull/1098)
-
-### 🐞 Fixed
 - Fix a publisher negotiation race during join where frequent `CallSettings`
   updates (for example audio output route changes) could cause `setPublisher`
   to fail. [#1099](https://github.com/GetStream/stream-video-swift/pull/1099)
