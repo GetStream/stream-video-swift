@@ -17,6 +17,7 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
         case accept
         case reject
         case join
+        case leave
         case updateTrackSize
         case callKitActivated
         case ring
@@ -39,6 +40,8 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
 
         case reject(reason: String?)
 
+        case leave(reason: String?)
+
         case ring(request: RingCallRequest)
 
         case setVideoFilter(videoFilter: VideoFilter?)
@@ -55,6 +58,9 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
                 return audioSession
 
             case let .reject(reason):
+                return reason ?? ""
+
+            case let .leave(reason):
                 return reason ?? ""
 
             case let .ring(request):
@@ -191,6 +197,11 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
                 policy: policy
             )
         }
+    }
+
+    override func leave(reason: String? = nil) {
+        stubbedFunctionInput[.leave]?.append(.leave(reason: reason))
+        super.leave(reason: reason)
     }
 
     override func updateTrackSize(

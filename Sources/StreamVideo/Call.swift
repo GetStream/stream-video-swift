@@ -614,9 +614,13 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     ///
     /// The cleanup sequence clears active/ringing call references from
     /// `StreamVideo` state before emitting `CallNotification.callEnded`.
-    public func leave() {
+    ///
+    /// - Parameter reason: Optional reason forwarded to the SFU leave request.
+    ///   Pass a custom value when you want the backend to distinguish between
+    ///   different leave flows (for example, user action vs timeout).
+    public func leave(reason: String? = nil) {
         disposableBag.removeAll()
-        callController.leave()
+        callController.leave(reason: reason)
         closedCaptionsAdapter.stop()
         stateMachine.transition(.idle(.init(call: self)))
         /// Upon `Call.leave` we remove the call from the cache. Any further actions that are required

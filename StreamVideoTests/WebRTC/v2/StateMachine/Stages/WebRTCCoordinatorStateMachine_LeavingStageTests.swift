@@ -24,7 +24,7 @@ final class WebRTCCoordinatorStateMachine_LeavingStageTests: XCTestCase, @unchec
         .joining,
         .peerConnectionPreparing
     ]
-    private lazy var subject: WebRTCCoordinator.StateMachine.Stage! = .leaving(.init())
+    private lazy var subject: WebRTCCoordinator.StateMachine.Stage! = .leaving(.init(), reason: nil)
     private lazy var mockCoordinatorStack: MockWebRTCCoordinatorStack! = .init(
         videoConfig: Self.videoConfig
     )
@@ -121,9 +121,61 @@ final class WebRTCCoordinatorStateMachine_LeavingStageTests: XCTestCase, @unchec
                 .recordedInputPayload(
                     Stream_Video_Sfu_Event_SfuRequest.self,
                     for: .sendMessage
-                )?.first?.leaveCallRequest.sessionID, sessionId
+                )?.first?.leaveCallRequest.sessionID,
+            sessionId
+        )
+        XCTAssertEqual(
+            webSocket
+                .mockEngine
+                .recordedInputPayload(
+                    Stream_Video_Sfu_Event_SfuRequest.self,
+                    for: .sendMessage
+                )?.first?.leaveCallRequest.reason,
+            ""
         )
         XCTAssertEqual(webSocket.timesCalled(.disconnectAsync), 1)
+    }
+
+    func test_transition_withReason_sendsLeaveRequestWithReason() async throws {
+        let reason = "ended-by-host"
+        let subject: WebRTCCoordinator.StateMachine.Stage = .leaving(.init(), reason: reason)
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        let sessionId = try await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .$sessionID
+            .filter { !$0.isEmpty }
+            .nextValue()
+        await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
+        mockCoordinatorStack
+            .sfuStack
+            .setConnectionState(to: .connected(healthCheckInfo: .init()))
+
+        _ = subject.transition(from: .joined(subject.context))
+        await wait(for: 1)
+
+        let webSocket = mockCoordinatorStack.sfuStack.webSocket
+        XCTAssertEqual(
+            webSocket
+                .mockEngine
+                .recordedInputPayload(
+                    Stream_Video_Sfu_Event_SfuRequest.self,
+                    for: .sendMessage
+                )?.first?.leaveCallRequest.sessionID,
+            sessionId
+        )
+        XCTAssertEqual(
+            webSocket
+                .mockEngine
+                .recordedInputPayload(
+                    Stream_Video_Sfu_Event_SfuRequest.self,
+                    for: .sendMessage
+                )?.first?.leaveCallRequest.reason,
+            reason
+        )
     }
 
     // MARK: - Private helpers

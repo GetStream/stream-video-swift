@@ -186,7 +186,7 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
             }
         ) { _ in
             await self.assertTransitionToStage(.leaving) {
-                self.subject.leave()
+                self.subject.leave(reason: nil)
             } handler: { _ in }
         }
     }
