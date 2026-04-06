@@ -298,6 +298,27 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable 
         await fulfillment { capturer.timesCalled(.startCapture) == 1 }
     }
 
+    func test_beginScreenSharing_capturerThrowsError_stopsCapturingAndPropagatesError() async throws {
+        let screensharingType = ScreensharingType.inApp
+        let capturer = MockStreamVideoCapturer()
+        let error = ClientError("permissions denied")
+        capturer.stub(for: .startCapture, with: error)
+        mockCapturerFactory.stub(for: .buildScreenCapturer, with: capturer)
+
+        let thrownError = await XCTAssertThrowsErrorAsync {
+            try await subject.beginScreenSharing(
+                of: screensharingType,
+                ownCapabilities: [.screenshare],
+                includeAudio: true
+            )
+        }
+
+        XCTAssertEqual(thrownError as? ClientError, error)
+        XCTAssertEqual(capturer.timesCalled(.startCapture), 1)
+        XCTAssertTrue(capturer.timesCalled(.stopCapture) >= 1)
+        XCTAssertNil(screenShareSessionProvider.activeSession)
+    }
+
     // MARK: - stopScreenSharing
 
     func test_stopScreenSharing_updateMuteStateOnSFU() async throws {
