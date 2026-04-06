@@ -29,9 +29,16 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
 
     // MARK: - Properties
 
+    /// The role of the underlying peer connection in the current WebRTC
+    /// session.
+    ///
+    /// The readiness-aware join flow inspects this value to decide whether it
+    /// should wait for the connection to report `.connected` before finishing
+    /// the join transition.
+    let peerType: PeerConnectionType
+
     private let identifier = UUID()
     private let sessionId: String
-    private let peerType: PeerConnectionType
     private let peerConnection: StreamRTCPeerConnectionProtocol
     private let subsystem: LogSubsystem
     private let clientCapabilities: Set<ClientCapability>

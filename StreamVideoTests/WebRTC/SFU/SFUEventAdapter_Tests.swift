@@ -2,6 +2,7 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 @testable import StreamVideo
 import StreamWebRTC
 @preconcurrency import XCTest
@@ -17,13 +18,18 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
         webSocket: mockWebSocket,
         webSocketFactory: MockWebSocketClientFactory()
     )
+    private lazy var stageSubject: CurrentValueSubject<
+        WebRTCCoordinator.StateMachine.Stage.ID,
+        Never
+    >! = .init(.idle)
     private lazy var stateAdapter: WebRTCStateAdapter! = .init(
         user: .dummy(),
         apiKey: .unique,
         callCid: .unique,
         videoConfig: Self.videoConfig,
         callSettings: .default,
-        rtcPeerConnectionCoordinatorFactory: MockRTCPeerConnectionCoordinatorFactory()
+        rtcPeerConnectionCoordinatorFactory: MockRTCPeerConnectionCoordinatorFactory(),
+        stagePublisher: stageSubject.eraseToAnyPublisher()
     )
     private lazy var subject: SFUEventAdapter! = .init(
         sfuAdapter: sfuAdapter,
@@ -46,6 +52,7 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
     override func tearDown() {
         subject = nil
         stateAdapter = nil
+        stageSubject = nil
         sfuAdapter = nil
         mockWebSocket = nil
         mockService = nil

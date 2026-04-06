@@ -75,6 +75,10 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
         )
     }
 
+    func test_init_stateMachineStartsInIdleStage() {
+        XCTAssertEqual(subject.stateMachine.currentStage.id, .idle)
+    }
+
     // MARK: - connect
 
     func test_connect_shouldSetInitialCallSettingsAndTransitionStateMachine() async throws {

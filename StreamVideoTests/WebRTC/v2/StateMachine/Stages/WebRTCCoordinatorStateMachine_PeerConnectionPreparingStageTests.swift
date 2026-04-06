@@ -132,6 +132,84 @@ final class WebRTCCoordinatorStateMachine_PeerConnectionPreparingStageTests:
         completionCancellable.cancel()
     }
 
+    func test_transition_publisherHasNoTracksToPublish_transitionsToJoinedWithoutWaitingForReadiness(
+    ) async throws {
+        mockCoordinatorStack = .init(
+            videoConfig: Self.videoConfig,
+            callSettings: .init(audioOn: false, videoOn: false)
+        )
+
+        let expectedJoinCallResponse = JoinCallResponse.dummy(
+            call: .dummy(cid: "expected-call-id")
+        )
+        let completionSubject = PassthroughSubject<JoinCallResponse, Error>()
+        let completionExpectation = expectation(
+            description: "JoinResponseHandler should receive response."
+        )
+        var receivedCallID: String?
+        let completionCancellable = completionSubject.sink(
+            receiveCompletion: { _ in },
+            receiveValue: { response in
+                receivedCallID = response.call.cid
+                completionExpectation.fulfill()
+            }
+        )
+        defer { completionCancellable.cancel() }
+
+        let publisherConnectionState = CurrentValueSubject<
+            RTCPeerConnectionState,
+            Never
+        >(.new)
+        let publisherCoordinator = try XCTUnwrap(
+            MockRTCPeerConnectionCoordinator(
+                peerType: .publisher,
+                callSettings: .init(audioOn: false, videoOn: false),
+                sfuAdapter: mockCoordinatorStack.sfuStack.adapter
+            )
+        )
+        publisherCoordinator.stub(
+            for: \.connectionStatePublisher,
+            with: publisherConnectionState.eraseToAnyPublisher()
+        )
+        mockCoordinatorStack
+            .rtcPeerConnectionCoordinatorFactory
+            .stubbedBuildCoordinatorResult[.publisher] = publisherCoordinator
+
+        let context = WebRTCCoordinator.StateMachine.Stage.Context(
+            coordinator: mockCoordinatorStack.coordinator,
+            initialJoinCallResponse: expectedJoinCallResponse,
+            joinResponseHandler: completionSubject
+        )
+        subject = .peerConnectionPreparing(context, telemetryReporter: .init())
+
+        await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
+        try await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .configurePeerConnections()
+
+        let transitionExpectation = expectation(
+            description: "Stage is expected to transition to joined."
+        )
+        subject.transition = { target in
+            guard target.id == .joined else { return }
+            XCTAssertNil(target.context.initialJoinCallResponse)
+            XCTAssertNil(target.context.joinResponseHandler)
+            transitionExpectation.fulfill()
+        }
+
+        _ = subject.transition(from: .joining(subject.context))
+
+        await fulfillment(
+            of: [transitionExpectation, completionExpectation],
+            timeout: 1
+        )
+        XCTAssertEqual(receivedCallID, expectedJoinCallResponse.call.cid)
+    }
+
     func test_transition_whenSubscriberDoesNotBecomeReadyWithinTimeout_transitionsToJoinedWithoutWaitingForSubscriber(
     ) async throws {
         let expectedJoinCallResponse = JoinCallResponse.dummy(
