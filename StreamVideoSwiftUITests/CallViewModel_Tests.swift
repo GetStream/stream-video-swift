@@ -675,6 +675,77 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         await assertCallingState(.inCall)
     }
 
+    func test_joinCall_whenHangingUpWhileJoinIsInProgress_thenCallingStateDoesNotBecomeInCall() async throws {
+        let joinStartedExpectation = expectation(
+            description: "Join flow should start before hang up."
+        )
+        joinStartedExpectation.assertForOverFulfill = false
+
+        let inCallExpectation = expectation(
+            description: "CallingState should not become inCall after hang up."
+        )
+        inCallExpectation.isInverted = true
+        inCallExpectation.assertForOverFulfill = false
+
+        let delayedCall = MockCall(
+            .dummy(
+                callType: callType,
+                callId: callId,
+                coordinatorClient: mockCoordinatorClient
+            )
+        )
+        delayedCall.waitForJoinToResume = true
+        delayedCall.onJoinStarted = {
+            joinStartedExpectation.fulfill()
+        }
+        delayedCall.onJoinResumed = { [weak self] call in
+            await MainActor.run {
+                self?.streamVideo.state.activeCall = call
+            }
+        }
+
+        await prepare(call: delayedCall)
+
+        var activeCallCancellable: AnyCancellable?
+        var callingStateCancellable: AnyCancellable?
+
+        activeCallCancellable = streamVideo
+            .state
+            .$activeCall
+            .sink { [weak self] call in
+                Task { @MainActor [weak self] in
+                    self?.subject.setActiveCall(call)
+                }
+            }
+
+        callingStateCancellable = subject
+            .$callingState
+            .dropFirst()
+            .sink { state in
+                if state == .inCall {
+                    inCallExpectation.fulfill()
+                }
+            }
+
+        defer {
+            activeCallCancellable?.cancel()
+            callingStateCancellable?.cancel()
+        }
+
+        subject.joinCall(callType: callType, callId: callId)
+
+        await fulfillment(of: [joinStartedExpectation], timeout: defaultTimeout)
+
+        subject.hangUp()
+        await assertCallingState(.idle)
+
+        delayedCall.resumeJoin()
+
+        await fulfillment(of: [inCallExpectation], timeout: 1)
+        await fulfilmentInMainActor { delayedCall.timesCalled(.leave) == 1 }
+        await assertCallingState(.idle)
+    }
+
     func test_joinAndRingCall_joinsAndRingsMembers() async throws {
         // Given
         await prepare()
@@ -1338,11 +1409,14 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
     // MARK: - Private helpers
 
     private func prepare(
+        call: MockCall? = nil,
         ringTimeOut: Int = (Int(defaultTimeout) + 1) * 1000,
         file: StaticString = #file,
         line: UInt = #line
     ) async {
-        mockCall.stub(
+        let call = call ?? mockCall!
+
+        call.stub(
             for: .join,
             with: JoinCallResponse.dummy(
                 call: .dummy(
@@ -1355,7 +1429,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
                 )
             )
         )
-        mockCall.stub(
+        call.stub(
             for: .create,
             with: CallResponse.dummy(
                 cid: cId,
@@ -1366,7 +1440,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
                 type: callType
             )
         )
-        mockCall.stub(
+        call.stub(
             for: .get,
             with: GetCallResponse.dummy(
                 call: CallResponse.dummy(
@@ -1379,11 +1453,17 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
                 )
             )
         )
-        mockCall.stub(for: .reject, with: RejectCallResponse(duration: "0"))
-        mockCall.stub(for: .ring, with: RingCallResponse(duration: "0", membersIds: participants.map(\.id)))
+        call.stub(for: .reject, with: RejectCallResponse(duration: "0"))
+        call.stub(
+            for: .ring,
+            with: RingCallResponse(
+                duration: "0",
+                membersIds: participants.map(\.id)
+            )
+        )
 
         streamVideo = .init(stubbedProperty: [:], stubbedFunction: [
-            .call: mockCall!
+            .call: call
         ])
         streamVideo.state.user = firstUser.user
 
