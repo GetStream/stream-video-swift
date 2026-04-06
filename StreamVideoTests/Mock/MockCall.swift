@@ -76,6 +76,12 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
     var stubbedFunction: [FunctionKey: Any] = [:]
     @Atomic var stubbedFunctionInput: [FunctionKey: [FunctionInputKey]] = FunctionKey.allCases
         .reduce(into: [FunctionKey: [FunctionInputKey]]()) { $0[$1] = [] }
+    var waitForJoinToResume = false
+    var onJoinStarted: (@Sendable () -> Void)?
+    var onJoinResumed: (@Sendable (MockCall) async -> Void)?
+
+    private var joinContinuation: CheckedContinuation<Void, Never>?
+    private var joinWasCancelled = false
 
     override var state: CallState {
         get { self[dynamicMember: \.state] }
@@ -185,6 +191,22 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
                 policy: policy
             )
         )
+        onJoinStarted?()
+
+        if waitForJoinToResume {
+            await withCheckedContinuation { continuation in
+                joinContinuation = continuation
+            }
+        }
+
+        if joinWasCancelled {
+            throw CancellationError()
+        }
+
+        if let onJoinResumed {
+            await onJoinResumed(self)
+        }
+
         if let stub = stubbedFunction[.join] as? JoinCallResponse {
             return stub
         } else {
@@ -199,8 +221,14 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
         }
     }
 
+    func resumeJoin() {
+        joinContinuation?.resume()
+        joinContinuation = nil
+    }
+
     override func leave(reason: String? = nil) {
         stubbedFunctionInput[.leave]?.append(.leave(reason: reason))
+        joinWasCancelled = true
         super.leave(reason: reason)
     }
 
