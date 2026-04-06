@@ -185,6 +185,53 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
         }
     }
 
+    func test_didUpdateCallSettings_subjectIsPublisher_mediaUpdatesAreNotBlockedByNegotiationRequests() async throws {
+        mockSFUStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
+        _ = subject
+        mockLocalMediaAdapterA.stub(for: .trackInfo, with: [Stream_Video_Sfu_Models_TrackInfo()])
+        try await subject.setUp(with: .init(), ownCapabilities: [])
+        subject.completeSetUp()
+
+        let negotiationDidStart = Atomic(wrappedValue: false)
+        let didStartCallSettingsUpdate = Atomic(wrappedValue: false)
+        let continueNegotiation = DispatchSemaphore(value: 0)
+        var didReleaseNegotiation = false
+        defer {
+            if !didReleaseNegotiation {
+                continueNegotiation.signal()
+            }
+        }
+        mockPeerConnection.stub(
+            for: .offer,
+            with: StubVariantResultProvider<RTCSessionDescription> { _ in
+                negotiationDidStart.wrappedValue = true
+                continueNegotiation.wait()
+                return RTCSessionDescription(type: .offer, sdp: .unique)
+            }
+        )
+        mockLocalMediaAdapterA.onDidUpdateCallSettings = { _ in
+            didStartCallSettingsUpdate.wrappedValue = true
+        }
+
+        subject.restartICE()
+
+        await fulfillment { negotiationDidStart.wrappedValue }
+
+        let callSettingsTask = Task { [subject] in
+            try await subject?.didUpdateCallSettings(.init(audioOn: false))
+        }
+
+        await fulfillment { didStartCallSettingsUpdate.wrappedValue }
+
+        continueNegotiation.signal()
+        didReleaseNegotiation = true
+
+        try await callSettingsTask.value
+        await fulfillment { [mockPeerConnection] in
+            mockPeerConnection?.timesCalled(.offer) == 1
+        }
+    }
+
     // MARK: - didUpdateOwnCapabilities(_:)
 
     func test_didUpdateOwnCapabilities_setUpWasCalledOnAllMediaAdapters() async throws {

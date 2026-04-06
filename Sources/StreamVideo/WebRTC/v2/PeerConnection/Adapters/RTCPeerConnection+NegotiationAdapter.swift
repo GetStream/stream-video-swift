@@ -24,6 +24,12 @@ extension RTCPeerConnectionCoordinator {
         /// races triggered by rapid `CallSettings` updates (for example audio
         /// output route changes) that can otherwise make the initial
         /// `setPublisher` attempt fail.
+        ///
+        /// The retry deliberately covers only the SFU request. Once the SFU has
+        /// accepted the offer, applying the returned answer to the local peer
+        /// connection must remain single-shot. Retrying past that boundary would
+        /// re-send `setPublisher` for failures that are local signaling-state
+        /// problems rather than transient SFU issues.
         private let retryPolicy: RetryPolicy = .init(maxRetries: 1, delay: { _ in 0.25 })
 
         init(
@@ -66,13 +72,23 @@ extension RTCPeerConnectionCoordinator {
                     constraints: constraints
                 )
 
-                try await executeTask(retryPolicy: retryPolicy) {
+                let sessionDescription = try await executeTask(retryPolicy: retryPolicy) {
                     try await self.setPublisher(
-                        for: peerConnectionCoordinator,
                         offer: offer,
                         tracksInfo: tracksInfo
                     )
                 }
+
+                // Apply the accepted answer exactly once. If this fails we want
+                // the negotiation to fail locally rather than replaying
+                // `setPublisher` against an SFU session that has already
+                // advanced.
+                try await peerConnectionCoordinator.setRemoteDescription(
+                    .init(
+                        type: .answer,
+                        sdp: sessionDescription.sdp
+                    )
+                )
 
                 log.debug(
                     "Negotiation completed after \(Date().timeIntervalSince(negotiationStartedAt)) seconds { identifier:\(identifier) type:\(peerType) sessionID: \(sessionID) sfu: \(sfuAdapter.hostname) }",
@@ -168,21 +184,15 @@ extension RTCPeerConnectionCoordinator {
         }
 
         private func setPublisher(
-            for peerConnectionCoordinator: RTCPeerConnectionCoordinator,
             offer: RTCSessionDescription,
             tracksInfo: [Stream_Video_Sfu_Models_TrackInfo]
-        ) async throws {
-            let sessionDescription = try await sfuAdapter.setPublisher(
+        ) async throws -> Stream_Video_Sfu_Signal_SetPublisherResponse {
+            // Keep this helper scoped to the outbound SFU request so the retry
+            // policy does not accidentally repeat local answer application.
+            try await sfuAdapter.setPublisher(
                 sessionDescription: offer.sdp,
                 tracks: tracksInfo,
                 for: sessionID
-            )
-
-            try await peerConnectionCoordinator.setRemoteDescription(
-                .init(
-                    type: .answer,
-                    sdp: sessionDescription.sdp
-                )
             )
         }
     }

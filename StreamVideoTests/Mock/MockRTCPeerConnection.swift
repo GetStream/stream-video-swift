@@ -121,6 +121,9 @@ final class MockRTCPeerConnection: StreamRTCPeerConnectionProtocol, Mockable, @u
     ) async throws {
         stubbedFunctionInput[.setRemoteDescription]?
             .append(.setRemoteDescription(sessionDescription: sessionDescription))
+        if let error = stubbedFunction[.setRemoteDescription] as? Error {
+            throw error
+        }
     }
 
     func offer(

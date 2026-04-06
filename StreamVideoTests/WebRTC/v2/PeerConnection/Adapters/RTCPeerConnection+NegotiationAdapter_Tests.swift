@@ -135,6 +135,23 @@ final class RTCPeerConnectionCoordinator_NegotiationAdapter_Tests: XCTestCase, @
         XCTAssertEqual(mockPeerConnection?.timesCalled(.setRemoteDescription), 1)
     }
 
+    func test_negotiate_setRemoteDescriptionFails_doesNotRetrySetPublisher() async throws {
+        mockSFUStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
+        var response = Stream_Video_Sfu_Signal_SetPublisherResponse()
+        response.sdp = String.unique
+        mockSFUStack.service.stub(for: .setPublisher, with: response)
+        mockPeerConnection.stub(for: .setRemoteDescription, with: DummyError.transient)
+        subject.completeSetUp()
+
+        do {
+            try await negotiationAdapter.negotiate()
+            XCTFail("Expected an error but received success.")
+        } catch {
+            XCTAssertEqual(mockSFUStack.service.timesCalled(.setPublisher), 1)
+            XCTAssertEqual(mockPeerConnection?.timesCalled(.setRemoteDescription), 1)
+        }
+    }
+
     func test_negotiate_withPublishedAudioTrack_sendsTrackInSetPublisherRequest() async throws {
         mockSFUStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
         let expectedTrack = Stream_Video_Sfu_Models_TrackInfo

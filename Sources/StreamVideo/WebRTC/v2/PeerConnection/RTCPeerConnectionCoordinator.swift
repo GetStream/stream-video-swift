@@ -388,13 +388,21 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     ///
     /// For publisher connections this update is serialized on
     /// `setPublisherProcessingQueue`, the same queue used by negotiation.
-    /// Keeping these operations in order prevents a join-time race where many
-    /// consecutive `CallSettings` updates (for example due to audio route
-    /// changes) can mutate local transceivers while `setPublisher` is building
-    /// and sending tracks info.
+    ///
+    /// Only route-only updates are serialized with negotiation. Those updates
+    /// are the ones observed to race with `setPublisher` during join because
+    /// they can reconfigure local audio wiring while the publisher offer and
+    /// track snapshot are being assembled.
+    ///
+    /// Media-affecting updates such as turning audio/video off are applied
+    /// immediately instead of waiting behind negotiation. Delaying those would
+    /// leave local tracks enabled longer than requested and postpone the SFU
+    /// mute/unpublish propagation.
     func didUpdateCallSettings(
         _ settings: CallSettings
     ) async throws {
+        let currentCallSettings = callSettings
+
         log.debug(
             """
             PeerConnection will setUp:
@@ -412,10 +420,13 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             subsystems: subsystem
         )
 
-        if peerType == .publisher {
-            // Serialize publisher settings mutations with negotiation/setPublisher
-            // to avoid announcing a stale track snapshot while route-driven
-            // callSettings updates are still mutating local transceivers.
+        if shouldSerializeRouteUpdate(
+            from: currentCallSettings,
+            to: settings
+        ) {
+            // Route churn is the unstable part during join. Keep it ordered
+            // with negotiation so `buildAnnouncedTracks` and the transceiver
+            // snapshot used by `setPublisher` see a consistent publisher state.
             try await setPublisherProcessingQueue
                 .addSynchronousTaskOperation { [weak self, settings] in
                     guard let self else { return }
@@ -423,6 +434,10 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
                     try await mediaAdapter.didUpdateCallSettings(settings)
                 }
         } else {
+            // Published-media changes should not wait on negotiation. If the
+            // user mutes or disables camera while a negotiation round-trip is in
+            // flight, we still want to stop local capture and propagate the mute
+            // state immediately.
             callSettings = settings
             try await mediaAdapter.didUpdateCallSettings(settings)
         }
@@ -873,6 +888,31 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             .receive(on: dispatchQueue)
             .sinkTask(queue: subscriberOfferProcessingQueue) { [weak self] in await self?.handleSubscriberOffer($0) }
             .store(in: disposableBag)
+    }
+
+    private func shouldSerializeRouteUpdate(
+        from currentCallSettings: CallSettings,
+        to newCallSettings: CallSettings
+    ) -> Bool {
+        guard peerType == .publisher else {
+            return false
+        }
+
+        // Audio/video toggles and camera flips directly change the published
+        // media state. Those must remain responsive even if negotiation is
+        // currently busy, so they intentionally bypass the shared queue.
+        let updatesPublishedMediaState =
+            currentCallSettings.audioOn != newCallSettings.audioOn
+                || currentCallSettings.videoOn != newCallSettings.videoOn
+                || currentCallSettings.cameraPosition != newCallSettings.cameraPosition
+
+        // Speaker and audio-output changes are the route-driven updates that
+        // were observed to race with publisher negotiation during join.
+        let updatesAudioRouteState =
+            currentCallSettings.speakerOn != newCallSettings.speakerOn
+                || currentCallSettings.audioOutputOn != newCallSettings.audioOutputOn
+
+        return updatesAudioRouteState && !updatesPublishedMediaState
     }
 
     /// Validates that the tracks intended for negotiation with the SFU match the state of the transceivers in
