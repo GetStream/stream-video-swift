@@ -29,7 +29,10 @@ protocol WebRTCPermissionsAdapterDelegate: AnyObject {
 }
 
 /// Coordinates permission prompts and aligns call media with user grants.
-/// Serializes work to avoid races across app state and permission updates.
+///
+/// Prompts are deferred until the application is in the foreground and the
+/// WebRTC coordinator has reached the `.joined` stage. Work is serialized to
+/// avoid races across app state and permission updates.
 final class WebRTCPermissionsAdapter: @unchecked Sendable {
     private enum RequiredPermission: CustomStringConvertible {
         case microphone, camera
@@ -51,18 +54,32 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
 
     private weak var delegate: WebRTCPermissionsAdapterDelegate?
     private var requiredPermissions: Set<RequiredPermission> = []
+    private var canPromptForPermissions: Bool = false
 
     /// Creates an adapter and begins observing app/permission changes.
     ///
-    /// - Parameter delegate: Target for audio/video enable updates.
-    init(_ delegate: WebRTCPermissionsAdapterDelegate) {
+    /// - Parameters:
+    ///   - delegate: Target for audio/video enable updates.
+    ///   - stagePublisher: Publishes WebRTC stage transitions so prompts can
+    ///     wait until the call is fully joined.
+    init(
+        _ delegate: WebRTCPermissionsAdapterDelegate,
+        stagePublisher: AnyPublisher<WebRTCCoordinator.StateMachine.Stage.ID, Never>
+    ) {
         self.delegate = delegate
-        applicationStateAdapter
-            .statePublisher
-            .filter { $0 == .foreground }
-            .removeDuplicates()
-            .sink { [weak self] _ in self?.didMoveToForeground() }
-            .store(in: disposableBag)
+
+        Publishers.CombineLatest(
+            stagePublisher
+                .removeDuplicates()
+                .eraseToAnyPublisher(),
+            applicationStateAdapter
+                .statePublisher
+                .filter { $0 == .foreground }
+                .removeDuplicates()
+        ).sink { [weak self] stageID, _ in
+            self?.process(canPromptForPermissions: stageID == .joined)
+        }
+        .store(in: disposableBag)
 
         permissions
             .$hasMicrophonePermission
@@ -163,11 +180,21 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
 
     // MARK: - Private Helpers
 
-    /// Requests pending permissions when returning to foreground, if needed.
-    private func didMoveToForeground() {
+    /// Re-evaluates pending permissions after a stage or app-state change.
+    ///
+    /// Prompts are only issued once both gating conditions are met: the app is
+    /// in the foreground and the coordinator is already joined.
+    private func process(canPromptForPermissions: Bool) {
         processingQueue.addTaskOperation { [weak self] in
             guard
-                let self,
+                let self
+            else {
+                return
+            }
+
+            self.canPromptForPermissions = canPromptForPermissions
+
+            guard
                 shouldPrompt(for: requiredPermissions)
             else {
                 return
@@ -234,9 +261,9 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
 
             switch permission {
             case .microphone:
-                return !permissions.hasMicrophonePermission && permissions.canRequestMicrophonePermission
+                return !permissions.hasMicrophonePermission && permissions.canRequestMicrophonePermission && canPromptForPermissions
             case .camera:
-                return !permissions.hasCameraPermission && permissions.canRequestCameraPermission
+                return !permissions.hasCameraPermission && permissions.canRequestCameraPermission && canPromptForPermissions
             }
         }
     }

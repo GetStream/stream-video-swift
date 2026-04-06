@@ -95,8 +95,11 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
 
     private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
     private let callSettingsProcessingQueue = OperationQueue(maxConcurrentOperationCount: 1)
+    /// Publishes WebRTC stage changes so permission prompts can wait until the
+    /// coordinator has fully joined.
+    private let stagePublisher: AnyPublisher<WebRTCCoordinator.StateMachine.Stage.ID, Never>
     private var queuedTraces: ConsumableBucket<WebRTCTrace> = .init()
-    private lazy var permissionsAdapter: WebRTCPermissionsAdapter = .init(self)
+    private lazy var permissionsAdapter: WebRTCPermissionsAdapter = .init(self, stagePublisher: stagePublisher)
 
     /// Initializes the WebRTC state adapter with user details and connection
     /// configurations.
@@ -108,6 +111,8 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     ///   - videoConfig: Configuration for video settings.
     ///   - rtcPeerConnectionCoordinatorFactory: Factory for peer connection
     ///     creation.
+    ///   - stagePublisher: Publishes WebRTC stage transitions for permission
+    ///     handling.
     ///   - videoCaptureSessionProvider: Provides sessions for video capturing.
     ///   - screenShareSessionProvider: Provides sessions for screen sharing.
     init(
@@ -117,6 +122,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         videoConfig: VideoConfig,
         callSettings: CallSettings,
         rtcPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinatorProviding,
+        stagePublisher: AnyPublisher<WebRTCCoordinator.StateMachine.Stage.ID, Never>,
         videoCaptureSessionProvider: VideoCaptureSessionProvider = .init(),
         screenShareSessionProvider: ScreenShareSessionProvider = .init()
     ) {
@@ -130,6 +136,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
                 audioProcessingModule: videoConfig.audioProcessingModule
             ),
             rtcPeerConnectionCoordinatorFactory: rtcPeerConnectionCoordinatorFactory,
+            stagePublisher: stagePublisher,
             videoCaptureSessionProvider: videoCaptureSessionProvider,
             screenShareSessionProvider: screenShareSessionProvider
         )
@@ -147,6 +154,8 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     ///   audioSession..
     ///   - rtcPeerConnectionCoordinatorFactory: Factory for peer connection
     ///     creation.
+    ///   - stagePublisher: Publishes WebRTC stage transitions for permission
+    ///     handling.
     ///   - videoCaptureSessionProvider: Provides sessions for video capturing.
     ///   - screenShareSessionProvider: Provides sessions for screen sharing.
     init(
@@ -157,6 +166,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         callSettings: CallSettings,
         peerConnectionFactory: PeerConnectionFactory,
         rtcPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinatorProviding,
+        stagePublisher: AnyPublisher<WebRTCCoordinator.StateMachine.Stage.ID, Never>,
         videoCaptureSessionProvider: VideoCaptureSessionProvider = .init(),
         screenShareSessionProvider: ScreenShareSessionProvider = .init()
     ) {
@@ -171,6 +181,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         self.videoCaptureSessionProvider = videoCaptureSessionProvider
         self.screenShareSessionProvider = screenShareSessionProvider
         self.audioSession = .init()
+        self.stagePublisher = stagePublisher
 
         peerConnectionFactory
             .setFrameBufferPolicy(

@@ -2,6 +2,7 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 @testable import StreamVideo
 import StreamWebRTC
 @preconcurrency import XCTest
@@ -22,6 +23,10 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         .init(peerConnectionFactory: mockPeerConnectionFactory)
     private lazy var mockPermissions: MockPermissionsStore! = .init()
     private lazy var mockAudioStore: MockRTCAudioStore! = .init()
+    private lazy var stageSubject: CurrentValueSubject<
+        WebRTCCoordinator.StateMachine.Stage.ID,
+        Never
+    >! = .init(.idle)
     private lazy var subject: WebRTCStateAdapter! = .init(
         user: user,
         apiKey: apiKey,
@@ -29,7 +34,8 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         videoConfig: Self.videoConfig,
         callSettings: callSettings,
         peerConnectionFactory: mockPeerConnectionFactory,
-        rtcPeerConnectionCoordinatorFactory: rtcPeerConnectionCoordinatorFactory
+        rtcPeerConnectionCoordinatorFactory: rtcPeerConnectionCoordinatorFactory,
+        stagePublisher: stageSubject.eraseToAnyPublisher()
     )
 
     // MARK: - Lifecycle
@@ -47,6 +53,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         subject = nil
         callSettings = nil
         mockPermissions = nil
+        stageSubject = nil
         callCid = nil
         apiKey = nil
         user = nil
@@ -1177,7 +1184,10 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         try await subject.configurePeerConnections()
         await subject.enqueueCallSettings { _ in CallSettings(audioOn: false) }
 
-        subject.permissionsAdapter(.init(subject), audioOn: true)
+        subject.permissionsAdapter(
+            .init(subject, stagePublisher: stageSubject.eraseToAnyPublisher()),
+            audioOn: true
+        )
 
         let mockPublisher = try await XCTAsyncUnwrap(await subject.publisher as? MockRTCPeerConnectionCoordinator)
         await fulfillment {
@@ -1200,7 +1210,10 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         try await subject.configurePeerConnections()
         await subject.enqueueCallSettings { _ in CallSettings(videoOn: false) }
 
-        subject.permissionsAdapter(.init(subject), videoOn: true)
+        subject.permissionsAdapter(
+            .init(subject, stagePublisher: stageSubject.eraseToAnyPublisher()),
+            videoOn: true
+        )
 
         let mockPublisher = try await XCTAsyncUnwrap(await subject.publisher as? MockRTCPeerConnectionCoordinator)
         await fulfillment {

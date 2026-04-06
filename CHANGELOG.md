@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### 🐞 Fixed
 - Prevent abrupt call endings caused by audio-session readiness timing. [#1098](https://github.com/GetStream/stream-video-swift/pull/1098)
 - Prevent hanging up while a call is still joining from briefly showing the in-call UI after the join finishes in the background. [#1101](https://github.com/GetStream/stream-video-swift/pull/1101)
+- Delay microphone and camera permission prompts until the app is in the foreground and the WebRTC join has completed.
 
 # [1.45.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.45.0)
 _March 31, 2026_

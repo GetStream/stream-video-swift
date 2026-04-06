@@ -2,6 +2,7 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import Foundation
 @testable import StreamVideo
 import XCTest
@@ -11,7 +12,14 @@ final class WebRTCPermissionsAdapter_Tests: StreamVideoTestCase, @unchecked Send
     private lazy var mockAppStateAdapter: MockAppStateAdapter! = .init()
     private lazy var mockPermissions: MockPermissionsStore! = .init()
     private lazy var delegate: MockWebRTCPermissionsAdapterDelegate! = .init()
-    private lazy var subject: WebRTCPermissionsAdapter! = .init(delegate)
+    private lazy var stageSubject: CurrentValueSubject<
+        WebRTCCoordinator.StateMachine.Stage.ID,
+        Never
+    >! = .init(.idle)
+    private lazy var subject: WebRTCPermissionsAdapter! = .init(
+        delegate,
+        stagePublisher: stageSubject.eraseToAnyPublisher()
+    )
 
     override func tearDown() {
         mockAppStateAdapter?.dismante()
@@ -19,6 +27,7 @@ final class WebRTCPermissionsAdapter_Tests: StreamVideoTestCase, @unchecked Send
         mockAppStateAdapter = nil
         mockPermissions = nil
         delegate = nil
+        stageSubject = nil
         subject = nil
         super.tearDown()
     }
@@ -103,6 +112,7 @@ final class WebRTCPermissionsAdapter_Tests: StreamVideoTestCase, @unchecked Send
         mockAppStateAdapter.stubbedState = .foreground
         mockPermissions.stubMicrophonePermission(.unknown)
         await fulfillment { self.mockPermissions.mockStore.state.microphonePermission == .unknown }
+        stageSubject.send(.joined)
 
         await withTaskGroup(of: Void.self) { group in
             group.addTask {
@@ -128,6 +138,7 @@ final class WebRTCPermissionsAdapter_Tests: StreamVideoTestCase, @unchecked Send
         mockAppStateAdapter.stubbedState = .foreground
         mockPermissions.stubCameraPermission(.unknown)
         await fulfillment { self.mockPermissions.mockStore.state.cameraPermission == .unknown }
+        stageSubject.send(.joined)
 
         await withTaskGroup(of: Void.self) { group in
             group.addTask {
@@ -149,5 +160,67 @@ final class WebRTCPermissionsAdapter_Tests: StreamVideoTestCase, @unchecked Send
 
         mockAppStateAdapter?.dismante()
         mockPermissions?.dismantle()
+    }
+
+    func test_willSet_audioOnTrue_unknownMic_inForegroundBeforeJoined_doesNotRequestPermission() async {
+        mockAppStateAdapter.makeShared()
+        mockAppStateAdapter.stubbedState = .foreground
+        mockPermissions.stubMicrophonePermission(.unknown)
+        await fulfillment {
+            self.mockPermissions.mockStore.state.microphonePermission == .unknown
+        }
+
+        let input = CallSettings(audioOn: true, videoOn: false)
+        let output = await subject.willSet(callSettings: input)
+
+        XCTAssertFalse(output.audioOn)
+        XCTAssertFalse(output.videoOn)
+        XCTAssertEqual(mockPermissions.timesCalled(.requestMicrophonePermission), 0)
+    }
+
+    func test_stageTransitionsToJoined_withPendingMicPermissionInForeground_requestsPermission() async {
+        mockAppStateAdapter.makeShared()
+        mockAppStateAdapter.stubbedState = .foreground
+        mockPermissions.stubMicrophonePermission(.unknown)
+        await fulfillment {
+            self.mockPermissions.mockStore.state.microphonePermission == .unknown
+        }
+
+        let input = CallSettings(audioOn: true, videoOn: false)
+        _ = await subject.willSet(callSettings: input)
+        XCTAssertEqual(mockPermissions.timesCalled(.requestMicrophonePermission), 0)
+
+        stageSubject.send(.joined)
+
+        await fulfillment {
+            self.mockPermissions.timesCalled(.requestMicrophonePermission) == 1
+        }
+        mockPermissions.stubMicrophonePermission(.granted)
+        await fulfillment { self.delegate.audioOnValues.contains(true) }
+    }
+
+    func test_appMovesToForeground_withPendingCameraPermissionInJoined_requestsPermission() async {
+        mockAppStateAdapter.makeShared()
+        mockAppStateAdapter.stubbedState = .background
+        stageSubject.send(.joined)
+        mockPermissions.stubCameraPermission(.unknown)
+        await fulfillment {
+            self.mockPermissions.mockStore.state.cameraPermission == .unknown
+        }
+
+        let input = CallSettings(audioOn: false, videoOn: true)
+        let output = await subject.willSet(callSettings: input)
+
+        XCTAssertFalse(output.audioOn)
+        XCTAssertFalse(output.videoOn)
+        XCTAssertEqual(mockPermissions.timesCalled(.requestCameraPermission), 0)
+
+        mockAppStateAdapter.stubbedState = .foreground
+
+        await fulfillment {
+            self.mockPermissions.timesCalled(.requestCameraPermission) == 1
+        }
+        mockPermissions.stubCameraPermission(.granted)
+        await fulfillment { self.delegate.videoOnValues.contains(true) }
     }
 }

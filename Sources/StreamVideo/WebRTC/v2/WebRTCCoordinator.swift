@@ -42,7 +42,10 @@ final class WebRTCCoordinator: @unchecked Sendable {
 
     /// The state machine that manages the different stages of the WebRTC
     /// lifecycle.
-    private(set) lazy var stateMachine: StateMachine = .init(.init(coordinator: self))
+    ///
+    /// The coordinator constructs this eagerly so its stage publisher can be
+    /// passed to `WebRTCStateAdapter` during initialization.
+    let stateMachine: StateMachine
 
     private let disposableBag = DisposableBag()
 
@@ -54,10 +57,12 @@ final class WebRTCCoordinator: @unchecked Sendable {
     ///   - apiKey: The API key to authenticate with the WebRTC service.
     ///   - callCid: The call identifier (cid).
     ///   - videoConfig: The video configuration for the call.
+    ///   - callSettings: Initial media settings applied before the join flow
+    ///     starts.
+    ///   - rtcPeerConnectionCoordinatorFactory: Factory for creating peer
+    ///     connection coordinators.
     ///   - webRTCAuthenticator: The authenticator that will be used during all WebRTC flows.
     ///   - callAuthentication: A closure for handling call authentication.
-    ///   - rtcPeerConnectionCoordinatorFactory: Factory for creating the peer
-    ///     connection coordinator.
     init(
         user: User,
         apiKey: String,
@@ -68,17 +73,21 @@ final class WebRTCCoordinator: @unchecked Sendable {
         webRTCAuthenticator: WebRTCAuthenticating = WebRTCAuthenticator(),
         callAuthentication: @escaping AuthenticationHandler
     ) {
+        let stateMachine = StateMachine.init(.init(coordinator: nil))
         stateAdapter = .init(
             user: user,
             apiKey: apiKey,
             callCid: callCid,
             videoConfig: videoConfig,
             callSettings: callSettings,
-            rtcPeerConnectionCoordinatorFactory: rtcPeerConnectionCoordinatorFactory
+            rtcPeerConnectionCoordinatorFactory: rtcPeerConnectionCoordinatorFactory,
+            stagePublisher: stateMachine.publisher.map(\.id).eraseToAnyPublisher()
         )
+        self.stateMachine = stateMachine
         self.callAuthentication = callAuthentication
 
         // Initialize the state machine.
+        stateMachine.transition(.idle(.init(coordinator: self)))
         stateMachine.currentStage.context.authenticator = webRTCAuthenticator
 
         #if OBSERVE_RECONNECTION_NOTIFICATIONS
