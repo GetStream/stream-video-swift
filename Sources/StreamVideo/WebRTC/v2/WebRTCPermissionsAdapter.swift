@@ -31,8 +31,12 @@ protocol WebRTCPermissionsAdapterDelegate: AnyObject {
 /// Coordinates permission prompts and aligns call media with user grants.
 ///
 /// Prompts are deferred until the application is in the foreground and the
-/// WebRTC coordinator has reached the `.joined` stage. Work is serialized to
-/// avoid races across app state and permission updates.
+/// WebRTC coordinator has reached the `.joined` stage.
+///
+/// The adapter observes both app-state transitions and stage changes so
+/// permission prompts are always evaluated against the current lifecycle
+/// state. Work is serialized to avoid races across app state and permission
+/// updates.
 final class WebRTCPermissionsAdapter: @unchecked Sendable {
     private enum RequiredPermission: CustomStringConvertible {
         case microphone, camera
@@ -74,10 +78,9 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
                 .eraseToAnyPublisher(),
             applicationStateAdapter
                 .statePublisher
-                .filter { $0 == .foreground }
                 .removeDuplicates()
-        ).sink { [weak self] stageID, _ in
-            self?.process(canPromptForPermissions: stageID == .joined)
+        ).sink { [weak self] stageID, applicationState in
+            self?.process(stageID: stageID, applicationState: applicationState)
         }
         .store(in: disposableBag)
 
@@ -183,8 +186,11 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
     /// Re-evaluates pending permissions after a stage or app-state change.
     ///
     /// Prompts are only issued once both gating conditions are met: the app is
-    /// in the foreground and the coordinator is already joined.
-    private func process(canPromptForPermissions: Bool) {
+    /// currently in the foreground and the coordinator is already joined.
+    private func process(
+        stageID: WebRTCCoordinator.StateMachine.Stage.ID,
+        applicationState: ApplicationState
+    ) {
         processingQueue.addTaskOperation { [weak self] in
             guard
                 let self
@@ -192,9 +198,10 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
                 return
             }
 
-            self.canPromptForPermissions = canPromptForPermissions
+            self.canPromptForPermissions = stageID == .joined
 
             guard
+                applicationState == .foreground,
                 shouldPrompt(for: requiredPermissions)
             else {
                 return

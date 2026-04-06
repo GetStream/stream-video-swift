@@ -223,4 +223,35 @@ final class WebRTCPermissionsAdapter_Tests: StreamVideoTestCase, @unchecked Send
         mockPermissions.stubCameraPermission(.granted)
         await fulfillment { self.delegate.videoOnValues.contains(true) }
     }
+
+    func test_stageTransitionsToJoinedWhileAppIsBackgrounded_afterForeground_doesNotRequestUntilForeground(
+    ) async {
+        mockAppStateAdapter.makeShared()
+        mockAppStateAdapter.stubbedState = .foreground
+        mockPermissions.stubMicrophonePermission(.unknown)
+        await fulfillment {
+            self.mockPermissions.mockStore.state.microphonePermission == .unknown
+        }
+
+        let input = CallSettings(audioOn: true, videoOn: false)
+        let output = await subject.willSet(callSettings: input)
+
+        XCTAssertFalse(output.audioOn)
+        XCTAssertFalse(output.videoOn)
+        XCTAssertEqual(mockPermissions.timesCalled(.requestMicrophonePermission), 0)
+
+        mockAppStateAdapter.stubbedState = .background
+        stageSubject.send(.joined)
+
+        await wait(for: 0.1)
+        XCTAssertEqual(mockPermissions.timesCalled(.requestMicrophonePermission), 0)
+
+        mockAppStateAdapter.stubbedState = .foreground
+
+        await fulfillment {
+            self.mockPermissions.timesCalled(.requestMicrophonePermission) == 1
+        }
+        mockPermissions.stubMicrophonePermission(.granted)
+        await fulfillment { self.delegate.audioOnValues.contains(true) }
+    }
 }
