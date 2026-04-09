@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Replay buffered subscriber ICE trickles during join so remote audio does not wait for a later subscriber ICE restart before becoming audible. [#1111](https://github.com/GetStream/stream-video-swift/pull/1111)
 - Fix join-call timeout caused by a `PassthroughSubject` race where the response was emitted before the subscription was established. [#1113](https://github.com/GetStream/stream-video-swift/pull/1113)
 - CallKit-managed calls now respect the configured `participantAutoLeavePolicy`. [#1112](https://github.com/GetStream/stream-video-swift/pull/1112)
+- Prevent `CallViewModel` from entering `.inCall` from participant updates before the call is ready, while preserving the CallKit join handoff to `.inCall`. [#1109](https://github.com/GetStream/stream-video-swift/pull/1109)
 
 # [1.45.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.45.0)
 _March 31, 2026_
