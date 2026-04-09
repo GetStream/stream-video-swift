@@ -44,6 +44,12 @@ final class DemoCallJoinInterceptor: CallJoinIntercepting, @unchecked Sendable {
     /// The demo intentionally ignores send and wait failures so the example
     /// never blocks the UI forever when the readiness handshake is unavailable.
     func callReadyToJoin(_ call: Call) async throws {
+        // If the cancellable is nil it means that this call isn't a ringing
+        // call and thus we take no action.
+        guard customEventCancellable != nil else {
+            return
+        }
+
         do {
             try await call.sendCustomEvent([customEventKey: .string(currentUserID)])
             log.debug("Call presence event was sent for userId:\(currentUserID). Waiting for others.")

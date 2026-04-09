@@ -559,7 +559,8 @@ open class CallViewModel: ObservableObject {
                     create: true,
                     options: options,
                     ring: false,
-                    callSettings: settings
+                    callSettings: settings,
+                    joinInterceptor: callJoinInterceptor
                 )
                 
                 temporaryCallSettings = call.state.callSettings

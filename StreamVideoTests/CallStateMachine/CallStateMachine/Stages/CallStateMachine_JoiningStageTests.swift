@@ -443,6 +443,59 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
         }
     }
 
+    func test_execute_withoutRetries_joinInterceptorWaitingOnContinuation_transitionsToJoinedAfterTimeout(
+    ) async throws {
+        let originalTimeout = CallConfiguration.timeout
+        CallConfiguration.timeout.joinInterception = 0.1
+        defer { CallConfiguration.timeout = originalTimeout }
+
+        // This interceptor suspends on a continuation and does not react to
+        // cancellation on its own. It models the exact class of interceptor
+        // that used to keep the join flow blocked even after the timeout fired.
+        let interceptorStarted = expectation(description: "Join interceptor started.")
+        let joinInterceptor = NonCancellableJoinInterceptor_Spy {
+            interceptorStarted.fulfill()
+        }
+        let context = Call.StateMachine.Stage.Context(
+            call: call,
+            input: .join(
+                .init(
+                    create: true,
+                    callSettings: .init(audioOn: false),
+                    options: .init(memberIds: [.unique]),
+                    ring: true,
+                    notify: false,
+                    source: .inApp,
+                    deliverySubject: .init(nil),
+                    joinInterceptor: joinInterceptor
+                )
+            )
+        )
+
+        callController.stub(for: .join, with: JoinCallResponse.dummy())
+        subject.transition = { self.transitionedToStage = $0 }
+        subject.context = context
+
+        _ = subject.transition(from: .idle(.init()))
+
+        // First confirm the interceptor actually entered its suspended state.
+        await fulfillment(of: [interceptorStarted], timeout: defaultTimeout)
+
+        // The join should now complete because the timeout path stops waiting
+        // for the blocked interceptor task, rather than waiting for it to
+        // finish cooperatively.
+        await fulfilmentInMainActor(timeout: defaultTimeout) {
+            self.transitionedToStage?.id == .joined
+        }
+        XCTAssertEqual(self.streamVideo.state.activeCall?.cId, self.call.cId)
+
+        // Resume the interceptor only to clean up the background task that is
+        // still suspended on the continuation; this should not be required for
+        // the join transition itself anymore.
+        joinInterceptor.resume()
+        XCTAssertEqual(joinInterceptor.invocationCount, 1)
+    }
+
     func test_execute_withRetries_whenJoinFailsAndThereAreAvailableRetries_transitionsToJoining() async throws {
         let context = Call.StateMachine.Stage.Context(
             call: call,
@@ -605,6 +658,33 @@ private final class CallJoinInterceptor_Spy: CallJoinIntercepting, @unchecked Se
     func callReadyToJoin(_ call: Call) async throws {
         recordedCallCIds.append(call.cId)
         try await handler(call)
+    }
+
+    var invocationCount: Int {
+        recordedCallCIds.count
+    }
+}
+
+private final class NonCancellableJoinInterceptor_Spy: CallJoinIntercepting, @unchecked Sendable {
+    private let onEntered: @Sendable () -> Void
+    @Atomic private(set) var recordedCallCIds: [String] = []
+    @Atomic private var continuation: CheckedContinuation<Void, Never>?
+
+    init(onEntered: @escaping @Sendable () -> Void = {}) {
+        self.onEntered = onEntered
+    }
+
+    func callReadyToJoin(_ call: Call) async throws {
+        recordedCallCIds.append(call.cId)
+        onEntered()
+        await withCheckedContinuation { continuation in
+            self.continuation = continuation
+        }
+    }
+
+    func resume() {
+        continuation?.resume()
+        continuation = nil
     }
 
     var invocationCount: Int {

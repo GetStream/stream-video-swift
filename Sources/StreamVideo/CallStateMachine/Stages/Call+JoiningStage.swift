@@ -93,6 +93,7 @@ extension Call.StateMachine.Stage {
                     // stage transitions into the error state.
                     await call.callController.trace(.init(error))
                     input.deliverySubject.send(completion: .failure(error))
+                    call.leave(reason: "join.interception.failed")
                     transitionErrorOrLog(error)
                 } catch {
                     var input = input
@@ -200,22 +201,30 @@ extension Call.StateMachine.Stage {
                 return
             }
 
-            do {
-                try await withThrowingTaskGroup(of: Void.self) { group in
-                    group.addTask {
-                        try? await Task.sleep(nanoseconds: UInt64(timeout * 1_000_000_000))
+            let timeoutInNanoseconds = timeout > 0
+                ? UInt64(timeout * 1_000_000_000)
+                : 0
+
+            let result = await withFirstTaskCompleted(
+                {
+                    try await interceptor.callReadyToJoin(call)
+                },
+                {
+                    if timeoutInNanoseconds > 0 {
+                        try await Task.sleep(nanoseconds: timeoutInNanoseconds)
                     }
-
-                    group.addTask {
-                        try await interceptor.callReadyToJoin(call)
-                    }
-
-                    try await group.next()
-
-                    group.cancelAll()
                 }
-            } catch {
+            )
+
+            switch result {
+            case .first(.success):
+                return
+            case let .first(.failure(error)):
                 throw CallJoinInterceptionError(with: error)
+            case .second:
+                return
+            case .cancelled:
+                throw CancellationError()
             }
         }
     }

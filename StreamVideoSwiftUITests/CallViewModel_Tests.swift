@@ -851,6 +851,24 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         )
     }
 
+    func test_joinAndRingCall_callJoinInterceptor_passesInterceptorToCall() async {
+        let interceptor = CallJoinInterceptor_Mock()
+
+        await prepare()
+        subject.callJoinInterceptor = interceptor
+
+        subject.joinAndRingCall(
+            callType: callType,
+            callId: callId,
+            members: participants
+        )
+
+        await fulfilmentInMainActor { self.mockCall.recordedJoinInterceptors.count == 1 }
+
+        let recordedInterceptor = mockCall.recordedJoinInterceptors.first as? CallJoinInterceptor_Mock
+        XCTAssertTrue(recordedInterceptor === interceptor)
+    }
+
     func test_joinAndRingCall_usesLocalCallSettingsOverrides() async throws {
         // Given
         await prepare()
