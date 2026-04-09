@@ -131,7 +131,10 @@ extension Call.StateMachine.Stage {
 
             try Task.checkCancellation()
 
+            let sessionID = await call.callController.sessionID()
+            await MainActor.run { call.state.sessionId = sessionID }
             await call.state.update(from: response)
+            call.update(recordingState: response.call.recording ? .recording : .noRecording)
 
             try Task.checkCancellation()
 
