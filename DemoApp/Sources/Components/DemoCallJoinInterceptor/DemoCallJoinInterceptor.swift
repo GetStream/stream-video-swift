@@ -9,9 +9,11 @@ import StreamVideoSwiftUI
 
 /// Demo interceptor that waits until another participant announces readiness
 /// through a custom event before the local join flow finishes.
-final class DemoCallJoinInterceptor: CallJoinIntercepting, @unchecked Sendable {
+@MainActor
+final class DemoCallJoinInterceptor: CallJoinIntercepting {
     @Injected(\.streamVideo) private var streamVideo
 
+    private let disposableBag = DisposableBag()
     private var ringingCallCancellable: AnyCancellable?
     private var customEventCancellable: AnyCancellable?
     private let customEventKey: String
@@ -32,7 +34,9 @@ final class DemoCallJoinInterceptor: CallJoinIntercepting, @unchecked Sendable {
                 .$ringingCall
                 .receive(on: DispatchQueue.main)
                 .removeDuplicates { $0?.cId == $1?.cId }
-                .sink { [weak self] in self?.didUpdate(ringingCall: $0) }
+                .sinkTask(storeIn: disposableBag) { @MainActor [weak self] ringingCall in
+                    self?.didUpdate(ringingCall: ringingCall)
+                }
         }
     }
 
@@ -77,8 +81,12 @@ final class DemoCallJoinInterceptor: CallJoinIntercepting, @unchecked Sendable {
             .filter { [currentUserID] in $0 != currentUserID }
             .log(.debug) { "Call presence event was received for userID:\($0)" }
             .map { _ in true }
-            .sink { [weak self] in self?.hasOtherReadyParticipants.send($0) }
-        
+            .sinkTask(
+                storeIn: disposableBag
+            ) { @MainActor [weak self] didReceiveReadyParticipant in
+                self?.hasOtherReadyParticipants.send(didReceiveReadyParticipant)
+            }
+
         log.debug("Call presence events observation has started.")
     }
 

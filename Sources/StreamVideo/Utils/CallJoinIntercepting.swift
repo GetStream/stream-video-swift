@@ -39,10 +39,13 @@ extension WebRTCTrace {
     init(
         _ error: CallJoinInterceptionError
     ) {
+        let redactedError = error.underlyingError ?? error
         self.init(
             id: nil,
             tag: "call.join.interception.failed",
-            data: .init(["error": "\(error)"])
+            data: .init([
+                "errorType": String(describing: type(of: redactedError))
+            ])
         )
     }
 }

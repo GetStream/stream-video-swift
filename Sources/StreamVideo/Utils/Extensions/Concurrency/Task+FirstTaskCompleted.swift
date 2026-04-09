@@ -127,8 +127,12 @@ private final class FirstTaskCompletedCoordinator<First: Sendable, Second: Senda
 
     func setFirstTask(_ task: Task<Void, Never>) {
         let shouldCancel = queue.sync { () -> Bool in
+            guard resolvedResult == nil else {
+                return true
+            }
+
             firstTask = task
-            return resolvedResult != nil
+            return false
         }
 
         if shouldCancel {
@@ -138,8 +142,12 @@ private final class FirstTaskCompletedCoordinator<First: Sendable, Second: Senda
 
     func setSecondTask(_ task: Task<Void, Never>) {
         let shouldCancel = queue.sync { () -> Bool in
+            guard resolvedResult == nil else {
+                return true
+            }
+
             secondTask = task
-            return resolvedResult != nil
+            return false
         }
 
         if shouldCancel {
@@ -148,13 +156,21 @@ private final class FirstTaskCompletedCoordinator<First: Sendable, Second: Senda
     }
 
     func cancelFirstTask() {
-        let task = queue.sync { firstTask }
+        let task = queue.sync {
+            let task = firstTask
+            firstTask = nil
+            return task
+        }
 
         task?.cancel()
     }
 
     func cancelSecondTask() {
-        let task = queue.sync { secondTask }
+        let task = queue.sync {
+            let task = secondTask
+            secondTask = nil
+            return task
+        }
 
         task?.cancel()
     }
