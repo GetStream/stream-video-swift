@@ -24,6 +24,7 @@ final class CallDurationView_Tests: StreamVideoUITestCase, @unchecked Sendable {
             members: [],
             ring: true
         )
+        viewModel.callingState = .inCall
     }
 
     override func tearDown() async throws {
@@ -31,7 +32,7 @@ final class CallDurationView_Tests: StreamVideoUITestCase, @unchecked Sendable {
         try await super.tearDown()
     }
 
-    // MARK: - Rendering based on viewModel.call.state.duration
+    // MARK: - Rendering based on active call duration
 
     func test_callDurationView_durationIsLessThanZero_viewWasConfiguredCorrectly() throws {
         viewModel.call?.state.duration = -100

@@ -77,6 +77,10 @@ public class CallState: ObservableObject {
 
     @Published public internal(set) var updatedAt: Date = .distantPast
     @Published public internal(set) var startsAt: Date?
+    /// The time when the active call session started.
+    ///
+    /// This value is populated from the backend session payload once the call
+    /// has actually started. It excludes any ringing or pre-join time.
     @Published public internal(set) var startedAt: Date?
     @Published public internal(set) var endedAt: Date?
     @Published public internal(set) var endedBy: User?
@@ -96,6 +100,10 @@ public class CallState: ObservableObject {
     @Published public internal(set) var callSettings: CallSettings = .default
 
     @Published public internal(set) var isCurrentUserScreensharing: Bool = false
+    /// The elapsed duration of the active call session in seconds.
+    ///
+    /// The timer begins only after the backend reports a started session and is
+    /// reset when that session ends. Ringing time is not included.
     @Published public internal(set) var duration: TimeInterval = 0
     @Published public internal(set) var statsReport: CallStatsReport?
 
@@ -568,19 +576,18 @@ public class CallState: ObservableObject {
         }
 
         guard let session else {
-            log.debug("[IP]No session.Resetting...", functionName: function, fileName: file, lineNumber: line)
-            return reset()
+            if startedAt == nil {
+                reset()
+            }
+            return
         }
 
         if session.endedAt != nil {
-            log.debug("[IP]Ended.Resetting...", functionName: function, fileName: file, lineNumber: line)
             reset()
         } else if session.liveEndedAt != nil {
-            log.debug("[IP]Live ended.Resetting...", functionName: function, fileName: file, lineNumber: line)
             reset()
         } else if let newStartedAt = session.startedAt ?? session.liveStartedAt {
             guard newStartedAt != startedAt else {
-                log.debug("[IP]startedAt wasn't updated. Skipping...", functionName: function, fileName: file, lineNumber: line)
                 return
             }
 
@@ -593,24 +600,11 @@ public class CallState: ObservableObject {
                 .publish(every: 1.0)
                 .receive(on: DispatchQueue.main)
                 .map { _ in Date().timeIntervalSince(newStartedAt) }
-                .log(.debug) { "[IP]Duration timer updated duration:\(String(format: "%.2f", $0))" }
                 .assign(to: \.duration, onWeak: self)
 
             self.duration = newDuration
             self.startedAt = newStartedAt
-            log.debug(
-                "[IP]startedAt:\(newStartedAt) duration:\(newDuration)",
-                functionName: function,
-                fileName: file,
-                lineNumber: line
-            )
         } else if startedAt == nil {
-            log.debug(
-                "[IP]startedAt:nil session.endedAt:nil session.liveEndedAt:nil.Resetting...",
-                functionName: function,
-                fileName: file,
-                lineNumber: line
-            )
             reset()
         }
     }

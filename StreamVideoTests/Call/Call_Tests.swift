@@ -373,34 +373,37 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
     // MARK: - Duration
 
     func test_call_duration() async throws {
-        // Given
         let call = streamVideo?.call(callType: callType, callId: callId)
-        let startDate = Date()
-        let callResponse = mockResponseBuilder.makeCallResponse(
-            cid: callCid,
-            liveStartedAt: startDate
+        let startedAt = Date(timeIntervalSinceNow: -75)
+
+        call?.state.update(
+            from: CallResponse.dummy(
+                cid: callCid,
+                session: .dummy(
+                    startedAt: startedAt
+                )
+            )
         )
 
-        // When
-        call?.state.update(from: callResponse)
-        try await waitForCallEvent(nanoseconds: 1_500_000_000)
-
-        // Then
-        var duration = call?.state.duration ?? 0
-        XCTAssertTrue(Int(duration) >= 1)
-        XCTAssertEqual(startDate, call?.state.startedAt)
-
-        // When
-        let endCallResponse = mockResponseBuilder.makeCallResponse(
-            cid: callCid,
-            liveStartedAt: startDate,
-            liveEndedAt: Date()
+        XCTAssertEqual(call?.state.startedAt, startedAt)
+        XCTAssertEqual(
+            call?.state.duration ?? 0,
+            Date().timeIntervalSince(startedAt),
+            accuracy: 1
         )
-        call?.state.update(from: endCallResponse)
 
-        // Then
-        duration = call?.state.duration ?? 0
-        XCTAssertTrue(Int(duration) >= 1)
+        call?.state.update(
+            from: CallResponse.dummy(
+                cid: callCid,
+                session: .dummy(
+                    endedAt: Date(),
+                    startedAt: startedAt
+                )
+            )
+        )
+
+        XCTAssertNil(call?.state.startedAt)
+        XCTAssertEqual(call?.state.duration, 0)
     }
 
     // MARK: - setIncomingVideoQualitySettings

@@ -9,10 +9,19 @@ import SwiftUI
 /// A view that presents the call's duration and recording state.
 public struct CallDurationView: View {
 
-    var showRingingDuration: Bool
+    private let showRingingDuration: Bool
 
     @ObservedObject private var viewModel: CallViewModel
 
+    /// Creates a duration view for the provided call view model.
+    ///
+    /// - Parameters:
+    ///   - viewModel: The view model that supplies the current calling state and
+    ///     in-call duration updates.
+    ///   - showRingingDuration: When `true`, the view shows a locally tracked
+    ///     timer while the call is still ringing in the outgoing state. Once the
+    ///     call is connected, the view always switches to the backend-provided
+    ///     call duration.
     public init(_ viewModel: CallViewModel, showRingingDuration: Bool = true) {
         self.viewModel = viewModel
         self.showRingingDuration = showRingingDuration
@@ -49,8 +58,8 @@ private struct InCallDurationView: View {
     @Injected(\.colors) private var colors: Colors
     @Injected(\.images) private var images: Images
 
-    var viewModel: CallViewModel
-    @State var duration: TimeInterval
+    let viewModel: CallViewModel
+    @State private var duration: TimeInterval
 
     init(_ viewModel: CallViewModel) {
         self.viewModel = viewModel
@@ -72,8 +81,8 @@ private struct InCallDurationView: View {
 }
 
 private struct RingingCallDurationView: View {
-    var startedRingingAt: Date
-    @State var duration: TimeInterval
+    private let startedRingingAt: Date
+    @State private var duration: TimeInterval
 
     init(_ startRingingAt: Date) {
         self.startedRingingAt = startRingingAt
@@ -91,8 +100,8 @@ private struct DurationView<IconView: View>: View {
     @Injected(\.colors) private var colors: Colors
     @Injected(\.formatters.mediaDuration) private var formatter: MediaDurationFormatter
 
-    var duration: TimeInterval
-    var iconView: IconView
+    let duration: TimeInterval
+    private let iconView: IconView
 
     init(duration: TimeInterval, @ViewBuilder iconView: () -> IconView) {
         self.duration = duration
