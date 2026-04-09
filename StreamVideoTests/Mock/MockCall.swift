@@ -76,6 +76,7 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
     var stubbedFunction: [FunctionKey: Any] = [:]
     @Atomic var stubbedFunctionInput: [FunctionKey: [FunctionInputKey]] = FunctionKey.allCases
         .reduce(into: [FunctionKey: [FunctionInputKey]]()) { $0[$1] = [] }
+    @Atomic var recordedJoinInterceptors: [CallJoinIntercepting?] = []
     var waitForJoinToResume = false
     var onJoinStarted: (@Sendable () -> Void)?
     var onJoinResumed: (@Sendable (MockCall) async -> Void)?
@@ -179,7 +180,8 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
         ring: Bool = false,
         notify: Bool = false,
         callSettings: CallSettings? = nil,
-        policy: WebRTCJoinPolicy = .default
+        policy: WebRTCJoinPolicy = .default,
+        joinInterceptor: CallJoinIntercepting? = nil
     ) async throws -> JoinCallResponse {
         stubbedFunctionInput[.join]?.append(
             .join(
@@ -191,6 +193,7 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
                 policy: policy
             )
         )
+        recordedJoinInterceptors.append(joinInterceptor)
         onJoinStarted?()
 
         if waitForJoinToResume {
@@ -216,7 +219,8 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
                 ring: ring,
                 notify: notify,
                 callSettings: callSettings,
-                policy: policy
+                policy: policy,
+                joinInterceptor: joinInterceptor
             )
         }
     }

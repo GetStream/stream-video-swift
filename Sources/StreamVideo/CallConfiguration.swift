@@ -21,13 +21,18 @@ enum CallConfiguration {
         /// Timeout duration for rejecting a call in seconds.
         var reject: TimeInterval
 
+        /// Timeout duration for a join interceptor to delay the final joined
+        /// transition before the SDK proceeds without it.
+        var joinInterception: TimeInterval
+
         /// Timeout values for authentication in production environment.
         ///
         /// These values are used when the app is running in production mode.
         static let production = Timeout(
             join: 30,
             accept: 10,
-            reject: 10
+            reject: 10,
+            joinInterception: 5
         )
 
         #if STREAM_TESTS
@@ -38,7 +43,8 @@ enum CallConfiguration {
         static let testing = Timeout(
             join: 10,
             accept: 10,
-            reject: 10
+            reject: 10,
+            joinInterception: 10
         )
         #endif
     }

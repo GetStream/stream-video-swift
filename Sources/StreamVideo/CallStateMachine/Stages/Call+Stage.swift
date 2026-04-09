@@ -33,6 +33,9 @@ extension Call.StateMachine {
                 var source: JoinSource
                 var deliverySubject: CurrentValueSubject<JoinCallResponse?, Error>
                 var policy: WebRTCJoinPolicy = .default
+                /// Optional hook that runs after local join state has been
+                /// updated and before the joined transition is finalized.
+                var joinInterceptor: CallJoinIntercepting?
 
                 var currentNumberOfRetries = 0
                 var retryPolicy: RetryPolicy = .fastAndSimple

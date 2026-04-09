@@ -318,6 +318,131 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
         }
     }
 
+    func test_execute_withoutRetries_joinInterceptorReturns_transitionsToJoined() async throws {
+        let joinInterceptor = CallJoinInterceptor_Spy()
+        let context = Call.StateMachine.Stage.Context(
+            call: call,
+            input: .join(
+                .init(
+                    create: true,
+                    callSettings: .init(audioOn: false),
+                    options: .init(memberIds: [.unique]),
+                    ring: true,
+                    notify: false,
+                    source: .inApp,
+                    deliverySubject: .init(nil),
+                    joinInterceptor: joinInterceptor
+                )
+            )
+        )
+
+        try await assertJoining(
+            context,
+            joinResponse: JoinCallResponse.dummy(),
+            expectedTransition: .joined
+        ) { @MainActor in
+            XCTAssertEqual(joinInterceptor.invocationCount, 1)
+            XCTAssertEqual(joinInterceptor.recordedCallCIds, [self.call.cId])
+        }
+    }
+
+    func test_execute_withoutRetries_joinInterceptorThrows_tracesFailureAndTransitionsToError() async throws {
+        let deliverySubject = CurrentValueSubject<JoinCallResponse?, Error>(nil)
+        let deliveryExpectation = expectation(description: "DeliverySubject delivered failure.")
+        var deliveredError: Error?
+        let cancellable = deliverySubject
+            .receive(on: DispatchQueue.main)
+            .sink { completion in
+                switch completion {
+                case .finished:
+                    break
+                case let .failure(error):
+                    deliveredError = error
+                    deliveryExpectation.fulfill()
+                }
+            } receiveValue: { _ in }
+        let joinInterceptor = CallJoinInterceptor_Spy { _ in
+            throw TestError()
+        }
+        let context = Call.StateMachine.Stage.Context(
+            call: call,
+            input: .join(
+                .init(
+                    create: true,
+                    callSettings: .init(audioOn: false),
+                    options: .init(memberIds: [.unique]),
+                    ring: true,
+                    notify: false,
+                    source: .inApp,
+                    deliverySubject: deliverySubject,
+                    joinInterceptor: joinInterceptor
+                )
+            )
+        )
+
+        try await assertJoining(
+            context,
+            joinResponse: JoinCallResponse.dummy(),
+            expectedTransition: .error
+        ) { @MainActor in
+            await self.fulfillment(of: [deliveryExpectation], timeout: defaultTimeout)
+
+            let error = try XCTUnwrap(deliveredError as? CallJoinInterceptionError)
+            XCTAssertTrue(error.underlyingError is TestError)
+            XCTAssertEqual(joinInterceptor.invocationCount, 1)
+            XCTAssertNil(self.streamVideo.state.activeCall)
+            XCTAssertEqual(self.callController.timesCalled(.observeWebRTCStateUpdated), 0)
+            XCTAssertEqual(self.callController.timesCalled(.trace), 1)
+
+            let trace = try XCTUnwrap(
+                self.callController.recordedInputPayload(
+                    WebRTCTrace.self,
+                    for: .trace
+                )?.first
+            )
+            XCTAssertNil(trace.id)
+            XCTAssertEqual(trace.tag, "call.join.interception.failed")
+        }
+
+        cancellable.cancel()
+    }
+
+    func test_execute_withoutRetries_joinInterceptorExceedsConfiguredTimeout_transitionsToJoined() async throws {
+        let originalTimeout = CallConfiguration.timeout
+        CallConfiguration.timeout.joinInterception = 0.01
+        defer { CallConfiguration.timeout = originalTimeout }
+
+        let joinInterceptor = CallJoinInterceptor_Spy { _ in
+            try await Task.sleep(nanoseconds: 2_000_000_000)
+        }
+        let context = Call.StateMachine.Stage.Context(
+            call: call,
+            input: .join(
+                .init(
+                    create: true,
+                    callSettings: .init(audioOn: false),
+                    options: .init(memberIds: [.unique]),
+                    ring: true,
+                    notify: false,
+                    source: .inApp,
+                    deliverySubject: .init(nil),
+                    joinInterceptor: joinInterceptor
+                )
+            )
+        )
+        let start = Date()
+
+        try await assertJoining(
+            context,
+            joinResponse: JoinCallResponse.dummy(),
+            expectedTransition: .joined
+        ) { @MainActor in
+            XCTAssertLessThan(Date().timeIntervalSince(start), 2)
+            XCTAssertEqual(joinInterceptor.invocationCount, 1)
+            XCTAssertEqual(self.streamVideo.state.activeCall?.cId, self.call.cId)
+        }
+    }
+
     func test_execute_withRetries_whenJoinFailsAndThereAreAvailableRetries_transitionsToJoining() async throws {
         let context = Call.StateMachine.Stage.Context(
             call: call,
@@ -466,5 +591,23 @@ extension Call.StateMachine.Stage.Context.Input {
         default:
             return nil
         }
+    }
+}
+
+private final class CallJoinInterceptor_Spy: CallJoinIntercepting, @unchecked Sendable {
+    private let handler: @Sendable (Call) async throws -> Void
+    @Atomic private(set) var recordedCallCIds: [String] = []
+
+    init(handler: @escaping @Sendable (Call) async throws -> Void = { _ in }) {
+        self.handler = handler
+    }
+
+    func callReadyToJoin(_ call: Call) async throws {
+        recordedCallCIds.append(call.cId)
+        try await handler(call)
+    }
+
+    var invocationCount: Int {
+        recordedCallCIds.count
     }
 }

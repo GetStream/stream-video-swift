@@ -666,6 +666,26 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
         }
     }
 
+    func test_join_withJoinInterceptor_joinInterceptorWasInvoked() async throws {
+        let mockCallController = MockCallController()
+        let call = Call.dummy(callType: callType, callId: callId, callController: mockCallController)
+        let joinInterceptor = CallJoinInterceptor_Spy()
+        mockCallController.stub(
+            for: .join,
+            with: JoinCallResponse.dummy(
+                call: .dummy(
+                    cid: call.cId,
+                    id: call.callId,
+                    type: call.callType
+                )
+            )
+        )
+
+        _ = try await call.join(joinInterceptor: joinInterceptor)
+
+        XCTAssertEqual(joinInterceptor.invocationCount, 1)
+    }
+
     // MARK: - leave
 
     func test_leave_withReason_reasonWasPassedToCallController() {
@@ -856,6 +876,14 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
             .process(.coordinatorEvent(event))
 
         try await fulfillmentHandler(call)
+    }
+}
+
+private final class CallJoinInterceptor_Spy: CallJoinIntercepting, @unchecked Sendable {
+    @Atomic private(set) var invocationCount = 0
+
+    func callReadyToJoin(_ call: Call) async throws {
+        invocationCount += 1
     }
 }
 

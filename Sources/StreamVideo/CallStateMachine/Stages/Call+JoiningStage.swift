@@ -85,6 +85,15 @@ extension Call.StateMachine.Stage {
                 do {
                     let response = try await executeJoin(call: call, input: input)
                     transitionOrError(.joined(context, response: response))
+                } catch let error as CallJoinInterceptionError {
+                    // Interception failures are terminal for this join attempt,
+                    // so they are surfaced to the original caller without
+                    // entering the retry branch below.
+                    // Record the failure in the tracing pipeline before the
+                    // stage transitions into the error state.
+                    await call.callController.trace(.init(error))
+                    input.deliverySubject.send(completion: .failure(error))
+                    transitionErrorOrLog(error)
                 } catch {
                     var input = input
                     input.currentNumberOfRetries += 1
@@ -108,6 +117,10 @@ extension Call.StateMachine.Stage {
         /// Executes the join call operation with retry logic.
         /// The call result is returned both as a stage-local response and through the
         /// shared `join` completion channel.
+        ///
+        /// Before the stage publishes the join result, it gives the optional
+        /// join interceptor a bounded window to perform app-specific readiness
+        /// work.
         ///
         /// - Parameters:
         ///   - call: The call to join.
@@ -141,6 +154,16 @@ extension Call.StateMachine.Stage {
 
             try Task.checkCancellation()
 
+            // Use the shared call configuration so production and test builds
+            // can tune interception timing independently.
+            try await interceptJoinIfNeeded(
+                input.joinInterceptor,
+                call: call,
+                timeout: CallConfiguration.timeout.joinInterception
+            )
+
+            try Task.checkCancellation()
+
             await Task(disposableBag: disposableBag) { @MainActor [weak streamVideo] in
                 streamVideo?.state.activeCall = call
             }.value
@@ -152,6 +175,48 @@ extension Call.StateMachine.Stage {
             call.callController.observeWebRTCStateUpdated()
 
             return response
+        }
+
+        /// Runs the optional join interceptor without letting it block the join
+        /// flow indefinitely.
+        ///
+        /// If the interceptor completes first, the join flow continues
+        /// immediately. If the timeout completes first, the interceptor is
+        /// cancelled and the join continues. If the interceptor throws before
+        /// timing out, the error is wrapped and surfaced to the caller.
+        ///
+        /// - Parameters:
+        ///   - interceptor: The interceptor provided by the integrator.
+        ///   - call: The call that is about to become active.
+        ///   - timeout: The maximum number of seconds the interceptor may delay
+        ///     the join flow.
+        /// - Throws: A `CallJoinInterceptionError` when the interceptor throws.
+        private func interceptJoinIfNeeded(
+            _ interceptor: CallJoinIntercepting?,
+            call: Call,
+            timeout: TimeInterval
+        ) async throws {
+            guard let interceptor else {
+                return
+            }
+
+            do {
+                try await withThrowingTaskGroup(of: Void.self) { group in
+                    group.addTask {
+                        try? await Task.sleep(nanoseconds: UInt64(timeout * 1_000_000_000))
+                    }
+
+                    group.addTask {
+                        try await interceptor.callReadyToJoin(call)
+                    }
+
+                    try await group.next()
+
+                    group.cancelAll()
+                }
+            } catch {
+                throw CallJoinInterceptionError(with: error)
+            }
         }
     }
 }

@@ -12,6 +12,7 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
         case leave
         case setDisconnectionTimeout
         case observeWebRTCStateUpdated
+        case trace
         case changeAudioState
         case changeVideoState
         case changeCameraMode
@@ -36,6 +37,8 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
         case leave(reason: String?)
 
         case observeWebRTCStateUpdated
+
+        case trace(WebRTCTrace)
 
         case changeAudioState(Bool)
 
@@ -67,6 +70,8 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
                 return reason ?? ""
             case .observeWebRTCStateUpdated:
                 return ()
+            case let .trace(trace):
+                return trace
             case let .changeAudioState(value):
                 return value
             case let .changeVideoState(value):
@@ -165,6 +170,11 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
     override func observeWebRTCStateUpdated() {
         stubbedFunctionInput[.observeWebRTCStateUpdated]?
             .append(.observeWebRTCStateUpdated)
+    }
+
+    override func trace(_ trace: WebRTCTrace) async {
+        stubbedFunctionInput[.trace]?
+            .append(.trace(trace))
     }
 
     override func changeVideoState(isEnabled: Bool) async throws {

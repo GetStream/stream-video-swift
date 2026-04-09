@@ -13,5 +13,15 @@ final class CallConfigurationTests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(timeout.join, 30)
         XCTAssertEqual(timeout.accept, 10)
         XCTAssertEqual(timeout.reject, 10)
+        XCTAssertEqual(timeout.joinInterception, 5)
+    }
+
+    func test_timeout_shouldReturnTestingTimeouts() {
+        let timeout = CallConfiguration.Timeout.testing
+
+        XCTAssertEqual(timeout.join, 10)
+        XCTAssertEqual(timeout.accept, 10)
+        XCTAssertEqual(timeout.reject, 10)
+        XCTAssertEqual(timeout.joinInterception, 10)
     }
 }

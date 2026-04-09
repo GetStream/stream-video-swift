@@ -564,6 +564,17 @@ class CallController: @unchecked Sendable {
         await webRTCCoordinator.didPerform(action)
     }
 
+    // MARK: - Call tracing
+
+    /// Records a call-level trace that should be forwarded into the WebRTC
+    /// tracing pipeline.
+    ///
+    /// This is used for call flow events that are not emitted by a lower-level
+    /// WebRTC component directly, such as join interception failures.
+    func trace(_ trace: WebRTCTrace) async {
+        await webRTCCoordinator.trace(trace)
+    }
+
     // MARK: - private
 
     private func handleParticipantsUpdated() {
