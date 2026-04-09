@@ -544,6 +544,8 @@ struct Stream_Video_Sfu_Signal_SendAnswerRequest {
 
   var sessionID: String = String()
 
+  var negotiationID: UInt32 = 0
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
@@ -1640,6 +1642,7 @@ extension Stream_Video_Sfu_Signal_SendAnswerRequest: SwiftProtobuf.Message, Swif
     1: .standard(proto: "peer_type"),
     2: .same(proto: "sdp"),
     3: .standard(proto: "session_id"),
+    4: .standard(proto: "negotiation_id"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1651,6 +1654,7 @@ extension Stream_Video_Sfu_Signal_SendAnswerRequest: SwiftProtobuf.Message, Swif
       case 1: try { try decoder.decodeSingularEnumField(value: &self.peerType) }()
       case 2: try { try decoder.decodeSingularStringField(value: &self.sdp) }()
       case 3: try { try decoder.decodeSingularStringField(value: &self.sessionID) }()
+      case 4: try { try decoder.decodeSingularUInt32Field(value: &self.negotiationID) }()
       default: break
       }
     }
@@ -1666,6 +1670,9 @@ extension Stream_Video_Sfu_Signal_SendAnswerRequest: SwiftProtobuf.Message, Swif
     if !self.sessionID.isEmpty {
       try visitor.visitSingularStringField(value: self.sessionID, fieldNumber: 3)
     }
+    if self.negotiationID != 0 {
+      try visitor.visitSingularUInt32Field(value: self.negotiationID, fieldNumber: 4)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -1673,6 +1680,7 @@ extension Stream_Video_Sfu_Signal_SendAnswerRequest: SwiftProtobuf.Message, Swif
     if lhs.peerType != rhs.peerType {return false}
     if lhs.sdp != rhs.sdp {return false}
     if lhs.sessionID != rhs.sessionID {return false}
+    if lhs.negotiationID != rhs.negotiationID {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
