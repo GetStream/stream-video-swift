@@ -910,22 +910,30 @@ struct Stream_Video_Sfu_Event_ParticipantJoined {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var callCid: String = String()
+  var callCid: String {
+    get {return _storage._callCid}
+    set {_uniqueStorage()._callCid = newValue}
+  }
 
   var participant: Stream_Video_Sfu_Models_Participant {
-    get {return _participant ?? Stream_Video_Sfu_Models_Participant()}
-    set {_participant = newValue}
+    get {return _storage._participant ?? Stream_Video_Sfu_Models_Participant()}
+    set {_uniqueStorage()._participant = newValue}
   }
   /// Returns true if `participant` has been explicitly set.
-  var hasParticipant: Bool {return self._participant != nil}
+  var hasParticipant: Bool {return _storage._participant != nil}
   /// Clears the value of `participant`. Subsequent reads from it will return its default value.
-  mutating func clearParticipant() {self._participant = nil}
+  mutating func clearParticipant() {_uniqueStorage()._participant = nil}
+
+  var isPinned: Bool {
+    get {return _storage._isPinned}
+    set {_uniqueStorage()._isPinned = newValue}
+  }
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
 
-  fileprivate var _participant: Stream_Video_Sfu_Models_Participant? = nil
+  fileprivate var _storage = _StorageClass.defaultInstance
 }
 
 /// ParticipantJoined is fired when a user leaves a call
@@ -985,6 +993,8 @@ struct Stream_Video_Sfu_Event_SubscriberOffer {
   var iceRestart: Bool = false
 
   var sdp: String = String()
+
+  var negotiationID: UInt32 = 0
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -2702,38 +2712,80 @@ extension Stream_Video_Sfu_Event_ParticipantJoined: SwiftProtobuf.Message, Swift
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .standard(proto: "call_cid"),
     2: .same(proto: "participant"),
+    3: .standard(proto: "is_pinned"),
   ]
 
+  fileprivate class _StorageClass: @unchecked Sendable {
+    var _callCid: String = String()
+    var _participant: Stream_Video_Sfu_Models_Participant? = nil
+    var _isPinned: Bool = false
+
+    static let defaultInstance = _StorageClass()
+
+    private init() {}
+
+    init(copying source: _StorageClass) {
+      _callCid = source._callCid
+      _participant = source._participant
+      _isPinned = source._isPinned
+    }
+  }
+
+  fileprivate mutating func _uniqueStorage() -> _StorageClass {
+    if !isKnownUniquelyReferenced(&_storage) {
+      _storage = _StorageClass(copying: _storage)
+    }
+    return _storage
+  }
+
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-    while let fieldNumber = try decoder.nextFieldNumber() {
-      // The use of inline closures is to circumvent an issue where the compiler
-      // allocates stack space for every case branch when no optimizations are
-      // enabled. https://github.com/apple/swift-protobuf/issues/1034
-      switch fieldNumber {
-      case 1: try { try decoder.decodeSingularStringField(value: &self.callCid) }()
-      case 2: try { try decoder.decodeSingularMessageField(value: &self._participant) }()
-      default: break
+    _ = _uniqueStorage()
+    try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
+      while let fieldNumber = try decoder.nextFieldNumber() {
+        // The use of inline closures is to circumvent an issue where the compiler
+        // allocates stack space for every case branch when no optimizations are
+        // enabled. https://github.com/apple/swift-protobuf/issues/1034
+        switch fieldNumber {
+        case 1: try { try decoder.decodeSingularStringField(value: &_storage._callCid) }()
+        case 2: try { try decoder.decodeSingularMessageField(value: &_storage._participant) }()
+        case 3: try { try decoder.decodeSingularBoolField(value: &_storage._isPinned) }()
+        default: break
+        }
       }
     }
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    // The use of inline closures is to circumvent an issue where the compiler
-    // allocates stack space for every if/case branch local when no optimizations
-    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
-    // https://github.com/apple/swift-protobuf/issues/1182
-    if !self.callCid.isEmpty {
-      try visitor.visitSingularStringField(value: self.callCid, fieldNumber: 1)
+    try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every if/case branch local when no optimizations
+      // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+      // https://github.com/apple/swift-protobuf/issues/1182
+      if !_storage._callCid.isEmpty {
+        try visitor.visitSingularStringField(value: _storage._callCid, fieldNumber: 1)
+      }
+      try { if let v = _storage._participant {
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+      } }()
+      if _storage._isPinned != false {
+        try visitor.visitSingularBoolField(value: _storage._isPinned, fieldNumber: 3)
+      }
     }
-    try { if let v = self._participant {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
-    } }()
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Stream_Video_Sfu_Event_ParticipantJoined, rhs: Stream_Video_Sfu_Event_ParticipantJoined) -> Bool {
-    if lhs.callCid != rhs.callCid {return false}
-    if lhs._participant != rhs._participant {return false}
+    if lhs._storage !== rhs._storage {
+      let storagesAreEqual: Bool = withExtendedLifetime((lhs._storage, rhs._storage)) { (_args: (_StorageClass, _StorageClass)) in
+        let _storage = _args.0
+        let rhs_storage = _args.1
+        if _storage._callCid != rhs_storage._callCid {return false}
+        if _storage._participant != rhs_storage._participant {return false}
+        if _storage._isPinned != rhs_storage._isPinned {return false}
+        return true
+      }
+      if !storagesAreEqual {return false}
+    }
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -2828,6 +2880,7 @@ extension Stream_Video_Sfu_Event_SubscriberOffer: SwiftProtobuf.Message, SwiftPr
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .standard(proto: "ice_restart"),
     2: .same(proto: "sdp"),
+    3: .standard(proto: "negotiation_id"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -2838,6 +2891,7 @@ extension Stream_Video_Sfu_Event_SubscriberOffer: SwiftProtobuf.Message, SwiftPr
       switch fieldNumber {
       case 1: try { try decoder.decodeSingularBoolField(value: &self.iceRestart) }()
       case 2: try { try decoder.decodeSingularStringField(value: &self.sdp) }()
+      case 3: try { try decoder.decodeSingularUInt32Field(value: &self.negotiationID) }()
       default: break
       }
     }
@@ -2850,12 +2904,16 @@ extension Stream_Video_Sfu_Event_SubscriberOffer: SwiftProtobuf.Message, SwiftPr
     if !self.sdp.isEmpty {
       try visitor.visitSingularStringField(value: self.sdp, fieldNumber: 2)
     }
+    if self.negotiationID != 0 {
+      try visitor.visitSingularUInt32Field(value: self.negotiationID, fieldNumber: 3)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Stream_Video_Sfu_Event_SubscriberOffer, rhs: Stream_Video_Sfu_Event_SubscriberOffer) -> Bool {
     if lhs.iceRestart != rhs.iceRestart {return false}
     if lhs.sdp != rhs.sdp {return false}
+    if lhs.negotiationID != rhs.negotiationID {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
