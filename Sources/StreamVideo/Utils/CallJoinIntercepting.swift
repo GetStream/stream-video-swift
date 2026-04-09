@@ -44,7 +44,7 @@ extension WebRTCTrace {
             id: nil,
             tag: "call.join.interception.failed",
             data: .init([
-                "errorType": String(describing: type(of: redactedError))
+                "error": String(describing: redactedError)
             ])
         )
     }

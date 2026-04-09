@@ -404,7 +404,7 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
             XCTAssertEqual(trace.tag, "call.join.interception.failed")
             XCTAssertEqual(
                 trace.data,
-                .init(["errorType": String(describing: TestError.self)])
+                .init(["error": String(describing: TestError())])
             )
         }
 
