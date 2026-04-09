@@ -246,8 +246,18 @@ final class SFUEventAdapter: @unchecked Sendable {
             }
 
             let showTrack = updatedParticipants.count < participantsThreshold
-            let participant = event.participant.toCallParticipant()
+            var participant = event.participant.toCallParticipant()
                 .withUpdated(showTrack: showTrack)
+
+            if event.isPinned {
+                participant = participant.withUpdated(
+                    pin: .init(
+                        isLocal: false,
+                        pinnedAt: Date()
+                    )
+                )
+            }
+
             updatedParticipants[event.participant.sessionID] = participant
             log.debug("Enqueue participant joined event: \(event.participant.name) success!")
 
@@ -459,11 +469,12 @@ final class SFUEventAdapter: @unchecked Sendable {
             let sessionIds = event.pins.map(\.sessionID)
 
             for (key, participant) in updatedParticipants {
-                if
-                    sessionIds.contains(key),
-                    (participant.pin == nil || participant.pin?.isLocal == true) {
-                    updatedParticipants[key] = participant
-                        .withUpdated(pin: .init(isLocal: false, pinnedAt: .init()))
+                if sessionIds.contains(key) {
+                    updatedParticipants[key] = participant.pin?.isLocal == false
+                        ? participant
+                        : participant.withUpdated(
+                            pin: .init(isLocal: false, pinnedAt: .init())
+                        )
                 } else {
                     updatedParticipants[key] = participant.withUpdated(pin: nil)
                 }
