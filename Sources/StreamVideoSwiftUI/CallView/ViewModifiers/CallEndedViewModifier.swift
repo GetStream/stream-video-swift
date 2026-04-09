@@ -38,6 +38,11 @@ private final class CallEndedViewModifierViewModel: ObservableObject, @unchecked
             .receive(on: DispatchQueue.main)
             .sink { [weak self] in self?.activeCall = $0 }
     }
+
+    func dismiss() {
+        activeCall = nil
+        lastCall = nil
+    }
 }
 
 @available(iOS 14.0, *)
@@ -59,14 +64,12 @@ private struct CallEndedViewModifier<Subview: View>: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .sheet(isPresented: $viewModel.isPresentingSubview) {
+            .sheet(isPresented: $viewModel.isPresentingSubview, onDismiss: { viewModel.dismiss() }) {
                 subviewProvider(viewModel.lastCall) {
                     viewModel.isPresentingSubview = false
-                    viewModel.lastCall = nil
                 }
                 .onDisappear {
                     viewModel.isPresentingSubview = false
-                    viewModel.lastCall = nil
                 }
             }
             .onReceive(viewModel.$activeCall.removeDuplicates { $0?.cId == $1?.cId }) { call in
