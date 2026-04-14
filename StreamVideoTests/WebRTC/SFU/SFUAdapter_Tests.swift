@@ -539,6 +539,83 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
         )
     }
 
+    // MARK: - consume
+
+    func test_subscriberOfferAndSubscriberICETrickle_bufferedOnSharedPublisher_replayedAcrossSeparateConsumes() async throws {
+        _ = subject
+
+        let bucket = ConsumableBucket(
+            subject.publisher.eraseToAnyPublisher()
+        )
+
+        var offer = Stream_Video_Sfu_Event_SubscriberOffer()
+        offer.sdp = .unique
+
+        var trickle = Stream_Video_Sfu_Models_ICETrickle()
+        trickle.sessionID = .unique
+        trickle.peerType = .subscriber
+        trickle.iceCandidate = .unique
+
+        let healthCheck = Stream_Video_Sfu_Event_HealthCheckResponse()
+
+        var replayedOffers: [Stream_Video_Sfu_Event_SubscriberOffer] = []
+        var replayedTrickles: [Stream_Video_Sfu_Models_ICETrickle] = []
+        var replayedHealthChecks: [Stream_Video_Sfu_Event_HealthCheckResponse] = []
+
+        let offerCancellable = subject
+            .publisher(eventType: Stream_Video_Sfu_Event_SubscriberOffer.self)
+            .sink { replayedOffers.append($0) }
+        let trickleCancellable = subject
+            .publisher(eventType: Stream_Video_Sfu_Models_ICETrickle.self)
+            .sink { replayedTrickles.append($0) }
+        let healthCheckCancellable = subject
+            .publisher(eventType: Stream_Video_Sfu_Event_HealthCheckResponse.self)
+            .sink { replayedHealthChecks.append($0) }
+
+        defer {
+            offerCancellable.cancel()
+            trickleCancellable.cancel()
+            healthCheckCancellable.cancel()
+        }
+
+        mockWebSocket.eventSubject.send(.sfuEvent(.subscriberOffer(offer)))
+        mockWebSocket.eventSubject.send(.sfuEvent(.iceTrickle(trickle)))
+        mockWebSocket.eventSubject.send(.sfuEvent(.healthCheckResponse(healthCheck)))
+
+        await wait(for: 0.1)
+
+        replayedOffers.removeAll()
+        replayedTrickles.removeAll()
+        replayedHealthChecks.removeAll()
+
+        subject.consume(
+            Stream_Video_Sfu_Event_SubscriberOffer.self,
+            bucket: bucket,
+            flush: false
+        )
+
+        await wait(for: 0.1)
+
+        XCTAssertEqual(replayedOffers.map(\.sdp), [offer.sdp])
+        XCTAssertTrue(replayedTrickles.isEmpty)
+        XCTAssertTrue(replayedHealthChecks.isEmpty)
+
+        subject.consume(
+            Stream_Video_Sfu_Models_ICETrickle.self,
+            bucket: bucket,
+            flush: true
+        )
+
+        await wait(for: 0.1)
+
+        XCTAssertEqual(replayedOffers.map(\.sdp), [offer.sdp])
+        XCTAssertEqual(
+            replayedTrickles.map(\.iceCandidate),
+            [trickle.iceCandidate]
+        )
+        XCTAssertTrue(replayedHealthChecks.isEmpty)
+    }
+
     // MARK: - webSocketClient(_:didUpdateConnectionState:)
 
     func test_didUpdateConnectionState_connectionStateWasUpdated() {

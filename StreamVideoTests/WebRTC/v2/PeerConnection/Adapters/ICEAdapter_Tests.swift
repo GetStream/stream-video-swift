@@ -177,6 +177,77 @@ final class ICEAdapterTests: XCTestCase, @unchecked Sendable {
         XCTAssertNil(candidate.sdpMid)
     }
 
+    func test_subscriberICETrickle_receivedBeforeRemoteDescription_addsCandidateAfterHasRemoteDescription() async throws {
+        let subscriber = ICEAdapter(
+            sessionID: sessionId,
+            peerType: .subscriber,
+            peerConnection: mockPeerConnection,
+            sfuAdapter: mockSFUStack.adapter
+        )
+
+        mockSFUStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
+        await wait(for: 0.5)
+
+        var event = Stream_Video_Sfu_Models_ICETrickle()
+        event.sessionID = sessionId
+        event.peerType = .subscriber
+        event.iceCandidate = """
+        {
+            "candidate":"\(String.unique)"
+        }
+        """
+
+        mockSFUStack.receiveEvent(.sfuEvent(.iceTrickle(event)))
+        await wait(for: 0.5)
+
+        XCTAssertEqual(mockPeerConnection.timesCalled(.addCandidate), 0)
+
+        mockPeerConnection
+            .subject
+            .send(
+                StreamRTCPeerConnection.HasRemoteDescription(
+                    sessionDescription: .init(type: .answer, sdp: .unique)
+                )
+            )
+
+        await fulfillment { self.mockPeerConnection.timesCalled(.addCandidate) == 1 }
+        _ = subscriber
+    }
+
+    func test_subscriberICETrickle_withPublisherPeerType_doesNotAddCandidateOnSubscriberAdapter() async throws {
+        let subscriber = ICEAdapter(
+            sessionID: sessionId,
+            peerType: .subscriber,
+            peerConnection: mockPeerConnection,
+            sfuAdapter: mockSFUStack.adapter
+        )
+
+        mockPeerConnection.stub(
+            for: \.remoteDescription,
+            with: RTCSessionDescription(
+                type: .answer,
+                sdp: .unique
+            )
+        )
+        mockSFUStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
+        await wait(for: 0.5)
+
+        var event = Stream_Video_Sfu_Models_ICETrickle()
+        event.sessionID = sessionId
+        event.peerType = .publisherUnspecified
+        event.iceCandidate = """
+        {
+            "candidate":"\(String.unique)"
+        }
+        """
+
+        mockSFUStack.receiveEvent(.sfuEvent(.iceTrickle(event)))
+        await wait(for: 0.5)
+
+        XCTAssertEqual(mockPeerConnection.timesCalled(.addCandidate), 0)
+        _ = subscriber
+    }
+
     // MARK: - Private helpers
 
     private func assertSFUTrickleTriggered(
