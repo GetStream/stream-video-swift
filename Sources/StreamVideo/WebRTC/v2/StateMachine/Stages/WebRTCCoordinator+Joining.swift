@@ -403,17 +403,25 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
                 try Task.checkCancellation()
 
-                // Once our PeerConnection have been created we consume the
-                // eventBucket we created above in order to re-apply any event
-                // that our PeerConnections missed during the initialisation.
+                // Once our PeerConnections have been created we replay the
+                // buffered SFU events that may have arrived before the
+                // subscriber stack was ready to observe them.
                 //
-                // Specifically, below we are consuming any SubscriberOffer event
-                // that has being received before our Subscriber was ready to
-                // process it. This scenario is possible to occur if we join
-                // a call where another user is already publishing audio.
+                // This is especially important when we join a call where
+                // another participant is already publishing audio. In that
+                // case the SFU can send both a subscriber offer and the
+                // associated subscriber ICE trickles before the subscriber
+                // peer connection and ICE adapter are fully configured.
                 sfuAdapter.consume(
                     Stream_Video_Sfu_Event_SubscriberOffer.self,
-                    bucket: subscriberEventBucket
+                    bucket: subscriberEventBucket,
+                    flush: false
+                )
+
+                sfuAdapter.consume(
+                    Stream_Video_Sfu_Models_ICETrickle.self,
+                    bucket: subscriberEventBucket,
+                    flush: true
                 )
 
                 try Task.checkCancellation()

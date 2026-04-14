@@ -270,20 +270,27 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         subjectSendEvent.send(LeaveEvent(hostname: host, payload: payload))
     }
 
-    /// Consumes events of a specified type from the given event bucket.
+    /// Replays buffered SFU events of a specified type.
     ///
-    /// This method retrieves all events of the specified type from the provided
-    /// `SFUEventBucket` and sends them through the WebSocket's event subject.
+    /// The bucket may contain a mix of SFU payloads collected while another
+    /// part of the join flow was not ready to observe them yet. Replayed
+    /// events are forwarded through the WebSocket event subject so existing
+    /// typed publishers can process them as if they had just arrived from the
+    /// network.
     ///
     /// - Parameters:
-    ///   - eventType: The type of events to consume.
-    ///   - bucket: The `SFUEventBucket` from which to consume events.
+    ///   - eventType: The type of buffered events to replay.
+    ///   - bucket: The bucket that stores buffered SFU payloads.
+    ///   - flush: When `true`, clears the bucket as part of consumption.
+    ///     Pass `false` when additional event types still need to be replayed
+    ///     from the same mixed bucket.
     func consume<EventType>(
         _ eventType: EventType.Type,
-        bucket: ConsumableBucket<Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload>
+        bucket: ConsumableBucket<Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload>,
+        flush: Bool
     ) {
         let events = bucket
-            .consume(flush: true)
+            .consume(flush: flush)
             .filter { $0.payload(EventType.self) != nil }
 
         guard !events.isEmpty else {
