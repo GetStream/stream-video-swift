@@ -4,9 +4,11 @@
 
 import Foundation
 
-/// Indicates which of two concurrently started tasks completed first.
+/// Indicates how a two-task race completed.
 ///
-/// Completion means the task either returned a value or threw an error.
+/// `.first` and `.second` mean that side completed by returning a value or
+/// throwing an error. `.cancelled` means the parent task was cancelled before
+/// either side won the race.
 ///
 /// - Important: The losing task is cancelled but not awaited. If it does not
 /// cooperate with cancellation, it may continue running in the background after
@@ -17,12 +19,19 @@ enum FirstTaskCompletedResult<First: Sendable, Second: Sendable>: @unchecked Sen
     case cancelled
 }
 
-/// Runs two tasks concurrently and returns as soon as either one completes.
+/// Runs two tasks concurrently and returns as soon as the race is resolved.
+///
+/// The race resolves when either operation returns, throws, or the parent task
+/// is cancelled.
 ///
 /// Unlike `withConcurrentChildrenTask`, this helper is intentionally
-/// unstructured with respect to the competing operations: once one operation
-/// completes, the other is cancelled and the helper returns immediately without
-/// awaiting the cancelled task.
+/// unstructured with respect to the competing operations: once the race is
+/// resolved, the other operation is cancelled and the helper returns
+/// immediately without awaiting the cancelled task.
+///
+/// Task handles are registered through a coordinator so a task created after
+/// the race has already resolved is cancelled as soon as its handle is
+/// observed, instead of being left running indefinitely.
 ///
 /// Use this helper when waiting for the loser to finish would block an
 /// important caller path, such as a timeout race.
@@ -37,7 +46,8 @@ func withFirstTaskCompleted<First: Sendable, Second: Sendable>(
         await withCheckedContinuation { continuation in
             coordinator.install(continuation)
 
-            coordinator.setFirstTask(
+            coordinator.setTask(
+                for: .first,
                 Task(priority: priority) {
                     let result: Result<First, Error>
                     do {
@@ -50,11 +60,12 @@ func withFirstTaskCompleted<First: Sendable, Second: Sendable>(
                         return
                     }
 
-                    coordinator.cancelSecondTask()
+                    coordinator.cancelTask(for: .second)
                 }
             )
 
-            coordinator.setSecondTask(
+            coordinator.setTask(
+                for: .second,
                 Task(priority: priority) {
                     let result: Result<Second, Error>
                     do {
@@ -67,7 +78,7 @@ func withFirstTaskCompleted<First: Sendable, Second: Sendable>(
                         return
                     }
 
-                    coordinator.cancelFirstTask()
+                    coordinator.cancelTask(for: .first)
                 }
             )
         }
@@ -80,7 +91,13 @@ func withFirstTaskCompleted<First: Sendable, Second: Sendable>(
     }
 }
 
+/// Serializes result delivery and task-handle management for the race.
+///
+/// This closes the gap between result resolution and task registration by
+/// cancelling any task whose handle is installed after the race has already
+/// resolved.
 private final class FirstTaskCompletedCoordinator<First: Sendable, Second: Sendable>: @unchecked Sendable {
+    enum TaskKey { case first, second }
     typealias Result = FirstTaskCompletedResult<First, Second>
 
     private let queue = UnfairQueue()
@@ -125,13 +142,18 @@ private final class FirstTaskCompletedCoordinator<First: Sendable, Second: Senda
         return true
     }
 
-    func setFirstTask(_ task: Task<Void, Never>) {
+    func setTask(for taskKey: TaskKey, _ task: Task<Void, Never>) {
         let shouldCancel = queue.sync { () -> Bool in
             guard resolvedResult == nil else {
                 return true
             }
 
-            firstTask = task
+            switch taskKey {
+            case .first:
+                firstTask = task
+            case .second:
+                secondTask = task
+            }
             return false
         }
 
@@ -140,43 +162,25 @@ private final class FirstTaskCompletedCoordinator<First: Sendable, Second: Senda
         }
     }
 
-    func setSecondTask(_ task: Task<Void, Never>) {
-        let shouldCancel = queue.sync { () -> Bool in
-            guard resolvedResult == nil else {
-                return true
+    func cancelTask(for taskKey: TaskKey) {
+        let task = queue.sync {
+            switch taskKey {
+            case .first:
+                let task = firstTask
+                firstTask = nil
+                return task
+            case .second:
+                let task = secondTask
+                secondTask = nil
+                return task
             }
-
-            secondTask = task
-            return false
-        }
-
-        if shouldCancel {
-            task.cancel()
-        }
-    }
-
-    func cancelFirstTask() {
-        let task = queue.sync {
-            let task = firstTask
-            firstTask = nil
-            return task
-        }
-
-        task?.cancel()
-    }
-
-    func cancelSecondTask() {
-        let task = queue.sync {
-            let task = secondTask
-            secondTask = nil
-            return task
         }
 
         task?.cancel()
     }
 
     func cancelAll() {
-        cancelFirstTask()
-        cancelSecondTask()
+        cancelTask(for: .first)
+        cancelTask(for: .second)
     }
 }
