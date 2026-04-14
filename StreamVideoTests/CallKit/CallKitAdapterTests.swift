@@ -79,6 +79,17 @@ final class CallKitAdapterTests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(callKitService.callSettings, callSettings)
     }
 
+    func test_participantAutoLeavePolicy_callKitServiceReceivedTheUpdatedValue() {
+        let policy = MockParticipantAutoLeavePolicy()
+
+        subject.participantAutoLeavePolicy = policy
+
+        XCTAssertEqual(
+            ObjectIdentifier(callKitService.participantAutoLeavePolicy as AnyObject),
+            ObjectIdentifier(policy)
+        )
+    }
+
     // MARK: - Private Helpers
 
     private func makeStreamVideo() async throws -> StreamVideo {
@@ -100,4 +111,10 @@ final class CallKitAdapterTests: XCTestCase, @unchecked Sendable {
 
         return client
     }
+}
+
+private final class MockParticipantAutoLeavePolicy:
+    ParticipantAutoLeavePolicy,
+    @unchecked Sendable {
+    var onPolicyTriggered: (() -> Void)?
 }

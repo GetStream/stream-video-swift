@@ -71,6 +71,8 @@ struct DemoCallingViewModifier: ViewModifier {
             }
             .onAppear {
                 guard !isAnonymous else { return }
+                callKitAdapter.participantAutoLeavePolicy =
+                    AppEnvironment.autoLeavePolicy.policy
                 callKitAdapter.registerForIncomingCalls()
                 callKitAdapter.iconTemplateImageData = UIImage(named: "logo")?.pngData()
                 configureVideoRenderingOptions()

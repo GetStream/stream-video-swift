@@ -32,6 +32,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         var isActive: Bool = false
         var ringingTimedOut: Bool = false
         var isEndedElsewhere: Bool = false
+        var leaveReason: String?
 
         init(
             call: Call,
@@ -121,6 +122,19 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     /// runs in the background. See `CallKitMissingPermissionPolicy`.
     open var missingPermissionPolicy: CallKitMissingPermissionPolicy = .none
 
+    /// The policy that decides whether CallKit-managed calls should leave
+    /// automatically when participant state changes.
+    open var participantAutoLeavePolicy: ParticipantAutoLeavePolicy =
+        DefaultParticipantAutoLeavePolicy() {
+        didSet {
+            var oldValue = oldValue
+            oldValue.onPolicyTriggered = nil
+            participantAutoLeavePolicy.onPolicyTriggered = { [weak self] in
+                self?.participantAutoLeavePolicyTriggered()
+            }
+        }
+    }
+
     var callSettings: CallSettings?
 
     /// The call controller used for managing calls.
@@ -170,6 +184,10 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             .filter { [weak self] _ in self?.applicationStateAdapter.state != .foreground }
             .debounce(for: 0.5, scheduler: DispatchQueue.global(qos: .userInteractive))
             .sink { [weak self] in self?.performMuteRequest($0) }
+
+        participantAutoLeavePolicy.onPolicyTriggered = { [weak self] in
+            self?.participantAutoLeavePolicyTriggered()
+        }
     }
 
     /// Report an incoming call to CallKit.
@@ -360,60 +378,17 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         _ cId: String,
         ringingTimedOut: Bool
     ) {
-        guard let callEndedEntry = callEntry(for: cId) else {
-            return
-        }
-        if ringingTimedOut {
-            callEndedEntry.ringingTimedOut = ringingTimedOut
-        } else {
-            callEndedEntry.isEndedElsewhere = true
-        }
-        set(callEndedEntry, for: callEndedEntry.callUUID)
-
-        log.debug(
-            """
-            CallEnded
-            callId:\(callEndedEntry.call.callId)
-            callType:\(callEndedEntry.call.callType)
-            callerId:\(callEndedEntry.createdBy?.id)
-            ringingTimedOut:\(callEndedEntry.ringingTimedOut)
-            isEndedElsewhere:\(callEndedEntry.isEndedElsewhere)
-            """,
-            subsystems: .callKit
-        )
-        Task(disposableBag: disposableBag) { [weak self] in
-            do {
-                // End the call.
-                try await self?.requestTransaction(
-                    CXEndCallAction(
-                        call: callEndedEntry.callUUID
-                    )
-                )
-            } catch {
-                log.error(error, subsystems: .callKit)
-            }
-        }
+        endCall(cId, ringingTimedOut: ringingTimedOut)
     }
 
     /// Handle when a participant leaves the call.
+    ///
+    /// The default implementation delegates auto-leave decisions to
+    /// `participantAutoLeavePolicy`.
     open func callParticipantLeft(
         _ response: CallSessionParticipantLeftEvent
     ) {
-        // End the call if only one participant remains.
-        /// in the call, we leave.
-        Task(disposableBag: disposableBag) { @MainActor [weak self] in
-            guard let self else {
-                return
-            }
-            if let call = callEntry(for: response.callCid)?.call,
-               call.state.participants.count == 1 {
-                log.debug(
-                    "Call will end as only one participant left in the call",
-                    subsystems: .callKit
-                )
-                callEnded(response.callCid, ringingTimedOut: false)
-            }
-        }
+        _ = response
     }
 
     // MARK: - CXProviderDelegate
@@ -585,7 +560,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 // is ended before or during the join flow.
                 eventPipelineSubject.send(.reject)
                 stackEntry.call.didPerform(.performEndCall)
-                stackEntry.call.leave()
+                stackEntry.call.leave(reason: stackEntry.leaveReason)
             } else {
                 do {
                     let rejectionReason = await streamVideo?
@@ -751,6 +726,65 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         log.debug(
             "\(type(of: self)) is now subscribed to CallEvent updates.",
             subsystems: .callKit
+        )
+    }
+
+    private func endCall(
+        _ cId: String,
+        ringingTimedOut: Bool,
+        leaveReason: String? = nil
+    ) {
+        guard let callEndedEntry = callEntry(for: cId) else {
+            return
+        }
+        if ringingTimedOut {
+            callEndedEntry.ringingTimedOut = ringingTimedOut
+        } else {
+            callEndedEntry.isEndedElsewhere = true
+        }
+        if let leaveReason {
+            callEndedEntry.leaveReason = leaveReason
+        }
+        set(callEndedEntry, for: callEndedEntry.callUUID)
+
+        log.debug(
+            """
+            CallEnded
+            callId:\(callEndedEntry.call.callId)
+            callType:\(callEndedEntry.call.callType)
+            callerId:\(callEndedEntry.createdBy?.id)
+            ringingTimedOut:\(callEndedEntry.ringingTimedOut)
+            isEndedElsewhere:\(callEndedEntry.isEndedElsewhere)
+            leaveReason:\(callEndedEntry.leaveReason ?? "nil")
+            """,
+            subsystems: .callKit
+        )
+        Task(disposableBag: disposableBag) { [weak self] in
+            do {
+                // End the call.
+                try await self?.requestTransaction(
+                    CXEndCallAction(
+                        call: callEndedEntry.callUUID
+                    )
+                )
+            } catch {
+                log.error(error, subsystems: .callKit)
+            }
+        }
+    }
+
+    private func participantAutoLeavePolicyTriggered() {
+        guard
+            let active,
+            let activeCallEntry = callEntry(for: active)
+        else {
+            return
+        }
+
+        endCall(
+            activeCallEntry.call.cId,
+            ringingTimedOut: false,
+            leaveReason: "auto-leave"
         )
     }
 

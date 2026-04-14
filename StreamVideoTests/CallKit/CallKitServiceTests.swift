@@ -797,7 +797,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
     // MARK: - callParticipantLeft
 
     @MainActor
-    func test_callParticipantLeft_participantsLeftMoreThanOne_callWasNotEnded() async throws {
+    func test_callParticipantLeft_defaultParticipantAutoLeavePolicy_callWasNotEnded() async throws {
         let firstCallUUID = UUID()
         uuidFactory.getResult = firstCallUUID
         let call = stubCall(response: defaultGetCallResponse)
@@ -820,26 +820,18 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
             )
         )
 
-        let callState = CallState(.dummy())
-        callState.participants = [.dummy(), .dummy()]
-        call.stub(for: \.state, with: callState)
         try await assertNotRequestTransaction(CXEndCallAction.self) {
             subject.callParticipantLeft(.dummy(callCid: call.cId))
         }
     }
 
     @MainActor
-    func test_callParticipantLeft_participantsLeftOnlyOne_callNotEnded() async throws {
+    func test_participantAutoLeavePolicyTriggered_activeCallEnded() async throws {
         let firstCallUUID = UUID()
         uuidFactory.getResult = firstCallUUID
-        let call = stubCall(
-            response: .dummy(
-                call: defaultGetCallResponse.call,
-                duration: "100",
-                members: [],
-                ownCapabilities: []
-            )
-        )
+        let call = stubCall(response: defaultGetCallResponse)
+        let participantAutoLeavePolicy = MockParticipantAutoLeavePolicy()
+        subject.participantAutoLeavePolicy = participantAutoLeavePolicy
         subject.streamVideo = mockedStreamVideo
 
         subject.reportIncomingCall(
@@ -859,13 +851,21 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
             )
         )
 
-        let callState = CallState(.dummy())
-        callState.participants = [.dummy()]
-        call.stub(for: \.state, with: callState)
-
         try await assertRequestTransaction(CXEndCallAction.self) {
-            subject.callParticipantLeft(.dummy(callCid: cid))
+            participantAutoLeavePolicy.trigger()
         }
+
+        subject.provider(
+            callProvider,
+            perform: CXEndCallAction(
+                call: firstCallUUID
+            )
+        )
+
+        let reason = try XCTUnwrap(
+            call.recordedInputPayload(String.self, for: .leave)?.first
+        )
+        XCTAssertEqual(reason, "auto-leave")
     }
 
     // MARK: - didActivate
@@ -1163,5 +1163,15 @@ private class MockUUIDFactory: UUIDProviding {
 
     func get() -> UUID {
         getResult ?? .init()
+    }
+}
+
+private final class MockParticipantAutoLeavePolicy:
+    ParticipantAutoLeavePolicy,
+    @unchecked Sendable {
+    var onPolicyTriggered: (() -> Void)?
+
+    func trigger() {
+        onPolicyTriggered?()
     }
 }
