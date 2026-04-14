@@ -164,6 +164,88 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
         }
     }
 
+    func test_handleParticipantJoined_givenPinnedEvent_whenPublished_thenAddsParticipantWithRemotePin() async throws {
+        let participant = CallParticipant.dummy()
+        var event = Stream_Video_Sfu_Event_ParticipantJoined()
+        event.participant = .init()
+        event.participant.userID = participant.sessionId
+        event.participant.sessionID = participant.sessionId
+        event.isPinned = true
+        let joinedAt = Date()
+
+        try await assert(
+            event,
+            wrappedEvent: .sfuEvent(.participantJoined(event)),
+            initialState: [.dummy()].reduce(into: [String: CallParticipant]()) { $0[$1.sessionId] = $1 }
+        ) {
+            guard let pin = $0[participant.sessionId]?.pin else {
+                return false
+            }
+
+            return $0[participant.sessionId]?.showTrack == true
+                && pin.isLocal == false
+                && pin.pinnedAt >= joinedAt
+        }
+    }
+
+    func test_handleParticipantJoined_givenUnpinnedEvent_whenPublished_thenAddsParticipantWithoutPin() async throws {
+        let participant = CallParticipant.dummy()
+        var event = Stream_Video_Sfu_Event_ParticipantJoined()
+        event.participant = .init()
+        event.participant.userID = participant.sessionId
+        event.participant.sessionID = participant.sessionId
+        event.isPinned = false
+
+        try await assert(
+            event,
+            wrappedEvent: .sfuEvent(.participantJoined(event)),
+            initialState: [.dummy()].reduce(into: [String: CallParticipant]()) { $0[$1.sessionId] = $1 }
+        ) {
+            $0[participant.sessionId] != nil
+                && $0[participant.sessionId]?.showTrack == true
+                && $0[participant.sessionId]?.pin == nil
+        }
+    }
+
+    func test_handlePinsChanged_givenParticipantJoinedWhilePinned_whenPublished_thenKeepsRemotePin() async throws {
+        let participant = CallParticipant.dummy()
+        var joinedEvent = Stream_Video_Sfu_Event_ParticipantJoined()
+        joinedEvent.participant = .init()
+        joinedEvent.participant.userID = participant.sessionId
+        joinedEvent.participant.sessionID = participant.sessionId
+        joinedEvent.isPinned = true
+
+        try await assert(
+            joinedEvent,
+            wrappedEvent: .sfuEvent(.participantJoined(joinedEvent)),
+            initialState: [:]
+        ) {
+            $0[participant.sessionId]?.pin?.isLocal == false
+        }
+
+        let participantsAfterJoin = await stateAdapter.participants
+        let joinedPinnedAt = try XCTUnwrap(
+            participantsAfterJoin[participant.sessionId]?.pin?.pinnedAt
+        )
+
+        var pinsChangedEvent = Stream_Video_Sfu_Event_PinsChanged()
+        var pinInfo = Stream_Video_Sfu_Models_Pin()
+        pinInfo.sessionID = participant.sessionId
+        pinsChangedEvent.pins = [pinInfo]
+
+        try await assert(
+            pinsChangedEvent,
+            wrappedEvent: .sfuEvent(.pinsUpdated(pinsChangedEvent)),
+            initialState: participantsAfterJoin
+        ) {
+            guard let pin = $0[participant.sessionId]?.pin else {
+                return false
+            }
+
+            return pin.isLocal == false && pin.pinnedAt >= joinedPinnedAt
+        }
+    }
+
     func test_handleParticipantJoined_givenEventWithRecording_whenPublished_thenDoesNotAddParticipant() async throws {
         let participant = CallParticipant.dummy()
         var event = Stream_Video_Sfu_Event_ParticipantJoined()
