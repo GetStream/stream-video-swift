@@ -86,7 +86,7 @@ private struct RingingCallDurationView: View {
 
     init(_ startRingingAt: Date) {
         self.startedRingingAt = startRingingAt
-        self._duration = .init(initialValue: Date().timeIntervalSince(startRingingAt))
+        self._duration = .init(initialValue: Date().timeIntervalSince(startRingingAt).rounded())
     }
 
     var body: some View {
