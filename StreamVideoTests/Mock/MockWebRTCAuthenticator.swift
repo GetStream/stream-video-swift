@@ -44,6 +44,11 @@ final class MockWebRTCAuthenticator: WebRTCAuthenticating, Mockable, @unchecked 
         }
     }
 
+    /// Called (and awaited) at the start of ``authenticate``.
+    /// Set to a suspending closure to block the mock until the
+    /// test is ready, preventing the connecting stage from racing.
+    var onAuthenticate: (@Sendable () async throws -> Void)?
+
     var stubbedProperty: [String: Any] = [:]
     var stubbedFunction: [FunctionKey: Any] = [:]
     @Atomic var stubbedFunctionInput: [FunctionKey: [MockFunctionInputKey]] = FunctionKey.allCases
@@ -92,6 +97,8 @@ final class MockWebRTCAuthenticator: WebRTCAuthenticating, Mockable, @unchecked 
                     options: options
                 )
             )
+
+        try await onAuthenticate?()
 
         switch stubbedFunction[.authenticate] as? Result<(SFUAdapter, JoinCallResponse), Error> {
         case let .success(result):

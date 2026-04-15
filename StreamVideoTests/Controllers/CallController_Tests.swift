@@ -3,6 +3,7 @@
 //
 
 import AVFoundation
+import Combine
 @testable import StreamVideo
 @preconcurrency import XCTest
 
@@ -305,6 +306,132 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
 
         let result = try await joinTask.value
         XCTAssertEqual(result.call.cid, expectedResponse.call.cid)
+    }
+
+    func test_joinCall_handlerEmitsBeforeNextValueSubscribes_responseIsDelivered() async throws {
+        let expectedResponse = JoinCallResponse.dummy(
+            call: .dummy(cid: "relay-cid")
+        )
+
+        // Stub authenticate to succeed so the connecting stage
+        // doesn't error out and kill the handler.
+        mockWebRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .webRTCAuthenticator
+            .stub(
+                for: .authenticate,
+                with: Result<(SFUAdapter, JoinCallResponse), Error>
+                    .success((
+                        mockWebRTCCoordinatorFactory
+                            .mockCoordinatorStack
+                            .sfuStack
+                            .adapter,
+                        expectedResponse
+                    ))
+            )
+
+        // waitForAuthentication succeeds so connecting completes and
+        // the handler propagates through the state machine stages.
+        mockWebRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .webRTCAuthenticator
+            .stub(
+                for: .waitForAuthentication,
+                with: Result<Void, Error>.success(())
+            )
+
+        let joinTask = Task {
+            try await self.subject.joinCall(
+                create: true,
+                callSettings: nil,
+                options: nil,
+                ring: false,
+                notify: false,
+                source: .inApp
+            )
+        }
+
+        // Wait for connect() to store the handler on the context
+        // and the connecting stage to begin.
+        await fulfillment {
+            self.mockWebRTCCoordinatorFactory
+                .mockCoordinatorStack
+                .coordinator
+                .stateMachine
+                .currentStage
+                .context
+                .joinResponseHandler != nil
+        }
+
+        // Send directly on the handler, simulating the coordinator
+        // completing before nextValue subscribes downstream.
+        mockWebRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .coordinator
+            .stateMachine
+            .currentStage
+            .context
+            .joinResponseHandler?
+            .send(expectedResponse)
+
+        let result = try await joinTask.value
+        XCTAssertEqual(result.call.cid, expectedResponse.call.cid)
+    }
+
+    func test_joinCall_handlerCompletesWithError_joinCallThrows() async throws {
+        let expectedError = ClientError("coordinator failed")
+
+        // Block the mock authenticator so the ConnectingStage's
+        // background Task cannot race and complete the handler
+        // before the test sends its own failure.
+        mockWebRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .webRTCAuthenticator
+            .onAuthenticate = { @Sendable in
+                try await Task.sleep(nanoseconds: UInt64(300 * 1_000_000_000))
+            }
+
+        var capturedHandler: PassthroughSubject<JoinCallResponse, Error>?
+        let handlerSet = expectation(
+            description: "joinResponseHandler was set"
+        )
+        let cancellable = mockWebRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .coordinator
+            .stateMachine
+            .publisher
+            .compactMap { $0.context.joinResponseHandler }
+            .first()
+            .sink { handler in
+                capturedHandler = handler
+                handlerSet.fulfill()
+            }
+
+        let joinTask = Task {
+            try await self.subject.joinCall(
+                create: true,
+                callSettings: nil,
+                options: nil,
+                ring: false,
+                notify: false,
+                source: .inApp
+            )
+        }
+
+        await fulfillment(of: [handlerSet], timeout: defaultTimeout)
+        cancellable.cancel()
+
+        capturedHandler?.send(completion: .failure(expectedError))
+
+        do {
+            _ = try await joinTask.value
+            XCTFail("Expected joinCall to throw.")
+        } catch {
+            XCTAssertEqual(
+                (error as? ClientError)?.localizedDescription,
+                expectedError.localizedDescription
+            )
+        }
     }
 
     // MARK: - cleanUp
