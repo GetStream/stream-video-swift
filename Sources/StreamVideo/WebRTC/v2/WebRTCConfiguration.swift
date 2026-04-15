@@ -46,7 +46,7 @@ enum WebRTCConfiguration {
             authenticate: 5,
             connect: 5,
             join: 5,
-            migrationCompletion: 5,
+            migrationCompletion: 2,
             publisherSetUpBeforeNegotiation: 5,
             audioSessionConfigurationCompletion: 5,
             audioSessionReadinessWatchdog: 5,

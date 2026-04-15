@@ -381,6 +381,16 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
     func test_joinCall_handlerCompletesWithError_joinCallThrows() async throws {
         let expectedError = ClientError("coordinator failed")
 
+        // Block the mock authenticator so the ConnectingStage's
+        // background Task cannot race and complete the handler
+        // before the test sends its own failure.
+        mockWebRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .webRTCAuthenticator
+            .onAuthenticate = {
+                try await Task.sleep(nanoseconds: UInt64(300 * 1_000_000_000))
+            }
+
         var capturedHandler: PassthroughSubject<JoinCallResponse, Error>?
         let handlerSet = expectation(
             description: "joinResponseHandler was set"

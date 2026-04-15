@@ -148,7 +148,6 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
         let httpClient = httpClientWithGetCallResponse()
         let rejectCallResponse = RejectCallResponse(duration: "1")
         let data = try! JSONEncoder.default.encode(rejectCallResponse)
-        httpClient.dataResponses.append(data)
         let streamVideo = StreamVideo.mock(httpClient: httpClient)
         self.streamVideo = streamVideo
         let call = streamVideo.call(callType: callType, callId: callId)
@@ -165,6 +164,7 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
         XCTAssert(streamVideo.state.ringingCall?.cId == call.cId)
 
         // When
+        httpClient.dataResponses.append(data)
         try await call.reject()
         await fulfillment {
             streamVideo.state.activeCall == nil
