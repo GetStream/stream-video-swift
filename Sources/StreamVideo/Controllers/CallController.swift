@@ -134,9 +134,29 @@ class CallController: @unchecked Sendable {
         source: JoinSource,
         policy: WebRTCJoinPolicy = .default
     ) async throws -> JoinCallResponse {
-        // Each join attempt uses a fresh delivery subject so a failed attempt
-        // cannot complete future retries on the same controller.
+        /// Each join attempt creates a fresh `PassthroughSubject` so
+        /// that a failure from a previous attempt cannot accidentally
+        /// complete a future retry on the same controller.
+        ///
+        /// The subject is handed to the WebRTC coordinator via
+        /// ``WebRTCCoordinator/connect(create:callSettings:options:ring:notify:source:joinResponseHandler:policy:)``
+        /// which stores it on the state-machine context. Once the
+        /// coordinator's joining flow succeeds, it calls
+        /// ``WebRTCCoordinator.StateMachine.Stage/reportJoinCompletion()``
+        /// which sends the ``JoinCallResponse`` on this subject.
+        ///
+        /// Because `PassthroughSubject` does **not** replay values,
+        /// a response emitted between the moment `connect()` returns
+        /// and the moment `nextValue` establishes its Combine
+        /// subscription would be silently lost — causing a spurious
+        /// 30-second timeout (`TimeOutError`).
+        ///
+        /// Wrapping the subject with `.relay()` eliminates this race:
+        /// the relay subscribes eagerly and synchronously, buffering
+        /// the latest value in a `CurrentValueSubject` so that
+        /// `nextValue` always receives it regardless of timing.
         let joinCallResponseSubject = PassthroughSubject<JoinCallResponse, Error>()
+        let relay = joinCallResponseSubject.relay()
 
         try await webRTCCoordinator.connect(
             create: create,
@@ -150,7 +170,7 @@ class CallController: @unchecked Sendable {
         )
 
         do {
-            return try await joinCallResponseSubject
+            return try await relay
                 .nextValue(timeout: WebRTCConfiguration.timeout.join)
         } catch {
             await webRTCCoordinator.cleanUp()
