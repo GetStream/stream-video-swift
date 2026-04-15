@@ -221,6 +221,85 @@ final class CallState_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(subject.callSettings, initialCallSettings)
     }
 
+    func test_update_fromCallResponse_withoutStartedSession_keepsDurationReset() {
+        let subject = CallState(.dummy())
+
+        subject.update(
+            from: CallResponse.dummy(
+                session: .dummy()
+            )
+        )
+
+        XCTAssertNil(subject.startedAt)
+        XCTAssertEqual(subject.duration, 0)
+    }
+
+    func test_update_fromCallResponse_withStartedAt_usesActualCallStart() {
+        let subject = CallState(.dummy())
+        let startedAt = Date(timeIntervalSinceNow: -95)
+
+        subject.update(
+            from: CallResponse.dummy(
+                session: .dummy(
+                    liveStartedAt: Date(timeIntervalSinceNow: -120),
+                    startedAt: startedAt
+                )
+            )
+        )
+
+        XCTAssertEqual(subject.startedAt, startedAt)
+        XCTAssertEqual(
+            subject.duration,
+            Date().timeIntervalSince(startedAt),
+            accuracy: 1
+        )
+    }
+
+    func test_update_fromCallResponse_withOnlyLiveStartedAt_usesLiveStartedAt() {
+        let subject = CallState(.dummy())
+        let liveStartedAt = Date(timeIntervalSinceNow: -42)
+
+        subject.update(
+            from: CallResponse.dummy(
+                session: .dummy(
+                    liveStartedAt: liveStartedAt
+                )
+            )
+        )
+
+        XCTAssertEqual(subject.startedAt, liveStartedAt)
+        XCTAssertEqual(
+            subject.duration,
+            Date().timeIntervalSince(liveStartedAt),
+            accuracy: 1
+        )
+    }
+
+    func test_update_fromCallResponse_withEndedSession_resetsDuration() {
+        let subject = CallState(.dummy())
+        let startedAt = Date(timeIntervalSinceNow: -30)
+
+        subject.update(
+            from: CallResponse.dummy(
+                session: .dummy(
+                    startedAt: startedAt
+                )
+            )
+        )
+
+        subject.update(
+            from: CallResponse.dummy(
+                session: .dummy(
+                    endedAt: Date(),
+                    startedAt: startedAt
+                )
+            )
+        )
+
+        XCTAssertNil(subject.startedAt)
+        XCTAssertEqual(subject.duration, 0)
+    }
+
     // MARK: - Private helpers
 
     private func assertParticipantsUpdate(

@@ -9,66 +9,120 @@ import SwiftUI
 /// A view that presents the call's duration and recording state.
 public struct CallDurationView: View {
 
-    @Injected(\.colors) private var colors: Colors
-    @Injected(\.fonts) private var fonts: Fonts
-    @Injected(\.images) private var images: Images
-    @Injected(\.formatters.mediaDuration) private var formatter: MediaDurationFormatter
+    private let showRingingDuration: Bool
 
-    @State private var duration: TimeInterval
     @ObservedObject private var viewModel: CallViewModel
 
-    @MainActor
-    public init(_ viewModel: CallViewModel) {
+    /// Creates a duration view for the provided call view model.
+    ///
+    /// - Parameters:
+    ///   - viewModel: The view model that supplies the current calling state and
+    ///     in-call duration updates.
+    ///   - showRingingDuration: When `true`, the view shows a locally tracked
+    ///     timer while the call is still ringing in the outgoing state. Once the
+    ///     call is connected, the view always switches to the backend-provided
+    ///     call duration.
+    public init(_ viewModel: CallViewModel, showRingingDuration: Bool = true) {
         self.viewModel = viewModel
-        _duration = .init(initialValue: viewModel.call?.state.duration ?? 0)
+        self.showRingingDuration = showRingingDuration
     }
 
     public var body: some View {
-        Group {
-            if duration > 0, let formattedDuration = formatter.format(duration) {
-                HStack(spacing: 4) {
-                    iconView
-                        .foregroundColor(foregroundColor)
-
-                    TimeView(formattedDuration)
-                        .layoutPriority(2)
-                }
-                .padding(.horizontal)
-                .padding(.vertical, 4)
-                .background(Color(colors.participantBackground))
-                .clipShape(Capsule())
-            } else {
-                EmptyView()
-            }
-        }
-        .onReceive(viewModel.call?.state.$duration) { self.duration = $0 }
-        .accessibility(identifier: accessibilityIdentifier)
+        contentView
     }
 
     // MARK: - Private Helpers
-
-    private var foregroundColor: Color {
-        viewModel.recordingState == .recording
-            ? colors.inactiveCallControl
-            : colors.onlineIndicatorColor
-    }
-
-    @ViewBuilder
-    private var iconView: some View {
-        if viewModel.recordingState == .recording {
-            images.recordIcon
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: 12)
-        } else {
-            EmptyView()
-        }
-    }
 
     private var accessibilityIdentifier: String {
         viewModel.recordingState == .recording
             ? "recordingView"
             : "callDurationView"
+    }
+
+    @ViewBuilder
+    private var contentView: some View {
+        switch viewModel.callingState {
+        case .outgoing where showRingingDuration:
+            RingingCallDurationView(Date())
+                .accessibility(identifier: accessibilityIdentifier)
+        case .inCall:
+            InCallDurationView(viewModel)
+                .accessibility(identifier: accessibilityIdentifier)
+        default:
+            EmptyView()
+        }
+    }
+}
+
+private struct InCallDurationView: View {
+    @Injected(\.colors) private var colors: Colors
+    @Injected(\.images) private var images: Images
+
+    let viewModel: CallViewModel
+    @State private var duration: TimeInterval
+
+    init(_ viewModel: CallViewModel) {
+        self.viewModel = viewModel
+        self._duration = .init(initialValue: viewModel.call?.state.duration ?? 0)
+    }
+
+    var body: some View {
+        DurationView(duration: duration) {
+            if viewModel.recordingState == .recording {
+                images.recordIcon
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 12)
+                    .foregroundColor(colors.inactiveCallControl)
+            }
+        }
+        .onReceive(viewModel.call?.state.$duration) { self.duration = $0 }
+    }
+}
+
+private struct RingingCallDurationView: View {
+    private let startedRingingAt: Date
+    @State private var duration: TimeInterval
+
+    init(_ startRingingAt: Date) {
+        self.startedRingingAt = startRingingAt
+        self._duration = .init(initialValue: Date().timeIntervalSince(startRingingAt).rounded())
+    }
+
+    var body: some View {
+        DurationView(duration: duration) { EmptyView() }
+            .onReceive(DefaultTimer.publish(every: 1).receive(on: DispatchQueue.main)) { _ in duration += 1 }
+    }
+}
+
+private struct DurationView<IconView: View>: View {
+
+    @Injected(\.colors) private var colors: Colors
+    @Injected(\.formatters.mediaDuration) private var formatter: MediaDurationFormatter
+
+    let duration: TimeInterval
+    private let iconView: IconView
+
+    init(duration: TimeInterval, @ViewBuilder iconView: () -> IconView) {
+        self.duration = duration
+        self.iconView = iconView()
+    }
+
+    var body: some View {
+        if duration > 0, let formattedDuration = formatter.format(duration) {
+            HStack(spacing: 4) {
+                iconView
+
+                TimeView(formattedDuration)
+                    .layoutPriority(2)
+            }
+            .padding(.horizontal)
+            .padding(.vertical, 4)
+            .background(Color(colors.participantBackground))
+            .clipShape(Capsule())
+        } else {
+            EmptyView()
+        }
     }
 }
 

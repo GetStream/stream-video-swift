@@ -58,7 +58,6 @@ class CallController: @unchecked Sendable {
     private var cachedLocation: String?
     private let initialCallSettings: CallSettings
 
-    private var joinCallResponseFetchObserver: AnyCancellable?
     private var webRTCClientSessionIDObserver: AnyCancellable?
     private var webRTCClientStateObserver: AnyCancellable?
     private var webRTCParticipantsObserver: AnyCancellable?
@@ -105,6 +104,8 @@ class CallController: @unchecked Sendable {
         }
     }
 
+    func sessionID() async -> String { await webRTCCoordinator.stateAdapter.sessionID }
+
     /// Joins a call with the provided information and join source.
     /// The returned `JoinCallResponse` is emitted only after the call flow has
     /// reached the connected state.
@@ -133,20 +134,9 @@ class CallController: @unchecked Sendable {
         source: JoinSource,
         policy: WebRTCJoinPolicy = .default
     ) async throws -> JoinCallResponse {
-        joinCallResponseFetchObserver?.cancel()
-        joinCallResponseFetchObserver = nil
-
         // Each join attempt uses a fresh delivery subject so a failed attempt
         // cannot complete future retries on the same controller.
         let joinCallResponseSubject = PassthroughSubject<JoinCallResponse, Error>()
-        joinCallResponseFetchObserver = joinCallResponseSubject
-            .compactMap { $0 }
-            .sinkTask(storeIn: disposableBag) { [weak self] in await self?.didFetch($0) }
-
-        defer {
-            joinCallResponseFetchObserver?.cancel()
-            joinCallResponseFetchObserver = nil
-        }
 
         try await webRTCCoordinator.connect(
             create: create,
@@ -670,16 +660,6 @@ class CallController: @unchecked Sendable {
             return cachedLocation
         }
         return try await LocationFetcher.getLocation()
-    }
-
-    private func didFetch(_ response: JoinCallResponse) async {
-        let sessionId = await webRTCCoordinator.stateAdapter.sessionID
-        Task(disposableBag: disposableBag) { @MainActor [weak self] in
-            self?.call?.state.sessionId = sessionId
-            self?.call?.update(recordingState: response.call.recording ? .recording : .noRecording)
-            self?.call?.state.ownCapabilities = response.ownCapabilities
-            self?.call?.state.update(from: response)
-        }
     }
 
     private func webRTCClientDidUpdateStage(

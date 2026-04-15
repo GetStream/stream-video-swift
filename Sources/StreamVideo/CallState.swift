@@ -77,12 +77,11 @@ public class CallState: ObservableObject {
 
     @Published public internal(set) var updatedAt: Date = .distantPast
     @Published public internal(set) var startsAt: Date?
-    @Published public internal(set) var startedAt: Date? {
-        didSet {
-            setupDurationTimer()
-        }
-    }
-
+    /// The time when the active call session started.
+    ///
+    /// This value is populated from the backend session payload once the call
+    /// has actually started. It excludes any ringing or pre-join time.
+    @Published public internal(set) var startedAt: Date?
     @Published public internal(set) var endedAt: Date?
     @Published public internal(set) var endedBy: User?
     @Published public internal(set) var custom: [String: RawJSON] = [:]
@@ -93,12 +92,7 @@ public class CallState: ObservableObject {
     @Published public internal(set) var transcribing: Bool = false
     @Published public internal(set) var captioning: Bool = false
     @Published public internal(set) var egress: EgressResponse? { didSet { didUpdate(egress) } }
-    @Published public internal(set) var session: CallSessionResponse? {
-        didSet {
-            didUpdate(session)
-        }
-    }
-
+    @Published public internal(set) var session: CallSessionResponse?
     @Published public internal(set) var reconnectionStatus = ReconnectionStatus.connected
     @Published public internal(set) var anonymousParticipantCount: UInt32 = 0
     @Published public internal(set) var participantCount: UInt32 = 0
@@ -106,6 +100,10 @@ public class CallState: ObservableObject {
     @Published public internal(set) var callSettings: CallSettings = .default
 
     @Published public internal(set) var isCurrentUserScreensharing: Bool = false
+    /// The elapsed duration of the active call session in seconds.
+    ///
+    /// The timer begins only after the backend reports a started session and is
+    /// reset when that session ends. Ringing time is not included.
     @Published public internal(set) var duration: TimeInterval = 0
     @Published public internal(set) var statsReport: CallStatsReport?
 
@@ -372,48 +370,88 @@ public class CallState: ObservableObject {
         }
     }
     
-    internal func update(from response: GetOrCreateCallResponse) {
-        update(from: response.call)
+    internal func update(
+        from response: GetOrCreateCallResponse,
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line
+    ) {
+        update(from: response.call, file: file, function: function, line: line)
         mergeMembers(response.members)
         ownCapabilities = response.ownCapabilities
     }
     
-    internal func update(from response: JoinCallResponse) {
-        update(from: response.call)
+    internal func update(
+        from response: JoinCallResponse,
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line
+    ) {
+        update(from: response.call, file: file, function: function, line: line)
         mergeMembers(response.members)
         ownCapabilities = response.ownCapabilities
         statsCollectionInterval = response.statsOptions.reportingIntervalMs / 1000
     }
     
-    internal func update(from response: GetCallResponse) {
-        update(from: response.call)
+    internal func update(
+        from response: GetCallResponse,
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line
+    ) {
+        update(from: response.call, file: file, function: function, line: line)
         mergeMembers(response.members)
         ownCapabilities = response.ownCapabilities
     }
     
-    internal func update(from response: CallStateResponseFields) {
-        update(from: response.call)
+    internal func update(
+        from response: CallStateResponseFields,
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line
+    ) {
+        update(from: response.call, file: file, function: function, line: line)
         mergeMembers(response.members)
         ownCapabilities = response.ownCapabilities
     }
     
-    internal func update(from response: UpdateCallResponse) {
-        update(from: response.call)
+    internal func update(
+        from response: UpdateCallResponse,
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line
+    ) {
+        update(from: response.call, file: file, function: function, line: line)
         mergeMembers(response.members)
         ownCapabilities = response.ownCapabilities
     }
     
-    internal func update(from event: CallCreatedEvent) {
-        update(from: event.call)
+    internal func update(
+        from event: CallCreatedEvent,
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line
+    ) {
+        update(from: event.call, file: file, function: function, line: line)
         mergeMembers(event.members)
     }
     
-    internal func update(from event: CallRingEvent) {
-        update(from: event.call)
+    internal func update(
+        from event: CallRingEvent,
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line
+    ) {
+        update(from: event.call, file: file, function: function, line: line)
         mergeMembers(event.members)
     }
     
-    internal func update(from response: CallResponse) {
+    internal func update(
+        from response: CallResponse,
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line
+    ) {
         custom = response.custom
         createdAt = response.createdAt
         updatedAt = response.updatedAt
@@ -426,6 +464,7 @@ public class CallState: ObservableObject {
         captioning = response.captioning
         blockedUserIds = Set(response.blockedUserIds.map { $0 })
         team = response.team
+        configureDuration(for: response.session, file: file, function: function, line: line)
         session = response.session
         settings = response.settings
         egress = response.egress
@@ -521,40 +560,52 @@ public class CallState: ObservableObject {
         individualRecordingStatus = egress?.individualRecording?.status == runningStatus
         compositeRecordingStatus = egress?.compositeRecording?.status == runningStatus
     }
-    
-    private func didUpdate(_ session: CallSessionResponse?) {
-        guard let session else { return }
-        if let startedAt = session.startedAt {
-            self.startedAt = startedAt
-        } else if let liveStartedAt = session.liveStartedAt {
-            startedAt = liveStartedAt
-        } else if startedAt == nil {
-            /// If we don't receive a value from the SFU we start the timer on the current date.
-            startedAt = Date()
+
+    private func configureDuration(
+        for session: CallSessionResponse?,
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line
+    ) {
+        func reset() {
+            durationCancellable?.cancel()
+            durationCancellable = nil
+
+            duration = 0
+            startedAt = nil
         }
-        
-        if session.liveEndedAt != nil {
-            resetTimer()
-        }
-    }
-    
-    private func setupDurationTimer() {
-        resetTimer()
-        durationCancellable = DefaultTimer
-            .publish(every: 1.0)
-            .receive(on: DispatchQueue.main)
-            .compactMap { [weak self] _ in
-                if let startedAt = self?.startedAt {
-                    return Date().timeIntervalSince(startedAt)
-                } else {
-                    return 0
-                }
+
+        guard let session else {
+            if startedAt == nil {
+                reset()
             }
-            .assign(to: \.duration, onWeak: self)
-    }
-    
-    private func resetTimer() {
-        durationCancellable?.cancel()
-        durationCancellable = nil
+            return
+        }
+
+        if session.endedAt != nil {
+            reset()
+        } else if session.liveEndedAt != nil {
+            reset()
+        } else if let newStartedAt = session.startedAt ?? session.liveStartedAt {
+            guard newStartedAt != startedAt else {
+                return
+            }
+
+            let now = Date()
+            let newDuration = now.timeIntervalSince(newStartedAt).rounded()
+
+            durationCancellable?.cancel()
+            durationCancellable = nil
+            durationCancellable = DefaultTimer
+                .publish(every: 1.0)
+                .receive(on: DispatchQueue.main)
+                .map { _ in Date().timeIntervalSince(newStartedAt) }
+                .assign(to: \.duration, onWeak: self)
+
+            self.duration = newDuration
+            self.startedAt = newStartedAt
+        } else if startedAt == nil {
+            reset()
+        }
     }
 }
