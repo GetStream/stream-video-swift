@@ -387,7 +387,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         mockWebRTCCoordinatorFactory
             .mockCoordinatorStack
             .webRTCAuthenticator
-            .onAuthenticate = {
+            .onAuthenticate = { @Sendable in
                 try await Task.sleep(nanoseconds: UInt64(300 * 1_000_000_000))
             }
 
