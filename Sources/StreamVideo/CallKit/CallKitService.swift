@@ -237,7 +237,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 }
 
                 if streamVideo.state.ringingCall?.cId != callEntry.call.cId {
-                    Task(disposableBag: disposableBag) { [weak self] in
+                    Task(disposableBag: disposableBag) { @MainActor [weak self] in
                         self?.streamVideo?.state.ringingCall = callEntry.call
                     }
                 }

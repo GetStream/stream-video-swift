@@ -84,6 +84,27 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         )
     }
 
+    func test_trace_forwardsTraceToStatsAdapter() async {
+        let statsAdapter = MockWebRTCStatsAdapter()
+        let expected = WebRTCTrace(status: .available(.great))
+
+        await mockWebRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .set(statsAdapter: statsAdapter)
+
+        await subject.trace(expected)
+
+        XCTAssertEqual(
+            statsAdapter.recordedInputPayload(
+                WebRTCTrace.self,
+                for: .trace
+            )?.first,
+            expected
+        )
+    }
+
     // MARK: - setCall
 
     func test_setCall_updatesSessionIdCorrectly() async throws {

@@ -477,6 +477,16 @@ final class WebRTCCoordinator: @unchecked Sendable {
         await stateAdapter.trace(.init(action))
     }
 
+    // MARK: - Call Tracing
+
+    /// Forwards a call-level trace to the shared tracing adapter.
+    ///
+    /// This keeps call-flow diagnostics, such as intercepted joins, in the
+    /// same trace stream as lower-level WebRTC events.
+    func trace(_ trace: WebRTCTrace) async {
+        await stateAdapter.trace(trace)
+    }
+
     // MARK: - Private
 
     /// Creates the state machine for managing WebRTC stages.

@@ -138,6 +138,12 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     }
 
     /// Joins the current call.
+    ///
+    /// The SDK resolves the join source, performs the backend join request,
+    /// updates local call state, and then completes the joined transition. When
+    /// `joinInterceptor` is provided, the SDK waits for it after the join
+    /// response has been applied locally but before the call is marked as the
+    /// active call.
     /// - Parameters:
     ///  - create: whether the call should be created if it doesn't exist.
     ///  - options: configuration options for the call.
@@ -145,7 +151,11 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     ///  - notify: whether the participants should be notified about the call.
     ///  - callSettings: optional call settings.
     ///  - policy: controls when the join request is considered complete.
-    /// - Throws: An error if the call could not be joined.
+    ///  - joinInterceptor: An optional interceptor that can delay or abort the
+    ///    final joined transition after the join response has been received and
+    ///    applied to local state.
+    /// - Throws: An error if the call could not be joined or if
+    ///   `joinInterceptor` throws.
     @discardableResult
     public func join(
         create: Bool = false,
@@ -153,7 +163,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         ring: Bool = false,
         notify: Bool = false,
         callSettings: CallSettings? = nil,
-        policy: WebRTCJoinPolicy = .default
+        policy: WebRTCJoinPolicy = .default,
+        joinInterceptor: CallJoinIntercepting? = nil
     ) async throws -> JoinCallResponse {
         /// Determines the source from which the join action was initiated.
         ///
@@ -222,7 +233,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                                 notify: notify,
                                 source: joinSource,
                                 deliverySubject: deliverySubject,
-                                policy: policy
+                                policy: policy,
+                                joinInterceptor: joinInterceptor
                             )
                         )
                     )

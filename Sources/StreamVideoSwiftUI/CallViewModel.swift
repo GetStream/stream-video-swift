@@ -198,6 +198,14 @@ open class CallViewModel: ObservableObject {
     /// Returns the noiseCancellationFilter if available.
     public var noiseCancellationAudioFilter: AudioFilter? { streamVideo.videoConfig.noiseCancellationFilter }
 
+    /// Optional interceptor invoked after the call join response has been
+    /// applied locally but before the SDK treats the call as fully entered.
+    ///
+    /// Assign this when your app needs to perform readiness work during the
+    /// join flow, such as waiting for another participant or validating an
+    /// external precondition. Throw from the interceptor to fail the join.
+    public var callJoinInterceptor: CallJoinIntercepting?
+
     private var participantUpdates: AnyCancellable?
     private var blockedUserUpdates: AnyCancellable?
     private var reconnectionUpdates: AnyCancellable?
@@ -551,7 +559,8 @@ open class CallViewModel: ObservableObject {
                     create: true,
                     options: options,
                     ring: false,
-                    callSettings: settings
+                    callSettings: settings,
+                    joinInterceptor: callJoinInterceptor
                 )
                 
                 temporaryCallSettings = call.state.callSettings
@@ -910,7 +919,8 @@ open class CallViewModel: ObservableObject {
                     options: options,
                     ring: ring,
                     callSettings: settings,
-                    policy: policy
+                    policy: policy,
+                    joinInterceptor: callJoinInterceptor
                 )
                 try Task.checkCancellation()
                 save(call: resolvedCall)
@@ -1085,6 +1095,11 @@ open class CallViewModel: ObservableObject {
                 setActiveCall(call)
             }
         case .outgoing where call?.cId == event.callCid:
+            // Mirror `joinCall` so the incoming UI is dismissed before
+            // `enterCall` finishes the async join flow, which may now be
+            // delayed by a `callJoinInterceptor`.
+            setCallingState(.joining)
+
             skipCallStateUpdates = false
             enterCall(
                 call: call,

@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🔄 Changed
 - Added optional leave reasons to `Call.leave` and `CallViewModel.hangUp`, and propagated them through the WebRTC leave flow so SFU leave requests include explicit end-of-call context. [#1100](https://github.com/GetStream/stream-video-swift/pull/1100)
+- Added an optional join interception hook so apps can delay or abort call entry after the join response is applied locally. [#1108](https://github.com/GetStream/stream-video-swift/pull/1108)
 
 ### 🐞 Fixed
 - Prevent abrupt call endings caused by audio-session readiness timing. [#1098](https://github.com/GetStream/stream-video-swift/pull/1098)

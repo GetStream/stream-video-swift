@@ -137,6 +137,24 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         XCTAssert(callViewModel.callingState == .outgoing)
     }
 
+    func test_startCall_callJoinInterceptor_passesInterceptorToCall() async {
+        let interceptor = CallJoinInterceptor_Mock()
+
+        await prepare()
+        subject.callJoinInterceptor = interceptor
+
+        subject.startCall(
+            callType: callType,
+            callId: callId,
+            members: participants
+        )
+
+        await fulfilmentInMainActor { self.mockCall.recordedJoinInterceptors.count == 1 }
+
+        let recordedInterceptor = mockCall.recordedJoinInterceptors.first as? CallJoinInterceptor_Mock
+        XCTAssertTrue(recordedInterceptor === interceptor)
+    }
+
     func test_callKitJoiningEventOnInit_setsCallingStateToJoiningAndAssignsCall() async {
         // Given
         let callKitService = MockCallKitService()
@@ -831,6 +849,24 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
                 video: true
             )
         )
+    }
+
+    func test_joinAndRingCall_callJoinInterceptor_passesInterceptorToCall() async {
+        let interceptor = CallJoinInterceptor_Mock()
+
+        await prepare()
+        subject.callJoinInterceptor = interceptor
+
+        subject.joinAndRingCall(
+            callType: callType,
+            callId: callId,
+            members: participants
+        )
+
+        await fulfilmentInMainActor { self.mockCall.recordedJoinInterceptors.count == 1 }
+
+        let recordedInterceptor = mockCall.recordedJoinInterceptors.first as? CallJoinInterceptor_Mock
+        XCTAssertTrue(recordedInterceptor === interceptor)
     }
 
     func test_joinAndRingCall_usesLocalCallSettingsOverrides() async throws {
@@ -1625,6 +1661,10 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         ) { self.subject.callingState == expected }
         #endif
     }
+}
+
+private final class CallJoinInterceptor_Mock: CallJoinIntercepting, @unchecked Sendable {
+    func callReadyToJoin(_ call: Call) async throws {}
 }
 
 extension User {
