@@ -45,6 +45,16 @@ final class RelayPublisher_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(result, 3)
     }
 
+    func test_optionalNilValueSentBeforeSubscription_isReplayed() async throws {
+        let source = PassthroughSubject<Int?, Error>()
+        let relay = source.relay()
+
+        source.send(nil)
+
+        let result = try await relay.nextValue(timeout: 2)
+        XCTAssertNil(result)
+    }
+
     // MARK: - Completion
 
     func test_upstreamCompletion_isForwarded() async {

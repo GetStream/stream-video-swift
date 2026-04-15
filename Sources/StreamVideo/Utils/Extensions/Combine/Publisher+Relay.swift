@@ -4,14 +4,21 @@
 
 import Combine
 
+private enum RelayBuffer<Output> {
+    case empty
+    case value(Output)
+}
+
 extension Publisher where Output: Sendable {
 
     /// Eagerly subscribes to the upstream publisher and replays the
-    /// latest emitted value to every new downstream subscriber.
+    /// latest emitted value to every new downstream subscriber while
+    /// the upstream publisher remains active.
     ///
     /// Unlike operators such as `.share()`, `.relay()` subscribes
     /// **synchronously** at call-time, so values emitted before a
-    /// downstream subscriber attaches are never lost.
+    /// downstream subscriber attaches are available to later subscribers.
+    /// Upstream completion is forwarded immediately.
     ///
     /// ```swift
     /// let source = PassthroughSubject<Int, Error>()
@@ -26,13 +33,14 @@ extension Publisher where Output: Sendable {
 }
 
 /// A publisher that eagerly subscribes to its upstream and replays
-/// the latest value to late subscribers.
+/// the latest value to late subscribers while the upstream remains
+/// active.
 ///
 /// Created via the ``Publisher/relay()`` operator.
 final class RelayPublisher<Output, Failure: Error>: Publisher,
     @unchecked Sendable {
 
-    private let buffer = CurrentValueSubject<Output?, Failure>(nil)
+    private let buffer = CurrentValueSubject<RelayBuffer<Output>, Failure>(.empty)
     private var upstreamCancellable: AnyCancellable?
 
     init<P: Publisher>(
@@ -42,7 +50,7 @@ final class RelayPublisher<Output, Failure: Error>: Publisher,
             receiveCompletion: { [buffer] in
                 buffer.send(completion: $0)
             },
-            receiveValue: { [buffer] in buffer.send($0) }
+            receiveValue: { [buffer] in buffer.send(.value($0)) }
         )
     }
 
@@ -56,7 +64,12 @@ final class RelayPublisher<Output, Failure: Error>: Publisher,
         subscriber: S
     ) where S.Input == Output, S.Failure == Failure {
         buffer
-            .compactMap { $0 }
+            .compactMap {
+                guard case let .value(value) = $0 else {
+                    return nil
+                }
+                return value
+            }
             .receive(subscriber: subscriber)
     }
 }
