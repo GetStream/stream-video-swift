@@ -6,7 +6,17 @@
 
 final class MockCallAuthenticator: @unchecked Sendable {
 
+    typealias AuthenticateHandler = (
+        Bool,
+        Bool,
+        String?,
+        [String]?,
+        Bool,
+        CreateCallOptions?
+    ) async throws -> JoinCallResponse
+
     var authenticateResult: Result<JoinCallResponse, Error> = .failure(ClientError.Unknown())
+    var authenticateHandler: AuthenticateHandler?
 
     private(set) var authenticateCalledWithInput: [(
         create: Bool,
@@ -35,6 +45,16 @@ final class MockCallAuthenticator: @unchecked Sendable {
                 options
             )
         )
+        if let authenticateHandler {
+            return try await authenticateHandler(
+                create,
+                ring,
+                migratingFrom,
+                migratingFromList,
+                notify,
+                options
+            )
+        }
         switch authenticateResult {
         case let .success(result):
             return result

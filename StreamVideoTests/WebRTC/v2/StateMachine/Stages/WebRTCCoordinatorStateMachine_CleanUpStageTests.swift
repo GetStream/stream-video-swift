@@ -134,6 +134,9 @@ final class WebRTCCoordinatorStateMachine_CleanUpStageTests: XCTestCase, @unchec
         subject.context.reconnectionStrategy = .rejoin
         subject.context.disconnectionSource = .userInitiated
         subject.context.flowError = ClientError()
+        subject.context.rejoinMaxAttempts = 2
+        subject.context.rejoinAttemptWindow = 30
+        subject.context.rejoinAttemptTimestamps = [.init()]
         subject.context.isRejoiningFromSessionID = .unique
         subject.context.migratingFromSFU = .unique
         subject.context.migrationStatusObserver = .init(
@@ -160,6 +163,9 @@ final class WebRTCCoordinatorStateMachine_CleanUpStageTests: XCTestCase, @unchec
         XCTAssertEqual(subject.context.reconnectionStrategy, .unknown)
         XCTAssertNil(subject.context.disconnectionSource)
         XCTAssertNil(subject.context.flowError)
+        XCTAssertEqual(subject.context.rejoinMaxAttempts, 5)
+        XCTAssertEqual(subject.context.rejoinAttemptWindow, 120)
+        XCTAssertTrue(subject.context.rejoinAttemptTimestamps.isEmpty)
         XCTAssertNil(subject.context.isRejoiningFromSessionID)
         XCTAssertTrue(subject.context.migratingFromSFU.isEmpty)
         XCTAssertNil(subject.context.migrationStatusObserver)
