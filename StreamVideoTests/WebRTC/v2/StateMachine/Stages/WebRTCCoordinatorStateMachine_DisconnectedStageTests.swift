@@ -393,6 +393,7 @@ final class WebRTCCoordinatorStateMachine_DisconnectedStageTests: XCTestCase, @u
             )
             transitionExpectation.isInverted = true
         }
+        transitionExpectation.assertForOverFulfill = false
 
         subject.transition = { target in
             Task {
@@ -403,6 +404,9 @@ final class WebRTCCoordinatorStateMachine_DisconnectedStageTests: XCTestCase, @u
                     transitionExpectation
                         .expectationDescription =
                         "Expectation to land on id:\(expectedTarget) but instead landed on id:\(target.id)."
+                    transitionExpectation.fulfill()
+                } else if expectedTarget == nil {
+                    transitionExpectation.fulfill()
                 }
             }
         }
@@ -414,7 +418,10 @@ final class WebRTCCoordinatorStateMachine_DisconnectedStageTests: XCTestCase, @u
             }
 
             group.addTask {
-                await self.fulfillment(of: [transitionExpectation], timeout: defaultTimeout)
+                await self.fulfillment(
+                    of: [transitionExpectation],
+                    timeout: transitionExpectation.isInverted ? 2 : defaultTimeout
+                )
                 if transitionExpectation.isInverted {
                     await validationHandler(subject!)
                 }

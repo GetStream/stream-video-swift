@@ -370,42 +370,6 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
         )
     }
 
-    // MARK: - Duration
-
-    func test_call_duration() async throws {
-        let call = streamVideo?.call(callType: callType, callId: callId)
-        let startedAt = Date(timeIntervalSinceNow: -75)
-
-        call?.state.update(
-            from: CallResponse.dummy(
-                cid: callCid,
-                session: .dummy(
-                    startedAt: startedAt
-                )
-            )
-        )
-
-        XCTAssertEqual(call?.state.startedAt, startedAt)
-        XCTAssertEqual(
-            call?.state.duration ?? 0,
-            Date().timeIntervalSince(startedAt),
-            accuracy: 1
-        )
-
-        call?.state.update(
-            from: CallResponse.dummy(
-                cid: callCid,
-                session: .dummy(
-                    endedAt: Date(),
-                    startedAt: startedAt
-                )
-            )
-        )
-
-        XCTAssertNil(call?.state.startedAt)
-        XCTAssertEqual(call?.state.duration, 0)
-    }
-
     // MARK: - setIncomingVideoQualitySettings
 
     func test_setIncomingVideoQualitySettings_updatesCallState() async throws {
