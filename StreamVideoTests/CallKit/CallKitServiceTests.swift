@@ -855,12 +855,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
             participantAutoLeavePolicy.trigger()
         }
 
-        subject.provider(
-            callProvider,
-            perform: CXEndCallAction(
-                call: firstCallUUID
-            )
-        )
+        await fulfillment { call.timesCalled(.leave) == 1 }
 
         let reason = try XCTUnwrap(
             call.recordedInputPayload(String.self, for: .leave)?.first
