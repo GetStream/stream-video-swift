@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Prevent outgoing ringing time from being counted toward call duration. [#1106](https://github.com/GetStream/stream-video-swift/pull/1106)
 - Replay buffered subscriber ICE trickles during join so remote audio does not wait for a later subscriber ICE restart before becoming audible. [#1111](https://github.com/GetStream/stream-video-swift/pull/1111)
 - Fix join-call timeout caused by a `PassthroughSubject` race where the response was emitted before the subscription was established. [#1113](https://github.com/GetStream/stream-video-swift/pull/1113)
+- Handle CallKit ringing edge cases by ending already-handled incoming calls with explicit leave reasons when they were answered, rejected, missed, or ended elsewhere. [#1114](https://github.com/GetStream/stream-video-swift/pull/1114)
 
 # [1.45.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.45.0)
 _March 31, 2026_

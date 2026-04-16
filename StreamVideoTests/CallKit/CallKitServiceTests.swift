@@ -226,19 +226,46 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
     func test_reportIncomingCall_streamVideoReconnectsAndCallIsAccepted_callWasEnded() async throws {
         stubConnectionState(to: .disconnected(error: nil))
 
-        try await assertCallWasHandled(wasAccepted: true)
+        try await assertCallWasHandled(
+            wasAccepted: true,
+            expectedLeaveReason: "user-responded-elsehwhere"
+        )
     }
 
     func test_reportIncomingCall_streamVideoReconnectsAndCallIsRejected_callWasEnded() async throws {
         stubConnectionState(to: .disconnected(error: nil))
 
-        try await assertCallWasHandled(wasRejected: true)
+        try await assertCallWasHandled(
+            wasRejected: true,
+            expectedLeaveReason: "user-responded-elsehwhere"
+        )
+    }
+
+    func test_reportIncomingCall_streamVideoReconnectsAndCallIsMissed_callWasEnded() async throws {
+        stubConnectionState(to: .disconnected(error: nil))
+
+        try await assertCallWasHandled(
+            wasMissed: true,
+            expectedLeaveReason: "user-responded-elsehwhere"
+        )
     }
 
     func test_reportIncomingCall_streamVideoReconnectsAndCallIsRejectedByEveryoneElse_callWasEnded() async throws {
         stubConnectionState(to: .disconnected(error: nil))
 
-        try await assertCallWasHandled(wasRejectedByEveryoneElse: true)
+        try await assertCallWasHandled(
+            wasRejectedByEveryoneElse: true,
+            expectedLeaveReason: "other-participants-rejected"
+        )
+    }
+
+    func test_reportIncomingCall_streamVideoReconnectsAndCallHasEndedElsewhere_callWasEnded() async throws {
+        stubConnectionState(to: .disconnected(error: nil))
+
+        try await assertCallWasHandled(
+            endedAt: .init(),
+            expectedLeaveReason: "call-ended-elsewhere"
+        )
     }
 
     func test_reportIncomingCall_streamVideoReconnectsCallerDidNotReject_callWasNotEnded() async throws {
@@ -269,19 +296,46 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
     func test_reportIncomingCall_streamVideoConnectedAndCallIsAccepted_callWasEnded() async throws {
         stubConnectionState(to: .connected)
 
-        try await assertCallWasHandled(wasAccepted: true)
+        try await assertCallWasHandled(
+            wasAccepted: true,
+            expectedLeaveReason: "user-responded-elsehwhere"
+        )
     }
 
     func test_reportIncomingCall_streamVideoConnectedAndCallIsRejected_callWasEnded() async throws {
         stubConnectionState(to: .connected)
 
-        try await assertCallWasHandled(wasRejected: true)
+        try await assertCallWasHandled(
+            wasRejected: true,
+            expectedLeaveReason: "user-responded-elsehwhere"
+        )
+    }
+
+    func test_reportIncomingCall_streamVideoConnectedAndCallIsMissed_callWasEnded() async throws {
+        stubConnectionState(to: .connected)
+
+        try await assertCallWasHandled(
+            wasMissed: true,
+            expectedLeaveReason: "user-responded-elsehwhere"
+        )
     }
 
     func test_reportIncomingCall_streamVideoConnectedAndCallIsRejectedByEveryoneElse_callWasEnded() async throws {
         stubConnectionState(to: .connected)
 
-        try await assertCallWasHandled(wasRejectedByEveryoneElse: true)
+        try await assertCallWasHandled(
+            wasRejectedByEveryoneElse: true,
+            expectedLeaveReason: "other-participants-rejected"
+        )
+    }
+
+    func test_reportIncomingCall_streamVideoConnectedAndCallHasEndedElsewhere_callWasEnded() async throws {
+        stubConnectionState(to: .connected)
+
+        try await assertCallWasHandled(
+            endedAt: .init(),
+            expectedLeaveReason: "call-ended-elsewhere"
+        )
     }
 
     @MainActor
@@ -477,7 +531,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
             XCTFail()
         case .ring:
             XCTFail()
-        case .setVideoFilter(videoFilter: let videoFilter):
+        case .setVideoFilter:
             XCTFail()
         }
     }
@@ -794,6 +848,38 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(reason, "timeout")
     }
 
+    @MainActor
+    func test_callEnded_leaveReasonProvided_expectedReasonIsForwardedToReject() async throws {
+        let call = stubCall(response: defaultGetCallResponse)
+        subject.streamVideo = mockedStreamVideo
+
+        subject.reportIncomingCall(
+            cid,
+            localizedCallerName: localizedCallerName,
+            callerId: callerId,
+            hasVideo: false
+        ) { _ in }
+
+        try await assertRequestTransaction(CXEndCallAction.self) {
+            subject.callEnded(
+                cid,
+                ringingTimedOut: false,
+                leaveReason: "call-ended-elsewhere"
+            )
+        }
+
+        await fulfillment { call.timesCalled(.reject) == 1 }
+
+        let reason = try XCTUnwrap(call.recordedInputPayload(String.self, for: .reject)?.first)
+        XCTAssertEqual(reason, "call-ended-elsewhere")
+    }
+
+    func test_checkIfCallWasHandled_streamVideoNil_returnsNotConfiguredReason() {
+        let result = subject.checkIfCallWasHandled(callState: defaultGetCallResponse)
+
+        XCTAssertEqual(result, "not-configured")
+    }
+
     // MARK: - callParticipantLeft
 
     @MainActor
@@ -1066,9 +1152,13 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         otherMembers: [MemberResponse] = [.dummy()],
         wasAccepted: Bool = false,
         wasRejected: Bool = false,
-        wasRejectedByEveryoneElse: Bool = false
+        wasMissed: Bool = false,
+        wasRejectedByEveryoneElse: Bool = false,
+        endedAt: Date? = nil,
+        expectedLeaveReason: String
     ) async throws {
         let acceptedBy = wasAccepted ? [user.id: Date()] : [:]
+        let missedBy = wasMissed ? [user.id: Date()] : [:]
         let rejectedBy: [String: Date] = {
             if wasRejected {
                 return [user.id: Date()]
@@ -1080,11 +1170,13 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
                 return [:]
             }
         }()
-        stubCall(
+        let call = stubCall(
             response: .dummy(
                 call: .dummy(
+                    endedAt: endedAt,
                     session: .dummy(
                         acceptedBy: acceptedBy,
+                        missedBy: missedBy,
                         rejectedBy: rejectedBy
                     )
                 ),
@@ -1101,6 +1193,16 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
                 hasVideo: false
             ) { _ in }
         }
+
+        await fulfillment { call.timesCalled(MockCall.MockCallFunctionKey.reject) == 1 }
+
+        let reason = try XCTUnwrap(
+            call.recordedInputPayload(
+                String.self,
+                for: MockCall.MockCallFunctionKey.reject
+            )?.first
+        )
+        XCTAssertEqual(reason, expectedLeaveReason)
     }
 
     @MainActor
