@@ -268,21 +268,19 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                     .reportCall()
 
                 let callState = try await callEntry.call.get()
-                if !checkIfCallWasHandled(callState: callState) {
-                    callEntry.createdBy = callState.call.createdBy.toUser
-                    setUpRingingTimer(for: callState)
-                } else {
+                if let leaveReason = checkIfCallWasHandled(callState: callState) {
                     log.debug(
-                        """
-                        Rejecting VoIP incoming call as it has been handled.
-                        callUUID:\(callUUID)
-                        cid:\(cid) 
-                        callerId:\(callerId)
-                        callerName:\(localizedCallerName)
-                        """,
+                        "Ending call with reason:\(leaveReason) { uuid:\(callUUID), cid:\(cid), callerId:\(callerId), callerName:\(localizedCallerName) }",
                         subsystems: .callKit
                     )
-                    callEnded(cid, ringingTimedOut: false)
+                    callEnded(
+                        cid,
+                        ringingTimedOut: false,
+                        leaveReason: leaveReason
+                    )
+                } else {
+                    callEntry.createdBy = callState.call.createdBy.toUser
+                    setUpRingingTimer(for: callState)
                 }
             } catch {
                 log.error(
@@ -376,10 +374,23 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         callCache.remove(for: newCallEntry.call.cId)
     }
 
-    /// Handle call end event.
+    /// Handles a ringing or active CallKit call ending.
+    ///
+    /// Calling this method requests the matching `CXEndCallAction`. If the call
+    /// is still ringing, the eventual reject request uses `leaveReason` when
+    /// provided; otherwise the SDK derives a rejection reason from the current
+    /// ringing state.
+    ///
+    /// - Parameters:
+    ///   - cId: The call CID managed by CallKit.
+    ///   - ringingTimedOut: Whether the ringing timer elapsed before the user
+    ///     answered.
+    ///   - leaveReason: An explicit backend rejection reason to use for ringing
+    ///     calls that were already handled elsewhere.
     open func callEnded(
         _ cId: String,
-        ringingTimedOut: Bool
+        ringingTimedOut: Bool,
+        leaveReason: String? = nil
     ) {
         endCall(cId, ringingTimedOut: ringingTimedOut)
     }
@@ -569,12 +580,16 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 stackEntry.call.leave(reason: stackEntry.leaveReason)
             } else {
                 do {
-                    let rejectionReason = await streamVideo?
-                        .rejectionReasonProvider
-                        .reason(
-                            for: stackEntry.call.cId,
-                            ringTimeout: stackEntry.ringingTimedOut
-                        )
+                    let rejectionReason = if let leaveReason = stackEntry.leaveReason {
+                        leaveReason
+                    } else {
+                        await streamVideo?
+                            .rejectionReasonProvider
+                            .reason(
+                                for: stackEntry.call.cId,
+                                ringTimeout: stackEntry.ringingTimedOut
+                            )
+                    }
                     log.debug(
                         """
                         Rejecting with reason: \(rejectionReason ?? "nil")
@@ -639,32 +654,110 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         try await callController.requestTransaction(with: action)
     }
 
-    /// Return whether this call was already accepted or rejected.
-    open func checkIfCallWasHandled(callState: GetCallResponse) -> Bool {
+    /// Returns a backend leave reason when an incoming ringing call was
+    /// already handled elsewhere.
+    ///
+    /// The backend can transition the call state before this device finishes
+    /// presenting the CallKit UI. When that happens, we stop the local
+    /// ringing flow immediately and preserve the backend reason so the
+    /// eventual reject request matches what already happened remotely.
+    ///
+    /// The decision order is intentionally explicit and mirrors the
+    /// confirmed product rules:
+    /// 1. The call already ended.
+    /// 2. The current user already accepted, rejected, or missed it on
+    ///    another device.
+    /// 3. The creator rejected it.
+    /// 4. Every remaining participant except the current user and creator
+    ///    rejected it.
+    ///
+    /// - Parameter callState: The latest call state fetched from the backend
+    ///   before starting the local ringing timer.
+    /// - Returns: A backend leave reason when the call should stop ringing
+    ///   immediately, or `nil` when the local device should keep ringing.
+    ///   The current mapping is:
+    ///   - `call-has-ended`
+    ///   - `user-responded-elsewhere`
+    ///   - `creator-rejected`
+    ///   - `all-other-participants-rejected`
+    open func checkIfCallWasHandled(callState: GetCallResponse) -> String? {
         guard let streamVideo else {
             log.warning(
                 "CallKit operation:\(#function) cannot be fulfilled because StreamVideo is nil.",
                 subsystems: .callKit
             )
-            return false
+            return "not-configured"
         }
 
-        var allMembers = callState.members.map(\.user.toUser)
-        let creator = callState.call.createdBy.toUser
-        let isUserInMembersArray = allMembers.filter { $0.id == creator.id }.isEmpty == false
-        if !isUserInMembersArray {
-            allMembers.append(creator)
+        guard callState.call.endedAt == nil else {
+            log.info("Call has ended before the user respond to it", subsystems: .callKit)
+            return "call-has-ended"
         }
-        let allCallees = allMembers.filter { $0.id != creator.id }
 
+        // The current-user branch is evaluated before every remote-participant
+        // branch because another device owned by the same user should always
+        // win over remote participant state.
         let currentUserId = streamVideo.user.id
-        let acceptedBy = callState.call.session?.acceptedBy ?? [:]
-        let rejectedBy = callState.call.session?.rejectedBy ?? [:]
-        let isAccepted = acceptedBy[currentUserId] != nil
-        let isRejected = rejectedBy[currentUserId] != nil
-        let isRejectedByEveryoneElse = (allCallees.endIndex > 1)
-            && rejectedBy.keys.filter { $0 != currentUserId }.count == (allCallees.endIndex - 1)
-        return isAccepted || isRejected || isRejectedByEveryoneElse
+        let hasCurrentUserAcceptedElsewhere =
+            callState.call.session?.acceptedBy[currentUserId] != nil
+        let hasCurrentUserRejectedElsewhere =
+            callState.call.session?.rejectedBy[currentUserId] != nil
+        let hasCurrentUserMissed = callState.call.session?.missedBy[currentUserId] != nil
+
+        guard
+            !hasCurrentUserAcceptedElsewhere,
+            !hasCurrentUserRejectedElsewhere,
+            !hasCurrentUserMissed
+        else {
+            var message = "Call has been handled by current user {"
+            message += " acceptedElsewhere:\(hasCurrentUserAcceptedElsewhere)"
+            message += ", rejectedElsewhere:\(hasCurrentUserRejectedElsewhere)"
+            message += ", missed:\(hasCurrentUserMissed)"
+            message += " }"
+            log.info(message, subsystems: .callKit)
+            return "user-responded-elsewhere"
+        }
+
+        let rejectedParticipantIds = Set((callState.call.session?.rejectedBy ?? [:]).keys)
+        let creatorId = callState.call.createdBy.id
+
+        // The creator branch is separate from the "all other participants"
+        // branch because product treats it as its own handled-call condition,
+        // even though the backend still reports both cases through
+        // `session.rejectedBy`.
+        guard !rejectedParticipantIds.contains(creatorId) else {
+            log.info(
+                "Call has been rejected by the creator { creatorId:\(creatorId) }",
+                subsystems: .callKit
+            )
+            return "creator-rejected"
+        }
+
+        // The creator is handled by the dedicated branch above. The
+        // "all other participants" rule explicitly excludes both the current
+        // user and the creator, so this set models only the remaining remote
+        // participants that must all reject before we stop ringing.
+        let otherParticipantIds = Set(
+            callState.members
+                .map(\.userId)
+                .filter { $0 != currentUserId && $0 != creatorId }
+        )
+        let rejectedByOtherParticipantsCount =
+            rejectedParticipantIds.intersection(otherParticipantIds).endIndex
+
+        guard
+            otherParticipantIds.isEmpty == false,
+            otherParticipantIds.isSubset(of: rejectedParticipantIds)
+        else {
+            return nil
+        }
+
+        var message = "Call has been rejected by other participants {"
+        message += " otherParticipantsCount:\(otherParticipantIds.endIndex)"
+        message += ", rejectedByOtherParticipantsCount:\(rejectedByOtherParticipantsCount)"
+        message += " }"
+        log.info(message, subsystems: .callKit)
+        return "all-other-participants-rejected"
     }
 
     /// Start the ringing timeout timer for the call.
