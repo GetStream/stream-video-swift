@@ -131,3 +131,6 @@ buildServer.json
 
 # zed
 .zed
+
+# Codex local environment
+.codex/
