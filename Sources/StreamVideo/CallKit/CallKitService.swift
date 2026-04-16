@@ -122,10 +122,13 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     /// runs in the background. See `CallKitMissingPermissionPolicy`.
     open var missingPermissionPolicy: CallKitMissingPermissionPolicy = .none
 
-    /// The policy that decides whether CallKit-managed calls should leave
-    /// automatically when participant state changes.
-    open var participantAutoLeavePolicy: ParticipantAutoLeavePolicy =
-        DefaultParticipantAutoLeavePolicy() {
+    /// The policy that decides whether CallKit-managed calls
+    /// should leave automatically when participant state changes.
+    ///
+    /// - Important: Assign a **dedicated** policy instance.
+    ///   Do not share the same instance with ``CallViewModel``
+    ///   because each consumer overwrites `onPolicyTriggered`.
+    open var participantAutoLeavePolicy: ParticipantAutoLeavePolicy = LastParticipantAutoLeavePolicy() {
         didSet {
             var oldValue = oldValue
             oldValue.onPolicyTriggered = nil

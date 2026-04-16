@@ -67,6 +67,12 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         super.tearDown()
     }
 
+    // MARK: - participantAutoLeavePolicy
+
+    func test_participantAutoLeavePolicy_hasExpectedDefaultValue() {
+        XCTAssertTrue(subject.participantAutoLeavePolicy is LastParticipantAutoLeavePolicy)
+    }
+
     // MARK: - reportIncomingCall
 
     @MainActor
