@@ -73,7 +73,7 @@ final class WebRTCTracesAdapter: WebRTCTracing, @unchecked Sendable {
     /// Updating these will reset trace event collection for the respective role,
     /// flush prior traces, and attach to the new event stream.
     var publisher: RTCPeerConnectionCoordinator? {
-        didSet { didUpdate(publisher: publisher) }
+        didSet { didUpdate(publisher: publisher, oldValue: oldValue) }
     }
 
     /// The peer connection coordinator for the publisher/subscriber stream.
@@ -81,7 +81,7 @@ final class WebRTCTracesAdapter: WebRTCTracing, @unchecked Sendable {
     /// Updating these will reset trace event collection for the respective role,
     /// flush prior traces, and attach to the new event stream.
     var subscriber: RTCPeerConnectionCoordinator? {
-        didSet { didUpdate(subscriber: subscriber) }
+        didSet { didUpdate(subscriber: subscriber, oldValue: oldValue) }
     }
 
     /// Buffers trace events related to publisher/subscriber peer connections.
@@ -277,8 +277,15 @@ final class WebRTCTracesAdapter: WebRTCTracing, @unchecked Sendable {
     ///
     /// Sets up Combine event pipeline for trace collection for the specified role,
     /// emits a "Created" event for the new peer connection, and clears prior traces.
-    private func didUpdate(publisher: RTCPeerConnectionCoordinator?) {
+    private func didUpdate(
+        publisher: RTCPeerConnectionCoordinator?,
+        oldValue: RTCPeerConnectionCoordinator?
+    ) {
+        guard publisher !== oldValue else {
+            return
+        }
         guard let peerConnection = publisher else {
+            disposableBag.remove(DisposableKey.publisher.rawValue)
             return
         }
         disposableBag.remove(DisposableKey.publisher.rawValue)
@@ -305,8 +312,15 @@ final class WebRTCTracesAdapter: WebRTCTracing, @unchecked Sendable {
     ///
     /// Sets up Combine event pipeline for trace collection for the specified role,
     /// emits a "Created" event for the new peer connection, and clears prior traces.
-    private func didUpdate(subscriber: RTCPeerConnectionCoordinator?) {
+    private func didUpdate(
+        subscriber: RTCPeerConnectionCoordinator?,
+        oldValue: RTCPeerConnectionCoordinator?
+    ) {
+        guard subscriber !== oldValue else {
+            return
+        }
         guard let peerConnection = subscriber else {
+            disposableBag.remove(DisposableKey.subscriber.rawValue)
             return
         }
         disposableBag.remove(DisposableKey.subscriber.rawValue)

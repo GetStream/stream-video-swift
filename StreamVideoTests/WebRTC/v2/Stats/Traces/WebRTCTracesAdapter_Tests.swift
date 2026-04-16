@@ -10,12 +10,14 @@ final class WebRTCTracesAdapter_Tests: XCTestCase, @unchecked Sendable {
 
     private lazy var reportSubject: PassthroughSubject<CallStatsReport, Never>! = .init()
     private lazy var disposableBag: DisposableBag! = .init()
+    private lazy var mockSFUStack: MockSFUStack! = .init()
     private lazy var subject: WebRTCTracesAdapter! = .init(latestReportPublisher: reportSubject.eraseToAnyPublisher())
 
     override func tearDown() {
         subject = nil
         reportSubject = nil
         disposableBag = nil
+        mockSFUStack = nil
         super.tearDown()
     }
 
@@ -85,5 +87,61 @@ final class WebRTCTracesAdapter_Tests: XCTestCase, @unchecked Sendable {
             return
         }
         XCTAssertTrue(idx1 < idx3 && idx2 < idx3)
+    }
+
+    func test_setPublisher_sameInstanceTwice_doesNotAppendDuplicateCreateTrace() throws {
+        let publisher = try XCTUnwrap(
+            MockRTCPeerConnectionCoordinator(
+                peerType: .publisher,
+                sfuAdapter: mockSFUStack.adapter
+            )
+        )
+
+        subject.publisher = publisher
+
+        let initialTraces = subject.flushTraces()
+        XCTAssertEqual(initialTraces.filter { $0.tag == "create" }.count, 1)
+
+        subject.publisher = publisher
+
+        let repeatedAssignmentTraces = subject.flushTraces()
+        XCTAssertFalse(repeatedAssignmentTraces.contains { $0.tag == "create" })
+    }
+
+    func test_setSubscriber_sameInstanceTwice_doesNotAppendDuplicateCreateTrace() throws {
+        let subscriber = try XCTUnwrap(
+            MockRTCPeerConnectionCoordinator(
+                peerType: .subscriber,
+                sfuAdapter: mockSFUStack.adapter
+            )
+        )
+
+        subject.subscriber = subscriber
+
+        let initialTraces = subject.flushTraces()
+        XCTAssertEqual(initialTraces.filter { $0.tag == "create" }.count, 1)
+
+        subject.subscriber = subscriber
+
+        let repeatedAssignmentTraces = subject.flushTraces()
+        XCTAssertFalse(repeatedAssignmentTraces.contains { $0.tag == "create" })
+    }
+
+    func test_setPublisher_nil_removesPreviousSubscription() throws {
+        let publisher = try XCTUnwrap(
+            MockRTCPeerConnectionCoordinator(
+                peerType: .publisher,
+                sfuAdapter: mockSFUStack.adapter
+            )
+        )
+
+        subject.publisher = publisher
+        _ = subject.flushTraces()
+
+        subject.publisher = nil
+        publisher.stubEventSubject.send(StreamRTCPeerConnection.CloseEvent())
+
+        let traces = subject.flushTraces()
+        XCTAssertFalse(traces.contains { $0.tag == "close" })
     }
 }
