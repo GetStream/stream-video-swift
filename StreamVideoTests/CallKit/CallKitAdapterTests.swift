@@ -14,6 +14,7 @@ final class CallKitAdapterTests: XCTestCase, @unchecked Sendable {
     @MainActor
     override func setUp() async throws {
         try await super.setUp()
+        _ = MockStreamVideo()
         InjectedValues[\.callKitPushNotificationAdapter] = callKitPushNotificationAdapter
         InjectedValues[\.callKitService] = callKitService
         CurrentDevice.currentValue.didUpdate(.phone)
