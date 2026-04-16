@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### 🔄 Changed
 - Added optional leave reasons to `Call.leave` and `CallViewModel.hangUp`, and propagated them through the WebRTC leave flow so SFU leave requests include explicit end-of-call context. [#1100](https://github.com/GetStream/stream-video-swift/pull/1100)
 - Added an optional join interception hook so apps can delay or abort call entry after the join response is applied locally. [#1108](https://github.com/GetStream/stream-video-swift/pull/1108)
+- Exposed `participantAutoLeavePolicy` on `CallKitAdapter` and `CallKitService` so CallKit flows can share the same auto-leave rules as `CallViewModel`.
 
 ### 🐞 Fixed
 - Prevent abrupt call endings caused by audio-session readiness timing. [#1098](https://github.com/GetStream/stream-video-swift/pull/1098)
@@ -16,6 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Prevent outgoing ringing time from being counted toward call duration. [#1106](https://github.com/GetStream/stream-video-swift/pull/1106)
 - Replay buffered subscriber ICE trickles during join so remote audio does not wait for a later subscriber ICE restart before becoming audible. [#1111](https://github.com/GetStream/stream-video-swift/pull/1111)
 - Fix join-call timeout caused by a `PassthroughSubject` race where the response was emitted before the subscription was established. [#1113](https://github.com/GetStream/stream-video-swift/pull/1113)
+- CallKit-managed calls now respect the configured `participantAutoLeavePolicy`. [#1112](https://github.com/GetStream/stream-video-swift/pull/1112)
 
 # [1.45.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.45.0)
 _March 31, 2026_

@@ -258,8 +258,13 @@ open class CallViewModel: ObservableObject {
 
     private var automaticLayoutHandling = true
 
-    /// The policy to whenever call events occur in order to decide if the current user should remain
-    /// in the call or not. Default value is the no operation policy `DefaultParticipantAutoLeavePolicy`,
+    /// The policy that decides whether the local user should
+    /// automatically leave based on participant state changes.
+    /// Defaults to ``DefaultParticipantAutoLeavePolicy`` (no-op).
+    ///
+    /// - Important: Assign a **dedicated** policy instance.
+    ///   Do not share the same instance with ``CallKitService``
+    ///   because each consumer overwrites `onPolicyTriggered`.
     public var participantAutoLeavePolicy: ParticipantAutoLeavePolicy = DefaultParticipantAutoLeavePolicy() {
         didSet {
             var oldValue = oldValue

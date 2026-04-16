@@ -39,6 +39,13 @@ open class CallKitAdapter {
         didSet { callKitService.callSettings = callSettings }
     }
 
+    /// The policy that decides if a CallKit-managed call should leave
+    /// automatically when participant state changes.
+    open var participantAutoLeavePolicy: ParticipantAutoLeavePolicy {
+        get { callKitService.participantAutoLeavePolicy }
+        set { callKitService.participantAutoLeavePolicy = newValue }
+    }
+
     /// The policy defining the availability of CallKit services.
     ///
     /// - Default: `.regionBased`
