@@ -79,7 +79,7 @@ final class CallKitAdapterTests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(callKitService.callSettings, callSettings)
     }
 
-    func test_participantAutoLeavePolicy_callKitServiceReceivedTheUpdatedValue() {
+    func test_participantAutoLeavePolicy_whenSet_forwardsValueToCallKitService() {
         let policy = MockParticipantAutoLeavePolicy()
 
         subject.participantAutoLeavePolicy = policy

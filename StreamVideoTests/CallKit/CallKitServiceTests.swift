@@ -803,7 +803,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
     // MARK: - callParticipantLeft
 
     @MainActor
-    func test_callParticipantLeft_defaultParticipantAutoLeavePolicy_callWasNotEnded() async throws {
+    func test_defaultParticipantAutoLeavePolicy_whenParticipantLeaves_doesNotEndCall() async throws {
         let firstCallUUID = UUID()
         uuidFactory.getResult = firstCallUUID
         let call = stubCall(response: defaultGetCallResponse)
@@ -832,7 +832,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
     }
 
     @MainActor
-    func test_participantAutoLeavePolicyTriggered_activeCallEnded() async throws {
+    func test_activeCall_whenParticipantAutoLeavePolicyTriggers_endsCall() async throws {
         let firstCallUUID = UUID()
         uuidFactory.getResult = firstCallUUID
         let call = stubCall(response: defaultGetCallResponse)
