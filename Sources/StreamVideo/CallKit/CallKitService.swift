@@ -740,18 +740,44 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         ringingTimedOut: Bool,
         leaveReason: String? = nil
     ) {
-        guard let callEndedEntry = callEntry(for: cId) else {
+        // Inspect and mark the entry as ended while holding the storage lock so
+        // competing end requests cannot overwrite the original end cause.
+        let result: (CallEntry, Bool)? = storageAccessQueue.sync {
+            guard
+                let callEndedEntry = _storage.first(where: { $0.value.call.cId == cId })?.value
+            else {
+                return nil
+            }
+
+            let wasAlreadyMarkedEnded = callEndedEntry.leaveReason != nil
+                || callEndedEntry.isEndedElsewhere
+                || callEndedEntry.ringingTimedOut
+
+            guard wasAlreadyMarkedEnded == false else {
+                // A previous caller already decided why this call ended.
+                return (callEndedEntry, false)
+            }
+
+            if ringingTimedOut {
+                callEndedEntry.ringingTimedOut = true
+            } else {
+                callEndedEntry.isEndedElsewhere = true
+            }
+
+            if let leaveReason {
+                callEndedEntry.leaveReason = leaveReason
+            }
+
+            _storage[callEndedEntry.callUUID] = callEndedEntry
+
+            return (callEndedEntry, true)
+        }
+
+        guard let result else {
             return
         }
-        if ringingTimedOut {
-            callEndedEntry.ringingTimedOut = ringingTimedOut
-        } else {
-            callEndedEntry.isEndedElsewhere = true
-        }
-        if let leaveReason {
-            callEndedEntry.leaveReason = leaveReason
-        }
-        set(callEndedEntry, for: callEndedEntry.callUUID)
+
+        let (callEndedEntry, shouldRequestTransaction) = result
 
         log.debug(
             """
@@ -765,6 +791,12 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             """,
             subsystems: .callKit
         )
+        guard shouldRequestTransaction else {
+            return
+        }
+
+        // Only the first transition to ended should enqueue a CallKit end
+        // action. Later callers reuse the stored end state and exit above.
         Task(disposableBag: disposableBag) { [weak self] in
             do {
                 // End the call.

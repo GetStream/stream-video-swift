@@ -800,6 +800,51 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(reason, "timeout")
     }
 
+    @MainActor
+    func test_callEnded_whenAlreadyMarkedEnded_doesNotRequestSecondTransaction()
+        async throws {
+        let call = stubCall(response: defaultGetCallResponse)
+        subject.streamVideo = mockedStreamVideo
+
+        subject.reportIncomingCall(
+            cid,
+            localizedCallerName: localizedCallerName,
+            callerId: callerId,
+            hasVideo: false
+        ) { _ in }
+
+        subject.callEnded(cid, ringingTimedOut: true)
+
+        await fulfillment(timeout: defaultTimeout) {
+            (self.callController.requestWasCalledWith?.0.actions.last
+                as? CXEndCallAction
+            ) != nil
+        }
+
+        let firstAction = try XCTUnwrap(
+            callController.requestWasCalledWith?.0.actions.last as? CXEndCallAction
+        )
+
+        callController.reset()
+        subject.callEnded(cid, ringingTimedOut: false)
+
+        await waitExpectation(
+            timeout: 1,
+            description: "Wait for duplicate endCall tasks to complete."
+        )
+
+        XCTAssertNil(callController.requestWasCalledWith)
+
+        subject.provider(callProvider, perform: firstAction)
+
+        await fulfillment { call.timesCalled(.reject) == 1 }
+
+        let reason = try XCTUnwrap(
+            call.recordedInputPayload(String.self, for: .reject)?.first
+        )
+        XCTAssertEqual(reason, "timeout")
+    }
+
     // MARK: - callParticipantLeft
 
     @MainActor
