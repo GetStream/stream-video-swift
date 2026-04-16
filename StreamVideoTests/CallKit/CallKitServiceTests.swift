@@ -905,6 +905,34 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
     }
 
     @MainActor
+    func test_callEnded_leaveReasonProvided_expectedReasonIsForwardedToReject() async throws {
+        let call = stubCall(response: defaultGetCallResponse)
+        subject.streamVideo = mockedStreamVideo
+
+        subject.reportIncomingCall(
+            cid,
+            localizedCallerName: localizedCallerName,
+            callerId: callerId,
+            hasVideo: false
+        ) { _ in }
+
+        try await assertRequestTransaction(CXEndCallAction.self) {
+            subject.callEnded(
+                cid,
+                ringingTimedOut: false,
+                leaveReason: "call-has-ended"
+            )
+        }
+
+        await fulfillment { call.timesCalled(.reject) == 1 }
+
+        let reason = try XCTUnwrap(
+            call.recordedInputPayload(String.self, for: .reject)?.first
+        )
+        XCTAssertEqual(reason, "call-has-ended")
+    }
+
+    @MainActor
     func test_callEnded_whenAlreadyMarkedEnded_doesNotRequestSecondTransaction()
         async throws {
         let call = stubCall(response: defaultGetCallResponse)
@@ -947,6 +975,12 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
             call.recordedInputPayload(String.self, for: .reject)?.first
         )
         XCTAssertEqual(reason, "timeout")
+    }
+
+    func test_checkIfCallWasHandled_streamVideoNil_returnsNotConfiguredReason() {
+        let result = subject.checkIfCallWasHandled(callState: defaultGetCallResponse)
+
+        XCTAssertEqual(result, "not-configured")
     }
 
     // MARK: - callParticipantLeft

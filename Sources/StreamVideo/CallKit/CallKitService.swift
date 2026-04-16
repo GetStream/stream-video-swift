@@ -392,7 +392,11 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         ringingTimedOut: Bool,
         leaveReason: String? = nil
     ) {
-        endCall(cId, ringingTimedOut: ringingTimedOut)
+        endCall(
+            cId,
+            ringingTimedOut: ringingTimedOut,
+            leaveReason: leaveReason
+        )
     }
 
     /// Called when a participant leaves the call.
