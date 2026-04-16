@@ -384,10 +384,13 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         endCall(cId, ringingTimedOut: ringingTimedOut)
     }
 
-    /// Handle when a participant leaves the call.
+    /// Called when a participant leaves the call.
     ///
-    /// The default implementation delegates auto-leave decisions to
-    /// `participantAutoLeavePolicy`.
+    /// The default implementation is a **no-op**. Auto-leave
+    /// decisions are handled independently by the configured
+    /// ``participantAutoLeavePolicy``, which observes participant
+    /// state on its own. Override this method in a subclass if
+    /// you need custom handling for participant-left events.
     open func callParticipantLeft(
         _ response: CallSessionParticipantLeftEvent
     ) {
