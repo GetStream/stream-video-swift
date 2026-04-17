@@ -188,6 +188,37 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         await assertCallingState(.joining)
     }
 
+    func test_callKitJoin_whenActiveCallIsRestoredBeforeCallKitFinishes_thenJoinedEventTransitionsCallingStateToInCall() async {
+        // Given
+        let callKitService = MockCallKitService()
+        InjectedValues[\.callKitService] = callKitService
+        callKitService.send(.joining(mockCall))
+        subject = .init()
+        await assertCallingState(.joining)
+
+        // When
+        let remoteParticipant = CallParticipant.dummy(id: "remote-participant")
+        subject.call?.state.participantsMap = [remoteParticipant.id: remoteParticipant]
+
+        // Then
+        await fulfilmentInMainActor {
+            self.subject.callParticipants[remoteParticipant.id] != nil
+        }
+        await assertCallingState(.joining)
+
+        // When
+        subject.setActiveCall(mockCall)
+
+        // Then
+        await assertCallingState(.joining)
+
+        // When
+        callKitService.send(.joined)
+
+        // Then
+        await assertCallingState(.inCall)
+    }
+
     func test_setActiveCallNil_whileCallKitJoinIsInProgress_keepsCallingStateJoining() async {
         // Given
         let callKitService = MockCallKitService()
@@ -212,6 +243,29 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         subject.call?.state.reconnectionStatus = .migrating
 
         // Then
+        await assertCallingState(.reconnecting)
+
+        // When
+        subject.call?.state.reconnectionStatus = .connected
+
+        // Then
+        await assertCallingState(.inCall)
+    }
+
+    func test_reconnectingCall_whenParticipantsUpdate_thenCallingStateRemainsReconnectingUntilConnectionRestores() async {
+        // Given
+        await prepareMediaScenario()
+        subject.call?.state.reconnectionStatus = .migrating
+        await assertCallingState(.reconnecting)
+
+        // When
+        let remoteParticipant = CallParticipant.dummy(id: "remote-participant")
+        subject.call?.state.participantsMap = [remoteParticipant.id: remoteParticipant]
+
+        // Then
+        await fulfilmentInMainActor {
+            self.subject.callParticipants[remoteParticipant.id] != nil
+        }
         await assertCallingState(.reconnecting)
 
         // When
@@ -252,6 +306,44 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
 
         // Then
         await assertCallingState(.idle)
+    }
+
+    func test_outgoingCall_whenParticipantsUpdateBeforeAcceptedEvent_thenCallingStateRemainsOutgoingUntilJoinCompletes(
+    ) async throws {
+        // Given
+        await prepare()
+        subject.startCall(
+            callType: .default,
+            callId: callId,
+            members: participants,
+            ring: true
+        )
+        await assertCallingState(.outgoing)
+
+        // When
+        let remoteParticipant = CallParticipant.dummy(id: "remote-participant")
+        subject.call?.state.participantsMap = [remoteParticipant.id: remoteParticipant]
+
+        // Then
+        await fulfilmentInMainActor {
+            self.subject.callParticipants[remoteParticipant.id] != nil
+        }
+        await assertCallingState(.outgoing)
+
+        // When
+        streamVideo.process(
+            .coordinatorEvent(
+                .typeCallAcceptedEvent(
+                    .dummy(
+                        callCid: cId,
+                        user: secondUser.user.toUserResponse()
+                    )
+                )
+            )
+        )
+
+        // Then
+        await assertCallingState(.inCall)
     }
 
     func test_outgoingCall_rejectedEventThreeParticipants() async throws {

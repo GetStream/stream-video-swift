@@ -147,11 +147,7 @@ open class CallViewModel: ObservableObject {
     @Published public var outgoingCallMembers = [Member]()
 
     /// Dictionary of the call participants.
-    @Published public private(set) var callParticipants = [String: CallParticipant]() {
-        didSet {
-            updateCallStateIfNeeded()
-        }
-    }
+    @Published public private(set) var callParticipants = [String: CallParticipant]()
 
     /// Contains info about a participant event. It's reset to nil after 2 seconds.
     @Published public var participantEvent: ParticipantEvent?
@@ -297,17 +293,22 @@ open class CallViewModel: ObservableObject {
         callKitServiceObserver
             .publisher
             .receive(on: DispatchQueue.main)
-            .compactMap {
-                switch $0 {
+            .sink { [weak self] event in
+                guard let self else { return }
+
+                switch event {
                 case let .joining(call):
-                    return call
+                    setCallingState(.joining)
+                    self.call = call
+                case .joined:
+                    guard let call else { return }
+                    // CallKit can report the active call while it still marks
+                    // the bridge as `.joining`. Once `.joined` arrives we need
+                    // an explicit handoff to let the regular in-call UI take over.
+                    setActiveCall(call)
                 default:
-                    return nil
+                    break
                 }
-            }
-            .sink { [weak self] in
-                self?.setCallingState(.joining)
-                self?.call = $0
             }
             .store(in: disposableBag)
     }
@@ -1192,33 +1193,6 @@ open class CallViewModel: ObservableObject {
         default:
             if call?.cId == event.callCid {
                 leaveCall(reason: "ended")
-            }
-        }
-    }
-
-    private func updateCallStateIfNeeded() {
-        guard !skipCallStateUpdates else { return }
-        if callingState == .outgoing {
-            if !callParticipants.isEmpty {
-                setCallingState(.inCall)
-            }
-            return
-        }
-        guard call != nil || !callParticipants.isEmpty else { return }
-        if callingState != .reconnecting, callingState != .inCall {
-            // Participant updates can arrive before the CallKit-driven join
-            // flow finishes. Keep .joining visible until the observer reports
-            // that the temporary CallKit sync state has ended.
-            switch callKitServiceObserver.value {
-            case .joining:
-                setCallingState(.joining)
-            default:
-                setCallingState(.inCall)
-            }
-        } else {
-            let shouldGoInCall = callParticipants.count > 1
-            if shouldGoInCall, callingState != .inCall {
-                setCallingState(.inCall)
             }
         }
     }
