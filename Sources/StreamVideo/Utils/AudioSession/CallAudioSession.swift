@@ -175,12 +175,15 @@ final class CallAudioSession: @unchecked Sendable {
         disposableBag.remove(DisposableKey.deferredActivation.rawValue)
         audioStore
             .publisher(\.isActive)
-            /// We drop the first value in case the `AVAudioSession` is already
-            /// active because of other media playback.
-            /// We only want the first activation that happens after this
-            /// session starts observing the shared store.
-            .dropFirst()
-            .filter { $0 == true }
+            /// Make the current value part of the sequence so a stale
+            /// `isActive == true` left behind by a previous call we are
+            /// taking over from still wakes us up. By the time this
+            /// subscription is installed we have already claimed ownership
+            /// of the shared audio store, so a current `true` means we
+            /// inherited an already-active session and should proceed.
+            .prepend(audioStore.state.isActive)
+            .removeDuplicates()
+            .first(where: { $0 })
             .receive(on: processingQueue)
             .sink { [weak self] _ in
                 self?.performActivation(

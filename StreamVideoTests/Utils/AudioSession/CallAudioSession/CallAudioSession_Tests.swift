@@ -161,6 +161,49 @@ final class CallAudioSession_Tests: XCTestCase, @unchecked Sendable {
 
     // MARK: shouldSetActive = false
 
+    func test_activate_shouldSetActiveFalse_isActiveOnStoreAlreadyTrue_firesDeferredActivationImmediately() async {
+        let callSettingsSubject = CurrentValueSubject<CallSettings, Never>(.default)
+        let capabilitiesSubject = CurrentValueSubject<Set<OwnCapability>, Never>([.sendAudio])
+        let delegate = SpyAudioSessionAdapterDelegate()
+        let policy = MockAudioSessionPolicy()
+        let policyConfiguration = AudioSessionConfiguration(
+            isActive: true,
+            category: .playAndRecord,
+            mode: .voiceChat,
+            options: [.allowBluetoothHFP, .allowBluetoothA2DP],
+            overrideOutputAudioPort: .speaker
+        )
+        policy.stub(for: .configuration, with: policyConfiguration)
+        mockAudioStore.audioStore.dispatch(.setActive(true))
+
+        await fulfillment {
+            self.mockAudioStore.audioStore.state.isActive
+        }
+
+        subject = .init(policy: policy)
+        await claimOwnership(of: subject)
+
+        subject.activate(
+            callSettingsPublisher: callSettingsSubject.eraseToAnyPublisher(),
+            ownCapabilitiesPublisher: capabilitiesSubject.eraseToAnyPublisher(),
+            delegate: delegate,
+            statsAdapter: nil,
+            shouldSetActive: false
+        )
+
+        // No further `.setActive(true)` dispatch is emitted; the deferred
+        // activation must still fire because the store already owned by this
+        // session is active.
+        await fulfillment {
+            let state = self.mockAudioStore.audioStore.state
+            return state.audioSessionConfiguration.category == policyConfiguration.category
+                && state.audioSessionConfiguration.mode == policyConfiguration.mode
+                && state.audioSessionConfiguration.options == policyConfiguration.options
+                && state.isMicrophoneMuted == false
+                && state.webRTCAudioSessionConfiguration.isAudioEnabled
+        }
+    }
+
     func test_activate_shouldSetActiveFalse_isActiveOnStoreIsTrue_dropsFirstValueAndActivatesCorrectly() async {
         mockAudioStore.audioStore.dispatch(.setActive(true))
         let callSettingsSubject = CurrentValueSubject<CallSettings, Never>(.default)

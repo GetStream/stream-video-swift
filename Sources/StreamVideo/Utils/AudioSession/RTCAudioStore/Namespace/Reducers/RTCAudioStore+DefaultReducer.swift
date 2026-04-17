@@ -92,6 +92,10 @@ extension RTCAudioStore.Namespace {
             case .callKit:
                 break
 
+            // Unreachable: `RTCAudioStore.Coordinator.coordinate(action:state:)`
+            // unwraps `.conditioned` to its nested action before the executor
+            // hands it to reducers, so this case only exists to keep the
+            // switch exhaustive.
             case .conditioned:
                 break
             }
