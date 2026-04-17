@@ -47,6 +47,34 @@ extension WebRTCCoordinator.StateMachine {
             // https://www.notion.so/stream-wiki/Improved-Reconnects-and-ICE-connection-handling-2186a5d7f9f680c29236c2c37cfa11a3?source=copy_link#2186a5d7f9f68088a9b1d6ecf67e5aad
             var fastReconnectionMaxAttempts: Int = 3
             var fastReconnectionAttempts: Int = 0
+            /// Maximum number of `.rejoin` transitions allowed inside the
+            /// rolling `rejoinAttemptWindow`.
+            ///
+            /// This is intentionally a burst guard, not a lifetime cap. The
+            /// goal is to stop pathological loops that keep issuing backend
+            /// `joinCall` requests in a short period of time after unstable
+            /// disconnects, while still allowing long-running calls to recover
+            /// from occasional isolated rejoin events.
+            ///
+            /// Example:
+            /// - If 10 rejoins happen within 2 minutes, the 11th rejoin
+            ///   inside that same 2-minute window is rejected.
+            /// - If rejoins are 6 minutes apart, older attempts have already
+            ///   aged out of the rolling window before the next one happens, so
+            ///   each rejoin is treated as an isolated recovery and is allowed.
+            var rejoinMaxAttempts: Int = 10
+            /// Size of the rolling window used by `rejoinMaxAttempts`.
+            ///
+            /// Only rejoin attempts whose timestamps are newer than
+            /// `now - rejoinAttemptWindow` count toward the limit.
+            var rejoinAttemptWindow: TimeInterval = 120
+            /// Timestamps for recent rejoin attempts that are still inside the
+            /// rolling window.
+            ///
+            /// Entries older than `rejoinAttemptWindow` are pruned before each
+            /// new rejoin decision, so the array models "recent rejoin burst
+            /// pressure" rather than "all rejoins since the call started".
+            var rejoinAttemptTimestamps: [Date] = []
 
             var healthCheckInterval: TimeInterval = 5
             var webSocketHealthTimeout: TimeInterval = 15
@@ -69,6 +97,43 @@ extension WebRTCCoordinator.StateMachine {
                 default:
                     return reconnectionStrategy
                 }
+            }
+
+            /// Registers a rejoin attempt if the rolling rejoin limit has not
+            /// been reached yet.
+            ///
+            /// Before checking the limit, this prunes any timestamps that are
+            /// older than `rejoinAttemptWindow`.
+            ///
+            /// This means the limit is evaluated against only recent activity.
+            /// Rejoins that happened far enough in the past stop counting.
+            ///
+            /// Example with the default configuration:
+            /// - Window: 120 seconds
+            /// - Max attempts: 10
+            /// - 10 attempts inside the last 120 seconds consume the full
+            ///   budget, so the 11th attempt inside that same window is
+            ///   rejected.
+            /// - A later rejoin at `06:00` is allowed, because all prior
+            ///   timestamps are outside the 120-second window and are pruned
+            ///   first.
+            ///
+            /// - Parameter date: The date of the attempted rejoin.
+            /// - Returns: `true` when the attempt is allowed, otherwise `false`.
+            mutating func registerRejoinAttempt(
+                at date: Date = .init()
+            ) -> Bool {
+                let cutoff = date.addingTimeInterval(-rejoinAttemptWindow)
+                rejoinAttemptTimestamps = rejoinAttemptTimestamps.filter {
+                    $0 >= cutoff
+                }
+
+                guard rejoinAttemptTimestamps.count < rejoinMaxAttempts else {
+                    return false
+                }
+
+                rejoinAttemptTimestamps.append(date)
+                return true
             }
         }
 

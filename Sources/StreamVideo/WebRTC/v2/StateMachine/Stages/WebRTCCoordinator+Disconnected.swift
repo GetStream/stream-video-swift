@@ -156,11 +156,11 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         try transition?(.fastReconnecting(context))
                     } else {
                         context.fastReconnectionAttempts = 0
-                        try transition?(.rejoining(context))
+                        try transitionToRejoiningIfPossible()
                     }
                 case .rejoin:
                     context.fastReconnectionAttempts = 0
-                    try transition?(.rejoining(context))
+                    try transitionToRejoiningIfPossible()
                 case .migrate:
                     context.fastReconnectionAttempts = 0
                     try transition?(.migrating(context))
@@ -181,6 +181,44 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     transitionOrDisconnect(.disconnected(context))
                 }
             }
+        }
+
+        /// Attempts a rejoin while enforcing a rolling limit to prevent
+        /// repeated backend join loops after unstable disconnects.
+        ///
+        /// Important:
+        /// - This does not cap the total number of rejoins for the whole call.
+        /// - It only caps how many rejoins may happen inside the recent rolling
+        ///   window tracked by `Context.registerRejoinAttempt`.
+        /// - When attempts are spaced far enough apart, earlier attempts age out
+        ///   of the window and new rejoins are allowed.
+        ///
+        /// With the default configuration, a call that rejoins once every
+        /// 6 minutes will continue to rejoin successfully, because each prior
+        /// rejoin has already fallen out of the 120-second window. What gets
+        /// blocked is the pathological case where the SDK keeps cycling through
+        /// `.rejoin` repeatedly in a short time span and would otherwise keep
+        /// issuing backend `joinCall` requests.
+        ///
+        /// Once the burst limit is reached, we leave the call instead of
+        /// attempting another rejoin. That makes the failure mode explicit and
+        /// stops the internal reconnect/rejoin loop from continuing silently.
+        private func transitionToRejoiningIfPossible() throws {
+            guard context.registerRejoinAttempt() else {
+                log.warning(
+                    """
+                    Rejoin attempts exceeded \(context.rejoinMaxAttempts) within \
+                    \(context.rejoinAttemptWindow) seconds. Leaving call.
+                    """,
+                    subsystems: .webRTC
+                )
+                try transition?(
+                    .leaving(context, reason: "rejoin_attempt_limit_exceeded")
+                )
+                return
+            }
+
+            try transition?(.rejoining(context))
         }
 
         /// Observes internet connection status and triggers reconnection when
