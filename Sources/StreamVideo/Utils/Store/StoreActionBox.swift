@@ -60,6 +60,16 @@ enum StoreActionBox<Element: Sendable> {
             return .delayed(element, delay: .init(before: currentDelay.before, after: delay))
         }
     }
+
+    /// Replaces the wrapped action while preserving delay configuration.
+    func replacing(with element: Element) -> Self {
+        switch self {
+        case .normal:
+            return .normal(element)
+        case let .delayed(_, delay):
+            return .delayed(element, delay: delay)
+        }
+    }
 }
 
 /// Opt‑in protocol that makes an action type able to produce a

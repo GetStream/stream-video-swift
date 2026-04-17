@@ -31,6 +31,7 @@ final class RTCAudioStore: @unchecked Sendable {
                 isRecording: false,
                 isMicrophoneMuted: true,
                 hasRecordingPermission: false,
+                activeSessionIdentifier: "",
                 audioDeviceModule: nil,
                 currentRoute: .init(audioSession.currentRoute),
                 audioSessionConfiguration: .init(

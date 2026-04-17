@@ -81,6 +81,26 @@ final class Store_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(subject.state.reducersCalled, 0)
     }
 
+    func test_dispatch_coordinatorTransformsAction_beforeMiddlewareAndReducers() async {
+        subject.dispatch(.coordinatedToVerifyReducersOrder)
+
+        await fulfillment {
+            self.middlewareA.actionsReceived.endIndex == 1
+                && self.middlewareB.actionsReceived.endIndex == 1
+                && self.subject.state.reducersAccessVerification == "A_B"
+        }
+
+        guard case .some(.verifyReducersOrder) = middlewareA.actionsReceived.first else {
+            return XCTFail("Expected middlewareA to receive transformed action.")
+        }
+
+        guard case .some(.verifyReducersOrder) = middlewareB.actionsReceived.first else {
+            return XCTFail("Expected middlewareB to receive transformed action.")
+        }
+
+        XCTAssertEqual(subject.state.reducersCalled, 0)
+    }
+
     // MARK: - Effects
 
     func test_addEffect_configuresDependenciesAndReceivesStateUpdates() async {
@@ -125,6 +145,7 @@ private struct TestStoreState: Equatable {
 
 private enum TestStoreAction: Sendable, StoreActionBoxProtocol {
     case callReducersWithStep
+    case coordinatedToVerifyReducersOrder
     case verifyReducersOrder
 }
 
@@ -148,6 +169,9 @@ private final class TestStoreReducer: Reducer<TestStoreNamespace>, @unchecked Se
         case .callReducersWithStep:
             updatedState.reducersCalled += 1
 
+        case .coordinatedToVerifyReducersOrder:
+            updatedState.reducersCalled += 100
+
         case .verifyReducersOrder:
             if updatedState.reducersAccessVerification.isEmpty {
                 updatedState.reducersAccessVerification = identifier
@@ -162,6 +186,24 @@ private final class TestStoreReducer: Reducer<TestStoreNamespace>, @unchecked Se
 
 private final class TestStoreCoordinator: StoreCoordinator<TestStoreNamespace>, @unchecked Sendable {
     var shouldExecuteNextAction = true
+
+    override func coordinate(
+        action: StoreActionBox<TestStoreAction>,
+        state: TestStoreState
+    ) -> StoreActionBox<TestStoreAction>? {
+        guard shouldExecute(
+            action: action.wrappedValue,
+            state: state
+        ) else {
+            return nil
+        }
+
+        guard case .coordinatedToVerifyReducersOrder = action.wrappedValue else {
+            return action
+        }
+
+        return action.replacing(with: .verifyReducersOrder)
+    }
 
     override func shouldExecute(
         action: TestStoreAction,

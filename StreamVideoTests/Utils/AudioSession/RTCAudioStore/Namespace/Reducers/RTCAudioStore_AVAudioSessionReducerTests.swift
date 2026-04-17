@@ -248,6 +248,7 @@ final class RTCAudioStore_AVAudioSessionReducerTests: XCTestCase, @unchecked Sen
         isRecording: Bool = false,
         isMicrophoneMuted: Bool = false,
         hasRecordingPermission: Bool = false,
+        activeSessionIdentifier: String = "",
         audioDeviceModule: AudioDeviceModule? = nil,
         currentRoute: RTCAudioStore.StoreState.AudioRoute = .empty,
         category: AVAudioSession.Category = .soloAmbient,
@@ -266,6 +267,7 @@ final class RTCAudioStore_AVAudioSessionReducerTests: XCTestCase, @unchecked Sen
             isRecording: isRecording,
             isMicrophoneMuted: isMicrophoneMuted,
             hasRecordingPermission: hasRecordingPermission,
+            activeSessionIdentifier: activeSessionIdentifier,
             audioDeviceModule: audioDeviceModule,
             currentRoute: currentRoute,
             audioSessionConfiguration: .init(

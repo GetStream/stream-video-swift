@@ -41,6 +41,10 @@ final class CallAudioSession: @unchecked Sendable {
         }
     }
 
+    /// Stable identifier used to claim ownership of shared audio state.
+    let identifier = String(
+        UUID().uuidString.replacingOccurrences(of: "-", with: "").prefix(8)
+    )
     var currentRouteIsExternal: Bool { audioStore.state.currentRoute.isExternal }
 
     private(set) weak var delegate: StreamAudioSessionAdapterDelegate?
@@ -65,15 +69,21 @@ final class CallAudioSession: @unchecked Sendable {
     init(policy: AudioSessionPolicy = DefaultAudioSessionPolicy()) {
         self.policy = policy
 
-        /// - Important: This runs whenever an CallAudioSession is created and ensures that
-        /// the configuration is correctly for calling. This is quite important for CallKit as if the category and
-        /// mode aren't set correctly it won't activate the audioSession.
+        /// - Important: This runs whenever a `CallAudioSession` is created and
+        ///   ensures the audio session is valid for calling. This matters for
+        ///   CallKit because it will not activate the audio session unless the
+        ///   category and mode are already aligned with call audio.
+        /// - Important: We only apply this bootstrap configuration when the
+        ///   shared audio store is currently unowned.
         audioStore.dispatch(
-            .avAudioSession(
-                .setCategoryAndModeAndCategoryOptions(
-                    .playAndRecord,
-                    mode: .voiceChat,
-                    categoryOptions: [.allowBluetoothHFP, .allowBluetoothA2DP]
+            .conditioned(
+                .activeSessionIdentifier(""),
+                action: .avAudioSession(
+                    .setCategoryAndModeAndCategoryOptions(
+                        .playAndRecord,
+                        mode: .voiceChat,
+                        categoryOptions: [.allowBluetoothHFP, .allowBluetoothA2DP]
+                    )
                 )
             )
         )
@@ -121,9 +131,10 @@ final class CallAudioSession: @unchecked Sendable {
 
         do {
             try await audioStore.dispatch([
-                .setAudioDeviceModule(nil),
-                .webRTCAudioSession(.setAudioEnabled(false)),
-                .setActive(false)
+                .conditioned(.activeSessionIdentifier(identifier), action: .setAudioDeviceModule(nil)),
+                .conditioned(.activeSessionIdentifier(identifier), action: .webRTCAudioSession(.setAudioEnabled(false))),
+                .conditioned(.activeSessionIdentifier(identifier), action: .setActive(false)),
+                .conditioned(.activeSessionIdentifier(identifier), action: .setActiveSessionIdentifier(""))
             ]).result()
         } catch {
             log.error(
@@ -164,10 +175,10 @@ final class CallAudioSession: @unchecked Sendable {
         disposableBag.remove(DisposableKey.deferredActivation.rawValue)
         audioStore
             .publisher(\.isActive)
-            /// We drop the first value in case the AudioSession is already active (e.g. because AVAudioSession
-            /// has been used for other media playing).
-            /// We only want to catch the first session activation that will happen **after** our subscription
-            /// here,
+            /// We drop the first value in case the `AVAudioSession` is already
+            /// active because of other media playback.
+            /// We only want the first activation that happens after this
+            /// session starts observing the shared store.
             .dropFirst()
             .filter { $0 == true }
             .receive(on: processingQueue)
@@ -188,7 +199,12 @@ final class CallAudioSession: @unchecked Sendable {
 
         // Expose the policy's stereo preference so the audio device module can
         // reconfigure itself before WebRTC starts playout.
-        audioStore.dispatch(.stereo(.setPlayoutPreferred(policy is LivestreamAudioSessionPolicy)))
+        audioStore.dispatch(
+            .conditioned(
+                .activeSessionIdentifier(identifier),
+                action: .stereo(.setPlayoutPreferred(policy is LivestreamAudioSessionPolicy))
+            )
+        )
 
         configureCallSettingsAndCapabilitiesObservation(
             callSettingsPublisher: callSettingsPublisher,
@@ -252,7 +268,14 @@ final class CallAudioSession: @unchecked Sendable {
             .filter { $0.isEmpty }
             .receive(on: processingQueue)
             .compactMap { [weak self] _ in self?.lastAppliedConfiguration?.options }
-            .sink { [weak self] in self?.audioStore.dispatch(.avAudioSession(.setCategoryOptions($0))) }
+            .sink { [weak self, identifier] in
+                self?.audioStore.dispatch(
+                    .conditioned(
+                        .activeSessionIdentifier(identifier),
+                        action: .avAudioSession(.setCategoryOptions($0))
+                    )
+                )
+            }
             .store(in: disposableBag)
     }
 
@@ -329,15 +352,25 @@ final class CallAudioSession: @unchecked Sendable {
 
         var actions: [StoreActionBox<RTCAudioStore.Namespace.Action>] = []
 
-        actions.append(.normal(.setMicrophoneMuted(!callSettings.audioOn || !ownCapabilities.contains(.sendAudio))))
+        actions.append(
+            .normal(
+                .conditioned(
+                    .activeSessionIdentifier(identifier),
+                    action: .setMicrophoneMuted(!callSettings.audioOn || !ownCapabilities.contains(.sendAudio))
+                )
+            )
+        )
 
         actions.append(
             .normal(
-                .avAudioSession(
-                    .setCategoryAndModeAndCategoryOptions(
-                        configuration.category,
-                        mode: configuration.mode,
-                        categoryOptions: configuration.options
+                .conditioned(
+                    .activeSessionIdentifier(identifier),
+                    action: .avAudioSession(
+                        .setCategoryAndModeAndCategoryOptions(
+                            configuration.category,
+                            mode: configuration.mode,
+                            categoryOptions: configuration.options
+                        )
                     )
                 )
             )
@@ -348,9 +381,15 @@ final class CallAudioSession: @unchecked Sendable {
             // as if a new track gets added later on WebRTC will try to restart
             // the playout. However, the combination of audioEnabled:false
             // and AVAudioSession.active:false seems to work.
-            .normal(.webRTCAudioSession(.setAudioEnabled(configuration.isActive))),
-            .normal(.setActive(configuration.isActive)),
-            .normal(.avAudioSession(.setOverrideOutputAudioPort(configuration.overrideOutputAudioPort ?? .none)))
+            .normal(.conditioned(
+                .activeSessionIdentifier(identifier),
+                action: .webRTCAudioSession(.setAudioEnabled(configuration.isActive))
+            )),
+            .normal(.conditioned(.activeSessionIdentifier(identifier), action: .setActive(configuration.isActive))),
+            .normal(.conditioned(
+                .activeSessionIdentifier(identifier),
+                action: .avAudioSession(.setOverrideOutputAudioPort(configuration.overrideOutputAudioPort ?? .none))
+            ))
         ])
 
         audioStore.dispatch(

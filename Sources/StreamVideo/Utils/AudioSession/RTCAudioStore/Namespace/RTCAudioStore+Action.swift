@@ -11,7 +11,27 @@ extension RTCAudioStore {
     ///
     /// Use these to update cached statuses or to trigger system prompts
     /// via middleware responsible for requesting permissions.
-    public enum StoreAction: Sendable, Equatable, StoreActionBoxProtocol, CustomStringConvertible {
+    public indirect enum StoreAction: Sendable, Equatable, StoreActionBoxProtocol, CustomStringConvertible {
+
+        /// Predicates that gate shared-audio mutations to the current owner.
+        public enum Condition: Sendable, Equatable, CustomStringConvertible {
+            /// Matches only when the shared audio store is owned by `value`.
+            case activeSessionIdentifier(String)
+
+            func evaluate(with state: StoreState) -> Bool {
+                switch self {
+                case let .activeSessionIdentifier(value):
+                    return state.activeSessionIdentifier == value
+                }
+            }
+
+            public var description: String {
+                switch self {
+                case let .activeSessionIdentifier(value):
+                    return ".activeSessionIdentifier(\(value))"
+                }
+            }
+        }
 
         enum StereoAction: Equatable, Sendable, CustomStringConvertible {
             case setPlayoutPreferred(Bool)
@@ -131,7 +151,13 @@ extension RTCAudioStore {
         case audioDeviceModuleSetRecording(Bool)
         case setMicrophoneMuted(Bool)
         case setHasRecordingPermission(Bool)
+        /// Executes `action` only when `condition` still matches the latest
+        /// shared audio store state.
+        case conditioned(Condition, action: StoreAction)
 
+        /// Updates the identifier of the session that currently owns shared
+        /// audio state.
+        case setActiveSessionIdentifier(String)
         case setAudioDeviceModule(AudioDeviceModule?)
         case setCurrentRoute(RTCAudioStore.StoreState.AudioRoute)
 
@@ -159,6 +185,12 @@ extension RTCAudioStore {
 
             case .setHasRecordingPermission(let value):
                 return ".setHasRecordingPermission(\(value))"
+
+            case let .conditioned(condition, action):
+                return ".conditioned(\(condition), action:\(action))"
+
+            case .setActiveSessionIdentifier(let value):
+                return ".setActiveSessionIdentifier(\(value))"
 
             case .setAudioDeviceModule(let value):
                 return ".setAudioDeviceModule(\(value))"

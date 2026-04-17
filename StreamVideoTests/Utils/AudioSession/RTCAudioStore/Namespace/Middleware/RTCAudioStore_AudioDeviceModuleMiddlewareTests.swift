@@ -352,6 +352,7 @@ final class RTCAudioStore_AudioDeviceModuleMiddlewareTests: XCTestCase, @uncheck
         isRecording: Bool = false,
         isMicrophoneMuted: Bool = false,
         hasRecordingPermission: Bool = false,
+        activeSessionIdentifier: String = "",
         audioDeviceModule: AudioDeviceModule? = nil,
         currentRoute: RTCAudioStore.StoreState.AudioRoute = .empty,
         audioSessionConfiguration: RTCAudioStore.StoreState.AVAudioSessionConfiguration = .init(
@@ -372,6 +373,7 @@ final class RTCAudioStore_AudioDeviceModuleMiddlewareTests: XCTestCase, @uncheck
             isRecording: isRecording,
             isMicrophoneMuted: isMicrophoneMuted,
             hasRecordingPermission: hasRecordingPermission,
+            activeSessionIdentifier: activeSessionIdentifier,
             audioDeviceModule: audioDeviceModule,
             currentRoute: currentRoute,
             audioSessionConfiguration: audioSessionConfiguration,

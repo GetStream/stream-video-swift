@@ -55,6 +55,9 @@ extension RTCAudioStore.Namespace {
             case let .setHasRecordingPermission(value):
                 updatedState.hasRecordingPermission = value
 
+            case let .setActiveSessionIdentifier(value):
+                updatedState.activeSessionIdentifier = value
+
             case let .setAudioDeviceModule(value):
                 updatedState.audioDeviceModule = value
                 if value == nil {
@@ -87,6 +90,9 @@ extension RTCAudioStore.Namespace {
                 break
 
             case .callKit:
+                break
+
+            case .conditioned:
                 break
             }
 
