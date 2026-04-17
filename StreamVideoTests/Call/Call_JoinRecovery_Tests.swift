@@ -9,10 +9,10 @@ import Combine
 @MainActor
 final class Call_JoinRecovery_Tests: StreamVideoTestCase, @unchecked Sendable {
 
-    func test_join_afterInitialJoinAndSubscriberDisconnects_capsBackendJoinRequestsAfterFiveRejoins() async throws {
+    func test_join_afterInitialJoinAndSubscriberDisconnects_capsBackendJoinRequestsAfterTenRejoins() async throws {
         let mockPermissions = MockPermissionsStore()
         defer { mockPermissions.dismantle() }
-        let maxRejoinAttempts = 5
+        let maxRejoinAttempts = 10
         let expectedJoinCallAttempts = maxRejoinAttempts + 1
 
         let callType = "livestream"

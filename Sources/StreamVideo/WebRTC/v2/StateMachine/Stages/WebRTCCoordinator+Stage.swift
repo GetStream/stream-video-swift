@@ -57,12 +57,12 @@ extension WebRTCCoordinator.StateMachine {
             /// from occasional isolated rejoin events.
             ///
             /// Example:
-            /// - If 5 rejoins happen within 2 minutes, the 6th rejoin inside
-            ///   that same 2-minute window is rejected.
+            /// - If 10 rejoins happen within 2 minutes, the 11th rejoin
+            ///   inside that same 2-minute window is rejected.
             /// - If rejoins are 6 minutes apart, older attempts have already
             ///   aged out of the rolling window before the next one happens, so
             ///   each rejoin is treated as an isolated recovery and is allowed.
-            var rejoinMaxAttempts: Int = 5
+            var rejoinMaxAttempts: Int = 10
             /// Size of the rolling window used by `rejoinMaxAttempts`.
             ///
             /// Only rejoin attempts whose timestamps are newer than
@@ -110,9 +110,9 @@ extension WebRTCCoordinator.StateMachine {
             ///
             /// Example with the default configuration:
             /// - Window: 120 seconds
-            /// - Max attempts: 5
-            /// - Attempts at `00:00`, `00:30`, `01:00`, `01:30`, `01:50`
-            ///   consume the full budget, so another rejoin at `01:55` is
+            /// - Max attempts: 10
+            /// - 10 attempts inside the last 120 seconds consume the full
+            ///   budget, so the 11th attempt inside that same window is
             ///   rejected.
             /// - A later rejoin at `06:00` is allowed, because all prior
             ///   timestamps are outside the 120-second window and are pruned

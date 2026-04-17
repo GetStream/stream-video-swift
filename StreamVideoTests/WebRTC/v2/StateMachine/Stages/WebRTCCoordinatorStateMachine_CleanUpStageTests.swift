@@ -163,7 +163,7 @@ final class WebRTCCoordinatorStateMachine_CleanUpStageTests: XCTestCase, @unchec
         XCTAssertEqual(subject.context.reconnectionStrategy, .unknown)
         XCTAssertNil(subject.context.disconnectionSource)
         XCTAssertNil(subject.context.flowError)
-        XCTAssertEqual(subject.context.rejoinMaxAttempts, 5)
+        XCTAssertEqual(subject.context.rejoinMaxAttempts, 10)
         XCTAssertEqual(subject.context.rejoinAttemptWindow, 120)
         XCTAssertTrue(subject.context.rejoinAttemptTimestamps.isEmpty)
         XCTAssertNil(subject.context.isRejoiningFromSessionID)
