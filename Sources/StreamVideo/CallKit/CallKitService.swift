@@ -174,7 +174,16 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             .default
             .publisher(for: Notification.Name(CallNotification.callEnded))
             .compactMap { $0.object as? Call }
-            .sink { [weak self] in self?.callEnded($0.cId, ringingTimedOut: false) }
+            .sink {
+                [weak self] in self?.callEnded(
+                    $0.cId,
+                    ringingTimedOut: false,
+                    leaveReason: StreamRejectionReasonProvider
+                        .HandledCallReason
+                        .callEndedLocally
+                        .rawValue
+                )
+            }
 
         /// - Important:
         /// It used to debounce System's attempts to mute/unmute the call. It seems that the system
@@ -234,7 +243,14 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 """,
                 subsystems: .callKit
             )
-            callEnded(cid, ringingTimedOut: false)
+            callEnded(
+                cid,
+                ringingTimedOut: false,
+                leaveReason: StreamRejectionReasonProvider
+                    .HandledCallReason
+                    .notConfigured
+                    .rawValue
+            )
             return
         }
 
@@ -268,21 +284,19 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                     .reportCall()
 
                 let callState = try await callEntry.call.get()
-                if !checkIfCallWasHandled(callState: callState) {
-                    callEntry.createdBy = callState.call.createdBy.toUser
-                    setUpRingingTimer(for: callState)
-                } else {
+                if let leaveReason = checkIfCallWasHandled(callState: callState) {
                     log.debug(
-                        """
-                        Rejecting VoIP incoming call as it has been handled.
-                        callUUID:\(callUUID)
-                        cid:\(cid) 
-                        callerId:\(callerId)
-                        callerName:\(localizedCallerName)
-                        """,
+                        "Ending call with reason:\(leaveReason) { uuid:\(callUUID), cid:\(cid), callerId:\(callerId), callerName:\(localizedCallerName) }",
                         subsystems: .callKit
                     )
-                    callEnded(cid, ringingTimedOut: false)
+                    callEnded(
+                        cid,
+                        ringingTimedOut: false,
+                        leaveReason: leaveReason
+                    )
+                } else {
+                    callEntry.createdBy = callState.call.createdBy.toUser
+                    setUpRingingTimer(for: callState)
                 }
             } catch {
                 log.error(
@@ -295,7 +309,14 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                     subsystems: .callKit,
                     error: error
                 )
-                callEnded(cid, ringingTimedOut: false)
+                callEnded(
+                    cid,
+                    ringingTimedOut: false,
+                    leaveReason: StreamRejectionReasonProvider
+                        .HandledCallReason
+                        .reportCallFailed
+                        .rawValue
+                )
             }
         }
     }
@@ -376,12 +397,29 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         callCache.remove(for: newCallEntry.call.cId)
     }
 
-    /// Handle call end event.
+    /// Handles a ringing or active CallKit call ending.
+    ///
+    /// Calling this method requests the matching `CXEndCallAction`. If the call
+    /// is still ringing, the eventual reject request uses `leaveReason` when
+    /// provided; otherwise the SDK derives a rejection reason from the current
+    /// ringing state.
+    ///
+    /// - Parameters:
+    ///   - cId: The call CID managed by CallKit.
+    ///   - ringingTimedOut: Whether the ringing timer elapsed before the user
+    ///     answered.
+    ///   - leaveReason: An explicit backend rejection reason to use for ringing
+    ///     calls that were already handled elsewhere.
     open func callEnded(
         _ cId: String,
-        ringingTimedOut: Bool
+        ringingTimedOut: Bool,
+        leaveReason: String? = nil
     ) {
-        endCall(cId, ringingTimedOut: ringingTimedOut)
+        endCall(
+            cId,
+            ringingTimedOut: ringingTimedOut,
+            leaveReason: leaveReason
+        )
     }
 
     /// Called when a participant leaves the call.
@@ -569,12 +607,16 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 stackEntry.call.leave(reason: stackEntry.leaveReason)
             } else {
                 do {
-                    let rejectionReason = await streamVideo?
-                        .rejectionReasonProvider
-                        .reason(
-                            for: stackEntry.call.cId,
-                            ringTimeout: stackEntry.ringingTimedOut
-                        )
+                    let rejectionReason = if let leaveReason = stackEntry.leaveReason {
+                        leaveReason
+                    } else {
+                        await streamVideo?
+                            .rejectionReasonProvider
+                            .reason(
+                                for: stackEntry.call.cId,
+                                ringTimeout: stackEntry.ringingTimedOut
+                            )
+                    }
                     log.debug(
                         """
                         Rejecting with reason: \(rejectionReason ?? "nil")
@@ -639,32 +681,32 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         try await callController.requestTransaction(with: action)
     }
 
-    /// Return whether this call was already accepted or rejected.
-    open func checkIfCallWasHandled(callState: GetCallResponse) -> Bool {
+    /// Checks whether the incoming ringing call was already handled before
+    /// this device finished presenting CallKit.
+    ///
+    /// CallKit uses this gate right after fetching the latest backend state,
+    /// before starting the local ringing timer. If a leave reason is returned,
+    /// the service immediately ends the CallKit flow instead of continuing to
+    /// ring locally.
+    ///
+    /// - Parameter callState: The latest backend state for the ringing call.
+    /// - Returns: A backend leave reason when CallKit should stop ringing
+    ///   immediately, or `nil` when the local device should keep ringing.
+    open func checkIfCallWasHandled(callState: GetCallResponse) -> String? {
         guard let streamVideo else {
             log.warning(
                 "CallKit operation:\(#function) cannot be fulfilled because StreamVideo is nil.",
                 subsystems: .callKit
             )
-            return false
+            return StreamRejectionReasonProvider
+                .HandledCallReason
+                .notConfigured
+                .rawValue
         }
 
-        var allMembers = callState.members.map(\.user.toUser)
-        let creator = callState.call.createdBy.toUser
-        let isUserInMembersArray = allMembers.filter { $0.id == creator.id }.isEmpty == false
-        if !isUserInMembersArray {
-            allMembers.append(creator)
-        }
-        let allCallees = allMembers.filter { $0.id != creator.id }
-
-        let currentUserId = streamVideo.user.id
-        let acceptedBy = callState.call.session?.acceptedBy ?? [:]
-        let rejectedBy = callState.call.session?.rejectedBy ?? [:]
-        let isAccepted = acceptedBy[currentUserId] != nil
-        let isRejected = rejectedBy[currentUserId] != nil
-        let isRejectedByEveryoneElse = (allCallees.endIndex > 1)
-            && rejectedBy.keys.filter { $0 != currentUserId }.count == (allCallees.endIndex - 1)
-        return isAccepted || isRejected || isRejectedByEveryoneElse
+        return streamVideo
+            .rejectionReasonProvider
+            .reason(callState: callState)
     }
 
     /// Start the ringing timeout timer for the call.
@@ -716,7 +758,14 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 guard let self else { return }
                 switch event {
                 case let .typeCallEndedEvent(response):
-                    callEnded(response.callCid, ringingTimedOut: false)
+                    callEnded(
+                        response.callCid,
+                        ringingTimedOut: false,
+                        leaveReason: StreamRejectionReasonProvider
+                            .HandledCallReason
+                            .callEventReceived
+                            .rawValue
+                    )
                 case let .typeCallAcceptedEvent(response):
                     callAccepted(response)
                 case let .typeCallRejectedEvent(response):
@@ -819,10 +868,13 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             return
         }
 
-        endCall(
+        callEnded(
             activeCallEntry.call.cId,
             ringingTimedOut: false,
-            leaveReason: "auto-leave"
+            leaveReason: StreamRejectionReasonProvider
+                .HandledCallReason
+                .autoLeave
+                .rawValue
         )
     }
 
