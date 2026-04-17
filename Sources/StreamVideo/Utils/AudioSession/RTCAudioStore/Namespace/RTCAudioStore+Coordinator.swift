@@ -86,6 +86,12 @@ extension RTCAudioStore {
                     state: state.stereoConfiguration
                 )
 
+            // CallKit activation/deactivation events are global system
+            // notifications. They must reach the reducer regardless of
+            // which `CallAudioSession` (if any) currently owns the shared
+            // store, otherwise CallKit's audio-session hand-off would be
+            // dropped during call transitions. Do not gate this on
+            // `activeSessionIdentifier`.
             case .callKit:
                 return true
 

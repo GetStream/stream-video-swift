@@ -85,6 +85,60 @@ final class CallAudioSession_Tests: XCTestCase, @unchecked Sendable {
         }
     }
 
+    func test_init_whenAnotherSessionOwnsAudio_doesNotMutateOwnershipSensitiveStoreFields() async {
+        let owner = String.unique
+        let ownerModule = AudioDeviceModule(MockRTCAudioDeviceModule())
+
+        mockAudioStore.audioStore.dispatch(
+            [
+                .setActiveSessionIdentifier(owner),
+                .setAudioDeviceModule(ownerModule),
+                .webRTCAudioSession(.setAudioEnabled(true)),
+                .setActive(true)
+            ]
+        )
+
+        await fulfillment {
+            let state = self.mockAudioStore.audioStore.state
+            return state.activeSessionIdentifier == owner
+                && state.audioDeviceModule === ownerModule
+                && state.webRTCAudioSessionConfiguration.isAudioEnabled
+                && state.isActive
+        }
+
+        // Catch any ownership-sensitive field that flips during the init
+        // window. The bootstrap dispatch is conditioned on the store being
+        // unowned, so none of these should ever emit while another session
+        // owns the store.
+        let unexpectedMutation = expectation(
+            description: "init must not mutate ownership-sensitive store fields"
+        )
+        unexpectedMutation.isInverted = true
+        Publishers
+            .CombineLatest4(
+                mockAudioStore.audioStore.publisher(\.activeSessionIdentifier).removeDuplicates(),
+                mockAudioStore.audioStore
+                    .publisher(\.audioDeviceModule)
+                    .map { $0.map(ObjectIdentifier.init) }
+                    .removeDuplicates(),
+                mockAudioStore.audioStore.publisher(\.webRTCAudioSessionConfiguration.isAudioEnabled).removeDuplicates(),
+                mockAudioStore.audioStore.publisher(\.isActive).removeDuplicates()
+            )
+            .dropFirst()
+            .sink { _ in unexpectedMutation.fulfill() }
+            .store(in: &cancellables)
+
+        subject = .init(policy: MockAudioSessionPolicy())
+
+        await safeFulfillment(of: [unexpectedMutation], timeout: 0.5)
+
+        let state = mockAudioStore.audioStore.state
+        XCTAssertEqual(state.activeSessionIdentifier, owner)
+        XCTAssertTrue(state.audioDeviceModule === ownerModule)
+        XCTAssertTrue(state.webRTCAudioSessionConfiguration.isAudioEnabled)
+        XCTAssertTrue(state.isActive)
+    }
+
     // MARK: - activate
 
     // MARK: shouldSetActive = true
@@ -195,42 +249,6 @@ final class CallAudioSession_Tests: XCTestCase, @unchecked Sendable {
         // activation must still fire because the store already owned by this
         // session is active.
         await fulfillment {
-            let state = self.mockAudioStore.audioStore.state
-            return state.audioSessionConfiguration.category == policyConfiguration.category
-                && state.audioSessionConfiguration.mode == policyConfiguration.mode
-                && state.audioSessionConfiguration.options == policyConfiguration.options
-                && state.isMicrophoneMuted == false
-                && state.webRTCAudioSessionConfiguration.isAudioEnabled
-        }
-    }
-
-    func test_activate_shouldSetActiveFalse_isActiveOnStoreIsTrue_dropsFirstValueAndActivatesCorrectly() async {
-        mockAudioStore.audioStore.dispatch(.setActive(true))
-        let callSettingsSubject = CurrentValueSubject<CallSettings, Never>(.default)
-        let capabilitiesSubject = CurrentValueSubject<Set<OwnCapability>, Never>([.sendAudio])
-        let delegate = SpyAudioSessionAdapterDelegate()
-        let policy = MockAudioSessionPolicy()
-        let policyConfiguration = AudioSessionConfiguration(
-            isActive: true,
-            category: .playAndRecord,
-            mode: .voiceChat,
-            options: [.allowBluetoothHFP, .allowBluetoothA2DP],
-            overrideOutputAudioPort: .speaker
-        )
-        policy.stub(for: .configuration, with: policyConfiguration)
-        subject = .init(policy: policy)
-        await claimOwnership(of: subject)
-
-        subject.activate(
-            callSettingsPublisher: callSettingsSubject.eraseToAnyPublisher(),
-            ownCapabilitiesPublisher: capabilitiesSubject.eraseToAnyPublisher(),
-            delegate: delegate,
-            statsAdapter: nil,
-            shouldSetActive: false
-        )
-        mockAudioStore.audioStore.dispatch(.setActive(true))
-
-        await fulfilmentInMainActor {
             let state = self.mockAudioStore.audioStore.state
             return state.audioSessionConfiguration.category == policyConfiguration.category
                 && state.audioSessionConfiguration.mode == policyConfiguration.mode
@@ -404,6 +422,83 @@ final class CallAudioSession_Tests: XCTestCase, @unchecked Sendable {
                 && state.audioDeviceModule === replacementModule
                 && state.webRTCAudioSessionConfiguration.isAudioEnabled
                 && state.isActive
+        }
+    }
+
+    // MARK: - answer while in-call handoff
+
+    func test_answerWhileInCall_handoffBetweenTwoSessions_preservesTakingOverSessionState() async {
+        let sessionACallSettings = PassthroughSubject<CallSettings, Never>()
+        let sessionACapabilities = PassthroughSubject<Set<OwnCapability>, Never>()
+        let sessionADelegate = SpyAudioSessionAdapterDelegate()
+        let sessionAPolicy = MockAudioSessionPolicy()
+        sessionAPolicy.stub(
+            for: .configuration,
+            with: AudioSessionConfiguration(
+                isActive: true,
+                category: .playAndRecord,
+                mode: .voiceChat,
+                options: [.allowBluetoothHFP, .allowBluetoothA2DP],
+                overrideOutputAudioPort: .speaker
+            )
+        )
+        let sessionAModule = AudioDeviceModule(MockRTCAudioDeviceModule())
+
+        // Session A: claim ownership through the same handshake the
+        // `WebRTCStateAdapter.configureAudioSession` performs, then
+        // activate and drive the policy.
+        let sessionA: CallAudioSession = .init(policy: sessionAPolicy)
+        mockAudioStore.audioStore.dispatch(
+            [
+                .setActiveSessionIdentifier(sessionA.identifier),
+                .setAudioDeviceModule(sessionAModule)
+            ]
+        )
+        await fulfillment {
+            self.mockAudioStore.audioStore.state.activeSessionIdentifier == sessionA.identifier
+                && self.mockAudioStore.audioStore.state.audioDeviceModule === sessionAModule
+        }
+        sessionA.activate(
+            callSettingsPublisher: sessionACallSettings.eraseToAnyPublisher(),
+            ownCapabilitiesPublisher: sessionACapabilities.eraseToAnyPublisher(),
+            delegate: sessionADelegate,
+            statsAdapter: nil,
+            shouldSetActive: true
+        )
+        sessionACallSettings.send(CallSettings(audioOn: true, speakerOn: true))
+        sessionACapabilities.send([.sendAudio])
+        await fulfillment {
+            self.mockAudioStore.audioStore.state.webRTCAudioSessionConfiguration.isAudioEnabled
+                && self.mockAudioStore.audioStore.state.isActive
+        }
+
+        // Session B: replicates the ownership hand-off performed by
+        // `WebRTCStateAdapter.configureAudioSession` on an incoming call.
+        let sessionB: CallAudioSession = .init(policy: MockAudioSessionPolicy())
+        let sessionBModule = AudioDeviceModule(MockRTCAudioDeviceModule())
+        mockAudioStore.audioStore.dispatch(
+            [
+                .setActiveSessionIdentifier(sessionB.identifier),
+                .setAudioDeviceModule(sessionBModule)
+            ]
+        )
+        await fulfillment {
+            self.mockAudioStore.audioStore.state.activeSessionIdentifier == sessionB.identifier
+                && self.mockAudioStore.audioStore.state.audioDeviceModule === sessionBModule
+        }
+
+        // Session A's teardown now happens after session B has already
+        // claimed ownership. None of A's cleanup actions should affect
+        // the shared state because each of them is conditioned on A still
+        // owning the store.
+        await sessionA.deactivate()
+
+        await fulfillment {
+            let state = self.mockAudioStore.audioStore.state
+            return state.activeSessionIdentifier == sessionB.identifier
+                && state.audioDeviceModule === sessionBModule
+                && state.isActive
+                && state.webRTCAudioSessionConfiguration.isAudioEnabled
         }
     }
 

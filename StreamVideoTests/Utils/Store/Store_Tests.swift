@@ -82,6 +82,9 @@ final class Store_Tests: XCTestCase, @unchecked Sendable {
     }
 
     func test_dispatch_coordinatorTransformsAction_beforeMiddlewareAndReducers() async {
+        reducerA.identifier = "A"
+        reducerB.identifier = "B"
+
         subject.dispatch(.coordinatedToVerifyReducersOrder)
 
         await fulfillment {
