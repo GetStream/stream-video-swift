@@ -39,7 +39,7 @@ extension Task where Failure == any Error {
                 /// This is default for task groups to account for when there aren't any pending tasks.
                 /// Awaiting on an empty group immediately returns 'nil' without suspending.
                 guard let result = try await group.next() else {
-                    throw _Concurrency.CancellationError()
+                    throw Swift.CancellationError()
                 }
 
                 /// If we reach this, it means we have a value before the timeout.
