@@ -4,6 +4,8 @@
 
 import Foundation
 
+private typealias SwiftCancellationError = CancellationError
+
 /// An extension to the `Task` type that adds timeout functionality.
 extension Task where Failure == any Error {
     @discardableResult
@@ -39,7 +41,7 @@ extension Task where Failure == any Error {
                 /// This is default for task groups to account for when there aren't any pending tasks.
                 /// Awaiting on an empty group immediately returns 'nil' without suspending.
                 guard let result = try await group.next() else {
-                    throw Swift.CancellationError()
+                    throw SwiftCancellationError()
                 }
 
                 /// If we reach this, it means we have a value before the timeout.
