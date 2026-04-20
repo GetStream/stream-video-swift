@@ -63,6 +63,11 @@ extension Call.StateMachine.Stage {
             }
         }
 
+        /// Cancels in-flight join work when the state machine leaves `.joining`.
+        override func willTransitionAway() {
+            disposableBag.removeAll()
+        }
+
         // MARK: - Private Helpers
 
         /// Executes the call joining process asynchronously.
@@ -85,6 +90,9 @@ extension Call.StateMachine.Stage {
                 do {
                     let response = try await executeJoin(call: call, input: input)
                     transitionOrError(.joined(context, response: response))
+                } catch is CancellationError {
+                    // A replacement stage already owns the call lifecycle.
+                    return
                 } catch let error as CallJoinInterceptionError {
                     // Interception failures are terminal for this join attempt,
                     // so they are surfaced to the original caller without

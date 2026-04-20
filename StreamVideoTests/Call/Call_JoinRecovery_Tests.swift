@@ -9,11 +9,140 @@ import Combine
 @MainActor
 final class Call_JoinRecovery_Tests: StreamVideoTestCase, @unchecked Sendable {
 
+    func test_join_whenOuterJoinTimeouts_leavesAndStopsRetrying() async throws {
+        let previousTimeout = CallConfiguration.timeout
+        CallConfiguration.timeout.join = 3
+        defer { CallConfiguration.timeout = previousTimeout }
+
+        let mockPermissions = MockPermissionsStore()
+        defer { mockPermissions.dismantle() }
+
+        let callType = "livestream"
+        let callId = String.unique
+        let defaultAPI = MockDefaultAPIEndpoints()
+        let videoConfig = VideoConfig.dummy()
+        let webRTCCoordinatorFactory = MockWebRTCCoordinatorFactory(
+            videoConfig: videoConfig
+        )
+        let controller = CallController(
+            defaultAPI: defaultAPI,
+            user: .dummy(),
+            callId: callId,
+            callType: callType,
+            apiKey: .unique,
+            videoConfig: videoConfig,
+            initialCallSettings: .default,
+            cachedLocation: .unique,
+            webRTCCoordinatorFactory: webRTCCoordinatorFactory
+        )
+        let subject = Call(
+            callType: callType,
+            callId: callId,
+            coordinatorClient: defaultAPI,
+            callController: controller
+        )
+        let joinResponse = JoinCallResponse.dummy(
+            call: .dummy(
+                cid: subject.cId,
+                id: subject.callId,
+                type: subject.callType
+            ),
+            credentials: .dummy(server: .dummy(edgeName: "test-sfu")),
+            ownCapabilities: [.sendAudio, .sendVideo]
+        )
+        let unexpectedJoined = expectation(
+            description: "Join should not complete after timing out"
+        )
+        unexpectedJoined.isInverted = true
+        let joinedObserver = webRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .coordinator
+            .stateMachine
+            .publisher
+            .dropFirst()
+            .receive(on: DispatchQueue.main)
+            .sink {
+                if $0.id == .joined {
+                    unexpectedJoined.fulfill()
+                }
+            }
+        defer { joinedObserver.cancel() }
+        defaultAPI.stub(for: .joinCall, with: joinResponse)
+        webRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .coordinator
+            .stateMachine
+            .currentStage
+            .context
+            .authenticator = CallAuthenticationBackedWebRTCAuthenticator(
+                sfuAdapter: webRTCCoordinatorFactory
+                    .mockCoordinatorStack
+                    .sfuStack
+                    .adapter
+            )
+
+        let joinTask = Task {
+            try await subject.join(
+                create: false,
+                ring: false,
+                notify: false,
+                callSettings: .init(audioOn: false, videoOn: false)
+            )
+        }
+
+        await fulfilmentInMainActor(timeout: defaultTimeout) {
+            webRTCCoordinatorFactory
+                .mockCoordinatorStack
+                .coordinator
+                .stateMachine
+                .currentStage
+                .id == .joining
+                && (
+                    webRTCCoordinatorFactory
+                        .mockCoordinatorStack
+                        .coordinator
+                        .stateMachine
+                        .currentStage
+                        .context
+                        .sfuEventObserver != nil
+                )
+        }
+
+        await wait(for: 0.5)
+
+        webRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .sfuStack
+            .setConnectionState(to: .connected(healthCheckInfo: .init()))
+
+        do {
+            _ = try await joinTask.value
+            XCTFail("Expected join to time out.")
+        } catch {
+            XCTAssertTrue(error is TimeOutError)
+        }
+
+        webRTCCoordinatorFactory.mockCoordinatorStack.joinResponse([])
+
+        await fulfilmentInMainActor(timeout: defaultTimeout) {
+            webRTCCoordinatorFactory
+                .mockCoordinatorStack
+                .coordinator
+                .stateMachine
+                .currentStage
+                .id == .idle
+        }
+        await fulfilmentInMainActor(timeout: defaultTimeout) {
+            self.streamVideo?.state.activeCall == nil
+        }
+        await fulfillment(of: [unexpectedJoined], timeout: 3)
+
+        XCTAssertEqual(defaultAPI.timesCalled(.joinCall), 1)
+    }
+
     func test_join_afterInitialJoinAndSubscriberDisconnects_capsBackendJoinRequestsAfterTenRejoins() async throws {
         let mockPermissions = MockPermissionsStore()
         defer { mockPermissions.dismantle() }
-        let maxRejoinAttempts = 10
-        let expectedJoinCallAttempts = maxRejoinAttempts + 1
 
         let callType = "livestream"
         let callId = String.unique
@@ -107,40 +236,60 @@ final class Call_JoinRecovery_Tests: StreamVideoTestCase, @unchecked Sendable {
 
         _ = try await joinTask.value
 
-        XCTAssertEqual(defaultAPI.timesCalled(.joinCall), 1)
-
-        for _ in 0..<maxRejoinAttempts {
-            subscriberDisconnected.send(())
-
-            let nextJoinCallCount = defaultAPI.timesCalled(.joinCall) + 1
-            await fulfilmentInMainActor(timeout: defaultTimeout + 2) {
-                defaultAPI.timesCalled(.joinCall) >= nextJoinCallCount
-                    && webRTCCoordinatorFactory
-                    .mockCoordinatorStack
-                    .coordinator
-                    .stateMachine
-                    .currentStage
-                    .id == .joining
-            }
-
-            await wait(for: 0.5)
+        await fulfilmentInMainActor(timeout: defaultTimeout) {
             webRTCCoordinatorFactory
                 .mockCoordinatorStack
-                .sfuStack
-                .setConnectionState(to: .connected(healthCheckInfo: .init()))
-            webRTCCoordinatorFactory.mockCoordinatorStack.joinResponse([])
-
-            await fulfilmentInMainActor(timeout: defaultTimeout) {
-                webRTCCoordinatorFactory
-                    .mockCoordinatorStack
-                    .coordinator
-                    .stateMachine
-                    .currentStage
-                    .id == .joined
-            }
+                .coordinator
+                .stateMachine
+                .currentStage
+                .id == .joined
         }
 
-        XCTAssertEqual(defaultAPI.timesCalled(.joinCall), expectedJoinCallAttempts)
+        XCTAssertEqual(defaultAPI.timesCalled(.joinCall), 1)
+
+        let recentAttempts = { (count: Int) in
+            let now = Date()
+            return (0..<count).map { now.addingTimeInterval(TimeInterval(-$0)) }
+        }
+
+        webRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .coordinator
+            .stateMachine
+            .currentStage
+            .context
+            .rejoinAttemptTimestamps = recentAttempts(9)
+
+        let joinCallCountBeforeAllowedRejoin = defaultAPI.timesCalled(.joinCall)
+        subscriberDisconnected.send(())
+
+        await fulfilmentInMainActor(timeout: defaultTimeout + 2) {
+            defaultAPI.timesCalled(.joinCall) == joinCallCountBeforeAllowedRejoin + 1
+        }
+
+        await wait(for: 0.5)
+        webRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .sfuStack
+            .setConnectionState(to: .connected(healthCheckInfo: .init()))
+        webRTCCoordinatorFactory.mockCoordinatorStack.joinResponse([])
+
+        await fulfilmentInMainActor(timeout: defaultTimeout) {
+            webRTCCoordinatorFactory
+                .mockCoordinatorStack
+                .coordinator
+                .stateMachine
+                .currentStage
+                .id == .joined
+        }
+
+        webRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .coordinator
+            .stateMachine
+            .currentStage
+            .context
+            .rejoinAttemptTimestamps = recentAttempts(10)
 
         subscriberDisconnected.send(())
 
@@ -153,6 +302,8 @@ final class Call_JoinRecovery_Tests: StreamVideoTestCase, @unchecked Sendable {
                 .id == .idle
         }
 
+        XCTAssertEqual(defaultAPI.timesCalled(.joinCall), 2)
+
         let joinCallRequests = try XCTUnwrap(
             defaultAPI.recordedInputPayload(
                 (String, String, JoinCallRequest).self,
@@ -160,7 +311,7 @@ final class Call_JoinRecovery_Tests: StreamVideoTestCase, @unchecked Sendable {
             )
         )
 
-        XCTAssertEqual(joinCallRequests.count, expectedJoinCallAttempts)
+        XCTAssertEqual(joinCallRequests.count, 2)
         XCTAssertTrue(joinCallRequests.allSatisfy { $0.2.create == false })
         XCTAssertTrue(joinCallRequests.allSatisfy { $0.2.ring == false })
         XCTAssertTrue(joinCallRequests.allSatisfy { $0.2.notify == false })

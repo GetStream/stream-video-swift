@@ -144,6 +144,9 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// `joinInterceptor` is provided, the SDK waits for it after the join
     /// response has been applied locally but before the call is marked as the
     /// active call.
+    ///
+    /// If the final handoff times out, the SDK leaves the call with reason
+    /// `join.timeout` before rethrowing the timeout error.
     /// - Parameters:
     ///  - create: whether the call should be created if it doesn't exist.
     ///  - options: configuration options for the call.
@@ -155,7 +158,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     ///    final joined transition after the join response has been received and
     ///    applied to local state.
     /// - Throws: An error if the call could not be joined or if
-    ///   `joinInterceptor` throws.
+    ///   `joinInterceptor` throws. Throws `TimeOutError` when the final joined
+    ///   handoff does not complete in time.
     @discardableResult
     public func join(
         create: Bool = false,
@@ -246,10 +250,16 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         if let joinResponse = result as? JoinCallResponse {
             return joinResponse
         } else if let publisher = result as? AnyPublisher<JoinCallResponse?, Error> {
-            let result = try await publisher
-                .compactMap { $0 }
-                .nextValue(timeout: CallConfiguration.timeout.join)
-            return result
+            do {
+                return try await publisher
+                    .compactMap { $0 }
+                    .nextValue(timeout: CallConfiguration.timeout.join)
+            } catch {
+                if error is TimeOutError {
+                    leave(reason: "join.timeout")
+                }
+                throw error
+            }
         } else {
             throw ClientError("Call was unable to join call.")
         }
