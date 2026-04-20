@@ -369,10 +369,18 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         helpers.duringDismantleObservedAllCallEnded = false
 
         let creatorUserFlow = try await helpers
-            .callFlow(id: callId, type: .default, userId: creatorUserId)
+            .callFlow(
+                id: callId,
+                type: .default,
+                userId: creatorUserId
+            )
 
         let participantUserFlow = try await helpers
-            .callFlow(id: callId, type: .default, userId: participantUserId)
+            .callFlow(
+                id: callId,
+                type: .default,
+                userId: participantUserId
+            )
 
         let creatorFlow = try await creatorUserFlow
             .perform { try await $0.call.create(memberIds: [creatorUserId, participantUserId]) }
@@ -1032,6 +1040,97 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
 
         try await flow
             .assertEventuallyInMainActor { $0.call.streamVideo.state.activeCall == nil }
+    }
+
+    func test_join_whenParticipantCancelsJoinAttemptAndRetries_thenSecondJoinSucceedsWithoutTimeoutErrors() async throws {
+        let callId = String.unique
+        let creator = String.unique
+        let participant = String.unique
+
+        let creatorCallFlow = try await helpers
+            .callFlow(id: callId, type: .default, userId: creator)
+
+        let participantCallFlow = try await helpers
+            .callFlow(id: callId, type: .default, userId: participant)
+
+        let creatorJoinedCallFlow = try await creatorCallFlow
+            .perform {
+                try await $0.call.create(
+                    memberIds: [creator, participant]
+                )
+            }
+            .perform {
+                try await $0.call.join(
+                    policy: .peerConnectionReadinessAware
+                )
+            }
+
+        let participantJoinedEvents = creatorJoinedCallFlow
+            .subscribe(for: CallSessionParticipantJoinedEvent.self)
+        let participantLeftEvents = creatorJoinedCallFlow
+            .subscribe(for: CallSessionParticipantLeftEvent.self)
+
+        let cancelledJoinTask = Task {
+            try await participantCallFlow.call.join()
+        }
+
+        try await participantJoinedEvents
+            .assertEventually {
+                $0.callCid == creatorJoinedCallFlow.call.cId &&
+                    $0.participant.user.id == participant
+            }
+
+        cancelledJoinTask.cancel()
+        participantCallFlow.call.leave(reason: "join.cancelled")
+
+        do {
+            _ = try await cancelledJoinTask.value
+            XCTFail("Expected cancellation.")
+        } catch is CancellationError {
+        } catch {
+            XCTFail("Unexpected error type: \(error)")
+        }
+
+        try await participantLeftEvents
+            .assertEventually {
+                $0.callCid == creatorJoinedCallFlow.call.cId &&
+                    $0.participant.user.id == participant
+            }
+
+        let participantRejoinedFlow = try await participantCallFlow
+            .perform {
+                try await $0.call.join()
+            }
+            .assertEventuallyInMainActor {
+                $0.call.state.reconnectionStatus == .connected
+            }
+            .assertEventuallyInMainActor {
+                $0.call.state.participants.endIndex == 2
+            }
+            .assertEventuallyInMainActor {
+                $0.call.state.participants.first {
+                    $0.userId == creator
+                } != nil
+            }
+
+        try await creatorJoinedCallFlow
+            .assertEventuallyInMainActor {
+                $0.call.state.participants.endIndex == 2
+            }
+            .assertEventuallyInMainActor {
+                $0.call.state.participants.first {
+                    $0.userId == participant
+                } != nil
+            }
+            .delay(CallConfiguration.timeout.join + 0.5)
+            .assertInMainActor {
+                $0.call.state.participants.endIndex == 2
+            }
+
+        try await participantRejoinedFlow
+            .assertInMainActor {
+                $0.call.state.reconnectionStatus == .connected
+            }
     }
 
     // MARK: - Pin

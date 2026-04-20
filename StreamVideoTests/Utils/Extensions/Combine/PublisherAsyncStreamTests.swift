@@ -243,6 +243,55 @@ final class PublisherAsyncStreamTests: XCTestCase, @unchecked Sendable {
             XCTAssertTrue(error is ClientError)
         }
     }
+
+    /// Tests firstValue propagates cancellation while waiting for a value.
+    func test_firstValue_whenTaskIsCancelled_throwsCancellationError() async {
+        // Given
+        let publisher = PassthroughSubject<Int, Never>()
+        let task = Task {
+            try await publisher.firstValue()
+        }
+
+        // When
+        try? await Task.sleep(nanoseconds: 100_000_000)
+        task.cancel()
+
+        do {
+            _ = try await task.value
+            XCTFail("Expected cancellation.")
+        } catch is CancellationError {
+        } catch {
+            XCTFail("Unexpected error type: \(error)")
+        }
+    }
+
+    /// Tests firstValue with timeout propagates cancellation immediately.
+    func test_firstValue_withTimeout_whenTaskIsCancelled_throwsCancellationError() async {
+        // Given
+        let publisher = PassthroughSubject<Int, Never>()
+        let startTime = Date()
+        let task = Task {
+            try await publisher.firstValue(timeoutInSeconds: 1.0)
+        }
+
+        // When
+        try? await Task.sleep(nanoseconds: 100_000_000)
+        task.cancel()
+
+        do {
+            _ = try await task.value
+            XCTFail("Expected cancellation.")
+        } catch is CancellationError {
+            let elapsed = Date().timeIntervalSince(startTime)
+            XCTAssertLessThan(
+                elapsed,
+                0.5,
+                "Cancellation should not wait for the timeout to elapse."
+            )
+        } catch {
+            XCTFail("Unexpected error type: \(error)")
+        }
+    }
     
     // MARK: - nextValue Tests
     
@@ -311,6 +360,34 @@ final class PublisherAsyncStreamTests: XCTestCase, @unchecked Sendable {
         } catch {
             // Expected timeout
             XCTAssertTrue(error is ClientError)
+        }
+    }
+
+    /// Tests nextValue propagates cancellation instead of waiting for timeout.
+    func test_nextValue_withTimeout_whenTaskIsCancelled_throwsCancellationError() async {
+        // Given
+        let publisher = PassthroughSubject<Int, Never>()
+        let startTime = Date()
+        let task = Task {
+            try await publisher.nextValue(timeout: 1.0)
+        }
+
+        // When
+        try? await Task.sleep(nanoseconds: 100_000_000)
+        task.cancel()
+
+        do {
+            _ = try await task.value
+            XCTFail("Expected cancellation.")
+        } catch is CancellationError {
+            let elapsed = Date().timeIntervalSince(startTime)
+            XCTAssertLessThan(
+                elapsed,
+                0.5,
+                "Cancellation should not wait for the timeout to elapse."
+            )
+        } catch {
+            XCTFail("Unexpected error type: \(error)")
         }
     }
     

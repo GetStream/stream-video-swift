@@ -689,6 +689,47 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
         XCTAssertEqual(joinInterceptor.invocationCount, 1)
     }
 
+    func test_join_whenJoinCompletionTimesOut_leavesCallWithJoinTimeoutReason() async throws {
+        let originalTimeout = CallConfiguration.timeout
+        CallConfiguration.timeout.join = 0.1
+        defer { CallConfiguration.timeout = originalTimeout }
+
+        let mockCallController = MockCallController()
+        let call = Call.dummy(
+            callType: callType,
+            callId: callId,
+            callController: mockCallController
+        )
+        let joinInterceptor = CallJoinInterceptor_Spy { _ in
+            try await Task.sleep(nanoseconds: 1_000_000_000)
+        }
+        mockCallController.stub(
+            for: .join,
+            with: JoinCallResponse.dummy(
+                call: .dummy(
+                    cid: call.cId,
+                    id: call.callId,
+                    type: call.callType
+                )
+            )
+        )
+
+        do {
+            _ = try await call.join(joinInterceptor: joinInterceptor)
+            XCTFail("Expected join to time out.")
+        } catch {
+            XCTAssertTrue(error is TimeOutError)
+        }
+
+        XCTAssertEqual(
+            mockCallController.recordedInputPayload(
+                String.self,
+                for: .leave
+            )?.first,
+            "join.timeout"
+        )
+    }
+
     // MARK: - leave
 
     func test_leave_withReason_reasonWasPassedToCallController() {
@@ -883,10 +924,16 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
 }
 
 private final class CallJoinInterceptor_Spy: CallJoinIntercepting, @unchecked Sendable {
+    private let handler: @Sendable (Call) async throws -> Void
     @Atomic private(set) var invocationCount = 0
+
+    init(handler: @escaping @Sendable (Call) async throws -> Void = { _ in }) {
+        self.handler = handler
+    }
 
     func callReadyToJoin(_ call: Call) async throws {
         invocationCount += 1
+        try await handler(call)
     }
 }
 

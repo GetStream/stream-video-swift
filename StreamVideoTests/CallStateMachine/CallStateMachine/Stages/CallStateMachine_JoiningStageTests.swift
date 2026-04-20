@@ -500,6 +500,70 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
         XCTAssertEqual(joinInterceptor.invocationCount, 1)
     }
 
+    func test_willTransitionAway_whenJoinInterceptorIsSuspended_cancelsPendingJoinTask(
+    ) async throws {
+        let deliverySubject = CurrentValueSubject<JoinCallResponse?, Error>(nil)
+        let interceptorStarted = expectation(description: "Join interceptor started.")
+        let unexpectedTransition = expectation(
+            description: "Join should not transition after cancellation."
+        )
+        unexpectedTransition.isInverted = true
+        let unexpectedDelivery = expectation(
+            description: "Join should not deliver after cancellation."
+        )
+        unexpectedDelivery.isInverted = true
+        let cancellable = deliverySubject
+            .receive(on: DispatchQueue.main)
+            .compactMap { $0 }
+            .sink { _ in
+                unexpectedDelivery.fulfill()
+            } receiveValue: { _ in
+                unexpectedDelivery.fulfill()
+            }
+        let joinInterceptor = NonCancellableJoinInterceptor_Spy {
+            interceptorStarted.fulfill()
+        }
+        let context = Call.StateMachine.Stage.Context(
+            call: call,
+            input: .join(
+                .init(
+                    create: true,
+                    callSettings: .init(audioOn: false),
+                    options: .init(memberIds: [.unique]),
+                    ring: true,
+                    notify: false,
+                    source: .inApp,
+                    deliverySubject: deliverySubject,
+                    joinInterceptor: joinInterceptor
+                )
+            )
+        )
+
+        callController.stub(for: .join, with: JoinCallResponse.dummy())
+        subject.transition = { _ in
+            unexpectedTransition.fulfill()
+        }
+        subject.context = context
+
+        _ = subject.transition(from: .idle(.init()))
+
+        await fulfillment(of: [interceptorStarted], timeout: defaultTimeout)
+
+        subject.willTransitionAway()
+        joinInterceptor.resume()
+
+        await fulfillment(
+            of: [unexpectedTransition, unexpectedDelivery],
+            timeout: 0.2
+        )
+
+        XCTAssertEqual(joinInterceptor.invocationCount, 1)
+        XCTAssertNil(streamVideo.state.activeCall)
+        XCTAssertEqual(callController.timesCalled(.observeWebRTCStateUpdated), 0)
+
+        cancellable.cancel()
+    }
+
     func test_execute_withRetries_whenJoinFailsAndThereAreAvailableRetries_transitionsToJoining() async throws {
         let context = Call.StateMachine.Stage.Context(
             call: call,
