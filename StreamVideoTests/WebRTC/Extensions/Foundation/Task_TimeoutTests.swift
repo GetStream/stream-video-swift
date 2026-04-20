@@ -178,8 +178,10 @@ final class TaskTimeoutTests: XCTestCase, @unchecked Sendable {
         do {
             _ = try await task.value
             XCTFail("Cancelled task should not complete successfully")
-        } catch {
+        } catch is CancellationError {
             return
+        } catch {
+            XCTFail("Unexpected error type: \(error)")
         }
     }
     
@@ -202,8 +204,10 @@ final class TaskTimeoutTests: XCTestCase, @unchecked Sendable {
         do {
             _ = try await task.value
             XCTFail("Task should have been cancelled")
-        } catch {
+        } catch is CancellationError {
             XCTAssertTrue(operationStarted, "Operation should have started")
+        } catch {
+            XCTFail("Unexpected error type: \(error)")
         }
     }
 

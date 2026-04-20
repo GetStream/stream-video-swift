@@ -16,7 +16,7 @@ extension Task where Failure == any Error {
         line: UInt = #line,
         operation: @Sendable @escaping () async throws -> Success
     ) {
-        self = Task(priority: priority) {
+        self = Task<Success, Failure>(priority: priority) {
             try await withThrowingTaskGroup(of: Success.self) { group in
 
                 /// Add the operation to perform as the first task.
@@ -39,7 +39,7 @@ extension Task where Failure == any Error {
                 /// This is default for task groups to account for when there aren't any pending tasks.
                 /// Awaiting on an empty group immediately returns 'nil' without suspending.
                 guard let result = try await group.next() else {
-                    throw ClientError("Task produced no value", file, line)
+                    throw _Concurrency.CancellationError()
                 }
 
                 /// If we reach this, it means we have a value before the timeout.
