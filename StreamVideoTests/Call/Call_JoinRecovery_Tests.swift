@@ -98,6 +98,7 @@ final class Call_JoinRecovery_Tests: StreamVideoTestCase, @unchecked Sendable {
                 .id == .joining
         }
 
+        await wait(for: 0.5)
         webRTCCoordinatorFactory
             .mockCoordinatorStack
             .sfuStack
@@ -122,6 +123,7 @@ final class Call_JoinRecovery_Tests: StreamVideoTestCase, @unchecked Sendable {
                     .id == .joining
             }
 
+            await wait(for: 0.5)
             webRTCCoordinatorFactory
                 .mockCoordinatorStack
                 .sfuStack
