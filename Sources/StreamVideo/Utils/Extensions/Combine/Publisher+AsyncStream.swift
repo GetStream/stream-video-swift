@@ -55,7 +55,7 @@ public extension Publisher where Output: Sendable {
         }
 
         if Task<Never, Never>.isCancelled {
-            throw _Concurrency.CancellationError()
+            throw CancellationError()
         }
         throw ClientError("Task produced no value.", file, line)
     }

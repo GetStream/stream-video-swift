@@ -364,30 +364,22 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
 
     func test_end_whenCreatorEndsCall_thenParticipantAutomaticallyLeaves() async throws {
         let callId = String.unique
-        let creatorUserId = "user-a"
-        let participantUserId = "user-b"
+        let creatorUserId = String.unique
+        let participantUserId = String.unique
         helpers.duringDismantleObservedAllCallEnded = false
-
-        let apiKey = "hd8szvscpxvd"
-        let userAToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3NzY2ODczNDMsInVzZXJfaWQiOiJ1c2VyLWEifQ.1ZgWONVUFKEB6vneFKfyPt9Ht1VrXIEpRzR877dF7gw"
-        let userBToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3NzY2ODczNTUsInVzZXJfaWQiOiJ1c2VyLWIifQ.ggHutnqzYYd3e_p1VZkgQpgnjAwMTqRMoomhNadRCzE"
 
         let creatorUserFlow = try await helpers
             .callFlow(
                 id: callId,
                 type: .default,
-                userId: creatorUserId,
-                overrideAPIKey: apiKey,
-                overrideToken: userAToken
+                userId: creatorUserId
             )
 
         let participantUserFlow = try await helpers
             .callFlow(
                 id: callId,
                 type: .default,
-                userId: participantUserId,
-                overrideAPIKey: apiKey,
-                overrideToken: userBToken
+                userId: participantUserId
             )
 
         let creatorFlow = try await creatorUserFlow
