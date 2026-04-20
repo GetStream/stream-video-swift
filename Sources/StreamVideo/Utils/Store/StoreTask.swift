@@ -70,8 +70,8 @@ final class StoreTask<Namespace: StoreNamespace>: Sendable {
             var updatedState = state
             for action in actions {
                 guard
-                    coordinator.shouldExecute(
-                        action: action.wrappedValue,
+                    let resolvedAction = coordinator.coordinate(
+                        action: action,
                         state: updatedState
                     )
                 else {
@@ -89,7 +89,7 @@ final class StoreTask<Namespace: StoreNamespace>: Sendable {
                 updatedState = try await executor.run(
                     identifier: identifier,
                     state: updatedState,
-                    action: action,
+                    action: resolvedAction,
                     reducers: reducers,
                     middleware: middleware,
                     logger: logger,

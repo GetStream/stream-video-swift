@@ -811,9 +811,19 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     }
 
     func configureAudioSession(source: JoinSource?) async throws {
-        try await audioStore.dispatch([
-            .setAudioDeviceModule(peerConnectionFactory.audioDeviceModule)
-        ]).result()
+        try await audioStore.dispatch(
+            [
+                // Claim ownership before installing the ADM so any late
+                // teardown from a previous call becomes a no-op. Both
+                // actions run in the same batch on the store's serial
+                // processing queue, so no other dispatch can interleave
+                // between them. That makes the ADM install implicitly
+                // ownership-safe and removes the need to wrap it in a
+                // `.conditioned(...)` action.
+                .setActiveSessionIdentifier(audioSession.identifier),
+                .setAudioDeviceModule(peerConnectionFactory.audioDeviceModule)
+            ]
+        ).result()
 
         let sourceIsCallKit = {
             guard

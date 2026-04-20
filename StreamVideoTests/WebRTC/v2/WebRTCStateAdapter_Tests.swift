@@ -645,7 +645,14 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         await assertTrueAsync(await subject.audioSession.statsAdapter === statsAdapter)
     }
 
-    func test_configureAudioSession_dispatchesAudioStoreUpdates() async throws {
+    func test_configureAudioSession_claimsOwnershipAndDispatchesAudioStoreUpdates() async throws {
+        mockAudioStore.audioStore.dispatch(
+            [
+                .setActiveSessionIdentifier(String.unique),
+                .setAudioDeviceModule(.init(MockRTCAudioDeviceModule()))
+            ]
+        )
+
         try await subject.configureAudioSession(source: .inApp)
 
         await fulfillment {
@@ -653,7 +660,9 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
             guard let module = state.audioDeviceModule else { return false }
             let factory = await self.subject.peerConnectionFactory
             let adapterModule = factory.audioDeviceModule
-            return module === adapterModule
+            let audioSession = await self.subject.audioSession
+            return state.activeSessionIdentifier == audioSession.identifier
+                && module === adapterModule
                 && state.isRecording == adapterModule.isRecording
                 && state.isMicrophoneMuted == adapterModule.isMicrophoneMuted
         }
