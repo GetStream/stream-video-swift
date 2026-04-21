@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		41A1C0DE2F82100100A1B2C3 /* 10-call-join-interceptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41A1C0DE2F82100200A1B2C3 /* 10-call-join-interceptor.swift */; };
 		400062A42EDF390D0086E14B /* 27-moderation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 400062A32EDF390D0086E14B /* 27-moderation.swift */; };
 		400D91B62B63D88100EBA47D /* DocumentationTests.h in Headers */ = {isa = PBXBuildFile; fileRef = 400D91B52B63D88100EBA47D /* DocumentationTests.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		400D91C72B63D96800EBA47D /* 03-quickstart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 400D91C62B63D96800EBA47D /* 03-quickstart.swift */; };
@@ -91,6 +92,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		41A1C0DE2F82100200A1B2C3 /* 10-call-join-interceptor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "10-call-join-interceptor.swift"; sourceTree = "<group>"; };
 		400062A32EDF390D0086E14B /* 27-moderation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "27-moderation.swift"; sourceTree = "<group>"; };
 		400D91B22B63D88100EBA47D /* DocumentationTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = DocumentationTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		400D91B52B63D88100EBA47D /* DocumentationTests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DocumentationTests.h; sourceTree = "<group>"; };
@@ -278,6 +280,7 @@
 				40FFDC932B6401CC004DA7A2 /* 07-video-fallback.swift */,
 				40FFDC952B64023A004DA7A2 /* 08-permission-requests.swift */,
 				40FFDC972B640566004DA7A2 /* 09-audio-volume-indicator.swift */,
+				41A1C0DE2F82100200A1B2C3 /* 10-call-join-interceptor.swift */,
 				40FFDC992B6405C7004DA7A2 /* 10-network-quality-indicator.swift */,
 				40FFDC9B2B6405EA004DA7A2 /* 11-speaking-while-muted.swift */,
 				40FFDC9D2B64063D004DA7A2 /* 12-connection-unstable.swift */,
@@ -451,6 +454,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				40FFDC5A2B63F08D004DA7A2 /* 01-call-participant.swift in Sources */,
+				41A1C0DE2F82100100A1B2C3 /* 10-call-join-interceptor.swift in Sources */,
 				40FFDC9A2B6405C7004DA7A2 /* 10-network-quality-indicator.swift in Sources */,
 				40AD64BB2DC2671E0077AE15 /* 05-proximity-policies.swift in Sources */,
 				400D91D12B63DEA200EBA47D /* 04-camera-and-microphone.swift in Sources */,
