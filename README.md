@@ -271,12 +271,22 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 
 ### 1.8.0 milestone - March
 
-- [] Battery usage improvements
-- [] Swift 6.2 support
-- [] RTMP streaming from device
+- [x] Battery usage improvements
+- [x] Thermal state improvements
+- [x] Swift 6.2 support
+- [x] Ringing call improvements on slower networks
+- [x] Support for raw and individual recording
+
+### 1.9.0 milestone - June
+
+- [] WebRTC upgrade to the latest version
+- [] Reduce SDK size
+- [] External mic support
+- [] Migrate to Stream Core
 
 ### After 1.8.0
 
+- RTMP streaming from device
 - Query call session endpoint + better missed calls support
 - SIP
 - Breakout rooms
