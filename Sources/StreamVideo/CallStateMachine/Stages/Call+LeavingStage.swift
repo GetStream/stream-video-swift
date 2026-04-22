@@ -67,8 +67,8 @@ extension Call.StateMachine.Stage {
             input.resetOutgoingRingingController()
             input.resetAudioFilter()
 
-            Task(disposableBag: disposableBag) { @MainActor [weak self, weak call] in
-                guard let self, let call else {
+            Task(disposableBag: disposableBag) { @MainActor [weak self, call] in
+                guard let self else {
                     return
                 }
 

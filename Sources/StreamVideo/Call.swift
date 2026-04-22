@@ -638,6 +638,10 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// repeated leave requests from UI, CallKit, or backend-event fallbacks
     /// share a single teardown path.
     ///
+    /// The SDK clears `StreamVideo.State.activeCall` and
+    /// `StreamVideo.State.ringingCall` before posting
+    /// `Notification.Name(CallNotification.callEnded)`.
+    ///
     /// - Parameter reason: Optional reason forwarded to the SFU leave request.
     ///   Pass a custom value when you want the backend to distinguish between
     ///   different leave flows (for example, user action vs timeout).
