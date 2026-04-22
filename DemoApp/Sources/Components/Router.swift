@@ -77,6 +77,20 @@ final class Router: ObservableObject {
             return
         }
 
+        let deeplinkCallCid = callCid(
+            from: deeplinkInfo.callId,
+            callType: deeplinkInfo.callType
+        )
+
+        if
+            deeplinkInfo.baseURL == AppEnvironment.baseURL,
+            appState.activeCall?.cId == deeplinkCallCid {
+            log.debug(
+                "Request to handle deeplink \(url) ignored because the call is already active."
+            )
+            return
+        }
+
         if
             deeplinkInfo.baseURL != AppEnvironment.baseURL,
             let currentUser = appState.currentUser {

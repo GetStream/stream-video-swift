@@ -25,6 +25,10 @@ final class DeeplinkTests: StreamTestCase {
         static let deeplinkUrlWithCallIdInPath: URL = .init(string: "https://getstream.io/video/demos/join/test-call")!
         static let customScheme: URL = .init(string: "streamvideo://video/demos?id=test-call")!
         static let customSchemeWithCallIdInPath: URL = .init(string: "streamvideo://video/demos/join/test-call")!
+
+        static func customScheme(callId: String) -> URL {
+            .init(string: "streamvideo://video/demos?id=\(callId)")!
+        }
     }
 
     func test_associationFile_validationWasSuccessful() throws {
@@ -94,6 +98,40 @@ final class DeeplinkTests: StreamTestCase {
             userRobot
                 .assertCallControls()
                 .assertParticipantsAreVisible(count: 1)
+        }
+    }
+
+    func test_customSchemeURL_forActiveCall_doesNotRejoinAfterLeaving() throws {
+        let activeCallId = "test-call"
+
+        GIVEN("user starts the call referenced by the deeplink") {
+            userRobot
+                .waitForAutoLogin()
+                .startCall(activeCallId)
+        }
+        WHEN("user opens a deeplink for the active call") {
+            openURL(MockDeeplink.customScheme(callId: activeCallId))
+        }
+        AND("user leaves the call") {
+            userRobot.endCall()
+        }
+        THEN("user stays out of the call") {
+            userRobot.assertThereAreNoCallControls()
+            XCTAssertTrue(
+                CallDetailsPage.callIdInputField.wait().exists,
+                "callIdInputField should appear"
+            )
+
+            let rejoinExpectation = XCTNSPredicateExpectation(
+                predicate: NSPredicate(format: "exists == true"),
+                object: CallPage.hangUpButton
+            )
+            rejoinExpectation.isInverted = true
+
+            XCTAssertEqual(
+                XCTWaiter.wait(for: [rejoinExpectation], timeout: 3),
+                .completed
+            )
         }
     }
 }
