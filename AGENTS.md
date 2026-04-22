@@ -154,6 +154,12 @@ Agents should optimize for media quality, API stability, backwards compatibility
 ## Security & Configuration Tips
 - Never commit API keys or user data; use env/xcconfig with placeholders.
 - Redact tokens in logs; use TLS; respect backend-provided TURN/ICE config.
+- Shared Codex worktree config lives in `.codex/environments/environment.toml`
+  and `.codex/scripts/*.sh`; keep those files repo-relative and free of secrets.
+- Do not hardcode tokens, usernames, emails, local absolute paths, or other
+  machine-specific values in tracked `.codex` files.
+- Run `./Scripts/check_codex_shared_config.sh` after updating tracked `.codex`
+  files.
 
 ### Media & permissions checklist
 - Request & handle camera and microphone permissions gracefully.
