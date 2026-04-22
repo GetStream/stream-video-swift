@@ -26,6 +26,7 @@ extension Call.StateMachine.Stage {
     final class LeavingStage: Call.StateMachine.Stage, @unchecked Sendable {
         private let reason: String?
         private let disposableBag = DisposableBag()
+        private var shouldCascadeActiveCallTeardown = false
 
         init(
             _ context: Context,
@@ -42,6 +43,11 @@ extension Call.StateMachine.Stage {
             case .leaving:
                 return nil
             default:
+                shouldCascadeActiveCallTeardown = [
+                    .accepting,
+                    .accepted,
+                    .joining
+                ].contains(previousStage.id)
                 execute()
                 return self
             }
@@ -75,7 +81,8 @@ extension Call.StateMachine.Stage {
                 if call.streamVideo.state.ringingCall?.cId == call.cId {
                     call.streamVideo.state.ringingCall = nil
                 }
-                if call.streamVideo.state.activeCall?.cId == call.cId {
+                if let activeCall = call.streamVideo.state.activeCall,
+                   activeCall.cId == call.cId || shouldCascadeActiveCallTeardown {
                     call.streamVideo.state.activeCall = nil
                 }
 
