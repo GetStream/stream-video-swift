@@ -55,7 +55,13 @@ internal struct DemoCallContainerView: View {
             let contact = callIntent.contacts?.first
 
             guard let name = contact?.personHandle?.value else { return }
-            viewModel.startCall(callType: callType, callId: .unique, members: [.init(user: .init(id: name))], ring: true)
+            viewModel.startCall(
+                callType: callType,
+                callId: .unique,
+                members: [.init(user: .init(id: name))],
+                ring: true,
+                highScaleLivestreamPublisherHint: AppEnvironment.highScaleLivestreamPublisherHint.value
+            )
         }
     }
 }

@@ -17,7 +17,8 @@ extension AppEnvironment {
         .init { .init(DebugMenu.VideoProcessingPipelineToggleView()) },
         .init { .init(DebugMenu.CapturingPipelineToggleView()) },
         .init { .init(DebugMenu.VideoRenderingMenuView()) },
-        .init { .init(DebugMenu.CallJoinInterceptorSelector()) }
+        .init { .init(DebugMenu.CallJoinInterceptorSelector()) },
+        .init { .init(DebugMenu.HighScaleLivestreamPublisherHintToggleView()) }
     ]
 }
 

@@ -417,6 +417,9 @@ open class CallViewModel: ObservableObject {
     ///  - maxParticipants: An optional integer representing the maximum number of participants allowed in the call.
     ///  - startsAt: An optional date when the call starts.
     ///  - backstage: An optional request for setting up backstage.
+    ///  - highScaleLivestreamPublisherHint: Optional join-only hint forwarded
+    ///    through `CreateCallOptions` when the call is started via the
+    ///    create-and-join flow.
     ///  - video: A boolean indicating if the call will be video or only audio. Still requires appropriate
     ///   setting of ``CallSettings`.`
     public func startCall(
@@ -429,6 +432,7 @@ open class CallViewModel: ObservableObject {
         maxParticipants: Int? = nil,
         startsAt: Date? = nil,
         backstage: BackstageSettingsRequest? = nil,
+        highScaleLivestreamPublisherHint: Bool? = nil,
         customData: [String: RawJSON]? = nil,
         video: Bool? = nil
     ) {
@@ -448,6 +452,7 @@ open class CallViewModel: ObservableObject {
                 maxParticipants: maxParticipants,
                 startsAt: startsAt,
                 backstage: backstage,
+                highScaleLivestreamPublisherHint: highScaleLivestreamPublisherHint,
                 customData: customData
             )
         } else {
@@ -887,6 +892,7 @@ open class CallViewModel: ObservableObject {
         maxParticipants: Int? = nil,
         startsAt: Date? = nil,
         backstage: BackstageSettingsRequest? = nil,
+        highScaleLivestreamPublisherHint: Bool? = nil,
         customData: [String: RawJSON]? = nil,
         policy: WebRTCJoinPolicy = .default
     ) {
@@ -914,7 +920,8 @@ open class CallViewModel: ObservableObject {
                     custom: customData,
                     settings: settingsRequest,
                     startsAt: startsAt,
-                    team: team
+                    team: team,
+                    highScaleLivestreamPublisherHint: highScaleLivestreamPublisherHint
                 )
                 let settings = localCallSettingsChange ? callSettings : nil
 

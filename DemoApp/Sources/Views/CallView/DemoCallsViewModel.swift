@@ -71,7 +71,8 @@ class DemoCallsViewModel: ObservableObject {
             callType: .default,
             callId: UUID().uuidString,
             members: members,
-            ring: true
+            ring: true,
+            highScaleLivestreamPublisherHint: AppEnvironment.highScaleLivestreamPublisherHint.value
         )
     }
 }

@@ -41,6 +41,9 @@ final class Call_JoinRecovery_Tests: StreamVideoTestCase, @unchecked Sendable {
             coordinatorClient: defaultAPI,
             callController: controller
         )
+        let options = CreateCallOptions(
+            highScaleLivestreamPublisherHint: true
+        )
         let joinResponse = JoinCallResponse.dummy(
             call: .dummy(
                 cid: subject.cId,
@@ -84,6 +87,7 @@ final class Call_JoinRecovery_Tests: StreamVideoTestCase, @unchecked Sendable {
         let joinTask = Task {
             try await subject.join(
                 create: false,
+                options: options,
                 ring: false,
                 notify: false,
                 callSettings: .init(audioOn: false, videoOn: false)
@@ -168,6 +172,9 @@ final class Call_JoinRecovery_Tests: StreamVideoTestCase, @unchecked Sendable {
             coordinatorClient: defaultAPI,
             callController: controller
         )
+        let options = CreateCallOptions(
+            highScaleLivestreamPublisherHint: true
+        )
         let joinResponse = JoinCallResponse.dummy(
             call: .dummy(
                 cid: subject.cId,
@@ -212,6 +219,7 @@ final class Call_JoinRecovery_Tests: StreamVideoTestCase, @unchecked Sendable {
         let joinTask = Task {
             try await subject.join(
                 create: false,
+                options: options,
                 ring: false,
                 notify: false,
                 callSettings: .init(audioOn: false, videoOn: false)
@@ -315,6 +323,11 @@ final class Call_JoinRecovery_Tests: StreamVideoTestCase, @unchecked Sendable {
         XCTAssertTrue(joinCallRequests.allSatisfy { $0.2.create == false })
         XCTAssertTrue(joinCallRequests.allSatisfy { $0.2.ring == false })
         XCTAssertTrue(joinCallRequests.allSatisfy { $0.2.notify == false })
+        XCTAssertTrue(
+            joinCallRequests.allSatisfy {
+                $0.2.hintHighScaleLivestreamPublisher == true
+            }
+        )
     }
 
     func test_join_afterAbnormalWebSocketClosure_issuesAdditionalBackendJoinRequest() async throws {
@@ -344,6 +357,9 @@ final class Call_JoinRecovery_Tests: StreamVideoTestCase, @unchecked Sendable {
             callId: callId,
             coordinatorClient: defaultAPI,
             callController: controller
+        )
+        let options = CreateCallOptions(
+            highScaleLivestreamPublisherHint: true
         )
         let joinResponse = JoinCallResponse.dummy(
             call: .dummy(
@@ -403,6 +419,7 @@ final class Call_JoinRecovery_Tests: StreamVideoTestCase, @unchecked Sendable {
         let joinTask = Task {
             try await subject.join(
                 create: false,
+                options: options,
                 ring: false,
                 notify: false,
                 callSettings: .init(audioOn: false, videoOn: false)
@@ -449,10 +466,15 @@ final class Call_JoinRecovery_Tests: StreamVideoTestCase, @unchecked Sendable {
         XCTAssertTrue(joinCallRequests.allSatisfy { $0.2.create == false })
         XCTAssertTrue(joinCallRequests.allSatisfy { $0.2.ring == false })
         XCTAssertTrue(joinCallRequests.allSatisfy { $0.2.notify == false })
+        XCTAssertTrue(
+            joinCallRequests.allSatisfy {
+                $0.2.hintHighScaleLivestreamPublisher == true
+            }
+        )
     }
 }
 
-private final class CallAuthenticationBackedWebRTCAuthenticator:
+final class CallAuthenticationBackedWebRTCAuthenticator:
     WebRTCAuthenticating,
     @unchecked Sendable {
     @Injected(\.audioStore) private var audioStore

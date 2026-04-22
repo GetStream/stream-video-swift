@@ -56,6 +56,7 @@ class CallController: @unchecked Sendable {
     private let videoConfig: VideoConfig
     private let webRTCCoordinatorFactory: WebRTCCoordinatorProviding
     private var cachedLocation: String?
+    private var cachedHighScaleLivestreamPublisherHint: Bool?
     private let initialCallSettings: CallSettings
 
     private var webRTCClientSessionIDObserver: AnyCancellable?
@@ -116,6 +117,8 @@ class CallController: @unchecked Sendable {
     ///   - callSettings: The current call settings.
     ///   - videoOptions: Configuration options about the video.
     ///   - options: Create call options.
+    ///              `CreateCallOptions.highScaleLivestreamPublisherHint` is
+    ///              forwarded only to backend join requests.
     ///   - migratingFrom: If SFU migration is being performed.
     ///   - ring: Whether ringing events should be handled.
     ///   - notify: Whether users should be notified about the call.
@@ -134,6 +137,8 @@ class CallController: @unchecked Sendable {
         source: JoinSource,
         policy: WebRTCJoinPolicy = .default
     ) async throws -> JoinCallResponse {
+        cachedHighScaleLivestreamPublisherHint = options?.highScaleLivestreamPublisherHint
+
         /// Each join attempt creates a fresh `PassthroughSubject` so
         /// that a failure from a previous attempt cannot accidentally
         /// complete a future retry on the same controller.
@@ -619,7 +624,7 @@ class CallController: @unchecked Sendable {
     ///   - migratingFrom: The immediate SFU edge this flow is migrating from.
     ///   - migratingFromList: All exhausted SFU edges that should be avoided.
     ///   - notify: Whether the backend should notify call members.
-    ///   - options: Additional call creation options.
+    ///   - options: Additional call creation options and join-only hints.
     /// - Returns: The backend join response used to continue the WebRTC flow.
     /// - Throws: An error if location fetch or join request fails.
     private func authenticateCall(
@@ -650,6 +655,7 @@ class CallController: @unchecked Sendable {
         let joinCall = JoinCallRequest(
             create: create,
             data: callRequest,
+            hintHighScaleLivestreamPublisher: cachedHighScaleLivestreamPublisherHint,
             location: location,
             migratingFrom: migratingFrom,
             migratingFromList: migratingFromList?.isEmpty == false ? migratingFromList : nil,

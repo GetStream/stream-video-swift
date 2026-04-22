@@ -253,6 +253,7 @@ struct SimpleCallingView: View {
                 members: [],
                 ring: false,
                 maxDuration: AppEnvironment.callExpiration.duration,
+                highScaleLivestreamPublisherHint: AppEnvironment.highScaleLivestreamPublisherHint.value,
                 video: viewModel.callSettings.videoOn
             )
         }

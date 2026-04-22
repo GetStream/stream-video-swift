@@ -173,6 +173,7 @@ struct DetailedCallingView<Factory: ViewFactory>: View {
                                 callId: text,
                                 members: members,
                                 ring: callFlow == .ringEvents,
+                                highScaleLivestreamPublisherHint: AppEnvironment.highScaleLivestreamPublisherHint.value,
                                 video: viewModel.callSettings.videoOn
                             )
                         }

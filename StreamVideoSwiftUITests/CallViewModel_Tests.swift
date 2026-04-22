@@ -785,6 +785,38 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         await assertCallingState(.inCall)
     }
 
+    func test_startCall_withHighScaleLivestreamPublisherHint_forwardsHintInJoinOptions() async throws {
+        await prepare()
+        mockCall.resetRecords(for: .join)
+
+        subject.startCall(
+            callType: callType,
+            callId: callId,
+            members: participants,
+            highScaleLivestreamPublisherHint: true
+        )
+
+        await fulfilmentInMainActor { self.mockCall.timesCalled(.join) == 1 }
+
+        let joinPayload = try XCTUnwrap(
+            mockCall
+                .recordedInputPayload(
+                    (
+                        Bool,
+                        CreateCallOptions?,
+                        Bool,
+                        Bool,
+                        CallSettings?,
+                        WebRTCJoinPolicy
+                    ).self,
+                    for: .join
+                )?
+                .last
+        )
+
+        XCTAssertEqual(joinPayload.1?.highScaleLivestreamPublisherHint, true)
+    }
+
     func test_joinCall_whenHangingUpWhileJoinIsInProgress_thenCallingStateDoesNotBecomeInCall() async throws {
         let joinStartedExpectation = expectation(
             description: "Join flow should start before hang up."
