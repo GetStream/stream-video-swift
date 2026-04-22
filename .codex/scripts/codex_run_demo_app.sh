@@ -133,37 +133,21 @@ codex_prepare_simulator() {
 }
 
 codex_select_destination_record() {
-    local simulator_records="$1"
-    local device_records="$2"
-    local selection_type="$3"
-    local selected_udid selected_record
+    local selection_type="$1"
+    local selected_kind selected_record
 
-    selected_udid="$(
-        codex_select_udid_with_simulator_buddy "${selection_type}"
+    selected_record="$(
+        codex_select_record_with_simulator_buddy "${selection_type}"
     )" || return $?
 
-    selected_record="$(codex_find_record_by_udid "${simulator_records}" "${selected_udid}")"
-    if [[ -n "${selected_record}" ]]; then
-        CODEX_RESOLVED_DESTINATION_KIND="simulator"
-        CODEX_RESOLVED_RECORD="${selected_record}"
-        return 0
-    fi
+    IFS='|' read -r selected_kind _ <<< "${selected_record}"
 
-    selected_record="$(codex_find_record_by_udid "${device_records}" "${selected_udid}")"
-    if [[ -n "${selected_record}" ]]; then
-        CODEX_RESOLVED_DESTINATION_KIND="device"
-        CODEX_RESOLVED_RECORD="${selected_record}"
-        return 0
-    fi
-
-    echo \
-        "error: Selected destination ${selected_udid} is not available for ${CODEX_DEMO_SCHEME}." \
-        >&2
-    return 2
+    CODEX_RESOLVED_DESTINATION_KIND="${selected_kind}"
+    CODEX_RESOLVED_RECORD="${selected_record}"
 }
 
 codex_resolve_destination() {
-    local simulator_records device_records selected_record selection_type
+    local all_records selected_kind selected_record selection_type
     local destination_kind="${CODEX_DEMO_DESTINATION:-}"
     local simulator_id="${CODEX_SIMULATOR_ID:-}"
     local device_id="${CODEX_DEVICE_ID:-}"
@@ -213,8 +197,8 @@ codex_resolve_destination() {
     fi
 
     codex_ensure_repo_root
-    simulator_records="$(codex_simulator_records "${CODEX_DEMO_SCHEME}")"
-    device_records="$(codex_device_records "${CODEX_DEMO_SCHEME}")"
+    echo "==> Resolving destinations for ${CODEX_DEMO_SCHEME}"
+    all_records="$(codex_destination_records all)"
 
     if [[ -n "${destination_kind}" && "${destination_kind}" != "simulator" && "${destination_kind}" != "device" ]]; then
         codex_die "CODEX_DEMO_DESTINATION must be simulator or device."
@@ -223,14 +207,18 @@ codex_resolve_destination() {
     if [[ -n "${device_id}" ]]; then
         [[ -z "${simulator_id}" ]] || codex_die "Cannot combine simulator and device options."
         ${choose_simulator} && codex_die "Cannot combine simulator and device options."
-        destination_kind="device"
-        selected_record="$(codex_find_record_by_udid "${device_records}" "${device_id}")"
+        selected_record="$(codex_find_record_by_udid "${all_records}" "${device_id}")"
         [[ -n "${selected_record}" ]] || codex_die "Device ${device_id} was not found."
+        IFS='|' read -r selected_kind _ <<< "${selected_record}"
+        [[ "${selected_kind}" == "device" ]] || codex_die "Destination ${device_id} is not a device."
+        destination_kind="device"
     elif [[ -n "${simulator_id}" ]]; then
         [[ -z "${device_id}" ]] || codex_die "Cannot combine simulator and device options."
-        destination_kind="simulator"
-        selected_record="$(codex_find_record_by_udid "${simulator_records}" "${simulator_id}")"
+        selected_record="$(codex_find_record_by_udid "${all_records}" "${simulator_id}")"
         [[ -n "${selected_record}" ]] || codex_die "Simulator ${simulator_id} was not found."
+        IFS='|' read -r selected_kind _ <<< "${selected_record}"
+        [[ "${selected_kind}" == "simulator" ]] || codex_die "Destination ${simulator_id} is not a simulator."
+        destination_kind="simulator"
     else
         if ${choose_device}; then
             ${choose_simulator} && codex_die "Choose either a simulator or a device, not both."
@@ -243,10 +231,7 @@ codex_resolve_destination() {
             selection_type="all"
         fi
 
-        codex_select_destination_record \
-            "${simulator_records}" \
-            "${device_records}" \
-            "${selection_type}" || exit $?
+        codex_select_destination_record "${selection_type}" || exit $?
         destination_kind="${CODEX_RESOLVED_DESTINATION_KIND}"
         selected_record="${CODEX_RESOLVED_RECORD}"
     fi
@@ -261,9 +246,9 @@ codex_resolve_destination() {
 codex_run_simulator() {
     local record="$1"
     local dry_run="$2"
-    local simulator_name simulator_udid simulator_os destination app_path
+    local _ simulator_name simulator_udid simulator_os destination app_path
 
-    IFS='|' read -r simulator_name simulator_udid simulator_os <<< "${record}"
+    IFS='|' read -r _ simulator_name simulator_udid simulator_os <<< "${record}"
     destination="id=${simulator_udid}"
     codex_build_app "${destination}"
     codex_build_simulator_launch_command "${simulator_udid}"
@@ -293,9 +278,9 @@ codex_run_simulator() {
 codex_run_device() {
     local record="$1"
     local dry_run="$2"
-    local device_name device_udid _ build_destination app_path
+    local _ device_name device_udid __ build_destination app_path
 
-    IFS='|' read -r device_name device_udid _ <<< "${record}"
+    IFS='|' read -r _ device_name device_udid __ <<< "${record}"
     build_destination="generic/platform=iOS"
     codex_build_app "${build_destination}"
     codex_build_device_launch_command "${device_udid}"

@@ -59,8 +59,10 @@ case "${scheme}" in
 esac
 
 codex_require_command "${CODEX_SIMULATOR_BUDDY_BIN}"
+codex_require_command python3
 codex_ensure_repo_root
-simulator_records="$(codex_simulator_records "${scheme}")"
+echo "==> Resolving simulators for ${scheme}"
+simulator_records="$(codex_destination_records simulator)"
 
 if [[ -n "${simulator_id}" ]]; then
     selected_record="$(codex_find_record_by_udid "${simulator_records}" "${simulator_id}")"
@@ -68,13 +70,11 @@ if [[ -n "${simulator_id}" ]]; then
 else
     selected_record="$(
         codex_select_record_with_simulator_buddy \
-            "${simulator_records}" \
-            simulator \
             simulator
     )" || exit $?
 fi
 
-IFS='|' read -r simulator_name simulator_udid simulator_os <<< "${selected_record}"
+IFS='|' read -r _ simulator_name simulator_udid simulator_os <<< "${selected_record}"
 
 command=(
     "${CODEX_XCODEBUILD_BIN}"

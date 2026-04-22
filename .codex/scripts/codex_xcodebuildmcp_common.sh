@@ -22,58 +22,50 @@ codex_require_command() {
 }
 
 codex_destination_records() {
-    local scheme="$1"
-    local platform="$2"
+    local selection_type="${1:-all}"
+    local payload
 
-    codex_require_command "${CODEX_XCODEBUILD_BIN}"
-    "${CODEX_XCODEBUILD_BIN}" \
-        -project "${CODEX_PROJECT_PATH}" \
-        -scheme "${scheme}" \
-        -showdestinations | awk -v wanted_platform="${platform}" '
-            /\{ platform:/ {
-                line = $0
-                sub(/^[[:space:]]*\{ /, "", line)
-                sub(/ \}$/, "", line)
+    codex_require_command "${CODEX_SIMULATOR_BUDDY_BIN}"
+    codex_require_command python3
 
-                split(line, parts, /, /)
-                delete field
+    payload="$(
+        "${CODEX_SIMULATOR_BUDDY_BIN}" list \
+            --type "${selection_type}" \
+            --format json \
+            2>/dev/null
+    )" || {
+        echo "error: simulator-buddy list failed for ${selection_type}." >&2
+        return 2
+    }
 
-                for (i = 1; i <= length(parts); i++) {
-                    separator = index(parts[i], ":")
-                    if (separator == 0) {
-                        continue
-                    }
+    SIMULATOR_BUDDY_JSON="${payload}" python3 - <<'PY'
+import json
+import os
 
-                    key = substr(parts[i], 1, separator - 1)
-                    value = substr(parts[i], separator + 1)
-                    field[key] = value
-                }
+items = json.loads(os.environ["SIMULATOR_BUDDY_JSON"])
 
-                if (field["platform"] != wanted_platform) {
-                    next
-                }
+for item in items:
+    kind = item.get("kind")
+    name = item.get("name")
+    udid = item.get("udid")
+    runtime = item.get("runtime", "")
+    state = item.get("state")
 
-                if (field["id"] ~ /^dvtdevice-/) {
-                    next
-                }
+    if not kind or not name or not udid or state == "unavailable":
+        continue
 
-                if (field["error"] != "") {
-                    next
-                }
-
-                print field["name"] "|" field["id"] "|" field["OS"]
-            }
-        '
+    print(f"{kind}|{name}|{udid}|{runtime}")
+PY
 }
 
 codex_simulator_records() {
-    local scheme="$1"
-    codex_destination_records "${scheme}" "iOS Simulator"
+    local records="${1:-$(codex_destination_records simulator)}"
+    print -r -- "${records}" | awk -F'|' '$1 == "simulator"'
 }
 
 codex_device_records() {
-    local scheme="$1"
-    codex_destination_records "${scheme}" "iOS"
+    local records="${1:-$(codex_destination_records device)}"
+    print -r -- "${records}" | awk -F'|' '$1 == "device"'
 }
 
 codex_find_record_by_udid() {
@@ -89,29 +81,29 @@ codex_find_record_by_udid() {
 
 codex_record_udid() {
     local record="$1"
-    print -r -- "${${(s:|:)record}[2]}"
+    print -r -- "${${(s:|:)record}[3]}"
 }
 
-codex_simulator_buddy_udid() {
-    local command="$1"
-    local selection_type="$2"
+codex_select_record_with_simulator_buddy() {
+    local selection_type="$1"
     local output
     local exit_code
 
+    codex_require_command "${CODEX_SIMULATOR_BUDDY_BIN}"
+    codex_require_command python3
+
     output="$(
-        "${CODEX_SIMULATOR_BUDDY_BIN}" "${command}" \
+        "${CODEX_SIMULATOR_BUDDY_BIN}" select \
             --type "${selection_type}" \
             --scope "${CODEX_DESTINATION_SCOPE}" \
+            --format json \
             2>/dev/null
     )"
     exit_code=$?
 
-    if (( exit_code == 0 )); then
-        print -r -- "${output}"
-        return 0
-    fi
-
     case "${exit_code}" in
+        0)
+            ;;
         1)
             return 1
             ;;
@@ -120,54 +112,28 @@ codex_simulator_buddy_udid() {
             ;;
         *)
             echo \
-                "error: simulator-buddy ${command} failed for ${selection_type}." \
+                "error: simulator-buddy select failed for ${selection_type}." \
                 >&2
             return 2
             ;;
     esac
-}
 
-codex_select_udid_with_simulator_buddy() {
-    local selection_type="$1"
-    local selected_udid
-    local exit_code
+    SIMULATOR_BUDDY_JSON="${output}" python3 - <<'PY'
+import json
+import os
 
-    selected_udid="$(
-        codex_simulator_buddy_udid select "${selection_type}"
-    )"
-    exit_code=$?
+payload = json.loads(os.environ["SIMULATOR_BUDDY_JSON"])
+destination = payload.get("destination") or {}
 
-    case "${exit_code}" in
-        0)
-            print -r -- "${selected_udid}"
-            return 0
-            ;;
-        130)
-            return 130
-            ;;
-        *)
-            return "${exit_code}"
-            ;;
-    esac
-}
+kind = destination.get("kind")
+name = destination.get("name")
+udid = destination.get("udid")
+runtime = destination.get("runtime", "")
+state = destination.get("state")
 
-codex_select_record_with_simulator_buddy() {
-    local records="$1"
-    local selection_type="$2"
-    local label="$3"
-    local selected_udid selected_record
+if not kind or not name or not udid or state == "unavailable":
+    raise SystemExit(1)
 
-    selected_udid="$(
-        codex_select_udid_with_simulator_buddy "${selection_type}"
-    )" || return $?
-
-    selected_record="$(codex_find_record_by_udid "${records}" "${selected_udid}")"
-    if [[ -z "${selected_record}" ]]; then
-        echo \
-            "error: Selected ${label} ${selected_udid} is not available for this action." \
-            >&2
-        return 2
-    fi
-
-    print -r -- "${selected_record}"
+print(f"{kind}|{name}|{udid}|{runtime}")
+PY
 }
