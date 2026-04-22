@@ -7,20 +7,6 @@ import XCTest
 // Requires running a standalone Sinatra server
 final class DeeplinkTests: StreamTestCase {
 
-    override static func setUp() {
-        super.setUp()
-
-        // We are launching and terminating the app to ensure the executable
-        // has been installed.
-        app.launch()
-        app.terminate()
-    }
-
-    override func setUpWithError() throws {
-        launchApp = false
-        try super.setUpWithError()
-    }
-
     private enum MockDeeplink {
         static let deeplinkUrlWithCallIdInPath: URL = .init(string: "https://getstream.io/video/demos/join/test-call")!
         static let customScheme: URL = .init(string: "streamvideo://video/demos?id=test-call")!
@@ -102,15 +88,13 @@ final class DeeplinkTests: StreamTestCase {
     }
 
     func test_customSchemeURL_forActiveCall_doesNotRejoinAfterLeaving() throws {
-        let activeCallId = "test-call"
-
         GIVEN("user starts the call referenced by the deeplink") {
             userRobot
                 .waitForAutoLogin()
-                .startCall(activeCallId)
+                .startCall(callId)
         }
         WHEN("user opens a deeplink for the active call") {
-            openURL(MockDeeplink.customScheme(callId: activeCallId))
+            openURL(MockDeeplink.customScheme(callId: callId))
         }
         AND("user leaves the call") {
             userRobot.endCall()
