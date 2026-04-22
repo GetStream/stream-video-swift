@@ -734,12 +734,31 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
 
     func test_leave_withReason_reasonWasPassedToCallController() {
         let mockCallController = MockCallController()
-        let call = MockCall(.dummy(callController: mockCallController))
-        call.stub(for: \.state, with: .init(.dummy()))
+        let subject = MockCall(.dummy(callController: mockCallController))
+        subject.stub(for: \.state, with: .init(.dummy()))
         let expectedReason = "manual-hangup"
 
-        call.leave(reason: expectedReason)
+        subject.leave(reason: expectedReason)
 
+        XCTAssertEqual(
+            mockCallController.recordedInputPayload(
+                String.self,
+                for: .leave
+            )?.first,
+            expectedReason
+        )
+    }
+
+    func test_leave_whenCalledRepeatedly_callsCallControllerOnlyOnce() {
+        let mockCallController = MockCallController()
+        let subject = MockCall(.dummy(callController: mockCallController))
+        subject.stub(for: \.state, with: .init(.dummy()))
+        let expectedReason = "manual-hangup"
+
+        subject.leave(reason: expectedReason)
+        subject.leave(reason: expectedReason)
+
+        XCTAssertEqual(mockCallController.timesCalled(.leave), 1)
         XCTAssertEqual(
             mockCallController.recordedInputPayload(
                 String.self,
