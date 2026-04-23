@@ -26,6 +26,14 @@ extension Call.StateMachine.Stage {
     final class LeavingStage: Call.StateMachine.Stage, @unchecked Sendable {
         private let reason: String?
         private let disposableBag = DisposableBag()
+        /// When a replacement call leaves before it becomes `activeCall`, the
+        /// previous active call may still be stored in `StreamVideo.State`.
+        ///
+        /// Clearing `activeCall` in that situation reuses
+        /// `StreamVideo.State.didUpdateActiveCall`, which leaves the stale
+        /// active call for us. This keeps the replacement flow consistent with
+        /// the normal active-call handoff without affecting unrelated leaves.
+        private var shouldCascadeActiveCallTeardown = false
 
         init(
             _ context: Context,
@@ -42,6 +50,11 @@ extension Call.StateMachine.Stage {
             case .leaving:
                 return nil
             default:
+                shouldCascadeActiveCallTeardown = [
+                    .accepting,
+                    .accepted,
+                    .joining
+                ].contains(previousStage.id)
                 execute()
                 return self
             }
@@ -75,7 +88,12 @@ extension Call.StateMachine.Stage {
                 if call.streamVideo.state.ringingCall?.cId == call.cId {
                     call.streamVideo.state.ringingCall = nil
                 }
-                if call.streamVideo.state.activeCall?.cId == call.cId {
+                /// Replacement flows can leave while `activeCall` still points
+                /// to the call being replaced. Resetting `activeCall` here
+                /// triggers the existing `oldValue.leave()` cascade and tears
+                /// down that stale active call as well.
+                if let activeCall = call.streamVideo.state.activeCall,
+                   activeCall.cId == call.cId || shouldCascadeActiveCallTeardown {
                     call.streamVideo.state.activeCall = nil
                 }
 

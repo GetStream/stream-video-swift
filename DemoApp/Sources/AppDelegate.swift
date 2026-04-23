@@ -26,31 +26,6 @@ class AppDelegate: NSObject, UIApplicationDelegate, @MainActor UNUserNotificatio
         return true
     }
 
-    /// Method used to handle custom URL schemes
-    func application(
-        _ app: UIApplication,
-        open url: URL,
-        options: [UIApplication.OpenURLOptionsKey: Any] = [:]
-    ) -> Bool {
-        Router.shared.handle(url: url)
-        return true
-    }
-
-    /// Method used to handle universal deeplinks
-    func application(
-        _ application: UIApplication,
-        continue userActivity: NSUserActivity,
-        restorationHandler: @escaping (
-            [UIUserActivityRestoring]?
-        ) -> Void
-    ) -> Bool {
-        guard let url = userActivity.webpageURL else {
-            return false
-        }
-        Router.shared.handle(url: url)
-        return true
-    }
-
     func application(
         _ application: UIApplication,
         didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
