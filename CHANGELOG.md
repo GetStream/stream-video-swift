@@ -7,6 +7,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### ✅ Added
 - Added `CreateCallOptions.highScaleLivestreamPublisherHint` so `Call.join(options: ...)` can mark publishers for high-scale livestream join routing. [#1134](https://github.com/GetStream/stream-video-swift/pull/1134)
 
+### 🔄 Changed
+- Exposed the subscribed remote `RTCAudioTrack` on `CallParticipant`. [#1136](https://github.com/GetStream/stream-video-swift/pull/1136)
+
 # [1.46.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.46.0)
 _April 20, 2026_
 

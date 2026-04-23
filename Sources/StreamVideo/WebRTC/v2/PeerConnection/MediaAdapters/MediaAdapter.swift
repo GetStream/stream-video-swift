@@ -68,7 +68,7 @@ final class MediaAdapter {
                     sessionID: sessionID,
                     peerConnection: peerConnection,
                     peerConnectionFactory: peerConnectionFactory,
-                    localMediaManager: LocalNoOpMediaAdapter(subject: subject),
+                    localMediaManager: RemoteAudioMediaAdapter(subject: subject, peerConnection: peerConnection),
                     subject: subject
                 ),
                 videoMediaAdapter: .init(
