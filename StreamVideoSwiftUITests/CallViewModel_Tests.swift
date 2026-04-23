@@ -785,7 +785,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         await assertCallingState(.inCall)
     }
 
-    func test_startCall_withHighScaleLivestreamPublisherHint_forwardsHintInJoinOptions() async throws {
+    func test_startCall_forwardsHighScalePublisherHint() async throws {
         await prepare()
         mockCall.resetRecords(for: .join)
 

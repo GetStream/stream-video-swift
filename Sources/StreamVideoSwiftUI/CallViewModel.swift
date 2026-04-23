@@ -417,9 +417,8 @@ open class CallViewModel: ObservableObject {
     ///  - maxParticipants: An optional integer representing the maximum number of participants allowed in the call.
     ///  - startsAt: An optional date when the call starts.
     ///  - backstage: An optional request for setting up backstage.
-    ///  - highScaleLivestreamPublisherHint: Optional join-only hint forwarded
-    ///    through `CreateCallOptions` when the call is started via the
-    ///    create-and-join flow.
+    ///  - highScaleLivestreamPublisherHint: Marks this join as a
+    ///   high-scale livestream publisher when backend routing needs it.
     ///  - video: A boolean indicating if the call will be video or only audio. Still requires appropriate
     ///   setting of ``CallSettings`.`
     public func startCall(

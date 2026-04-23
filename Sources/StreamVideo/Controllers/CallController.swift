@@ -56,7 +56,6 @@ class CallController: @unchecked Sendable {
     private let videoConfig: VideoConfig
     private let webRTCCoordinatorFactory: WebRTCCoordinatorProviding
     private var cachedLocation: String?
-    private var cachedHighScaleLivestreamPublisherHint: Bool?
     private let initialCallSettings: CallSettings
 
     private var webRTCClientSessionIDObserver: AnyCancellable?
@@ -135,8 +134,6 @@ class CallController: @unchecked Sendable {
         source: JoinSource,
         policy: WebRTCJoinPolicy = .default
     ) async throws -> JoinCallResponse {
-        cachedHighScaleLivestreamPublisherHint = options?.highScaleLivestreamPublisherHint
-
         /// Each join attempt creates a fresh `PassthroughSubject` so
         /// that a failure from a previous attempt cannot accidentally
         /// complete a future retry on the same controller.
@@ -653,7 +650,7 @@ class CallController: @unchecked Sendable {
         let joinCall = JoinCallRequest(
             create: create,
             data: callRequest,
-            hintHighScaleLivestreamPublisher: cachedHighScaleLivestreamPublisherHint,
+            hintHighScaleLivestreamPublisher: options?.highScaleLivestreamPublisherHint,
             location: location,
             migratingFrom: migratingFrom,
             migratingFromList: migratingFromList?.isEmpty == false ? migratingFromList : nil,

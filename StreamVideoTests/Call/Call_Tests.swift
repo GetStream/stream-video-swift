@@ -638,16 +638,16 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
         )
     }
 
-    func test_join_withHighScaleLivestreamPublisherHint_optionsWerePassedToCallController() async throws {
+    func test_join_passesHighScalePublisherHintToCallController() async throws {
         let mockCallController = MockCallController()
-        let call = MockCall(.dummy(callController: mockCallController))
-        call.stub(for: \.state, with: .init(.dummy()))
+        let subject = MockCall(.dummy(callController: mockCallController))
+        subject.stub(for: \.state, with: .init(.dummy()))
         mockCallController.stub(for: .join, with: JoinCallResponse.dummy())
         let options = CreateCallOptions(
             highScaleLivestreamPublisherHint: true
         )
 
-        _ = try await call.join(options: options)
+        _ = try await subject.join(options: options)
 
         XCTAssertEqual(
             mockCallController.recordedInputPayload(

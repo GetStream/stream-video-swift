@@ -117,7 +117,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         .connecting(
                             context,
                             create: false,
-                            options: nil,
+                            options: context.recoveryJoinOptions(),
                             ring: false,
                             notify: false
                         )

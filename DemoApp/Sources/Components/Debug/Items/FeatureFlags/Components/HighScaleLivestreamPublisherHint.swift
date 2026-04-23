@@ -7,9 +7,11 @@ import SwiftUI
 
 extension AppEnvironment {
 
+    /// Controls whether demo joins send the publisher hint or omit it.
     enum HighScaleLivestreamPublisherHintToggle: Hashable, Debuggable {
         case enabled, disabled
 
+        /// Label consumed by the shared debug menu renderer.
         var title: String {
             switch self {
             case .enabled:
@@ -19,6 +21,7 @@ extension AppEnvironment {
             }
         }
 
+        /// `nil` omits the hint, which keeps regular demo joins unchanged.
         var value: Bool? {
             switch self {
             case .enabled:
@@ -29,7 +32,9 @@ extension AppEnvironment {
         }
     }
 
-    nonisolated(unsafe) static var highScaleLivestreamPublisherHint: HighScaleLivestreamPublisherHintToggle = .disabled
+    /// Omitting by default keeps regular demo joins on the standard path.
+    nonisolated(unsafe) static var highScaleLivestreamPublisherHint:
+        HighScaleLivestreamPublisherHintToggle = .disabled
 }
 
 extension DebugMenu {

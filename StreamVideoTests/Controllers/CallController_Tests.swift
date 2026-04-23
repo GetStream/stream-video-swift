@@ -166,7 +166,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         }
     }
 
-    func test_joinCall_withHighScaleLivestreamPublisherHint_setsJoinRequestHint() async throws {
+    func test_joinCall_withHighScaleHint_setsJoinRequestHint() async throws {
         let defaultAPI = MockDefaultAPIEndpoints()
         let webRTCCoordinatorFactory = MockWebRTCCoordinatorFactory(
             videoConfig: Self.videoConfig
@@ -215,7 +215,14 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
             defaultAPI.timesCalled(.joinCall) == 1
         }
 
-        await wait(for: 0.5)
+        await fulfillment {
+            webRTCCoordinatorFactory
+                .mockCoordinatorStack
+                .coordinator
+                .stateMachine
+                .currentStage
+                .id == .joining
+        }
         webRTCCoordinatorFactory
             .mockCoordinatorStack
             .sfuStack
@@ -234,7 +241,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         XCTAssertEqual(request.hintHighScaleLivestreamPublisher, true)
     }
 
-    func test_joinCall_withoutHighScaleLivestreamPublisherHint_clearsJoinRequestHint() async throws {
+    func test_joinCall_withoutHighScaleHint_clearsRequestHint() async throws {
         let defaultAPI = MockDefaultAPIEndpoints()
         let webRTCCoordinatorFactory = MockWebRTCCoordinatorFactory(
             videoConfig: Self.videoConfig
@@ -280,7 +287,14 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
             defaultAPI.timesCalled(.joinCall) == 1
         }
 
-        await wait(for: 0.5)
+        await fulfillment {
+            webRTCCoordinatorFactory
+                .mockCoordinatorStack
+                .coordinator
+                .stateMachine
+                .currentStage
+                .id == .joining
+        }
         webRTCCoordinatorFactory
             .mockCoordinatorStack
             .sfuStack

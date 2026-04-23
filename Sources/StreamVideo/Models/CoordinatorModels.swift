@@ -19,8 +19,8 @@ public struct CreateCallOptions: Sendable, Hashable {
     public var settings: CallSettingsRequest?
     public var startsAt: Date?
     public var team: String?
-    /// Join-only hint that marks the participant as publishing to a large
-    /// livestream audience.
+    /// Marks this join as a high-scale livestream publisher for backend
+    /// routing.
     public var highScaleLivestreamPublisherHint: Bool?
     
     public init(

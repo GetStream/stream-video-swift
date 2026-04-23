@@ -24,6 +24,9 @@ extension WebRTCCoordinator.StateMachine {
             var flowError: Error?
             var joinSource: JoinSource?
             var joinPolicy: WebRTCJoinPolicy = .default
+            /// Preserves explicit join routing hints for recovery requests that
+            /// no longer carry the original `CreateCallOptions`.
+            var highScaleLivestreamPublisherHint: Bool?
             /// Shared adapter handling SFU track subscriptions updates across
             /// stage transitions.
             var updateSubscriptionsAdapter: WebRTCUpdateSubscriptionsAdapter?
@@ -97,6 +100,15 @@ extension WebRTCCoordinator.StateMachine {
                 default:
                     return reconnectionStrategy
                 }
+            }
+
+            /// Builds the minimal options payload used when recovery
+            /// authentication no longer has the original join options.
+            func recoveryJoinOptions() -> CreateCallOptions? {
+                guard let hint = highScaleLivestreamPublisherHint else {
+                    return nil
+                }
+                return .init(highScaleLivestreamPublisherHint: hint)
             }
 
             /// Registers a rejoin attempt if the rolling rejoin limit has not

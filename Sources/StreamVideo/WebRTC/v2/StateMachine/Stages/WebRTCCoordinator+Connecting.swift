@@ -13,8 +13,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
     ///   - ring: A Boolean indicating whether to ring the other participants.
     /// - Returns: A `ConnectingStage` instance representing the connecting
     ///   state of the WebRTC coordinator.
-    /// - Important: When transitioning from `.rejoining` values for ``ring``,
-    /// ``notify`` & ``options`` are nullified as are not relevant to the `rejoining` flow.
+    /// - Important: Rejoining transitions ignore ringing side effects.
+    ///   They rebuild only recovery-safe join options from context.
     static func connecting(
         _ context: Context,
         create: Bool,
@@ -70,14 +70,19 @@ extension WebRTCCoordinator.StateMachine.Stage {
         ///   occurring.
         /// - Returns: This `ConnectingStage` instance if the transition is
         ///   valid, otherwise `nil`.
-        /// - Important: When transitioning from `.rejoining` values for ``ring``,
-        /// ``notify`` & ``options`` are nullified as are not relevant to the `rejoining` flow.
+        /// - Important: Rejoining transitions ignore ringing side effects.
+        ///   They rebuild only recovery-safe join options from context.
         /// - Note: Valid transition from: `.idle`,  `.rejoining`
         override func transition(
             from previousStage: WebRTCCoordinator.StateMachine.Stage
         ) -> Self? {
             switch previousStage.id {
             case .idle:
+                /// The join hint is captured only after the explicit
+                /// `.idle -> .connecting` transition is accepted. Failed
+                /// transition attempts must not mutate the active context.
+                context.highScaleLivestreamPublisherHint =
+                    options?.highScaleLivestreamPublisherHint
                 execute(
                     create: create,
                     ring: ring,
@@ -88,16 +93,15 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 )
                 return self
             case .rejoining:
-                if ring || notify || options != nil {
+                if ring || notify {
                     log.assert(ring == false, "Ring cannot be true when rejoining.")
                     log.assert(notify == false, "Notify cannot be true when rejoining.")
-                    log.assert(options == nil, "CreateCallOptions cannot be non-nil when rejoining.")
                 }
                 execute(
                     create: false,
                     ring: false,
                     notify: false,
-                    options: nil,
+                    options: options,
                     updateSession: true,
                     onErrorDisconnect: true
                 )
