@@ -42,6 +42,26 @@ func configureSentry() {
     }
 }
 
+private func resolving(
+    baseTypes: [LogDestination.Type],
+    environment: [String: String]
+) -> [LogDestination.Type] {
+    let terminalLogsEnvironmentKey = "STREAM_VIDEO_TERMINAL_LOGS"
+    guard environment[terminalLogsEnvironmentKey] == "1" else {
+        return baseTypes
+    }
+
+    let hasConsoleDestination = baseTypes.contains {
+        ObjectIdentifier($0) == ObjectIdentifier(ConsoleLogDestination.self)
+    }
+
+    guard hasConsoleDestination == false else {
+        return baseTypes
+    }
+
+    return [ConsoleLogDestination.self] + baseTypes
+}
+
 private final class SentryLogDestination: LogDestination, @unchecked Sendable {
     func write(message: String) {
         // TODO: remove me once this function is gone from the protocol
