@@ -117,8 +117,6 @@ class CallController: @unchecked Sendable {
     ///   - callSettings: The current call settings.
     ///   - videoOptions: Configuration options about the video.
     ///   - options: Create call options.
-    ///              `CreateCallOptions.highScaleLivestreamPublisherHint` is
-    ///              forwarded only to backend join requests.
     ///   - migratingFrom: If SFU migration is being performed.
     ///   - ring: Whether ringing events should be handled.
     ///   - notify: Whether users should be notified about the call.
