@@ -89,7 +89,8 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
             custom: [.unique: .bool(true)],
             settings: CallSettingsRequest(audio: .init(defaultDevice: .earpiece)),
             startsAt: .init(timeIntervalSince1970: 100),
-            team: .unique
+            team: .unique,
+            highScaleLivestreamPublisherHint: true
         )
         let expectedJoinSource = JoinSource.callKit(.init {})
 
@@ -116,6 +117,10 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
             XCTAssertEqual(expectedStage.options?.settings?.audio?.defaultDevice, .earpiece)
             XCTAssertEqual(expectedStage.options?.startsAt, expectedOptions.startsAt)
             XCTAssertEqual(expectedStage.options?.team, expectedOptions.team)
+            XCTAssertEqual(
+                expectedStage.context.highScaleLivestreamPublisherHint,
+                true
+            )
             XCTAssertTrue(expectedStage.ring)
             XCTAssertTrue(expectedStage.notify)
             XCTAssertEqual(expectedStage.context.joinSource, expectedJoinSource)
@@ -125,6 +130,51 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
                 expectedCallSettings
             )
         }
+    }
+
+    func test_connect_rejectedTransition_keepsHighScaleHint() async throws {
+        let canAuthenticate = CurrentValueSubject<Bool, Never>(false)
+        mockWebRTCAuthenticator.onAuthenticate = { @Sendable in
+            _ = try await canAuthenticate
+                .filter { $0 }
+                .nextValue(timeout: defaultTimeout)
+        }
+        let firstHandler = PassthroughSubject<JoinCallResponse, Error>()
+        let secondHandler = PassthroughSubject<JoinCallResponse, Error>()
+        let options = CreateCallOptions(
+            highScaleLivestreamPublisherHint: true
+        )
+
+        try await subject.connect(
+            callSettings: nil,
+            options: options,
+            ring: false,
+            notify: false,
+            source: .inApp,
+            joinResponseHandler: firstHandler
+        )
+        await fulfillment {
+            self.subject.stateMachine.currentStage.id == .connecting
+        }
+
+        try await subject.connect(
+            callSettings: nil,
+            options: nil,
+            ring: false,
+            notify: false,
+            source: .inApp,
+            joinResponseHandler: secondHandler
+        )
+
+        XCTAssertEqual(
+            subject
+                .stateMachine
+                .currentStage
+                .context
+                .highScaleLivestreamPublisherHint,
+            true
+        )
+        canAuthenticate.send(true)
     }
 
     // MARK: - cleanUp

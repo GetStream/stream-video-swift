@@ -37,6 +37,7 @@ final class MockWebRTCCoordinatorFactory: WebRTCCoordinatorProviding, @unchecked
             callSettings,
             callAuthentication
         )
+        mockCoordinatorStack.callAuthenticator.authenticateHandler = callAuthentication
         return mockCoordinatorStack.coordinator
     }
 }

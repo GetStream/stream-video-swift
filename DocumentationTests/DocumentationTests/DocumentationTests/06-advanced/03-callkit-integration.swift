@@ -106,6 +106,12 @@ private func content() {
     }
 
     container {
+        @Injected(\.callKitAdapter) var callKitAdapter
+        callKitAdapter.participantAutoLeavePolicy =
+            LastParticipantAutoLeavePolicy()
+    }
+
+    container {
         struct MyCustomView: View {
             @Injected(\.streamVideo) var streamVideo
             @Injected(\.callKitAdapter) var callKitAdapter

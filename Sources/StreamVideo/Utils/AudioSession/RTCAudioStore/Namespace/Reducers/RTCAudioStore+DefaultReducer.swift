@@ -55,6 +55,9 @@ extension RTCAudioStore.Namespace {
             case let .setHasRecordingPermission(value):
                 updatedState.hasRecordingPermission = value
 
+            case let .setActiveSessionIdentifier(value):
+                updatedState.activeSessionIdentifier = value
+
             case let .setAudioDeviceModule(value):
                 updatedState.audioDeviceModule = value
                 if value == nil {
@@ -87,6 +90,13 @@ extension RTCAudioStore.Namespace {
                 break
 
             case .callKit:
+                break
+
+            // Unreachable: `RTCAudioStore.Coordinator.coordinate(action:state:)`
+            // unwraps `.conditioned` to its nested action before the executor
+            // hands it to reducers, so this case only exists to keep the
+            // switch exhaustive.
+            case .conditioned:
                 break
             }
 

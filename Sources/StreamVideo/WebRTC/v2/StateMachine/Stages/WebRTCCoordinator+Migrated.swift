@@ -79,7 +79,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                             create: false,
                             ring: false,
                             notify: false,
-                            options: nil
+                            options: context.recoveryJoinOptions()
                         )
 
                     // Start observing SFU-full errors on the newly assigned SFU

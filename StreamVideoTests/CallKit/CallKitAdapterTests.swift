@@ -14,6 +14,7 @@ final class CallKitAdapterTests: XCTestCase, @unchecked Sendable {
     @MainActor
     override func setUp() async throws {
         try await super.setUp()
+        _ = MockStreamVideo()
         InjectedValues[\.callKitPushNotificationAdapter] = callKitPushNotificationAdapter
         InjectedValues[\.callKitService] = callKitService
         CurrentDevice.currentValue.didUpdate(.phone)
@@ -79,6 +80,17 @@ final class CallKitAdapterTests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(callKitService.callSettings, callSettings)
     }
 
+    func test_participantAutoLeavePolicy_whenSet_forwardsValueToCallKitService() {
+        let policy = MockParticipantAutoLeavePolicy()
+
+        subject.participantAutoLeavePolicy = policy
+
+        XCTAssertEqual(
+            ObjectIdentifier(callKitService.participantAutoLeavePolicy as AnyObject),
+            ObjectIdentifier(policy)
+        )
+    }
+
     // MARK: - Private Helpers
 
     private func makeStreamVideo() async throws -> StreamVideo {
@@ -100,4 +112,10 @@ final class CallKitAdapterTests: XCTestCase, @unchecked Sendable {
 
         return client
     }
+}
+
+private final class MockParticipantAutoLeavePolicy:
+    ParticipantAutoLeavePolicy,
+    @unchecked Sendable {
+    var onPolicyTriggered: (() -> Void)?
 }

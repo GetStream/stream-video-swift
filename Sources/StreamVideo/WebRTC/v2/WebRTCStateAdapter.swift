@@ -431,7 +431,13 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
                 /// We remove the existing user in order to avoid showing a stale video tile
                 /// in the Call.
                 .filter { $0.key != sessionID }
-                .reduce(into: ParticipantsStorage()) { $0[$1.key] = $1.value.withUpdated(track: nil) }
+                .reduce(into: ParticipantsStorage()) {
+                    $0[$1.key] = $1
+                        .value
+                        .withUpdated(audioTrack: nil)
+                        .withUpdated(track: nil)
+                        .withUpdated(screensharingTrack: nil)
+                }
         )
 
         peerConnectionsDisposableBag.removeAll()
@@ -715,6 +721,8 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         participants.reduce(into: ParticipantsStorage()) { partialResult, entry in
             var newParticipant = entry
                 .value
+                /// Updates the participant with an audio track if available.
+                .withUpdated(audioTrack: track(for: entry.value, of: .audio) as? RTCAudioTrack)
                 /// Updates the participant with a video track if available.
                 .withUpdated(track: track(for: entry.value, of: .video) as? RTCVideoTrack)
                 /// Updates the participant with a screensharing track if available.
@@ -790,30 +798,55 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     private func set(participants: ParticipantsStorage) {
         /// Updates the local participants storage.
         self.participants = participants
+
+        /// Filters participants who have audio tracks.
+        let participantsWithAudioTracks = participants
+            .filter { $0.value.audioTrack != nil }
+            .map(\.value.name)
+            .sorted()
+            .joined(separator: ",")
+
         /// Filters participants who have video tracks.
         let participantsWithVideoTracks = participants
             .filter { $0.value.track != nil }
             .map(\.value.name)
             .sorted()
             .joined(separator: ",")
-        /// Logs the count and names of participants with video tracks.
-        if participantsWithVideoTracks.isEmpty {
-            log.debug(
-                "\(participants.count) participants updated. None of the participants have video.",
-                subsystems: .webRTC
-            )
-        } else {
-            log.debug(
-                "\(participants.count) participants updated. \(participantsWithVideoTracks) have video tracks.",
-                subsystems: .webRTC
-            )
+
+        var logMessage = "\(participants.count) total participants."
+
+        switch (participantsWithAudioTracks.isEmpty, participantsWithVideoTracks.isEmpty) {
+        case (true, true):
+            logMessage += " No participant has video or audio tracks."
+
+        case (true, false):
+            logMessage += " \(participantsWithVideoTracks) have video track assigned."
+
+        case (false, true):
+            logMessage += " \(participantsWithAudioTracks) have audio track assigned."
+
+        case (false, false):
+            logMessage += " \(participantsWithAudioTracks) have audio track assigned."
+            logMessage += " \(participantsWithVideoTracks) have video track assigned."
         }
+
+        log.debug(logMessage, subsystems: .webRTC)
     }
 
     func configureAudioSession(source: JoinSource?) async throws {
-        try await audioStore.dispatch([
-            .setAudioDeviceModule(peerConnectionFactory.audioDeviceModule)
-        ]).result()
+        try await audioStore.dispatch(
+            [
+                // Claim ownership before installing the ADM so any late
+                // teardown from a previous call becomes a no-op. Both
+                // actions run in the same batch on the store's serial
+                // processing queue, so no other dispatch can interleave
+                // between them. That makes the ADM install implicitly
+                // ownership-safe and removes the need to wrap it in a
+                // `.conditioned(...)` action.
+                .setActiveSessionIdentifier(audioSession.identifier),
+                .setAudioDeviceModule(peerConnectionFactory.audioDeviceModule)
+            ]
+        ).result()
 
         let sourceIsCallKit = {
             guard

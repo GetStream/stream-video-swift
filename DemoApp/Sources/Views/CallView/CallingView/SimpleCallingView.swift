@@ -247,12 +247,16 @@ struct SimpleCallingView: View {
             await setPreferredVideoCodec(for: callId)
             try? await setAudioSessionPolicyOverride(for: callId)
             await setClientCapabilities(for: callId)
+            let highScaleHint = AppEnvironment
+                .highScaleLivestreamPublisherHint
+                .value
             viewModel.startCall(
                 callType: callType,
                 callId: callId,
                 members: [],
                 ring: false,
                 maxDuration: AppEnvironment.callExpiration.duration,
+                highScaleLivestreamPublisherHint: highScaleHint,
                 video: viewModel.callSettings.videoOn
             )
         }

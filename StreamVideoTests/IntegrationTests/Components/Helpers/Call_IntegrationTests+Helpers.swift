@@ -84,13 +84,15 @@ extension Call_IntegrationTests {
             type: String,
             userId: String,
             environment: String = "pronto",
-            clientResolutionMode: StreamVideoHelper.ClientResolutionMode = .ignoreCache
+            clientResolutionMode: StreamVideoHelper.ClientResolutionMode = .ignoreCache,
+            overrideAPIKey: String? = nil,
+            overrideToken: String? = nil
         ) async throws -> CallFlow<Void> {
             let authentication = try await authentication
                 .authenticate(userId: userId, environment: environment)
             let client = try await client.buildClient(
-                apiKey: authentication.apiKey,
-                token: authentication.token,
+                apiKey: overrideAPIKey ?? authentication.apiKey,
+                token: overrideToken ?? authentication.token,
                 userId: userId,
                 connectMode: .afterInit,
                 clientResolutionMode: clientResolutionMode,

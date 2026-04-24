@@ -39,22 +39,7 @@ struct DemoCallingViewModifier: ViewModifier {
             .alignedToReadableContentGuide()
             .background(appearance.colors.lobbyBackground.edgesIgnoringSafeArea(.all))
             .onReceive(appState.$deeplinkInfo) { deeplinkInfo in
-                guard
-                    !isAnonymous,
-                    deeplinkInfo.callId != self.text.wrappedValue
-                else { return }
-
-                // We may get in this situation when launching the app from a
-                // deeplink.
-                if deeplinkInfo.callId.isEmpty {
-                    joinCallIfNeeded(with: self.text.wrappedValue, callType: callType)
-                } else {
-                    self.text.wrappedValue = deeplinkInfo.callId
-                    joinCallIfNeeded(
-                        with: self.text.wrappedValue,
-                        callType: callType
-                    )
-                }
+                autoJoinIfNeeded(from: deeplinkInfo)
             }
             .onChange(of: viewModel.callingState) { callingState in
                 switch callingState {
@@ -71,10 +56,12 @@ struct DemoCallingViewModifier: ViewModifier {
             }
             .onAppear {
                 guard !isAnonymous else { return }
+                callKitAdapter.participantAutoLeavePolicy =
+                    AppEnvironment.autoLeavePolicy.policy
                 callKitAdapter.registerForIncomingCalls()
                 callKitAdapter.iconTemplateImageData = UIImage(named: "logo")?.pngData()
                 configureVideoRenderingOptions()
-                joinCallIfNeeded(with: text.wrappedValue, callType: callType)
+                autoJoinIfNeeded(from: appState.deeplinkInfo)
             }
             .onReceive(appState.$activeCall) { call in
                 viewModel.setActiveCall(call)
@@ -111,8 +98,22 @@ struct DemoCallingViewModifier: ViewModifier {
             } catch {
                 log.error(error)
             }
-            AppState.shared.deeplinkInfo = .empty
         }
+    }
+
+    private func autoJoinIfNeeded(from deeplinkInfo: DeeplinkInfo) {
+        guard !isAnonymous, !deeplinkInfo.callId.isEmpty else {
+            return
+        }
+
+        let resolvedCallType = deeplinkInfo.callType.isEmpty
+            ? callType
+            : deeplinkInfo.callType
+
+        callType = resolvedCallType
+        text.wrappedValue = deeplinkInfo.callId
+        appState.deeplinkInfo = .empty
+        joinCallIfNeeded(with: deeplinkInfo.callId, callType: resolvedCallType)
     }
 
     private func configureVideoRenderingOptions() {

@@ -233,6 +233,9 @@ extension RTCAudioStore {
         var isMicrophoneMuted: Bool
         var hasRecordingPermission: Bool
 
+        /// Identifies the `CallAudioSession` that currently owns the shared
+        /// audio stack. Empty when no session owns it.
+        var activeSessionIdentifier: String
         var audioDeviceModule: AudioDeviceModule?
         var currentRoute: AudioRoute
 
@@ -243,6 +246,7 @@ extension RTCAudioStore {
         var description: String {
             " { " +
                 "isActive:\(isActive)" +
+                ", activeSessionIdentifier:\(activeSessionIdentifier)" +
                 ", isInterrupted:\(isInterrupted)" +
                 ", isRecording:\(isRecording)" +
                 ", isMicrophoneMuted:\(isMicrophoneMuted)" +
@@ -266,6 +270,7 @@ extension RTCAudioStore {
             case stereoConfiguration
             case audioDeviceModule
             case currentRoute
+            case activeSessionIdentifier
         }
 
         func encode(to encoder: Encoder) throws {
@@ -274,6 +279,7 @@ extension RTCAudioStore {
             try container.encode(isInterrupted, forKey: .isInterrupted)
             try container.encode(isRecording, forKey: .isRecording)
             try container.encode(isMicrophoneMuted, forKey: .isMicrophoneMuted)
+            try container.encode(activeSessionIdentifier, forKey: .activeSessionIdentifier)
             try container.encode(
                 hasRecordingPermission,
                 forKey: .hasRecordingPermission
@@ -308,6 +314,7 @@ extension RTCAudioStore {
                 && lhs.stereoConfiguration == rhs.stereoConfiguration
                 && lhs.audioDeviceModule === rhs.audioDeviceModule
                 && lhs.currentRoute == rhs.currentRoute
+                && lhs.activeSessionIdentifier == rhs.activeSessionIdentifier
         }
 
         func hash(into hasher: inout Hasher) {
@@ -318,6 +325,7 @@ extension RTCAudioStore {
             hasher.combine(hasRecordingPermission)
             hasher.combine(audioSessionConfiguration)
             hasher.combine(webRTCAudioSessionConfiguration)
+            hasher.combine(activeSessionIdentifier)
             hasher.combine(stereoConfiguration)
             if let audioDeviceModule {
                 hasher.combine(ObjectIdentifier(audioDeviceModule))

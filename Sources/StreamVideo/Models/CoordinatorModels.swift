@@ -19,6 +19,9 @@ public struct CreateCallOptions: Sendable, Hashable {
     public var settings: CallSettingsRequest?
     public var startsAt: Date?
     public var team: String?
+    /// Marks this join as a high-scale livestream publisher for backend
+    /// routing.
+    public var highScaleLivestreamPublisherHint: Bool?
     
     public init(
         memberIds: [String]? = nil,
@@ -26,7 +29,8 @@ public struct CreateCallOptions: Sendable, Hashable {
         custom: [String: RawJSON]? = nil,
         settings: CallSettingsRequest? = nil,
         startsAt: Date? = nil,
-        team: String? = nil
+        team: String? = nil,
+        highScaleLivestreamPublisherHint: Bool? = nil
     ) {
         self.memberIds = memberIds
         self.members = members
@@ -34,6 +38,7 @@ public struct CreateCallOptions: Sendable, Hashable {
         self.settings = settings
         self.startsAt = startsAt
         self.team = team
+        self.highScaleLivestreamPublisherHint = highScaleLivestreamPublisherHint
     }
 }
 

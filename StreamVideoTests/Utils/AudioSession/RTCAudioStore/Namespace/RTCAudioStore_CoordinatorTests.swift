@@ -15,6 +15,69 @@ final class RTCAudioStore_CoordinatorTests: XCTestCase, @unchecked Sendable {
         super.tearDown()
     }
 
+    func test_coordinate_conditionedAction_matchingState_returnsNestedAction() {
+        let ownerID = String.unique
+        let state = makeState(activeSessionIdentifier: ownerID)
+        let action = RTCAudioStore.StoreAction
+            .conditioned(
+                .activeSessionIdentifier(ownerID),
+                action: .setActive(true)
+            )
+            .withBeforeDelay(0.5)
+
+        let result = subject.coordinate(
+            action: action,
+            state: state
+        )
+
+        guard let result else {
+            return XCTFail("Expected conditioned action to be coordinated.")
+        }
+
+        guard case let .delayed(resolvedAction, delay) = result else {
+            return XCTFail("Expected conditioned action to stay delayed.")
+        }
+
+        XCTAssertEqual(resolvedAction, .setActive(true))
+        XCTAssertEqual(delay.before, 0.5)
+        XCTAssertEqual(delay.after, 0)
+    }
+
+    func test_coordinate_conditionedAction_nonMatchingState_returnsNil() {
+        let state = makeState(activeSessionIdentifier: "owner-a")
+
+        XCTAssertNil(
+            subject.coordinate(
+                action: .normal(
+                    .conditioned(
+                        .activeSessionIdentifier("owner-b"),
+                        action: .setActive(true)
+                    )
+                ),
+                state: state
+            )
+        )
+    }
+
+    func test_coordinate_conditionedAction_matchingStateAndRedundantNestedAction_returnsNil() {
+        let state = makeState(
+            isRecording: true,
+            activeSessionIdentifier: "owner-a"
+        )
+
+        XCTAssertNil(
+            subject.coordinate(
+                action: .normal(
+                    .conditioned(
+                        .activeSessionIdentifier("owner-a"),
+                        action: .setRecording(true)
+                    )
+                ),
+                state: state
+            )
+        )
+    }
+
     func test_setActive_sameValue_returnsFalse() {
         let state = makeState(isActive: true)
 
@@ -259,6 +322,7 @@ final class RTCAudioStore_CoordinatorTests: XCTestCase, @unchecked Sendable {
         isRecording: Bool = false,
         isMicrophoneMuted: Bool = false,
         hasRecordingPermission: Bool = false,
+        activeSessionIdentifier: String = "",
         audioDeviceModule: AudioDeviceModule? = nil,
         currentRoute: RTCAudioStore.StoreState.AudioRoute = .empty,
         audioSessionConfiguration: RTCAudioStore.StoreState.AVAudioSessionConfiguration = .init(
@@ -282,6 +346,7 @@ final class RTCAudioStore_CoordinatorTests: XCTestCase, @unchecked Sendable {
             isRecording: isRecording,
             isMicrophoneMuted: isMicrophoneMuted,
             hasRecordingPermission: hasRecordingPermission,
+            activeSessionIdentifier: activeSessionIdentifier,
             audioDeviceModule: audioDeviceModule,
             currentRoute: currentRoute,
             audioSessionConfiguration: audioSessionConfiguration,

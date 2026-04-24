@@ -144,6 +144,9 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// `joinInterceptor` is provided, the SDK waits for it after the join
     /// response has been applied locally but before the call is marked as the
     /// active call.
+    ///
+    /// If the final handoff times out, the SDK leaves the call with reason
+    /// `join.timeout` before rethrowing the timeout error.
     /// - Parameters:
     ///  - create: whether the call should be created if it doesn't exist.
     ///  - options: configuration options for the call.
@@ -155,7 +158,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     ///    final joined transition after the join response has been received and
     ///    applied to local state.
     /// - Throws: An error if the call could not be joined or if
-    ///   `joinInterceptor` throws.
+    ///   `joinInterceptor` throws. Throws `TimeOutError` when the final joined
+    ///   handoff does not complete in time.
     @discardableResult
     public func join(
         create: Bool = false,
@@ -246,10 +250,16 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         if let joinResponse = result as? JoinCallResponse {
             return joinResponse
         } else if let publisher = result as? AnyPublisher<JoinCallResponse?, Error> {
-            let result = try await publisher
-                .compactMap { $0 }
-                .nextValue(timeout: CallConfiguration.timeout.join)
-            return result
+            do {
+                return try await publisher
+                    .compactMap { $0 }
+                    .nextValue(timeout: CallConfiguration.timeout.join)
+            } catch {
+                if error is TimeOutError {
+                    leave(reason: "join.timeout")
+                }
+                throw error
+            }
         } else {
             throw ClientError("Call was unable to join call.")
         }
@@ -624,38 +634,41 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
     /// Leave the current call.
     ///
-    /// The cleanup sequence clears active/ringing call references from
-    /// `StreamVideo` state before emitting `CallNotification.callEnded`.
+    /// The cleanup sequence is coordinated by the ``Call/StateMachine`` so
+    /// repeated leave requests from UI, CallKit, or backend-event fallbacks
+    /// share a single teardown path.
+    ///
+    /// The SDK clears `StreamVideo.State.activeCall` and
+    /// `StreamVideo.State.ringingCall` before posting
+    /// `Notification.Name(CallNotification.callEnded)`.
     ///
     /// - Parameter reason: Optional reason forwarded to the SFU leave request.
     ///   Pass a custom value when you want the backend to distinguish between
     ///   different leave flows (for example, user action vs timeout).
     public func leave(reason: String? = nil) {
-        disposableBag.removeAll()
-        callController.leave(reason: reason)
-        closedCaptionsAdapter.stop()
-        stateMachine.transition(.idle(.init(call: self)))
-        /// Upon `Call.leave` we remove the call from the cache. Any further actions that are required
-        /// to happen on the call object (e.g. rejoin) will need to fetch a new instance from `StreamVideo`
-        /// client.
-        callCache.remove(for: cId)
-        outgoingRingingController = nil
-
-        // Reset the activeAudioFilter
-        setAudioFilter(nil)
-
-        let strongSelf = self
-        let cId = self.cId
-        Task(disposableBag: disposableBag) { @MainActor [strongSelf, streamVideo, cId] in
-            if streamVideo.state.ringingCall?.cId == cId {
-                streamVideo.state.ringingCall = nil
-            }
-            if streamVideo.state.activeCall?.cId == cId {
-                streamVideo.state.activeCall = nil
-            }
-
-            postNotification(with: CallNotification.callEnded, object: strongSelf)
-        }
+        stateMachine.transition(
+            .leaving(
+                .init(
+                    call: self,
+                    input: .leaving(
+                        .init(
+                            reason: reason,
+                            disposableBag: disposableBag,
+                            callController: callController,
+                            closedCaptionsAdapter: closedCaptionsAdapter,
+                            callCache: callCache,
+                            resetOutgoingRingingController: { [weak self] in
+                                self?.outgoingRingingController = nil
+                            },
+                            resetAudioFilter: { [weak self] in
+                                self?.setAudioFilter(nil)
+                            }
+                        )
+                    )
+                ),
+                reason: reason
+            )
+        )
     }
 
     /// Starts noise cancellation asynchronously.

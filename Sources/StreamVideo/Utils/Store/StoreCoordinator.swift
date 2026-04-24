@@ -13,6 +13,27 @@ import Foundation
 /// reducing unnecessary work along the pipeline.
 class StoreCoordinator<Namespace: StoreNamespace>: @unchecked Sendable {
 
+    /// Resolves the action that should flow through the store pipeline.
+    ///
+    /// The default implementation preserves the original action when
+    /// ``shouldExecute(action:state:)`` returns `true` and skips it
+    /// otherwise. Subclasses can override this method to unwrap or rewrite
+    /// actions before middleware and reducers receive them.
+    ///
+    /// - Parameters:
+    ///   - action: The boxed action that is about to be dispatched.
+    ///   - state: The current state before the action runs.
+    /// - Returns: The action to execute, or `nil` to skip execution.
+    func coordinate(
+        action: StoreActionBox<Namespace.Action>,
+        state: Namespace.State
+    ) -> StoreActionBox<Namespace.Action>? {
+        shouldExecute(
+            action: action.wrappedValue,
+            state: state
+        ) ? action : nil
+    }
+
     /// Determines whether an action should run for the provided state snapshot.
     ///
     /// This default implementation always executes the action.

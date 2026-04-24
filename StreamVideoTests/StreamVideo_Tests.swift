@@ -107,6 +107,44 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
         XCTAssertNil(streamVideo.state.ringingCall)
     }
 
+    @MainActor
+    func test_streamVideo_activeCallReplacement_postsCallEndedNotificationForPreviousCall() async throws {
+        let subject = StreamVideo.mock(httpClient: HTTPClient_Mock())
+        self.streamVideo = subject
+        let previousCallId = String(String.unique.prefix(10))
+        let previousCallCid = callCid(from: previousCallId, callType: callType)
+        let nextActiveCall = subject.call(callType: callType, callId: callId)
+
+        let notificationExpectation = expectation(
+            description: "Previous call ended notification"
+        )
+        let token = NotificationCenter.default.addObserver(
+            forName: NSNotification.Name(CallNotification.callEnded),
+            object: nil,
+            queue: .main
+        ) { notification in
+            guard (notification.object as? Call)?.cId == previousCallCid else {
+                return
+            }
+            notificationExpectation.fulfill()
+        }
+        defer { NotificationCenter.default.removeObserver(token) }
+
+        do {
+            let previousCall = subject.call(
+                callType: callType,
+                callId: previousCallId
+            )
+            subject.state.activeCall = previousCall
+            subject.state.activeCall = nextActiveCall
+        }
+
+        await fulfillment(of: [notificationExpectation], timeout: defaultTimeout)
+
+        XCTAssertTrue(subject.state.activeCall === nextActiveCall)
+        XCTAssertNil(subject.state.ringingCall)
+    }
+
     func test_streamVideo_ringCallAccept() async throws {
         let httpClient = httpClientWithGetCallResponse()
         let streamVideo = StreamVideo.mock(httpClient: httpClient)

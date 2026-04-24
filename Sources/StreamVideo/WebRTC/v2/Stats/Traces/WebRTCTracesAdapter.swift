@@ -68,20 +68,26 @@ final class WebRTCTracesAdapter: WebRTCTracing, @unchecked Sendable {
     /// data, and re-attach Combine publishers to new event streams.
     var sfuAdapter: SFUAdapter? { didSet { didUpdate(sfuAdapter) } }
 
-    /// The peer connection coordinator for the publisher/subscriber stream.
+    /// The peer connection coordinator for the publishing peer connection.
     ///
-    /// Updating these will reset trace event collection for the respective role,
-    /// flush prior traces, and attach to the new event stream.
+    /// Assigning a different coordinator instance rebinds tracing for the
+    /// publisher role and emits a synthetic `create` trace for that new
+    /// peer connection. Reassigning the same instance is ignored so reconnect
+    /// flows do not emit duplicate synthetic `create` traces. Setting this to
+    /// `nil` removes the current publisher subscription.
     var publisher: RTCPeerConnectionCoordinator? {
-        didSet { didUpdate(publisher: publisher) }
+        didSet { didUpdate(publisher: publisher, oldValue: oldValue) }
     }
 
-    /// The peer connection coordinator for the publisher/subscriber stream.
+    /// The peer connection coordinator for the subscribing peer connection.
     ///
-    /// Updating these will reset trace event collection for the respective role,
-    /// flush prior traces, and attach to the new event stream.
+    /// Assigning a different coordinator instance rebinds tracing for the
+    /// subscriber role and emits a synthetic `create` trace for that new
+    /// peer connection. Reassigning the same instance is ignored so reconnect
+    /// flows do not emit duplicate synthetic `create` traces. Setting this to
+    /// `nil` removes the current subscriber subscription.
     var subscriber: RTCPeerConnectionCoordinator? {
-        didSet { didUpdate(subscriber: subscriber) }
+        didSet { didUpdate(subscriber: subscriber, oldValue: oldValue) }
     }
 
     /// Buffers trace events related to publisher/subscriber peer connections.
@@ -273,14 +279,24 @@ final class WebRTCTracesAdapter: WebRTCTracing, @unchecked Sendable {
             .store(in: disposableBag, key: DisposableKey.error.rawValue)
     }
 
-    /// Handles changes to the publisher/subscriber peer connection.
+    /// Rebinds publisher tracing when the coordinator instance changes.
     ///
-    /// Sets up Combine event pipeline for trace collection for the specified role,
-    /// emits a "Created" event for the new peer connection, and clears prior traces.
-    private func didUpdate(publisher: RTCPeerConnectionCoordinator?) {
-        guard let peerConnection = publisher else {
+    /// Reassigning the same coordinator instance is ignored so reconnect
+    /// bookkeeping does not emit duplicate synthetic `create` traces. Setting
+    /// the coordinator to `nil` removes the active publisher subscription.
+    private func didUpdate(
+        publisher: RTCPeerConnectionCoordinator?,
+        oldValue: RTCPeerConnectionCoordinator?
+    ) {
+        guard publisher !== oldValue else {
             return
         }
+
+        guard let peerConnection = publisher else {
+            disposableBag.remove(DisposableKey.publisher.rawValue)
+            return
+        }
+
         disposableBag.remove(DisposableKey.publisher.rawValue)
         peerConnection
             .eventPublisher
@@ -301,14 +317,24 @@ final class WebRTCTracesAdapter: WebRTCTracing, @unchecked Sendable {
         )
     }
 
-    /// Handles changes to the publisher/subscriber peer connection.
+    /// Rebinds subscriber tracing when the coordinator instance changes.
     ///
-    /// Sets up Combine event pipeline for trace collection for the specified role,
-    /// emits a "Created" event for the new peer connection, and clears prior traces.
-    private func didUpdate(subscriber: RTCPeerConnectionCoordinator?) {
-        guard let peerConnection = subscriber else {
+    /// Reassigning the same coordinator instance is ignored so reconnect
+    /// bookkeeping does not emit duplicate synthetic `create` traces. Setting
+    /// the coordinator to `nil` removes the active subscriber subscription.
+    private func didUpdate(
+        subscriber: RTCPeerConnectionCoordinator?,
+        oldValue: RTCPeerConnectionCoordinator?
+    ) {
+        guard subscriber !== oldValue else {
             return
         }
+
+        guard let peerConnection = subscriber else {
+            disposableBag.remove(DisposableKey.subscriber.rawValue)
+            return
+        }
+
         disposableBag.remove(DisposableKey.subscriber.rawValue)
         peerConnection
             .eventPublisher

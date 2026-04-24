@@ -13,6 +13,7 @@ extension Call.StateMachine {
             enum Input {
                 case none
                 case join(JoinInput)
+                case leaving(LeavingInput)
                 case accepting(deliverySubject: PassthroughSubject<AcceptCallResponse, Error>)
                 case rejecting(RejectingInput)
             }
@@ -46,6 +47,16 @@ extension Call.StateMachine {
                 var deliverySubject: CurrentValueSubject<RejectCallResponse?, Error>
             }
 
+            struct LeavingInput {
+                let reason: String?
+                let disposableBag: DisposableBag
+                let callController: CallController
+                let closedCaptionsAdapter: ClosedCaptionsAdapter
+                let callCache: CallCache
+                let resetOutgoingRingingController: @Sendable () -> Void
+                let resetAudioFilter: @Sendable () -> Void
+            }
+
             weak var call: Call?
             var input: Input = .none
             var output: Output = .none
@@ -56,6 +67,7 @@ extension Call.StateMachine {
             case idle
             case joining
             case joined
+            case leaving
             case accepting
             case accepted
             case rejecting

@@ -67,6 +67,12 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         super.tearDown()
     }
 
+    // MARK: - participantAutoLeavePolicy
+
+    func test_participantAutoLeavePolicy_hasExpectedDefaultValue() {
+        XCTAssertTrue(subject.participantAutoLeavePolicy is LastParticipantAutoLeavePolicy)
+    }
+
     // MARK: - reportIncomingCall
 
     @MainActor
@@ -210,7 +216,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         struct ConnectionError: Error {}
         stubConnectionState(to: .disconnected(error: nil))
         mockedStreamVideo.stub(for: .connect, with: ConnectionError())
-        _ = stubCall(response: defaultGetCallResponse)
+        let call = stubCall(response: defaultGetCallResponse)
         subject.streamVideo = mockedStreamVideo
 
         try await assertRequestTransaction(CXEndCallAction.self) {
@@ -221,24 +227,84 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
                 hasVideo: false
             ) { _ in }
         }
+
+        await fulfillment { call.timesCalled(.reject) == 1 }
+
+        let reason = try XCTUnwrap(
+            call.recordedInputPayload(String.self, for: .reject)?.first
+        )
+        XCTAssertEqual(
+            reason,
+            StreamRejectionReasonProvider.HandledCallReason.reportCallFailed.rawValue
+        )
     }
 
     func test_reportIncomingCall_streamVideoReconnectsAndCallIsAccepted_callWasEnded() async throws {
         stubConnectionState(to: .disconnected(error: nil))
 
-        try await assertCallWasHandled(wasAccepted: true)
+        try await assertCallWasHandled(
+            wasAccepted: true,
+            expectedLeaveReason: "user-responded-elsewhere"
+        )
     }
 
     func test_reportIncomingCall_streamVideoReconnectsAndCallIsRejected_callWasEnded() async throws {
         stubConnectionState(to: .disconnected(error: nil))
 
-        try await assertCallWasHandled(wasRejected: true)
+        try await assertCallWasHandled(
+            wasRejected: true,
+            expectedLeaveReason: "user-responded-elsewhere"
+        )
     }
 
-    func test_reportIncomingCall_streamVideoReconnectsAndCallIsRejectedByEveryoneElse_callWasEnded() async throws {
+    func test_reportIncomingCall_streamVideoReconnectsAndCallIsMissed_callWasEnded() async throws {
         stubConnectionState(to: .disconnected(error: nil))
 
-        try await assertCallWasHandled(wasRejectedByEveryoneElse: true)
+        try await assertCallWasHandled(
+            wasMissed: true,
+            expectedLeaveReason: "user-responded-elsewhere"
+        )
+    }
+
+    func test_reportIncomingCall_streamVideoReconnectsAndCreatorRejects_callWasEnded() async throws {
+        stubConnectionState(to: .disconnected(error: nil))
+
+        try await assertCallWasHandled(
+            wasRejectedByCreator: true,
+            expectedLeaveReason: StreamRejectionReasonProvider
+                .HandledCallReason
+                .creatorRejected
+                .rawValue
+        )
+    }
+
+    func test_reportIncomingCall_streamVideoReconnectsAndCreatorRejectsAfterAnotherParticipantAccepted_callWasNotEnded(
+    ) async throws {
+        stubConnectionState(to: .disconnected(error: nil))
+
+        try await assertCreatorRejectionDoesNotEndCallWhenAnotherParticipantAccepted()
+    }
+
+    func test_reportIncomingCall_streamVideoReconnectsAndAllOtherParticipantsReject_callWasEnded() async throws {
+        stubConnectionState(to: .disconnected(error: nil))
+
+        try await assertCallWasHandled(
+            otherParticipantIds: ["participant-1", "participant-2"],
+            wereAllOtherParticipantsRejected: true,
+            expectedLeaveReason: StreamRejectionReasonProvider
+                .HandledCallReason
+                .allOtherParticipantsRejected
+                .rawValue
+        )
+    }
+
+    func test_reportIncomingCall_streamVideoReconnectsAndCallHasEndedElsewhere_callWasEnded() async throws {
+        stubConnectionState(to: .disconnected(error: nil))
+
+        try await assertCallWasHandled(
+            endedAt: .init(),
+            expectedLeaveReason: "call-has-ended"
+        )
     }
 
     func test_reportIncomingCall_streamVideoReconnectsCallerDidNotReject_callWasNotEnded() async throws {
@@ -249,7 +315,8 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
                     session: .dummy(
                         acceptedBy: [:],
                         rejectedBy: [:]
-                    )
+                    ),
+                    settings: .dummy(ring: .dummy(autoCancelTimeoutMs: 10 * 1000))
                 ),
                 members: [.dummy(userId: user.id)]
             )
@@ -269,19 +336,100 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
     func test_reportIncomingCall_streamVideoConnectedAndCallIsAccepted_callWasEnded() async throws {
         stubConnectionState(to: .connected)
 
-        try await assertCallWasHandled(wasAccepted: true)
+        try await assertCallWasHandled(
+            wasAccepted: true,
+            expectedLeaveReason: "user-responded-elsewhere"
+        )
     }
 
     func test_reportIncomingCall_streamVideoConnectedAndCallIsRejected_callWasEnded() async throws {
         stubConnectionState(to: .connected)
 
-        try await assertCallWasHandled(wasRejected: true)
+        try await assertCallWasHandled(
+            wasRejected: true,
+            expectedLeaveReason: "user-responded-elsewhere"
+        )
     }
 
-    func test_reportIncomingCall_streamVideoConnectedAndCallIsRejectedByEveryoneElse_callWasEnded() async throws {
+    func test_reportIncomingCall_streamVideoConnectedAndCallIsMissed_callWasEnded() async throws {
         stubConnectionState(to: .connected)
 
-        try await assertCallWasHandled(wasRejectedByEveryoneElse: true)
+        try await assertCallWasHandled(
+            wasMissed: true,
+            expectedLeaveReason: "user-responded-elsewhere"
+        )
+    }
+
+    func test_reportIncomingCall_streamVideoConnectedAndCreatorRejects_callWasEnded() async throws {
+        stubConnectionState(to: .connected)
+
+        try await assertCallWasHandled(
+            wasRejectedByCreator: true,
+            expectedLeaveReason: StreamRejectionReasonProvider
+                .HandledCallReason
+                .creatorRejected
+                .rawValue
+        )
+    }
+
+    func test_reportIncomingCall_streamVideoConnectedAndCreatorRejectsAfterAnotherParticipantAccepted_callWasNotEnded(
+    ) async throws {
+        stubConnectionState(to: .connected)
+
+        try await assertCreatorRejectionDoesNotEndCallWhenAnotherParticipantAccepted()
+    }
+
+    func test_reportIncomingCall_streamVideoConnectedAndAllOtherParticipantsReject_callWasEnded() async throws {
+        stubConnectionState(to: .connected)
+
+        try await assertCallWasHandled(
+            otherParticipantIds: ["participant-1", "participant-2"],
+            wereAllOtherParticipantsRejected: true,
+            expectedLeaveReason: StreamRejectionReasonProvider
+                .HandledCallReason
+                .allOtherParticipantsRejected
+                .rawValue
+        )
+    }
+
+    func test_reportIncomingCall_streamVideoConnectedAndOnlySomeOtherParticipantsReject_callWasNotEnded() async throws {
+        stubConnectionState(to: .connected)
+
+        let creatorId = "creator"
+        await stubCall(
+            response: .dummy(
+                call: .dummy(
+                    createdBy: .dummy(id: creatorId),
+                    session: .dummy(rejectedBy: ["participant-1": Date()]),
+                    settings: .dummy(ring: .dummy(autoCancelTimeoutMs: 10 * 1000))
+                ),
+                members: [
+                    .dummy(userId: creatorId),
+                    .dummy(userId: "participant-1"),
+                    .dummy(userId: "participant-2"),
+                    .dummy(userId: user.id)
+                ]
+            )
+        )
+        subject.streamVideo = mockedStreamVideo
+
+        try await assertNotRequestTransaction(CXEndCallAction.self) {
+            subject.reportIncomingCall(
+                cid,
+                localizedCallerName: localizedCallerName,
+                callerId: callerId,
+                hasVideo: false
+            ) { _ in }
+        }
+    }
+
+    func test_reportIncomingCall_streamVideoConnectedAndCallHasEndedElsewhere_callWasEnded() async throws {
+        stubConnectionState(to: .connected)
+
+        try await assertCallWasHandled(
+            endedAt: .init(),
+            expectedLeaveReason: "call-has-ended"
+        )
     }
 
     @MainActor
@@ -387,7 +535,8 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
                     session: .dummy(
                         acceptedBy: [:],
                         rejectedBy: [:]
-                    )
+                    ),
+                    settings: .dummy(ring: .dummy(autoCancelTimeoutMs: 10 * 1000))
                 ),
                 members: [.dummy(userId: user.id)]
             )
@@ -477,7 +626,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
             XCTFail()
         case .ring:
             XCTFail()
-        case .setVideoFilter(videoFilter: let videoFilter):
+        case .setVideoFilter:
             XCTFail()
         }
     }
@@ -794,10 +943,92 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(reason, "timeout")
     }
 
+    @MainActor
+    func test_callEnded_leaveReasonProvided_expectedReasonIsForwardedToReject() async throws {
+        let call = stubCall(response: defaultGetCallResponse)
+        subject.streamVideo = mockedStreamVideo
+
+        subject.reportIncomingCall(
+            cid,
+            localizedCallerName: localizedCallerName,
+            callerId: callerId,
+            hasVideo: false
+        ) { _ in }
+
+        try await assertRequestTransaction(CXEndCallAction.self) {
+            subject.callEnded(
+                cid,
+                ringingTimedOut: false,
+                leaveReason: "call-has-ended"
+            )
+        }
+
+        await fulfillment { call.timesCalled(.reject) == 1 }
+
+        let reason = try XCTUnwrap(
+            call.recordedInputPayload(String.self, for: .reject)?.first
+        )
+        XCTAssertEqual(reason, "call-has-ended")
+    }
+
+    @MainActor
+    func test_callEnded_whenAlreadyMarkedEnded_doesNotRequestSecondTransaction()
+        async throws {
+        let call = stubCall(response: defaultGetCallResponse)
+        subject.streamVideo = mockedStreamVideo
+
+        subject.reportIncomingCall(
+            cid,
+            localizedCallerName: localizedCallerName,
+            callerId: callerId,
+            hasVideo: false
+        ) { _ in }
+
+        subject.callEnded(cid, ringingTimedOut: true)
+
+        await fulfillment(timeout: defaultTimeout) {
+            (self.callController.requestWasCalledWith?.0.actions.last
+                as? CXEndCallAction
+            ) != nil
+        }
+
+        let firstAction = try XCTUnwrap(
+            callController.requestWasCalledWith?.0.actions.last as? CXEndCallAction
+        )
+
+        callController.reset()
+        subject.callEnded(cid, ringingTimedOut: false)
+
+        await waitExpectation(
+            timeout: 1,
+            description: "Wait for duplicate endCall tasks to complete."
+        )
+
+        XCTAssertNil(callController.requestWasCalledWith)
+
+        subject.provider(callProvider, perform: firstAction)
+
+        await fulfillment { call.timesCalled(.reject) == 1 }
+
+        let reason = try XCTUnwrap(
+            call.recordedInputPayload(String.self, for: .reject)?.first
+        )
+        XCTAssertEqual(reason, "timeout")
+    }
+
+    func test_checkIfCallWasHandled_streamVideoNil_returnsNotConfiguredReason() {
+        let result = subject.checkIfCallWasHandled(callState: defaultGetCallResponse)
+
+        XCTAssertEqual(
+            result,
+            StreamRejectionReasonProvider.HandledCallReason.notConfigured.rawValue
+        )
+    }
+
     // MARK: - callParticipantLeft
 
     @MainActor
-    func test_callParticipantLeft_participantsLeftMoreThanOne_callWasNotEnded() async throws {
+    func test_defaultParticipantAutoLeavePolicy_whenParticipantLeaves_doesNotEndCall() async throws {
         let firstCallUUID = UUID()
         uuidFactory.getResult = firstCallUUID
         let call = stubCall(response: defaultGetCallResponse)
@@ -820,26 +1051,18 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
             )
         )
 
-        let callState = CallState(.dummy())
-        callState.participants = [.dummy(), .dummy()]
-        call.stub(for: \.state, with: callState)
         try await assertNotRequestTransaction(CXEndCallAction.self) {
             subject.callParticipantLeft(.dummy(callCid: call.cId))
         }
     }
 
     @MainActor
-    func test_callParticipantLeft_participantsLeftOnlyOne_callNotEnded() async throws {
+    func test_activeCall_whenParticipantAutoLeavePolicyTriggers_endsCall() async throws {
         let firstCallUUID = UUID()
         uuidFactory.getResult = firstCallUUID
-        let call = stubCall(
-            response: .dummy(
-                call: defaultGetCallResponse.call,
-                duration: "100",
-                members: [],
-                ownCapabilities: []
-            )
-        )
+        let call = stubCall(response: defaultGetCallResponse)
+        let participantAutoLeavePolicy = MockParticipantAutoLeavePolicy()
+        subject.participantAutoLeavePolicy = participantAutoLeavePolicy
         subject.streamVideo = mockedStreamVideo
 
         subject.reportIncomingCall(
@@ -859,13 +1082,106 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
             )
         )
 
-        let callState = CallState(.dummy())
-        callState.participants = [.dummy()]
-        call.stub(for: \.state, with: callState)
+        try await assertRequestTransaction(CXEndCallAction.self) {
+            participantAutoLeavePolicy.trigger()
+        }
+
+        await fulfillment { call.timesCalled(.leave) == 1 }
+
+        let reason = try XCTUnwrap(
+            call.recordedInputPayload(String.self, for: .leave)?.first
+        )
+        XCTAssertEqual(
+            reason,
+            StreamRejectionReasonProvider.HandledCallReason.autoLeave.rawValue
+        )
+    }
+
+    @MainActor
+    func test_callEndedNotification_expectedLeaveReasonIsForwardedToLeave() async throws {
+        let firstCallUUID = UUID()
+        uuidFactory.getResult = firstCallUUID
+        let call = stubCall(response: defaultGetCallResponse)
+        subject.streamVideo = mockedStreamVideo
+
+        subject.reportIncomingCall(
+            cid,
+            localizedCallerName: localizedCallerName,
+            callerId: callerId,
+            hasVideo: false
+        ) { _ in }
+
+        await waitExpectation(timeout: 2)
+
+        subject.provider(
+            callProvider,
+            perform: CXAnswerCallAction(call: firstCallUUID)
+        )
+
+        await waitExpectation(timeout: 1)
 
         try await assertRequestTransaction(CXEndCallAction.self) {
-            subject.callParticipantLeft(.dummy(callCid: cid))
+            NotificationCenter.default.post(
+                name: Notification.Name(CallNotification.callEnded),
+                object: call
+            )
         }
+
+        await fulfillment { call.timesCalled(.leave) == 1 }
+
+        let reason = try XCTUnwrap(
+            call.recordedInputPayload(String.self, for: .leave)?.last
+        )
+        XCTAssertEqual(
+            reason,
+            StreamRejectionReasonProvider.HandledCallReason.callEndedLocally.rawValue
+        )
+    }
+
+    @MainActor
+    func test_callEndedEvent_expectedLeaveReasonIsForwardedToReject() async throws {
+        let currentDevice = CurrentDevice(currentDeviceProvider: { .phone })
+        currentDevice.didUpdate(.phone)
+        let simulatorDevice = CurrentDevice(currentDeviceProvider: { .simulator })
+        simulatorDevice.didUpdate(.simulator)
+        InjectedValues[\.currentDevice] = currentDevice
+        defer { InjectedValues[\.currentDevice] = simulatorDevice }
+
+        let call = stubCall(response: defaultGetCallResponse)
+        subject.streamVideo = mockedStreamVideo
+
+        subject.reportIncomingCall(
+            cid,
+            localizedCallerName: localizedCallerName,
+            callerId: callerId,
+            hasVideo: false
+        ) { _ in }
+
+        await waitExpectation(timeout: 1)
+
+        let event = WrappedEvent.coordinatorEvent(
+            .typeCallEndedEvent(
+                .init(
+                    call: .dummy(cid: cid, id: callId),
+                    callCid: cid,
+                    createdAt: .init()
+                )
+            )
+        )
+
+        try await assertRequestTransaction(CXEndCallAction.self) {
+            mockedStreamVideo.process(event)
+        }
+
+        await fulfillment { call.timesCalled(.reject) == 1 }
+
+        let reason = try XCTUnwrap(
+            call.recordedInputPayload(String.self, for: .reject)?.last
+        )
+        XCTAssertEqual(
+            reason,
+            StreamRejectionReasonProvider.HandledCallReason.callEventReceived.rawValue
+        )
     }
 
     // MARK: - didActivate
@@ -1061,39 +1377,120 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         )
     }
 
+    /// Builds a `GetCallResponse` with three explicit participant groups
+    /// because `checkIfCallWasHandled(callState:)` evaluates them differently:
+    /// - the current user
+    /// - the creator
+    /// - every other participant that is neither the current user nor the creator
+    ///
+    /// Keeping those groups explicit in the tests makes the handled-call
+    /// conditions easier to read and keeps the fixture aligned with the
+    /// production rules agreed with the team.
     @MainActor
     private func assertCallWasHandled(
-        otherMembers: [MemberResponse] = [.dummy()],
+        creatorId: String = "creator",
+        includeCreatorInMembers: Bool = true,
+        otherParticipantIds: [String] = [],
         wasAccepted: Bool = false,
         wasRejected: Bool = false,
-        wasRejectedByEveryoneElse: Bool = false
+        wasMissed: Bool = false,
+        wasRejectedByCreator: Bool = false,
+        wereAllOtherParticipantsRejected: Bool = false,
+        endedAt: Date? = nil,
+        expectedLeaveReason: String
     ) async throws {
         let acceptedBy = wasAccepted ? [user.id: Date()] : [:]
+        let missedBy = wasMissed ? [user.id: Date()] : [:]
+        let otherParticipants = otherParticipantIds
+            .filter { $0 != user.id && $0 != creatorId }
+            .map { MemberResponse.dummy(userId: $0) }
         let rejectedBy: [String: Date] = {
             if wasRejected {
                 return [user.id: Date()]
-            } else if wasRejectedByEveryoneElse {
-                return otherMembers.reduce(into: [String: Date]()) { partialResult, otherMember in
-                    partialResult[otherMember.userId] = .init()
-                }
-            } else {
-                return [:]
+            }
+            var rejectedParticipantIds: [String] = []
+            if wasRejectedByCreator {
+                rejectedParticipantIds.append(creatorId)
+            }
+            if wereAllOtherParticipantsRejected {
+                rejectedParticipantIds.append(contentsOf: otherParticipants.map(\.userId))
+            }
+            return rejectedParticipantIds.reduce(into: [String: Date]()) {
+                partialResult,
+                    participantId in
+                partialResult[participantId] = .init()
             }
         }()
-        stubCall(
+        let creatorMember = includeCreatorInMembers && creatorId != user.id
+            ? [MemberResponse.dummy(userId: creatorId)]
+            : []
+        let call = stubCall(
             response: .dummy(
                 call: .dummy(
+                    cid: cid,
+                    createdBy: .dummy(id: creatorId),
+                    endedAt: endedAt,
+                    id: callId,
                     session: .dummy(
                         acceptedBy: acceptedBy,
+                        missedBy: missedBy,
                         rejectedBy: rejectedBy
                     )
                 ),
-                members: otherMembers + [.dummy(userId: user.id)]
+                members: creatorMember + otherParticipants + [.dummy(userId: user.id)]
             )
         )
         subject.streamVideo = mockedStreamVideo
 
         try await assertRequestTransaction(CXEndCallAction.self) {
+            subject.reportIncomingCall(
+                cid,
+                localizedCallerName: localizedCallerName,
+                callerId: callerId,
+                hasVideo: false
+            ) { _ in }
+        }
+
+        await fulfillment { call.timesCalled(MockCall.MockCallFunctionKey.reject) == 1 }
+
+        let reason = try XCTUnwrap(
+            call.recordedInputPayload(
+                String.self,
+                for: MockCall.MockCallFunctionKey.reject
+            )?.first
+        )
+        XCTAssertEqual(reason, expectedLeaveReason)
+    }
+
+    @MainActor
+    private func assertCreatorRejectionDoesNotEndCallWhenAnotherParticipantAccepted() async throws {
+        let creatorId = "creator"
+        let acceptedParticipantId = "participant-1"
+        let response: GetCallResponse = .dummy(
+            call: .dummy(
+                cid: cid,
+                createdBy: .dummy(id: creatorId),
+                id: callId,
+                session: .dummy(
+                    acceptedBy: [acceptedParticipantId: Date()],
+                    rejectedBy: [creatorId: Date()]
+                ),
+                settings: .dummy(ring: .dummy(autoCancelTimeoutMs: 10 * 1000))
+            ),
+            members: [
+                .dummy(userId: creatorId),
+                .dummy(userId: acceptedParticipantId),
+                .dummy(userId: user.id)
+            ]
+        )
+
+        stubCall(
+            response: response
+        )
+        subject.streamVideo = mockedStreamVideo
+        XCTAssertNil(subject.checkIfCallWasHandled(callState: response))
+
+        try await assertNotRequestTransaction(CXEndCallAction.self) {
             subject.reportIncomingCall(
                 cid,
                 localizedCallerName: localizedCallerName,
@@ -1163,5 +1560,15 @@ private class MockUUIDFactory: UUIDProviding {
 
     func get() -> UUID {
         getResult ?? .init()
+    }
+}
+
+private final class MockParticipantAutoLeavePolicy:
+    ParticipantAutoLeavePolicy,
+    @unchecked Sendable {
+    var onPolicyTriggered: (() -> Void)?
+
+    func trigger() {
+        onPolicyTriggered?()
     }
 }

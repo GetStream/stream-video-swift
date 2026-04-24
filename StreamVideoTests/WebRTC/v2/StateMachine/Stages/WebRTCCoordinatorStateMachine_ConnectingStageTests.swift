@@ -378,8 +378,50 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
             XCTAssertFalse(input.create)
             XCTAssertFalse(input.ring)
             XCTAssertFalse(input.notify)
-            XCTAssertNil(input.options)
+            XCTAssertEqual(input.options?.team, options.team)
             XCTAssertTrue(target.context.flowError is ClientError)
+        }
+    }
+
+    func test_transition_fromRejoiningWithHighScaleHint_forwardsReceivedOptions() async throws {
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.authenticator = mockCoordinatorStack.webRTCAuthenticator
+        let options = CreateCallOptions(
+            team: .unique,
+            highScaleLivestreamPublisherHint: true
+        )
+
+        try await assertTransition(
+            from: .rejoining,
+            expectedTarget: .disconnected,
+            subject: .connecting(
+                subject.context,
+                create: true,
+                options: options,
+                ring: true,
+                notify: true
+            )
+        ) { [mockCoordinatorStack] _ in
+            let callType = (
+                coordinator: WebRTCCoordinator,
+                currentSFU: String?,
+                migratingFromList: [String]?,
+                create: Bool,
+                ring: Bool,
+                notify: Bool,
+                options: CreateCallOptions?
+            ).self
+            let input = try XCTUnwrap(
+                mockCoordinatorStack?.webRTCAuthenticator.recordedInputPayload(
+                    callType,
+                    for: .authenticate
+                )?.first
+            )
+            XCTAssertFalse(input.create)
+            XCTAssertFalse(input.ring)
+            XCTAssertFalse(input.notify)
+            XCTAssertEqual(input.options?.team, options.team)
+            XCTAssertEqual(input.options?.highScaleLivestreamPublisherHint, true)
         }
     }
 

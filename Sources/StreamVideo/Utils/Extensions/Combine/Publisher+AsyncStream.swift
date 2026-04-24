@@ -30,6 +30,16 @@ public extension Publisher where Output: Sendable {
         }
     }
 
+    /// Waits for the first value emitted by the publisher.
+    ///
+    /// If the publisher completes before emitting a value, the method throws
+    /// `ClientError`. If the awaiting task is cancelled before a value is
+    /// emitted, the method throws `CancellationError`.
+    ///
+    /// - Parameters:
+    ///   - file: The file captured for error reporting.
+    ///   - line: The line captured for error reporting.
+    /// - Returns: The first emitted output value.
     func firstValue(
         file: StaticString = #file,
         line: UInt = #line
@@ -44,9 +54,24 @@ public extension Publisher where Output: Sendable {
             }
         }
 
+        if Task<Never, Never>.isCancelled {
+            throw CancellationError()
+        }
         throw ClientError("Task produced no value.", file, line)
     }
 
+    /// Waits for the first value emitted by the publisher within the provided
+    /// timeout.
+    ///
+    /// Cancellation is propagated immediately to the underlying timed task so a
+    /// cancelled caller does not continue waiting until the timeout elapses.
+    ///
+    /// - Parameters:
+    ///   - timeoutInSeconds: The maximum time to wait for the first value.
+    ///   - file: The file captured for error reporting.
+    ///   - function: The function captured for error reporting.
+    ///   - line: The line captured for error reporting.
+    /// - Returns: The first emitted output value.
     func firstValue(
         timeoutInSeconds: TimeInterval,
         file: StaticString = #file,
@@ -55,16 +80,34 @@ public extension Publisher where Output: Sendable {
     ) async throws -> Output {
         // Invariant: publisher used read-only in this async path.
         let erasedPublisher = eraseToAnyPublisher()
-        return try await Task(
+        let timeoutTask = Task(
             timeoutInSeconds: timeoutInSeconds,
             file: file,
             function: function,
             line: line
         ) {
             try await erasedPublisher.firstValue(file: file, line: line)
-        }.value
+        }
+
+        // Ensure callers that cancel while awaiting a timed publisher do not
+        // leave the underlying timeout task running until the deadline.
+        return try await withTaskCancellationHandler {
+            try await timeoutTask.value
+        } onCancel: {
+            timeoutTask.cancel()
+        }
     }
 
+    /// Waits for the next emitted value, optionally skipping a number of
+    /// earlier values first.
+    ///
+    /// - Parameters:
+    ///   - dropFirst: The number of values to ignore before returning.
+    ///   - timeout: An optional timeout for receiving the value.
+    ///   - file: The file captured for error reporting.
+    ///   - function: The function captured for error reporting.
+    ///   - line: The line captured for error reporting.
+    /// - Returns: The next emitted output value after applying `dropFirst`.
     func nextValue(
         dropFirst: Int = 0,
         timeout: TimeInterval? = nil,

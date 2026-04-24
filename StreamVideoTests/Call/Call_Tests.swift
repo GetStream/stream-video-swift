@@ -602,6 +602,34 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
         )
     }
 
+    func test_join_passesHighScalePublisherHintToCallController() async throws {
+        let mockCallController = MockCallController()
+        let subject = MockCall(.dummy(callController: mockCallController))
+        subject.stub(for: \.state, with: .init(.dummy()))
+        mockCallController.stub(for: .join, with: JoinCallResponse.dummy())
+        let options = CreateCallOptions(
+            highScaleLivestreamPublisherHint: true
+        )
+
+        _ = try await subject.join(options: options)
+
+        XCTAssertEqual(
+            mockCallController.recordedInputPayload(
+                (
+                    Bool,
+                    CallSettings?,
+                    CreateCallOptions?,
+                    Bool,
+                    Bool,
+                    JoinSource,
+                    WebRTCJoinPolicy
+                ).self,
+                for: .join
+            )?.first?.2?.highScaleLivestreamPublisherHint,
+            true
+        )
+    }
+
     func test_join_withPolicy_policyWasPassedToCallController() async throws {
         let mockCallController = MockCallController()
         let call = MockCall(.dummy(callController: mockCallController))
@@ -653,16 +681,76 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
         XCTAssertEqual(joinInterceptor.invocationCount, 1)
     }
 
+    func test_join_whenJoinCompletionTimesOut_leavesCallWithJoinTimeoutReason() async throws {
+        let originalTimeout = CallConfiguration.timeout
+        CallConfiguration.timeout.join = 0.1
+        defer { CallConfiguration.timeout = originalTimeout }
+
+        let mockCallController = MockCallController()
+        let call = Call.dummy(
+            callType: callType,
+            callId: callId,
+            callController: mockCallController
+        )
+        let joinInterceptor = CallJoinInterceptor_Spy { _ in
+            try await Task.sleep(nanoseconds: 1_000_000_000)
+        }
+        mockCallController.stub(
+            for: .join,
+            with: JoinCallResponse.dummy(
+                call: .dummy(
+                    cid: call.cId,
+                    id: call.callId,
+                    type: call.callType
+                )
+            )
+        )
+
+        do {
+            _ = try await call.join(joinInterceptor: joinInterceptor)
+            XCTFail("Expected join to time out.")
+        } catch {
+            XCTAssertTrue(error is TimeOutError)
+        }
+
+        XCTAssertEqual(
+            mockCallController.recordedInputPayload(
+                String.self,
+                for: .leave
+            )?.first,
+            "join.timeout"
+        )
+    }
+
     // MARK: - leave
 
     func test_leave_withReason_reasonWasPassedToCallController() {
         let mockCallController = MockCallController()
-        let call = MockCall(.dummy(callController: mockCallController))
-        call.stub(for: \.state, with: .init(.dummy()))
+        let subject = MockCall(.dummy(callController: mockCallController))
+        subject.stub(for: \.state, with: .init(.dummy()))
         let expectedReason = "manual-hangup"
 
-        call.leave(reason: expectedReason)
+        subject.leave(reason: expectedReason)
 
+        XCTAssertEqual(
+            mockCallController.recordedInputPayload(
+                String.self,
+                for: .leave
+            )?.first,
+            expectedReason
+        )
+    }
+
+    func test_leave_whenCalledRepeatedly_callsCallControllerOnlyOnce() {
+        let mockCallController = MockCallController()
+        let subject = MockCall(.dummy(callController: mockCallController))
+        subject.stub(for: \.state, with: .init(.dummy()))
+        let expectedReason = "manual-hangup"
+
+        subject.leave(reason: expectedReason)
+        subject.leave(reason: expectedReason)
+
+        XCTAssertEqual(mockCallController.timesCalled(.leave), 1)
         XCTAssertEqual(
             mockCallController.recordedInputPayload(
                 String.self,
@@ -847,10 +935,16 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
 }
 
 private final class CallJoinInterceptor_Spy: CallJoinIntercepting, @unchecked Sendable {
+    private let handler: @Sendable (Call) async throws -> Void
     @Atomic private(set) var invocationCount = 0
+
+    init(handler: @escaping @Sendable (Call) async throws -> Void = { _ in }) {
+        self.handler = handler
+    }
 
     func callReadyToJoin(_ call: Call) async throws {
         invocationCount += 1
+        try await handler(call)
     }
 }
 

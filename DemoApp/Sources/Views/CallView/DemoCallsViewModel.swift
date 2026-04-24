@@ -67,11 +67,15 @@ class DemoCallsViewModel: ObservableObject {
     func startCall(with employees: [StreamEmployee]) {
         var members = employees.map { Member(user: User(id: $0.id, name: $0.name, imageURL: $0.imageURL)) }
         members.append(Member(user: streamVideo.user))
+        let highScaleHint = AppEnvironment
+            .highScaleLivestreamPublisherHint
+            .value
         callViewModel.startCall(
             callType: .default,
             callId: UUID().uuidString,
             members: members,
-            ring: true
+            ring: true,
+            highScaleLivestreamPublisherHint: highScaleHint
         )
     }
 }

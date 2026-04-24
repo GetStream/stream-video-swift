@@ -9,6 +9,31 @@ extension RTCAudioStore {
     /// Skips redundant store work by evaluating whether an action would mutate
     /// the current state before allowing reducers to run.
     final class Coordinator: StoreCoordinator<Namespace>, @unchecked Sendable {
+        override func coordinate(
+            action: StoreActionBox<StoreAction>,
+            state: StoreState
+        ) -> StoreActionBox<StoreAction>? {
+            switch action.wrappedValue {
+            case let .conditioned(condition, nestedAction):
+                guard condition.evaluate(with: state) else {
+                    return nil
+                }
+                return coordinate(
+                    action: action.replacing(with: nestedAction),
+                    state: state
+                )
+
+            default:
+                guard shouldExecute(
+                    action: action.wrappedValue,
+                    state: state
+                ) else {
+                    return nil
+                }
+                return action
+            }
+        }
+
         /// Returns `true` when reducers should execute for the given action and
         /// state combination.
         override func shouldExecute(
@@ -34,6 +59,9 @@ extension RTCAudioStore {
             case let .setHasRecordingPermission(value):
                 return value != state.hasRecordingPermission
 
+            case let .setActiveSessionIdentifier(value):
+                return value != state.activeSessionIdentifier
+
             case let .setAudioDeviceModule(value):
                 return value !== state.audioDeviceModule
 
@@ -52,14 +80,24 @@ extension RTCAudioStore {
                     state: state.webRTCAudioSessionConfiguration
                 )
 
-            case .callKit:
-                return true
-                
             case let .stereo(value):
                 return shouldExecute(
                     action: value,
                     state: state.stereoConfiguration
                 )
+
+            // CallKit activation/deactivation events are global system
+            // notifications. They must reach the reducer regardless of
+            // which `CallAudioSession` (if any) currently owns the shared
+            // store, otherwise CallKit's audio-session hand-off would be
+            // dropped during call transitions. Do not gate this on
+            // `activeSessionIdentifier`.
+            case .callKit:
+                return true
+
+            case let .conditioned(condition, action):
+                return condition.evaluate(with: state)
+                    && shouldExecute(action: action, state: state)
             }
         }
 

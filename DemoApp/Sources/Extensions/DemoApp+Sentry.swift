@@ -6,7 +6,14 @@ import Foundation
 import Sentry
 import StreamVideo
 
+private let terminalLogsEnvironmentKey = "STREAM_VIDEO_TERMINAL_LOGS"
+
 func configureSentry() {
+    let terminalDestinationTypes: [LogDestination.Type] =
+        ProcessInfo.processInfo.environment[terminalLogsEnvironmentKey] == "1"
+            ? [ConsoleLogDestination.self]
+            : []
+
     if AppEnvironment.configuration.isRelease {
         // We're tracking Crash Reports / Issues from the Demo App to keep improving the SDK
         SentrySDK.start { options in
@@ -24,15 +31,35 @@ func configureSentry() {
             SentryLogDestination.self,
             MemoryLogDestination.self,
             OSLogDestination.self
-        ]
+        ] + terminalDestinationTypes
     } else {
         LogConfig.level = .debug
         LogConfig.webRTCLogsEnabled = true
         LogConfig.destinationTypes = [
             MemoryLogDestination.self,
             OSLogDestination.self
-        ]
+        ] + terminalDestinationTypes
     }
+}
+
+private func resolving(
+    baseTypes: [LogDestination.Type],
+    environment: [String: String]
+) -> [LogDestination.Type] {
+    let terminalLogsEnvironmentKey = "STREAM_VIDEO_TERMINAL_LOGS"
+    guard environment[terminalLogsEnvironmentKey] == "1" else {
+        return baseTypes
+    }
+
+    let hasConsoleDestination = baseTypes.contains {
+        ObjectIdentifier($0) == ObjectIdentifier(ConsoleLogDestination.self)
+    }
+
+    guard hasConsoleDestination == false else {
+        return baseTypes
+    }
+
+    return [ConsoleLogDestination.self] + baseTypes
 }
 
 private final class SentryLogDestination: LogDestination, @unchecked Sendable {

@@ -238,6 +238,69 @@ final class WebRTCCoordinatorStateMachine_DisconnectedStageTests: XCTestCase, @u
         ) { _ in }
     }
 
+    func test_transition_connectionRestoresWithRejoinStrategy_registersRejoinAttempt() async {
+        subject.context.reconnectionStrategy = .rejoin
+        subject.context.rejoinMaxAttempts = 3
+        subject.context.rejoinAttemptTimestamps = [.init(timeIntervalSinceNow: -10)]
+
+        await assertTransitionAfterTrigger(
+            expectedTarget: .rejoining,
+            trigger: { [mockCoordinatorStack] in
+                mockCoordinatorStack?
+                    .internetConnection
+                    .subject
+                    .send(.available(.great))
+            }
+        ) { target in
+            XCTAssertEqual(target.context.rejoinAttemptTimestamps.count, 2)
+        }
+    }
+
+    func test_transition_connectionRestoresWithRejoinStrategy_prunesExpiredAttempts() async {
+        subject.context.reconnectionStrategy = .rejoin
+        subject.context.rejoinMaxAttempts = 1
+        subject.context.rejoinAttemptWindow = 60
+        subject.context.rejoinAttemptTimestamps = [.init(timeIntervalSinceNow: -120)]
+
+        await assertTransitionAfterTrigger(
+            expectedTarget: .rejoining,
+            trigger: { [mockCoordinatorStack] in
+                mockCoordinatorStack?
+                    .internetConnection
+                    .subject
+                    .send(.available(.great))
+            }
+        ) { target in
+            XCTAssertEqual(target.context.rejoinAttemptTimestamps.count, 1)
+            XCTAssertTrue(
+                target.context.rejoinAttemptTimestamps.allSatisfy {
+                    abs($0.timeIntervalSinceNow) < 5
+                }
+            )
+        }
+    }
+
+    func test_transition_connectionRestoresWithRejoinStrategyWhenLimitIsReached_landsOnLeaving() async {
+        subject.context.reconnectionStrategy = .rejoin
+        subject.context.rejoinMaxAttempts = 2
+        subject.context.rejoinAttemptTimestamps = [
+            .init(timeIntervalSinceNow: -10),
+            .init(timeIntervalSinceNow: -5)
+        ]
+
+        await assertTransitionAfterTrigger(
+            expectedTarget: .leaving,
+            trigger: { [mockCoordinatorStack] in
+                mockCoordinatorStack?
+                    .internetConnection
+                    .subject
+                    .send(.available(.great))
+            }
+        ) { target in
+            XCTAssertEqual(target.context.rejoinAttemptTimestamps.count, 2)
+        }
+    }
+
     func test_transition_connectionRestoresWithFastStrategyWithoutExpiredDeadline_landsOnFastReconnection() async throws {
         subject.context.reconnectionStrategy = .fast(disconnectedSince: .init(), deadline: 10)
         let publisher =
@@ -263,6 +326,27 @@ final class WebRTCCoordinatorStateMachine_DisconnectedStageTests: XCTestCase, @u
                     .send(.available(.great))
             }
         ) { _ in }
+    }
+
+    func test_transition_connectionRestoresWithFastStrategyWhenRejoinLimitIsReached_landsOnLeaving() async {
+        subject.context.reconnectionStrategy = .fast(
+            disconnectedSince: .init(timeIntervalSinceNow: -30),
+            deadline: 10
+        )
+        subject.context.rejoinMaxAttempts = 1
+        subject.context.rejoinAttemptTimestamps = [.init()]
+
+        await assertTransitionAfterTrigger(
+            expectedTarget: .leaving,
+            trigger: { [mockCoordinatorStack] in
+                mockCoordinatorStack?
+                    .internetConnection
+                    .subject
+                    .send(.available(.great))
+            }
+        ) { target in
+            XCTAssertEqual(target.context.rejoinAttemptTimestamps.count, 1)
+        }
     }
 
     func test_transition_connectionRestoresWithFastStrategyPublisherNotHealthy_landsOnRejoin() async throws {

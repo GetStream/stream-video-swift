@@ -168,11 +168,15 @@ struct DetailedCallingView<Factory: ViewFactory>: View {
                                 video: viewModel.callSettings.videoOn
                             )
                         } else {
+                            let highScaleHint = AppEnvironment
+                                .highScaleLivestreamPublisherHint
+                                .value
                             viewModel.startCall(
                                 callType: callType,
                                 callId: text,
                                 members: members,
                                 ring: callFlow == .ringEvents,
+                                highScaleLivestreamPublisherHint: highScaleHint,
                                 video: viewModel.callSettings.videoOn
                             )
                         }
