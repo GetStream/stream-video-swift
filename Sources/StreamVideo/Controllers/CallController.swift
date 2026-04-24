@@ -619,7 +619,7 @@ class CallController: @unchecked Sendable {
     ///   - migratingFrom: The immediate SFU edge this flow is migrating from.
     ///   - migratingFromList: All exhausted SFU edges that should be avoided.
     ///   - notify: Whether the backend should notify call members.
-    ///   - options: Additional call creation options.
+    ///   - options: Additional call creation options and join-only hints.
     /// - Returns: The backend join response used to continue the WebRTC flow.
     /// - Throws: An error if location fetch or join request fails.
     private func authenticateCall(
@@ -650,6 +650,7 @@ class CallController: @unchecked Sendable {
         let joinCall = JoinCallRequest(
             create: create,
             data: callRequest,
+            hintHighScaleLivestreamPublisher: options?.highScaleLivestreamPublisherHint,
             location: location,
             migratingFrom: migratingFrom,
             migratingFromList: migratingFromList?.isEmpty == false ? migratingFromList : nil,
