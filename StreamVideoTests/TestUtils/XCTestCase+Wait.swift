@@ -7,8 +7,8 @@ import XCTest
 extension XCTestCase {
 
     func wait(for interval: TimeInterval) async {
-        let waitExpectation = expectation(description: "Waiting for \(interval) seconds...")
-        waitExpectation.isInverted = true
-        await fulfillment(of: [waitExpectation], timeout: interval)
+        guard interval > 0 else { return }
+        let nanoseconds = UInt64((interval * 1_000_000_000).rounded())
+        try? await Task.sleep(nanoseconds: nanoseconds)
     }
 }

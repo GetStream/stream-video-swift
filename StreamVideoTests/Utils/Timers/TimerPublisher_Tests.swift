@@ -62,13 +62,19 @@ final class TimerPublisher_Tests: XCTestCase, @unchecked Sendable {
     func test_receive_whenResubscribed_timerResumes() async {
         let subject = TimerPublisher(interval: 0.2)
 
+        let firstValueExpectation = expectation(description: "Should receive first value")
         let expectation = expectation(description: "Should receive values after resubscription")
 
         var cancellable = subject
             .log(.debug) { "Received value: \($0.millisecondsSince1970)" }
-            .sink { [weak self] in self?.receivedDates.append($0) }
+            .sink { [weak self] in
+                self?.receivedDates.append($0)
+                if self?.receivedDates.count == 1 {
+                    firstValueExpectation.fulfill()
+                }
+            }
 
-        await wait(for: 0.25)
+        await fulfillment(of: [firstValueExpectation], timeout: 1)
         cancellable.cancel()
 
         XCTAssertEqual(receivedDates.count, 1)
