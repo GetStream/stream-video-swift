@@ -277,6 +277,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
                 .store(in: disposableBag)
         } else {
             configureSubscriberOfferObserver()
+
             sfuAdapter
                 .refreshPublisher
                 .sink { [weak self] in self?.configureSubscriberOfferObserver() }

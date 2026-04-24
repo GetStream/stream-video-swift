@@ -766,6 +766,11 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         let mockSubscriber = try await XCTAsyncUnwrap(await subject.subscriber as? MockRTCPeerConnectionCoordinator)
         let sessionId = await subject.sessionID
         await subject.didAddTrack(
+            await subject.peerConnectionFactory.mockAudioTrack(),
+            type: .audio,
+            for: userId
+        )
+        await subject.didAddTrack(
             .dummy(
                 kind: .video,
                 peerConnectionFactory: await subject.peerConnectionFactory
@@ -773,7 +778,10 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
             type: .video,
             for: userId
         )
-        await fulfillment { await self.subject.participants[userId]?.track != nil }
+        await fulfillment {
+            let participant = await self.subject.participants[userId]
+            return participant?.audioTrack != nil && participant?.track != nil
+        }
         await subject.cleanUpForReconnection()
 
         XCTAssertEqual(mockPublisher.timesCalled(.close), 0)
@@ -786,6 +794,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         await assertEqualAsync(await subject.token, "")
         await assertEqualAsync(await subject.sessionID, sessionId)
         await assertEqualAsync(await subject.ownCapabilities, ownCapabilities)
+        await assertNilAsync(await subject.participants[userId]?.audioTrack)
         await assertEqualAsync(await subject.participants[userId]?.track, nil)
         await assertEqualAsync(await subject.participantsCount, 12)
         await assertEqualAsync(await subject.anonymousCount, 22)
@@ -817,6 +826,28 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
     }
 
     // MARK: - didAddTrack
+
+    func test_didAddTrack_audioOfExistingParticipant_shouldAddTrack() async throws {
+        let participant = CallParticipant.dummy()
+        let track = await subject
+            .peerConnectionFactory
+            .mockAudioTrack()
+        await subject.enqueue { _ in [participant.sessionId: participant] }
+
+        await subject.didAddTrack(
+            track,
+            type: .audio,
+            for: participant.sessionId
+        )
+
+        await fulfillment {
+            await self
+                .subject
+                .participants[participant.sessionId]?
+                .audioTrack?
+                .trackId == track.trackId
+        }
+    }
 
     func test_didAddTrack_videoOfExistingParticipant_shouldAddTrack() async throws {
         let participant = CallParticipant.dummy()
@@ -863,6 +894,27 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
     }
 
     // MARK: - didRemoveTrack
+
+    func test_didRemoveTrack_audioOfExistingParticipant_shouldRemoveTrack() async throws {
+        let participant = CallParticipant.dummy()
+        let track = await subject
+            .peerConnectionFactory
+            .mockAudioTrack()
+        await subject.enqueue { _ in [participant.sessionId: participant] }
+        await subject.didAddTrack(track, type: .audio, for: participant.sessionId)
+
+        await subject.didRemoveTrack(
+            for: participant.sessionId,
+            type: .audio
+        )
+
+        await fulfillment {
+            await self
+                .subject
+                .participants[participant.sessionId]?
+                .audioTrack == nil
+        }
+    }
 
     func test_didRemoveTrack_videoOfExistingParticipant_shouldRemoveTrack() async throws {
         let participant = CallParticipant.dummy()
@@ -968,16 +1020,19 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         ]
         await subject.enqueue { _ in initialParticipants }
 
+        await subject.didAddTrack(participantTracks["1"]!, type: .audio, for: "1")
         await subject.didAddTrack(participantTracks["2"]!, type: .video, for: "2")
         await subject.didAddTrack(participantTracks["3"]!, type: .screenshare, for: "3")
 
         await subject.enqueue { _ in initialParticipants }
 
         await fulfillment {
+            let participant1 = await self.subject.participants["1"]
             let participant2 = await self.subject.participants["2"]
             let participant3 = await self.subject.participants["3"]
 
-            return participant2?.track?.trackId == participantTracks["2"]?.trackId
+            return participant1?.audioTrack?.trackId == participantTracks["1"]?.trackId
+                && participant2?.track?.trackId == participantTracks["2"]?.trackId
                 && participant3?.screenshareTrack?.trackId == participantTracks["3"]?.trackId
         }
     }
@@ -996,16 +1051,19 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         await subject.set(incomingVideoQualitySettings: .disabled(group: .custom(sessionIds: ["2"])))
         await subject.enqueue { _ in initialParticipants }
 
+        await subject.didAddTrack(participantTracks["1"]!, type: .audio, for: "1")
         await subject.didAddTrack(participantTracks["2"]!, type: .video, for: "2")
         await subject.didAddTrack(participantTracks["3"]!, type: .screenshare, for: "3")
 
         await subject.enqueue { _ in initialParticipants }
 
         await fulfillment {
+            let participant1 = await self.subject.participants["1"]
             let participant2 = await self.subject.participants["2"]
             let participant3 = await self.subject.participants["3"]
 
-            return participant2?.track == nil
+            return participant1?.audioTrack?.trackId == participantTracks["1"]?.trackId
+                && participant2?.track == nil
                 && participant3?.screenshareTrack?.trackId == participantTracks["3"]?.trackId
         }
     }
