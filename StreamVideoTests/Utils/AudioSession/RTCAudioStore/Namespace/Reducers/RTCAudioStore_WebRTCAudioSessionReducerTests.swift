@@ -168,6 +168,7 @@ final class RTCAudioStore_WebRTCAudioSessionReducerTests: XCTestCase, @unchecked
             isInterrupted: isInterrupted,
             isRecording: isRecording,
             isMicrophoneMuted: isMicrophoneMuted,
+            isMutedSpeechDetectionEnabled: false,
             hasRecordingPermission: hasRecordingPermission,
             activeSessionIdentifier: activeSessionIdentifier,
             audioDeviceModule: audioDeviceModule,

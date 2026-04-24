@@ -1094,6 +1094,14 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         await fulfillment { await self.subject.callSettings.speakerOn }
     }
 
+    func test_audioSessionDidUpdateSpeakingWhileMuted_updatesPublishedValue() async {
+        subject.audioSessionAdapterDidUpdateSpeakingWhileMuted(true)
+
+        await fulfillment {
+            await self.subject.isSpeakingWhileMuted
+        }
+    }
+
     // MARK: - updateCallSettings
 
     func test_updateCallSettings_noChanges_callSettingsDoNotChange() async {

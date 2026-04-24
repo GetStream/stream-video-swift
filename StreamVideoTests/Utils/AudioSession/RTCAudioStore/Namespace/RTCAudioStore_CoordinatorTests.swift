@@ -128,6 +128,28 @@ final class RTCAudioStore_CoordinatorTests: XCTestCase, @unchecked Sendable {
         )
     }
 
+    func test_setMutedSpeechDetectionEnabled_sameValue_returnsFalse() {
+        let state = makeState(isMutedSpeechDetectionEnabled: true)
+
+        XCTAssertFalse(
+            subject.shouldExecute(
+                action: .setMutedSpeechDetectionEnabled(true),
+                state: state
+            )
+        )
+    }
+
+    func test_setMutedSpeechDetectionEnabled_differentValue_returnsTrue() {
+        let state = makeState(isMutedSpeechDetectionEnabled: false)
+
+        XCTAssertTrue(
+            subject.shouldExecute(
+                action: .setMutedSpeechDetectionEnabled(true),
+                state: state
+            )
+        )
+    }
+
     func test_setCurrentRoute_sameValue_returnsFalse() {
         let state = makeState(currentRoute: .empty)
 
@@ -321,6 +343,7 @@ final class RTCAudioStore_CoordinatorTests: XCTestCase, @unchecked Sendable {
         isInterrupted: Bool = false,
         isRecording: Bool = false,
         isMicrophoneMuted: Bool = false,
+        isMutedSpeechDetectionEnabled: Bool = false,
         hasRecordingPermission: Bool = false,
         activeSessionIdentifier: String = "",
         audioDeviceModule: AudioDeviceModule? = nil,
@@ -345,6 +368,7 @@ final class RTCAudioStore_CoordinatorTests: XCTestCase, @unchecked Sendable {
             isInterrupted: isInterrupted,
             isRecording: isRecording,
             isMicrophoneMuted: isMicrophoneMuted,
+            isMutedSpeechDetectionEnabled: isMutedSpeechDetectionEnabled,
             hasRecordingPermission: hasRecordingPermission,
             activeSessionIdentifier: activeSessionIdentifier,
             audioDeviceModule: audioDeviceModule,

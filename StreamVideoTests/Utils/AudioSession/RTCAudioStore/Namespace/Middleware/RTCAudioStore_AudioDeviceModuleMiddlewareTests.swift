@@ -231,7 +231,7 @@ final class RTCAudioStore_AudioDeviceModuleMiddlewareTests: XCTestCase, @uncheck
 
         XCTAssertEqual(currentMock.timesCalled(.reset), 0)
         XCTAssertEqual(currentMock.timesCalled(.setMuteMode), 1)
-        XCTAssertEqual(currentMock.timesCalled(.setRecordingAlwaysPreparedMode), 1)
+        XCTAssertEqual(currentMock.timesCalled(.setRecordingAlwaysPreparedMode), 0)
 
         wait(for: [setRecordingExpectation, setMicrophoneMutedExpectation], timeout: 1)
     }
@@ -257,7 +257,26 @@ final class RTCAudioStore_AudioDeviceModuleMiddlewareTests: XCTestCase, @uncheck
         XCTAssertEqual(currentMock.timesCalled(.reset), 1)
         XCTAssertEqual(replacementMock.timesCalled(.reset), 0)
         XCTAssertEqual(replacementMock.timesCalled(.setMuteMode), 1)
-        XCTAssertEqual(replacementMock.timesCalled(.setRecordingAlwaysPreparedMode), 1)
+        XCTAssertEqual(replacementMock.timesCalled(.setRecordingAlwaysPreparedMode), 0)
+    }
+
+    // MARK: - setMutedSpeechDetectionEnabled
+
+    func test_setMutedSpeechDetectionEnabled_updatesModule() throws {
+        let (module, mock) = makeModule(isRecording: false)
+
+        subject.apply(
+            state: makeState(audioDeviceModule: module),
+            action: .setMutedSpeechDetectionEnabled(true),
+            file: #file,
+            function: #function,
+            line: #line
+        )
+
+        XCTAssertEqual(
+            mock.recordedInputPayload(Bool.self, for: .setRecordingAlwaysPreparedMode),
+            [true]
+        )
     }
 
     // MARK: - setPlayoutPreferred
@@ -274,6 +293,10 @@ final class RTCAudioStore_AudioDeviceModuleMiddlewareTests: XCTestCase, @uncheck
         )
 
         XCTAssertTrue(mock.prefersStereoPlayout)
+        XCTAssertEqual(
+            mock.recordedInputPayload(Bool.self, for: .setRecordingAlwaysPreparedMode),
+            [false]
+        )
     }
 
     func test_setPlayoutPreferred_false_updatesModule() throws {
@@ -288,6 +311,7 @@ final class RTCAudioStore_AudioDeviceModuleMiddlewareTests: XCTestCase, @uncheck
         )
 
         XCTAssertFalse(mock.prefersStereoPlayout)
+        XCTAssertEqual(mock.timesCalled(.setRecordingAlwaysPreparedMode), 0)
     }
 
     // MARK: - setAudioEnabled
@@ -352,6 +376,7 @@ final class RTCAudioStore_AudioDeviceModuleMiddlewareTests: XCTestCase, @uncheck
         isRecording: Bool = false,
         isMicrophoneMuted: Bool = false,
         hasRecordingPermission: Bool = false,
+        isMutedSpeechDetectionEnabled: Bool = false,
         activeSessionIdentifier: String = "",
         audioDeviceModule: AudioDeviceModule? = nil,
         currentRoute: RTCAudioStore.StoreState.AudioRoute = .empty,
@@ -372,6 +397,7 @@ final class RTCAudioStore_AudioDeviceModuleMiddlewareTests: XCTestCase, @uncheck
             isInterrupted: isInterrupted,
             isRecording: isRecording,
             isMicrophoneMuted: isMicrophoneMuted,
+            isMutedSpeechDetectionEnabled: isMutedSpeechDetectionEnabled,
             hasRecordingPermission: hasRecordingPermission,
             activeSessionIdentifier: activeSessionIdentifier,
             audioDeviceModule: audioDeviceModule,

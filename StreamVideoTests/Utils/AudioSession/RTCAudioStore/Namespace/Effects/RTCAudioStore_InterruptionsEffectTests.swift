@@ -182,6 +182,7 @@ final class RTCAudioStore_InterruptionsEffectTests: XCTestCase, @unchecked Senda
             isInterrupted: isInterrupted,
             isRecording: isRecording,
             isMicrophoneMuted: isMicrophoneMuted,
+            isMutedSpeechDetectionEnabled: false,
             hasRecordingPermission: hasRecordingPermission,
             activeSessionIdentifier: activeSessionIdentifier,
             audioDeviceModule: audioDeviceModule,

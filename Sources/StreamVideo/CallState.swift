@@ -99,6 +99,13 @@ public class CallState: ObservableObject {
     @Published public internal(set) var isInitialized: Bool = false
     @Published public internal(set) var callSettings: CallSettings = .default
 
+    /// Indicates whether the current user is speaking while their microphone is muted.
+    ///
+    /// This is a local signal derived from the active WebRTC audio device.
+    /// It remains `false` when muted speech detection is unsupported, disabled,
+    /// or the microphone is unmuted.
+    @Published public internal(set) var isSpeakingWhileMuted: Bool = false
+
     @Published public internal(set) var isCurrentUserScreensharing: Bool = false
     /// The elapsed duration of the active call session in seconds.
     ///

@@ -63,6 +63,16 @@ extension RTCAudioStore {
                     }
                 }
 
+            case .setMutedSpeechDetectionEnabled(let value):
+                if let audioDeviceModule = state.audioDeviceModule {
+                    log.throwing(
+                        "Unable to process setMutedSpeechDetectionEnabled:\(value).",
+                        subsystems: .audioSession
+                    ) {
+                        try audioDeviceModule.setMutedSpeechDetectionEnabled(value)
+                    }
+                }
+
             case .setAudioDeviceModule(let value):
                 log.throwing(
                     "Unable to process setAudioDeviceModule:\(value).",

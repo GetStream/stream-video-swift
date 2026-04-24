@@ -79,6 +79,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     @Published private(set) var participantPins: [PinInfo] = []
     @Published private(set) var incomingVideoQualitySettings: IncomingVideoQualitySettings = .none
     @Published private(set) var isTracingEnabled: Bool = false
+    @Published private(set) var isSpeakingWhileMuted: Bool = false
 
     private(set) var clientCapabilities: Set<ClientCapability> = [
         .subscriberVideoPause
@@ -271,6 +272,10 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         statsAdapter?.isTracingEnabled = value
     }
 
+    func set(isSpeakingWhileMuted value: Bool) {
+        self.isSpeakingWhileMuted = value
+    }
+
     func set(audioSessionPolicy: AudioSessionPolicy) {
         audioSession.didUpdatePolicy(
             audioSessionPolicy,
@@ -420,6 +425,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         set(participantsCount: 0)
         set(anonymousCount: 0)
         set(participantPins: [])
+        set(isSpeakingWhileMuted: false)
         trackStorage.removeAll()
         permissionsAdapter.cleanUp()
     }
@@ -450,6 +456,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         set(sfuAdapter: nil)
         set(statsAdapter: nil)
         set(token: "")
+        set(isSpeakingWhileMuted: false)
         trackStorage.removeAll()
 
         /// We set the initialCallSettings to the last activated CallSettings, in order to maintain the state
@@ -917,6 +924,18 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
             functionName: function,
             fileName: file,
             lineNumber: line
+        )
+    }
+
+    nonisolated func audioSessionAdapterDidUpdateSpeakingWhileMuted(
+        _ isSpeakingWhileMuted: Bool
+    ) {
+        Task(disposableBag: disposableBag) { [weak self] in
+            await self?.set(isSpeakingWhileMuted: isSpeakingWhileMuted)
+        }
+        log.debug(
+            "AudioSession delegated updated isSpeakingWhileMuted:\(isSpeakingWhileMuted).",
+            subsystems: .audioSession
         )
     }
 

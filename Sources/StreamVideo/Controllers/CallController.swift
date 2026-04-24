@@ -101,6 +101,7 @@ class CallController: @unchecked Sendable {
             await observeSessionIDUpdates()
             await observeStatsReporterUpdates()
             await observeCallSettingsUpdates()
+            await observeSpeakingWhileMutedUpdates()
         }
     }
 
@@ -797,6 +798,18 @@ class CallController: @unchecked Sendable {
             .$callSettings
             .removeDuplicates()
             .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in self?.call?.state.update(callSettings: $0) }
+            .store(in: disposableBag)
+    }
+
+    private func observeSpeakingWhileMutedUpdates() async {
+        await webRTCCoordinator
+            .stateAdapter
+            .$isSpeakingWhileMuted
+            .removeDuplicates()
+            .log(.debug) { "Speaking while muted updated to \($0)" }
+            .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in
+                self?.call?.state.isSpeakingWhileMuted = $0
+            }
             .store(in: disposableBag)
     }
 }
