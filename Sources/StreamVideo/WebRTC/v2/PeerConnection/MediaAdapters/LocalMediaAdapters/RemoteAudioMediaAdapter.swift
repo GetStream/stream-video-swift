@@ -57,18 +57,18 @@ final class RemoteAudioMediaAdapter: LocalMediaAdapting {
         self.subject = subject
 
         peerConnection
-           .publisher(eventType: StreamRTCPeerConnection.AddedReceiverEvent.self)
-           .compactMap(AudioTrack.init)
-           .receive(on: processingQueue)
-           .sink { [weak self] in self?.processAddedTrack($0) }
-           .store(in: disposableBag)
+            .publisher(eventType: StreamRTCPeerConnection.AddedReceiverEvent.self)
+            .compactMap(AudioTrack.init)
+            .receive(on: processingQueue)
+            .sink { [weak self] in self?.processAddedTrack($0) }
+            .store(in: disposableBag)
 
         peerConnection
-           .publisher(eventType: StreamRTCPeerConnection.RemovedReceiverEvent.self)
-           .receive(on: processingQueue)
-           .compactMap { [weak self] in self?.audioReceivers[$0.receiver.receiverId] }
-           .sink { [weak self] in self?.processRemovedTrack($0) }
-           .store(in: disposableBag)
+            .publisher(eventType: StreamRTCPeerConnection.RemovedReceiverEvent.self)
+            .receive(on: processingQueue)
+            .compactMap { [weak self] in self?.audioReceivers[$0.receiver.receiverId] }
+            .sink { [weak self] in self?.processRemovedTrack($0) }
+            .store(in: disposableBag)
     }
 
     /// No-op because remote audio does not require local setup.
