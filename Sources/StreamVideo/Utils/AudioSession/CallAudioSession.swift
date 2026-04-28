@@ -130,6 +130,7 @@ final class CallAudioSession: @unchecked Sendable {
             return
         }
 
+        setSpeakingWhileMuted(false)
         disposableBag.removeAll()
         delegate = nil
 

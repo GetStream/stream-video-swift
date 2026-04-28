@@ -43,6 +43,9 @@ class CallController: @unchecked Sendable {
                 Task(disposableBag: disposableBag) { @MainActor [weak self] in
                     guard let self else { return }
                     call.state.sessionId = await webRTCCoordinator.stateAdapter.sessionID
+                    call.state.isSpeakingWhileMuted = await webRTCCoordinator
+                        .stateAdapter
+                        .isSpeakingWhileMuted
                 }
             }
         }

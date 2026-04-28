@@ -783,6 +783,50 @@ final class CallAudioSession_Tests: XCTestCase, @unchecked Sendable {
         }
     }
 
+    func test_deactivate_whenSpeakingWhileMuted_resetsDelegate() async {
+        let callSettingsSubject = PassthroughSubject<CallSettings, Never>()
+        let capabilitiesSubject = PassthroughSubject<Set<OwnCapability>, Never>()
+        let delegate = SpyAudioSessionAdapterDelegate()
+        let policy = MockAudioSessionPolicy()
+        let module = AudioDeviceModule(MockRTCAudioDeviceModule())
+        policy.stub(
+            for: .configuration,
+            with: AudioSessionConfiguration(
+                isActive: true,
+                category: .playAndRecord,
+                mode: .voiceChat,
+                options: [.allowBluetoothHFP]
+            )
+        )
+
+        mockAudioStore.audioStore.dispatch([
+            .setAudioDeviceModule(module),
+            .setHasRecordingPermission(true)
+        ])
+        subject = .init(policy: policy)
+        await claimOwnership(of: subject)
+        subject.activate(
+            callSettingsPublisher: callSettingsSubject.eraseToAnyPublisher(),
+            ownCapabilitiesPublisher: capabilitiesSubject.eraseToAnyPublisher(),
+            delegate: delegate,
+            statsAdapter: nil,
+            shouldSetActive: true
+        )
+
+        callSettingsSubject.send(CallSettings(audioOn: false))
+        capabilitiesSubject.send([.sendAudio])
+        await fulfillment {
+            self.mockAudioStore.audioStore.state.isMutedSpeechDetectionEnabled
+        }
+
+        module.audioDeviceModule(.init(), didReceiveSpeechActivityEvent: .started)
+        await fulfillment { delegate.speakingWhileMutedUpdates.contains(true) }
+
+        await subject.deactivate()
+
+        XCTAssertEqual(delegate.speakingWhileMutedUpdates.last, false)
+    }
+
     func test_currentRouteIsExternal_matchesAudioStoreState() async {
         let policy = MockAudioSessionPolicy()
         subject = .init(policy: policy)
