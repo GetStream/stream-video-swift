@@ -6,7 +6,6 @@ setopt errexit nounset pipefail
 ROOT_DIR=${0:A:h:h}
 SCRIPT_PATH="${ROOT_DIR}/scripts/codex_run_demo_app.sh"
 TEST_SCHEME_SCRIPT_PATH="${ROOT_DIR}/scripts/codex_test_scheme.sh"
-WORKDIR="${ROOT_DIR:h}"
 SIMULATOR_BUDDY_BIN=${SIMULATOR_BUDDY_BIN:-simulator-buddy}
 
 fake_xcodebuild="$(mktemp)"
@@ -79,15 +78,27 @@ for item in json.load(sys.stdin):
 }
 
 simulator_output="$(
-    XCODEBUILD_BIN="${fake_xcodebuild}" \
-        "${SCRIPT_PATH}" --simulator-id "${first_simulator_id}" --dry-run
+    "${SCRIPT_PATH}" --dry-run
 )"
 
-assert_contains "${simulator_output}" "==> Resolving destinations for DemoApp"
-assert_contains "${simulator_output}" "Build: ${fake_xcodebuild}"
-assert_not_contains "${simulator_output}" "Build: xcodebuild -quiet"
-assert_contains "${simulator_output}" "SIMCTL_CHILD_STREAM_VIDEO_TERMINAL_LOGS=1"
-assert_contains "${simulator_output}" "--console-pty"
+assert_contains "${simulator_output}" "Dry run: simulator-buddy run"
+assert_contains "${simulator_output}" "--env STREAM_VIDEO_TERMINAL_LOGS=1"
+assert_contains "${simulator_output}" "--log-category Video"
+assert_contains "${simulator_output}" "-project"
+assert_contains "${simulator_output}" "StreamVideo.xcodeproj"
+assert_contains "${simulator_output}" "-scheme DemoApp"
+assert_contains "${simulator_output}" "-hideShellScriptEnvironment"
+assert_not_contains "${simulator_output}" "xcrun simctl"
+assert_not_contains "${simulator_output}" "xcrun devicectl"
+
+simulator_choice_output="$("${SCRIPT_PATH}" --choose-simulator --dry-run)"
+assert_contains "${simulator_choice_output}" "--type simulator"
+
+device_choice_output="$("${SCRIPT_PATH}" --choose-device --dry-run)"
+assert_contains "${device_choice_output}" "--type device"
+
+direct_destination_output="$("${SCRIPT_PATH}" --simulator-id SIM-TEST --dry-run)"
+assert_contains "${direct_destination_output}" "--destination SIM-TEST"
 
 test_scheme_output="$(
     XCODEBUILD_BIN="${fake_xcodebuild}" \
@@ -96,31 +107,5 @@ test_scheme_output="$(
 
 assert_contains "${test_scheme_output}" "==> Resolving simulators for StreamVideo"
 assert_contains "${test_scheme_output}" "Dry run: ${fake_xcodebuild} test"
-
-first_device_id="$(
-    "${SIMULATOR_BUDDY_BIN}" list --type device --format json | python3 -c '
-import json
-import sys
-
-for item in json.load(sys.stdin):
-    if item.get("state") == "unavailable":
-        continue
-    print(item["udid"])
-    break
-'
-)"
-
-if [[ -n "${first_device_id}" ]]; then
-    device_output="$(
-        XCODEBUILD_BIN="${fake_xcodebuild}" \
-            "${SCRIPT_PATH}" --device-id "${first_device_id}" --dry-run
-    )"
-
-    assert_contains "${device_output}" "==> Resolving destinations for DemoApp"
-    assert_contains "${device_output}" "Build: ${fake_xcodebuild}"
-    assert_not_contains "${device_output}" "Build: xcodebuild -quiet"
-    assert_contains "${device_output}" "DEVICECTL_CHILD_STREAM_VIDEO_TERMINAL_LOGS=1"
-    assert_contains "${device_output}" "--console"
-fi
 
 echo "codex_run_demo_app tests passed"

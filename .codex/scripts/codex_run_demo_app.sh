@@ -7,11 +7,10 @@ SCRIPT_DIR=${0:A:h}
 source "${SCRIPT_DIR}/codex_xcodebuildmcp_common.sh"
 
 CODEX_DEMO_SCHEME=${CODEX_DEMO_SCHEME:-DemoApp}
-CODEX_DEMO_BUNDLE_ID=${CODEX_DEMO_BUNDLE_ID:-io.getstream.iOS.VideoDemoApp}
 CODEX_DEMO_CONFIGURATION=${CODEX_DEMO_CONFIGURATION:-Debug}
+CODEX_DEMO_BUNDLE_ID=${CODEX_DEMO_BUNDLE_ID:-}
 CODEX_TERMINAL_LOG_ENV=${CODEX_TERMINAL_LOG_ENV:-STREAM_VIDEO_TERMINAL_LOGS}
-CODEX_BUILD_COMMAND=()
-CODEX_LAUNCH_COMMAND=()
+CODEX_DEMO_LOG_CATEGORIES=${CODEX_DEMO_LOG_CATEGORIES:-Video}
 
 usage() {
     cat <<'EOF'
@@ -26,61 +25,8 @@ Optional environment overrides:
   CODEX_DEMO_DESTINATION=simulator|device
   CODEX_SIMULATOR_ID=<udid>
   CODEX_DEVICE_ID=<udid>
+  CODEX_DEMO_LOG_CATEGORIES=Video,WebRTC
 EOF
-}
-
-codex_build_settings_json() {
-    local destination="$1"
-
-    "${CODEX_XCODEBUILD_BIN}" \
-        -project "${CODEX_PROJECT_PATH}" \
-        -scheme "${CODEX_DEMO_SCHEME}" \
-        -configuration "${CODEX_DEMO_CONFIGURATION}" \
-        -destination "${destination}" \
-        -showBuildSettings \
-        -json
-}
-
-codex_build_app() {
-    CODEX_BUILD_COMMAND=(
-        -project "${CODEX_PROJECT_PATH}" \
-        -scheme "${CODEX_DEMO_SCHEME}" \
-        -configuration "${CODEX_DEMO_CONFIGURATION}" \
-        -destination "$1" \
-        -hideShellScriptEnvironment \
-        build
-    )
-    CODEX_BUILD_COMMAND=("${CODEX_XCODEBUILD_BIN}" "${CODEX_BUILD_COMMAND[@]}")
-}
-
-codex_app_artifact_field() {
-    local destination="$1"
-    local field="$2"
-    local payload
-
-    payload="$(codex_build_settings_json "${destination}")"
-
-    BUILD_SETTINGS_JSON="${payload}" python3 - "${field}" <<'PY'
-import json
-import os
-import sys
-
-field = sys.argv[1]
-payload = json.loads(os.environ["BUILD_SETTINGS_JSON"])
-
-for entry in payload:
-    settings = entry.get("buildSettings", {})
-    if settings.get("PRODUCT_TYPE") != "com.apple.product-type.application":
-        continue
-
-    if field == "app_path":
-        print(f"{settings['TARGET_BUILD_DIR']}/{settings['FULL_PRODUCT_NAME']}")
-    else:
-        print(settings[field])
-    raise SystemExit(0)
-
-raise SystemExit(1)
-PY
 }
 
 codex_print_command() {
@@ -92,69 +38,13 @@ codex_print_command() {
     printf '\n'
 }
 
-codex_build_simulator_launch_command() {
-    local simulator_id="$1"
-
-    CODEX_LAUNCH_COMMAND=(
-        env
-        "SIMCTL_CHILD_${CODEX_TERMINAL_LOG_ENV}=1"
-        xcrun simctl launch
-        --console-pty
-        --terminate-running-process
-        "${simulator_id}"
-        "${CODEX_DEMO_BUNDLE_ID}"
-    )
-}
-
-codex_build_device_launch_command() {
-    local device_id="$1"
-
-    CODEX_LAUNCH_COMMAND=(
-        env
-        "DEVICECTL_CHILD_${CODEX_TERMINAL_LOG_ENV}=1"
-        xcrun devicectl device process launch
-        --device "${device_id}"
-        --console
-        --terminate-existing
-        "${CODEX_DEMO_BUNDLE_ID}"
-    )
-}
-
-codex_prepare_simulator() {
-    local simulator_id="$1"
-
-    open -a Simulator --args -CurrentDeviceUDID "${simulator_id}" \
-        >/dev/null 2>&1 || true
-
-    if ! xcrun simctl bootstatus "${simulator_id}" -b >/dev/null 2>&1; then
-        xcrun simctl boot "${simulator_id}" >/dev/null 2>&1 || true
-        xcrun simctl bootstatus "${simulator_id}" -b
-    fi
-}
-
-codex_select_destination_record() {
-    local selection_type="$1"
-    local selected_kind selected_record
-
-    selected_record="$(
-        codex_select_record_with_simulator_buddy "${selection_type}"
-    )" || return $?
-
-    IFS='|' read -r selected_kind _ <<< "${selected_record}"
-
-    CODEX_RESOLVED_DESTINATION_KIND="${selected_kind}"
-    CODEX_RESOLVED_RECORD="${selected_record}"
-}
-
-codex_resolve_destination() {
-    local all_records selected_kind selected_record selection_type
-    local destination_kind="${CODEX_DEMO_DESTINATION:-}"
+codex_destination_from_options() {
     local simulator_id="${CODEX_SIMULATOR_ID:-}"
     local device_id="${CODEX_DEVICE_ID:-}"
     local choose_simulator=false
     local choose_device=false
-
-    dry_run=false
+    local dry_run=false
+    local extra_options=()
 
     while (( $# > 0 )); do
         case "$1" in
@@ -182,7 +72,7 @@ codex_resolve_destination() {
                 exit 0
                 ;;
             *)
-                codex_die "Unknown argument: $1"
+                extra_options+=("$1")
                 ;;
         esac
         shift
@@ -196,136 +86,54 @@ codex_resolve_destination() {
         codex_die "Provide either --simulator-id or --device-id, not both."
     fi
 
-    codex_ensure_repo_root
-    echo "==> Resolving destinations for ${CODEX_DEMO_SCHEME}"
-    all_records="$(codex_destination_records all)"
-
-    if [[ -n "${destination_kind}" && "${destination_kind}" != "simulator" && "${destination_kind}" != "device" ]]; then
+    if [[ -n "${simulator_id}" ]]; then
+        extra_options+=(--destination "${simulator_id}")
+    elif [[ -n "${device_id}" ]]; then
+        extra_options+=(--destination "${device_id}")
+    elif ${choose_simulator}; then
+        extra_options+=(--type simulator)
+    elif ${choose_device}; then
+        extra_options+=(--type device)
+    elif [[ "${CODEX_DEMO_DESTINATION:-}" == "simulator" ]]; then
+        extra_options+=(--type simulator)
+    elif [[ "${CODEX_DEMO_DESTINATION:-}" == "device" ]]; then
+        extra_options+=(--type device)
+    elif [[ -n "${CODEX_DEMO_DESTINATION:-}" ]]; then
         codex_die "CODEX_DEMO_DESTINATION must be simulator or device."
     fi
 
-    if [[ -n "${device_id}" ]]; then
-        [[ -z "${simulator_id}" ]] || codex_die "Cannot combine simulator and device options."
-        ${choose_simulator} && codex_die "Cannot combine simulator and device options."
-        selected_record="$(codex_find_record_by_udid "${all_records}" "${device_id}")"
-        [[ -n "${selected_record}" ]] || codex_die "Device ${device_id} was not found."
-        IFS='|' read -r selected_kind _ <<< "${selected_record}"
-        [[ "${selected_kind}" == "device" ]] || codex_die "Destination ${device_id} is not a device."
-        destination_kind="device"
-    elif [[ -n "${simulator_id}" ]]; then
-        [[ -z "${device_id}" ]] || codex_die "Cannot combine simulator and device options."
-        selected_record="$(codex_find_record_by_udid "${all_records}" "${simulator_id}")"
-        [[ -n "${selected_record}" ]] || codex_die "Simulator ${simulator_id} was not found."
-        IFS='|' read -r selected_kind _ <<< "${selected_record}"
-        [[ "${selected_kind}" == "simulator" ]] || codex_die "Destination ${simulator_id} is not a simulator."
-        destination_kind="simulator"
-    else
-        if ${choose_device}; then
-            ${choose_simulator} && codex_die "Choose either a simulator or a device, not both."
-            selection_type="device"
-        elif ${choose_simulator}; then
-            selection_type="simulator"
-        elif [[ -n "${destination_kind}" ]]; then
-            selection_type="${destination_kind}"
-        else
-            selection_type="all"
-        fi
-
-        codex_select_destination_record "${selection_type}" || exit $?
-        destination_kind="${CODEX_RESOLVED_DESTINATION_KIND}"
-        selected_record="${CODEX_RESOLVED_RECORD}"
-    fi
-
-    [[ -n "${selected_record}" ]] || codex_die "No destination was resolved."
-
     CODEX_RESOLVED_DRY_RUN="${dry_run}"
-    CODEX_RESOLVED_DESTINATION_KIND="${destination_kind}"
-    CODEX_RESOLVED_RECORD="${selected_record}"
+    CODEX_RESOLVED_OPTIONS=("${extra_options[@]}")
 }
 
-codex_run_simulator() {
-    local record="$1"
-    local dry_run="$2"
-    local _ simulator_name simulator_udid simulator_os destination app_path
-
-    IFS='|' read -r _ simulator_name simulator_udid simulator_os <<< "${record}"
-    destination="id=${simulator_udid}"
-    codex_build_app "${destination}"
-    codex_build_simulator_launch_command "${simulator_udid}"
-
-    echo "Running ${CODEX_DEMO_SCHEME} on ${simulator_name} (${simulator_udid})"
-
-    if [[ "${dry_run}" == "true" ]]; then
-        app_path="$(codex_app_artifact_field "${destination}" app_path)"
-        codex_print_command "Build" "${CODEX_BUILD_COMMAND[@]}"
-        codex_print_command "Install" \
-            xcrun simctl install "${simulator_udid}" "${app_path}"
-        codex_print_command "Launch" "${CODEX_LAUNCH_COMMAND[@]}"
-        return 0
-    fi
-
-    codex_prepare_simulator "${simulator_udid}"
-    echo "==> Building ${CODEX_DEMO_SCHEME}"
-    "${CODEX_BUILD_COMMAND[@]}"
-    echo "==> Resolving app bundle path"
-    app_path="$(codex_app_artifact_field "${destination}" app_path)"
-    echo "==> Installing on ${simulator_name}"
-    xcrun simctl install "${simulator_udid}" "${app_path}"
-    echo "==> Launching ${CODEX_DEMO_SCHEME}"
-    "${CODEX_LAUNCH_COMMAND[@]}"
-}
-
-codex_run_device() {
-    local record="$1"
-    local dry_run="$2"
-    local _ device_name device_udid __ build_destination app_path
-
-    IFS='|' read -r _ device_name device_udid __ <<< "${record}"
-    build_destination="generic/platform=iOS"
-    codex_build_app "${build_destination}"
-    codex_build_device_launch_command "${device_udid}"
-
-    echo "Running ${CODEX_DEMO_SCHEME} on ${device_name} (${device_udid})"
-
-    if [[ "${dry_run}" == "true" ]]; then
-        app_path="$(codex_app_artifact_field "${build_destination}" app_path)"
-        codex_print_command "Build" "${CODEX_BUILD_COMMAND[@]}"
-        codex_print_command "Install" \
-            xcrun devicectl device install app \
-            --device "${device_udid}" \
-            "${app_path}"
-        codex_print_command "Launch" "${CODEX_LAUNCH_COMMAND[@]}"
-        return 0
-    fi
-
-    echo "==> Building ${CODEX_DEMO_SCHEME}"
-    "${CODEX_BUILD_COMMAND[@]}"
-    echo "==> Resolving app bundle path"
-    app_path="$(codex_app_artifact_field "${build_destination}" app_path)"
-    echo "==> Installing on ${device_name}"
-    xcrun devicectl device install app \
-        --device "${device_udid}" \
-        "${app_path}"
-    echo "==> Launching ${CODEX_DEMO_SCHEME}"
-    "${CODEX_LAUNCH_COMMAND[@]}"
-}
-
-codex_require_command "${CODEX_XCODEBUILD_BIN}"
+codex_ensure_repo_root
 codex_require_command "${CODEX_SIMULATOR_BUDDY_BIN}"
-codex_require_command xcrun
-codex_require_command python3
-codex_resolve_destination "$@"
+codex_destination_from_options "$@"
 
-case "${CODEX_RESOLVED_DESTINATION_KIND}" in
-    simulator)
-        codex_run_simulator "${CODEX_RESOLVED_RECORD}" \
-            "${CODEX_RESOLVED_DRY_RUN}"
-        ;;
-    device)
-        codex_run_device "${CODEX_RESOLVED_RECORD}" \
-            "${CODEX_RESOLVED_DRY_RUN}"
-        ;;
-    *)
-        codex_die "Unsupported destination kind: ${CODEX_RESOLVED_DESTINATION_KIND}"
-        ;;
-esac
+run_command=(
+    "${CODEX_SIMULATOR_BUDDY_BIN}" run
+    --env "${CODEX_TERMINAL_LOG_ENV}=1"
+    "${CODEX_RESOLVED_OPTIONS[@]}"
+)
+
+if [[ -n "${CODEX_DEMO_LOG_CATEGORIES}" ]]; then
+    run_command+=(--log-category "${CODEX_DEMO_LOG_CATEGORIES}")
+fi
+
+if [[ -n "${CODEX_DEMO_BUNDLE_ID}" ]]; then
+    run_command+=(--bundle-id "${CODEX_DEMO_BUNDLE_ID}")
+fi
+
+run_command+=(
+    -project "${CODEX_PROJECT_PATH}"
+    -scheme "${CODEX_DEMO_SCHEME}"
+    -configuration "${CODEX_DEMO_CONFIGURATION}"
+    -hideShellScriptEnvironment
+)
+
+if [[ "${CODEX_RESOLVED_DRY_RUN}" == "true" ]]; then
+    codex_print_command "Dry run" "${run_command[@]}"
+    exit 0
+fi
+
+exec "${run_command[@]}"
