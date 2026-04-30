@@ -93,6 +93,7 @@ final class RTCAudioStore_AVAudioSessionEffectTests: XCTestCase, @unchecked Send
             isInterrupted: false,
             isRecording: false,
             isMicrophoneMuted: false,
+            isMutedSpeechDetectionEnabled: false,
             hasRecordingPermission: true,
             activeSessionIdentifier: "",
             audioDeviceModule: audioDeviceModule,

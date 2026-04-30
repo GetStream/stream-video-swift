@@ -153,6 +153,9 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
     /// Publisher emitting AGC changes.
     var isVoiceProcessingAGCEnabledPublisher: AnyPublisher<Bool, Never> { isVoiceProcessingAGCEnabledSubject.eraseToAnyPublisher() }
 
+    /// `true` while muted speech detection is enabled in WebRTC.
+    var isMutedSpeechDetectionEnabled: Bool { source.isRecordingAlwaysPreparedMode }
+
     /// Observes RMS audio levels (in dB) derived from the input tap.
     private let audioLevelSubject = CurrentValueSubject<Float, Never>(Constant.silenceDB) // default to silence
     /// Latest measured audio level.
@@ -251,11 +254,24 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         /// - `.restartEngine`: rebuilds the whole graph and requires explicit calling of
         /// `initAndStartRecording` .
         _ = source.setMuteMode(isPreferred ? .inputMixer : .voiceProcessing)
-        /// - Important: We can probably set this one to false when the user doesn't have
-        /// sendAudio capability.
-        _ = source.setRecordingAlwaysPreparedMode(false)
+        if isPreferred {
+            _ = source.setRecordingAlwaysPreparedMode(false)
+        }
         source.prefersStereoPlayout = isPreferred
         source.isVoiceProcessingBypassed = isPreferred
+    }
+
+    /// Enables or disables WebRTC muted speech detection.
+    /// - Parameter isEnabled: `true` to receive muted speech activity events.
+    /// - Throws: `ClientError` when the underlying module reports a failure.
+    func setMutedSpeechDetectionEnabled(_ isEnabled: Bool) throws {
+        guard isEnabled != source.isRecordingAlwaysPreparedMode else {
+            return
+        }
+
+        try throwingExecution("Unable to setMutedSpeechDetectionEnabled:\(isEnabled)") {
+            source.setRecordingAlwaysPreparedMode(isEnabled)
+        }
     }
 
     /// Starts or stops speaker playout on the ADM, retrying transient failures.

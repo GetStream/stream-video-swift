@@ -112,6 +112,7 @@ final class RTCAudioStore_CallKitReducerTests: XCTestCase, @unchecked Sendable {
             isInterrupted: isInterrupted,
             isRecording: isRecording,
             isMicrophoneMuted: isMicrophoneMuted,
+            isMutedSpeechDetectionEnabled: false,
             hasRecordingPermission: hasRecordingPermission,
             activeSessionIdentifier: activeSessionIdentifier,
             audioDeviceModule: audioDeviceModule,

@@ -231,6 +231,7 @@ extension RTCAudioStore {
         var isInterrupted: Bool
         var isRecording: Bool
         var isMicrophoneMuted: Bool
+        var isMutedSpeechDetectionEnabled: Bool
         var hasRecordingPermission: Bool
 
         /// Identifies the `CallAudioSession` that currently owns the shared
@@ -250,6 +251,7 @@ extension RTCAudioStore {
                 ", isInterrupted:\(isInterrupted)" +
                 ", isRecording:\(isRecording)" +
                 ", isMicrophoneMuted:\(isMicrophoneMuted)" +
+                ", isMutedSpeechDetectionEnabled:\(isMutedSpeechDetectionEnabled)" +
                 ", hasRecordingPermission:\(hasRecordingPermission)" +
                 ", audioSessionConfiguration:\(audioSessionConfiguration)" +
                 ", webRTCAudioSessionConfiguration:\(webRTCAudioSessionConfiguration)" +
@@ -264,6 +266,7 @@ extension RTCAudioStore {
             case isInterrupted
             case isRecording
             case isMicrophoneMuted
+            case isMutedSpeechDetectionEnabled
             case hasRecordingPermission
             case audioSessionConfiguration
             case webRTCAudioSessionConfiguration
@@ -279,6 +282,10 @@ extension RTCAudioStore {
             try container.encode(isInterrupted, forKey: .isInterrupted)
             try container.encode(isRecording, forKey: .isRecording)
             try container.encode(isMicrophoneMuted, forKey: .isMicrophoneMuted)
+            try container.encode(
+                isMutedSpeechDetectionEnabled,
+                forKey: .isMutedSpeechDetectionEnabled
+            )
             try container.encode(activeSessionIdentifier, forKey: .activeSessionIdentifier)
             try container.encode(
                 hasRecordingPermission,
@@ -308,6 +315,7 @@ extension RTCAudioStore {
                 && lhs.isInterrupted == rhs.isInterrupted
                 && lhs.isRecording == rhs.isRecording
                 && lhs.isMicrophoneMuted == rhs.isMicrophoneMuted
+                && lhs.isMutedSpeechDetectionEnabled == rhs.isMutedSpeechDetectionEnabled
                 && lhs.hasRecordingPermission == rhs.hasRecordingPermission
                 && lhs.audioSessionConfiguration == rhs.audioSessionConfiguration
                 && lhs.webRTCAudioSessionConfiguration == rhs.webRTCAudioSessionConfiguration
@@ -322,6 +330,7 @@ extension RTCAudioStore {
             hasher.combine(isInterrupted)
             hasher.combine(isRecording)
             hasher.combine(isMicrophoneMuted)
+            hasher.combine(isMutedSpeechDetectionEnabled)
             hasher.combine(hasRecordingPermission)
             hasher.combine(audioSessionConfiguration)
             hasher.combine(webRTCAudioSessionConfiguration)

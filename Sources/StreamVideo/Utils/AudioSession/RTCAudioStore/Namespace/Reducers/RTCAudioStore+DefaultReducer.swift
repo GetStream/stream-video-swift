@@ -52,6 +52,9 @@ extension RTCAudioStore.Namespace {
             case let .setMicrophoneMuted(value):
                 updatedState.isMicrophoneMuted = value
 
+            case let .setMutedSpeechDetectionEnabled(value):
+                updatedState.isMutedSpeechDetectionEnabled = value
+
             case let .setHasRecordingPermission(value):
                 updatedState.hasRecordingPermission = value
 
@@ -60,6 +63,8 @@ extension RTCAudioStore.Namespace {
 
             case let .setAudioDeviceModule(value):
                 updatedState.audioDeviceModule = value
+                updatedState.isMutedSpeechDetectionEnabled =
+                    value?.isMutedSpeechDetectionEnabled ?? false
                 if value == nil {
                     updatedState.isRecording = false
                     updatedState.isMicrophoneMuted = true
