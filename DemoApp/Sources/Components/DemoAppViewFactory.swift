@@ -56,6 +56,24 @@ final class DemoAppViewFactory: ViewFactory {
         DemoCallTopView(viewFactory: self, viewModel: viewModel)
     }
 
+    func makeVideoParticipantView(
+        participant: CallParticipant,
+        id: String,
+        availableFrame: CGRect,
+        contentMode: UIView.ContentMode,
+        customData: [String: RawJSON],
+        call: Call?
+    ) -> some View {
+        DemoParticipantVideoWrapper(
+            participant: participant,
+            id: id,
+            availableFrame: availableFrame,
+            layoutContentMode: contentMode,
+            customData: customData,
+            call: call
+        )
+    }
+
     func makeVideoCallParticipantModifier(
         participant: CallParticipant,
         call: Call?,

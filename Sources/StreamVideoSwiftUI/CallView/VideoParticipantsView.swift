@@ -58,9 +58,31 @@ public struct VideoParticipantsView<Factory: ViewFactory>: View {
     }
 }
 
-public enum VideoCallParticipantDecoration: Hashable, CaseIterable {
+public enum VideoCallParticipantDecoration: Hashable {
     case options
     case speaking
+    /// App-defined menu items, shown by ``VideoCallParticipantCustomOptionsModifier`` (separate from the stock ``VideoCallParticipantOptionsModifier``).
+    case customOptions([ParticipantMenuOptionItem])
+}
+
+extension VideoCallParticipantDecoration {
+
+    /// Default decorations for participant chrome: stock ellipsis menu and speaking indicator (matches legacy `CaseIterable` defaults).
+    public static var defaultPreset: [VideoCallParticipantDecoration] {
+        [.options, .speaking]
+    }
+}
+
+public extension Set where Element == VideoCallParticipantDecoration {
+
+    /// Concatenates payloads from every ``VideoCallParticipantDecoration/customOptions`` member (set iteration order is undefined).
+    func mergedCustomMenuItems() -> [ParticipantMenuOptionItem] {
+        reduce(into: []) { result, decoration in
+            if case .customOptions(let items) = decoration {
+                result.append(contentsOf: items)
+            }
+        }
+    }
 }
 
 public struct VideoCallParticipantModifier: ViewModifier {
@@ -78,7 +100,7 @@ public struct VideoCallParticipantModifier: ViewModifier {
         availableFrame: CGRect,
         ratio: CGFloat,
         showAllInfo: Bool,
-        decorations: [VideoCallParticipantDecoration] = VideoCallParticipantDecoration.allCases
+        decorations: [VideoCallParticipantDecoration] = VideoCallParticipantDecoration.defaultPreset
     ) {
         self.participant = participant
         self.call = call
@@ -99,7 +121,7 @@ public struct VideoCallParticipantModifier: ViewModifier {
                                 participant: participant,
                                 isPinned: participant.isPinned
                             )
-                            
+
                             Spacer()
 
                             if showAllInfo {
@@ -115,6 +137,10 @@ public struct VideoCallParticipantModifier: ViewModifier {
                 VideoCallParticipantOptionsModifier(participant: participant, call: call),
                 decoration: .options,
                 availableDecorations: decorations
+            )
+            .applyVideoCallParticipantCustomMenuDecorations(
+                decorations: decorations,
+                participant: participant
             )
             .applyDecorationModifierIfRequired(
                 VideoCallParticipantSpeakingModifier(participant: participant, participantCount: participantCount),
@@ -143,6 +169,25 @@ extension View {
             self.modifier(modifier())
         } else {
             self
+        }
+    }
+
+    /// Applies ``VideoCallParticipantCustomOptionsModifier`` when the decoration set includes any ``VideoCallParticipantDecoration/customOptions`` with a non-empty payload.
+    @ViewBuilder
+    public func applyVideoCallParticipantCustomMenuDecorations(
+        decorations: Set<VideoCallParticipantDecoration>,
+        participant: CallParticipant
+    ) -> some View {
+        let items = decorations.mergedCustomMenuItems()
+        if items.isEmpty {
+            self
+        } else {
+            self.modifier(
+                VideoCallParticipantCustomOptionsModifier(
+                    participant: participant,
+                    items: items
+                )
+            )
         }
     }
 }
@@ -291,6 +336,78 @@ public struct VideoCallParticipantOptionsModifier: ViewModifier {
                 _ = try await call?.kickUser(userId: participant.userId)
             } catch {
                 log.error(error)
+            }
+        }
+    }
+}
+
+/// Top-right overlay menu for integrator-defined actions (``VideoCallParticipantDecoration/customOptions``), separate from stock ``VideoCallParticipantOptionsModifier``.
+@MainActor
+public struct VideoCallParticipantCustomOptionsModifier: ViewModifier {
+
+    @Injected(\.appearance) var appearance
+
+    @State private var presentActionSheet: Bool = false
+
+    public var participant: CallParticipant
+    public var items: [ParticipantMenuOptionItem]
+
+    public init(
+        participant: CallParticipant,
+        items: [ParticipantMenuOptionItem]
+    ) {
+        self.participant = participant
+        self.items = items
+    }
+
+    private var menuRows: [(id: String, title: String, action: () -> Void)] {
+        items.map { item in
+            (item.id, item.title, { item.perform() })
+        }
+    }
+
+    public func body(content: Content) -> some View {
+        content
+            .overlay(
+                TopRightView {
+                    customMenuContent
+                }
+                .padding(4)
+            )
+    }
+
+    @ViewBuilder
+    private var customOptionsButtonView: some View {
+        Image(systemName: "ellipsis.circle")
+            .foregroundColor(.white)
+            .padding(8)
+            .background(appearance.colors.participantInfoBackgroundColor)
+            .clipShape(Circle())
+    }
+
+    @ViewBuilder
+    private var customMenuContent: some View {
+        if #available(iOS 14.0, *) {
+            Menu {
+                ForEach(menuRows, id: \.id) { row in
+                    Button(
+                        action: row.action,
+                        label: { Text(row.title) }
+                    )
+                }
+            } label: { customOptionsButtonView }
+        } else {
+            Button {
+                presentActionSheet.toggle()
+            } label: {
+                customOptionsButtonView
+            }
+            .actionSheet(isPresented: $presentActionSheet) {
+                ActionSheet(
+                    title: Text("\(participant.name)"),
+                    buttons: menuRows
+                        .map { ActionSheet.Button.default(Text($0.title), action: $0.action) } + [ActionSheet.Button.cancel()]
+                )
             }
         }
     }
