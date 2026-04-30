@@ -66,7 +66,7 @@ private func content() {
                 availableFrame: CGRect,
                 ratio: CGFloat,
                 showAllInfo: Bool,
-                decorations: [VideoCallParticipantDecoration] = VideoCallParticipantDecoration.allCases
+                decorations: [VideoCallParticipantDecoration] = VideoCallParticipantDecoration.defaultPreset
             ) {
                 self.participant = participant
                 self.call = call
@@ -103,6 +103,10 @@ private func content() {
                         VideoCallParticipantOptionsModifier(participant: participant, call: call),
                         decoration: .options,
                         availableDecorations: decorations
+                    )
+                    .applyVideoCallParticipantCustomMenuDecorations(
+                        decorations: decorations,
+                        participant: participant
                     )
                     .applyDecorationModifierIfRequired(
                         VideoCallParticipantSpeakingModifier(participant: participant, participantCount: participantCount),

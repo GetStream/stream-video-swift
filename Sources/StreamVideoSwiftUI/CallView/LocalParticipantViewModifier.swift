@@ -21,7 +21,7 @@ public struct LocalParticipantViewModifier: ViewModifier {
         call: Call?,
         callSettings: Binding<CallSettings>,
         showAllInfo: Bool = false,
-        decorations: [VideoCallParticipantDecoration] = VideoCallParticipantDecoration.allCases
+        decorations: [VideoCallParticipantDecoration] = VideoCallParticipantDecoration.defaultPreset
     ) {
         self.localParticipant = localParticipant
         self.call = call
@@ -88,7 +88,7 @@ public struct LocalParticipantViewModifier_iOS13: ViewModifier {
         call: Call?,
         callSettings: Binding<CallSettings>,
         showAllInfo: Bool = false,
-        decorations: [VideoCallParticipantDecoration] = VideoCallParticipantDecoration.allCases
+        decorations: [VideoCallParticipantDecoration] = VideoCallParticipantDecoration.defaultPreset
     ) {
         self.localParticipant = localParticipant
         self.call = call

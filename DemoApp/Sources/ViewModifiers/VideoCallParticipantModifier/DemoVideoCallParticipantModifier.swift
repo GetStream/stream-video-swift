@@ -17,19 +17,22 @@ struct DemoVideoCallParticipantModifier: ViewModifier {
     var availableFrame: CGRect
     var ratio: CGFloat
     var showAllInfo: Bool
+    private var enabledDecorations: Set<DemoCallParticipantDecoration>
 
     init(
         participant: CallParticipant,
         call: Call?,
         availableFrame: CGRect,
         ratio: CGFloat,
-        showAllInfo: Bool
+        showAllInfo: Bool,
+        decorations: [DemoCallParticipantDecoration] = [.sdkSpeakingRing, .demoExtendedMenu]
     ) {
         self.participant = participant
         self.call = call
         self.availableFrame = availableFrame
         self.ratio = ratio
         self.showAllInfo = showAllInfo
+        self.enabledDecorations = DemoCallParticipantDecoration.normalizedSet(decorations)
     }
 
     func body(content: Content) -> some View {
@@ -42,16 +45,19 @@ struct DemoVideoCallParticipantModifier: ViewModifier {
                         availableFrame: availableFrame,
                         ratio: ratio,
                         showAllInfo: showAllInfo,
-                        decorations: [.speaking, .options]
+                        decorations: Array(enabledDecorations.asVideoCallParticipantDecorations())
                     )
+                )
+                .applyDemoDecorationModifierIfRequired(
+                    DemoExtendedParticipantOptionsOverlayModifier(
+                        participant: participant,
+                        call: call
+                    ),
+                    decoration: .demoExtendedMenu,
+                    availableDecorations: enabledDecorations
                 )
                 .modifier(ReactionsViewModifier(participant: participant))
         }
-    }
-    
-    @MainActor
-    private var participantCount: Int {
-        call?.state.participants.count ?? 0
     }
 
     @MainActor
