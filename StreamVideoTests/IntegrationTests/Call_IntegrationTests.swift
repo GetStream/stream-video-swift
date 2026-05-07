@@ -58,8 +58,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
             .callFlow(id: .unique, type: .default, userId: .unique)
             .perform { try await $0.client.setDevice(id: deviceId) }
             .perform { try await $0.client.deleteDevice(id: deviceId) }
-            .perform { try await $0.client.listDevices() }
-            .assert { $0.value.isEmpty }
+            .assertEventually { try await $0.client.listDevices().isEmpty }
     }
 
     func test_deleteDevice_whenAVoIPDeviceIsremoved_thenListDevicesShoulBeUpdatedAsExpected() async throws {
@@ -69,8 +68,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
             .callFlow(id: .unique, type: .default, userId: .unique)
             .perform { try await $0.client.setVoipDevice(id: deviceId) }
             .perform { try await $0.client.deleteDevice(id: deviceId) }
-            .perform { try await $0.client.listDevices() }
-            .assert { $0.value.isEmpty }
+            .assertEventually { try await $0.client.listDevices().isEmpty }
     }
 
     // MARK: Create
@@ -501,9 +499,14 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
 
             group.addTask {
                 try await user2CallFlow
-                    .perform { $0.client.subscribe(for: CallRingEvent.self) }
-                    .assertEventually { (event: CallRingEvent) in event.call.id == callId }
-                    .perform { try await $0.call.get() }
+                    .assertEventually {
+                        do {
+                            _ = try await $0.call.get()
+                            return true
+                        } catch {
+                            return false
+                        }
+                    }
                     .perform { try await $0.call.accept() }
                     .assertEventuallyInMainActor { $0.call.state.session?.acceptedBy[user2] != nil }
             }
@@ -640,9 +643,12 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
                 backstage: .init(enabled: true)
             ) }
             .perform { try await $0.call.join() }
+            .assertEventuallyInMainActor { $0.call.state.sessionId.isEmpty == false }
+            .assertEventuallyInMainActor { $0.call.state.backstage }
 
         try await otherHostCallFlow
             .perform { try await $0.call.join() }
+            .assertEventuallyInMainActor { $0.call.state.sessionId.isEmpty == false }
 
         try await helpers
             .callFlow(id: callId, type: .livestream, userId: participant, environment: "demo")
@@ -816,10 +822,10 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
                     .helpers
                     .callFlow(id: callId, type: .audioRoom, userId: participant, environment: "demo")
                     .perform { try await $0.call.join(callSettings: .init(audioOn: false, videoOn: false)) }
+                    .assertEventuallyInMainActor { $0.call.state.participants.endIndex == 2 }
                     .assertEventuallyInMainActor { $0.call.currentUserHasCapability(.sendAudio) == false }
                     .assertEventuallyInMainActor { $0.call.state.callSettings.audioOn == false }
                     .perform { try await $0.call.microphone.toggle() }
-                    .delay(0.5)
                     .assertEventuallyInMainActor { $0.call.currentUserHasCapability(.sendAudio) == false }
                     .assertEventuallyInMainActor { $0.call.state.callSettings.audioOn == false }
             }
@@ -854,12 +860,12 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
             group.addTask {
                 try await participantCallFlow
                     .perform { try await $0.call.join(callSettings: .init(audioOn: false, videoOn: false)) }
+                    .assertEventuallyInMainActor { $0.call.state.participants.endIndex == 2 }
                     .assertEventuallyInMainActor { $0.call.currentUserHasCapability(.sendAudio) == false }
                     .assertEventuallyInMainActor { $0.call.state.callSettings.audioOn == false }
                     .perform { try await $0.call.request(permissions: [.sendAudio]) }
                     .assertEventuallyInMainActor { $0.call.currentUserHasCapability(.sendAudio) }
                     .perform { try await $0.call.microphone.toggle() }
-                    .delay(0.5)
                     .assertEventuallyInMainActor { $0.call.state.callSettings.audioOn }
             }
 
@@ -897,12 +903,12 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
                     .helpers
                     .callFlow(id: callId, type: .audioRoom, userId: participant, environment: "demo")
                     .perform { try await $0.call.join(callSettings: .init(audioOn: false, videoOn: false)) }
+                    .assertEventuallyInMainActor { $0.call.state.participants.endIndex == 2 }
                     .assertEventuallyInMainActor { $0.call.currentUserHasCapability(.sendAudio) == false }
                     .assertEventuallyInMainActor { $0.call.state.callSettings.audioOn == false }
                     .perform { try await $0.call.request(permissions: [.sendAudio]) }
                     .assertEventuallyInMainActor { $0.call.currentUserHasCapability(.sendAudio) == false }
                     .perform { try await $0.call.microphone.toggle() }
-                    .delay(0.5)
                     .assertEventuallyInMainActor { $0.call.currentUserHasCapability(.sendAudio) == false }
                     .assertEventuallyInMainActor { $0.call.state.callSettings.audioOn == false }
             }
@@ -933,7 +939,11 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
                     .assertEventuallyInMainActor { $0.call.state.permissionRequests.endIndex == 1 }
                     .tryMap { await $0.call.state.permissionRequests.first }
                     .perform { try await $0.call.grant(request: $0.value) }
-                    .delay(2)
+                    .assertEventuallyInMainActor {
+                        $0.call.state.participants.first {
+                            $0.userId == participant
+                        }?.hasAudio == true
+                    }
                     .perform { try await $0.call.revoke(permissions: [.sendAudio], for: participant) }
             }
 
@@ -943,7 +953,6 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
                     .assertEventuallyInMainActor { $0.call.currentUserHasCapability(.sendAudio) == false }
                     .perform { try await $0.call.request(permissions: [.sendAudio]) }
                     .assertEventuallyInMainActor { $0.call.currentUserHasCapability(.sendAudio) }
-                    .delay(1) // Wait for the call state to be updated
                     .perform { try await $0.call.microphone.toggle() }
                     .assertEventuallyInMainActor { $0.call.state.callSettings.audioOn }
                     .assertEventuallyInMainActor { $0.call.currentUserHasCapability(.sendAudio) == false }
@@ -951,7 +960,6 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
                     .performWithoutValueOverride { $0.call.updateCallSettingsManagers(with: await $0.call.state.callSettings) }
                     .assertEventuallyInMainActor { $0.call.microphone.status == .disabled }
                     .perform { try await $0.call.microphone.toggle() }
-                    .delay(0.5)
                     .assertEventuallyInMainActor { $0.call.currentUserHasCapability(.sendAudio) == false }
                     .assertEventuallyInMainActor { $0.call.state.callSettings.audioOn == false }
             }

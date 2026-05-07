@@ -38,9 +38,10 @@ final class VideoProximityPolicy_Tests: XCTestCase, @unchecked Sendable {
 
         subject.didUpdateProximity(.near, on: mockCall)
 
-        await wait(for: 0.25)
-        XCTAssertEqual(mockCallController.timesCalled(.changeVideoState), 0)
-        XCTAssertEqual(mockCall.state.incomingVideoQualitySettings, .disabled(group: .all))
+        await assertState(
+            incomingVideoQualitySettings: .disabled(group: .all),
+            timesCalledChangeVideoState: 0
+        )
     }
 
     func test_didUpdateProximity_near_videoTrue_incomingVideoQualitySettingsNone_incomingVideoQualitySettingsAndCameraDisabled(
@@ -50,9 +51,10 @@ final class VideoProximityPolicy_Tests: XCTestCase, @unchecked Sendable {
 
         subject.didUpdateProximity(.near, on: mockCall)
 
-        await wait(for: 0.25)
-        XCTAssertEqual(mockCallController.timesCalled(.changeVideoState), 1)
-        XCTAssertEqual(mockCall.state.incomingVideoQualitySettings, .disabled(group: .all))
+        await assertState(
+            incomingVideoQualitySettings: .disabled(group: .all),
+            timesCalledChangeVideoState: 1
+        )
     }
 
     func test_didUpdateProximity_near_videoFalse_incomingVideoQualitySettingsOtherThanNone_incomingVideoQualitySettingsAndCameraDisabled(
@@ -62,9 +64,10 @@ final class VideoProximityPolicy_Tests: XCTestCase, @unchecked Sendable {
 
         subject.didUpdateProximity(.near, on: mockCall)
 
-        await wait(for: 0.25)
-        XCTAssertEqual(mockCallController.timesCalled(.changeVideoState), 0)
-        XCTAssertEqual(mockCall.state.incomingVideoQualitySettings, .disabled(group: .all))
+        await assertState(
+            incomingVideoQualitySettings: .disabled(group: .all),
+            timesCalledChangeVideoState: 0
+        )
     }
 
     func test_didUpdateProximity_far_noCachedValue_nothingHappens() async {
@@ -73,9 +76,10 @@ final class VideoProximityPolicy_Tests: XCTestCase, @unchecked Sendable {
 
         subject.didUpdateProximity(.far, on: mockCall)
 
-        await wait(for: 0.25)
-        XCTAssertEqual(mockCallController.timesCalled(.changeVideoState), 0)
-        XCTAssertEqual(mockCall.state.incomingVideoQualitySettings, .manual(group: .all, targetSize: .quarter))
+        await assertState(
+            incomingVideoQualitySettings: .manual(group: .all, targetSize: .quarter),
+            timesCalledChangeVideoState: 0
+        )
     }
 
     func test_didUpdateProximity_far_cachedValueWithIncomingQualitySettingsAndVideoOff_incomingVideoQualitySettingsUpdated() async {
@@ -83,12 +87,16 @@ final class VideoProximityPolicy_Tests: XCTestCase, @unchecked Sendable {
         mockCall.state.incomingVideoQualitySettings = .manual(group: .all, targetSize: .quarter)
 
         subject.didUpdateProximity(.near, on: mockCall)
-        await wait(for: 0.25)
+        await assertState(
+            incomingVideoQualitySettings: .disabled(group: .all),
+            timesCalledChangeVideoState: 0
+        )
         subject.didUpdateProximity(.far, on: mockCall)
 
-        await wait(for: 0.25)
-        XCTAssertEqual(mockCallController.timesCalled(.changeVideoState), 0)
-        XCTAssertEqual(mockCall.state.incomingVideoQualitySettings, .manual(group: .all, targetSize: .quarter))
+        await assertState(
+            incomingVideoQualitySettings: .manual(group: .all, targetSize: .quarter),
+            timesCalledChangeVideoState: 0
+        )
     }
 
     func test_didUpdateProximity_far_cachedValueWithoutIncomingQualitySettingsAndVideoOn_videoWasUpdated() async {
@@ -96,13 +104,17 @@ final class VideoProximityPolicy_Tests: XCTestCase, @unchecked Sendable {
         mockCall.state.incomingVideoQualitySettings = .none
 
         subject.didUpdateProximity(.near, on: mockCall)
-        await wait(for: 0.25)
+        await assertState(
+            incomingVideoQualitySettings: .disabled(group: .all),
+            timesCalledChangeVideoState: 1
+        )
         subject.didUpdateProximity(.far, on: mockCall)
 
-        await wait(for: 0.25)
-        XCTAssertEqual(mockCallController.timesCalled(.changeVideoState), 2)
-        XCTAssertEqual(mockCallController.recordedInputPayload(Bool.self, for: .changeVideoState)?.last, true)
-        XCTAssertEqual(mockCall.state.incomingVideoQualitySettings, .none)
+        await assertState(
+            incomingVideoQualitySettings: .none,
+            timesCalledChangeVideoState: 2,
+            lastChangeVideoStateValue: true
+        )
     }
 
     func test_didUpdateProximity_far_cachedValueWithIncomingQualitySettingsAndVideoOn_incomingVideoQualitySettingsAndVideoWereUpdated(
@@ -111,12 +123,53 @@ final class VideoProximityPolicy_Tests: XCTestCase, @unchecked Sendable {
         mockCall.state.incomingVideoQualitySettings = .manual(group: .all, targetSize: .quarter)
 
         subject.didUpdateProximity(.near, on: mockCall)
-        await wait(for: 0.25)
+        await assertState(
+            incomingVideoQualitySettings: .disabled(group: .all),
+            timesCalledChangeVideoState: 1
+        )
         subject.didUpdateProximity(.far, on: mockCall)
 
-        await wait(for: 0.25)
-        XCTAssertEqual(mockCallController.timesCalled(.changeVideoState), 2)
-        XCTAssertEqual(mockCallController.recordedInputPayload(Bool.self, for: .changeVideoState)?.last, true)
-        XCTAssertEqual(mockCall.state.incomingVideoQualitySettings, .manual(group: .all, targetSize: .quarter))
+        await assertState(
+            incomingVideoQualitySettings: .manual(group: .all, targetSize: .quarter),
+            timesCalledChangeVideoState: 2,
+            lastChangeVideoStateValue: true
+        )
+    }
+
+    // MARK: - Private helpers
+
+    private func assertState(
+        incomingVideoQualitySettings expectedIncomingVideoQualitySettings: IncomingVideoQualitySettings,
+        timesCalledChangeVideoState expectedTimesCalledChangeVideoState: Int,
+        lastChangeVideoStateValue expectedLastChangeVideoStateValue: Bool? = nil,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) async {
+        await fulfilmentInMainActor(timeout: 2, filePath: file, line: line) {
+            self.mockCall.state.incomingVideoQualitySettings == expectedIncomingVideoQualitySettings
+                && self.mockCallController.timesCalled(.changeVideoState) == expectedTimesCalledChangeVideoState
+        }
+
+        XCTAssertEqual(
+            mockCallController.timesCalled(.changeVideoState),
+            expectedTimesCalledChangeVideoState,
+            file: file,
+            line: line
+        )
+        XCTAssertEqual(
+            mockCall.state.incomingVideoQualitySettings,
+            expectedIncomingVideoQualitySettings,
+            file: file,
+            line: line
+        )
+
+        if let expectedLastChangeVideoStateValue {
+            XCTAssertEqual(
+                mockCallController.recordedInputPayload(Bool.self, for: .changeVideoState)?.last,
+                expectedLastChangeVideoStateValue,
+                file: file,
+                line: line
+            )
+        }
     }
 }
