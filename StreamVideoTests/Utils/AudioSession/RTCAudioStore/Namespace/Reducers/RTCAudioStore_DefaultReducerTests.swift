@@ -122,6 +122,7 @@ final class RTCAudioStore_DefaultReducerTests: XCTestCase, @unchecked Sendable {
         let state = makeState(
             isRecording: true,
             isMicrophoneMuted: true,
+            isMutedSpeechDetectionEnabled: true,
             audioDeviceModule: module
         )
 
@@ -136,14 +137,18 @@ final class RTCAudioStore_DefaultReducerTests: XCTestCase, @unchecked Sendable {
         XCTAssertNil(result.audioDeviceModule)
         XCTAssertFalse(result.isRecording)
         XCTAssertTrue(result.isMicrophoneMuted)
+        XCTAssertFalse(result.isMutedSpeechDetectionEnabled)
     }
 
     func test_reduce_setAudioDeviceModule_nonNil_preservesRecordingFlags() async throws {
         let currentModule = AudioDeviceModule(MockRTCAudioDeviceModule())
-        let replacement = AudioDeviceModule(MockRTCAudioDeviceModule())
+        let replacementSource = MockRTCAudioDeviceModule()
+        replacementSource.stub(for: \.isRecordingAlwaysPreparedMode, with: true)
+        let replacement = AudioDeviceModule(replacementSource)
         let state = makeState(
             isRecording: true,
             isMicrophoneMuted: true,
+            isMutedSpeechDetectionEnabled: false,
             audioDeviceModule: currentModule
         )
 
@@ -158,6 +163,21 @@ final class RTCAudioStore_DefaultReducerTests: XCTestCase, @unchecked Sendable {
         XCTAssertTrue(result.audioDeviceModule === replacement)
         XCTAssertTrue(result.isRecording)
         XCTAssertTrue(result.isMicrophoneMuted)
+        XCTAssertTrue(result.isMutedSpeechDetectionEnabled)
+    }
+
+    func test_reduce_setMutedSpeechDetectionEnabled_updatesFlag() async throws {
+        let state = makeState(isMutedSpeechDetectionEnabled: false)
+
+        let result = try await subject.reduce(
+            state: state,
+            action: .setMutedSpeechDetectionEnabled(true),
+            file: #file,
+            function: #function,
+            line: #line
+        )
+
+        XCTAssertTrue(result.isMutedSpeechDetectionEnabled)
     }
 
     func test_reduce_setAudioDeviceModule_nil_resetsStereoConfiguration() async throws {
@@ -205,6 +225,7 @@ final class RTCAudioStore_DefaultReducerTests: XCTestCase, @unchecked Sendable {
         isInterrupted: Bool = false,
         isRecording: Bool = false,
         isMicrophoneMuted: Bool = false,
+        isMutedSpeechDetectionEnabled: Bool = false,
         hasRecordingPermission: Bool = false,
         activeSessionIdentifier: String = "",
         audioDeviceModule: AudioDeviceModule? = nil,
@@ -232,6 +253,7 @@ final class RTCAudioStore_DefaultReducerTests: XCTestCase, @unchecked Sendable {
             isInterrupted: isInterrupted,
             isRecording: isRecording,
             isMicrophoneMuted: isMicrophoneMuted,
+            isMutedSpeechDetectionEnabled: isMutedSpeechDetectionEnabled,
             hasRecordingPermission: hasRecordingPermission,
             activeSessionIdentifier: activeSessionIdentifier,
             audioDeviceModule: audioDeviceModule,

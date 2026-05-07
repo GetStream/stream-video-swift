@@ -17,4 +17,10 @@ protocol StreamAudioSessionAdapterDelegate: AnyObject {
         function: StaticString,
         line: UInt
     )
+
+    /// Called when local muted speech detection changes.
+    /// - Parameter isSpeakingWhileMuted: `true` while local muted speech is active.
+    func audioSessionAdapterDidUpdateSpeakingWhileMuted(
+        _ isSpeakingWhileMuted: Bool
+    )
 }

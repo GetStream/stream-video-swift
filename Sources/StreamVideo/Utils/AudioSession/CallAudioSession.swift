@@ -12,7 +12,10 @@ final class CallAudioSession: @unchecked Sendable {
 
     @Injected(\.audioStore) private var audioStore
 
-    private enum DisposableKey: String { case deferredActivation }
+    private enum DisposableKey: String {
+        case deferredActivation
+        case speechActivity
+    }
 
     /// Bundles the reactive inputs we need to evaluate whenever call
     /// capabilities or settings change, keeping log context attached.
@@ -65,6 +68,7 @@ final class CallAudioSession: @unchecked Sendable {
     private var lastAppliedConfiguration: AudioSessionConfiguration?
     private var lastCallSettings: CallSettings?
     private var lastOwnCapabilities: Set<OwnCapability>?
+    private var isSpeakingWhileMuted = false
 
     init(policy: AudioSessionPolicy = DefaultAudioSessionPolicy()) {
         self.policy = policy
@@ -126,6 +130,7 @@ final class CallAudioSession: @unchecked Sendable {
             return
         }
 
+        setSpeakingWhileMuted(false)
         disposableBag.removeAll()
         delegate = nil
 
@@ -215,6 +220,7 @@ final class CallAudioSession: @unchecked Sendable {
         )
         configureCurrentRouteObservation()
         configureCallOptionsObservation()
+        configureMutedSpeechDetectionObservation()
 
         statsAdapter?.trace(.init(audioSession: traceRepresentation))
     }
@@ -260,6 +266,77 @@ final class CallAudioSession: @unchecked Sendable {
                 )
             }
             .store(in: disposableBag)
+    }
+
+    /// Wires ADM speech activity and inputs that affect muted speech detection.
+    private func configureMutedSpeechDetectionObservation() {
+        audioStore
+            .publisher(\.audioDeviceModule)
+            .removeDuplicates()
+            .receive(on: processingQueue)
+            .sink { [weak self] in self?.configureSpeechActivityObservation($0) }
+            .store(in: disposableBag)
+
+        audioStore
+            .publisher(\.hasRecordingPermission)
+            .removeDuplicates()
+            .receive(on: processingQueue)
+            .sink { [weak self] _ in self?.reevaluateMutedSpeechDetection() }
+            .store(in: disposableBag)
+
+        audioStore
+            .publisher(\.stereoConfiguration)
+            .removeDuplicates()
+            .receive(on: processingQueue)
+            .sink { [weak self] _ in self?.reevaluateMutedSpeechDetection() }
+            .store(in: disposableBag)
+    }
+
+    /// Observes speech activity from the currently installed audio device module.
+    private func configureSpeechActivityObservation(_ audioDeviceModule: AudioDeviceModule?) {
+        disposableBag.remove(DisposableKey.speechActivity.rawValue)
+        setSpeakingWhileMuted(false)
+
+        guard let audioDeviceModule else {
+            return
+        }
+
+        audioDeviceModule
+            .publisher
+            .receive(on: processingQueue)
+            .sink { [weak self] in self?.didReceiveAudioDeviceModuleEvent($0) }
+            .store(in: disposableBag, key: DisposableKey.speechActivity.rawValue)
+    }
+
+    private func didReceiveAudioDeviceModuleEvent(_ event: AudioDeviceModule.Event) {
+        switch event {
+        case .speechActivityStarted:
+            guard audioStore.state.isMutedSpeechDetectionEnabled else {
+                return
+            }
+            setSpeakingWhileMuted(true)
+
+        case .speechActivityEnded:
+            setSpeakingWhileMuted(false)
+
+        default:
+            break
+        }
+    }
+
+    private func reevaluateMutedSpeechDetection() {
+        guard let lastCallSettings, let lastOwnCapabilities else {
+            setSpeakingWhileMuted(false)
+            return
+        }
+
+        processingPipeline.send(
+            .init(
+                callSettings: lastCallSettings,
+                ownCapabilities: lastOwnCapabilities,
+                currentRoute: audioStore.state.currentRoute
+            )
+        )
     }
 
     /// Reapplies the last known category options when the system clears them,
@@ -354,12 +431,26 @@ final class CallAudioSession: @unchecked Sendable {
         )
 
         var actions: [StoreActionBox<RTCAudioStore.Namespace.Action>] = []
+        let mutedSpeechDetectionEnabled = shouldEnableMutedSpeechDetection(
+            configuration,
+            callSettings: callSettings,
+            ownCapabilities: ownCapabilities
+        )
 
         actions.append(
             .normal(
                 .conditioned(
                     .activeSessionIdentifier(identifier),
                     action: .setMicrophoneMuted(!callSettings.audioOn || !ownCapabilities.contains(.sendAudio))
+                )
+            )
+        )
+
+        actions.append(
+            .normal(
+                .conditioned(
+                    .activeSessionIdentifier(identifier),
+                    action: .setMutedSpeechDetectionEnabled(mutedSpeechDetectionEnabled)
                 )
             )
         )
@@ -405,6 +496,34 @@ final class CallAudioSession: @unchecked Sendable {
         lastAppliedConfiguration = configuration
         lastCallSettings = callSettings
         lastOwnCapabilities = ownCapabilities
+
+        if !mutedSpeechDetectionEnabled {
+            setSpeakingWhileMuted(false)
+        }
+    }
+
+    private func shouldEnableMutedSpeechDetection(
+        _ configuration: AudioSessionConfiguration,
+        callSettings: CallSettings,
+        ownCapabilities: Set<OwnCapability>
+    ) -> Bool {
+        configuration.isActive
+            && configuration.category == .playAndRecord
+            && (configuration.mode == .voiceChat || configuration.mode == .videoChat)
+            && callSettings.audioOn == false
+            && ownCapabilities.contains(.sendAudio)
+            && audioStore.state.hasRecordingPermission
+            && audioStore.state.stereoConfiguration.playout.preferred == false
+            && audioStore.state.stereoConfiguration.playout.enabled == false
+    }
+
+    private func setSpeakingWhileMuted(_ value: Bool) {
+        guard value != isSpeakingWhileMuted else {
+            return
+        }
+
+        isSpeakingWhileMuted = value
+        delegate?.audioSessionAdapterDidUpdateSpeakingWhileMuted(value)
     }
 }
 

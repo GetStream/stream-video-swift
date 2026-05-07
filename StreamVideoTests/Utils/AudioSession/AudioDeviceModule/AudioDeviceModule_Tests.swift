@@ -174,7 +174,30 @@ final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(recordedModes, [.inputMixer, .voiceProcessing])
 
         let recordedPreparedFlags = source.recordedInputPayload(Bool.self, for: .setRecordingAlwaysPreparedMode)
-        XCTAssertEqual(recordedPreparedFlags, [false, false])
+        XCTAssertEqual(recordedPreparedFlags, [false])
+    }
+
+    func test_setMutedSpeechDetectionEnabled_updatesRecordingAlwaysPreparedMode() throws {
+        source.stub(for: \.isRecordingAlwaysPreparedMode, with: false)
+        makeSubject()
+
+        try subject.setMutedSpeechDetectionEnabled(true)
+
+        XCTAssertTrue(subject.isMutedSpeechDetectionEnabled)
+        XCTAssertEqual(
+            source.recordedInputPayload(Bool.self, for: .setRecordingAlwaysPreparedMode),
+            [true]
+        )
+    }
+
+    func test_setMutedSpeechDetectionEnabled_whenStateUnchanged_doesNothing() throws {
+        source.stub(for: \.isRecordingAlwaysPreparedMode, with: true)
+        makeSubject()
+
+        try subject.setMutedSpeechDetectionEnabled(true)
+
+        XCTAssertTrue(subject.isMutedSpeechDetectionEnabled)
+        XCTAssertEqual(source.timesCalled(.setRecordingAlwaysPreparedMode), 0)
     }
 
     func test_refreshStereoPlayoutState_invokesUnderlyingModule() {

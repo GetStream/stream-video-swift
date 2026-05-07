@@ -30,6 +30,7 @@ final class RTCAudioStore: @unchecked Sendable {
                 isInterrupted: false,
                 isRecording: false,
                 isMicrophoneMuted: true,
+                isMutedSpeechDetectionEnabled: false,
                 hasRecordingPermission: false,
                 activeSessionIdentifier: "",
                 audioDeviceModule: nil,

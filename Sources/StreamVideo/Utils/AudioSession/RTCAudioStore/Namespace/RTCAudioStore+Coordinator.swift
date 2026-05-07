@@ -56,6 +56,9 @@ extension RTCAudioStore {
             case let .setMicrophoneMuted(value):
                 return value != state.isMicrophoneMuted
 
+            case let .setMutedSpeechDetectionEnabled(value):
+                return value != state.isMutedSpeechDetectionEnabled
+
             case let .setHasRecordingPermission(value):
                 return value != state.hasRecordingPermission
 

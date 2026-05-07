@@ -124,6 +124,8 @@ final class MockRTCAudioDeviceModule: RTCAudioDeviceModuleControlling, Mockable,
             return "isVoiceProcessingEnabled"
         case \MockRTCAudioDeviceModule.isVoiceProcessingAGCEnabled:
             return "isVoiceProcessingAGCEnabled"
+        case \MockRTCAudioDeviceModule.isRecordingAlwaysPreparedMode:
+            return "isRecordingAlwaysPreparedMode"
         case \MockRTCAudioDeviceModule.prefersStereoPlayout:
             return "prefersStereoPlayout"
         default:
@@ -141,6 +143,7 @@ final class MockRTCAudioDeviceModule: RTCAudioDeviceModuleControlling, Mockable,
         stub(for: \.isVoiceProcessingBypassed, with: false)
         stub(for: \.isVoiceProcessingEnabled, with: false)
         stub(for: \.isVoiceProcessingAGCEnabled, with: false)
+        stub(for: \.isRecordingAlwaysPreparedMode, with: false)
         stub(for: \.prefersStereoPlayout, with: false)
 
         stub(for: .initAndStartRecording, with: 0)
@@ -208,6 +211,10 @@ final class MockRTCAudioDeviceModule: RTCAudioDeviceModuleControlling, Mockable,
 
     var isVoiceProcessingAGCEnabled: Bool {
         self[dynamicMember: \.isVoiceProcessingAGCEnabled]
+    }
+
+    var isRecordingAlwaysPreparedMode: Bool {
+        self[dynamicMember: \.isRecordingAlwaysPreparedMode]
     }
 
     var prefersStereoPlayout: Bool {
@@ -283,6 +290,7 @@ final class MockRTCAudioDeviceModule: RTCAudioDeviceModuleControlling, Mockable,
     func setRecordingAlwaysPreparedMode(_ alwaysPreparedRecording: Bool) -> Int {
         stubbedFunctionInput[.setRecordingAlwaysPreparedMode]?
             .append(.setRecordingAlwaysPreparedMode(alwaysPreparedRecording))
+        stub(for: \.isRecordingAlwaysPreparedMode, with: alwaysPreparedRecording)
         return stubbedFunction[.setRecordingAlwaysPreparedMode] as! Int
     }
 }

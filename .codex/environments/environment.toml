@@ -26,5 +26,13 @@ platform = "darwin"
 [[actions]]
 name = "Run DemoApp"
 icon = "run"
-command = "./.codex/scripts/codex_run_demo_app.sh"
+command = """
+simulator-buddy run \
+  --env STREAM_VIDEO_TERMINAL_LOGS=1 \
+  --log-category Video \
+  -project ./StreamVideo.xcodeproj \
+  -scheme DemoApp \
+  -configuration Debug \
+  -hideShellScriptEnvironment
+"""
 platform = "darwin"
