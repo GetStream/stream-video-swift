@@ -28,11 +28,16 @@ extension CallSettingsManager {
             return
         }
         await self.state.setUpdatingState(state)
-        try await action(state)
-        await MainActor.run {
-            onUpdate(state)
+        do {
+            try await action(state)
+            await MainActor.run {
+                onUpdate(state)
+            }
+            await self.state.setUpdatingState(nil)
+        } catch {
+            await self.state.setUpdatingState(nil)
+            throw error
         }
-        await self.state.setUpdatingState(nil)
     }
 }
 

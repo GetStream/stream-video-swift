@@ -276,11 +276,41 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
 
     func test_changeAudioState_shouldUpdateAudioState() async throws {
         await subject.stateAdapter.enqueueOwnCapabilities { [.sendAudio, .sendVideo] }
-        await subject.changeAudioState(isEnabled: false)
+        try await subject.changeAudioState(isEnabled: false)
 
         await fulfillment {
             let currentValue = await self.subject.stateAdapter.callSettings.audioOn
             return currentValue == false
+        }
+    }
+
+    func test_changeAudioState_withoutSendAudioCapability_throwsMissingPermissions() async throws {
+        callSettings = .init(audioOn: false)
+        let mockPermissions = MockPermissionsStore()
+        defer { mockPermissions.dismantle() }
+        mockPermissions.stubMicrophonePermission(.granted)
+        await subject.stateAdapter.enqueueOwnCapabilities { [] }
+
+        do {
+            try await subject.changeAudioState(isEnabled: true)
+            XCTFail("changeAudioState should fail without send-audio capability")
+        } catch {
+            XCTAssertTrue(error is ClientError.MissingPermissions)
+        }
+    }
+
+    func test_changeVideoState_withoutSendVideoCapability_throwsMissingPermissions() async throws {
+        callSettings = .init(audioOn: false, videoOn: false)
+        let mockPermissions = MockPermissionsStore()
+        defer { mockPermissions.dismantle() }
+        mockPermissions.stubCameraPermission(.granted)
+        await subject.stateAdapter.enqueueOwnCapabilities { [] }
+
+        do {
+            try await subject.changeVideoState(isEnabled: true)
+            XCTFail("changeVideoState should fail without send-video capability")
+        } catch {
+            XCTAssertTrue(error is ClientError.MissingPermissions)
         }
     }
 

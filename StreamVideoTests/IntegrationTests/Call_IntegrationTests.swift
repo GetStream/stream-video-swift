@@ -825,7 +825,8 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
                     .assertEventuallyInMainActor { $0.call.state.participants.endIndex == 2 }
                     .assertEventuallyInMainActor { $0.call.currentUserHasCapability(.sendAudio) == false }
                     .assertEventuallyInMainActor { $0.call.state.callSettings.audioOn == false }
-                    .perform { try await $0.call.microphone.toggle() }
+                    .performWithErrorExpectation { try await $0.call.microphone.toggle() }
+                    .assert { $0.value is ClientError.MissingPermissions }
                     .assertEventuallyInMainActor { $0.call.currentUserHasCapability(.sendAudio) == false }
                     .assertEventuallyInMainActor { $0.call.state.callSettings.audioOn == false }
             }
@@ -908,7 +909,8 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
                     .assertEventuallyInMainActor { $0.call.state.callSettings.audioOn == false }
                     .perform { try await $0.call.request(permissions: [.sendAudio]) }
                     .assertEventuallyInMainActor { $0.call.currentUserHasCapability(.sendAudio) == false }
-                    .perform { try await $0.call.microphone.toggle() }
+                    .performWithErrorExpectation { try await $0.call.microphone.toggle() }
+                    .assert { $0.value is ClientError.MissingPermissions }
                     .assertEventuallyInMainActor { $0.call.currentUserHasCapability(.sendAudio) == false }
                     .assertEventuallyInMainActor { $0.call.state.callSettings.audioOn == false }
             }
@@ -959,7 +961,8 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
                     .assertEventuallyInMainActor { $0.call.state.callSettings.audioOn == false }
                     .performWithoutValueOverride { $0.call.updateCallSettingsManagers(with: await $0.call.state.callSettings) }
                     .assertEventuallyInMainActor { $0.call.microphone.status == .disabled }
-                    .perform { try await $0.call.microphone.toggle() }
+                    .performWithErrorExpectation { try await $0.call.microphone.toggle() }
+                    .assert { $0.value is ClientError.MissingPermissions }
                     .assertEventuallyInMainActor { $0.call.currentUserHasCapability(.sendAudio) == false }
                     .assertEventuallyInMainActor { $0.call.state.callSettings.audioOn == false }
             }
@@ -997,8 +1000,8 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
                     .perform { try await $0.call.join(callSettings: .init(audioOn: false, videoOn: false)) }
                     .assertEventuallyInMainActor { $0.call.currentUserHasCapability(.sendVideo) == false }
                     .assertEventuallyInMainActor { $0.call.state.callSettings.videoOn == false }
-                    .perform { try await $0.call.camera.toggle() }
-                    .delay(0.5)
+                    .performWithErrorExpectation { try await $0.call.camera.toggle() }
+                    .assert { $0.value is ClientError.MissingPermissions }
                     .assertEventuallyInMainActor { $0.call.state.callSettings.videoOn == false }
                     .assertEventuallyInMainActor { $0.call.currentUserHasCapability(.sendVideo) == false }
             }

@@ -63,6 +63,30 @@ final class MicrophoneManager_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(callController.timesCalled(.changeAudioState), 0)
     }
 
+    func test_initialStatusDisabled_enable_whenControllerThrows_clearsUpdatingState() async throws {
+        let callController = MockCallController()
+        callController.stub(for: .changeAudioState, with: ClientError.MissingPermissions())
+        let subject = MicrophoneManager(
+            callController: callController,
+            initialStatus: .disabled
+        )
+
+        do {
+            try await subject.enable()
+            XCTFail("enable should fail when controller throws")
+        } catch {
+            XCTAssertTrue(error is ClientError.MissingPermissions)
+        }
+        do {
+            try await subject.enable()
+            XCTFail("enable should fail when controller throws")
+        } catch {
+            XCTAssertTrue(error is ClientError.MissingPermissions)
+        }
+
+        XCTAssertEqual(callController.timesCalled(.changeAudioState), 2)
+    }
+
     // MARK: - disable
 
     func test_initialStatusEnabled_disable_statusDoesNotChangeUntilCallSettingsUpdate() async throws {

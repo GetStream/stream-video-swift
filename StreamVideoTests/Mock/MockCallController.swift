@@ -180,6 +180,9 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
     override func changeVideoState(isEnabled: Bool) async throws {
         stubbedFunctionInput[.changeVideoState]?
             .append(.changeVideoState(isEnabled))
+        if let error = stubbedFunction[.changeVideoState] as? Error {
+            throw error
+        }
     }
 
     override func changeAudioState(
@@ -190,6 +193,9 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
     ) async throws {
         stubbedFunctionInput[.changeAudioState]?
             .append(.changeAudioState(isEnabled))
+        if let error = stubbedFunction[.changeAudioState] as? Error {
+            throw error
+        }
     }
 
     override func changeCameraMode(position: CameraPosition) async throws {

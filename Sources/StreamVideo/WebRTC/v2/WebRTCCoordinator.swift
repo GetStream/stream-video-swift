@@ -169,9 +169,9 @@ final class WebRTCCoordinator: @unchecked Sendable {
         file: StaticString = #file,
         function: StaticString = #function,
         line: UInt = #line
-    ) async {
-        await stateAdapter
-            .enqueueCallSettings(
+    ) async throws {
+        try await stateAdapter
+            .updateCallSettings(
                 functionName: function,
                 fileName: file,
                 lineNumber: line
@@ -188,9 +188,9 @@ final class WebRTCCoordinator: @unchecked Sendable {
     /// Changes the video state (enabled/disabled) for the call.
     ///
     /// - Parameter isEnabled: Whether the video should be enabled.
-    func changeVideoState(isEnabled: Bool) async {
-        await stateAdapter
-            .enqueueCallSettings { $0.withUpdatedVideoState(isEnabled) }
+    func changeVideoState(isEnabled: Bool) async throws {
+        try await stateAdapter
+            .updateCallSettings { $0.withUpdatedVideoState(isEnabled) }
     }
 
     /// Changes the audio output state (e.g., speaker or headphones).

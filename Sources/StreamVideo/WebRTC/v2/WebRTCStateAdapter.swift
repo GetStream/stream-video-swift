@@ -579,63 +579,36 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
                 return
             }
 
-            let currentCallSettings = await callSettings
-            let newCallSettings = operation(currentCallSettings)
-            let updatedCallSettings = await permissionsAdapter
-                .willSet(callSettings: newCallSettings)
-
-            guard
-                updatedCallSettings != currentCallSettings
-            else {
-                return
-            }
-
-            /// Prevents local media from being enabled when the user has already
-            /// lost the relevant permissions. This keeps actor state aligned with
-            /// server-side capabilities for audio-room moderation flows.
-            let ownCapabilities = await self.ownCapabilities
-            guard
-                ownCapabilities.allows(callSettings: updatedCallSettings)
-            else {
-                log.warning(
-                    "Unable to update callSettings:\(updatedCallSettings) due to missing capabilities:\(ownCapabilities)",
-                    subsystems: .webRTC,
-                    functionName: functionName,
-                    fileName: fileName,
-                    lineNumber: lineNumber
-                )
-                return
-            }
-
-            await set(callSettings: updatedCallSettings)
-            log.debug(
-                "CallSettings updated \(currentCallSettings) -> \(updatedCallSettings)",
-                subsystems: .webRTC,
+            try await self.processCallSettingsUpdate(
                 functionName: functionName,
                 fileName: fileName,
-                lineNumber: lineNumber
+                lineNumber: lineNumber,
+                throwsOnMissingCapabilities: false,
+                operation
             )
+        }
+    }
 
+    func updateCallSettings(
+        functionName: StaticString = #function,
+        fileName: StaticString = #fileID,
+        lineNumber: UInt = #line,
+        _ operation: @Sendable @escaping (CallSettings) -> CallSettings
+    ) async throws {
+        try await callSettingsProcessingQueue.addSynchronousTaskOperation {
+            [weak self] in
             guard
-                let publisher = await self.publisher
+                let self
             else {
                 return
             }
 
-            try await publisher.didUpdateCallSettings(updatedCallSettings)
-
-            if updatedCallSettings.cameraPosition != currentCallSettings.cameraPosition {
-                try await publisher.didUpdateCameraPosition(
-                    updatedCallSettings.cameraPosition == .back ? .back : .front
-                )
-            }
-
-            log.debug(
-                "Publisher callSettings updated: \(updatedCallSettings).",
-                subsystems: .webRTC,
+            try await self.processCallSettingsUpdate(
                 functionName: functionName,
                 fileName: fileName,
-                lineNumber: lineNumber
+                lineNumber: lineNumber,
+                throwsOnMissingCapabilities: true,
+                operation
             )
         }
     }
@@ -684,6 +657,73 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
                 log.error(error, subsystems: .webRTC)
             }
         }
+    }
+
+    private func processCallSettingsUpdate(
+        functionName: StaticString,
+        fileName: StaticString,
+        lineNumber: UInt,
+        throwsOnMissingCapabilities: Bool,
+        _ operation: @Sendable @escaping (CallSettings) -> CallSettings
+    ) async throws {
+        let currentCallSettings = callSettings
+        let newCallSettings = operation(currentCallSettings)
+        let updatedCallSettings = await permissionsAdapter
+            .willSet(callSettings: newCallSettings)
+
+        guard
+            updatedCallSettings != currentCallSettings
+        else {
+            return
+        }
+
+        let ownCapabilities = ownCapabilities
+        guard
+            ownCapabilities.allows(callSettings: updatedCallSettings)
+        else {
+            log.warning(
+                "Unable to update callSettings:\(updatedCallSettings) due to missing capabilities:\(ownCapabilities)",
+                subsystems: .webRTC,
+                functionName: functionName,
+                fileName: fileName,
+                lineNumber: lineNumber
+            )
+            if throwsOnMissingCapabilities {
+                throw ClientError.MissingPermissions()
+            }
+            return
+        }
+
+        set(callSettings: updatedCallSettings)
+        log.debug(
+            "CallSettings updated \(currentCallSettings) -> \(updatedCallSettings)",
+            subsystems: .webRTC,
+            functionName: functionName,
+            fileName: fileName,
+            lineNumber: lineNumber
+        )
+
+        guard
+            let publisher
+        else {
+            return
+        }
+
+        try await publisher.didUpdateCallSettings(updatedCallSettings)
+
+        if updatedCallSettings.cameraPosition != currentCallSettings.cameraPosition {
+            try await publisher.didUpdateCameraPosition(
+                updatedCallSettings.cameraPosition == .back ? .back : .front
+            )
+        }
+
+        log.debug(
+            "Publisher callSettings updated: \(updatedCallSettings).",
+            subsystems: .webRTC,
+            functionName: functionName,
+            fileName: fileName,
+            lineNumber: lineNumber
+        )
     }
 
     func trace(_ trace: WebRTCTrace) {
