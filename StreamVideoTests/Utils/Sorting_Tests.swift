@@ -818,6 +818,319 @@ final class Sorting_Tests: XCTestCase, @unchecked Sendable {
         )
     }
 
+    // MARK: - withParticipantSources
+
+    func test_withParticipantSources_firstSourceHasHighestPriority() {
+        let subject = withParticipantSources([.rtmp, .srt, .whip])
+
+        assertSort(
+            [
+                .dummy(source: .srt),
+                .dummy(source: .rtmp)
+            ],
+            comparator: subject,
+            expectedTransformer: { [$0[1], $0[0]] } // rtmp (index 0) beats srt (index 1).
+        )
+    }
+
+    func test_withParticipantSources_laterSourceHasLowerPriority() {
+        let subject = withParticipantSources([.rtmp, .srt, .whip])
+
+        assertSort(
+            [
+                .dummy(source: .whip),
+                .dummy(source: .srt)
+            ],
+            comparator: subject,
+            expectedTransformer: { [$0[1], $0[0]] } // srt (index 1) beats whip (index 2).
+        )
+    }
+
+    func test_withParticipantSources_unlistedSourceRanksLast() {
+        let subject = withParticipantSources([.rtmp, .srt])
+
+        assertSort(
+            [
+                .dummy(source: .webRTCUnspecified),
+                .dummy(source: .srt)
+            ],
+            comparator: subject,
+            expectedTransformer: { [$0[1], $0[0]] } // srt (listed) beats webRTCUnspecified (unlisted).
+        )
+    }
+
+    func test_withParticipantSources_bothUnlisted_orderedSame() {
+        let subject = withParticipantSources([.rtmp])
+
+        assertSort(
+            [
+                .dummy(source: .webRTCUnspecified),
+                .dummy(source: .sip)
+            ],
+            comparator: subject,
+            expectedTransformer: { [$0[0], $0[1]] } // Both unlisted — order unchanged.
+        )
+    }
+
+    func test_withParticipantSources_sameSource_orderedSame() {
+        let subject = withParticipantSources([.rtmp, .srt])
+
+        assertSort(
+            [
+                .dummy(source: .srt),
+                .dummy(source: .srt)
+            ],
+            comparator: subject,
+            expectedTransformer: { [$0[0], $0[1]] }
+        )
+    }
+
+    func test_withParticipantSources_emptySourceList_allUnlisted() {
+        let subject = withParticipantSources([])
+
+        assertSort(
+            [
+                .dummy(source: .rtmp),
+                .dummy(source: .srt)
+            ],
+            comparator: subject,
+            expectedTransformer: { [$0[0], $0[1]] } // All unlisted — order unchanged.
+        )
+    }
+
+    // MARK: - videoIngressSource
+
+    func test_videoIngressSource_rtmpBeforeSrt() {
+        assertSort(
+            [
+                .dummy(source: .srt),
+                .dummy(source: .rtmp)
+            ],
+            comparator: videoIngressSource,
+            expectedTransformer: { [$0[1], $0[0]] } // rtmp has higher priority than srt.
+        )
+    }
+
+    func test_videoIngressSource_srtBeforeWhip() {
+        assertSort(
+            [
+                .dummy(source: .whip),
+                .dummy(source: .srt)
+            ],
+            comparator: videoIngressSource,
+            expectedTransformer: { [$0[1], $0[0]] } // srt has higher priority than whip.
+        )
+    }
+
+    func test_videoIngressSource_whipBeforeRtsp() {
+        assertSort(
+            [
+                .dummy(source: .rtsp),
+                .dummy(source: .whip)
+            ],
+            comparator: videoIngressSource,
+            expectedTransformer: { [$0[1], $0[0]] } // whip has higher priority than rtsp.
+        )
+    }
+
+    func test_videoIngressSource_anyIngressBeforeWebRTC() {
+        assertSort(
+            [
+                .dummy(source: .webRTCUnspecified),
+                .dummy(source: .rtsp)
+            ],
+            comparator: videoIngressSource,
+            expectedTransformer: { [$0[1], $0[0]] } // rtsp (ingress) ranks above webRTCUnspecified.
+        )
+    }
+
+    func test_videoIngressSource_allFourIngressTypes() {
+        assertSort(
+            [
+                .dummy(source: .rtsp),
+                .dummy(source: .whip),
+                .dummy(source: .srt),
+                .dummy(source: .rtmp)
+            ],
+            comparator: videoIngressSource,
+            expectedTransformer: { [$0[3], $0[2], $0[1], $0[0]] } // rtmp, srt, whip, rtsp.
+        )
+    }
+
+    func test_videoIngressSource_sipIsNotIngress() {
+        assertSort(
+            [
+                .dummy(source: .sip),
+                .dummy(source: .rtmp)
+            ],
+            comparator: videoIngressSource,
+            expectedTransformer: { [$0[1], $0[0]] } // rtmp (ingress) ranks above sip (not in list).
+        )
+    }
+
+    func test_videoIngressSource_sameSource_orderedSame() {
+        assertSort(
+            [
+                .dummy(source: .rtmp),
+                .dummy(source: .rtmp)
+            ],
+            comparator: videoIngressSource,
+            expectedTransformer: { [$0[0], $0[1]] }
+        )
+    }
+
+    // MARK: - speakerLayoutSortPreset with ingress
+
+    func test_speakerLayoutSortPreset_ingressParticipantBeforeWebRTC_whenInvisible() {
+        let combined = combineComparators(speakerLayoutSortPreset)
+
+        assertSort(
+            [
+                .dummy(showTrack: false, source: .webRTCUnspecified),
+                .dummy(showTrack: false, source: .rtmp)
+            ],
+            comparator: combined,
+            expectedTransformer: { [$0[1], $0[0]] } // RTMP ingress ranks above plain WebRTC.
+        )
+    }
+
+    func test_speakerLayoutSortPreset_speakingStillBeforeIngress_whenInvisible() {
+        let combined = combineComparators(speakerLayoutSortPreset)
+
+        assertSort(
+            [
+                .dummy(showTrack: false, isSpeaking: false, source: .rtmp),
+                .dummy(showTrack: false, isSpeaking: true, source: .webRTCUnspecified)
+            ],
+            comparator: combined,
+            expectedTransformer: { [$0[1], $0[0]] } // Speaking WebRTC participant still beats silent RTMP.
+        )
+    }
+
+    func test_speakerLayoutSortPreset_multipleIngressTypes_whenInvisible() {
+        let combined = combineComparators(speakerLayoutSortPreset)
+
+        assertSort(
+            [
+                .dummy(showTrack: false, source: .whip),
+                .dummy(showTrack: false, source: .rtmp),
+                .dummy(showTrack: false, source: .webRTCUnspecified)
+            ],
+            comparator: combined,
+            expectedTransformer: { [$0[1], $0[0], $0[2]] } // rtmp, whip, webRTCUnspecified.
+        )
+    }
+
+    // MARK: - paginatedLayoutSortPreset with ingress
+
+    func test_paginatedLayoutSortPreset_ingressParticipantBeforeWebRTC_whenInvisible() {
+        let combined = combineComparators(paginatedLayoutSortPreset)
+
+        assertSort(
+            [
+                .dummy(showTrack: false, source: .webRTCUnspecified),
+                .dummy(showTrack: false, source: .srt)
+            ],
+            comparator: combined,
+            expectedTransformer: { [$0[1], $0[0]] } // SRT ingress ranks above plain WebRTC.
+        )
+    }
+
+    func test_paginatedLayoutSortPreset_dominantSpeakerBeforeIngress_whenInvisible() {
+        let combined = combineComparators(paginatedLayoutSortPreset)
+
+        assertSort(
+            [
+                .dummy(showTrack: false, isDominantSpeaker: false, source: .rtmp),
+                .dummy(showTrack: false, isDominantSpeaker: true, source: .webRTCUnspecified)
+            ],
+            comparator: combined,
+            expectedTransformer: { [$0[1], $0[0]] } // Dominant speaker beats ingress.
+        )
+    }
+
+    func test_paginatedLayoutSortPreset_ingressBeforeVideoPublisher_whenInvisible() {
+        let combined = combineComparators(paginatedLayoutSortPreset)
+
+        assertSort(
+            [
+                .dummy(hasVideo: true, showTrack: false, source: .webRTCUnspecified),
+                .dummy(hasVideo: false, showTrack: false, source: .rtmp)
+            ],
+            comparator: combined,
+            expectedTransformer: { [$0[1], $0[0]] } // RTMP ingress ranks above video-publishing WebRTC.
+        )
+    }
+
+    // MARK: - livestreamOrAudioRoomSortPreset with ingress
+
+    func test_livestreamOrAudioRoomSortPreset_rtmpIngressBeforeWebRTC_whenInvisible() {
+        let combined = combineComparators(livestreamOrAudioRoomSortPreset)
+
+        assertSort(
+            [
+                .dummy(showTrack: false, source: .webRTCUnspecified),
+                .dummy(showTrack: false, source: .rtmp)
+            ],
+            comparator: combined,
+            expectedTransformer: { [$0[1], $0[0]] }
+        )
+    }
+
+    func test_livestreamOrAudioRoomSortPreset_srtIngressBeforeWebRTC_whenInvisible() {
+        let combined = combineComparators(livestreamOrAudioRoomSortPreset)
+
+        assertSort(
+            [
+                .dummy(showTrack: false, source: .webRTCUnspecified),
+                .dummy(showTrack: false, source: .srt)
+            ],
+            comparator: combined,
+            expectedTransformer: { [$0[1], $0[0]] } // SRT also prioritized (was previously only RTMP).
+        )
+    }
+
+    func test_livestreamOrAudioRoomSortPreset_whipIngressBeforeWebRTC_whenInvisible() {
+        let combined = combineComparators(livestreamOrAudioRoomSortPreset)
+
+        assertSort(
+            [
+                .dummy(showTrack: false, source: .webRTCUnspecified),
+                .dummy(showTrack: false, source: .whip)
+            ],
+            comparator: combined,
+            expectedTransformer: { [$0[1], $0[0]] }
+        )
+    }
+
+    func test_livestreamOrAudioRoomSortPreset_rtspIngressBeforeWebRTC_whenInvisible() {
+        let combined = combineComparators(livestreamOrAudioRoomSortPreset)
+
+        assertSort(
+            [
+                .dummy(showTrack: false, source: .webRTCUnspecified),
+                .dummy(showTrack: false, source: .rtsp)
+            ],
+            comparator: combined,
+            expectedTransformer: { [$0[1], $0[0]] }
+        )
+    }
+
+    func test_livestreamOrAudioRoomSortPreset_ingressPriorityOrder_whenInvisible() {
+        let combined = combineComparators(livestreamOrAudioRoomSortPreset)
+
+        assertSort(
+            [
+                .dummy(showTrack: false, source: .rtsp),
+                .dummy(showTrack: false, source: .srt),
+                .dummy(showTrack: false, source: .rtmp),
+                .dummy(showTrack: false, source: .whip)
+            ],
+            comparator: combined,
+            expectedTransformer: { [$0[2], $0[1], $0[3], $0[0]] } // rtmp, srt, whip, rtsp.
+        )
+    }
+
     // MARK: - Private Helpers
 
     private func assertSort(
