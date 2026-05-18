@@ -115,4 +115,5 @@ public nonisolated func withParticipantSources(_ sources: [ParticipantSource]) -
 
 /// A comparator that surfaces video-ingest participants (RTMP, SRT, WHIP, RTSP)
 /// ahead of regular WebRTC participants, in that priority order.
-public nonisolated(unsafe) let videoIngressSource: StreamSortComparator<CallParticipant> = withParticipantSources([.rtmp, .srt, .whip, .rtsp])
+public nonisolated(unsafe) let videoIngressSource: StreamSortComparator<CallParticipant> =
+    withParticipantSources([.rtmp, .srt, .whip, .rtsp])
