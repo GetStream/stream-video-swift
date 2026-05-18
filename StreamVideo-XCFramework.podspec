@@ -20,7 +20,7 @@ Pod::Spec.new do |spec|
   spec.vendored_frameworks = "#{spec.module_name}.xcframework", 'Frameworks/StreamWebRTC.xcframework'
   spec.preserve_paths = "#{spec.module_name}.xcframework/*", 'Frameworks/*'
 
-  spec.dependency('SwiftProtobuf', '~> 1.29')
+  spec.dependency('SwiftProtobuf', '1.37.0')
 
   spec.prepare_command = <<-CMD
     mkdir -p Frameworks/
