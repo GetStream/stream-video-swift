@@ -99,3 +99,21 @@ public nonisolated func participantSource(_ source: ParticipantSource) -> Stream
         return .orderedSame
     }
 }
+
+/// A comparator creator that ranks participants by their source priority.
+/// Sources listed earlier take precedence; participants with unlisted sources
+/// are ranked last.
+public nonisolated func withParticipantSources(_ sources: [ParticipantSource]) -> StreamSortComparator<CallParticipant> {
+    { a, b in
+        let priorityA = sources.firstIndex(of: a.source) ?? Int.max
+        let priorityB = sources.firstIndex(of: b.source) ?? Int.max
+        if priorityA < priorityB { return .orderedAscending }
+        if priorityA > priorityB { return .orderedDescending }
+        return .orderedSame
+    }
+}
+
+/// A comparator that surfaces video-ingest participants (RTMP, SRT, WHIP, RTSP)
+/// ahead of regular WebRTC participants, in that priority order.
+public nonisolated(unsafe) let videoIngressSource: StreamSortComparator<CallParticipant> =
+    withParticipantSources([.rtmp, .srt, .whip, .rtsp])
