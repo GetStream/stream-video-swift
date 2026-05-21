@@ -139,3 +139,5 @@ buildServer.json
 !.codex/environments/environment.toml
 !.codex/scripts/
 !.codex/scripts/*.sh
+.codegraph
+.cursor

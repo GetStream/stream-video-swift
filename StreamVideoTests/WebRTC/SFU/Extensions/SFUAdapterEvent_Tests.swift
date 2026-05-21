@@ -9,7 +9,7 @@ final class SFUAdapterEvent_Tests: XCTestCase, @unchecked Sendable {
 
     func test_CreateEvent() {
         let event = SFUAdapter.CreateEvent(hostname: "example.com")
-        XCTAssertEqual(event.traceTag, "create")
+        XCTAssertEqual(event.traceTag, "sfu.create")
         XCTAssertEqual(event.traceData?.value as? [String: String], ["url": "example.com"])
     }
 

@@ -71,10 +71,9 @@ final class WebRTCTracesAdapter: WebRTCTracing, @unchecked Sendable {
     /// The peer connection coordinator for the publishing peer connection.
     ///
     /// Assigning a different coordinator instance rebinds tracing for the
-    /// publisher role and emits a synthetic `create` trace for that new
-    /// peer connection. Reassigning the same instance is ignored so reconnect
-    /// flows do not emit duplicate synthetic `create` traces. Setting this to
-    /// `nil` removes the current publisher subscription.
+    /// publisher role. Reassigning the same instance is ignored so reconnect
+    /// bookkeeping does not attach duplicate event subscriptions. Setting this
+    /// to `nil` removes the current publisher subscription.
     var publisher: RTCPeerConnectionCoordinator? {
         didSet { didUpdate(publisher: publisher, oldValue: oldValue) }
     }
@@ -82,10 +81,9 @@ final class WebRTCTracesAdapter: WebRTCTracing, @unchecked Sendable {
     /// The peer connection coordinator for the subscribing peer connection.
     ///
     /// Assigning a different coordinator instance rebinds tracing for the
-    /// subscriber role and emits a synthetic `create` trace for that new
-    /// peer connection. Reassigning the same instance is ignored so reconnect
-    /// flows do not emit duplicate synthetic `create` traces. Setting this to
-    /// `nil` removes the current subscriber subscription.
+    /// subscriber role. Reassigning the same instance is ignored so reconnect
+    /// bookkeeping does not attach duplicate event subscriptions. Setting this
+    /// to `nil` removes the current subscriber subscription.
     var subscriber: RTCPeerConnectionCoordinator? {
         didSet { didUpdate(subscriber: subscriber, oldValue: oldValue) }
     }
@@ -282,8 +280,8 @@ final class WebRTCTracesAdapter: WebRTCTracing, @unchecked Sendable {
     /// Rebinds publisher tracing when the coordinator instance changes.
     ///
     /// Reassigning the same coordinator instance is ignored so reconnect
-    /// bookkeeping does not emit duplicate synthetic `create` traces. Setting
-    /// the coordinator to `nil` removes the active publisher subscription.
+    /// bookkeeping does not attach duplicate event subscriptions. Setting the
+    /// coordinator to `nil` removes the active publisher subscription.
     private func didUpdate(
         publisher: RTCPeerConnectionCoordinator?,
         oldValue: RTCPeerConnectionCoordinator?
@@ -310,8 +308,8 @@ final class WebRTCTracesAdapter: WebRTCTracing, @unchecked Sendable {
     /// Rebinds subscriber tracing when the coordinator instance changes.
     ///
     /// Reassigning the same coordinator instance is ignored so reconnect
-    /// bookkeeping does not emit duplicate synthetic `create` traces. Setting
-    /// the coordinator to `nil` removes the active subscriber subscription.
+    /// bookkeeping does not attach duplicate event subscriptions. Setting the
+    /// coordinator to `nil` removes the active subscriber subscription.
     private func didUpdate(
         subscriber: RTCPeerConnectionCoordinator?,
         oldValue: RTCPeerConnectionCoordinator?
