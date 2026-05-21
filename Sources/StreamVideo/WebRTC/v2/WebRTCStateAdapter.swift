@@ -343,6 +343,16 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
             audioDeviceModule: peerConnectionFactory.audioDeviceModule
         )
 
+        trace(
+            .init(
+                peerType: .publisher,
+                event: StreamRTCPeerConnection.CreatedEvent(
+                    configuration: connectOptions.rtcConfiguration,
+                    hostname: sfuAdapter.host
+                )
+            )
+        )
+
         let subscriber = rtcPeerConnectionCoordinatorFactory.buildCoordinator(
             sessionId: sessionID,
             peerType: .subscriber,
@@ -361,6 +371,16 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
             screenShareSessionProvider: screenShareSessionProvider,
             clientCapabilities: clientCapabilities,
             audioDeviceModule: peerConnectionFactory.audioDeviceModule
+        )
+
+        trace(
+            .init(
+                peerType: .subscriber,
+                event: StreamRTCPeerConnection.CreatedEvent(
+                    configuration: connectOptions.rtcConfiguration,
+                    hostname: sfuAdapter.host
+                )
+            )
         )
 
         publisher

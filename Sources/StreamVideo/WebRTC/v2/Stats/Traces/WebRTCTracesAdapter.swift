@@ -66,7 +66,7 @@ final class WebRTCTracesAdapter: WebRTCTracing, @unchecked Sendable {
     ///
     /// Updating this property will reset trace and stats collection, flush previous
     /// data, and re-attach Combine publishers to new event streams.
-    var sfuAdapter: SFUAdapter? { didSet { didUpdate(sfuAdapter) } }
+    var sfuAdapter: SFUAdapter? { didSet { didUpdate(sfuAdapter, oldValue: oldValue) } }
 
     /// The peer connection coordinator for the publishing peer connection.
     ///
@@ -239,8 +239,8 @@ final class WebRTCTracesAdapter: WebRTCTracing, @unchecked Sendable {
     ///
     /// Attaches new Combine subscriptions to event streams, flushes previous buckets,
     /// and emits an SFU "created" event as the first trace for the new adapter.
-    private func didUpdate(_ sfuAdapter: SFUAdapter?) {
-        guard let sfuAdapter else {
+    private func didUpdate(_ sfuAdapter: SFUAdapter?, oldValue: SFUAdapter?) {
+        guard let sfuAdapter, sfuAdapter !== oldValue else {
             return
         }
 
@@ -305,16 +305,6 @@ final class WebRTCTracesAdapter: WebRTCTracing, @unchecked Sendable {
             .log(.debug, subsystems: .webRTC) { "Trace tag:\($0.tag) create for id:\($0.id) at timestamp:\($0.timestamp)." }
             .sink { [weak self] in self?.peerConnectionBucket.append($0) }
             .store(in: disposableBag, key: DisposableKey.publisher.rawValue)
-
-        peerConnectionBucket.append(
-            .init(
-                peerType: .publisher,
-                event: StreamRTCPeerConnection.CreatedEvent(
-                    configuration: peerConnection.configuration,
-                    hostname: sfuAdapter?.host ?? ""
-                )
-            )
-        )
     }
 
     /// Rebinds subscriber tracing when the coordinator instance changes.
@@ -343,15 +333,5 @@ final class WebRTCTracesAdapter: WebRTCTracing, @unchecked Sendable {
             .log(.debug, subsystems: .webRTC) { "Trace tag:\($0.tag) create for id:\($0.id) at timestamp:\($0.timestamp)." }
             .sink { [weak self] in self?.peerConnectionBucket.append($0) }
             .store(in: disposableBag, key: DisposableKey.subscriber.rawValue)
-
-        peerConnectionBucket.append(
-            .init(
-                peerType: .subscriber,
-                event: StreamRTCPeerConnection.CreatedEvent(
-                    configuration: peerConnection.configuration,
-                    hostname: sfuAdapter?.host ?? ""
-                )
-            )
-        )
     }
 }

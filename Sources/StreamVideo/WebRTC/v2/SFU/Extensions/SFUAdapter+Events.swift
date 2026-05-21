@@ -9,7 +9,7 @@ extension SFUAdapter {
     /// Indicates that an SFUAdapter was created for a given host.
     struct CreateEvent: SFUAdapterEvent, Equatable {
         var hostname: String
-        var traceTag: String { "create" }
+        var traceTag: String { "sfu.create" }
         var traceData: AnyEncodable? { .init(["url": hostname]) }
     }
 
