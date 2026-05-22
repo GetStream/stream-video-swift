@@ -87,40 +87,73 @@ final class WebRTCTracesAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertTrue(idx1 < idx3 && idx2 < idx3)
     }
 
-    func test_publisher_whenSameCoordinatorIsReassigned_doesNotEmitDuplicateCreateTrace_() throws {
+    func test_sfuAdapter_whenSameInstanceIsReassigned_doesNotEmitDuplicateCreateTrace_() throws {
+        let sfuStack = MockSFUStack()
+
+        subject.sfuAdapter = sfuStack.adapter
+
+        XCTAssertEqual(sfuCreateTraces(in: subject.flushTraces()).count, 1)
+
+        subject.sfuAdapter = sfuStack.adapter
+
+        XCTAssertTrue(sfuCreateTraces(in: subject.flushTraces()).isEmpty)
+    }
+
+    func test_sfuAdapter_whenInstanceChanges_emitsCreateTraceForReplacement_() throws {
+        let first = MockSFUStack()
+        let second = MockSFUStack()
+
+        subject.sfuAdapter = first.adapter
+        _ = subject.flushTraces()
+
+        subject.sfuAdapter = second.adapter
+
+        let createTraces = sfuCreateTraces(in: subject.flushTraces())
+        XCTAssertEqual(createTraces.count, 1)
+        XCTAssertEqual(
+            (createTraces.first?.data?.value as? [String: String])?["url"],
+            second.adapter.host
+        )
+    }
+
+    func test_publisher_whenSameCoordinatorIsReassigned_doesNotAttachDuplicateSubscriptions_() throws {
         let coordinator = try makeCoordinator(peerType: .publisher)
 
         subject.publisher = coordinator
-
-        XCTAssertEqual(createTraces(for: "publisher", in: subject.flushTraces()).count, 1)
+        coordinator.stubEventSubject.send(StreamRTCPeerConnection.CloseEvent())
+        XCTAssertEqual(closeTraces(for: "publisher", in: subject.flushTraces()).count, 1)
 
         subject.publisher = coordinator
+        coordinator.stubEventSubject.send(StreamRTCPeerConnection.CloseEvent())
 
-        XCTAssertTrue(createTraces(for: "publisher", in: subject.flushTraces()).isEmpty)
+        XCTAssertEqual(closeTraces(for: "publisher", in: subject.flushTraces()).count, 1)
     }
 
-    func test_subscriber_whenSameCoordinatorIsReassigned_doesNotEmitDuplicateCreateTrace_() throws {
+    func test_subscriber_whenSameCoordinatorIsReassigned_doesNotAttachDuplicateSubscriptions_() throws {
         let coordinator = try makeCoordinator(peerType: .subscriber)
 
         subject.subscriber = coordinator
-
-        XCTAssertEqual(createTraces(for: "subscriber", in: subject.flushTraces()).count, 1)
+        coordinator.stubEventSubject.send(StreamRTCPeerConnection.CloseEvent())
+        XCTAssertEqual(closeTraces(for: "subscriber", in: subject.flushTraces()).count, 1)
 
         subject.subscriber = coordinator
+        coordinator.stubEventSubject.send(StreamRTCPeerConnection.CloseEvent())
 
-        XCTAssertTrue(createTraces(for: "subscriber", in: subject.flushTraces()).isEmpty)
+        XCTAssertEqual(closeTraces(for: "subscriber", in: subject.flushTraces()).count, 1)
     }
 
-    func test_publisher_whenCoordinatorChanges_emitsCreateTraceForReplacement_() throws {
+    func test_publisher_whenCoordinatorChanges_rebindsToReplacementEvents_() throws {
         let first = try makeCoordinator(peerType: .publisher)
         let second = try makeCoordinator(peerType: .publisher)
 
         subject.publisher = first
+        first.stubEventSubject.send(StreamRTCPeerConnection.CloseEvent())
         _ = subject.flushTraces()
 
         subject.publisher = second
+        second.stubEventSubject.send(StreamRTCPeerConnection.CloseEvent())
 
-        XCTAssertEqual(createTraces(for: "publisher", in: subject.flushTraces()).count, 1)
+        XCTAssertEqual(closeTraces(for: "publisher", in: subject.flushTraces()).count, 1)
     }
 
     func test_subscriber_whenCleared_stopsObservingEventsFromPreviousCoordinator_() throws {
@@ -153,10 +186,14 @@ final class WebRTCTracesAdapter_Tests: XCTestCase, @unchecked Sendable {
         )
     }
 
-    private func createTraces(
+    private func sfuCreateTraces(in traces: [WebRTCTrace]) -> [WebRTCTrace] {
+        traces.filter { $0.id == "sfu" && $0.tag == "sfu.create" }
+    }
+
+    private func closeTraces(
         for id: String,
         in traces: [WebRTCTrace]
     ) -> [WebRTCTrace] {
-        traces.filter { $0.id == id && $0.tag == "create" }
+        traces.filter { $0.id == id && $0.tag == "close" }
     }
 }

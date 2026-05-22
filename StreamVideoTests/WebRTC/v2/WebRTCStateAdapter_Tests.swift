@@ -540,6 +540,31 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         )
     }
 
+    func test_configurePeerConnections_shouldTracePeerConnectionCreateEvents() async throws {
+        let mockStatsAdapter = MockWebRTCStatsAdapter()
+        await subject.set(statsAdapter: mockStatsAdapter)
+        let sfuStack = MockSFUStack()
+        await subject.set(sfuAdapter: sfuStack.adapter)
+        await subject.enqueueOwnCapabilities { [.sendAudio, .sendVideo] }
+
+        try await subject.configurePeerConnections()
+
+        let traces = mockStatsAdapter.recordedInputPayload(WebRTCTrace.self, for: .trace) ?? []
+        let createTraces = traces.filter { $0.tag == "create" }
+        XCTAssertEqual(createTraces.count, 2)
+        XCTAssertEqual(
+            Set(createTraces.compactMap(\.id)),
+            Set(["publisher", "subscriber"])
+        )
+        createTraces.forEach { trace in
+            let payload = trace.data?.value as? [String: AnyEncodable]
+            XCTAssertEqual(
+                payload?["url"]?.value as? String,
+                sfuStack.adapter.host
+            )
+        }
+    }
+
     func test_configurePeerConnections_withSFU_completesSetUp() async throws {
         let sfuStack = MockSFUStack()
         await subject.set(sfuAdapter: sfuStack.adapter)

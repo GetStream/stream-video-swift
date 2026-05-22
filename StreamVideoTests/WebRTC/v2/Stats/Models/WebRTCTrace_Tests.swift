@@ -37,7 +37,7 @@ final class WebRTCTrace_Tests: XCTestCase, @unchecked Sendable {
         let trace = WebRTCTrace(event: event)
 
         XCTAssertEqual(trace.id, "sfu")
-        XCTAssertEqual(trace.tag, "create")
+        XCTAssertEqual(trace.tag, "sfu.create")
         XCTAssertEqual((trace.data?.value as? [String: String])?["url"], event.hostname)
     }
 
