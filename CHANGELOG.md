@@ -4,6 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### 🔄 Changed
+
+# [1.47.1](https://github.com/GetStream/stream-video-swift/releases/tag/1.47.1)
+_May 25, 2026_
+
 ### 🐞 Fixed
 - An audio issue that can cause the local AVAudioEngine to fail to initialise.[#1148](https://github.com/GetStream/stream-video-swift/pull/1148)
 
