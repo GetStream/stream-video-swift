@@ -904,6 +904,60 @@ extension Stream_Video_Sfu_Models_ClientCapability: CaseIterable {
 
 #endif  // swift(>=4.2)
 
+/// DegradationPreference represents the RTCDegradationPreference from WebRTC.
+/// See https://developer.mozilla.org/en-US/docs/Web/API/RTCRtpSender/setParameters#degradationpreference
+enum Stream_Video_Sfu_Models_DegradationPreference: SwiftProtobuf.Enum {
+  typealias RawValue = Int
+  case unspecified // = 0
+  case balanced // = 1
+  case maintainFramerate // = 2
+  case maintainResolution // = 3
+  case maintainFramerateAndResolution // = 4
+  case UNRECOGNIZED(Int)
+
+  init() {
+    self = .unspecified
+  }
+
+  init?(rawValue: Int) {
+    switch rawValue {
+    case 0: self = .unspecified
+    case 1: self = .balanced
+    case 2: self = .maintainFramerate
+    case 3: self = .maintainResolution
+    case 4: self = .maintainFramerateAndResolution
+    default: self = .UNRECOGNIZED(rawValue)
+    }
+  }
+
+  var rawValue: Int {
+    switch self {
+    case .unspecified: return 0
+    case .balanced: return 1
+    case .maintainFramerate: return 2
+    case .maintainResolution: return 3
+    case .maintainFramerateAndResolution: return 4
+    case .UNRECOGNIZED(let i): return i
+    }
+  }
+
+}
+
+#if swift(>=4.2)
+
+extension Stream_Video_Sfu_Models_DegradationPreference: CaseIterable {
+  // The compiler won't synthesize support with the UNRECOGNIZED case.
+  static let allCases: [Stream_Video_Sfu_Models_DegradationPreference] = [
+    .unspecified,
+    .balanced,
+    .maintainFramerate,
+    .maintainResolution,
+    .maintainFramerateAndResolution,
+  ]
+}
+
+#endif  // swift(>=4.2)
+
 /// CallState is the current state of the call
 /// as seen by an SFU.
 struct Stream_Video_Sfu_Models_CallState {
@@ -1190,6 +1244,9 @@ struct Stream_Video_Sfu_Models_PublishOption {
 
   /// Audio bitrate profiles for different audio quality profiles.
   var audioBitrateProfiles: [Stream_Video_Sfu_Models_AudioBitrate] = []
+
+  /// The degradation preference for video encoding.
+  var degradationPreference: Stream_Video_Sfu_Models_DegradationPreference = .unspecified
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -1799,6 +1856,7 @@ extension Stream_Video_Sfu_Models_WebsocketReconnectStrategy: @unchecked Sendabl
 extension Stream_Video_Sfu_Models_AndroidThermalState: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_AppleThermalState: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_ClientCapability: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_DegradationPreference: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_CallState: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_ParticipantCount: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_Pin: @unchecked Sendable {}
@@ -1999,6 +2057,16 @@ extension Stream_Video_Sfu_Models_ClientCapability: SwiftProtobuf._ProtoNameProv
     0: .same(proto: "CLIENT_CAPABILITY_UNSPECIFIED"),
     1: .same(proto: "CLIENT_CAPABILITY_SUBSCRIBER_VIDEO_PAUSE"),
     2: .same(proto: "CLIENT_CAPABILITY_COORDINATOR_STATS"),
+  ]
+}
+
+extension Stream_Video_Sfu_Models_DegradationPreference: SwiftProtobuf._ProtoNameProviding {
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    0: .same(proto: "DEGRADATION_PREFERENCE_UNSPECIFIED"),
+    1: .same(proto: "DEGRADATION_PREFERENCE_BALANCED"),
+    2: .same(proto: "DEGRADATION_PREFERENCE_MAINTAIN_FRAMERATE"),
+    3: .same(proto: "DEGRADATION_PREFERENCE_MAINTAIN_RESOLUTION"),
+    4: .same(proto: "DEGRADATION_PREFERENCE_MAINTAIN_FRAMERATE_AND_RESOLUTION"),
   ]
 }
 
@@ -2433,6 +2501,7 @@ extension Stream_Video_Sfu_Models_PublishOption: SwiftProtobuf.Message, SwiftPro
     8: .same(proto: "id"),
     9: .standard(proto: "use_single_layer"),
     10: .standard(proto: "audio_bitrate_profiles"),
+    11: .standard(proto: "degradation_preference"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -2451,6 +2520,7 @@ extension Stream_Video_Sfu_Models_PublishOption: SwiftProtobuf.Message, SwiftPro
       case 8: try { try decoder.decodeSingularInt32Field(value: &self.id) }()
       case 9: try { try decoder.decodeSingularBoolField(value: &self.useSingleLayer) }()
       case 10: try { try decoder.decodeRepeatedMessageField(value: &self.audioBitrateProfiles) }()
+      case 11: try { try decoder.decodeSingularEnumField(value: &self.degradationPreference) }()
       default: break
       }
     }
@@ -2491,6 +2561,9 @@ extension Stream_Video_Sfu_Models_PublishOption: SwiftProtobuf.Message, SwiftPro
     if !self.audioBitrateProfiles.isEmpty {
       try visitor.visitRepeatedMessageField(value: self.audioBitrateProfiles, fieldNumber: 10)
     }
+    if self.degradationPreference != .unspecified {
+      try visitor.visitSingularEnumField(value: self.degradationPreference, fieldNumber: 11)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -2505,6 +2578,7 @@ extension Stream_Video_Sfu_Models_PublishOption: SwiftProtobuf.Message, SwiftPro
     if lhs.id != rhs.id {return false}
     if lhs.useSingleLayer != rhs.useSingleLayer {return false}
     if lhs.audioBitrateProfiles != rhs.audioBitrateProfiles {return false}
+    if lhs.degradationPreference != rhs.degradationPreference {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
