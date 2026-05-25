@@ -1171,6 +1171,8 @@ struct Stream_Video_Sfu_Event_VideoSender {
 
   var publishOptionID: Int32 = 0
 
+  var degradationPreference: Stream_Video_Sfu_Models_DegradationPreference = .unspecified
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
@@ -3274,6 +3276,7 @@ extension Stream_Video_Sfu_Event_VideoSender: SwiftProtobuf.Message, SwiftProtob
     3: .same(proto: "layers"),
     4: .standard(proto: "track_type"),
     5: .standard(proto: "publish_option_id"),
+    6: .standard(proto: "degradation_preference"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -3286,6 +3289,7 @@ extension Stream_Video_Sfu_Event_VideoSender: SwiftProtobuf.Message, SwiftProtob
       case 3: try { try decoder.decodeRepeatedMessageField(value: &self.layers) }()
       case 4: try { try decoder.decodeSingularEnumField(value: &self.trackType) }()
       case 5: try { try decoder.decodeSingularInt32Field(value: &self.publishOptionID) }()
+      case 6: try { try decoder.decodeSingularEnumField(value: &self.degradationPreference) }()
       default: break
       }
     }
@@ -3308,6 +3312,9 @@ extension Stream_Video_Sfu_Event_VideoSender: SwiftProtobuf.Message, SwiftProtob
     if self.publishOptionID != 0 {
       try visitor.visitSingularInt32Field(value: self.publishOptionID, fieldNumber: 5)
     }
+    if self.degradationPreference != .unspecified {
+      try visitor.visitSingularEnumField(value: self.degradationPreference, fieldNumber: 6)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -3316,6 +3323,7 @@ extension Stream_Video_Sfu_Event_VideoSender: SwiftProtobuf.Message, SwiftProtob
     if lhs.layers != rhs.layers {return false}
     if lhs.trackType != rhs.trackType {return false}
     if lhs.publishOptionID != rhs.publishOptionID {return false}
+    if lhs.degradationPreference != rhs.degradationPreference {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
