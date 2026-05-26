@@ -111,6 +111,11 @@ struct PublishOptions: Sendable, Hashable {
         /// be provided by the source or it should be derived by using
         /// `PeerConnectionFactory.codecCapabilities(videoCodec)?.fmtp`
         var fmtp: String
+        /// Preferred WebRTC degradation behavior for constrained bandwidth.
+        ///
+        /// When the SFU omits this value, the SDK keeps its previous behavior
+        /// by defaulting to `.maintainFramerate`.
+        var degradationPreference: Stream_Video_Sfu_Models_DegradationPreference
 
         /// Initializes video options from a server model.
         ///
@@ -129,6 +134,9 @@ struct PublishOptions: Sendable, Hashable {
                 height: Int(publishOption.videoDimension.height)
             )
             fmtp = publishOption.codec.fmtp
+            degradationPreference = publishOption.degradationPreference == .unspecified
+                ? .maintainFramerate
+                : publishOption.degradationPreference
         }
 
         /// Initializes video options with specific parameters.
@@ -141,6 +149,8 @@ struct PublishOptions: Sendable, Hashable {
         ///   - bitrate: Bitrate for the video stream. Defaults to `.maxBitrate`.
         ///   - frameRate: Frame rate for the video stream. Defaults to `30`.
         ///   - dimensions: Dimensions of the video stream. Defaults to `.full`.
+        ///   - degradationPreference: Preferred behavior under constrained
+        ///   bandwidth. Defaults to `.maintainFramerate` for backwards compatibility.
         init(
             id: Int = 0,
             codec: VideoCodec,
@@ -151,7 +161,8 @@ struct PublishOptions: Sendable, Hashable {
             ),
             bitrate: Int = .maxBitrate,
             frameRate: Int = .defaultFrameRate,
-            dimensions: CGSize = .full
+            dimensions: CGSize = .full,
+            degradationPreference: Stream_Video_Sfu_Models_DegradationPreference = .maintainFramerate
         ) {
             self.id = id
             self.codec = codec
@@ -160,6 +171,7 @@ struct PublishOptions: Sendable, Hashable {
             self.bitrate = bitrate
             self.frameRate = frameRate
             self.dimensions = dimensions
+            self.degradationPreference = degradationPreference
         }
 
         /// Combines properties into a hash value for use in hash-based collections.

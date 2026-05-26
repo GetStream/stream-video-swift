@@ -552,6 +552,110 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable 
         }
     }
 
+    // MARK: - changePublishQuality
+
+    func test_publish_withDefaultDegradationPreference_senderWasUpdated() async throws {
+        let screenShareOptions = PublishOptions.VideoPublishOptions.dummy(codec: .h264)
+        publishOptions = [screenShareOptions]
+        let transceiver = try makeTransceiver(of: .screenshare, videoOptions: screenShareOptions)
+        mockPeerConnection.stub(for: .addTransceiver, with: transceiver)
+        screenShareSessionProvider.activeSession = .init(
+            localTrack: subject.primaryTrack,
+            screenSharingType: .inApp,
+            capturer: MockStreamVideoCapturer(),
+            includeAudio: true
+        )
+
+        try await subject.publish()
+
+        await fulfillment {
+            transceiver.sender.parameters.degradationPreference ==
+                NSNumber(value: RTCDegradationPreference.maintainFramerate.rawValue)
+        }
+    }
+
+    func test_publish_withExplicitDegradationPreference_senderWasUpdated() async throws {
+        let screenShareOptions = PublishOptions.VideoPublishOptions.dummy(
+            codec: .h264,
+            degradationPreference: .balanced
+        )
+        publishOptions = [screenShareOptions]
+        let transceiver = try makeTransceiver(of: .screenshare, videoOptions: screenShareOptions)
+        mockPeerConnection.stub(for: .addTransceiver, with: transceiver)
+        screenShareSessionProvider.activeSession = .init(
+            localTrack: subject.primaryTrack,
+            screenSharingType: .inApp,
+            capturer: MockStreamVideoCapturer(),
+            includeAudio: true
+        )
+
+        try await subject.publish()
+
+        await fulfillment {
+            transceiver.sender.parameters.degradationPreference ==
+                NSNumber(value: RTCDegradationPreference.balanced.rawValue)
+        }
+    }
+
+    func test_changePublishQuality_withDegradationPreference_senderWasUpdated() async throws {
+        let transceiver = try makeTransceiver(of: .screenshare, videoOptions: .dummy(codec: .h264))
+        mockPeerConnection.stub(for: .addTransceiver, with: transceiver)
+        screenShareSessionProvider.activeSession = .init(
+            localTrack: subject.primaryTrack,
+            screenSharingType: .inApp,
+            capturer: MockStreamVideoCapturer(),
+            includeAudio: true
+        )
+        try await subject.publish()
+        await fulfillment { self.mockPeerConnection.timesCalled(.addTransceiver) == 1 }
+
+        subject.changePublishQuality(
+            with: [
+                .dummy(
+                    codec: .dummy(name: "h264"),
+                    layers: [],
+                    trackType: .screenShare,
+                    degradationPreference: .maintainResolution
+                )
+            ]
+        )
+
+        await fulfillment {
+            transceiver.sender.parameters.degradationPreference ==
+                NSNumber(value: RTCDegradationPreference.maintainResolution.rawValue)
+        }
+    }
+
+    func test_changePublishQuality_withUnspecifiedDegradationPreference_keepsSenderPreference() async throws {
+        let transceiver = try makeTransceiver(of: .screenshare, videoOptions: .dummy(codec: .h264))
+        mockPeerConnection.stub(for: .addTransceiver, with: transceiver)
+        screenShareSessionProvider.activeSession = .init(
+            localTrack: subject.primaryTrack,
+            screenSharingType: .inApp,
+            capturer: MockStreamVideoCapturer(),
+            includeAudio: true
+        )
+        try await subject.publish()
+        await fulfillment { self.mockPeerConnection.timesCalled(.addTransceiver) == 1 }
+
+        subject.changePublishQuality(
+            with: [
+                .dummy(
+                    codec: .dummy(name: "h264"),
+                    layers: [],
+                    trackType: .screenShare,
+                    degradationPreference: .unspecified
+                )
+            ]
+        )
+
+        await wait(for: 1)
+        XCTAssertEqual(
+            transceiver.sender.parameters.degradationPreference,
+            NSNumber(value: RTCDegradationPreference.maintainFramerate.rawValue)
+        )
+    }
+
     // MARK: - Private
 
     private func makeTransceiver(
