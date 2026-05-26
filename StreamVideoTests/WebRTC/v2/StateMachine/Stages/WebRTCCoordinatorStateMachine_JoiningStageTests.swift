@@ -61,6 +61,48 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
         }
     }
 
+    // MARK: - willTransitionAway
+
+    func test_willTransitionAway_whenJoinResponseIsPending_cancelsPendingJoinTask(
+    ) async throws {
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.reconnectAttempts = 11
+
+        await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
+        mockCoordinatorStack.webRTCAuthenticator.stubbedFunction[.waitForConnect] = Result<Void, Error>.success(())
+
+        let unexpectedTransition = expectation(
+            description: "Joining stage should not transition after cancellation."
+        )
+        unexpectedTransition.isInverted = true
+        subject.transition = { _ in unexpectedTransition.fulfill() }
+
+        _ = subject.transition(from: .fastReconnected(subject.context))
+
+        await fulfillment("Join request was not sent before cancellation.") {
+            let webSocketEngine = self.mockCoordinatorStack.sfuStack.webSocket.mockEngine
+            guard
+                let requests = webSocketEngine.recordedInputPayload(
+                    Stream_Video_Sfu_Event_SfuRequest.self,
+                    for: .sendMessage
+                )
+            else {
+                return false
+            }
+            return !requests.isEmpty
+        }
+
+        subject.willTransitionAway()
+        mockCoordinatorStack.sfuStack.receiveEvent(
+            .sfuEvent(.joinResponse(Stream_Video_Sfu_Event_JoinResponse()))
+        )
+
+        await fulfillment(of: [unexpectedTransition], timeout: 0.2)
+    }
+
     // MARK: - transition from connected with isRejoiningFromSessionID == nil
 
     func test_transition_fromConnectedWithoutCoordinator_updatesReconnectionStrategy() async throws {

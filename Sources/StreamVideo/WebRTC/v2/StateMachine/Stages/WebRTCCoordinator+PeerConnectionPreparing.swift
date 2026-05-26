@@ -100,13 +100,21 @@ extension WebRTCCoordinator.StateMachine.Stage {
             }
         }
 
+        /// Cancels the pending peer-connection readiness wait before leaving
+        /// `.peerConnectionPreparing`.
+        override func willTransitionAway() {
+            super.willTransitionAway()
+            disposableBag.removeAll()
+        }
+
         // MARK: - Private Helpers
 
         /// Waits for publisher peer-connection readiness, reports join telemetry, then
         /// transitions to `.joined`.
         ///
         /// The stage tolerates readiness timeouts by logging warnings and
-        /// continuing join completion.
+        /// continuing join completion. Cancellation stops the stage without
+        /// reporting join completion.
         private func execute() async {
             guard
                 context.coordinator != nil
@@ -115,14 +123,24 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 return
             }
 
-            await perform(for: configuration)
+            do {
+                try await perform(for: configuration)
 
-            await reportTelemetryAndCompletion()
+                try Task.checkCancellation()
 
-            transitionOrDisconnect(.joined(context))
+                await reportTelemetryAndCompletion()
+
+                try Task.checkCancellation()
+
+                transitionOrDisconnect(.joined(context))
+            } catch is CancellationError {
+                return
+            } catch {
+                transitionDisconnectOrError(error)
+            }
         }
 
-        private func perform(for configuration: Configuration) async {
+        private func perform(for configuration: Configuration) async throws {
             guard
                 let coordinator = context.coordinator,
                 let publisher = await coordinator.stateAdapter.publisher,
@@ -133,15 +151,16 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
             switch configuration {
             case .publisherOnly:
-                await waitForPeerConnectionToBePrepared(
+                try await waitForPeerConnectionToBePrepared(
                     publisher,
                     subsystem: .peerConnectionPublisher,
                     timeout: timeout
                 )
             case .publisherAndSubscriber:
-                await withTaskGroup(of: Void.self) { [timeout] group in
+                try await withThrowingTaskGroup(of: Void.self) { [timeout] group in
                     group.addTask { [weak self] in
-                        await self?.waitForPeerConnectionToBePrepared(
+                        guard let self else { return }
+                        try await self.waitForPeerConnectionToBePrepared(
                             publisher,
                             subsystem: .peerConnectionPublisher,
                             timeout: timeout
@@ -149,14 +168,15 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     }
 
                     group.addTask { [weak self] in
-                        await self?.waitForPeerConnectionToBePrepared(
+                        guard let self else { return }
+                        try await self.waitForPeerConnectionToBePrepared(
                             subscriber,
                             subsystem: .peerConnectionSubscriber,
                             timeout: timeout
                         )
                     }
 
-                    await group.waitForAll()
+                    try await group.waitForAll()
                 }
             }
         }
@@ -189,10 +209,12 @@ extension WebRTCCoordinator.StateMachine.Stage {
             _ peerConnection: RTCPeerConnectionCoordinator,
             subsystem: LogSubsystem,
             timeout: TimeInterval
-        ) async {
+        ) async throws {
             guard await canWaitForPeerConnection(peerConnection) else {
                 return
             }
+
+            try Task.checkCancellation()
 
             do {
                 _ = try await peerConnection
@@ -200,6 +222,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     .log(.debug, subsystems: subsystem) { "PeerConnection transitioned to \($0)" }
                     .filter { $0 == .connected }
                     .nextValue(timeout: timeout)
+            } catch is CancellationError {
+                throw CancellationError()
             } catch {
                 log.warning(
                     "PeerConnection wasn't ready in \(timeout) seconds. We continue joining and the connections should be ready after completing.",
