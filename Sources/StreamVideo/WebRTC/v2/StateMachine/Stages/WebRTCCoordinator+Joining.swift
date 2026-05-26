@@ -75,6 +75,13 @@ extension WebRTCCoordinator.StateMachine.Stage {
             }
         }
 
+        /// Cancels in-flight join, rejoin, or migration work before leaving
+        /// `.joining`.
+        override func willTransitionAway() {
+            super.willTransitionAway()
+            disposableBag.removeAll()
+        }
+
         /// Executes the joining process.
         /// - Parameter isFastReconnecting: A flag indicating if this is a fast
         ///   reconnection.
