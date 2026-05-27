@@ -418,10 +418,16 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                 let params = transceiver
                     .sender
                     .parameters
+                if params.setDegradationPreference(videoSender.degradationPreference) {
+                    hasChanges = true
+                }
 
                 guard
                     !params.encodings.isEmpty
                 else {
+                    if hasChanges {
+                        transceiver.sender.parameters = params
+                    }
                     log.warning("Update publish quality, No suitable video encoding quality found", subsystems: .webRTC)
                     return
                 }
@@ -796,6 +802,11 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         else {
             log.warning("Unable to create transceiver for options:\(options).", subsystems: .webRTC)
             return
+        }
+
+        let params = transceiver.sender.parameters
+        if params.setDegradationPreference(options.degradationPreference) {
+            transceiver.sender.parameters = params
         }
         transceiverStorage.set(transceiver, track: track, for: options)
     }
