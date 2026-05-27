@@ -93,12 +93,16 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     private let rtcPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinatorProviding
     private let disposableBag = DisposableBag()
     private let peerConnectionsDisposableBag = DisposableBag()
+    /// Holds temporary peer-connection trace subscriptions created before the
+    /// stats adapter is available.
+    private let pendingPeerConnectionTracesDisposableBag = DisposableBag()
 
     private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
     private let callSettingsProcessingQueue = OperationQueue(maxConcurrentOperationCount: 1)
     /// Publishes WebRTC stage changes so permission prompts can wait until the
     /// coordinator has fully joined.
     private let stagePublisher: AnyPublisher<WebRTCCoordinator.StateMachine.Stage.ID, Never>
+    /// Stores traces emitted before the stats adapter is ready to consume them.
     private var queuedTraces: ConsumableBucket<WebRTCTrace> = .init()
     private lazy var permissionsAdapter: WebRTCPermissionsAdapter = .init(self, stagePublisher: stagePublisher)
 
@@ -231,10 +235,20 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     /// Sets the own capabilities of the current user.
     private func set(ownCapabilities value: Set<OwnCapability>) { self.ownCapabilities = value }
 
-    /// Sets the WebRTC stats reporter.
+    /// Sets the WebRTC stats reporter and drains traces collected before it was
+    /// available.
+    ///
+    /// Peer connections can emit traceable events while they are being created
+    /// and before `JoinedStage` installs the stats adapter. Those events are
+    /// stored in `queuedTraces`; once a stats adapter is provided, the queued
+    /// traces are transferred to it and the temporary peer-connection observers
+    /// are removed so normal stats-adapter tracing can take over.
     func set(statsAdapter value: WebRTCStatsAdapting?) {
         self.statsAdapter = value
         value?.consume(queuedTraces)
+        if value != nil {
+            pendingPeerConnectionTracesDisposableBag.removeAll()
+        }
     }
 
     /// Sets the SFU (Selective Forwarding Unit) adapter and updates the stats
@@ -383,6 +397,20 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
             )
         )
 
+        if let statsAdapter {
+            statsAdapter.publisher = publisher
+            statsAdapter.subscriber = subscriber
+        } else {
+            observePendingPeerConnectionTraces(
+                for: .publisher,
+                peerConnection: publisher
+            )
+            observePendingPeerConnectionTraces(
+                for: .subscriber,
+                peerConnection: subscriber
+            )
+        }
+
         publisher
             .trackPublisher
             .log(.debug, subsystems: .peerConnectionPublisher)
@@ -428,6 +456,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     func cleanUp() async {
         screenShareSessionProvider.activeSession = nil
         videoCaptureSessionProvider.activeSession = nil
+        pendingPeerConnectionTracesDisposableBag.removeAll()
         peerConnectionsDisposableBag.removeAll()
         disposableBag.removeAll()
         await audioSession.deactivate()
@@ -467,6 +496,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         )
 
         peerConnectionsDisposableBag.removeAll()
+        pendingPeerConnectionTracesDisposableBag.removeAll()
         disposableBag.removeAll()
         await audioSession.deactivate()
         await publisher?.prepareForClosing()
@@ -712,6 +742,26 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         } else {
             queuedTraces.append(trace)
         }
+    }
+
+    /// Observes peer-connection events until the stats adapter is installed.
+    ///
+    /// This prevents early publisher/subscriber events, such as `createOffer`
+    /// or ICE state changes, from being lost during join setup. The subscription
+    /// is temporary and is cancelled as soon as a non-nil stats adapter is set.
+    private func observePendingPeerConnectionTraces(
+        for peerType: PeerConnectionType,
+        peerConnection: RTCPeerConnectionCoordinator
+    ) {
+        let queuedTraces = self.queuedTraces
+        peerConnection
+            .eventPublisher
+            .map { WebRTCTrace(peerType: peerType, event: $0) }
+            .log(.debug, subsystems: .webRTC) {
+                "Trace tag:\($0.tag) create for id:\($0.id) at timestamp:\($0.timestamp)."
+            }
+            .sink { queuedTraces.append($0) }
+            .store(in: pendingPeerConnectionTracesDisposableBag)
     }
 
     private func processEnqueuedOperation(

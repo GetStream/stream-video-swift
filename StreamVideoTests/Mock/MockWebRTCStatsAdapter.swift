@@ -59,6 +59,7 @@ final class MockWebRTCStatsAdapter: Mockable, WebRTCStatsAdapting, @unchecked Se
     }
 
     let latestReportSubject: PassthroughSubject<CallStatsReport, Never> = .init()
+    var consumedTraces: [WebRTCTrace] = []
 
     // MARK: - WebRTCStatsAdapting
 
@@ -117,5 +118,6 @@ final class MockWebRTCStatsAdapter: Mockable, WebRTCStatsAdapting, @unchecked Se
 
     func consume(_ bucket: ConsumableBucket<WebRTCTrace>) {
         stubbedFunctionInput[.consume]?.append(.consume(bucket))
+        consumedTraces.append(contentsOf: bucket.consume(flush: true))
     }
 }

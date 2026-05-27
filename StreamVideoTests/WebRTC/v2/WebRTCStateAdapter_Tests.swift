@@ -337,6 +337,36 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         await assertTrueAsync(await subject.statsAdapter === expected)
     }
 
+    func test_setStatsReporter_consumesQueuedPeerConnectionEventTraces() async throws {
+        let sfuStack = MockSFUStack()
+        await subject.set(sfuAdapter: sfuStack.adapter)
+        try await subject.configurePeerConnections()
+        let publisher = try await XCTAsyncUnwrap(await subject.publisher as? MockRTCPeerConnectionCoordinator)
+        publisher.stubEventSubject.send(
+            StreamRTCPeerConnection.CreateOfferEvent(
+                sessionDescription: .init(type: .offer, sdp: "")
+            )
+        )
+        let statsAdapter = MockWebRTCStatsAdapter()
+
+        await subject.set(statsAdapter: statsAdapter)
+
+        XCTAssertTrue(
+            statsAdapter.consumedTraces.contains {
+                $0.id == PeerConnectionType.publisher.rawValue
+                    && $0.tag == "createOffer"
+            }
+        )
+
+        publisher.stubEventSubject.send(StreamRTCPeerConnection.CloseEvent())
+
+        XCTAssertFalse(
+            statsAdapter
+                .recordedInputPayload(WebRTCTrace.self, for: .trace)?
+                .contains { $0.tag == "close" } == true
+        )
+    }
+
     // MARK: - setSFUAdapter
 
     func test_setSFUAdapter_shouldUpdateSFUAdapterAndStatsReporter() async throws {
@@ -563,6 +593,20 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
                 sfuStack.adapter.host
             )
         }
+    }
+
+    func test_configurePeerConnections_withExistingStatsAdapter_updatesStatsAdapterWithPeerConnections() async throws {
+        let mockStatsAdapter = MockWebRTCStatsAdapter()
+        await subject.set(statsAdapter: mockStatsAdapter)
+        let sfuStack = MockSFUStack()
+        await subject.set(sfuAdapter: sfuStack.adapter)
+
+        try await subject.configurePeerConnections()
+
+        let publisher = try await XCTAsyncUnwrap(await subject.publisher)
+        let subscriber = try await XCTAsyncUnwrap(await subject.subscriber)
+        XCTAssertTrue(mockStatsAdapter.publisher === publisher)
+        XCTAssertTrue(mockStatsAdapter.subscriber === subscriber)
     }
 
     func test_configurePeerConnections_withSFU_completesSetUp() async throws {

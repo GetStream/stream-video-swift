@@ -68,7 +68,16 @@ final class WebRTCStatsReporter: WebRTCStatsReporting, @unchecked Sendable {
 
     // MARK: - Manual trigger
 
+    /// Triggers delivery only when no previous delivery is still in flight.
+    ///
+    /// The provider flushes trace buffers while preparing the delivery input.
+    /// Skipping the provider while another delivery is active prevents traces
+    /// from being flushed into a payload that would be discarded.
     func triggerDelivery() {
+        guard canDeliverStats else {
+            return
+        }
+
         guard
             let input = provider()
         else {
@@ -95,6 +104,10 @@ final class WebRTCStatsReporter: WebRTCStatsReporting, @unchecked Sendable {
         log.debug("Delivery scheduled on hostname:\(sfuAdapter?.hostname) with interval:\(interval) seconds.")
     }
 
+    /// Schedules periodic delivery without draining buffers during overlap.
+    ///
+    /// The timer checks `canDeliverStats` before asking the provider for input
+    /// so an overlapping tick does not flush traces that cannot be sent yet.
     private func scheduleDelivery(with interval: TimeInterval) {
         deliveryCancellable?.cancel()
         deliveryCancellable = nil
@@ -106,6 +119,7 @@ final class WebRTCStatsReporter: WebRTCStatsReporting, @unchecked Sendable {
 
         deliveryCancellable = DefaultTimer
             .publish(every: interval)
+            .filter { [weak self] _ in self?.canDeliverStats == true }
             .compactMap { [weak self] _ in self?.provider() }
             .sink { [weak self] in self?.deliverStats($0) }
     }
@@ -114,7 +128,7 @@ final class WebRTCStatsReporter: WebRTCStatsReporting, @unchecked Sendable {
     ///
     /// - Parameter report: The statistics report to deliver.
     private func deliverStats(_ input: Input) {
-        guard activeDeliveryTask == nil else {
+        guard canDeliverStats else {
             return
         }
 
@@ -157,4 +171,7 @@ final class WebRTCStatsReporter: WebRTCStatsReporting, @unchecked Sendable {
         }
         // swiftlint:enable discourage_task_init
     }
+
+    /// Indicates whether collecting and sending a new delivery payload is safe.
+    private var canDeliverStats: Bool { activeDeliveryTask == nil }
 }
