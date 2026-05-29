@@ -9,6 +9,7 @@ final class CallKitAdapterTests: XCTestCase, @unchecked Sendable {
 
     private lazy var callKitPushNotificationAdapter: MockCallKitPushNotificationAdapter! = .init()
     private lazy var callKitService: MockCallKitService! = .init()
+    private lazy var callKitExternalAdapter: CallKitExternalAdapter! = .init()
     private lazy var subject: CallKitAdapter! = .init()
 
     @MainActor
@@ -17,12 +18,14 @@ final class CallKitAdapterTests: XCTestCase, @unchecked Sendable {
         _ = MockStreamVideo()
         InjectedValues[\.callKitPushNotificationAdapter] = callKitPushNotificationAdapter
         InjectedValues[\.callKitService] = callKitService
+        InjectedValues[\.callKitExternalAdapter] = callKitExternalAdapter
         CurrentDevice.currentValue.didUpdate(.phone)
     }
 
     override func tearDown() {
         callKitPushNotificationAdapter = nil
         callKitService = nil
+        callKitExternalAdapter = nil
         subject = nil
         super.tearDown()
     }
@@ -58,6 +61,7 @@ final class CallKitAdapterTests: XCTestCase, @unchecked Sendable {
 
         // Then
         XCTAssertTrue(callKitService.streamVideo === streamVideo)
+        XCTAssertTrue(callKitExternalAdapter.streamVideo === streamVideo)
         XCTAssertTrue(callKitPushNotificationAdapter.registerWasCalled)
     }
 
@@ -67,6 +71,7 @@ final class CallKitAdapterTests: XCTestCase, @unchecked Sendable {
 
         // Then
         XCTAssertNil(callKitService.streamVideo)
+        XCTAssertNil(callKitExternalAdapter.streamVideo)
         XCTAssertTrue(callKitPushNotificationAdapter.unregisterWasCalled)
     }
 

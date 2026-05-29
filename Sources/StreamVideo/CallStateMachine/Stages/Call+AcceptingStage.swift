@@ -24,6 +24,15 @@ extension Call.StateMachine.Stage {
 
     /// Represents the accepting stage in the call state machine.
     final class AcceptingStage: Call.StateMachine.Stage, @unchecked Sendable {
+        /// CallKit bridge used to promote an already reported incoming system
+        /// call when the user accepts from the app's own incoming-call screen.
+        ///
+        /// If CallKit does not know the call, the bridge is a no-op and the
+        /// normal backend accept continues. If CallKit does know the call, this
+        /// asks CallKit to perform `CXAnswerCallAction` before the backend
+        /// accept so the system UI and audio session move to the in-call state.
+        @Injected(\.callKitService) private var callKitService
+
         private let disposableBag = DisposableBag()
 
         /// Creates a new accepting stage with the provided context.
@@ -73,6 +82,14 @@ extension Call.StateMachine.Stage {
                 }
 
                 do {
+                    try Task.checkCancellation()
+
+                    // Keep CallKit in sync before the backend accept. This
+                    // covers foreground incoming calls that were already
+                    // reported to CallKit but accepted from the app UI instead
+                    // of the native CallKit answer affordance.
+                    try await callKitService.reportExternalIncomingCallConnecting(call)
+
                     try Task.checkCancellation()
 
                     let response = try await call.coordinatorClient.acceptCall(

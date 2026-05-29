@@ -11,6 +11,9 @@ open class CallKitAdapter {
 
     @Injected(\.callKitPushNotificationAdapter) private var callKitPushNotificationAdapter
     @Injected(\.callKitService) private var callKitService
+    /// Observes calls started or accepted from in-app UI and mirrors them to
+    /// CallKit after the SDK has already created the regular `Call` object.
+    @Injected(\.callKitExternalAdapter) private var callKitExternalAdapter
     @Injected(\.currentDevice) private var currentDevice
 
     private var loggedInStateCancellable: AnyCancellable?
@@ -86,6 +89,10 @@ open class CallKitAdapter {
         }
 
         callKitService.streamVideo = streamVideo
+        // Keep the external bridge on the same authenticated client as the
+        // main CallKit service. The bridge only observes SDK state and asks the
+        // service to create CallKit transactions for in-app call flows.
+        callKitExternalAdapter.streamVideo = streamVideo
 
         guard streamVideo != nil else {
             unregisterForIncomingCalls()

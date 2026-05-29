@@ -20,6 +20,7 @@ extension AVCaptureDevice: @retroactive @unchecked Sendable {}
 extension AVCapturePhotoOutput: @retroactive @unchecked Sendable {}
 extension AVCaptureVideoDataOutput: @retroactive @unchecked Sendable {}
 extension CMSampleBuffer: @retroactive @unchecked Sendable {}
+extension CXStartCallAction: @retroactive @unchecked Sendable {}
 extension CXAnswerCallAction: @retroactive @unchecked Sendable {}
 extension CXSetHeldCallAction: @retroactive @unchecked Sendable {}
 extension CXSetMutedCallAction: @retroactive @unchecked Sendable {}
@@ -46,6 +47,7 @@ extension AVCapturePhotoOutput: @unchecked Sendable {}
 extension AVCaptureVideoDataOutput: @unchecked Sendable {}
 extension CMSampleBuffer: @unchecked Sendable {}
 extension CXAnswerCallAction: @unchecked Sendable {}
+extension CXStartCallAction: @unchecked Sendable {}
 extension CXSetHeldCallAction: @unchecked Sendable {}
 extension CXSetMutedCallAction: @unchecked Sendable {}
 extension KeyPath: @unchecked Sendable {}

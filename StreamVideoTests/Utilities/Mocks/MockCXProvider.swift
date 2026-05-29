@@ -9,6 +9,8 @@ final class MockCXProvider: CXProvider {
     enum Invocation {
         case reportNewIncomingCall(uuid: UUID, update: CXCallUpdate, completion: (Error?) -> Void)
         case reportCall(uuid: UUID, endedAt: Date?, reason: CXCallEndedReason)
+        case reportOutgoingCallStartedConnecting(uuid: UUID, date: Date?)
+        case reportOutgoingCallConnected(uuid: UUID, date: Date?)
     }
 
     private(set) var invocations: [Invocation] = []
@@ -42,6 +44,30 @@ final class MockCXProvider: CXProvider {
                 uuid: UUID,
                 endedAt: dateEnded,
                 reason: endedReason
+            )
+        )
+    }
+
+    override func reportOutgoingCall(
+        with UUID: UUID,
+        startedConnectingAt dateStartedConnecting: Date?
+    ) {
+        invocations.append(
+            .reportOutgoingCallStartedConnecting(
+                uuid: UUID,
+                date: dateStartedConnecting
+            )
+        )
+    }
+
+    override func reportOutgoingCall(
+        with UUID: UUID,
+        connectedAt dateConnected: Date?
+    ) {
+        invocations.append(
+            .reportOutgoingCallConnected(
+                uuid: UUID,
+                date: dateConnected
             )
         )
     }

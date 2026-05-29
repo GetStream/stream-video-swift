@@ -26,20 +26,42 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
 
     /// Represents a call that is being managed by the service.
     final class CallEntry: Equatable, @unchecked Sendable {
+        /// SDK call object that owns backend and WebRTC lifecycle work.
         var call: Call
+        /// Stable CallKit UUID used for every transaction for this call.
         var callUUID: UUID
+        /// User that created an incoming ringing call, if fetched from backend.
         var createdBy: User?
+        /// Whether CallKit has promoted the call to the active system call.
         var isActive: Bool = false
+        /// Whether the local CallKit ringing timer expired before answer.
         var ringingTimedOut: Bool = false
+        /// Whether backend or another device ended this CallKit entry first.
         var isEndedElsewhere: Bool = false
+        /// Backend rejection or leave reason to apply when CallKit ends it.
         var leaveReason: String?
+        /// Last CallKit presentation metadata associated with this entry.
+        ///
+        /// Incoming calls build this update before calling
+        /// `reportNewIncomingCall`. Outgoing calls build it before requesting
+        /// `CXStartCallAction`. Keeping it with the entry lets follow-up
+        /// CallKit reporting use the same handle, display name, and video
+        /// metadata if a later action needs to refresh the system UI.
+        var callUpdate: CXCallUpdate
 
+        /// Creates a bridge entry between one SDK call and one CallKit UUID.
+        ///
+        /// `callUUID` must stay stable for the whole CallKit lifecycle. CallKit
+        /// treats every action (`start`, `answer`, `mute`, `end`) as belonging
+        /// to that UUID, while the SDK continues to identify the call by `cId`.
         init(
             call: Call,
-            callUUID: UUID = .init()
+            callUUID: UUID = .init(),
+            callUpdate: CXCallUpdate
         ) {
             self.call = call
             self.callUUID = callUUID
+            self.callUpdate = callUpdate
         }
 
         static func == (
@@ -499,10 +521,64 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
 
     open func provider(
         _ provider: CXProvider,
+        perform action: CXStartCallAction
+    ) {
+        // CallKit only sends this action after the SDK has requested a start
+        // transaction. If the UUID is missing, the transaction no longer maps
+        // to an SDK call and must fail so the system does not show a stale call.
+        guard
+            let callEntry = callEntry(for: action.callUUID)
+        else {
+            action.fail()
+            return
+        }
+
+        if action.callUUID != active {
+            // This is the first start action for the outgoing call. Marking the
+            // UUID active makes later CallKit actions, especially end and mute,
+            // use the "active call" branch rather than the ringing reject path.
+            active = action.callUUID
+            callEntry.isActive = true
+            Task(disposableBag: disposableBag) { @MainActor [weak self] in
+                guard let self else { return }
+                // The app still owns the SDK join flow, but WebRTC must know
+                // the call has been handed to CallKit before audio is
+                // configured. This prevents WebRTC from activating the audio
+                // session independently while CallKit owns it.
+                callEntry.call.state.joinSource = .callKit(.init {})
+
+                // `startedConnectingAt` moves the system call from "dialing"
+                // to "connecting". The SDK reports "connected" separately once
+                // the same call becomes `StreamVideo.State.activeCall`.
+                callProvider.reportOutgoingCall(
+                    with: action.callUUID,
+                    startedConnectingAt: Date()
+                )
+                action.fulfill()
+            }
+        } else if action.callUUID == active {
+            // Defensive branch for repeated start actions for an already active
+            // UUID. The normal connected transition is reported by
+            // `reportExternalConnectedOutgoingCall(_:)`, but fulfilling here
+            // keeps CallKit from leaving a valid duplicate action pending.
+            Task(disposableBag: disposableBag) { @MainActor [weak self] in
+                guard let self else { return }
+                callProvider.reportOutgoingCall(
+                    with: action.callUUID,
+                    connectedAt: Date()
+                )
+                action.fulfill()
+            }
+        } else {
+            action.fail()
+        }
+    }
+
+    open func provider(
+        _ provider: CXProvider,
         perform action: CXAnswerCallAction
     ) {
         guard
-            action.callUUID != active,
             let callToJoinEntry = callEntry(for: action.callUUID)
         else {
             return action.fail()
@@ -510,64 +586,76 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
 
         ringingTimerCancellable?.cancel()
         ringingTimerCancellable = nil
-        active = action.callUUID
-        callToJoinEntry.call.didPerform(.performAnswerCall)
 
-        Task(disposableBag: disposableBag) { @MainActor [weak self] in
-            guard let self else {
-                return
-            }
-            log
-                .debug(
+        if action.callUUID == active {
+            // The in-app incoming-call screen has already promoted this UUID
+            // before requesting `CXAnswerCallAction`. In that case the SDK
+            // accepting stage continues with the backend accept, so this
+            // delegate path only confirms the CallKit UI transition.
+            action.fulfill()
+            log.debug(
+                "VoIP incoming call with callId:\(callToJoinEntry.call.callId) callType:\(callToJoinEntry.call.callType) callerId:\(callToJoinEntry.createdBy?.id) was answered from inApp call screen.",
+                subsystems: .callKit
+            )
+        } else {
+            active = action.callUUID
+            callToJoinEntry.call.didPerform(.performAnswerCall)
+
+            Task(disposableBag: disposableBag) { @MainActor [weak self] in
+                guard let self else {
+                    return
+                }
+                log.debug(
                     "Answering VoIP incoming call with callId:\(callToJoinEntry.call.callId) callType:\(callToJoinEntry.call.callType) callerId:\(callToJoinEntry.createdBy?.id)."
                 )
 
-            do {
-                // Mark the CallKit accept before the async join work starts so
-                // the UI can keep the call in a transitional state while the
-                // app is waking up.
-                eventPipelineSubject.send(.accept)
-                try await callToJoinEntry.call.accept()
-                // We need to fulfil here the action to allow CallKit to release
-                // the audioSession to the app, for activation.
-                action.fulfill()
-            } catch {
-                log.error(error, subsystems: .callKit)
-                action.fail()
-            }
-
-            do {
-                // Publish the concrete call as soon as the join flow starts so
-                // CallViewModel can present the joining screen even when the
-                // app was launched from CallKit in the background.
-                eventPipelineSubject.send(.joining(callToJoinEntry.call))
-                // Pass a CallKit completion hook through the join flow so the
-                // WebRTC layer can release CallKit's audio session ownership as
-                // soon as it has configured the audio device module.
-                callToJoinEntry.call.state.joinSource = .callKit(.init {
-                    // Allow CallKit to hand audio session activation back to
-                    // the app before we continue configuring audio locally.
+                do {
+                    // Mark the CallKit accept before the async join work starts so
+                    // the UI can keep the call in a transitional state while the
+                    // app is waking up.
+                    eventPipelineSubject.send(.accept)
+                    try await callToJoinEntry.call.accept()
+                    // We need to fulfil here the action to allow CallKit to release
+                    // the audioSession to the app, for activation.
                     action.fulfill()
-                })
+                } catch {
+                    log.error(error, subsystems: .callKit)
+                    action.fail()
+                }
 
-                // Before reach here we should fulfil the action to allow
-                // CallKit to release the audioSession, so that the SDK
-                // can configure and activate it and complete successfully the
-                // peerConnection configuration.
-                try await callToJoinEntry.call.join(
-                    callSettings: callSettings,
-                    policy: .peerConnectionReadinessAware
-                )
-                // Once the call is joined, the regular call state can take
-                // over and the temporary CallKit bridge can stand down.
-                eventPipelineSubject.send(.joined)
-            } catch {
-                callToJoinEntry.call.leave()
-                set(nil, for: action.callUUID)
-                log.error(error, subsystems: .callKit)
-                // Reset the bridge if the CallKit-driven join flow aborts
-                // before the call becomes active.
-                eventPipelineSubject.send(.idle)
+                do {
+                    // Publish the concrete call as soon as the join flow starts so
+                    // CallViewModel can present the joining screen even when the
+                    // app was launched from CallKit in the background.
+                    eventPipelineSubject.send(.joining(callToJoinEntry.call))
+                    // Pass a CallKit completion hook through the join flow so the
+                    // WebRTC layer can release CallKit's audio session ownership as
+                    // soon as it has configured the audio device module.
+                    callToJoinEntry.call.state.joinSource = .callKit(.init {
+                        // Allow CallKit to hand audio session activation back to
+                        // the app before we continue configuring audio locally.
+                        action.fulfill()
+                    })
+
+                    // Before reach here we should fulfil the action to allow
+                    // CallKit to release the audioSession, so that the SDK
+                    // can configure and activate it and complete successfully the
+                    // peerConnection configuration.
+                    try await callToJoinEntry.call.join(
+                        callSettings: callSettings,
+                        policy: .peerConnectionReadinessAware
+                    )
+                    // Once the call is joined, the regular call state can take
+                    // over and the temporary CallKit bridge can stand down.
+                    eventPipelineSubject.send(.joined)
+                } catch {
+                    callToJoinEntry.call.leave()
+                    set(nil, for: action.callUUID)
+                    log.error(error, subsystems: .callKit)
+                    // Reset the bridge if the CallKit-driven join flow aborts
+                    // before the call becomes active.
+                    eventPipelineSubject.send(.idle)
+                }
             }
         }
     }
@@ -912,18 +1000,31 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         callerId: String,
         hasVideo: Bool
     ) -> (UUID, CXCallUpdate) {
-        let update = CXCallUpdate()
         let idComponents = cid.components(separatedBy: ":")
         let uuid = uuidFactory.get()
+        let update = buildCXUpdate(
+            localizedCallerName: localizedCallerName,
+            callerId: callerId,
+            hasVideo: hasVideo
+        )
         if
             idComponents.count >= 2,
             let call = streamVideo?.call(
                 callType: idComponents[0],
                 callId: idComponents[1]
             ) {
-            set(.init(call: call, callUUID: uuid), for: uuid)
+            set(.init(call: call, callUUID: uuid, callUpdate: update), for: uuid)
         }
 
+        return (uuid, update)
+    }
+
+    private func buildCXUpdate(
+        localizedCallerName: String,
+        callerId: String,
+        hasVideo: Bool
+    ) -> CXCallUpdate {
+        let update = CXCallUpdate()
         update.localizedCallerName = localizedCallerName
         update.remoteHandle = CXHandle(type: .generic, value: callerId)
         update.hasVideo = hasVideo
@@ -939,8 +1040,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             update.supportsHolding = false
             update.supportsUngrouping = false
         }
-
-        return (uuid, update)
+        return update
     }
 
     // MARK: - Storage Access
@@ -1049,5 +1149,98 @@ extension InjectedValues {
     public var callKitService: CallKitService {
         get { Self[CallKitService.self] }
         set { Self[CallKitService.self] = newValue }
+    }
+}
+
+extension CallKitService {
+
+    /// Promotes an existing incoming CallKit call after in-app accept.
+    ///
+    /// Incoming calls are normally registered with CallKit when the VoIP push
+    /// arrives, so by the time the app's custom incoming-call screen appears
+    /// this service already has a `CallEntry` and a CallKit UUID. When the user
+    /// taps the in-app accept button, the SDK still has to tell CallKit that the
+    /// system call is no longer ringing. The supported CallKit transition for
+    /// that is a `CXAnswerCallAction`.
+    ///
+    /// The method sets `active` before requesting the transaction so the
+    /// delegate can distinguish this in-app handoff from a CallKit UI answer.
+    /// It also marks the call as `.callKit` sourced so the later WebRTC join
+    /// uses CallKit's audio session ownership.
+    @MainActor
+    func reportExternalIncomingCallConnecting(_ call: Call) async throws {
+        guard let callEntry = callEntry(for: call.cId) else {
+            return
+        }
+
+        callEntry.isActive = true
+        active = callEntry.callUUID
+        call.state.joinSource = .callKit(.init {})
+
+        try await requestTransaction(
+            CXAnswerCallAction(call: callEntry.callUUID)
+        )
+    }
+
+    /// Registers an SDK-created outgoing ringing call with CallKit.
+    ///
+    /// The app starts the call from its own UI, so there is no CallKit UUID yet.
+    /// This method creates one, stores the SDK call beside the CallKit metadata,
+    /// and requests a `CXStartCallAction`. CallKit then calls
+    /// `provider(_:perform:)`, where the service reports the system call as
+    /// connecting.
+    ///
+    /// The provider is touched before the transaction is requested. Without a
+    /// live `CXProvider`, CallKit can reject `CXStartCallAction` with
+    /// `unknownCallProvider`.
+    @MainActor
+    func reportExternalOutgoingCall(_ call: Call) async throws {
+        guard callEntry(for: call.cId) == nil else {
+            return
+        }
+
+        _ = callProvider
+        call.state.joinSource = .callKit(.init {})
+        let update = buildCXUpdate(
+            localizedCallerName: call.state.createdBy?.name ?? "Unknown",
+            callerId: call.state.createdBy?.id ?? "unknown",
+            hasVideo: call.state.callSettings.videoOn
+        )
+
+        let uuid = uuidFactory.get()
+        set(.init(call: call, callUUID: uuid, callUpdate: update), for: uuid)
+
+        let memberIds = call
+            .state
+            .members.map(\.id)
+            .filter { streamVideo?.user.id != $0 }.joined(separator: ",")
+
+        try await requestTransaction(
+            CXStartCallAction(
+                call: uuid,
+                handle: CXHandle(type: .generic, value: memberIds)
+            )
+        )
+    }
+
+    /// Reports that an externally started outgoing CallKit call connected.
+    ///
+    /// The SDK emits this once the same outgoing call becomes
+    /// `StreamVideo.State.activeCall`. At that point the call is no longer just
+    /// ringing locally; WebRTC has joined and CallKit can move the system UI to
+    /// the connected in-call state.
+    @MainActor
+    func reportExternalConnectedOutgoingCall(_ call: Call) async {
+        guard
+            let callEntry = callEntry(for: call.cId),
+            active == callEntry.callUUID
+        else {
+            return
+        }
+
+        callProvider.reportOutgoingCall(
+            with: callEntry.callUUID,
+            connectedAt: Date()
+        )
     }
 }

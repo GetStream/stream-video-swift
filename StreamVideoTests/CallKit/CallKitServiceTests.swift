@@ -580,6 +580,159 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         }
     }
 
+    // MARK: - external CallKit handoff
+
+    @MainActor
+    func test_reportExternalOutgoingCall_requestsStartCallActionAndStoresCallKitJoinSource() async throws {
+        let callUUID = UUID()
+        uuidFactory.getResult = callUUID
+        let call = makeExternalOutgoingCall(remoteUserIds: ["remote"])
+        subject.streamVideo = mockedStreamVideo
+
+        try await subject.reportExternalOutgoingCall(call)
+
+        await fulfillment {
+            self.callController.requestWasCalledWith?.0.actions.last is CXStartCallAction
+        }
+
+        let action = try XCTUnwrap(
+            callController.requestWasCalledWith?.0.actions.last as? CXStartCallAction
+        )
+        XCTAssertEqual(action.callUUID, callUUID)
+        XCTAssertEqual(action.handle.value, "remote")
+
+        guard case .callKit = call.state.joinSource else {
+            return XCTFail("Expected outgoing handoff to mark joinSource as CallKit.")
+        }
+    }
+
+    @MainActor
+    func test_reportExternalOutgoingCall_callAlreadyStored_doesNotRequestSecondStartAction() async throws {
+        let call = makeExternalOutgoingCall(remoteUserIds: ["remote"])
+        subject.streamVideo = mockedStreamVideo
+
+        try await subject.reportExternalOutgoingCall(call)
+        await fulfillment {
+            self.callController.requestWasCalledWith?.0.actions.last is CXStartCallAction
+        }
+
+        callController.reset()
+        try await subject.reportExternalOutgoingCall(call)
+
+        await waitExpectation(timeout: 1)
+        XCTAssertNil(callController.requestWasCalledWith)
+    }
+
+    @MainActor
+    func test_providerStartCall_firstStart_reportsOutgoingCallConnecting() async throws {
+        let callUUID = UUID()
+        uuidFactory.getResult = callUUID
+        let call = makeExternalOutgoingCall(remoteUserIds: ["remote"])
+        subject.streamVideo = mockedStreamVideo
+        try await subject.reportExternalOutgoingCall(call)
+        let action = try XCTUnwrap(
+            callController.requestWasCalledWith?.0.actions.last as? CXStartCallAction
+        )
+        callProvider.reset()
+
+        subject.provider(callProvider, perform: action)
+
+        await fulfillment {
+            if case .reportOutgoingCallStartedConnecting = self.callProvider.invocations.last {
+                return true
+            } else {
+                return false
+            }
+        }
+        guard case let .reportOutgoingCallStartedConnecting(uuid, date) = callProvider.invocations.last else {
+            return XCTFail()
+        }
+        XCTAssertEqual(uuid, callUUID)
+        XCTAssertNotNil(date)
+        XCTAssertEqual(subject.callId, call.callId)
+    }
+
+    @MainActor
+    func test_reportExternalConnectedOutgoingCall_activeCall_reportsOutgoingCallConnected() async throws {
+        let callUUID = UUID()
+        uuidFactory.getResult = callUUID
+        let call = makeExternalOutgoingCall(remoteUserIds: ["remote"])
+        subject.streamVideo = mockedStreamVideo
+        try await subject.reportExternalOutgoingCall(call)
+        let action = try XCTUnwrap(
+            callController.requestWasCalledWith?.0.actions.last as? CXStartCallAction
+        )
+        subject.provider(callProvider, perform: action)
+        await fulfillment {
+            if case .reportOutgoingCallStartedConnecting = self.callProvider.invocations.last {
+                return true
+            } else {
+                return false
+            }
+        }
+        callProvider.reset()
+
+        await subject.reportExternalConnectedOutgoingCall(call)
+
+        guard case let .reportOutgoingCallConnected(uuid, date) = callProvider.invocations.last else {
+            return XCTFail()
+        }
+        XCTAssertEqual(uuid, callUUID)
+        XCTAssertNotNil(date)
+    }
+
+    @MainActor
+    func test_reportExternalIncomingCallConnecting_existingIncomingCall_requestsAnswerCallAction() async throws {
+        let callUUID = UUID()
+        uuidFactory.getResult = callUUID
+        let call = stubCall(response: defaultGetCallResponse)
+        subject.streamVideo = mockedStreamVideo
+        subject.reportIncomingCall(
+            cid,
+            localizedCallerName: localizedCallerName,
+            callerId: callerId,
+            hasVideo: false
+        ) { _ in }
+        await waitExpectation(timeout: 1)
+        callController.reset()
+
+        try await subject.reportExternalIncomingCallConnecting(call)
+
+        let action = try XCTUnwrap(
+            callController.requestWasCalledWith?.0.actions.last as? CXAnswerCallAction
+        )
+        XCTAssertEqual(action.callUUID, callUUID)
+        XCTAssertEqual(subject.callId, call.callId)
+        guard case .callKit = call.state.joinSource else {
+            return XCTFail("Expected incoming handoff to mark joinSource as CallKit.")
+        }
+    }
+
+    @MainActor
+    func test_providerAnswerCall_whenIncomingCallWasAcceptedInApp_doesNotAcceptOrJoinAgain() async throws {
+        let callUUID = UUID()
+        uuidFactory.getResult = callUUID
+        let call = stubCall(response: defaultGetCallResponse)
+        subject.streamVideo = mockedStreamVideo
+        subject.reportIncomingCall(
+            cid,
+            localizedCallerName: localizedCallerName,
+            callerId: callerId,
+            hasVideo: false
+        ) { _ in }
+        await waitExpectation(timeout: 1)
+        try await subject.reportExternalIncomingCallConnecting(call)
+        let action = try XCTUnwrap(
+            callController.requestWasCalledWith?.0.actions.last as? CXAnswerCallAction
+        )
+
+        subject.provider(callProvider, perform: action)
+
+        await waitExpectation(timeout: 1)
+        XCTAssertEqual(call.timesCalled(.accept), 0)
+        XCTAssertEqual(call.timesCalled(.join), 0)
+    }
+
     // MARK: - accept
 
     @MainActor
@@ -1526,6 +1679,21 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         let mockedState = mockedStreamVideo.state
         mockedState.connection = status
         mockedStreamVideo.stub(for: \.state, with: mockedState)
+    }
+
+    @MainActor
+    private func makeExternalOutgoingCall(
+        remoteUserIds: [String],
+        videoOn: Bool = true
+    ) -> MockCall {
+        let call = MockCall(.dummy(callId: callId))
+        let callState = CallState(.dummy())
+        callState.createdBy = user
+        callState.callSettings = .init(audioOn: true, videoOn: videoOn)
+        callState.members = [Member(user: user, updatedAt: Date())]
+            + remoteUserIds.map { Member(user: .init(id: $0), updatedAt: Date()) }
+        call.stub(for: \.state, with: callState)
+        return call
     }
 
     @MainActor
