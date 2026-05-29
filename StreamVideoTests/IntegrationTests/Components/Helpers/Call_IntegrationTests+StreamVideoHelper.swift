@@ -110,5 +110,9 @@ extension Call_IntegrationTests.Helpers {
 
             registeredClients[userId] = nil
         }
+
+        func client(for userId: String) -> StreamVideo? {
+            registeredClients[userId]
+        }
     }
 }
