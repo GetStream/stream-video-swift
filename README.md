@@ -279,9 +279,9 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 
 ### 1.9.0 milestone - June
 
-- [] WebRTC upgrade to the latest version
+- [x] WebRTC upgrade to the latest version
 - [] Reduce SDK size
-- [] External mic support
+- [x] External mic support
 - [] Migrate to Stream Core
 
 ### After 1.8.0
