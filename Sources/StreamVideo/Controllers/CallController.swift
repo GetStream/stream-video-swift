@@ -13,12 +13,22 @@ class CallController: @unchecked Sendable {
         case currentUserBlocked
     }
 
+    private lazy var clientEventReporter: ClientEventReporting = ClientEventReporter(
+        api: defaultAPI,
+        context: .init(
+            userId: user.id,
+            callType: callType,
+            callId: callId
+        )
+    )
+
     private lazy var webRTCCoordinator = webRTCCoordinatorFactory.buildCoordinator(
         user: user,
         apiKey: apiKey,
         callCid: callCid(from: callId, callType: callType),
         videoConfig: videoConfig,
-        callSettings: initialCallSettings
+        callSettings: initialCallSettings,
+        clientEventReporter: clientEventReporter
     ) {
         [weak self, callId] create, ring, migratingFrom, migratingFromList, notify, options in
         if let self {

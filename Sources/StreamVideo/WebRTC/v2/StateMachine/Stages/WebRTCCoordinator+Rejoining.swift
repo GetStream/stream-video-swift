@@ -69,6 +69,10 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         )
                     }
 
+                    // A full rejoin is a new attempt to join the call: start a
+                    // fresh join attempt so a new `join_success_id` is used.
+                    await coordinator.clientEventReporter.reportJoinInitiated()
+
                     try Task.checkCancellation()
 
                     if

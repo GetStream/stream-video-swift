@@ -61,10 +61,17 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 guard let self else { return }
                 do {
                     guard
-                        context.coordinator != nil
+                        let coordinator = context.coordinator
                     else {
                         throw ClientError("WebRCTAdapter instance not available.")
                     }
+
+                    // The backend ended/blocked the call. If a join stage is
+                    // still in progress, report it as a backend-leave failure.
+                    context.peerConnectionConnectReporters.forEach { $0.stop() }
+                    await coordinator
+                        .clientEventReporter
+                        .abortPendingStages(failure: .init(code: .backendLeave))
 
                     try Task.checkCancellation()
 

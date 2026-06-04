@@ -70,6 +70,14 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         throw ClientError("WebRCTAdapter instance not available.")
                     }
 
+                    // If the user leaves while a join stage is still in
+                    // progress, report it as a client-aborted failure so the
+                    // backend records an explicit failure instead of a no-show.
+                    context.peerConnectionConnectReporters.forEach { $0.stop() }
+                    await coordinator
+                        .clientEventReporter
+                        .abortPendingStages(failure: .init(code: .clientAborted))
+
                     try Task.checkCancellation()
 
                     if let sfuAdapter = await coordinator.stateAdapter.sfuAdapter {

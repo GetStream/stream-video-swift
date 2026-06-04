@@ -49,11 +49,15 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 Task(disposableBag: disposableBag) { [weak self] in
                     guard let self else { return }
                     do {
-                        guard context.coordinator != nil else {
+                        guard let coordinator = context.coordinator else {
                             throw ClientError(
                                 "WebRCTCoordinator instance not available."
                             )
                         }
+
+                        // A migration is a new attempt to join the call: start a
+                        // fresh join attempt so a new `join_success_id` is used.
+                        await coordinator.clientEventReporter.reportJoinInitiated()
 
                         try Task.checkCancellation()
 
