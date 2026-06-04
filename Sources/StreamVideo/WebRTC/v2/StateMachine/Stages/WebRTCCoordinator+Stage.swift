@@ -35,6 +35,12 @@ extension WebRTCCoordinator.StateMachine {
             /// migration immediately when the current SFU has no capacity.
             var sfuFullObserver: WebRTCSFUFullObserver?
 
+            /// Observes publisher/subscriber peer-connection state to report the
+            /// ``ClientEventStage/peerConnectionConnect`` event pairs. Retained on
+            /// the context so observation survives the `.joining -> .joined`
+            /// transition until each connection resolves.
+            var peerConnectionConnectReporters: [WebRTCPeerConnectionConnectReporter] = []
+
             var audioSessionWatchdog: WebRTCAudioSessionWatchdog = .init()
 
             var isRejoiningFromSessionID: String?

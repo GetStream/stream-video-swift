@@ -153,16 +153,42 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     /// create an ``SFUAdapter`` instance that we can later use in our
                     /// flow. The initial response is preserved so ``Call.join()`` can be
                     /// completed only once the handshake reaches the connected state.
-                    let (sfuAdapter, response) = try await context
-                        .authenticator
-                        .authenticate(
-                            coordinator: coordinator,
-                            currentSFU: nil,
-                            migratingFromList: nil,
-                            create: create,
-                            ring: ring,
-                            notify: notify,
-                            options: options
+                    ///
+                    /// The `CoordinatorJoin` client event pair brackets the
+                    /// coordinator `JoinCall` REST request.
+                    let coordinatorJoinAttempt = await coordinator
+                        .clientEventReporter
+                        .beginStage(.coordinatorJoin)
+                    let sfuAdapter: SFUAdapter
+                    let response: JoinCallResponse
+                    do {
+                        (sfuAdapter, response) = try await context
+                            .authenticator
+                            .authenticate(
+                                coordinator: coordinator,
+                                currentSFU: nil,
+                                migratingFromList: nil,
+                                create: create,
+                                ring: ring,
+                                notify: notify,
+                                options: options
+                            )
+                    } catch {
+                        await coordinator
+                            .clientEventReporter
+                            .completeStage(
+                                coordinatorJoinAttempt,
+                                retryCount: Int(context.reconnectAttempts),
+                                failure: .init(error)
+                            )
+                        throw error
+                    }
+                    await coordinator
+                        .clientEventReporter
+                        .completeStage(
+                            coordinatorJoinAttempt,
+                            outcome: .success,
+                            retryCount: Int(context.reconnectAttempts)
                         )
 
                     context.initialJoinCallResponse = response

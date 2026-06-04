@@ -321,6 +321,60 @@ extension WebRTCCoordinator.StateMachine.Stage {
             sfuAdapter: SFUAdapter,
             isFastReconnecting: Bool
         ) async throws {
+            // Fast reconnects refresh the WebSocket transparently and must not
+            // emit join-lifecycle client events.
+            guard !isFastReconnecting else {
+                try await performJoin(
+                    coordinator: coordinator,
+                    sfuAdapter: sfuAdapter,
+                    isFastReconnecting: true
+                )
+                return
+            }
+
+            // The `WSJoin` client event pair brackets the SFU signaling join.
+            let wsJoinAttempt = await coordinator
+                .clientEventReporter
+                .beginStage(.wsJoin)
+            do {
+                try await performJoin(
+                    coordinator: coordinator,
+                    sfuAdapter: sfuAdapter,
+                    isFastReconnecting: false
+                )
+            } catch {
+                await coordinator
+                    .clientEventReporter
+                    .completeStage(
+                        wsJoinAttempt,
+                        retryCount: Int(context.reconnectAttempts),
+                        details: .init(
+                            sfuId: context.currentSFU,
+                            callSessionId: context.initialJoinCallResponse?.call.session?.id
+                        ),
+                        failure: .init(error)
+                    )
+                throw error
+            }
+            await coordinator
+                .clientEventReporter
+                .completeStage(
+                    wsJoinAttempt,
+                    outcome: .success,
+                    retryCount: Int(context.reconnectAttempts)
+                )
+        }
+
+        /// Performs the SFU signaling join handshake and peer-connection setup.
+        ///
+        /// - Parameters:
+        ///   - coordinator: The WebRTC coordinator.
+        ///   - sfuAdapter: The SFU adapter.
+        private func performJoin(
+            coordinator: WebRTCCoordinator,
+            sfuAdapter: SFUAdapter,
+            isFastReconnecting: Bool
+        ) async throws {
             if let eventObserver = context.sfuEventObserver {
                 eventObserver.sfuAdapter = sfuAdapter
             } else {
@@ -409,6 +463,11 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 }
 
                 try Task.checkCancellation()
+
+                // Now that the peer connections exist, start reporting the
+                // PeerConnectionConnect client event pairs by observing their
+                // connection state until each resolves.
+                await startPeerConnectionConnectReporting(coordinator: coordinator)
 
                 // Once our PeerConnections have been created we replay the
                 // buffered SFU events that may have arrived before the
@@ -533,6 +592,46 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     for: [firstPublishingParticipant],
                     incomingVideoQualitySettings: .none,
                     trackTypes: [.audio, .video]
+                )
+            }
+        }
+
+        /// Starts observing the publisher and subscriber peer connections so the
+        /// ``ClientEventStage/peerConnectionConnect`` event pairs are reported as
+        /// each connection resolves.
+        ///
+        /// A connection that never starts negotiating (for example the publisher
+        /// of a subscribe-only viewer) emits nothing, which the backend treats as
+        /// "publish not attempted".
+        private func startPeerConnectionConnectReporting(
+            coordinator: WebRTCCoordinator
+        ) async {
+            let stateAdapter = coordinator.stateAdapter
+            let details = ClientEventStageDetails(
+                sfuId: context.currentSFU,
+                callSessionId: context.initialJoinCallResponse?.call.session?.id,
+                userSessionId: await stateAdapter.sessionID
+            )
+            let wasPreviouslyConnected = context.reconnectAttempts > 0
+
+            // Stop any reporters left over from a previous attempt before
+            // starting fresh observation for this one.
+            context.peerConnectionConnectReporters.forEach { $0.stop() }
+            context.peerConnectionConnectReporters = []
+
+            let peerConnections: [(PeerConnectionType, RTCPeerConnectionCoordinator?)] = [
+                (.publisher, await stateAdapter.publisher),
+                (.subscriber, await stateAdapter.subscriber)
+            ]
+
+            context.peerConnectionConnectReporters = peerConnections.compactMap { peerType, peerConnection in
+                guard let peerConnection else { return nil }
+                return WebRTCPeerConnectionConnectReporter(
+                    peerConnectionType: peerType,
+                    statePublisher: peerConnection.connectionStatePublisher,
+                    reporter: coordinator.clientEventReporter,
+                    wasPreviouslyConnected: wasPreviouslyConnected,
+                    details: details
                 )
             }
         }

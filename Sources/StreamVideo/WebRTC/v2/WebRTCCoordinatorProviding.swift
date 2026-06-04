@@ -16,6 +16,7 @@ protocol WebRTCCoordinatorProviding {
     ///   - apiKey: The API key for authenticating WebRTC calls.
     ///   - callCid: The call identifier (callCid) for the session.
     ///   - videoConfig: The video configuration settings for the session.
+    ///   - clientEventReporter: Reports client-side join-lifecycle events.
     ///   - callAuthentication: A closure to handle authentication when
     ///     joining the call.
     /// - Returns: An instance of `WebRTCCoordinator`.
@@ -25,6 +26,7 @@ protocol WebRTCCoordinatorProviding {
         callCid: String,
         videoConfig: VideoConfig,
         callSettings: CallSettings,
+        clientEventReporter: ClientEventReporting,
         callAuthentication: @escaping WebRTCCoordinator.AuthenticationHandler
     ) -> WebRTCCoordinator
 }
@@ -52,6 +54,7 @@ struct WebRTCCoordinatorFactory: WebRTCCoordinatorProviding {
         callCid: String,
         videoConfig: VideoConfig,
         callSettings: CallSettings,
+        clientEventReporter: ClientEventReporting,
         callAuthentication: @escaping WebRTCCoordinator.AuthenticationHandler
     ) -> WebRTCCoordinator {
         .init(
@@ -60,6 +63,7 @@ struct WebRTCCoordinatorFactory: WebRTCCoordinatorProviding {
             callCid: callCid,
             videoConfig: videoConfig,
             callSettings: callSettings,
+            clientEventReporter: clientEventReporter,
             callAuthentication: callAuthentication
         )
     }
