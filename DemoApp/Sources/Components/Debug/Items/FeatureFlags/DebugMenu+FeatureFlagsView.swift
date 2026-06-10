@@ -13,7 +13,7 @@ extension AppEnvironment {
         var viewProvider: () -> AnyView
     }
 
-    nonisolated(unsafe) static var featureFlags: [FeatureFlag] = [
+    @MainActor static var featureFlags: [FeatureFlag] = [
         .init { .init(DebugMenu.VideoProcessingPipelineToggleView()) },
         .init { .init(DebugMenu.CapturingPipelineToggleView()) },
         .init { .init(DebugMenu.VideoRenderingMenuView()) },

@@ -71,12 +71,12 @@ final class AudioTrackPlayer: NSObject, AVAudioPlayerDelegate, @unchecked Sendab
     }
 }
 
-extension AudioTrackPlayer: InjectionKey {
-    nonisolated(unsafe) static var currentValue: AudioTrackPlayer = .init()
+extension AudioTrackPlayer: @MainActor InjectionKey {
+    @MainActor static var currentValue: AudioTrackPlayer = .init()
 }
 
 extension InjectedValues {
-    var audioPlayer: AudioTrackPlayer {
+    @MainActor var audioPlayer: AudioTrackPlayer {
         get { Self[AudioTrackPlayer.self] }
         set { _ = newValue }
     }

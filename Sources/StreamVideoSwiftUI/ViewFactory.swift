@@ -214,29 +214,39 @@ extension ViewFactory {
     }
 
     public func makeIncomingCallView(viewModel: CallViewModel, callInfo: IncomingCall) -> some View {
-        if #available(iOS 14.0, *) {
-            return IncomingCallView(
-                viewFactory: self,
-                callInfo: callInfo,
-                onCallAccepted: { _ in
-                    viewModel.acceptCall(callType: callInfo.type, callId: callInfo.id)
-                },
-                onCallRejected: { _ in
-                    viewModel.rejectCall(callType: callInfo.type, callId: callInfo.id)
-                }
-            )
-        } else {
-            return IncomingCallView_iOS13(
-                viewFactory: self,
-                callInfo: callInfo,
-                onCallAccepted: { _ in
-                    viewModel.acceptCall(callType: callInfo.type, callId: callInfo.id)
-                },
-                onCallRejected: { _ in
-                    viewModel.rejectCall(callType: callInfo.type, callId: callInfo.id)
-                }
-            )
-        }
+//        if #available(iOS 14.0, *) {
+//            return IncomingCallView(
+//                viewFactory: self,
+//                callInfo: callInfo,
+//                onCallAccepted: { _ in
+//                    viewModel.acceptCall(callType: callInfo.type, callId: callInfo.id)
+//                },
+//                onCallRejected: { _ in
+//                    viewModel.rejectCall(callType: callInfo.type, callId: callInfo.id)
+//                }
+//            )
+//        } else {
+//            return IncomingCallView_iOS13(
+//                viewFactory: self,
+//                callInfo: callInfo,
+//                onCallAccepted: { _ in
+//                    viewModel.acceptCall(callType: callInfo.type, callId: callInfo.id)
+//                },
+//                onCallRejected: { _ in
+//                    viewModel.rejectCall(callType: callInfo.type, callId: callInfo.id)
+//                }
+//            )
+//        }
+        return IncomingCallView(
+            viewFactory: self,
+            callInfo: callInfo,
+            onCallAccepted: { _ in
+                viewModel.acceptCall(callType: callInfo.type, callId: callInfo.id)
+            },
+            onCallRejected: { _ in
+                viewModel.rejectCall(callType: callInfo.type, callId: callInfo.id)
+            }
+        )
     }
 
     public func makeWaitingLocalUserView(viewModel: CallViewModel) -> some View {
@@ -346,26 +356,34 @@ extension ViewFactory {
         let handleCloseLobby = {
             viewModel.setCallingState(.idle)
         }
-        if #available(iOS 14.0, *) {
-            return LobbyView(
-                viewFactory: self,
-                callId: lobbyInfo.callId,
-                callType: lobbyInfo.callType,
-                callSettings: callSettings,
-                onJoinCallTap: handleJoinCall,
-                onCloseLobby: handleCloseLobby
-            )
-        } else {
-            return LobbyView_iOS13(
-                viewFactory: self,
-                callViewModel: viewModel,
-                callId: lobbyInfo.callId,
-                callType: lobbyInfo.callType,
-                callSettings: callSettings,
-                onJoinCallTap: handleJoinCall,
-                onCloseLobby: handleCloseLobby
-            )
-        }
+//        if #available(iOS 14.0, *) {
+//            return LobbyView(
+//                viewFactory: self,
+//                callId: lobbyInfo.callId,
+//                callType: lobbyInfo.callType,
+//                callSettings: callSettings,
+//                onJoinCallTap: handleJoinCall,
+//                onCloseLobby: handleCloseLobby
+//            )
+//        } else {
+//            return LobbyView_iOS13(
+//                viewFactory: self,
+//                callViewModel: viewModel,
+//                callId: lobbyInfo.callId,
+//                callType: lobbyInfo.callType,
+//                callSettings: callSettings,
+//                onJoinCallTap: handleJoinCall,
+//                onCloseLobby: handleCloseLobby
+//            )
+//        }
+        return LobbyView(
+            viewFactory: self,
+            callId: lobbyInfo.callId,
+            callType: lobbyInfo.callType,
+            callSettings: callSettings,
+            onJoinCallTap: handleJoinCall,
+            onCloseLobby: handleCloseLobby
+        )
     }
 
     public func makeReconnectionView(viewModel: CallViewModel) -> some View {
@@ -377,21 +395,27 @@ extension ViewFactory {
         callSettings: Binding<CallSettings>,
         call: Call?
     ) -> some ViewModifier {
-        if #available(iOS 14.0, *) {
-            return LocalParticipantViewModifier(
-                localParticipant: localParticipant,
-                call: call,
-                callSettings: callSettings,
-                showAllInfo: true
-            )
-        } else {
-            return LocalParticipantViewModifier_iOS13(
-                localParticipant: localParticipant,
-                call: call,
-                callSettings: callSettings,
-                showAllInfo: true
-            )
-        }
+//        if #available(iOS 14.0, *) {
+//            return LocalParticipantViewModifier(
+//                localParticipant: localParticipant,
+//                call: call,
+//                callSettings: callSettings,
+//                showAllInfo: true
+//            )
+//        } else {
+//            return LocalParticipantViewModifier_iOS13(
+//                localParticipant: localParticipant,
+//                call: call,
+//                callSettings: callSettings,
+//                showAllInfo: true
+//            )
+//        }
+        return LocalParticipantViewModifier(
+            localParticipant: localParticipant,
+            call: call,
+            callSettings: callSettings,
+            showAllInfo: true
+        )
     }
 
     public func makeUserAvatar(

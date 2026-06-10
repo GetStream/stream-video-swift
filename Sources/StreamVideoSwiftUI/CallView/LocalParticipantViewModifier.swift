@@ -73,6 +73,7 @@ public struct LocalParticipantViewModifier: ViewModifier {
     }
 }
 
+/*
 @available(iOS, introduced: 13, obsoleted: 14)
 public struct LocalParticipantViewModifier_iOS13: ViewModifier {
 
@@ -140,6 +141,7 @@ public struct LocalParticipantViewModifier_iOS13: ViewModifier {
         call?.state.participants.count ?? 0
     }
 }
+ */
 
 internal struct ParticipantMicrophoneCheckView: View {
 

@@ -131,6 +131,7 @@ private struct CallEndedViewModifier<Subview: View>: ViewModifier {
     }
 }
 
+/*
 @available(iOS, introduced: 13, obsoleted: 14)
 private struct CallEndedViewModifier_iOS13<Subview: View>: ViewModifier {
 
@@ -204,6 +205,7 @@ private struct CallEndedViewModifier_iOS13<Subview: View>: ViewModifier {
             }
     }
 }
+ */
 
 extension View {
 
@@ -224,20 +226,26 @@ extension View {
         presentationValidator: @escaping (Call?) -> Bool = { _ in true },
         @ViewBuilder _ content: @escaping (Call?, @escaping () -> Void) -> some View
     ) -> some View {
-        if #available(iOS 14.0, *) {
-            modifier(
-                CallEndedViewModifier(
-                    presentationValidator: presentationValidator,
-                    subviewProvider: content
-                )
+//        if #available(iOS 14.0, *) {
+//            modifier(
+//                CallEndedViewModifier(
+//                    presentationValidator: presentationValidator,
+//                    subviewProvider: content
+//                )
+//            )
+//        } else {
+//            modifier(
+//                CallEndedViewModifier_iOS13(
+//                    presentationValidator: presentationValidator,
+//                    subviewProvider: content
+//                )
+//            )
+//        }
+        modifier(
+            CallEndedViewModifier(
+                presentationValidator: presentationValidator,
+                subviewProvider: content
             )
-        } else {
-            modifier(
-                CallEndedViewModifier_iOS13(
-                    presentationValidator: presentationValidator,
-                    subviewProvider: content
-                )
-            )
-        }
+        )
     }
 }

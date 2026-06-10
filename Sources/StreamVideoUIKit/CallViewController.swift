@@ -45,13 +45,15 @@ open class CallViewController: UIViewController {
     }
     
     open func makeVideoView<Factory: ViewFactory>(with viewFactory: Factory) -> UIView {
-        if #available(iOS 14.0, *) {
-            let videoView = CallContainer(viewFactory: viewFactory, viewModel: viewModel)
-            return CallViewContainer(view: videoView, frame: view.frame)
-        } else {
-            let videoView = CallContainer_iOS13(viewFactory: viewFactory, viewModel: viewModel)
-            return CallViewContainer(view: videoView, frame: view.frame)
-        }
+//        if #available(iOS 14.0, *) {
+//            let videoView = CallContainer(viewFactory: viewFactory, viewModel: viewModel)
+//            return CallViewContainer(view: videoView, frame: view.frame)
+//        } else {
+//            let videoView = CallContainer_iOS13(viewFactory: viewFactory, viewModel: viewModel)
+//            return CallViewContainer(view: videoView, frame: view.frame)
+//        }
+        let videoView = CallContainer(viewFactory: viewFactory, viewModel: viewModel)
+        return CallViewContainer(view: videoView, frame: view.frame)
     }
     
     public func startCall(
@@ -106,16 +108,16 @@ final class CallViewContainer: UIView {
         embed(uiView)
     }
     
-    @available(iOS, introduced: 13, obsoleted: 14)
-    init<Factory: ViewFactory>(view: CallContainer_iOS13<Factory>, frame: CGRect) {
-        let uiView = UIHostingController(rootView: view).view!
-        uiView.backgroundColor = .clear
-        
-        super.init(frame: .zero)
-        
-        uiView.translatesAutoresizingMaskIntoConstraints = false
-        embed(uiView)
-    }
+//    @available(iOS, introduced: 13, obsoleted: 14)
+//    init<Factory: ViewFactory>(view: CallContainer_iOS13<Factory>, frame: CGRect) {
+//        let uiView = UIHostingController(rootView: view).view!
+//        uiView.backgroundColor = .clear
+//        
+//        super.init(frame: .zero)
+//        
+//        uiView.translatesAutoresizingMaskIntoConstraints = false
+//        embed(uiView)
+//    }
     
     @available(*, unavailable)
     required init?(coder: NSCoder) {

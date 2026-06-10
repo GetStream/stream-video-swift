@@ -91,20 +91,26 @@ public struct PermissionsPromptView: View {
         Button {
             presentNavigationPopup = true
         } label: {
-            if #available(iOS 14.0, *) {
-                Label {
-                    Text(L10n.Call.Permissions.Missing.Cta.title)
-                } icon: {
-                    Image(systemName: "gear")
-                }
-                .minimumScaleFactor(0.7)
-            } else {
-                HStack(alignment: .center, spacing: 4) {
-                    Image(systemName: "gear")
-                    Text(L10n.Call.Permissions.Missing.Cta.title)
-                }
-                .minimumScaleFactor(0.7)
+//            if #available(iOS 14.0, *) {
+//                Label {
+//                    Text(L10n.Call.Permissions.Missing.Cta.title)
+//                } icon: {
+//                    Image(systemName: "gear")
+//                }
+//                .minimumScaleFactor(0.7)
+//            } else {
+//                HStack(alignment: .center, spacing: 4) {
+//                    Image(systemName: "gear")
+//                    Text(L10n.Call.Permissions.Missing.Cta.title)
+//                }
+//                .minimumScaleFactor(0.7)
+//            }
+            Label {
+                Text(L10n.Call.Permissions.Missing.Cta.title)
+            } icon: {
+                Image(systemName: "gear")
             }
+            .minimumScaleFactor(0.7)
         }
         .padding(.vertical, 4)
         .padding(.horizontal, 8)

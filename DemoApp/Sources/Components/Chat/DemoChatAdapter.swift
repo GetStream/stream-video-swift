@@ -60,10 +60,10 @@ extension StreamChatSwiftUI.InjectedValues {
     /// Provides access to the `StreamVideo` instance in the views and view models.
     var chatWrapper: DemoChatAdapter? {
         get {
-            Self[DemoChatAdapter.InjectionKey.self]
+            Self.self[DemoChatAdapter.InjectionKey.self]
         }
         set {
-            Self[DemoChatAdapter.InjectionKey.self] = newValue
+            Self.self[DemoChatAdapter.InjectionKey.self] = newValue
         }
     }
 }
