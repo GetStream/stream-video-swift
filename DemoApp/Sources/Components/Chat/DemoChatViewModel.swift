@@ -61,7 +61,7 @@ final class DemoChatViewModel: ObservableObject, ChatChannelControllerDelegate {
     func markAsRead() {
         channelController?.markRead { error in
             if let error {
-                log.error(error)
+                StreamCore.log.error(error)
             }
         }
         unreadCount = 0
