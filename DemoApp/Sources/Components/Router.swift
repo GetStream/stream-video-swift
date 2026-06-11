@@ -227,7 +227,12 @@ final class Router: ObservableObject {
         )
 
         if !AppEnvironment.configuration.isTest {
-            streamChatWrapper = .init(user, token: token)
+            streamChatWrapper = .init(
+                userId: user.id,
+                userName: user.name,
+                imageURL: user.imageURL,
+                token: token
+            )
         }
         setUp(streamVideo: streamVideo, deeplinkInfo: deeplinkInfo, user: user)
 

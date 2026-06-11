@@ -79,7 +79,7 @@ final class DemoCallJoinInterceptor: CallJoinIntercepting {
             .eventPublisher(for: CustomVideoEvent.self)
             .compactMap { [customEventKey] in $0.custom[customEventKey]?.stringValue }
             .filter { [currentUserID] in $0 != currentUserID }
-            .log(.debug) { "Call presence event was received for userID:\($0)" }
+            .log(LogLevel.debug) { "Call presence event was received for userID:\($0)" }
             .map { _ in true }
             .sinkTask(
                 storeIn: disposableBag
