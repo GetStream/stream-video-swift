@@ -177,7 +177,9 @@ public class CallState: ObservableObject {
         _ callSession: StreamVideo.CallSession
     ) {
         self.streamVideoSession = callSession
-        bindDurationTracker()
+        Task(disposableBag: disposableBag) { @MainActor [weak self] in
+            self?.bindDurationTracker()
+        }
     }
 
     internal func updateState(from event: VideoEvent) {
@@ -593,30 +595,32 @@ public class CallState: ObservableObject {
     }
 
     /// Republishes the tracker's output on the `duration` and `startedAt`
-    /// published properties. `receive(on:)` guarantees delivery on the main
-    /// queue, which makes the isolation assumption below safe.
-    private nonisolated func bindDurationTracker() {
-        // `sinkTask` is unsuitable here: it reuses one task identifier per
-        // subscription, so frequent emissions (the 1-second duration timer)
-        // cancel each other's pending assignments and values get dropped.
-        // `receive(on:)` + `sink` delivers every value, in order, on the main
-        // queue, which also makes the isolation assumption below safe.
+    /// published properties.
+    ///
+    /// Binding is dispatched once from the nonisolated init onto the main
+    /// actor. The tracker's `CurrentValueSubject`s replay their latest
+    /// value on subscription, so emissions that happen before the bind
+    /// lands are not lost.
+    ///
+    /// `sinkTask` is unsuitable here: it reuses one task identifier per
+    /// subscription, so frequent emissions (the 1-second duration timer)
+    /// cancel each other's pending assignments and values get dropped.
+    /// `receive(on:)` + weak assignment delivers every value, in order, on
+    /// the main queue.
+    @MainActor
+    private func bindDurationTracker() {
         durationTracker
             .durationPublisher
             .removeDuplicates()
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] value in
-                MainActor.assumeIsolated { self?.duration = value }
-            }
+            .assign(to: \.duration, onWeak: self)
             .store(in: disposableBag)
 
         durationTracker
             .startedAtPublisher
             .removeDuplicates()
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] value in
-                MainActor.assumeIsolated { self?.startedAt = value }
-            }
+            .assign(to: \.startedAt, onWeak: self)
             .store(in: disposableBag)
     }
 }
