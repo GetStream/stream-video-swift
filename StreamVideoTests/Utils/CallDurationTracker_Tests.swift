@@ -26,12 +26,12 @@ final class CallDurationTracker_Tests: XCTestCase, @unchecked Sendable {
             .store(in: disposableBag)
     }
 
-    override func tearDown() {
+    override func tearDown() async throws {
         disposableBag = nil
         duration = nil
         startedAt = nil
         subject = nil
-        super.tearDown()
+        try await super.tearDown()
     }
 
     // MARK: - didUpdate(session:)
