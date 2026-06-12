@@ -53,6 +53,10 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
     override func tearDown() {
         mockApplicationStateAdapter.dismante()
         mockPermissions.dismantle()
+        // Restore the process-global audio store. Leaving the mock shared
+        // poisons every subsequent real join in the same xctest process
+        // (joins stall waiting on the stale store and time out).
+        mockAudioStore.dismantle()
         subject = nil
         uuidFactory = nil
         callController = nil
