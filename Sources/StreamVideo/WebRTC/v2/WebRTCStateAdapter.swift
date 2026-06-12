@@ -935,19 +935,19 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
             return true
         }()
 
-        if case let .callKit(completion) = source {
-            // Let CallKit release its audio session ownership once WebRTC has
-            // the audio device module it needs.
-            completion.complete()
-        }
-
         audioSession.activate(
             callSettingsPublisher: $callSettings.removeDuplicates().eraseToAnyPublisher(),
             ownCapabilitiesPublisher: $ownCapabilities.removeDuplicates().eraseToAnyPublisher(),
             delegate: self,
             statsAdapter: statsAdapter,
-            /// If we are joining from CallKit the AudioSession will be activated from it and we
-            /// shouldn't attempt another activation.
+            /// When joining from CallKit we configure the session here but
+            /// never activate it ourselves. The ordering is: the joining
+            /// stage fulfils the pending answer action once the call has
+            /// joined, CallKit then activates the session and `didActivate`
+            /// dispatches `.callKit(.activate)` into the audio store, whose
+            /// `isActive` flip wakes the deferred activation scheduled by
+            /// `CallAudioSession` below. Activating locally as well would
+            /// race CallKit's ownership of the session.
             shouldSetActive: !sourceIsCallKit
         )
     }

@@ -573,6 +573,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
 
         subject.context.coordinator = mockCoordinatorStack.coordinator
         subject.context.reconnectAttempts = 11
+        subject.context.joinSource = .inApp
         await mockCoordinatorStack
             .coordinator
             .stateAdapter
@@ -582,6 +583,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             .sfuEvent(.joinResponse(Stream_Video_Sfu_Event_JoinResponse())),
             every: 0.3
         )
+        let start = Date()
 
         try await assertTransition(
             from: .connected,
@@ -589,6 +591,49 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             subject: subject
         ) { _ in }
 
+        // Non-CallKit joins go through the readiness wait: with the audio
+        // store inactive the stage must hold for at least the configured
+        // readiness window before configuring the peer connections.
+        XCTAssertGreaterThanOrEqual(Date().timeIntervalSince(start), 0.1)
+        cancellable.cancel()
+    }
+
+    func test_transition_fromConnected_joinSourceIsCallKit_doesNotWaitForAudioSessionReadiness() async throws {
+        let previousTimeout = WebRTCConfiguration.timeout
+        let mockAudioStore = MockRTCAudioStore()
+        mockAudioStore.makeShared()
+        defer {
+            WebRTCConfiguration.timeout = previousTimeout
+            mockAudioStore.dismantle()
+        }
+        // With a practically infinite readiness window and an inactive audio
+        // store, the stage can only reach `.joined` within the assertion
+        // timeout if the CallKit join skipped the readiness wait entirely.
+        WebRTCConfiguration.timeout.audioSessionConfigurationCompletion = 60
+
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.reconnectAttempts = 11
+        subject.context.joinSource = .callKit(.init {})
+        await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
+        mockCoordinatorStack.webRTCAuthenticator.stubbedFunction[.waitForConnect] = Result<Void, Error>.success(())
+        let cancellable = receiveEvent(
+            .sfuEvent(.joinResponse(Stream_Video_Sfu_Event_JoinResponse())),
+            every: 0.3
+        )
+        let start = Date()
+
+        try await assertTransition(
+            from: .connected,
+            expectedTarget: .joined,
+            subject: subject
+        ) { _ in }
+
+        // Sanity bound: the join must complete well below the readiness
+        // window, proving no stall occurred while the store stayed inactive.
+        XCTAssertLessThan(Date().timeIntervalSince(start), defaultTimeout)
         cancellable.cancel()
     }
 

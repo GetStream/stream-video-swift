@@ -737,10 +737,14 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         }
     }
 
-    func test_configureAudioSession_callKitSource_completesActionCompletion() async throws {
+    func test_configureAudioSession_callKitSource_doesNotCompleteActionCompletion() async throws {
+        // The CallKit answer action is fulfilled by the Call state machine's
+        // joining stage once the call has joined successfully, not while the
+        // audio session is being configured.
         let completionExpectation = expectation(
-            description: "CallKit action completion invoked."
+            description: "CallKit action completion should not be invoked."
         )
+        completionExpectation.isInverted = true
         let sfuStack = MockSFUStack()
         sfuStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
         await subject.set(sfuAdapter: sfuStack.adapter)
