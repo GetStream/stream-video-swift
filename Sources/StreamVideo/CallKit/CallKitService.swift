@@ -571,7 +571,14 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 // over and the temporary CallKit bridge can stand down.
                 eventPipelineSubject.send(.joined)
             } catch {
-                callToJoinEntry.call.leave()
+                // Interceptor vetoes and join timeouts already leave the call
+                // (with their specific reasons) inside the join flow. Issuing
+                // another leave here would race that one and could drop the
+                // original leave reason, so only leave for failures the join
+                // flow has not already handled.
+                if !(error is CallJoinInterceptionError), !(error is TimeOutError) {
+                    callToJoinEntry.call.leave()
+                }
                 // The answer action has already been fulfilled at this point,
                 // so CallKit must be told explicitly that the call failed
                 // (e.g. when a join interceptor vetoed the join). Otherwise

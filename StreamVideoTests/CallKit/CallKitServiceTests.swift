@@ -685,6 +685,43 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(call.stubbedFunctionInput[.leave]?.count, 1)
     }
 
+    @MainActor
+    func test_accept_joinFailsWithInterceptionError_callIsReportedEndedWithoutAdditionalLeave() async throws {
+        let firstCallUUID = UUID()
+        uuidFactory.getResult = firstCallUUID
+        let call = stubCall(response: defaultGetCallResponse)
+        call.stubbedJoinError = CallJoinInterceptionError("interceptor veto")
+        subject.streamVideo = mockedStreamVideo
+
+        subject.reportIncomingCall(
+            cid,
+            localizedCallerName: localizedCallerName,
+            callerId: callerId,
+            hasVideo: false
+        ) { _ in }
+
+        await waitExpectation(timeout: 1)
+
+        subject.provider(
+            callProvider,
+            perform: CXAnswerCallAction(call: firstCallUUID)
+        )
+
+        await fulfillment {
+            self.callProvider.invocations.contains {
+                switch $0 {
+                case let .reportCall(uuid, _, reason):
+                    return uuid == firstCallUUID && reason == .failed
+                default:
+                    return false
+                }
+            }
+        }
+        // The join flow has already left the call when the interceptor vetoes
+        // the join, so the service must not issue another leave.
+        XCTAssertEqual(call.stubbedFunctionInput[.leave]?.count, 0)
+    }
+
     // MARK: - mute
 
     @MainActor
