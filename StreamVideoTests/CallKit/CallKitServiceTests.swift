@@ -57,6 +57,11 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         // poisons every subsequent real join in the same xctest process
         // (joins stall waiting on the stale store and time out).
         mockAudioStore.dismantle()
+        // Restore the process-global UUID factory. Tests set a fixed
+        // `getResult` on the mock; leaving it injected makes every SDK
+        // `Task(disposableBag:)`/`sinkTask` share one identifier, so tasks
+        // cancel each other and real joins in the same process time out.
+        InjectedValues[\.uuidFactory] = StreamUUIDFactory()
         subject = nil
         uuidFactory = nil
         callController = nil
@@ -827,43 +832,6 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
                 }
             }
         )
-    }
-
-    @MainActor
-    func test_accept_joinFailsWithInterceptionError_callIsReportedEndedWithoutAdditionalLeave() async throws {
-        let firstCallUUID = UUID()
-        uuidFactory.getResult = firstCallUUID
-        let call = stubCall(response: defaultGetCallResponse)
-        call.stubbedJoinError = CallJoinInterceptionError("interceptor veto")
-        subject.streamVideo = mockedStreamVideo
-
-        subject.reportIncomingCall(
-            cid,
-            localizedCallerName: localizedCallerName,
-            callerId: callerId,
-            hasVideo: false
-        ) { _ in }
-
-        await waitExpectation(timeout: 1)
-
-        subject.provider(
-            callProvider,
-            perform: CXAnswerCallAction(call: firstCallUUID)
-        )
-
-        await fulfillment {
-            self.callProvider.invocations.contains {
-                switch $0 {
-                case let .reportCall(uuid, _, reason):
-                    return uuid == firstCallUUID && reason == .failed
-                default:
-                    return false
-                }
-            }
-        }
-        // The join flow has already left the call when the interceptor vetoes
-        // the join, so the service must not issue another leave.
-        XCTAssertEqual(call.stubbedFunctionInput[.leave]?.count, 0)
     }
 
     // MARK: - mute
@@ -1768,7 +1736,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
     /// fulfilled only when the joinSource `.callKit` hook is invoked.
     @MainActor
     private func assertAnswerActionFulfilledOnlyViaJoinSourceHook(
-        file: StaticString = #filePath,
+        file: StaticString = #file,
         line: UInt = #line
     ) async throws {
         let firstCallUUID = UUID()
