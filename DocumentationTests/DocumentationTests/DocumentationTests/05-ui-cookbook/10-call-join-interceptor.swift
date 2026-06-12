@@ -84,4 +84,22 @@ private func content() {
         let callViewModel = CallViewModel()
         callViewModel.callJoinInterceptor = ParticipantReadyCallJoinInterceptor(streamVideo: streamVideo)
     }
+
+    container {
+        @MainActor
+        final class ParticipantReadyCallJoinInterceptor: CallJoinIntercepting {
+            private let streamVideo: StreamVideo
+
+            init(streamVideo: StreamVideo) {
+                self.streamVideo = streamVideo
+            }
+
+            func callReadyToJoin(_ call: Call) async throws { /* Readiness work goes here. */ }
+        }
+
+        // Assign the interceptor on the adapter so calls answered through
+        // CallKit honor it too.
+        @Injected(\.callKitAdapter) var callKitAdapter
+        callKitAdapter.callJoinInterceptor = ParticipantReadyCallJoinInterceptor(streamVideo: streamVideo)
+    }
 }

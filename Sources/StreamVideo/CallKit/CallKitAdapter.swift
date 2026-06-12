@@ -57,6 +57,17 @@ open class CallKitAdapter {
         didSet { didUpdate(streamVideo) }
     }
 
+    /// Optional interceptor invoked after the call join response has been
+    /// applied locally but before the SDK treats the call as fully entered.
+    ///
+    /// Assign this when your app needs to perform readiness work during the
+    /// join flow, such as waiting for another participant or validating an
+    /// external precondition. Throw from the interceptor to fail the join.
+    public var callJoinInterceptor: CallJoinIntercepting? {
+        get { callKitService.callJoinInterceptor }
+        set { callKitService.callJoinInterceptor = newValue }
+    }
+
     /// Initializes the `CallKitAdapter`.
     public init() {}
 

@@ -138,6 +138,14 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         }
     }
 
+    /// Optional interceptor invoked after the call join response has been
+    /// applied locally but before the SDK treats the call as fully entered.
+    ///
+    /// Assign this when your app needs to perform readiness work during the
+    /// join flow, such as waiting for another participant or validating an
+    /// external precondition. Throw from the interceptor to fail the join.
+    public var callJoinInterceptor: CallJoinIntercepting?
+
     var callSettings: CallSettings?
 
     /// The call controller used for managing calls.
@@ -556,13 +564,23 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 // peerConnection configuration.
                 try await callToJoinEntry.call.join(
                     callSettings: callSettings,
-                    policy: .peerConnectionReadinessAware
+                    policy: .peerConnectionReadinessAware,
+                    joinInterceptor: callJoinInterceptor
                 )
                 // Once the call is joined, the regular call state can take
                 // over and the temporary CallKit bridge can stand down.
                 eventPipelineSubject.send(.joined)
             } catch {
                 callToJoinEntry.call.leave()
+                // The answer action has already been fulfilled at this point,
+                // so CallKit must be told explicitly that the call failed
+                // (e.g. when a join interceptor vetoed the join). Otherwise
+                // the system keeps presenting an ongoing call.
+                callProvider.reportCall(
+                    with: action.callUUID,
+                    endedAt: nil,
+                    reason: .failed
+                )
                 set(nil, for: action.callUUID)
                 log.error(error, subsystems: .callKit)
                 // Reset the bridge if the CallKit-driven join flow aborts
