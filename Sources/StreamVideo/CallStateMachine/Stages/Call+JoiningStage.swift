@@ -177,6 +177,12 @@ extension Call.StateMachine.Stage {
             try Task.checkCancellation()
 
             await Task(disposableBag: disposableBag) { @MainActor [weak streamVideo] in
+                // When an interceptor delayed entry, anchor the visible call
+                // duration to the local joined moment instead of the backend
+                // session start.
+                if input.joinInterceptor != nil {
+                    call.state.durationStartOverride = Date()
+                }
                 streamVideo?.state.activeCall = call
             }.value
 

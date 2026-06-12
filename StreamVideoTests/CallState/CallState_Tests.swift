@@ -234,7 +234,7 @@ final class CallState_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(subject.duration, 0)
     }
 
-    func test_update_fromCallResponse_withStartedAt_usesActualCallStart() {
+    func test_update_fromCallResponse_withStartedAt_usesActualCallStart() async {
         let subject = CallState(.dummy())
         let startedAt = Date(timeIntervalSinceNow: -95)
 
@@ -247,15 +247,13 @@ final class CallState_Tests: XCTestCase, @unchecked Sendable {
             )
         )
 
+        await fulfilmentInMainActor {
+            abs(subject.duration - Date().timeIntervalSince(startedAt)) <= 1
+        }
         XCTAssertEqual(subject.startedAt, startedAt)
-        XCTAssertEqual(
-            subject.duration,
-            Date().timeIntervalSince(startedAt),
-            accuracy: 1
-        )
     }
 
-    func test_update_fromCallResponse_withOnlyLiveStartedAt_usesLiveStartedAt() {
+    func test_update_fromCallResponse_withOnlyLiveStartedAt_usesLiveStartedAt() async {
         let subject = CallState(.dummy())
         let liveStartedAt = Date(timeIntervalSinceNow: -42)
 
@@ -267,15 +265,13 @@ final class CallState_Tests: XCTestCase, @unchecked Sendable {
             )
         )
 
+        await fulfilmentInMainActor {
+            abs(subject.duration - Date().timeIntervalSince(liveStartedAt)) <= 1
+        }
         XCTAssertEqual(subject.startedAt, liveStartedAt)
-        XCTAssertEqual(
-            subject.duration,
-            Date().timeIntervalSince(liveStartedAt),
-            accuracy: 1
-        )
     }
 
-    func test_update_fromCallResponse_withEndedSession_resetsDuration() {
+    func test_update_fromCallResponse_withEndedSession_resetsDuration() async {
         let subject = CallState(.dummy())
         let startedAt = Date(timeIntervalSinceNow: -30)
 
@@ -286,6 +282,7 @@ final class CallState_Tests: XCTestCase, @unchecked Sendable {
                 )
             )
         )
+        await fulfilmentInMainActor { subject.startedAt == startedAt }
 
         subject.update(
             from: CallResponse.dummy(
@@ -296,8 +293,71 @@ final class CallState_Tests: XCTestCase, @unchecked Sendable {
             )
         )
 
-        XCTAssertNil(subject.startedAt)
-        XCTAssertEqual(subject.duration, 0)
+        await fulfilmentInMainActor {
+            subject.startedAt == nil && subject.duration == 0
+        }
+    }
+
+    // MARK: - durationStartOverride
+
+    func test_durationStartOverride_whenSet_anchorsDurationToOverride() async {
+        let subject = CallState(.dummy())
+        let startedAt = Date(timeIntervalSinceNow: -95)
+        subject.update(
+            from: CallResponse.dummy(
+                session: .dummy(startedAt: startedAt)
+            )
+        )
+
+        let override = Date(timeIntervalSinceNow: -5)
+        subject.durationStartOverride = override
+
+        await fulfilmentInMainActor {
+            abs(subject.duration - Date().timeIntervalSince(override)) <= 1
+        }
+        XCTAssertEqual(subject.startedAt, startedAt)
+    }
+
+    func test_durationStartOverride_sessionUpdates_doNotReanchorDuration() async {
+        let subject = CallState(.dummy())
+        let override = Date(timeIntervalSinceNow: -5)
+        subject.durationStartOverride = override
+
+        let startedAt = Date(timeIntervalSinceNow: -95)
+        subject.update(
+            from: CallResponse.dummy(
+                session: .dummy(startedAt: startedAt)
+            )
+        )
+
+        await fulfilmentInMainActor { subject.startedAt == startedAt }
+        XCTAssertEqual(
+            subject.duration,
+            Date().timeIntervalSince(override),
+            accuracy: 1
+        )
+    }
+
+    func test_durationStartOverride_withEndedSession_resetsDurationAndOverride() async {
+        let subject = CallState(.dummy())
+        subject.update(
+            from: CallResponse.dummy(
+                session: .dummy(startedAt: Date(timeIntervalSinceNow: -30))
+            )
+        )
+        subject.durationStartOverride = Date(timeIntervalSinceNow: -5)
+        await fulfilmentInMainActor { subject.duration > 0 }
+
+        subject.update(
+            from: CallResponse.dummy(
+                session: .dummy(endedAt: Date())
+            )
+        )
+
+        await fulfilmentInMainActor {
+            subject.startedAt == nil && subject.duration == 0
+        }
+        XCTAssertNil(subject.durationStartOverride)
     }
 
     // MARK: - Private helpers

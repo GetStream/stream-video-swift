@@ -346,6 +346,58 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
         }
     }
 
+    func test_execute_withoutRetries_joinInterceptorReturns_durationStartOverrideWasSet() async throws {
+        let joinInterceptor = CallJoinInterceptor_Spy()
+        let context = Call.StateMachine.Stage.Context(
+            call: call,
+            input: .join(
+                .init(
+                    create: true,
+                    callSettings: .init(audioOn: false),
+                    options: .init(memberIds: [.unique]),
+                    ring: true,
+                    notify: false,
+                    source: .inApp,
+                    deliverySubject: .init(nil),
+                    joinInterceptor: joinInterceptor
+                )
+            )
+        )
+
+        try await assertJoining(
+            context,
+            joinResponse: JoinCallResponse.dummy(),
+            expectedTransition: .joined
+        ) { @MainActor in
+            XCTAssertNotNil(self.call.state.durationStartOverride)
+        }
+    }
+
+    func test_execute_withoutRetries_withoutJoinInterceptor_durationStartOverrideRemainsNil() async throws {
+        let context = Call.StateMachine.Stage.Context(
+            call: call,
+            input: .join(
+                .init(
+                    create: true,
+                    callSettings: .init(audioOn: false),
+                    options: .init(memberIds: [.unique]),
+                    ring: true,
+                    notify: false,
+                    source: .inApp,
+                    deliverySubject: .init(nil)
+                )
+            )
+        )
+
+        try await assertJoining(
+            context,
+            joinResponse: JoinCallResponse.dummy(),
+            expectedTransition: .joined
+        ) { @MainActor in
+            XCTAssertNil(self.call.state.durationStartOverride)
+        }
+    }
+
     func test_execute_withoutRetries_joinInterceptorThrows_tracesFailureAndTransitionsToError() async throws {
         let deliverySubject = CurrentValueSubject<JoinCallResponse?, Error>(nil)
         let deliveryExpectation = expectation(description: "DeliverySubject delivered failure.")

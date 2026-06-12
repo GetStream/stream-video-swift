@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Added support for SFU-provided WebRTC degradation preferences for outgoing video and screen-share tracks.[#1153](https://github.com/GetStream/stream-video-swift/pull/1153)
 - Exposed `callJoinInterceptor` on `CallKitAdapter` and `CallKitService` so CallKit-answered calls honor `CallJoinIntercepting`. [#1160](https://github.com/GetStream/stream-video-swift/pull/1160)
 
+### 🐞 Fixed
+- When a `CallJoinIntercepting` delays call entry, `Call.state.duration` now starts from the moment the user joined instead of the backend session start. [#1161](https://github.com/GetStream/stream-video-swift/pull/1161)
+
 # [1.47.1](https://github.com/GetStream/stream-video-swift/releases/tag/1.47.1)
 _May 26, 2026_
 

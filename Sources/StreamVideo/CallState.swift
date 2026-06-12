@@ -109,8 +109,9 @@ public class CallState: ObservableObject {
     @Published public internal(set) var isCurrentUserScreensharing: Bool = false
     /// The elapsed duration of the active call session in seconds.
     ///
-    /// The timer begins only after the backend reports a started session and is
-    /// reset when that session ends. Ringing time is not included.
+    /// The timer begins once the backend reports a started session, or from
+    /// the moment the user joined when a join interceptor delayed call entry.
+    /// It is reset when the session ends. Ringing time is not included.
     @Published public internal(set) var duration: TimeInterval = 0
     @Published public internal(set) var statsReport: CallStatsReport?
 
@@ -150,7 +151,20 @@ public class CallState: ObservableObject {
     /// help customize logic, analytics, and UI based on how the call was started.
     var joinSource: JoinSource?
 
-    private var durationCancellable: AnyCancellable?
+    /// When set, `duration` is measured from this local date instead of the
+    /// backend session start.
+    ///
+    /// The join flow sets this once a join interceptor has delayed call entry,
+    /// so the visible duration starts when the user actually joined. It is
+    /// cleared whenever the duration resets (e.g. the session ends).
+    var durationStartOverride: Date? {
+        get { durationTracker.startOverride }
+        set { durationTracker.startOverride = newValue }
+    }
+
+    /// Computes the visible call duration. `duration` and `startedAt`
+    /// republish its output.
+    private let durationTracker = CallDurationTracker()
     private nonisolated let disposableBag = DisposableBag()
 
     /// We mark this one as `nonisolated` to allow us to initialise a state
@@ -163,6 +177,7 @@ public class CallState: ObservableObject {
         _ callSession: StreamVideo.CallSession
     ) {
         self.streamVideoSession = callSession
+        bindDurationTracker()
     }
 
     internal func updateState(from event: VideoEvent) {
@@ -574,45 +589,34 @@ public class CallState: ObservableObject {
         function: StaticString = #function,
         line: UInt = #line
     ) {
-        func reset() {
-            durationCancellable?.cancel()
-            durationCancellable = nil
+        durationTracker.didUpdate(session)
+    }
 
-            duration = 0
-            startedAt = nil
-        }
-
-        guard let session else {
-            if startedAt == nil {
-                reset()
+    /// Republishes the tracker's output on the `duration` and `startedAt`
+    /// published properties. `receive(on:)` guarantees delivery on the main
+    /// queue, which makes the isolation assumption below safe.
+    private nonisolated func bindDurationTracker() {
+        // `sinkTask` is unsuitable here: it reuses one task identifier per
+        // subscription, so frequent emissions (the 1-second duration timer)
+        // cancel each other's pending assignments and values get dropped.
+        // `receive(on:)` + `sink` delivers every value, in order, on the main
+        // queue, which also makes the isolation assumption below safe.
+        durationTracker
+            .durationPublisher
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] value in
+                MainActor.assumeIsolated { self?.duration = value }
             }
-            return
-        }
+            .store(in: disposableBag)
 
-        if session.endedAt != nil {
-            reset()
-        } else if session.liveEndedAt != nil {
-            reset()
-        } else if let newStartedAt = session.startedAt ?? session.liveStartedAt {
-            guard newStartedAt != startedAt else {
-                return
+        durationTracker
+            .startedAtPublisher
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] value in
+                MainActor.assumeIsolated { self?.startedAt = value }
             }
-
-            let now = Date()
-            let newDuration = now.timeIntervalSince(newStartedAt).rounded()
-
-            durationCancellable?.cancel()
-            durationCancellable = nil
-            durationCancellable = DefaultTimer
-                .publish(every: 1.0)
-                .receive(on: DispatchQueue.main)
-                .map { _ in Date().timeIntervalSince(newStartedAt) }
-                .assign(to: \.duration, onWeak: self)
-
-            self.duration = newDuration
-            self.startedAt = newStartedAt
-        } else if startedAt == nil {
-            reset()
-        }
+            .store(in: disposableBag)
     }
 }
