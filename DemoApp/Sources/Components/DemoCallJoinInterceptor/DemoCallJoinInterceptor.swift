@@ -62,6 +62,7 @@ final class DemoCallJoinInterceptor: CallJoinIntercepting {
         }
 
         _ = try? await hasOtherReadyParticipants
+            .receive(on: DispatchQueue.main)
             .filter { $0 }
             .nextValue()
     }
@@ -77,6 +78,7 @@ final class DemoCallJoinInterceptor: CallJoinIntercepting {
 
         customEventCancellable = ringingCall
             .eventPublisher(for: CustomVideoEvent.self)
+            .receive(on: DispatchQueue.main)
             .compactMap { [customEventKey] in $0.custom[customEventKey]?.stringValue }
             .filter { [currentUserID] in $0 != currentUserID }
             .log(LogLevel.debug) { "Call presence event was received for userID:\($0)" }

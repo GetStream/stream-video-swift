@@ -631,6 +631,97 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         }
     }
 
+    @MainActor
+    func test_accept_withJoinInterceptor_interceptorIsForwardedToJoin() async throws {
+        let interceptor = StubCallJoinInterceptor()
+        subject.callJoinInterceptor = interceptor
+
+        let call = try await acceptIncomingCall()
+
+        let recorded = try XCTUnwrap(call.recordedJoinInterceptors.first ?? nil)
+        XCTAssertIdentical(recorded as AnyObject, interceptor)
+    }
+
+    @MainActor
+    func test_accept_withoutJoinInterceptor_joinReceivesNilInterceptor() async throws {
+        let call = try await acceptIncomingCall()
+
+        XCTAssertEqual(call.recordedJoinInterceptors.count, 1)
+        XCTAssertNil(call.recordedJoinInterceptors.first ?? nil)
+    }
+
+    @MainActor
+    func test_accept_joinFails_callIsReportedEndedToCallKit() async throws {
+        let firstCallUUID = UUID()
+        uuidFactory.getResult = firstCallUUID
+        let call = stubCall(response: defaultGetCallResponse)
+        call.stubbedJoinError = ClientError("join failed")
+        subject.streamVideo = mockedStreamVideo
+
+        subject.reportIncomingCall(
+            cid,
+            localizedCallerName: localizedCallerName,
+            callerId: callerId,
+            hasVideo: false
+        ) { _ in }
+
+        await waitExpectation(timeout: 1)
+
+        subject.provider(
+            callProvider,
+            perform: CXAnswerCallAction(call: firstCallUUID)
+        )
+
+        await fulfillment {
+            self.callProvider.invocations.contains {
+                switch $0 {
+                case let .reportCall(uuid, _, reason):
+                    return uuid == firstCallUUID && reason == .failed
+                default:
+                    return false
+                }
+            }
+        }
+        XCTAssertEqual(call.stubbedFunctionInput[.leave]?.count, 1)
+    }
+
+    @MainActor
+    func test_accept_joinFailsWithInterceptionError_callIsReportedEndedWithoutAdditionalLeave() async throws {
+        let firstCallUUID = UUID()
+        uuidFactory.getResult = firstCallUUID
+        let call = stubCall(response: defaultGetCallResponse)
+        call.stubbedJoinError = CallJoinInterceptionError("interceptor veto")
+        subject.streamVideo = mockedStreamVideo
+
+        subject.reportIncomingCall(
+            cid,
+            localizedCallerName: localizedCallerName,
+            callerId: callerId,
+            hasVideo: false
+        ) { _ in }
+
+        await waitExpectation(timeout: 1)
+
+        subject.provider(
+            callProvider,
+            perform: CXAnswerCallAction(call: firstCallUUID)
+        )
+
+        await fulfillment {
+            self.callProvider.invocations.contains {
+                switch $0 {
+                case let .reportCall(uuid, _, reason):
+                    return uuid == firstCallUUID && reason == .failed
+                default:
+                    return false
+                }
+            }
+        }
+        // The join flow has already left the call when the interceptor vetoes
+        // the join, so the service must not issue another leave.
+        XCTAssertEqual(call.stubbedFunctionInput[.leave]?.count, 0)
+    }
+
     // MARK: - mute
 
     @MainActor
@@ -1528,6 +1619,34 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         mockedStreamVideo.stub(for: \.state, with: mockedState)
     }
 
+    /// Reports an incoming call and answers it, returning the stubbed call so
+    /// tests can assert on the recorded join inputs.
+    @MainActor
+    private func acceptIncomingCall() async throws -> MockCall {
+        let firstCallUUID = UUID()
+        uuidFactory.getResult = firstCallUUID
+        let call = stubCall(response: defaultGetCallResponse)
+        subject.streamVideo = mockedStreamVideo
+
+        subject.reportIncomingCall(
+            cid,
+            localizedCallerName: localizedCallerName,
+            callerId: callerId,
+            hasVideo: false
+        ) { _ in }
+
+        await waitExpectation(timeout: 1)
+
+        subject.provider(
+            callProvider,
+            perform: CXAnswerCallAction(call: firstCallUUID)
+        )
+
+        await fulfillment { call.recordedJoinInterceptors.count == 1 }
+
+        return call
+    }
+
     @MainActor
     @discardableResult
     private func stubCall(
@@ -1571,4 +1690,8 @@ private final class MockParticipantAutoLeavePolicy:
     func trigger() {
         onPolicyTriggered?()
     }
+}
+
+private final class StubCallJoinInterceptor: CallJoinIntercepting, @unchecked Sendable {
+    func callReadyToJoin(_ call: Call) async throws { /* No-op */ }
 }
