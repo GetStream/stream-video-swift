@@ -392,12 +392,19 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         )
                     }
 
-                    group.addTask { [weak self] in
+                    group.addTask { [weak self, context] in
                         /// Before we move on configuring the PeerConnections we need to ensure
-                        /// that the audioSession has been:
-                        /// - released from CallKit (if our source was CallKit)
-                        /// - activated and configured correctly
-                        await self?.ensureAudioSessionIsReady()
+                        /// that the audioSession has been activated and configured correctly.
+                        ///
+                        /// When the join was initiated from CallKit, activation only happens
+                        /// after the call has fully joined and the pending answer action has
+                        /// been fulfilled, so waiting here would always time out. We skip the
+                        /// wait and let CallKit's later activation start audio once it arrives.
+                        if case .callKit = context.joinSource {
+                            // No-op: CallKit activates the session post-join.
+                        } else {
+                            await self?.ensureAudioSessionIsReady()
+                        }
 
                         /// Configures all peer connections after the audio session is ready.
                         /// Ensures signaling, media, and routing are correctly established for

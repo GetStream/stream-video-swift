@@ -53,6 +53,15 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
     override func tearDown() {
         mockApplicationStateAdapter.dismante()
         mockPermissions.dismantle()
+        // Restore the process-global audio store. Leaving the mock shared
+        // poisons every subsequent real join in the same xctest process
+        // (joins stall waiting on the stale store and time out).
+        mockAudioStore.dismantle()
+        // Restore the process-global UUID factory. Tests set a fixed
+        // `getResult` on the mock; leaving it injected makes every SDK
+        // `Task(disposableBag:)`/`sinkTask` share one identifier, so tasks
+        // cancel each other and real joins in the same process time out.
+        InjectedValues[\.uuidFactory] = StreamUUIDFactory()
         subject = nil
         uuidFactory = nil
         callController = nil
@@ -651,7 +660,76 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
     }
 
     @MainActor
-    func test_accept_joinFails_callIsReportedEndedToCallKit() async throws {
+    func test_accept_joinFailsAfterActionWasFulfilled_callIsReportedEndedToCallKit() async throws {
+        let firstCallUUID = UUID()
+        uuidFactory.getResult = firstCallUUID
+        let call = stubCall(response: defaultGetCallResponse)
+        call.waitForJoinToResume = true
+        call.stubbedJoinError = ClientError("join failed")
+        subject.streamVideo = mockedStreamVideo
+
+        subject.reportIncomingCall(
+            cid,
+            localizedCallerName: localizedCallerName,
+            callerId: callerId,
+            hasVideo: false
+        ) { _ in }
+
+        await waitExpectation(timeout: 1)
+
+        let action = RecordingAnswerCallAction(call: firstCallUUID)
+        subject.provider(callProvider, perform: action)
+
+        await fulfillment { call.timesCalled(.join) == 1 }
+
+        // Fulfil the action through the joinSource hook while the join is
+        // still suspended, mirroring the joining stage invoking the hook
+        // right before the join flow throws (e.g. delivery timeout).
+        guard
+            case let .callKit(completion) = try XCTUnwrap(call.state.joinSource)
+        else {
+            return XCTFail("Expected the joinSource to be set to .callKit.")
+        }
+        completion.complete()
+        await fulfillment { action.fulfillWasCalled }
+
+        call.resumeJoin()
+
+        await fulfillment {
+            self.callProvider.invocations.contains {
+                switch $0 {
+                case let .reportCall(uuid, _, reason):
+                    return uuid == firstCallUUID && reason == .failed
+                default:
+                    return false
+                }
+            }
+        }
+        XCTAssertFalse(action.failWasCalled)
+        XCTAssertEqual(call.stubbedFunctionInput[.leave]?.count, 1)
+    }
+
+    @MainActor
+    func test_accept_actionIsFulfilledOnlyWhenJoinSourceHookIsInvoked() async throws {
+        try await assertAnswerActionFulfilledOnlyViaJoinSourceHook()
+    }
+
+    @MainActor
+    func test_accept_appStateIsBackground_actionIsFulfilledOnlyWhenJoinSourceHookIsInvoked() async throws {
+        mockApplicationStateAdapter.stubbedState = .background
+
+        try await assertAnswerActionFulfilledOnlyViaJoinSourceHook()
+    }
+
+    @MainActor
+    func test_accept_appStateIsForeground_actionIsFulfilledOnlyWhenJoinSourceHookIsInvoked() async throws {
+        mockApplicationStateAdapter.stubbedState = .foreground
+
+        try await assertAnswerActionFulfilledOnlyViaJoinSourceHook()
+    }
+
+    @MainActor
+    func test_accept_joinFails_actionIsFailedAndCallIsNotReportedEnded() async throws {
         let firstCallUUID = UUID()
         uuidFactory.getResult = firstCallUUID
         let call = stubCall(response: defaultGetCallResponse)
@@ -667,30 +745,36 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
 
         await waitExpectation(timeout: 1)
 
-        subject.provider(
-            callProvider,
-            perform: CXAnswerCallAction(call: firstCallUUID)
-        )
+        let action = RecordingAnswerCallAction(call: firstCallUUID)
+        subject.provider(callProvider, perform: action)
 
-        await fulfillment {
-            self.callProvider.invocations.contains {
+        await fulfillment { action.failWasCalled }
+        XCTAssertFalse(action.fulfillWasCalled)
+        XCTAssertEqual(call.stubbedFunctionInput[.leave]?.count, 1)
+
+        // The cleanup removes the call entry after the report decision, so
+        // once the entry is gone we can assert no report was made.
+        await fulfillment { self.subject.callCount == 0 }
+        XCTAssertFalse(
+            callProvider.invocations.contains {
                 switch $0 {
-                case let .reportCall(uuid, _, reason):
-                    return uuid == firstCallUUID && reason == .failed
+                case .reportCall:
+                    return true
                 default:
                     return false
                 }
             }
-        }
-        XCTAssertEqual(call.stubbedFunctionInput[.leave]?.count, 1)
+        )
     }
 
+    // MARK: - timedOutPerforming
+
     @MainActor
-    func test_accept_joinFailsWithInterceptionError_callIsReportedEndedWithoutAdditionalLeave() async throws {
+    func test_timedOutPerformingAnswerAction_whileJoining_joinIsAbortedAndBridgeResets() async throws {
         let firstCallUUID = UUID()
         uuidFactory.getResult = firstCallUUID
         let call = stubCall(response: defaultGetCallResponse)
-        call.stubbedJoinError = CallJoinInterceptionError("interceptor veto")
+        call.waitForJoinToResume = true
         subject.streamVideo = mockedStreamVideo
 
         subject.reportIncomingCall(
@@ -702,24 +786,52 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
 
         await waitExpectation(timeout: 1)
 
-        subject.provider(
-            callProvider,
-            perform: CXAnswerCallAction(call: firstCallUUID)
-        )
+        let action = RecordingAnswerCallAction(call: firstCallUUID)
+        subject.provider(callProvider, perform: action)
+        await fulfillment { call.timesCalled(.join) == 1 }
 
+        subject.provider(callProvider, timedOutPerforming: action)
+
+        await fulfillment { call.timesCalled(.leave) == 1 }
+        XCTAssertEqual(
+            call.recordedInputPayload(String.self, for: .leave)?.first,
+            "callkit.join.timeout"
+        )
+        XCTAssertEqual(subject.callCount, 0)
         await fulfillment {
-            self.callProvider.invocations.contains {
+            if case .idle = self.subject.eventPipelineSubject.value {
+                return true
+            } else {
+                return false
+            }
+        }
+        // The timeout path never touches the dead action.
+        XCTAssertFalse(action.fulfillWasCalled)
+        XCTAssertFalse(action.failWasCalled)
+
+        // Resume the suspended join: it throws because the timeout's leave
+        // cancelled it, and the catch must not report the call as failed
+        // (the no-op fail on the dead action is tolerated) nor overwrite
+        // the timeout leave reason.
+        call.resumeJoin()
+
+        await fulfillment { action.failWasCalled }
+        XCTAssertFalse(action.fulfillWasCalled)
+        let leaveReasons = try XCTUnwrap(
+            call.recordedInputPayload(String.self, for: .leave)
+        )
+        XCTAssertEqual(leaveReasons.first, "callkit.join.timeout")
+        XCTAssertTrue(leaveReasons.dropFirst().allSatisfy(\.isEmpty))
+        XCTAssertFalse(
+            callProvider.invocations.contains {
                 switch $0 {
-                case let .reportCall(uuid, _, reason):
-                    return uuid == firstCallUUID && reason == .failed
+                case .reportCall:
+                    return true
                 default:
                     return false
                 }
             }
-        }
-        // The join flow has already left the call when the interceptor vetoes
-        // the join, so the service must not issue another leave.
-        XCTAssertEqual(call.stubbedFunctionInput[.leave]?.count, 0)
+        )
     }
 
     // MARK: - mute
@@ -1619,6 +1731,53 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         mockedStreamVideo.stub(for: \.state, with: mockedState)
     }
 
+    /// Answers an incoming call and asserts the deferred-fulfil contract:
+    /// the answer action stays pending while the join is running and is
+    /// fulfilled only when the joinSource `.callKit` hook is invoked.
+    @MainActor
+    private func assertAnswerActionFulfilledOnlyViaJoinSourceHook(
+        file: StaticString = #file,
+        line: UInt = #line
+    ) async throws {
+        let firstCallUUID = UUID()
+        uuidFactory.getResult = firstCallUUID
+        let call = stubCall(response: defaultGetCallResponse)
+        subject.streamVideo = mockedStreamVideo
+
+        subject.reportIncomingCall(
+            cid,
+            localizedCallerName: localizedCallerName,
+            callerId: callerId,
+            hasVideo: false
+        ) { _ in }
+
+        await waitExpectation(timeout: 1)
+
+        let action = RecordingAnswerCallAction(call: firstCallUUID)
+        subject.provider(callProvider, perform: action)
+
+        await fulfillment(file: file, line: line) { call.timesCalled(.join) == 1 }
+        XCTAssertFalse(action.fulfillWasCalled, file: file, line: line)
+
+        guard
+            case let .callKit(completion) = try XCTUnwrap(
+                call.state.joinSource,
+                file: file,
+                line: line
+            )
+        else {
+            return XCTFail(
+                "Expected the joinSource to be set to .callKit.",
+                file: file,
+                line: line
+            )
+        }
+        completion.complete()
+
+        await fulfillment(file: file, line: line) { action.fulfillWasCalled }
+        XCTAssertFalse(action.failWasCalled, file: file, line: line)
+    }
+
     /// Reports an incoming call and answers it, returning the stubbed call so
     /// tests can assert on the recorded join inputs.
     @MainActor
@@ -1679,6 +1838,23 @@ private class MockUUIDFactory: UUIDProviding {
 
     func get() -> UUID {
         getResult ?? .init()
+    }
+}
+
+/// Records `fulfill`/`fail` invocations because `CXAction.isComplete` doesn't
+/// update for actions that aren't part of a system-delivered transaction.
+private final class RecordingAnswerCallAction: CXAnswerCallAction, @unchecked Sendable {
+    private(set) var fulfillWasCalled = false
+    private(set) var failWasCalled = false
+
+    override func fulfill() {
+        fulfillWasCalled = true
+        super.fulfill()
+    }
+
+    override func fail() {
+        failWasCalled = true
+        super.fail()
     }
 }
 

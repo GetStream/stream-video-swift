@@ -97,9 +97,10 @@ private func content() {
             func callReadyToJoin(_ call: Call) async throws { /* Readiness work goes here. */ }
         }
 
-        // Assign the interceptor on the adapter so calls answered through
-        // CallKit honor it too.
+        // Assign the interceptor at startup, where streamVideo is handed to
+        // the adapter, so CallKit-answered calls honor it even on cold launch.
         @Injected(\.callKitAdapter) var callKitAdapter
+        callKitAdapter.streamVideo = streamVideo
         callKitAdapter.callJoinInterceptor = ParticipantReadyCallJoinInterceptor(streamVideo: streamVideo)
     }
 }
