@@ -13,12 +13,20 @@ enum ClientEventStage: String, Sendable {
     /// Fired immediately when `Call.join()` is requested (and on every full
     /// rejoin / migration, which are treated as new join attempts).
     case joinInitiated = "JoinInitiated"
+    /// The SFU WebSocket connection becoming ready for authentication.
+    case coordinatorWS = "CoordinatorWS"
+    /// The media permission prompt/check point for requested local devices.
+    case mediaDevicePermission = "MediaDevicePermission"
     /// The coordinator `JoinCall` REST request.
     case coordinatorJoin = "CoordinatorJoin"
     /// The SFU signaling WebSocket join handshake.
     case wsJoin = "WSJoin"
     /// A publisher or subscriber peer-connection connect attempt.
     case peerConnectionConnect = "PeerConnectionConnect"
+    /// The first remote video frame signal observed by the client.
+    case firstVideoFrame = "FirstVideoFrame"
+    /// The first remote audio frame signal observed by the client.
+    case firstAudioFrame = "FirstAudioFrame"
 }
 
 /// Whether an event marks the start or the resolution of a stage attempt.

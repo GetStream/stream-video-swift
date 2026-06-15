@@ -55,6 +55,8 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
 
     private let disposableBag = DisposableBag()
     private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
+    /// Reports permission-stage client events for the active join attempt.
+    private let clientEventReporter: ClientEventReporting
 
     private weak var delegate: WebRTCPermissionsAdapterDelegate?
     private var requiredPermissions: Set<RequiredPermission> = []
@@ -66,11 +68,14 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
     ///   - delegate: Target for audio/video enable updates.
     ///   - stagePublisher: Publishes WebRTC stage transitions so prompts can
     ///     wait until the call is fully joined.
+    ///   - clientEventReporter: Reports permission-stage client events.
     init(
         _ delegate: WebRTCPermissionsAdapterDelegate,
-        stagePublisher: AnyPublisher<WebRTCCoordinator.StateMachine.Stage.ID, Never>
+        stagePublisher: AnyPublisher<WebRTCCoordinator.StateMachine.Stage.ID, Never>,
+        clientEventReporter: ClientEventReporting = NoOpClientEventReporter()
     ) {
         self.delegate = delegate
+        self.clientEventReporter = clientEventReporter
 
         Publishers.CombineLatest(
             stagePublisher
@@ -128,7 +133,7 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
 
                 if requiredPermissions != updatedRequiredPermissions {
                     self.requiredPermissions = updatedRequiredPermissions
-                    
+
                     switch applicationStateAdapter.state {
                     case .foreground where shouldPrompt(for: updatedRequiredPermissions):
                         log.debug(
@@ -229,6 +234,10 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
             "WebRTC will request permissions for:\(Array(requiredPermissions)).",
             subsystems: .webRTC
         )
+
+        // TODO: Add microphone/camera/screen-share permission status fields
+        // here when the generated ClientEvent schema exposes them.
+        await clientEventReporter.reportEvent(.mediaDevicePermission)
 
         for requiredPermission in requiredPermissions {
             switch requiredPermission {

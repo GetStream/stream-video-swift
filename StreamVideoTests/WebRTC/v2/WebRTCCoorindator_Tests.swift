@@ -128,6 +128,9 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
             XCTAssertTrue(expectedStage.notify)
             XCTAssertEqual(expectedStage.context.joinSource, expectedJoinSource)
             XCTAssertNotNil(expectedStage.context.joinResponseHandler)
+            await self.fulfillment {
+                await self.mockClientEventReporter.reportJoinInitiatedCallCount == 1
+            }
             await self.assertEqualAsync(
                 await self.subject.stateAdapter.initialCallSettings,
                 expectedCallSettings
@@ -159,6 +162,9 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
         await fulfillment {
             self.subject.stateMachine.currentStage.id == .connecting
         }
+        await fulfillment {
+            await self.mockClientEventReporter.reportJoinInitiatedCallCount == 1
+        }
 
         try await subject.connect(
             callSettings: nil,
@@ -177,6 +183,9 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
                 .highScaleLivestreamPublisherHint,
             true
         )
+        let reportJoinInitiatedCallCount = await mockClientEventReporter
+            .reportJoinInitiatedCallCount
+        XCTAssertEqual(reportJoinInitiatedCallCount, 1)
         canAuthenticate.send(true)
     }
 

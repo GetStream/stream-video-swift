@@ -103,6 +103,21 @@ final class ClientEventReporter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(Set(recordedEvents().compactMap(\.joinSuccessId)), [attemptId])
     }
 
+    func test_reportEvent_sendsInitiatedEventWithoutPendingCompletion() async {
+        await subject.reportJoinInitiated()
+        let attemptId = await subject.joinAttemptId
+        await subject.reportEvent(.firstVideoFrame, details: .init(sfuId: "sfu-1"))
+
+        await waitForEventCount(2)
+        let event = event(stage: "FirstVideoFrame", type: "initiated")
+        XCTAssertEqual(event?.joinSuccessId, attemptId)
+        XCTAssertNotNil(event?.eventSessionId)
+        XCTAssertEqual(event?.sfuId, "sfu-1")
+
+        await subject.abortPendingStages(failure: .init(code: .clientAborted))
+        await assertEventCountStaysAt(2)
+    }
+
     // MARK: - PeerConnection
 
     func test_peerConnectionStage_mapsToWireValueAndCarriesDetails() async {

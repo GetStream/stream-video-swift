@@ -139,6 +139,10 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         throw ClientError("WebRTCCoordinator instance not available in stage id:\(id).")
                     }
 
+                    if !updateSession {
+                        await coordinator.clientEventReporter.reportJoinInitiated()
+                    }
+
                     try Task.checkCancellation()
 
                     if updateSession {
@@ -202,7 +206,41 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     /// We provide the ``SFUAdapter`` to the authenticator which will ensure
                     /// that we will continue only when the WS `connectionState` on the
                     /// ``SFUAdapter`` has changed to `.authenticating`.
-                    try await context.authenticator.waitForAuthentication(on: sfuAdapter)
+                    let coordinatorWSDetails = ClientEventStageDetails(
+                        sfuId: response.credentials.server.edgeName,
+                        callSessionId: response.call.session?.id
+                    )
+                    // TODO: Attach coordinator_connect_id here when the
+                    // generated ClientEvent schema exposes it.
+                    let coordinatorWSAttempt = await coordinator
+                        .clientEventReporter
+                        .beginStage(
+                            .coordinatorWS,
+                            peerConnection: nil,
+                            details: coordinatorWSDetails
+                        )
+                    do {
+                        try await context.authenticator.waitForAuthentication(on: sfuAdapter)
+                    } catch {
+                        await coordinator
+                            .clientEventReporter
+                            .completeStage(
+                                coordinatorWSAttempt,
+                                retryCount: Int(context.reconnectAttempts),
+                                details: coordinatorWSDetails,
+                                failure: .init(error)
+                            )
+                        throw error
+                    }
+                    await coordinator
+                        .clientEventReporter
+                        .completeStage(
+                            coordinatorWSAttempt,
+                            outcome: .success,
+                            retryCount: Int(context.reconnectAttempts),
+                            details: coordinatorWSDetails,
+                            failure: nil
+                        )
 
                     try Task.checkCancellation()
 

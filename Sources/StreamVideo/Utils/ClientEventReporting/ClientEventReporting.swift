@@ -97,6 +97,15 @@ protocol ClientEventReporting: Sendable {
     /// Fast reconnects must **not** call this.
     func reportJoinInitiated() async
 
+    /// Reports a single `initiated` event that has no matching completion.
+    ///
+    /// Used for spec stages whose outcome is represented by stage-specific
+    /// fields instead of an `initiated` / `completed` pair.
+    func reportEvent(
+        _ stage: ClientEventStage,
+        details: ClientEventStageDetails
+    ) async
+
     /// Reports a stage `initiated` event and returns a handle used to report
     /// the matching `completed` event.
     ///
@@ -144,6 +153,11 @@ protocol ClientEventReporting: Sendable {
 }
 
 extension ClientEventReporting {
+
+    /// Convenience that reports a single event without extra details.
+    func reportEvent(_ stage: ClientEventStage) async {
+        await reportEvent(stage, details: .init())
+    }
 
     /// Convenience that begins a stage without peer-connection or extra details.
     @discardableResult
@@ -206,4 +220,51 @@ extension ClientEventReporting {
             failure: failure
         )
     }
+}
+
+/// No-op fallback used by low-level adapters constructed without a call
+/// reporter, mostly in focused unit tests.
+actor NoOpClientEventReporter: ClientEventReporting {
+    /// Current no-op join attempt identifier.
+    private(set) var joinAttemptId: String = UUID().uuidString
+
+    /// Starts a no-op join attempt.
+    func reportJoinInitiated() async {
+        joinAttemptId = UUID().uuidString
+    }
+
+    /// Drops single-event reports.
+    func reportEvent(
+        _ stage: ClientEventStage,
+        details: ClientEventStageDetails
+    ) async {}
+
+    /// Returns a synthetic stage attempt without delivery.
+    @discardableResult
+    func beginStage(
+        _ stage: ClientEventStage,
+        peerConnection: ClientEventPeerConnection?,
+        details: ClientEventStageDetails
+    ) async -> ClientEventStageAttempt {
+        .init(
+            stage: stage,
+            stageId: UUID().uuidString,
+            peerConnection: peerConnection,
+            joinAttemptId: joinAttemptId,
+            startedAt: Date(),
+            details: details
+        )
+    }
+
+    /// Drops stage completions.
+    func completeStage(
+        _ attempt: ClientEventStageAttempt,
+        outcome: ClientEventOutcome,
+        retryCount: Int,
+        details: ClientEventStageDetails,
+        failure: ClientEventFailure?
+    ) async {}
+
+    /// Drops pending-stage aborts.
+    func abortPendingStages(failure: ClientEventFailure) async {}
 }

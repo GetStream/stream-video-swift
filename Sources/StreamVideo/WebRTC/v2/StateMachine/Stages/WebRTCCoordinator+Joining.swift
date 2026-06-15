@@ -332,10 +332,20 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 return
             }
 
+            let details = ClientEventStageDetails(
+                sfuId: context.currentSFU,
+                callSessionId: context.initialJoinCallResponse?.call.session?.id
+            )
+            await coordinator.stateAdapter.set(
+                clientEventDetails: details.merging(
+                    .init(userSessionId: await coordinator.stateAdapter.sessionID)
+                )
+            )
+
             // The `WSJoin` client event pair brackets the SFU signaling join.
             let wsJoinAttempt = await coordinator
                 .clientEventReporter
-                .beginStage(.wsJoin)
+                .beginStage(.wsJoin, peerConnection: nil, details: details)
             do {
                 try await performJoin(
                     coordinator: coordinator,
@@ -348,10 +358,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     .completeStage(
                         wsJoinAttempt,
                         retryCount: Int(context.reconnectAttempts),
-                        details: .init(
-                            sfuId: context.currentSFU,
-                            callSessionId: context.initialJoinCallResponse?.call.session?.id
-                        ),
+                        details: details,
                         failure: .init(error)
                     )
                 throw error

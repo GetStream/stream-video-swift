@@ -98,6 +98,21 @@ actor ClientEventReporter: ClientEventReporting {
         deliver(event)
     }
 
+    /// Reports a single initiated event without tracking a pending completion.
+    func reportEvent(
+        _ stage: ClientEventStage,
+        details: ClientEventStageDetails
+    ) async {
+        let event = makeEvent(
+            stage: stage,
+            eventType: .initiated,
+            stageId: UUID().uuidString,
+            peerConnection: nil,
+            details: details
+        )
+        deliver(event)
+    }
+
     @discardableResult
     func beginStage(
         _ stage: ClientEventStage,
@@ -216,6 +231,12 @@ actor ClientEventReporter: ClientEventReporting {
             userSessionId: details.userSessionId,
             wasPreviouslyConnected: details.wasPreviouslyConnected
         )
+        // TODO: When generation adds join_reason, coordinator_connect_id,
+        // track_id, and permission status fields, wire them here instead of
+        // adding a sidecar payload.
+        // TODO: Generated names currently use join_success_id and
+        // event_session_id; switch to join_attempt_id and stage_id when the
+        // schema does.
         // `type` is not part of the generated memberwise initializer, so set it
         // explicitly to carry the call type (`<call_type>`).
         event.type = context.callType
