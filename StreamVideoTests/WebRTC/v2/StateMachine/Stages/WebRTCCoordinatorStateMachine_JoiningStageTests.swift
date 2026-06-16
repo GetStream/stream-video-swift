@@ -243,6 +243,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             expectedTarget: .disconnected,
             subject: subject
         ) { XCTAssertTrue($0.context.flowError is TimeOutError) }
+        await assertWebSocketJoinCompleted(outcome: .failure, retryCount: 11)
     }
 
     func test_transition_fromConnectedReceivesJoinResponse_updatesCallSettingsOnStateAdapter() async throws {
@@ -440,6 +441,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
         ) { target in
             XCTAssertEqual(target.context.fastReconnectDeadlineSeconds, 22)
         }
+        await assertWebSocketJoinCompleted(outcome: .success, retryCount: 11)
         cancellable.cancel()
     }
 
@@ -1239,6 +1241,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             XCTAssertEqual((subscriber as? MockRTCPeerConnectionCoordinator)?.timesCalled(.restartICE), 0)
             XCTAssertEqual(mockCoordinatorStack?.webRTCAuthenticator.timesCalled(.waitForConnect), 1)
         }
+        await assertNoWebSocketJoinReported()
         cancellable.cancel()
     }
 
@@ -1755,6 +1758,57 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
         _ = subject.transition(from: .init(id: from, context: subject.context))
 
         await fulfillment(of: [transitionExpectation], timeout: defaultTimeout)
+    }
+
+    private func assertWebSocketJoinCompleted(
+        outcome: ClientEventOutcome,
+        retryCount: Int,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) async {
+        await fulfillment {
+            let completedStages = await self.mockCoordinatorStack
+                .clientEventReporter
+                .completedStages
+            return completedStages.contains { $0.attempt.stage == .wsJoin }
+        }
+
+        let begunStages = await mockCoordinatorStack
+            .clientEventReporter
+            .begunStages
+            .filter { $0.stage == .wsJoin }
+        let completedStages = await mockCoordinatorStack
+            .clientEventReporter
+            .completedStages
+            .filter { $0.attempt.stage == .wsJoin }
+
+        XCTAssertEqual(begunStages.count, 1, file: file, line: line)
+        XCTAssertEqual(completedStages.count, 1, file: file, line: line)
+        XCTAssertEqual(
+            completedStages.first?.attempt.stageId,
+            begunStages.first?.attempt.stageId,
+            file: file,
+            line: line
+        )
+        XCTAssertEqual(completedStages.first?.outcome, outcome, file: file, line: line)
+        XCTAssertEqual(completedStages.first?.retryCount, retryCount, file: file, line: line)
+    }
+
+    private func assertNoWebSocketJoinReported(
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) async {
+        let begunStages = await mockCoordinatorStack
+            .clientEventReporter
+            .begunStages
+            .filter { $0.stage == .wsJoin }
+        let completedStages = await mockCoordinatorStack
+            .clientEventReporter
+            .completedStages
+            .filter { $0.attempt.stage == .wsJoin }
+
+        XCTAssertTrue(begunStages.isEmpty, file: file, line: line)
+        XCTAssertTrue(completedStages.isEmpty, file: file, line: line)
     }
 
     private func receiveEvent(

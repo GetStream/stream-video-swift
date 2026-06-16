@@ -34,6 +34,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
         private let disposableBag = DisposableBag()
         private let startTime = Date()
         private var telemetryReporter: JoinedStateTelemetryReporter = .init()
+        private var webSocketJoinTelemetryReporter: WebSocketJoinTelemetryReporter = .init()
 
         /// Initializes a new instance of `JoiningStage`.
         /// - Parameter context: The context for the joining stage.
@@ -127,6 +128,12 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         )
                     )
 
+                    if !isFastReconnecting {
+                        try await beginWebSocketJoin(
+                            coordinator: coordinator
+                        )
+                    }
+
                     try Task.checkCancellation()
 
                     try await join(
@@ -198,6 +205,10 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
                     context.reconnectAttempts += 1
 
+                    try await beginWebSocketJoin(
+                        coordinator: coordinator
+                    )
+
                     try Task.checkCancellation()
 
                     try await join(
@@ -261,6 +272,10 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     )
                     context.reconnectAttempts += 1
 
+                    try await beginWebSocketJoin(
+                        coordinator: coordinator
+                    )
+
                     try Task.checkCancellation()
 
                     try await join(
@@ -301,17 +316,14 @@ extension WebRTCCoordinator.StateMachine.Stage {
             ).createOffer().sdp
         }
 
-        /// Performs the join process.
-        /// The steps we should follow are:
-        /// - Wait for the joinResponse.
-        /// - Extract the publishOptions from the joinResponse and update the WebRTCStateAdapter.
-        /// - If we are not fastReconnecting, configure our peerConnections (and restore screenSharing)
-        /// if required.
-        /// - Extract participants from the joinResponse and update the WebRTCStateAdapter.
-        /// - Extract callSettings from the joinResponse and update the WebRTCStateAdapter.
-        /// - Extract fastReconnectionDeadline from the joinResponse and update the context.
-        /// - Wait for the webSocket state to become `.connected`.
-        /// - Report telemetry.
+        /// Performs the SFU join process after the join request is sent.
+        ///
+        /// `WSJoin` telemetry is completed as soon as the SFU `JoinResponse`
+        /// is received. Everything after that response, including
+        /// peer-connection setup and media readiness, belongs to later stages.
+        /// The remaining work applies the SFU response, configures peer
+        /// connections when needed, waits for the SFU socket to connect, and
+        /// reports the overall join telemetry.
         ///
         /// - Parameters:
         ///   - coordinator: The WebRTC coordinator.
@@ -332,44 +344,18 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 return
             }
 
-            let details = ClientEventStageDetails(
-                sfuId: context.currentSFU,
-                callSessionId: context.initialJoinCallResponse?.call.session?.id,
-                coordinatorConnectId: context.coordinatorConnectId
+            try await performJoin(
+                coordinator: coordinator,
+                sfuAdapter: sfuAdapter,
+                isFastReconnecting: false
             )
-            await coordinator.stateAdapter.set(clientEventDetails: details)
-
-            // The `WSJoin` client event pair brackets the SFU signaling join.
-            let wsJoinAttempt = await coordinator
-                .clientEventReporter
-                .beginStage(.wsJoin, peerConnection: nil, details: details)
-            do {
-                try await performJoin(
-                    coordinator: coordinator,
-                    sfuAdapter: sfuAdapter,
-                    isFastReconnecting: false
-                )
-            } catch {
-                await coordinator
-                    .clientEventReporter
-                    .completeStage(
-                        wsJoinAttempt,
-                        retryCount: Int(context.reconnectAttempts),
-                        details: details,
-                        failure: .init(error)
-                    )
-                throw error
-            }
-            await coordinator
-                .clientEventReporter
-                .completeStage(
-                    wsJoinAttempt,
-                    outcome: .success,
-                    retryCount: Int(context.reconnectAttempts)
-                )
         }
 
-        /// Performs the SFU signaling join handshake and peer-connection setup.
+        /// Waits for the SFU join response, then prepares peer connections.
+        ///
+        /// The `JoinResponse` wait is the only part included in `WSJoin`
+        /// elapsed time. Subsequent setup still happens here, but is reported
+        /// by peer-connection and first-frame client events.
         ///
         /// - Parameters:
         ///   - coordinator: The WebRTC coordinator.
@@ -407,9 +393,12 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     .eraseToAnyPublisher()
             )
 
-            let joinResponse = try await sfuAdapter
-                .publisher(eventType: Stream_Video_Sfu_Event_JoinResponse.self)
-                .nextValue(timeout: WebRTCConfiguration.timeout.join)
+            try Task.checkCancellation()
+
+            let joinResponse = try await observeSFUResponse(
+                sfuAdapter: sfuAdapter,
+                isFastReconnecting: isFastReconnecting
+            )
 
             try Task.checkCancellation()
 
@@ -669,6 +658,82 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         telemetryReporter: telemetryReporter
                     )
                 )
+            }
+        }
+
+        /// Starts `WSJoin` telemetry for the active SFU join request.
+        ///
+        /// Fast reconnects skip this because they refresh the SFU socket
+        /// transparently and must not emit join-lifecycle client events.
+        ///
+        /// - Parameter coordinator: Coordinator that owns the reporter and
+        ///   state adapter for this attempt.
+        private func beginWebSocketJoin(
+            coordinator: WebRTCCoordinator
+        ) async throws {
+            webSocketJoinTelemetryReporter.configure(
+                stateAdapter: coordinator.stateAdapter,
+                clientEventReporter: coordinator.clientEventReporter
+            )
+
+            try Task.checkCancellation()
+
+            await webSocketJoinTelemetryReporter.begin(
+                sfuId: context.currentSFU,
+                callSessionId: context.initialJoinCallResponse?.call.session?.id,
+                coordinatorConnectId: context.coordinatorConnectId
+            )
+        }
+
+        /// Resolves the current `WSJoin` event pair.
+        ///
+        /// - Parameter error: Optional error from waiting for the SFU
+        ///   `JoinResponse`; `nil` marks the attempt as successful.
+        private func completeWebSocketJoin(
+            _ error: Error?
+        ) async {
+            if let error {
+                await webSocketJoinTelemetryReporter.fail(
+                    retryCount: Int(context.reconnectAttempts),
+                    error: error
+                )
+            } else {
+                await webSocketJoinTelemetryReporter.complete(
+                    retryCount: Int(context.reconnectAttempts)
+                )
+            }
+        }
+
+        /// Waits for the SFU `JoinResponse` and resolves `WSJoin` telemetry.
+        ///
+        /// The response is the success boundary for `WSJoin`. Fast reconnects
+        /// still wait for the response but do not emit client-event telemetry.
+        ///
+        /// - Parameters:
+        ///   - sfuAdapter: SFU adapter that publishes join responses.
+        ///   - isFastReconnecting: Whether this is a transparent fast
+        ///     reconnect.
+        /// - Returns: The SFU join response.
+        private func observeSFUResponse(
+            sfuAdapter: SFUAdapter,
+            isFastReconnecting: Bool
+        ) async throws -> Stream_Video_Sfu_Event_JoinResponse {
+            do {
+                let joinResponse = try await sfuAdapter
+                    .publisher(eventType: Stream_Video_Sfu_Event_JoinResponse.self)
+                    .nextValue(timeout: WebRTCConfiguration.timeout.join)
+
+                if !isFastReconnecting {
+                    await completeWebSocketJoin(nil)
+                }
+
+                return joinResponse
+            } catch {
+                if !isFastReconnecting {
+                    await completeWebSocketJoin(error)
+                }
+
+                throw error
             }
         }
     }
