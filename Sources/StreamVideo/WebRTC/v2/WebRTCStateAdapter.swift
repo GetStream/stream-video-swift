@@ -280,7 +280,10 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     ///
     /// - Parameter value: Details attached to the next media events.
     func set(clientEventDetails value: ClientEventStageDetails) async {
-        permissionsAdapter.set(clientEventDetails: value)
+        permissionsAdapter.set(
+            clientEventDetails: value,
+            callSettings: callSettings
+        )
         await mediaFrameReporter.reset(details: value)
     }
 

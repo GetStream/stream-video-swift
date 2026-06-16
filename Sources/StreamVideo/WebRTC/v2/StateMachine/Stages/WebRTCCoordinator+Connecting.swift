@@ -141,9 +141,9 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         throw ClientError("WebRTCCoordinator instance not available in stage id:\(id).")
                     }
 
-                    if !updateSession {
-                        await coordinator.clientEventReporter.reportJoinInitiated()
-                    }
+                    await coordinator.clientEventReporter.reportJoinInitiated(
+                        details: .init(coordinatorConnectId: context.coordinatorConnectId)
+                    )
 
                     try Task.checkCancellation()
 
@@ -203,7 +203,12 @@ extension WebRTCCoordinator.StateMachine.Stage {
                             coordinatorJoinAttempt,
                             outcome: .success,
                             retryCount: Int(context.reconnectAttempts),
-                            details: coordinatorJoinDetails,
+                            details: coordinatorJoinDetails.merging(
+                                .init(
+                                    callSessionId: response.call.session?.id
+                                        ?? response.call.currentSessionId
+                                )
+                            ),
                             failure: nil
                         )
 

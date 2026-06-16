@@ -61,6 +61,7 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
     private weak var delegate: WebRTCPermissionsAdapterDelegate?
     private var requiredPermissions: Set<RequiredPermission> = []
     private var clientEventDetails: ClientEventStageDetails = .init()
+    private var reportedMediaDevicePermissionCoordinatorConnectId: String?
     private var canPromptForPermissions: Bool = false
 
     /// Creates an adapter and begins observing app/permission changes.
@@ -180,10 +181,21 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
 
     /// Updates details attached to media permission client events.
     ///
-    /// - Parameter value: Event details for the active join attempt.
-    func set(clientEventDetails value: ClientEventStageDetails) {
-        processingQueue.addOperation { [weak self] in
-            self?.clientEventDetails = value
+    /// - Parameters:
+    ///   - value: Event details for the active join attempt.
+    ///   - callSettings: Desired media settings for the active join attempt.
+    func set(
+        clientEventDetails value: ClientEventStageDetails,
+        callSettings: CallSettings? = nil
+    ) {
+        processingQueue.addTaskOperation { [weak self] in
+            guard let self else { return }
+            clientEventDetails = value
+            await reportMediaDevicePermissionIfNeeded(
+                requiredPermissions: callSettings
+                    .map { Self.requiredPermissions(for: $0) }
+                    ?? requiredPermissions
+            )
         }
     }
 
@@ -193,6 +205,7 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
             // required, so when the app moves to foreground no prompts will
             // appear.
             self?.requiredPermissions = []
+            self?.reportedMediaDevicePermissionCoordinatorConnectId = nil
         }
     }
 
@@ -245,23 +258,8 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
             subsystems: .webRTC
         )
 
-        await clientEventReporter.reportEvent(
-            .mediaDevicePermission,
-            details: clientEventDetails.merging(
-                .init(
-                    microphonePermissionStatus: status(
-                        for: .microphone,
-                        current: permissions.state.microphonePermission,
-                        canRequest: permissions.canRequestMicrophonePermission
-                    ),
-                    cameraPermissionStatus: status(
-                        for: .camera,
-                        current: permissions.state.cameraPermission,
-                        canRequest: permissions.canRequestCameraPermission
-                    ),
-                    screenShareStatus: .notInitiated
-                )
-            )
+        await reportMediaDevicePermissionIfNeeded(
+            requiredPermissions: requiredPermissions
         )
 
         for requiredPermission in requiredPermissions {
@@ -291,10 +289,53 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
         )
     }
 
+    private static func requiredPermissions(
+        for callSettings: CallSettings
+    ) -> Set<RequiredPermission> {
+        var result = Set<RequiredPermission>()
+        if callSettings.audioOn { result.insert(.microphone) }
+        if callSettings.videoOn { result.insert(.camera) }
+        return result
+    }
+
+    private func reportMediaDevicePermissionIfNeeded(
+        requiredPermissions: Set<RequiredPermission>
+    ) async {
+        guard
+            let coordinatorConnectId = clientEventDetails.coordinatorConnectId,
+            reportedMediaDevicePermissionCoordinatorConnectId != coordinatorConnectId
+        else {
+            return
+        }
+
+        reportedMediaDevicePermissionCoordinatorConnectId = coordinatorConnectId
+        await clientEventReporter.reportEvent(
+            .mediaDevicePermission,
+            details: clientEventDetails.merging(
+                .init(
+                    microphonePermissionStatus: status(
+                        for: .microphone,
+                        current: permissions.state.microphonePermission,
+                        canRequest: permissions.canRequestMicrophonePermission,
+                        requiredPermissions: requiredPermissions
+                    ),
+                    cameraPermissionStatus: status(
+                        for: .camera,
+                        current: permissions.state.cameraPermission,
+                        canRequest: permissions.canRequestCameraPermission,
+                        requiredPermissions: requiredPermissions
+                    ),
+                    screenShareStatus: .notInitiated
+                )
+            )
+        )
+    }
+
     private func status(
         for permission: RequiredPermission,
         current: PermissionStore.Permission,
-        canRequest: Bool
+        canRequest: Bool,
+        requiredPermissions: Set<RequiredPermission>
     ) -> ClientEventPermissionStatus {
         if current == .granted {
             return .granted

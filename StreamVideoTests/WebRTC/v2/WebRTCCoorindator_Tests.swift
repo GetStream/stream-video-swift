@@ -131,6 +131,13 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
             await self.fulfillment {
                 await self.mockClientEventReporter.reportJoinInitiatedCallCount == 1
             }
+            let joinInitiatedDetails = await self.mockClientEventReporter
+                .reportJoinInitiatedDetails
+                .first
+            XCTAssertEqual(
+                joinInitiatedDetails?.coordinatorConnectId,
+                expectedStage.context.coordinatorConnectId
+            )
             await self.assertEqualAsync(
                 await self.subject.stateAdapter.initialCallSettings,
                 expectedCallSettings

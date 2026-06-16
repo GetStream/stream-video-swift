@@ -83,7 +83,7 @@ actor ClientEventReporter: ClientEventReporting {
 
     // MARK: - ClientEventReporting
 
-    func reportJoinInitiated() async {
+    func reportJoinInitiated(details: ClientEventStageDetails) async {
         // A new attempt supersedes the previous one. Drop any stage attempts
         // that never completed so they are not later resolved against the new
         // attempt id; the backend treats their missing completion as a failure.
@@ -93,7 +93,8 @@ actor ClientEventReporter: ClientEventReporting {
             stage: .joinInitiated,
             eventType: .initiated,
             stageId: nil,
-            peerConnection: nil
+            peerConnection: nil,
+            details: details
         )
         deliver(event)
     }

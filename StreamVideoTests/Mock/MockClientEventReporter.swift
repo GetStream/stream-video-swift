@@ -31,13 +31,15 @@ actor MockClientEventReporter: ClientEventReporting {
 
     private(set) var joinAttemptId: String = UUID().uuidString.lowercased()
     private(set) var reportJoinInitiatedCallCount = 0
+    private(set) var reportJoinInitiatedDetails: [ClientEventStageDetails] = []
     private(set) var reportedEvents: [ReportedEvent] = []
     private(set) var begunStages: [BegunStage] = []
     private(set) var completedStages: [CompletedStage] = []
     private(set) var abortedFailures: [ClientEventFailure] = []
 
-    func reportJoinInitiated() async {
+    func reportJoinInitiated(details: ClientEventStageDetails) async {
         reportJoinInitiatedCallCount += 1
+        reportJoinInitiatedDetails.append(details)
         joinAttemptId = UUID().uuidString.lowercased()
     }
 

@@ -58,7 +58,11 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         // A migration is a new attempt to join the call: start a
                         // fresh join attempt so a new `join_attempt_id` is used.
                         context.coordinatorConnectId = UUID().uuidString.lowercased()
-                        await coordinator.clientEventReporter.reportJoinInitiated()
+                        await coordinator.clientEventReporter.reportJoinInitiated(
+                            details: .init(
+                                coordinatorConnectId: context.coordinatorConnectId
+                            )
+                        )
 
                         try Task.checkCancellation()
 

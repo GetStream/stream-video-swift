@@ -55,6 +55,21 @@ final class ClientEventReporter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertNil(joinInitiated?.outcome)
     }
 
+    func test_reportJoinInitiated_withDetails_includesCoordinatorConnectId() async {
+        await subject.reportJoinInitiated(
+            details: .init(
+                coordinatorConnectId: "85e8b199-d4ab-4eb7-a681-1d6916a86906"
+            )
+        )
+
+        await waitForEventCount(1)
+        let joinInitiated = event(stage: "JoinInitiated", type: "initiated")
+        XCTAssertEqual(
+            joinInitiated?.coordinatorConnectId,
+            "85e8b199-d4ab-4eb7-a681-1d6916a86906"
+        )
+    }
+
     func test_reportJoinInitiated_calledTwice_regeneratesJoinAttemptId() async {
         await subject.reportJoinInitiated()
         let firstId = await subject.joinAttemptId
@@ -93,6 +108,28 @@ final class ClientEventReporter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(completed?.retryCountAttempt, 2)
         XCTAssertEqual(completed?.elapsedTime, 414)
         XCTAssertNil(completed?.retryFailureCode)
+    }
+
+    func test_completeStage_success_mergesCompletionDetails() async {
+        await subject.reportJoinInitiated()
+        let attempt = await subject.beginStage(
+            .coordinatorJoin,
+            peerConnection: nil,
+            details: .init(coordinatorConnectId: "coordinator-connect-id")
+        )
+
+        await subject.completeStage(
+            attempt,
+            outcome: .success,
+            retryCount: 0,
+            details: .init(callSessionId: "call-session-id"),
+            failure: nil
+        )
+
+        await waitForEventCount(3)
+        let completed = event(stage: "CoordinatorJoin", type: "completed")
+        XCTAssertEqual(completed?.coordinatorConnectId, "coordinator-connect-id")
+        XCTAssertEqual(completed?.callSessionId, "call-session-id")
     }
 
     func test_eventsOfSameAttempt_shareJoinAttemptId() async {

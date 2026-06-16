@@ -69,12 +69,6 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         )
                     }
 
-                    // A full rejoin is a new attempt to join the call: start a
-                    // fresh join attempt so a new `join_attempt_id` is used.
-                    await coordinator.clientEventReporter.reportJoinInitiated()
-
-                    try Task.checkCancellation()
-
                     if
                         let sfuAdapter = await coordinator.stateAdapter.sfuAdapter {
                         if case .connected = sfuAdapter.connectionState {

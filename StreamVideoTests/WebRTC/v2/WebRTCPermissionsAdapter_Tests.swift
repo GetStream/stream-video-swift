@@ -214,7 +214,8 @@ final class WebRTCPermissionsAdapter_Tests: StreamVideoTestCase, @unchecked Send
         subject.set(
             clientEventDetails: .init(
                 coordinatorConnectId: "85e8b199-d4ab-4eb7-a681-1d6916a86906"
-            )
+            ),
+            callSettings: .init(audioOn: true, videoOn: true)
         )
 
         await withTaskGroup(of: Void.self) { group in
@@ -233,6 +234,9 @@ final class WebRTCPermissionsAdapter_Tests: StreamVideoTestCase, @unchecked Send
             await group.waitForAll()
         }
 
+        await fulfillment {
+            await self.mockClientEventReporter.reportedEvents.count == 1
+        }
         let event = await mockClientEventReporter.reportedEvents.first
         XCTAssertEqual(event?.stage, .mediaDevicePermission)
         XCTAssertEqual(
@@ -240,6 +244,32 @@ final class WebRTCPermissionsAdapter_Tests: StreamVideoTestCase, @unchecked Send
             "85e8b199-d4ab-4eb7-a681-1d6916a86906"
         )
         XCTAssertEqual(event?.details.microphonePermissionStatus, .initiated)
+        XCTAssertEqual(event?.details.cameraPermissionStatus, .granted)
+        XCTAssertEqual(event?.details.screenShareStatus, .notInitiated)
+    }
+
+    func test_setClientEventDetails_withGrantedPermissions_reportsPermissionStatuses(
+    ) async {
+        mockPermissions.stubMicrophonePermission(.granted)
+        mockPermissions.stubCameraPermission(.granted)
+        await fulfillment {
+            self.mockPermissions.mockStore.state.microphonePermission == .granted
+                && self.mockPermissions.mockStore.state.cameraPermission == .granted
+        }
+
+        subject.set(
+            clientEventDetails: .init(
+                coordinatorConnectId: "85e8b199-d4ab-4eb7-a681-1d6916a86906"
+            ),
+            callSettings: .init(audioOn: true, videoOn: true)
+        )
+
+        await fulfillment {
+            await self.mockClientEventReporter.reportedEvents.count == 1
+        }
+        let event = await mockClientEventReporter.reportedEvents.first
+        XCTAssertEqual(event?.stage, .mediaDevicePermission)
+        XCTAssertEqual(event?.details.microphonePermissionStatus, .granted)
         XCTAssertEqual(event?.details.cameraPermissionStatus, .granted)
         XCTAssertEqual(event?.details.screenShareStatus, .notInitiated)
     }

@@ -116,7 +116,7 @@ protocol ClientEventReporting: Sendable {
     /// ``ClientEventStage/joinInitiated`` event. Called for fresh joins as well
     /// as full rejoins and migrations, which are treated as new join attempts.
     /// Fast reconnects must **not** call this.
-    func reportJoinInitiated() async
+    func reportJoinInitiated(details: ClientEventStageDetails) async
 
     /// Reports a single `initiated` event that has no matching completion.
     ///
@@ -174,6 +174,11 @@ protocol ClientEventReporting: Sendable {
 }
 
 extension ClientEventReporting {
+
+    /// Convenience that reports a `JoinInitiated` event without extra details.
+    func reportJoinInitiated() async {
+        await reportJoinInitiated(details: .init())
+    }
 
     /// Convenience that reports a single event without extra details.
     func reportEvent(_ stage: ClientEventStage) async {
@@ -250,7 +255,7 @@ actor NoOpClientEventReporter: ClientEventReporting {
     private(set) var joinAttemptId: String = UUID().uuidString.lowercased()
 
     /// Starts a no-op join attempt.
-    func reportJoinInitiated() async {
+    func reportJoinInitiated(details: ClientEventStageDetails) async {
         joinAttemptId = UUID().uuidString.lowercased()
     }
 
