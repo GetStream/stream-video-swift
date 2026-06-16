@@ -15,6 +15,8 @@ extension WebRTCCoordinator.StateMachine {
             var authenticator: WebRTCAuthenticating = WebRTCAuthenticator()
             var sfuEventObserver: SFUEventAdapter?
             var reconnectAttempts: UInt32 = 0
+            /// Shared id for events emitted by one coordinator connection flow.
+            var coordinatorConnectId: String = UUID().uuidString.lowercased()
             var currentSFU: String = ""
             var fastReconnectDeadlineSeconds: TimeInterval = 0
             var disconnectionTimeout: TimeInterval = 0

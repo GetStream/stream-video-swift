@@ -13,7 +13,7 @@ import Foundation
 struct ClientEventStageAttempt: Sendable, Equatable {
     /// The stage this attempt belongs to.
     let stage: ClientEventStage
-    /// The UUID shared by the `initiated` / `completed` pair (`event_session_id`).
+    /// The UUID shared by the `initiated` / `completed` pair (`stage_id`).
     let stageId: String
     /// The peer connection this attempt reports on (only for
     /// ``ClientEventStage/peerConnectionConnect``).
@@ -38,8 +38,16 @@ struct ClientEventStageDetails: Sendable, Equatable {
     var sfuId: String?
     /// Call session id associated with the attempt.
     var callSessionId: String?
-    /// Per-user session id associated with the attempt.
-    var userSessionId: String?
+    /// Coordinator connection id shared by the active coordinator flow.
+    var coordinatorConnectId: String?
+    /// Media track id attached to first-frame events.
+    var trackId: String?
+    /// Microphone permission status for media-device permission events.
+    var microphonePermissionStatus: ClientEventPermissionStatus?
+    /// Camera permission status for media-device permission events.
+    var cameraPermissionStatus: ClientEventPermissionStatus?
+    /// Screen-share permission status for media-device permission events.
+    var screenShareStatus: ClientEventPermissionStatus?
     /// Whether the ICE connection had been established earlier in the same
     /// session. Required on every `PeerConnectionConnect` event.
     var wasPreviouslyConnected: Bool?
@@ -52,14 +60,22 @@ struct ClientEventStageDetails: Sendable, Equatable {
     init(
         sfuId: String? = nil,
         callSessionId: String? = nil,
-        userSessionId: String? = nil,
+        coordinatorConnectId: String? = nil,
+        trackId: String? = nil,
+        microphonePermissionStatus: ClientEventPermissionStatus? = nil,
+        cameraPermissionStatus: ClientEventPermissionStatus? = nil,
+        screenShareStatus: ClientEventPermissionStatus? = nil,
         wasPreviouslyConnected: Bool? = nil,
         previouslyConnectedTimestamp: Date? = nil,
         iceState: ClientEventICEState? = nil
     ) {
         self.sfuId = sfuId
         self.callSessionId = callSessionId
-        self.userSessionId = userSessionId
+        self.coordinatorConnectId = coordinatorConnectId
+        self.trackId = trackId
+        self.microphonePermissionStatus = microphonePermissionStatus
+        self.cameraPermissionStatus = cameraPermissionStatus
+        self.screenShareStatus = screenShareStatus
         self.wasPreviouslyConnected = wasPreviouslyConnected
         self.previouslyConnectedTimestamp = previouslyConnectedTimestamp
         self.iceState = iceState
@@ -70,7 +86,12 @@ struct ClientEventStageDetails: Sendable, Equatable {
         .init(
             sfuId: other.sfuId ?? sfuId,
             callSessionId: other.callSessionId ?? callSessionId,
-            userSessionId: other.userSessionId ?? userSessionId,
+            coordinatorConnectId: other.coordinatorConnectId ?? coordinatorConnectId,
+            trackId: other.trackId ?? trackId,
+            microphonePermissionStatus: other.microphonePermissionStatus
+                ?? microphonePermissionStatus,
+            cameraPermissionStatus: other.cameraPermissionStatus ?? cameraPermissionStatus,
+            screenShareStatus: other.screenShareStatus ?? screenShareStatus,
             wasPreviouslyConnected: other.wasPreviouslyConnected ?? wasPreviouslyConnected,
             previouslyConnectedTimestamp: other.previouslyConnectedTimestamp ?? previouslyConnectedTimestamp,
             iceState: other.iceState ?? iceState
@@ -85,7 +106,7 @@ struct ClientEventStageDetails: Sendable, Equatable {
 /// network delivery and delivery failures never surface to the join flow.
 protocol ClientEventReporting: Sendable {
 
-    /// The join attempt id (`join_success_id`) currently shared across the
+    /// The join attempt id (`join_attempt_id`) currently shared across the
     /// events of the active join attempt.
     var joinAttemptId: String { get async }
 
@@ -226,11 +247,11 @@ extension ClientEventReporting {
 /// reporter, mostly in focused unit tests.
 actor NoOpClientEventReporter: ClientEventReporting {
     /// Current no-op join attempt identifier.
-    private(set) var joinAttemptId: String = UUID().uuidString
+    private(set) var joinAttemptId: String = UUID().uuidString.lowercased()
 
     /// Starts a no-op join attempt.
     func reportJoinInitiated() async {
-        joinAttemptId = UUID().uuidString
+        joinAttemptId = UUID().uuidString.lowercased()
     }
 
     /// Drops single-event reports.
@@ -248,7 +269,7 @@ actor NoOpClientEventReporter: ClientEventReporting {
     ) async -> ClientEventStageAttempt {
         .init(
             stage: stage,
-            stageId: UUID().uuidString,
+            stageId: UUID().uuidString.lowercased(),
             peerConnection: peerConnection,
             joinAttemptId: joinAttemptId,
             startedAt: Date(),

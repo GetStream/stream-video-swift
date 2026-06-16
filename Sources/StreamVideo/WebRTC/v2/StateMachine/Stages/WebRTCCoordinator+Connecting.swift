@@ -81,6 +81,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 /// The join hint is captured only after the explicit
                 /// `.idle -> .connecting` transition is accepted. Failed
                 /// transition attempts must not mutate the active context.
+                context.coordinatorConnectId = UUID().uuidString.lowercased()
                 context.highScaleLivestreamPublisherHint =
                     options?.highScaleLivestreamPublisherHint
                 execute(
@@ -97,6 +98,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     log.assert(ring == false, "Ring cannot be true when rejoining.")
                     log.assert(notify == false, "Notify cannot be true when rejoining.")
                 }
+                context.coordinatorConnectId = UUID().uuidString.lowercased()
                 execute(
                     create: false,
                     ring: false,
@@ -160,9 +162,16 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     ///
                     /// The `CoordinatorJoin` client event pair brackets the
                     /// coordinator `JoinCall` REST request.
+                    let coordinatorJoinDetails = ClientEventStageDetails(
+                        coordinatorConnectId: context.coordinatorConnectId
+                    )
                     let coordinatorJoinAttempt = await coordinator
                         .clientEventReporter
-                        .beginStage(.coordinatorJoin)
+                        .beginStage(
+                            .coordinatorJoin,
+                            peerConnection: nil,
+                            details: coordinatorJoinDetails
+                        )
                     let sfuAdapter: SFUAdapter
                     let response: JoinCallResponse
                     do {
@@ -183,6 +192,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                             .completeStage(
                                 coordinatorJoinAttempt,
                                 retryCount: Int(context.reconnectAttempts),
+                                details: coordinatorJoinDetails,
                                 failure: .init(error)
                             )
                         throw error
@@ -192,7 +202,9 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         .completeStage(
                             coordinatorJoinAttempt,
                             outcome: .success,
-                            retryCount: Int(context.reconnectAttempts)
+                            retryCount: Int(context.reconnectAttempts),
+                            details: coordinatorJoinDetails,
+                            failure: nil
                         )
 
                     context.initialJoinCallResponse = response
@@ -208,10 +220,9 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     /// ``SFUAdapter`` has changed to `.authenticating`.
                     let coordinatorWSDetails = ClientEventStageDetails(
                         sfuId: response.credentials.server.edgeName,
-                        callSessionId: response.call.session?.id
+                        callSessionId: response.call.session?.id,
+                        coordinatorConnectId: context.coordinatorConnectId
                     )
-                    // TODO: Attach coordinator_connect_id here when the
-                    // generated ClientEvent schema exposes it.
                     let coordinatorWSAttempt = await coordinator
                         .clientEventReporter
                         .beginStage(

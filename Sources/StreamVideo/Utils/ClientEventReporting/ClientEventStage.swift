@@ -45,6 +45,19 @@ enum ClientEventOutcome: String, Sendable {
     case failure
 }
 
+/// Permission status values reported on
+/// ``ClientEventStage/mediaDevicePermission``.
+enum ClientEventPermissionStatus: String, Sendable, Equatable {
+    /// The SDK started a system permission request.
+    case initiated = "INITIATED"
+    /// The permission is denied or unavailable.
+    case failed = "FAILED"
+    /// The permission is already granted.
+    case granted = "GRANTED"
+    /// The permission was not requested for this attempt.
+    case notInitiated = "NOT_INITIATED"
+}
+
 /// Which peer connection a ``ClientEventStage/peerConnectionConnect`` event
 /// reports on. The raw values follow the backend contract (`publish` /
 /// `subscribe`) which differs from the internal ``PeerConnectionType``.

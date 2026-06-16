@@ -983,8 +983,13 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         )
         await reporter.add(track, type: .video)
 
-        reporter.renderFrame(try makeVideoFrame())
-        reporter.renderFrame(try makeVideoFrame())
+        let renderer = MediaFrameTrackRenderer(
+            type: .video,
+            trackId: track.trackId,
+            reporter: reporter
+        )
+        renderer.renderFrame(try makeVideoFrame())
+        renderer.renderFrame(try makeVideoFrame())
 
         await fulfillment {
             await self.mockClientEventReporter.reportedEvents.count == 1
@@ -994,6 +999,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(event?.stage, .firstVideoFrame)
         XCTAssertEqual(event?.details.sfuId, "sfu-1")
         XCTAssertEqual(event?.details.callSessionId, "call-session-1")
+        XCTAssertEqual(event?.details.trackId, track.trackId)
     }
 
     func test_mediaFrameReporter_renderAudio_shouldReportFirstAudioFrameOnce() async {
@@ -1004,8 +1010,13 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         await reporter.reset(details: .init(sfuId: "sfu-1"))
         await reporter.add(track, type: .audio)
 
-        reporter.render(pcmBuffer: makeAudioBuffer())
-        reporter.render(pcmBuffer: makeAudioBuffer())
+        let renderer = MediaFrameTrackRenderer(
+            type: .audio,
+            trackId: track.trackId,
+            reporter: reporter
+        )
+        renderer.render(pcmBuffer: makeAudioBuffer())
+        renderer.render(pcmBuffer: makeAudioBuffer())
 
         await fulfillment {
             await self.mockClientEventReporter.reportedEvents.count == 1
@@ -1015,6 +1026,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
             events.first?.stage,
             .firstAudioFrame
         )
+        XCTAssertEqual(events.first?.details.trackId, track.trackId)
     }
 
     // MARK: - didRemoveTrack

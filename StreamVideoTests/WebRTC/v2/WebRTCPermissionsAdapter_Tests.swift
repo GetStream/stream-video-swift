@@ -12,13 +12,15 @@ final class WebRTCPermissionsAdapter_Tests: StreamVideoTestCase, @unchecked Send
     private lazy var mockAppStateAdapter: MockAppStateAdapter! = .init()
     private lazy var mockPermissions: MockPermissionsStore! = .init()
     private lazy var delegate: MockWebRTCPermissionsAdapterDelegate! = .init()
+    private lazy var mockClientEventReporter: MockClientEventReporter! = .init()
     private lazy var stageSubject: CurrentValueSubject<
         WebRTCCoordinator.StateMachine.Stage.ID,
         Never
     >! = .init(.idle)
     private lazy var subject: WebRTCPermissionsAdapter! = .init(
         delegate,
-        stagePublisher: stageSubject.eraseToAnyPublisher()
+        stagePublisher: stageSubject.eraseToAnyPublisher(),
+        clientEventReporter: mockClientEventReporter
     )
 
     override func tearDown() {
@@ -27,6 +29,7 @@ final class WebRTCPermissionsAdapter_Tests: StreamVideoTestCase, @unchecked Send
         mockAppStateAdapter = nil
         mockPermissions = nil
         delegate = nil
+        mockClientEventReporter = nil
         stageSubject = nil
         subject = nil
         super.tearDown()
@@ -197,6 +200,48 @@ final class WebRTCPermissionsAdapter_Tests: StreamVideoTestCase, @unchecked Send
         }
         mockPermissions.stubMicrophonePermission(.granted)
         await fulfillment { self.delegate.audioOnValues.contains(true) }
+    }
+
+    func test_willSet_whenRequestingPermission_reportsPermissionStatuses() async {
+        mockAppStateAdapter.makeShared()
+        mockAppStateAdapter.stubbedState = .foreground
+        mockPermissions.stubMicrophonePermission(.unknown)
+        mockPermissions.stubCameraPermission(.granted)
+        await fulfillment {
+            self.mockPermissions.mockStore.state.microphonePermission == .unknown
+        }
+        stageSubject.send(.joined)
+        subject.set(
+            clientEventDetails: .init(
+                coordinatorConnectId: "85e8b199-d4ab-4eb7-a681-1d6916a86906"
+            )
+        )
+
+        await withTaskGroup(of: Void.self) { group in
+            group.addTask {
+                let input = CallSettings(audioOn: true, videoOn: true)
+                _ = await self.subject.willSet(callSettings: input)
+            }
+
+            group.addTask {
+                await self.fulfillment {
+                    self.mockPermissions.timesCalled(.requestMicrophonePermission) == 1
+                }
+                self.mockPermissions.stubMicrophonePermission(.granted)
+            }
+
+            await group.waitForAll()
+        }
+
+        let event = await mockClientEventReporter.reportedEvents.first
+        XCTAssertEqual(event?.stage, .mediaDevicePermission)
+        XCTAssertEqual(
+            event?.details.coordinatorConnectId,
+            "85e8b199-d4ab-4eb7-a681-1d6916a86906"
+        )
+        XCTAssertEqual(event?.details.microphonePermissionStatus, .initiated)
+        XCTAssertEqual(event?.details.cameraPermissionStatus, .granted)
+        XCTAssertEqual(event?.details.screenShareStatus, .notInitiated)
     }
 
     func test_appMovesToForeground_withPendingCameraPermissionInJoined_requestsPermission() async {

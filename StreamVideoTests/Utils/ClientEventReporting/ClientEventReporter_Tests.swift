@@ -48,9 +48,10 @@ final class ClientEventReporter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(joinInitiated?.id, "call-1")
         XCTAssertEqual(joinInitiated?.sdkVersion, SystemEnvironment.version)
         XCTAssertEqual(joinInitiated?.userAgent, SystemEnvironment.xStreamClientHeader)
-        XCTAssertNotNil(joinInitiated?.joinSuccessId)
+        XCTAssertNotNil(joinInitiated?.joinAttemptId)
+        XCTAssertEqual(joinInitiated?.joinAttemptId, joinInitiated?.joinAttemptId?.lowercased())
         // JoinInitiated has no stage_id / outcome.
-        XCTAssertNil(joinInitiated?.eventSessionId)
+        XCTAssertNil(joinInitiated?.stageId)
         XCTAssertNil(joinInitiated?.outcome)
     }
 
@@ -63,7 +64,7 @@ final class ClientEventReporter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertNotEqual(firstId, secondId)
 
         await waitForEventCount(2)
-        XCTAssertEqual(Set(recordedEvents().compactMap(\.joinSuccessId)), [firstId, secondId])
+        XCTAssertEqual(Set(recordedEvents().compactMap(\.joinAttemptId)), [firstId, secondId])
     }
 
     // MARK: - Stage pairs
@@ -74,7 +75,8 @@ final class ClientEventReporter_Tests: XCTestCase, @unchecked Sendable {
 
         await waitForEventCount(2)
         let initiated = event(stage: "CoordinatorJoin", type: "initiated")
-        XCTAssertEqual(initiated?.eventSessionId, attempt.stageId)
+        XCTAssertEqual(initiated?.stageId, attempt.stageId)
+        XCTAssertEqual(initiated?.stageId, initiated?.stageId?.lowercased())
         XCTAssertNil(initiated?.outcome)
     }
 
@@ -86,7 +88,7 @@ final class ClientEventReporter_Tests: XCTestCase, @unchecked Sendable {
 
         await waitForEventCount(3)
         let completed = event(stage: "WSJoin", type: "completed")
-        XCTAssertEqual(completed?.eventSessionId, attempt.stageId)
+        XCTAssertEqual(completed?.stageId, attempt.stageId)
         XCTAssertEqual(completed?.outcome, "success")
         XCTAssertEqual(completed?.retryCountAttempt, 2)
         XCTAssertEqual(completed?.elapsedTime, 414)
@@ -100,19 +102,23 @@ final class ClientEventReporter_Tests: XCTestCase, @unchecked Sendable {
         await subject.completeStage(attempt, outcome: .success)
 
         await waitForEventCount(3)
-        XCTAssertEqual(Set(recordedEvents().compactMap(\.joinSuccessId)), [attemptId])
+        XCTAssertEqual(Set(recordedEvents().compactMap(\.joinAttemptId)), [attemptId])
     }
 
     func test_reportEvent_sendsInitiatedEventWithoutPendingCompletion() async {
         await subject.reportJoinInitiated()
         let attemptId = await subject.joinAttemptId
-        await subject.reportEvent(.firstVideoFrame, details: .init(sfuId: "sfu-1"))
+        await subject.reportEvent(
+            .firstVideoFrame,
+            details: .init(sfuId: "sfu-1", trackId: "track-1")
+        )
 
         await waitForEventCount(2)
         let event = event(stage: "FirstVideoFrame", type: "initiated")
-        XCTAssertEqual(event?.joinSuccessId, attemptId)
-        XCTAssertNotNil(event?.eventSessionId)
+        XCTAssertEqual(event?.joinAttemptId, attemptId)
+        XCTAssertNotNil(event?.stageId)
         XCTAssertEqual(event?.sfuId, "sfu-1")
+        XCTAssertEqual(event?.trackId, "track-1")
 
         await subject.abortPendingStages(failure: .init(code: .clientAborted))
         await assertEventCountStaysAt(2)
@@ -128,7 +134,7 @@ final class ClientEventReporter_Tests: XCTestCase, @unchecked Sendable {
             details: .init(
                 sfuId: "sfu-1",
                 callSessionId: "call-session-1",
-                userSessionId: "user-session-1",
+                coordinatorConnectId: "85e8b199-d4ab-4eb7-a681-1d6916a86906",
                 wasPreviouslyConnected: false
             )
         )
@@ -140,7 +146,11 @@ final class ClientEventReporter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertTrue(pcEvents.allSatisfy { $0.peerConnection == "publish" })
         XCTAssertTrue(pcEvents.allSatisfy { $0.wasPreviouslyConnected == false })
         XCTAssertTrue(pcEvents.allSatisfy { $0.sfuId == "sfu-1" })
-        XCTAssertTrue(pcEvents.allSatisfy { $0.userSessionId == "user-session-1" })
+        XCTAssertTrue(
+            pcEvents.allSatisfy {
+                $0.coordinatorConnectId == "85e8b199-d4ab-4eb7-a681-1d6916a86906"
+            }
+        )
         XCTAssertTrue(pcEvents.allSatisfy { $0.callSessionId == "call-session-1" })
     }
 
@@ -183,7 +193,7 @@ final class ClientEventReporter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertTrue(completions.allSatisfy { $0.outcome == "failure" })
         XCTAssertTrue(completions.allSatisfy { $0.retryFailureCode == "BACKEND_LEAVE" })
         XCTAssertEqual(
-            Set(completions.compactMap(\.eventSessionId)),
+            Set(completions.compactMap(\.stageId)),
             [coordinatorJoin.stageId, wsJoin.stageId]
         )
     }
@@ -236,6 +246,28 @@ final class ClientEventReporter_Tests: XCTestCase, @unchecked Sendable {
 
         await waitForCallCount(5)
         await assertCallCountStaysAt(5)
+    }
+
+    // MARK: - Description
+
+    func test_clientEventDescription_ignoresNilFields() {
+        let subject = ClientEvent(
+            elapsedTime: 414,
+            eventType: "completed",
+            stage: "WSJoin",
+            wasPreviouslyConnected: false
+        )
+        subject.type = "default"
+
+        let description = subject.description
+
+        XCTAssertTrue(description.contains("elapsedTime: 414"))
+        XCTAssertTrue(description.contains("eventType: completed"))
+        XCTAssertTrue(description.contains("stage: WSJoin"))
+        XCTAssertTrue(description.contains("type: default"))
+        XCTAssertTrue(description.contains("wasPreviouslyConnected: false"))
+        XCTAssertFalse(description.contains("callSessionId"))
+        XCTAssertFalse(description.contains("nil"))
     }
 
     // MARK: - Helpers

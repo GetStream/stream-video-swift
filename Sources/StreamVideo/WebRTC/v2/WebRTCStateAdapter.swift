@@ -276,10 +276,11 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         statsAdapter?.sfuAdapter = value
     }
 
-    /// Resets media-frame reporting details for the active join attempt.
+    /// Resets client-event details for media-related reporters.
     ///
-    /// - Parameter value: Details attached to the next first-frame events.
+    /// - Parameter value: Details attached to the next media events.
     func set(clientEventDetails value: ClientEventStageDetails) async {
+        permissionsAdapter.set(clientEventDetails: value)
         await mediaFrameReporter.reset(details: value)
     }
 

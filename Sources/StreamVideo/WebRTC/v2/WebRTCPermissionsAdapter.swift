@@ -60,6 +60,7 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
 
     private weak var delegate: WebRTCPermissionsAdapterDelegate?
     private var requiredPermissions: Set<RequiredPermission> = []
+    private var clientEventDetails: ClientEventStageDetails = .init()
     private var canPromptForPermissions: Bool = false
 
     /// Creates an adapter and begins observing app/permission changes.
@@ -177,6 +178,15 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
         }
     }
 
+    /// Updates details attached to media permission client events.
+    ///
+    /// - Parameter value: Event details for the active join attempt.
+    func set(clientEventDetails value: ClientEventStageDetails) {
+        processingQueue.addOperation { [weak self] in
+            self?.clientEventDetails = value
+        }
+    }
+
     func cleanUp() {
         processingQueue.addOperation { [weak self] in
             // By emptying the Set we are saying that there are no permissions
@@ -235,9 +245,24 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
             subsystems: .webRTC
         )
 
-        // TODO: Add microphone/camera/screen-share permission status fields
-        // here when the generated ClientEvent schema exposes them.
-        await clientEventReporter.reportEvent(.mediaDevicePermission)
+        await clientEventReporter.reportEvent(
+            .mediaDevicePermission,
+            details: clientEventDetails.merging(
+                .init(
+                    microphonePermissionStatus: status(
+                        for: .microphone,
+                        current: permissions.state.microphonePermission,
+                        canRequest: permissions.canRequestMicrophonePermission
+                    ),
+                    cameraPermissionStatus: status(
+                        for: .camera,
+                        current: permissions.state.cameraPermission,
+                        canRequest: permissions.canRequestCameraPermission
+                    ),
+                    screenShareStatus: .notInitiated
+                )
+            )
+        )
 
         for requiredPermission in requiredPermissions {
             switch requiredPermission {
@@ -264,6 +289,20 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
             "WebRTC completed request permissions for:\(Array(requiredPermissions)).",
             subsystems: .webRTC
         )
+    }
+
+    private func status(
+        for permission: RequiredPermission,
+        current: PermissionStore.Permission,
+        canRequest: Bool
+    ) -> ClientEventPermissionStatus {
+        if current == .granted {
+            return .granted
+        } else if requiredPermissions.contains(permission), canRequest {
+            return .initiated
+        } else {
+            return current.clientEventPermissionStatus
+        }
     }
 
     /// Returns `true` if at least one permission in the set can be requested.
@@ -303,6 +342,22 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
             }
             delegate?.permissionsAdapter(self, videoOn: hasPermission)
             requiredPermissions.remove(.camera)
+        }
+    }
+}
+
+extension PermissionStore.Permission {
+    /// Maps local permission state to the client-event wire status.
+    fileprivate var clientEventPermissionStatus: ClientEventPermissionStatus {
+        switch self {
+        case .unknown:
+            return .notInitiated
+        case .requesting:
+            return .initiated
+        case .denied:
+            return .failed
+        case .granted:
+            return .granted
         }
     }
 }

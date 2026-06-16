@@ -30,7 +30,10 @@ final class WebRTCPeerConnectionConnectReporter_Tests: XCTestCase, @unchecked Se
             statePublisher: stateSubject.eraseToAnyPublisher(),
             reporter: mockReporter,
             wasPreviouslyConnected: wasPreviouslyConnected,
-            details: .init(sfuId: "sfu-1", userSessionId: "session-1")
+            details: .init(
+                sfuId: "sfu-1",
+                coordinatorConnectId: "85e8b199-d4ab-4eb7-a681-1d6916a86906"
+            )
         )
     }
 

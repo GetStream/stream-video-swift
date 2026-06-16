@@ -56,7 +56,7 @@ actor ClientEventReporter: ClientEventReporting {
 
     /// The id shared across all events of the active join attempt. Regenerated
     /// by ``reportJoinInitiated()`` on every new attempt.
-    private(set) var joinAttemptId: String = UUID().uuidString
+    private(set) var joinAttemptId: String = UUID().uuidString.lowercased()
 
     /// Stages that were begun but not yet completed, keyed by `stageId`. Used by
     /// ``abortPendingStages(failure:)`` to fail in-progress stages on leave.
@@ -88,7 +88,7 @@ actor ClientEventReporter: ClientEventReporting {
         // that never completed so they are not later resolved against the new
         // attempt id; the backend treats their missing completion as a failure.
         activeAttempts.removeAll()
-        joinAttemptId = UUID().uuidString
+        joinAttemptId = UUID().uuidString.lowercased()
         let event = makeEvent(
             stage: .joinInitiated,
             eventType: .initiated,
@@ -106,7 +106,7 @@ actor ClientEventReporter: ClientEventReporting {
         let event = makeEvent(
             stage: stage,
             eventType: .initiated,
-            stageId: UUID().uuidString,
+            stageId: UUID().uuidString.lowercased(),
             peerConnection: nil,
             details: details
         )
@@ -121,7 +121,7 @@ actor ClientEventReporter: ClientEventReporting {
     ) async -> ClientEventStageAttempt {
         let attempt = ClientEventStageAttempt(
             stage: stage,
-            stageId: UUID().uuidString,
+            stageId: UUID().uuidString.lowercased(),
             peerConnection: peerConnection,
             joinAttemptId: joinAttemptId,
             startedAt: currentDate(),
@@ -210,33 +210,32 @@ actor ClientEventReporter: ClientEventReporting {
     ) -> ClientEvent {
         let event = ClientEvent(
             callSessionId: details.callSessionId,
+            cameraPermissionStatus: details.cameraPermissionStatus?.rawValue,
+            coordinatorConnectId: details.coordinatorConnectId,
             elapsedTime: elapsedTime,
-            eventSessionId: stageId,
             eventType: eventType.rawValue,
             iceState: details.iceState?.rawValue,
             id: context.callId,
-            joinSuccessId: joinAttemptId ?? self.joinAttemptId,
+            joinAttemptId: stage == .coordinatorWS ? nil : joinAttemptId ?? self.joinAttemptId,
+            microphonePermissionStatus: details.microphonePermissionStatus?.rawValue,
             outcome: outcome?.rawValue,
             peerConnection: peerConnection?.rawValue,
             previouslyConnectedTimestamp: details.previouslyConnectedTimestamp,
             retryCountAttempt: retryCount,
             retryFailureCode: failure?.code,
             retryFailureReason: failure?.reason,
+            screenShareStatus: details.screenShareStatus?.rawValue,
             sdkVersion: context.sdkVersion,
             sfuId: details.sfuId,
             stage: stage.rawValue,
+            stageId: stageId,
             timestamp: currentDate(),
+            trackId: details.trackId,
             userAgent: context.userAgent,
             userId: context.userId,
-            userSessionId: details.userSessionId,
             wasPreviouslyConnected: details.wasPreviouslyConnected
         )
-        // TODO: When generation adds join_reason, coordinator_connect_id,
-        // track_id, and permission status fields, wire them here instead of
-        // adding a sidecar payload.
-        // TODO: Generated names currently use join_success_id and
-        // event_session_id; switch to join_attempt_id and stage_id when the
-        // schema does.
+        // TODO: Wire join_reason when the generated ClientEvent schema exposes it.
         // `type` is not part of the generated memberwise initializer, so set it
         // explicitly to carry the call type (`<call_type>`).
         event.type = context.callType
@@ -269,6 +268,10 @@ actor ClientEventReporter: ClientEventReporting {
         while true {
             do {
                 _ = try await api.reportClientCallEvent(reportClientEventRequest: request)
+                log.debug(
+                    "ClientEvent retries:\(retries) request:\(request) reported successfully.",
+                    subsystems: .webRTC
+                )
                 return
             } catch {
                 // `hasClientErrors` is `false` for `4xx` validation errors (do
@@ -299,4 +302,57 @@ extension RetryPolicy {
         maxRetries: 4,
         delay: { retries in 0.5 * pow(2, Double(retries)) }
     )
+}
+
+extension ReportClientEventRequest: CustomStringConvertible {
+    public var description: String {
+        var result = "{"
+        result += " count: \(events.endIndex)"
+        result += ", events: \(events)"
+        result += " }"
+        return result
+    }
+}
+
+extension ClientEvent: CustomStringConvertible {
+    public var description: String {
+        var result = "{"
+        var separator = " "
+
+        func append<T>(label: String, value: T?) {
+            guard let value else { return }
+            result += "\(separator)\(label): \(value)"
+            separator = ", "
+        }
+
+        append(label: "callSessionId", value: callSessionId)
+        append(label: "cameraPermissionStatus", value: cameraPermissionStatus)
+        append(label: "coordinatorConnectId", value: coordinatorConnectId)
+        append(label: "elapsedTime", value: elapsedTime)
+        append(label: "eventType", value: eventType)
+        append(label: "iceState", value: iceState)
+        append(label: "id", value: id)
+        append(label: "joinAttemptId", value: joinAttemptId)
+        append(label: "microphonePermissionStatus", value: microphonePermissionStatus)
+        append(label: "outcome", value: outcome)
+        append(label: "peerConnection", value: peerConnection)
+        append(label: "previouslyConnectedTimestamp", value: previouslyConnectedTimestamp)
+        append(label: "retryCountAttempt", value: retryCountAttempt)
+        append(label: "retryFailureCode", value: retryFailureCode)
+        append(label: "retryFailureReason", value: retryFailureReason)
+        append(label: "screenShareStatus", value: screenShareStatus)
+        append(label: "sdkVersion", value: sdkVersion)
+        append(label: "sfuId", value: sfuId)
+        append(label: "stage", value: stage)
+        append(label: "stageId", value: stageId)
+        append(label: "timestamp", value: timestamp)
+        append(label: "trackId", value: trackId)
+        append(label: "type", value: type)
+        append(label: "userAgent", value: userAgent)
+        append(label: "userId", value: userId)
+        append(label: "wasPreviouslyConnected", value: wasPreviouslyConnected)
+        result += " }"
+
+        return result
+    }
 }

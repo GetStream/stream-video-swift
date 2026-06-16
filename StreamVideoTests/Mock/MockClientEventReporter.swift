@@ -29,7 +29,7 @@ actor MockClientEventReporter: ClientEventReporting {
         var details: ClientEventStageDetails
     }
 
-    private(set) var joinAttemptId: String = UUID().uuidString
+    private(set) var joinAttemptId: String = UUID().uuidString.lowercased()
     private(set) var reportJoinInitiatedCallCount = 0
     private(set) var reportedEvents: [ReportedEvent] = []
     private(set) var begunStages: [BegunStage] = []
@@ -38,7 +38,7 @@ actor MockClientEventReporter: ClientEventReporting {
 
     func reportJoinInitiated() async {
         reportJoinInitiatedCallCount += 1
-        joinAttemptId = UUID().uuidString
+        joinAttemptId = UUID().uuidString.lowercased()
     }
 
     func reportEvent(
@@ -56,7 +56,7 @@ actor MockClientEventReporter: ClientEventReporting {
     ) async -> ClientEventStageAttempt {
         let attempt = ClientEventStageAttempt(
             stage: stage,
-            stageId: UUID().uuidString,
+            stageId: UUID().uuidString.lowercased(),
             peerConnection: peerConnection,
             joinAttemptId: joinAttemptId,
             startedAt: Date(),

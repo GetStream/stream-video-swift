@@ -9,9 +9,9 @@ import StreamWebRTC
 
 /// Reports the first rendered remote audio and video frames for a join attempt.
 ///
-/// The reporter registers itself as a renderer on remote RTC media tracks and
-/// removes itself after the first frame of each media kind is observed.
-final class MediaFrameReporter: NSObject, @unchecked Sendable, RTCVideoRenderer, RTCAudioRenderer {
+/// The reporter registers retained per-track renderers on remote RTC media
+/// tracks and removes them after the first frame of each media kind is observed.
+final class MediaFrameReporter: @unchecked Sendable {
     /// Stores renderer state behind actor isolation.
     private let storage: MediaFrameReporterStorage
 
@@ -19,50 +19,90 @@ final class MediaFrameReporter: NSObject, @unchecked Sendable, RTCVideoRenderer,
     /// - Parameter clientEventReporter: Reporter used for client-event delivery.
     init(clientEventReporter: ClientEventReporting) {
         storage = .init(clientEventReporter: clientEventReporter)
-        super.init()
     }
 
     /// Starts a fresh reporting window for a new join attempt.
     /// - Parameter details: Event details attached to frame reports.
     func reset(details: ClientEventStageDetails) async {
-        await storage.reset(details: details, renderer: self)
+        await storage.reset(details: details)
     }
 
-    /// Registers this reporter on a remote media track when still needed.
+    /// Registers a retained renderer on a remote media track when still needed.
     /// - Parameters:
     ///   - track: Track to observe for rendered frames.
     ///   - type: Media kind represented by the track.
     func add(_ track: RTCMediaStreamTrack, type: TrackType) async {
-        await storage.add(track, type: type, renderer: self)
+        await storage.add(track, type: type, reporter: self)
     }
 
-    /// Removes this reporter from a previously observed track.
+    /// Removes the retained renderer from a previously observed track.
     /// - Parameters:
     ///   - track: Track that no longer needs frame observation.
     ///   - type: Media kind represented by the track.
     func remove(_ track: RTCMediaStreamTrack, type: TrackType) async {
-        await storage.remove(track, type: type, renderer: self)
+        await storage.remove(track, type: type)
     }
 
     /// Removes this reporter from all currently observed tracks.
     func removeAllTracks() async {
-        await storage.removeAllTracks(renderer: self)
+        await storage.removeAllTracks()
+    }
+
+    /// Reports the first rendered frame from a retained track renderer.
+    ///
+    /// - Parameters:
+    ///   - type: Media kind that produced the frame.
+    ///   - trackId: Track id attached to the rendered frame event.
+    func reportFrame(type: TrackType, trackId: String) async {
+        await storage.report(type, trackId: trackId)
+    }
+}
+
+/// Renderer retained per observed media track so frame reports carry track id.
+final class MediaFrameTrackRenderer:
+    NSObject,
+    @unchecked Sendable,
+    RTCVideoRenderer,
+    RTCAudioRenderer {
+    /// Reporter that receives forwarded frame callbacks.
+    private weak var reporter: MediaFrameReporter?
+    /// Media kind represented by the retained renderer.
+    private let type: TrackType
+    /// Track id attached to frame reports.
+    private let trackId: String
+
+    /// Creates a renderer for a single remote media track.
+    ///
+    /// - Parameters:
+    ///   - type: Media kind represented by the track.
+    ///   - trackId: Track id attached to frame reports.
+    ///   - reporter: Reporter receiving first-frame notifications.
+    init(type: TrackType, trackId: String, reporter: MediaFrameReporter) {
+        self.type = type
+        self.trackId = trackId
+        self.reporter = reporter
     }
 
     /// Receives video-size updates required by ``RTCVideoRenderer``.
     func setSize(_ size: CGSize) {}
 
-    /// Reports the first rendered remote video frame.
+    /// Forwards rendered remote video frames to ``MediaFrameReporter``.
+    ///
     /// - Parameter frame: Rendered frame supplied by WebRTC.
     func renderFrame(_ frame: RTCVideoFrame?) {
         guard frame != nil else { return }
-        Task { await storage.report(.firstVideoFrame, renderer: self) }
+        Task { [reporter, type, trackId] in
+            await reporter?.reportFrame(type: type, trackId: trackId)
+        }
     }
 
-    /// Reports the first rendered remote audio frame.
+    /// Forwards rendered remote audio frames to ``MediaFrameReporter``.
+    ///
     /// - Parameter pcmBuffer: Rendered audio buffer supplied by WebRTC.
     func render(pcmBuffer: AVAudioPCMBuffer) {
-        Task { await storage.report(.firstAudioFrame, renderer: self) }
+        Task { [reporter, type, trackId] in
+            await reporter?.reportFrame(type: type, trackId: trackId)
+        }
     }
 }
 
@@ -78,9 +118,13 @@ private actor MediaFrameReporterStorage {
     /// Whether the current join attempt has reported an audio frame.
     private var didReportAudioFrame = false
     /// Remote video tracks currently observed for first-frame delivery.
-    private var videoTracks: [ObjectIdentifier: RTCVideoTrack] = [:]
+    private var videoTracks: [
+        ObjectIdentifier: (track: RTCVideoTrack, renderer: MediaFrameTrackRenderer)
+    ] = [:]
     /// Remote audio tracks currently observed for first-frame delivery.
-    private var audioTracks: [ObjectIdentifier: RTCAudioTrack] = [:]
+    private var audioTracks: [
+        ObjectIdentifier: (track: RTCAudioTrack, renderer: MediaFrameTrackRenderer)
+    ] = [:]
 
     /// Creates actor-isolated storage for the media frame reporter.
     ///
@@ -94,9 +138,8 @@ private actor MediaFrameReporterStorage {
     ///
     /// - Parameters:
     ///   - details: Event details attached to the next first-frame reports.
-    ///   - renderer: Renderer to detach from tracks left by the old window.
-    func reset(details: ClientEventStageDetails, renderer: MediaFrameReporter) {
-        removeAllTracks(renderer: renderer)
+    func reset(details: ClientEventStageDetails) {
+        removeAllTracks()
         self.details = details
         didReportVideoFrame = false
         didReportAudioFrame = false
@@ -108,25 +151,35 @@ private actor MediaFrameReporterStorage {
     /// - Parameters:
     ///   - track: Remote media track to observe.
     ///   - type: Media kind represented by the track.
-    ///   - renderer: Renderer to attach to the track.
+    ///   - reporter: Reporter receiving retained renderer callbacks.
     func add(
         _ track: RTCMediaStreamTrack,
         type: TrackType,
-        renderer: MediaFrameReporter
+        reporter: MediaFrameReporter
     ) {
         switch type {
         case .audio:
             guard let track = track as? RTCAudioTrack, !didReportAudioFrame else { return }
             let id = ObjectIdentifier(track)
             guard audioTracks[id] == nil else { return }
-            audioTracks[id] = track
-            track.add(renderer)
+            let trackRenderer = MediaFrameTrackRenderer(
+                type: type,
+                trackId: track.trackId,
+                reporter: reporter
+            )
+            audioTracks[id] = (track, trackRenderer)
+            track.add(trackRenderer)
         case .video, .screenshare:
             guard let track = track as? RTCVideoTrack, !didReportVideoFrame else { return }
             let id = ObjectIdentifier(track)
             guard videoTracks[id] == nil else { return }
-            videoTracks[id] = track
-            track.add(renderer)
+            let trackRenderer = MediaFrameTrackRenderer(
+                type: type,
+                trackId: track.trackId,
+                reporter: reporter
+            )
+            videoTracks[id] = (track, trackRenderer)
+            track.add(trackRenderer)
         default:
             return
         }
@@ -137,65 +190,76 @@ private actor MediaFrameReporterStorage {
     /// - Parameters:
     ///   - track: Remote media track to stop observing.
     ///   - type: Media kind represented by the track.
-    ///   - renderer: Renderer to detach from the track.
-    func remove(
-        _ track: RTCMediaStreamTrack,
-        type: TrackType,
-        renderer: MediaFrameReporter
-    ) {
+    func remove(_ track: RTCMediaStreamTrack, type: TrackType) {
         switch type {
         case .audio:
             guard let track = track as? RTCAudioTrack else { return }
-            audioTracks.removeValue(forKey: ObjectIdentifier(track))?.remove(renderer)
+            if let removed = audioTracks.removeValue(forKey: ObjectIdentifier(track)) {
+                removed.track.remove(removed.renderer)
+            }
         case .video, .screenshare:
             guard let track = track as? RTCVideoTrack else { return }
-            videoTracks.removeValue(forKey: ObjectIdentifier(track))?.remove(renderer)
+            if let removed = videoTracks.removeValue(forKey: ObjectIdentifier(track)) {
+                removed.track.remove(removed.renderer)
+            }
         default:
             return
         }
     }
 
     /// Detaches the renderer from all observed tracks.
-    ///
-    /// - Parameter renderer: Renderer to detach from each observed track.
-    func removeAllTracks(renderer: MediaFrameReporter) {
+    func removeAllTracks() {
         let videoTracksToDetach = Array(videoTracks.values)
         let audioTracksToDetach = Array(audioTracks.values)
         videoTracks.removeAll()
         audioTracks.removeAll()
-        videoTracksToDetach.forEach { $0.remove(renderer) }
-        audioTracksToDetach.forEach { $0.remove(renderer) }
+        videoTracksToDetach.forEach { $0.track.remove($0.renderer) }
+        audioTracksToDetach.forEach { $0.track.remove($0.renderer) }
     }
 
     /// Reports the first frame for the requested media kind once.
     ///
     /// - Parameters:
-    ///   - stage: First-frame stage that was observed.
-    ///   - renderer: Renderer to detach after the event is emitted.
+    ///   - type: Media kind that produced the frame.
+    ///   - trackId: Track id attached to the frame event.
     func report(
-        _ stage: ClientEventStage,
-        renderer: MediaFrameReporter
+        _ type: TrackType,
+        trackId: String
     ) async {
-        let tracksToDetach: ([RTCVideoTrack], [RTCAudioTrack])
-        switch stage {
-        case .firstVideoFrame:
+        let stage: ClientEventStage
+        let tracksToDetach: (
+            [(
+                track: RTCVideoTrack,
+                renderer: MediaFrameTrackRenderer
+            )],
+            [(
+                track: RTCAudioTrack,
+                renderer: MediaFrameTrackRenderer
+            )]
+        )
+        switch type {
+        case .video, .screenshare:
             guard !didReportVideoFrame else { return }
             didReportVideoFrame = true
+            stage = .firstVideoFrame
             tracksToDetach = (Array(videoTracks.values), [])
             videoTracks.removeAll()
-        case .firstAudioFrame:
+        case .audio:
             guard !didReportAudioFrame else { return }
             didReportAudioFrame = true
+            stage = .firstAudioFrame
             tracksToDetach = ([], Array(audioTracks.values))
             audioTracks.removeAll()
         default:
             return
         }
 
-        tracksToDetach.0.forEach { $0.remove(renderer) }
-        tracksToDetach.1.forEach { $0.remove(renderer) }
+        tracksToDetach.0.forEach { $0.track.remove($0.renderer) }
+        tracksToDetach.1.forEach { $0.track.remove($0.renderer) }
 
-        // TODO: Attach track_id when the generated schema exposes it.
-        await clientEventReporter.reportEvent(stage, details: details)
+        await clientEventReporter.reportEvent(
+            stage,
+            details: details.merging(.init(trackId: trackId))
+        )
     }
 }
