@@ -1197,6 +1197,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             .coordinator
             .stateAdapter
             .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
+        mockCoordinatorStack.sfuStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
         mockCoordinatorStack.webRTCAuthenticator.stubbedFunction[.waitForConnect] = Result<Void, Error>.success(())
 
         /// We manually trigger the peerConnection configuration to allow us to test what will happen to

@@ -128,7 +128,22 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         )
                     )
 
-                    if !isFastReconnecting {
+                    let isSFUConnected: Bool = {
+                        switch sfuAdapter.connectionState {
+                        case .connected, .authenticating:
+                            return true
+                        default:
+                            return false
+                        }
+                    }()
+                    // Fast reconnect normally stays inside the same join
+                    // attempt. If the SFU websocket is unhealthy, we still
+                    // send a new WSJoin pair so backend analytics can measure
+                    // the fresh JoinRequest -> JoinResponse attempt without
+                    // rotating the join_attempt_id.
+                    let shouldReportWebSocketJoin = !isFastReconnecting
+                        || !isSFUConnected
+                    if shouldReportWebSocketJoin {
                         try await beginWebSocketJoin(
                             coordinator: coordinator
                         )
@@ -139,7 +154,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     try await join(
                         coordinator: coordinator,
                         sfuAdapter: sfuAdapter,
-                        isFastReconnecting: isFastReconnecting
+                        isFastReconnecting: isFastReconnecting,
+                        shouldReportWebSocketJoin: shouldReportWebSocketJoin
                     )
 
                     try Task.checkCancellation()
@@ -214,7 +230,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     try await join(
                         coordinator: coordinator,
                         sfuAdapter: sfuAdapter,
-                        isFastReconnecting: false
+                        isFastReconnecting: false,
+                        shouldReportWebSocketJoin: true
                     )
 
                     await transitionToNextStage(
@@ -281,7 +298,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     try await join(
                         coordinator: coordinator,
                         sfuAdapter: sfuAdapter,
-                        isFastReconnecting: false
+                        isFastReconnecting: false,
+                        shouldReportWebSocketJoin: true
                     )
 
                     await transitionToNextStage(
@@ -331,15 +349,19 @@ extension WebRTCCoordinator.StateMachine.Stage {
         private func join(
             coordinator: WebRTCCoordinator,
             sfuAdapter: SFUAdapter,
-            isFastReconnecting: Bool
+            isFastReconnecting: Bool,
+            shouldReportWebSocketJoin: Bool
         ) async throws {
-            // Fast reconnects refresh the WebSocket transparently and must not
-            // emit join-lifecycle client events.
+            // Fast reconnects usually refresh the WebSocket transparently and
+            // skip join-lifecycle events. If the SFU websocket is not connected,
+            // the fast reconnect sends a new WSJoin attempt using the existing
+            // join_attempt_id.
             guard !isFastReconnecting else {
                 try await performJoin(
                     coordinator: coordinator,
                     sfuAdapter: sfuAdapter,
-                    isFastReconnecting: true
+                    isFastReconnecting: true,
+                    shouldReportWebSocketJoin: shouldReportWebSocketJoin
                 )
                 return
             }
@@ -347,7 +369,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
             try await performJoin(
                 coordinator: coordinator,
                 sfuAdapter: sfuAdapter,
-                isFastReconnecting: false
+                isFastReconnecting: false,
+                shouldReportWebSocketJoin: shouldReportWebSocketJoin
             )
         }
 
@@ -363,7 +386,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
         private func performJoin(
             coordinator: WebRTCCoordinator,
             sfuAdapter: SFUAdapter,
-            isFastReconnecting: Bool
+            isFastReconnecting: Bool,
+            shouldReportWebSocketJoin: Bool
         ) async throws {
             if let eventObserver = context.sfuEventObserver {
                 eventObserver.sfuAdapter = sfuAdapter
@@ -397,7 +421,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
             let joinResponse = try await observeSFUResponse(
                 sfuAdapter: sfuAdapter,
-                isFastReconnecting: isFastReconnecting
+                shouldReportWebSocketJoin: shouldReportWebSocketJoin
             )
 
             try Task.checkCancellation()
@@ -708,29 +732,30 @@ extension WebRTCCoordinator.StateMachine.Stage {
         /// Waits for the SFU `JoinResponse` and resolves `WSJoin` telemetry.
         ///
         /// The response is the success boundary for `WSJoin`. Fast reconnects
-        /// still wait for the response but do not emit client-event telemetry.
+        /// only emit this telemetry when the SFU websocket was unhealthy and a
+        /// new WSJoin attempt had to be tracked.
         ///
         /// - Parameters:
         ///   - sfuAdapter: SFU adapter that publishes join responses.
-        ///   - isFastReconnecting: Whether this is a transparent fast
-        ///     reconnect.
+        ///   - shouldReportWebSocketJoin: Whether a `WSJoin` event pair was
+        ///     started for this join response.
         /// - Returns: The SFU join response.
         private func observeSFUResponse(
             sfuAdapter: SFUAdapter,
-            isFastReconnecting: Bool
+            shouldReportWebSocketJoin: Bool
         ) async throws -> Stream_Video_Sfu_Event_JoinResponse {
             do {
                 let joinResponse = try await sfuAdapter
                     .publisher(eventType: Stream_Video_Sfu_Event_JoinResponse.self)
                     .nextValue(timeout: WebRTCConfiguration.timeout.join)
 
-                if !isFastReconnecting {
+                if shouldReportWebSocketJoin {
                     await completeWebSocketJoin(nil)
                 }
 
                 return joinResponse
             } catch {
-                if !isFastReconnecting {
+                if shouldReportWebSocketJoin {
                     await completeWebSocketJoin(error)
                 }
 

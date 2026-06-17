@@ -47,8 +47,9 @@ final class WSJoinClientEventScenarios_Tests: XCTestCase, @unchecked Sendable {
         trace.assertCompleted(.wsJoin, outcome: .success, retryCount: 2)
     }
 
-    func test_fastReconnect_doesNotReportWSJoin() async throws {
+    func test_fastReconnect_whenSFUIsConnected_doesNotReportWSJoin() async throws {
         let harness = ClientEventScenarioHarness()
+        harness.stack.sfuStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
         let subject = try await makeJoiningStage(harness: harness, reconnectAttempts: 1)
 
         let cancellable = receiveJoinResponse(harness)
@@ -61,6 +62,26 @@ final class WSJoinClientEventScenarios_Tests: XCTestCase, @unchecked Sendable {
 
         let trace = await harness.trace
         trace.assertNotReported(.wsJoin)
+    }
+
+    func test_fastReconnect_whenSFUIsNotConnected_reportsWSJoinWithExistingJoinAttemptId(
+    ) async throws {
+        let harness = ClientEventScenarioHarness()
+        let joinAttemptId = await harness.stack.clientEventReporter.joinAttemptId
+        let subject = try await makeJoiningStage(harness: harness, reconnectAttempts: 1)
+
+        let cancellable = receiveJoinResponse(harness)
+        try await assertTransition(
+            subject,
+            from: .fastReconnected,
+            expectedTarget: .joined
+        ) { _ in }
+        cancellable.cancel()
+
+        let trace = await harness.trace
+        trace.assertCompleted(.wsJoin, outcome: .success, retryCount: 1)
+        XCTAssertEqual(trace.begun(.wsJoin).first?.attempt.joinAttemptId, joinAttemptId)
+        XCTAssertTrue(trace.joinInitiatedDetails.isEmpty)
     }
 
     // MARK: - Private
