@@ -23,6 +23,7 @@ final class CoordinatorJoinClientEventScenarios_Tests: XCTestCase, @unchecked Se
             outcome: .failure,
             retryCount: 3
         )
+        XCTAssertEqual(trace.begun(.coordinatorJoin).first?.details.joinReason, .firstAttempt)
     }
 
     func test_authenticationSucceedsAfterRetries_reportsCoordinatorJoinSuccessWithRetryCount(
@@ -58,6 +59,7 @@ final class CoordinatorJoinClientEventScenarios_Tests: XCTestCase, @unchecked Se
             trace.completed(.coordinatorJoin).last?.details.callSessionId,
             "call-session-1"
         )
+        XCTAssertEqual(trace.begun(.coordinatorJoin).first?.details.joinReason, .firstAttempt)
     }
 
     // MARK: - Private

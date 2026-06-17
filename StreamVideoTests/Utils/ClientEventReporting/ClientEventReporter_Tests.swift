@@ -132,6 +132,20 @@ final class ClientEventReporter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(completed?.callSessionId, "call-session-id")
     }
 
+    func test_beginStage_withJoinReason_includesJoinReason() async {
+        await subject.reportJoinInitiated()
+
+        _ = await subject.beginStage(
+            .coordinatorJoin,
+            peerConnection: nil,
+            details: .init(joinReason: .fullRejoin)
+        )
+
+        await waitForEventCount(2)
+        let initiated = event(stage: "CoordinatorJoin", type: "initiated")
+        XCTAssertEqual(initiated?.joinReason, "full-rejoin")
+    }
+
     func test_eventsOfSameAttempt_shareJoinAttemptId() async {
         await subject.reportJoinInitiated()
         let attemptId = await subject.joinAttemptId
@@ -324,6 +338,20 @@ final class ClientEventReporter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertTrue(description.contains("wasPreviouslyConnected: false"))
         XCTAssertFalse(description.contains("callSessionId"))
         XCTAssertFalse(description.contains("nil"))
+    }
+
+    func test_clientEvent_encodeToJSON_includesJoinReason() {
+        let subject = ClientEvent(
+            eventType: "initiated",
+            joinReason: "first-attempt",
+            stage: "CoordinatorJoin"
+        )
+
+        let data = try? CodableHelper.jsonEncoder.encode(subject)
+        let json = data
+            .flatMap { try? JSONSerialization.jsonObject(with: $0) as? [String: Any] }
+
+        XCTAssertEqual(json?["join_reason"] as? String, "first-attempt")
     }
 
     // MARK: - Helpers

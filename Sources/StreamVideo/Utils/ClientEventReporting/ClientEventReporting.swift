@@ -40,6 +40,8 @@ struct ClientEventStageDetails: Sendable, Equatable {
     var callSessionId: String?
     /// Coordinator connection id shared by the active coordinator flow.
     var coordinatorConnectId: String?
+    /// Reason that triggered the coordinator join.
+    var joinReason: ClientEventJoinReason?
     /// Media track id attached to first-frame events.
     var trackId: String?
     /// Microphone permission status for media-device permission events.
@@ -61,6 +63,7 @@ struct ClientEventStageDetails: Sendable, Equatable {
         sfuId: String? = nil,
         callSessionId: String? = nil,
         coordinatorConnectId: String? = nil,
+        joinReason: ClientEventJoinReason? = nil,
         trackId: String? = nil,
         microphonePermissionStatus: ClientEventPermissionStatus? = nil,
         cameraPermissionStatus: ClientEventPermissionStatus? = nil,
@@ -72,6 +75,7 @@ struct ClientEventStageDetails: Sendable, Equatable {
         self.sfuId = sfuId
         self.callSessionId = callSessionId
         self.coordinatorConnectId = coordinatorConnectId
+        self.joinReason = joinReason
         self.trackId = trackId
         self.microphonePermissionStatus = microphonePermissionStatus
         self.cameraPermissionStatus = cameraPermissionStatus
@@ -87,6 +91,7 @@ struct ClientEventStageDetails: Sendable, Equatable {
             sfuId: other.sfuId ?? sfuId,
             callSessionId: other.callSessionId ?? callSessionId,
             coordinatorConnectId: other.coordinatorConnectId ?? coordinatorConnectId,
+            joinReason: other.joinReason ?? joinReason,
             trackId: other.trackId ?? trackId,
             microphonePermissionStatus: other.microphonePermissionStatus
                 ?? microphonePermissionStatus,

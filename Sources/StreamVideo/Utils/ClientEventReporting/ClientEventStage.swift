@@ -29,6 +29,19 @@ enum ClientEventStage: String, Sendable {
     case firstAudioFrame = "FirstAudioFrame"
 }
 
+/// Reason attached to `CoordinatorJoin` events so backend analytics can
+/// distinguish fresh joins from recovery joins.
+enum ClientEventJoinReason: String, Sendable, Equatable {
+    /// First user-initiated attempt to join the call.
+    case firstAttempt = "first-attempt"
+    /// Join retried after network became available again.
+    case networkAvailable = "network-available"
+    /// Join performed while migrating to a different SFU.
+    case migration
+    /// Full rejoin that obtains new credentials/session state.
+    case fullRejoin = "full-rejoin"
+}
+
 /// Whether an event marks the start or the resolution of a stage attempt.
 enum ClientEventType: String, Sendable {
     /// Emitted when the client begins the stage attempt.

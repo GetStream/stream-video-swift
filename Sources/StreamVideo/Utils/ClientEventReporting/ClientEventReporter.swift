@@ -212,6 +212,7 @@ actor ClientEventReporter: ClientEventReporting {
             iceState: details.iceState?.rawValue,
             id: context.callId,
             joinAttemptId: stage == .coordinatorWS ? nil : joinAttemptId ?? self.joinAttemptId,
+            joinReason: details.joinReason?.rawValue,
             microphonePermissionStatus: details.microphonePermissionStatus?.rawValue,
             outcome: outcome?.rawValue,
             peerConnection: peerConnection?.rawValue,
@@ -230,7 +231,6 @@ actor ClientEventReporter: ClientEventReporting {
             userId: context.userId,
             wasPreviouslyConnected: details.wasPreviouslyConnected
         )
-        // TODO: Wire join_reason when the generated ClientEvent schema exposes it.
         // `type` is not part of the generated memberwise initializer, so set it
         // explicitly to carry the call type (`<call_type>`).
         event.type = context.callType

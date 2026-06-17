@@ -163,7 +163,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     /// The `CoordinatorJoin` client event pair brackets the
                     /// coordinator `JoinCall` REST request.
                     let coordinatorJoinDetails = ClientEventStageDetails(
-                        coordinatorConnectId: context.coordinatorConnectId
+                        coordinatorConnectId: context.coordinatorConnectId,
+                        joinReason: updateSession ? .fullRejoin : .firstAttempt
                     )
                     let coordinatorJoinAttempt = await coordinator
                         .clientEventReporter
