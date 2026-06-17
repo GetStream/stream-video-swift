@@ -1416,7 +1416,11 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         await subject.enqueueCallSettings { _ in CallSettings(audioOn: false) }
 
         subject.permissionsAdapter(
-            .init(subject, stagePublisher: stageSubject.eraseToAnyPublisher()),
+            .init(
+                subject,
+                stagePublisher: stageSubject.eraseToAnyPublisher(),
+                clientEventReporter: NoOpClientEventReporter()
+            ),
             audioOn: true
         )
 
@@ -1442,7 +1446,11 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         await subject.enqueueCallSettings { _ in CallSettings(videoOn: false) }
 
         subject.permissionsAdapter(
-            .init(subject, stagePublisher: stageSubject.eraseToAnyPublisher()),
+            .init(
+                subject,
+                stagePublisher: stageSubject.eraseToAnyPublisher(),
+                clientEventReporter: NoOpClientEventReporter()
+            ),
             videoOn: true
         )
 

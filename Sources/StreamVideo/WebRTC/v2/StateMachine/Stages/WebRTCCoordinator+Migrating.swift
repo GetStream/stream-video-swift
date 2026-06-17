@@ -55,8 +55,10 @@ extension WebRTCCoordinator.StateMachine.Stage {
                             )
                         }
 
-                        // A migration is a new attempt to join the call: start a
-                        // fresh join attempt so a new `join_attempt_id` is used.
+                        // A migration is a new attempt to join the call. Rotate
+                        // the coordinator connect id first, then
+                        // `reportJoinInitiated` rotates the join_attempt_id and
+                        // reports both ids on the new JoinInitiated event.
                         context.coordinatorConnectId = UUID().uuidString.lowercased()
                         await coordinator.clientEventReporter.reportJoinInitiated(
                             details: .init(

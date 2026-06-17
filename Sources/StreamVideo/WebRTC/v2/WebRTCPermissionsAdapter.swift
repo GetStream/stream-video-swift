@@ -74,7 +74,7 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
     init(
         _ delegate: WebRTCPermissionsAdapterDelegate,
         stagePublisher: AnyPublisher<WebRTCCoordinator.StateMachine.Stage.ID, Never>,
-        clientEventReporter: ClientEventReporting = NoOpClientEventReporter()
+        clientEventReporter: ClientEventReporting
     ) {
         self.delegate = delegate
         self.clientEventReporter = clientEventReporter
