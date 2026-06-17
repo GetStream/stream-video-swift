@@ -247,6 +247,25 @@ final class ClientEventReporter_Tests: XCTestCase, @unchecked Sendable {
         await assertEventCountStaysAt(3)
     }
 
+    func test_abortPendingStages_whenReporterIsReleased_stillDeliversFailureCompletion() async {
+        var reporter: ClientEventReporter? = .init(
+            api: mockAPI,
+            context: .init(userId: "user-1", callType: "default", callId: "call-1"),
+            retryPolicy: noDelayRetryPolicy,
+            currentDate: { [dateHolder] in dateHolder!.date }
+        )
+
+        await reporter?.reportJoinInitiated()
+        _ = await reporter?.beginStage(.wsJoin)
+        await reporter?.abortPendingStages(failure: .init(code: .clientAborted))
+        reporter = nil
+
+        await waitForEventCount(3)
+        let completed = event(stage: "WSJoin", type: "completed")
+        XCTAssertEqual(completed?.outcome, "failure")
+        XCTAssertEqual(completed?.retryFailureCode, "CLIENT_ABORTED")
+    }
+
     // MARK: - Retry policy
 
     func test_send_retriesOnServerError_upToFiveAttempts() async {

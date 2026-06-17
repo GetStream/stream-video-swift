@@ -44,14 +44,9 @@ actor ClientEventReporter: ClientEventReporting {
         }
     }
 
-    /// The coordinator client used to deliver events. Declared
-    /// `nonisolated(unsafe)` because `DefaultAPIEndpoints` is not `Sendable`
-    /// while the concrete client is `@unchecked Sendable` and safe for
-    /// concurrent use.
-    private nonisolated(unsafe) let api: DefaultAPIEndpoints
     private let context: Context
-    private let retryPolicy: RetryPolicy
     private let currentDate: @Sendable () -> Date
+    private let delivery: ClientEventDelivery
     private let disposableBag = DisposableBag()
 
     /// The id shared across all events of the active join attempt. Regenerated
@@ -75,10 +70,9 @@ actor ClientEventReporter: ClientEventReporting {
         retryPolicy: RetryPolicy = .clientEventReporting,
         currentDate: @escaping @Sendable () -> Date = { Date() }
     ) {
-        self.api = api
         self.context = context
-        self.retryPolicy = retryPolicy
         self.currentDate = currentDate
+        self.delivery = .init(api: api, retryPolicy: retryPolicy)
     }
 
     // MARK: - ClientEventReporting
@@ -245,49 +239,14 @@ actor ClientEventReporter: ClientEventReporting {
 
     /// Schedules delivery of a single event in its own task.
     ///
-    /// The task is tracked by the `disposableBag` and never awaited by the
-    /// caller, so the join flow is not blocked. Because actors are reentrant at
-    /// suspension points, the network/backoff `await` inside ``send(_:)`` does
-    /// not block subsequent `beginStage`/`completeStage` calls.
+    /// Delivery intentionally is not tied to this reporter's `disposableBag`.
+    /// A call can be deallocated immediately after leaving while the final
+    /// `completed/failure` event is still in flight; retaining the delivery task
+    /// independently gives that event a chance to reach the backend.
     private func deliver(_ event: ClientEvent) {
-        Task(disposableBag: disposableBag) { [weak self] in
-            await self?.send(event)
-        }
-    }
-
-    /// Performs delivery with the configured retry policy. Failures are
-    /// swallowed once retries are exhausted.
-    ///
-    /// The retry loop is inlined (rather than using the shared `executeTask`)
-    /// so the API call stays an actor-isolated call and the non-`Sendable`
-    /// coordinator client never crosses an isolation boundary. Because the
-    /// actor is reentrant at the `await` points, in-flight retries never block
-    /// other reporting calls.
-    private func send(_ event: ClientEvent) async {
-        let request = ReportClientEventRequest(events: [event])
-        var retries = 0
-        while true {
-            do {
-                _ = try await api.reportClientCallEvent(reportClientEventRequest: request)
-                log.debug(
-                    "ClientEvent retries:\(retries) request:\(request) reported successfully.",
-                    subsystems: .webRTC
-                )
-                return
-            } catch {
-                // `hasClientErrors` is `false` for `4xx` validation errors (do
-                // not retry) and `true` for `5xx`, network, and timeout errors.
-                guard retries < retryPolicy.maxRetries, error.hasClientErrors else {
-                    log.debug(
-                        "Failed to report client event stage:\(event.stage ?? "-") type:\(event.eventType ?? "-"): \(error)",
-                        subsystems: .webRTC
-                    )
-                    return
-                }
-                let delay = retryPolicy.delay(retries)
-                try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
-                retries += 1
-            }
+        let delivery = delivery
+        Task {
+            await delivery.send(event)
         }
     }
 }
