@@ -183,6 +183,34 @@ final class WebRTCCoordinatorStateMachine_MigratedStageTests: XCTestCase, @unche
         }
     }
 
+    func test_transition_SFUConnected_reportsCoordinatorJoinWithMigrationReason() async throws {
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.authenticator = mockCoordinatorStack.webRTCAuthenticator
+        mockCoordinatorStack.webRTCAuthenticator.stub(
+            for: .authenticate,
+            with: Result<(SFUAdapter, JoinCallResponse), Error>
+                .success((mockCoordinatorStack.sfuStack.adapter, .dummy()))
+        )
+        mockCoordinatorStack.webRTCAuthenticator.stub(
+            for: .waitForAuthentication,
+            with: Result<Void, Error>.success(())
+        )
+
+        try await assertTransition(
+            from: .migrating,
+            expectedTarget: .joining,
+            subject: subject
+        ) { [mockCoordinatorStack] _ in
+            let begunStages = await mockCoordinatorStack?
+                .clientEventReporter
+                .begunStages
+            XCTAssertEqual(
+                begunStages?.first { $0.stage == .coordinatorJoin }?.details.joinReason,
+                .migration
+            )
+        }
+    }
+
     func test_transition_SFUConnected_createsSFUFullObserverForNewAdapter() async throws {
         subject.context.coordinator = mockCoordinatorStack.coordinator
         subject.context.authenticator = mockCoordinatorStack.webRTCAuthenticator

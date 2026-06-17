@@ -2,6 +2,7 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import AVFoundation
 import Combine
 @testable import StreamVideo
 import StreamWebRTC
@@ -23,6 +24,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         .init(peerConnectionFactory: mockPeerConnectionFactory)
     private lazy var mockPermissions: MockPermissionsStore! = .init()
     private lazy var mockAudioStore: MockRTCAudioStore! = .init()
+    private lazy var mockClientEventReporter: MockClientEventReporter! = .init()
     private lazy var stageSubject: CurrentValueSubject<
         WebRTCCoordinator.StateMachine.Stage.ID,
         Never
@@ -34,6 +36,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         videoConfig: Self.videoConfig,
         callSettings: callSettings,
         peerConnectionFactory: mockPeerConnectionFactory,
+        clientEventReporter: mockClientEventReporter,
         rtcPeerConnectionCoordinatorFactory: rtcPeerConnectionCoordinatorFactory,
         stagePublisher: stageSubject.eraseToAnyPublisher()
     )
@@ -53,6 +56,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         subject = nil
         callSettings = nil
         mockPermissions = nil
+        mockClientEventReporter = nil
         stageSubject = nil
         callCid = nil
         apiKey = nil
@@ -966,6 +970,85 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         }
     }
 
+    func test_mediaFrameReporter_renderFrame_shouldReportFirstVideoFrameOnce() async throws {
+        let reporter = MediaFrameReporter(clientEventReporter: mockClientEventReporter)
+        let track = await subject
+            .peerConnectionFactory
+            .mockVideoTrack(forScreenShare: false)
+        await reporter.reset(
+            details: .init(
+                sfuId: "sfu-1",
+                callSessionId: "call-session-1"
+            )
+        )
+        await reporter.add(track, type: .video)
+
+        let renderer = MediaFrameTrackRenderer(
+            type: .video,
+            trackId: track.trackId,
+            reporter: reporter
+        )
+        renderer.renderFrame(try makeVideoFrame())
+        renderer.renderFrame(try makeVideoFrame())
+
+        await fulfillment {
+            await self.mockClientEventReporter.reportedEvents.count == 1
+        }
+        let events = await mockClientEventReporter.reportedEvents
+        let event = events.first
+        XCTAssertEqual(event?.stage, .firstVideoFrame)
+        XCTAssertEqual(event?.details.sfuId, "sfu-1")
+        XCTAssertEqual(event?.details.callSessionId, "call-session-1")
+        XCTAssertEqual(event?.details.trackId, track.trackId)
+    }
+
+    func test_mediaFrameReporter_renderAudio_withNonSilentBuffer_shouldReportFirstAudioFrameOnce() async {
+        let reporter = MediaFrameReporter(clientEventReporter: mockClientEventReporter)
+        let track = await subject
+            .peerConnectionFactory
+            .mockAudioTrack()
+        await reporter.reset(details: .init(sfuId: "sfu-1"))
+        await reporter.add(track, type: .audio)
+
+        let renderer = MediaFrameTrackRenderer(
+            type: .audio,
+            trackId: track.trackId,
+            reporter: reporter
+        )
+        renderer.render(pcmBuffer: makeAudioBuffer(samples: [0.1]))
+        renderer.render(pcmBuffer: makeAudioBuffer(samples: [0.1]))
+
+        await fulfillment {
+            await self.mockClientEventReporter.reportedEvents.count == 1
+        }
+        let events = await mockClientEventReporter.reportedEvents
+        XCTAssertEqual(
+            events.first?.stage,
+            .firstAudioFrame
+        )
+        XCTAssertEqual(events.first?.details.trackId, track.trackId)
+    }
+
+    func test_mediaFrameReporter_renderAudio_withSilentBuffer_doesNotReportFirstAudioFrame() async {
+        let reporter = MediaFrameReporter(clientEventReporter: mockClientEventReporter)
+        let track = await subject
+            .peerConnectionFactory
+            .mockAudioTrack()
+        await reporter.reset(details: .init(sfuId: "sfu-1"))
+        await reporter.add(track, type: .audio)
+
+        let renderer = MediaFrameTrackRenderer(
+            type: .audio,
+            trackId: track.trackId,
+            reporter: reporter
+        )
+        renderer.render(pcmBuffer: makeAudioBuffer(samples: [0, 0]))
+
+        await wait(for: 0.2)
+        let events = await mockClientEventReporter.reportedEvents
+        XCTAssertTrue(events.isEmpty)
+    }
+
     // MARK: - didRemoveTrack
 
     func test_didRemoveTrack_audioOfExistingParticipant_shouldRemoveTrack() async throws {
@@ -1333,7 +1416,11 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         await subject.enqueueCallSettings { _ in CallSettings(audioOn: false) }
 
         subject.permissionsAdapter(
-            .init(subject, stagePublisher: stageSubject.eraseToAnyPublisher()),
+            .init(
+                subject,
+                stagePublisher: stageSubject.eraseToAnyPublisher(),
+                clientEventReporter: NoOpClientEventReporter()
+            ),
             audioOn: true
         )
 
@@ -1359,7 +1446,11 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         await subject.enqueueCallSettings { _ in CallSettings(videoOn: false) }
 
         subject.permissionsAdapter(
-            .init(subject, stagePublisher: stageSubject.eraseToAnyPublisher()),
+            .init(
+                subject,
+                stagePublisher: stageSubject.eraseToAnyPublisher(),
+                clientEventReporter: NoOpClientEventReporter()
+            ),
             videoOn: true
         )
 
@@ -1413,6 +1504,34 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
     ) async rethrows {
         let value = try await expression()
         XCTAssertFalse(value, file: file, line: line)
+    }
+
+    private func makeVideoFrame() throws -> RTCVideoFrame {
+        RTCVideoFrame(
+            buffer: RTCCVPixelBuffer(pixelBuffer: try .make()),
+            rotation: ._0,
+            timeStampNs: 0
+        )
+    }
+
+    private func makeAudioBuffer(samples: [Float]) -> AVAudioPCMBuffer {
+        let format = AVAudioFormat(
+            commonFormat: .pcmFormatFloat32,
+            sampleRate: 48000,
+            channels: 1,
+            interleaved: false
+        )!
+        let buffer = AVAudioPCMBuffer(
+            pcmFormat: format,
+            frameCapacity: AVAudioFrameCount(samples.count)
+        )!
+        buffer.frameLength = AVAudioFrameCount(samples.count)
+        if let channel = buffer.floatChannelData?.pointee {
+            for (index, sample) in samples.enumerated() {
+                channel[index] = sample
+            }
+        }
+        return buffer
     }
 
     private func prepare(

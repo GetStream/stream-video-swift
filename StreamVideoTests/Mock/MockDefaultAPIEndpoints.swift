@@ -593,7 +593,13 @@ final class MockDefaultAPIEndpoints: DefaultAPIEndpoints, Mockable, @unchecked S
     }
     
     func reportClientCallEvent(reportClientEventRequest: ReportClientEventRequest) async throws -> ReportClientEventResponse {
-        stubbedFunctionInput[.clientCallEvent]?.append(.clientCallEvent(request: reportClientEventRequest))
+        // Client events are delivered from concurrent fire-and-forget tasks, so
+        // the recording append must be atomic to avoid lost updates.
+        _stubbedFunctionInput.mutate {
+            var value = $0
+            value[.clientCallEvent, default: []].append(.clientCallEvent(request: reportClientEventRequest))
+            return value
+        }
         return try stubbedResult(for: .clientCallEvent)
     }
 }

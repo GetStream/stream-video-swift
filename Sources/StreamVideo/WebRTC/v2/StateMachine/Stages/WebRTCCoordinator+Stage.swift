@@ -15,6 +15,8 @@ extension WebRTCCoordinator.StateMachine {
             var authenticator: WebRTCAuthenticating = WebRTCAuthenticator()
             var sfuEventObserver: SFUEventAdapter?
             var reconnectAttempts: UInt32 = 0
+            /// Shared id for events emitted by one coordinator connection flow.
+            var coordinatorConnectId: String = UUID().uuidString.lowercased()
             var currentSFU: String = ""
             var fastReconnectDeadlineSeconds: TimeInterval = 0
             var disconnectionTimeout: TimeInterval = 0
@@ -34,6 +36,12 @@ extension WebRTCCoordinator.StateMachine {
             /// Observes SFU-full events for the active adapter so we can force
             /// migration immediately when the current SFU has no capacity.
             var sfuFullObserver: WebRTCSFUFullObserver?
+
+            /// Observes publisher/subscriber peer-connection state to report the
+            /// ``ClientEventStage/peerConnectionConnect`` event pairs. Retained on
+            /// the context so observation survives the `.joining -> .joined`
+            /// transition until each connection resolves.
+            var peerConnectionConnectReporters: [WebRTCPeerConnectionConnectReporter] = []
 
             var audioSessionWatchdog: WebRTCAudioSessionWatchdog = .init()
 
