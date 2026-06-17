@@ -629,6 +629,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 return WebRTCPeerConnectionConnectReporter(
                     peerConnectionType: peerType,
                     statePublisher: peerConnection.connectionStatePublisher,
+                    iceStatePublisher: peerConnection.iceConnectionStatePublisher,
                     reporter: coordinator.clientEventReporter,
                     wasPreviouslyConnected: wasPreviouslyConnected,
                     details: details

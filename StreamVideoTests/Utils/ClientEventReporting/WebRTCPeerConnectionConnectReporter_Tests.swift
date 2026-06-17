@@ -11,12 +11,14 @@ import StreamWebRTC
 final class WebRTCPeerConnectionConnectReporter_Tests: XCTestCase, @unchecked Sendable {
 
     private lazy var stateSubject: CurrentValueSubject<RTCPeerConnectionState, Never>! = .init(.new)
+    private lazy var iceStateSubject: CurrentValueSubject<RTCIceConnectionState, Never>! = .init(.new)
     private lazy var mockReporter: MockClientEventReporter! = .init()
     private var subject: WebRTCPeerConnectionConnectReporter!
 
     override func tearDown() {
         subject = nil
         stateSubject = nil
+        iceStateSubject = nil
         mockReporter = nil
         super.tearDown()
     }
@@ -28,6 +30,7 @@ final class WebRTCPeerConnectionConnectReporter_Tests: XCTestCase, @unchecked Se
         subject = .init(
             peerConnectionType: peerConnectionType,
             statePublisher: stateSubject.eraseToAnyPublisher(),
+            iceStatePublisher: iceStateSubject.eraseToAnyPublisher(),
             reporter: mockReporter,
             wasPreviouslyConnected: wasPreviouslyConnected,
             details: .init(
@@ -67,6 +70,7 @@ final class WebRTCPeerConnectionConnectReporter_Tests: XCTestCase, @unchecked Se
 
         stateSubject.send(.connecting)
         stateSubject.send(.connected)
+        iceStateSubject.send(.connected)
 
         await waitUntil { await self.mockReporter.completedStages.count == 1 }
         let begun = await mockReporter.begunStages
@@ -77,11 +81,37 @@ final class WebRTCPeerConnectionConnectReporter_Tests: XCTestCase, @unchecked Se
         XCTAssertEqual(completed.first?.details.iceState, .connected)
     }
 
-    func test_whenFailed_reportsFailureCompletionWithICEFailure() async {
+    func test_whenConnectionConnectedButIceNotConnected_doesNotComplete() async {
         makeSubject()
 
         stateSubject.send(.connecting)
+        stateSubject.send(.connected)
+
+        try? await Task.sleep(nanoseconds: 200_000_000)
+        let completed = await mockReporter.completedStages
+        XCTAssertTrue(completed.isEmpty)
+    }
+
+    func test_whenConnectionFailedWithDisconnectedICE_reportsFailureCompletionWithoutFailureCode() async {
+        makeSubject()
+
+        stateSubject.send(.connecting)
+        iceStateSubject.send(.disconnected)
         stateSubject.send(.failed)
+
+        await waitUntil { await self.mockReporter.completedStages.count == 1 }
+        let completed = await mockReporter.completedStages.first
+        XCTAssertEqual(completed?.outcome, .failure)
+        XCTAssertEqual(completed?.details.iceState, .failed)
+        XCTAssertNil(completed?.failure)
+    }
+
+    func test_whenICEFailedBeforeConnectionConnected_reportsFailureCompletionWithICEFailure() async {
+        makeSubject()
+
+        stateSubject.send(.connecting)
+        iceStateSubject.send(.checking)
+        iceStateSubject.send(.failed)
 
         await waitUntil { await self.mockReporter.completedStages.count == 1 }
         let completed = await mockReporter.completedStages.first
@@ -95,6 +125,7 @@ final class WebRTCPeerConnectionConnectReporter_Tests: XCTestCase, @unchecked Se
 
         // No `.connecting` intermediate state.
         stateSubject.send(.connected)
+        iceStateSubject.send(.connected)
 
         await waitUntil { await self.mockReporter.completedStages.count == 1 }
         let begun = await mockReporter.begunStages

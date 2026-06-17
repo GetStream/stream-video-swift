@@ -1002,7 +1002,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(event?.details.trackId, track.trackId)
     }
 
-    func test_mediaFrameReporter_renderAudio_shouldReportFirstAudioFrameOnce() async {
+    func test_mediaFrameReporter_renderAudio_withNonSilentBuffer_shouldReportFirstAudioFrameOnce() async {
         let reporter = MediaFrameReporter(clientEventReporter: mockClientEventReporter)
         let track = await subject
             .peerConnectionFactory
@@ -1015,8 +1015,8 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
             trackId: track.trackId,
             reporter: reporter
         )
-        renderer.render(pcmBuffer: makeAudioBuffer())
-        renderer.render(pcmBuffer: makeAudioBuffer())
+        renderer.render(pcmBuffer: makeAudioBuffer(samples: [0.1]))
+        renderer.render(pcmBuffer: makeAudioBuffer(samples: [0.1]))
 
         await fulfillment {
             await self.mockClientEventReporter.reportedEvents.count == 1
@@ -1027,6 +1027,26 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
             .firstAudioFrame
         )
         XCTAssertEqual(events.first?.details.trackId, track.trackId)
+    }
+
+    func test_mediaFrameReporter_renderAudio_withSilentBuffer_doesNotReportFirstAudioFrame() async {
+        let reporter = MediaFrameReporter(clientEventReporter: mockClientEventReporter)
+        let track = await subject
+            .peerConnectionFactory
+            .mockAudioTrack()
+        await reporter.reset(details: .init(sfuId: "sfu-1"))
+        await reporter.add(track, type: .audio)
+
+        let renderer = MediaFrameTrackRenderer(
+            type: .audio,
+            trackId: track.trackId,
+            reporter: reporter
+        )
+        renderer.render(pcmBuffer: makeAudioBuffer(samples: [0, 0]))
+
+        await wait(for: 0.2)
+        let events = await mockClientEventReporter.reportedEvents
+        XCTAssertTrue(events.isEmpty)
     }
 
     // MARK: - didRemoveTrack
@@ -1486,15 +1506,23 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         )
     }
 
-    private func makeAudioBuffer() -> AVAudioPCMBuffer {
+    private func makeAudioBuffer(samples: [Float]) -> AVAudioPCMBuffer {
         let format = AVAudioFormat(
             commonFormat: .pcmFormatFloat32,
             sampleRate: 48000,
             channels: 1,
             interleaved: false
         )!
-        let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: 1)!
-        buffer.frameLength = 1
+        let buffer = AVAudioPCMBuffer(
+            pcmFormat: format,
+            frameCapacity: AVAudioFrameCount(samples.count)
+        )!
+        buffer.frameLength = AVAudioFrameCount(samples.count)
+        if let channel = buffer.floatChannelData?.pointee {
+            for (index, sample) in samples.enumerated() {
+                channel[index] = sample
+            }
+        }
         return buffer
     }
 

@@ -96,10 +96,11 @@ final class MediaFrameTrackRenderer:
         }
     }
 
-    /// Forwards rendered remote audio frames to ``MediaFrameReporter``.
+    /// Forwards non-silent rendered remote audio frames to ``MediaFrameReporter``.
     ///
     /// - Parameter pcmBuffer: Rendered audio buffer supplied by WebRTC.
     func render(pcmBuffer: AVAudioPCMBuffer) {
+        guard !pcmBuffer.rmsAndPeak.isSilent else { return }
         Task { [reporter, type, trackId] in
             await reporter?.reportFrame(type: type, trackId: trackId)
         }

@@ -6,14 +6,17 @@ import Combine
 import Foundation
 import StreamWebRTC
 
-/// Observes a single peer connection's connection state and reports the
+/// Observes a single peer connection's connection and ICE state and reports the
 /// matching ``ClientEventStage/peerConnectionConnect`` `initiated` / `completed`
 /// pair through a ``ClientEventReporting``.
 ///
-/// A `PeerConnectionConnect` `initiated` event is emitted when the connection
-/// starts negotiating, and the `completed` event is emitted when it reaches a
-/// terminal state (`connected` → success, `failed` → failure). A peer
-/// connection that never leaves `new` (for example the publisher of a
+/// A `PeerConnectionConnect` `initiated` event is emitted when either state
+/// starts progressing. The `completed` event succeeds only after both the
+/// connection and ICE states are connected, and fails as soon as either state
+/// fails. A raw ICE failure carries `ICE_CONNECTIVITY_FAILED`; aggregate
+/// peer-connection failures without raw ICE failure are completed without a
+/// specific failure code until a precise non-ICE signal is available.
+/// A peer connection that never leaves `new` (for example the publisher of a
 /// subscribe-only viewer) emits nothing, which the backend correctly treats as
 /// "not attempted".
 final class WebRTCPeerConnectionConnectReporter: @unchecked Sendable {
@@ -22,7 +25,9 @@ final class WebRTCPeerConnectionConnectReporter: @unchecked Sendable {
     private let peerConnection: ClientEventPeerConnection
     private let details: ClientEventStageDetails
     private let disposableBag = DisposableBag()
-    private var continuation: AsyncStream<RTCPeerConnectionState>.Continuation?
+    private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
+    private var attempt: ClientEventStageAttempt?
+    private var didResolve = false
 
     /// Starts observing a peer connection.
     ///
@@ -30,6 +35,7 @@ final class WebRTCPeerConnectionConnectReporter: @unchecked Sendable {
     ///   - peerConnectionType: The internal peer-connection type, mapped to the
     ///     wire `publish` / `subscribe` value.
     ///   - statePublisher: The connection-state stream to observe.
+    ///   - iceStatePublisher: The ICE-state stream to observe.
     ///   - reporter: The reporter that delivers the events.
     ///   - wasPreviouslyConnected: Whether the ICE connection had been
     ///     established earlier in the same session (a reconnect).
@@ -38,6 +44,7 @@ final class WebRTCPeerConnectionConnectReporter: @unchecked Sendable {
     init(
         peerConnectionType: PeerConnectionType,
         statePublisher: AnyPublisher<RTCPeerConnectionState, Never>,
+        iceStatePublisher: AnyPublisher<RTCIceConnectionState, Never>,
         reporter: ClientEventReporting,
         wasPreviouslyConnected: Bool,
         details: ClientEventStageDetails
@@ -46,77 +53,139 @@ final class WebRTCPeerConnectionConnectReporter: @unchecked Sendable {
         peerConnection = .init(peerConnectionType)
         self.details = details.merging(.init(wasPreviouslyConnected: wasPreviouslyConnected))
 
-        var capturedContinuation: AsyncStream<RTCPeerConnectionState>.Continuation?
-        let stream = AsyncStream<RTCPeerConnectionState> { continuation in
-            capturedContinuation = continuation
-            let cancellable = statePublisher.sink { continuation.yield($0) }
-            continuation.onTermination = { _ in cancellable.cancel() }
+        Publishers.CombineLatest(
+            statePublisher.prepend(.new),
+            iceStatePublisher.prepend(.new)
+        )
+        .removeDuplicates { $0 == $1 }
+        .sinkTask(queue: processingQueue) { [weak self] in
+            await self?.consume(connectionState: $0, iceConnectionState: $1)
         }
-        continuation = capturedContinuation
-
-        Task(disposableBag: disposableBag) { [weak self] in
-            await self?.consume(stream)
-            // Tear down the underlying subscription once the connection
-            // resolves so it does not keep buffering state changes.
-            self?.continuation?.finish()
-        }
+        .store(in: disposableBag)
     }
 
     /// Stops observing without reporting a completion.
     func stop() {
-        continuation?.finish()
         disposableBag.removeAll()
     }
 
     // MARK: - Private
 
-    private func consume(_ stream: AsyncStream<RTCPeerConnectionState>) async {
-        var attempt: ClientEventStageAttempt?
+    private func consume(
+        connectionState: RTCPeerConnectionState,
+        iceConnectionState: RTCIceConnectionState
+    ) async {
+        guard !didResolve else { return }
 
-        func begin() async -> ClientEventStageAttempt {
-            if let attempt {
-                return attempt
-            }
-            let new = await reporter.beginStage(
-                .peerConnectionConnect,
-                peerConnection: peerConnection,
-                details: details
+        if connectionState == .failed || iceConnectionState == .failed {
+            await complete(
+                outcome: .failure,
+                connectionState: connectionState,
+                iceConnectionState: iceConnectionState
             )
-            attempt = new
-            return new
+            return
         }
 
-        for await state in stream {
-            switch state {
-            case .connecting:
-                _ = await begin()
+        if connectionState == .connected && (iceConnectionState == .connected || iceConnectionState == .completed) {
+            await complete(
+                outcome: .success,
+                connectionState: connectionState,
+                iceConnectionState: iceConnectionState
+            )
+        } else if connectionState.isConnecting || iceConnectionState.isConnecting {
+            _ = await begin()
+        }
+    }
 
-            case .connected:
-                let attempt = await begin()
-                await reporter.completeStage(
-                    attempt,
-                    outcome: .success,
-                    retryCount: 0,
-                    details: .init(iceState: .connected),
-                    failure: nil
-                )
-                return
+    private func begin() async -> ClientEventStageAttempt {
+        if let attempt {
+            return attempt
+        }
 
-            case .failed:
-                let attempt = await begin()
-                await reporter.completeStage(
-                    attempt,
-                    retryCount: 0,
-                    details: .init(iceState: .failed),
-                    failure: .init(code: .iceConnectivityFailed)
-                )
-                return
+        let attempt = await reporter.beginStage(
+            .peerConnectionConnect,
+            peerConnection: peerConnection,
+            details: details
+        )
+        self.attempt = attempt
+        return attempt
+    }
 
-            default:
-                // `.new`, `.disconnected`, `.closed` are transient or teardown
-                // states and do not resolve the connect attempt.
-                break
+    private func complete(
+        outcome: ClientEventOutcome,
+        connectionState: RTCPeerConnectionState,
+        iceConnectionState: RTCIceConnectionState
+    ) async {
+        didResolve = true
+
+        let attempt = await begin()
+        let clientEventICEState = ClientEventICEState(iceConnectionState)
+
+        let failure: ClientEventFailure? = {
+            guard outcome == .failure else {
+                return nil
             }
+            if iceConnectionState == .failed {
+                return .init(code: .iceConnectivityFailed)
+            } else {
+                return nil
+            }
+        }()
+
+        await reporter.completeStage(
+            attempt,
+            outcome: outcome,
+            retryCount: 0,
+            details: .init(iceState: clientEventICEState),
+            failure: failure
+        )
+        stop()
+    }
+}
+
+private extension RTCPeerConnectionState {
+    var isConnecting: Bool {
+        switch self {
+        case .connecting, .connected:
+            return true
+        default:
+            return false
+        }
+    }
+}
+
+private extension RTCIceConnectionState {
+    var isConnecting: Bool {
+        switch self {
+        case .checking, .connected, .completed:
+            return true
+        default:
+            return false
+        }
+    }
+}
+
+private extension ClientEventICEState {
+    init(_ source: RTCIceConnectionState) {
+        switch source {
+        case .new:
+            self = .notConnected
+        case .checking:
+            self = .notConnected
+        case .connected:
+            self = .connected
+        case .completed:
+            self = .connected
+        case .failed:
+            self = .failed
+        case .disconnected:
+            self = .failed
+        case .closed:
+            self = .failed
+        case .count:
+            self = .notConnected
+        @unknown default:
+            self = .notConnected
         }
     }
 }
