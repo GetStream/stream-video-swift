@@ -173,7 +173,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     context.reconnectionStrategy = context
                         .reconnectionStrategy
                         .next
-                    transitionDisconnectOrError(error)
+                    transitionErrorOrDisconnect(error)
                 }
             }
         }
@@ -656,6 +656,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     iceStatePublisher: peerConnection.iceConnectionStatePublisher,
                     reporter: coordinator.clientEventReporter,
                     wasPreviouslyConnected: wasPreviouslyConnected,
+                    retryCount: context.clientEventRetryCount,
                     details: details
                 )
             }
@@ -717,15 +718,30 @@ extension WebRTCCoordinator.StateMachine.Stage {
         private func completeWebSocketJoin(
             _ error: Error?
         ) async {
+            // Use the client-event retry count instead of `reconnectAttempts`
+            // directly. During initial join, a WSJoin timeout is retried by the
+            // outer Call.join() loop and should report attempt 0, 1, 2, ...
+            // even though WebRTC recovery has not started yet.
             if let error {
                 await webSocketJoinTelemetryReporter.fail(
-                    retryCount: Int(context.reconnectAttempts),
+                    retryCount: context.clientEventRetryCount,
                     error: error
                 )
             } else {
                 await webSocketJoinTelemetryReporter.complete(
-                    retryCount: Int(context.reconnectAttempts)
+                    retryCount: context.clientEventRetryCount
                 )
+            }
+        }
+
+        /// Initial joins are owned by `Call.join()`, which retries only when the
+        /// pending join subject receives a failure. Recovery joins keep using the
+        /// disconnected path so the WebRTC recovery state machine can continue.
+        private func transitionErrorOrDisconnect(_ error: Error) {
+            if context.joinResponseHandler != nil {
+                transitionErrorOrLog(error)
+            } else {
+                transitionDisconnectOrError(error)
             }
         }
 

@@ -62,17 +62,54 @@ final class CoordinatorJoinClientEventScenarios_Tests: XCTestCase, @unchecked Se
         XCTAssertEqual(trace.begun(.coordinatorJoin).first?.details.joinReason, .firstAttempt)
     }
 
+    func test_authenticationSucceedsAfterCallJoinRetry_reportsCoordinatorJoinSuccessWithJoinRetryCount(
+    ) async throws {
+        let harness = ClientEventScenarioHarness()
+        let response = JoinCallResponse.dummy(
+            call: .dummy(currentSessionId: "call-session-1")
+        )
+        harness.stack.webRTCAuthenticator.stub(
+            for: .authenticate,
+            with: Result<(SFUAdapter, JoinCallResponse), Error>
+                .success((harness.stack.sfuStack.adapter, response))
+        )
+        harness.stack.webRTCAuthenticator.stub(
+            for: .waitForAuthentication,
+            with: Result<Void, Error>.success(())
+        )
+        let subject = makeConnectingStage(
+            harness: harness,
+            reconnectAttempts: 0,
+            coordinatorJoinAttemptCount: 2
+        )
+
+        try await assertTransition(
+            subject,
+            from: .idle,
+            expectedTarget: .connected
+        ) { _ in }
+
+        let trace = await harness.trace
+        trace.assertCompleted(
+            .coordinatorJoin,
+            outcome: .success,
+            retryCount: 2
+        )
+    }
+
     // MARK: - Private
 
     private func makeConnectingStage(
         harness: ClientEventScenarioHarness,
-        reconnectAttempts: UInt32
+        reconnectAttempts: UInt32,
+        coordinatorJoinAttemptCount: Int = 0
     ) -> WebRTCCoordinator.StateMachine.Stage {
         var context = WebRTCCoordinator.StateMachine.Stage.Context(
             coordinator: harness.stack.coordinator,
             reconnectAttempts: reconnectAttempts
         )
         context.authenticator = harness.stack.webRTCAuthenticator
+        context.coordinatorJoinAttemptCount = coordinatorJoinAttemptCount
         return .connecting(
             context,
             create: true,

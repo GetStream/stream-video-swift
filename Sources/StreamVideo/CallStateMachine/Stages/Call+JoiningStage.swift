@@ -148,7 +148,8 @@ extension Call.StateMachine.Stage {
                 ring: input.ring,
                 notify: input.notify,
                 source: input.source,
-                policy: input.policy
+                policy: input.policy,
+                coordinatorJoinAttemptCount: input.currentNumberOfRetries
             )
 
             try Task.checkCancellation()

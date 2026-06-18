@@ -24,6 +24,7 @@ final class WebRTCPeerConnectionConnectReporter: @unchecked Sendable {
     private let reporter: ClientEventReporting
     private let peerConnection: ClientEventPeerConnection
     private let details: ClientEventStageDetails
+    private let retryCount: Int
     private let disposableBag = DisposableBag()
     private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
     private var attempt: ClientEventStageAttempt?
@@ -39,6 +40,7 @@ final class WebRTCPeerConnectionConnectReporter: @unchecked Sendable {
     ///   - reporter: The reporter that delivers the events.
     ///   - wasPreviouslyConnected: Whether the ICE connection had been
     ///     established earlier in the same session (a reconnect).
+    ///   - retryCount: Retry count to attach to the completion event.
     ///   - details: Stage-specific identifiers (sfu id, session ids) included
     ///     on every emitted event.
     init(
@@ -47,11 +49,13 @@ final class WebRTCPeerConnectionConnectReporter: @unchecked Sendable {
         iceStatePublisher: AnyPublisher<RTCIceConnectionState, Never>,
         reporter: ClientEventReporting,
         wasPreviouslyConnected: Bool,
+        retryCount: Int = 0,
         details: ClientEventStageDetails
     ) {
         self.reporter = reporter
         peerConnection = .init(peerConnectionType)
         self.details = details.merging(.init(wasPreviouslyConnected: wasPreviouslyConnected))
+        self.retryCount = retryCount
 
         Publishers.CombineLatest(
             statePublisher.prepend(.new),
@@ -135,7 +139,7 @@ final class WebRTCPeerConnectionConnectReporter: @unchecked Sendable {
         await reporter.completeStage(
             attempt,
             outcome: outcome,
-            retryCount: 0,
+            retryCount: retryCount,
             details: .init(iceState: clientEventICEState),
             failure: failure
         )
