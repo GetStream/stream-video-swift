@@ -25,7 +25,8 @@ final class WebRTCPeerConnectionConnectReporter_Tests: XCTestCase, @unchecked Se
 
     private func makeSubject(
         peerConnectionType: PeerConnectionType = .publisher,
-        wasPreviouslyConnected: Bool = false
+        wasPreviouslyConnected: Bool = false,
+        retryCount: Int = 0
     ) {
         subject = .init(
             peerConnectionType: peerConnectionType,
@@ -33,6 +34,7 @@ final class WebRTCPeerConnectionConnectReporter_Tests: XCTestCase, @unchecked Se
             iceStatePublisher: iceStateSubject.eraseToAnyPublisher(),
             reporter: mockReporter,
             wasPreviouslyConnected: wasPreviouslyConnected,
+            retryCount: retryCount,
             details: .init(
                 sfuId: "sfu-1",
                 coordinatorConnectId: "85e8b199-d4ab-4eb7-a681-1d6916a86906"

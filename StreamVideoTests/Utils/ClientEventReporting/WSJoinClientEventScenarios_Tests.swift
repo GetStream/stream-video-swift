@@ -14,7 +14,39 @@ final class WSJoinClientEventScenarios_Tests: XCTestCase, @unchecked Sendable {
         defer { WebRTCConfiguration.timeout = previousTimeout }
 
         let harness = ClientEventScenarioHarness()
-        let subject = try await makeJoiningStage(harness: harness, reconnectAttempts: 2)
+        let subject = try await makeJoiningStage(
+            harness: harness,
+            reconnectAttempts: 0,
+            coordinatorJoinAttemptCount: 2
+        )
+        subject.context.joinResponseHandler = PassthroughSubject<JoinCallResponse, Error>()
+        try await assertTransition(
+            subject,
+            from: .connected,
+            expectedTarget: .error
+        ) { _ in }
+
+        let trace = await harness.trace
+        trace.assertCompleted(
+            .wsJoin,
+            outcome: .failure,
+            retryCount: 2,
+            failureCode: ClientEventFailureCode.requestTimeout.rawValue
+        )
+    }
+
+    func test_joinResponseTimeout_whenJoinCompletionIsNotPending_transitionsToDisconnected(
+    ) async throws {
+        let previousTimeout = WebRTCConfiguration.timeout
+        WebRTCConfiguration.timeout.join = 0.1
+        defer { WebRTCConfiguration.timeout = previousTimeout }
+
+        let harness = ClientEventScenarioHarness()
+        let subject = try await makeJoiningStage(
+            harness: harness,
+            reconnectAttempts: 1,
+            coordinatorJoinAttemptCount: 2
+        )
 
         try await assertTransition(
             subject,
@@ -26,7 +58,7 @@ final class WSJoinClientEventScenarios_Tests: XCTestCase, @unchecked Sendable {
         trace.assertCompleted(
             .wsJoin,
             outcome: .failure,
-            retryCount: 2,
+            retryCount: 1,
             failureCode: ClientEventFailureCode.requestTimeout.rawValue
         )
     }
@@ -88,7 +120,8 @@ final class WSJoinClientEventScenarios_Tests: XCTestCase, @unchecked Sendable {
 
     private func makeJoiningStage(
         harness: ClientEventScenarioHarness,
-        reconnectAttempts: UInt32
+        reconnectAttempts: UInt32,
+        coordinatorJoinAttemptCount: Int = 0
     ) async throws -> WebRTCCoordinator.StateMachine.Stage {
         await harness.installSFUAdapter()
         harness.stack.webRTCAuthenticator.stub(
@@ -101,6 +134,7 @@ final class WSJoinClientEventScenarios_Tests: XCTestCase, @unchecked Sendable {
             currentSFU: "sfu-1"
         )
         context.authenticator = harness.stack.webRTCAuthenticator
+        context.coordinatorJoinAttemptCount = coordinatorJoinAttemptCount
         context.initialJoinCallResponse = .dummy(
             call: .dummy(currentSessionId: "call-session-1")
         )

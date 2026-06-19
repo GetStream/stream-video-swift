@@ -776,7 +776,8 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
             Bool,
             Bool,
             JoinSource,
-            WebRTCJoinPolicy
+            WebRTCJoinPolicy,
+            Int
         ).self
         let recordedInput = try XCTUnwrap(
             callController.recordedInputPayload(
@@ -790,6 +791,7 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
         XCTAssertEqual(context.input.join?.ring, recordedInput.3)
         XCTAssertEqual(context.input.join?.notify, recordedInput.4)
         XCTAssertEqual(context.input.join?.source, recordedInput.5)
+        XCTAssertEqual(context.input.join?.currentNumberOfRetries, recordedInput.7)
 
         switch (context.input.join?.policy, recordedInput.6) {
         case (.default, .default):

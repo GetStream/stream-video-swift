@@ -192,7 +192,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                             .clientEventReporter
                             .completeStage(
                                 coordinatorJoinAttempt,
-                                retryCount: Int(context.reconnectAttempts),
+                                retryCount: context.clientEventRetryCount,
                                 details: coordinatorJoinDetails,
                                 failure: .init(error)
                             )
@@ -203,7 +203,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         .completeStage(
                             coordinatorJoinAttempt,
                             outcome: .success,
-                            retryCount: Int(context.reconnectAttempts),
+                            retryCount: context.clientEventRetryCount,
                             details: coordinatorJoinDetails.merging(
                                 .init(
                                     callSessionId: response.call.session?.id
@@ -243,7 +243,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                             .clientEventReporter
                             .completeStage(
                                 coordinatorWSAttempt,
-                                retryCount: Int(context.reconnectAttempts),
+                                retryCount: context.clientEventRetryCount,
                                 details: coordinatorWSDetails,
                                 failure: .init(error)
                             )
@@ -254,7 +254,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         .completeStage(
                             coordinatorWSAttempt,
                             outcome: .success,
-                            retryCount: Int(context.reconnectAttempts),
+                            retryCount: context.clientEventRetryCount,
                             details: coordinatorWSDetails,
                             failure: nil
                         )

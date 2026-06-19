@@ -115,6 +115,8 @@ final class WebRTCCoordinator: @unchecked Sendable {
     ///   - source: Source that initiated the join.
     ///   - joinResponseHandler: A subject that receives the join completion
     ///     result once the flow finishes.
+    ///   - coordinatorJoinAttemptCount: Zero-based retry index of the
+    ///     coordinator join attempt.
     func connect(
         create: Bool = true,
         callSettings: CallSettings?,
@@ -123,7 +125,8 @@ final class WebRTCCoordinator: @unchecked Sendable {
         notify: Bool,
         source: JoinSource,
         joinResponseHandler: PassthroughSubject<JoinCallResponse, Error>,
-        policy: WebRTCJoinPolicy = .default
+        policy: WebRTCJoinPolicy = .default,
+        coordinatorJoinAttemptCount: Int = 0
     ) async throws {
         // We update the initial CallSettings so that we have a reference
         // on what CallSettings the caller wants to have after the user joins
@@ -133,6 +136,7 @@ final class WebRTCCoordinator: @unchecked Sendable {
         stateMachine.currentStage.context.joinSource = source
         stateMachine.currentStage.context.joinResponseHandler = joinResponseHandler
         stateMachine.currentStage.context.joinPolicy = policy
+        stateMachine.currentStage.context.coordinatorJoinAttemptCount = coordinatorJoinAttemptCount
 
         stateMachine.transition(
             .connecting(
