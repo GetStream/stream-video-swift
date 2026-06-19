@@ -7,8 +7,8 @@ import StreamWebRTC
 
 extension RTCAudioStore {
 
-    /// Restores microphone capture after CallKit hands the audio session to
-    /// the app.
+    /// Restores ADM playout and microphone capture after CallKit hands the
+    /// audio session to the app.
     ///
     /// With CallKit joins the answer action is fulfilled only once the call
     /// has joined, so the WebRTC layer configures the peer connections (and
@@ -21,16 +21,19 @@ extension RTCAudioStore {
     /// replaying the same recovery `InterruptionsEffect` uses: stop and start
     /// recording, then re-apply the current microphone mute state.
     ///
-    /// Playout needs no equivalent treatment: WebRTC restarts its audio unit
-    /// when the activation is forwarded through `audioSessionDidActivate`,
-    /// and the deferred policy application re-issues `setAudioEnabled`,
-    /// which maps to `setPlayout` on the ADM.
+    /// The same activation window can also leave playout in a stale state:
+    /// WebRTC may report `isPlaying == true` even after its audio engine
+    /// failed to start against a temporarily unavailable output route. The
+    /// middleware therefore forces a playout restart before applying any
+    /// recording-specific recovery.
     final class CallKitRecoveryMiddleware: Middleware<RTCAudioStore.Namespace>,
         @unchecked Sendable {
 
-        /// Dispatches a recording restart when CallKit activates the audio
-        /// session while recording was already on. Activations with recording
-        /// off are left untouched.
+        /// Forces playout to restart when CallKit activates the audio session.
+        ///
+        /// If recording was already on, this also dispatches the existing
+        /// recording restart sequence so the microphone recovers against the
+        /// now-active audio session.
         override func apply(
             state: RTCAudioStore.StoreState,
             action: RTCAudioStore.StoreAction,
@@ -40,22 +43,25 @@ extension RTCAudioStore {
         ) {
             guard
                 case .callKit(.activate) = action,
-                state.audioDeviceModule != nil,
-                state.isRecording
+                let audioDeviceModule = state.audioDeviceModule
             else {
                 return
             }
+            
+            audioDeviceModule.resetPlayout()
 
-            // The follow-up actions are enqueued on the store's serial
-            // processing queue, so they execute after `CallKitReducer` has
-            // forwarded the activation to the WebRTC session. The restart
-            // therefore runs against an active audio session.
-            let actions: [Namespace.Action] = [
-                .setRecording(false),
-                .setRecording(true),
-                .setMicrophoneMuted(state.isMicrophoneMuted)
-            ]
-            dispatcher?.dispatch(actions.map(\.box))
+            if state.isRecording {
+                // The follow-up actions are enqueued on the store's serial
+                // processing queue, so they execute after `CallKitReducer` has
+                // forwarded the activation to the WebRTC session. The restart
+                // therefore runs against an active audio session.
+                var actions: [Namespace.Action] = [
+                    .setRecording(false),
+                    .setRecording(true),
+                    .setMicrophoneMuted(state.isMicrophoneMuted)
+                ]
+                dispatcher?.dispatch(actions.map(\.box))
+            }
         }
     }
 }
