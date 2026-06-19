@@ -80,24 +80,6 @@ final class WebRTCStatsReporter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(request.deviceState?.thermalState, .critical)
     }
 
-    func test_triggerDelivery_whileDeliveryIsActive_doesNotRequestNewInput() {
-        mockSFUStack.service.sendStatsDelay = 1
-        var providerCallsCount = 0
-        subject = WebRTCStatsReporter(
-            interval: 100,
-            provider: {
-                providerCallsCount += 1
-                return self.input
-            }
-        )
-        subject.sfuAdapter = mockSFUStack.adapter
-
-        subject.triggerDelivery()
-        subject.triggerDelivery()
-
-        XCTAssertEqual(providerCallsCount, 1)
-    }
-
     func test_sfuAdapterNotNil_updateToAnotherSFUAdapter_firstReportCollectionIsCancelledAndOnlyTheSecondOneCompletes(
     ) async throws {
         try XCTSkipIf(true, "https://linear.app/stream/issue/IOS-904/reenable-skipped-tests")

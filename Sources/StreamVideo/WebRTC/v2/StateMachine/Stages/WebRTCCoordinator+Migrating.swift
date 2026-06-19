@@ -2,8 +2,6 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
-import Foundation
-
 extension WebRTCCoordinator.StateMachine.Stage {
 
     /// Creates and returns a migrating stage for the WebRTC coordinator state
@@ -51,22 +49,11 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 Task(disposableBag: disposableBag) { [weak self] in
                     guard let self else { return }
                     do {
-                        guard let coordinator = context.coordinator else {
+                        guard context.coordinator != nil else {
                             throw ClientError(
                                 "WebRCTCoordinator instance not available."
                             )
                         }
-
-                        // A migration is a new attempt to join the call. Rotate
-                        // the coordinator connect id first, then
-                        // `reportJoinInitiated` rotates the join_attempt_id and
-                        // reports both ids on the new JoinInitiated event.
-                        context.coordinatorConnectId = UUID().uuidString.lowercased()
-                        await coordinator.clientEventReporter.reportJoinInitiated(
-                            details: .init(
-                                coordinatorConnectId: context.coordinatorConnectId
-                            )
-                        )
 
                         try Task.checkCancellation()
 

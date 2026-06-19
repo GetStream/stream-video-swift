@@ -77,9 +77,6 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
     @Atomic var stubbedFunctionInput: [FunctionKey: [FunctionInputKey]] = FunctionKey.allCases
         .reduce(into: [FunctionKey: [FunctionInputKey]]()) { $0[$1] = [] }
     @Atomic var recordedJoinInterceptors: [CallJoinIntercepting?] = []
-    /// When set, `join` throws this error instead of returning the stubbed
-    /// response, allowing tests to drive join-failure paths.
-    var stubbedJoinError: Error?
     var waitForJoinToResume = false
     var onJoinStarted: (@Sendable () -> Void)?
     var onJoinResumed: (@Sendable (MockCall) async -> Void)?
@@ -211,10 +208,6 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
 
         if let onJoinResumed {
             await onJoinResumed(self)
-        }
-
-        if let stubbedJoinError {
-            throw stubbedJoinError
         }
 
         if let stub = stubbedFunction[.join] as? JoinCallResponse {

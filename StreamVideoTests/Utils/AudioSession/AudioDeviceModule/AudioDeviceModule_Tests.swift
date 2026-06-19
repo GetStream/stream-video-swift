@@ -82,32 +82,6 @@ final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
         }
     }
 
-    // MARK: - resetPlayout
-
-    func test_resetPlayout_whenPlayoutInitialized_restartsPlayout() {
-        source.stub(for: \.isPlaying, with: true)
-        source.stub(for: \.isPlayoutInitialized, with: true)
-        makeSubject()
-
-        subject.resetPlayout()
-
-        XCTAssertEqual(source.timesCalled(.stopPlayout), 1)
-        XCTAssertEqual(source.timesCalled(.startPlayout), 1)
-        XCTAssertEqual(source.timesCalled(.initAndStartPlayout), 0)
-    }
-
-    func test_resetPlayout_whenPlayoutNotInitialized_reinitializesPlayout() {
-        source.stub(for: \.isPlaying, with: true)
-        source.stub(for: \.isPlayoutInitialized, with: false)
-        makeSubject()
-
-        subject.resetPlayout()
-
-        XCTAssertEqual(source.timesCalled(.stopPlayout), 1)
-        XCTAssertEqual(source.timesCalled(.startPlayout), 0)
-        XCTAssertEqual(source.timesCalled(.initAndStartPlayout), 1)
-    }
-
     // MARK: - setRecording
 
     func test_setRecording_whenActivatingInitialized_callsStartRecording() throws {

@@ -92,12 +92,6 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
 
     private let connectionStateSubject: CurrentValueSubject<RTCPeerConnectionState, Never> = .init(.new)
     var connectionStatePublisher: AnyPublisher<RTCPeerConnectionState, Never> { connectionStateSubject.eraseToAnyPublisher() }
-    var iceConnectionStatePublisher: AnyPublisher<RTCIceConnectionState, Never> {
-        eventPublisher
-            .compactMap { $0 as? StreamRTCPeerConnection.ICEConnectionChangedEvent }
-            .map(\.state)
-            .eraseToAnyPublisher()
-    }
 
     /// A Boolean value indicating whether the peer connection is in a healthy state.
     ///

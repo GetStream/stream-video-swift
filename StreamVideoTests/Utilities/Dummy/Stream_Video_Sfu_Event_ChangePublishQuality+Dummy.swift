@@ -36,8 +36,7 @@ extension Stream_Video_Sfu_Event_VideoSender {
         codec: VideoCodec,
         trackType: Stream_Video_Sfu_Models_TrackType = .unspecified,
         layers: [Stream_Video_Sfu_Event_VideoLayerSetting] = [],
-        publishOptionID: Int = 0,
-        degradationPreference: Stream_Video_Sfu_Models_DegradationPreference = .unspecified
+        publishOptionID: Int = 0
     ) -> Stream_Video_Sfu_Event_VideoSender {
         var result = Stream_Video_Sfu_Event_VideoSender()
         result.codec = .init()
@@ -45,7 +44,6 @@ extension Stream_Video_Sfu_Event_VideoSender {
         result.layers = layers
         result.trackType = trackType
         result.publishOptionID = Int32(publishOptionID)
-        result.degradationPreference = degradationPreference
         return result
     }
 }

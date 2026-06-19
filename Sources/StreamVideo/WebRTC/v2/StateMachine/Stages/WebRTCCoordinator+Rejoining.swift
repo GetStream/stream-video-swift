@@ -69,6 +69,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         )
                     }
 
+                    try Task.checkCancellation()
+
                     if
                         let sfuAdapter = await coordinator.stateAdapter.sfuAdapter {
                         if case .connected = sfuAdapter.connectionState {

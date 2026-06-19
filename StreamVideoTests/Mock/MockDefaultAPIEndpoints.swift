@@ -75,7 +75,6 @@ final class MockDefaultAPIEndpoints: DefaultAPIEndpoints, Mockable, @unchecked S
         case createGuest
         case videoConnect
         case ringCall
-        case clientCallEvent
     }
 
     enum MockFunctionInputKey: Payloadable {
@@ -127,7 +126,6 @@ final class MockDefaultAPIEndpoints: DefaultAPIEndpoints, Mockable, @unchecked S
         case createGuest(request: CreateGuestRequest)
         case videoConnect
         case ringCall(request: RingCallRequest)
-        case clientCallEvent(request: ReportClientEventRequest)
 
         var payload: Any {
             switch self {
@@ -226,8 +224,6 @@ final class MockDefaultAPIEndpoints: DefaultAPIEndpoints, Mockable, @unchecked S
             case .videoConnect:
                 return ()
             case let .ringCall(request: request):
-                return request
-            case let .clientCallEvent(request: request):
                 return request
             }
         }
@@ -590,16 +586,5 @@ final class MockDefaultAPIEndpoints: DefaultAPIEndpoints, Mockable, @unchecked S
     func ringCall(type: String, id: String, ringCallRequest: RingCallRequest) async throws -> RingCallResponse {
         stubbedFunctionInput[.ringCall]?.append(.ringCall(request: ringCallRequest))
         return try stubbedResult(for: .ringCall)
-    }
-    
-    func reportClientCallEvent(reportClientEventRequest: ReportClientEventRequest) async throws -> ReportClientEventResponse {
-        // Client events are delivered from concurrent fire-and-forget tasks, so
-        // the recording append must be atomic to avoid lost updates.
-        _stubbedFunctionInput.mutate {
-            var value = $0
-            value[.clientCallEvent, default: []].append(.clientCallEvent(request: reportClientEventRequest))
-            return value
-        }
-        return try stubbedResult(for: .clientCallEvent)
     }
 }

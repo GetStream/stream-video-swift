@@ -5,50 +5,6 @@
 import Foundation
 import StreamWebRTC
 
-extension Stream_Video_Sfu_Models_DegradationPreference {
-
-    /// WebRTC sender parameter value for this SFU degradation preference.
-    ///
-    /// `.unspecified` and unknown values return `nil` so live SFU updates can
-    /// leave the sender's current WebRTC behavior unchanged.
-    var rtcDegradationPreference: NSNumber? {
-        switch self {
-        case .balanced:
-            return NSNumber(value: RTCDegradationPreference.balanced.rawValue)
-        case .maintainFramerate:
-            return NSNumber(value: RTCDegradationPreference.maintainFramerate.rawValue)
-        case .maintainResolution:
-            return NSNumber(value: RTCDegradationPreference.maintainResolution.rawValue)
-        case .maintainFramerateAndResolution:
-            return NSNumber(value: RTCDegradationPreference.maintainFramerateAndResolution.rawValue)
-        case .unspecified, .UNRECOGNIZED:
-            return nil
-        }
-    }
-}
-
-extension RTCRtpParameters {
-
-    /// Updates the degradation preference when the SFU provides an explicit value.
-    ///
-    /// - Parameter preference: The SFU-provided preference to apply.
-    /// - Returns: `true` when the parameter changed.
-    @discardableResult
-    func setDegradationPreference(
-        _ preference: Stream_Video_Sfu_Models_DegradationPreference
-    ) -> Bool {
-        guard
-            let rtcDegradationPreference = preference.rtcDegradationPreference,
-            degradationPreference != rtcDegradationPreference
-        else {
-            return false
-        }
-
-        degradationPreference = rtcDegradationPreference
-        return true
-    }
-}
-
 extension RTCRtpTransceiverInit {
 
     /// Creates a temporary `RTCRtpTransceiverInit` instance for a specific track type.

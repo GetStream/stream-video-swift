@@ -28,7 +28,6 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
         callCid: .unique,
         videoConfig: Self.videoConfig,
         callSettings: .default,
-        clientEventReporter: NoOpClientEventReporter(),
         rtcPeerConnectionCoordinatorFactory: MockRTCPeerConnectionCoordinatorFactory(),
         stagePublisher: stageSubject.eraseToAnyPublisher()
     )

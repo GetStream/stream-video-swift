@@ -1078,7 +1078,9 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         let participantLeftEvents = creatorJoinedCallFlow
             .subscribe(for: CallSessionParticipantLeftEvent.self)
 
-        try await participantCallFlow.call.join()
+        let cancelledJoinTask = Task {
+            try await participantCallFlow.call.join()
+        }
 
         try await participantJoinedEvents
             .assertEventually {
@@ -1086,10 +1088,16 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
                     $0.participant.user.id == participant
             }
 
-        try await creatorCallFlow
-            .assertEventuallyInMainActor { $0.call.state.participants.endIndex == 2 }
-
+        cancelledJoinTask.cancel()
         participantCallFlow.call.leave(reason: "join.cancelled")
+
+        do {
+            _ = try await cancelledJoinTask.value
+            XCTFail("Expected cancellation.")
+        } catch is CancellationError {
+        } catch {
+            XCTFail("Unexpected error type: \(error)")
+        }
 
         try await participantLeftEvents
             .assertEventually {
@@ -1097,11 +1105,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
                     $0.participant.user.id == participant
             }
 
-        try await creatorCallFlow
-            .assertEventuallyInMainActor { $0.call.state.participants.endIndex == 1 }
-
-        let participantRejoinedFlow = try await helpers
-            .callFlow(id: callId, type: .default, userId: participant)
+        let participantRejoinedFlow = try await participantCallFlow
             .perform {
                 try await $0.call.join()
             }

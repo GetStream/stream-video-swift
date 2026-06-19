@@ -18,7 +18,6 @@ final class MockWebRTCCoordinatorFactory: WebRTCCoordinatorProviding, @unchecked
         callCid: String,
         videoConfig: VideoConfig,
         callSettings: CallSettings,
-        clientEventReporter: ClientEventReporting,
         callAuthentication: WebRTCCoordinator.AuthenticationHandler
     )?
 
@@ -28,7 +27,6 @@ final class MockWebRTCCoordinatorFactory: WebRTCCoordinatorProviding, @unchecked
         callCid: String,
         videoConfig: VideoConfig,
         callSettings: CallSettings,
-        clientEventReporter: ClientEventReporting,
         callAuthentication: @escaping WebRTCCoordinator.AuthenticationHandler
     ) -> WebRTCCoordinator {
         buildCoordinatorWasCalled = (
@@ -37,7 +35,6 @@ final class MockWebRTCCoordinatorFactory: WebRTCCoordinatorProviding, @unchecked
             callCid,
             videoConfig,
             callSettings,
-            clientEventReporter,
             callAuthentication
         )
         mockCoordinatorStack.callAuthenticator.authenticateHandler = callAuthentication

@@ -28,8 +28,7 @@ final class StreamVideoSfuModelsPublishOption_ConvenienceTests: XCTestCase, @unc
             capturingLayers: .init(spatialLayers: 3, temporalLayers: 2),
             bitrate: 1_000_000,
             frameRate: 30,
-            dimensions: CGSize(width: 1920, height: 1080),
-            degradationPreference: .maintainResolution
+            dimensions: CGSize(width: 1920, height: 1080)
         )
 
         let publishOption = Stream_Video_Sfu_Models_PublishOption(videoOptions, trackType: .video)
@@ -42,7 +41,6 @@ final class StreamVideoSfuModelsPublishOption_ConvenienceTests: XCTestCase, @unc
         XCTAssertEqual(publishOption.videoDimension.height, 1080)
         XCTAssertEqual(publishOption.maxSpatialLayers, 3)
         XCTAssertEqual(publishOption.maxTemporalLayers, 2)
-        XCTAssertEqual(publishOption.degradationPreference, .maintainResolution)
     }
 
     func test_initWithScreenSharePublishOptions() {

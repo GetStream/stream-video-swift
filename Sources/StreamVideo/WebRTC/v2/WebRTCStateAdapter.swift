@@ -93,28 +93,14 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     private let rtcPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinatorProviding
     private let disposableBag = DisposableBag()
     private let peerConnectionsDisposableBag = DisposableBag()
-    /// Holds temporary peer-connection trace subscriptions created before the
-    /// stats adapter is available.
-    private let pendingPeerConnectionTracesDisposableBag = DisposableBag()
 
     private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
     private let callSettingsProcessingQueue = OperationQueue(maxConcurrentOperationCount: 1)
     /// Publishes WebRTC stage changes so permission prompts can wait until the
     /// coordinator has fully joined.
     private let stagePublisher: AnyPublisher<WebRTCCoordinator.StateMachine.Stage.ID, Never>
-    /// Stores traces emitted before the stats adapter is ready to consume them.
     private var queuedTraces: ConsumableBucket<WebRTCTrace> = .init()
-    /// Reports join-lifecycle client events for this call.
-    private let clientEventReporter: ClientEventReporting
-    /// Observes remote media tracks for first rendered frame events.
-    private lazy var mediaFrameReporter = MediaFrameReporter(
-        clientEventReporter: clientEventReporter
-    )
-    private lazy var permissionsAdapter: WebRTCPermissionsAdapter = .init(
-        self,
-        stagePublisher: stagePublisher,
-        clientEventReporter: clientEventReporter
-    )
+    private lazy var permissionsAdapter: WebRTCPermissionsAdapter = .init(self, stagePublisher: stagePublisher)
 
     /// Initializes the WebRTC state adapter with user details and connection
     /// configurations.
@@ -124,8 +110,6 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     ///   - apiKey: The API key for authenticating WebRTC calls.
     ///   - callCid: The call identifier (callCid).
     ///   - videoConfig: Configuration for video settings.
-    ///   - callSettings: Initial call media settings.
-    ///   - clientEventReporter: Reports join-lifecycle client events.
     ///   - rtcPeerConnectionCoordinatorFactory: Factory for peer connection
     ///     creation.
     ///   - stagePublisher: Publishes WebRTC stage transitions for permission
@@ -138,7 +122,6 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         callCid: String,
         videoConfig: VideoConfig,
         callSettings: CallSettings,
-        clientEventReporter: ClientEventReporting,
         rtcPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinatorProviding,
         stagePublisher: AnyPublisher<WebRTCCoordinator.StateMachine.Stage.ID, Never>,
         videoCaptureSessionProvider: VideoCaptureSessionProvider = .init(),
@@ -153,7 +136,6 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
             peerConnectionFactory: PeerConnectionFactory.build(
                 audioProcessingModule: videoConfig.audioProcessingModule
             ),
-            clientEventReporter: clientEventReporter,
             rtcPeerConnectionCoordinatorFactory: rtcPeerConnectionCoordinatorFactory,
             stagePublisher: stagePublisher,
             videoCaptureSessionProvider: videoCaptureSessionProvider,
@@ -169,10 +151,8 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     ///   - apiKey: The API key for authenticating WebRTC calls.
     ///   - callCid: The call identifier (callCid).
     ///   - videoConfig: Configuration for video settings.
-    ///   - peerConnectionFactory: Factory used to construct peer connections
-    ///     and the audio session.
-    ///   - callSettings: Initial call media settings.
-    ///   - clientEventReporter: Reports join-lifecycle client events.
+    ///   - peerConnectionFactory: The factory to use when constructing peerConnection and for the
+    ///   audioSession..
     ///   - rtcPeerConnectionCoordinatorFactory: Factory for peer connection
     ///     creation.
     ///   - stagePublisher: Publishes WebRTC stage transitions for permission
@@ -186,7 +166,6 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         videoConfig: VideoConfig,
         callSettings: CallSettings,
         peerConnectionFactory: PeerConnectionFactory,
-        clientEventReporter: ClientEventReporting,
         rtcPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinatorProviding,
         stagePublisher: AnyPublisher<WebRTCCoordinator.StateMachine.Stage.ID, Never>,
         videoCaptureSessionProvider: VideoCaptureSessionProvider = .init(),
@@ -199,7 +178,6 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         self._callSettings = .init(initialValue: callSettings)
         let peerConnectionFactory = peerConnectionFactory
         self.peerConnectionFactory = peerConnectionFactory
-        self.clientEventReporter = clientEventReporter
         self.rtcPeerConnectionCoordinatorFactory = rtcPeerConnectionCoordinatorFactory
         self.videoCaptureSessionProvider = videoCaptureSessionProvider
         self.screenShareSessionProvider = screenShareSessionProvider
@@ -253,20 +231,10 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     /// Sets the own capabilities of the current user.
     private func set(ownCapabilities value: Set<OwnCapability>) { self.ownCapabilities = value }
 
-    /// Sets the WebRTC stats reporter and drains traces collected before it was
-    /// available.
-    ///
-    /// Peer connections can emit traceable events while they are being created
-    /// and before `JoinedStage` installs the stats adapter. Those events are
-    /// stored in `queuedTraces`; once a stats adapter is provided, the queued
-    /// traces are transferred to it and the temporary peer-connection observers
-    /// are removed so normal stats-adapter tracing can take over.
+    /// Sets the WebRTC stats reporter.
     func set(statsAdapter value: WebRTCStatsAdapting?) {
         self.statsAdapter = value
         value?.consume(queuedTraces)
-        if value != nil {
-            pendingPeerConnectionTracesDisposableBag.removeAll()
-        }
     }
 
     /// Sets the SFU (Selective Forwarding Unit) adapter and updates the stats
@@ -274,17 +242,6 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     func set(sfuAdapter value: SFUAdapter?) {
         self.sfuAdapter = value
         statsAdapter?.sfuAdapter = value
-    }
-
-    /// Resets client-event details for media-related reporters.
-    ///
-    /// - Parameter value: Details attached to the next media events.
-    func set(clientEventDetails value: ClientEventStageDetails) async {
-        permissionsAdapter.set(
-            clientEventDetails: value,
-            callSettings: callSettings
-        )
-        await mediaFrameReporter.reset(details: value)
     }
 
     /// Sets the number of participants in the call.
@@ -426,20 +383,6 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
             )
         )
 
-        if let statsAdapter {
-            statsAdapter.publisher = publisher
-            statsAdapter.subscriber = subscriber
-        } else {
-            observePendingPeerConnectionTraces(
-                for: .publisher,
-                peerConnection: publisher
-            )
-            observePendingPeerConnectionTraces(
-                for: .subscriber,
-                peerConnection: subscriber
-            )
-        }
-
         publisher
             .trackPublisher
             .log(.debug, subsystems: .peerConnectionPublisher)
@@ -485,7 +428,6 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     func cleanUp() async {
         screenShareSessionProvider.activeSession = nil
         videoCaptureSessionProvider.activeSession = nil
-        pendingPeerConnectionTracesDisposableBag.removeAll()
         peerConnectionsDisposableBag.removeAll()
         disposableBag.removeAll()
         await audioSession.deactivate()
@@ -504,7 +446,6 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         set(anonymousCount: 0)
         set(participantPins: [])
         set(isSpeakingWhileMuted: false)
-        await set(clientEventDetails: .init())
         trackStorage.removeAll()
         permissionsAdapter.cleanUp()
     }
@@ -526,7 +467,6 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         )
 
         peerConnectionsDisposableBag.removeAll()
-        pendingPeerConnectionTracesDisposableBag.removeAll()
         disposableBag.removeAll()
         await audioSession.deactivate()
         await publisher?.prepareForClosing()
@@ -538,7 +478,6 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         set(token: "")
         set(isSpeakingWhileMuted: false)
         trackStorage.removeAll()
-        await mediaFrameReporter.removeAllTracks()
 
         /// We set the initialCallSettings to the last activated CallSettings, in order to maintain the state
         /// during reconnects.
@@ -564,7 +503,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
 
     // MARK: - Track Management
 
-    /// Adds a track for the given participant ID and observes remote frames.
+    /// Adds a track for the given participant ID and track type.
     ///
     /// - Parameters:
     ///   - track: The media stream track to add.
@@ -574,25 +513,18 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         _ track: RTCMediaStreamTrack,
         type: TrackType,
         for id: String
-    ) async {
+    ) {
         trackStorage.addTrack(track, type: type, for: id)
-        if id != sessionID {
-            await mediaFrameReporter.add(track, type: type)
-        }
         enqueue { $0 }
     }
 
-    /// Removes a track for the given participant ID and stops frame observation.
+    /// Removes a track for the given participant ID.
     ///
     /// - Parameters:
     ///   - id: The participant ID whose track should be removed.
     ///   - type: The type of track (audio, video, screenshare) or `nil` to remove all.
-    func didRemoveTrack(for id: String, type: TrackType? = nil) async {
-        let removedTracks = tracks(for: id, type: type)
+    func didRemoveTrack(for id: String, type: TrackType? = nil) {
         trackStorage.removeTrack(for: id, type: type)
-        for removedTrack in removedTracks {
-            await mediaFrameReporter.remove(removedTrack.track, type: removedTrack.type)
-        }
 
         enqueue { $0 }
     }
@@ -628,22 +560,6 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         of trackType: TrackType
     ) -> RTCMediaStreamTrack? {
         trackStorage.track(for: lookup, of: trackType)
-    }
-
-    /// Returns tracks that will be removed from storage.
-    ///
-    /// - Parameters:
-    ///   - lookup: Participant lookup prefix or session ID.
-    ///   - type: Specific media type to remove, or `nil` for all media.
-    /// - Returns: Tracks currently stored for the requested lookup and type.
-    private func tracks(
-        for lookup: String,
-        type: TrackType?
-    ) -> [(type: TrackType, track: RTCMediaStreamTrack)] {
-        let types = type.map { [$0] } ?? [.audio, .video, .screenshare]
-        return types.compactMap { type in
-            trackStorage.track(for: lookup, of: type).map { (type, $0) }
-        }
     }
 
     // MARK: - Participant Operations
@@ -798,26 +714,6 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         }
     }
 
-    /// Observes peer-connection events until the stats adapter is installed.
-    ///
-    /// This prevents early publisher/subscriber events, such as `createOffer`
-    /// or ICE state changes, from being lost during join setup. The subscription
-    /// is temporary and is cancelled as soon as a non-nil stats adapter is set.
-    private func observePendingPeerConnectionTraces(
-        for peerType: PeerConnectionType,
-        peerConnection: RTCPeerConnectionCoordinator
-    ) {
-        let queuedTraces = self.queuedTraces
-        peerConnection
-            .eventPublisher
-            .map { WebRTCTrace(peerType: peerType, event: $0) }
-            .log(.debug, subsystems: .webRTC) {
-                "Trace tag:\($0.tag) create for id:\($0.id) at timestamp:\($0.timestamp)."
-            }
-            .sink { queuedTraces.append($0) }
-            .store(in: pendingPeerConnectionTracesDisposableBag)
-    }
-
     private func processEnqueuedOperation(
         _ operation: @escaping ParticipantOperation,
         functionName: StaticString = #function,
@@ -902,12 +798,12 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     private func peerConnectionReceivedTrackEvent(
         _ peerConnectionType: PeerConnectionType,
         event: TrackEvent
-    ) async {
+    ) {
         switch event {
         case let .added(id, trackType, track):
-            await didAddTrack(track, type: trackType, for: id)
+            didAddTrack(track, type: trackType, for: id)
         case let .removed(id, trackType, _):
-            await didRemoveTrack(for: id, type: trackType)
+            didRemoveTrack(for: id, type: trackType)
         }
     }
 
@@ -989,19 +885,19 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
             return true
         }()
 
+        if case let .callKit(completion) = source {
+            // Let CallKit release its audio session ownership once WebRTC has
+            // the audio device module it needs.
+            completion.complete()
+        }
+
         audioSession.activate(
             callSettingsPublisher: $callSettings.removeDuplicates().eraseToAnyPublisher(),
             ownCapabilitiesPublisher: $ownCapabilities.removeDuplicates().eraseToAnyPublisher(),
             delegate: self,
             statsAdapter: statsAdapter,
-            /// When joining from CallKit we configure the session here but
-            /// never activate it ourselves. The ordering is: the joining
-            /// stage fulfils the pending answer action once the call has
-            /// joined, CallKit then activates the session and `didActivate`
-            /// dispatches `.callKit(.activate)` into the audio store, whose
-            /// `isActive` flip wakes the deferred activation scheduled by
-            /// `CallAudioSession` below. Activating locally as well would
-            /// race CallKit's ownership of the session.
+            /// If we are joining from CallKit the AudioSession will be activated from it and we
+            /// shouldn't attempt another activation.
             shouldSetActive: !sourceIsCallKit
         )
     }

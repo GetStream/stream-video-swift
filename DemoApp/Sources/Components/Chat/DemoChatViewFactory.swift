@@ -16,17 +16,21 @@ final class DemoChatViewFactory: @MainActor ViewFactory {
     private init() {}
 
     static let shared = DemoChatViewFactory()
-    
-    public var styles = RegularStyles()
 
-    func makeReactionsOverlayView(options: ReactionsOverlayViewOptions) -> some View {
+    func makeReactionsOverlayView(
+        channel: ChatChannel,
+        currentSnapshot: UIImage,
+        messageDisplayInfo: MessageDisplayInfo,
+        onBackgroundTap: @escaping () -> Void,
+        onActionExecuted: @escaping (MessageActionInfo) -> Void
+    ) -> some View {
         DemoReactionsOverlayView(
             factory: self,
-            channel: options.channel,
-            currentSnapshot: options.currentSnapshot,
-            messageDisplayInfo: options.messageDisplayInfo,
-            onBackgroundTap: options.onBackgroundTap,
-            onActionExecuted: options.onActionExecuted
+            channel: channel,
+            currentSnapshot: currentSnapshot,
+            messageDisplayInfo: messageDisplayInfo,
+            onBackgroundTap: onBackgroundTap,
+            onActionExecuted: onActionExecuted
         )
     }
 }

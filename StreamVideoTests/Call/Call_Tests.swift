@@ -568,8 +568,7 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
                     Bool,
                     Bool,
                     JoinSource,
-                    WebRTCJoinPolicy,
-                    Int
+                    WebRTCJoinPolicy
                 ).self,
                 for: .join
             )?.first?.5,
@@ -595,8 +594,7 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
                     Bool,
                     Bool,
                     JoinSource,
-                    WebRTCJoinPolicy,
-                    Int
+                    WebRTCJoinPolicy
                 ).self,
                 for: .join
             )?.first?.5,
@@ -624,8 +622,7 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
                     Bool,
                     Bool,
                     JoinSource,
-                    WebRTCJoinPolicy,
-                    Int
+                    WebRTCJoinPolicy
                 ).self,
                 for: .join
             )?.first?.2?.highScaleLivestreamPublisherHint,
@@ -650,8 +647,7 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
                     Bool,
                     Bool,
                     JoinSource,
-                    WebRTCJoinPolicy,
-                    Int
+                    WebRTCJoinPolicy
                 ).self,
                 for: .join
             )?.first

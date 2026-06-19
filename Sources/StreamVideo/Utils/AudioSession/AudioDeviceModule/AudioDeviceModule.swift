@@ -298,29 +298,6 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         }
     }
 
-    /// Forces WebRTC playout to stop and start again.
-    ///
-    /// This is intentionally lower level than ``setPlayout(_:)`` because
-    /// recovery paths may need to restart playout even when the cached ADM
-    /// state still reports `isPlaying == true` after a failed engine start.
-    func resetPlayout() {
-        log.throwing(subsystems: .audioSession) {
-            try throwingExecution("Unable to stop playout") {
-                source.stopPlayout()
-            }
-
-            if source.isPlayoutInitialized {
-                try throwingExecution("Unable to start playout") {
-                    source.startPlayout()
-                }
-            } else {
-                try throwingExecution("Unable to initAndStart playout") {
-                    source.initAndStartPlayout()
-                }
-            }
-        }
-    }
-
     /// Enables or disables recording on the wrapped audio device module.
     /// - Parameter isEnabled: When `true` recording starts, otherwise stops.
     /// - Throws: `ClientError` when the underlying module reports a failure.

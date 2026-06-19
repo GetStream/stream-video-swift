@@ -21,7 +21,7 @@ struct DemoChatAdapter {
     let streamChatUI: StreamChat
 
     @MainActor
-    init(userId: String, userName: String, imageURL: URL?, token: String) {
+    init(_ user: User, token: String) {
         let chatClient = ChatClient(config: .init(apiKeyString: AppState.shared.apiKey))
 
         self.chatClient = chatClient
@@ -31,14 +31,14 @@ struct DemoChatAdapter {
 
         chatClient.connectUser(
             userInfo: .init(
-                id: userId,
-                name: userName,
-                imageURL: imageURL
+                id: user.id,
+                name: user.name,
+                imageURL: user.imageURL
             )
         ) { completionHandler in
             Task {
                 do {
-                    let userToken = try await AuthenticationProvider.fetchToken(for: userId)
+                    let userToken = try await AuthenticationProvider.fetchToken(for: user.id)
                     let token = try Token(rawValue: userToken.rawValue)
                     completionHandler(.success(token))
                 } catch {

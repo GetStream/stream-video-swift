@@ -1201,19 +1201,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
             try self.jsonDecoder.decode(RingCallResponse.self, from: $0)
         }
     }
-    
-    open func reportClientCallEvent(reportClientEventRequest: ReportClientEventRequest) async throws -> ReportClientEventResponse {
-        let path = "/api/v2/video/call_client_event"
-
-        let urlRequest = try makeRequest(
-            uriPath: path,
-            httpMethod: "POST",
-            request: reportClientEventRequest
-        )
-        return try await send(request: urlRequest) {
-            try self.jsonDecoder.decode(ReportClientEventResponse.self, from: $0)
-        }
-    }
 }
 
 protocol DefaultAPIEndpoints {
@@ -1336,6 +1323,4 @@ protocol DefaultAPIEndpoints {
     func videoConnect() async throws -> Void
     
     func ringCall(type: String, id: String, ringCallRequest: RingCallRequest) async throws -> RingCallResponse
-    
-    func reportClientCallEvent(reportClientEventRequest: ReportClientEventRequest) async throws -> ReportClientEventResponse
 }

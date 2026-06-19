@@ -62,6 +62,5 @@ extension Stream_Video_Sfu_Models_PublishOption {
         videoDimension.height = UInt32(source.dimensions.height)
         maxSpatialLayers = Int32(source.capturingLayers.spatialLayers)
         maxTemporalLayers = Int32(source.capturingLayers.temporalLayers)
-        degradationPreference = source.degradationPreference
     }
 }

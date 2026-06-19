@@ -149,16 +149,6 @@ final class MockRTCPeerConnectionCoordinator:
         }
     }
 
-    override var iceConnectionStatePublisher: AnyPublisher<RTCIceConnectionState, Never> {
-        if let stub = stubbedProperty[
-            propertyKey(for: \.iceConnectionStatePublisher)
-        ] as? AnyPublisher<RTCIceConnectionState, Never> {
-            return stub
-        } else {
-            return super.iceConnectionStatePublisher
-        }
-    }
-
     override var isHealthy: Bool {
         self[dynamicMember: \.isHealthy]
     }

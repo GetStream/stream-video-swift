@@ -44,8 +44,7 @@ extension PublishOptions.VideoPublishOptions {
         ),
         bitrate: Int = .maxBitrate,
         frameRate: Int = .defaultFrameRate,
-        dimensions: CGSize = .full,
-        degradationPreference: Stream_Video_Sfu_Models_DegradationPreference = .maintainFramerate
+        dimensions: CGSize = .full
     ) -> PublishOptions.VideoPublishOptions {
         .init(
             id: id,
@@ -54,8 +53,7 @@ extension PublishOptions.VideoPublishOptions {
             capturingLayers: capturingLayers,
             bitrate: bitrate,
             frameRate: frameRate,
-            dimensions: dimensions,
-            degradationPreference: degradationPreference
+            dimensions: dimensions
         )
     }
 }

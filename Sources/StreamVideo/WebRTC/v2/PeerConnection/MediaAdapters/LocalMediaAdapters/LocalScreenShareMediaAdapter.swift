@@ -294,44 +294,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
     func changePublishQuality(
         with layerSettings: [Stream_Video_Sfu_Event_VideoSender]
     ) {
-        processingQueue.addTaskOperation { [weak self] in
-            guard let self else { return }
-
-            for videoSender in layerSettings {
-                let key = PublishOptions.VideoPublishOptions(
-                    id: Int(videoSender.publishOptionID),
-                    codec: VideoCodec(videoSender.codec)
-                )
-                guard
-                    let transceiver = transceiverStorage.get(for: key)?.transceiver
-                else {
-                    log.debug(
-                        """
-                        We didn't apply publish quality change because transceiver
-                        not found for publishOptionID:\(videoSender.publishOptionID) and codec:\(VideoCodec(videoSender.codec)).
-                        Available transceivers: \(transceiverStorage.map { "publishOptionID:\($0.key.id), codec:\($0.key.codec)" })
-                        """,
-                        subsystems: .webRTC
-                    )
-                    continue
-                }
-
-                let params = transceiver.sender.parameters
-                guard params.setDegradationPreference(videoSender.degradationPreference) else {
-                    log.info(
-                        "Update publish quality, degradation preference unchanged",
-                        subsystems: .webRTC
-                    )
-                    continue
-                }
-
-                log.info(
-                    "Update publish quality degradation preference for publishOptionID:\(videoSender.publishOptionID) codec:\(VideoCodec(videoSender.codec))",
-                    subsystems: .webRTC
-                )
-                transceiver.sender.parameters = params
-            }
-        }
+        /* No-op */
     }
 
     /// Retrieves information about the active screen sharing tracks.
@@ -475,11 +438,6 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
         else {
             log.warning("Unable to create transceiver for options:\(options).", subsystems: .webRTC)
             return
-        }
-
-        let params = transceiver.sender.parameters
-        if params.setDegradationPreference(options.degradationPreference) {
-            transceiver.sender.parameters = params
         }
         transceiverStorage.set(transceiver, track: track, for: options)
     }

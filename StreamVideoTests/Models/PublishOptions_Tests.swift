@@ -29,33 +29,6 @@ final class VideoPublishOptionsTests: XCTestCase, @unchecked Sendable {
         assertTrackLayers(.video, for: .av1, spatialLayers: 1)
     }
 
-    // MARK: - degradationPreference
-
-    func test_init_withExplicitDegradationPreference_assignsPreference() {
-        var publishOption = Stream_Video_Sfu_Models_PublishOption(
-            trackType: .video,
-            codec: .dummy(name: "h264"),
-            bitrate: 1000
-        )
-        publishOption.degradationPreference = .balanced
-
-        let result = PublishOptions.VideoPublishOptions(publishOption)
-
-        XCTAssertEqual(result.degradationPreference, .balanced)
-    }
-
-    func test_init_withUnspecifiedDegradationPreference_defaultsToMaintainFramerate() {
-        let publishOption = Stream_Video_Sfu_Models_PublishOption(
-            trackType: .video,
-            codec: .dummy(name: "h264"),
-            bitrate: 1000
-        )
-
-        let result = PublishOptions.VideoPublishOptions(publishOption)
-
-        XCTAssertEqual(result.degradationPreference, .maintainFramerate)
-    }
-
     // MARK: - Private Helpers
 
     private func assertTrackLayers(

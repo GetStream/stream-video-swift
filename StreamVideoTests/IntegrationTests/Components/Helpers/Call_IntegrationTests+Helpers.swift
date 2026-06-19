@@ -6,8 +6,6 @@ import Foundation
 @testable import StreamVideo
 import XCTest
 
-extension String: @retroactive Error {}
-
 extension Call_IntegrationTests {
     struct Helpers: Sendable {
         @Injected(\.audioStore) private var audioStore

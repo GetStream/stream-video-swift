@@ -14,7 +14,6 @@ final class MockWebRTCCoordinatorStack: @unchecked Sendable {
     let videoConfig: VideoConfig
     let callAuthenticator: MockCallAuthenticator
     let webRTCAuthenticator: MockWebRTCAuthenticator
-    let clientEventReporter: MockClientEventReporter
     let coordinator: WebRTCCoordinator
     let sfuStack: MockSFUStack
     let mockAudioDeviceModule: MockRTCAudioDeviceModule
@@ -53,15 +52,12 @@ final class MockWebRTCCoordinatorStack: @unchecked Sendable {
             .init(peerConnectionFactory: peerConenctionFactory)
         self.rtcPeerConnectionCoordinatorFactory = rtcPeerConnectionCoordinatorFactory
         self.internetConnection = internetConnection
-        let clientEventReporter = MockClientEventReporter()
-        self.clientEventReporter = clientEventReporter
         coordinator = .init(
             user: user,
             apiKey: apiKey,
             callCid: callCid,
             videoConfig: videoConfig,
             callSettings: callSettings,
-            clientEventReporter: clientEventReporter,
             rtcPeerConnectionCoordinatorFactory: rtcPeerConnectionCoordinatorFactory,
             webRTCAuthenticator: webRTCAuthenticator,
             callAuthentication: callAuthenticator.authenticate

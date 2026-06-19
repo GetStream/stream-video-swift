@@ -31,8 +31,7 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
             ring: Bool = false,
             notify: Bool = false,
             source: JoinSource,
-            policy: WebRTCJoinPolicy,
-            coordinatorJoinAttemptCount: Int
+            policy: WebRTCJoinPolicy
         )
 
         case leave(reason: String?)
@@ -64,10 +63,9 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
                 ring,
                 notify,
                 source,
-                policy,
-                coordinatorJoinAttemptCount
+                policy
             ):
-                return (create, callSettings, options, ring, notify, source, policy, coordinatorJoinAttemptCount)
+                return (create, callSettings, options, ring, notify, source, policy)
             case let .leave(reason):
                 return reason ?? ""
             case .observeWebRTCStateUpdated:
@@ -124,8 +122,7 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
         ring: Bool = false,
         notify: Bool = false,
         source: JoinSource,
-        policy: WebRTCJoinPolicy = .default,
-        coordinatorJoinAttemptCount: Int = 0
+        policy: WebRTCJoinPolicy = .default
     ) async throws -> JoinCallResponse {
         stubbedFunctionInput[.join]?.append(
             .join(
@@ -135,8 +132,7 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
                 ring: ring,
                 notify: notify,
                 source: source,
-                policy: policy,
-                coordinatorJoinAttemptCount: coordinatorJoinAttemptCount
+                policy: policy
             )
         )
 
@@ -156,8 +152,7 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
                 ring: ring,
                 notify: notify,
                 source: source,
-                policy: policy,
-                coordinatorJoinAttemptCount: coordinatorJoinAttemptCount
+                policy: policy
             )
         }
     }

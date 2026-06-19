@@ -81,7 +81,6 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 /// The join hint is captured only after the explicit
                 /// `.idle -> .connecting` transition is accepted. Failed
                 /// transition attempts must not mutate the active context.
-                context.coordinatorConnectId = UUID().uuidString.lowercased()
                 context.highScaleLivestreamPublisherHint =
                     options?.highScaleLivestreamPublisherHint
                 execute(
@@ -98,7 +97,6 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     log.assert(ring == false, "Ring cannot be true when rejoining.")
                     log.assert(notify == false, "Notify cannot be true when rejoining.")
                 }
-                context.coordinatorConnectId = UUID().uuidString.lowercased()
                 execute(
                     create: false,
                     ring: false,
@@ -141,10 +139,6 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         throw ClientError("WebRTCCoordinator instance not available in stage id:\(id).")
                     }
 
-                    await coordinator.clientEventReporter.reportJoinInitiated(
-                        details: .init(coordinatorConnectId: context.coordinatorConnectId)
-                    )
-
                     try Task.checkCancellation()
 
                     if updateSession {
@@ -159,58 +153,16 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     /// create an ``SFUAdapter`` instance that we can later use in our
                     /// flow. The initial response is preserved so ``Call.join()`` can be
                     /// completed only once the handshake reaches the connected state.
-                    ///
-                    /// The `CoordinatorJoin` client event pair brackets the
-                    /// coordinator `JoinCall` REST request.
-                    let coordinatorJoinDetails = ClientEventStageDetails(
-                        coordinatorConnectId: context.coordinatorConnectId,
-                        joinReason: updateSession ? .fullRejoin : .firstAttempt
-                    )
-                    let coordinatorJoinAttempt = await coordinator
-                        .clientEventReporter
-                        .beginStage(
-                            .coordinatorJoin,
-                            peerConnection: nil,
-                            details: coordinatorJoinDetails
-                        )
-                    let sfuAdapter: SFUAdapter
-                    let response: JoinCallResponse
-                    do {
-                        (sfuAdapter, response) = try await context
-                            .authenticator
-                            .authenticate(
-                                coordinator: coordinator,
-                                currentSFU: nil,
-                                migratingFromList: nil,
-                                create: create,
-                                ring: ring,
-                                notify: notify,
-                                options: options
-                            )
-                    } catch {
-                        await coordinator
-                            .clientEventReporter
-                            .completeStage(
-                                coordinatorJoinAttempt,
-                                retryCount: context.clientEventRetryCount,
-                                details: coordinatorJoinDetails,
-                                failure: .init(error)
-                            )
-                        throw error
-                    }
-                    await coordinator
-                        .clientEventReporter
-                        .completeStage(
-                            coordinatorJoinAttempt,
-                            outcome: .success,
-                            retryCount: context.clientEventRetryCount,
-                            details: coordinatorJoinDetails.merging(
-                                .init(
-                                    callSessionId: response.call.session?.id
-                                        ?? response.call.currentSessionId
-                                )
-                            ),
-                            failure: nil
+                    let (sfuAdapter, response) = try await context
+                        .authenticator
+                        .authenticate(
+                            coordinator: coordinator,
+                            currentSFU: nil,
+                            migratingFromList: nil,
+                            create: create,
+                            ring: ring,
+                            notify: notify,
+                            options: options
                         )
 
                     context.initialJoinCallResponse = response
@@ -224,40 +176,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     /// We provide the ``SFUAdapter`` to the authenticator which will ensure
                     /// that we will continue only when the WS `connectionState` on the
                     /// ``SFUAdapter`` has changed to `.authenticating`.
-                    let coordinatorWSDetails = ClientEventStageDetails(
-                        sfuId: response.credentials.server.edgeName,
-                        callSessionId: response.call.session?.id,
-                        coordinatorConnectId: context.coordinatorConnectId
-                    )
-                    let coordinatorWSAttempt = await coordinator
-                        .clientEventReporter
-                        .beginStage(
-                            .coordinatorWS,
-                            peerConnection: nil,
-                            details: coordinatorWSDetails
-                        )
-                    do {
-                        try await context.authenticator.waitForAuthentication(on: sfuAdapter)
-                    } catch {
-                        await coordinator
-                            .clientEventReporter
-                            .completeStage(
-                                coordinatorWSAttempt,
-                                retryCount: context.clientEventRetryCount,
-                                details: coordinatorWSDetails,
-                                failure: .init(error)
-                            )
-                        throw error
-                    }
-                    await coordinator
-                        .clientEventReporter
-                        .completeStage(
-                            coordinatorWSAttempt,
-                            outcome: .success,
-                            retryCount: context.clientEventRetryCount,
-                            details: coordinatorWSDetails,
-                            failure: nil
-                        )
+                    try await context.authenticator.waitForAuthentication(on: sfuAdapter)
 
                     try Task.checkCancellation()
 

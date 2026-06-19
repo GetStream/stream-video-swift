@@ -148,8 +148,7 @@ extension Call.StateMachine.Stage {
                 ring: input.ring,
                 notify: input.notify,
                 source: input.source,
-                policy: input.policy,
-                coordinatorJoinAttemptCount: input.currentNumberOfRetries
+                policy: input.policy
             )
 
             try Task.checkCancellation()
@@ -179,21 +178,6 @@ extension Call.StateMachine.Stage {
 
             await Task(disposableBag: disposableBag) { @MainActor [weak streamVideo] in
                 streamVideo?.state.activeCall = call
-
-                // The call is now fully joined (including any interceptor
-                // delay). If the join was initiated from CallKit, invoke the
-                // completion hook so the pending `CXAnswerCallAction` is
-                // fulfilled. This is the audio hand-off point: the WebRTC
-                // layer configured the session earlier with
-                // `shouldSetActive: false`, so once CallKit (now fulfilled)
-                // activates the session and `didActivate` dispatches the
-                // activation into the audio store, the deferred activation
-                // wakes up and audio starts. Failure paths never reach this
-                // point; they complete the action through `CallKitService`'s
-                // join error handling.
-                if case let .callKit(completion) = call.state.joinSource {
-                    completion.complete()
-                }
             }.value
 
             try Task.checkCancellation()

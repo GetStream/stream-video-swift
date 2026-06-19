@@ -91,23 +91,6 @@ final class CallKitAdapterTests: XCTestCase, @unchecked Sendable {
         )
     }
 
-    // MARK: - callJoinInterceptor
-
-    func test_callJoinInterceptor_whenSet_forwardsValueToCallKitService() throws {
-        let interceptor = StubCallJoinInterceptor()
-
-        subject.callJoinInterceptor = interceptor
-
-        XCTAssertIdentical(
-            try XCTUnwrap(callKitService.callJoinInterceptor) as AnyObject,
-            interceptor
-        )
-        XCTAssertIdentical(
-            try XCTUnwrap(subject.callJoinInterceptor) as AnyObject,
-            interceptor
-        )
-    }
-
     // MARK: - Private Helpers
 
     private func makeStreamVideo() async throws -> StreamVideo {
@@ -135,8 +118,4 @@ private final class MockParticipantAutoLeavePolicy:
     ParticipantAutoLeavePolicy,
     @unchecked Sendable {
     var onPolicyTriggered: (() -> Void)?
-}
-
-private final class StubCallJoinInterceptor: CallJoinIntercepting, @unchecked Sendable {
-    func callReadyToJoin(_ call: Call) async throws { /* No-op */ }
 }

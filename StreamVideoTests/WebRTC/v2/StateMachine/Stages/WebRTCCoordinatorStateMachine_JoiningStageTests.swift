@@ -243,7 +243,6 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             expectedTarget: .disconnected,
             subject: subject
         ) { XCTAssertTrue($0.context.flowError is TimeOutError) }
-        await assertWebSocketJoinCompleted(outcome: .failure, retryCount: 11)
     }
 
     func test_transition_fromConnectedReceivesJoinResponse_updatesCallSettingsOnStateAdapter() async throws {
@@ -441,7 +440,6 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
         ) { target in
             XCTAssertEqual(target.context.fastReconnectDeadlineSeconds, 22)
         }
-        await assertWebSocketJoinCompleted(outcome: .success, retryCount: 11)
         cancellable.cancel()
     }
 
@@ -575,7 +573,6 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
 
         subject.context.coordinator = mockCoordinatorStack.coordinator
         subject.context.reconnectAttempts = 11
-        subject.context.joinSource = .inApp
         await mockCoordinatorStack
             .coordinator
             .stateAdapter
@@ -585,7 +582,6 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             .sfuEvent(.joinResponse(Stream_Video_Sfu_Event_JoinResponse())),
             every: 0.3
         )
-        let start = Date()
 
         try await assertTransition(
             from: .connected,
@@ -593,49 +589,6 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             subject: subject
         ) { _ in }
 
-        // Non-CallKit joins go through the readiness wait: with the audio
-        // store inactive the stage must hold for at least the configured
-        // readiness window before configuring the peer connections.
-        XCTAssertGreaterThanOrEqual(Date().timeIntervalSince(start), 0.1)
-        cancellable.cancel()
-    }
-
-    func test_transition_fromConnected_joinSourceIsCallKit_doesNotWaitForAudioSessionReadiness() async throws {
-        let previousTimeout = WebRTCConfiguration.timeout
-        let mockAudioStore = MockRTCAudioStore()
-        mockAudioStore.makeShared()
-        defer {
-            WebRTCConfiguration.timeout = previousTimeout
-            mockAudioStore.dismantle()
-        }
-        // With a practically infinite readiness window and an inactive audio
-        // store, the stage can only reach `.joined` within the assertion
-        // timeout if the CallKit join skipped the readiness wait entirely.
-        WebRTCConfiguration.timeout.audioSessionConfigurationCompletion = 60
-
-        subject.context.coordinator = mockCoordinatorStack.coordinator
-        subject.context.reconnectAttempts = 11
-        subject.context.joinSource = .callKit(.init {})
-        await mockCoordinatorStack
-            .coordinator
-            .stateAdapter
-            .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
-        mockCoordinatorStack.webRTCAuthenticator.stubbedFunction[.waitForConnect] = Result<Void, Error>.success(())
-        let cancellable = receiveEvent(
-            .sfuEvent(.joinResponse(Stream_Video_Sfu_Event_JoinResponse())),
-            every: 0.3
-        )
-        let start = Date()
-
-        try await assertTransition(
-            from: .connected,
-            expectedTarget: .joined,
-            subject: subject
-        ) { _ in }
-
-        // Sanity bound: the join must complete well below the readiness
-        // window, proving no stall occurred while the store stayed inactive.
-        XCTAssertLessThan(Date().timeIntervalSince(start), defaultTimeout)
         cancellable.cancel()
     }
 
@@ -1197,7 +1150,6 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             .coordinator
             .stateAdapter
             .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
-        mockCoordinatorStack.sfuStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
         mockCoordinatorStack.webRTCAuthenticator.stubbedFunction[.waitForConnect] = Result<Void, Error>.success(())
 
         /// We manually trigger the peerConnection configuration to allow us to test what will happen to
@@ -1242,7 +1194,6 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             XCTAssertEqual((subscriber as? MockRTCPeerConnectionCoordinator)?.timesCalled(.restartICE), 0)
             XCTAssertEqual(mockCoordinatorStack?.webRTCAuthenticator.timesCalled(.waitForConnect), 1)
         }
-        await assertNoWebSocketJoinReported()
         cancellable.cancel()
     }
 
@@ -1759,57 +1710,6 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
         _ = subject.transition(from: .init(id: from, context: subject.context))
 
         await fulfillment(of: [transitionExpectation], timeout: defaultTimeout)
-    }
-
-    private func assertWebSocketJoinCompleted(
-        outcome: ClientEventOutcome,
-        retryCount: Int,
-        file: StaticString = #filePath,
-        line: UInt = #line
-    ) async {
-        await fulfillment {
-            let completedStages = await self.mockCoordinatorStack
-                .clientEventReporter
-                .completedStages
-            return completedStages.contains { $0.attempt.stage == .wsJoin }
-        }
-
-        let begunStages = await mockCoordinatorStack
-            .clientEventReporter
-            .begunStages
-            .filter { $0.stage == .wsJoin }
-        let completedStages = await mockCoordinatorStack
-            .clientEventReporter
-            .completedStages
-            .filter { $0.attempt.stage == .wsJoin }
-
-        XCTAssertEqual(begunStages.count, 1, file: file, line: line)
-        XCTAssertEqual(completedStages.count, 1, file: file, line: line)
-        XCTAssertEqual(
-            completedStages.first?.attempt.stageId,
-            begunStages.first?.attempt.stageId,
-            file: file,
-            line: line
-        )
-        XCTAssertEqual(completedStages.first?.outcome, outcome, file: file, line: line)
-        XCTAssertEqual(completedStages.first?.retryCount, retryCount, file: file, line: line)
-    }
-
-    private func assertNoWebSocketJoinReported(
-        file: StaticString = #filePath,
-        line: UInt = #line
-    ) async {
-        let begunStages = await mockCoordinatorStack
-            .clientEventReporter
-            .begunStages
-            .filter { $0.stage == .wsJoin }
-        let completedStages = await mockCoordinatorStack
-            .clientEventReporter
-            .completedStages
-            .filter { $0.attempt.stage == .wsJoin }
-
-        XCTAssertTrue(begunStages.isEmpty, file: file, line: line)
-        XCTAssertTrue(completedStages.isEmpty, file: file, line: line)
     }
 
     private func receiveEvent(

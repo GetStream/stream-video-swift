@@ -37,10 +37,6 @@ final class WebRTCCoordinator: @unchecked Sendable {
     /// The state adapter manages the WebRTC state and media configuration.
     let stateAdapter: WebRTCStateAdapter
 
-    /// Reports client-side join-lifecycle events so the backend can track and
-    /// reconcile the user's progress through the join flow.
-    let clientEventReporter: ClientEventReporting
-
     /// The handler used for authenticating the user during call joining.
     let callAuthentication: AuthenticationHandler
 
@@ -63,10 +59,9 @@ final class WebRTCCoordinator: @unchecked Sendable {
     ///   - videoConfig: The video configuration for the call.
     ///   - callSettings: Initial media settings applied before the join flow
     ///     starts.
-    ///   - clientEventReporter: Reports join-lifecycle client events.
     ///   - rtcPeerConnectionCoordinatorFactory: Factory for creating peer
     ///     connection coordinators.
-    ///   - webRTCAuthenticator: The authenticator used during WebRTC flows.
+    ///   - webRTCAuthenticator: The authenticator that will be used during all WebRTC flows.
     ///   - callAuthentication: A closure for handling call authentication.
     init(
         user: User,
@@ -74,7 +69,6 @@ final class WebRTCCoordinator: @unchecked Sendable {
         callCid: String,
         videoConfig: VideoConfig,
         callSettings: CallSettings,
-        clientEventReporter: ClientEventReporting,
         rtcPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinatorProviding = StreamRTCPeerConnectionCoordinatorFactory(),
         webRTCAuthenticator: WebRTCAuthenticating = WebRTCAuthenticator(),
         callAuthentication: @escaping AuthenticationHandler
@@ -86,12 +80,10 @@ final class WebRTCCoordinator: @unchecked Sendable {
             callCid: callCid,
             videoConfig: videoConfig,
             callSettings: callSettings,
-            clientEventReporter: clientEventReporter,
             rtcPeerConnectionCoordinatorFactory: rtcPeerConnectionCoordinatorFactory,
             stagePublisher: stateMachine.publisher.map(\.id).eraseToAnyPublisher()
         )
         self.stateMachine = stateMachine
-        self.clientEventReporter = clientEventReporter
         self.callAuthentication = callAuthentication
 
         // Initialize the state machine.
@@ -115,8 +107,6 @@ final class WebRTCCoordinator: @unchecked Sendable {
     ///   - source: Source that initiated the join.
     ///   - joinResponseHandler: A subject that receives the join completion
     ///     result once the flow finishes.
-    ///   - coordinatorJoinAttemptCount: Zero-based retry index of the
-    ///     coordinator join attempt.
     func connect(
         create: Bool = true,
         callSettings: CallSettings?,
@@ -125,8 +115,7 @@ final class WebRTCCoordinator: @unchecked Sendable {
         notify: Bool,
         source: JoinSource,
         joinResponseHandler: PassthroughSubject<JoinCallResponse, Error>,
-        policy: WebRTCJoinPolicy = .default,
-        coordinatorJoinAttemptCount: Int = 0
+        policy: WebRTCJoinPolicy = .default
     ) async throws {
         // We update the initial CallSettings so that we have a reference
         // on what CallSettings the caller wants to have after the user joins
@@ -136,7 +125,6 @@ final class WebRTCCoordinator: @unchecked Sendable {
         stateMachine.currentStage.context.joinSource = source
         stateMachine.currentStage.context.joinResponseHandler = joinResponseHandler
         stateMachine.currentStage.context.joinPolicy = policy
-        stateMachine.currentStage.context.coordinatorJoinAttemptCount = coordinatorJoinAttemptCount
 
         stateMachine.transition(
             .connecting(
