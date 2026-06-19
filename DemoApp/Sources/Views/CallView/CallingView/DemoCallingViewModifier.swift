@@ -56,6 +56,7 @@ struct DemoCallingViewModifier: ViewModifier {
             }
             .onAppear {
                 guard !isAnonymous else { return }
+                callKitAdapter.callJoinInterceptor = AppEnvironment.callJoinInterceptor.value
                 callKitAdapter.participantAutoLeavePolicy =
                     AppEnvironment.autoLeavePolicy.policy
                 callKitAdapter.registerForIncomingCalls()

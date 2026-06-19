@@ -138,6 +138,14 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         }
     }
 
+    /// Optional interceptor invoked after the call join response has been
+    /// applied locally but before the SDK treats the call as fully entered.
+    ///
+    /// Assign this when your app needs to perform readiness work during the
+    /// join flow, such as waiting for another participant or validating an
+    /// external precondition. Throw from the interceptor to fail the join.
+    public var callJoinInterceptor: CallJoinIntercepting?
+
     var callSettings: CallSettings?
 
     /// The call controller used for managing calls.
@@ -497,6 +505,23 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         audioStore.dispatch(.callKit(.deactivate(audioSession)))
     }
 
+    /// Handles the user answering an incoming CallKit call.
+    ///
+    /// The answer action stays pending while the SDK accepts the call and
+    /// runs the full join flow (including any `CallJoinIntercepting` delay),
+    /// so the system call UI keeps showing the call as connecting until the
+    /// user is actually connected:
+    /// - On success, the Call state machine's joining stage invokes the
+    ///   `JoinSource.ActionCompletion` hook stored in `call.state.joinSource`
+    ///   and the action is fulfilled. CallKit then activates the audio
+    ///   session and the system UI starts counting the call duration.
+    /// - On failure, the action is failed (exactly once). If the action had
+    ///   already been fulfilled — the join failed after the hook fired — the
+    ///   call is reported to CallKit as `.failed` instead, tearing down the
+    ///   live system call.
+    /// - If the join outlasts CallKit's allowed answer window, the system
+    ///   times the action out and `provider(_:timedOutPerforming:)` aborts
+    ///   the join.
     open func provider(
         _ provider: CXProvider,
         perform action: CXAnswerCallAction
@@ -513,6 +538,27 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         active = action.callUUID
         callToJoinEntry.call.didPerform(.performAnswerCall)
 
+        // Guards the answer action so it is completed exactly once across the
+        // success path (the joinSource hook fulfilling it once the call has
+        // joined) and the failure paths (accept/join errors failing it).
+        // Returns `true` when the provided completion was executed and `false`
+        // when the action had already been completed by another path.
+        let hasCompletedAction = Atomic(wrappedValue: false)
+        @discardableResult @Sendable func completeActionOnce(
+            _ completion: @escaping () -> Void
+        ) -> Bool {
+            var shouldComplete = false
+            hasCompletedAction.mutate { hasCompleted in
+                shouldComplete = !hasCompleted
+                return true
+            }
+            guard shouldComplete else {
+                return false
+            }
+            completion()
+            return true
+        }
+
         Task(disposableBag: disposableBag) { @MainActor [weak self] in
             guard let self else {
                 return
@@ -528,12 +574,9 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 // app is waking up.
                 eventPipelineSubject.send(.accept)
                 try await callToJoinEntry.call.accept()
-                // We need to fulfil here the action to allow CallKit to release
-                // the audioSession to the app, for activation.
-                action.fulfill()
             } catch {
                 log.error(error, subsystems: .callKit)
-                action.fail()
+                completeActionOnce { action.fail() }
             }
 
             do {
@@ -541,28 +584,54 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 // CallViewModel can present the joining screen even when the
                 // app was launched from CallKit in the background.
                 eventPipelineSubject.send(.joining(callToJoinEntry.call))
-                // Pass a CallKit completion hook through the join flow so the
-                // WebRTC layer can release CallKit's audio session ownership as
-                // soon as it has configured the audio device module.
+                // Pass a CallKit completion hook through the join flow. The
+                // Call state machine's joining stage invokes it once the call
+                // has joined successfully (after any join interceptor).
                 callToJoinEntry.call.state.joinSource = .callKit(.init {
-                    // Allow CallKit to hand audio session activation back to
-                    // the app before we continue configuring audio locally.
-                    action.fulfill()
+                    // Fulfil the answer action so CallKit hands audio session
+                    // activation to the app and the system UI starts counting
+                    // the call duration only once the user is connected.
+                    completeActionOnce { action.fulfill() }
                 })
 
-                // Before reach here we should fulfil the action to allow
-                // CallKit to release the audioSession, so that the SDK
-                // can configure and activate it and complete successfully the
-                // peerConnection configuration.
+                // The answer action stays pending while the join is running:
+                // the joinSource hook above fulfils it on success, while the
+                // catch below fails it when the join aborts. Until then the
+                // system UI keeps showing the call as connecting.
                 try await callToJoinEntry.call.join(
                     callSettings: callSettings,
-                    policy: .peerConnectionReadinessAware
+                    policy: .peerConnectionReadinessAware,
+                    joinInterceptor: callJoinInterceptor
                 )
                 // Once the call is joined, the regular call state can take
                 // over and the temporary CallKit bridge can stand down.
                 eventPipelineSubject.send(.joined)
             } catch {
-                callToJoinEntry.call.leave()
+                // On the common path the join fails before the joinSource
+                // hook fulfilled the action, so failing the action is enough
+                // to tear down the system UI and reporting the call ended
+                // would be redundant.
+                let didFail = completeActionOnce { action.fail() }
+                if !didFail {
+                    // The action was already fulfilled: the joining stage
+                    // invoked the hook before `Call.join`'s delivery timeout
+                    // threw, so the system call is live. Reporting the
+                    // failure is the only thing that tears the CallKit UI
+                    // down in that race.
+                    callProvider.reportCall(
+                        with: action.callUUID,
+                        endedAt: nil,
+                        reason: .failed
+                    )
+                }
+                // Interceptor vetoes and join timeouts already leave the call
+                // (with their specific reasons) inside the join flow. Issuing
+                // another leave here would race that one and could drop the
+                // original leave reason, so only leave for failures the join
+                // flow has not already handled.
+                if !(error is CallJoinInterceptionError), !(error is TimeOutError) {
+                    callToJoinEntry.call.leave()
+                }
                 set(nil, for: action.callUUID)
                 log.error(error, subsystems: .callKit)
                 // Reset the bridge if the CallKit-driven join flow aborts
@@ -570,6 +639,54 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 eventPipelineSubject.send(.idle)
             }
         }
+    }
+
+    /// Called when the system gave up waiting for `action` to be completed
+    /// before its timeout elapsed.
+    ///
+    /// With the answer action being fulfilled only once the call has joined
+    /// successfully (see `provider(_:perform: CXAnswerCallAction)` for the
+    /// full answer lifecycle), a slow join (network, SFU negotiation or a
+    /// join interceptor delaying entry) can exceed CallKit's allowed window.
+    /// By the time this is invoked the action is already dead system-side
+    /// and CallKit has torn down the pending system call UI on its own, so
+    /// the SDK neither fulfils, fails nor reports the call here.
+    ///
+    /// For the pending answer action of a tracked call the SDK aborts the
+    /// in-flight join by leaving with reason `callkit.join.timeout`, removes
+    /// the call entry and resets the CallKit bridge to idle. The join flow's
+    /// failure handling that runs afterwards is idempotent: its reason-less
+    /// `leave()` is a state-machine no-op, completing the dead action has no
+    /// effect, and the call is not reported as failed again. Timeouts for
+    /// any other action type are only logged.
+    open func provider(
+        _ provider: CXProvider,
+        timedOutPerforming action: CXAction
+    ) {
+        guard
+            let answerAction = action as? CXAnswerCallAction,
+            let callToJoinEntry = callEntry(for: answerAction.callUUID)
+        else {
+            log.warning(
+                "CallKit timed out performing action:\(action).",
+                subsystems: .callKit
+            )
+            return
+        }
+
+        log.warning(
+            """
+            CallKit timed out performing the answer action while joining
+            callId:\(callToJoinEntry.call.callId)
+            callType:\(callToJoinEntry.call.callType)
+            callerId:\(callToJoinEntry.createdBy?.id)
+            """,
+            subsystems: .callKit
+        )
+
+        callToJoinEntry.call.leave(reason: "callkit.join.timeout")
+        set(nil, for: answerAction.callUUID)
+        eventPipelineSubject.send(.idle)
     }
 
     open func provider(

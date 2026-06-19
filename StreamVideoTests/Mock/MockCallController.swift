@@ -31,7 +31,8 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
             ring: Bool = false,
             notify: Bool = false,
             source: JoinSource,
-            policy: WebRTCJoinPolicy
+            policy: WebRTCJoinPolicy,
+            coordinatorJoinAttemptCount: Int
         )
 
         case leave(reason: String?)
@@ -63,9 +64,10 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
                 ring,
                 notify,
                 source,
-                policy
+                policy,
+                coordinatorJoinAttemptCount
             ):
-                return (create, callSettings, options, ring, notify, source, policy)
+                return (create, callSettings, options, ring, notify, source, policy, coordinatorJoinAttemptCount)
             case let .leave(reason):
                 return reason ?? ""
             case .observeWebRTCStateUpdated:
@@ -122,7 +124,8 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
         ring: Bool = false,
         notify: Bool = false,
         source: JoinSource,
-        policy: WebRTCJoinPolicy = .default
+        policy: WebRTCJoinPolicy = .default,
+        coordinatorJoinAttemptCount: Int = 0
     ) async throws -> JoinCallResponse {
         stubbedFunctionInput[.join]?.append(
             .join(
@@ -132,7 +135,8 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
                 ring: ring,
                 notify: notify,
                 source: source,
-                policy: policy
+                policy: policy,
+                coordinatorJoinAttemptCount: coordinatorJoinAttemptCount
             )
         )
 
@@ -152,7 +156,8 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
                 ring: ring,
                 notify: notify,
                 source: source,
-                policy: policy
+                policy: policy,
+                coordinatorJoinAttemptCount: coordinatorJoinAttemptCount
             )
         }
     }

@@ -15,6 +15,11 @@ extension WebRTCCoordinator.StateMachine {
             var authenticator: WebRTCAuthenticating = WebRTCAuthenticator()
             var sfuEventObserver: SFUEventAdapter?
             var reconnectAttempts: UInt32 = 0
+            /// Zero-based retry index of the `CoordinatorJoin` attempt that
+            /// created this coordinator flow.
+            var coordinatorJoinAttemptCount: Int = 0
+            /// Shared id for events emitted by one coordinator connection flow.
+            var coordinatorConnectId: String = UUID().uuidString.lowercased()
             var currentSFU: String = ""
             var fastReconnectDeadlineSeconds: TimeInterval = 0
             var disconnectionTimeout: TimeInterval = 0
@@ -34,6 +39,12 @@ extension WebRTCCoordinator.StateMachine {
             /// Observes SFU-full events for the active adapter so we can force
             /// migration immediately when the current SFU has no capacity.
             var sfuFullObserver: WebRTCSFUFullObserver?
+
+            /// Observes publisher/subscriber peer-connection state to report the
+            /// ``ClientEventStage/peerConnectionConnect`` event pairs. Retained on
+            /// the context so observation survives the `.joining -> .joined`
+            /// transition until each connection resolves.
+            var peerConnectionConnectReporters: [WebRTCPeerConnectionConnectReporter] = []
 
             var audioSessionWatchdog: WebRTCAudioSessionWatchdog = .init()
 
@@ -82,6 +93,27 @@ extension WebRTCCoordinator.StateMachine {
             var healthCheckInterval: TimeInterval = 5
             var webSocketHealthTimeout: TimeInterval = 15
             var lastHealthCheckReceivedAt: Date?
+            /// Retry count attached to client-event stage completions.
+            ///
+            /// The retry source depends on where the flow is in the call
+            /// lifecycle:
+            /// - While a `Call.join()` caller is still waiting for completion,
+            ///   failures are retried by that outer join loop. Those attempts
+            ///   create new `JoinInitiated`, `CoordinatorJoin`, `CoordinatorWS`,
+            ///   and `WSJoin` event pairs, so they use
+            ///   `coordinatorJoinAttemptCount`.
+            /// - After the call has joined, failures are handled by WebRTC
+            ///   recovery. Those attempts reuse the recovery context and use
+            ///   `reconnectAttempts`.
+            ///
+            /// In particular, an initial `WSJoin` timeout is still a failed
+            /// join attempt, not an in-call reconnect, even though the failure
+            /// happens on the SFU websocket.
+            var clientEventRetryCount: Int {
+                joinResponseHandler != nil
+                    ? coordinatorJoinAttemptCount
+                    : Int(reconnectAttempts)
+            }
 
             /// Stores the initial join response so the pending ``Call.join()``
             /// completion can be finished once the SFU handshake succeeds.

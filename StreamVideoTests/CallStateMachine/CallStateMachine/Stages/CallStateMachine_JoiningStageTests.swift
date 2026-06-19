@@ -346,6 +346,104 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
         }
     }
 
+    func test_execute_withoutRetries_joinSourceIsCallKit_completionIsInvokedOnceJoined() async throws {
+        let completionInvoked = expectation(
+            description: "CallKit joinSource completion was invoked."
+        )
+        let joinSource = JoinSource.callKit(.init { completionInvoked.fulfill() })
+        call.state.joinSource = joinSource
+        let context = Call.StateMachine.Stage.Context(
+            call: call,
+            input: .join(
+                .init(
+                    create: true,
+                    callSettings: .init(audioOn: false),
+                    options: .init(memberIds: [.unique]),
+                    ring: true,
+                    notify: false,
+                    source: joinSource,
+                    deliverySubject: .init(nil)
+                )
+            )
+        )
+
+        try await assertJoining(
+            context,
+            joinResponse: JoinCallResponse.dummy(),
+            expectedTransition: .joined
+        ) { @MainActor in
+            await self.fulfillment(of: [completionInvoked], timeout: defaultTimeout)
+            XCTAssertEqual(self.streamVideo.state.activeCall?.cId, self.call.cId)
+        }
+    }
+
+    func test_execute_withoutRetries_joinSourceIsCallKitAndJoinFails_completionIsNotInvoked() async throws {
+        let completionInvoked = expectation(
+            description: "CallKit joinSource completion should not be invoked."
+        )
+        completionInvoked.isInverted = true
+        let joinSource = JoinSource.callKit(.init { completionInvoked.fulfill() })
+        call.state.joinSource = joinSource
+        let context = Call.StateMachine.Stage.Context(
+            call: call,
+            input: .join(
+                .init(
+                    create: true,
+                    callSettings: .init(audioOn: false),
+                    options: .init(memberIds: [.unique]),
+                    ring: true,
+                    notify: false,
+                    source: joinSource,
+                    deliverySubject: .init(nil),
+                    retryPolicy: .init(maxRetries: 0, delay: { _ in 0 })
+                )
+            )
+        )
+
+        try await assertJoining(
+            context,
+            expectedTransition: .error
+        ) { @MainActor in
+            await self.fulfillment(of: [completionInvoked], timeout: 1)
+        }
+    }
+
+    func test_execute_withoutRetries_joinSourceIsCallKitAndInterceptorThrows_completionIsNotInvoked() async throws {
+        let completionInvoked = expectation(
+            description: "CallKit joinSource completion should not be invoked."
+        )
+        completionInvoked.isInverted = true
+        let joinSource = JoinSource.callKit(.init { completionInvoked.fulfill() })
+        call.state.joinSource = joinSource
+        let joinInterceptor = CallJoinInterceptor_Spy { _ in
+            throw TestError()
+        }
+        let context = Call.StateMachine.Stage.Context(
+            call: call,
+            input: .join(
+                .init(
+                    create: true,
+                    callSettings: .init(audioOn: false),
+                    options: .init(memberIds: [.unique]),
+                    ring: true,
+                    notify: false,
+                    source: joinSource,
+                    deliverySubject: .init(nil),
+                    joinInterceptor: joinInterceptor
+                )
+            )
+        )
+
+        try await assertJoining(
+            context,
+            joinResponse: JoinCallResponse.dummy(),
+            expectedTransition: .error
+        ) { @MainActor in
+            await self.fulfillment(of: [completionInvoked], timeout: 1)
+            XCTAssertNil(self.streamVideo.state.activeCall)
+        }
+    }
+
     func test_execute_withoutRetries_joinInterceptorThrows_tracesFailureAndTransitionsToError() async throws {
         let deliverySubject = CurrentValueSubject<JoinCallResponse?, Error>(nil)
         let deliveryExpectation = expectation(description: "DeliverySubject delivered failure.")
@@ -678,7 +776,8 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
             Bool,
             Bool,
             JoinSource,
-            WebRTCJoinPolicy
+            WebRTCJoinPolicy,
+            Int
         ).self
         let recordedInput = try XCTUnwrap(
             callController.recordedInputPayload(
@@ -692,6 +791,7 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
         XCTAssertEqual(context.input.join?.ring, recordedInput.3)
         XCTAssertEqual(context.input.join?.notify, recordedInput.4)
         XCTAssertEqual(context.input.join?.source, recordedInput.5)
+        XCTAssertEqual(context.input.join?.currentNumberOfRetries, recordedInput.7)
 
         switch (context.input.join?.policy, recordedInput.6) {
         case (.default, .default):

@@ -27,7 +27,8 @@ extension RTCAudioStore {
 
         static func middleware(audioSession: RTCAudioSession) -> [Middleware<RTCAudioStore.Namespace>] {
             [
-                AudioDeviceModuleMiddleware()
+                AudioDeviceModuleMiddleware(),
+                CallKitRecoveryMiddleware()
             ]
         }
 

@@ -8,6 +8,7 @@ import XCTest
 
 final class CallKitPushNotificationAdapterTests: XCTestCase, @unchecked Sendable {
 
+    private lazy var streamVideo: MockStreamVideo! = .init()
     private lazy var callKitService: MockCallKitService! = .init()
     private lazy var subject: CallKitPushNotificationAdapter! = .init()
 
@@ -15,10 +16,12 @@ final class CallKitPushNotificationAdapterTests: XCTestCase, @unchecked Sendable
 
     override func setUp() {
         super.setUp()
+        _ = streamVideo
         InjectedValues[\.callKitService] = callKitService
     }
 
     override func tearDown() {
+        streamVideo = nil
         callKitService = nil
         subject = nil
         super.tearDown()

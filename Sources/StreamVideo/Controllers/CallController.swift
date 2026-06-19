@@ -13,12 +13,22 @@ class CallController: @unchecked Sendable {
         case currentUserBlocked
     }
 
+    private lazy var clientEventReporter: ClientEventReporting = ClientEventReporter(
+        api: defaultAPI,
+        context: .init(
+            userId: user.id,
+            callType: callType,
+            callId: callId
+        )
+    )
+
     private lazy var webRTCCoordinator = webRTCCoordinatorFactory.buildCoordinator(
         user: user,
         apiKey: apiKey,
         callCid: callCid(from: callId, callType: callType),
         videoConfig: videoConfig,
-        callSettings: initialCallSettings
+        callSettings: initialCallSettings,
+        clientEventReporter: clientEventReporter
     ) {
         [weak self, callId] create, ring, migratingFrom, migratingFromList, notify, options in
         if let self {
@@ -126,6 +136,8 @@ class CallController: @unchecked Sendable {
     ///   - source: Describes the source from which the join action was triggered.
     ///            Use this to indicate if the call was joined from in-app UI or
     ///            via CallKit.
+    ///   - coordinatorJoinAttemptCount: Zero-based retry index of the
+    ///     coordinator join attempt.
     /// - Returns: A newly created `JoinCallResponse`.
     /// - Throws: If authentication, API call, or SFU connection fails.
     @discardableResult
@@ -136,7 +148,8 @@ class CallController: @unchecked Sendable {
         ring: Bool = false,
         notify: Bool = false,
         source: JoinSource,
-        policy: WebRTCJoinPolicy = .default
+        policy: WebRTCJoinPolicy = .default,
+        coordinatorJoinAttemptCount: Int = 0
     ) async throws -> JoinCallResponse {
         /// Each join attempt creates a fresh `PassthroughSubject` so
         /// that a failure from a previous attempt cannot accidentally
@@ -170,7 +183,8 @@ class CallController: @unchecked Sendable {
             notify: notify,
             source: source,
             joinResponseHandler: joinCallResponseSubject,
-            policy: policy
+            policy: policy,
+            coordinatorJoinAttemptCount: coordinatorJoinAttemptCount
         )
 
         do {

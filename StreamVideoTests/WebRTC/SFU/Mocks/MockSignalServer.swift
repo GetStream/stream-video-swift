@@ -47,6 +47,7 @@ final class MockSignalServer: SFUSignalService, Mockable, @unchecked Sendable {
 
     var updateMuteStatesWasCalledWithRequest: Stream_Video_Sfu_Signal_UpdateMuteStatesRequest?
     var sendStatsWasCalledWithRequest: Stream_Video_Sfu_Signal_SendStatsRequest?
+    var sendStatsDelay: TimeInterval = 0
     private(set) var startNoiseCancellationWasCalledWithRequest: Stream_Video_Sfu_Signal_StartNoiseCancellationRequest?
     private(set) var stopNoiseCancellationWasCalledWithRequest: Stream_Video_Sfu_Signal_StopNoiseCancellationRequest?
     private(set) var setPublisherWasCalledWithRequest: Stream_Video_Sfu_Signal_SetPublisherRequest?
@@ -86,6 +87,9 @@ final class MockSignalServer: SFUSignalService, Mockable, @unchecked Sendable {
         sendStatsRequest: Stream_Video_Sfu_Signal_SendStatsRequest
     ) async throws -> Stream_Video_Sfu_Signal_SendStatsResponse {
         sendStatsWasCalledWithRequest = sendStatsRequest
+        if sendStatsDelay > 0 {
+            try await Task.sleep(nanoseconds: UInt64(sendStatsDelay * 1_000_000_000))
+        }
         return stubbedFunction[.sendStats] as! Stream_Video_Sfu_Signal_SendStatsResponse
     }
 

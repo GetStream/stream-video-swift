@@ -20,7 +20,8 @@ class CallController_Mock: CallController, @unchecked Sendable {
         ring: Bool = false,
         notify: Bool = false,
         source: JoinSource,
-        policy: WebRTCJoinPolicy = .default
+        policy: WebRTCJoinPolicy = .default,
+        coordinatorJoinAttemptCount: Int = 0
     ) async throws -> JoinCallResponse {
         mockResponseBuilder.makeJoinCallResponse(cid: super.call?.cId ?? "default:\(String.unique)")
     }

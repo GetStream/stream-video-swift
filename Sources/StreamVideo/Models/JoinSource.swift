@@ -11,8 +11,18 @@ import Foundation
 /// This helps distinguish the user's entry point and can be used to customize
 /// behavior or analytics based on how the call was initiated.
 enum JoinSource: Sendable, Equatable {
-    /// Carries the completion hook CallKit expects us to invoke once the SDK is
-    /// ready for CallKit to hand audio session ownership back to the app.
+    /// Carries the completion hook CallKit expects us to invoke once the call
+    /// has been joined successfully.
+    ///
+    /// `CallKitService` stores it on `CallState.joinSource` when the user
+    /// answers an incoming call, before the join flow starts. The Call state
+    /// machine's joining stage invokes it right after the joined call becomes
+    /// the active call (including any join interceptor delay). Completing it
+    /// fulfils the pending `CXAnswerCallAction`, which lets CallKit hand
+    /// audio session ownership to the app and switches the system call UI
+    /// from connecting to a running call duration. It is never invoked on
+    /// join failure paths; those complete the action through
+    /// `CallKitService`'s error handling.
     struct ActionCompletion: @unchecked Sendable {
         fileprivate let identifier: UUID = .init()
         private let completion: () -> Void
@@ -31,6 +41,9 @@ enum JoinSource: Sendable, Equatable {
     case inApp
 
     /// Indicates that the call was joined via CallKit integration.
+    ///
+    /// The associated `ActionCompletion` fulfils the pending answer action
+    /// and is invoked by the joining stage once the call has joined.
     case callKit(ActionCompletion)
 
     /// Compares `JoinSource` values while treating CallKit sources as distinct

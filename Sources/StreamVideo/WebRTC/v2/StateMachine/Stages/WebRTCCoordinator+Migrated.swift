@@ -68,18 +68,68 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         )
                     }
 
-                    /// The authenticator will fetch a ``JoinCallResponse`` and will use it to
-                    /// create an ``SFUAdapter`` instance that we can later use in our flow.
-                    let (sfuAdapter, response) = try await context
-                        .authenticator
-                        .authenticate(
-                            coordinator: coordinator,
-                            currentSFU: context.migratingFromSFU,
-                            migratingFromList: context.migratingFromList,
-                            create: false,
-                            ring: false,
-                            notify: false,
-                            options: context.recoveryJoinOptions()
+                    /// The coordinator join request for migration is still a
+                    /// join-lifecycle stage and must be reported separately
+                    /// from the later SFU `WSJoin` stage.
+                    ///
+                    /// Migration already created a new join attempt in
+                    /// ``MigratingStage``; this event pair records the
+                    /// coordinator REST join for that same attempt and marks it
+                    /// with ``ClientEventJoinReason/migration``.
+                    let coordinatorJoinDetails = ClientEventStageDetails(
+                        coordinatorConnectId: context.coordinatorConnectId,
+                        joinReason: .migration
+                    )
+                    let coordinatorJoinAttempt = await coordinator
+                        .clientEventReporter
+                        .beginStage(
+                            .coordinatorJoin,
+                            peerConnection: nil,
+                            details: coordinatorJoinDetails
+                        )
+                    let sfuAdapter: SFUAdapter
+                    let response: JoinCallResponse
+                    do {
+                        (sfuAdapter, response) = try await context
+                            .authenticator
+                            .authenticate(
+                                coordinator: coordinator,
+                                currentSFU: context.migratingFromSFU,
+                                migratingFromList: context.migratingFromList,
+                                create: false,
+                                ring: false,
+                                notify: false,
+                                options: context.recoveryJoinOptions()
+                            )
+                    } catch {
+                        // Authentication failed before assigning a new SFU, so
+                        // resolve the migration CoordinatorJoin pair as failed.
+                        await coordinator
+                            .clientEventReporter
+                            .completeStage(
+                                coordinatorJoinAttempt,
+                                retryCount: Int(context.reconnectAttempts),
+                                details: coordinatorJoinDetails,
+                                failure: .init(error)
+                            )
+                        throw error
+                    }
+                    // The coordinator returned a new session/SFU assignment.
+                    // Attach the session id on completion because it may not be
+                    // known when the initiated event is sent.
+                    await coordinator
+                        .clientEventReporter
+                        .completeStage(
+                            coordinatorJoinAttempt,
+                            outcome: .success,
+                            retryCount: Int(context.reconnectAttempts),
+                            details: coordinatorJoinDetails.merging(
+                                .init(
+                                    callSessionId: response.call.session?.id
+                                        ?? response.call.currentSessionId
+                                )
+                            ),
+                            failure: nil
                         )
 
                     // Start observing SFU-full errors on the newly assigned SFU
