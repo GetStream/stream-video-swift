@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 # Upcoming
 
 ### 🔄 Changed
+
+# [1.48.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.48.0)
+_June 19, 2026_
+
+### 🔄 Changed
 - Added support for SFU-provided WebRTC degradation preferences for outgoing video and screen-share tracks.[#1153](https://github.com/GetStream/stream-video-swift/pull/1153)
 - Exposed `callJoinInterceptor` on `CallKitAdapter` and `CallKitService` so CallKit-answered calls honor `CallJoinIntercepting`. [#1160](https://github.com/GetStream/stream-video-swift/pull/1160)
 
