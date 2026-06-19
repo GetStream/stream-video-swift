@@ -97,10 +97,11 @@ extension WebRTCCoordinator.StateMachine {
             ///
             /// The retry source depends on where the flow is in the call
             /// lifecycle:
-            /// - Before the call has joined, failures are retried by the outer
-            ///   `Call.join()` loop. Those attempts create new `JoinInitiated`,
-            ///   `CoordinatorJoin`, `CoordinatorWS`, and `WSJoin` event pairs,
-            ///   so they use `coordinatorJoinAttemptCount`.
+            /// - While a `Call.join()` caller is still waiting for completion,
+            ///   failures are retried by that outer join loop. Those attempts
+            ///   create new `JoinInitiated`, `CoordinatorJoin`, `CoordinatorWS`,
+            ///   and `WSJoin` event pairs, so they use
+            ///   `coordinatorJoinAttemptCount`.
             /// - After the call has joined, failures are handled by WebRTC
             ///   recovery. Those attempts reuse the recovery context and use
             ///   `reconnectAttempts`.
@@ -109,7 +110,9 @@ extension WebRTCCoordinator.StateMachine {
             /// join attempt, not an in-call reconnect, even though the failure
             /// happens on the SFU websocket.
             var clientEventRetryCount: Int {
-                max(coordinatorJoinAttemptCount, Int(reconnectAttempts))
+                joinResponseHandler != nil
+                    ? coordinatorJoinAttemptCount
+                    : Int(reconnectAttempts)
             }
 
             /// Stores the initial join response so the pending ``Call.join()``

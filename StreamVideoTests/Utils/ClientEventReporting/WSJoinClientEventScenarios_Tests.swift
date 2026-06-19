@@ -42,13 +42,25 @@ final class WSJoinClientEventScenarios_Tests: XCTestCase, @unchecked Sendable {
         defer { WebRTCConfiguration.timeout = previousTimeout }
 
         let harness = ClientEventScenarioHarness()
-        let subject = try await makeJoiningStage(harness: harness, reconnectAttempts: 2)
+        let subject = try await makeJoiningStage(
+            harness: harness,
+            reconnectAttempts: 1,
+            coordinatorJoinAttemptCount: 2
+        )
 
         try await assertTransition(
             subject,
             from: .connected,
             expectedTarget: .disconnected
         ) { _ in }
+
+        let trace = await harness.trace
+        trace.assertCompleted(
+            .wsJoin,
+            outcome: .failure,
+            retryCount: 1,
+            failureCode: ClientEventFailureCode.requestTimeout.rawValue
+        )
     }
 
     func test_joinResponseAfterRetries_reportsWSJoinSuccessWithRetryCount() async throws {

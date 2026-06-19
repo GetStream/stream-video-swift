@@ -2,6 +2,7 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 @testable import StreamVideo
 import XCTest
 
@@ -80,7 +81,8 @@ final class CoordinatorJoinClientEventScenarios_Tests: XCTestCase, @unchecked Se
         let subject = makeConnectingStage(
             harness: harness,
             reconnectAttempts: 0,
-            coordinatorJoinAttemptCount: 2
+            coordinatorJoinAttemptCount: 2,
+            hasPendingJoinCompletion: true
         )
 
         try await assertTransition(
@@ -102,7 +104,8 @@ final class CoordinatorJoinClientEventScenarios_Tests: XCTestCase, @unchecked Se
     private func makeConnectingStage(
         harness: ClientEventScenarioHarness,
         reconnectAttempts: UInt32,
-        coordinatorJoinAttemptCount: Int = 0
+        coordinatorJoinAttemptCount: Int = 0,
+        hasPendingJoinCompletion: Bool = false
     ) -> WebRTCCoordinator.StateMachine.Stage {
         var context = WebRTCCoordinator.StateMachine.Stage.Context(
             coordinator: harness.stack.coordinator,
@@ -110,6 +113,9 @@ final class CoordinatorJoinClientEventScenarios_Tests: XCTestCase, @unchecked Se
         )
         context.authenticator = harness.stack.webRTCAuthenticator
         context.coordinatorJoinAttemptCount = coordinatorJoinAttemptCount
+        if hasPendingJoinCompletion {
+            context.joinResponseHandler = PassthroughSubject<JoinCallResponse, Error>()
+        }
         return .connecting(
             context,
             create: true,
