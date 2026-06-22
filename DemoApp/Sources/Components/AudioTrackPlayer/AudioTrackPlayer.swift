@@ -27,6 +27,10 @@ final class AudioTrackPlayer: NSObject, AVAudioPlayerDelegate, @unchecked Sendab
     private var audioPlayer: AVAudioPlayer?
     private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
 
+    override nonisolated init() {
+        super.init()
+    }
+
     func play(_ track: Track) {
         processingQueue.addTaskOperation { @MainActor [weak self] in
             guard

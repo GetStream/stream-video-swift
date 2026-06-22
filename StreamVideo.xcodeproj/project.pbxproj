@@ -549,10 +549,6 @@
 				StreamVideoSwiftUI/CallingViews/CallingParticipantView.swift,
 				StreamVideoSwiftUI/CallingViews/IncomingCallView.swift,
 				StreamVideoSwiftUI/CallingViews/IncomingCallViewModel.swift,
-				StreamVideoSwiftUI/CallingViews/iOS13/BackportStateObject.swift,
-				StreamVideoSwiftUI/CallingViews/iOS13/IncomingCallView_iOS13.swift,
-				StreamVideoSwiftUI/CallingViews/iOS13/PreJoiningView_iOS13.swift,
-				StreamVideoSwiftUI/CallingViews/iOS13/VideoView_iOS13.swift,
 				StreamVideoSwiftUI/CallingViews/JoiningCallView.swift,
 				StreamVideoSwiftUI/CallingViews/LobbyViewModel.swift,
 				StreamVideoSwiftUI/CallingViews/MicrophoneChecker.swift,
@@ -718,10 +714,6 @@
 				StreamVideoSwiftUI/CallingViews/CallingParticipantView.swift,
 				StreamVideoSwiftUI/CallingViews/IncomingCallView.swift,
 				StreamVideoSwiftUI/CallingViews/IncomingCallViewModel.swift,
-				StreamVideoSwiftUI/CallingViews/iOS13/BackportStateObject.swift,
-				StreamVideoSwiftUI/CallingViews/iOS13/IncomingCallView_iOS13.swift,
-				StreamVideoSwiftUI/CallingViews/iOS13/PreJoiningView_iOS13.swift,
-				StreamVideoSwiftUI/CallingViews/iOS13/VideoView_iOS13.swift,
 				StreamVideoSwiftUI/CallingViews/JoiningCallView.swift,
 				StreamVideoSwiftUI/CallingViews/LobbyViewModel.swift,
 				StreamVideoSwiftUI/CallingViews/MicrophoneChecker.swift,
@@ -1923,7 +1915,7 @@
 				INFOPLIST_FILE = "$(SRCROOT)/Sources/StreamVideo/Info.plist";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_GENERATE_MAP_FILE = YES;
 				LD_MAP_FILE_PATH = "linkmaps/$(PRODUCT_NAME)-$(CURRENT_ARCH)-LinkMap.txt";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1990,7 +1982,7 @@
 				INFOPLIST_FILE = "$(SRCROOT)/Sources/StreamVideoSwiftUI/Info.plist";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_GENERATE_MAP_FILE = YES;
 				LD_MAP_FILE_PATH = "linkmaps/$(PRODUCT_NAME)-$(CURRENT_ARCH)-LinkMap.txt";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -2120,7 +2112,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -2229,7 +2221,7 @@
 				INFOPLIST_FILE = "$(SRCROOT)/CallIntent/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = CallIntent;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -2260,7 +2252,7 @@
 				INFOPLIST_FILE = "$(SRCROOT)/ScreenSharing/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = ScreenSharing;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -2334,7 +2326,7 @@
 				INFOPLIST_FILE = "$(SRCROOT)/CallIntent/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = CallIntent;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -2367,7 +2359,7 @@
 				INFOPLIST_FILE = "$(SRCROOT)/CallIntent/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = CallIntent;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -2540,7 +2532,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -2589,7 +2581,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -2626,7 +2618,7 @@
 				INFOPLIST_FILE = "$(SRCROOT)/ScreenSharing/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = ScreenSharing;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -2663,7 +2655,7 @@
 				INFOPLIST_FILE = "$(SRCROOT)/ScreenSharing/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = ScreenSharing;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -2803,7 +2795,7 @@
 				INFOPLIST_FILE = "$(SRCROOT)/Sources/StreamVideo/Info.plist";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_GENERATE_MAP_FILE = YES;
 				LD_MAP_FILE_PATH = "linkmaps/$(PRODUCT_NAME)-$(CURRENT_ARCH)-LinkMap.txt";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -2847,7 +2839,7 @@
 				INFOPLIST_FILE = "$(SRCROOT)/Sources/StreamVideo/Info.plist";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_GENERATE_MAP_FILE = YES;
 				LD_MAP_FILE_PATH = "linkmaps/$(PRODUCT_NAME)-$(CURRENT_ARCH)-LinkMap.txt";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -2925,7 +2917,7 @@
 				INFOPLIST_FILE = "$(SRCROOT)/Sources/StreamVideoSwiftUI/Info.plist";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_GENERATE_MAP_FILE = YES;
 				LD_MAP_FILE_PATH = "linkmaps/$(PRODUCT_NAME)-$(CURRENT_ARCH)-LinkMap.txt";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -2967,7 +2959,7 @@
 				INFOPLIST_FILE = "$(SRCROOT)/Sources/StreamVideoSwiftUI/Info.plist";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_GENERATE_MAP_FILE = YES;
 				LD_MAP_FILE_PATH = "linkmaps/$(PRODUCT_NAME)-$(CURRENT_ARCH)-LinkMap.txt";
 				LD_RUNPATH_SEARCH_PATHS = (
