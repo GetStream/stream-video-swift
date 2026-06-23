@@ -141,3 +141,6 @@ buildServer.json
 !.codex/scripts/*.sh
 .codegraph
 .cursor
+
+.docs/*
+.omo/*
