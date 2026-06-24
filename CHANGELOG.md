@@ -4,7 +4,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
-### 🔄 Changed
+### 🐞 Fixed
+- Local video sometimes failed to start when joining a call, because the publisher negotiation was debounced on the main run loop and could be delayed while the call UI was presenting.
 
 # [1.48.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.48.0)
 _June 19, 2026_

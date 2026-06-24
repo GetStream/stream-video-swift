@@ -275,7 +275,13 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         if peerType == .publisher {
             peerConnection
                 .publisher(eventType: StreamRTCPeerConnection.ShouldNegotiateEvent.self)
-                .debounce(for: 0.5, scheduler: RunLoop.main)
+                // Debounce on a global dispatch queue rather than `RunLoop.main`.
+                // A `RunLoop`-scheduled timer only fires in the run loop's default
+                // mode, so while the main run loop is parked in a tracking/event
+                // mode (UI presentation, scrolling, animations) or the main thread
+                // is saturated during call join, the publisher negotiation can be
+                // delayed or never start, leaving local tracks unpublished.
+                .debounce(for: 0.5, scheduler: DispatchQueue.global(qos: .userInteractive))
                 .log(.debug) { _ in "Publisher will negotiate" }
                 .receive(on: dispatchQueue)
                 .map { _ in () }

@@ -312,6 +312,46 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
         }
     }
 
+    /// Regression test: the publisher negotiation must start even when the main
+    /// run loop is not being pumped (e.g. while the call UI is presenting during
+    /// join). Debouncing the negotiation trigger on `RunLoop.main` makes the
+    /// timer fire only in the run loop's default mode, so a busy/blocked main
+    /// thread delays — or never starts — negotiation, leaving local tracks
+    /// unpublished. This is intentionally a synchronous test so blocking the
+    /// current thread also blocks the main run loop, reproducing that condition.
+    func test_negotiate_subjectIsPublisher_whenMainRunLoopBlocked_startsNegotiation() {
+        _ = subject
+        let negotiationStarted = DispatchSemaphore(value: 0)
+        let peerConnection = mockPeerConnection!
+
+        // Observe the negotiation (createOffer) from a background thread so the
+        // check never relies on the main run loop being pumped.
+        DispatchQueue.global(qos: .userInitiated).async {
+            let deadline = Date().addingTimeInterval(5)
+            while Date() < deadline {
+                if peerConnection.timesCalled(.offer) > 0 {
+                    negotiationStarted.signal()
+                    return
+                }
+                Thread.sleep(forTimeInterval: 0.02)
+            }
+        }
+
+        mockPeerConnection
+            .subject
+            .send(StreamRTCPeerConnection.ShouldNegotiateEvent())
+
+        // Blocking here keeps the main run loop from running its timers; a
+        // `RunLoop.main`-scheduled debounce would never fire under this wait.
+        let result = negotiationStarted.wait(timeout: .now() + 3)
+
+        XCTAssertEqual(
+            result,
+            .success,
+            "Publisher negotiation did not start while the main run loop was blocked."
+        )
+    }
+
     func test_negotiate_subjectIsPublisher_callsSetLocalDescriptionWithExpectedOffer() async throws {
         _ = subject
         let offer = "useinbandfec=1;\r\n00:11 opus/;\r\n12:13: red/48000/2"
