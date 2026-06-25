@@ -643,6 +643,142 @@ final class CallAudioSession_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(policy.stubbedFunctionInput[.configuration]?.count ?? 0, 1)
     }
 
+    func test_routeChangeWithCategoryChangeReason_isIgnored() async {
+        let callSettingsSubject = PassthroughSubject<CallSettings, Never>()
+        let capabilitiesSubject = PassthroughSubject<Set<OwnCapability>, Never>()
+        let delegate = SpyAudioSessionAdapterDelegate()
+        let policy = MockAudioSessionPolicy()
+        let policyConfiguration = AudioSessionConfiguration(
+            isActive: true,
+            category: .playAndRecord,
+            mode: .voiceChat,
+            options: [.allowBluetoothHFP],
+            overrideOutputAudioPort: .speaker
+        )
+        policy.stub(for: .configuration, with: policyConfiguration)
+
+        subject = .init(policy: policy)
+        await claimOwnership(of: subject)
+        subject.activate(
+            callSettingsPublisher: callSettingsSubject.eraseToAnyPublisher(),
+            ownCapabilitiesPublisher: capabilitiesSubject.eraseToAnyPublisher(),
+            delegate: delegate,
+            statsAdapter: nil,
+            shouldSetActive: true
+        )
+
+        callSettingsSubject.send(CallSettings(audioOn: true, speakerOn: true))
+        capabilitiesSubject.send([.sendAudio])
+
+        await fulfillment {
+            (policy.stubbedFunctionInput[.configuration]?.count ?? 0) == 1
+        }
+        let initialCount = policy.stubbedFunctionInput[.configuration]?.count ?? 0
+
+        // A `.categoryChange` route notification is emitted by our own
+        // category/mode reconfiguration and momentarily reports the default
+        // (receiver) route while the desired override is the speaker. It must
+        // not be treated as a user-driven route change.
+        mockAudioStore.audioStore.dispatch(
+            .setCurrentRoute(
+                makeRoute(reason: .categoryChange, speakerOn: false)
+            )
+        )
+
+        await wait(for: 0.5)
+
+        XCTAssertFalse(delegate.speakerUpdates.contains(false))
+        XCTAssertEqual(
+            policy.stubbedFunctionInput[.configuration]?.count ?? 0,
+            initialCount
+        )
+    }
+
+    /// Reproduces the reported join scenario (no external device connected):
+    /// the OS emits a continuous stream of `.categoryChange` route
+    /// notifications while joining, each momentarily reporting the default
+    /// (receiver) route while the speaker override is still pending. The
+    /// speaker update is fed back into call settings exactly like
+    /// `WebRTCStateAdapter` does, which is what closes the loop. Before the fix
+    /// this oscillates `speakerOn` and reconfigures the session endlessly,
+    /// restarting the audio unit so captured microphone audio never reaches the
+    /// published track.
+    func test_categoryChangeStormDuringJoin_settlesWithoutReconfigurationLoop() async {
+        let callSettingsSubject = CurrentValueSubject<CallSettings, Never>(
+            .init(audioOn: true, speakerOn: true)
+        )
+        let capabilitiesSubject = CurrentValueSubject<Set<OwnCapability>, Never>(
+            [.sendAudio]
+        )
+        let policy = MockAudioSessionPolicy()
+        policy.stub(
+            for: .configuration,
+            with: AudioSessionConfiguration(
+                isActive: true,
+                category: .playAndRecord,
+                mode: .voiceChat,
+                options: [.allowBluetoothHFP],
+                overrideOutputAudioPort: .speaker
+            )
+        )
+        let delegate = SpeakerFeedbackAudioSessionAdapterDelegate(callSettingsSubject)
+
+        subject = .init(policy: policy)
+        await claimOwnership(of: subject)
+        subject.activate(
+            callSettingsPublisher: callSettingsSubject.eraseToAnyPublisher(),
+            ownCapabilitiesPublisher: capabilitiesSubject.eraseToAnyPublisher(),
+            delegate: delegate,
+            statsAdapter: nil,
+            shouldSetActive: true
+        )
+
+        await fulfillment {
+            (policy.stubbedFunctionInput[.configuration]?.count ?? 0) == 1
+        }
+
+        // Model the OS feedback that drives the real loop: each time the call
+        // reconfigures the AVAudioSession category, a `.categoryChange` route
+        // notification fires. We seed the first one and re-emit after every
+        // subsequent reconfiguration, capped so a regression surfaces as a
+        // bounded storm instead of hanging the test.
+        let injectionCap = 25
+        var injections = 0
+        var lastObservedCount = policy.stubbedFunctionInput[.configuration]?.count ?? 0
+
+        mockAudioStore.audioStore.dispatch(
+            .setCurrentRoute(makeRoute(reason: .categoryChange, speakerOn: false))
+        )
+        injections += 1
+
+        for _ in 0..<injectionCap {
+            await wait(for: 0.1)
+            let current = policy.stubbedFunctionInput[.configuration]?.count ?? 0
+            guard current > lastObservedCount, injections < injectionCap else {
+                continue
+            }
+            lastObservedCount = current
+            mockAudioStore.audioStore.dispatch(
+                .setCurrentRoute(makeRoute(reason: .categoryChange, speakerOn: false))
+            )
+            injections += 1
+        }
+
+        // With the fix the storm never starts: the seed notification is
+        // ignored, so it triggers no reconfiguration, no further notifications,
+        // and the speaker selection is preserved.
+        XCTAssertEqual(injections, 1)
+        XCTAssertEqual(policy.stubbedFunctionInput[.configuration]?.count ?? 0, 1)
+        XCTAssertFalse(delegate.speakerUpdates.contains(false))
+        XCTAssertEqual(callSettingsSubject.value.speakerOn, true)
+
+        // A genuine hardware transition is still honoured.
+        mockAudioStore.audioStore.dispatch(
+            .setCurrentRoute(makeRoute(reason: .oldDeviceUnavailable, speakerOn: false))
+        )
+        await fulfillment { delegate.speakerUpdates.contains(false) }
+    }
+
     // MARK: - muted speech detection
 
     func test_activate_whenMutedAndAllowed_enablesMutedSpeechDetection() async {
@@ -953,6 +1089,37 @@ private final class SpyAudioSessionAdapterDelegate: StreamAudioSessionAdapterDel
         line: UInt
     ) {
         speakerUpdates.append(speakerOn)
+    }
+
+    func audioSessionAdapterDidUpdateSpeakingWhileMuted(
+        _ isSpeakingWhileMuted: Bool
+    ) {
+        speakingWhileMutedUpdates.append(isSpeakingWhileMuted)
+    }
+}
+
+/// Mirrors `WebRTCStateAdapter` by feeding speaker updates back into the call
+/// settings the audio session observes, so route-change handling can be tested
+/// with the same feedback loop the SDK uses in production.
+private final class SpeakerFeedbackAudioSessionAdapterDelegate: StreamAudioSessionAdapterDelegate, @unchecked Sendable {
+    private let callSettingsSubject: CurrentValueSubject<CallSettings, Never>
+    private(set) var speakerUpdates: [Bool] = []
+    private(set) var speakingWhileMutedUpdates: [Bool] = []
+
+    init(_ callSettingsSubject: CurrentValueSubject<CallSettings, Never>) {
+        self.callSettingsSubject = callSettingsSubject
+    }
+
+    func audioSessionAdapterDidUpdateSpeakerOn(
+        _ speakerOn: Bool,
+        file: StaticString,
+        function: StaticString,
+        line: UInt
+    ) {
+        speakerUpdates.append(speakerOn)
+        callSettingsSubject.send(
+            callSettingsSubject.value.withUpdatedSpeakerState(speakerOn)
+        )
     }
 
     func audioSessionAdapterDidUpdateSpeakingWhileMuted(
