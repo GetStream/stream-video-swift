@@ -33,7 +33,7 @@ extension AppEnvironment {
     }
 
     /// Default to enabled in debug builds so the pipeline is exercised during development.
-    nonisolated(unsafe) static var callJoinInterceptor: CallJoinInterceptor = .none
+    nonisolated(unsafe) static var callJoinInterceptor: CallJoinInterceptor = .synchronised
 }
 
 extension DebugMenu {

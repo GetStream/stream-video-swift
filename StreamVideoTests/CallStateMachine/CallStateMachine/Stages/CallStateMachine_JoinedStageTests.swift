@@ -97,6 +97,42 @@ final class CallStateMachineStageJoinedStage_Tests: StreamVideoTestCase, @unchec
                 .contains([.sendAudio]) ?? false
         }
     }
+
+    // MARK: - JoinInterceptor
+
+    func test_joiningTransition_joinInterceptorProvided_callDidJoinInvoked() async {
+        let joinInterceptor = JoinedTrackingInterceptor_Spy()
+        let context = Call.StateMachine.Stage.Context(
+            call: call,
+            input: .join(
+                .init(
+                    create: true,
+                    ring: false,
+                    notify: false,
+                    source: .inApp,
+                    deliverySubject: .init(nil),
+                    joinInterceptor: joinInterceptor
+                )
+            )
+        )
+        subject = .joined(context, response: response)
+
+        _ = subject.transition(from: .init(id: .joining, context: context))
+
+        await fulfillment {
+            joinInterceptor.recordedJoinedCIds == [self.call.cId]
+        }
+    }
+}
+
+private final class JoinedTrackingInterceptor_Spy: CallJoinIntercepting, @unchecked Sendable {
+    @Atomic private(set) var recordedJoinedCIds: [String] = []
+
+    func callReadyToJoin(_ call: Call) async throws {}
+
+    func callDidJoin(_ call: Call) async {
+        recordedJoinedCIds.append(call.cId)
+    }
 }
 
 extension Call.StateMachine.Stage.Context.Output {

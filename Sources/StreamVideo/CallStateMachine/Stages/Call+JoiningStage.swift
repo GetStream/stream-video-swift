@@ -141,6 +141,10 @@ extension Call.StateMachine.Stage {
         ) async throws -> JoinCallResponse {
             try Task.checkCancellation()
 
+            observeCallStage(call, joinCallInterceptor: input.joinInterceptor)
+
+            try Task.checkCancellation()
+
             let response = try await call.callController.joinCall(
                 create: input.create,
                 callSettings: input.callSettings,
@@ -253,6 +257,38 @@ extension Call.StateMachine.Stage {
             case .cancelled:
                 throw CancellationError()
             }
+        }
+
+        /// Bridges the WebRTC join lifecycle to the interceptor's preparation
+        /// hook.
+        ///
+        /// When an interceptor is provided, this subscribes to the call
+        /// controller's `stagePublisher` and, every time the underlying WebRTC
+        /// state machine reports the `.joining` stage, invokes
+        /// ``CallJoinIntercepting/callWillJoin(_:)``. This gives integrators
+        /// a chance to run setup work (e.g. muting remote tracks) while the peer
+        /// connection is still being negotiated. The subscription is stored in
+        /// the stage-scoped `disposableBag`, so it is torn down automatically
+        /// when the stage transitions away.
+        ///
+        /// - Parameters:
+        ///   - call: The call being joined.
+        ///   - joinCallInterceptor: The optional interceptor to notify. When
+        ///     `nil`, no observation is set up.
+        private func observeCallStage(
+            _ call: Call,
+            joinCallInterceptor: CallJoinIntercepting?
+        ) {
+            guard let joinCallInterceptor else {
+                return
+            }
+
+            call
+                .callController
+                .stagePublisher
+                .filter { $0 == .joining }
+                .sinkTask(storeIn: disposableBag) { _ in await joinCallInterceptor.callWillJoin(call) }
+                .store(in: disposableBag)
         }
     }
 }

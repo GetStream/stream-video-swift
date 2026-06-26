@@ -662,6 +662,40 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
         cancellable.cancel()
     }
 
+    func test_execute_whenWebRTCStageBecomesJoining_invokesInterceptorCallIsPreparing() async throws {
+        // The interceptor suspends in `callReadyToJoin`, keeping the stage in
+        // `.joining` so the stage-observation subscription stays alive while we
+        // assert that the preparing hook fired.
+        let joinInterceptor = NonCancellableJoinInterceptor_Spy()
+        callController.stageSubject.send(.joining)
+        callController.stub(for: .join, with: JoinCallResponse.dummy())
+        let context = Call.StateMachine.Stage.Context(
+            call: call,
+            input: .join(
+                .init(
+                    create: true,
+                    callSettings: .init(audioOn: false),
+                    options: .init(memberIds: [.unique]),
+                    ring: true,
+                    notify: false,
+                    source: .inApp,
+                    deliverySubject: .init(nil),
+                    joinInterceptor: joinInterceptor
+                )
+            )
+        )
+        subject.transition = { self.transitionedToStage = $0 }
+        subject.context = context
+
+        _ = subject.transition(from: .idle(.init()))
+
+        await fulfilmentInMainActor(timeout: defaultTimeout) {
+            joinInterceptor.recordedPreparingCIds == [self.call.cId]
+        }
+
+        joinInterceptor.resume()
+    }
+
     func test_execute_withRetries_whenJoinFailsAndThereAreAvailableRetries_transitionsToJoining() async throws {
         let context = Call.StateMachine.Stage.Context(
             call: call,
@@ -836,10 +870,15 @@ private final class CallJoinInterceptor_Spy: CallJoinIntercepting, @unchecked Se
 private final class NonCancellableJoinInterceptor_Spy: CallJoinIntercepting, @unchecked Sendable {
     private let onEntered: @Sendable () -> Void
     @Atomic private(set) var recordedCallCIds: [String] = []
+    @Atomic private(set) var recordedPreparingCIds: [String] = []
     @Atomic private var continuation: CheckedContinuation<Void, Never>?
 
     init(onEntered: @escaping @Sendable () -> Void = {}) {
         self.onEntered = onEntered
+    }
+
+    func callWillJoin(_ call: Call) async {
+        recordedPreparingCIds.append(call.cId)
     }
 
     func callReadyToJoin(_ call: Call) async throws {
