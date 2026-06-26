@@ -85,14 +85,20 @@ final class StreamVideoCapturer: StreamVideoCapturing, @unchecked Sendable {
             ]
         )
         #else
+        // The interruptions handler is placed before the capture handler so it
+        // updates its state and observers before the capture session is started
+        // or stopped. This keeps an intentional `stopCapture` from being misread
+        // as an unexpected stop, and ensures the stop observer is installed
+        // before capture begins.
+        let interruptionsHandler = CameraInterruptionsHandler()
         var actionHandlers: [StreamVideoCapturerActionHandler] = [
+            interruptionsHandler,
             CameraBackgroundAccessHandler(),
             CameraCaptureHandler(),
             CameraFocusHandler(),
             CameraCapturePhotoHandler(),
             CameraVideoOutputHandler(),
-            CameraZoomHandler(),
-            CameraInterruptionsHandler()
+            CameraZoomHandler()
         ]
 
         let systemPressureHandler = CameraSystemPressureHandler()
@@ -111,6 +117,18 @@ final class StreamVideoCapturer: StreamVideoCapturing, @unchecked Sendable {
             audioDeviceModule: audioDeviceModule,
             actionHandlers: actionHandlers
         )
+
+        interruptionsHandler.actionDispatcher = { [weak streamCapturer] action in
+            guard let streamCapturer else { return }
+            do {
+                try await streamCapturer.dispatch(action)
+            } catch {
+                log.error(
+                    "Failed to dispatch camera restart action: \(error).",
+                    subsystems: .videoCapturer
+                )
+            }
+        }
 
         if usesNewCapturingPipeline {
             systemPressureHandler.actionDispatcher = { [weak streamCapturer] action in
