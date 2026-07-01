@@ -2,6 +2,7 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 @testable import StreamVideo
 
 final class MockCallController: CallController, Mockable, @unchecked Sendable {
@@ -88,6 +89,14 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
                 return value
             }
         }
+    }
+
+    /// Backs ``stagePublisher`` so tests can drive WebRTC stage transitions
+    /// without standing up a real coordinator.
+    let stageSubject = CurrentValueSubject<WebRTCCoordinator.StateMachine.Stage.ID, Never>(.idle)
+
+    override var stagePublisher: AnyPublisher<WebRTCCoordinator.StateMachine.Stage.ID, Never> {
+        stageSubject.eraseToAnyPublisher()
     }
 
     var stubbedProperty: [String: Any] = [:]

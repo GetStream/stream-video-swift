@@ -19,6 +19,7 @@ extension Call.StateMachine.Stage {
         JoinedStage(
             .init(
                 call: context.call,
+                input: context.input,
                 output: .joined(response)
             )
         )
@@ -77,11 +78,22 @@ extension Call.StateMachine.Stage {
         ///
         /// The method subscribes to call settings and capability updates so the
         /// call controller and media managers stay aligned with live call state.
+        /// Once those subscriptions are in place it notifies the optional join
+        /// interceptor via ``CallJoinIntercepting/callDidJoin(_:)``, allowing it
+        /// to undo any temporary setup applied during the preparing stage. The
+        /// interceptor is recovered from the join input that travelled through
+        /// the state machine context.
         private func execute() {
+            let joinInterceptor: CallJoinIntercepting? = {
+                guard case let .join(input) = context.input else { return nil }
+                return input.joinInterceptor
+            }()
+
             Task(disposableBag: disposableBag) { [weak self] in
                 guard let self, let call = context.call else { return }
                 await subscribeToCallSettingsUpdates(on: call)
                 await subscribeToOwnCapabilitiesChanges(on: call)
+                await joinInterceptor?.callDidJoin(call)
             }
         }
 

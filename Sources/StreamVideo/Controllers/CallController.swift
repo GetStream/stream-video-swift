@@ -61,6 +61,17 @@ class CallController: @unchecked Sendable {
         }
     }
 
+    /// Publishes the identifier of the WebRTC coordinator's current state
+    /// machine stage.
+    ///
+    /// A new value is emitted whenever the join/connection lifecycle advances
+    /// (for example into `.joining` or `.joined`). The call's join state
+    /// machine observes this to drive the optional ``CallJoinIntercepting``
+    /// preparation hook without reaching into WebRTC internals directly.
+    var stagePublisher: AnyPublisher<WebRTCCoordinator.StateMachine.Stage.ID, Never> {
+        webRTCCoordinator.stateMachine.publisher.map(\.id).eraseToAnyPublisher()
+    }
+
     private let user: User
     private let callId: String
     private let callType: String
