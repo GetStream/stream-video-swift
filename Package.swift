@@ -23,14 +23,16 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-protobuf.git", exact: "1.30.0"),
-        .package(url: "https://github.com/GetStream/stream-video-swift-webrtc.git", exact: "145.8.0")
+        .package(url: "https://github.com/GetStream/stream-video-swift-webrtc.git", exact: "145.8.0"),
+        .package(url: "https://github.com/GetStream/stream-core-swift.git", from: "0.8.0")
     ],
     targets: [
         .target(
             name: "StreamVideo",
             dependencies: [
                 .product(name: "SwiftProtobuf", package: "swift-protobuf"),
-                .product(name: "StreamWebRTC", package: "stream-video-swift-webrtc")
+                .product(name: "StreamWebRTC", package: "stream-video-swift-webrtc"),
+                .product(name: "StreamCore", package: "stream-core-swift")
             ]
         ),
         .target(
