@@ -97,7 +97,14 @@ final class WebRTCPeerConnectionConnectReporter: @unchecked Sendable {
                 iceConnectionState: iceConnectionState
             )
         } else if connectionState.isConnecting || iceConnectionState.isConnecting {
-            _ = await begin()
+            let attempt = await begin()
+            // Keep the pending attempt's ICE state current so a completion
+            // forced by an abort (user leave / backend end) mid-connect still
+            // reports the last observed ICE state instead of omitting it.
+            await reporter.updateStage(
+                attempt,
+                details: .init(iceState: ClientEventICEState(iceConnectionState))
+            )
         }
     }
 

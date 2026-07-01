@@ -166,6 +166,24 @@ actor ClientEventReporter: ClientEventReporting {
         deliver(event)
     }
 
+    func updateStage(
+        _ attempt: ClientEventStageAttempt,
+        details: ClientEventStageDetails
+    ) async {
+        guard let stored = activeAttempts[attempt.stageId] else {
+            // Already resolved (or aborted); nothing to keep current.
+            return
+        }
+        activeAttempts[attempt.stageId] = ClientEventStageAttempt(
+            stage: stored.stage,
+            stageId: stored.stageId,
+            peerConnection: stored.peerConnection,
+            joinAttemptId: stored.joinAttemptId,
+            startedAt: stored.startedAt,
+            details: stored.details.merging(details)
+        )
+    }
+
     func abortPendingStages(failure: ClientEventFailure) async {
         let pending = activeAttempts.values
         activeAttempts.removeAll()

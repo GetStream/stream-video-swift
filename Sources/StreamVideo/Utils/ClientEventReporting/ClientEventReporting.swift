@@ -167,6 +167,20 @@ protocol ClientEventReporting: Sendable {
         failure: ClientEventFailure?
     ) async
 
+    /// Merges new stage-specific fields into a pending (begun but not yet
+    /// completed) stage attempt.
+    ///
+    /// Lets an in-progress stage keep its details current so a completion
+    /// forced by ``abortPendingStages(failure:)`` (user leave / backend end)
+    /// reports the last observed state (e.g. the ICE state of a
+    /// ``ClientEventStage/peerConnectionConnect`` still negotiating) instead of
+    /// omitting it. Non-nil fields override those captured at initiation; no-op
+    /// if the attempt has already resolved.
+    func updateStage(
+        _ attempt: ClientEventStageAttempt,
+        details: ClientEventStageDetails
+    ) async
+
     /// Completes every stage that was begun but not yet completed as a failure.
     ///
     /// Used when the user leaves the call or the backend ends it while a join
