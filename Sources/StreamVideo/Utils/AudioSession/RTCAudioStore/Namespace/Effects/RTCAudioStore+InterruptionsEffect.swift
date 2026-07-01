@@ -57,10 +57,25 @@ extension RTCAudioStore {
                     state.audioDeviceModule != nil {
                     let isRecording = state.isRecording
                     let isMicrophoneMuted = state.isMicrophoneMuted
+                    let isMutedSpeechDetectionEnabled = state.isMutedSpeechDetectionEnabled
 
                     if isRecording {
+                        // Muted speech detection keeps WebRTC's input graph
+                        // "enabled" across a stop/start (persistent recording
+                        // mode), so resuming after an interruption looks like a
+                        // runtime mute toggle and the engine input — torn down
+                        // by the OS during the interruption — is never actually
+                        // restarted, leaving capture dead. Drop persistent mode
+                        // around the restart so the input-graph transition
+                        // forces a real engine restart, then restore it.
+                        if isMutedSpeechDetectionEnabled {
+                            actions.append(.setMutedSpeechDetectionEnabled(false))
+                        }
                         actions.append(.setRecording(false))
                         actions.append(.setRecording(true))
+                        if isMutedSpeechDetectionEnabled {
+                            actions.append(.setMutedSpeechDetectionEnabled(true))
+                        }
                     }
 
                     actions.append(.setMicrophoneMuted(isMicrophoneMuted))

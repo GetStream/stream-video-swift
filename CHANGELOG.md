@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🐞 Fixed
 - Local video could fail to start when joining a call if the camera capture session stopped unexpectedly (e.g. after a capture-server connection loss), because the capturer did not restart it. [#1175](https://github.com/GetStream/stream-video-swift/pull/1175)
+- The microphone now recovers after an audio-session interruption ends while the app is backgrounded, instead of staying silent (recording but capturing nothing) until you leave and rejoin the call. [#1174](https://github.com/GetStream/stream-video-swift/pull/1174)
 - Local video sometimes failed to start when joining a call, because the publisher negotiation was debounced on the main run loop and could be delayed while the call UI was presenting.[#1173](https://github.com/GetStream/stream-video-swift/pull/1173)
 - Constant audio route changes while joining a call no longer mute the microphone, so captured audio reaches the published track. [#1172](https://github.com/GetStream/stream-video-swift/pull/1172)
 
