@@ -22,7 +22,12 @@ public class ClientError: Error, CustomStringConvertible, @unchecked Sendable {
     /// An underlying error.
     public let underlyingError: Error?
     
-    public let apiError: APIError?
+    /// The associated API error, if this wraps one.
+    ///
+    /// Typed as ``StreamAPIError`` (StreamCore's `APIError`) so the whole app
+    /// converges on one API error type; only the generated OpenAPI layer keeps
+    /// video's own `APIError`.
+    public let apiError: StreamAPIError?
     
     var errorDescription: String? {
         if let apiError {
@@ -63,7 +68,9 @@ public class ClientError: Error, CustomStringConvertible, @unchecked Sendable {
         underlyingError = error
         message = error?.localizedDescription ?? nil
         location = .init(file: "\(file)", line: Int(line))
-        if let aErr = error as? APIError {
+        // Errors thrown by the transport are now `StreamAPIError`
+        // (StreamCore's), so capture that type here.
+        if let aErr = error as? StreamAPIError {
             apiError = aErr
         } else {
             apiError = nil
@@ -131,15 +138,18 @@ extension Error {
 }
 
 extension Error {
+    // Casts to `StreamAPIError` (StreamCore's) because that is the type the
+    // transport now throws. Only the stored `code`/`statusCode` are read, so no
+    // `import StreamCore` is required here.
     var isTokenExpiredError: Bool {
-        if let error = self as? APIError, ClosedRange.tokenInvalidErrorCodes ~= error.code {
+        if let error = self as? StreamAPIError, ClosedRange.tokenInvalidErrorCodes ~= error.code {
             return true
         }
         return false
     }
     
     var hasClientErrors: Bool {
-        if let apiError = self as? APIError,
+        if let apiError = self as? StreamAPIError,
            ClosedRange.clientErrorCodes ~= apiError.statusCode {
             return false
         }
@@ -156,7 +166,10 @@ extension ClosedRange where Bound == Int {
 }
 
 struct APIErrorContainer: Codable {
-    let error: APIError
+    // Decodes the server error envelope directly into `StreamAPIError`
+    // (identical `CodingKeys` to video's `APIError`), so WebSocket-surfaced API
+    // errors converge on StreamCore's type too.
+    let error: StreamAPIError
 }
 
 extension APIError: Error {}

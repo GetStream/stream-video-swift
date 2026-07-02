@@ -89,12 +89,11 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     private let coordinatorClient: DefaultAPI
     private let apiTransport: DefaultAPITransport
     
-    private var webSocketClient: WebSocketClient? {
-        didSet {
-            setupConnectionRecoveryHandler()
-        }
-    }
-        
+    private var webSocketClient: CoordinatorWebSocketProtocol?
+    /// Observes the coordinator socket's state (replaces the old
+    /// `ConnectionStateDelegate` callback).
+    private var connectionStateCancellable: AnyCancellable?
+
     private let eventsMiddleware = WSEventsMiddleware()
     private var cachedLocation: String?
     private var connectTask: Task<Void, Error>?
@@ -110,9 +109,6 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         return center
     }()
     
-    /// Background worker that takes care about client connection recovery when the Internet comes back
-    /// OR app transitions from background to foreground.
-    private(set) var connectionRecoveryHandler: ConnectionRecoveryHandler?
     private(set) var timerType: Timer.Type = DefaultTimer.self
 
     var tokenRetryTimer: TimerControl?
@@ -562,29 +558,37 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     private func makeWebSocketClient(
         url: URL,
         apiKey: APIKey
-    ) -> WebSocketClient {
-        let webSocketClient = environment.webSocketClientBuilder(eventNotificationCenter, url)
-        
-        webSocketClient.connectionStateDelegate = self
-        webSocketClient.onWSConnectionEstablished = { [weak self, weak webSocketClient] in
-            guard let self = self, let webSocketClient else { return }
+    ) -> CoordinatorWebSocketProtocol {
+        let webSocketClient = environment.webSocketClientBuilder(
+            eventNotificationCenter,
+            url,
+            { [weak self] in self?.makeConnectPayload() }
+        )
 
-            let connectUserRequest = ConnectUserDetailsRequest(
-                custom: self.user.customData,
-                id: self.user.id,
-                image: self.user.imageURL?.absoluteString,
-                name: self.user.originalName
-            )
-            
-            let authRequest = WSAuthMessageRequest(
-                token: self.token.rawValue,
-                userDetails: connectUserRequest
-            )
+        // The wrapper isn't a `ConnectionStateDelegate` source, so observe state
+        // via its publisher and forward as before (incl. to the recovery handler).
+        // The publisher fires on StreamCore's callback thread; hop to main since
+        // `handleConnectionStateChange` mutates the `@Published` `state.connection`.
+        connectionStateCancellable = webSocketClient
+            .connectionStatePublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in self?.handleConnectionStateChange($0) }
 
-            webSocketClient.engine?.send(jsonMessage: authRequest)
-        }
-        
         return webSocketClient
+    }
+
+    /// Builds the coordinator connect payload (auth) sent once the socket opens.
+    private func makeConnectPayload() -> (any Codable)? {
+        let connectUserRequest = ConnectUserDetailsRequest(
+            custom: user.customData,
+            id: user.id,
+            image: user.imageURL?.absoluteString,
+            name: user.originalName
+        )
+        return WSAuthMessageRequest(
+            token: token.rawValue,
+            userDetails: connectUserRequest
+        )
     }
     
     private func loadConnectionId() async -> String {
@@ -682,18 +686,6 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         return try await coordinatorClient.createDevice(createDeviceRequest: createDeviceRequest)
     }
     
-    private func setupConnectionRecoveryHandler() {
-        guard let webSocketClient = webSocketClient else {
-            return
-        }
-
-        connectionRecoveryHandler = nil
-        connectionRecoveryHandler = environment.connectionRecoveryHandlerBuilder(
-            webSocketClient,
-            eventNotificationCenter
-        )
-    }
-    
     private func connectUser(isInitial: Bool = false) async throws {
         if !isInitial && connectTask != nil {
             log.debug("Waiting for already running connect task")
@@ -769,32 +761,30 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     }
 }
 
-extension StreamVideo: ConnectionStateDelegate {
-    
-    func webSocketClient(
-        _ client: WebSocketClient,
-        didUpdateConnectionState state: WebSocketConnectionState
+extension StreamVideo {
+
+    private func handleConnectionStateChange(
+        _ state: WebSocketConnectionState
     ) {
         self.state.connection = ConnectionStatus(webSocketConnectionState: state)
         switch state {
         case let .disconnected(source):
-            if let serverError = source.serverError {
-                if serverError.isInvalidTokenError {
-                    Task(disposableBag: disposableBag) { [weak self] in
-                        guard let self else {
-                            return
-                        }
-                        do {
-                            guard let apiTransport = apiTransport as? URLSessionTransport else { return }
-                            self.tokenSubject.send(try await apiTransport.refreshToken())
-                            log.debug("user token updated, will reconnect ws")
-                            webSocketClient?.connect()
-                        } catch {
-                            log.error("Error refreshing token, will disconnect ws connection", error: error)
-                        }
+            // On invalid-token disconnects, refresh the token and reconnect.
+            // Other reconnection cases are handled by the recovery handler owned
+            // by `CoordinatorWebSocket`.
+            if let serverError = source.serverError, serverError.isInvalidTokenError {
+                Task(disposableBag: disposableBag) { [weak self] in
+                    guard let self else {
+                        return
                     }
-                } else {
-                    connectionRecoveryHandler?.webSocketClient(client, didUpdateConnectionState: state)
+                    do {
+                        guard let apiTransport = apiTransport as? URLSessionTransport else { return }
+                        self.tokenSubject.send(try await apiTransport.refreshToken())
+                        log.debug("user token updated, will reconnect ws")
+                        webSocketClient?.connect()
+                    } catch {
+                        log.error("Error refreshing token, will disconnect ws connection", error: error)
+                    }
                 }
             }
             eventSubject.send(.internalEvent(WSDisconnected()))

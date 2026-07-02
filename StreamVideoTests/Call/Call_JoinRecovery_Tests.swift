@@ -388,7 +388,7 @@ final class Call_JoinRecovery_Tests: StreamVideoTestCase, @unchecked Sendable {
                     .adapter
             )
         )
-        let refreshedWebSocket = MockWebSocketClient(webSocketClientType: .sfu)
+        let refreshedWebSocket = MockSFUWebSocket()
         defaultAPI.stub(for: .joinCall, with: joinResponse)
         webRTCCoordinatorFactory
             .mockCoordinatorStack
@@ -401,8 +401,7 @@ final class Call_JoinRecovery_Tests: StreamVideoTestCase, @unchecked Sendable {
         webRTCCoordinatorFactory
             .mockCoordinatorStack
             .sfuStack
-            .webSocketFactory
-            .stub(for: .build, with: refreshedWebSocket)
+            .nextWebSocket = refreshedWebSocket
         webRTCCoordinatorFactory
             .mockCoordinatorStack
             .coordinator
@@ -448,8 +447,8 @@ final class Call_JoinRecovery_Tests: StreamVideoTestCase, @unchecked Sendable {
         webRTCCoordinatorFactory.mockCoordinatorStack.sfuStack.setConnectionState(
             to: .disconnected(source: .serverInitiated())
         )
-        refreshedWebSocket.simulate(state: .connected(healthCheckInfo: .init()))
-        refreshedWebSocket.eventSubject.send(.sfuEvent(.joinResponse(.init())))
+        refreshedWebSocket.simulate(state: .connected)
+        refreshedWebSocket.receive(.joinResponse(.init()))
 
         await fulfilmentInMainActor(timeout: defaultTimeout + 2) {
             defaultAPI.timesCalled(.joinCall) >= 2

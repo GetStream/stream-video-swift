@@ -72,10 +72,11 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     try Task.checkCancellation()
 
                     log.debug("Refreshing webSocket", subsystems: .webRTC)
+                    // `eventNotificationCenter` is no longer part of the config
+                    // (owned by `SFUWebSocket` post-StreamCore migration).
                     sfuAdapter.refresh(
                         webSocketConfiguration: .init(
-                            url: sfuAdapter.connectURL,
-                            eventNotificationCenter: .init()
+                            url: sfuAdapter.connectURL
                         )
                     )
 

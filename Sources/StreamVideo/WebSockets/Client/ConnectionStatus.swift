@@ -133,7 +133,23 @@ enum WebSocketConnectionState: Equatable {
                     return false
                 }
             }
-            
+
+            // Coordinator errors now arrive as `StreamAPIError` (not `ErrorPayload`)
+            // after the error-model migration, so gate on the API error too. Uses
+            // code ranges directly since StreamCore's computed helpers aren't
+            // visible here (this file doesn't import StreamCore).
+            if let apiError = clientError?.apiError {
+                if ClosedRange.tokenInvalidErrorCodes ~= apiError.code {
+                    // Don't reconnect on invalid token errors
+                    return false
+                }
+
+                if ClosedRange.clientErrorCodes ~= apiError.statusCode {
+                    // Don't reconnect on client side errors
+                    return false
+                }
+            }
+
             return true
         case .systemInitiated:
             return true
