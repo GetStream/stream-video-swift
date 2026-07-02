@@ -70,8 +70,10 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 )
             } else if let error = context.flowError {
                 // If we got here from an unrecoverable error, we won't attempt
-                // any reconnection and instead we will disconnect.
-                if let apiError = error as? APIError, apiError.unrecoverable == true {
+                // any reconnection and instead we will disconnect. Errors are now
+                // `StreamAPIError` (StreamCore's); `unrecoverable` is a stored
+                // property, so no StreamCore import is needed here.
+                if let apiError = error as? StreamAPIError, apiError.unrecoverable == true {
                     context.reconnectionStrategy = .disconnected
                 }
                 log.error(

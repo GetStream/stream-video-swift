@@ -7,11 +7,11 @@ import XCTest
 
 final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
     private lazy var mockService: MockSignalServer! = .init()
-    private lazy var mockWebSocket: MockWebSocketClient! = .init(webSocketClientType: .sfu)
+    private lazy var mockWebSocket: MockSFUWebSocket! = .init()
     private lazy var subject: SFUAdapter! = .init(
         signalService: mockService,
         webSocket: mockWebSocket,
-        webSocketFactory: MockWebSocketClientFactory()
+        webSocketFactory: { _, _ in MockSFUWebSocket() }
     )
 
     // MARK: - Lifecycle
@@ -25,14 +25,6 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
         mockService = nil
         mockWebSocket = nil
         super.tearDown()
-    }
-
-    // MARK: - init
-
-    func test_init_webSocketDelegateWasSetCorrectly() {
-        _ = subject
-
-        XCTAssertTrue(mockWebSocket.connectionStateDelegate === subject)
     }
 
     // MARK: - connect
@@ -56,7 +48,7 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
 
     func test_disconnect_givenConnectedState_thenCallsWebSocketDisconnect() async {
         _ = subject
-        mockWebSocket.simulate(state: .connected(healthCheckInfo: .init()))
+        mockWebSocket.simulate(state: .connected)
 
         // When
         await subject.disconnect()
@@ -67,7 +59,7 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
 
     func test_disconnect_eventWasPublished() async throws {
         _ = subject
-        mockWebSocket.simulate(state: .connected(healthCheckInfo: .init()))
+        mockWebSocket.simulate(state: .connected)
 
         await assertEventWasPublished(
             expected: SFUAdapter.DisconnectEvent(hostname: mockService.hostname),
@@ -83,9 +75,9 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
 
         // Then
         let input = try XCTUnwrap(
-            mockWebSocket.mockEngine.recordedInputPayload(
+            mockWebSocket.recordedInputPayload(
                 Stream_Video_Sfu_Event_HealthCheckRequest.self,
-                for: .sendMessage
+                for: .send
             )
         )
 
@@ -95,16 +87,16 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
     // MARK: - sendMessage
 
     func test_sendMessage_webSocketEngineWasCalled() throws {
-        mockWebSocket.simulate(state: .connected(healthCheckInfo: .init()))
+        mockWebSocket.simulate(state: .connected)
 
         // When
-        subject.send(message: Stream_Video_Sfu_Event_HealthCheckRequest())
+        subject.send(message: Stream_Video_Sfu_Event_SfuRequest())
 
         // Then
         let input = try XCTUnwrap(
-            mockWebSocket.mockEngine.recordedInputPayload(
-                Stream_Video_Sfu_Event_HealthCheckRequest.self,
-                for: .sendMessage
+            mockWebSocket.recordedInputPayload(
+                Stream_Video_Sfu_Event_SfuRequest.self,
+                for: .send
             )
         )
 
@@ -116,8 +108,7 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
     func test_refresh_currentWebSocketDisconnects() {
         subject.refresh(
             webSocketConfiguration: .init(
-                url: .init(string: "https://getstream.io")!,
-                eventNotificationCenter: .init()
+                url: .init(string: "https://getstream.io")!
             )
         )
 
@@ -125,21 +116,20 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
     }
 
     func test_refresh_oldWebSocketDisconnectsNoLongerReceivesCalls() throws {
-        mockWebSocket.simulate(state: .connected(healthCheckInfo: .init()))
+        mockWebSocket.simulate(state: .connected)
 
         subject.refresh(
             webSocketConfiguration: .init(
-                url: .init(string: "https://getstream.io")!,
-                eventNotificationCenter: .init()
+                url: .init(string: "https://getstream.io")!
             )
         )
 
         subject.sendHealthCheck()
 
         let input = try XCTUnwrap(
-            mockWebSocket.mockEngine.recordedInputPayload(
+            mockWebSocket.recordedInputPayload(
                 Stream_Video_Sfu_Event_HealthCheckRequest.self,
-                for: .sendMessage
+                for: .send
             )
         )
 
@@ -149,7 +139,7 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
     // MARK: - updateTrackMuteState
 
     func test_updateTrackMuteState_serviceWasCalledWithCorrectRequest() async throws {
-        mockWebSocket.simulate(state: .connected(healthCheckInfo: .init()))
+        mockWebSocket.simulate(state: .connected)
         let sessionID = String.unique
         
         try await subject.updateTrackMuteState(
@@ -169,7 +159,7 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
 
     func test_updateTrackMuteState_eventWasPublished() async throws {
         _ = subject
-        mockWebSocket.simulate(state: .connected(healthCheckInfo: .init()))
+        mockWebSocket.simulate(state: .connected)
         let sessionID = String.unique
         var payload = Stream_Video_Sfu_Signal_UpdateMuteStatesRequest()
         payload.sessionID = sessionID
@@ -196,7 +186,7 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
     // MARK: - sendStats
 
     func test_sendStats_withoutThermalState_serviceWasCalledWithCorrectRequest() async throws {
-        mockWebSocket.simulate(state: .connected(healthCheckInfo: .init()))
+        mockWebSocket.simulate(state: .connected)
         let sessionID = String.unique
         let unifiedSessionId = String.unique
 
@@ -216,7 +206,7 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
     }
 
     func test_sendStats_withThermalState_serviceWasCalledWithCorrectRequest() async throws {
-        mockWebSocket.simulate(state: .connected(healthCheckInfo: .init()))
+        mockWebSocket.simulate(state: .connected)
         let sessionID = String.unique
         let unifiedSessionId = String.unique
 
@@ -239,7 +229,7 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
     // MARK: - toggleNoiseCancellation
 
     func test_toggleNoiseCancellation_enabled_serviceWasCalledWithCorrectRequest() async throws {
-        mockWebSocket.simulate(state: .connected(healthCheckInfo: .init()))
+        mockWebSocket.simulate(state: .connected)
         let sessionID = String.unique
 
         // When
@@ -252,7 +242,7 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
 
     func test_toggleNoiseCancellation_enabled_eventWasPublished() async throws {
         _ = subject
-        mockWebSocket.simulate(state: .connected(healthCheckInfo: .init()))
+        mockWebSocket.simulate(state: .connected)
         let sessionID = String.unique
         var request = Stream_Video_Sfu_Signal_StartNoiseCancellationRequest()
         request.sessionID = sessionID
@@ -269,7 +259,7 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
     }
 
     func test_toggleNoiseCancellation_disabled_serviceWasCalledWithCorrectRequest() async throws {
-        mockWebSocket.simulate(state: .connected(healthCheckInfo: .init()))
+        mockWebSocket.simulate(state: .connected)
         let sessionID = String.unique
 
         // When
@@ -282,7 +272,7 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
 
     func test_toggleNoiseCancellation_disabled_eventWasPublished() async throws {
         _ = subject
-        mockWebSocket.simulate(state: .connected(healthCheckInfo: .init()))
+        mockWebSocket.simulate(state: .connected)
         let sessionID = String.unique
         var request = Stream_Video_Sfu_Signal_StopNoiseCancellationRequest()
         request.sessionID = sessionID
@@ -302,7 +292,7 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
 
     func test_setPublisher_serviceWasCalledWithCorrectRequest() async throws {
         _ = subject
-        mockWebSocket.simulate(state: .connected(healthCheckInfo: .init()))
+        mockWebSocket.simulate(state: .connected)
         let sessionDescription = String.unique
         let sessionID = String.unique
 
@@ -321,7 +311,7 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
 
     func test_setPublisher_eventWasPublished() async throws {
         _ = subject
-        mockWebSocket.simulate(state: .connected(healthCheckInfo: .init()))
+        mockWebSocket.simulate(state: .connected)
         let sessionID = String.unique
         let sessionDescription = String.unique
         var request = Stream_Video_Sfu_Signal_SetPublisherRequest()
@@ -347,7 +337,7 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
     // MARK: - updateSubscriptions
 
     func test_updateSubscriptions_serviceWasCalledWithCorrectRequest() async throws {
-        mockWebSocket.simulate(state: .connected(healthCheckInfo: .init()))
+        mockWebSocket.simulate(state: .connected)
         let sessionID = String.unique
 
         // When
@@ -363,7 +353,7 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
 
     func test_updateSubscriptions_eventWasPublished() async throws {
         _ = subject
-        mockWebSocket.simulate(state: .connected(healthCheckInfo: .init()))
+        mockWebSocket.simulate(state: .connected)
         let sessionID = String.unique
         var request = Stream_Video_Sfu_Signal_UpdateSubscriptionsRequest()
         request.sessionID = sessionID
@@ -404,7 +394,7 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
 
     func test_sendAnswer_eventWasPublished() async throws {
         _ = subject
-        mockWebSocket.simulate(state: .connected(healthCheckInfo: .init()))
+        mockWebSocket.simulate(state: .connected)
         let sessionDescription = String.unique
         let sessionID = String.unique
         var request = Stream_Video_Sfu_Signal_SendAnswerRequest()
@@ -449,7 +439,7 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
 
     func test_iCETrickle_eventWasPublished() async throws {
         _ = subject
-        mockWebSocket.simulate(state: .connected(healthCheckInfo: .init()))
+        mockWebSocket.simulate(state: .connected)
         let candidate = String.unique
         let sessionID = String.unique
         var request = Stream_Video_Sfu_Models_ICETrickle()
@@ -491,7 +481,7 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
 
     func test_restartICE_eventWasPublished() async throws {
         _ = subject
-        mockWebSocket.simulate(state: .connected(healthCheckInfo: .init()))
+        mockWebSocket.simulate(state: .connected)
         let sessionID = String.unique
         var request = Stream_Video_Sfu_Signal_ICERestartRequest()
         request.sessionID = sessionID
@@ -515,7 +505,7 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
 
     func test_sendJoinRequest_eventWasPublished() async throws {
         _ = subject
-        mockWebSocket.simulate(state: .connected(healthCheckInfo: .init()))
+        mockWebSocket.simulate(state: .connected)
         var payload = Stream_Video_Sfu_Event_JoinRequest()
         payload.sessionID = .unique
 
@@ -529,7 +519,7 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
 
     func test_sendLeaveRequest_eventWasPublished() async throws {
         _ = subject
-        mockWebSocket.simulate(state: .connected(healthCheckInfo: .init()))
+        mockWebSocket.simulate(state: .connected)
         var payload = Stream_Video_Sfu_Event_LeaveCallRequest()
         payload.sessionID = .unique
 
@@ -578,9 +568,9 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
             healthCheckCancellable.cancel()
         }
 
-        mockWebSocket.eventSubject.send(.sfuEvent(.subscriberOffer(offer)))
-        mockWebSocket.eventSubject.send(.sfuEvent(.iceTrickle(trickle)))
-        mockWebSocket.eventSubject.send(.sfuEvent(.healthCheckResponse(healthCheck)))
+        mockWebSocket.eventSubject.send(.subscriberOffer(offer))
+        mockWebSocket.eventSubject.send(.iceTrickle(trickle))
+        mockWebSocket.eventSubject.send(.healthCheckResponse(healthCheck))
 
         await wait(for: 0.1)
 
@@ -616,18 +606,20 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
         XCTAssertTrue(replayedHealthChecks.isEmpty)
     }
 
-    // MARK: - webSocketClient(_:didUpdateConnectionState:)
+    // MARK: - connectionState
 
-    func test_didUpdateConnectionState_connectionStateWasUpdated() {
-        [
-            WebSocketConnectionState.initialized,
+    func test_connectionState_mirrorsWebSocketConnectionState() {
+        let states: [SFUConnectionState] = [
+            .initialized,
             .disconnected(source: .systemInitiated),
             .connecting,
             .authenticating,
-            .connected(healthCheckInfo: .init()),
+            .connected,
             .disconnecting(source: .userInitiated)
-        ].forEach { state in
-            subject.webSocketClient(mockWebSocket, didUpdateConnectionState: state)
+        ]
+
+        states.forEach { state in
+            mockWebSocket.simulate(state: state)
 
             XCTAssertEqual(subject.connectionState, state)
         }

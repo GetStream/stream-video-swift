@@ -128,7 +128,7 @@ final class Retries_Tests: XCTestCase, @unchecked Sendable {
     func test_executeTask_clientError() async throws {
         // Given
         let httpClient = HTTPClient_Mock()
-        let apiError = APIError(
+        let apiError = StreamAPIError(
             code: 40,
             details: [],
             duration: "1.0",

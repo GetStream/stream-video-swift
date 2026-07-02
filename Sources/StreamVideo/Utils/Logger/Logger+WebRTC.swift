@@ -3,9 +3,26 @@
 //
 
 import Foundation
+import StreamCore
 import StreamWebRTC
 
-extension Logger {
+extension StreamCore.LogSubsystem {
+    /// The subsystem responsible for internal WebRTC logs.
+    ///
+    /// Declared here (not in StreamCore) since internal WebRTC logging is
+    /// video-specific. Uses a bit above StreamCore's range.
+    static let webRTCInternal = StreamCore.LogSubsystem(rawValue: 1 << 19)
+}
+
+extension StreamCore.LogConfig {
+    /// Toggles internal WebRTC logging on or off.
+    public static var webRTCLogsEnabled: Bool {
+        get { StreamCore.Logger.WebRTC.mode != .none }
+        set { StreamCore.Logger.WebRTC.mode = newValue ? .all : .none }
+    }
+}
+
+extension StreamCore.Logger {
 
     public enum WebRTC {
         public enum LogMode: Sendable { case none, validFilesOnly, all }
@@ -14,7 +31,12 @@ extension Logger {
             didSet { RTCLogger.default.didUpdate(mode: mode) }
         }
 
-        nonisolated(unsafe) static var severity: RTCLoggingSeverity = .init(LogConfig.level) {
+        // TODO: [StreamCore migration] Previously video's `LogConfig.level`
+        // `didSet` kept this WebRTC severity in sync. StreamCore's `LogConfig`
+        // (lock-backed) has no such hook, so severity is only seeded from the
+        // level at init and no longer auto-updates. Restore syncing if/when
+        // StreamCore exposes a level-change hook (or wire it explicitly).
+        nonisolated(unsafe) static var severity: RTCLoggingSeverity = .init(StreamCore.LogConfig.level) {
             didSet { RTCLogger.default.didUpdate(severity: severity) }
         }
 
@@ -30,7 +52,7 @@ extension Logger {
 
 extension RTCLoggingSeverity {
 
-    init(_ logLevel: LogLevel) {
+    init(_ logLevel: StreamCore.LogLevel) {
         switch logLevel {
         case .debug:
             self = .verbose
@@ -44,7 +66,7 @@ extension RTCLoggingSeverity {
     }
 }
 
-extension Logger.WebRTC {
+extension StreamCore.Logger.WebRTC {
     final class RTCLogger: @unchecked Sendable {
         static let `default` = RTCLogger()
 
@@ -92,18 +114,18 @@ extension Logger.WebRTC {
             switch severity {
             case .none, .verbose:
                 if isMessageFromValidFile(trimmedMessage) {
-                    log.debug(trimmedMessage, subsystems: .webRTCInternal)
+                    StreamCore.log.debug(trimmedMessage, subsystems: .webRTCInternal)
                 }
             case .info:
                 if isMessageFromValidFile(trimmedMessage) {
-                    log.info(trimmedMessage, subsystems: .webRTCInternal)
+                    StreamCore.log.info(trimmedMessage, subsystems: .webRTCInternal)
                 }
             case .warning:
-                log.warning(trimmedMessage, subsystems: .webRTCInternal)
+                StreamCore.log.warning(trimmedMessage, subsystems: .webRTCInternal)
             case .error:
-                log.error(trimmedMessage, subsystems: .webRTCInternal)
+                StreamCore.log.error(trimmedMessage, subsystems: .webRTCInternal)
             @unknown default:
-                log.debug(trimmedMessage, subsystems: .webRTCInternal)
+                StreamCore.log.debug(trimmedMessage, subsystems: .webRTCInternal)
             }
         }
 

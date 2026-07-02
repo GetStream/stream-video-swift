@@ -56,7 +56,7 @@ struct ClientEventFailure: Sendable, Equatable {
                     reason: urlError.localizedDescription
                 )
             }
-        } else if let apiError = error as? APIError {
+        } else if let apiError = error as? StreamAPIError {
             self.init(code: "\(apiError.code)", reason: apiError.message)
         } else {
             self.init(
