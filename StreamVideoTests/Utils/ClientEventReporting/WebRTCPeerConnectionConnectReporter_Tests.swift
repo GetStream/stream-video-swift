@@ -122,6 +122,21 @@ final class WebRTCPeerConnectionConnectReporter_Tests: XCTestCase, @unchecked Se
         XCTAssertEqual(completed?.failure?.code, ClientEventFailureCode.iceConnectivityFailed.rawValue)
     }
 
+    func test_connecting_keepsPendingAttemptICEStateCurrentForAbort() async {
+        makeSubject()
+
+        stateSubject.send(.connecting)
+        iceStateSubject.send(.checking)
+
+        await fulfillment { await self.mockReporter.updatedStages.isEmpty == false }
+        let updated = await mockReporter.updatedStages.last
+        let completed = await mockReporter.completedStages
+        // Still negotiating: no completion yet, but the pending attempt now
+        // carries an ICE state so an abort mid-connect reports it.
+        XCTAssertTrue(completed.isEmpty)
+        XCTAssertEqual(updated?.details.iceState, .notConnected)
+    }
+
     func test_jumpStraightToConnected_stillReportsInitiatedAndCompletion() async {
         makeSubject()
 

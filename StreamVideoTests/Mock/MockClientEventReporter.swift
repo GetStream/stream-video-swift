@@ -33,8 +33,14 @@ actor MockClientEventReporter: ClientEventReporting {
     private(set) var reportJoinInitiatedCallCount = 0
     private(set) var reportJoinInitiatedDetails: [ClientEventStageDetails] = []
     private(set) var reportedEvents: [ReportedEvent] = []
+    struct UpdatedStage: Sendable {
+        var attempt: ClientEventStageAttempt
+        var details: ClientEventStageDetails
+    }
+
     private(set) var begunStages: [BegunStage] = []
     private(set) var completedStages: [CompletedStage] = []
+    private(set) var updatedStages: [UpdatedStage] = []
     private(set) var abortedFailures: [ClientEventFailure] = []
 
     func reportJoinInitiated(details: ClientEventStageDetails) async {
@@ -91,6 +97,13 @@ actor MockClientEventReporter: ClientEventReporting {
                 failure: failure
             )
         )
+    }
+
+    func updateStage(
+        _ attempt: ClientEventStageAttempt,
+        details: ClientEventStageDetails
+    ) async {
+        updatedStages.append(.init(attempt: attempt, details: details))
     }
 
     func abortPendingStages(failure: ClientEventFailure) async {

@@ -48,6 +48,12 @@ actor NoOpClientEventReporter: ClientEventReporting {
         failure: ClientEventFailure?
     ) async {}
 
+    /// Drops pending-stage detail updates.
+    func updateStage(
+        _ attempt: ClientEventStageAttempt,
+        details: ClientEventStageDetails
+    ) async {}
+
     /// Drops pending-stage aborts.
     func abortPendingStages(failure: ClientEventFailure) async {}
 }
