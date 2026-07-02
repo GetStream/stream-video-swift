@@ -145,22 +145,25 @@ actor ClientEventReporter: ClientEventReporting {
         details: ClientEventStageDetails,
         failure: ClientEventFailure?
     ) async {
-        guard activeAttempts.removeValue(forKey: attempt.stageId) != nil else {
+        guard let stored = activeAttempts.removeValue(forKey: attempt.stageId) else {
             // The stage was already resolved (e.g. aborted on leave). Avoid
             // emitting a duplicate completion for the same `stage_id`.
             return
         }
-        let elapsed = Int(currentDate().timeIntervalSince(attempt.startedAt) * 1000)
+        // Build from the stored attempt so any details persisted via
+        // `updateStage(_:details:)` are honored on completion, not just on
+        // abort. Completion `details` still override them.
+        let elapsed = Int(currentDate().timeIntervalSince(stored.startedAt) * 1000)
         let event = makeEvent(
-            stage: attempt.stage,
+            stage: stored.stage,
             eventType: .completed,
-            stageId: attempt.stageId,
-            peerConnection: attempt.peerConnection,
-            joinAttemptId: attempt.joinAttemptId,
+            stageId: stored.stageId,
+            peerConnection: stored.peerConnection,
+            joinAttemptId: stored.joinAttemptId,
             outcome: outcome,
             elapsedTime: max(0, elapsed),
             retryCount: retryCount,
-            details: attempt.details.merging(details),
+            details: stored.details.merging(details),
             failure: outcome == .failure ? failure : nil
         )
         deliver(event)
