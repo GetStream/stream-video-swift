@@ -169,7 +169,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
             .assertInMainActor { $0.call.state.members.endIndex == 1 }
             .assertInMainActor { $0.call.state.members.first?.id == user1 }
             .performWithErrorExpectation { try await $0.call.addMembers(members: [.init(userId: user2)]) }
-            .tryMap { $0.value as? APIError }
+            .tryMap { $0.value as? StreamAPIError }
             .assert { $0.value.code == 4 }
             .assert { $0.value.message == "UpdateCallMembers failed with error: \"the provided users [\(user2)] don't exist\"" }
     }
@@ -198,7 +198,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         try await helpers
             .callFlow(id: callId, type: callType, userId: .unique)
             .performWithErrorExpectation { try await $0.call.get() }
-            .tryMap { $0.value as? APIError }
+            .tryMap { $0.value as? StreamAPIError }
             .assert { $0.value.code == 16 }
             .assert { $0.value.message == "GetCall failed with error: \"Can't find call with id \(cid)\"" }
     }
@@ -209,7 +209,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         try await helpers
             .callFlow(id: .unique, type: callType, userId: .unique)
             .performWithErrorExpectation { try await $0.call.get() }
-            .tryMap { $0.value as? APIError }
+            .tryMap { $0.value as? StreamAPIError }
             .assert { $0.value.code == 16 }
             .assert { $0.value.message.localizedStandardContains("\(callType): call type does not exist") }
     }
@@ -608,7 +608,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         try await helpers
             .callFlow(id: callId, type: .livestream, userId: participant, environment: "demo")
             .performWithErrorExpectation { try await $0.call.join() }
-            .tryMap { $0.value as? APIError }
+            .tryMap { $0.value as? StreamAPIError }
             .assert { $0.value.code == 17 }
             .assert {
                 $0.value
@@ -653,7 +653,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         try await helpers
             .callFlow(id: callId, type: .livestream, userId: participant, environment: "demo")
             .performWithErrorExpectation { try await $0.call.join() }
-            .tryMap { $0.value as? APIError }
+            .tryMap { $0.value as? StreamAPIError }
             .assert { $0.value.code == 17 }
             .assert {
                 $0.value

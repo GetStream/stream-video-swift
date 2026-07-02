@@ -199,7 +199,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
             XCTAssertEqual(
                 target.context.disconnectionSource,
                 .serverInitiated(
-                    error: .NetworkError(
+                    error: ClientError.NetworkError(
                         "Not available"
                     )
                 )
@@ -346,6 +346,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         var sfuError = Stream_Video_Sfu_Models_Error()
         sfuError.shouldRetry = true
         let clientError = ClientError(with: sfuError)
+        let expectedError = sfuError
 
         await assertTransitionAfterTrigger(
             expectedTarget: .disconnected,
@@ -365,7 +366,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
             }
             XCTAssertEqual(
                 target.context.disconnectionSource,
-                .serverInitiated(error: clientError)
+                .serverInitiated(error: expectedError)
             )
         }
     }
@@ -378,6 +379,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         var sfuError = Stream_Video_Sfu_Models_Error()
         sfuError.shouldRetry = false
         let clientError = ClientError(with: sfuError)
+        let expectedError = sfuError
 
         await assertTransitionAfterTrigger(
             expectedTarget: .disconnected,
@@ -392,7 +394,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
             XCTAssertEqual(target.context.reconnectionStrategy, .rejoin)
             XCTAssertEqual(
                 target.context.disconnectionSource,
-                .serverInitiated(error: clientError)
+                .serverInitiated(error: expectedError)
             )
         }
     }

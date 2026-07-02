@@ -145,7 +145,7 @@ final class WebRTCCoordinatorStateMachine_DisconnectedStageTests: XCTestCase, @u
 
     func test_transition_flowErrorIsUnrecoverable_reconnectionStrategyChangesToDisconnected() {
         subject.context.reconnectionStrategy = .rejoin
-        subject.context.flowError = APIError(
+        subject.context.flowError = StreamAPIError(
             code: 0,
             details: [],
             duration: "0",

@@ -83,11 +83,11 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
         _ = subject.transition(from: .fastReconnected(subject.context))
 
         await fulfillment("Join request was not sent before cancellation.") {
-            let webSocketEngine = self.mockCoordinatorStack.sfuStack.webSocket.mockEngine
+            let webSocketEngine = self.mockCoordinatorStack.sfuStack.webSocket
             guard
                 let requests = webSocketEngine.recordedInputPayload(
                     Stream_Video_Sfu_Event_SfuRequest.self,
-                    for: .sendMessage
+                    for: .send
                 )
             else {
                 return false
@@ -161,11 +161,11 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             expectedTarget: .disconnected,
             subject: subject
         ) { [mockCoordinatorStack] _ in
-            let webSocketEngine = try XCTUnwrap(mockCoordinatorStack?.sfuStack.webSocket.mockEngine)
+            let webSocketEngine = try XCTUnwrap(mockCoordinatorStack?.sfuStack.webSocket)
             let request = try XCTUnwrap(
                 webSocketEngine.recordedInputPayload(
                     Stream_Video_Sfu_Event_SfuRequest.self,
-                    for: .sendMessage
+                    for: .send
                 )?.first
             )
             let sessionID = await mockCoordinatorStack?.coordinator.stateAdapter.sessionID
@@ -289,11 +289,11 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             expectedTarget: .disconnected,
             subject: subject
         ) { [mockCoordinatorStack] _ in
-            let webSocketEngine = try XCTUnwrap(mockCoordinatorStack?.sfuStack.webSocket.mockEngine)
+            let webSocketEngine = try XCTUnwrap(mockCoordinatorStack?.sfuStack.webSocket)
             let requests = try XCTUnwrap(
                 webSocketEngine.recordedInputPayload(
                     Stream_Video_Sfu_Event_HealthCheckRequest.self,
-                    for: .sendMessage
+                    for: .send
                 )
             )
             XCTAssertEqual(requests.count, 1)
@@ -706,11 +706,11 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             expectedTarget: .disconnected,
             subject: subject
         ) { [mockCoordinatorStack] _ in
-            let webSocketEngine = try XCTUnwrap(mockCoordinatorStack?.sfuStack.webSocket.mockEngine)
+            let webSocketEngine = try XCTUnwrap(mockCoordinatorStack?.sfuStack.webSocket)
             let request = try XCTUnwrap(
                 webSocketEngine.recordedInputPayload(
                     Stream_Video_Sfu_Event_SfuRequest.self,
-                    for: .sendMessage
+                    for: .send
                 )?.first
             )
             let sessionID = await mockCoordinatorStack?.coordinator.stateAdapter.sessionID
@@ -880,11 +880,11 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             expectedTarget: .disconnected,
             subject: subject
         ) { [mockCoordinatorStack] _ in
-            let webSocketEngine = try XCTUnwrap(mockCoordinatorStack?.sfuStack.webSocket.mockEngine)
+            let webSocketEngine = try XCTUnwrap(mockCoordinatorStack?.sfuStack.webSocket)
             let requests = try XCTUnwrap(
                 webSocketEngine.recordedInputPayload(
                     Stream_Video_Sfu_Event_HealthCheckRequest.self,
-                    for: .sendMessage
+                    for: .send
                 )
             )
             XCTAssertEqual(requests.count, 1)
@@ -1150,11 +1150,11 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             expectedTarget: .disconnected,
             subject: subject
         ) { [mockCoordinatorStack] _ in
-            let webSocketEngine = try XCTUnwrap(mockCoordinatorStack?.sfuStack.webSocket.mockEngine)
+            let webSocketEngine = try XCTUnwrap(mockCoordinatorStack?.sfuStack.webSocket)
             let request = try XCTUnwrap(
                 webSocketEngine.recordedInputPayload(
                     Stream_Video_Sfu_Event_SfuRequest.self,
-                    for: .sendMessage
+                    for: .send
                 )?.first
             )
             let sessionID = await mockCoordinatorStack?.coordinator.stateAdapter.sessionID
@@ -1351,11 +1351,11 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             expectedTarget: .disconnected,
             subject: subject
         ) { [mockCoordinatorStack] _ in
-            let webSocketEngine = try XCTUnwrap(mockCoordinatorStack?.sfuStack.webSocket.mockEngine)
+            let webSocketEngine = try XCTUnwrap(mockCoordinatorStack?.sfuStack.webSocket)
             let request = try XCTUnwrap(
                 webSocketEngine.recordedInputPayload(
                     Stream_Video_Sfu_Event_SfuRequest.self,
-                    for: .sendMessage
+                    for: .send
                 )?.first
             )
             let sessionID = await mockCoordinatorStack?.coordinator.stateAdapter.sessionID
@@ -1527,11 +1527,11 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             expectedTarget: .disconnected,
             subject: subject
         ) { [mockCoordinatorStack] _ in
-            let webSocketEngine = try XCTUnwrap(mockCoordinatorStack?.sfuStack.webSocket.mockEngine)
+            let webSocketEngine = try XCTUnwrap(mockCoordinatorStack?.sfuStack.webSocket)
             let requests = try XCTUnwrap(
                 webSocketEngine.recordedInputPayload(
                     Stream_Video_Sfu_Event_HealthCheckRequest.self,
-                    for: .sendMessage
+                    for: .send
                 )
             )
             XCTAssertEqual(requests.count, 1)

@@ -12,11 +12,11 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
     private nonisolated(unsafe) static var videoConfig: VideoConfig! = .dummy()
 
     private lazy var mockService: MockSignalServer! = .init()
-    private lazy var mockWebSocket: MockWebSocketClient! = .init(webSocketClientType: .sfu)
+    private lazy var mockWebSocket: MockSFUWebSocket! = .init()
     private lazy var sfuAdapter: SFUAdapter! = .init(
         signalService: mockService,
         webSocket: mockWebSocket,
-        webSocketFactory: MockWebSocketClientFactory()
+        webSocketFactory: { _, _ in MockSFUWebSocket() }
     )
     private lazy var stageSubject: CurrentValueSubject<
         WebRTCCoordinator.StateMachine.Stage.ID,
@@ -907,7 +907,9 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
         /// the stateAdapter spins up another task to complete the update.
         await withTaskGroup(of: Void.self) { group in
             group.addTask {
-                self.mockWebSocket.eventSubject.send(wrappedEvent)
+                if case let .sfuEvent(payload) = wrappedEvent {
+                    self.mockWebSocket.receive(payload)
+                }
                 await self.fulfillment(of: [eventExpectation], timeout: defaultTimeout)
             }
             group.addTask {

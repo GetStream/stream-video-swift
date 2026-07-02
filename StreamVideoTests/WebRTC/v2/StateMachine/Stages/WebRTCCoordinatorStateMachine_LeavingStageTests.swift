@@ -91,7 +91,7 @@ final class WebRTCCoordinatorStateMachine_LeavingStageTests: XCTestCase, @unchec
         await wait(for: 0.5)
 
         let webSocket = mockCoordinatorStack.sfuStack.webSocket
-        XCTAssertEqual(webSocket.mockEngine.timesCalled(.sendMessage), 0)
+        XCTAssertEqual(webSocket.timesCalled(.send), 0)
         XCTAssertEqual(webSocket.timesCalled(.disconnectAsync), 0)
     }
 
@@ -117,19 +117,17 @@ final class WebRTCCoordinatorStateMachine_LeavingStageTests: XCTestCase, @unchec
         let webSocket = mockCoordinatorStack.sfuStack.webSocket
         XCTAssertEqual(
             webSocket
-                .mockEngine
                 .recordedInputPayload(
                     Stream_Video_Sfu_Event_SfuRequest.self,
-                    for: .sendMessage
+                    for: .send
                 )?.first?.leaveCallRequest.sessionID,
             sessionId
         )
         XCTAssertEqual(
             webSocket
-                .mockEngine
                 .recordedInputPayload(
                     Stream_Video_Sfu_Event_SfuRequest.self,
-                    for: .sendMessage
+                    for: .send
                 )?.first?.leaveCallRequest.reason,
             ""
         )
@@ -160,19 +158,17 @@ final class WebRTCCoordinatorStateMachine_LeavingStageTests: XCTestCase, @unchec
         let webSocket = mockCoordinatorStack.sfuStack.webSocket
         XCTAssertEqual(
             webSocket
-                .mockEngine
                 .recordedInputPayload(
                     Stream_Video_Sfu_Event_SfuRequest.self,
-                    for: .sendMessage
+                    for: .send
                 )?.first?.leaveCallRequest.sessionID,
             sessionId
         )
         XCTAssertEqual(
             webSocket
-                .mockEngine
                 .recordedInputPayload(
                     Stream_Video_Sfu_Event_SfuRequest.self,
-                    for: .sendMessage
+                    for: .send
                 )?.first?.leaveCallRequest.reason,
             reason
         )
