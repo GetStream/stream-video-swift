@@ -356,6 +356,29 @@ final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(audioEngineNodeAdapter.recordedInputPayload(Int.self, for: .uninstall)?.first, 0)
     }
 
+    func test_didCreateEngine_whenReplacingEngine_retainsPreviousEngineUntilRelease() {
+        makeSubject()
+        var firstEngine: AVAudioEngine? = AVAudioEngine()
+        var secondEngine: AVAudioEngine? = AVAudioEngine()
+        weak var weakFirstEngine = firstEngine
+        weak var weakSecondEngine = secondEngine
+
+        _ = subject.audioDeviceModule(.init(), didCreateEngine: firstEngine!)
+        _ = subject.audioDeviceModule(.init(), didCreateEngine: secondEngine!)
+        firstEngine = nil
+        secondEngine = nil
+
+        XCTAssertNotNil(weakFirstEngine)
+        XCTAssertNotNil(weakSecondEngine)
+
+        _ = subject.audioDeviceModule(.init(), willReleaseEngine: weakFirstEngine!)
+        XCTAssertNil(weakFirstEngine)
+        XCTAssertNotNil(weakSecondEngine)
+
+        _ = subject.audioDeviceModule(.init(), willReleaseEngine: weakSecondEngine!)
+        XCTAssertNil(weakSecondEngine)
+    }
+
     func test_configureInputFromSource_installsTap() {
         makeSubject()
         let engine = AVAudioEngine()
