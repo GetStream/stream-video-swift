@@ -45,13 +45,13 @@ open class CallViewController: UIViewController {
     }
     
     open func makeVideoView<Factory: ViewFactory>(with viewFactory: Factory) -> UIView {
-        if #available(iOS 14.0, *) {
-            let videoView = CallContainer(viewFactory: viewFactory, viewModel: viewModel)
-            return CallViewContainer(view: videoView, frame: view.frame)
-        } else {
-            let videoView = CallContainer_iOS13(viewFactory: viewFactory, viewModel: viewModel)
-            return CallViewContainer(view: videoView, frame: view.frame)
-        }
+        return CallViewContainer(
+            view: CallContainer(
+                viewFactory: viewFactory,
+                viewModel: viewModel
+            ),
+            frame: view.frame
+        )
     }
     
     public func startCall(
@@ -95,24 +95,12 @@ class PassthroughView: UIView {
 
 final class CallViewContainer: UIView {
     
-    @available(iOS 14.0, *)
     init<Factory: ViewFactory>(view: CallContainer<Factory>, frame: CGRect) {
         let uiView = UIHostingController(rootView: view).view!
         uiView.backgroundColor = .clear
         
         super.init(frame: .zero)
 
-        uiView.translatesAutoresizingMaskIntoConstraints = false
-        embed(uiView)
-    }
-    
-    @available(iOS, introduced: 13, obsoleted: 14)
-    init<Factory: ViewFactory>(view: CallContainer_iOS13<Factory>, frame: CGRect) {
-        let uiView = UIHostingController(rootView: view).view!
-        uiView.backgroundColor = .clear
-        
-        super.init(frame: .zero)
-        
         uiView.translatesAutoresizingMaskIntoConstraints = false
         embed(uiView)
     }
