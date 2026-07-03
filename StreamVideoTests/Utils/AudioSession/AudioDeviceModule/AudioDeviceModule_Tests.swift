@@ -254,6 +254,7 @@ final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
     func test_engineMutations_fromConcurrentQueues_areSerialized() {
         makeSubject()
         source.stub(for: \.isRecordingInitialized, with: false)
+        let overlapDetectionWindow: TimeInterval = 1
 
         let op1Entered = expectation(description: "setRecording entered the ADM")
         let op1Release = DispatchSemaphore(value: 0)
@@ -296,7 +297,7 @@ final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
             self.subject.refreshStereoPlayoutState()
             op2Finished.fulfill()
         }
-        wait(for: [op2OverlappedOp1], timeout: 1)
+        wait(for: [op2OverlappedOp1], timeout: overlapDetectionWindow)
 
         op1Release.signal()
         wait(for: [op1Finished, op2Finished], timeout: defaultTimeout)
@@ -360,23 +361,23 @@ final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
         makeSubject()
         var firstEngine: AVAudioEngine? = AVAudioEngine()
         var secondEngine: AVAudioEngine? = AVAudioEngine()
-        weak var weakFirstEngine = firstEngine
-        weak var weakSecondEngine = secondEngine
+        let weakFirstEngine = WeakEngineBox(firstEngine)
+        let weakSecondEngine = WeakEngineBox(secondEngine)
 
         _ = subject.audioDeviceModule(.init(), didCreateEngine: firstEngine!)
         _ = subject.audioDeviceModule(.init(), didCreateEngine: secondEngine!)
         firstEngine = nil
         secondEngine = nil
 
-        XCTAssertNotNil(weakFirstEngine)
-        XCTAssertNotNil(weakSecondEngine)
+        XCTAssertNotNil(weakFirstEngine.value)
+        XCTAssertNotNil(weakSecondEngine.value)
 
-        _ = subject.audioDeviceModule(.init(), willReleaseEngine: weakFirstEngine!)
-        XCTAssertNil(weakFirstEngine)
-        XCTAssertNotNil(weakSecondEngine)
+        _ = subject.audioDeviceModule(.init(), willReleaseEngine: weakFirstEngine.value!)
+        XCTAssertNil(weakFirstEngine.value)
+        XCTAssertNotNil(weakSecondEngine.value)
 
-        _ = subject.audioDeviceModule(.init(), willReleaseEngine: weakSecondEngine!)
-        XCTAssertNil(weakSecondEngine)
+        _ = subject.audioDeviceModule(.init(), willReleaseEngine: weakSecondEngine.value!)
+        XCTAssertNil(weakSecondEngine.value)
     }
 
     func test_configureInputFromSource_installsTap() {
@@ -550,5 +551,13 @@ final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
         operation(.init())
         await safeFulfillment(of: expectations, file: file, line: line)
         cancellables.removeAll()
+    }
+}
+
+private struct WeakEngineBox {
+    weak var value: AVAudioEngine?
+
+    init(_ value: AVAudioEngine?) {
+        self.value = value
     }
 }
