@@ -186,14 +186,12 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
     /// Public stream of `Event` values describing engine transitions.
     let publisher: AnyPublisher<Event, Never>
 
-    /// Strong reference to the latest engine so we can introspect it if needed.
-    private var engine: AVAudioEngine?
     /// Retains engines by identity until WebRTC explicitly releases them.
     ///
     /// WebRTC can create a replacement engine before the previous engine has
-    /// fully torn down. Replacing ``engine`` directly would release the old
-    /// graph during that overlap, which can race `AURemoteIO` deallocation.
-    private var retainedEngines: [ObjectIdentifier: AVAudioEngine] = [:]
+    /// fully torn down. Releasing the previous engine during that overlap can
+    /// race `AURemoteIO` deallocation.
+    @Atomic private var retainedEngines: [ObjectIdentifier: AVAudioEngine] = [:]
     @Atomic private var engineInputContext: AVAudioEngine.InputContext? {
         didSet { audioBufferRenderer.configure(with: engineInputContext) }
     }
@@ -437,9 +435,11 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         _ audioDeviceModule: RTCAudioDeviceModule,
         didCreateEngine engine: AVAudioEngine
     ) -> Int {
-        engineQueue.sync {
-            retainedEngines[ObjectIdentifier(engine)] = engine
-            self.engine = engine
+        let identifier = ObjectIdentifier(engine)
+        _retainedEngines.mutate {
+            var retainedEngines = $0
+            retainedEngines[identifier] = engine
+            return retainedEngines
         }
         subject.send(.didCreateAudioEngine(engine))
         return Constant.successResult
@@ -534,11 +534,11 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         _ audioDeviceModule: RTCAudioDeviceModule,
         willReleaseEngine engine: AVAudioEngine
     ) -> Int {
-        engineQueue.sync {
-            retainedEngines[ObjectIdentifier(engine)] = nil
-            if self.engine === engine {
-                self.engine = retainedEngines.values.first
-            }
+        let identifier = ObjectIdentifier(engine)
+        _retainedEngines.mutate {
+            var retainedEngines = $0
+            retainedEngines[identifier] = nil
+            return retainedEngines
         }
         subject.send(.willReleaseAudioEngine(engine))
         audioLevelsAdapter.uninstall(on: 0)
