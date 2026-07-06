@@ -90,6 +90,12 @@ final class MockRTCAudioDeviceModule: RTCAudioDeviceModuleControlling, Mockable,
     @Atomic var stubbedFunctionInput: [FunctionKey: [MockFunctionInputKey]] =
         MockFunctionKey.allCases.reduce(into: [:]) { $0[$1] = [] }
 
+    /// Invoked at the start of every mocked function, on the caller's thread.
+    ///
+    /// Lets concurrency tests gate a call in-flight (e.g. block inside one
+    /// operation while another is attempted from a different thread).
+    var onInvoke: ((MockFunctionKey) -> Void)?
+
     func stub<T>(for keyPath: KeyPath<MockRTCAudioDeviceModule, T>, with value: T) {
         stubbedProperty[propertyKey(for: keyPath)] = value
     }
@@ -223,18 +229,21 @@ final class MockRTCAudioDeviceModule: RTCAudioDeviceModuleControlling, Mockable,
     }
 
     func initAndStartRecording() -> Int {
+        onInvoke?(.initAndStartRecording)
         stubbedFunctionInput[.initAndStartRecording]?
             .append(.initAndStartRecording)
         return stubbedFunction[.initAndStartRecording] as? Int ?? 0
     }
 
     func setMicrophoneMuted(_ isMuted: Bool) -> Int {
+        onInvoke?(.setMicrophoneMuted)
         stubbedFunctionInput[.setMicrophoneMuted]?
             .append(.setMicrophoneMuted(isMuted))
         return stubbedFunction[.setMicrophoneMuted] as! Int
     }
 
     func stopRecording() -> Int {
+        onInvoke?(.stopRecording)
         stubbedFunctionInput[.stopRecording]?
             .append(.stopRecording)
         return stubbedFunction[.stopRecording] as? Int ?? 0
@@ -247,47 +256,55 @@ final class MockRTCAudioDeviceModule: RTCAudioDeviceModuleControlling, Mockable,
     }
 
     func reset() -> Int {
+        onInvoke?(.reset)
         stubbedFunctionInput[.reset]?
             .append(.reset)
         return stubbedFunction[.reset] as! Int
     }
 
     func initAndStartPlayout() -> Int {
+        onInvoke?(.initAndStartPlayout)
         stubbedFunctionInput[.initAndStartPlayout]?
             .append(.initAndStartPlayout)
         return stubbedFunction[.initAndStartPlayout] as! Int
     }
 
     func startPlayout() -> Int {
+        onInvoke?(.startPlayout)
         stubbedFunctionInput[.startPlayout]?
             .append(.startPlayout)
         return stubbedFunction[.startPlayout] as! Int
     }
 
     func stopPlayout() -> Int {
+        onInvoke?(.stopPlayout)
         stubbedFunctionInput[.stopPlayout]?
             .append(.stopPlayout)
         return stubbedFunction[.stopPlayout] as! Int
     }
 
     func startRecording() -> Int {
+        onInvoke?(.startRecording)
         stubbedFunctionInput[.startRecording]?
             .append(.startRecording)
         return stubbedFunction[.startRecording] as! Int
     }
 
     func refreshStereoPlayoutState() {
+        onInvoke?(.refreshStereoPlayoutState)
         stubbedFunctionInput[.refreshStereoPlayoutState]?
             .append(.refreshStereoPlayoutState)
     }
 
     func setMuteMode(_ mode: RTCAudioEngineMuteMode) -> Int {
+        onInvoke?(.setMuteMode)
         stubbedFunctionInput[.setMuteMode]?
             .append(.setMuteMode(mode))
         return stubbedFunction[.setMuteMode] as! Int
     }
 
     func setRecordingAlwaysPreparedMode(_ alwaysPreparedRecording: Bool) -> Int {
+        onInvoke?(.setRecordingAlwaysPreparedMode)
         stubbedFunctionInput[.setRecordingAlwaysPreparedMode]?
             .append(.setRecordingAlwaysPreparedMode(alwaysPreparedRecording))
         stub(for: \.isRecordingAlwaysPreparedMode, with: alwaysPreparedRecording)

@@ -244,6 +244,65 @@ final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(source.timesCalled(.reset), 1)
     }
 
+    // MARK: - Concurrent engine access
+
+    /// The `AVAudioEngine` graph behind the ADM is not thread-safe. Store
+    /// middleware, `StereoPlayoutEffect` (its own queue) and the stats collector
+    /// each drive the ADM from independent queues, so two engine mutations must
+    /// never overlap. Overlap is what makes WebRTC's `setVoiceProcessingEnabled`
+    /// graph connect throw and abort the app (regression seen since 1.48.0).
+    func test_engineMutations_fromConcurrentQueues_areSerialized() {
+        makeSubject()
+        source.stub(for: \.isRecordingInitialized, with: false)
+        let overlapDetectionWindow: TimeInterval = 1
+
+        let op1Entered = expectation(description: "setRecording entered the ADM")
+        let op1Release = DispatchSemaphore(value: 0)
+        let op1Finished = expectation(description: "setRecording finished")
+        let op2Finished = expectation(description: "refreshStereoPlayoutState finished")
+
+        let op2OverlappedOp1 = expectation(
+            description: "refreshStereoPlayoutState ran while setRecording was in-flight"
+        )
+        op2OverlappedOp1.isInverted = true
+
+        let op1InFlight = Atomic<Bool>(wrappedValue: false)
+
+        source.onInvoke = { key in
+            switch key {
+            case .initAndStartRecording:
+                op1InFlight.mutate { _ in true }
+                op1Entered.fulfill()
+                op1Release.wait()
+                op1InFlight.mutate { _ in false }
+            case .refreshStereoPlayoutState:
+                if op1InFlight.wrappedValue {
+                    op2OverlappedOp1.fulfill()
+                }
+            default:
+                break
+            }
+        }
+
+        // Dedicated queues (default QoS) keep both operations off the shared
+        // global pool and avoid priority-inversion noise from the gating
+        // semaphore.
+        DispatchQueue(label: "test.op1").async {
+            try? self.subject.setRecording(true)
+            op1Finished.fulfill()
+        }
+        wait(for: [op1Entered], timeout: defaultTimeout)
+
+        DispatchQueue(label: "test.op2").async {
+            self.subject.refreshStereoPlayoutState()
+            op2Finished.fulfill()
+        }
+        wait(for: [op2OverlappedOp1], timeout: overlapDetectionWindow)
+
+        op1Release.signal()
+        wait(for: [op1Finished, op2Finished], timeout: defaultTimeout)
+    }
+
     // MARK: - Delegate callbacks
 
     func test_didReceiveSpeechActivityEvent_started_emitsEvent() async {
@@ -296,6 +355,29 @@ final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
 
         XCTAssertEqual(audioEngineNodeAdapter.timesCalled(.uninstall), 1)
         XCTAssertEqual(audioEngineNodeAdapter.recordedInputPayload(Int.self, for: .uninstall)?.first, 0)
+    }
+
+    func test_didCreateEngine_whenReplacingEngine_retainsPreviousEngineUntilRelease() {
+        makeSubject()
+        var firstEngine: AVAudioEngine? = AVAudioEngine()
+        var secondEngine: AVAudioEngine? = AVAudioEngine()
+        let weakFirstEngine = WeakEngineBox(firstEngine)
+        let weakSecondEngine = WeakEngineBox(secondEngine)
+
+        _ = subject.audioDeviceModule(.init(), didCreateEngine: firstEngine!)
+        _ = subject.audioDeviceModule(.init(), didCreateEngine: secondEngine!)
+        firstEngine = nil
+        secondEngine = nil
+
+        XCTAssertNotNil(weakFirstEngine.value)
+        XCTAssertNotNil(weakSecondEngine.value)
+
+        _ = subject.audioDeviceModule(.init(), willReleaseEngine: weakFirstEngine.value!)
+        XCTAssertNil(weakFirstEngine.value)
+        XCTAssertNotNil(weakSecondEngine.value)
+
+        _ = subject.audioDeviceModule(.init(), willReleaseEngine: weakSecondEngine.value!)
+        XCTAssertNil(weakSecondEngine.value)
     }
 
     func test_configureInputFromSource_installsTap() {
@@ -469,5 +551,13 @@ final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
         operation(.init())
         await safeFulfillment(of: expectations, file: file, line: line)
         cancellables.removeAll()
+    }
+}
+
+private struct WeakEngineBox {
+    weak var value: AVAudioEngine?
+
+    init(_ value: AVAudioEngine?) {
+        self.value = value
     }
 }
