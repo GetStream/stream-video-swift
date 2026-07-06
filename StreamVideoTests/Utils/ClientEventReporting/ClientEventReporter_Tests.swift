@@ -132,6 +132,22 @@ final class ClientEventReporter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(completed?.callSessionId, "call-session-id")
     }
 
+    func test_completeStage_afterUpdateStage_includesPersistedDetails() async {
+        await subject.reportJoinInitiated()
+        let attempt = await subject.beginStage(
+            .peerConnectionConnect,
+            peerConnection: .publish,
+            details: .init(sfuId: "sfu-1", wasPreviouslyConnected: false)
+        )
+        // Persist a field the completion does not resend; it must survive.
+        await subject.updateStage(attempt, details: .init(iceState: .notConnected))
+        await subject.completeStage(attempt, outcome: .success)
+
+        await waitForEventCount(3)
+        let completed = event(stage: "PeerConnectionConnect", type: "completed")
+        XCTAssertEqual(completed?.iceState, "NOT_CONNECTED")
+    }
+
     func test_beginStage_withJoinReason_includesJoinReason() async {
         await subject.reportJoinInitiated()
 

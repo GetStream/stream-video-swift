@@ -154,6 +154,55 @@ final class RTCAudioStore_InterruptionsEffectTests: XCTestCase, @unchecked Senda
         }
     }
 
+    func test_didEndInterruption_shouldResumeTrue_recordingAndMutedSpeechDetection_togglesPersistentModeAroundRestart() {
+        let dispatcherExpectation = expectation(description: "Dispatcher called")
+        dispatcherExpectation.assertForOverFulfill = false
+
+        subject.dispatcher = .init { [weak self] actions, _, _, _ in
+            self?.dispatched.append(actions)
+            dispatcherExpectation.fulfill()
+        }
+
+        let module = AudioDeviceModule(MockRTCAudioDeviceModule())
+        subject.stateProvider = { [weak self] in
+            self?.makeState(
+                isInterrupted: true,
+                isRecording: true,
+                isMicrophoneMuted: true,
+                isMutedSpeechDetectionEnabled: true,
+                audioDeviceModule: module
+            )
+        }
+
+        publisher.audioSessionDidEndInterruption(session, shouldResumeSession: true)
+
+        wait(for: [dispatcherExpectation], timeout: 1)
+
+        guard let actions = dispatched.first else {
+            return XCTFail("Expected dispatched actions.")
+        }
+
+        XCTAssertEqual(actions.count, 6)
+        guard case .setInterrupted(false) = actions[0].wrappedValue else {
+            return XCTFail("Expected action[0] setInterrupted(false).")
+        }
+        guard case .setMutedSpeechDetectionEnabled(false) = actions[1].wrappedValue else {
+            return XCTFail("Expected action[1] setMutedSpeechDetectionEnabled(false).")
+        }
+        guard case .setRecording(false) = actions[2].wrappedValue else {
+            return XCTFail("Expected action[2] setRecording(false).")
+        }
+        guard case .setRecording(true) = actions[3].wrappedValue else {
+            return XCTFail("Expected action[3] setRecording(true).")
+        }
+        guard case .setMutedSpeechDetectionEnabled(true) = actions[4].wrappedValue else {
+            return XCTFail("Expected action[4] setMutedSpeechDetectionEnabled(true).")
+        }
+        guard case .setMicrophoneMuted(true) = actions[5].wrappedValue else {
+            return XCTFail("Expected action[5] setMicrophoneMuted(true).")
+        }
+    }
+
     // MARK: - Helpers
 
     private func makeState(
@@ -161,6 +210,7 @@ final class RTCAudioStore_InterruptionsEffectTests: XCTestCase, @unchecked Senda
         isInterrupted: Bool = false,
         isRecording: Bool = false,
         isMicrophoneMuted: Bool = false,
+        isMutedSpeechDetectionEnabled: Bool = false,
         hasRecordingPermission: Bool = false,
         activeSessionIdentifier: String = "",
         audioDeviceModule: AudioDeviceModule? = nil,
@@ -182,7 +232,7 @@ final class RTCAudioStore_InterruptionsEffectTests: XCTestCase, @unchecked Senda
             isInterrupted: isInterrupted,
             isRecording: isRecording,
             isMicrophoneMuted: isMicrophoneMuted,
-            isMutedSpeechDetectionEnabled: false,
+            isMutedSpeechDetectionEnabled: isMutedSpeechDetectionEnabled,
             hasRecordingPermission: hasRecordingPermission,
             activeSessionIdentifier: activeSessionIdentifier,
             audioDeviceModule: audioDeviceModule,
