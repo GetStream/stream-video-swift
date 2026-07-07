@@ -5,6 +5,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 # Upcoming
 
 ### 🐞 Fixed
+- Fixed a crash that could occur when starting a new ringing call replaced a previous one that was still ringing. [#1184](https://github.com/GetStream/stream-video-swift/pull/1184)
 - Fixed an audio crash that could occur when the audio device module was updated from multiple threads at the same time. [#1179](https://github.com/GetStream/stream-video-swift/pull/1179)
 - Local video could fail to start when joining a call if the camera capture session stopped unexpectedly (e.g. after a capture-server connection loss), because the capturer did not restart it. [#1175](https://github.com/GetStream/stream-video-swift/pull/1175)
 - The microphone now recovers after an audio-session interruption ends while the app is backgrounded, instead of staying silent (recording but capturing nothing) until you leave and rejoin the call. [#1174](https://github.com/GetStream/stream-video-swift/pull/1174)
