@@ -4,6 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### 🔄 Changed
+
+# [1.49.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.49.0)
+_July 07, 2026_
+
 ### 🐞 Fixed
 - Fixed a crash that could occur when starting a new ringing call replaced a previous one that was still ringing. [#1184](https://github.com/GetStream/stream-video-swift/pull/1184)
 - Fixed an audio crash that could occur when the audio device module was updated from multiple threads at the same time. [#1179](https://github.com/GetStream/stream-video-swift/pull/1179)
