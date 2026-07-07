@@ -210,6 +210,48 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
         }
     }
 
+    func test_streamVideo_ringingCallReplacement_releasesPreviousCallRetainedOnlyByRingingCall() async throws {
+        // Regression for IOS-1873: replacing `state.ringingCall` while it
+        // held the previous call's last strong reference deallocated that
+        // call inside the PublishedSubject lock. The deallocation cancelled
+        // the call's OutgoingRingingController subscription to $ringingCall,
+        // re-acquiring the same non-recursive lock and crashing.
+        let previousCallId = String(String.unique.prefix(10))
+        let previousCallCid = callCid(from: previousCallId, callType: callType)
+        let getCallResponse = GetCallResponse(
+            call: MockResponseBuilder().makeCallResponse(cid: previousCallCid),
+            duration: "1",
+            members: [],
+            ownCapabilities: []
+        )
+        httpClient.dataResponses = [try JSONEncoder.default.encode(getCallResponse)]
+
+        nonisolated(unsafe) weak var previousCall: Call?
+        do {
+            let call = streamVideo.call(callType: callType, callId: previousCallId)
+            previousCall = call
+            // ring() configures the call's OutgoingRingingController and
+            // sets it as `state.ringingCall`.
+            try await call.ring()
+            await fulfillment { [streamVideo] in
+                streamVideo?.state.ringingCall?.cId == previousCallCid
+            }
+            // Drop the cache reference so `state.ringingCall` remains the
+            // only strong reference, as with a rejected ring that was
+            // evicted from the cache before `ringingCall` was cleared.
+            InjectedValues[\.callCache].remove(for: previousCallCid)
+        }
+        XCTAssertNotNil(previousCall)
+
+        let nextCall = streamVideo.call(callType: callType, callId: callId)
+        await MainActor.run { [streamVideo] in
+            streamVideo?.state.ringingCall = nextCall
+        }
+
+        await fulfillment { previousCall == nil }
+        XCTAssertTrue(streamVideo.state.ringingCall === nextCall)
+    }
+
     func test_streamVideo_incomingCallAccept() async throws {
         // Given
         let streamVideo = StreamVideo.mock(httpClient: HTTPClient_Mock())
