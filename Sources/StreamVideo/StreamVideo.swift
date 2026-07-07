@@ -33,7 +33,12 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         /// This is set for both incoming calls and outgoing calls started
         /// with `Call.ring()`. The value is cleared after the call is
         /// joined, rejected, ended, or promoted to `activeCall`.
-        @Published public internal(set) var ringingCall: Call?
+        @Published public internal(set) var ringingCall: Call? {
+            // Keep the previous call alive until after the PublishedSubject lock is
+            // released: deallocating it inside the setter cancels its
+            // OutgoingRingingController subscription to $ringingCall and aborts.
+            didSet { _ = oldValue }
+        }
 
         private nonisolated let disposableBag = DisposableBag()
 
