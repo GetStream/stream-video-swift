@@ -7,7 +7,7 @@ on:
 
 permissions:
   contents: write
-  issues: read
+  pull-requests: write
 
 jobs:
   merge-release-to-main:
