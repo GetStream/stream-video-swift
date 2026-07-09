@@ -15,8 +15,8 @@ on:
         default: false
 
 permissions:
-  contents: read
   actions: write
+  contents: read
 
 jobs:
   record:
