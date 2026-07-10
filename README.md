@@ -280,11 +280,16 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 ### 1.9.0 milestone - June
 
 - [x] WebRTC upgrade to the latest version
-- [] Reduce SDK size
 - [x] External mic support
-- [] Migrate to Stream Core
+- [x] Improved join call analytics
 
-### After 1.8.0
+### 1.10.0 milestone - September
+
+- [] Migrate to Stream Core
+- [] Reduce SDK size
+- [] Improve ringing reliability
+
+### After 1.10.0
 
 - RTMP streaming from device
 - Query call session endpoint + better missed calls support
