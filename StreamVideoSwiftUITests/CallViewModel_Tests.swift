@@ -44,6 +44,23 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         try await super.tearDown()
     }
 
+    func test_error_apiError_setsToastMessage() {
+        let message = "Token generation failed with error"
+        subject = .init()
+
+        subject.error = APIError(
+            code: 0,
+            details: [],
+            duration: "",
+            message: message,
+            moreInfo: "",
+            statusCode: 500
+        )
+
+        XCTAssertEqual(subject.toast?.message, message)
+        XCTAssertTrue(subject.errorAlertShown)
+    }
+
     @MainActor
     func test_startCall_withoutLocalCallSettingsAndRingTrue_respectsDashboardSettings() async throws {
         // Given
