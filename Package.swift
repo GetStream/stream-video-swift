@@ -26,7 +26,7 @@ let package = Package(
         .package(url: "https://github.com/GetStream/stream-video-swift-webrtc.git", exact: "145.8.0"),
         // Shared low-level SDK. Provides the logger, WebSocket client, error
         // model, etc. that StreamVideo is migrating onto.
-        .package(url: "https://github.com/GetStream/stream-core-swift.git", from: "0.8.0")
+        .package(url: "https://github.com/GetStream/stream-core-swift.git", branch: "develop")
     ],
     targets: [
         .target(
