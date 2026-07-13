@@ -74,6 +74,8 @@ final class SFUWebSocket: SFUWebSocketProtocol, StreamCore.ConnectionStateDelega
             webSocketClientType: .sfu,
             connectRequest: URLRequest(url: url),
             requiresAuth: false,
+            // Keep SFU health checks below the call state's 15-second timeout.
+            pingInterval: 5,
             pingRequestBuilder: { makeSFUHealthCheckPing() }
         )
         webSocket.connectionStateDelegate = self
