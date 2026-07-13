@@ -5,6 +5,7 @@
 // swiftlint:disable discourage_task_init
 
 import Foundation
+import StreamCore
 
 /// Extension to Task for integration with a `DisposableBag`.
 ///
