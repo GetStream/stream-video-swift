@@ -37,6 +37,9 @@ struct MockSFUStack: @unchecked Sendable {
 
     // MARK: - WebSocket
 
+    // These helpers intentionally target the original socket. Recovery tests
+    // use it to establish and fail the initial connection after configuring
+    // `nextWebSocket` as its replacement.
     func setConnectionState(to state: WebSocketConnectionState) {
         webSocket.simulate(state: .init(webSocketConnectionState: state))
     }

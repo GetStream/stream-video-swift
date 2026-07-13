@@ -13,10 +13,10 @@ import Foundation
 /// therefore cannot import StreamCore). `SFUWebSocket` maps
 /// `StreamCore.WebSocketConnectionState` into this type at the boundary.
 ///
-/// - TODO: [StreamCore migration] This boundary enum exists so the WebRTC state
-///   machine stays StreamCore-free. Once the leaf types are unified and the SFU
-///   wrapper is retired, consumers could use `StreamCore.WebSocketConnectionState`
-///   directly and this type can be removed.
+/// - TODO: Remove this boundary when WebRTC can consume StreamCore's state
+///   directly. This type currently drops connected health-check metadata and
+///   timeout origin, and exposes the underlying server error instead of
+///   StreamCore's `ClientError`.
 enum SFUConnectionState: Equatable {
     /// Describes the source of a disconnection.
     enum DisconnectionSource: Equatable {

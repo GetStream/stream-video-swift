@@ -23,11 +23,7 @@ public class ClientError: Error, CustomStringConvertible, @unchecked Sendable {
     public let underlyingError: Error?
     
     /// The associated API error, if this wraps one.
-    ///
-    /// Typed as ``StreamAPIError`` (StreamCore's `APIError`) so the whole app
-    /// converges on one API error type; only the generated OpenAPI layer keeps
-    /// video's own `APIError`.
-    public let apiError: StreamAPIError?
+    public let apiError: APIError?
     
     var errorDescription: String? {
         if let apiError {
@@ -68,10 +64,19 @@ public class ClientError: Error, CustomStringConvertible, @unchecked Sendable {
         underlyingError = error
         message = error?.localizedDescription ?? nil
         location = .init(file: "\(file)", line: Int(line))
-        // Errors thrown by the transport are now `StreamAPIError`
-        // (StreamCore's), so capture that type here.
-        if let aErr = error as? StreamAPIError {
-            apiError = aErr
+        if let apiError = error as? APIError {
+            self.apiError = apiError
+        } else if let apiError = error as? StreamAPIError {
+            self.apiError = APIError(
+                code: apiError.code,
+                details: apiError.details,
+                duration: apiError.duration,
+                exceptionFields: apiError.exceptionFields,
+                message: apiError.message,
+                moreInfo: apiError.moreInfo,
+                statusCode: apiError.statusCode,
+                unrecoverable: apiError.unrecoverable
+            )
         } else {
             apiError = nil
         }
@@ -122,8 +127,11 @@ extension ClientError: Equatable {
 extension ClientError {
     /// Returns `true` if underlaying error is `ErrorPayload` with code is inside invalid token codes range.
     var isInvalidTokenError: Bool {
-        (underlyingError as? ErrorPayload)?.isInvalidTokenError == true
-            || apiError?.isTokenExpiredError == true
+        if (underlyingError as? ErrorPayload)?.isInvalidTokenError == true {
+            return true
+        }
+        guard let apiError else { return false }
+        return ClosedRange.tokenInvalidErrorCodes.contains(apiError.code)
     }
 }
 

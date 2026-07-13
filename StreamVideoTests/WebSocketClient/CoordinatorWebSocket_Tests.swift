@@ -11,13 +11,13 @@ final class CoordinatorWebSocket_Tests: XCTestCase, @unchecked Sendable {
     // `VideoWebSocketConnectionState` (a StreamVideo alias) is used instead of
     // the bare name, which is ambiguous here since StreamCore is imported.
 
-    func test_map_initializedConnectingAuthenticating() {
+    func test_initializedConnectingAuthenticating_areMapped() {
         XCTAssertEqual(VideoWebSocketConnectionState(.initialized), .initialized)
         XCTAssertEqual(VideoWebSocketConnectionState(.connecting), .connecting)
         XCTAssertEqual(VideoWebSocketConnectionState(.authenticating), .authenticating)
     }
 
-    func test_map_connected_carriesConnectionId() {
+    func test_connected_carriesConnectionId() {
         let subject = VideoWebSocketConnectionState(
             .connected(healthCheckInfo: .init(connectionId: "the-connection-id", participantCount: nil))
         )
@@ -28,7 +28,7 @@ final class CoordinatorWebSocket_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(info.coordinatorHealthCheck?.connectionId, "the-connection-id")
     }
 
-    func test_map_disconnectionSources() {
+    func test_disconnectionSources_areMapped() {
         XCTAssertEqual(
             VideoWebSocketConnectionState(.disconnected(source: .userInitiated)),
             .disconnected(source: .userInitiated)

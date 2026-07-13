@@ -123,7 +123,7 @@ final class CoordinatorWebSocket:
 
         webSocket.connectionStateDelegate = self
         webSocket.onWSConnectionEstablished = { [weak self] in
-            guard let self, let payload = connectPayloadProvider() else { return }
+            guard let self, let payload = self.connectPayloadProvider() else { return }
             webSocket.engine?.send(jsonMessage: payload)
         }
 
