@@ -97,15 +97,8 @@ final class CoordinatorWebSocket:
         self.webSocket = webSocket
 
         // StreamCore's recovery handler drives reconnection off the underlying
-        // client. Its default policies are internal, so we pass a re-implemented
-        // set that preserves the video-specific CallKit policy:
+        // client. Compose its policies with the video-specific CallKit policy:
         // internet AND wsAuto AND (background OR CallKit).
-        //
-        // TODO: [StreamCore migration] Once StreamCore makes its reconnection
-        // policies `public`, replace this list with StreamCore's convenience
-        // init and only inject `CallKitReconnectionPolicy` (the sole
-        // video-specific one). The four re-implemented policies below can then be
-        // deleted.
         let backgroundTaskScheduler = Self.makeBackgroundTaskScheduler()
         let internetConnection = StreamCore.InternetConnection(
             monitor: StreamCore.InternetConnection.Monitor()
