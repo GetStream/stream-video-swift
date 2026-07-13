@@ -2,6 +2,7 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import Foundation
 import StreamCore
 import StreamWebRTC
@@ -31,11 +32,6 @@ extension StreamCore.Logger {
             didSet { RTCLogger.default.didUpdate(mode: mode) }
         }
 
-        // TODO: [StreamCore migration] Previously video's `LogConfig.level`
-        // `didSet` kept this WebRTC severity in sync. StreamCore's `LogConfig`
-        // (lock-backed) has no such hook, so severity is only seeded from the
-        // level at init and no longer auto-updates. Restore syncing if/when
-        // StreamCore exposes a level-change hook (or wire it explicitly).
         nonisolated(unsafe) static var severity: RTCLoggingSeverity = .init(StreamCore.LogConfig.level) {
             didSet { RTCLogger.default.didUpdate(severity: severity) }
         }
@@ -73,8 +69,12 @@ extension StreamCore.Logger.WebRTC {
         private let logger = RTCCallbackLogger()
         private var isRunning = false
         private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
+        private let levelCancellable: AnyCancellable
 
         private init() {
+            levelCancellable = StreamCore.LogConfig.levelPublisher
+                .dropFirst()
+                .sink { severity = .init($0) }
             didUpdate(mode: mode)
         }
 
