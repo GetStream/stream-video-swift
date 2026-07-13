@@ -6,6 +6,49 @@
 import XCTest
 
 final class ClientError_Tests: XCTestCase, @unchecked Sendable {
+    func test_init_videoAPIError_preservesPublicAPIError() throws {
+        let apiError = APIError(
+            code: 1,
+            details: [2],
+            duration: "3ms",
+            message: "message",
+            moreInfo: "more info",
+            statusCode: 400,
+            unrecoverable: false
+        )
+
+        let subject = ClientError(with: apiError)
+        let exposedAPIError: APIError = try XCTUnwrap(subject.apiError)
+
+        XCTAssertTrue(exposedAPIError === apiError)
+    }
+
+    func test_init_streamAPIError_convertsToPublicAPIErrorPreservingFields() throws {
+        let apiError = StreamAPIError(
+            code: ClosedRange.tokenInvalidErrorCodes.lowerBound,
+            details: [2, 3],
+            duration: "4ms",
+            exceptionFields: ["field": "reason"],
+            message: "message",
+            moreInfo: "more info",
+            statusCode: 429,
+            unrecoverable: true
+        )
+
+        let subject = ClientError(with: apiError)
+        let exposedAPIError: APIError = try XCTUnwrap(subject.apiError)
+
+        XCTAssertEqual(exposedAPIError.code, apiError.code)
+        XCTAssertEqual(exposedAPIError.details, apiError.details)
+        XCTAssertEqual(exposedAPIError.duration, apiError.duration)
+        XCTAssertEqual(exposedAPIError.exceptionFields, apiError.exceptionFields)
+        XCTAssertEqual(exposedAPIError.message, apiError.message)
+        XCTAssertEqual(exposedAPIError.moreInfo, apiError.moreInfo)
+        XCTAssertEqual(exposedAPIError.statusCode, apiError.statusCode)
+        XCTAssertEqual(exposedAPIError.unrecoverable, apiError.unrecoverable)
+        XCTAssertTrue(subject.isInvalidTokenError)
+    }
+
     func test_isInvalidTokenError_whenUnderlayingErrorIsInvalidToken_returnsTrue() {
         // Create error code withing `ErrorPayload.tokenInvalidErrorCodes` range
         let error = ErrorPayload(

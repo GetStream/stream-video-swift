@@ -28,9 +28,6 @@ extension Task {
         disposableBag: DisposableBag,
         identifier: String = UUIDProviderKey.currentValue.get().uuidString,
         priority: TaskPriority? = nil,
-        // `.videoDefault` (== `.other`) is a StreamVideo-owned member, so it can
-        // be used as a default argument without importing StreamCore here (which
-        // would make `log`/`DisposableBag` ambiguous). See `LogSubsystem.videoDefault`.
         subsystem: LogSubsystem = .videoDefault,
         file: StaticString = #file,
         function: StaticString = #function,
@@ -64,9 +61,6 @@ extension Task {
         disposableBag: DisposableBag,
         identifier: String = UUIDProviderKey.currentValue.get().uuidString,
         priority: TaskPriority? = nil,
-        // `.videoDefault` (== `.other`) is a StreamVideo-owned member, so it can
-        // be used as a default argument without importing StreamCore here (which
-        // would make `log`/`DisposableBag` ambiguous). See `LogSubsystem.videoDefault`.
         subsystem: LogSubsystem = .videoDefault,
         file: StaticString = #file,
         function: StaticString = #function,

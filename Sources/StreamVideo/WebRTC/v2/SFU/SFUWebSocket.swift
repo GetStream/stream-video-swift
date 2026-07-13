@@ -30,16 +30,12 @@ protocol SFUWebSocketProtocol: AnyObject {
 /// Owns the SFU signaling WebSocket, backed by `StreamCore.WebSocketClient`.
 ///
 /// This is the single boundary that imports StreamCore for the SFU WebSocket.
-/// It exposes a StreamCore-free, StreamVideo-typed surface (`SFUConnectionState`,
-/// an SFU-payload event publisher, connect/disconnect/send) so `SFUAdapter` and
-/// the WebRTC state machine never import StreamCore.
+/// It maps StreamCore connection states and server errors into
+/// `SFUConnectionState`, narrows inbound events to SFU payloads, and provides
+/// the protocol seam used to mock the socket in `SFUAdapter` tests.
 ///
-/// - TODO: [StreamCore migration] This isolation wrapper exists because video
-///   still owns duplicated leaf types (`log`, `ClientError`, `DisposableBag`,
-///   `Event`, `EventNotificationCenter`) that collide when StreamCore is
-///   imported directly. Once those are unified on StreamCore (leaf migration),
-///   `SFUAdapter` can import StreamCore directly and this wrapper can be
-///   inlined/retired.
+/// - TODO: Remove this wrapper when `SFUAdapter` can consume StreamCore's
+///   state, error, and event types directly and has an equivalent mocking seam.
 final class SFUWebSocket: SFUWebSocketProtocol, StreamCore.ConnectionStateDelegate, @unchecked Sendable {
 
     private let webSocket: StreamCore.WebSocketClient
