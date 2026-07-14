@@ -125,6 +125,8 @@ extension SFUConnectionState {
             self = .disconnecting(source: .init(source))
         case let .disconnected(source):
             self = .disconnected(source: .init(source))
+        @unknown default:
+            self = .disconnected(source: .systemInitiated)
         }
     }
 }
@@ -143,6 +145,8 @@ extension SFUConnectionState.DisconnectionSource {
             self = .noPongReceived
         case .timeout:
             self = .timeout
+        @unknown default:
+            self = .systemInitiated
         }
     }
 }
