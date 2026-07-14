@@ -2,7 +2,7 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
-import StreamCore
+import enum StreamCore.RawJSON
 import StreamVideo
 import SwiftUI
 
