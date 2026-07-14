@@ -195,6 +195,8 @@ extension VideoWebSocketConnectionState {
             self = .disconnecting(source: .init(source))
         case let .disconnected(source):
             self = .disconnected(source: .init(source))
+        @unknown default:
+            self = .disconnected(source: .systemInitiated)
         }
     }
 }
@@ -218,6 +220,8 @@ extension VideoWebSocketConnectionState.DisconnectionSource {
         case let .serverInitiated(error):
             self = .serverInitiated(error: error.map { VideoClientError(with: $0.apiError ?? $0) })
         case .timeout:
+            self = .systemInitiated
+        @unknown default:
             self = .systemInitiated
         }
     }
