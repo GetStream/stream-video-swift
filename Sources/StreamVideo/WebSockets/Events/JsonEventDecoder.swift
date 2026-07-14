@@ -3,10 +3,11 @@
 //
 
 import Foundation
+import StreamCore
 
 struct JsonEventDecoder: AnyEventDecoder {
     func decode(from data: Data) throws -> WrappedEvent {
-        let event = try StreamJSONDecoder.default.decode(VideoEvent.self, from: data)
+        let event = try JSONDecoder.streamCore.decode(VideoEvent.self, from: data)
         return .coordinatorEvent(event)
     }
 }

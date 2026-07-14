@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 @testable import StreamVideo
 import XCTest
 
@@ -106,67 +107,16 @@ final class JSONDecoder_Tests: XCTestCase, @unchecked Sendable {
         )
     }
 
-    func test_datesAreCached() throws {
-        final class ISO8601DateFormatter_Spy: ISO8601DateFormatter {
-            var dateFromStringCalledCounter: Int = 0
+    func test_decodes_whenDecodingDateFromRFC3339DateWithMicroseconds() throws {
+        let data = json(dateString: "2020-06-09T08:10:40.800912Z").data(using: .utf8)!
+        let decoded = try JSONDecoder.streamCore.decode([String: Date].self, from: data)
+        let date = try XCTUnwrap(decoded[dateKey])
 
-            override func date(from string: String) -> Date? {
-                dateFromStringCalledCounter += 1
-                return super.date(from: string)
-            }
-        }
-
-        final class NSCache_Spy: NSCache<NSString, NSDate> {
-            var setObjectCalledCounter: Int = 0
-            var getObjectCalledCounter: Int = 0
-
-            override func object(forKey key: NSString) -> NSDate? {
-                getObjectCalledCounter += 1
-                return super.object(forKey: key)
-            }
-
-            override func setObject(_ obj: NSDate, forKey key: NSString) {
-                setObjectCalledCounter += 1
-                super.setObject(obj, forKey: key)
-            }
-        }
-
-        // Given a decoder with spy dateFormatter and cache
-        let dateFormatter = ISO8601DateFormatter_Spy()
-        dateFormatter.formatOptions = [.withFractionalSeconds, .withInternetDateTime]
-        let dateCache = NSCache_Spy()
-        let decoder = StreamJSONDecoder(dateFormatter: dateFormatter, dateCache: dateCache)
-
-        // When we decode a payload with repeated dates
-        let repeatedDate = "2020-06-09T08:10:40.800912Z" // If you change this, make sure to change `actualDecodedDate` below
-        let jsonPayload = """
-            {
-                "date1": "\(repeatedDate)",
-                "date2": "\(repeatedDate)",
-                "date3": "\(repeatedDate)",
-                "date4": "\(repeatedDate)",
-                "date5": "\(repeatedDate)"
-            }
-        """
-        let dateDict = try decoder.decode([String: Date].self, from: jsonPayload.data(using: .utf8)!)
-
-        // Then we should only decode the date once and use the cache
-        XCTAssertEqual(dateFormatter.dateFromStringCalledCounter, 1)
-        XCTAssertEqual(dateCache.setObjectCalledCounter, 1)
-        XCTAssertEqual(dateCache.getObjectCalledCounter, 5)
-
-        // The actual decoded date must match the date JSONDecoder decoded and cached
-        let actualDecodedDate = Date(timeIntervalSince1970: 1_591_690_240.8)
         XCTAssertEqual(
-            dateCache.object(forKey: repeatedDate as NSString)?.timeIntervalSince1970,
-            actualDecodedDate.timeIntervalSince1970
+            date.timeIntervalSince1970,
+            1_591_690_240.800_912,
+            accuracy: 0.000_001
         )
-
-        // All dates must be decoded
-        XCTAssertEqual(dateDict.keys.count, 5)
-        for (_, value) in dateDict {
-            XCTAssertEqual(value, actualDecodedDate)
-        }
     }
 
     // MARK: Helpers
