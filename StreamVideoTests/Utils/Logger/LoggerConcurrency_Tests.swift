@@ -7,6 +7,16 @@ import XCTest
 
 final class LoggerConcurrency_Tests: XCTestCase, @unchecked Sendable {
 
+    func test_logLevelChanged_afterWebRTCLoggerInitialization_updatesSeverity() {
+        let originalLevel = LogConfig.level
+        defer { LogConfig.level = originalLevel }
+
+        _ = Logger.WebRTC.RTCLogger.default
+        LogConfig.level = .debug
+
+        XCTAssertEqual(Logger.WebRTC.severity, .verbose)
+    }
+
     func test_concurrentLoggingProcessesAllMessages() {
         let iterations = 200
         let expectation = expectation(description: "All log messages are processed")
