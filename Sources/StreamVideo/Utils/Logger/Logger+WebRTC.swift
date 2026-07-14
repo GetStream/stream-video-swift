@@ -62,6 +62,8 @@ extension RTCLoggingSeverity {
             self = .warning
         case .error:
             self = .error
+        @unknown default:
+            self = .verbose
         }
     }
 }
