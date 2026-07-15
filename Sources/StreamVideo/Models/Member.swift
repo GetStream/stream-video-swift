@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 
 /// Represents a member in the call.
 public struct Member: Identifiable, Equatable, Sendable, Codable {

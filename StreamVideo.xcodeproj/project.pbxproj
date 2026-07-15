@@ -61,6 +61,8 @@
 		C0DE0C6E00000000000000C3 /* StreamCore in Frameworks */ = {isa = PBXBuildFile; productRef = C0DE0C6E00000000000000B2 /* StreamCore */; };
 		C0DE0C6E00000000000000C4 /* StreamCore in Frameworks */ = {isa = PBXBuildFile; productRef = C0DE0C6E00000000000000B3 /* StreamCore */; };
 		C0DE0C6E00000000000000C5 /* StreamCore in Frameworks */ = {isa = PBXBuildFile; productRef = C0DE0C6E00000000000000B4 /* StreamCore */; };
+		C0DE0C6E00000000000000C6 /* StreamCore in Frameworks */ = {isa = PBXBuildFile; productRef = C0DE0C6E00000000000000B5 /* StreamCore */; };
+		C0DE0C6E00000000000000C7 /* StreamCore in Frameworks */ = {isa = PBXBuildFile; productRef = C0DE0C6E00000000000000B6 /* StreamCore */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -1117,6 +1119,7 @@
 			files = (
 				84F7380F287C141000A363F4 /* StreamVideoSwiftUI.framework in Frameworks */,
 				822FF71D2AEAD0BE000202A7 /* StreamSwiftTestHelpers in Frameworks */,
+				C0DE0C6E00000000000000C6 /* StreamCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1136,6 +1139,7 @@
 			files = (
 				84F73830287C146D00A363F4 /* StreamVideoUIKit.framework in Frameworks */,
 				822FF71F2AEAD0C4000202A7 /* StreamSwiftTestHelpers in Frameworks */,
+				C0DE0C6E00000000000000C7 /* StreamCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1440,6 +1444,7 @@
 			name = StreamVideoSwiftUITests;
 			packageProductDependencies = (
 				822FF71C2AEAD0BE000202A7 /* StreamSwiftTestHelpers */,
+				C0DE0C6E00000000000000B5 /* StreamCore */,
 			);
 			productName = StreamVideoSwiftUITests;
 			productReference = 84F7380E287C141000A363F4 /* StreamVideoSwiftUITests.xctest */;
@@ -1487,6 +1492,7 @@
 			name = StreamVideoUIKitTests;
 			packageProductDependencies = (
 				822FF71E2AEAD0C4000202A7 /* StreamSwiftTestHelpers */,
+				C0DE0C6E00000000000000B6 /* StreamCore */,
 			);
 			productName = StreamVideoUIKitTests;
 			productReference = 84F7382F287C146D00A363F4 /* StreamVideoUIKitTests.xctest */;
@@ -3485,6 +3491,16 @@
 			productName = StreamCore;
 		};
 		C0DE0C6E00000000000000B4 /* StreamCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C0DE0C6E00000000000000A1 /* XCRemoteSwiftPackageReference "stream-core-swift" */;
+			productName = StreamCore;
+		};
+		C0DE0C6E00000000000000B5 /* StreamCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C0DE0C6E00000000000000A1 /* XCRemoteSwiftPackageReference "stream-core-swift" */;
+			productName = StreamCore;
+		};
+		C0DE0C6E00000000000000B6 /* StreamCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = C0DE0C6E00000000000000A1 /* XCRemoteSwiftPackageReference "stream-core-swift" */;
 			productName = StreamCore;

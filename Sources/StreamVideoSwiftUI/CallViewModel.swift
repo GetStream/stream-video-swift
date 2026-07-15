@@ -3,6 +3,7 @@
 //
 
 import Combine
+import enum StreamCore.RawJSON
 import StreamVideo
 import StreamWebRTC
 import SwiftUI
