@@ -3,8 +3,11 @@
 //
 
 import Foundation
+import StreamCore
 
-extension Stream_Video_Sfu_Models_Error: Error, ReflectiveStringConvertible {}
+extension Stream_Video_Sfu_Models_Error:
+    Error,
+    ReflectiveStringConvertible {}
 
 /// A Client error.
 public class ClientError: Error, CustomStringConvertible, @unchecked Sendable {
