@@ -44,7 +44,7 @@ extension Task {
                 line: line
             ) { await block() }
         }
-        store(in: disposableBag, identifier: identifier)
+        store(in: disposableBag, key: identifier)
     }
 
     /// Initializes and stores a throwing task in the given `DisposableBag`.
@@ -77,7 +77,7 @@ extension Task {
                 line: line
             ) { try await block() }
         }
-        store(in: disposableBag, identifier: identifier)
+        store(in: disposableBag, key: identifier)
     }
 
     /// Stores a cancel handler for the task in the specified `DisposableBag`.
@@ -87,8 +87,8 @@ extension Task {
     ///   - identifier: A unique key under which the cancel handler is stored.
     public func store(
         in disposableBag: DisposableBag,
-        identifier: String = UUID().uuidString
+        identifier: String
     ) {
-        disposableBag.insert(.init(cancel), with: identifier)
+        store(in: disposableBag, key: identifier)
     }
 }
