@@ -2,6 +2,7 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import StreamCore
 import Foundation
 
 public final class CustomVideoEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {

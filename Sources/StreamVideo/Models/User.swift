@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 
 /// Model for the user's info.
 public struct User: Identifiable, Hashable, Sendable, Codable {

@@ -5,6 +5,7 @@
 import AVFoundation
 import Combine
 import Foundation
+import StreamCore
 import StreamWebRTC
 
 /// Observable object that provides info about the call state, as well as methods for updating it.

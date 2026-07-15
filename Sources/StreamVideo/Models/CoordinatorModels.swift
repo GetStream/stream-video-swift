@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 
 public struct FetchingLocationError: Error {}
 

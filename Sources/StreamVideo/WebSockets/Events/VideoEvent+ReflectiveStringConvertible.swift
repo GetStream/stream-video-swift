@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 
 extension VideoEvent: ReflectiveStringConvertible {}
 extension AppUpdatedEvent: ReflectiveStringConvertible {}
