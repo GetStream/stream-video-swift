@@ -6,12 +6,13 @@ import Foundation
 import StreamCore
 
 /// An `Event` object representing an event in the chat system.
-public protocol Event: Sendable {}
+public protocol Event: StreamCore.Event {}
 
 public protocol SendableEvent:
     Event,
     ProtoModel,
-    ReflectiveStringConvertible {}
+    ReflectiveStringConvertible,
+    StreamCore.SendableEvent {}
 
 extension Event {
     var name: String {
@@ -47,24 +48,24 @@ internal enum WrappedEvent: Event, Sendable, CustomStringConvertible {
     case coordinatorEvent(VideoEvent)
     case sfuEvent(Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload)
     
-    func healthcheck() -> HealthCheckInfo? {
+    func healthcheck() -> StreamCore.HealthCheckInfo? {
         switch self {
         case let .coordinatorEvent(event):
             if case let .typeHealthCheckEvent(healthCheckEvent) = event {
-                return HealthCheckInfo(coordinatorHealthCheck: healthCheckEvent)
+                return StreamCore.HealthCheckInfo(
+                    connectionId: healthCheckEvent.connectionId
+                )
             }
             if case let .typeConnectedEvent(connectedEvent) = event {
-                return HealthCheckInfo(
-                    coordinatorHealthCheck: .init(
-                        cid: nil,
-                        connectionId: connectedEvent.connectionId,
-                        createdAt: connectedEvent.createdAt
-                    )
+                return StreamCore.HealthCheckInfo(
+                    connectionId: connectedEvent.connectionId
                 )
             }
         case let .sfuEvent(event):
             if case let .healthCheckResponse(healthCheckEvent) = event {
-                return HealthCheckInfo(sfuHealthCheck: healthCheckEvent)
+                return StreamCore.HealthCheckInfo(
+                    participantCount: Int(healthCheckEvent.participantCount.total)
+                )
             }
         case .internalEvent:
             break

@@ -932,7 +932,7 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
 
         streamVideo
             .eventNotificationCenter
-            .process(.coordinatorEvent(event))
+            .process(WrappedEvent.coordinatorEvent(event))
 
         try await fulfillmentHandler(call)
     }
