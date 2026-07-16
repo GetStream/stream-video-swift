@@ -619,8 +619,8 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     
     private func loadConnectionIdFromHealthcheck() -> String? {
         guard
-            case let .connected(healthCheckInfo: healtCheckInfo) = webSocketClient?.connectionState,
-            let connectionId = healtCheckInfo.coordinatorHealthCheck?.connectionId
+            case let .connected(healthCheckInfo: healthCheckInfo) = webSocketClient?.connectionState,
+            let connectionId = healthCheckInfo.connectionId
         else {
             return nil
         }
