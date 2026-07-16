@@ -36,28 +36,21 @@ extension CoordinatorWebSocketProtocol {
 ///
 /// This is the single boundary that imports StreamCore for the coordinator
 /// socket. It:
-/// - decodes coordinator events via ``CoordinatorEventDecoder`` and forwards
-///   them into video's existing `EventNotificationCenter` + middlewares (so the
-///   whole coordinator event-handling surface stays unchanged);
+/// - decodes coordinator events via ``JsonEventDecoder`` through the shared
+///   app event notification center;
 /// - performs the auth handshake by sending video's connect payload on
 ///   `onWSConnectionEstablished`;
 /// - maps `StreamCore.WebSocketConnectionState` back into video's
 ///   `WebSocketConnectionState`.
 ///
-/// - TODO: [StreamCore migration] This isolation wrapper exists because video
-///   still owns duplicated leaf types (`log`, `ClientError`, `Event`,
-///   `EventNotificationCenter`, `WebSocketConnectionState`, `HealthCheckInfo`)
-///   that collide when StreamCore is imported directly. Once those are unified
-///   on StreamCore (leaf migration), `StreamVideo` can import StreamCore
-///   directly and this wrapper (+ the `Video*` aliases + the event boxing) can
-///   be inlined/retired.
+/// - TODO: [IOS-1812] Remove this isolation wrapper and its `Video*` aliases
+///   after the remaining connection and error types are unified.
 final class CoordinatorWebSocket:
     CoordinatorWebSocketProtocol,
     StreamCore.ConnectionStateDelegate,
     @unchecked Sendable {
 
     private let webSocket: StreamCore.WebSocketClient
-    private let eventNotificationCenter: VideoEventNotificationCenter
     /// Builds the connect payload (video's `WSAuthMessageRequest`) sent once the
     /// socket connects. Provided by the caller since it needs the current
     /// user/token; returns `nil` if the caller is gone.
@@ -65,7 +58,6 @@ final class CoordinatorWebSocket:
     /// StreamCore's recovery handler, owned here so reconnection stays inside the
     /// StreamCore boundary. Receives state forwarded from this wrapper.
     private let recoveryHandler: StreamCore.ConnectionRecoveryHandler
-    private var cancellables = Set<AnyCancellable>()
 
     @Published private(set) var connectionState: VideoWebSocketConnectionState = .initialized
     var connectionStatePublisher: AnyPublisher<VideoWebSocketConnectionState, Never> {
@@ -74,19 +66,17 @@ final class CoordinatorWebSocket:
 
     init(
         url: URL,
-        eventNotificationCenter: VideoEventNotificationCenter,
+        eventNotificationCenter: EventNotificationCenter,
         sessionConfiguration: URLSessionConfiguration = .default,
         connectPayloadProvider: @escaping () -> (any Codable)?,
         hasActiveCall: @escaping @Sendable () -> Bool
     ) {
-        self.eventNotificationCenter = eventNotificationCenter
         self.connectPayloadProvider = connectPayloadProvider
 
-        let coreEventCenter = StreamCore.DefaultEventNotificationCenter()
         let webSocket = StreamCore.WebSocketClient(
             sessionConfiguration: sessionConfiguration,
-            eventDecoder: CoordinatorEventDecoder(),
-            eventNotificationCenter: coreEventCenter,
+            eventDecoder: JsonEventDecoder(),
+            eventNotificationCenter: eventNotificationCenter,
             webSocketClientType: .coordinator,
             connectRequest: URLRequest(url: url),
             requiresAuth: true,
@@ -105,7 +95,7 @@ final class CoordinatorWebSocket:
         )
         recoveryHandler = StreamCore.DefaultConnectionRecoveryHandler(
             webSocketClient: webSocket,
-            eventNotificationCenter: coreEventCenter,
+            eventNotificationCenter: eventNotificationCenter,
             backgroundTaskScheduler: backgroundTaskScheduler,
             internetConnection: internetConnection,
             reconnectionStrategy: StreamCore.DefaultRetryStrategy(),
@@ -126,13 +116,6 @@ final class CoordinatorWebSocket:
             guard let self, let payload = self.connectPayloadProvider() else { return }
             webSocket.engine?.send(jsonMessage: payload)
         }
-
-        // Bridge decoded coordinator events into video's event pipeline.
-        webSocket
-            .eventSubject
-            .compactMap { $0 as? CoordinatorEvent }
-            .sink { [weak self] in self?.eventNotificationCenter.process($0.wrapped) }
-            .store(in: &cancellables)
     }
 
     private static func makeBackgroundTaskScheduler() -> StreamCore.BackgroundTaskScheduler? {

@@ -12,6 +12,7 @@ lane :sonar_upload do
   Dir.chdir('..') do
     sh("./fastlane/sonar/bin/sonar-scanner " \
        "-Dsonar.projectVersion=#{version_number} " \
+       "-Dsonar.scanner.skipJreProvisioning=true " \
        "-Dproject.settings=sonar-project.properties " \
        "-Dsonar.coverageReportPaths='reports/sonarqube-generic-coverage.xml'")
   end

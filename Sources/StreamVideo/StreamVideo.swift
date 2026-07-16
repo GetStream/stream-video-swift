@@ -100,10 +100,10 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     private var connectTask: Task<Void, Error>?
 
     /// The notification center used to send and receive notifications about incoming events.
-    private(set) lazy var eventNotificationCenter: EventNotificationCenter = {
-        let center = EventNotificationCenter()
+    private(set) lazy var eventNotificationCenter: DefaultEventNotificationCenter = {
+        let center = DefaultEventNotificationCenter()
         eventsMiddleware.add(subscriber: self)
-        var middlewares: [EventMiddleware] = [
+        let middlewares: [EventMiddleware] = [
             eventsMiddleware
         ]
         center.add(middlewares: middlewares)
