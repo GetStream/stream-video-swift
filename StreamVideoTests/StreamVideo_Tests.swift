@@ -367,7 +367,9 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
         // When
         let coordinatorEvent = VideoEvent.typeCallAcceptedEvent(.dummy(callCid: "cid"))
         let internalEvent = WrappedEvent.internalEvent(WSConnected())
-        streamVideo.eventNotificationCenter.process(.coordinatorEvent(coordinatorEvent))
+        streamVideo.eventNotificationCenter.process(
+            WrappedEvent.coordinatorEvent(coordinatorEvent)
+        )
         streamVideo.eventNotificationCenter.process(internalEvent)
         await fulfillment { receivedEvents.count == 1 }
 
@@ -397,7 +399,7 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
         // When
         let event = CallAcceptedEvent.dummy()
         streamVideo.eventNotificationCenter.process(
-            .coordinatorEvent(.typeCallAcceptedEvent(event))
+            WrappedEvent.coordinatorEvent(.typeCallAcceptedEvent(event))
         )
 
         await fulfillment { receivedEvents.count == 1 }
@@ -434,7 +436,9 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
                 }
                 group.addTask {
                     await self.wait(for: 0.5)
-                    streamVideo.eventNotificationCenter.process(.coordinatorEvent(event))
+                    streamVideo.eventNotificationCenter.process(
+                        WrappedEvent.coordinatorEvent(event)
+                    )
                 }
             }
         }
@@ -468,7 +472,9 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
                 }
                 group.addTask {
                     await self.wait(for: 0.5)
-                    streamVideo.eventNotificationCenter.process(.coordinatorEvent(event))
+                    streamVideo.eventNotificationCenter.process(
+                        WrappedEvent.coordinatorEvent(event)
+                    )
                 }
             }
         }

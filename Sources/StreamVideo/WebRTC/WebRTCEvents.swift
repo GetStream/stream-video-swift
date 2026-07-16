@@ -21,7 +21,6 @@ extension Stream_Video_Sfu_Event_JoinResponse: Event {}
 extension Stream_Video_Sfu_Event_HealthCheckResponse: Event {}
 extension Stream_Video_Sfu_Event_SfuRequest: SendableEvent {}
 extension Stream_Video_Sfu_Event_HealthCheckRequest: SendableEvent {}
-extension Stream_Video_Sfu_Event_HealthCheckResponse: HealthCheck {}
 extension Stream_Video_Sfu_Event_TrackPublished: Event {}
 extension Stream_Video_Sfu_Event_TrackUnpublished: Event {}
 extension Stream_Video_Sfu_Event_Error: Event {}

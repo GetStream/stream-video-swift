@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 
 extension StreamVideo {
     struct Environment: Sendable {
@@ -22,8 +23,6 @@ extension StreamVideo {
                 eventNotificationCenter: $0,
                 sessionConfiguration: config,
                 connectPayloadProvider: $2,
-                // Resolved here (StreamCore-free) so the CallKit reconnection
-                // policy keeps working without importing StreamCore at the DI site.
                 hasActiveCall: { InjectedValues[\.callKitService].callCount > 0 }
             )
         }

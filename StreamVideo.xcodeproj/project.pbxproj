@@ -270,8 +270,6 @@
 			membershipExceptions = (
 				Mock/CallController_Mock.swift,
 				Mock/CallParticipant_Mock.swift,
-				Mock/EventBatcher_Mock.swift,
-				Mock/EventDecoder_Mock.swift,
 				Mock/HTTPClient_Mock.swift,
 				Mock/MockAppStateAdapter.swift,
 				Mock/MockCall.swift,
@@ -358,8 +356,6 @@
 			membershipExceptions = (
 				Mock/CallController_Mock.swift,
 				Mock/CallParticipant_Mock.swift,
-				Mock/EventBatcher_Mock.swift,
-				Mock/EventDecoder_Mock.swift,
 				Mock/HTTPClient_Mock.swift,
 				Mock/MockDefaultAPIEndpoints.swift,
 				Mock/MockFunc.swift,
