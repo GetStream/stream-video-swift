@@ -14,5 +14,3 @@ struct HealthCheckInfo: Equatable {
     var coordinatorHealthCheck: HealthCheckEvent?
     var sfuHealthCheck: Stream_Video_Sfu_Event_HealthCheckResponse?
 }
-
-protocol HealthCheck: Event, Equatable {}

@@ -6,19 +6,11 @@ import Foundation
 import StreamCore
 
 /// An `Event` object representing an event in the chat system.
-public protocol Event: StreamCore.Event {}
+public typealias Event = StreamCore.Event
 
-public protocol SendableEvent:
-    Event,
-    ProtoModel,
-    ReflectiveStringConvertible,
-    StreamCore.SendableEvent {}
+public typealias SendableEvent = StreamCore.SendableEvent
 
 extension Event {
-    var name: String {
-        String(describing: Self.self)
-    }
-    
     func unwrap() -> VideoEvent? {
         if let unwrapped = self as? VideoEvent {
             return unwrapped
