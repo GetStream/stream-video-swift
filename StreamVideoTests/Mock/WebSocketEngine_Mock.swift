@@ -18,6 +18,7 @@ final class WebSocketEngine_Mock: WebSocketEngine, @unchecked Sendable {
 
     /// How many times was `disconnect()` called
     @Atomic var disconnect_calledCount = 0
+    @Atomic var disconnect_closeCode: URLSessionWebSocketTask.CloseCode?
 
     /// How many times was `sendPing()` called
     @Atomic var sendPing_calledCount = 0
@@ -41,6 +42,7 @@ final class WebSocketEngine_Mock: WebSocketEngine, @unchecked Sendable {
     }
 
     func disconnect(with code: URLSessionWebSocketTask.CloseCode) {
+        disconnect_closeCode = code
         disconnect_calledCount += 1
     }
 
