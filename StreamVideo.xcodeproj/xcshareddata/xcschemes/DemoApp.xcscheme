@@ -118,6 +118,9 @@
             isEnabled = "YES">
          </AdditionalOption>
       </AdditionalOptions>
+      <MetalAPIValidationSettings
+         isEnabled = "No">
+      </MetalAPIValidationSettings>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Debug"

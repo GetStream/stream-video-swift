@@ -121,8 +121,12 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
     // MARK: publishQualityChanged
 
     func test_handleChangePublishQuality_givenEvent_whenPublished_thenUpdatesPublisherQuality() async throws {
+        let stateAdapter = try XCTUnwrap(stateAdapter)
         try await stateAdapter.configurePeerConnections()
         let publisher = await stateAdapter.publisher
+        let mockPublisher = try XCTUnwrap(
+            publisher as? MockRTCPeerConnectionCoordinator
+        )
 
         let participantA = CallParticipant.dummy()
         let participantB = CallParticipant.dummy()
@@ -138,9 +142,8 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
             event,
             wrappedEvent: .sfuEvent(.changePublishQuality(event)),
             initialState: [participantA, participantB].reduce(into: [String: CallParticipant]()) { $0[$1.sessionId] = $1 }
-        ) { [event] _ in
-            let mockPublisher = try XCTUnwrap(publisher as? MockRTCPeerConnectionCoordinator)
-            return mockPublisher
+        ) { [event, mockPublisher] _ in
+            mockPublisher
                 .recordedInputPayload(Stream_Video_Sfu_Event_ChangePublishQuality.self, for: .changePublishQuality)?
                 .first == event
         }

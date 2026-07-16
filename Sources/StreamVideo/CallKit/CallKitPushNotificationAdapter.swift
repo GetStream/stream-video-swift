@@ -41,6 +41,43 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
 
     @Injected(\.callKitService) private var callKitService
 
+    private final class SendableCompletion: @unchecked Sendable {
+        private let completion: () -> Void
+
+        init(_ completion: @escaping () -> Void) {
+            self.completion = completion
+        }
+
+        func callAsFunction() {
+            completion()
+        }
+    }
+
+    private var activeSystemCallingService: SystemCallingService {
+        #if canImport(LiveCommunicationKit)
+        if #available(iOS 27.0, *), shouldUseLiveCommunicationKit {
+            return InjectedValues[\.liveCommunicationKitService]
+        }
+        #endif
+        return callKitService
+    }
+
+    private var configuredStreamVideo: StreamVideo? {
+        if let streamVideo = callKitService.streamVideo {
+            return streamVideo
+        }
+        #if canImport(LiveCommunicationKit)
+        if #available(iOS 27.0, *) {
+            return InjectedValues[\.liveCommunicationKitService].streamVideo
+        }
+        #endif
+        return nil
+    }
+
+    private var shouldUseLiveCommunicationKit: Bool {
+        configuredStreamVideo?.videoConfig.useLiveCommunicationKit ?? true
+    }
+
     /// The push registry used for VoIP push notifications.
     open private(set) lazy var registry: PKPushRegistry = .init(queue: .init(label: "io.getstream.voip"))
 
@@ -106,8 +143,11 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
         for type: PKPushType,
         completion: @escaping () -> Void
     ) {
-        defer { completion() }
-        guard type == .voIP else { return }
+        let pushCompletion = SendableCompletion(completion)
+        guard type == .voIP else {
+            pushCompletion()
+            return
+        }
         
         let content = decodePayload(payload)
 
@@ -116,7 +156,7 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
                 "Received VoIP push notification with cid:\(content.cid) callerId:\(content.callerId) callerName:\(content.localizedCallerName)."
             )
 
-        callKitService.reportIncomingCall(
+        activeSystemCallingService.reportIncomingCall(
             content.cid,
             localizedCallerName: content.localizedCallerName,
             callerId: content.callerId,
@@ -125,6 +165,7 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
                 if let error {
                     log.error(error, subsystems: .callKit)
                 }
+                pushCompletion()
             }
         )
     }

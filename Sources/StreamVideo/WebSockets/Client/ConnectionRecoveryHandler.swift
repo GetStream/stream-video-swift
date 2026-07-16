@@ -320,7 +320,12 @@ struct CallKitReconnectionPolicy: AutomaticReconnectionPolicy {
     init() {}
 
     func canBeReconnected() -> Bool {
-        callKitService.callCount > 0
+        #if canImport(LiveCommunicationKit)
+        if #available(iOS 27.0, *) {
+            return InjectedValues[\.liveCommunicationKitService].callCount > 0
+        }
+        #endif
+        return callKitService.callCount > 0
     }
 }
 
