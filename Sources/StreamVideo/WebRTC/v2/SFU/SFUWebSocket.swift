@@ -128,20 +128,22 @@ struct SFUWebSocketCloseCodeProvider: WebSocketCloseCodeProviding {
     ) -> URLSessionWebSocketTask.CloseCode {
         switch context {
         case .disconnection(source: .noPongReceived):
-            // The SFU treats 4001 as an unhealthy transport. Unlike a normal
-            // closure, it keeps participant state available for fast reconnect.
+            // 4001 identifies the health-check timeout across Stream SDKs. The
+            // SFU treats every non-1000/non-1001 code as an abnormal close and
+            // preserves participant state during its reconnect grace period.
             return Self.connectionUnhealthy
         case .reconfiguration:
-            // The SFU reserves 4002 for replacing the signaling socket with a
-            // new configuration without treating the replacement as a leave.
+            // 4002 identifies a Swift socket replacement. It is not reserved by
+            // the SFU; using a custom code selects the abnormal-close path and
+            // avoids immediate participant teardown.
             return Self.reconfiguration
         case let .explicit(code, _):
             // Preserve callers that intentionally use a protocol close code,
             // such as `.goingAway` during adapter teardown.
             return code
         case .disconnection:
-            // Only no-pong is recoverable through fast reconnect. All other
-            // sources retain the existing normal-closure behavior.
+            // Preserve intentional-disconnect behavior. A normal closure tells
+            // the SFU it can tear down participant state immediately.
             return .normalClosure
         @unknown default:
             // A future StreamCore context is not implicitly recoverable.
