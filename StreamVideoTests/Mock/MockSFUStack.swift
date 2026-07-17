@@ -2,6 +2,7 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import StreamCore
 @testable import StreamVideo
 
 struct MockSFUStack: @unchecked Sendable {
@@ -84,6 +85,8 @@ extension SFUConnectionState.DisconnectionSource {
             self = .systemInitiated
         case .noPongReceived:
             self = .noPongReceived
+        case .timeout:
+            self = .systemInitiated
         }
     }
 }
