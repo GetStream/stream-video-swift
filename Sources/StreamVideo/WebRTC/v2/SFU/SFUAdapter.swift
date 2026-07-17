@@ -218,10 +218,7 @@ final class SFUAdapter: CustomStringConvertible, @unchecked Sendable {
         webSocketConfiguration: WebSocketConfiguration
     ) {
         log.debug("Will refresh \(self).", subsystems: .sfu)
-        // `StreamCore.WebSocketClient` can't be reconfigured in place, so a
-        // refresh tears down the current socket and builds a fresh one via the
-        // injected factory. 4002 is the SFU "refresh" close code.
-        webSocket.disconnect(code: .init(rawValue: 4002)!)
+        webSocket.disconnectForReconfiguration()
         requestDisposableBag.removeAll()
         webSocket = webSocketFactory(
             webSocketConfiguration.url,

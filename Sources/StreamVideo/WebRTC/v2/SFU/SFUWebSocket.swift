@@ -23,6 +23,7 @@ protocol SFUWebSocketProtocol: AnyObject {
     func connect()
     func disconnect() async
     func disconnect(code: URLSessionWebSocketTask.CloseCode)
+    func disconnectForReconfiguration()
     func send(_ message: any SendableEvent)
     func inject(_ payload: Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload)
 }
@@ -72,6 +73,7 @@ final class SFUWebSocket: SFUWebSocketProtocol, ConnectionStateDelegate, @unchec
             requiresAuth: false,
             // Keep SFU health checks below the call state's 15-second timeout.
             pingInterval: 5,
+            closeCodeProvider: SFUWebSocketCloseCodeProvider(),
             pingRequestBuilder: { makeSFUHealthCheckPing() }
         )
         webSocket.connectionStateDelegate = self
@@ -87,6 +89,10 @@ final class SFUWebSocket: SFUWebSocketProtocol, ConnectionStateDelegate, @unchec
 
     func disconnect(code: URLSessionWebSocketTask.CloseCode) {
         webSocket.disconnect(code: code, source: .userInitiated) {}
+    }
+
+    func disconnectForReconfiguration() {
+        webSocket.disconnect(context: .reconfiguration) {}
     }
 
     /// Sends an outbound SFU message over the WebSocket.
@@ -106,6 +112,41 @@ final class SFUWebSocket: SFUWebSocketProtocol, ConnectionStateDelegate, @unchec
         didUpdateConnectionState state: WebSocketConnectionState
     ) {
         connectionState = .init(state)
+    }
+}
+
+struct SFUWebSocketCloseCodeProvider: WebSocketCloseCodeProviding {
+    private static let connectionUnhealthy = URLSessionWebSocketTask.CloseCode(
+        rawValue: 4001
+    )!
+    private static let reconfiguration = URLSessionWebSocketTask.CloseCode(
+        rawValue: 4002
+    )!
+
+    func closeCode(
+        for context: WebSocketCloseContext
+    ) -> URLSessionWebSocketTask.CloseCode {
+        switch context {
+        case .disconnection(source: .noPongReceived):
+            // The SFU treats 4001 as an unhealthy transport. Unlike a normal
+            // closure, it keeps participant state available for fast reconnect.
+            return Self.connectionUnhealthy
+        case .reconfiguration:
+            // The SFU reserves 4002 for replacing the signaling socket with a
+            // new configuration without treating the replacement as a leave.
+            return Self.reconfiguration
+        case let .explicit(code, _):
+            // Preserve callers that intentionally use a protocol close code,
+            // such as `.goingAway` during adapter teardown.
+            return code
+        case .disconnection:
+            // Only no-pong is recoverable through fast reconnect. All other
+            // sources retain the existing normal-closure behavior.
+            return .normalClosure
+        @unknown default:
+            // A future StreamCore context is not implicitly recoverable.
+            return .normalClosure
+        }
     }
 }
 
