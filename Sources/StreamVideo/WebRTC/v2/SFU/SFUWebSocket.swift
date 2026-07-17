@@ -23,7 +23,7 @@ protocol SFUWebSocketProtocol: AnyObject {
     func connect()
     func disconnect() async
     func disconnect(code: URLSessionWebSocketTask.CloseCode)
-    func send(_ message: any StreamCore.SendableEvent)
+    func send(_ message: any SendableEvent)
     func inject(_ payload: Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload)
 }
 
@@ -36,9 +36,9 @@ protocol SFUWebSocketProtocol: AnyObject {
 ///
 /// - TODO: Remove this wrapper when `SFUAdapter` can consume StreamCore's
 ///   state, error, and event types directly and has an equivalent mocking seam.
-final class SFUWebSocket: SFUWebSocketProtocol, StreamCore.ConnectionStateDelegate, @unchecked Sendable {
+final class SFUWebSocket: SFUWebSocketProtocol, ConnectionStateDelegate, @unchecked Sendable {
 
-    private let webSocket: StreamCore.WebSocketClient
+    private let webSocket: WebSocketClient
 
     /// The current connection state, mapped from StreamCore's connection state.
     @Published private(set) var connectionState: SFUConnectionState = .initialized
@@ -63,10 +63,10 @@ final class SFUWebSocket: SFUWebSocketProtocol, StreamCore.ConnectionStateDelega
         sessionConfiguration: URLSessionConfiguration
     ) {
         connectURL = url
-        webSocket = StreamCore.WebSocketClient(
+        webSocket = WebSocketClient(
             sessionConfiguration: sessionConfiguration,
             eventDecoder: WebRTCEventDecoder(),
-            eventNotificationCenter: StreamCore.DefaultEventNotificationCenter(),
+            eventNotificationCenter: DefaultEventNotificationCenter(),
             webSocketClientType: .sfu,
             connectRequest: URLRequest(url: url),
             requiresAuth: false,
@@ -90,7 +90,7 @@ final class SFUWebSocket: SFUWebSocketProtocol, StreamCore.ConnectionStateDelega
     }
 
     /// Sends an outbound SFU message over the WebSocket.
-    func send(_ message: any StreamCore.SendableEvent) {
+    func send(_ message: any SendableEvent) {
         webSocket.engine?.send(message: message)
     }
 
@@ -102,8 +102,8 @@ final class SFUWebSocket: SFUWebSocketProtocol, StreamCore.ConnectionStateDelega
     // MARK: - ConnectionStateDelegate
 
     func webSocketClient(
-        _ client: StreamCore.WebSocketClient,
-        didUpdateConnectionState state: StreamCore.WebSocketConnectionState
+        _ client: WebSocketClient,
+        didUpdateConnectionState state: WebSocketConnectionState
     ) {
         connectionState = .init(state)
     }
@@ -111,7 +111,7 @@ final class SFUWebSocket: SFUWebSocketProtocol, StreamCore.ConnectionStateDelega
 
 extension SFUConnectionState {
     /// Maps StreamCore's connection state into the video-side representation.
-    init(_ state: StreamCore.WebSocketConnectionState) {
+    init(_ state: WebSocketConnectionState) {
         switch state {
         case .initialized:
             self = .initialized
@@ -133,7 +133,7 @@ extension SFUConnectionState {
 
 extension SFUConnectionState.DisconnectionSource {
     /// Maps StreamCore's disconnection source into the video-side representation.
-    init(_ source: StreamCore.WebSocketConnectionState.DisconnectionSource) {
+    init(_ source: WebSocketConnectionState.DisconnectionSource) {
         switch source {
         case .userInitiated:
             self = .userInitiated

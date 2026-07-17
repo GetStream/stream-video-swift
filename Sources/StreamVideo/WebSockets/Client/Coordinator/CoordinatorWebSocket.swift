@@ -12,15 +12,14 @@ import StreamCore
 /// production uses ``CoordinatorWebSocket`` (backed by
 /// `StreamCore.WebSocketClient`).
 protocol CoordinatorWebSocketProtocol: AnyObject {
-    /// The current connection state (video's `WebSocketConnectionState`, mapped
-    /// from StreamCore's at the boundary).
-    var connectionState: VideoWebSocketConnectionState { get }
+    /// The current connection state.
+    var connectionState: WebSocketConnectionState { get }
     /// Emits every connection-state change.
-    var connectionStatePublisher: AnyPublisher<VideoWebSocketConnectionState, Never> { get }
+    var connectionStatePublisher: AnyPublisher<WebSocketConnectionState, Never> { get }
 
     func connect()
     func disconnect(
-        source: VideoWebSocketConnectionState.DisconnectionSource,
+        source: WebSocketConnectionState.DisconnectionSource,
         completion: @Sendable @escaping () -> Void
     )
 }
@@ -40,27 +39,22 @@ extension CoordinatorWebSocketProtocol {
 ///   app event notification center;
 /// - performs the auth handshake by sending video's connect payload on
 ///   `onWSConnectionEstablished`;
-/// - maps `StreamCore.WebSocketConnectionState` back into video's
-///   `WebSocketConnectionState`.
-///
-/// - TODO: [IOS-1812] Remove this isolation wrapper and its `Video*` aliases
-///   after the remaining connection and error types are unified.
 final class CoordinatorWebSocket:
     CoordinatorWebSocketProtocol,
-    StreamCore.ConnectionStateDelegate,
+    ConnectionStateDelegate,
     @unchecked Sendable {
 
-    private let webSocket: StreamCore.WebSocketClient
+    private let webSocket: WebSocketClient
     /// Builds the connect payload (video's `WSAuthMessageRequest`) sent once the
     /// socket connects. Provided by the caller since it needs the current
     /// user/token; returns `nil` if the caller is gone.
     private let connectPayloadProvider: () -> (any Codable)?
     /// StreamCore's recovery handler, owned here so reconnection stays inside the
     /// StreamCore boundary. Receives state forwarded from this wrapper.
-    private let recoveryHandler: StreamCore.ConnectionRecoveryHandler
+    private let recoveryHandler: ConnectionRecoveryHandler
 
-    @Published private(set) var connectionState: VideoWebSocketConnectionState = .initialized
-    var connectionStatePublisher: AnyPublisher<VideoWebSocketConnectionState, Never> {
+    @Published private(set) var connectionState: WebSocketConnectionState = .initialized
+    var connectionStatePublisher: AnyPublisher<WebSocketConnectionState, Never> {
         $connectionState.eraseToAnyPublisher()
     }
 
@@ -73,7 +67,7 @@ final class CoordinatorWebSocket:
     ) {
         self.connectPayloadProvider = connectPayloadProvider
 
-        let webSocket = StreamCore.WebSocketClient(
+        let webSocket = WebSocketClient(
             sessionConfiguration: sessionConfiguration,
             eventDecoder: JsonEventDecoder(),
             eventNotificationCenter: eventNotificationCenter,
@@ -93,7 +87,7 @@ final class CoordinatorWebSocket:
         let internetConnection = StreamCore.InternetConnection(
             monitor: StreamCore.InternetConnection.Monitor()
         )
-        recoveryHandler = StreamCore.DefaultConnectionRecoveryHandler(
+        recoveryHandler = DefaultConnectionRecoveryHandler(
             webSocketClient: webSocket,
             eventNotificationCenter: eventNotificationCenter,
             backgroundTaskScheduler: backgroundTaskScheduler,
@@ -118,10 +112,10 @@ final class CoordinatorWebSocket:
         }
     }
 
-    private static func makeBackgroundTaskScheduler() -> StreamCore.BackgroundTaskScheduler? {
+    private static func makeBackgroundTaskScheduler() -> BackgroundTaskScheduler? {
         guard !Bundle.main.isAppExtension else { return nil }
         #if os(iOS)
-        return StreamCore.IOSBackgroundTaskScheduler()
+        return IOSBackgroundTaskScheduler()
         #else
         return nil
         #endif
@@ -132,12 +126,12 @@ final class CoordinatorWebSocket:
     }
 
     func disconnect(
-        source: VideoWebSocketConnectionState.DisconnectionSource,
+        source: WebSocketConnectionState.DisconnectionSource,
         completion: @Sendable @escaping () -> Void
     ) {
         webSocket.disconnect(
             code: .normalClosure,
-            source: .init(source),
+            source: source,
             completion: completion
         )
     }
@@ -145,84 +139,12 @@ final class CoordinatorWebSocket:
     // MARK: - ConnectionStateDelegate
 
     func webSocketClient(
-        _ client: StreamCore.WebSocketClient,
-        didUpdateConnectionState state: StreamCore.WebSocketConnectionState
+        _ client: WebSocketClient,
+        didUpdateConnectionState state: WebSocketConnectionState
     ) {
-        connectionState = .init(state)
+        connectionState = state
         // Forward the raw state to the recovery handler (it's a
         // ConnectionStateDelegate but not the socket's delegate — we are).
         recoveryHandler.webSocketClient(client, didUpdateConnectionState: state)
-    }
-}
-
-extension VideoWebSocketConnectionState {
-    /// Maps StreamCore's connection state into video's.
-    init(_ state: StreamCore.WebSocketConnectionState) {
-        switch state {
-        case .initialized:
-            self = .initialized
-        case .connecting:
-            self = .connecting
-        case .authenticating:
-            self = .authenticating
-        case let .connected(healthCheckInfo):
-            self = .connected(
-                healthCheckInfo: VideoHealthCheckInfo(
-                    coordinatorHealthCheck: healthCheckInfo.connectionId.map {
-                        HealthCheckEvent(connectionId: $0, createdAt: Date())
-                    },
-                    sfuHealthCheck: nil
-                )
-            )
-        case let .disconnecting(source):
-            self = .disconnecting(source: .init(source))
-        case let .disconnected(source):
-            self = .disconnected(source: .init(source))
-        @unknown default:
-            self = .disconnected(source: .systemInitiated)
-        }
-    }
-}
-
-extension VideoWebSocketConnectionState.DisconnectionSource {
-    /// Maps StreamCore's disconnection source into video's.
-    ///
-    /// For `serverInitiated`, the StreamCore error's `apiError` (if any) is
-    /// carried through so video's `ClientError.isInvalidTokenError` /
-    /// `apiError` gating keeps working; otherwise the whole error is stored as
-    /// the underlying error. StreamCore's `.timeout` has no video equivalent, so
-    /// it maps to `.systemInitiated`.
-    init(_ source: StreamCore.WebSocketConnectionState.DisconnectionSource) {
-        switch source {
-        case .userInitiated:
-            self = .userInitiated
-        case .systemInitiated:
-            self = .systemInitiated
-        case .noPongReceived:
-            self = .noPongReceived
-        case let .serverInitiated(error):
-            self = .serverInitiated(error: error.map { VideoClientError(with: $0.apiError ?? $0) })
-        case .timeout:
-            self = .systemInitiated
-        @unknown default:
-            self = .systemInitiated
-        }
-    }
-}
-
-extension StreamCore.WebSocketConnectionState.DisconnectionSource {
-    /// Maps video's (outbound) disconnection source into StreamCore's. Used when
-    /// video code asks the wrapper to disconnect.
-    init(_ source: VideoWebSocketConnectionState.DisconnectionSource) {
-        switch source {
-        case .userInitiated:
-            self = .userInitiated
-        case .systemInitiated:
-            self = .systemInitiated
-        case .noPongReceived:
-            self = .noPongReceived
-        case .serverInitiated:
-            self = .serverInitiated(error: nil)
-        }
     }
 }

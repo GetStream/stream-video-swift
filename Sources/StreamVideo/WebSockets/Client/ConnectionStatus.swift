@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 
 // `ConnectionStatus` is just a simplified and friendlier wrapper around `WebSocketConnectionState`.
 
@@ -26,7 +27,6 @@ public enum ConnectionStatus: Equatable, Sendable {
 }
 
 extension ConnectionStatus {
-    // In internal initializer used for convering internal `WebSocketConnectionState` to `ChatClientConnectionStatus`.
     init(webSocketConnectionState: WebSocketConnectionState) {
         switch webSocketConnectionState {
         case .initialized:
@@ -42,121 +42,19 @@ extension ConnectionStatus {
             self = .disconnecting
             
         case let .disconnected(source):
-            let isWaitingForReconnect = webSocketConnectionState.isAutomaticReconnectionEnabled || source.serverError?
+            let serverError = source.serverError
+            let isWaitingForReconnect = webSocketConnectionState.isAutomaticReconnectionEnabled || serverError?
                 .isInvalidTokenError == true
             
-            self = isWaitingForReconnect ? .connecting : .disconnected(error: source.serverError)
+            self = isWaitingForReconnect ? .connecting : .disconnected(error: serverError?.asVideoClientError)
         }
     }
 }
 
 typealias ConnectionId = String
 
-/// A web socket connection state.
-enum WebSocketConnectionState: Equatable {
-    /// Provides additional information about the source of disconnecting.
-    enum DisconnectionSource: Equatable {
-        /// A user initiated web socket disconnecting.
-        case userInitiated
-        
-        /// A server initiated web socket disconnecting, an optional error object is provided.
-        case serverInitiated(error: ClientError? = nil)
-        
-        /// The system initiated web socket disconnecting.
-        case systemInitiated
-        
-        /// `WebSocketPingController` didn't get a pong response.
-        case noPongReceived
-        
-        /// Returns the underlaying error if connection cut was initiated by the server.
-        var serverError: ClientError? {
-            guard case let .serverInitiated(error) = self else { return nil }
-            
-            return error
-        }
-    }
-    
-    /// The initial state meaning that  there was no atempt to connect yet.
-    case initialized
-    
-    /// The web socket is not connected. Contains the source/reason why the disconnection has happened.
-    case disconnected(source: DisconnectionSource)
-    
-    /// The web socket is connecting.
-    case connecting
-    
-    /// The web socket is connected, client is authenticating.
-    case authenticating
-    
-    /// The web socket was connected.
-    case connected(healthCheckInfo: HealthCheckInfo)
-    
-    /// The web socket is disconnecting. `source` contains more info about the source of the event.
-    case disconnecting(source: DisconnectionSource)
-    
-    /// Checks if the connection state is connected.
-    var isConnected: Bool {
-        if case .connected = self {
-            return true
-        }
-        return false
-    }
-    
-    /// Returns false if the connection state is in the `notConnected` state.
-    var isActive: Bool {
-        if case .disconnected = self {
-            return false
-        }
-        return true
-    }
-    
-    /// Returns `true` is the state requires and allows automatic reconnection.
-    var isAutomaticReconnectionEnabled: Bool {
-        guard case let .disconnected(source) = self else { return false }
-        
-        switch source {
-        case let .serverInitiated(clientError):
-            if let wsEngineError = clientError?.underlyingError as? WebSocketEngineError,
-               wsEngineError.code == WebSocketEngineError.stopErrorCode {
-                // Don't reconnect on `stop` errors
-                return false
-            }
-            
-            if let serverInitiatedError = clientError?.underlyingError as? ErrorPayload {
-                if serverInitiatedError.isInvalidTokenError {
-                    // Don't reconnect on invalid token errors
-                    return false
-                }
-                
-                if serverInitiatedError.isClientError {
-                    // Don't reconnect on client side errors
-                    return false
-                }
-            }
-
-            // Coordinator errors now arrive as `StreamAPIError` (not `ErrorPayload`)
-            // after the error-model migration, so gate on the API error too. Uses
-            // code ranges directly since StreamCore's computed helpers aren't
-            // visible here (this file doesn't import StreamCore).
-            if let apiError = clientError?.apiError {
-                if ClosedRange.tokenInvalidErrorCodes ~= apiError.code {
-                    // Don't reconnect on invalid token errors
-                    return false
-                }
-
-                if ClosedRange.clientErrorCodes ~= apiError.statusCode {
-                    // Don't reconnect on client side errors
-                    return false
-                }
-            }
-
-            return true
-        case .systemInitiated:
-            return true
-        case .noPongReceived:
-            return true
-        case .userInitiated:
-            return false
-        }
+private extension StreamCore.ClientError {
+    var asVideoClientError: ClientError {
+        ClientError(with: (apiError as Error?) ?? self)
     }
 }

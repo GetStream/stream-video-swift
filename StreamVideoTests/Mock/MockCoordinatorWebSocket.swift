@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import StreamCore
 @testable import StreamVideo
 
 final class MockCoordinatorWebSocket: CoordinatorWebSocketProtocol, Mockable, @unchecked Sendable {

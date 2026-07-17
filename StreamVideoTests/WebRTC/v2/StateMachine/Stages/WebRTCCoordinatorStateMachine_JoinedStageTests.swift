@@ -343,9 +343,11 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
             sfuAdapter: mockCoordinatorStack.sfuStack.adapter
         )
         subject.context.fastReconnectDeadlineSeconds = 12
-        var sfuError = Stream_Video_Sfu_Models_Error()
-        sfuError.shouldRetry = true
-        let clientError = ClientError(with: sfuError)
+        let sfuError = {
+            var result = Stream_Video_Sfu_Models_Error()
+            result.shouldRetry = true
+            return result
+        }()
         let expectedError = sfuError
 
         await assertTransitionAfterTrigger(
@@ -353,7 +355,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
             trigger: { [mockCoordinatorStack] in
                 mockCoordinatorStack?.sfuStack.setConnectionState(
                     to: .disconnected(
-                        source: .serverInitiated(error: clientError)
+                        source: .serverInitiated(error: .init(with: sfuError))
                     )
                 )
             }
@@ -376,9 +378,11 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
             sfuAdapter: mockCoordinatorStack.sfuStack.adapter
         )
         subject.context.fastReconnectDeadlineSeconds = 12
-        var sfuError = Stream_Video_Sfu_Models_Error()
-        sfuError.shouldRetry = false
-        let clientError = ClientError(with: sfuError)
+        let sfuError = {
+            var result = Stream_Video_Sfu_Models_Error()
+            result.shouldRetry = false
+            return result
+        }()
         let expectedError = sfuError
 
         await assertTransitionAfterTrigger(
@@ -386,7 +390,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
             trigger: { [mockCoordinatorStack] in
                 mockCoordinatorStack?.sfuStack.setConnectionState(
                     to: .disconnected(
-                        source: .serverInitiated(error: clientError)
+                        source: .serverInitiated(error: .init(with: sfuError))
                     )
                 )
             }
