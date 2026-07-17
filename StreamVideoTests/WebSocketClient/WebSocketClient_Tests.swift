@@ -151,6 +151,7 @@ final class WebSocketClient_Tests: XCTestCase, @unchecked Sendable {
 
         // Assert disconnect is called
         AssertAsync.willBeEqual(engine!.disconnect_calledCount, 1)
+        XCTAssertEqual(engine!.disconnect_closeCode, .normalClosure)
     }
 
     func test_whenConnectedAndEngineDisconnectsWithServerError_itIsTreatedAsServerInitiatedDisconnect() {
@@ -263,7 +264,7 @@ final class WebSocketClient_Tests: XCTestCase, @unchecked Sendable {
         AssertAsync.willBeEqual(pingController.pongReceivedCount, 2)
     }
 
-    func test_webSocketPingController_disconnectOnNoPongReceived_disconnectsEngine() {
+    func test_webSocketPingController_disconnectOnNoPongReceived_coordinatorUsesNormalClosure() {
         // Simulate connection to make sure web socket engine exists
         test_connectionFlow()
 
@@ -275,6 +276,30 @@ final class WebSocketClient_Tests: XCTestCase, @unchecked Sendable {
             Assert.willBeEqual(self.webSocketClient.connectionState, .disconnecting(source: .noPongReceived))
             Assert.willBeEqual(self.engine!.disconnect_calledCount, 1)
         }
+        XCTAssertEqual(engine!.disconnect_closeCode, .normalClosure)
+    }
+
+    func test_webSocketPingController_disconnectOnNoPongReceived_sfuUsesUnhealthyConnectionClosure() {
+        var environment = WebSocketClient.Environment.mock
+        environment.timerType = VirtualTimeTimer.self
+        webSocketClient = WebSocketClient(
+            sessionConfiguration: .ephemeral,
+            eventDecoder: decoder,
+            eventNotificationCenter: eventNotificationCenter,
+            webSocketClientType: .sfu,
+            environment: environment,
+            connectURL: connectURL
+        )
+        webSocketClient.connect()
+        AssertAsync.willBeEqual(engine!.connect_calledCount, 1)
+
+        pingController.delegate?.disconnectOnNoPongReceived()
+
+        AssertAsync {
+            Assert.willBeEqual(self.webSocketClient.connectionState, .disconnecting(source: .noPongReceived))
+            Assert.willBeEqual(self.engine!.disconnect_calledCount, 1)
+        }
+        XCTAssertEqual(engine!.disconnect_closeCode?.rawValue, 4001)
     }
 
     // MARK: - Event handling tests

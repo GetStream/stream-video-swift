@@ -295,7 +295,14 @@ extension WebSocketClient: WebSocketPingControllerDelegate {
 
     func disconnectOnNoPongReceived() {
         log.debug("disconnecting from \(connectURL)", subsystems: .webSocket)
-        disconnect(source: .noPongReceived) {
+        let closeCode: URLSessionWebSocketTask.CloseCode
+        switch webSocketClientType {
+        case .coordinator:
+            closeCode = .normalClosure
+        case .sfu:
+            closeCode = .init(rawValue: 4001)!
+        }
+        disconnect(code: closeCode, source: .noPongReceived) {
             log.debug("Websocket is disconnected because of no pong received", subsystems: .webSocket)
         }
     }
