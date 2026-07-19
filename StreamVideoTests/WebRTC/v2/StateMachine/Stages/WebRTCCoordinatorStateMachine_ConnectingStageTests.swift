@@ -257,7 +257,7 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
         }
     }
 
-    func test_transition_fromIdle_successfulAuthenticationCreatesSFUFullObserver() async throws {
+    func test_transition_fromIdle_successfulAuthenticationCreatesSFUErrorObserver() async throws {
         subject.context.coordinator = mockCoordinatorStack.coordinator
         subject.context.authenticator = mockCoordinatorStack.webRTCAuthenticator
         mockCoordinatorStack.webRTCAuthenticator.stub(
@@ -276,7 +276,7 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
             subject: subject
         ) { target in
             XCTAssertEqual(
-                target.context.sfuFullObserver?.hostname,
+                target.context.sfuErrorObserver?.hostname,
                 self.mockCoordinatorStack.sfuStack.adapter.hostname
             )
         }

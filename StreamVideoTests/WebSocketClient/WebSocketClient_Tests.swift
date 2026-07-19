@@ -364,6 +364,48 @@ final class WebSocketClient_Tests: XCTestCase, @unchecked Sendable {
         cancellable.cancel()
     }
 
+    func test_webSocketDidReceiveMessage_withSFUError_publishesErrorBeforeDisconnecting(
+    ) throws {
+        var environment = WebSocketClient.Environment.mock
+        environment.timerType = VirtualTimeTimer.self
+        let subject = WebSocketClient(
+            sessionConfiguration: .ephemeral,
+            eventDecoder: WebRTCEventDecoder(),
+            eventNotificationCenter: eventNotificationCenter,
+            webSocketClientType: .sfu,
+            environment: environment,
+            connectURL: connectURL
+        )
+        let receiptExpectation = expectation(
+            description: "SFU error event received"
+        )
+        var receivedError: Stream_Video_Sfu_Event_Error?
+        let cancellable = subject
+            .eventSubject
+            .compactMap { event -> Stream_Video_Sfu_Event_Error? in
+                guard case let .sfuEvent(.error(error)) = event else {
+                    return nil
+                }
+                return error
+            }
+            .sink {
+                receivedError = $0
+                receiptExpectation.fulfill()
+            }
+        defer { cancellable.cancel() }
+
+        var expectedError = Stream_Video_Sfu_Event_Error()
+        expectedError.error.code = .sfuFull
+        expectedError.reconnectStrategy = .migrate
+        var event = Stream_Video_Sfu_Event_SfuEvent()
+        event.eventPayload = .error(expectedError)
+
+        subject.webSocketDidReceiveMessage(try event.serializedData())
+
+        wait(for: [receiptExpectation], timeout: 1)
+        XCTAssertEqual(receivedError, expectedError)
+    }
+
     func test_whenNonHealthCheckEventComes_getsBatchedAndPostedAfterProcessing() throws {
         // Simulate connection
         test_connectionFlow()

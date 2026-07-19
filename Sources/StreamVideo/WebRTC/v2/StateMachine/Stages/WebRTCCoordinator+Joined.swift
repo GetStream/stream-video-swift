@@ -538,7 +538,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
         /// by the event while tracking rejected SFU edges for migration retries.
         private func observeSFUFullError() {
             context
-                .sfuFullObserver?
+                .sfuErrorObserver?
                 .publisher
                 .receive(on: processingQueue)
                 .log(.warning, subsystems: .sfu) { _ in

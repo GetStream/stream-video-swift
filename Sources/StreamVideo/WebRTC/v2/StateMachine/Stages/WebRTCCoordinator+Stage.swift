@@ -36,9 +36,8 @@ extension WebRTCCoordinator.StateMachine {
             /// stage transitions.
             var updateSubscriptionsAdapter: WebRTCUpdateSubscriptionsAdapter?
 
-            /// Observes SFU-full events for the active adapter so we can force
-            /// migration immediately when the current SFU has no capacity.
-            var sfuFullObserver: WebRTCSFUFullObserver?
+            /// Observes terminal errors from the active SFU.
+            var sfuErrorObserver: WebRTCSFUErrorObserver?
 
             /// Observes publisher/subscriber peer-connection state to report the
             /// ``ClientEventStage/peerConnectionConnect`` event pairs. Retained on

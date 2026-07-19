@@ -223,6 +223,11 @@ extension WebSocketClient: WebSocketEngineDelegate {
 
         if let error = event.error() {
             log.error("Received an error webSocket event.", subsystems: .webSocket, error: error)
+            // TODO: Move this SFU error forwarding to the StreamCore migration
+            // after it removes StreamVideo's WebSocket client.
+            if case .sfuEvent = event {
+                eventSubject.send(event)
+            }
             connectionState = .disconnecting(source: .serverInitiated(error: ClientError(with: error)))
             return
         } else {

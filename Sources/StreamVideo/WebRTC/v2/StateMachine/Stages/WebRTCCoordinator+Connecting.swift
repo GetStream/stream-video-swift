@@ -217,7 +217,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
                     // Start observing SFU full events before the WS handshake
                     // progresses so early server-side rejections are not lost.
-                    context.sfuFullObserver = .init(sfuAdapter)
+                    context.sfuErrorObserver = .init(sfuAdapter)
 
                     try Task.checkCancellation()
 

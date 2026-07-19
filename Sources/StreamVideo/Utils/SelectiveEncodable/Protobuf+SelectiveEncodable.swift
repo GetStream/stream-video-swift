@@ -63,6 +63,10 @@ extension Stream_Video_Sfu_Event_VideoLayerSetting: SelectiveEncodable {}
 extension Stream_Video_Sfu_Models_Error: SelectiveEncodable {}
 extension Stream_Video_Sfu_Models_VideoDimension: SelectiveEncodable {}
 
+// MARK: - Additional conformances
+
+extension Stream_Video_Sfu_Event_Error: Error {}
+
 // MARK: - Extended Selective Encodable Conformances
 
 extension Stream_Video_Sfu_Event_JoinRequest: SelectiveEncodable {

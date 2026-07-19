@@ -6,10 +6,10 @@ import Combine
 @testable import StreamVideo
 import XCTest
 
-final class WebRTCSFUFullObserver_Tests: XCTestCase, @unchecked Sendable {
+final class WebRTCSFUErrorObserver_Tests: XCTestCase, @unchecked Sendable {
     private var cancellables: Set<AnyCancellable> = []
     private lazy var sfuStack: MockSFUStack! = .init()
-    private lazy var subject: WebRTCSFUFullObserver! = .init(sfuStack.adapter)
+    private lazy var subject: WebRTCSFUErrorObserver! = .init(sfuStack.adapter)
 
     // MARK: - Lifecycle
 

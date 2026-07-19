@@ -25,9 +25,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
 extension WebRTCCoordinator.StateMachine.Stage {
 
     /// Represents the joining stage in the WebRTC coordinator state machine.
-    final class JoiningStage:
-        WebRTCCoordinator.StateMachine.Stage,
-        @unchecked Sendable {
+    final class JoiningStage: WebRTCCoordinator.StateMachine.Stage, @unchecked Sendable {
 
         @Injected(\.audioStore) private var audioStore
 
@@ -170,9 +168,11 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         sfuAdapter: sfuAdapter
                     )
                 } catch {
-                    context.reconnectionStrategy = context
-                        .reconnectionStrategy
-                        .next
+                    if (error as? Stream_Video_Sfu_Event_Error) == nil {
+                        context.reconnectionStrategy = context
+                            .reconnectionStrategy
+                            .next
+                    }
                     transitionErrorOrDisconnect(error)
                 }
             }
@@ -240,7 +240,9 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         sfuAdapter: sfuAdapter
                     )
                 } catch {
-                    context.reconnectionStrategy = .rejoin
+                    if (error as? Stream_Video_Sfu_Event_Error) == nil {
+                        context.reconnectionStrategy = .rejoin
+                    }
                     transitionDisconnectOrError(error)
                 }
             }
@@ -745,31 +747,63 @@ extension WebRTCCoordinator.StateMachine.Stage {
             }
         }
 
-        /// Waits for the SFU `JoinResponse` and resolves `WSJoin` telemetry.
+        /// Waits for the SFU `JoinResponse` while observing terminal SFU errors
+        /// and resolves `WSJoin` telemetry.
         ///
         /// The response is the success boundary for `WSJoin`. Fast reconnects
         /// only emit this telemetry when the SFU websocket was unhealthy and a
-        /// new WSJoin attempt had to be tracked.
+        /// new WSJoin attempt had to be tracked. Join-specific SFU errors
+        /// interrupt the wait.
         ///
         /// - Parameters:
         ///   - sfuAdapter: SFU adapter that publishes join responses.
         ///   - shouldReportWebSocketJoin: Whether a `WSJoin` event pair was
         ///     started for this join response.
         /// - Returns: The SFU join response.
+        /// - Throws: The terminal SFU error or a join-response timeout.
         private func observeSFUResponse(
             sfuAdapter: SFUAdapter,
             shouldReportWebSocketJoin: Bool
         ) async throws -> Stream_Video_Sfu_Event_JoinResponse {
+            typealias ResultType = Result<Stream_Video_Sfu_Event_JoinResponse, Stream_Video_Sfu_Event_Error>
             do {
-                let joinResponse = try await sfuAdapter
+                let joinResponsePublisher = sfuAdapter
                     .publisher(eventType: Stream_Video_Sfu_Event_JoinResponse.self)
-                    .nextValue(timeout: WebRTCConfiguration.timeout.join)
+                    .map { ResultType.success($0) }
 
-                if shouldReportWebSocketJoin {
-                    await completeWebSocketJoin(nil)
+                guard let sfuErrorObserver = context.sfuErrorObserver else {
+                    throw ClientError(
+                        "WebRTCSFUErrorObserver instance not available."
+                    )
                 }
 
-                return joinResponse
+                let joinResult = try await joinResponsePublisher
+                    .merge(
+                        with: sfuErrorObserver
+                            .joiningPublisher
+                            .map { ResultType.failure($0) }
+                    )
+                    .nextValue(timeout: WebRTCConfiguration.timeout.join)
+
+                switch joinResult {
+                case .success(let response):
+                    if shouldReportWebSocketJoin {
+                        await completeWebSocketJoin(nil)
+                    }
+                    return response
+                case .failure(let error):
+                    context.reconnectionStrategy = .init(
+                        from: error.reconnectStrategy,
+                        fastReconnectDeadlineSeconds: context.fastReconnectDeadlineSeconds
+                    )
+                    if
+                        error.error.code == .sfuFull,
+                        context.currentSFU.isEmpty == false,
+                        context.migratingFromList.contains(context.currentSFU) == false {
+                        context.migratingFromList = context.migratingFromList + [context.currentSFU]
+                    }
+                    throw error
+                }
             } catch {
                 if shouldReportWebSocketJoin {
                     await completeWebSocketJoin(error)

@@ -546,7 +546,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
     func test_transition_sfuFullObserved_landsOnDisconnectedWithMigrationContextUpdated() async {
         subject.context.currentSFU = "edge-1"
         subject.context.migratingFromList = ["edge-0"]
-        subject.context.sfuFullObserver = .init(mockCoordinatorStack.sfuStack.adapter)
+        subject.context.sfuErrorObserver = .init(mockCoordinatorStack.sfuStack.adapter)
 
         await assertTransitionAfterTrigger(
             expectedTarget: .disconnected,
@@ -567,7 +567,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
     func test_transition_sfuFullObserved_withDuplicateCurrentSFU_keepsUniqueMigratingFromList() async {
         subject.context.currentSFU = "edge-1"
         subject.context.migratingFromList = ["edge-0", "edge-1"]
-        subject.context.sfuFullObserver = .init(mockCoordinatorStack.sfuStack.adapter)
+        subject.context.sfuErrorObserver = .init(mockCoordinatorStack.sfuStack.adapter)
 
         await assertTransitionAfterTrigger(
             expectedTarget: .disconnected,
@@ -588,7 +588,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
     func test_transition_sfuFullObserved_withEmptyCurrentSFU_doesNotAppendToMigratingFromList() async {
         subject.context.currentSFU = ""
         subject.context.migratingFromList = ["edge-0"]
-        subject.context.sfuFullObserver = .init(mockCoordinatorStack.sfuStack.adapter)
+        subject.context.sfuErrorObserver = .init(mockCoordinatorStack.sfuStack.adapter)
 
         await assertTransitionAfterTrigger(
             expectedTarget: .disconnected,
@@ -609,7 +609,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
     func test_transition_sfuFullObserved_withRejoinStrategy_usesStrategyFromErrorPayload() async {
         subject.context.currentSFU = "edge-1"
         subject.context.migratingFromList = []
-        subject.context.sfuFullObserver = .init(mockCoordinatorStack.sfuStack.adapter)
+        subject.context.sfuErrorObserver = .init(mockCoordinatorStack.sfuStack.adapter)
 
         await assertTransitionAfterTrigger(
             expectedTarget: .disconnected,

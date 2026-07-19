@@ -107,11 +107,11 @@ final class WebRTCCoordinatorStateMachine_DisconnectedStageTests: XCTestCase, @u
         }
     }
 
-    func test_transition_cleansUpSFUFullObserver() async throws {
-        subject.context.sfuFullObserver = .init(mockCoordinatorStack.sfuStack.adapter)
+    func test_transition_cleansUpSFUErrorObserver() async throws {
+        subject.context.sfuErrorObserver = .init(mockCoordinatorStack.sfuStack.adapter)
 
         await assertTransitionAfterTrigger(trigger: {}) { target in
-            XCTAssertNil(target.context.sfuFullObserver)
+            XCTAssertNil(target.context.sfuErrorObserver)
         }
     }
 

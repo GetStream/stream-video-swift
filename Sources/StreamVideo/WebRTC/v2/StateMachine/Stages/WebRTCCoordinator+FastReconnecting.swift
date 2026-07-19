@@ -78,6 +78,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                             eventNotificationCenter: .init()
                         )
                     )
+                    context.sfuErrorObserver = .init(sfuAdapter)
 
                     try Task.checkCancellation()
 

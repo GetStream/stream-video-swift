@@ -155,6 +155,33 @@ final class WebRTCCoordinatorStateMachine_FastReconnectingStageTests: XCTestCase
         XCTAssertTrue(newWebSocket.connectionStateDelegate === sfuAdapter)
     }
 
+    func test_transition_refreshWasCalled_rebindsSFUErrorObserverToNewWebSocket(
+    ) async {
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        let sfuAdapter = mockCoordinatorStack.sfuStack.adapter
+        subject.context.sfuErrorObserver = .init(sfuAdapter)
+        await mockCoordinatorStack.coordinator.stateAdapter.set(
+            sfuAdapter: sfuAdapter
+        )
+        let newWebSocket = MockWebSocketClient(webSocketClientType: .sfu)
+        mockCoordinatorStack.sfuStack.webSocketFactory.stub(
+            for: .build,
+            with: newWebSocket
+        )
+
+        _ = subject.transition(from: .disconnected(subject.context))
+        await wait(for: 0.5)
+
+        var error = Stream_Video_Sfu_Event_Error()
+        error.error.code = .sfuFull
+        newWebSocket.eventSubject.send(.sfuEvent(.error(error)))
+
+        XCTAssertEqual(
+            subject.context.sfuErrorObserver?.shouldMigrateError,
+            error
+        )
+    }
+
     func test_transition_connectWasCalledOnSFUAdapter() async throws {
         subject.context.coordinator = mockCoordinatorStack.coordinator
         let sfuAdapter = mockCoordinatorStack.sfuStack.adapter
