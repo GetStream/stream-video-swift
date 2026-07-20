@@ -14,9 +14,9 @@ protocol SFUWebSocketProtocol: AnyObject {
     /// The URL used for the WebSocket connection.
     var connectURL: URL { get }
     /// The current connection state.
-    var connectionState: SFUConnectionState { get }
+    var connectionState: WebSocketConnectionState { get }
     /// Emits every connection-state change.
-    var connectionStatePublisher: AnyPublisher<SFUConnectionState, Never> { get }
+    var connectionStatePublisher: AnyPublisher<WebSocketConnectionState, Never> { get }
     /// Emits every inbound SFU event payload.
     var eventPublisher: AnyPublisher<Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload, Never> { get }
 
@@ -30,21 +30,16 @@ protocol SFUWebSocketProtocol: AnyObject {
 
 /// Owns the SFU signaling WebSocket, backed by `StreamCore.WebSocketClient`.
 ///
-/// This is the single boundary that imports StreamCore for the SFU WebSocket.
-/// It maps StreamCore connection states and server errors into
-/// `SFUConnectionState`, narrows inbound events to SFU payloads, and provides
-/// the protocol seam used to mock the socket in `SFUAdapter` tests.
-///
-/// - TODO: Remove this wrapper when `SFUAdapter` can consume StreamCore's
-///   state, error, and event types directly and has an equivalent mocking seam.
+/// Narrows inbound events to SFU payloads and provides the protocol seam used
+/// to mock the socket in `SFUAdapter` tests.
 final class SFUWebSocket: SFUWebSocketProtocol, ConnectionStateDelegate, @unchecked Sendable {
 
     private let webSocket: WebSocketClient
 
-    /// The current connection state, mapped from StreamCore's connection state.
-    @Published private(set) var connectionState: SFUConnectionState = .initialized
+    /// The current connection state.
+    @Published private(set) var connectionState: WebSocketConnectionState = .initialized
 
-    var connectionStatePublisher: AnyPublisher<SFUConnectionState, Never> {
+    var connectionStatePublisher: AnyPublisher<WebSocketConnectionState, Never> {
         $connectionState.eraseToAnyPublisher()
     }
 
@@ -111,7 +106,7 @@ final class SFUWebSocket: SFUWebSocketProtocol, ConnectionStateDelegate, @unchec
         _ client: WebSocketClient,
         didUpdateConnectionState state: WebSocketConnectionState
     ) {
-        connectionState = .init(state)
+        connectionState = state
     }
 }
 
@@ -148,48 +143,6 @@ struct SFUWebSocketCloseCodeProvider: WebSocketCloseCodeProviding {
         @unknown default:
             // A future StreamCore context is not implicitly recoverable.
             return .normalClosure
-        }
-    }
-}
-
-extension SFUConnectionState {
-    /// Maps StreamCore's connection state into the video-side representation.
-    init(_ state: WebSocketConnectionState) {
-        switch state {
-        case .initialized:
-            self = .initialized
-        case .connecting:
-            self = .connecting
-        case .authenticating:
-            self = .authenticating
-        case .connected:
-            self = .connected
-        case let .disconnecting(source):
-            self = .disconnecting(source: .init(source))
-        case let .disconnected(source):
-            self = .disconnected(source: .init(source))
-        @unknown default:
-            self = .disconnected(source: .systemInitiated)
-        }
-    }
-}
-
-extension SFUConnectionState.DisconnectionSource {
-    /// Maps StreamCore's disconnection source into the video-side representation.
-    init(_ source: WebSocketConnectionState.DisconnectionSource) {
-        switch source {
-        case .userInitiated:
-            self = .userInitiated
-        case let .serverInitiated(error):
-            self = .serverInitiated(error: error?.underlyingError)
-        case .systemInitiated:
-            self = .systemInitiated
-        case .noPongReceived:
-            self = .noPongReceived
-        case .timeout:
-            self = .timeout
-        @unknown default:
-            self = .systemInitiated
         }
     }
 }
