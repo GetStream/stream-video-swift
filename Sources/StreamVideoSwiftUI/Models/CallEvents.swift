@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import protocol StreamCore.Event
 import StreamVideo
 
 /// Represents a call event.
