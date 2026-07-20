@@ -47,6 +47,9 @@ extension ConnectionStatus {
                 .isInvalidTokenError == true
             
             self = isWaitingForReconnect ? .connecting : .disconnected(error: serverError?.asVideoClientError)
+
+        @unknown default:
+            self = .disconnected()
         }
     }
 }
