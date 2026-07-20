@@ -16,6 +16,7 @@ final class MockSFUWebSocket: SFUWebSocketProtocol, Mockable, @unchecked Sendabl
         case connect
         case disconnect
         case disconnectAsync
+        case disconnectForReconfiguration
         case send
         case inject
     }
@@ -24,6 +25,7 @@ final class MockSFUWebSocket: SFUWebSocketProtocol, Mockable, @unchecked Sendabl
         case connect
         case disconnect(code: URLSessionWebSocketTask.CloseCode)
         case disconnectAsync
+        case disconnectForReconfiguration
         case send(message: any StreamCore.SendableEvent)
         case inject(payload: Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload)
 
@@ -34,6 +36,8 @@ final class MockSFUWebSocket: SFUWebSocketProtocol, Mockable, @unchecked Sendabl
             case let .disconnect(code):
                 return code
             case .disconnectAsync:
+                return ()
+            case .disconnectForReconfiguration:
                 return ()
             case let .send(message):
                 return message
@@ -84,6 +88,12 @@ final class MockSFUWebSocket: SFUWebSocketProtocol, Mockable, @unchecked Sendabl
 
     func disconnect(code: URLSessionWebSocketTask.CloseCode) {
         stubbedFunctionInput[.disconnect]?.append(.disconnect(code: code))
+    }
+
+    func disconnectForReconfiguration() {
+        stubbedFunctionInput[.disconnectForReconfiguration]?.append(
+            .disconnectForReconfiguration
+        )
     }
 
     func send(_ message: any StreamCore.SendableEvent) {

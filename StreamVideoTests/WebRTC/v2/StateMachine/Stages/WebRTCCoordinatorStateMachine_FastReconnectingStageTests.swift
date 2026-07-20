@@ -104,14 +104,8 @@ final class WebRTCCoordinatorStateMachine_FastReconnectingStageTests: XCTestCase
         _ = subject.transition(from: .disconnected(subject.context))
         await wait(for: 0.5)
 
-        XCTAssertEqual(webSocket.timesCalled(.disconnect), 1)
-        XCTAssertEqual(
-            webSocket.recordedInputPayload(
-                URLSessionWebSocketTask.CloseCode.self,
-                for: .disconnect
-            )?.first,
-            .init(rawValue: 4002)
-        )
+        XCTAssertEqual(webSocket.timesCalled(.disconnectForReconfiguration), 1)
+        XCTAssertEqual(webSocket.timesCalled(.disconnect), 0)
     }
 
     func test_transition_refreshWasCalledOnSFUAdapter_newWebSocketClientWasConfiguredCorrectly() async throws {
