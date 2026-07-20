@@ -4,18 +4,16 @@
 
 import Combine
 import Foundation
+import StreamCore
 
 /// A class that manages the communication with a Selective Forwarding Unit (SFU) for video streaming.
 ///
 /// The `SFUAdapter` class handles both WebSocket connections and HTTP requests to the SFU server.
 /// It provides methods for managing video tracks, updating subscriptions, and handling WebRTC signaling.
 ///
-/// The SFU signaling WebSocket is backed by `StreamCore.WebSocketClient` via the
-/// ``SFUWebSocket`` wrapper. The wrapper is the single place that imports
-/// StreamCore for the SFU path, so this type — and the WebRTC state machine it
-/// feeds — stay StreamCore-free and keep using video-owned types such as
-/// ``SFUConnectionState``. This is why `SFUAdapter` is no longer a
-/// `ConnectionStateDelegate`: state now arrives through the wrapper's publisher.
+/// The SFU signaling WebSocket is backed by `StreamCore.WebSocketClient` via
+/// ``SFUWebSocket``. `SFUAdapter` observes the socket's state publisher instead
+/// of acting as `ConnectionStateDelegate` directly.
 final class SFUAdapter: CustomStringConvertible, @unchecked Sendable {
 
     /// Configuration for the SFU service.
@@ -69,10 +67,8 @@ final class SFUAdapter: CustomStringConvertible, @unchecked Sendable {
 
     /// The current connection state of the WebSocket.
     ///
-    /// Mirrors ``SFUWebSocket``'s state (see ``setUpPublishers()``), which maps
-    /// `StreamCore.WebSocketConnectionState` into the video-owned
-    /// ``SFUConnectionState`` so consumers never observe StreamCore types.
-    @Published private(set) var connectionState: SFUConnectionState = .initialized
+    /// Mirrors ``SFUWebSocket``'s state (see ``setUpPublishers()``).
+    @Published private(set) var connectionState: WebSocketConnectionState = .initialized
 
     /// A publisher that is used to inform subscribers that the SFUAdapter has refreshed its webSocket
     /// connection.
@@ -607,9 +603,6 @@ final class SFUAdapter: CustomStringConvertible, @unchecked Sendable {
             .sink { [weak self] in self?.setUpPublishers() }
             .store(in: disposableBag)
 
-        // Mirror the wrapper's already-mapped SFUConnectionState into our own
-        // published property (the wrapper is the ConnectionStateDelegate now, so
-        // this replaces the old delegate callback).
         webSocket
             .connectionStatePublisher
             .sink { [weak self] in self?.connectionState = $0 }

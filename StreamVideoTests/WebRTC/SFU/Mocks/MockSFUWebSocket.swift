@@ -64,9 +64,9 @@ final class MockSFUWebSocket: SFUWebSocketProtocol, Mockable, @unchecked Sendabl
 
     var connectURL: URL = .init(string: "https://getstream.io")!
 
-    @Published var connectionStateValue: SFUConnectionState = .initialized
-    var connectionState: SFUConnectionState { connectionStateValue }
-    var connectionStatePublisher: AnyPublisher<SFUConnectionState, Never> {
+    @Published var connectionStateValue: WebSocketConnectionState = .initialized
+    var connectionState: WebSocketConnectionState { connectionStateValue }
+    var connectionStatePublisher: AnyPublisher<WebSocketConnectionState, Never> {
         $connectionStateValue.eraseToAnyPublisher()
     }
 
@@ -108,7 +108,7 @@ final class MockSFUWebSocket: SFUWebSocketProtocol, Mockable, @unchecked Sendabl
     // MARK: - Helpers
 
     /// Simulates a connection-state change.
-    func simulate(state: SFUConnectionState) {
+    func simulate(state: WebSocketConnectionState) {
         connectionStateValue = state
     }
 

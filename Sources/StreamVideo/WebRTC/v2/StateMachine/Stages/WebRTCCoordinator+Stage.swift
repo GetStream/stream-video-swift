@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import StreamCore
 
 extension WebRTCCoordinator.StateMachine {
     /// Represents a stage in the WebRTC coordinator state machine.
@@ -25,10 +26,7 @@ extension WebRTCCoordinator.StateMachine {
             var disconnectionTimeout: TimeInterval = 0
             var reportingIntervalMs: TimeInterval = 0
             var reconnectionStrategy: ReconnectionStrategy = .unknown
-            // Uses the video-owned `SFUConnectionState.DisconnectionSource`
-            // (mapped from StreamCore at the `SFUWebSocket` boundary) so the
-            // state machine stays StreamCore-free.
-            var disconnectionSource: SFUConnectionState.DisconnectionSource?
+            var disconnectionSource: WebSocketConnectionState.DisconnectionSource?
             var flowError: Error?
             var joinSource: JoinSource?
             var joinPolicy: WebRTCJoinPolicy = .default
