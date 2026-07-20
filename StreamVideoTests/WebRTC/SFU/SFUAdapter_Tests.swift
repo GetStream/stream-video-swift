@@ -112,7 +112,10 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
             )
         )
 
-        XCTAssertEqual(mockWebSocket.timesCalled(.disconnect), 1)
+        XCTAssertEqual(
+            mockWebSocket.timesCalled(.disconnectForReconfiguration),
+            1
+        )
     }
 
     func test_refresh_oldWebSocketDisconnectsNoLongerReceivesCalls() throws {
