@@ -42,51 +42,12 @@ struct MockSFUStack: @unchecked Sendable {
     // use it to establish and fail the initial connection after configuring
     // `nextWebSocket` as its replacement.
     func setConnectionState(to state: WebSocketConnectionState) {
-        webSocket.simulate(state: .init(webSocketConnectionState: state))
+        webSocket.simulate(state: state)
     }
 
     func receiveEvent(_ event: WrappedEvent) {
         if case let .sfuEvent(payload) = event {
             webSocket.receive(payload)
-        }
-    }
-}
-
-// Test-only mapping from the (coordinator) `WebSocketConnectionState` used by
-// existing tests into the SFU-specific `SFUConnectionState`. Kept in the test
-// target since production never converts between the two.
-extension SFUConnectionState {
-    init(webSocketConnectionState state: WebSocketConnectionState) {
-        switch state {
-        case .initialized:
-            self = .initialized
-        case .connecting:
-            self = .connecting
-        case .authenticating:
-            self = .authenticating
-        case .connected:
-            self = .connected
-        case let .disconnecting(source):
-            self = .disconnecting(source: .init(source))
-        case let .disconnected(source):
-            self = .disconnected(source: .init(source))
-        }
-    }
-}
-
-extension SFUConnectionState.DisconnectionSource {
-    init(_ source: WebSocketConnectionState.DisconnectionSource) {
-        switch source {
-        case .userInitiated:
-            self = .userInitiated
-        case let .serverInitiated(error):
-            self = .serverInitiated(error: error?.underlyingError)
-        case .systemInitiated:
-            self = .systemInitiated
-        case .noPongReceived:
-            self = .noPongReceived
-        case .timeout:
-            self = .systemInitiated
         }
     }
 }

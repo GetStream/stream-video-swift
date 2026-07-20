@@ -104,8 +104,8 @@ final class WSEventsMiddleware_Tests: XCTestCase, @unchecked Sendable {
         }
         subject.add(subscriber: subscriber)
 
-        _ = subject.handle(event: WrappedEvent.internalEvent(StreamCore.WSConnected()))
-        _ = subject.handle(event: WrappedEvent.internalEvent(StreamCore.WSDisconnected()))
+        _ = subject.handle(event: WrappedEvent.internalEvent(WSConnected()))
+        _ = subject.handle(event: WrappedEvent.internalEvent(WSDisconnected()))
 
         wait(for: [expectation], timeout: defaultTimeout)
         XCTAssertEqual(

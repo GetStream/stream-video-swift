@@ -3,6 +3,8 @@
 //
 
 import Combine
+import class StreamCore.ClientError
+import enum StreamCore.WebSocketConnectionState
 @testable import StreamVideo
 @preconcurrency import XCTest
 
@@ -199,9 +201,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
             XCTAssertEqual(
                 target.context.disconnectionSource,
                 .serverInitiated(
-                    error: ClientError.NetworkError(
-                        "Not available"
-                    )
+                    error: StreamCore.ClientError.NetworkError("Not available")
                 )
             )
         }
@@ -348,7 +348,9 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
             result.shouldRetry = true
             return result
         }()
-        let expectedError = sfuError
+        let expectedSource: WebSocketConnectionState.DisconnectionSource = .serverInitiated(
+            error: .init(with: sfuError)
+        )
 
         await assertTransitionAfterTrigger(
             expectedTarget: .disconnected,
@@ -368,7 +370,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
             }
             XCTAssertEqual(
                 target.context.disconnectionSource,
-                .serverInitiated(error: expectedError)
+                expectedSource
             )
         }
     }
@@ -383,7 +385,9 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
             result.shouldRetry = false
             return result
         }()
-        let expectedError = sfuError
+        let expectedSource: WebSocketConnectionState.DisconnectionSource = .serverInitiated(
+            error: .init(with: sfuError)
+        )
 
         await assertTransitionAfterTrigger(
             expectedTarget: .disconnected,
@@ -398,7 +402,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
             XCTAssertEqual(target.context.reconnectionStrategy, .rejoin)
             XCTAssertEqual(
                 target.context.disconnectionSource,
-                .serverInitiated(error: expectedError)
+                expectedSource
             )
         }
     }

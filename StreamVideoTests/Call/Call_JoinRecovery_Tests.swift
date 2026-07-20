@@ -447,7 +447,7 @@ final class Call_JoinRecovery_Tests: StreamVideoTestCase, @unchecked Sendable {
         webRTCCoordinatorFactory.mockCoordinatorStack.sfuStack.setConnectionState(
             to: .disconnected(source: .serverInitiated())
         )
-        refreshedWebSocket.simulate(state: .connected)
+        refreshedWebSocket.simulate(state: .connected(healthCheckInfo: .init()))
         refreshedWebSocket.receive(.joinResponse(.init()))
 
         await fulfilmentInMainActor(timeout: defaultTimeout + 2) {
