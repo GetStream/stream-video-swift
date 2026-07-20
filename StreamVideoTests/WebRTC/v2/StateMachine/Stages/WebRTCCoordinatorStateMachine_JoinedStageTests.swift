@@ -3,7 +3,6 @@
 //
 
 import Combine
-import class StreamCore.ClientError
 import enum StreamCore.WebSocketConnectionState
 @testable import StreamVideo
 @preconcurrency import XCTest
@@ -198,12 +197,10 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
             default:
                 XCTFail()
             }
-            XCTAssertEqual(
-                target.context.disconnectionSource,
-                .serverInitiated(
-                    error: StreamCore.ClientError.NetworkError("Not available")
-                )
-            )
+            guard case let .serverInitiated(error)? = target.context.disconnectionSource else {
+                return XCTFail()
+            }
+            XCTAssertEqual(error?.localizedDescription, "Not available")
         }
     }
 
