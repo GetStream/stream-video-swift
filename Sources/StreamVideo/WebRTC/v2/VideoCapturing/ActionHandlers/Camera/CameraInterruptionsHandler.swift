@@ -28,20 +28,67 @@ final class CameraInterruptionsHandler: StreamVideoCapturerActionHandler, @unche
         case running(session: AVCaptureSession, disposableBag: DisposableBag)
     }
 
+    /// Tracks one intentional camera-position transition from its expected
+    /// capture-session stop until the corresponding start notification.
+    ///
+    /// Instances provide transition identity in addition to ordering. This lets
+    /// failure rollback remove the exact in-flight change without completing an
+    /// older or newer change during rapid consecutive flips.
+    private final class CameraPositionChange {
+        /// Notification the transition is waiting to receive next.
+        enum State: Equatable {
+            /// The capture handler has not stopped the previous device yet.
+            case awaitingStop
+            /// The expected stop arrived; the replacement device has not started yet.
+            case awaitingStart
+        }
+
+        /// Start action to restore if a later action handler rejects this change.
+        let previousStartAction: StreamVideoCapturer.Action
+        /// Current notification phase for this transition.
+        var state: State = .awaitingStop
+
+        init(previousStartAction: StreamVideoCapturer.Action) {
+            self.previousStartAction = previousStartAction
+        }
+    }
+
     /// Maximum number of consecutive automatic restart attempts before giving
     /// up, to avoid a restart loop when the capture server cannot recover. The
     /// counter resets once capture successfully starts again.
     private static let maxRestartAttempts = 3
 
-    /// Serializes notification handling. All observers deliver on this queue
-    /// (via `receive(on:)`), so the restart bookkeeping below is mutated from a
-    /// single place.
+    /// Serializes lifecycle actions, failure callbacks, and notifications.
+    ///
+    /// All observers deliver on this queue through `receive(on:)`, while
+    /// ``handle(_:)`` and ``handleFailure(for:)`` enqueue synchronous operations.
+    /// Keeping every transition mutation here prevents capture actions from
+    /// racing delayed `AVCaptureSession` notifications.
     private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
     private var state: State = .idle
     private var lastStartAction: StreamVideoCapturer.Action?
     private var restartAttempts = 0
     private var isInterrupted = false
     private var isRestarting = false
+
+    /// Intentional camera changes awaiting their stop/start notifications.
+    ///
+    /// Notification handlers consume this collection in FIFO order because
+    /// `AVCaptureSession` posts lifecycle notifications in transition order.
+    private var cameraPositionChanges: [CameraPositionChange] = []
+
+    /// Change staged by the most recent position-change pipeline invocation.
+    ///
+    /// ``handleFailure(for:)`` matches this identity against the FIFO before
+    /// rolling back. Once notifications complete and remove the transition, a
+    /// retained reference cannot roll back an already completed change.
+    private var currentCameraPositionChange: CameraPositionChange?
+
+    /// Whether automatic recovery must remain suppressed for an intentional
+    /// camera stop/start cycle.
+    private var isChangingCameraPosition: Bool {
+        !cameraPositionChanges.isEmpty
+    }
 
     /// Dispatches actions back through the capturer pipeline. Assigned by
     /// ``StreamVideoCapturer`` so the handler can issue a full capture restart.
@@ -51,6 +98,26 @@ final class CameraInterruptionsHandler: StreamVideoCapturerActionHandler, @unche
 
     /// Handles camera capture lifecycle actions.
     func handle(_ action: StreamVideoCapturer.Action) async throws {
+        try await processingQueue.addSynchronousTaskOperation { [weak self] in
+            self?.handleAction(action)
+        }
+    }
+
+    /// Rolls back a staged camera-position change rejected by a later handler.
+    ///
+    /// The callback runs on ``processingQueue`` so it is ordered with any stop
+    /// or start notification already emitted by the failed capture attempt.
+    func handleFailure(for action: StreamVideoCapturer.Action) async {
+        try? await processingQueue.addSynchronousTaskOperation { [weak self] in
+            self?.handleActionFailure(action)
+        }
+    }
+
+    // MARK: - Private
+
+    /// Applies lifecycle bookkeeping on ``processingQueue`` before downstream
+    /// handlers mutate the capture session.
+    private func handleAction(_ action: StreamVideoCapturer.Action) {
         switch action {
         /// Handle start capture event and register for session notifications.
         case let .startCapture(_, _, _, _, videoCapturer, _, _):
@@ -62,6 +129,13 @@ final class CameraInterruptionsHandler: StreamVideoCapturerActionHandler, @unche
             } else {
                 didStopCapture()
             }
+        case let .setCameraPosition(position, videoSource, videoCapturer, videoCapturerDelegate):
+            handleCameraPositionChange(
+                position: position,
+                videoSource: videoSource,
+                videoCapturer: videoCapturer,
+                videoCapturerDelegate: videoCapturerDelegate
+            )
         /// Handle stop capture event and cleanup.
         case .stopCapture:
             didStopCapture()
@@ -69,8 +143,6 @@ final class CameraInterruptionsHandler: StreamVideoCapturerActionHandler, @unche
             break
         }
     }
-
-    // MARK: - Private
 
     /// Sets up observers and state when camera capture starts.
     private func didStartCapture(
@@ -121,7 +193,7 @@ final class CameraInterruptionsHandler: StreamVideoCapturerActionHandler, @unche
             .default
             .publisher(for: AVCaptureSession.didStopRunningNotification, object: session)
             .receive(on: processingQueue)
-            .sink { [weak self] _ in self?.attemptRestart(reason: "session stopped unexpectedly") }
+            .sink { [weak self] _ in self?.handleDidStopRunning() }
             .store(in: disposableBag)
 
         /// Observe runtime errors and restart capture.
@@ -154,6 +226,82 @@ final class CameraInterruptionsHandler: StreamVideoCapturerActionHandler, @unche
         state = .running(session: session, disposableBag: disposableBag)
         lastStartAction = startAction
         isInterrupted = false
+        cameraPositionChanges.removeAll()
+        currentCameraPositionChange = nil
+    }
+
+    /// Stages the recovery configuration for a requested camera position.
+    ///
+    /// The new start action is cached immediately so a successful transition
+    /// recovers with the selected camera. The pending transition retains the
+    /// previous action so ``handleFailure(for:)`` can restore it if downstream
+    /// handling fails. Same-position requests refresh dependencies without
+    /// expecting a capture-session stop.
+    ///
+    /// - Parameters:
+    ///   - position: Camera position requested by the caller.
+    ///   - videoSource: Source that receives frames from the selected camera.
+    ///   - videoCapturer: Capturer performing the position change.
+    ///   - videoCapturerDelegate: Delegate receiving captured frames.
+    private func handleCameraPositionChange(
+        position: AVCaptureDevice.Position,
+        videoSource: RTCVideoSource,
+        videoCapturer: RTCVideoCapturer,
+        videoCapturerDelegate: RTCVideoCapturerDelegate
+    ) {
+        guard
+            let previousStartAction = lastStartAction,
+            case let .startCapture(
+                currentPosition,
+                dimensions,
+                frameRate,
+                _,
+                _,
+                _,
+                audioDeviceModule
+            ) = previousStartAction
+        else {
+            return
+        }
+        lastStartAction = .startCapture(
+            position: position,
+            dimensions: dimensions,
+            frameRate: frameRate,
+            videoSource: videoSource,
+            videoCapturer: videoCapturer,
+            videoCapturerDelegate: videoCapturerDelegate,
+            audioDeviceModule: audioDeviceModule
+        )
+        if currentPosition != position {
+            let change = CameraPositionChange(previousStartAction: previousStartAction)
+            cameraPositionChanges.append(change)
+            currentCameraPositionChange = change
+        } else {
+            currentCameraPositionChange = nil
+        }
+    }
+
+    /// Removes the exact transition staged by a failed position-change action
+    /// and restores its last successful recovery configuration.
+    ///
+    /// If the transition already completed, its identity is no longer present
+    /// and there is nothing to roll back. If capture already stopped, recovery
+    /// restarts with the restored configuration.
+    private func handleActionFailure(_ action: StreamVideoCapturer.Action) {
+        guard
+            case .setCameraPosition = action,
+            let change = currentCameraPositionChange,
+            let index = cameraPositionChanges.firstIndex(where: { $0 === change })
+        else {
+            return
+        }
+        let shouldRestart = change.state == .awaitingStart
+        cameraPositionChanges.remove(at: index)
+        lastStartAction = change.previousStartAction
+        currentCameraPositionChange = nil
+        if shouldRestart {
+            attemptRestart(reason: "camera position change failed after session stopped")
+        }
     }
 
     /// Cleans up resources and resets state when camera capture stops.
@@ -162,6 +310,8 @@ final class CameraInterruptionsHandler: StreamVideoCapturerActionHandler, @unche
             disposableBag.removeAll()
         }
         state = .idle
+        cameraPositionChanges.removeAll()
+        currentCameraPositionChange = nil
     }
 
     private func setInterrupted(_ value: Bool) {
@@ -180,10 +330,27 @@ final class CameraInterruptionsHandler: StreamVideoCapturerActionHandler, @unche
         session.startRunning()
     }
 
-    /// Clears restart bookkeeping once capture is running again.
+    /// Clears restart bookkeeping and completes the oldest transition awaiting
+    /// its start notification.
+    ///
+    /// FIFO completion prevents a delayed start from an earlier flip from
+    /// clearing suppression for a newer flip.
     private func handleDidStartRunning() {
         restartAttempts = 0
         isRestarting = false
+        if let index = cameraPositionChanges.firstIndex(where: { $0.state == .awaitingStart }) {
+            cameraPositionChanges.remove(at: index)
+        }
+    }
+
+    /// Consumes an expected position-change stop or starts recovery for a
+    /// genuinely unexpected session stop.
+    private func handleDidStopRunning() {
+        guard let index = cameraPositionChanges.firstIndex(where: { $0.state == .awaitingStop }) else {
+            attemptRestart(reason: "session stopped unexpectedly")
+            return
+        }
+        cameraPositionChanges[index].state = .awaitingStart
     }
 
     /// Restarts capture when the session stops or errors while we still expect
@@ -196,7 +363,8 @@ final class CameraInterruptionsHandler: StreamVideoCapturerActionHandler, @unche
         guard
             case .running = state,
             !isInterrupted,
-            !isRestarting
+            !isRestarting,
+            !isChangingCameraPosition
         else {
             return
         }
