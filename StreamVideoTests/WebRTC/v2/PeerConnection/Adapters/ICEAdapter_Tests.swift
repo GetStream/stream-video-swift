@@ -118,7 +118,7 @@ final class ICEAdapterTests: XCTestCase, @unchecked Sendable {
         await wait(for: 0.5)
         var candidate = Stream_Video_Sfu_Models_ICETrickle()
         candidate.iceCandidate = iceCandidate.sdp
-        mockSFUStack.receiveEvent(.sfuEvent(.iceTrickle(candidate)))
+        mockSFUStack.receiveEvent(.iceTrickle(candidate))
         await wait(for: 1.0) // Wait until the event has been processed from the ICEAdapter
 
         mockPeerConnection
@@ -164,7 +164,7 @@ final class ICEAdapterTests: XCTestCase, @unchecked Sendable {
         }
         """
         event.sessionID = .unique
-        mockSFUStack.receiveEvent(.sfuEvent(.iceTrickle(event)))
+        mockSFUStack.receiveEvent(.iceTrickle(event))
 
         await fulfillment { self.mockPeerConnection.timesCalled(.addCandidate) == 1 }
         let candidate = try XCTUnwrap(
@@ -198,7 +198,7 @@ final class ICEAdapterTests: XCTestCase, @unchecked Sendable {
         }
         """
 
-        mockSFUStack.receiveEvent(.sfuEvent(.iceTrickle(event)))
+        mockSFUStack.receiveEvent(.iceTrickle(event))
         await wait(for: 0.5)
 
         XCTAssertEqual(mockPeerConnection.timesCalled(.addCandidate), 0)
@@ -242,7 +242,7 @@ final class ICEAdapterTests: XCTestCase, @unchecked Sendable {
         }
         """
 
-        mockSFUStack.receiveEvent(.sfuEvent(.iceTrickle(event)))
+        mockSFUStack.receiveEvent(.iceTrickle(event))
         await wait(for: 0.5)
 
         XCTAssertEqual(mockPeerConnection.timesCalled(.addCandidate), 0)
