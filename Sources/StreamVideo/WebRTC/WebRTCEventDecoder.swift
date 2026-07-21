@@ -6,14 +6,6 @@ import Foundation
 import StreamCore
 
 /// Decodes raw SFU WebSocket frames into events for `StreamCore.WebSocketClient`.
-///
-/// Since the SFU socket now runs on StreamCore, this conforms to
-/// `StreamCore.AnyEventDecoder` and returns a `StreamCore.Event` (the SFU
-/// payload, which conforms through video's refined `Event` protocol).
-/// Previously it conformed to video's `AnyEventDecoder` and returned a
-/// `WrappedEvent.sfuEvent(...)`.
-///
-/// - TODO: [IOS-1812] Remove with the SFU isolation wrapper.
 struct WebRTCEventDecoder: AnyEventDecoder {
 
     func decode(from data: Data) throws -> StreamCore.Event {

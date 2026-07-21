@@ -45,9 +45,9 @@ struct MockSFUStack: @unchecked Sendable {
         webSocket.simulate(state: state)
     }
 
-    func receiveEvent(_ event: WrappedEvent) {
-        if case let .sfuEvent(payload) = event {
-            webSocket.receive(payload)
-        }
+    func receiveEvent(
+        _ payload: Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload
+    ) {
+        webSocket.receive(payload)
     }
 }

@@ -34,11 +34,9 @@ extension Event {
     }
 }
 
-/// An internal object that we use to wrap the kind of events that are handled by WS: SFU and coordinator events
 internal enum WrappedEvent: Event, Sendable, CustomStringConvertible {
     case internalEvent(Event)
     case coordinatorEvent(VideoEvent)
-    case sfuEvent(Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload)
     
     func healthcheck() -> StreamCore.HealthCheckInfo? {
         switch self {
@@ -53,12 +51,6 @@ internal enum WrappedEvent: Event, Sendable, CustomStringConvertible {
                     connectionId: connectedEvent.connectionId
                 )
             }
-        case let .sfuEvent(event):
-            if case let .healthCheckResponse(healthCheckEvent) = event {
-                return StreamCore.HealthCheckInfo(
-                    participantCount: Int(healthCheckEvent.participantCount.total)
-                )
-            }
         case .internalEvent:
             break
         }
@@ -71,11 +63,6 @@ internal enum WrappedEvent: Event, Sendable, CustomStringConvertible {
             if case let .typeConnectionErrorEvent(errorEvent) = event {
                 return errorEvent.error
             }
-        case let .sfuEvent(event):
-            if case let .error(errorEvent) = event {
-                return errorEvent.error
-            }
-            return nil
         case .internalEvent:
             break
         }
@@ -86,8 +73,6 @@ internal enum WrappedEvent: Event, Sendable, CustomStringConvertible {
         switch self {
         case let .coordinatorEvent(event):
             return "coordinator: \(event.type)"
-        case let .sfuEvent(event):
-            return "sfu: \(event.name)"
         case let .internalEvent(event):
             return "internal: \(event.name)"
         }
@@ -97,8 +82,6 @@ internal enum WrappedEvent: Event, Sendable, CustomStringConvertible {
         switch self {
         case let .coordinatorEvent(event):
             return "coordinator: \(event)"
-        case let .sfuEvent(event):
-            return "sfu: \(event)"
         case let .internalEvent(event):
             return "internal: \(event)"
         }

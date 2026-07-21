@@ -75,21 +75,21 @@ final class MockWebRTCCoordinatorStack: @unchecked Sendable {
     func joinResponse(_ participants: [CallParticipant]) {
         var event = Stream_Video_Sfu_Event_JoinResponse()
         event.callState.participants = participants.map { .init($0) }
-        sfuStack.receiveEvent(.sfuEvent(.joinResponse(event)))
+        sfuStack.receiveEvent(.joinResponse(event))
     }
 
     func participantJoined(_ participant: CallParticipant) {
         var event = Stream_Video_Sfu_Event_ParticipantJoined()
         event.participant = .init(participant)
         event.callCid = callCid
-        sfuStack.receiveEvent(.sfuEvent(.participantJoined(event)))
+        sfuStack.receiveEvent(.participantJoined(event))
     }
 
     func participantLeft(_ participant: CallParticipant) {
         var event = Stream_Video_Sfu_Event_ParticipantLeft()
         event.participant = .init(participant)
         event.callCid = callCid
-        sfuStack.receiveEvent(.sfuEvent(.participantLeft(event)))
+        sfuStack.receiveEvent(.participantLeft(event))
     }
 
     func addTrack(
@@ -124,7 +124,7 @@ final class MockWebRTCCoordinatorStack: @unchecked Sendable {
             .sink { [weak self] _ in
                 guard let self else { return }
                 let event = Stream_Video_Sfu_Event_HealthCheckResponse()
-                sfuStack.receiveEvent(.sfuEvent(.healthCheckResponse(event)))
+                sfuStack.receiveEvent(.healthCheckResponse(event))
             }
     }
 }

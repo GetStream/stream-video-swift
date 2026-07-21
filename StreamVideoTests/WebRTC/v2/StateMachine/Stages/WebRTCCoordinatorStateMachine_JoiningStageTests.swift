@@ -97,7 +97,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
 
         subject.willTransitionAway()
         mockCoordinatorStack.sfuStack.receiveEvent(
-            .sfuEvent(.joinResponse(Stream_Video_Sfu_Event_JoinResponse()))
+            .joinResponse(Stream_Video_Sfu_Event_JoinResponse())
         )
 
         await fulfillment(of: [unexpectedTransition], timeout: 0.2)
@@ -255,7 +255,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
 
         let cancellable = receiveEvent(
-            .sfuEvent(.joinResponse(Stream_Video_Sfu_Event_JoinResponse())),
+            .joinResponse(Stream_Video_Sfu_Event_JoinResponse()),
             every: 0.3
         )
 
@@ -280,7 +280,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
 
         let cancellable = receiveEvent(
-            .sfuEvent(.joinResponse(Stream_Video_Sfu_Event_JoinResponse())),
+            .joinResponse(Stream_Video_Sfu_Event_JoinResponse()),
             every: 0.3
         )
 
@@ -312,7 +312,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
         var response = Stream_Video_Sfu_Event_JoinResponse()
         response.fastReconnectDeadlineSeconds = 22
         let cancellable = receiveEvent(
-            .sfuEvent(.joinResponse(response)),
+            .joinResponse(response),
             every: 0.3
         )
 
@@ -333,7 +333,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
         mockCoordinatorStack.webRTCAuthenticator.stubbedFunction[.waitForConnect] = Result<Void, Error>.success(())
         let cancellable = receiveEvent(
-            .sfuEvent(.joinResponse(Stream_Video_Sfu_Event_JoinResponse())),
+            .joinResponse(Stream_Video_Sfu_Event_JoinResponse()),
             every: 0.3
         )
 
@@ -359,7 +359,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
         mockCoordinatorStack.webRTCAuthenticator.stubbedFunction[.waitForConnect] = Result<Void, Error>.success(())
         let cancellable = receiveEvent(
-            .sfuEvent(.joinResponse(Stream_Video_Sfu_Event_JoinResponse())),
+            .joinResponse(Stream_Video_Sfu_Event_JoinResponse()),
             every: 0.3
         )
 
@@ -403,7 +403,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             participantBuilder()
         ]
         let cancellable = receiveEvent(
-            .sfuEvent(.joinResponse(response)),
+            .joinResponse(response),
             every: 0.3
         )
 
@@ -430,7 +430,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
         var response = Stream_Video_Sfu_Event_JoinResponse()
         response.fastReconnectDeadlineSeconds = 22
         let cancellable = receiveEvent(
-            .sfuEvent(.joinResponse(response)),
+            .joinResponse(response),
             every: 0.3
         )
 
@@ -458,7 +458,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
         mockCoordinatorStack.webRTCAuthenticator.stubbedFunction[.waitForConnect] = Result<Void, Error>.success(())
         let cancellable = receiveEvent(
-            .sfuEvent(.joinResponse(Stream_Video_Sfu_Event_JoinResponse())),
+            .joinResponse(Stream_Video_Sfu_Event_JoinResponse()),
             every: 0.3
         )
 
@@ -510,7 +510,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
         mockCoordinatorStack.webRTCAuthenticator.stubbedFunction[.waitForConnect] = Result<Void, Error>.success(())
 
         let eventCancellable = receiveEvent(
-            .sfuEvent(.joinResponse(Stream_Video_Sfu_Event_JoinResponse())),
+            .joinResponse(Stream_Video_Sfu_Event_JoinResponse()),
             every: 0.3
         )
 
@@ -544,7 +544,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
         mockCoordinatorStack.webRTCAuthenticator.stubbedFunction[.waitForConnect] = Result<Void, Error>.success(())
 
         let eventCancellable = receiveEvent(
-            .sfuEvent(.joinResponse(Stream_Video_Sfu_Event_JoinResponse())),
+            .joinResponse(Stream_Video_Sfu_Event_JoinResponse()),
             every: 0.3
         )
 
@@ -582,7 +582,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
         mockCoordinatorStack.webRTCAuthenticator.stubbedFunction[.waitForConnect] = Result<Void, Error>.success(())
         let cancellable = receiveEvent(
-            .sfuEvent(.joinResponse(Stream_Video_Sfu_Event_JoinResponse())),
+            .joinResponse(Stream_Video_Sfu_Event_JoinResponse()),
             every: 0.3
         )
         let start = Date()
@@ -622,7 +622,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
         mockCoordinatorStack.webRTCAuthenticator.stubbedFunction[.waitForConnect] = Result<Void, Error>.success(())
         let cancellable = receiveEvent(
-            .sfuEvent(.joinResponse(Stream_Video_Sfu_Event_JoinResponse())),
+            .joinResponse(Stream_Video_Sfu_Event_JoinResponse()),
             every: 0.3
         )
         let start = Date()
@@ -845,7 +845,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
 
         let cancellable = receiveEvent(
-            .sfuEvent(.joinResponse(Stream_Video_Sfu_Event_JoinResponse())),
+            .joinResponse(Stream_Video_Sfu_Event_JoinResponse()),
             every: 0.3
         )
 
@@ -871,7 +871,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
 
         let cancellable = receiveEvent(
-            .sfuEvent(.joinResponse(Stream_Video_Sfu_Event_JoinResponse())),
+            .joinResponse(Stream_Video_Sfu_Event_JoinResponse()),
             every: 0.3
         )
 
@@ -904,7 +904,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
         var response = Stream_Video_Sfu_Event_JoinResponse()
         response.fastReconnectDeadlineSeconds = 22
         let cancellable = receiveEvent(
-            .sfuEvent(.joinResponse(response)),
+            .joinResponse(response),
             every: 0.3
         )
 
@@ -925,7 +925,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
         mockCoordinatorStack.webRTCAuthenticator.stubbedFunction[.waitForConnect] = Result<Void, Error>.success(())
         let cancellable = receiveEvent(
-            .sfuEvent(.joinResponse(Stream_Video_Sfu_Event_JoinResponse())),
+            .joinResponse(Stream_Video_Sfu_Event_JoinResponse()),
             every: 0.3
         )
 
@@ -951,7 +951,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
         mockCoordinatorStack.webRTCAuthenticator.stubbedFunction[.waitForConnect] = Result<Void, Error>.success(())
         let cancellable = receiveEvent(
-            .sfuEvent(.joinResponse(Stream_Video_Sfu_Event_JoinResponse())),
+            .joinResponse(Stream_Video_Sfu_Event_JoinResponse()),
             every: 0.3
         )
 
@@ -998,7 +998,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             participantBuilder(subject.context.isRejoiningFromSessionID)
         ]
         let cancellable = receiveEvent(
-            .sfuEvent(.joinResponse(response)),
+            .joinResponse(response),
             every: 0.3
         )
 
@@ -1025,7 +1025,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
         var response = Stream_Video_Sfu_Event_JoinResponse()
         response.fastReconnectDeadlineSeconds = 22
         let cancellable = receiveEvent(
-            .sfuEvent(.joinResponse(response)),
+            .joinResponse(response),
             every: 0.3
         )
 
@@ -1052,7 +1052,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
         mockCoordinatorStack.webRTCAuthenticator.stubbedFunction[.waitForConnect] = Result<Void, Error>.success(())
         let cancellable = receiveEvent(
-            .sfuEvent(.joinResponse(Stream_Video_Sfu_Event_JoinResponse())),
+            .joinResponse(Stream_Video_Sfu_Event_JoinResponse()),
             every: 0.3
         )
 
@@ -1227,7 +1227,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             participantBuilder()
         ]
         let cancellable = receiveEvent(
-            .sfuEvent(.joinResponse(response)),
+            .joinResponse(response),
             every: 0.3
         )
 
@@ -1259,7 +1259,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
         mockCoordinatorStack.webRTCAuthenticator.stubbedFunction[.waitForConnect] = Result<Void, Error>.success(())
         let cancellable = receiveEvent(
-            .sfuEvent(.joinResponse(Stream_Video_Sfu_Event_JoinResponse())),
+            .joinResponse(Stream_Video_Sfu_Event_JoinResponse()),
             every: 0.3
         )
 
@@ -1492,7 +1492,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
 
         let cancellable = receiveEvent(
-            .sfuEvent(.joinResponse(Stream_Video_Sfu_Event_JoinResponse())),
+            .joinResponse(Stream_Video_Sfu_Event_JoinResponse()),
             every: 0.3
         )
 
@@ -1518,7 +1518,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
 
         let cancellable = receiveEvent(
-            .sfuEvent(.joinResponse(Stream_Video_Sfu_Event_JoinResponse())),
+            .joinResponse(Stream_Video_Sfu_Event_JoinResponse()),
             every: 0.3
         )
 
@@ -1551,7 +1551,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
         var response = Stream_Video_Sfu_Event_JoinResponse()
         response.fastReconnectDeadlineSeconds = 22
         let cancellable = receiveEvent(
-            .sfuEvent(.joinResponse(response)),
+            .joinResponse(response),
             every: 0.3
         )
 
@@ -1573,7 +1573,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
         mockCoordinatorStack.webRTCAuthenticator.stubbedFunction[.waitForConnect] = Result<Void, Error>.success(())
         let cancellable = receiveEvent(
-            .sfuEvent(.joinResponse(Stream_Video_Sfu_Event_JoinResponse())),
+            .joinResponse(Stream_Video_Sfu_Event_JoinResponse()),
             every: 0.3
         )
 
@@ -1600,7 +1600,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
         mockCoordinatorStack.webRTCAuthenticator.stubbedFunction[.waitForConnect] = Result<Void, Error>.success(())
         let cancellable = receiveEvent(
-            .sfuEvent(.joinResponse(Stream_Video_Sfu_Event_JoinResponse())),
+            .joinResponse(Stream_Video_Sfu_Event_JoinResponse()),
             every: 0.3
         )
 
@@ -1645,7 +1645,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             participantBuilder()
         ]
         let cancellable = receiveEvent(
-            .sfuEvent(.joinResponse(response)),
+            .joinResponse(response),
             every: 0.3
         )
 
@@ -1673,7 +1673,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
         var response = Stream_Video_Sfu_Event_JoinResponse()
         response.fastReconnectDeadlineSeconds = 22
         let cancellable = receiveEvent(
-            .sfuEvent(.joinResponse(response)),
+            .joinResponse(response),
             every: 0.3
         )
 
@@ -1701,7 +1701,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
         mockCoordinatorStack.webRTCAuthenticator.stubbedFunction[.waitForConnect] = Result<Void, Error>.success(())
         let cancellable = receiveEvent(
-            .sfuEvent(.joinResponse(Stream_Video_Sfu_Event_JoinResponse())),
+            .joinResponse(Stream_Video_Sfu_Event_JoinResponse()),
             every: 0.3
         )
 
@@ -1813,7 +1813,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
     }
 
     private func receiveEvent(
-        _ event: WrappedEvent,
+        _ event: Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload,
         every timeInterval: TimeInterval
     ) -> AnyCancellable {
         Foundation

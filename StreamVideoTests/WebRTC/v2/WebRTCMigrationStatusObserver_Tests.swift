@@ -37,7 +37,7 @@ final class WebRTCMigrationStatusObserver_Tests: XCTestCase, @unchecked Sendable
                 await self.wait(for: 0.5)
                 self
                     .sfuStack
-                    .receiveEvent(.sfuEvent(.participantMigrationComplete(Stream_Video_Sfu_Event_ParticipantMigrationComplete())))
+                    .receiveEvent(.participantMigrationComplete(Stream_Video_Sfu_Event_ParticipantMigrationComplete()))
             }
 
             try await group.waitForAll()
