@@ -285,7 +285,8 @@ final class CameraInterruptionsHandler: StreamVideoCapturerActionHandler, @unche
     /// and restores its last successful recovery configuration.
     ///
     /// If the transition already completed, its identity is no longer present
-    /// and there is nothing to roll back.
+    /// and there is nothing to roll back. If capture already stopped, recovery
+    /// restarts with the restored configuration.
     private func handleActionFailure(_ action: StreamVideoCapturer.Action) {
         guard
             case .setCameraPosition = action,
@@ -294,9 +295,13 @@ final class CameraInterruptionsHandler: StreamVideoCapturerActionHandler, @unche
         else {
             return
         }
+        let shouldRestart = change.state == .awaitingStart
         cameraPositionChanges.remove(at: index)
         lastStartAction = change.previousStartAction
         currentCameraPositionChange = nil
+        if shouldRestart {
+            attemptRestart(reason: "camera position change failed after session stopped")
+        }
     }
 
     /// Cleans up resources and resets state when camera capture stops.

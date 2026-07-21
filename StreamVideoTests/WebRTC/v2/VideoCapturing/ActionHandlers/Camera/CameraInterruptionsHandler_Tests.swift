@@ -171,6 +171,37 @@ final class CameraInterruptionsHandler_Tests: XCTestCase, @unchecked Sendable {
         assertStartCapture(actions[1], position: .front)
     }
 
+    func test_handleFailure_setCameraPosition_whenSessionAlreadyStopped_restartsUsingLastSuccessfulPosition() async throws {
+        let recorder = ActionRecorder()
+        let action = makeSetCameraPositionAction(position: .back)
+        let unexpectedRecovery = expectation(description: "Capture should not recover.")
+        unexpectedRecovery.isInverted = true
+        unexpectedRecovery.assertForOverFulfill = false
+        let expectedRecovery = expectation(description: "Capture should recover.")
+        expectedRecovery.expectedFulfillmentCount = 2
+
+        try await subject.handle(makeStartAction(position: .front))
+        try await subject.handle(action)
+        subject.actionDispatcher = { _ in unexpectedRecovery.fulfill() }
+        NotificationCenter.default.post(
+            name: AVCaptureSession.didStopRunningNotification,
+            object: videoCapturer.captureSession
+        )
+        await safeFulfillment(of: [unexpectedRecovery], timeout: 0.5)
+
+        subject.actionDispatcher = { action in
+            await recorder.record(action)
+            expectedRecovery.fulfill()
+        }
+        await subject.handleFailure(for: action)
+
+        await fulfillment(of: [expectedRecovery], timeout: 1)
+        let actions = await recorder.actions
+        guard actions.count >= 2 else { return }
+        assertStopCapture(actions[0])
+        assertStartCapture(actions[1], position: .front)
+    }
+
     private func makeStartAction(
         position: AVCaptureDevice.Position
     ) -> StreamVideoCapturer.Action {
