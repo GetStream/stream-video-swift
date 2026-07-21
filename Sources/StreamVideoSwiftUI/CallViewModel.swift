@@ -269,6 +269,13 @@ open class CallViewModel: ObservableObject {
         }
     }
 
+    /// Arbitrates the create/hang-up race for the current outgoing ring.
+    /// Non-nil only between starting a ringing call and the point where its
+    /// outcome (created or rejected) has been resolved; `nil` otherwise so a
+    /// stale coordinator never leaks into the next call. See
+    /// ``OutgoingRingCreationCoordinator``.
+    private var ringCreationCoordinator: OutgoingRingCreationCoordinator?
+
     public init(
         participantsLayout: ParticipantsLayout = .grid,
         callSettings: CallSettings? = nil
@@ -435,6 +442,9 @@ open class CallViewModel: ObservableObject {
         customData: [String: RawJSON]? = nil,
         video: Bool? = nil
     ) {
+        // Drop any coordinator left over from a previous call so this start
+        // begins from a clean `.creating` state.
+        ringCreationCoordinator = nil
         outgoingCallMembers = members
         setCallingState(ring ? .outgoing : .joining)
         let membersRequest: [MemberRequest]? = members.isEmpty
@@ -463,6 +473,9 @@ open class CallViewModel: ObservableObject {
                 callId: callId,
                 callSettings: callSettings
             )
+            // Start arbitrating this ring before `create` is kicked off, so a
+            // hang-up that arrives during create has a coordinator to talk to.
+            ringCreationCoordinator = .init(call)
             self.call = call
             Task(disposableBag: disposableBag, priority: .userInitiated) { [weak self] in
                 guard let self else { return }
@@ -476,11 +489,28 @@ open class CallViewModel: ObservableObject {
                         maxParticipants: maxParticipants,
                         video: video
                     )
+
+                    // Create succeeded. Announce it to the coordinator: this
+                    // throws `CallAlreadyRejected` if the user hung up while we
+                    // were creating, so the ring timer below is only armed for
+                    // a call that is genuinely still ringing.
+                    try ringCreationCoordinator?.created()
+                    ringCreationCoordinator = nil
+
                     let timeoutSeconds = TimeInterval(
                         callData.settings.ring.autoCancelTimeoutMs / 1000
                     )
                     startTimer(timeout: timeoutSeconds)
+                } catch is OutgoingRingCreationCoordinator.CallAlreadyRejected {
+                    // Hang-up raced create and could not reject a call that did
+                    // not exist yet. The call exists now, so cancel it here to
+                    // stop the callee ringing. Best-effort: leave already tore
+                    // down local state.
+                    ringCreationCoordinator = nil
+                    _ = try? await call.reject(reason: RejectCallRequest.Reason.cancel)
                 } catch {
+                    // Genuine create failure: surface the error and reset UI.
+                    ringCreationCoordinator = nil
                     self.error = error
                     setCallingState(.idle)
                     self.call = nil
@@ -1003,7 +1033,13 @@ open class CallViewModel: ObservableObject {
 
         Task(disposableBag: disposableBag, priority: .userInitiated) { [weak self] in
             guard let self else { return }
+
             do {
+                // Tell the coordinator the user hung up. If create is still in
+                // flight this throws `CallNotCreatedYet`, and we defer the
+                // cancel to the create path instead of rejecting a call the
+                // backend does not know about yet.
+                try ringCreationCoordinator?.rejected()
                 let rejectionReason = await streamVideo
                     .rejectionReasonProvider
                     .reason(for: call.cId, ringTimeout: ringTimeout)
@@ -1016,6 +1052,15 @@ open class CallViewModel: ObservableObject {
                     """
                 )
                 try await call.reject(reason: rejectionReason)
+            } catch is OutgoingRingCreationCoordinator.CallNotCreatedYet {
+                // Expected during the race: the create path owns the cancel and
+                // will issue it as soon as create completes, so we only log.
+                log.warning(
+                    """
+                    Call was hung up before create completed. It will be \
+                    rejected immediately once create finishes.
+                    """
+                )
             } catch {
                 log.error(error)
             }

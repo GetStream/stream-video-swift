@@ -15,7 +15,6 @@
     {
       "parallelizable" : true,
       "skippedTests" : [
-        "CallViewModel_Tests",
         "CallViewModel_Tests\/test_applicationDidBecomeActive_activatesAllTracksRequired()",
         "CallViewModel_Tests\/test_callSettings_toggleAudio()",
         "CallViewModel_Tests\/test_callSettings_toggleCamera()",
