@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🔄 Changed
 
+### 🐞 Fixed
+- Fixed camera flips reverting to the front camera during active calls. [#1206](https://github.com/GetStream/stream-video-swift/pull/1206)
+
 # [1.49.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.49.0)
 _July 08, 2026_
 
