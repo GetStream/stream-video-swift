@@ -93,6 +93,9 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
     private var joinWasCancelled = false
     private var createContinuation: CheckedContinuation<Void, Never>?
     private var isCreateInFlight = false
+    /// Buffers a `resumeCreate()` that arrives before `create` has stored its
+    /// continuation, so an early/synchronous resume is consumed instead of lost.
+    private var pendingCreateResume = false
     private let createGate = UnfairQueue()
 
     override var state: CallState {
@@ -151,7 +154,19 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
 
         if waitForCreateToResume {
             await withCheckedContinuation { continuation in
-                createGate.sync { createContinuation = continuation }
+                let resumeImmediately: Bool = createGate.sync {
+                    // A resume already arrived before we suspended: consume it
+                    // and continue without storing the continuation.
+                    guard !pendingCreateResume else {
+                        pendingCreateResume = false
+                        return true
+                    }
+                    createContinuation = continuation
+                    return false
+                }
+                if resumeImmediately {
+                    continuation.resume()
+                }
             }
         }
 
@@ -181,7 +196,12 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
 
     func resumeCreate() {
         let continuation: CheckedContinuation<Void, Never>? = createGate.sync {
-            let value = createContinuation
+            guard let value = createContinuation else {
+                // create() has not suspended yet: buffer the resume so it is
+                // consumed once the continuation is set up.
+                pendingCreateResume = true
+                return nil
+            }
             createContinuation = nil
             return value
         }
