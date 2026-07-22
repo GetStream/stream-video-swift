@@ -561,7 +561,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         await prepare()
         mockCall.waitForCreateToResume = true
         let createStarted = expectation(description: "create started")
-        mockCall.onCreateStarted = { createStarted.fulfill() }
+        mockCall.onCreateStarted = { @Sendable in createStarted.fulfill() }
 
         subject.startCall(
             callType: .default,

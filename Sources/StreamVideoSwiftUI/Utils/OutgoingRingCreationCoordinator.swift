@@ -36,8 +36,11 @@ final class OutgoingRingCreationCoordinator: @unchecked Sendable {
     struct CallNotCreatedYet: Error {}
 
     /// Progress of the outgoing ring as observed by the two call sites.
-    /// Starts at `.creating` and only leaves it once one of the calls runs.
-    private enum State { case creating, created, rejected }
+    /// Starts at `.creating`. `.pendingCancel` records a hang-up that arrived
+    /// while create was still running, so ``created()`` — and only it — issues
+    /// the cancel once the call exists. `.rejected` is a hang-up that landed
+    /// after create finished, where the hang-up site rejects directly.
+    private enum State { case creating, created, pendingCancel, rejected }
 
     /// The call whose create/hang-up race we are arbitrating. Held so a future
     /// extension could reject from here; today the cancel is issued by the
@@ -64,16 +67,16 @@ final class OutgoingRingCreationCoordinator: @unchecked Sendable {
     ///   the callee stops ringing.
     func created() throws {
         try lock.sync {
+            // A hang-up landed while create was in flight but could not reject a
+            // call that did not exist yet. Consume the pending cancel and tell
+            // the create site to perform it, now that the call exists.
+            guard state != .pendingCancel else {
+                state = .rejected
+                throw CallAlreadyRejected()
+            }
             // Common path: no hang-up seen yet, so simply mark the call as
             // created and let the caller start the ring-timeout timer.
-            guard state == .rejected else {
-                state = .created
-                return
-            }
-            // Hang-up won the race earlier but could not reject a call that did
-            // not exist yet. Now that create has finished, tell the create site
-            // to perform the cancel.
-            throw CallAlreadyRejected()
+            state = .created
         }
     }
 
@@ -84,17 +87,19 @@ final class OutgoingRingCreationCoordinator: @unchecked Sendable {
     ///   will issue the cancel once create returns.
     func rejected() throws {
         try lock.sync {
-            // Create already finished (or a reject already ran): record the
-            // rejection and let the hang-up site reject through the normal path.
-            guard state == .creating else {
+            switch state {
+            case .creating, .pendingCancel:
+                // Create is still in flight: record the intent to cancel and
+                // tell every hang-up to stand down, so none fires a reject the
+                // backend would refuse for a not-yet-created call. ``created()``
+                // performs the single cancel once create returns.
+                state = .pendingCancel
+                throw CallNotCreatedYet()
+            case .created, .rejected:
+                // Create already finished: record the rejection and let the
+                // hang-up site reject through the normal path.
                 state = .rejected
-                return
             }
-            // Create is still in flight: record the intent to reject, then tell
-            // the hang-up site to stand down so it does not fire a reject the
-            // backend would refuse for a not-yet-created call.
-            state = .rejected
-            throw CallNotCreatedYet()
         }
     }
 }
