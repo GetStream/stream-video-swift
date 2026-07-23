@@ -3,18 +3,47 @@
 //
 
 @testable import StreamVideo
+import StreamWebRTC
 import XCTest
 
 final class LoggerConcurrency_Tests: XCTestCase, @unchecked Sendable {
 
-    func test_logLevelChanged_afterWebRTCLoggerInitialization_updatesSeverity() {
+    func test_webRTCLogsEnabled_updatesWebRTCMode() {
+        let originalMode = Logger.WebRTC.mode
+        defer { Logger.WebRTC.mode = originalMode }
+
+        LogConfig.webRTCLogsEnabled = false
+
+        XCTAssertFalse(LogConfig.webRTCLogsEnabled)
+        guard case .none = Logger.WebRTC.mode else {
+            return XCTFail("Expected WebRTC logging to be disabled.")
+        }
+
+        LogConfig.webRTCLogsEnabled = true
+
+        XCTAssertTrue(LogConfig.webRTCLogsEnabled)
+        guard case .all = Logger.WebRTC.mode else {
+            return XCTFail("Expected WebRTC logging to be enabled.")
+        }
+    }
+
+    func test_logLevelChanged_afterWebRTCLoggerInitialization_updatesExpectedSeverity() {
         let originalLevel = LogConfig.level
         defer { LogConfig.level = originalLevel }
 
         _ = Logger.WebRTC.RTCLogger.default
-        LogConfig.level = .debug
 
-        XCTAssertEqual(Logger.WebRTC.severity, .verbose)
+        let cases: [(LogLevel, RTCLoggingSeverity)] = [
+            (.debug, .verbose),
+            (.info, .info),
+            (.warning, .warning),
+            (.error, .error)
+        ]
+
+        for (level, expectedSeverity) in cases {
+            LogConfig.level = level
+            XCTAssertEqual(Logger.WebRTC.severity, expectedSeverity)
+        }
     }
 
     func test_concurrentLoggingProcessesAllMessages() {

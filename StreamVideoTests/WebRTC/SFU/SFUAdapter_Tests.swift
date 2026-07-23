@@ -11,33 +11,40 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
         .connected(healthCheckInfo: .init())
     private lazy var mockService: MockSignalServer! = .init()
     private lazy var mockWebSocket: MockSFUWebSocket! = .init()
+    private lazy var replacementWebSocket: MockSFUWebSocket! = .init()
     private lazy var subject: SFUAdapter! = .init(
         signalService: mockService,
         webSocket: mockWebSocket,
-        webSocketFactory: { _, _ in MockSFUWebSocket() }
+        webSocketFactory: { [replacementWebSocket] _, _, _ in
+            replacementWebSocket
+        }
     )
 
     // MARK: - Lifecycle
     
     override func setUp() {
         super.setUp()
+        _ = subject
     }
 
     override func tearDown() {
         subject = nil
         mockService = nil
         mockWebSocket = nil
+        replacementWebSocket = nil
         super.tearDown()
     }
 
     // MARK: - connect
 
-    func test_connect_givenValidConfiguration_thenCallsWebSocketConnect() {
+    func test_connect_givenValidConfiguration_thenCallsWebSocketConnect() async {
         // When
         subject.connect()
 
         // Then
-        XCTAssertEqual(mockWebSocket.timesCalled(.connect), 1)
+        await fulfillment {
+            self.mockWebSocket.timesCalled(.connect) == 1
+        }
     }
 
     func test_connect_eventWasPublished() async throws {
@@ -108,17 +115,17 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
 
     // MARK: - refresh
     
-    func test_refresh_currentWebSocketDisconnects() {
+    func test_refresh_currentWebSocketDisconnects() async {
         subject.refresh(
             webSocketConfiguration: .init(
                 url: .init(string: "https://getstream.io")!
             )
         )
 
-        XCTAssertEqual(
-            mockWebSocket.timesCalled(.disconnectForReconfiguration),
-            1
-        )
+        await fulfillment {
+            self.mockWebSocket
+                .timesCalled(.disconnectForReconfiguration) == 1
+        }
     }
 
     func test_refresh_oldWebSocketDisconnectsNoLongerReceivesCalls() throws {
@@ -140,6 +147,61 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
         )
 
         XCTAssertNil(input.first)
+    }
+
+    func test_refresh_lateOldWebSocketState_isIgnored() async {
+        _ = subject
+        mockWebSocket.simulate(state: connectedState)
+
+        subject.refresh(
+            webSocketConfiguration: .init(
+                url: .init(string: "https://getstream.io")!
+            )
+        )
+        mockWebSocket.simulate(
+            state: .disconnected(source: .systemInitiated)
+        )
+
+        XCTAssertEqual(subject.connectionState, .initialized)
+
+        subject.connect()
+
+        await fulfillment {
+            self.subject.connectionState == .connecting
+        }
+    }
+
+    func test_refresh_existingEventPublisher_ignoresLateOldSocketEventAndReceivesNewSocketEvent() async {
+        _ = subject
+        var received: [Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload] = []
+        let newEventReceived = expectation(description: "New socket event received.")
+        let cancellable = subject.publisher.sink {
+            received.append($0)
+            newEventReceived.fulfill()
+        }
+        defer { cancellable.cancel() }
+
+        subject.refresh(
+            webSocketConfiguration: .init(
+                url: .init(string: "https://getstream.io")!
+            )
+        )
+        subject.connect()
+
+        let oldEvent =
+            Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload
+                .healthCheckResponse(.init())
+        var offer = Stream_Video_Sfu_Event_SubscriberOffer()
+        offer.sdp = .unique
+        let newEvent =
+            Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload
+                .subscriberOffer(offer)
+
+        mockWebSocket.receive(oldEvent)
+        replacementWebSocket.receive(newEvent)
+
+        await fulfillment(of: [newEventReceived], timeout: defaultTimeout)
+        XCTAssertEqual(received, [newEvent])
     }
 
     // MARK: - updateTrackMuteState
@@ -574,9 +636,9 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
             healthCheckCancellable.cancel()
         }
 
-        mockWebSocket.eventSubject.send(.subscriberOffer(offer))
-        mockWebSocket.eventSubject.send(.iceTrickle(trickle))
-        mockWebSocket.eventSubject.send(.healthCheckResponse(healthCheck))
+        mockWebSocket.receive(.subscriberOffer(offer))
+        mockWebSocket.receive(.iceTrickle(trickle))
+        mockWebSocket.receive(.healthCheckResponse(healthCheck))
 
         await wait(for: 0.1)
 

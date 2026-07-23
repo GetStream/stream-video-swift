@@ -48,6 +48,17 @@ final class SFUWebSocket_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(closeCode, .goingAway)
     }
 
+    func test_makeSFUHealthCheckPing_wrapsHealthCheckInSFURequest() throws {
+        let event = try XCTUnwrap(
+            makeSFUHealthCheckPing() as? Stream_Video_Sfu_Event_SfuRequest
+        )
+
+        XCTAssertEqual(
+            event.requestPayload,
+            .healthCheckRequest(.init())
+        )
+    }
+
     func test_inject_typedPayload_publishesSamePayload() {
         let subject = SFUWebSocket(
             url: URL(string: "https://getstream.io")!,

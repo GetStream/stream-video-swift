@@ -12,9 +12,14 @@ import StreamCore
 /// It provides methods for managing video tracks, updating subscriptions, and handling WebRTC signaling.
 ///
 /// The SFU signaling WebSocket is backed by `StreamCore.WebSocketClient` via
-/// ``SFUWebSocket``. `SFUAdapter` observes the socket's state publisher instead
-/// of acting as `ConnectionStateDelegate` directly.
+/// ``SFUWebSocket``.
 final class SFUAdapter: CustomStringConvertible, @unchecked Sendable {
+
+    typealias WebSocketFactory = @Sendable (
+        _ url: URL,
+        _ sessionConfiguration: URLSessionConfiguration,
+        _ environment: WebSocketClient.Environment
+    ) -> SFUWebSocket
 
     /// Configuration for the SFU service.
     struct ServiceConfiguration {
@@ -31,10 +36,6 @@ final class SFUAdapter: CustomStringConvertible, @unchecked Sendable {
     }
 
     /// Configuration for the WebSocket connection.
-    ///
-    /// The event-notification center and event decoder that used to live here
-    /// were removed during the StreamCore migration: ``SFUWebSocket`` now creates
-    /// and owns those internally, so callers only need to supply the URL.
     struct WebSocketConfiguration {
         /// The URL for the WebSocket connection.
         var url: URL
@@ -45,15 +46,15 @@ final class SFUAdapter: CustomStringConvertible, @unchecked Sendable {
     private let processingQueue = DispatchQueue(label: "io.getstream.sfu.event.processingQueue")
     private let signalService: SFUSignalService
     private let refreshSubject = PassthroughSubject<Void, Never>()
-    /// The SFU signaling socket. Typed as a protocol so tests can inject a mock
-    /// while production uses ``SFUWebSocket`` (a `StreamCore.WebSocketClient`
-    /// wrapper).
-    private var webSocket: SFUWebSocketProtocol
-    /// Builds the replacement socket in ``refresh(webSocketConfiguration:)``.
-    /// `StreamCore.WebSocketClient` can't be reconfigured in place, so a refresh
-    /// swaps in a freshly built instance; injecting the factory lets tests mock
-    /// that new instance too.
-    private let webSocketFactory: (URL, URLSessionConfiguration) -> SFUWebSocketProtocol
+    // Stable relay that keeps existing subscribers alive when refresh replaces
+    // the underlying WebSocket and setUpPublishers reconnects its event stream.
+    private let eventSubject = PassthroughSubject<
+        Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload,
+        Never
+    >()
+    /// The active SFU signaling socket.
+    private var webSocket: SFUWebSocket
+    private let webSocketFactory: WebSocketFactory
     private var disposableBag = DisposableBag()
     private var requestDisposableBag = DisposableBag()
     private var isConnected: Bool {
@@ -86,7 +87,7 @@ final class SFUAdapter: CustomStringConvertible, @unchecked Sendable {
 
     /// A Combine publisher that allows observation of *all events* received by the adapter.
     var publisher: AnyPublisher<Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload, Never> {
-        webSocket.eventPublisher
+        eventSubject.eraseToAnyPublisher()
     }
 
     private let subjectSendEvent: PassthroughSubject<SFUAdapterEvent, Never> = .init()
@@ -128,9 +129,13 @@ final class SFUAdapter: CustomStringConvertible, @unchecked Sendable {
 
     init(
         signalService: SFUSignalService,
-        webSocket: SFUWebSocketProtocol,
-        webSocketFactory: @escaping (URL, URLSessionConfiguration) -> SFUWebSocketProtocol = {
-            SFUWebSocket(url: $0, sessionConfiguration: $1)
+        webSocket: SFUWebSocket,
+        webSocketFactory: @escaping WebSocketFactory = {
+            SFUWebSocket(
+                url: $0,
+                sessionConfiguration: $1,
+                environment: $2
+            )
         }
     ) {
         self.signalService = signalService
@@ -143,7 +148,7 @@ final class SFUAdapter: CustomStringConvertible, @unchecked Sendable {
     deinit {
         disposableBag.removeAll()
         requestDisposableBag.removeAll()
-        webSocket.disconnect(code: .goingAway)
+        webSocket.disconnect(code: .normalClosure)
     }
 
     // MARK: - WebSocket
@@ -161,8 +166,7 @@ final class SFUAdapter: CustomStringConvertible, @unchecked Sendable {
         function: StaticString = #function,
         line: UInt = #line
     ) -> AnyPublisher<T, Never> {
-        webSocket
-            .eventPublisher
+        eventSubject
             .compactMap { $0.payload(T.self) }
             .eraseToAnyPublisher()
     }
@@ -194,9 +198,6 @@ final class SFUAdapter: CustomStringConvertible, @unchecked Sendable {
 
     /// Sends an SFU request through the WebSocket connection.
     ///
-    /// Typed to the concrete `SfuRequest` (instead of the former
-    /// `SendableEvent`) so `SFUAdapter` never has to name StreamCore's
-    /// `SendableEvent`; the ``SFUWebSocket`` boundary forwards it to the client.
     /// - Parameter message: The SFU request to be sent.
     func send(message: Stream_Video_Sfu_Event_SfuRequest) {
         statusCheck()
@@ -218,7 +219,8 @@ final class SFUAdapter: CustomStringConvertible, @unchecked Sendable {
         requestDisposableBag.removeAll()
         webSocket = webSocketFactory(
             webSocketConfiguration.url,
-            webSocketConfiguration.sessionConfiguration
+            webSocketConfiguration.sessionConfiguration,
+            webSocket.environment
         )
 
         refreshSubject.send(())
@@ -289,9 +291,7 @@ final class SFUAdapter: CustomStringConvertible, @unchecked Sendable {
             "\(events.endIndex) event(s) of type \(eventType) found in bucket and will consume on sfuAdapter:\(self).",
             subsystems: .sfu
         )
-        // Re-inject through the wrapper so buffered payloads flow out of the same
-        // event publisher as live ones (replaces the old direct
-        // `eventSubject.send(.sfuEvent(...))`).
+        // Route replayed payloads through the same publisher as live events.
         events.forEach { webSocket.inject($0) }
     }
 
@@ -616,7 +616,7 @@ final class SFUAdapter: CustomStringConvertible, @unchecked Sendable {
                 \($0)
                 """
             }
-            .sink { _ in }
+            .sink { [weak self] in self?.eventSubject.send($0) }
             .store(in: disposableBag)
 
         signalService

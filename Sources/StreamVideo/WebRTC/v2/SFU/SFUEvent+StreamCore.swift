@@ -2,7 +2,6 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
-import Foundation
 import StreamCore
 
 extension Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload {

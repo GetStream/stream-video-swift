@@ -3,80 +3,111 @@
 //
 
 import Foundation
+import StreamCore
 @testable import StreamVideo
 import XCTest
 
 final class ClientError_Tests: XCTestCase, @unchecked Sendable {
     func test_init_videoAPIError_preservesPublicAPIError() throws {
-        let apiError = APIError(
-            code: 1,
-            details: [2],
-            duration: "3ms",
-            message: "message",
-            moreInfo: "more info",
-            statusCode: 400,
-            unrecoverable: false
-        )
+        let apiError = makeAPIError(code: 1)
 
         let subject = ClientError(with: apiError)
-        let exposedAPIError: APIError = try XCTUnwrap(subject.apiError)
+        let exposedAPIError = try XCTUnwrap(subject.apiError)
 
         XCTAssertTrue(exposedAPIError === apiError)
     }
 
-    func test_APIError_usesStreamCoreType() {
-        XCTAssertEqual(String(reflecting: APIError.self), "StreamCore.APIError")
-    }
-
-    func test_encodeToJSON_returnsGeneratedClientShape() throws {
-        let subject = APIError(
-            code: 1,
-            message: "message",
-            statusCode: 400
-        )
-        let jsonEncodable: any JSONEncodable = subject
+    func test_encodeToJSON_preservesLegacyWireShape() throws {
+        let subject = makeAPIError(code: 1)
+        let jsonEncodable: any StreamCore.JSONEncodable = subject
 
         let encoded = try XCTUnwrap(jsonEncodable.encodeToJSON() as? String)
         let data = try XCTUnwrap(Data(base64Encoded: encoded))
-        let decoded = try JSONDecoder.default.decode(APIError.self, from: data)
 
-        XCTAssertEqual(decoded, subject)
+        AssertJSONEqual(
+            data,
+            """
+            {
+              "code": 1,
+              "details": [2],
+              "duration": "3ms",
+              "exception_fields": {"field": "reason"},
+              "message": "message",
+              "more_info": "more info",
+              "StatusCode": 400,
+              "unrecoverable": false
+            }
+            """.data(using: .utf8)!
+        )
     }
 
-    func test_isInvalidTokenError_whenUnderlayingErrorIsInvalidToken_returnsTrue() {
-        // Create error code withing `ErrorPayload.tokenInvalidErrorCodes` range
-        let error = ErrorPayload(
-            code: .random(in: ClosedRange.tokenInvalidErrorCodes),
-            message: .unique,
-            statusCode: .unique
-        )
+    func test_APIError_equality_preservesLegacyFields() {
+        let subject = makeAPIError(code: 1)
+        let equalValue = makeAPIError(code: 1)
+        let differentValue = makeAPIError(code: 2)
 
-        // Assert `isInvalidTokenError` returns true
-        XCTAssertTrue(error.isInvalidTokenError)
-
-        // Create client error wrapping the error
-        let clientError = ClientError(with: error)
-
-        // Assert `isInvalidTokenError` returns true
-        XCTAssertTrue(clientError.isInvalidTokenError)
+        XCTAssertEqual(subject, equalValue)
+        XCTAssertNotEqual(subject, differentValue)
     }
 
-    func test_isInvalidTokenError_whenUnderlayingErrorIsNotInvalidToken_returnsFalse() {
-        // Create error code outside `ErrorPayload.tokenInvalidErrorCodes` range
-        let error = ErrorPayload(
-            code: ClosedRange.tokenInvalidErrorCodes.lowerBound - 1,
-            message: .unique,
-            statusCode: .unique
-        )
+    func test_errorPayload_isInvalidTokenError_preservesLegacyBoundaries() {
+        let cases = [
+            (code: 39, expected: false),
+            (code: 40, expected: true),
+            (code: 42, expected: true),
+            (code: 43, expected: false)
+        ]
 
-        // Assert `isInvalidTokenError` returns false
-        XCTAssertFalse(error.isInvalidTokenError)
+        for testCase in cases {
+            let errorPayload = ErrorPayload(
+                code: testCase.code,
+                message: "message",
+                statusCode: 401
+            )
 
-        // Create client error wrapping the error
-        let clientError = ClientError(with: error)
+            XCTAssertEqual(
+                errorPayload.isInvalidTokenError,
+                testCase.expected,
+                "ErrorPayload code \(testCase.code)"
+            )
+        }
+    }
 
-        // Assert `isInvalidTokenError` returns false
-        XCTAssertFalse(clientError.isInvalidTokenError)
+    func test_clientError_isInvalidTokenError_usesStreamCoreBoundaries() {
+        let cases = [
+            (code: 1, expected: false),
+            (code: 2, expected: true),
+            (code: 40, expected: false),
+            (code: 41, expected: true),
+            (code: 43, expected: true),
+            (code: 44, expected: false)
+        ]
+
+        for testCase in cases {
+            XCTAssertEqual(
+                ClientError(with: makeAPIError(code: testCase.code))
+                    .isInvalidTokenError,
+                testCase.expected,
+                "APIError code \(testCase.code)"
+            )
+        }
+    }
+
+    func test_clientError_isTokenExpiredError_usesStreamCoreBoundary() {
+        let cases = [
+            (code: 39, expected: false),
+            (code: 40, expected: true),
+            (code: 41, expected: false)
+        ]
+
+        for testCase in cases {
+            XCTAssertEqual(
+                ClientError(with: makeAPIError(code: testCase.code))
+                    .isTokenExpiredError,
+                testCase.expected,
+                "APIError code \(testCase.code)"
+            )
+        }
     }
 
     func test_rateLimitError_isEphemeralError() {
@@ -90,5 +121,18 @@ final class ClientError_Tests: XCTestCase, @unchecked Sendable {
 
         // Assert `isRateLimitError` returns true
         XCTAssertTrue(error.isRateLimitError)
+    }
+
+    private func makeAPIError(code: Int) -> APIError {
+        APIError(
+            code: code,
+            details: [2],
+            duration: "3ms",
+            exceptionFields: ["field": "reason"],
+            message: "message",
+            moreInfo: "more info",
+            statusCode: 400,
+            unrecoverable: false
+        )
     }
 }

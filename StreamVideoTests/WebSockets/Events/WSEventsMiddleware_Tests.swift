@@ -114,6 +114,19 @@ final class WSEventsMiddleware_Tests: XCTestCase, @unchecked Sendable {
         )
     }
 
+    func test_handle_nonWrappedEvent_returnsEventWithoutNotifyingSubscribers() {
+        let expectation = expectation(description: "No subscriber")
+        expectation.isInverted = true
+        let subscriber = SubscriberSpy { _ in expectation.fulfill() }
+        subject.add(subscriber: subscriber)
+        let event = NonWrappedEvent(id: .unique)
+
+        let result = subject.handle(event: event)
+
+        XCTAssertEqual((result as? NonWrappedEvent)?.id, event.id)
+        wait(for: [expectation], timeout: 0.1)
+    }
+
     private func makeEvent() -> WrappedEvent {
         .coordinatorEvent(
             .typeHealthCheckEvent(
@@ -124,6 +137,10 @@ final class WSEventsMiddleware_Tests: XCTestCase, @unchecked Sendable {
             )
         )
     }
+}
+
+private struct NonWrappedEvent: StreamCore.Event {
+    let id: String
 }
 
 private final class SubscriberSpy: WSEventsSubscriber, @unchecked Sendable {

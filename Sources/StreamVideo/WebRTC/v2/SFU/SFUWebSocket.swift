@@ -6,41 +6,19 @@ import Combine
 import Foundation
 import StreamCore
 
-/// The surface `SFUAdapter` depends on for the SFU signaling WebSocket.
-///
-/// Extracted so `SFUAdapter` can be tested with a mock while production uses
-/// `SFUWebSocket` (backed by `StreamCore.WebSocketClient`).
-protocol SFUWebSocketProtocol: AnyObject {
-    /// The URL used for the WebSocket connection.
-    var connectURL: URL { get }
-    /// The current connection state.
-    var connectionState: WebSocketConnectionState { get }
-    /// Emits every connection-state change.
-    var connectionStatePublisher: AnyPublisher<WebSocketConnectionState, Never> { get }
-    /// Emits every inbound SFU event payload.
-    var eventPublisher: AnyPublisher<Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload, Never> { get }
-
-    func connect()
-    func disconnect() async
-    func disconnect(code: URLSessionWebSocketTask.CloseCode)
-    func disconnectForReconfiguration()
-    func send(_ message: any SendableEvent)
-    func inject(_ payload: Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload)
-}
-
 /// Owns the SFU signaling WebSocket, backed by `StreamCore.WebSocketClient`.
 ///
-/// Narrows inbound events to SFU payloads and provides the protocol seam used
-/// to mock the socket in `SFUAdapter` tests.
-final class SFUWebSocket: SFUWebSocketProtocol, ConnectionStateDelegate, @unchecked Sendable {
+/// Narrows inbound events to SFU payloads.
+class SFUWebSocket: @unchecked Sendable {
 
     private let webSocket: WebSocketClient
+    let environment: WebSocketClient.Environment
 
     /// The current connection state.
-    @Published private(set) var connectionState: WebSocketConnectionState = .initialized
+    var connectionState: WebSocketConnectionState { webSocket.connectionState }
 
     var connectionStatePublisher: AnyPublisher<WebSocketConnectionState, Never> {
-        $connectionState.eraseToAnyPublisher()
+        webSocket.connectionStatePublisher
     }
 
     /// The URL used for the WebSocket connection.
@@ -56,22 +34,27 @@ final class SFUWebSocket: SFUWebSocketProtocol, ConnectionStateDelegate, @unchec
 
     init(
         url: URL,
-        sessionConfiguration: URLSessionConfiguration
+        sessionConfiguration: URLSessionConfiguration,
+        environment: WebSocketClient.Environment = .init(
+            eventBatchingPeriod: 0
+        )
     ) {
         connectURL = url
+        self.environment = environment
         webSocket = WebSocketClient(
             sessionConfiguration: sessionConfiguration,
             eventDecoder: WebRTCEventDecoder(),
             eventNotificationCenter: DefaultEventNotificationCenter(),
             webSocketClientType: .sfu,
+            environment: environment,
             connectRequest: URLRequest(url: url),
+            healthCheckBeforeConnected: true,
             requiresAuth: false,
             // Keep SFU health checks below the call state's 15-second timeout.
             pingInterval: 5,
             closeCodeProvider: SFUWebSocketCloseCodeProvider(),
             pingRequestBuilder: { makeSFUHealthCheckPing() }
         )
-        webSocket.connectionStateDelegate = self
     }
 
     func connect() {
@@ -99,15 +82,6 @@ final class SFUWebSocket: SFUWebSocketProtocol, ConnectionStateDelegate, @unchec
     func inject(_ payload: Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload) {
         webSocket.eventSubject.send(payload)
     }
-
-    // MARK: - ConnectionStateDelegate
-
-    func webSocketClient(
-        _ client: WebSocketClient,
-        didUpdateConnectionState state: WebSocketConnectionState
-    ) {
-        connectionState = state
-    }
 }
 
 struct SFUWebSocketCloseCodeProvider: WebSocketCloseCodeProviding {
@@ -133,8 +107,7 @@ struct SFUWebSocketCloseCodeProvider: WebSocketCloseCodeProviding {
             // avoids immediate participant teardown.
             return Self.reconfiguration
         case let .explicit(code, _):
-            // Preserve callers that intentionally use a protocol close code,
-            // such as `.goingAway` during adapter teardown.
+            // Preserve callers that intentionally use a protocol close code.
             return code
         case .disconnection:
             // Preserve intentional-disconnect behavior. A normal closure tells

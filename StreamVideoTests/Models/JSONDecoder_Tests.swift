@@ -18,8 +18,16 @@ final class JSONDecoder_Tests: XCTestCase, @unchecked Sendable {
         checkDecodingDateThrowException(dateString: "123456")
     }
 
-    func test_throwsException_whenDecodingDateFromNonRFC3339Date() {
-        checkDecodingDateThrowException(dateString: "2020-09-30T19:51:17")
+    func test_decodes_whenDecodingDateWithoutTimezone() throws {
+        try checkDateIsDecodingToComponents(
+            dateString: "2020-09-30T19:51:17",
+            year: 2020,
+            month: 9,
+            day: 30,
+            hour: 19,
+            minute: 51,
+            second: 17
+        )
     }
 
     func test_decodes_whenDecodingDateFromRFC3339DateWithMilliseconds() throws {
@@ -179,15 +187,13 @@ final class JSONDecoder_Tests: XCTestCase, @unchecked Sendable {
 
     private func checkDecodingDateThrowException(dateString: String, file: StaticString = #filePath, line: UInt = #line) {
         // Given
-        let dateJson = json(dateString: "")
+        let dateJson = json(dateString: dateString)
         let data = dateJson.data(using: .utf8)!
 
-        do {
-            // When
-            _ = try decoder.decode([String: Date].self, from: data)
-        } catch {
-            // Then
-            XCTAssertNotNil(error, file: file, line: line)
-        }
+        XCTAssertThrowsError(
+            try decoder.decode([String: Date].self, from: data),
+            file: file,
+            line: line
+        )
     }
 }

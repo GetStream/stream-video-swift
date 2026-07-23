@@ -6,41 +6,11 @@ import Combine
 import Foundation
 import StreamCore
 
-/// The surface `StreamVideo` depends on for the coordinator signaling socket.
-///
-/// Extracted so the coordinator client can be tested with a mock while
-/// production uses ``CoordinatorWebSocket`` (backed by
-/// `StreamCore.WebSocketClient`).
-protocol CoordinatorWebSocketProtocol: AnyObject {
-    /// The current connection state.
-    var connectionState: WebSocketConnectionState { get }
-    /// Emits every connection-state change.
-    var connectionStatePublisher: AnyPublisher<WebSocketConnectionState, Never> { get }
-
-    func connect()
-    func disconnect(
-        source: WebSocketConnectionState.DisconnectionSource,
-        completion: @Sendable @escaping () -> Void
-    )
-}
-
-extension CoordinatorWebSocketProtocol {
-    /// Convenience user-initiated disconnect.
-    func disconnect(completion: @Sendable @escaping () -> Void) {
-        disconnect(source: .userInitiated, completion: completion)
-    }
-}
-
 /// Owns the coordinator signaling WebSocket, backed by `StreamCore.WebSocketClient`.
 ///
-/// This is the single boundary that imports StreamCore for the coordinator
-/// socket. It:
-/// - decodes coordinator events via ``JsonEventDecoder`` through the shared
-///   app event notification center;
-/// - performs the auth handshake by sending video's connect payload on
-///   `onWSConnectionEstablished`;
+/// It decodes coordinator events through the shared notification center and
+/// sends StreamVideo's authentication payload when the connection opens.
 final class CoordinatorWebSocket:
-    CoordinatorWebSocketProtocol,
     ConnectionStateDelegate,
     @unchecked Sendable {
 
@@ -49,13 +19,12 @@ final class CoordinatorWebSocket:
     /// socket connects. Provided by the caller since it needs the current
     /// user/token; returns `nil` if the caller is gone.
     private let connectPayloadProvider: () -> (any Codable)?
-    /// StreamCore's recovery handler, owned here so reconnection stays inside the
-    /// StreamCore boundary. Receives state forwarded from this wrapper.
     private let recoveryHandler: ConnectionRecoveryHandler
 
-    @Published private(set) var connectionState: WebSocketConnectionState = .initialized
+    var connectionState: WebSocketConnectionState { webSocket.connectionState }
+
     var connectionStatePublisher: AnyPublisher<WebSocketConnectionState, Never> {
-        $connectionState.eraseToAnyPublisher()
+        webSocket.connectionStatePublisher
     }
 
     init(
@@ -73,10 +42,9 @@ final class CoordinatorWebSocket:
             eventNotificationCenter: eventNotificationCenter,
             webSocketClientType: .coordinator,
             connectRequest: URLRequest(url: url),
+            healthCheckBeforeConnected: true,
             requiresAuth: true,
-            // Coordinator keep-alive is a native WS ping (handled by StreamCore's
-            // ping controller), not an app-level message — so no builder.
-            pingRequestBuilder: nil
+            pingInterval: 5
         )
         self.webSocket = webSocket
 
@@ -108,7 +76,7 @@ final class CoordinatorWebSocket:
         webSocket.connectionStateDelegate = self
         webSocket.onWSConnectionEstablished = { [weak self] in
             guard let self, let payload = self.connectPayloadProvider() else { return }
-            webSocket.engine?.send(jsonMessage: payload)
+            self.webSocket.engine?.send(jsonMessage: payload)
         }
     }
 
@@ -125,15 +93,8 @@ final class CoordinatorWebSocket:
         webSocket.connect()
     }
 
-    func disconnect(
-        source: WebSocketConnectionState.DisconnectionSource,
-        completion: @Sendable @escaping () -> Void
-    ) {
-        webSocket.disconnect(
-            code: .normalClosure,
-            source: source,
-            completion: completion
-        )
+    func disconnect() async {
+        await webSocket.disconnect()
     }
 
     // MARK: - ConnectionStateDelegate
@@ -142,9 +103,18 @@ final class CoordinatorWebSocket:
         _ client: WebSocketClient,
         didUpdateConnectionState state: WebSocketConnectionState
     ) {
-        connectionState = state
-        // Forward the raw state to the recovery handler (it's a
-        // ConnectionStateDelegate but not the socket's delegate — we are).
-        recoveryHandler.webSocketClient(client, didUpdateConnectionState: state)
+        if case let .disconnected(source) = state,
+           let serverError = source.serverError,
+           serverError.isInvalidTokenError || serverError.isTokenExpiredError {
+            // StreamVideo refreshes the token from the state publisher and
+            // reconnects explicitly. Do not let Core reconnect with the stale
+            // token in parallel.
+            return
+        }
+
+        recoveryHandler.webSocketClient(
+            client,
+            didUpdateConnectionState: state
+        )
     }
 }

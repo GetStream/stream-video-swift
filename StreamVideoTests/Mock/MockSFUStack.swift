@@ -6,41 +6,56 @@ import StreamCore
 @testable import StreamVideo
 
 struct MockSFUStack: @unchecked Sendable {
-    /// Reference box so the adapter's `refresh` factory can return a socket
-    /// injected after construction (mirrors the old factory-stub pattern).
-    final class Box: @unchecked Sendable { var socket: MockSFUWebSocket; init(_ s: MockSFUWebSocket) { socket = s } }
+    private final class WebSocketStorage: @unchecked Sendable {
+        private let lock = NSLock()
+        private var value: MockSFUWebSocket
+
+        init(_ value: MockSFUWebSocket) {
+            self.value = value
+        }
+
+        var current: MockSFUWebSocket {
+            get {
+                lock.lock()
+                defer { lock.unlock() }
+                return value
+            }
+            set {
+                lock.lock()
+                value = newValue
+                lock.unlock()
+            }
+        }
+    }
 
     var webSocket: MockSFUWebSocket
     var service: MockSignalServer
     let adapter: SFUAdapter
-    private let box: Box
+    private let webSocketStorage: WebSocketStorage
 
-    /// The web socket returned by the adapter's `refresh` factory. Defaults to
-    /// `webSocket`; set to a fresh mock to simulate a refreshed connection.
     var nextWebSocket: MockSFUWebSocket {
-        get { box.socket }
-        nonmutating set { box.socket = newValue }
+        get { webSocketStorage.current }
+        nonmutating set { webSocketStorage.current = newValue }
     }
 
     init() {
         let webSocket = MockSFUWebSocket()
         let service = MockSignalServer()
-        let box = Box(webSocket)
+        let webSocketStorage = WebSocketStorage(webSocket)
         self.webSocket = webSocket
         self.service = service
-        self.box = box
+        self.webSocketStorage = webSocketStorage
         adapter = SFUAdapter(
             signalService: service,
             webSocket: webSocket,
-            webSocketFactory: { _, _ in box.socket }
+            webSocketFactory: { [webSocketStorage] _, _, _ in
+                webSocketStorage.current
+            }
         )
     }
 
     // MARK: - WebSocket
 
-    // These helpers intentionally target the original socket. Recovery tests
-    // use it to establish and fail the initial connection after configuring
-    // `nextWebSocket` as its replacement.
     func setConnectionState(to state: WebSocketConnectionState) {
         webSocket.simulate(state: state)
     }
@@ -48,6 +63,6 @@ struct MockSFUStack: @unchecked Sendable {
     func receiveEvent(
         _ payload: Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload
     ) {
-        webSocket.receive(payload)
+        webSocket.inject(payload)
     }
 }

@@ -90,9 +90,8 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     private let coordinatorClient: DefaultAPI
     private let apiTransport: DefaultAPITransport
     
-    private var webSocketClient: CoordinatorWebSocketProtocol?
-    /// Observes the coordinator socket's state (replaces the old
-    /// `ConnectionStateDelegate` callback).
+    private var webSocketClient: CoordinatorWebSocket?
+    /// Observes coordinator connection-state changes on the main queue.
     private var connectionStateCancellable: AnyCancellable?
 
     private let eventsMiddleware = WSEventsMiddleware()
@@ -110,8 +109,6 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         return center
     }()
     
-    private(set) var timerType: Timer.Type = DefaultTimer.self
-
     var tokenRetryTimer: TimerControl?
     var tokenExpirationRetryStrategy: RetryStrategy = DefaultRetryStrategy()
         
@@ -346,15 +343,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     
     /// Disconnects the current `StreamVideo` client.
     public func disconnect() async {
-        await withCheckedContinuation { [webSocketClient] continuation in
-            if let webSocketClient = webSocketClient {
-                webSocketClient.disconnect {
-                    continuation.resume()
-                }
-            } else {
-                continuation.resume()
-            }
-        }
+        await webSocketClient?.disconnect()
     }
 
     /// Publishes all received video events coming from the coordinator.
@@ -536,7 +525,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             apiKey: apiKey.apiKeyString
         )
         if let connectURL = try? URL(string: Self.endpointConfig.wsEndpoint)?.appendingQueryItems(queryParams) {
-            webSocketClient = makeWebSocketClient(url: connectURL, apiKey: apiKey)
+            webSocketClient = makeWebSocketClient(url: connectURL)
             webSocketClient?.connect()
         } else {
             throw ClientError.Unknown()
@@ -556,18 +545,17 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         }
     }
     
-    private func makeWebSocketClient(
-        url: URL,
-        apiKey: APIKey
-    ) -> CoordinatorWebSocketProtocol {
-        let webSocketClient = environment.webSocketClientBuilder(
-            eventNotificationCenter,
-            url,
-            { [weak self] in self?.makeConnectPayload() }
+    private func makeWebSocketClient(url: URL) -> CoordinatorWebSocket {
+        let config = URLSessionConfiguration.default
+        config.waitsForConnectivity = false
+        let webSocketClient = CoordinatorWebSocket(
+            url: url,
+            eventNotificationCenter: eventNotificationCenter,
+            sessionConfiguration: config,
+            connectPayloadProvider: { [weak self] in self?.makeConnectPayload() },
+            hasActiveCall: { InjectedValues[\.callKitService].callCount > 0 }
         )
 
-        // The wrapper isn't a `ConnectionStateDelegate` source, so observe state
-        // via its publisher and forward as before (incl. to the recovery handler).
         // The publisher fires on StreamCore's callback thread; hop to main since
         // `handleConnectionStateChange` mutates the `@Published` `state.connection`.
         connectionStateCancellable = webSocketClient
@@ -767,13 +755,13 @@ extension StreamVideo {
     private func handleConnectionStateChange(
         _ state: WebSocketConnectionState
     ) {
-        self.state.connection = ConnectionStatus(webSocketConnectionState: state)
+        self.state.connection = ConnectionStatus(
+            videoWebSocketConnectionState: state
+        )
         switch state {
         case let .disconnected(source):
-            // On invalid-token disconnects, refresh the token and reconnect.
-            // Other reconnection cases are handled by the recovery handler owned
-            // by `CoordinatorWebSocket`.
-            if let serverError = source.serverError, serverError.isInvalidTokenError {
+            if let serverError = source.serverError,
+               serverError.isInvalidTokenError || serverError.isTokenExpiredError {
                 Task(disposableBag: disposableBag) { [weak self] in
                     guard let self else {
                         return

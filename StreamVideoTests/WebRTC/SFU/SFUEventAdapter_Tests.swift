@@ -15,8 +15,7 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
     private lazy var mockWebSocket: MockSFUWebSocket! = .init()
     private lazy var sfuAdapter: SFUAdapter! = .init(
         signalService: mockService,
-        webSocket: mockWebSocket,
-        webSocketFactory: { _, _ in MockSFUWebSocket() }
+        webSocket: mockWebSocket
     )
     private lazy var stageSubject: CurrentValueSubject<
         WebRTCCoordinator.StateMachine.Stage.ID,

@@ -5,6 +5,7 @@
 import AVFoundation
 import CallKit
 import Foundation
+import StreamCore
 @testable import StreamVideo
 @preconcurrency import XCTest
 
@@ -1725,7 +1726,9 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         await safeFulfillment(of: [waitExpectation], timeout: timeout)
     }
 
-    private func stubConnectionState(to status: ConnectionStatus) {
+    private func stubConnectionState(
+        to status: ConnectionStatus
+    ) {
         let mockedState = mockedStreamVideo.state
         mockedState.connection = status
         mockedStreamVideo.stub(for: \.state, with: mockedState)

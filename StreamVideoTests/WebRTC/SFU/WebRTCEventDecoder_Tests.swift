@@ -48,4 +48,33 @@ final class WebRTCEventDecoder_Tests: XCTestCase, @unchecked Sendable {
             XCTAssertTrue($0 is StreamCore.ClientError.IgnoredEventType)
         }
     }
+
+    func test_decode_malformedProtobuf_throws() {
+        XCTAssertThrowsError(
+            try subject.decode(from: Data([0x0a]))
+        )
+    }
+
+    func test_decode_errorProtobuf_returnsTypedTerminalPayload() throws {
+        var error = Stream_Video_Sfu_Models_Error()
+        error.message = .unique
+        var errorEvent = Stream_Video_Sfu_Event_Error()
+        errorEvent.error = error
+        errorEvent.reconnectStrategy = .migrate
+        var event = Stream_Video_Sfu_Event_SfuEvent()
+        event.error = errorEvent
+
+        let result = try subject.decode(
+            from: event.serializedData(partial: false)
+        )
+
+        XCTAssertEqual(
+            result as? Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload,
+            .error(errorEvent)
+        )
+        XCTAssertEqual(
+            (result.error() as? Stream_Video_Sfu_Models_Error)?.message,
+            error.message
+        )
+    }
 }

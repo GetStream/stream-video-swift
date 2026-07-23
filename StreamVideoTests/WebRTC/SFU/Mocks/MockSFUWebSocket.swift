@@ -7,12 +7,8 @@ import Foundation
 import StreamCore
 @testable import StreamVideo
 
-final class MockSFUWebSocket: SFUWebSocketProtocol, Mockable, @unchecked Sendable {
-
-    // MARK: - Mockable
-
-    typealias FunctionKey = MockFunctionKey
-    enum MockFunctionKey: Hashable, CaseIterable {
+final class MockSFUWebSocket: SFUWebSocket, @unchecked Sendable {
+    enum FunctionKey: Hashable {
         case connect
         case disconnect
         case disconnectAsync
@@ -21,99 +17,107 @@ final class MockSFUWebSocket: SFUWebSocketProtocol, Mockable, @unchecked Sendabl
         case inject
     }
 
-    enum FunctionInput: Payloadable {
-        case connect
-        case disconnect(code: URLSessionWebSocketTask.CloseCode)
-        case disconnectAsync
-        case disconnectForReconfiguration
-        case send(message: any StreamCore.SendableEvent)
-        case inject(payload: Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload)
-
-        var payload: Any {
-            switch self {
-            case .connect:
-                return ()
-            case let .disconnect(code):
-                return code
-            case .disconnectAsync:
-                return ()
-            case .disconnectForReconfiguration:
-                return ()
-            case let .send(message):
-                return message
-            case let .inject(payload):
-                return payload
-            }
-        }
-    }
-
-    var stubbedProperty: [String: Any] = [:]
-    var stubbedFunction: [FunctionKey: Any] = [:]
-    var stubbedFunctionInput: [FunctionKey: [FunctionInput]] = MockFunctionKey
-        .allCases
-        .reduce(into: [FunctionKey: [FunctionInput]]()) { $0[$1] = [] }
-    func stub<T>(for keyPath: KeyPath<MockSFUWebSocket, T>, with value: T) {
-        stubbedProperty[propertyKey(for: keyPath)] = value
-    }
-
-    func stub<T>(for function: FunctionKey, with value: T) {
-        stubbedFunction[function] = value
-    }
-
-    // MARK: - SFUWebSocketProtocol
-
-    var connectURL: URL = .init(string: "https://getstream.io")!
-
-    @Published var connectionStateValue: WebSocketConnectionState = .initialized
-    var connectionState: WebSocketConnectionState { connectionStateValue }
-    var connectionStatePublisher: AnyPublisher<WebSocketConnectionState, Never> {
-        $connectionStateValue.eraseToAnyPublisher()
-    }
-
-    let eventSubject = PassthroughSubject<
+    private let lock = NSLock()
+    private let stateSubject = CurrentValueSubject<
+        WebSocketConnectionState,
+        Never
+    >(.initialized)
+    private let receivedEventSubject = PassthroughSubject<
         Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload,
         Never
     >()
-    var eventPublisher: AnyPublisher<Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload, Never> {
-        eventSubject.eraseToAnyPublisher()
+    private var calls: [FunctionKey: Int] = [:]
+    private var sentMessages: [any SendableEvent] = []
+
+    override var connectionState: WebSocketConnectionState {
+        stateSubject.value
     }
 
-    func connect() {
-        stubbedFunctionInput[.connect]?.append(.connect)
+    override var connectionStatePublisher: AnyPublisher<
+        WebSocketConnectionState,
+        Never
+    > {
+        stateSubject.eraseToAnyPublisher()
     }
 
-    func disconnect() async {
-        stubbedFunctionInput[.disconnectAsync]?.append(.disconnectAsync)
+    override var eventPublisher: AnyPublisher<
+        Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload,
+        Never
+    > {
+        receivedEventSubject.eraseToAnyPublisher()
     }
 
-    func disconnect(code: URLSessionWebSocketTask.CloseCode) {
-        stubbedFunctionInput[.disconnect]?.append(.disconnect(code: code))
-    }
-
-    func disconnectForReconfiguration() {
-        stubbedFunctionInput[.disconnectForReconfiguration]?.append(
-            .disconnectForReconfiguration
+    init(
+        connectURL: URL = URL(string: "https://getstream.io")!
+    ) {
+        super.init(
+            url: connectURL,
+            sessionConfiguration: .ephemeral
         )
     }
 
-    func send(_ message: any StreamCore.SendableEvent) {
-        stubbedFunctionInput[.send]?.append(.send(message: message))
+    func timesCalled(_ key: FunctionKey) -> Int {
+        withLock { calls[key, default: 0] }
     }
 
-    func inject(_ payload: Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload) {
-        stubbedFunctionInput[.inject]?.append(.inject(payload: payload))
-        eventSubject.send(payload)
+    func recordedInputPayload<T>(
+        _ type: T.Type,
+        for key: FunctionKey
+    ) -> [T]? {
+        guard key == .send else { return nil }
+        return withLock { sentMessages.compactMap { $0 as? T } }
     }
 
-    // MARK: - Helpers
-
-    /// Simulates a connection-state change.
     func simulate(state: WebSocketConnectionState) {
-        connectionStateValue = state
+        stateSubject.send(state)
     }
 
-    /// Pushes an SFU event payload through the event stream.
-    func receive(_ payload: Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload) {
-        eventSubject.send(payload)
+    func receive(
+        _ payload: Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload
+    ) {
+        inject(payload)
+    }
+
+    override func connect() {
+        record(.connect)
+        stateSubject.send(.connecting)
+    }
+
+    override func disconnect() async {
+        record(.disconnectAsync)
+        stateSubject.send(.disconnecting(source: .userInitiated))
+    }
+
+    override func disconnect(code: URLSessionWebSocketTask.CloseCode) {
+        record(.disconnect)
+        stateSubject.send(.disconnecting(source: .userInitiated))
+    }
+
+    override func disconnectForReconfiguration() {
+        record(.disconnectForReconfiguration)
+        stateSubject.send(.disconnecting(source: .userInitiated))
+    }
+
+    override func send(_ message: any SendableEvent) {
+        withLock {
+            calls[.send, default: 0] += 1
+            sentMessages.append(message)
+        }
+    }
+
+    override func inject(
+        _ payload: Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload
+    ) {
+        receivedEventSubject.send(payload)
+    }
+
+    private func record(_ key: FunctionKey) {
+        withLock { calls[key, default: 0] += 1 }
+    }
+
+    private func withLock<T>(_ action: () -> T) -> T {
+        lock.lock()
+        defer { lock.unlock() }
+        return action()
     }
 }

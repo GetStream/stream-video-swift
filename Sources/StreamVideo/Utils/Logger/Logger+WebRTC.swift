@@ -7,14 +7,6 @@ import Foundation
 import StreamCore
 import StreamWebRTC
 
-extension StreamCore.LogSubsystem {
-    /// The subsystem responsible for internal WebRTC logs.
-    ///
-    /// Declared here (not in StreamCore) since internal WebRTC logging is
-    /// video-specific. Uses a bit above StreamCore's range.
-    static let webRTCInternal = StreamCore.LogSubsystem(rawValue: 1 << 19)
-}
-
 extension StreamCore.LogConfig {
     /// Toggles internal WebRTC logging on or off.
     public static var webRTCLogsEnabled: Bool {
@@ -116,18 +108,18 @@ extension StreamCore.Logger.WebRTC {
             switch severity {
             case .none, .verbose:
                 if isMessageFromValidFile(trimmedMessage) {
-                    StreamCore.log.debug(trimmedMessage, subsystems: .webRTCInternal)
+                    log.debug(trimmedMessage, subsystems: .webRTC)
                 }
             case .info:
                 if isMessageFromValidFile(trimmedMessage) {
-                    StreamCore.log.info(trimmedMessage, subsystems: .webRTCInternal)
+                    log.info(trimmedMessage, subsystems: .webRTC)
                 }
             case .warning:
-                StreamCore.log.warning(trimmedMessage, subsystems: .webRTCInternal)
+                log.warning(trimmedMessage, subsystems: .webRTC)
             case .error:
-                StreamCore.log.error(trimmedMessage, subsystems: .webRTCInternal)
+                log.error(trimmedMessage, subsystems: .webRTC)
             @unknown default:
-                StreamCore.log.debug(trimmedMessage, subsystems: .webRTCInternal)
+                log.debug(trimmedMessage, subsystems: .webRTC)
             }
         }
 

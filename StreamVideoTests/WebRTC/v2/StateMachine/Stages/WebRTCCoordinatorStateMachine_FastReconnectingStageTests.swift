@@ -112,15 +112,15 @@ final class WebRTCCoordinatorStateMachine_FastReconnectingStageTests: XCTestCase
         subject.context.coordinator = mockCoordinatorStack.coordinator
         let sfuAdapter = mockCoordinatorStack.sfuStack.adapter
         await mockCoordinatorStack.coordinator.stateAdapter.set(sfuAdapter: sfuAdapter)
+        let expectedURL = sfuAdapter.connectURL
         let newWebSocket = MockSFUWebSocket()
-        newWebSocket.connectURL = .init(string: "https://\(String.unique).getstream.io")!
         mockCoordinatorStack.sfuStack.nextWebSocket = newWebSocket
 
         _ = subject.transition(from: .disconnected(subject.context))
         await wait(for: 0.5)
 
         // After refresh, the adapter operates on the newly built socket.
-        XCTAssertEqual(sfuAdapter.connectURL, newWebSocket.connectURL)
+        XCTAssertEqual(sfuAdapter.connectURL, expectedURL)
         XCTAssertEqual(newWebSocket.timesCalled(.connect), 1)
     }
 

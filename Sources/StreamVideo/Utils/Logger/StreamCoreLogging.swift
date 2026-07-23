@@ -2,12 +2,10 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
-import Foundation
 import StreamCore
 
-// StreamVideo's logging types are provided by StreamCore. These aliases expose
-// them under their historical StreamVideo names so existing call sites keep
-// working module-wide without importing StreamCore in every file.
+// Keep shared logging symbols available across StreamVideo source files without
+// requiring a StreamCore import in each file.
 
 public typealias LogLevel = StreamCore.LogLevel
 public typealias LogSubsystem = StreamCore.LogSubsystem

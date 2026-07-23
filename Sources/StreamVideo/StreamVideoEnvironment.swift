@@ -3,30 +3,9 @@
 //
 
 import Foundation
-import StreamCore
 
 extension StreamVideo {
     struct Environment: Sendable {
-        // Builds the coordinator signaling socket. Backed by
-        // `StreamCore.WebSocketClient` via ``CoordinatorWebSocket``; the payload
-        // provider supplies the auth (`WSAuthMessageRequest`) sent on connect.
-        var webSocketClientBuilder: @Sendable (
-            _ eventNotificationCenter: EventNotificationCenter,
-            _ url: URL,
-            _ connectPayloadProvider: @escaping () -> (any Codable)?
-        ) -> CoordinatorWebSocketProtocol = {
-            let config = URLSessionConfiguration.default
-            config.waitsForConnectivity = false
-
-            return CoordinatorWebSocket(
-                url: $1,
-                eventNotificationCenter: $0,
-                sessionConfiguration: config,
-                connectPayloadProvider: $2,
-                hasActiveCall: { InjectedValues[\.callKitService].callCount > 0 }
-            )
-        }
-        
         var callControllerBuilder: @Sendable (
             _ defaultAPI: DefaultAPI,
             _ user: User,

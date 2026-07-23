@@ -153,9 +153,6 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
                 apiKey: coordinator.stateAdapter.apiKey,
                 token: await coordinator.stateAdapter.token
             ),
-            // Only the URL is passed now: after the StreamCore migration the
-            // event-notification center / decoder are created inside
-            // `SFUWebSocket`, so they were dropped from `WebSocketConfiguration`.
             webSocketConfiguration: .init(
                 url: try unwrap(
                     .init(string: response.credentials.server.wsEndpoint),

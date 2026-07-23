@@ -2,6 +2,7 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import Foundation
 @testable import StreamVideo
 import XCTest
 
@@ -243,5 +244,60 @@ final class RawJSON_Tests: XCTestCase, @unchecked Sendable {
         rawJSONArray[1] = .string("Stream")
 
         XCTAssertEqual(rawJSONArray, .array([.string("Hello"), .string("Stream")]))
+    }
+
+    func test_value_preservesLegacyNumericConversions() {
+        let subject = RawJSON.number(42.5)
+        let intValue: Int? = subject.value()
+        let int32Value: Int32? = subject.value()
+        let int64Value: Int64? = subject.value()
+        let uintValue: UInt? = subject.value()
+        let uint32Value: UInt32? = subject.value()
+        let uint64Value: UInt64? = subject.value()
+        let doubleValue: Double? = subject.value()
+        let floatValue: Float? = subject.value()
+
+        XCTAssertEqual(intValue, 42)
+        XCTAssertEqual(int32Value, 42)
+        XCTAssertEqual(int64Value, 42)
+        XCTAssertEqual(uintValue, 42)
+        XCTAssertEqual(uint32Value, 42)
+        XCTAssertEqual(uint64Value, 42)
+        XCTAssertEqual(doubleValue, 42.5)
+        XCTAssertEqual(floatValue, 42.5)
+    }
+
+    func test_value_preservesLegacyStructuredValuesAndFallback() {
+        let dictionary: [String: RawJSON]? =
+            RawJSON.dictionary(["key": .string("value")]).value()
+        let array: [RawJSON]? =
+            RawJSON.array([.number(1), .number(2)]).value()
+        let string: String? = RawJSON.string("value").value()
+        let bool: Bool? = RawJSON.bool(true).value()
+        let missing: String? = RawJSON.nil.value()
+
+        XCTAssertEqual(dictionary, ["key": .string("value")])
+        XCTAssertEqual(array, [.number(1), .number(2)])
+        XCTAssertEqual(string, "value")
+        XCTAssertEqual(bool, true)
+        XCTAssertNil(missing)
+        XCTAssertEqual(RawJSON.bool(true).value(fallback: "fallback"), "fallback")
+    }
+
+    func test_init_nsObject_preservesLegacyRecursiveConversion() {
+        let subject = RawJSON(
+            [
+                "name": NSString(string: "stream"),
+                "values": NSArray(array: [NSNumber(value: 1), NSNumber(value: 2)])
+            ] as NSDictionary
+        )
+
+        XCTAssertEqual(
+            subject,
+            .dictionary([
+                "name": .string("stream"),
+                "values": .array([.number(1), .number(2)])
+            ])
+        )
     }
 }
