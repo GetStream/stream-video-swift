@@ -29,13 +29,13 @@ final class OutgoingRingCreationCoordinator: @unchecked Sendable {
     /// Thrown from ``updateStateCreated()`` when the call was hung up before it
     /// finished being created. The create call site catches this and issues the
     /// cancel itself, now that the call exists on the backend to be rejected.
-    struct CallAlreadyRejected: Error {}
+    final class CallAlreadyRejected: Error {}
 
     /// Thrown from ``updateStateRejected()`` when hang-up arrives before create
     /// completes. The hang-up call site catches this and skips its own reject,
     /// because the still-pending ``updateStateCreated()`` will perform the
     /// cancel once create returns.
-    struct CallNotCreatedYet: Error {}
+    final class CallNotCreatedYet: Error {}
 
     /// Progress of the outgoing ring as observed by the two call sites.
     /// Starts at `.creating`. `.pendingCancel` records a hang-up that arrived
