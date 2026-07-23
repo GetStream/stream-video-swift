@@ -33,7 +33,7 @@ final class ClientEventDelivery_Tests: XCTestCase, @unchecked Sendable {
     func test_send_retriesServerErrorsUpToPolicyLimit() async {
         mockAPI.stub(
             for: .clientCallEvent,
-            with: StreamAPIError(
+            with: APIError(
                 code: 0,
                 details: [],
                 duration: "",
@@ -51,7 +51,7 @@ final class ClientEventDelivery_Tests: XCTestCase, @unchecked Sendable {
     func test_send_doesNotRetryClientErrors() async {
         mockAPI.stub(
             for: .clientCallEvent,
-            with: StreamAPIError(
+            with: APIError(
                 code: 0,
                 details: [],
                 duration: "",

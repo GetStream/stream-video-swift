@@ -38,6 +38,9 @@ cp ${OPENAPI_GENERATED_CODE_ROOT}/tmp/OpenAPIClient/Classes/OpenAPIs/*.swift ${O
 cp ${OPENAPI_GENERATED_CODE_ROOT}/tmp/OpenAPIClient/Classes/OpenAPIs/APIs/DefaultAPI.swift ${OPENAPI_GENERATED_CODE_ROOT}/APIs/
 mv ${OPENAPI_GENERATED_CODE_ROOT}/tmp/OpenAPIClient/Classes/OpenAPIs/Models ${OPENAPI_GENERATED_CODE_ROOT}
 
+# APIError is provided by StreamCore through a handwritten typealias.
+rm -f "${OPENAPI_GENERATED_CODE_ROOT}/Models/APIError.swift"
+
 # delete the tmp path
 rm -rf "${OPENAPI_GENERATED_CODE_ROOT}/tmp"
 

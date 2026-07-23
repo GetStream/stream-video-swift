@@ -22,5 +22,8 @@ rm -rf "$PROJECT_ROOT/Sources/StreamVideo/OpenApi/generated/Models/"*
   go run . openapi generate-client --language swift --spec "$SOURCE_PATH/releases/v2/video-openapi-clientside.yaml" --output "$PROJECT_ROOT/Sources/StreamVideo/OpenApi/generated/"
 )
 
+# APIError is provided by StreamCore through a handwritten typealias.
+rm -f "$PROJECT_ROOT/Sources/StreamVideo/OpenApi/generated/Models/APIError.swift"
+
 # format the generated code
 swiftformat Sources/StreamVideo/OpenApi/generated
