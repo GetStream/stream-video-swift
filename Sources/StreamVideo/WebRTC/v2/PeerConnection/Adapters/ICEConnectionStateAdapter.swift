@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import StreamCore
 import StreamWebRTC
 
 /// An adapter that observes ICE connection state changes from the WebRTC peer

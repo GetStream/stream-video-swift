@@ -5,6 +5,7 @@
 import AVFoundation
 import Combine
 import Foundation
+import StreamCore
 
 extension AVAudioSession {
     /// Captures a stable view of the session so state changes can be diffed

@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import StreamCore
 
 final class StoreStatistics<Namespace: StoreNamespace> {
 

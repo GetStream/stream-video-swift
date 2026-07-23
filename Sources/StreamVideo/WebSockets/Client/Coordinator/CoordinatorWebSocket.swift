@@ -61,7 +61,7 @@ final class CoordinatorWebSocket:
             backgroundTaskScheduler: backgroundTaskScheduler,
             internetConnection: internetConnection,
             reconnectionStrategy: StreamCore.DefaultRetryStrategy(),
-            reconnectionTimerType: StreamCore.DefaultTimer.self,
+            reconnectionTimerType: DefaultTimer.self,
             keepConnectionAliveInBackground: true,
             reconnectionPolicies: [
                 WebSocketAutomaticReconnectionPolicy(webSocket),
