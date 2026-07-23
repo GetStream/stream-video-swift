@@ -47,7 +47,7 @@ final class ClientEventFailure_Tests: XCTestCase, @unchecked Sendable {
     }
 
     func test_init_fromAPIError_usesBackendCodeAndMessage() {
-        let apiError = StreamAPIError(
+        let apiError = APIError(
             code: 17,
             details: [],
             duration: "",

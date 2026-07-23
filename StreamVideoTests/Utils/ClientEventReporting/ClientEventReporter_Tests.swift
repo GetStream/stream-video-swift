@@ -301,7 +301,7 @@ final class ClientEventReporter_Tests: XCTestCase, @unchecked Sendable {
     func test_send_retriesOnServerError_upToFiveAttempts() async {
         mockAPI.stub(
             for: .clientCallEvent,
-            with: StreamAPIError(code: 0, details: [], duration: "", message: "boom", moreInfo: "", statusCode: 500)
+            with: APIError(code: 0, details: [], duration: "", message: "boom", moreInfo: "", statusCode: 500)
         )
 
         await subject.reportJoinInitiated()
@@ -313,7 +313,7 @@ final class ClientEventReporter_Tests: XCTestCase, @unchecked Sendable {
     func test_send_doesNotRetryOnClientError() async {
         mockAPI.stub(
             for: .clientCallEvent,
-            with: StreamAPIError(code: 0, details: [], duration: "", message: "bad request", moreInfo: "", statusCode: 400)
+            with: APIError(code: 0, details: [], duration: "", message: "bad request", moreInfo: "", statusCode: 400)
         )
 
         await subject.reportJoinInitiated()

@@ -2,6 +2,7 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import Foundation
 @testable import StreamVideo
 import XCTest
 
@@ -23,30 +24,23 @@ final class ClientError_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertTrue(exposedAPIError === apiError)
     }
 
-    func test_init_streamAPIError_convertsToPublicAPIErrorPreservingFields() throws {
-        let apiError = StreamAPIError(
-            code: ClosedRange.tokenInvalidErrorCodes.lowerBound,
-            details: [2, 3],
-            duration: "4ms",
-            exceptionFields: ["field": "reason"],
+    func test_APIError_usesStreamCoreType() {
+        XCTAssertEqual(String(reflecting: APIError.self), "StreamCore.APIError")
+    }
+
+    func test_encodeToJSON_returnsGeneratedClientShape() throws {
+        let subject = APIError(
+            code: 1,
             message: "message",
-            moreInfo: "more info",
-            statusCode: 429,
-            unrecoverable: true
+            statusCode: 400
         )
+        let jsonEncodable: any JSONEncodable = subject
 
-        let subject = ClientError(with: apiError)
-        let exposedAPIError: APIError = try XCTUnwrap(subject.apiError)
+        let encoded = try XCTUnwrap(jsonEncodable.encodeToJSON() as? String)
+        let data = try XCTUnwrap(Data(base64Encoded: encoded))
+        let decoded = try JSONDecoder.default.decode(APIError.self, from: data)
 
-        XCTAssertEqual(exposedAPIError.code, apiError.code)
-        XCTAssertEqual(exposedAPIError.details, apiError.details)
-        XCTAssertEqual(exposedAPIError.duration, apiError.duration)
-        XCTAssertEqual(exposedAPIError.exceptionFields, apiError.exceptionFields)
-        XCTAssertEqual(exposedAPIError.message, apiError.message)
-        XCTAssertEqual(exposedAPIError.moreInfo, apiError.moreInfo)
-        XCTAssertEqual(exposedAPIError.statusCode, apiError.statusCode)
-        XCTAssertEqual(exposedAPIError.unrecoverable, apiError.unrecoverable)
-        XCTAssertTrue(subject.isInvalidTokenError)
+        XCTAssertEqual(decoded, subject)
     }
 
     func test_isInvalidTokenError_whenUnderlayingErrorIsInvalidToken_returnsTrue() {

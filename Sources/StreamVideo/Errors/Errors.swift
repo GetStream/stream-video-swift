@@ -69,17 +69,6 @@ public class ClientError: Error, CustomStringConvertible, @unchecked Sendable {
         location = .init(file: "\(file)", line: Int(line))
         if let apiError = error as? APIError {
             self.apiError = apiError
-        } else if let apiError = error as? StreamAPIError {
-            self.apiError = APIError(
-                code: apiError.code,
-                details: apiError.details,
-                duration: apiError.duration,
-                exceptionFields: apiError.exceptionFields,
-                message: apiError.message,
-                moreInfo: apiError.moreInfo,
-                statusCode: apiError.statusCode,
-                unrecoverable: apiError.unrecoverable
-            )
         } else {
             apiError = nil
         }
@@ -149,18 +138,15 @@ extension Error {
 }
 
 extension Error {
-    // Casts to `StreamAPIError` (StreamCore's) because that is the type the
-    // transport now throws. Only the stored `code`/`statusCode` are read, so no
-    // `import StreamCore` is required here.
     var isTokenExpiredError: Bool {
-        if let error = self as? StreamAPIError, ClosedRange.tokenInvalidErrorCodes ~= error.code {
+        if let error = self as? APIError, ClosedRange.tokenInvalidErrorCodes ~= error.code {
             return true
         }
         return false
     }
     
     var hasClientErrors: Bool {
-        if let apiError = self as? StreamAPIError,
+        if let apiError = self as? APIError,
            ClosedRange.clientErrorCodes ~= apiError.statusCode {
             return false
         }
@@ -177,10 +163,5 @@ extension ClosedRange where Bound == Int {
 }
 
 struct APIErrorContainer: Codable {
-    // Decodes the server error envelope directly into `StreamAPIError`
-    // (identical `CodingKeys` to video's `APIError`), so WebSocket-surfaced API
-    // errors converge on StreamCore's type too.
-    let error: StreamAPIError
+    let error: APIError
 }
-
-extension APIError: Error {}

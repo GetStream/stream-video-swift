@@ -108,10 +108,7 @@ final class URLSessionTransport: DefaultAPITransport, @unchecked Sendable {
         }
 
         do {
-            // Decode server errors into `StreamAPIError` (StreamCore's, identical
-            // `CodingKeys`) so every thrown API error downstream is StreamCore's
-            // type. The generated OpenAPI layer keeps video's `APIError`.
-            return try JSONDecoder.default.decode(StreamAPIError.self, from: data)
+            return try JSONDecoder.default.decode(APIError.self, from: data)
         } catch {
             return ClientError.NetworkError(response.description)
         }
