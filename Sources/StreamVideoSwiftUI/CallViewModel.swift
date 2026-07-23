@@ -475,7 +475,7 @@ open class CallViewModel: ObservableObject {
             )
             // Start arbitrating this ring before `create` is kicked off, so a
             // hang-up that arrives during create has a coordinator to talk to.
-            ringCreationCoordinator = .init(call)
+            ringCreationCoordinator = .init()
             self.call = call
             Task(disposableBag: disposableBag, priority: .userInitiated) { [weak self] in
                 guard let self else { return }
@@ -494,7 +494,7 @@ open class CallViewModel: ObservableObject {
                     // throws `CallAlreadyRejected` if the user hung up while we
                     // were creating, so the ring timer below is only armed for
                     // a call that is genuinely still ringing.
-                    try ringCreationCoordinator?.created()
+                    try ringCreationCoordinator?.updateStateCreated()
                     ringCreationCoordinator = nil
 
                     let timeoutSeconds = TimeInterval(
@@ -1039,7 +1039,7 @@ open class CallViewModel: ObservableObject {
                 // flight this throws `CallNotCreatedYet`, and we defer the
                 // cancel to the create path instead of rejecting a call the
                 // backend does not know about yet.
-                try ringCreationCoordinator?.rejected()
+                try ringCreationCoordinator?.updateStateRejected()
                 let rejectionReason = await streamVideo
                     .rejectionReasonProvider
                     .reason(for: call.cId, ringTimeout: ringTimeout)

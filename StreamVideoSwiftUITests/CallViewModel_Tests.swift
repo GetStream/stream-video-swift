@@ -556,7 +556,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
 
     /// Regression for caller hang-up while `create(ring:)` is still in flight:
     /// the callee must still receive a cancel.
-    func test_outgoingCall_hangUpDuringCreate_rejectsAfterCreateCompletes() async throws {
+    func test_outgoing_call_hang_up_during_create_rejects_after_create_completes() async throws {
         // Given
         await prepare()
         mockCall.waitForCreateToResume = true
