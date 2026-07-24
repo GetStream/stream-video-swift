@@ -139,7 +139,7 @@ final class WSEventsMiddleware_Tests: XCTestCase, @unchecked Sendable {
     }
 }
 
-private struct NonWrappedEvent: StreamCore.Event {
+private struct NonWrappedEvent: Event {
     let id: String
 }
 
@@ -156,7 +156,7 @@ private final class SubscriberSpy: WSEventsSubscriber, @unchecked Sendable {
 }
 
 private struct ConsumingMiddleware: EventMiddleware {
-    func handle(event: StreamCore.Event) -> StreamCore.Event? {
+    func handle(event: Event) -> Event? {
         nil
     }
 }

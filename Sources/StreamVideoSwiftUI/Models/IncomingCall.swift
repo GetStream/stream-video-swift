@@ -3,7 +3,6 @@
 //
 
 import Foundation
-import enum StreamCore.RawJSON
 import StreamVideo
 
 /// Represents an incoming call.

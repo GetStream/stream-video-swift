@@ -16,7 +16,7 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
         signalService: mockService,
         webSocket: mockWebSocket,
         webSocketFactory: { [replacementWebSocket] _, _, _ in
-            replacementWebSocket
+            replacementWebSocket!
         }
     )
 

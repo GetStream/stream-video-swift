@@ -7,7 +7,6 @@ import CallKit
 import Foundation
 import StreamCore
 @testable import StreamVideo
-import struct StreamVideo.User
 @preconcurrency import XCTest
 
 final class CallKitServiceTests: XCTestCase, @unchecked Sendable {

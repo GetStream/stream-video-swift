@@ -112,7 +112,7 @@ final class EventTests: XCTestCase, @unchecked Sendable {
     // MARK: - StreamCore compatibility
 
     func test_generatedCoordinatorEvent_isStreamCoreEvent() {
-        let subject: any StreamCore.Event = HealthCheckEvent(
+        let subject: any Event = HealthCheckEvent(
             connectionId: UUID().uuidString,
             createdAt: Date()
         )
@@ -123,7 +123,7 @@ final class EventTests: XCTestCase, @unchecked Sendable {
 
     func test_wrappedCoordinatorHealthCheck_returnsCoreHealthCheckInfo() {
         let connectionId = UUID().uuidString
-        let subject: any StreamCore.Event = WrappedEvent.coordinatorEvent(
+        let subject: any Event = WrappedEvent.coordinatorEvent(
             .typeHealthCheckEvent(
                 .init(
                     connectionId: connectionId,
@@ -134,7 +134,7 @@ final class EventTests: XCTestCase, @unchecked Sendable {
 
         XCTAssertEqual(
             subject.healthcheck(),
-            StreamCore.HealthCheckInfo(connectionId: connectionId)
+            HealthCheckInfo(connectionId: connectionId)
         )
     }
 
@@ -151,7 +151,7 @@ final class EventTests: XCTestCase, @unchecked Sendable {
                 statusCode: 400
             )
         )
-        let subject: any StreamCore.Event = WrappedEvent.coordinatorEvent(
+        let subject: any Event = WrappedEvent.coordinatorEvent(
             .typeConnectionErrorEvent(event)
         )
 
@@ -165,7 +165,7 @@ final class EventTests: XCTestCase, @unchecked Sendable {
         var request = Stream_Video_Sfu_Event_SfuRequest()
         request.healthCheckRequest =
             Stream_Video_Sfu_Event_HealthCheckRequest()
-        let subjects: [any StreamCore.SendableEvent] = [
+        let subjects: [any SendableEvent] = [
             request,
             Stream_Video_Sfu_Event_HealthCheckRequest()
         ]
