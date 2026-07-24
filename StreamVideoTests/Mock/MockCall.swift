@@ -83,9 +83,20 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
     var waitForJoinToResume = false
     var onJoinStarted: (@Sendable () -> Void)?
     var onJoinResumed: (@Sendable (MockCall) async -> Void)?
+    /// When true, `create` suspends until ``resumeCreate()`` is called.
+    var waitForCreateToResume = false
+    var onCreateStarted: (@Sendable () -> Void)?
+    /// Successful `reject` invocations (failed pre-create rejects are excluded).
+    private(set) var successfulRejectCount = 0
 
     private var joinContinuation: CheckedContinuation<Void, Never>?
     private var joinWasCancelled = false
+    private var createContinuation: CheckedContinuation<Void, Never>?
+    private var isCreateInFlight = false
+    /// Buffers a `resumeCreate()` that arrives before `create` has stored its
+    /// continuation, so an early/synchronous resume is consumed instead of lost.
+    private var pendingCreateResume = false
+    private let createGate = UnfairQueue()
 
     override var state: CallState {
         get { self[dynamicMember: \.state] }
@@ -138,6 +149,29 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
         video: Bool? = nil,
         transcription: TranscriptionSettingsRequest? = nil
     ) async throws -> CallResponse {
+        createGate.sync { isCreateInFlight = true }
+        onCreateStarted?()
+
+        if waitForCreateToResume {
+            await withCheckedContinuation { continuation in
+                let resumeImmediately: Bool = createGate.sync {
+                    // A resume already arrived before we suspended: consume it
+                    // and continue without storing the continuation.
+                    guard !pendingCreateResume else {
+                        pendingCreateResume = false
+                        return true
+                    }
+                    createContinuation = continuation
+                    return false
+                }
+                if resumeImmediately {
+                    continuation.resume()
+                }
+            }
+        }
+
+        defer { createGate.sync { isCreateInFlight = false } }
+
         if let response = stubbedFunction[.create] as? CallResponse {
             return response
         } else if let error = stubbedFunction[.create] as? Error {
@@ -160,6 +194,20 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
         }
     }
 
+    func resumeCreate() {
+        let continuation: CheckedContinuation<Void, Never>? = createGate.sync {
+            guard let value = createContinuation else {
+                // create() has not suspended yet: buffer the resume so it is
+                // consumed once the continuation is set up.
+                pendingCreateResume = true
+                return nil
+            }
+            createContinuation = nil
+            return value
+        }
+        continuation?.resume()
+    }
+
     override func get(
         membersLimit: Int? = nil,
         ring: Bool = false,
@@ -173,7 +221,14 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
     }
 
     override func reject(reason: String? = nil) async throws -> RejectCallResponse {
+        // Model the coordinator API: reject before create finishes fails, so a
+        // hang-up that races create cannot cancel the eventual ring.
+        let createStillInFlight = createGate.sync { isCreateInFlight }
+        if createStillInFlight {
+            throw ClientError("Call has not been created yet.")
+        }
         stubbedFunctionInput[.reject]?.append(.reject(reason: reason))
+        successfulRejectCount += 1
         return stubbedFunction[.reject] as! RejectCallResponse
     }
 

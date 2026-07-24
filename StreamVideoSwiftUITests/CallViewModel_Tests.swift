@@ -554,6 +554,45 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         await assertCallingState(.idle)
     }
 
+    /// Regression for caller hang-up while `create(ring:)` is still in flight:
+    /// the callee must still receive a cancel.
+    func test_outgoing_call_hang_up_during_create_rejects_after_create_completes() async throws {
+        // Given
+        await prepare()
+        mockCall.waitForCreateToResume = true
+        let createStarted = expectation(description: "create started")
+        mockCall.onCreateStarted = { @Sendable in createStarted.fulfill() }
+
+        subject.startCall(
+            callType: .default,
+            callId: callId,
+            members: participants,
+            ring: true
+        )
+        await assertCallingState(.outgoing)
+        await fulfillment(of: [createStarted], timeout: defaultTimeout)
+
+        // When: hang up while create(ring:) is still in flight. Hang-up defers
+        // the cancel to the create path, so nothing is rejected yet and these
+        // synchronous checks still observe the outgoing state.
+        subject.hangUp()
+        // Even though the reject will fail, the leaveCall should be completed
+        await assertCallingState(.idle)
+        XCTAssertEqual(
+            mockCall.successfulRejectCount,
+            0,
+            "Reject must not succeed before create finishes."
+        )
+
+        mockCall.resumeCreate()
+
+        await fulfilmentInMainActor { self.mockCall.successfulRejectCount == 1 }
+        let reason = try XCTUnwrap(
+            mockCall.recordedInputPayload(String.self, for: .reject)?.first
+        )
+        XCTAssertEqual(reason, RejectCallRequest.Reason.cancel)
+    }
+
     func test_outgoingCall_hangUpWithReason_forwardsReasonToCallLeave() async throws {
         // Given
         await prepare()
