@@ -513,7 +513,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     )
 
                     context.disconnectionSource = .serverInitiated(
-                        error: StreamCore.ClientError.NetworkError("Not available")
+                        error: ClientError.NetworkError("Not available")
                     )
 
                     log.warning(

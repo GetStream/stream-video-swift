@@ -6,7 +6,7 @@ import Foundation
 import StreamCore
 
 struct JsonEventDecoder: AnyEventDecoder {
-    func decode(from data: Data) throws -> StreamCore.Event {
+    func decode(from data: Data) throws -> Event {
         let event = try JSONDecoder.streamCore.decode(VideoEvent.self, from: data)
         return WrappedEvent.coordinatorEvent(event)
     }

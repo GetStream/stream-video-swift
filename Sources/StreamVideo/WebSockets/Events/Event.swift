@@ -5,11 +5,6 @@
 import Foundation
 import StreamCore
 
-/// An `Event` object representing an event in the chat system.
-public typealias Event = StreamCore.Event
-
-public typealias SendableEvent = StreamCore.SendableEvent
-
 extension Event {
     func unwrap() -> VideoEvent? {
         if let unwrapped = self as? VideoEvent {
@@ -38,16 +33,16 @@ internal enum WrappedEvent: Event, Sendable, CustomStringConvertible {
     case internalEvent(Event)
     case coordinatorEvent(VideoEvent)
     
-    func healthcheck() -> StreamCore.HealthCheckInfo? {
+    func healthcheck() -> HealthCheckInfo? {
         switch self {
         case let .coordinatorEvent(event):
             if case let .typeHealthCheckEvent(healthCheckEvent) = event {
-                return StreamCore.HealthCheckInfo(
+                return HealthCheckInfo(
                     connectionId: healthCheckEvent.connectionId
                 )
             }
             if case let .typeConnectedEvent(connectedEvent) = event {
-                return StreamCore.HealthCheckInfo(
+                return HealthCheckInfo(
                     connectionId: connectedEvent.connectionId
                 )
             }

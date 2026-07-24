@@ -11,7 +11,7 @@ import StreamCore
 /// The `SFUAdapter` class handles both WebSocket connections and HTTP requests to the SFU server.
 /// It provides methods for managing video tracks, updating subscriptions, and handling WebRTC signaling.
 ///
-/// The SFU signaling WebSocket is backed by `StreamCore.WebSocketClient` via
+/// The SFU signaling WebSocket is backed by `WebSocketClient` via
 /// ``SFUWebSocket``.
 final class SFUAdapter: CustomStringConvertible, @unchecked Sendable {
 

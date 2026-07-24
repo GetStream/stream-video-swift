@@ -59,9 +59,7 @@ class StoreLogger<Namespace: StoreNamespace> {
     /// - Parameter logSubsystem: The subsystem for categorizing logs.
     ///   Defaults to `.other`.
     init(
-        // `.videoDefault` (== `.other`) avoids importing StreamCore here for a
-        // default argument value (which would make `log` ambiguous).
-        logSubsystem: LogSubsystem = .videoDefault,
+        logSubsystem: LogSubsystem = .other,
         logSkipped: Bool = true
     ) {
         self.logSubsystem = logSubsystem

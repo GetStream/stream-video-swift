@@ -9,9 +9,6 @@ extension Stream_Video_Sfu_Models_Error:
     Error,
     ReflectiveStringConvertible {}
 
-/// A client error emitted by Stream.
-public typealias ClientError = StreamCore.ClientError
-
 extension Error {
     var isRateLimitError: Bool {
         if let error = (self as? ClientError)?.underlyingError as? ErrorPayload,

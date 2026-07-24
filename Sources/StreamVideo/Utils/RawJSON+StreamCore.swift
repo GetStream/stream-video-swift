@@ -5,9 +5,6 @@
 import Foundation
 import StreamCore
 
-/// A JSON value with an unknown structure.
-public typealias RawJSON = StreamCore.RawJSON
-
 public extension RawJSON {
     /// Extracts the wrapped value as the specified type, if possible.
     func value<T>() -> T? {

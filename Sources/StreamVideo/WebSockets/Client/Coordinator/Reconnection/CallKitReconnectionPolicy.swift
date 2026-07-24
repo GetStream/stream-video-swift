@@ -12,7 +12,7 @@ import StreamCore
 /// "has active call" check is injected as a closure because `callKitService` is
 /// resolved via video's DI (`@Injected`), which is ambiguous inside a
 /// StreamCore-importing file.
-struct CallKitReconnectionPolicy: StreamCore.AutomaticReconnectionPolicy {
+struct CallKitReconnectionPolicy: AutomaticReconnectionPolicy {
     private let hasActiveCall: @Sendable () -> Bool
 
     init(hasActiveCall: @escaping @Sendable () -> Bool) {

@@ -7,15 +7,15 @@ import Foundation
 import StreamCore
 import StreamWebRTC
 
-extension StreamCore.LogConfig {
+extension LogConfig {
     /// Toggles internal WebRTC logging on or off.
     public static var webRTCLogsEnabled: Bool {
-        get { StreamCore.Logger.WebRTC.mode != .none }
-        set { StreamCore.Logger.WebRTC.mode = newValue ? .all : .none }
+        get { Logger.WebRTC.mode != .none }
+        set { Logger.WebRTC.mode = newValue ? .all : .none }
     }
 }
 
-extension StreamCore.Logger {
+extension Logger {
 
     public enum WebRTC {
         public enum LogMode: Sendable { case none, validFilesOnly, all }
@@ -24,7 +24,7 @@ extension StreamCore.Logger {
             didSet { RTCLogger.default.didUpdate(mode: mode) }
         }
 
-        nonisolated(unsafe) static var severity: RTCLoggingSeverity = .init(StreamCore.LogConfig.level) {
+        nonisolated(unsafe) static var severity: RTCLoggingSeverity = .init(LogConfig.level) {
             didSet { RTCLogger.default.didUpdate(severity: severity) }
         }
 
@@ -40,7 +40,7 @@ extension StreamCore.Logger {
 
 extension RTCLoggingSeverity {
 
-    init(_ logLevel: StreamCore.LogLevel) {
+    init(_ logLevel: LogLevel) {
         switch logLevel {
         case .debug:
             self = .verbose
@@ -56,7 +56,7 @@ extension RTCLoggingSeverity {
     }
 }
 
-extension StreamCore.Logger.WebRTC {
+extension Logger.WebRTC {
     final class RTCLogger: @unchecked Sendable {
         static let `default` = RTCLogger()
 
@@ -66,7 +66,7 @@ extension StreamCore.Logger.WebRTC {
         private let levelCancellable: AnyCancellable
 
         private init() {
-            levelCancellable = StreamCore.LogConfig.levelPublisher
+            levelCancellable = LogConfig.levelPublisher
                 .dropFirst()
                 .sink { severity = .init($0) }
             didUpdate(mode: mode)

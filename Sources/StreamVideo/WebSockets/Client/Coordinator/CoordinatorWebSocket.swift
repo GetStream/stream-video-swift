@@ -6,7 +6,7 @@ import Combine
 import Foundation
 import StreamCore
 
-/// Owns the coordinator signaling WebSocket, backed by `StreamCore.WebSocketClient`.
+/// Owns the coordinator signaling WebSocket, backed by `WebSocketClient`.
 ///
 /// It decodes coordinator events through the shared notification center and
 /// sends StreamVideo's authentication payload when the connection opens.
@@ -52,15 +52,15 @@ final class CoordinatorWebSocket:
         // client. Compose its policies with the video-specific CallKit policy:
         // internet AND wsAuto AND (background OR CallKit).
         let backgroundTaskScheduler = Self.makeBackgroundTaskScheduler()
-        let internetConnection = StreamCore.InternetConnection(
-            monitor: StreamCore.InternetConnection.Monitor()
+        let internetConnection = InternetConnection(
+            monitor: InternetConnection.Monitor()
         )
         recoveryHandler = DefaultConnectionRecoveryHandler(
             webSocketClient: webSocket,
             eventNotificationCenter: eventNotificationCenter,
             backgroundTaskScheduler: backgroundTaskScheduler,
             internetConnection: internetConnection,
-            reconnectionStrategy: StreamCore.DefaultRetryStrategy(),
+            reconnectionStrategy: DefaultRetryStrategy(),
             reconnectionTimerType: DefaultTimer.self,
             keepConnectionAliveInBackground: true,
             reconnectionPolicies: [

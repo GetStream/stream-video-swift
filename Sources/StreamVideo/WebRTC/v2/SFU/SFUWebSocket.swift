@@ -6,7 +6,7 @@ import Combine
 import Foundation
 import StreamCore
 
-/// Owns the SFU signaling WebSocket, backed by `StreamCore.WebSocketClient`.
+/// Owns the SFU signaling WebSocket, backed by `WebSocketClient`.
 ///
 /// Narrows inbound events to SFU payloads.
 class SFUWebSocket: @unchecked Sendable {

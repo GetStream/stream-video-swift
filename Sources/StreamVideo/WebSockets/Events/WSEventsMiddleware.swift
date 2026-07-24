@@ -10,7 +10,7 @@ final class WSEventsMiddleware: EventMiddleware, @unchecked Sendable {
     private var subscribers = NSHashTable<AnyObject>.weakObjects()
     private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
 
-    func handle(event: StreamCore.Event) -> StreamCore.Event? {
+    func handle(event: Event) -> Event? {
         guard let event = event as? WrappedEvent else { return event }
 
         processingQueue.addTaskOperation { [weak self] in

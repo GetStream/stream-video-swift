@@ -399,7 +399,6 @@ final class Call_JoinRecovery_Tests: StreamVideoTestCase, @unchecked Sendable {
                     .adapter
             )
         )
-        let refreshedWebSocket = MockSFUWebSocket()
         defaultAPI.stub(for: .joinCall, with: joinResponse)
         webRTCCoordinatorFactory
             .mockCoordinatorStack
@@ -409,10 +408,6 @@ final class Call_JoinRecovery_Tests: StreamVideoTestCase, @unchecked Sendable {
             .mockCoordinatorStack
             .rtcPeerConnectionCoordinatorFactory
             .stubbedBuildCoordinatorResult[.subscriber] = subscriber
-        webRTCCoordinatorFactory
-            .mockCoordinatorStack
-            .sfuStack
-            .nextWebSocket = refreshedWebSocket
         webRTCCoordinatorFactory
             .mockCoordinatorStack
             .coordinator
@@ -472,12 +467,10 @@ final class Call_JoinRecovery_Tests: StreamVideoTestCase, @unchecked Sendable {
                     return false
                 } == true
         }
-        var initialSFUJoinResponse = Stream_Video_Sfu_Event_JoinResponse()
-        initialSFUJoinResponse.fastReconnectDeadlineSeconds = 30
         webRTCCoordinatorFactory
             .mockCoordinatorStack
             .sfuStack
-            .receiveEvent(.joinResponse(initialSFUJoinResponse))
+            .receiveEvent(.joinResponse(.init()))
         webRTCCoordinatorFactory
             .mockCoordinatorStack
             .sfuStack
@@ -500,28 +493,33 @@ final class Call_JoinRecovery_Tests: StreamVideoTestCase, @unchecked Sendable {
             to: .disconnected(source: .serverInitiated())
         )
         await fulfilmentInMainActor(timeout: defaultTimeout) {
-            refreshedWebSocket.timesCalled(.connect) == 1
-        }
-        refreshedWebSocket.simulate(state: .authenticating)
-        await fulfilmentInMainActor(timeout: defaultTimeout) {
-            refreshedWebSocket.recordedInputPayload(
-                Stream_Video_Sfu_Event_SfuRequest.self,
-                for: .send
-            )?.contains {
-                if case .joinRequest = $0.requestPayload {
-                    return true
-                }
-                return false
-            } == true
-        }
-        refreshedWebSocket.receive(.joinResponse(.init()))
-        refreshedWebSocket.simulate(
-            state: .connected(healthCheckInfo: .init())
-        )
-
-        await fulfilmentInMainActor(timeout: defaultTimeout + 2) {
             defaultAPI.timesCalled(.joinCall) >= 2
         }
+        await fulfilmentInMainActor(timeout: defaultTimeout) {
+            webRTCCoordinatorFactory
+                .mockCoordinatorStack
+                .sfuStack
+                .webSocket
+                .recordedInputPayload(
+                    Stream_Video_Sfu_Event_SfuRequest.self,
+                    for: .send
+                )?
+                .filter {
+                    if case .joinRequest = $0.requestPayload {
+                        return true
+                    }
+                    return false
+                }
+                .count == 2
+        }
+        webRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .sfuStack
+            .receiveEvent(.joinResponse(.init()))
+        webRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .sfuStack
+            .setConnectionState(to: .connected(healthCheckInfo: .init()))
 
         let joinCallRequests = try XCTUnwrap(
             defaultAPI.recordedInputPayload(

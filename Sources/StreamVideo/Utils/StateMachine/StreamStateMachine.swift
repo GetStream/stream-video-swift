@@ -24,7 +24,7 @@ public final class StreamStateMachine<StageType: StreamStateMachineStage> {
     /// Initializes the state machine with an initial stage.
     ///
     /// - Parameter initialStage: The initial stage of the state machine.
-    public init(initialStage: StageType, logSubsystem: LogSubsystem = .videoDefault) {
+    public init(initialStage: StageType, logSubsystem: LogSubsystem = .other) {
         self.logSubsystem = logSubsystem
         publisher = .init(initialStage)
     }

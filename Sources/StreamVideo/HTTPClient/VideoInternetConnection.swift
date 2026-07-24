@@ -22,11 +22,23 @@ extension Notification {
     }
 }
 
-/// An Internet Connection monitor.
+/// StreamVideo's internet connection monitor.
 ///
-/// Basically, it's a wrapper over legacy monitor based on `Reachability` (iOS 11 only)
-/// and default monitor based on `Network`.`NWPathMonitor` (iOS 12+).
-final class InternetConnection: @unchecked Sendable {
+/// StreamVideo retains this implementation instead of using
+/// `StreamCore.InternetConnection` directly to preserve its existing delivery
+/// semantics:
+///
+/// - Monitor updates are serialized onto `DispatchQueue.main` before `status`
+///   changes.
+/// - `statusPublisher` debounces updates by 100 milliseconds so brief path
+///   changes do not trigger reconnection work.
+/// - Status and availability changes use StreamVideo's historical notification
+///   names.
+///
+/// StreamCore exposes the same status model and `NWPathMonitor`-based
+/// monitoring, but updates status on the monitor's queue, does not debounce its
+/// publisher, and posts different notification names.
+final class VideoInternetConnection: @unchecked Sendable {
     /// The current Internet connection status.
     @Published private(set) var status: InternetConnectionStatus {
         didSet {
@@ -72,13 +84,13 @@ final class InternetConnection: @unchecked Sendable {
     }
 }
 
-extension InternetConnection: InternetConnectionDelegate {
+extension VideoInternetConnection: InternetConnectionDelegate {
     func internetConnectionStatusDidChange(status: InternetConnectionStatus) {
         subject.send(status)
     }
 }
 
-private extension InternetConnection {
+private extension VideoInternetConnection {
     func postNotification(_ name: Notification.Name, with status: InternetConnectionStatus) {
         notificationCenter.post(
             name: name,
@@ -111,48 +123,9 @@ protocol InternetConnectionMonitor: AnyObject {
     func stop()
 }
 
-// MARK: Internet Connection Subtypes
-
-/// The Internet connectivity status.
-public enum InternetConnectionStatus: Equatable, Sendable {
-    /// Notification of an Internet connection has not begun.
-    case unknown
-
-    /// The Internet is available with a specific `Quality` level.
-    case available(InternetConnectionQuality)
-
-    /// The Internet is unavailable.
-    case unavailable
-}
-
-/// The Internet connectivity status quality.
-public enum InternetConnectionQuality: Equatable, Sendable {
-    /// The Internet connection is great (like Wi-Fi).
-    case great
-
-    /// Internet connection uses an interface that is considered expensive, such as Cellular or a Personal Hotspot.
-    case expensive
-
-    /// Internet connection uses Low Data Mode.
-    /// Recommendations for Low Data Mode: don't autoplay video, music (high-quality) or gifs (big files).
-    /// Supports only by iOS 13+
-    case constrained
-}
-
-extension InternetConnectionStatus {
-    /// Returns `true` if the internet connection is available, ignoring the quality of the connection.
-    public var isAvailable: Bool {
-        if case .available = self {
-            return true
-        } else {
-            return false
-        }
-    }
-}
-
 // MARK: - Internet Connection Monitor
 
-extension InternetConnection {
+extension VideoInternetConnection {
     /// The default Internet connection monitor for iOS 12+.
     /// It uses Apple Network API.
     class Monitor: InternetConnectionMonitor, @unchecked Sendable {
@@ -214,24 +187,16 @@ extension InternetConnection {
     }
 }
 
-/// A protocol defining the interface for internet connection monitoring.
-public protocol InternetConnectionProtocol {
-    var status: InternetConnectionStatus { get }
-
-    /// A publisher that emits the current internet connection status.
-    ///
-    /// This publisher never fails and continuously updates with the latest
-    /// connection status.
-    var statusPublisher: AnyPublisher<InternetConnectionStatus, Never> { get }
-}
-
-extension InternetConnection: InternetConnectionProtocol {
+extension VideoInternetConnection: InternetConnectionProtocol {
     /// A publisher that emits the current internet connection status.
     ///
     /// This implementation uses a published property wrapper and erases the
     /// type to `AnyPublisher`.
     ///
     /// - Note: The publisher won't publish any duplicates.
+    /// - Important: Unlike `StreamCore.InternetConnection`, status updates are
+    ///   debounced by 100 milliseconds to ignore brief connectivity changes
+    ///   before StreamVideo starts reconnection work.
     public var statusPublisher: AnyPublisher<InternetConnectionStatus, Never> {
         $status
             .debounce(for: .seconds(0.1), scheduler: DispatchQueue.main)
@@ -240,13 +205,13 @@ extension InternetConnection: InternetConnectionProtocol {
     }
 }
 
-extension InternetConnection: InjectionKey {
+extension VideoInternetConnection: InjectionKey {
     /// The current value of the internet connection monitor.
     ///
     /// This property provides a default implementation of the
     /// `InternetConnection` with a default monitor.
-    public nonisolated(unsafe) static var currentValue: InternetConnectionProtocol = InternetConnection(
-        monitor: InternetConnection.Monitor()
+    public nonisolated(unsafe) static var currentValue: InternetConnectionProtocol = VideoInternetConnection(
+        monitor: VideoInternetConnection.Monitor()
     )
 }
 
@@ -256,7 +221,7 @@ extension InjectedValues {
     /// This property allows for dependency injection using the protocol type,
     /// providing more flexibility in testing and modular design.
     public var internetConnectionObserver: InternetConnectionProtocol {
-        get { Self[InternetConnection.self] }
-        set { Self[InternetConnection.self] = newValue }
+        get { Self[VideoInternetConnection.self] }
+        set { Self[VideoInternetConnection.self] = newValue }
     }
 }

@@ -5,9 +5,9 @@
 import StreamCore
 
 extension Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload {
-    public func healthcheck() -> StreamCore.HealthCheckInfo? {
+    public func healthcheck() -> HealthCheckInfo? {
         if case let .healthCheckResponse(event) = self {
-            return StreamCore.HealthCheckInfo(participantCount: Int(event.participantCount.total))
+            return HealthCheckInfo(participantCount: Int(event.participantCount.total))
         }
         return nil
     }
@@ -20,8 +20,8 @@ extension Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload {
     }
 }
 
-/// Builds the SFU health-check ping sent periodically by `StreamCore.WebSocketClient`.
-func makeSFUHealthCheckPing() -> any StreamCore.SendableEvent {
+/// Builds the SFU health-check ping sent periodically by `WebSocketClient`.
+func makeSFUHealthCheckPing() -> any SendableEvent {
     var request = Stream_Video_Sfu_Event_SfuRequest()
     request.healthCheckRequest = Stream_Video_Sfu_Event_HealthCheckRequest()
     return request
