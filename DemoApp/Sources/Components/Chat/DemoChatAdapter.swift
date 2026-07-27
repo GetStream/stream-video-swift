@@ -5,7 +5,7 @@
 import Combine
 import Foundation
 import struct StreamChat.ChannelId
-import struct StreamChat.ChatChannel
+import class StreamChat.ChatChannel
 import class StreamChat.ChatChannelController
 import protocol StreamChat.ChatChannelControllerDelegate
 import class StreamChat.ChatClient

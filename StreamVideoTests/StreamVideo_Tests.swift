@@ -185,7 +185,7 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
     func test_streamVideo_ringCallReject() async throws {
         let httpClient = httpClientWithGetCallResponse()
         let rejectCallResponse = RejectCallResponse(duration: "1")
-        let data = try! JSONEncoder.default.encode(rejectCallResponse)
+        let data = try! JSONEncoder.streamCore.encode(rejectCallResponse)
         let streamVideo = StreamVideo.mock(httpClient: httpClient)
         self.streamVideo = streamVideo
         let call = streamVideo.call(callType: callType, callId: callId)
@@ -224,7 +224,7 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
             members: [],
             ownCapabilities: []
         )
-        httpClient.dataResponses = [try JSONEncoder.default.encode(getCallResponse)]
+        httpClient.dataResponses = [try JSONEncoder.streamCore.encode(getCallResponse)]
 
         nonisolated(unsafe) weak var previousCall: Call?
         do {
@@ -512,7 +512,7 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
             members: [],
             ownCapabilities: []
         )
-        let data = try! JSONEncoder.default.encode(getCallResponse)
+        let data = try! JSONEncoder.streamCore.encode(getCallResponse)
         httpClient.dataResponses = [data]
         return httpClient
     }

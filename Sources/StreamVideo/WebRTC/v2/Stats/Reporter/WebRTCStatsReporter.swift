@@ -149,7 +149,7 @@ final class WebRTCStatsReporter: WebRTCStatsReporting, @unchecked Sendable {
                 try Task.checkCancellation()
 
                 let tracesData = try JSONEncoder
-                    .stream
+                    .streamCore
                     .encode(input.peerConnectionTraces)
                 let traces = String(data: tracesData, encoding: .utf8)
 

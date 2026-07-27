@@ -29,7 +29,7 @@ final class JsonEventDecoder_Tests: XCTestCase, @unchecked Sendable {
         )
 
         let result = try subject.decode(
-            from: JSONEncoder.stream.encode(expected)
+            from: JSONEncoder.streamCore.encode(expected)
         )
 
         guard
@@ -62,7 +62,7 @@ final class JsonEventDecoder_Tests: XCTestCase, @unchecked Sendable {
         )
 
         let result = try subject.decode(
-            from: JSONEncoder.stream.encode(event)
+            from: JSONEncoder.streamCore.encode(event)
         )
 
         XCTAssertEqual(
@@ -79,7 +79,7 @@ final class JsonEventDecoder_Tests: XCTestCase, @unchecked Sendable {
         )
 
         let result = try subject.decode(
-            from: JSONEncoder.stream.encode(event)
+            from: JSONEncoder.streamCore.encode(event)
         )
 
         XCTAssertEqual(
@@ -104,7 +104,7 @@ final class JsonEventDecoder_Tests: XCTestCase, @unchecked Sendable {
         )
 
         let result = try subject.decode(
-            from: JSONEncoder.stream.encode(event)
+            from: JSONEncoder.streamCore.encode(event)
         )
 
         XCTAssertEqual(result.error() as? APIError, expected)

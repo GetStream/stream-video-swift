@@ -25,7 +25,7 @@ final class RawJSON_Tests: XCTestCase, @unchecked Sendable {
         ]
 
         for test in tests {
-            let encoded = try JSONEncoder.stream.encode(test.value)
+            let encoded = try JSONEncoder.streamCore.encode(test.value)
             AssertJSONEqual(encoded, test.expected.data(using: .utf8)!)
         }
     }
@@ -47,7 +47,7 @@ final class RawJSON_Tests: XCTestCase, @unchecked Sendable {
         ]
 
         for test in tests {
-            let rawJSON = try? JSONDecoder.stream.decode(RawJSON.self, from: test.value.data(using: .utf8)!)
+            let rawJSON = try? JSONDecoder.streamCore.decode(RawJSON.self, from: test.value.data(using: .utf8)!)
             XCTAssertEqual(rawJSON, test.expected)
         }
     }
