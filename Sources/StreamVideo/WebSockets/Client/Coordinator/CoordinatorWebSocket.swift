@@ -42,7 +42,7 @@ final class CoordinatorWebSocket:
             eventNotificationCenter: eventNotificationCenter,
             webSocketClientType: .coordinator,
             connectRequest: URLRequest(url: url),
-            healthCheckBeforeConnected: true,
+            healthCheckBeforeConnected: false,
             requiresAuth: true,
             pingInterval: 5
         )

@@ -48,7 +48,7 @@ class SFUWebSocket: @unchecked Sendable {
             webSocketClientType: .sfu,
             environment: environment,
             connectRequest: URLRequest(url: url),
-            healthCheckBeforeConnected: true,
+            healthCheckBeforeConnected: false,
             requiresAuth: false,
             // Keep SFU health checks below the call state's 15-second timeout.
             pingInterval: 5,
