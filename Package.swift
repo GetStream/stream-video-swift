@@ -38,8 +38,7 @@ let package = Package(
         .target(
             name: "StreamVideoSwiftUI",
             dependencies: [
-                "StreamVideo",
-                .product(name: "StreamCore", package: "stream-core-swift")
+                "StreamVideo"
             ],
             resources: [
                 .process("Resources")
@@ -49,8 +48,7 @@ let package = Package(
             name: "StreamVideoUIKit",
             dependencies: [
                 "StreamVideo",
-                "StreamVideoSwiftUI",
-                .product(name: "StreamCore", package: "stream-core-swift")
+                "StreamVideoSwiftUI"
             ]
         )
     ]

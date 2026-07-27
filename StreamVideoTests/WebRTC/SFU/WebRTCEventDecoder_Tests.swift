@@ -45,7 +45,7 @@ final class WebRTCEventDecoder_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertThrowsError(
             try subject.decode(from: event.serializedData(partial: false))
         ) {
-            XCTAssertTrue($0 is StreamCore.ClientError.IgnoredEventType)
+            XCTAssertTrue($0 is ClientError.IgnoredEventType)
         }
     }
 

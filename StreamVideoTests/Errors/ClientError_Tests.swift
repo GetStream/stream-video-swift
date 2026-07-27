@@ -19,7 +19,7 @@ final class ClientError_Tests: XCTestCase, @unchecked Sendable {
 
     func test_encodeToJSON_preservesLegacyWireShape() throws {
         let subject = makeAPIError(code: 1)
-        let jsonEncodable: any StreamCore.JSONEncodable = subject
+        let jsonEncodable: any JSONEncodable = subject
 
         let encoded = try XCTUnwrap(jsonEncodable.encodeToJSON() as? String)
         let data = try XCTUnwrap(Data(base64Encoded: encoded))
