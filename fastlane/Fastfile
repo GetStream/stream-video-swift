@@ -1,0 +1,706 @@
+default_platform :ios
+opt_out_usage
+skip_docs
+
+require 'json'
+require 'net/http'
+import 'Sonarfile'
+import 'Allurefile'
+
+xcode_version = ENV['XCODE_VERSION'] || '26.2'
+xcode_project = 'StreamVideo.xcodeproj'
+sdk_names = ['StreamVideo', 'StreamVideoSwiftUI', 'StreamVideoUIKit']
+github_repo = ENV['GITHUB_REPOSITORY'] || 'GetStream/stream-video-swift'
+sinatra_port = 4567
+video_buddy_port = 5678
+derived_data_path = is_ci ? 'derived_data' : nil
+source_packages_path = is_ci ? 'spm_cache' : nil
+gci = ENV['GOOGLE_CLIENT_ID'] || ''
+reversed_gci = gci.split('.').reverse.join('.')
+is_localhost = !is_ci
+@force_check = false
+swift_environment_path = File.absolute_path('../Sources/StreamVideo/Generated/SystemEnvironment+Version.swift')
+
+before_all do |lane|
+  if is_ci
+    setup_ci
+    setup_git_config
+    select_xcode(version: xcode_version) unless [:sonar_upload, :allure_launch, :allure_upload, :stop_e2e_helpers, :merge_main].include?(lane)
+  elsif lane == :test_e2e
+    stop_e2e_helpers
+  end
+  create_credentials_config
+end
+
+after_all do |lane|
+  stop_e2e_helpers if lane == :test_e2e
+end
+
+desc "Release a new version"
+lane :release do |options|
+  artifacts_path = File.absolute_path('../StreamVideoArtifacts.json')
+  extra_changes = lambda do |release_version|
+    # Set the framework version on the artifacts
+    artifacts = JSON.parse(File.read(artifacts_path))
+    artifacts[release_version.to_s] = "https://github.com/#{github_repo}/releases/download/#{release_version}/StreamVideo-All.zip"
+    File.write(artifacts_path, JSON.dump(artifacts))
+
+    # Set the framework version in SystemEnvironment+Version.swift
+    old_content = File.read(swift_environment_path)
+    current_version = old_content[/version: String = "([^"]+)"/, 1]
+    new_content = old_content.gsub(current_version, release_version)
+    File.open(swift_environment_path, 'w') { |f| f.puts(new_content) }
+
+    # Update sdk sizes
+    Dir.chdir('fastlane') { update_img_shields_sdk_sizes }
+  end
+
+  check_unsafe_flags
+
+  release_ios_sdk(
+    version: options[:version],
+    bump_type: options[:type],
+    sdk_names: sdk_names,
+    github_repo: github_repo,
+    extra_changes: extra_changes,
+    create_pull_request: true
+  )
+end
+
+lane :merge_release do |options|
+  merge_release_to_main(author: options[:author])
+  sh('gh workflow run release-publish.yml --ref main')
+end
+
+lane :merge_main do
+  merge_main_to_develop
+  update_release_version_to_snapshot(file_path: swift_environment_path)
+  ensure_git_branch(branch: 'develop')
+  sh("git add #{swift_environment_path}")
+  sh("git commit -m 'Update release version to snapshot'")
+  sh('git push')
+end
+
+desc "Publish a new release to GitHub"
+lane :publish_release do |options|
+  release_version = get_sdk_version_from_environment
+  UI.user_error!("Release #{release_version} has already been published.") if git_tag_exists(tag: release_version, remote: true)
+  UI.user_error!('Release version cannot be empty') if release_version.to_s.empty?
+  ensure_git_branch(branch: 'main')
+
+  publish_ios_sdk(
+    skip_git_status_check: false,
+    version: release_version,
+    sdk_names: sdk_names,
+    github_repo: github_repo,
+    upload_assets: ['Products/StreamVideo.zip', 'Products/StreamVideoSwiftUI.zip', 'Products/StreamVideoUIKit.zip', 'Products/StreamVideo-All.zip']
+  )
+
+  update_spm(version: release_version)
+end
+
+lane :get_sdk_version_from_environment do
+  File.read(swift_environment_path).match(/String\s+=\s+"([\d.]+).*"/)[1]
+end
+
+lane :match_me do |options|
+  custom_match(
+    api_key: appstore_api_key,
+    app_identifier: [
+      'io.getstream.iOS.VideoDemoApp',
+      'io.getstream.iOS.DemoAppUIKit',
+      'io.getstream.iOS.VideoDemoApp.CallIntent',
+      'io.getstream.iOS.VideoDemoApp.ScreenSharing',
+      'io.getstream.StreamVideoNoiseCancellation'
+    ],
+    readonly: options[:readonly],
+    register_device: options[:register_device]
+  )
+end
+
+private_lane :update_google_plist do |options|
+  UI.message('Updating Google client info in plist files')
+  next if gci.nil?
+
+  Dir.glob(File.join("../#{options[:app_target]}", '**', '*.plist')).each do |plist_file|
+    old_content = File.read(plist_file)
+    new_content = old_content.gsub('$(GOOGLE_CLIENT_ID)', gci).gsub('$(REVERSED_GOOGLE_CLIENT_ID)', reversed_gci)
+    File.write(plist_file, new_content)
+    UI.message("✅ #{plist_file}")
+  end
+end
+
+lane :swiftui_testflight_build do |options|
+  app_target = 'DemoApp'
+
+  if options[:configuration] == 'Debug'
+    badge(path: app_target)
+    update_google_plist(app_target: app_target)
+  end
+
+  upload_beta(
+    app_target: app_target,
+    app_identifier: 'io.getstream.iOS.VideoDemoApp',
+    configuration: options[:configuration]
+  )
+end
+
+lane :uikit_testflight_build do |options|
+  upload_beta(app_target: 'DemoAppUIKit', app_identifier: 'io.getstream.iOS.DemoAppUIKit')
+end
+
+private_lane :upload_beta do |options|
+  is_manual_upload = is_localhost || ENV['GITHUB_EVENT_NAME'] == 'workflow_dispatch'
+  configuration = options[:configuration].to_s.empty? ? 'Release' : options[:configuration]
+
+  match_me
+
+  if is_ci && configuration != 'Release'
+    ['VideoDemoApp', 'DemoAppUIKit', 'VideoDemoApp.CallIntent', 'VideoDemoApp.ScreenSharing'].each do |name|
+      target = name == 'VideoDemoApp' ? 'DemoApp' : name.split('.').last
+      update_code_signing_settings(
+        code_sign_identity: "iPhone Distribution",
+        targets: target,
+        profile_name: "match AppStore io.getstream.iOS.#{name}"
+      )
+    end
+  end
+
+  sdk_version = get_sdk_version_from_environment
+  UI.important("[TestFlight] Uploading DemoApp version: #{sdk_version}")
+
+  testflight_build(
+    api_key: appstore_api_key,
+    xcode_project: xcode_project,
+    sdk_target: 'StreamVideo',
+    app_target: options[:app_target],
+    app_version: sdk_version,
+    app_identifier: options[:app_identifier],
+    configuration: configuration,
+    extensions: ['CallIntent', 'ScreenSharing'],
+    use_changelog: true,
+    is_manual_upload: is_manual_upload
+  )
+end
+
+private_lane :appstore_api_key do
+  @appstore_api_key ||= app_store_connect_api_key(
+    key_id: 'MT3PRT8TB7',
+    issuer_id: '69a6de96-0738-47e3-e053-5b8c7c11a4d1',
+    key_content: ENV.fetch('APPSTORE_API_KEY', nil),
+    in_house: false
+  )
+end
+
+lane :create_credentials_config do
+  # Make sure xcconfig exists even though it won't be used on CI
+  sh('touch ../TestTools/Credentials.xcconfig')
+end
+
+lane :build_test_app_and_frameworks do
+  scan(
+    project: xcode_project,
+    scheme: 'DemoApp',
+    testplan: 'SwiftUIDemoApp',
+    result_bundle: true,
+    derived_data_path: derived_data_path,
+    cloned_source_packages_path: source_packages_path,
+    clean: is_localhost,
+    build_for_testing: true
+  )
+end
+
+desc 'Runs LLC tests'
+lane :test do |options|
+  next unless is_check_required(sources: sources_matrix[:llc], force_check: @force_check)
+
+  update_testplan_on_ci(path: "StreamVideoTests/StreamVideo.xctestplan")
+
+  scan_options = {
+    project: xcode_project,
+    scheme: 'StreamVideo',
+    testplan: 'StreamVideo',
+    clean: is_localhost,
+    derived_data_path: derived_data_path,
+    cloned_source_packages_path: source_packages_path,
+    devices: options[:device],
+    number_of_retries: 3,
+    skip_build: options[:skip_build],
+    build_for_testing: options[:build_for_testing]
+  }
+
+  begin
+    scan(scan_options)
+  rescue StandardError => _e
+    failed_tests = retreive_failed_tests
+    UI.important("Re-running #{failed_tests.size} failed tests ⌛️")
+    scan(scan_options.merge(only_testing: failed_tests))
+  end
+
+  slather if is_ci && !options[:build_for_testing]
+end
+
+desc 'Runs SwiftUI tests'
+lane :test_swiftui do |options|
+  test_ui(
+    scheme: 'StreamVideoSwiftUI',
+    source: :swiftui,
+    device: options[:device],
+    record: options[:record],
+    skip_build: options[:skip_build],
+    build_for_testing: options[:build_for_testing]
+  )
+end
+
+desc 'Runs UIKit tests'
+lane :test_uikit do |options|
+  test_ui(
+    scheme: 'StreamVideoUIKit',
+    source: :uikit,
+    device: options[:device],
+    record: options[:record],
+    skip_build: options[:skip_build],
+    build_for_testing: options[:build_for_testing]
+  )
+end
+
+private_lane :test_ui do |options|
+  next unless is_check_required(sources: sources_matrix[options[:source]], force_check: @force_check)
+
+  record_mode = options[:record].to_s == 'true'
+  remove_snapshots(scheme: options[:scheme]) if record_mode
+
+  update_testplan_on_ci(path: "#{options[:scheme]}Tests/#{options[:scheme]}.xctestplan")
+
+  scan(
+    project: xcode_project,
+    scheme: options[:scheme],
+    testplan: options[:scheme],
+    clean: is_localhost,
+    derived_data_path: derived_data_path,
+    cloned_source_packages_path: source_packages_path,
+    skip_build: options[:skip_build],
+    result_bundle: true,
+    devices: options[:device],
+    build_for_testing: options[:build_for_testing],
+    fail_build: !record_mode
+  )
+
+  if record_mode && is_ci
+    png_files = git_status(ext: '.png').map { |_, png| png }.flatten
+    next if png_files.empty?
+
+    # Discard all files apart from the snapshots
+    Dir.chdir('..') do
+      png_files.each { |png| sh("git add #{png}") || true }
+      sh('git restore .')
+    end
+
+    pr_create(
+      title: "[CI][#{options[:scheme]}] Snapshots",
+      base_branch: current_branch,
+      head_branch: "#{current_branch}-#{options[:scheme]}-snapshots-#{Time.now.to_i}"
+    )
+  end
+end
+
+desc 'Starts Sinatra web server'
+lane :start_sinatra do
+  sh('bundle exec ruby sinatra.rb > sinatra.log 2>&1 &')
+end
+
+desc 'Stops Sinatra web server'
+lane :stop_sinatra do
+  sh("lsof -t -i:#{sinatra_port} | xargs kill -9")
+end
+
+desc 'Restarts Sinatra web server'
+lane :restart_sinatra do
+  stop_sinatra
+  start_sinatra
+end
+
+desc 'Starts Stream Video Buddy'
+lane :start_video_buddy do
+  sh("stream-video-buddy server --port #{video_buddy_port} > video-buddy-server.log 2>&1 &")
+end
+
+desc 'Stops Stream Video Buddy'
+lane :stop_video_buddy do
+  sh("lsof -t -i:#{video_buddy_port} | xargs kill -9")
+end
+
+desc 'Restarts Stream Video Buddy'
+lane :restart_video_buddy do
+  stop_video_buddy
+  start_video_buddy
+end
+
+desc 'Runs e2e ui tests'
+lane :test_e2e do |options|
+  next unless is_check_required(sources: sources_matrix[:e2e], force_check: @force_check)
+
+  update_testplan_on_ci(path: 'SwiftUIDemoAppUITests/SwiftUIDemoApp.xctestplan')
+
+  start_sinatra
+  start_video_buddy
+
+  scan_options = {
+    project: xcode_project,
+    scheme: 'DemoApp',
+    testplan: 'SwiftUIDemoApp',
+    result_bundle: true,
+    derived_data_path: derived_data_path,
+    cloned_source_packages_path: source_packages_path,
+    clean: is_localhost,
+    test_without_building: options[:test_without_building],
+    build_for_testing: options[:build_for_testing],
+    devices: options[:device],
+    prelaunch_simulator: is_ci,
+    number_of_retries: 3
+  }
+
+  if ENV['MATRIX_SIZE'] && options[:batch]
+    products_dir = File.expand_path("../#{derived_data_path}/Build/Products")
+    xctestrun = Dir.glob(File.expand_path("#{products_dir}/*.xctestrun")).first
+    tests = retrieve_xctest_names(xctestrun: xctestrun).values.flatten
+    slice_size = (tests.size / ENV['MATRIX_SIZE'].to_f).ceil
+    only_testing = []
+    tests.each_slice(slice_size) { |test| only_testing << test }
+    only_testing_batch = only_testing[options[:batch].to_i]
+    scan_options[:only_testing] = only_testing_batch
+    UI.important("Tests in total: #{only_testing.flatten.size}. Running #{only_testing_batch.size} of them ⌛️")
+  end
+
+  begin
+    scan(scan_options)
+  rescue StandardError
+    failed_tests = retreive_failed_tests
+    UI.important("Re-running #{failed_tests.size} failed tests ⌛️")
+    scan(scan_options.merge(only_testing: failed_tests))
+  end
+end
+
+private_lane :retreive_failed_tests do
+  report_path = 'test_output/report.junit'
+  raise UI.user_error!('There is no junit report to parse') unless File.file?(report_path)
+
+  junit_report = Nokogiri::XML(File.read(report_path))
+  failed_tests = []
+  passed_tests = []
+  suite_name = junit_report.xpath('//testsuite').first['name'].split('.').first
+  junit_report.xpath('//testcase').each do |testcase|
+    class_name = testcase['classname'].split('.').last
+    test_name = testcase['name'].delete('()')
+
+    if testcase.at_xpath('failure')
+      failed_tests << "#{suite_name}/#{class_name}/#{test_name}"
+    else
+      passed_tests << "#{suite_name}/#{class_name}/#{test_name}"
+    end
+  end
+
+  (failed_tests - passed_tests).uniq
+end
+
+lane :stop_e2e_helpers do
+  stop_sinatra
+  stop_video_buddy
+end
+
+private_lane :update_testplan_on_ci do |options|
+  update_testplan(path: options[:path], env_vars: { key: 'CI', value: 'TRUE' }) if is_ci || options[:force]
+end
+
+desc 'Builds SwiftUI Demo app'
+lane :build_swiftui_demo do
+  build_example_app(scheme: 'DemoApp')
+end
+
+desc 'Builds UIKit Demo app'
+lane :build_uikit_demo do
+  build_example_app(scheme: 'DemoAppUIKit')
+end
+
+desc 'Builds Tests for Docs'
+lane :build_docs_test do
+  build_example_app(scheme: 'DocumentationTests', project: 'DocumentationTests/DocumentationTests/DocumentationTests.xcodeproj')
+end
+
+private_lane :build_example_app do |options|
+  options[:project] ||= xcode_project
+  app_sources =
+    case options[:scheme]
+    when 'DemoApp'
+      :swiftui_sample_apps
+    when 'DemoAppUIKit'
+      :uikit_sample_apps
+    when 'DocumentationTests'
+      options[:derived_data_path] = derived_data_path
+      :documentation_tests
+    end
+
+  next unless is_check_required(sources: sources_matrix[app_sources], force_check: @force_check)
+
+  scan(
+    project: options[:project],
+    scheme: options[:scheme],
+    clean: is_localhost,
+    configuration: 'Debug',
+    derived_data_path: options[:derived_data_path],
+    cloned_source_packages_path: source_packages_path,
+    build_for_testing: true
+  )
+end
+
+lane :code_generation do
+  Dir.chdir('..') { sh('sh Scripts/generateCode.sh') }
+  sync_xcodeproj_references
+end
+
+lane :sync_xcodeproj_references do
+  Dir.chdir('..') do
+    project = Xcodeproj::Project.open(xcode_project)
+    status = git_status(ext: '.swift')
+
+    status[:d].each do |file_path|
+      next if file_path !~ %r{(/OpenApi/|/protobuf/)}
+
+      file = project.files.find { |f| f.full_path.to_s == file_path }
+      file.remove_from_project if file
+    end
+
+    status[:a].each do |file_path|
+      next if file_path !~ %r{(/OpenApi/|/protobuf/)} || project.files.find { |f| f.full_path.to_s == file_path }
+
+      group = project.main_group
+      split_file_path = file_path.split('/')
+      file_name = split_file_path.pop
+
+      split_file_path.each do |subfolder|
+        if group[subfolder]
+          group = group[subfolder]
+        else
+          group = group.new_group(subfolder)
+          group.path = subfolder
+        end
+      end
+
+      file_reference = group.new_file(file_path)
+      file_reference.path = file_name
+      project.targets.find { |n| n.name == 'StreamVideo' }.source_build_phase.add_file_reference(file_reference)
+    end
+
+    project.save
+  end
+end
+
+desc 'Run fastlane linting'
+lane :rubocop do
+  next unless is_check_required(sources: sources_matrix[:ruby], force_check: @force_check)
+
+  sh('bundle exec rubocop')
+end
+
+desc 'Run PR linting'
+lane :lint_pr do
+  danger(dangerfile: 'Dangerfile') if is_ci
+end
+
+desc 'Run source code formatting/linting'
+lane :run_swift_format do |options|
+  Dir.chdir('..') do
+    strict = options[:strict] ? '--lint' : nil
+    sh("swiftformat #{strict} --config .swiftformat .")
+    sh("swiftlint lint --config .swiftlint.yml --fix --progress --quiet --reporter json") unless strict
+    sh("swiftlint lint --config .swiftlint.yml --strict --progress --quiet --reporter json")
+  end
+end
+
+lane :install_runtime do |options|
+  install_ios_runtime(version: options[:ios], custom_script: 'Scripts/install_ios_runtime.sh')
+end
+
+desc 'Remove UI Snapshots'
+lane :remove_snapshots do |options|
+  snapshots_path = "../#{options[:scheme]}Tests/**/__Snapshots__/**/*.png"
+  if options[:only_unchanged]
+    png_files = git_status(ext: '.png')
+    changed_snapshots = (png_files[:a] + png_files[:m]).map { |f| File.expand_path(f) }
+    Dir.glob(snapshots_path).select { |f| File.delete(f) unless changed_snapshots.include?(File.expand_path(f)) }
+  else
+    Dir.glob(snapshots_path).select { |f| File.delete(f) }
+  end
+end
+
+lane :sources_matrix do
+  {
+    e2e: ['Sources', 'DemoApp', 'SwiftUIDemoAppUITests', '.github/workflows/smoke-checks.yml', xcode_project],
+    llc: ['Sources/StreamVideo', 'StreamVideoTests', '.github/workflows/smoke-checks.yml', xcode_project],
+    swiftui: ['Sources', 'StreamVideoSwiftUITests', '.github/workflows/smoke-checks.yml', xcode_project],
+    uikit: ['Sources', 'StreamVideoUIKitTests', '.github/workflows/smoke-checks.yml', xcode_project],
+    swiftui_sample_apps: ['Sources', 'DemoApp', '.github/workflows/smoke-checks.yml', xcode_project],
+    uikit_sample_apps: ['Sources', 'DemoAppUIKit', '.github/workflows/smoke-checks.yml', xcode_project],
+    documentation_tests: ['Sources', 'DocumentationTests', '.github/workflows/smoke-checks.yml', xcode_project],
+    size: ['Sources', '.github/workflows/smoke-checks.yml', xcode_project],
+    public_interface: ['Sources', '.github/workflows/smoke-checks.yml'],
+    ruby: ['fastlane', 'Gemfile', 'Gemfile.lock', '.github/workflows/smoke-checks.yml']
+  }
+end
+
+lane :copyright do
+  update_copyright(ignore: [derived_data_path, source_packages_path, 'vendor/'])
+  next unless is_ci
+
+  pr_create(
+    title: '[CI] Update Copyright',
+    head_branch: "ci/update-copyright-#{Time.now.to_i}"
+  )
+end
+
+lane :validate_public_interface do
+  next unless is_check_required(sources: sources_matrix[:public_interface], force_check: @force_check)
+
+  # Get branch names
+  original_branch = current_branch
+  target_branch = ENV['GITHUB_BASE_REF'] || (original_branch.include?('release/') ? 'main' : 'develop')
+  UI.important("Target branch: #{target_branch} 🕊️")
+
+  # Run the analysis on the current branch
+  sh('interface-analyser analysis ../Sources/ public_interface_current.json')
+
+  # Checkout the target branch
+  sh("git fetch origin #{target_branch}")
+  sh("git checkout #{target_branch}")
+
+  # Run the analysis on the target branch
+  sh('interface-analyser analysis ../Sources/ public_interface_previous.json')
+
+  # Run diff
+  report_path = 'interface-analyser-report.md'
+  sh("interface-analyser diff public_interface_current.json public_interface_previous.json #{report_path}")
+
+  # Check if report exists and is non-zero in size
+  diff =
+    if File.exist?(report_path) && File.size(report_path) > 0
+      File.read(report_path).strip
+    else
+      '🚀 No changes affecting the public interface.'
+    end
+
+  # Generate markdown table for the PR comment
+  header = '## Public Interface'
+  content = "#{header}\n#{diff}"
+
+  # Post PR comment if running in CI
+  pr_comment(text: content, edit_last_comment_with_text: header) if is_ci
+
+  # Checkout the original branch
+  sh("git fetch origin #{original_branch}")
+  sh("git checkout #{original_branch}")
+end
+
+lane :show_frameworks_sizes do |options|
+  next unless is_check_required(sources: sources_matrix[:size], force_check: @force_check)
+
+  sizes = options[:sizes] || frameworks_sizes
+  show_sdk_size(branch_sizes: sizes, github_repo: github_repo)
+  update_img_shields_sdk_sizes(sizes: sizes, open_pr: options[:open_pr]) if options[:update_readme]
+end
+
+lane :update_img_shields_sdk_sizes do |options|
+  update_sdk_size_in_readme(
+    open_pr: options[:open_pr] || false,
+    readme_path: 'README.md',
+    sizes: options[:sizes] || frameworks_sizes
+  )
+end
+
+private_lane :frameworks_sizes do
+  root_dir = 'Build/SDKSize'
+  archive_dir = "#{root_dir}/DemoApp.xcarchive"
+
+  FileUtils.rm_rf("../#{root_dir}/")
+
+  match_me
+
+  gym(
+    scheme: 'DemoAppUIKit',
+    configuration: 'Release',
+    archive_path: archive_dir,
+    export_method: 'ad-hoc',
+    export_options: 'fastlane/sdk_size_export_options.plist',
+    derived_data_path: derived_data_path,
+    cloned_source_packages_path: source_packages_path
+  )
+
+  frameworks_path = "../#{archive_dir}/Products/Applications/DemoAppUIKit.app/Frameworks"
+  stream_video_size = File.size("#{frameworks_path}/StreamVideo.framework/StreamVideo")
+  stream_video_size_kb = stream_video_size / 1024.0
+  stream_video_swiftui_size = File.size("#{frameworks_path}/StreamVideoSwiftUI.framework/StreamVideoSwiftUI")
+  stream_video_swiftui_size_kb = stream_video_swiftui_size / 1024.0
+  stream_video_uikit_size = File.size("#{frameworks_path}/StreamVideoUIKit.framework/StreamVideoUIKit")
+  stream_video_uikit_size_kb = (stream_video_uikit_size + stream_video_swiftui_size) / 1024.0
+  stream_web_rtc_size = File.size("#{frameworks_path}/StreamWebRTC.framework/StreamWebRTC")
+  stream_web_rtc_size_kb = stream_web_rtc_size / 1024.0
+
+  {
+    StreamVideo: stream_video_size_kb.round(0),
+    StreamVideoSwiftUI: stream_video_swiftui_size_kb.round(0),
+    StreamVideoUIKit: stream_video_uikit_size_kb.round(0),
+    StreamWebRTC: stream_web_rtc_size_kb.round(0)
+  }
+end
+
+desc "Updates WebRTC dependency locally. Usage: `bundle exec fastlane update_stream_chat version:125.6422.070 skip_pr:true`"
+lane :update_webrtc do |options|
+  raise UI.user_error!('Provide a version.') unless options[:version]
+
+  Dir.chdir('..') do
+    current_webrtc_version = File.read('Package.swift')[/stream-video-swift-webrtc\.git", exact: "([\d.]+)"\)/, 1]
+    ['StreamVideo.xcodeproj/project.pbxproj', 'Package.swift', swift_environment_path].each do |file|
+      if file == 'StreamVideo.xcodeproj/project.pbxproj'
+        content = File.read(file)
+        parts = current_webrtc_version.split('.')
+        parts[-1] = parts[-1].to_i.to_s
+        normalized_current_version = parts.join('.')
+        parts = options[:version].split('.')
+        parts[-1] = parts[-1].to_i.to_s
+        normalized_new_version = parts.join('.')
+        File.write(file, content.gsub("version = #{normalized_current_version}", "version = #{normalized_new_version}"))
+      else
+        File.write(file, File.read(file).gsub(current_webrtc_version, options[:version]))
+      end
+    end
+  end
+
+  skip_pr = %w[true 1].include?(options[:skip_pr].to_s.downcase)
+
+  if skip_pr
+    UI.message('Skipping PR creation as requested.')
+  else
+    pr_create(
+      title: "Update WebRTC dependency to #{options[:version]}",
+      base_branch: 'develop',
+      head_branch: "ci/update-webrtc-dependency-#{Time.now.to_i}",
+      github_repo: github_repo
+    )
+  end
+end
+
+lane :size_analyze do
+  next unless is_check_required(sources: sources_matrix[:size], force_check: @force_check)
+
+  gym(
+    scheme: 'DemoAppUIKit',
+    configuration: 'Release',
+    skip_archive: true,
+    skip_package_ipa: true,
+    skip_package_pkg: true,
+    skip_codesigning: true,
+    derived_data_path: derived_data_path,
+    cloned_source_packages_path: source_packages_path
+  )
+
+  show_detailed_sdk_size(sdk_names: sdk_names, threshold: 42)
+end
