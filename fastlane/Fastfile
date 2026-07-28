@@ -652,7 +652,7 @@ private_lane :frameworks_sizes do
   }
 end
 
-desc "Updates WebRTC dependency locally. Usage: `bundle exec fastlane update_stream_chat version:125.6422.070 skip_pr:true`"
+desc "Updates WebRTC dependency locally. Usage: `bundle exec fastlane update_webrtc version:125.6422.070 skip_pr:true`"
 lane :update_webrtc do |options|
   raise UI.user_error!('Provide a version.') unless options[:version]
 
