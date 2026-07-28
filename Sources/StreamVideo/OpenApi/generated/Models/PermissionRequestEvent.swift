@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 
 public final class PermissionRequestEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
     

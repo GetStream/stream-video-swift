@@ -22,5 +22,21 @@ rm -rf "$PROJECT_ROOT/Sources/StreamVideo/OpenApi/generated/Models/"*
   go run . openapi generate-client --language swift --spec "$SOURCE_PATH/releases/v2/video-openapi-clientside.yaml" --output "$PROJECT_ROOT/Sources/StreamVideo/OpenApi/generated/"
 )
 
+# Shared OpenAPI types are provided by StreamCore.
+rm -f \
+  "$PROJECT_ROOT/Sources/StreamVideo/OpenApi/generated/APIHelper.swift" \
+  "$PROJECT_ROOT/Sources/StreamVideo/OpenApi/generated/CodableHelper.swift" \
+  "$PROJECT_ROOT/Sources/StreamVideo/OpenApi/generated/Extensions.swift" \
+  "$PROJECT_ROOT/Sources/StreamVideo/OpenApi/generated/JSONDataEncoding.swift" \
+  "$PROJECT_ROOT/Sources/StreamVideo/OpenApi/generated/Models.swift" \
+  "$PROJECT_ROOT/Sources/StreamVideo/OpenApi/generated/OpenISO8601DateFormatter.swift" \
+  "$PROJECT_ROOT/Sources/StreamVideo/OpenApi/generated/Models/APIError.swift" \
+  "$PROJECT_ROOT/Sources/StreamVideo/OpenApi/generated/Models/ConnectUserDetailsRequest.swift" \
+  "$PROJECT_ROOT/Sources/StreamVideo/OpenApi/generated/Models/CreateDeviceRequest.swift" \
+  "$PROJECT_ROOT/Sources/StreamVideo/OpenApi/generated/Models/Device.swift" \
+  "$PROJECT_ROOT/Sources/StreamVideo/OpenApi/generated/Models/ListDevicesResponse.swift" \
+  "$PROJECT_ROOT/Sources/StreamVideo/OpenApi/generated/Models/ModelResponse.swift" \
+  "$PROJECT_ROOT/Sources/StreamVideo/OpenApi/generated/Models/WSAuthMessageRequest.swift"
+
 # format the generated code
 swiftformat Sources/StreamVideo/OpenApi/generated

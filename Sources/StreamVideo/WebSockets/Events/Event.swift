@@ -3,17 +3,9 @@
 //
 
 import Foundation
-
-/// An `Event` object representing an event in the chat system.
-public protocol Event: Sendable {}
-
-public protocol SendableEvent: Event, ProtoModel, ReflectiveStringConvertible {}
+import StreamCore
 
 extension Event {
-    var name: String {
-        String(describing: Self.self)
-    }
-    
     func unwrap() -> VideoEvent? {
         if let unwrapped = self as? VideoEvent {
             return unwrapped
@@ -37,30 +29,22 @@ extension Event {
     }
 }
 
-/// An internal object that we use to wrap the kind of events that are handled by WS: SFU and coordinator events
 internal enum WrappedEvent: Event, Sendable, CustomStringConvertible {
     case internalEvent(Event)
     case coordinatorEvent(VideoEvent)
-    case sfuEvent(Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload)
     
     func healthcheck() -> HealthCheckInfo? {
         switch self {
         case let .coordinatorEvent(event):
             if case let .typeHealthCheckEvent(healthCheckEvent) = event {
-                return HealthCheckInfo(coordinatorHealthCheck: healthCheckEvent)
+                return HealthCheckInfo(
+                    connectionId: healthCheckEvent.connectionId
+                )
             }
             if case let .typeConnectedEvent(connectedEvent) = event {
                 return HealthCheckInfo(
-                    coordinatorHealthCheck: .init(
-                        cid: nil,
-                        connectionId: connectedEvent.connectionId,
-                        createdAt: connectedEvent.createdAt
-                    )
+                    connectionId: connectedEvent.connectionId
                 )
-            }
-        case let .sfuEvent(event):
-            if case let .healthCheckResponse(healthCheckEvent) = event {
-                return HealthCheckInfo(sfuHealthCheck: healthCheckEvent)
             }
         case .internalEvent:
             break
@@ -74,11 +58,6 @@ internal enum WrappedEvent: Event, Sendable, CustomStringConvertible {
             if case let .typeConnectionErrorEvent(errorEvent) = event {
                 return errorEvent.error
             }
-        case let .sfuEvent(event):
-            if case let .error(errorEvent) = event {
-                return errorEvent.error
-            }
-            return nil
         case .internalEvent:
             break
         }
@@ -89,8 +68,6 @@ internal enum WrappedEvent: Event, Sendable, CustomStringConvertible {
         switch self {
         case let .coordinatorEvent(event):
             return "coordinator: \(event.type)"
-        case let .sfuEvent(event):
-            return "sfu: \(event.name)"
         case let .internalEvent(event):
             return "internal: \(event.name)"
         }
@@ -100,8 +77,6 @@ internal enum WrappedEvent: Event, Sendable, CustomStringConvertible {
         switch self {
         case let .coordinatorEvent(event):
             return "coordinator: \(event)"
-        case let .sfuEvent(event):
-            return "sfu: \(event)"
         case let .internalEvent(event):
             return "internal: \(event)"
         }

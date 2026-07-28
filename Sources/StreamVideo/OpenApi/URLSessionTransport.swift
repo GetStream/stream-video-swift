@@ -108,7 +108,7 @@ final class URLSessionTransport: DefaultAPITransport, @unchecked Sendable {
         }
 
         do {
-            return try JSONDecoder.default.decode(APIError.self, from: data)
+            return try JSONDecoder.streamCore.decode(APIError.self, from: data)
         } catch {
             return ClientError.NetworkError(response.description)
         }

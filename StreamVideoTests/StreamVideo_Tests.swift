@@ -185,7 +185,7 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
     func test_streamVideo_ringCallReject() async throws {
         let httpClient = httpClientWithGetCallResponse()
         let rejectCallResponse = RejectCallResponse(duration: "1")
-        let data = try! JSONEncoder.default.encode(rejectCallResponse)
+        let data = try! JSONEncoder.streamCore.encode(rejectCallResponse)
         let streamVideo = StreamVideo.mock(httpClient: httpClient)
         self.streamVideo = streamVideo
         let call = streamVideo.call(callType: callType, callId: callId)
@@ -224,7 +224,7 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
             members: [],
             ownCapabilities: []
         )
-        httpClient.dataResponses = [try JSONEncoder.default.encode(getCallResponse)]
+        httpClient.dataResponses = [try JSONEncoder.streamCore.encode(getCallResponse)]
 
         nonisolated(unsafe) weak var previousCall: Call?
         do {
@@ -367,7 +367,9 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
         // When
         let coordinatorEvent = VideoEvent.typeCallAcceptedEvent(.dummy(callCid: "cid"))
         let internalEvent = WrappedEvent.internalEvent(WSConnected())
-        streamVideo.eventNotificationCenter.process(.coordinatorEvent(coordinatorEvent))
+        streamVideo.eventNotificationCenter.process(
+            WrappedEvent.coordinatorEvent(coordinatorEvent)
+        )
         streamVideo.eventNotificationCenter.process(internalEvent)
         await fulfillment { receivedEvents.count == 1 }
 
@@ -397,7 +399,7 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
         // When
         let event = CallAcceptedEvent.dummy()
         streamVideo.eventNotificationCenter.process(
-            .coordinatorEvent(.typeCallAcceptedEvent(event))
+            WrappedEvent.coordinatorEvent(.typeCallAcceptedEvent(event))
         )
 
         await fulfillment { receivedEvents.count == 1 }
@@ -434,7 +436,9 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
                 }
                 group.addTask {
                     await self.wait(for: 0.5)
-                    streamVideo.eventNotificationCenter.process(.coordinatorEvent(event))
+                    streamVideo.eventNotificationCenter.process(
+                        WrappedEvent.coordinatorEvent(event)
+                    )
                 }
             }
         }
@@ -468,7 +472,9 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
                 }
                 group.addTask {
                     await self.wait(for: 0.5)
-                    streamVideo.eventNotificationCenter.process(.coordinatorEvent(event))
+                    streamVideo.eventNotificationCenter.process(
+                        WrappedEvent.coordinatorEvent(event)
+                    )
                 }
             }
         }
@@ -506,7 +512,7 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
             members: [],
             ownCapabilities: []
         )
-        let data = try! JSONEncoder.default.encode(getCallResponse)
+        let data = try! JSONEncoder.streamCore.encode(getCallResponse)
         httpClient.dataResponses = [data]
         return httpClient
     }

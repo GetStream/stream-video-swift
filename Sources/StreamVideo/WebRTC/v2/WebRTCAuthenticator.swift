@@ -157,8 +157,7 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
                 url: try unwrap(
                     .init(string: response.credentials.server.wsEndpoint),
                     errorMessage: "WebSocket URL is invalid."
-                ),
-                eventNotificationCenter: .init()
+                )
             )
         )
 

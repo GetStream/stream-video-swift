@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import StreamCore
 
 /// A state machine that manages transitions between different stages.
 ///

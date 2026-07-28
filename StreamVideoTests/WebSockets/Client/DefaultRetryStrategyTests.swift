@@ -6,6 +6,7 @@
 import XCTest
 
 final class DefaultRetryStrategyTests: XCTestCase, @unchecked Sendable {
+    private let expectedStreamVideoMaximumReconnectionDelay: TimeInterval = 25
     private var subject: DefaultRetryStrategy! = .init()
 
     override func tearDown() {
@@ -142,7 +143,13 @@ final class DefaultRetryStrategyTests: XCTestCase, @unchecked Sendable {
             let delay = subject.nextRetryDelay()
 
             XCTAssertGreaterThanOrEqual(delay, 0.25)
-            XCTAssertLessThanOrEqual(delay, min(0.5 + Double(i * 2), DefaultRetryStrategy.maximumReconnectionDelay))
+            XCTAssertLessThanOrEqual(
+                delay,
+                min(
+                    0.5 + Double(i * 2),
+                    expectedStreamVideoMaximumReconnectionDelay
+                )
+            )
         }
     }
 
@@ -153,6 +160,9 @@ final class DefaultRetryStrategyTests: XCTestCase, @unchecked Sendable {
 
         let delay = subject.nextRetryDelay()
 
-        XCTAssertLessThanOrEqual(delay, DefaultRetryStrategy.maximumReconnectionDelay)
+        XCTAssertLessThanOrEqual(
+            delay,
+            expectedStreamVideoMaximumReconnectionDelay
+        )
     }
 }

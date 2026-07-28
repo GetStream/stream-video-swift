@@ -4,12 +4,22 @@
 
 import Combine
 import Foundation
+import StreamCore
 
 /// A class that manages the communication with a Selective Forwarding Unit (SFU) for video streaming.
 ///
 /// The `SFUAdapter` class handles both WebSocket connections and HTTP requests to the SFU server.
 /// It provides methods for managing video tracks, updating subscriptions, and handling WebRTC signaling.
-final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unchecked Sendable {
+///
+/// The SFU signaling WebSocket is backed by `WebSocketClient` via
+/// ``SFUWebSocket``.
+final class SFUAdapter: CustomStringConvertible, @unchecked Sendable {
+
+    typealias WebSocketFactory = @Sendable (
+        _ url: URL,
+        _ sessionConfiguration: URLSessionConfiguration,
+        _ environment: WebSocketClient.Environment
+    ) -> SFUWebSocket
 
     /// Configuration for the SFU service.
     struct ServiceConfiguration {
@@ -29,19 +39,22 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
     struct WebSocketConfiguration {
         /// The URL for the WebSocket connection.
         var url: URL
-        /// The event notification center for handling WebSocket events.
-        var eventNotificationCenter: EventNotificationCenter
         /// The session configuration for the WebSocket connection. Defaults to not waiting for connectivity.
         var sessionConfiguration: URLSessionConfiguration = .default.toggleWaitsForConnectivity(false)
-        /// The decoder for WebRTC events. Defaults to a standard WebRTCEventDecoder.
-        var eventDecoder: WebRTCEventDecoder = WebRTCEventDecoder()
     }
 
     private let processingQueue = DispatchQueue(label: "io.getstream.sfu.event.processingQueue")
     private let signalService: SFUSignalService
     private let refreshSubject = PassthroughSubject<Void, Never>()
-    private let webSocketFactory: WebSocketClientProviding
-    private var webSocket: WebSocketClient
+    // Stable relay that keeps existing subscribers alive when refresh replaces
+    // the underlying WebSocket and setUpPublishers reconnects its event stream.
+    private let eventSubject = PassthroughSubject<
+        Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload,
+        Never
+    >()
+    /// The active SFU signaling socket.
+    private var webSocket: SFUWebSocket
+    private let webSocketFactory: WebSocketFactory
     private var disposableBag = DisposableBag()
     private var requestDisposableBag = DisposableBag()
     private var isConnected: Bool {
@@ -54,6 +67,8 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
     }
 
     /// The current connection state of the WebSocket.
+    ///
+    /// Mirrors ``SFUWebSocket``'s state (see ``setUpPublishers()``).
     @Published private(set) var connectionState: WebSocketConnectionState = .initialized
 
     /// A publisher that is used to inform subscribers that the SFUAdapter has refreshed its webSocket
@@ -72,17 +87,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
 
     /// A Combine publisher that allows observation of *all events* received by the adapter.
     var publisher: AnyPublisher<Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload, Never> {
-        webSocket
-            .eventSubject
-            .compactMap {
-                switch $0 {
-                case let .sfuEvent(event):
-                    return event
-                default:
-                    return nil
-                }
-            }
-            .eraseToAnyPublisher()
+        eventSubject.eraseToAnyPublisher()
     }
 
     private let subjectSendEvent: PassthroughSubject<SFUAdapterEvent, Never> = .init()
@@ -92,8 +97,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
 
     var description: String {
         """
-        Address: \(Unmanaged.passUnretained(webSocket).toOpaque())
-        SFUAdapter is delegate: \(webSocket.connectionStateDelegate === self)
+        Address: \(ObjectIdentifier(webSocket))
         ConnectionState: \(connectionState)
         ConnectURL: \(connectURL)
         Hostname: \(hostname)
@@ -109,7 +113,6 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         serviceConfiguration: ServiceConfiguration,
         webSocketConfiguration: WebSocketConfiguration
     ) {
-        let webSocketFactory = WebSocketClientFactory()
         self.init(
             signalService: .init(
                 httpClient: serviceConfiguration.httpClient,
@@ -117,28 +120,27 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
                 hostname: serviceConfiguration.url.absoluteString,
                 token: serviceConfiguration.token
             ),
-            webSocket: webSocketFactory.build(
-                sessionConfiguration: webSocketConfiguration.sessionConfiguration,
-                eventDecoder: webSocketConfiguration.eventDecoder,
-                eventNotificationCenter: webSocketConfiguration.eventNotificationCenter,
-                webSocketClientType: .sfu,
-                connectURL: webSocketConfiguration.url,
-                requiresAuth: false
-            ),
-            webSocketFactory: webSocketFactory
+            webSocket: SFUWebSocket(
+                url: webSocketConfiguration.url,
+                sessionConfiguration: webSocketConfiguration.sessionConfiguration
+            )
         )
     }
 
     init(
         signalService: SFUSignalService,
-        webSocket: WebSocketClient,
-        webSocketFactory: WebSocketClientProviding
+        webSocket: SFUWebSocket,
+        webSocketFactory: @escaping WebSocketFactory = {
+            SFUWebSocket(
+                url: $0,
+                sessionConfiguration: $1,
+                environment: $2
+            )
+        }
     ) {
         self.signalService = signalService
         self.webSocket = webSocket
         self.webSocketFactory = webSocketFactory
-
-        webSocket.connectionStateDelegate = self
 
         setUpPublishers()
     }
@@ -146,7 +148,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
     deinit {
         disposableBag.removeAll()
         requestDisposableBag.removeAll()
-        webSocket.disconnect {}
+        webSocket.disconnect(code: .normalClosure)
     }
 
     // MARK: - WebSocket
@@ -164,16 +166,8 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         function: StaticString = #function,
         line: UInt = #line
     ) -> AnyPublisher<T, Never> {
-        webSocket
-            .eventSubject
-            .compactMap {
-                switch $0 {
-                case let .sfuEvent(event):
-                    return event.payload(T.self)
-                default:
-                    return nil
-                }
-            }
+        eventSubject
+            .compactMap { $0.payload(T.self) }
             .eraseToAnyPublisher()
     }
 
@@ -199,18 +193,16 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
     /// Sends a health check request to the WebSocket server.
     func sendHealthCheck() {
         statusCheck()
-        webSocket
-            .engine?
-            .send(message: Stream_Video_Sfu_Event_HealthCheckRequest())
+        webSocket.send(Stream_Video_Sfu_Event_HealthCheckRequest())
     }
 
-    /// Sends a message through the WebSocket connection.
+    /// Sends an SFU request through the WebSocket connection.
     ///
-    /// - Parameter message: The message to be sent, conforming to the SendableEvent protocol.
-    func send(message: SendableEvent) {
+    /// - Parameter message: The SFU request to be sent.
+    func send(message: Stream_Video_Sfu_Event_SfuRequest) {
         statusCheck()
         log.debug(message, subsystems: .sfu)
-        webSocket.engine?.send(message: message)
+        webSocket.send(message)
     }
 
     /// Refreshes the WebSocket connection with a new configuration.
@@ -223,19 +215,13 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         webSocketConfiguration: WebSocketConfiguration
     ) {
         log.debug("Will refresh \(self).", subsystems: .sfu)
-        webSocket.connectionStateDelegate = nil
-        webSocket.disconnect(code: .init(rawValue: 4002)!) {}
+        webSocket.disconnectForReconfiguration()
         requestDisposableBag.removeAll()
-        webSocket = webSocketFactory.build(
-            sessionConfiguration: webSocketConfiguration.sessionConfiguration,
-            eventDecoder: webSocketConfiguration.eventDecoder,
-            eventNotificationCenter: webSocketConfiguration.eventNotificationCenter,
-            webSocketClientType: .sfu,
-            environment: .init(),
-            connectURL: webSocketConfiguration.url,
-            requiresAuth: false
+        webSocket = webSocketFactory(
+            webSocketConfiguration.url,
+            webSocketConfiguration.sessionConfiguration,
+            webSocket.environment
         )
-        webSocket.connectionStateDelegate = self
 
         refreshSubject.send(())
 
@@ -305,7 +291,8 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
             "\(events.endIndex) event(s) of type \(eventType) found in bucket and will consume on sfuAdapter:\(self).",
             subsystems: .sfu
         )
-        events.forEach { webSocket.eventSubject.send(.sfuEvent($0)) }
+        // Route replayed payloads through the same publisher as live events.
+        events.forEach { webSocket.inject($0) }
     }
 
     // MARK: - Service
@@ -606,34 +593,6 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         }
     }
 
-    // MARK: - ConnectionStateDelegate
-
-    /// Updates the connection state of the SFUAdapter when the WebSocket connection state changes.
-    ///
-    /// This method is part of the `ConnectionStateDelegate` protocol implementation. It's called
-    /// by the WebSocketClient whenever the connection state changes, allowing the SFUAdapter
-    /// to keep track of the current WebSocket connection state.
-    ///
-    /// - Parameters:
-    ///   - client: The WebSocketClient that triggered the state update.
-    ///   - state: The new WebSocketConnectionState.
-    ///
-    /// - Note: This method updates the `connectionState` property of the SFUAdapter,
-    ///         which is a published property that observers can react to.
-    func webSocketClient(
-        _ client: WebSocketClient,
-        didUpdateConnectionState state: WebSocketConnectionState
-    ) {
-        log.debug(
-            """
-            WebSocket connectionState changed to \(state)
-            client: \(Unmanaged.passUnretained(client).toOpaque())
-            """,
-            subsystems: .sfu
-        )
-        connectionState = state
-    }
-
     // MARK: - Private helpers
 
     private func setUpPublishers() {
@@ -645,14 +604,19 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
             .store(in: disposableBag)
 
         webSocket
-            .eventSubject
+            .connectionStatePublisher
+            .sink { [weak self] in self?.connectionState = $0 }
+            .store(in: disposableBag)
+
+        webSocket
+            .eventPublisher
             .log(.debug, subsystems: .sfu) {
                 """
                 SFU received event
                 \($0)
                 """
             }
-            .sink { _ in }
+            .sink { [weak self] in self?.eventSubject.send($0) }
             .store(in: disposableBag)
 
         signalService

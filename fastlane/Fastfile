@@ -643,12 +643,18 @@ private_lane :frameworks_sizes do
   stream_video_uikit_size_kb = (stream_video_uikit_size + stream_video_swiftui_size) / 1024.0
   stream_web_rtc_size = File.size("#{frameworks_path}/StreamWebRTC.framework/StreamWebRTC")
   stream_web_rtc_size_kb = stream_web_rtc_size / 1024.0
+  stream_core_framework =
+    Dir.glob("#{frameworks_path}/StreamCore{,_*}.framework").fetch(0)
+  stream_core_binary =
+    File.join(stream_core_framework, File.basename(stream_core_framework, '.framework'))
+  stream_core_size_kb = File.size(stream_core_binary) / 1024.0
 
   {
     StreamVideo: stream_video_size_kb.round(0),
     StreamVideoSwiftUI: stream_video_swiftui_size_kb.round(0),
     StreamVideoUIKit: stream_video_uikit_size_kb.round(0),
-    StreamWebRTC: stream_web_rtc_size_kb.round(0)
+    StreamWebRTC: stream_web_rtc_size_kb.round(0),
+    StreamCore: stream_core_size_kb.round(0)
   }
 end
 

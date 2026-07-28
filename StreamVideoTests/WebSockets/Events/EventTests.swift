@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 @testable import StreamVideo
 import XCTest
 
@@ -55,16 +56,21 @@ final class EventTests: XCTestCase, @unchecked Sendable {
     }
 
     func test_unwrap_isWrappedButNotCoordinatorEvent_returnsExpected() {
-        struct TestEvent: Event {}
-        let wrappedEvent = WrappedEvent.internalEvent(TestEvent())
+        let wrappedEvent = WrappedEvent.internalEvent(
+            HealthCheckEvent(
+                connectionId: UUID().uuidString,
+                createdAt: Date()
+            )
+        )
 
         XCTAssertNil(wrappedEvent.unwrap())
     }
 
     func test_unwrap_isUnknownEvent_returnsExpected() {
-        struct TestEvent: Event {}
-
-        let subject = TestEvent()
+        let subject = HealthCheckEvent(
+            connectionId: UUID().uuidString,
+            createdAt: Date()
+        )
 
         XCTAssertNil(subject.unwrap())
     }
@@ -95,10 +101,77 @@ final class EventTests: XCTestCase, @unchecked Sendable {
     }
 
     func test_forCall_isNotVideoEvent_returnsFalse() {
-        struct TestEvent: Event {}
-
-        let subject = TestEvent()
+        let subject = HealthCheckEvent(
+            connectionId: UUID().uuidString,
+            createdAt: Date()
+        )
 
         XCTAssertFalse(subject.forCall(cid: "123"))
+    }
+
+    // MARK: - StreamCore compatibility
+
+    func test_generatedCoordinatorEvent_isStreamCoreEvent() {
+        let subject: any Event = HealthCheckEvent(
+            connectionId: UUID().uuidString,
+            createdAt: Date()
+        )
+
+        XCTAssertNil(subject.healthcheck())
+        XCTAssertNil(subject.error())
+    }
+
+    func test_wrappedCoordinatorHealthCheck_returnsCoreHealthCheckInfo() {
+        let connectionId = UUID().uuidString
+        let subject: any Event = WrappedEvent.coordinatorEvent(
+            .typeHealthCheckEvent(
+                .init(
+                    connectionId: connectionId,
+                    createdAt: Date()
+                )
+            )
+        )
+
+        XCTAssertEqual(
+            subject.healthcheck(),
+            HealthCheckInfo(connectionId: connectionId)
+        )
+    }
+
+    func test_wrappedCoordinatorError_returnsAPIError() {
+        let event = ConnectionErrorEvent(
+            connectionId: UUID().uuidString,
+            createdAt: Date(),
+            error: .init(
+                code: 1,
+                details: [],
+                duration: "",
+                message: "test",
+                moreInfo: "",
+                statusCode: 400
+            )
+        )
+        let subject: any Event = WrappedEvent.coordinatorEvent(
+            .typeConnectionErrorEvent(event)
+        )
+
+        guard let result = subject.error() else {
+            return XCTFail("Expected an API error.")
+        }
+        XCTAssertTrue((result as AnyObject) === event.error)
+    }
+
+    func test_sendableProtobufEvents_serializeThroughStreamCoreProtocol() throws {
+        var request = Stream_Video_Sfu_Event_SfuRequest()
+        request.healthCheckRequest =
+            Stream_Video_Sfu_Event_HealthCheckRequest()
+        let subjects: [any SendableEvent] = [
+            request,
+            Stream_Video_Sfu_Event_HealthCheckRequest()
+        ]
+
+        for subject in subjects {
+            XCTAssertNoThrow(try subject.serializedData(partial: false))
+        }
     }
 }

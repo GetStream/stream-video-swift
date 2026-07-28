@@ -85,7 +85,7 @@ final class ClientEventScenarioHarness: @unchecked Sendable {
     }
 
     func sendJoinResponse(_ response: Stream_Video_Sfu_Event_JoinResponse = .init()) {
-        stack.sfuStack.receiveEvent(.sfuEvent(.joinResponse(response)))
+        stack.sfuStack.receiveEvent(.joinResponse(response))
     }
 }
 

@@ -160,10 +160,8 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         )
         subject.context.migrationStatusObserver = migrationStatusObserver
         let cancellable = receiveEvent(
-            .sfuEvent(
-                .participantMigrationComplete(
-                    Stream_Video_Sfu_Event_ParticipantMigrationComplete()
-                )
+            .participantMigrationComplete(
+                Stream_Video_Sfu_Event_ParticipantMigrationComplete()
             ),
             every: 0.1
         )
@@ -196,14 +194,10 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
             default:
                 XCTFail()
             }
-            XCTAssertEqual(
-                target.context.disconnectionSource,
-                .serverInitiated(
-                    error: .NetworkError(
-                        "Not available"
-                    )
-                )
-            )
+            guard case let .serverInitiated(error)? = target.context.disconnectionSource else {
+                return XCTFail()
+            }
+            XCTAssertEqual(error?.localizedDescription, "Not available")
         }
     }
 
@@ -343,16 +337,21 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
             sfuAdapter: mockCoordinatorStack.sfuStack.adapter
         )
         subject.context.fastReconnectDeadlineSeconds = 12
-        var sfuError = Stream_Video_Sfu_Models_Error()
-        sfuError.shouldRetry = true
-        let clientError = ClientError(with: sfuError)
+        let sfuError = {
+            var result = Stream_Video_Sfu_Models_Error()
+            result.shouldRetry = true
+            return result
+        }()
+        let expectedSource: WebSocketConnectionState.DisconnectionSource = .serverInitiated(
+            error: .init(with: sfuError)
+        )
 
         await assertTransitionAfterTrigger(
             expectedTarget: .disconnected,
             trigger: { [mockCoordinatorStack] in
                 mockCoordinatorStack?.sfuStack.setConnectionState(
                     to: .disconnected(
-                        source: .serverInitiated(error: clientError)
+                        source: .serverInitiated(error: .init(with: sfuError))
                     )
                 )
             }
@@ -365,7 +364,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
             }
             XCTAssertEqual(
                 target.context.disconnectionSource,
-                .serverInitiated(error: clientError)
+                expectedSource
             )
         }
     }
@@ -375,16 +374,21 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
             sfuAdapter: mockCoordinatorStack.sfuStack.adapter
         )
         subject.context.fastReconnectDeadlineSeconds = 12
-        var sfuError = Stream_Video_Sfu_Models_Error()
-        sfuError.shouldRetry = false
-        let clientError = ClientError(with: sfuError)
+        let sfuError = {
+            var result = Stream_Video_Sfu_Models_Error()
+            result.shouldRetry = false
+            return result
+        }()
+        let expectedSource: WebSocketConnectionState.DisconnectionSource = .serverInitiated(
+            error: .init(with: sfuError)
+        )
 
         await assertTransitionAfterTrigger(
             expectedTarget: .disconnected,
             trigger: { [mockCoordinatorStack] in
                 mockCoordinatorStack?.sfuStack.setConnectionState(
                     to: .disconnected(
-                        source: .serverInitiated(error: clientError)
+                        source: .serverInitiated(error: .init(with: sfuError))
                     )
                 )
             }
@@ -392,7 +396,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
             XCTAssertEqual(target.context.reconnectionStrategy, .rejoin)
             XCTAssertEqual(
                 target.context.disconnectionSource,
-                .serverInitiated(error: clientError)
+                expectedSource
             )
         }
     }
@@ -409,7 +413,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
             trigger: { [mockCoordinatorStack] in
                 mockCoordinatorStack?
                     .sfuStack
-                    .receiveEvent(.sfuEvent(.callEnded(Stream_Video_Sfu_Event_CallEnded())))
+                    .receiveEvent(.callEnded(Stream_Video_Sfu_Event_CallEnded()))
             }
         ) { _ in }
     }
@@ -428,7 +432,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
                 error.reconnectStrategy = .migrate
                 mockCoordinatorStack?
                     .sfuStack
-                    .receiveEvent(.sfuEvent(.error(error)))
+                    .receiveEvent(.error(error))
             }
         ) { target in
             XCTAssertEqual(target.context.reconnectionStrategy, .migrate)
@@ -446,7 +450,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
                 error.reconnectStrategy = .rejoin
                 mockCoordinatorStack?
                     .sfuStack
-                    .receiveEvent(.sfuEvent(.error(error)))
+                    .receiveEvent(.error(error))
             }
         ) { target in
             XCTAssertEqual(target.context.reconnectionStrategy, .rejoin)
@@ -465,7 +469,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
                 error.reconnectStrategy = .fast
                 mockCoordinatorStack?
                     .sfuStack
-                    .receiveEvent(.sfuEvent(.error(error)))
+                    .receiveEvent(.error(error))
             }
         ) { target in
             switch target.context.reconnectionStrategy {
@@ -487,7 +491,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
             trigger: { [mockCoordinatorStack] in
                 mockCoordinatorStack?
                     .sfuStack
-                    .receiveEvent(.sfuEvent(.goAway(Stream_Video_Sfu_Event_GoAway())))
+                    .receiveEvent(.goAway(Stream_Video_Sfu_Event_GoAway()))
             }
         ) { target in
             XCTAssertEqual(target.context.reconnectionStrategy, .migrate)
@@ -508,7 +512,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
                 error.reconnectStrategy = .disconnect
                 mockCoordinatorStack?
                     .sfuStack
-                    .receiveEvent(.sfuEvent(.error(error)))
+                    .receiveEvent(.error(error))
             }
         ) { _ in }
     }
@@ -529,7 +533,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
                 error.error.code = .participantSignalLost
                 mockCoordinatorStack?
                     .sfuStack
-                    .receiveEvent(.sfuEvent(.error(error)))
+                    .receiveEvent(.error(error))
             }
         ) { stage in
             switch stage.context.reconnectionStrategy {
@@ -556,7 +560,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
                 error.reconnectStrategy = .migrate
                 mockCoordinatorStack?
                     .sfuStack
-                    .receiveEvent(.sfuEvent(.error(error)))
+                    .receiveEvent(.error(error))
             }
         ) { stage in
             XCTAssertEqual(stage.context.reconnectionStrategy, .migrate)
@@ -577,7 +581,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
                 error.reconnectStrategy = .migrate
                 mockCoordinatorStack?
                     .sfuStack
-                    .receiveEvent(.sfuEvent(.error(error)))
+                    .receiveEvent(.error(error))
             }
         ) { stage in
             XCTAssertEqual(stage.context.reconnectionStrategy, .migrate)
@@ -598,7 +602,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
                 error.reconnectStrategy = .migrate
                 mockCoordinatorStack?
                     .sfuStack
-                    .receiveEvent(.sfuEvent(.error(error)))
+                    .receiveEvent(.error(error))
             }
         ) { stage in
             XCTAssertEqual(stage.context.reconnectionStrategy, .migrate)
@@ -619,7 +623,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
                 error.reconnectStrategy = .rejoin
                 mockCoordinatorStack?
                     .sfuStack
-                    .receiveEvent(.sfuEvent(.error(error)))
+                    .receiveEvent(.error(error))
             }
         ) { stage in
             XCTAssertEqual(stage.context.reconnectionStrategy, .rejoin)
@@ -659,7 +663,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         subject.context.webSocketHealthTimeout = 5
 
         await assertResultAfterTrigger {
-            self.mockCoordinatorStack.sfuStack.receiveEvent(.sfuEvent(.healthCheckResponse(.init())))
+            self.mockCoordinatorStack.sfuStack.receiveEvent(.healthCheckResponse(.init()))
         } validationHandler: { expectation in
             guard
                 let currentLastHealthCheckReceivedAt = self.subject.context.lastHealthCheckReceivedAt,
@@ -738,7 +742,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
                 error.reconnectStrategy = .fast
                 mockCoordinatorStack?
                     .sfuStack
-                    .receiveEvent(.sfuEvent(.error(error)))
+                    .receiveEvent(.error(error))
             }
         ) { target in
             switch target.context.reconnectionStrategy {
@@ -762,7 +766,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
                 error.reconnectStrategy = .rejoin
                 mockCoordinatorStack?
                     .sfuStack
-                    .receiveEvent(.sfuEvent(.error(error)))
+                    .receiveEvent(.error(error))
             }
         ) { target in
             XCTAssertEqual(target.context.reconnectionStrategy, .rejoin)
@@ -1059,7 +1063,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
     }
 
     private func receiveEvent(
-        _ event: WrappedEvent,
+        _ event: Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload,
         every timeInterval: TimeInterval
     ) -> AnyCancellable {
         Foundation

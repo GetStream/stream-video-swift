@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import StreamCore
 
 extension WebRTCCoordinator.StateMachine.Stage {
 
@@ -221,7 +222,9 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .sink { [weak self] (source: WebSocketConnectionState.DisconnectionSource) in
                     guard let self else { return }
                     context.disconnectionSource = source
-                    if let sfuError = (source.serverError?.underlyingError as? Stream_Video_Sfu_Models_Error) {
+                    if let sfuError = source
+                        .serverError?
+                        .underlyingError as? Stream_Video_Sfu_Models_Error {
                         context.reconnectionStrategy = sfuError.shouldRetry
                             ? .fast(
                                 disconnectedSince: .init(),
@@ -509,9 +512,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         deadline: context.fastReconnectDeadlineSeconds
                     )
 
-                    /// Set the disconnection source as server-initiated due to a network error.
                     context.disconnectionSource = .serverInitiated(
-                        error: .NetworkError("Not available")
+                        error: ClientError.NetworkError("Not available")
                     )
 
                     log.warning(

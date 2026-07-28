@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import StreamCore
 import StreamWebRTC
 
 /// A collector responsible for gathering WebRTC call statistics.

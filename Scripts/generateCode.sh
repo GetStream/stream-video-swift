@@ -38,6 +38,22 @@ cp ${OPENAPI_GENERATED_CODE_ROOT}/tmp/OpenAPIClient/Classes/OpenAPIs/*.swift ${O
 cp ${OPENAPI_GENERATED_CODE_ROOT}/tmp/OpenAPIClient/Classes/OpenAPIs/APIs/DefaultAPI.swift ${OPENAPI_GENERATED_CODE_ROOT}/APIs/
 mv ${OPENAPI_GENERATED_CODE_ROOT}/tmp/OpenAPIClient/Classes/OpenAPIs/Models ${OPENAPI_GENERATED_CODE_ROOT}
 
+# Shared OpenAPI types are provided by StreamCore.
+rm -f \
+    "${OPENAPI_GENERATED_CODE_ROOT}/APIHelper.swift" \
+    "${OPENAPI_GENERATED_CODE_ROOT}/CodableHelper.swift" \
+    "${OPENAPI_GENERATED_CODE_ROOT}/Extensions.swift" \
+    "${OPENAPI_GENERATED_CODE_ROOT}/JSONDataEncoding.swift" \
+    "${OPENAPI_GENERATED_CODE_ROOT}/Models.swift" \
+    "${OPENAPI_GENERATED_CODE_ROOT}/OpenISO8601DateFormatter.swift" \
+    "${OPENAPI_GENERATED_CODE_ROOT}/Models/APIError.swift" \
+    "${OPENAPI_GENERATED_CODE_ROOT}/Models/ConnectUserDetailsRequest.swift" \
+    "${OPENAPI_GENERATED_CODE_ROOT}/Models/CreateDeviceRequest.swift" \
+    "${OPENAPI_GENERATED_CODE_ROOT}/Models/Device.swift" \
+    "${OPENAPI_GENERATED_CODE_ROOT}/Models/ListDevicesResponse.swift" \
+    "${OPENAPI_GENERATED_CODE_ROOT}/Models/ModelResponse.swift" \
+    "${OPENAPI_GENERATED_CODE_ROOT}/Models/WSAuthMessageRequest.swift"
+
 # delete the tmp path
 rm -rf "${OPENAPI_GENERATED_CODE_ROOT}/tmp"
 

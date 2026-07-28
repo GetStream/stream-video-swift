@@ -74,8 +74,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     log.debug("Refreshing webSocket", subsystems: .webRTC)
                     sfuAdapter.refresh(
                         webSocketConfiguration: .init(
-                            url: sfuAdapter.connectURL,
-                            eventNotificationCenter: .init()
+                            url: sfuAdapter.connectURL
                         )
                     )
 

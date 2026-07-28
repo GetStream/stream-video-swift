@@ -7,7 +7,7 @@ import XCTest
 
 final class InternetConnection_Tests: XCTestCase, @unchecked Sendable {
     private var monitor: InternetConnectionMonitor_Mock! = .init()
-    private lazy var subject: InternetConnection! = .init(monitor: monitor)
+    private lazy var subject: VideoInternetConnection! = .init(monitor: monitor)
 
     override func setUp() async throws {
         try await super.setUp()

@@ -160,6 +160,8 @@ extension WebRTCTrace {
                 return "network.state.online"
             case .unavailable, .unknown:
                 return "network.state.offline"
+            @unknown default:
+                return "network.state.offline"
             }
         }()
         self.init(

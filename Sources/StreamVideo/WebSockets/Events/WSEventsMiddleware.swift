@@ -3,13 +3,16 @@
 //
 
 import Foundation
+import StreamCore
 
 final class WSEventsMiddleware: EventMiddleware, @unchecked Sendable {
 
     private var subscribers = NSHashTable<AnyObject>.weakObjects()
     private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
 
-    func handle(event: WrappedEvent) -> WrappedEvent? {
+    func handle(event: Event) -> Event? {
+        guard let event = event as? WrappedEvent else { return event }
+
         processingQueue.addTaskOperation { [weak self] in
             guard let self else { return }
             let allObjects = subscribers.allObjects

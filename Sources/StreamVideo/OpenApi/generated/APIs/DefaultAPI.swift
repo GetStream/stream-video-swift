@@ -70,8 +70,8 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         basePath: String,
         transport: DefaultAPITransport,
         middlewares: [DefaultAPIClientMiddleware],
-        jsonDecoder: JSONDecoder = JSONDecoder.default,
-        jsonEncoder: JSONEncoder = JSONEncoder.default
+        jsonDecoder: JSONDecoder = JSONDecoder.streamCore,
+        jsonEncoder: JSONEncoder = JSONEncoder.streamCore
     ) {
         self.basePath = basePath
         self.transport = transport

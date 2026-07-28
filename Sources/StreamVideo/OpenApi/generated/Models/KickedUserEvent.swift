@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 
 public final class KickedUserEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
     public var callCid: String
