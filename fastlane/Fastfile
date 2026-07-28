@@ -10,7 +10,6 @@ import 'Allurefile'
 xcode_version = ENV['XCODE_VERSION'] || '26.2'
 xcode_project = 'StreamVideo.xcodeproj'
 sdk_names = ['StreamVideo', 'StreamVideoSwiftUI', 'StreamVideoUIKit']
-podspec_names = ['StreamVideo', 'StreamVideo-XCFramework', 'StreamVideoSwiftUI', 'StreamVideoSwiftUI-XCFramework', 'StreamVideoUIKit', 'StreamVideoUIKit-XCFramework']
 github_repo = ENV['GITHUB_REPOSITORY'] || 'GetStream/stream-video-swift'
 sinatra_port = 4567
 video_buddy_port = 5678
@@ -26,7 +25,7 @@ before_all do |lane|
   if is_ci
     setup_ci
     setup_git_config
-    select_xcode(version: xcode_version) unless [:sonar_upload, :allure_launch, :allure_upload, :pod_lint, :stop_e2e_helpers, :merge_main].include?(lane)
+    select_xcode(version: xcode_version) unless [:sonar_upload, :allure_launch, :allure_upload, :stop_e2e_helpers, :merge_main].include?(lane)
   elsif lane == :test_e2e
     stop_e2e_helpers
   end
@@ -57,12 +56,11 @@ lane :release do |options|
   end
 
   check_unsafe_flags
-  pod_lint
+
   release_ios_sdk(
     version: options[:version],
     bump_type: options[:type],
     sdk_names: sdk_names,
-    podspec_names: podspec_names,
     github_repo: github_repo,
     extra_changes: extra_changes,
     create_pull_request: true
@@ -83,23 +81,17 @@ lane :merge_main do
   sh('git push')
 end
 
-desc "Publish a new release to GitHub and CocoaPods"
+desc "Publish a new release to GitHub"
 lane :publish_release do |options|
   release_version = get_sdk_version_from_environment
   UI.user_error!("Release #{release_version} has already been published.") if git_tag_exists(tag: release_version, remote: true)
   UI.user_error!('Release version cannot be empty') if release_version.to_s.empty?
   ensure_git_branch(branch: 'main')
 
-  clean_products
-  build_xcframeworks
-  compress_frameworks
-  clean_products
-
   publish_ios_sdk(
     skip_git_status_check: false,
     version: release_version,
     sdk_names: sdk_names,
-    podspec_names: podspec_names,
     github_repo: github_repo,
     upload_assets: ['Products/StreamVideo.zip', 'Products/StreamVideoSwiftUI.zip', 'Products/StreamVideoUIKit.zip', 'Products/StreamVideo-All.zip']
   )
@@ -109,11 +101,6 @@ end
 
 lane :get_sdk_version_from_environment do
   File.read(swift_environment_path).match(/String\s+=\s+"([\d.]+).*"/)[1]
-end
-
-lane :pod_lint do
-  # We don't lint StreamVideoSwiftUI and StreamVideoUIKit podspecs since pod lints them against StreamVideo's remote version instead of local one
-  pod_lib_lint(podspec: 'StreamVideo.podspec', allow_warnings: true)
 end
 
 lane :match_me do |options|
@@ -349,61 +336,6 @@ lane :restart_video_buddy do
   start_video_buddy
 end
 
-lane :build_xcframeworks do
-  match_me
-  output_directory = File.absolute_path("#{Dir.pwd}/../Products")
-  team_id = File.read('Matchfile').match(/team_id\("(.*)"\)/)[1]
-  codesign = ["codesign --timestamp -v --sign 'Apple Distribution: Stream.io Inc (#{team_id})'"]
-  sdk_names.each do |sdk|
-    create_xcframework(
-      project: xcode_project,
-      scheme: sdk,
-      destinations: ['iOS'],
-      include_BCSymbolMaps: true,
-      include_debug_symbols: true,
-      xcframework_output_directory: output_directory,
-      remove_xcarchives: true,
-      enable_bitcode: false
-    )
-    sh('../Scripts/removeUnneededSymbols.sh', sdk, output_directory)
-    codesign << lane_context[SharedValues::XCFRAMEWORK_OUTPUT_PATH]
-  end
-
-  remove_swiftui_core_module_shadow(output_directory: output_directory)
-  remove_stream_video_module_shadow(output_directory: output_directory)
-  remove_concurrency_module_shadow(output_directory: output_directory)
-  sh(codesign.join(' ')) # We need to sign all frameworks at once
-end
-
-# https://linear.app/stream/issue/IOS-630
-private_lane :remove_swiftui_core_module_shadow do |options|
-  Dir.glob("#{options[:output_directory]}/**/*.swiftinterface").each do |file|
-    if File.file?(file)
-      UI.important("Removing the SwiftUICore module's shadow at: #{file}...")
-      File.write(file, File.read(file).gsub('SwiftUICore.', ''))
-    end
-  end
-end
-
-# Swift emits an invalid module interface when a public type has the same name as a module, see https://github.com/swiftlang/swift/issues/56573
-private_lane :remove_stream_video_module_shadow do |options|
-  Dir.glob("#{options[:output_directory]}/**/*.swiftinterface") do |file|
-    if File.file?(file)
-      UI.important("Removing the StreamVideo module's shadow at: #{file}...")
-      File.write(file, File.read(file).gsub('StreamVideo.', ''))
-    end
-  end
-end
-
-private_lane :remove_concurrency_module_shadow do |options|
-  Dir.glob("#{options[:output_directory]}/**/*.swiftinterface").each do |file|
-    if File.file?(file)
-      UI.important("Removing the @_Concurrency.MainActor module's shadow at: #{file}...")
-      File.write(file, File.read(file).gsub('@_Concurrency.MainActor @preconcurrency ', ''))
-    end
-  end
-end
-
 desc 'Runs e2e ui tests'
 lane :test_e2e do |options|
   next unless is_check_required(sources: sources_matrix[:e2e], force_check: @force_check)
@@ -519,97 +451,6 @@ private_lane :build_example_app do |options|
     cloned_source_packages_path: source_packages_path,
     build_for_testing: true
   )
-end
-
-desc 'Compresses the XCFrameworks into zip files'
-lane :compress_frameworks do
-  Dir.chdir('..') do
-    FileUtils.cp('LICENSE', 'Products/LICENSE')
-    Dir.chdir('Products') do
-      sdk_names.each do |framework|
-        sh("zip -r #{framework} ./#{framework}.xcframework ./LICENSE")
-        sh("swift package compute-checksum #{framework}.zip")
-      end
-      sh('zip -r "StreamVideo-All" ./*.xcframework ./LICENSE') if sdk_names.size > 1
-    end
-  end
-end
-
-desc 'Cleans Products and DerivedData folders'
-lane :clean_products do
-  Dir.chdir('..') do
-    ['*.xcframework', '*.bundle', '*.BCSymbolMaps', '*.dSYMs', 'LICENSE'].each do |f|
-      sh("rm -rf Products/#{f}")
-    end
-  end
-end
-
-desc 'Update XCFrameworks and submit to the SPM repository'
-private_lane :update_spm do |options|
-  version = options[:version] || ''
-  UI.user_error!('You need to pass the version of the release you want to obtain the changelog from') unless version.length > 0
-
-  # Generate Checksums
-  stream_video_checksum = sh('swift package compute-checksum ../Products/StreamVideo.zip').strip
-  stream_video_swiftui_checksum = sh('swift package compute-checksum ../Products/StreamVideoSwiftUI.zip').strip
-  stream_video_uikit_checksum = sh('swift package compute-checksum ../Products/StreamVideoUIKit.zip').strip
-
-  # Update SPM Repo
-  spm_directory_name = 'StreamSPM'
-  spm_directory = "../../#{spm_directory_name}"
-  sh("git clone git@github.com:#{github_repo}-spm.git #{spm_directory}")
-
-  Dir.chdir(spm_directory) do
-    result = sh('basename `git rev-parse --show-toplevel`').strip
-    UI.error("Not using #{spm_directory_name} repo") unless result.to_s == spm_directory_name
-
-    file_lines = File.readlines('Package.swift')
-    file_data = ''
-    previous_module = ''
-
-    file_lines.each do |line|
-      formatted_line =
-        case previous_module
-        when 'StreamVideo'
-          line.gsub(/(checksum: ")[a-z0-9]+(")/, "\\1#{stream_video_checksum}\\2")
-        when 'StreamVideoSwiftUI'
-          line.gsub(/(checksum: ")[a-z0-9]+(")/, "\\1#{stream_video_swiftui_checksum}\\2")
-        when 'StreamVideoUIKit'
-          line.gsub(/(checksum: ")[a-z0-9]+(")/, "\\1#{stream_video_uikit_checksum}\\2")
-        else
-          line
-        end
-
-      url_pattern = %r{(releases/download/)[.0-9]+(/)}
-      if line.match(url_pattern)
-        formatted_line = line.gsub(url_pattern, "\\1#{version}\\2")
-        previous_module = line.match(/([a-zA-Z]+).zip/).to_s.gsub(/.zip/, '')
-      end
-
-      file_data << formatted_line
-    end
-
-    # Write the new changes
-    File.open('./Package.swift', 'w') { |file| file << file_data }
-
-    # Update the repo
-    sh('git add -A')
-    sh("git commit -m 'Bump #{version}'")
-    sh('git push')
-
-    github_release = set_github_release(
-      repository_name: "#{github_repo}-spm",
-      api_token: ENV.fetch('GITHUB_TOKEN', nil),
-      name: version,
-      tag_name: version,
-      commitish: 'main',
-      description: "https://github.com/#{github_repo}/releases/tag/#{version}"
-    )
-    UI.success("New SPM release available: #{github_release['html_url']}")
-  end
-
-  # Clean Up
-  sh("rm -rf #{spm_directory}")
 end
 
 lane :code_generation do
@@ -811,13 +652,13 @@ private_lane :frameworks_sizes do
   }
 end
 
-desc "Updates WebRTC dependency locally. Usage: `bundle exec fastlane update_stream_chat version:125.6422.070 skip_pr:true`"
+desc "Updates WebRTC dependency locally. Usage: `bundle exec fastlane update_webrtc version:125.6422.070 skip_pr:true`"
 lane :update_webrtc do |options|
   raise UI.user_error!('Provide a version.') unless options[:version]
 
   Dir.chdir('..') do
     current_webrtc_version = File.read('Package.swift')[/stream-video-swift-webrtc\.git", exact: "([\d.]+)"\)/, 1]
-    ['StreamVideo.xcodeproj/project.pbxproj', 'Package.swift', 'StreamVideo-XCFramework.podspec', 'StreamVideo.podspec', swift_environment_path].each do |file|
+    ['StreamVideo.xcodeproj/project.pbxproj', 'Package.swift', swift_environment_path].each do |file|
       if file == 'StreamVideo.xcodeproj/project.pbxproj'
         content = File.read(file)
         parts = current_webrtc_version.split('.')

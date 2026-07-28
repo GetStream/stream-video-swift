@@ -204,12 +204,6 @@ jobs:
     - name: Build UIKit
       run: bundle exec fastlane test_uikit device:"iPhone 15" build_for_testing:true
       timeout-minutes: 25
-    - name: Build XCFrameworks
-      run: bundle exec fastlane build_xcframeworks
-      timeout-minutes: 40
-      env:
-        MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
-        APPSTORE_API_KEY: ${{ secrets.APPSTORE_API_KEY }}
 
   automated-code-review:
     name: Automated Code Review
@@ -221,7 +215,6 @@ jobs:
     - uses: ./.github/actions/bootstrap
     - run: bundle exec fastlane rubocop
     - run: bundle exec fastlane run_swift_format strict:true
-    - run: bundle exec fastlane pod_lint
 
   slack:
     name: Slack Report

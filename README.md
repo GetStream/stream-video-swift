@@ -1,7 +1,6 @@
 # StreamVideo iOS
 
 <p align="center">
-  <a href="https://cocoapods.org/pods/StreamVideo"><img src="https://img.shields.io/badge/CocoaPods-compatible-green" /></a>
   <a href="https://www.swift.org/package-manager/"><img src="https://img.shields.io/badge/SPM-compatible-green" /></a>
 </p>
 <p align="center">
@@ -164,7 +163,7 @@ At the moment, all the customizations in the UIKit SDK, need to be done in Swift
 
 ## Chat SDK
 
-We also offer [Chat SDK](https://github.com/GetStream/stream-chat-swift) that seamlessly integrates with our Video SDK. To find out more about this product, please check our [docs](https://getstream.io/chat/docs/ios/). 
+We also offer [Chat SDK](https://github.com/GetStream/stream-chat-swift) that seamlessly integrates with our Video SDK. To find out more about this product, please check our [docs](https://getstream.io/chat/docs/ios/).
 
 ## Roadmap
 
