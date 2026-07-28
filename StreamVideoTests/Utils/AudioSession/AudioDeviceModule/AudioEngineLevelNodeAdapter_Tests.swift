@@ -52,6 +52,18 @@ final class AudioEngineLevelNodeAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(mixer.installTapCount, 1)
     }
 
+    func test_installInputTap_whenFormatIsInvalid_skipsInstallAndAllowsLaterValidInstall() {
+        let mixer = TestMixerNode()
+        let invalidFormat = makeInvalidAudioFormat()
+        let validFormat = makeAudioFormat()
+
+        sut.installInputTap(on: mixer, format: invalidFormat)
+        sut.installInputTap(on: mixer, format: validFormat)
+
+        XCTAssertEqual(mixer.installTapCount, 1)
+        XCTAssertTrue(mixer.capturedFormat === validFormat)
+    }
+
     func test_installInputTap_whenTapReceivesSamples_publishesDecibelValue() {
         let mixer = TestMixerNode()
         let format = makeAudioFormat()
@@ -101,9 +113,18 @@ final class AudioEngineLevelNodeAdapter_Tests: XCTestCase, @unchecked Sendable {
     private func makeAudioFormat() -> AVAudioFormat {
         AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: 48000, channels: 1, interleaved: false)!
     }
+
+    private func makeInvalidAudioFormat() -> AVAudioFormat {
+        AVAudioFormat(
+            commonFormat: .pcmFormatFloat32,
+            sampleRate: 0,
+            channels: 0,
+            interleaved: false
+        )!
+    }
 }
 
-private final class TestMixerNode: AVAudioMixerNode {
+private final class TestMixerNode: AVAudioMixerNode, @unchecked Sendable {
 
     private(set) var installTapCount = 0
     private(set) var removeTapCount = 0

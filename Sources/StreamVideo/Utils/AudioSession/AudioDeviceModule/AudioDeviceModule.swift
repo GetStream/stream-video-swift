@@ -557,6 +557,16 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         format: AVAudioFormat,
         context: [AnyHashable: Any]
     ) -> Int {
+        guard format.sampleRate > 0, format.channelCount > 0 else {
+            log.warning(
+                "Skipping input graph configuration because the format is invalid: \(format).",
+                subsystems: .audioRecording
+            )
+            engineInputContext = nil
+            audioLevelsAdapter.uninstall(on: 0)
+            return Constant.successResult
+        }
+
         engineInputContext = .init(
             engine: engine,
             source: source,

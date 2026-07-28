@@ -542,7 +542,7 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
     // MARK: - consume
 
     func test_subscriberOfferAndSubscriberICETrickle_bufferedOnSharedPublisher_replayedAcrossSeparateConsumes() async throws {
-        _ = subject
+        let subject = try XCTUnwrap(subject)
 
         let bucket = ConsumableBucket(
             subject.publisher.eraseToAnyPublisher()

@@ -8,9 +8,13 @@ import StreamWebRTC
 
 extension VideoConfig {
     static func dummy(
-        audioProcessingModule: AudioProcessingModule = MockAudioProcessingModule.shared
+        audioProcessingModule: AudioProcessingModule = MockAudioProcessingModule.shared,
+        useLiveCommunicationKit: Bool = true
     ) -> VideoConfig {
-        .init(audioProcessingModule: audioProcessingModule)
+        .init(
+            audioProcessingModule: audioProcessingModule,
+            useLiveCommunicationKit: useLiveCommunicationKit
+        )
     }
 }
 

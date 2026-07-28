@@ -131,80 +131,6 @@ private struct CallEndedViewModifier<Subview: View>: ViewModifier {
     }
 }
 
-@available(iOS, introduced: 13, obsoleted: 14)
-private struct CallEndedViewModifier_iOS13<Subview: View>: ViewModifier {
-
-    private var presentationValidator: (Call?) -> Bool
-    private var subviewProvider: (Call?, @escaping () -> Void) -> Subview
-
-    @BackportStateObject private var viewModel: CallEndedViewModifierViewModel
-
-    init(
-        presentationValidator: @escaping (Call?) -> Bool,
-        @ViewBuilder subviewProvider: @escaping (Call?, @escaping () -> Void) -> Subview
-    ) {
-        self.presentationValidator = presentationValidator
-        self.subviewProvider = subviewProvider
-        _viewModel = .init(wrappedValue: .init())
-    }
-
-    func body(content: Content) -> some View {
-        content
-            .sheet(isPresented: $viewModel.isPresentingSubview) {
-                subviewProvider(viewModel.lastCall) {
-                    viewModel.lastCall = nil
-                    viewModel.isPresentingSubview = false
-                }
-            }
-            .onReceive(viewModel.$activeCall) { call in
-                log
-                    .debug(
-                        "CallEnded view modifier received newValue:\(call?.cId ?? "nil") oldValue:\(viewModel.lastCall?.cId ?? "nil") isPresentingSubview:\(viewModel.isPresentingSubview) maxParticipantsCount:\(viewModel.maxParticipantsCount)."
-                    )
-
-                switch (call, viewModel.lastCall, viewModel.isPresentingSubview) {
-                case (nil, let activeCall, false)
-                    where activeCall != nil && viewModel
-                    .maxParticipantsCount > 1 && presentationValidator(viewModel.lastCall):
-                    /// The following presentation criteria are required:
-                    /// - The activeCall was ended.
-                    /// - Participants, during call's duration, grew to more than one.
-                    viewModel.isPresentingSubview = true
-
-                case let (newActiveCall, activeCall, _) where newActiveCall != nil && activeCall != nil:
-                    /// The activeCall was replaced with another call. We should not present the
-                    /// subview. We will also hide any modals if any is visible.
-                    viewModel.lastCall = newActiveCall
-                    viewModel.isPresentingSubview = false
-                    viewModel.maxParticipantsCount = 0
-
-                case (let newActiveCall, nil, _) where newActiveCall != nil:
-                    /// The activeCall was replaced with another call. We should not present the
-                    /// subview. We will also hide any modals if any is visible.
-                    viewModel.lastCall = newActiveCall
-                    viewModel.isPresentingSubview = false
-                    viewModel.maxParticipantsCount = 0
-
-                default:
-                    /// For every other case we won't perform any action.
-                    break
-                }
-            }
-            .onReceive(viewModel.activeCall?.state.$participants) {
-                /// Every time participants update, we store the maximum number of participants in
-                /// the call (during call's duration).
-                let newMaxParticipantsCount = max(viewModel.maxParticipantsCount, $0.count)
-                if newMaxParticipantsCount != viewModel.maxParticipantsCount {
-                    log
-                        .debug(
-                            "CallEnded view modifier updated maxParticipantsCount:\(viewModel.maxParticipantsCount) → \(newMaxParticipantsCount)"
-                        )
-                    viewModel.maxParticipantsCount = newMaxParticipantsCount
-                }
-            }
-    }
-}
-
 extension View {
 
     /// A viewModifier that observes callState from StreamVideo. Once the following criteria are being
@@ -224,20 +150,11 @@ extension View {
         presentationValidator: @escaping (Call?) -> Bool = { _ in true },
         @ViewBuilder _ content: @escaping (Call?, @escaping () -> Void) -> some View
     ) -> some View {
-        if #available(iOS 14.0, *) {
-            modifier(
-                CallEndedViewModifier(
-                    presentationValidator: presentationValidator,
-                    subviewProvider: content
-                )
+        modifier(
+            CallEndedViewModifier(
+                presentationValidator: presentationValidator,
+                subviewProvider: content
             )
-        } else {
-            modifier(
-                CallEndedViewModifier_iOS13(
-                    presentationValidator: presentationValidator,
-                    subviewProvider: content
-                )
-            )
-        }
+        )
     }
 }
