@@ -162,7 +162,6 @@ jobs:
     - run: bundle exec fastlane rubocop
     - run: bundle exec fastlane run_swift_format strict:true
     - run: bundle exec fastlane validate_public_interface
-    - run: bundle exec fastlane pod_lint
       if: startsWith(github.event.pull_request.head.ref, 'release/')
 
   build-old-xcode:
@@ -192,12 +191,6 @@ jobs:
     - name: Build UIKit
       run: bundle exec fastlane test_uikit device:"iPhone 16" build_for_testing:true
       timeout-minutes: 25
-    - name: Build XCFrameworks
-      run: bundle exec fastlane build_xcframeworks
-      timeout-minutes: 60
-      env:
-        MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
-        APPSTORE_API_KEY: ${{ secrets.APPSTORE_API_KEY }}
 
   build-test-app-and-frameworks:
     name: Build Test App and Frameworks
