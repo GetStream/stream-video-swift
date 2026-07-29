@@ -4,11 +4,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
-### 🔄 Changed
-
 ### 🐞 Fixed
 - Fixed camera flips reverting to the front camera during active calls. [#1206](https://github.com/GetStream/stream-video-swift/pull/1206)
 - Hanging up an outgoing call right after starting it now reliably stops the callee from ringing. [#1207](https://github.com/GetStream/stream-video-swift/pull/1207)
+
+### 🔄 Changed
+- Drop CocoaPods and XCFrameworks support. [#1210](https://github.com/GetStream/stream-video-swift/pull/1210), [#1213](https://github.com/GetStream/stream-video-swift/pull/1213)
 
 # [1.49.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.49.0)
 _July 08, 2026_

@@ -38,13 +38,7 @@ end
 
 desc "Release a new version"
 lane :release do |options|
-  artifacts_path = File.absolute_path('../StreamVideoArtifacts.json')
   extra_changes = lambda do |release_version|
-    # Set the framework version on the artifacts
-    artifacts = JSON.parse(File.read(artifacts_path))
-    artifacts[release_version.to_s] = "https://github.com/#{github_repo}/releases/download/#{release_version}/StreamVideo-All.zip"
-    File.write(artifacts_path, JSON.dump(artifacts))
-
     # Set the framework version in SystemEnvironment+Version.swift
     old_content = File.read(swift_environment_path)
     current_version = old_content[/version: String = "([^"]+)"/, 1]
@@ -92,8 +86,7 @@ lane :publish_release do |options|
     skip_git_status_check: false,
     version: release_version,
     sdk_names: sdk_names,
-    github_repo: github_repo,
-    upload_assets: ['Products/StreamVideo.zip', 'Products/StreamVideoSwiftUI.zip', 'Products/StreamVideoUIKit.zip', 'Products/StreamVideo-All.zip']
+    github_repo: github_repo
   )
 
   update_spm(version: release_version)
