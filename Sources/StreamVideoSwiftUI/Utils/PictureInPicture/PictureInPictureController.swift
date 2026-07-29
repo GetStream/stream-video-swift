@@ -25,6 +25,9 @@ final class PictureInPictureController: @unchecked Sendable {
     // MARK: - Properties
 
     private let store: PictureInPictureStore
+    private let makePictureInPictureController: @MainActor (
+        AVPictureInPictureController.ContentSource
+    ) -> AVPictureInPictureController
 
     private let proxyDelegate: PictureInPictureDelegateProxy = .init()
 
@@ -53,22 +56,43 @@ final class PictureInPictureController: @unchecked Sendable {
     /// Creates a new Picture-in-Picture controller.
     ///
     /// - Parameter store: The store managing Picture-in-Picture state
+    /// - Parameter isPictureInPictureSupported: Whether the device supports
+    ///   Picture-in-Picture.
+    /// - Parameter makePictureInPictureController: Creates the system
+    ///   Picture-in-Picture controller.
     /// - Returns: `nil` if Picture-in-Picture is not supported on the device
     @MainActor
     init?(
-        store: PictureInPictureStore
+        store: PictureInPictureStore,
+        isPictureInPictureSupported: Bool = AVPictureInPictureController
+            .isPictureInPictureSupported(),
+        makePictureInPictureController: @escaping @MainActor (
+            AVPictureInPictureController.ContentSource
+        ) -> AVPictureInPictureController = {
+            AVPictureInPictureController(contentSource: $0)
+        }
     ) {
-        guard AVPictureInPictureController.isPictureInPictureSupported() else {
+        guard isPictureInPictureSupported else {
+            log.warning(
+                "Picture-in-Picture isn't supported on this device.",
+                subsystems: .pictureInPicture
+            )
             return nil
         }
 
         self.store = store
+        self.makePictureInPictureController = makePictureInPictureController
 
-        store
-            .publisher(for: \.sourceView)
-            .removeDuplicates()
-            .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in self?.didUpdate($0) }
-            .store(in: disposableBag)
+        Publishers.CombineLatest(
+            store
+                .publisher(for: \.call)
+                .removeDuplicates { $0?.cId == $1?.cId },
+            store.publisher(for: \.sourceView).removeDuplicates()
+        )
+        .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in
+            self?.didUpdate(call: $0, sourceView: $1)
+        }
+        .store(in: disposableBag)
 
         proxyDelegate
             .publisher
@@ -85,10 +109,11 @@ final class PictureInPictureController: @unchecked Sendable {
             .store(in: disposableBag)
     }
 
-    /// Updates the Picture-in-Picture controller when the source view changes.
+    /// Updates the Picture-in-Picture controller when the call or source view
+    /// changes.
     @MainActor
-    private func didUpdate(_ sourceView: UIView?) {
-        guard let sourceView, store.state.call != nil else {
+    private func didUpdate(call: Call?, sourceView: UIView?) {
+        guard call != nil, let sourceView else {
             /// We ensure to cleanUp every Picture-in-Picture interacting component so that the next
             /// Call will start with clean state.
             pictureInPictureController?.stopPictureInPicture()
@@ -121,9 +146,7 @@ final class PictureInPictureController: @unchecked Sendable {
         )
 
         if pictureInPictureController == nil {
-            pictureInPictureController = .init(
-                contentSource: contentSource
-            )
+            pictureInPictureController = makePictureInPictureController(contentSource)
             pictureInPictureController?.canStartPictureInPictureAutomaticallyFromInline = store
                 .state
                 .canStartPictureInPictureAutomaticallyFromInline
@@ -145,7 +168,7 @@ final class PictureInPictureController: @unchecked Sendable {
             store: store
         )
 
-        didUpdate(store.state.sourceView)
+        didUpdate(call: store.state.call, sourceView: store.state.sourceView)
     }
 
     /// Handles updates to the Picture-in-Picture controller state.
