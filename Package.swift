@@ -24,7 +24,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/apple/swift-protobuf.git", exact: "1.30.0"),
         .package(url: "https://github.com/GetStream/stream-video-swift-webrtc.git", exact: "145.12.0"),
-        .package(url: "https://github.com/GetStream/stream-core-swift.git", branch: "develop")
+        .package(url: "https://github.com/GetStream/stream-core-swift.git", from: "0.10.1")
     ],
     targets: [
         .target(
