@@ -25,7 +25,7 @@ before_all do |lane|
   if is_ci
     setup_ci
     setup_git_config
-    select_xcode(version: xcode_version) unless [:sonar_upload, :allure_launch, :allure_upload, :stop_e2e_helpers, :merge_main].include?(lane)
+    select_xcode(version: xcode_version) unless [:sonar_upload, :allure_launch, :allure_upload, :stop_e2e_helpers, :merge_main, :pr].include?(lane)
   elsif lane == :test_e2e
     stop_e2e_helpers
   end
@@ -702,4 +702,8 @@ lane :size_analyze do
   )
 
   show_detailed_sdk_size(sdk_names: sdk_names, threshold: 42)
+end
+
+lane :pr do
+  next_pr_number(github_repo: github_repo)
 end

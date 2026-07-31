@@ -4,7 +4,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
-### 🔄 Changed
+### 🐞 Fixed
+- Fixed the SPM resolution failure in 1.50.0 for version-pinned integrations, by pinning StreamCore to a released version instead of a branch. [#1215](https://github.com/GetStream/stream-video-swift/pull/1215)
 
 # [1.50.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.50.0)
 _July 29, 2026_
