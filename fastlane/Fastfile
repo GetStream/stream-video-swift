@@ -88,8 +88,6 @@ lane :publish_release do |options|
     sdk_names: sdk_names,
     github_repo: github_repo
   )
-
-  update_spm(version: release_version)
 end
 
 lane :get_sdk_version_from_environment do
