@@ -294,6 +294,20 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         }
     }
 
+    /// Allows the audio engine to run only when its owner is ready.
+    func setEngineAvailability(_ isAvailable: Bool) throws {
+        try engineQueue.sync {
+            try throwingExecution("Unable to setEngineAvailability:\(isAvailable)") {
+                source.setEngineAvailability(
+                    .init(
+                        isInputAvailable: isAvailable,
+                        isOutputAvailable: isAvailable
+                    )
+                )
+            }
+        }
+    }
+
     /// Starts or stops speaker playout on the ADM, retrying transient failures.
     /// - Parameter isActive: `true` to start playout, `false` to stop.
     /// - Throws: `ClientError` when WebRTC returns a non-zero status.

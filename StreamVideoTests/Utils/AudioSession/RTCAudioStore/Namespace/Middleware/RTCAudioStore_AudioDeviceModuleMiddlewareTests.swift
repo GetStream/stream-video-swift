@@ -352,6 +352,46 @@ final class RTCAudioStore_AudioDeviceModuleMiddlewareTests: XCTestCase, @uncheck
         XCTAssertEqual(mock.timesCalled(.stopPlayout), 1)
     }
 
+    // MARK: - CallKit
+
+    func test_callKit_whenActivated_makesAudioEngineAvailable() {
+        let (module, mock) = makeModule(isRecording: false)
+
+        subject.apply(
+            state: makeState(audioDeviceModule: module),
+            action: .callKit(.activate(.sharedInstance())),
+            file: #file,
+            function: #function,
+            line: #line
+        )
+
+        let availability = mock.recordedInputPayload(
+            (Bool, Bool).self,
+            for: .setEngineAvailability
+        )?.last
+        XCTAssertEqual(availability?.0, true)
+        XCTAssertEqual(availability?.1, true)
+    }
+
+    func test_callKit_whenDeactivated_makesAudioEngineUnavailable() {
+        let (module, mock) = makeModule(isRecording: false)
+
+        subject.apply(
+            state: makeState(audioDeviceModule: module),
+            action: .callKit(.deactivate(.sharedInstance())),
+            file: #file,
+            function: #function,
+            line: #line
+        )
+
+        let availability = mock.recordedInputPayload(
+            (Bool, Bool).self,
+            for: .setEngineAvailability
+        )?.last
+        XCTAssertEqual(availability?.0, false)
+        XCTAssertEqual(availability?.1, false)
+    }
+
     // MARK: - Helpers
 
     private func makeModule(
