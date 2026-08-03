@@ -210,6 +210,32 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(update.remoteHandle?.value, callerId)
     }
 
+    func test_reportIncomingCall_callProviderCompletes_pushNotificationCompletionHandlerWasCalledAndCleared() throws {
+        let completionCallCount = Atomic(wrappedValue: 0)
+        callProvider.automaticallyCompletesReportNewIncomingCall = false
+        subject.pushNotificationCompletionHandler = {
+            completionCallCount.mutate { $0 + 1 }
+        }
+
+        subject.reportIncomingCall(
+            cid,
+            localizedCallerName: localizedCallerName,
+            callerId: callerId,
+            hasVideo: false
+        ) { _ in }
+
+        XCTAssertEqual(completionCallCount.wrappedValue, 0)
+        XCTAssertNotNil(subject.pushNotificationCompletionHandler)
+
+        guard case let .reportNewIncomingCall(_, _, completion) = callProvider.invocations.first else {
+            return XCTFail()
+        }
+        completion(nil)
+
+        XCTAssertEqual(completionCallCount.wrappedValue, 1)
+        XCTAssertNil(subject.pushNotificationCompletionHandler)
+    }
+
     func test_reportIncomingCall_streamVideoIsNil_noCallWasCreatedAndNoActionIsBeingPerformed() async throws {
         try await assertWithoutRequestTransaction {
             subject.reportIncomingCall(

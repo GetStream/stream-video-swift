@@ -123,6 +123,17 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     /// runs in the background. See `CallKitMissingPermissionPolicy`.
     open var missingPermissionPolicy: CallKitMissingPermissionPolicy = .none
 
+    /// The completion for the VoIP push currently being reported to CallKit.
+    ///
+    /// ``CallKitPushNotificationAdapter`` sets this before reporting an
+    /// incoming call. PushKit requires the call to be reported to CallKit
+    /// before its completion runs, so ``CallKitService`` keeps the completion
+    /// pending until `CXProvider` finishes `reportNewIncomingCall`.
+    ///
+    /// The completion is atomically consumed and cleared before invocation to
+    /// prevent a later incoming call from invoking a stale PushKit callback.
+    @Atomic var pushNotificationCompletionHandler: (() -> Void)?
+
     /// The policy that decides whether CallKit-managed calls
     /// should leave automatically when participant state changes.
     ///
@@ -211,7 +222,12 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         }
     }
 
-    /// Report an incoming call to CallKit.
+    /// Reports an incoming call to CallKit.
+    ///
+    /// When the report originated from ``CallKitPushNotificationAdapter``, the
+    /// provider completion also completes the pending PushKit notification.
+    /// This ordering ensures the system observes the incoming call report
+    /// before the PushKit delegate finishes handling the VoIP push.
     open func reportIncomingCall(
         _ cid: String,
         localizedCallerName: String,
@@ -229,7 +245,18 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         callProvider.reportNewIncomingCall(
             with: callUUID,
             update: callUpdate,
-            completion: completion
+            completion: { [self] error in
+                completion(error)
+
+                var pushNotificationCompletionHandler: (() -> Void)?
+                // Take and clear the handler in one operation so it is called
+                // at most once even if provider completion is repeated.
+                _pushNotificationCompletionHandler.mutate {
+                    pushNotificationCompletionHandler = $0
+                    return nil
+                }
+                pushNotificationCompletionHandler?()
+            }
         )
 
         log.debug(

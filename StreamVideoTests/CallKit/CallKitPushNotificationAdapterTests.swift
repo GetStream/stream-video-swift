@@ -156,20 +156,30 @@ final class CallKitPushNotificationAdapterTests: XCTestCase, @unchecked Sendable
         pushPayload.stubDictionaryPayload = payload
 
         let completionWasCalledExpectation = expectation(description: "Completion was called.")
+        let completionCallCount = Atomic(wrappedValue: 0)
         subject.pushRegistry(
             subject.registry,
             didReceiveIncomingPushWith: pushPayload,
             for: pushPayload.type,
-            completion: { completionWasCalledExpectation.fulfill() }
+            completion: {
+                completionCallCount.mutate { $0 + 1 }
+                completionWasCalledExpectation.fulfill()
+            }
         )
 
-        await fulfillment(of: [completionWasCalledExpectation])
-
         guard contentType == .voIP else {
+            await fulfillment(of: [completionWasCalledExpectation])
+            XCTAssertEqual(completionCallCount.wrappedValue, 1, file: file, line: line)
             return
         }
 
         await fulfillment { self.callKitService.reportIncomingCallWasCalled != nil }
+        XCTAssertEqual(completionCallCount.wrappedValue, 0, file: file, line: line)
+
+        let pushNotificationCompletionHandler = callKitService.pushNotificationCompletionHandler
+        callKitService.pushNotificationCompletionHandler = nil
+        pushNotificationCompletionHandler?()
+        await fulfillment(of: [completionWasCalledExpectation])
 
         if let content {
             XCTAssertEqual(

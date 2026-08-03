@@ -12,6 +12,7 @@ final class MockCXProvider: CXProvider {
     }
 
     private(set) var invocations: [Invocation] = []
+    var automaticallyCompletesReportNewIncomingCall = true
 
     convenience init() {
         self.init(configuration: .init(localizedName: "test"))
@@ -29,7 +30,9 @@ final class MockCXProvider: CXProvider {
                 completion: completion
             )
         )
-        completion(nil)
+        if automaticallyCompletesReportNewIncomingCall {
+            completion(nil)
+        }
     }
 
     override func reportCall(
@@ -48,5 +51,6 @@ final class MockCXProvider: CXProvider {
 
     func reset() {
         invocations = []
+        automaticallyCompletesReportNewIncomingCall = true
     }
 }
