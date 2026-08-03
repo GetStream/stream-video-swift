@@ -4,6 +4,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### 🐞 Fixed
+- Prevent CallKit-driven joins from disconnecting and rejoining while waiting for audio-session activation. [#1218](https://github.com/GetStream/stream-video-swift/pull/1218)
+
 ### 🔄 Changed
 
 # [1.50.1](https://github.com/GetStream/stream-video-swift/releases/tag/1.50.1)
