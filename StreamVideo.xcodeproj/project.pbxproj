@@ -423,6 +423,7 @@
 				Utils/ParticipantEventResetAdapter/ParticipantEventResetAdapter_Tests.swift,
 				Utils/PictureInPicture/MockAVPictureInPictureController.swift,
 				Utils/PictureInPicture/PictureInPictureContentProviderTests.swift,
+				Utils/PictureInPicture/PictureInPictureController_Tests.swift,
 				Utils/PictureInPicture/PictureInPictureContentViewTests.swift,
 				Utils/PictureInPicture/PictureInPictureEnforcedStopAdapterTests.swift,
 				Utils/PictureInPicture/PictureInPictureParticipantModifierTests.swift,
