@@ -97,6 +97,9 @@ jobs:
     runs-on: macos-15
     needs: guard
     if: ${{ github.event.inputs.record_snapshots_uikit != 'true' || github.event.inputs.record_snapshots_swiftui == 'true' }}
+    permissions:
+      contents: write # to push the snapshots branch
+      pull-requests: write
     env:
       GITHUB_TOKEN: ${{ secrets.CI_BOT_GITHUB_TOKEN }} # to open a PR
     steps:
@@ -124,6 +127,9 @@ jobs:
     runs-on: macos-15
     needs: guard
     if: ${{ github.event.inputs.record_snapshots_swiftui != 'true' || github.event.inputs.record_snapshots_uikit == 'true' }}
+    permissions:
+      contents: write # to push the snapshots branch
+      pull-requests: write
     env:
       GITHUB_TOKEN: ${{ secrets.CI_BOT_GITHUB_TOKEN }} # to open a PR
     steps:
