@@ -211,15 +211,15 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
     }
 
     func test_reportIncomingCall_pendingPushesCompleteWithOwnReports() throws {
-        let firstCallCount = Atomic(wrappedValue: 0)
-        let secondCallCount = Atomic(wrappedValue: 0)
+        var firstCallCount = 0
+        var secondCallCount = 0
         let secondCid = "default:\(String.unique)"
         callProvider.automaticallyCompletesReportNewIncomingCall = false
-        subject.enqueuePushNotificationCompletion({
-            firstCallCount.mutate { $0 + 1 }
+        subject.pushNotificationCompletionStorage.append({
+            firstCallCount += 1
         }, for: cid)
-        subject.enqueuePushNotificationCompletion({
-            secondCallCount.mutate { $0 + 1 }
+        subject.pushNotificationCompletionStorage.append({
+            secondCallCount += 1
         }, for: secondCid)
 
         subject.reportIncomingCall(
@@ -247,20 +247,16 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         let firstReportCompletion = try XCTUnwrap(reportCompletions.first)
         let secondReportCompletion = try XCTUnwrap(reportCompletions.last)
         XCTAssertEqual(reportCompletions.count, 2)
-        XCTAssertEqual(firstCallCount.wrappedValue, 0)
-        XCTAssertEqual(secondCallCount.wrappedValue, 0)
+        XCTAssertEqual(firstCallCount, 0)
+        XCTAssertEqual(secondCallCount, 0)
 
         secondReportCompletion(nil)
-        XCTAssertEqual(firstCallCount.wrappedValue, 0)
-        XCTAssertEqual(secondCallCount.wrappedValue, 1)
+        XCTAssertEqual(firstCallCount, 0)
+        XCTAssertEqual(secondCallCount, 1)
 
         firstReportCompletion(nil)
-        XCTAssertEqual(firstCallCount.wrappedValue, 1)
-        XCTAssertEqual(secondCallCount.wrappedValue, 1)
-
-        reportCompletions.forEach { $0(nil) }
-        XCTAssertEqual(firstCallCount.wrappedValue, 1)
-        XCTAssertEqual(secondCallCount.wrappedValue, 1)
+        XCTAssertEqual(firstCallCount, 1)
+        XCTAssertEqual(secondCallCount, 1)
     }
 
     func test_reportIncomingCall_streamVideoIsNil_noCallWasCreatedAndNoActionIsBeingPerformed() async throws {

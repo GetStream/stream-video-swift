@@ -17,6 +17,52 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         var isMuted: Bool
     }
 
+    /// Stores PushKit completions until their incoming calls are reported.
+    ///
+    /// PushKit delivery and CallKit reporting may use different queues. Access
+    /// is synchronized, and multiple pushes for the same CID are returned in
+    /// the order they were received.
+    final class PushNotificationCompletionStorage: @unchecked Sendable {
+        /// A PushKit completion that can be passed to CallKit's callback.
+        final class Completion: @unchecked Sendable {
+            private let action: () -> Void
+
+            init(_ action: @escaping () -> Void) {
+                self.action = action
+            }
+
+            func callAsFunction() {
+                action()
+            }
+        }
+
+        private let queue = UnfairQueue()
+        private var storage: [String: [Completion]] = [:]
+
+        /// Stores a completion for the call identified by `cid`.
+        func append(
+            _ completion: @escaping () -> Void,
+            for cid: String
+        ) {
+            queue.sync {
+                storage[cid, default: []].append(.init(completion))
+            }
+        }
+
+        /// Returns and removes the oldest completion stored for `cid`.
+        func pop(for cid: String) -> Completion? {
+            queue.sync {
+                guard var completions = storage[cid],
+                      !completions.isEmpty else {
+                    return nil
+                }
+                let completion = completions.removeFirst()
+                storage[cid] = completions.isEmpty ? nil : completions
+                return completion
+            }
+        }
+    }
+
     @Injected(\.callCache) private var callCache
     @Injected(\.uuidFactory) private var uuidFactory
     @Injected(\.currentDevice) private var currentDevice
@@ -123,8 +169,9 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     /// runs in the background. See `CallKitMissingPermissionPolicy`.
     open var missingPermissionPolicy: CallKitMissingPermissionPolicy = .none
 
-    @Atomic private var pushNotificationCompletionHandlers:
-        [String: [() -> Void]] = [:]
+    /// Pending PushKit completions keyed by call CID.
+    let pushNotificationCompletionStorage =
+        PushNotificationCompletionStorage()
 
     /// The policy that decides whether CallKit-managed calls
     /// should leave automatically when participant state changes.
@@ -227,9 +274,8 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         hasVideo: Bool = false,
         completion: @Sendable @escaping (Error?) -> Void
     ) {
-        let pushNotificationCompletionHandler = Atomic<(() -> Void)?>(
-            wrappedValue: takePushNotificationCompletion(for: cid)
-        )
+        let pushNotificationCompletion =
+            pushNotificationCompletionStorage.pop(for: cid)
         let (callUUID, callUpdate) = buildCallUpdate(
             cid: cid,
             localizedCallerName: localizedCallerName,
@@ -242,13 +288,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             update: callUpdate,
             completion: { error in
                 completion(error)
-
-                var completion: (() -> Void)?
-                pushNotificationCompletionHandler.mutate {
-                    completion = $0
-                    return nil
-                }
-                completion?()
+                pushNotificationCompletion?()
             }
         )
 
@@ -348,42 +388,6 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 )
             }
         }
-    }
-
-    /// Stores a PushKit completion until CallKit reports its incoming call.
-    ///
-    /// Completions are associated with the call CID so overlapping pushes can
-    /// finish in any order without invoking another push's callback.
-    ///
-    /// - Parameters:
-    ///   - completion: The PushKit delegate completion to invoke.
-    ///   - cid: The call CID from the VoIP push payload.
-    func enqueuePushNotificationCompletion(
-        _ completion: @escaping () -> Void,
-        for cid: String
-    ) {
-        _pushNotificationCompletionHandlers.mutate {
-            var handlers = $0
-            handlers[cid, default: []].append(completion)
-            return handlers
-        }
-    }
-
-    private func takePushNotificationCompletion(
-        for cid: String
-    ) -> (() -> Void)? {
-        var completion: (() -> Void)?
-        _pushNotificationCompletionHandlers.mutate {
-            var handlers = $0
-            guard var matchingHandlers = handlers[cid],
-                  !matchingHandlers.isEmpty else {
-                return handlers
-            }
-            completion = matchingHandlers.removeFirst()
-            handlers[cid] = matchingHandlers.isEmpty ? nil : matchingHandlers
-            return handlers
-        }
-        return completion
     }
 
     /// Handle acceptance by the same user on another device.
