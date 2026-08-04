@@ -17,52 +17,6 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         var isMuted: Bool
     }
 
-    /// Stores PushKit completions until their incoming calls are reported.
-    ///
-    /// PushKit delivery and CallKit reporting may use different queues. Access
-    /// is synchronized, and multiple pushes for the same CID are returned in
-    /// the order they were received.
-    final class PushNotificationCompletionStorage: @unchecked Sendable {
-        /// A PushKit completion that can be passed to CallKit's callback.
-        final class Completion: @unchecked Sendable {
-            private let action: () -> Void
-
-            init(_ action: @escaping () -> Void) {
-                self.action = action
-            }
-
-            func callAsFunction() {
-                action()
-            }
-        }
-
-        private let queue = UnfairQueue()
-        private var storage: [String: [Completion]] = [:]
-
-        /// Stores a completion for the call identified by `cid`.
-        func append(
-            _ completion: @escaping () -> Void,
-            for cid: String
-        ) {
-            queue.sync {
-                storage[cid, default: []].append(.init(completion))
-            }
-        }
-
-        /// Returns and removes the oldest completion stored for `cid`.
-        func pop(for cid: String) -> Completion? {
-            queue.sync {
-                guard var completions = storage[cid],
-                      !completions.isEmpty else {
-                    return nil
-                }
-                let completion = completions.removeFirst()
-                storage[cid] = completions.isEmpty ? nil : completions
-                return completion
-            }
-        }
-    }
-
     @Injected(\.callCache) private var callCache
     @Injected(\.uuidFactory) private var uuidFactory
     @Injected(\.currentDevice) private var currentDevice
@@ -169,10 +123,6 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     /// runs in the background. See `CallKitMissingPermissionPolicy`.
     open var missingPermissionPolicy: CallKitMissingPermissionPolicy = .none
 
-    /// Pending PushKit completions keyed by call CID.
-    let pushNotificationCompletionStorage =
-        PushNotificationCompletionStorage()
-
     /// The policy that decides whether CallKit-managed calls
     /// should leave automatically when participant state changes.
     ///
@@ -261,12 +211,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         }
     }
 
-    /// Reports an incoming call to CallKit.
-    ///
-    /// When the report originated from ``CallKitPushNotificationAdapter``, the
-    /// provider completion also completes the pending PushKit notification.
-    /// This ordering ensures the system observes the incoming call report
-    /// before the PushKit delegate finishes handling the VoIP push.
+    /// Report an incoming call to CallKit.
     open func reportIncomingCall(
         _ cid: String,
         localizedCallerName: String,
@@ -274,8 +219,6 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         hasVideo: Bool = false,
         completion: @Sendable @escaping (Error?) -> Void
     ) {
-        let pushNotificationCompletion =
-            pushNotificationCompletionStorage.pop(for: cid)
         let (callUUID, callUpdate) = buildCallUpdate(
             cid: cid,
             localizedCallerName: localizedCallerName,
@@ -286,10 +229,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         callProvider.reportNewIncomingCall(
             with: callUUID,
             update: callUpdate,
-            completion: { error in
-                completion(error)
-                pushNotificationCompletion?()
-            }
+            completion: completion
         )
 
         log.debug(

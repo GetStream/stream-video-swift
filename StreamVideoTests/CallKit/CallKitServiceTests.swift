@@ -210,55 +210,6 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(update.remoteHandle?.value, callerId)
     }
 
-    func test_reportIncomingCall_pendingPushesCompleteWithOwnReports() throws {
-        var firstCallCount = 0
-        var secondCallCount = 0
-        let secondCid = "default:\(String.unique)"
-        callProvider.automaticallyCompletesReportNewIncomingCall = false
-        subject.pushNotificationCompletionStorage.append({
-            firstCallCount += 1
-        }, for: cid)
-        subject.pushNotificationCompletionStorage.append({
-            secondCallCount += 1
-        }, for: secondCid)
-
-        subject.reportIncomingCall(
-            cid,
-            localizedCallerName: localizedCallerName,
-            callerId: callerId,
-            hasVideo: false
-        ) { _ in }
-        subject.reportIncomingCall(
-            secondCid,
-            localizedCallerName: localizedCallerName,
-            callerId: callerId,
-            hasVideo: false
-        ) { _ in }
-
-        let reportCompletions: [(Error?) -> Void] = callProvider
-            .invocations
-            .compactMap {
-                guard case let .reportNewIncomingCall(_, _, completion) = $0 else {
-                    return nil
-                }
-                return completion
-            }
-
-        let firstReportCompletion = try XCTUnwrap(reportCompletions.first)
-        let secondReportCompletion = try XCTUnwrap(reportCompletions.last)
-        XCTAssertEqual(reportCompletions.count, 2)
-        XCTAssertEqual(firstCallCount, 0)
-        XCTAssertEqual(secondCallCount, 0)
-
-        secondReportCompletion(nil)
-        XCTAssertEqual(firstCallCount, 0)
-        XCTAssertEqual(secondCallCount, 1)
-
-        firstReportCompletion(nil)
-        XCTAssertEqual(firstCallCount, 1)
-        XCTAssertEqual(secondCallCount, 1)
-    }
-
     func test_reportIncomingCall_streamVideoIsNil_noCallWasCreatedAndNoActionIsBeingPerformed() async throws {
         try await assertWithoutRequestTransaction {
             subject.reportIncomingCall(

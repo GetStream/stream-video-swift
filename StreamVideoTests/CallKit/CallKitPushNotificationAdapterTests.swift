@@ -10,7 +10,6 @@ final class CallKitPushNotificationAdapterTests: XCTestCase, @unchecked Sendable
 
     private lazy var streamVideo: MockStreamVideo! = .init()
     private lazy var callKitService: MockCallKitService! = .init()
-    private lazy var callProvider: MockCXProvider! = .init()
     private lazy var subject: CallKitPushNotificationAdapter! = .init()
 
     // MARK: - Lifecycle
@@ -19,15 +18,11 @@ final class CallKitPushNotificationAdapterTests: XCTestCase, @unchecked Sendable
         super.setUp()
         _ = streamVideo
         InjectedValues[\.callKitService] = callKitService
-        callProvider.automaticallyCompletesReportNewIncomingCall = false
-        callKitService.callProvider = callProvider
-        callKitService.forwardsReportIncomingCallToSuper = true
     }
 
     override func tearDown() {
         streamVideo = nil
         callKitService = nil
-        callProvider = nil
         subject = nil
         super.tearDown()
     }
@@ -181,12 +176,6 @@ final class CallKitPushNotificationAdapterTests: XCTestCase, @unchecked Sendable
         await fulfillment { self.callKitService.reportIncomingCallWasCalled != nil }
         XCTAssertEqual(completionCallCount, 0, file: file, line: line)
 
-        guard case let .reportNewIncomingCall(_, _, completion) = callProvider.invocations.first else {
-            return XCTFail(file: file, line: line)
-        }
-        completion(nil)
-        await fulfillment(of: [completionWasCalledExpectation])
-
         if let content {
             XCTAssertEqual(
                 callKitService.reportIncomingCallWasCalled?.cid,
@@ -219,6 +208,10 @@ final class CallKitPushNotificationAdapterTests: XCTestCase, @unchecked Sendable
                 line: line
             )
         }
+
+        callKitService.reportIncomingCallWasCalled?.completion(nil)
+        await fulfillment(of: [completionWasCalledExpectation])
+        XCTAssertEqual(completionCallCount, 1, file: file, line: line)
     }
 }
 
