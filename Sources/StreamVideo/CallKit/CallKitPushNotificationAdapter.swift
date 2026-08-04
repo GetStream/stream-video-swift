@@ -99,28 +99,17 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
         }
     }
 
-    /// Handles a push notification delivered by PushKit.
-    ///
-    /// VoIP pushes keep their completion pending until ``CallKitService`` has
-    /// finished reporting the matching incoming call to CallKit. Completing
-    /// earlier can cause the system to treat the push as unhandled and
-    /// terminate the app.
+    /// Delegate method called when the device receives a VoIP push notification.
     open nonisolated func pushRegistry(
         _ registry: PKPushRegistry,
         didReceiveIncomingPushWith payload: PKPushPayload,
         for type: PKPushType,
         completion: @escaping () -> Void
     ) {
-        guard type == .voIP else {
-            completion()
-            return
-        }
-
+        defer { completion() }
+        guard type == .voIP else { return }
+        
         let content = decodePayload(payload)
-        callKitService.pushNotificationCompletionStorage.append(
-            completion,
-            for: content.cid
-        )
 
         log
             .debug(
