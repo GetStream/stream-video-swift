@@ -7,6 +7,8 @@ import Foundation
 @testable import StreamVideo
 
 final class MockCallKitService: CallKitService, @unchecked Sendable {
+    var forwardsReportIncomingCallToSuper = false
+
     private(set) var reportIncomingCallWasCalled: (
         cid: String,
         callerName: String,
@@ -22,9 +24,17 @@ final class MockCallKitService: CallKitService, @unchecked Sendable {
         localizedCallerName: String,
         callerId: String,
         hasVideo: Bool?,
-        completion: @escaping ((any Error)?) -> Void
+        completion: @Sendable @escaping ((any Error)?) -> Void
     ) {
         reportIncomingCallWasCalled = (cid, localizedCallerName, callerId, hasVideo, completion)
+        guard forwardsReportIncomingCallToSuper else { return }
+        super.reportIncomingCall(
+            cid,
+            localizedCallerName: localizedCallerName,
+            callerId: callerId,
+            hasVideo: hasVideo ?? false,
+            completion: completion
+        )
     }
 
     func send(_ event: Event) {
