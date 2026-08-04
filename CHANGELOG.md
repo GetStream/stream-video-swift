@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🐞 Fixed
 - Prevent CallKit-driven joins from disconnecting and rejoining while waiting for audio-session activation. [#1218](https://github.com/GetStream/stream-video-swift/pull/1218)
+- Fixed a crash caused by completing a PushKit VoIP notification before CallKit finished reporting its incoming call. [#1221](https://github.com/GetStream/stream-video-swift/pull/1221)
 
 ### 🔄 Changed
 

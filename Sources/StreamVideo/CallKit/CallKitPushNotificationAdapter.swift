@@ -99,22 +99,29 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
         }
     }
 
-    /// Delegate method called when the device receives a VoIP push notification.
+    /// Handles a push notification delivered by PushKit.
+    ///
+    /// VoIP pushes complete after CallKit finishes reporting the incoming
+    /// call.
     open nonisolated func pushRegistry(
         _ registry: PKPushRegistry,
         didReceiveIncomingPushWith payload: PKPushPayload,
         for type: PKPushType,
         completion: @escaping () -> Void
     ) {
-        defer { completion() }
-        guard type == .voIP else { return }
-        
+        guard type == .voIP else {
+            completion()
+            return
+        }
+
         let content = decodePayload(payload)
 
         log
             .debug(
                 "Received VoIP push notification with cid:\(content.cid) callerId:\(content.callerId) callerName:\(content.localizedCallerName)."
             )
+
+        let sendableCompletion = UncheckedSendableBox(completion)
 
         callKitService.reportIncomingCall(
             content.cid,
@@ -125,6 +132,7 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
                 if let error {
                     log.error(error, subsystems: .callKit)
                 }
+                sendableCompletion.value()
             }
         )
     }
