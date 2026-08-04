@@ -116,9 +116,11 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
             return
         }
 
-        callKitService.pushNotificationCompletionHandler = completion
-        
         let content = decodePayload(payload)
+        callKitService.enqueuePushNotificationCompletion(
+            completion,
+            for: content.cid
+        )
 
         log
             .debug(

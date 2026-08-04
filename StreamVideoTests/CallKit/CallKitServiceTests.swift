@@ -210,12 +210,17 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(update.remoteHandle?.value, callerId)
     }
 
-    func test_reportIncomingCall_callProviderCompletes_pushNotificationCompletionHandlerWasCalledAndCleared() throws {
-        let completionCallCount = Atomic(wrappedValue: 0)
+    func test_reportIncomingCall_pendingPushesCompleteWithOwnReports() throws {
+        let firstCallCount = Atomic(wrappedValue: 0)
+        let secondCallCount = Atomic(wrappedValue: 0)
+        let secondCid = "default:\(String.unique)"
         callProvider.automaticallyCompletesReportNewIncomingCall = false
-        subject.pushNotificationCompletionHandler = {
-            completionCallCount.mutate { $0 + 1 }
-        }
+        subject.enqueuePushNotificationCompletion({
+            firstCallCount.mutate { $0 + 1 }
+        }, for: cid)
+        subject.enqueuePushNotificationCompletion({
+            secondCallCount.mutate { $0 + 1 }
+        }, for: secondCid)
 
         subject.reportIncomingCall(
             cid,
@@ -223,17 +228,39 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
             callerId: callerId,
             hasVideo: false
         ) { _ in }
+        subject.reportIncomingCall(
+            secondCid,
+            localizedCallerName: localizedCallerName,
+            callerId: callerId,
+            hasVideo: false
+        ) { _ in }
 
-        XCTAssertEqual(completionCallCount.wrappedValue, 0)
-        XCTAssertNotNil(subject.pushNotificationCompletionHandler)
+        let reportCompletions: [(Error?) -> Void] = callProvider
+            .invocations
+            .compactMap {
+                guard case let .reportNewIncomingCall(_, _, completion) = $0 else {
+                    return nil
+                }
+                return completion
+            }
 
-        guard case let .reportNewIncomingCall(_, _, completion) = callProvider.invocations.first else {
-            return XCTFail()
-        }
-        completion(nil)
+        let firstReportCompletion = try XCTUnwrap(reportCompletions.first)
+        let secondReportCompletion = try XCTUnwrap(reportCompletions.last)
+        XCTAssertEqual(reportCompletions.count, 2)
+        XCTAssertEqual(firstCallCount.wrappedValue, 0)
+        XCTAssertEqual(secondCallCount.wrappedValue, 0)
 
-        XCTAssertEqual(completionCallCount.wrappedValue, 1)
-        XCTAssertNil(subject.pushNotificationCompletionHandler)
+        secondReportCompletion(nil)
+        XCTAssertEqual(firstCallCount.wrappedValue, 0)
+        XCTAssertEqual(secondCallCount.wrappedValue, 1)
+
+        firstReportCompletion(nil)
+        XCTAssertEqual(firstCallCount.wrappedValue, 1)
+        XCTAssertEqual(secondCallCount.wrappedValue, 1)
+
+        reportCompletions.forEach { $0(nil) }
+        XCTAssertEqual(firstCallCount.wrappedValue, 1)
+        XCTAssertEqual(secondCallCount.wrappedValue, 1)
     }
 
     func test_reportIncomingCall_streamVideoIsNil_noCallWasCreatedAndNoActionIsBeingPerformed() async throws {

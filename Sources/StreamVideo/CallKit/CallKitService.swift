@@ -123,16 +123,8 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     /// runs in the background. See `CallKitMissingPermissionPolicy`.
     open var missingPermissionPolicy: CallKitMissingPermissionPolicy = .none
 
-    /// The completion for the VoIP push currently being reported to CallKit.
-    ///
-    /// ``CallKitPushNotificationAdapter`` sets this before reporting an
-    /// incoming call. PushKit requires the call to be reported to CallKit
-    /// before its completion runs, so ``CallKitService`` keeps the completion
-    /// pending until `CXProvider` finishes `reportNewIncomingCall`.
-    ///
-    /// The completion is atomically consumed and cleared before invocation to
-    /// prevent a later incoming call from invoking a stale PushKit callback.
-    @Atomic var pushNotificationCompletionHandler: (() -> Void)?
+    @Atomic private var pushNotificationCompletionHandlers:
+        [String: [() -> Void]] = [:]
 
     /// The policy that decides whether CallKit-managed calls
     /// should leave automatically when participant state changes.
@@ -235,6 +227,9 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         hasVideo: Bool = false,
         completion: @Sendable @escaping (Error?) -> Void
     ) {
+        let pushNotificationCompletionHandler = Atomic<(() -> Void)?>(
+            wrappedValue: takePushNotificationCompletion(for: cid)
+        )
         let (callUUID, callUpdate) = buildCallUpdate(
             cid: cid,
             localizedCallerName: localizedCallerName,
@@ -245,17 +240,15 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         callProvider.reportNewIncomingCall(
             with: callUUID,
             update: callUpdate,
-            completion: { [self] error in
+            completion: { error in
                 completion(error)
 
-                var pushNotificationCompletionHandler: (() -> Void)?
-                // Take and clear the handler in one operation so it is called
-                // at most once even if provider completion is repeated.
-                _pushNotificationCompletionHandler.mutate {
-                    pushNotificationCompletionHandler = $0
+                var completion: (() -> Void)?
+                pushNotificationCompletionHandler.mutate {
+                    completion = $0
                     return nil
                 }
-                pushNotificationCompletionHandler?()
+                completion?()
             }
         )
 
@@ -355,6 +348,42 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 )
             }
         }
+    }
+
+    /// Stores a PushKit completion until CallKit reports its incoming call.
+    ///
+    /// Completions are associated with the call CID so overlapping pushes can
+    /// finish in any order without invoking another push's callback.
+    ///
+    /// - Parameters:
+    ///   - completion: The PushKit delegate completion to invoke.
+    ///   - cid: The call CID from the VoIP push payload.
+    func enqueuePushNotificationCompletion(
+        _ completion: @escaping () -> Void,
+        for cid: String
+    ) {
+        _pushNotificationCompletionHandlers.mutate {
+            var handlers = $0
+            handlers[cid, default: []].append(completion)
+            return handlers
+        }
+    }
+
+    private func takePushNotificationCompletion(
+        for cid: String
+    ) -> (() -> Void)? {
+        var completion: (() -> Void)?
+        _pushNotificationCompletionHandlers.mutate {
+            var handlers = $0
+            guard var matchingHandlers = handlers[cid],
+                  !matchingHandlers.isEmpty else {
+                return handlers
+            }
+            completion = matchingHandlers.removeFirst()
+            handlers[cid] = matchingHandlers.isEmpty ? nil : matchingHandlers
+            return handlers
+        }
+        return completion
     }
 
     /// Handle acceptance by the same user on another device.
