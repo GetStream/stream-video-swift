@@ -464,6 +464,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     await ensureAudioSessionIsReady()
                 }
 
+                try Task.checkCancellation()
+
                 try await coordinator.stateAdapter.configurePeerConnections()
 
                 try Task.checkCancellation()

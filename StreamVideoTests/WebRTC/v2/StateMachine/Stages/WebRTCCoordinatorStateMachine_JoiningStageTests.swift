@@ -103,6 +103,62 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
         await fulfillment(of: [unexpectedTransition], timeout: 0.2)
     }
 
+    func test_willTransitionAway_audioReadinessPending_skipsPeerConnections(
+    ) async throws {
+        let previousTimeout = WebRTCConfiguration.timeout
+        let mockAudioStore = MockRTCAudioStore()
+        mockAudioStore.makeShared()
+        defer {
+            WebRTCConfiguration.timeout = previousTimeout
+            mockAudioStore.dismantle()
+        }
+        WebRTCConfiguration.timeout.audioSessionConfigurationCompletion = 60
+
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.reconnectAttempts = 11
+        subject.context.joinSource = .inApp
+        await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
+        mockCoordinatorStack.webRTCAuthenticator.stubbedFunction[.waitForConnect] =
+            Result<Void, Error>.success(())
+
+        let unexpectedTransition = expectation(
+            description: "Joining stage should not transition after cancellation."
+        )
+        unexpectedTransition.isInverted = true
+        subject.transition = { _ in unexpectedTransition.fulfill() }
+        let eventCancellable = receiveEvent(
+            .joinResponse(Stream_Video_Sfu_Event_JoinResponse()),
+            every: 0.1
+        )
+
+        _ = subject.transition(from: .connected(subject.context))
+
+        await fulfillment {
+            let audioSession = await self.mockCoordinatorStack
+                .coordinator
+                .stateAdapter
+                .audioSession
+            return audioSession.delegate != nil
+        }
+        eventCancellable.cancel()
+        subject.willTransitionAway()
+
+        await fulfillment(of: [unexpectedTransition], timeout: 0.2)
+        let publisher = await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .publisher
+        let subscriber = await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .subscriber
+        XCTAssertNil(publisher)
+        XCTAssertNil(subscriber)
+    }
+
     // MARK: - transition from connected with isRejoiningFromSessionID == nil
 
     func test_transition_fromConnectedWithoutCoordinator_updatesReconnectionStrategy() async throws {
