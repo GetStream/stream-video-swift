@@ -226,6 +226,19 @@ final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(source.timesCalled(.setRecordingAlwaysPreparedMode), 0)
     }
 
+    func test_setEngineAvailability_updatesInputAndOutputAvailability() throws {
+        makeSubject()
+
+        try subject.setEngineAvailability(false)
+
+        let availability = source.recordedInputPayload(
+            (Bool, Bool).self,
+            for: .setEngineAvailability
+        )?.last
+        XCTAssertEqual(availability?.0, false)
+        XCTAssertEqual(availability?.1, false)
+    }
+
     func test_refreshStereoPlayoutState_invokesUnderlyingModule() {
         makeSubject()
 

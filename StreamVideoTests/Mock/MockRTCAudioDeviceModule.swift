@@ -27,6 +27,7 @@ final class MockRTCAudioDeviceModule: RTCAudioDeviceModuleControlling, Mockable,
         case refreshStereoPlayoutState
         case setMuteMode
         case setRecordingAlwaysPreparedMode
+        case setEngineAvailability
     }
 
     enum MockFunctionInputKey: Payloadable {
@@ -42,6 +43,7 @@ final class MockRTCAudioDeviceModule: RTCAudioDeviceModuleControlling, Mockable,
         case refreshStereoPlayoutState
         case setMuteMode(RTCAudioEngineMuteMode)
         case setRecordingAlwaysPreparedMode(Bool)
+        case setEngineAvailability(Bool, Bool)
 
         var payload: Any {
             switch self {
@@ -81,6 +83,9 @@ final class MockRTCAudioDeviceModule: RTCAudioDeviceModuleControlling, Mockable,
 
             case let .setRecordingAlwaysPreparedMode(value):
                 return value
+
+            case let .setEngineAvailability(isInputAvailable, isOutputAvailable):
+                return (isInputAvailable, isOutputAvailable)
             }
         }
     }
@@ -163,6 +168,7 @@ final class MockRTCAudioDeviceModule: RTCAudioDeviceModuleControlling, Mockable,
         stub(for: .refreshStereoPlayoutState, with: 0)
         stub(for: .setMuteMode, with: 0)
         stub(for: .setRecordingAlwaysPreparedMode, with: 0)
+        stub(for: .setEngineAvailability, with: 0)
     }
 
     // MARK: - RTCAudioDeviceModuleControlling
@@ -309,5 +315,17 @@ final class MockRTCAudioDeviceModule: RTCAudioDeviceModuleControlling, Mockable,
             .append(.setRecordingAlwaysPreparedMode(alwaysPreparedRecording))
         stub(for: \.isRecordingAlwaysPreparedMode, with: alwaysPreparedRecording)
         return stubbedFunction[.setRecordingAlwaysPreparedMode] as! Int
+    }
+
+    func setEngineAvailability(_ availability: RTCAudioEngineAvailability) -> Int {
+        onInvoke?(.setEngineAvailability)
+        stubbedFunctionInput[.setEngineAvailability]?
+            .append(
+                .setEngineAvailability(
+                    availability.isInputAvailable,
+                    availability.isOutputAvailable
+                )
+            )
+        return stubbedFunction[.setEngineAvailability] as! Int
     }
 }

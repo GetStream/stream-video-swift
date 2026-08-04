@@ -698,6 +698,26 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         }
     }
 
+    func test_transition_callKitAudioSessionNotReadyBeforeWatchdog_remainsOnJoined() async {
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.joinSource = .callKit(.init {})
+        let previousTimeout = WebRTCConfiguration.timeout
+        let mockAudioStore = MockRTCAudioStore()
+        mockAudioStore.makeShared()
+        defer {
+            WebRTCConfiguration.timeout = previousTimeout
+            mockAudioStore.dismantle()
+        }
+        WebRTCConfiguration.timeout.audioSessionReadinessWatchdog = 0.2
+        subject.context.audioSessionWatchdog = .init()
+
+        await assertTransitionAfterTrigger(
+            trigger: {}
+        ) { stage in
+            XCTAssertEqual(stage.id, .joined)
+        }
+    }
+
     func test_transition_audioSessionBecomesReadyBeforeWatchdog_remainsOnJoined() async {
         subject.context.coordinator = mockCoordinatorStack.coordinator
         let previousTimeout = WebRTCConfiguration.timeout

@@ -575,6 +575,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
         /// after interruptions or CallKit handoff timing).
         ///
         /// Behavior:
+        /// - It skips the timer while a CallKit-originated join is waiting for
+        ///   CallKit's expected post-join activation.
         /// - Schedules a one-shot timer using
         ///   `WebRTCConfiguration.timeout.audioSessionReadinessWatchdog`.
         /// - If the timer fires first, it:
@@ -588,6 +590,10 @@ extension WebRTCCoordinator.StateMachine.Stage {
         /// once readiness is observed and timer is cancelled, this stage does not
         /// re-arm the watchdog again.
         private func observeAudioSessionReadiness() {
+            if case .callKit = context.joinSource, !audioStore.state.isActive {
+                return
+            }
+
             let key = "audio-session-readiness"
             let interval = WebRTCConfiguration.timeout.audioSessionReadinessWatchdog
 

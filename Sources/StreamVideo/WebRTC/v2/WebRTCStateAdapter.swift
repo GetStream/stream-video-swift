@@ -965,6 +965,20 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     }
 
     func configureAudioSession(source: JoinSource?) async throws {
+        let sourceIsCallKit = {
+            guard
+                let source,
+                case .callKit = source
+            else {
+                return false
+            }
+            return true
+        }()
+
+        try peerConnectionFactory.audioDeviceModule.setEngineAvailability(
+            !sourceIsCallKit || audioStore.state.isActive
+        )
+
         try await audioStore.dispatch(
             [
                 // Claim ownership before installing the ADM so any late
@@ -978,16 +992,6 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
                 .setAudioDeviceModule(peerConnectionFactory.audioDeviceModule)
             ]
         ).result()
-
-        let sourceIsCallKit = {
-            guard
-                let source,
-                case .callKit = source
-            else {
-                return false
-            }
-            return true
-        }()
 
         audioSession.activate(
             callSettingsPublisher: $callSettings.removeDuplicates().eraseToAnyPublisher(),

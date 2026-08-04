@@ -16,9 +16,10 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
     private lazy var apiKey: String! = .unique
     private lazy var callCid: String! = .unique
     private lazy var callSettings: CallSettings! = .default
+    private lazy var mockAudioDeviceModuleSource: MockRTCAudioDeviceModule! = .init()
     private lazy var mockPeerConnectionFactory: PeerConnectionFactory! = .build(
         audioProcessingModule: Self.videoConfig.audioProcessingModule,
-        audioDeviceModuleSource: MockRTCAudioDeviceModule()
+        audioDeviceModuleSource: mockAudioDeviceModuleSource
     )
     private lazy var rtcPeerConnectionCoordinatorFactory: MockRTCPeerConnectionCoordinatorFactory! =
         .init(peerConnectionFactory: mockPeerConnectionFactory)
@@ -62,6 +63,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         apiKey = nil
         user = nil
         mockPeerConnectionFactory = nil
+        mockAudioDeviceModuleSource = nil
         try await super.tearDown()
     }
 
@@ -716,6 +718,12 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
 
         await assertTrueAsync(await subject.audioSession.delegate === subject)
         await assertTrueAsync(await subject.audioSession.statsAdapter === statsAdapter)
+        let availability = mockAudioDeviceModuleSource.recordedInputPayload(
+            (Bool, Bool).self,
+            for: .setEngineAvailability
+        )?.last
+        XCTAssertEqual(availability?.0, true)
+        XCTAssertEqual(availability?.1, true)
     }
 
     func test_configureAudioSession_claimsOwnershipAndDispatchesAudioStoreUpdates() async throws {
@@ -762,6 +770,25 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         )
 
         await safeFulfillment(of: [completionExpectation], timeout: 1)
+        let availability = mockAudioDeviceModuleSource.recordedInputPayload(
+            (Bool, Bool).self,
+            for: .setEngineAvailability
+        )?.last
+        XCTAssertEqual(availability?.0, false)
+        XCTAssertEqual(availability?.1, false)
+    }
+
+    func test_configureAudioSession_activeCallKitSource_makesAudioEngineAvailable() async throws {
+        try await mockAudioStore.audioStore.dispatch(.setActive(true)).result()
+
+        try await subject.configureAudioSession(source: .callKit(.init {}))
+
+        let availability = mockAudioDeviceModuleSource.recordedInputPayload(
+            (Bool, Bool).self,
+            for: .setEngineAvailability
+        )?.last
+        XCTAssertEqual(availability?.0, true)
+        XCTAssertEqual(availability?.1, true)
     }
 
     // MARK: - cleanUp
