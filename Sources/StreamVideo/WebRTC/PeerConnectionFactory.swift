@@ -11,6 +11,15 @@ final class PeerConnectionFactory: @unchecked Sendable {
     
     /// The audio processing module associated with this factory.
     private let audioProcessingModule: RTCAudioProcessingModule
+
+    /// An optional native audio device used instead of WebRTC's default audio
+    /// engine.
+    ///
+    /// Custom environments can provide a device that avoids creating the
+    /// platform audio engine. When `nil`, the factory retains its standard
+    /// production audio pipeline and applies ``audioProcessingModule``.
+    private let audioDevice: RTCAudioDevice?
+
     /// Backing storage for the audio device module.
     ///
     /// Kept optional so we can release it explicitly in `deinit` before
@@ -25,12 +34,20 @@ final class PeerConnectionFactory: @unchecked Sendable {
         return audioDeviceModuleStorage
     }
     
-    /// Lazy-loaded RTCPeerConnectionFactory instance.
+    /// The underlying WebRTC factory configured with either the injected audio
+    /// device or the default production audio engine.
     private(set) lazy var factory: RTCPeerConnectionFactory = {
         let encoderFactory = RTCVideoEncoderFactorySimulcast(
             primary: Self.defaultEncoder,
             fallback: Self.defaultEncoder
         )
+        if let audioDevice {
+            return RTCPeerConnectionFactory(
+                encoderFactory: encoderFactory,
+                decoderFactory: Self.defaultDecoder,
+                audioDevice: audioDevice
+            )
+        }
         return RTCPeerConnectionFactory(
             audioDeviceModuleType: .audioEngine,
             bypassVoiceProcessing: false,
@@ -56,24 +73,47 @@ final class PeerConnectionFactory: @unchecked Sendable {
         Self.defaultDecoder.supportedCodecs()
     }
 
-    /// Creates or retrieves a PeerConnectionFactory instance for a given
-    /// audio processing module.
-    /// - Parameter audioProcessingModule: The RTCAudioProcessingModule to use.
+    /// Creates a peer-connection factory with the requested audio pipeline.
+    ///
+    /// - Parameters:
+    ///   - audioProcessingModule: The processing module used by the default
+    ///     WebRTC audio engine.
+    ///   - audioDeviceModuleSource: An optional controller backing the SDK's
+    ///     ``AudioDeviceModule`` wrapper. Provide it with `audioDevice` because
+    ///     WebRTC does not expose its audio-device module when initialized with
+    ///     a custom native device.
+    ///   - audioDevice: An optional native device that replaces WebRTC's
+    ///     default audio engine.
     /// - Returns: A PeerConnectionFactory instance.
     static func build(
         audioProcessingModule: RTCAudioProcessingModule,
-        audioDeviceModuleSource: RTCAudioDeviceModuleControlling? = nil
+        audioDeviceModuleSource: RTCAudioDeviceModuleControlling? = nil,
+        audioDevice: RTCAudioDevice? = nil
     ) -> PeerConnectionFactory {
-        return .init(audioProcessingModule, audioDeviceModuleSource: audioDeviceModuleSource)
+        .init(
+            audioProcessingModule,
+            audioDeviceModuleSource: audioDeviceModuleSource,
+            audioDevice: audioDevice
+        )
     }
     
-    /// Private initializer to ensure instances are created through the `build` method.
-    /// - Parameter audioProcessingModule: The RTCAudioProcessingModule to use.
+    /// Initializes a peer-connection factory with matching native and SDK audio
+    /// device implementations.
+    ///
+    /// - Parameters:
+    ///   - audioProcessingModule: The processing module used by the default
+    ///     WebRTC audio engine.
+    ///   - audioDeviceModuleSource: An optional controller used by the SDK's
+    ///     audio-device wrapper.
+    ///   - audioDevice: An optional native device used to construct WebRTC's
+    ///     peer-connection factory.
     private init(
         _ audioProcessingModule: RTCAudioProcessingModule,
-        audioDeviceModuleSource: RTCAudioDeviceModuleControlling?
+        audioDeviceModuleSource: RTCAudioDeviceModuleControlling?,
+        audioDevice: RTCAudioDevice?
     ) {
         self.audioProcessingModule = audioProcessingModule
+        self.audioDevice = audioDevice
         _ = factory
 
         if let audioDeviceModuleSource {

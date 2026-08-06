@@ -64,6 +64,11 @@ extension Call_IntegrationTests {
                         .compactMap { ($0.object as? Call)?.cId }
                         .filter { $0 == call.cId }
                         .nextValue(timeout: 2)
+                    try await Call_IntegrationTests.Assertions.assertEventually(
+                        timeout: 2
+                    ) {
+                        await call.callController.sessionID().isEmpty
+                    }
                 }
             }
             registeredCalls = [:]
@@ -76,6 +81,7 @@ extension Call_IntegrationTests {
                 .filter { $0 == nil }
                 .nextValue(timeout: 2)
 
+            permissions.dismantle()
             await client.dismantle()
         }
 
@@ -87,6 +93,7 @@ extension Call_IntegrationTests {
             userId: String,
             environment: String = "pronto",
             clientResolutionMode: StreamVideoHelper.ClientResolutionMode = .ignoreCache,
+            streamVideoEnvironment: StreamVideo.Environment = .init(),
             overrideAPIKey: String? = nil,
             overrideToken: String? = nil
         ) async throws -> CallFlow<Void> {
@@ -98,7 +105,8 @@ extension Call_IntegrationTests {
                 userId: userId,
                 connectMode: .afterInit,
                 clientResolutionMode: clientResolutionMode,
-                clientRegisterMode: .auto
+                clientRegisterMode: .auto,
+                streamVideoEnvironment: streamVideoEnvironment
             )
             let call = client.call(callType: type, callId: id)
             registeredCalls[userId] = call
