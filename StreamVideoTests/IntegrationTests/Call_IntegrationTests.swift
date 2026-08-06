@@ -798,7 +798,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         }
     }
 
-    func disable_test_audioRoom_participantWithoutSpeakPermission_toggleMicrophone_audioRemainsDisabled() async throws {
+    func test_audioRoom_participantWithoutSpeakPermission_toggleMicrophone_audioRemainsDisabled() async throws {
         helpers.permissions.setMicrophonePermission(isGranted: true)
         let callId = String.unique
         let host = String.unique
@@ -968,7 +968,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         }
     }
 
-    func disable_test_audioRoom_participantWithoutVideoPermission_toggleCamera_videoRemainsDisabled() async throws {
+    func test_audioRoom_participantWithoutVideoPermission_toggleCamera_videoRemainsDisabled() async throws {
         helpers.permissions.setCameraPermission(isGranted: true)
         let callId = String.unique
         let host = String.unique
