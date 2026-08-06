@@ -6,6 +6,12 @@ on:
     - cron: '0 1 * * 1-5'
 
   workflow_dispatch:
+    inputs:
+      verbose:
+        description: 'Run tests in verbose mode?'
+        type: boolean
+        required: false
+        default: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -17,6 +23,7 @@ permissions:
 env:
   HOMEBREW_NO_INSTALL_CLEANUP: 1 # Disable cleanup for homebrew, we don't need it on CI
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  VERBOSE: ${{ github.event.inputs.verbose == 'true' && '--verbose' || '' }}
 
 jobs:
   build-test-app-and-frameworks:
@@ -82,7 +89,7 @@ jobs:
     - name: Launch Allure TestOps
       run: bundle exec fastlane allure_launch cron:true
     - name: Run UI Tests (Debug)
-      run: bundle exec fastlane test_e2e device:"${{ env.IOS_SIMULATOR_DEVICE }}" cron:true test_without_building:true
+      run: bundle exec fastlane test_e2e device:"${{ env.IOS_SIMULATOR_DEVICE }}" cron:true test_without_building:true ${{ env.VERBOSE }}
       timeout-minutes: 90
       env:
         STREAM_SDK_TEST_APP: ${{ secrets.STREAM_SDK_TEST_APP }}
@@ -146,7 +153,7 @@ jobs:
         version: ${{ matrix.ios }}
         device: ${{ matrix.device }}
     - name: Run LLC Tests (Debug)
-      run: bundle exec fastlane test device:"${{ env.IOS_SIMULATOR_DEVICE }}" cron:true
+      run: bundle exec fastlane test device:"${{ env.IOS_SIMULATOR_DEVICE }}" cron:true ${{ env.VERBOSE }}
       timeout-minutes: 60
     - name: Parse xcresult
       if: failure()

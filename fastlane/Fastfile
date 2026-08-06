@@ -20,6 +20,7 @@ reversed_gci = gci.split('.').reverse.join('.')
 is_localhost = !is_ci
 @force_check = false
 swift_environment_path = File.absolute_path('../Sources/StreamVideo/Generated/SystemEnvironment+Version.swift')
+xcodebuild_formatter = FastlaneCore::Globals.verbose? ? '' : nil
 
 before_all do |lane|
   if is_ci
@@ -217,7 +218,8 @@ lane :test do |options|
     devices: options[:device],
     number_of_retries: 3,
     skip_build: options[:skip_build],
-    build_for_testing: options[:build_for_testing]
+    build_for_testing: options[:build_for_testing],
+    xcodebuild_formatter: xcodebuild_formatter
   }
 
   begin
@@ -274,7 +276,8 @@ private_lane :test_ui do |options|
     result_bundle: true,
     devices: options[:device],
     build_for_testing: options[:build_for_testing],
-    fail_build: !record_mode
+    fail_build: !record_mode,
+    xcodebuild_formatter: xcodebuild_formatter
   )
 
   if record_mode && is_ci
@@ -348,7 +351,8 @@ lane :test_e2e do |options|
     build_for_testing: options[:build_for_testing],
     devices: options[:device],
     prelaunch_simulator: is_ci,
-    number_of_retries: 3
+    number_of_retries: 3,
+    xcodebuild_formatter: xcodebuild_formatter
   }
 
   if ENV['MATRIX_SIZE'] && options[:batch]
