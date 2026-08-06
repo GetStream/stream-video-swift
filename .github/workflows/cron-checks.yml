@@ -34,7 +34,7 @@ jobs:
     - uses: ./.github/actions/ruby-cache
     - uses: ./.github/actions/xcode-cache
     - name: Build
-      run: bundle exec fastlane build_test_app_and_frameworks
+      run: bundle exec fastlane build_test_app_and_frameworks ${{ env.VERBOSE }}
       timeout-minutes: 60
     - uses: actions/upload-artifact@v4
       if: success()
@@ -181,11 +181,11 @@ jobs:
     - uses: ./.github/actions/ruby-cache
     - uses: ./.github/actions/xcode-cache
     - name: Build SwiftUI Demo App
-      run: bundle exec fastlane build_swiftui_demo
+      run: bundle exec fastlane build_swiftui_demo ${{ env.VERBOSE }}
     - name: Build UIKit Demo App
-      run: bundle exec fastlane build_uikit_demo
+      run: bundle exec fastlane build_uikit_demo ${{ env.VERBOSE }}
     - name: Build Docs Test Project
-      run: bundle exec fastlane build_docs_test
+      run: bundle exec fastlane build_docs_test ${{ env.VERBOSE }}
 
   build-old-xcode:
     name: Build SDKs (Old Xcode)
@@ -204,12 +204,12 @@ jobs:
     - name: List Xcode versions
       run: mdfind "kMDItemCFBundleIdentifier = 'com.apple.dt.Xcode'"
     - name: Build LLC
-      run: bundle exec fastlane test device:"iPhone 15" build_for_testing:true
+      run: bundle exec fastlane test device:"iPhone 15" build_for_testing:true ${{ env.VERBOSE }}
       timeout-minutes: 25
     - name: Build SwiftUI
-      run: bundle exec fastlane test_swiftui device:"iPhone 15" build_for_testing:true
+      run: bundle exec fastlane test_swiftui device:"iPhone 15" build_for_testing:true ${{ env.VERBOSE }}
     - name: Build UIKit
-      run: bundle exec fastlane test_uikit device:"iPhone 15" build_for_testing:true
+      run: bundle exec fastlane test_uikit device:"iPhone 15" build_for_testing:true ${{ env.VERBOSE }}
       timeout-minutes: 25
 
   automated-code-review:

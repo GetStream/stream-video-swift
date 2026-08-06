@@ -198,7 +198,8 @@ lane :build_test_app_and_frameworks do
     derived_data_path: derived_data_path,
     cloned_source_packages_path: source_packages_path,
     clean: is_localhost,
-    build_for_testing: true
+    build_for_testing: true,
+    xcodebuild_formatter: xcodebuild_formatter
   )
 end
 
@@ -444,7 +445,8 @@ private_lane :build_example_app do |options|
     configuration: 'Debug',
     derived_data_path: options[:derived_data_path],
     cloned_source_packages_path: source_packages_path,
-    build_for_testing: true
+    build_for_testing: true,
+    xcodebuild_formatter: xcodebuild_formatter
   )
 end
 
@@ -700,7 +702,8 @@ lane :size_analyze do
     skip_package_pkg: true,
     skip_codesigning: true,
     derived_data_path: derived_data_path,
-    cloned_source_packages_path: source_packages_path
+    cloned_source_packages_path: source_packages_path,
+    xcodebuild_formatter: xcodebuild_formatter
   )
 
   show_detailed_sdk_size(sdk_names: sdk_names, threshold: 42)
