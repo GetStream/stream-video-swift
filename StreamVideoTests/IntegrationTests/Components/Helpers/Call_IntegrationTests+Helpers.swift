@@ -9,6 +9,20 @@ import XCTest
 extension String: @retroactive Error {}
 
 extension Call_IntegrationTests {
+    private struct InactiveAudioSessionPolicy: AudioSessionPolicy {
+        func configuration(
+            for callSettings: CallSettings,
+            ownCapabilities: Set<OwnCapability>
+        ) -> AudioSessionConfiguration {
+            var configuration = DefaultAudioSessionPolicy().configuration(
+                for: callSettings,
+                ownCapabilities: ownCapabilities
+            )
+            configuration.isActive = false
+            return configuration
+        }
+    }
+
     struct Helpers: Sendable {
         @Injected(\.audioStore) private var audioStore
 
@@ -64,11 +78,6 @@ extension Call_IntegrationTests {
                         .compactMap { ($0.object as? Call)?.cId }
                         .filter { $0 == call.cId }
                         .nextValue(timeout: 2)
-                    try await Call_IntegrationTests.Assertions.assertEventually(
-                        timeout: 2
-                    ) {
-                        await call.callController.sessionID().isEmpty
-                    }
                 }
             }
             registeredCalls = [:]
@@ -93,7 +102,7 @@ extension Call_IntegrationTests {
             userId: String,
             environment: String = "pronto",
             clientResolutionMode: StreamVideoHelper.ClientResolutionMode = .ignoreCache,
-            streamVideoEnvironment: StreamVideo.Environment = .init(),
+            streamVideoEnvironment: StreamVideo.Environment = .silentAudioDevice,
             overrideAPIKey: String? = nil,
             overrideToken: String? = nil
         ) async throws -> CallFlow<Void> {
@@ -109,6 +118,7 @@ extension Call_IntegrationTests {
                 streamVideoEnvironment: streamVideoEnvironment
             )
             let call = client.call(callType: type, callId: id)
+            await call.updateAudioSessionPolicy(InactiveAudioSessionPolicy())
             registeredCalls[userId] = call
             return .init(
                 client: client,

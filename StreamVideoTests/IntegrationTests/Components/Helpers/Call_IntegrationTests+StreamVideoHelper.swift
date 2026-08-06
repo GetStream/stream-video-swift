@@ -4,7 +4,6 @@
 
 import Foundation
 @testable import StreamVideo
-import StreamWebRTC
 import XCTest
 
 extension Call_IntegrationTests.Helpers {
@@ -44,7 +43,7 @@ extension Call_IntegrationTests.Helpers {
             connectMode: ConnectMode,
             clientResolutionMode: ClientResolutionMode,
             clientRegisterMode: ClientRegisterMode,
-            streamVideoEnvironment: StreamVideo.Environment = .init()
+            streamVideoEnvironment: StreamVideo.Environment = .silentAudioDevice
         ) async throws -> StreamVideo {
             let autoConnectOnInit = {
                 switch connectMode {
@@ -134,8 +133,7 @@ extension StreamVideo.Environment {
                 cachedLocation in
             let peerConnectionFactory = PeerConnectionFactory.build(
                 audioProcessingModule: videoConfig.audioProcessingModule,
-                audioDeviceModuleSource: MockRTCAudioDeviceModule(),
-                audioDevice: SilentAudioDevice()
+                audioEngineAvailabilityOverride: false
             )
             return CallController(
                 defaultAPI: defaultAPI,
@@ -152,70 +150,5 @@ extension StreamVideo.Environment {
             )
         }
         return environment
-    }
-}
-
-private final class SilentAudioDevice: NSObject, RTCAudioDevice {
-    let deviceInputSampleRate: Double = 48000
-    let inputIOBufferDuration: TimeInterval = 0.01
-    let inputNumberOfChannels: Int = 1
-    let inputLatency: TimeInterval = 0
-    let deviceOutputSampleRate: Double = 48000
-    let outputIOBufferDuration: TimeInterval = 0.01
-    let outputNumberOfChannels: Int = 1
-    let outputLatency: TimeInterval = 0
-
-    private(set) var isInitialized = false
-    private(set) var isPlayoutInitialized = false
-    private(set) var isPlaying = false
-    private(set) var isRecordingInitialized = false
-    private(set) var isRecording = false
-
-    private var delegate: RTCAudioDeviceDelegate?
-
-    func initialize(with delegate: RTCAudioDeviceDelegate) -> Bool {
-        self.delegate = delegate
-        isInitialized = true
-        return true
-    }
-
-    func terminateDevice() -> Bool {
-        delegate = nil
-        isInitialized = false
-        isPlayoutInitialized = false
-        isPlaying = false
-        isRecordingInitialized = false
-        isRecording = false
-        return true
-    }
-
-    func initializePlayout() -> Bool {
-        isPlayoutInitialized = true
-        return true
-    }
-
-    func startPlayout() -> Bool {
-        isPlaying = true
-        return true
-    }
-
-    func stopPlayout() -> Bool {
-        isPlaying = false
-        return true
-    }
-
-    func initializeRecording() -> Bool {
-        isRecordingInitialized = true
-        return true
-    }
-
-    func startRecording() -> Bool {
-        isRecording = true
-        return true
-    }
-
-    func stopRecording() -> Bool {
-        isRecording = false
-        return true
     }
 }

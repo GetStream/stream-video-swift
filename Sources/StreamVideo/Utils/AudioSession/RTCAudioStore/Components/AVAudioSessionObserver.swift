@@ -56,7 +56,7 @@ extension AVAudioSession {
             self.routeSharingPolicy = source.routeSharingPolicy
             self.availableModes = source.availableModes
             self.preferredInput = source.preferredInput.map { .init($0) } ?? nil
-            #if compiler(>=6.0)
+            #if compiler(>=6.0) && !targetEnvironment(simulator)
             if #available(iOS 17.2, *) { self.renderingMode = "\(source.renderingMode)" }
             else { self.renderingMode = "" }
             #else

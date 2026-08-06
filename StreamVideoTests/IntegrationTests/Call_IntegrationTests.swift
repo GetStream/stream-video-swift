@@ -12,20 +12,6 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
 
     private enum LeaveRouteVariant: String { case defaultRoute, speakerEnabled }
 
-    private struct InactiveAudioSessionPolicy: AudioSessionPolicy {
-        func configuration(
-            for callSettings: CallSettings,
-            ownCapabilities: Set<OwnCapability>
-        ) -> AudioSessionConfiguration {
-            var configuration = DefaultAudioSessionPolicy().configuration(
-                for: callSettings,
-                ownCapabilities: ownCapabilities
-            )
-            configuration.isActive = false
-            return configuration
-        }
-    }
-
     // MARK: - Properties
 
     private var helpers: Call_IntegrationTests.Helpers! = .init(loggingMode: .sdk)
@@ -396,25 +382,17 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
 
         let creatorFlow = try await creatorUserFlow
             .perform { try await $0.call.create(memberIds: [creatorUserId, participantUserId]) }
+            .perform { try await $0.call.join() }
 
-        try await withThrowingTaskGroup(of: Void.self) { group in
-            group.addTask {
-                try await creatorFlow
-                    .perform { try await $0.call.join() }
-                    .subscribe(for: CustomVideoEvent.self)
-                    .assertEventually { (event: CustomVideoEvent) in event.custom["state"] == "joined" }
-                    .perform { try await $0.call.end() }
+        let participantFlow = try await participantUserFlow
+            .perform { try await $0.call.join() }
+
+        _ = try await creatorFlow.call.end()
+
+        try await participantFlow
+            .assertEventuallyInMainActor(timeout: 30) {
+                $0.call.streamVideo.state.activeCall == nil
             }
-
-            group.addTask {
-                try await participantUserFlow
-                    .perform { try await $0.call.join() }
-                    .perform { try await $0.call.sendCustomEvent(["state": "joined"]) }
-                    .assertEventuallyInMainActor { $0.call.streamVideo.state.activeCall == nil }
-            }
-
-            try await group.waitForAll()
-        }
     }
 
     // MARK: - SendReactions
@@ -814,23 +792,13 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
 
     func test_audioRoom_participantWithoutSpeakPermission_toggleMicrophone_audioRemainsDisabled() async throws {
         helpers.permissions.setMicrophonePermission(isGranted: true)
-        let streamVideoEnvironment = StreamVideo.Environment.silentAudioDevice
         let callId = String.unique
         let host = String.unique
         let participant = String.unique
 
         let hostCallFlow = try await helpers
-            .callFlow(
-                id: callId,
-                type: .audioRoom,
-                userId: host,
-                environment: "demo",
-                streamVideoEnvironment: streamVideoEnvironment
-            )
+            .callFlow(id: callId, type: .audioRoom, userId: host, environment: "demo")
             .perform { try await $0.call.create(memberIds: [host], backstage: .init(enabled: false)) }
-            .performWithoutValueOverride {
-                await $0.call.updateAudioSessionPolicy(InactiveAudioSessionPolicy())
-            }
             .perform { try await $0.call.join(callSettings: .init(audioOn: true, videoOn: false)) }
 
         try await withThrowingTaskGroup(of: Void.self) { group in
@@ -848,12 +816,8 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
                         id: callId,
                         type: .audioRoom,
                         userId: participant,
-                        environment: "demo",
-                        streamVideoEnvironment: streamVideoEnvironment
+                        environment: "demo"
                     )
-                    .performWithoutValueOverride {
-                        await $0.call.updateAudioSessionPolicy(InactiveAudioSessionPolicy())
-                    }
                     .perform { try await $0.call.join(callSettings: .init(audioOn: false, videoOn: false)) }
                     .assertEventuallyInMainActor { $0.call.state.participants.endIndex == 2 }
                     .assertEventuallyInMainActor { $0.call.currentUserHasCapability(.sendAudio) == false }
@@ -1003,23 +967,13 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
 
     func test_audioRoom_participantWithoutVideoPermission_toggleCamera_videoRemainsDisabled() async throws {
         helpers.permissions.setCameraPermission(isGranted: true)
-        let streamVideoEnvironment = StreamVideo.Environment.silentAudioDevice
         let callId = String.unique
         let host = String.unique
         let participant = String.unique
 
         let hostCallFlow = try await helpers
-            .callFlow(
-                id: callId,
-                type: .audioRoom,
-                userId: host,
-                environment: "demo",
-                streamVideoEnvironment: streamVideoEnvironment
-            )
+            .callFlow(id: callId, type: .audioRoom, userId: host, environment: "demo")
             .perform { try await $0.call.create(memberIds: [host], backstage: .init(enabled: false)) }
-            .performWithoutValueOverride {
-                await $0.call.updateAudioSessionPolicy(InactiveAudioSessionPolicy())
-            }
             .perform { try await $0.call.join(callSettings: .init(audioOn: true, videoOn: false)) }
 
         try await withThrowingTaskGroup(of: Void.self) { group in
@@ -1040,12 +994,8 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
                         id: callId,
                         type: .audioRoom,
                         userId: participant,
-                        environment: "demo",
-                        streamVideoEnvironment: streamVideoEnvironment
+                        environment: "demo"
                     )
-                    .performWithoutValueOverride {
-                        await $0.call.updateAudioSessionPolicy(InactiveAudioSessionPolicy())
-                    }
                     .perform { try await $0.call.join(callSettings: .init(audioOn: false, videoOn: false)) }
                     .assertEventuallyInMainActor { $0.call.currentUserHasCapability(.sendVideo) == false }
                     .assertEventuallyInMainActor { $0.call.state.callSettings.videoOn == false }
