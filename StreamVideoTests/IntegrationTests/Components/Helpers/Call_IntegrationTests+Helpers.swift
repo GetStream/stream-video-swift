@@ -9,6 +9,20 @@ import XCTest
 extension String: @retroactive Error {}
 
 extension Call_IntegrationTests {
+    private struct InactiveAudioSessionPolicy: AudioSessionPolicy {
+        func configuration(
+            for callSettings: CallSettings,
+            ownCapabilities: Set<OwnCapability>
+        ) -> AudioSessionConfiguration {
+            var configuration = DefaultAudioSessionPolicy().configuration(
+                for: callSettings,
+                ownCapabilities: ownCapabilities
+            )
+            configuration.isActive = false
+            return configuration
+        }
+    }
+
     struct Helpers: Sendable {
         @Injected(\.audioStore) private var audioStore
 
@@ -76,6 +90,7 @@ extension Call_IntegrationTests {
                 .filter { $0 == nil }
                 .nextValue(timeout: 2)
 
+            permissions.dismantle()
             await client.dismantle()
         }
 
@@ -87,6 +102,7 @@ extension Call_IntegrationTests {
             userId: String,
             environment: String = "pronto",
             clientResolutionMode: StreamVideoHelper.ClientResolutionMode = .ignoreCache,
+            streamVideoEnvironment: StreamVideo.Environment = .silentAudioDevice,
             overrideAPIKey: String? = nil,
             overrideToken: String? = nil
         ) async throws -> CallFlow<Void> {
@@ -98,9 +114,11 @@ extension Call_IntegrationTests {
                 userId: userId,
                 connectMode: .afterInit,
                 clientResolutionMode: clientResolutionMode,
-                clientRegisterMode: .auto
+                clientRegisterMode: .auto,
+                streamVideoEnvironment: streamVideoEnvironment
             )
             let call = client.call(callType: type, callId: id)
+            await call.updateAudioSessionPolicy(InactiveAudioSessionPolicy())
             registeredCalls[userId] = call
             return .init(
                 client: client,
