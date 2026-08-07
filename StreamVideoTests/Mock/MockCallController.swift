@@ -96,7 +96,7 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
         .allCases
         .reduce(into: [FunctionKey: [MockFunctionInputKey]]()) { $0[$1] = [] }
 
-    convenience init() {
+    convenience init(initialCallSettings: CallSettings = .default) {
         self.init(
             defaultAPI: MockDefaultAPIEndpoints(),
             user: .dummy(),
@@ -104,7 +104,7 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
             callType: .unique,
             apiKey: .unique,
             videoConfig: .dummy(),
-            initialCallSettings: .default,
+            initialCallSettings: initialCallSettings,
             cachedLocation: nil
         )
     }
