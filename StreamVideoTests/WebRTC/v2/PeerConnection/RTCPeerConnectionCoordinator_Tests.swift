@@ -92,6 +92,30 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
         XCTAssertTrue(iceConnectionStateAdapter.peerConnectionCoordinator === subject)
     }
 
+    func test_disconnectedPublisher_peerConnectionDisconnected_doesNotPublish() {
+        var receivedEvents = 0
+        let cancellable = subject.disconnectedPublisher.sink { receivedEvents += 1 }
+
+        mockPeerConnection.subject.send(
+            StreamRTCPeerConnection.DidChangeConnectionStateEvent(state: .disconnected)
+        )
+
+        XCTAssertEqual(receivedEvents, 0)
+        cancellable.cancel()
+    }
+
+    func test_disconnectedPublisher_peerConnectionFailed_publishes() {
+        var receivedEvents = 0
+        let cancellable = subject.disconnectedPublisher.sink { receivedEvents += 1 }
+
+        mockPeerConnection.subject.send(
+            StreamRTCPeerConnection.DidChangeConnectionStateEvent(state: .failed)
+        )
+
+        XCTAssertEqual(receivedEvents, 1)
+        cancellable.cancel()
+    }
+
     // MARK: - isHealthy
 
     func test_isHealthy_ICEConnectionFailed_ConnectionStateHealthy_returnsFalse() {

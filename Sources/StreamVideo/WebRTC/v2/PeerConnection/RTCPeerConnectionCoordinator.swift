@@ -85,7 +85,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     var disconnectedPublisher: AnyPublisher<Void, Never> {
         peerConnection
             .publisher(eventType: StreamRTCPeerConnection.DidChangeConnectionStateEvent.self)
-            .filter { $0.state == .disconnected || $0.state == .failed }
+            .filter { $0.state == .failed }
             .map { _ in () }
             .eraseToAnyPublisher()
     }
