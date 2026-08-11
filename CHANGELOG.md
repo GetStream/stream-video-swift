@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Prevent CallKit-driven joins from disconnecting and rejoining while waiting for audio-session activation. [#1218](https://github.com/GetStream/stream-video-swift/pull/1218)
 - Fixed a crash caused by completing a PushKit VoIP notification before CallKit finished reporting its incoming call. [#1221](https://github.com/GetStream/stream-video-swift/pull/1221)
 - Fixed a crash that could occur when setting up call participant observation from a background thread. [#1225](https://github.com/GetStream/stream-video-swift/pull/1225)
+- Transient peer-connection disconnections no longer trigger an immediate full rejoin, allowing the existing ICE restart flow to recover the session. [#1231](https://github.com/GetStream/stream-video-swift/pull/1231)
 
 ### 🔄 Changed
 
