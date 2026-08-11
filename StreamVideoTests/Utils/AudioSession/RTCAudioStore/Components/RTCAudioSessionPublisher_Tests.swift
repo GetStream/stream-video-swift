@@ -39,6 +39,14 @@ final class RTCAudioSessionPublisher_Tests: XCTestCase, @unchecked Sendable {
         }
     }
 
+    // MARK: - audioSessionMediaServerReset
+
+    func test_audioSessionMediaServerReset_publishedCorrectEvent() async {
+        await assertEvent(.mediaServicesWereReset) {
+            subject.audioSessionMediaServerReset(.sharedInstance())
+        }
+    }
+
     // MARK: - audioSessionDidChangeRoute
 
     func test_audioSessionDidChangeRoute_publishedCorrectEvent() async {

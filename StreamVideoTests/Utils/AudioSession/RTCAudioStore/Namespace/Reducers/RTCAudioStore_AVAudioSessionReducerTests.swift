@@ -193,6 +193,50 @@ final class RTCAudioStore_AVAudioSessionReducerTests: XCTestCase, @unchecked Sen
         XCTAssertEqual(session.timesCalled(.setConfiguration), 1)
     }
 
+    func test_reduce_restoreOutputAfterMediaServicesReset_reappliesCachedOverride() async throws {
+        let state = makeState(
+            category: .playAndRecord,
+            mode: .voiceChat,
+            options: [],
+            overrideOutput: .speaker
+        )
+
+        let result = try await subject.reduce(
+            state: state,
+            action: .avAudioSession(.restoreOutputAudioPortAfterMediaServicesReset),
+            file: #file,
+            function: #function,
+            line: #line
+        )
+
+        XCTAssertEqual(result, state)
+        let recorded = session.recordedInputPayload(
+            AVAudioSession.PortOverride.self,
+            for: .overrideOutputAudioPort
+        ) ?? []
+        XCTAssertEqual(recorded, [.speaker])
+    }
+
+    func test_reduce_restoreOutputAfterMediaServicesReset_nonPlayAndRecord_skipsOverride() async throws {
+        let state = makeState(
+            category: .playback,
+            mode: .default,
+            options: [.defaultToSpeaker],
+            overrideOutput: .speaker
+        )
+
+        let result = try await subject.reduce(
+            state: state,
+            action: .avAudioSession(.restoreOutputAudioPortAfterMediaServicesReset),
+            file: #file,
+            function: #function,
+            line: #line
+        )
+
+        XCTAssertEqual(result, state)
+        XCTAssertEqual(session.timesCalled(.overrideOutputAudioPort), 0)
+    }
+
     func test_reduce_systemSetCategory_updatesStateWithoutCallingSession() async throws {
         let state = makeState(
             category: .playback,

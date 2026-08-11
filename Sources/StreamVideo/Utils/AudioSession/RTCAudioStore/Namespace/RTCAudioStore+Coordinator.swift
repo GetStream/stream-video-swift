@@ -106,7 +106,10 @@ extension RTCAudioStore {
 
         // MARK: - Private Helpers
 
-        /// Determines if an AVAudioSession action would alter the configuration.
+        /// Determines if an AVAudioSession action should reach the reducer.
+        ///
+        /// Media-services recovery always executes because the system can lose
+        /// live route state without changing the cached configuration.
         private func shouldExecute(
             action: StoreAction.AVAudioSessionAction,
             state: StoreState.AVAudioSessionConfiguration
@@ -144,6 +147,9 @@ extension RTCAudioStore {
 
             case let .setOverrideOutputAudioPort(value):
                 return value != state.overrideOutputAudioPort
+
+            case .restoreOutputAudioPortAfterMediaServicesReset:
+                return true
             }
         }
 
