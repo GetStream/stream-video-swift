@@ -139,7 +139,7 @@ final class RTCAudioStore_InterruptionsEffectTests: XCTestCase, @unchecked Senda
             return XCTFail("Expected dispatched actions.")
         }
 
-        XCTAssertEqual(actions.count, 4)
+        XCTAssertEqual(actions.count, 3)
         guard case .setInterrupted(false) = actions[0].wrappedValue else {
             return XCTFail("Expected action[0] setInterrupted(false).")
         }
@@ -148,9 +148,6 @@ final class RTCAudioStore_InterruptionsEffectTests: XCTestCase, @unchecked Senda
         }
         guard case .setRecording(true) = actions[2].wrappedValue else {
             return XCTFail("Expected action[2] setRecording(true).")
-        }
-        guard case .setMicrophoneMuted(true) = actions[3].wrappedValue else {
-            return XCTFail("Expected action[3] setMicrophoneMuted(true).")
         }
     }
 
@@ -182,7 +179,7 @@ final class RTCAudioStore_InterruptionsEffectTests: XCTestCase, @unchecked Senda
             return XCTFail("Expected dispatched actions.")
         }
 
-        XCTAssertEqual(actions.count, 6)
+        XCTAssertEqual(actions.count, 5)
         guard case .setInterrupted(false) = actions[0].wrappedValue else {
             return XCTFail("Expected action[0] setInterrupted(false).")
         }
@@ -197,9 +194,6 @@ final class RTCAudioStore_InterruptionsEffectTests: XCTestCase, @unchecked Senda
         }
         guard case .setMutedSpeechDetectionEnabled(true) = actions[4].wrappedValue else {
             return XCTFail("Expected action[4] setMutedSpeechDetectionEnabled(true).")
-        }
-        guard case .setMicrophoneMuted(true) = actions[5].wrappedValue else {
-            return XCTFail("Expected action[5] setMicrophoneMuted(true).")
         }
     }
 
