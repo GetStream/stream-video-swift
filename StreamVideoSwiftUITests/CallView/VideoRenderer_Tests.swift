@@ -3,9 +3,11 @@
 //
 
 import Combine
+import ObjectiveC
 import StreamSwiftTestHelpers
 @testable import StreamVideo
 @testable import StreamVideoSwiftUI
+import StreamWebRTC
 import XCTest
 
 @MainActor
@@ -53,6 +55,40 @@ final class VideoRenderer_Tests: XCTestCase, @unchecked Sendable {
             thermalState: .critical,
             expected: Double(maximumFramesPerSecond) * 0.4
         )
+    }
+
+    func test_handleViewRendering_trackEnabledStateWasNotRead() throws {
+        let originalLogLevel = LogConfig.level
+        LogConfig.level = .info
+        defer { LogConfig.level = originalLogLevel }
+
+        let factory = PeerConnectionFactory.build(
+            audioProcessingModule: MockAudioProcessingModule.shared
+        )
+        let track = factory.makeVideoTrack(
+            source: factory.makeVideoSource(forScreenShare: false)
+        )
+        let participant = CallParticipant.dummy(track: track)
+        let selector = #selector(getter: RTCMediaStreamTrack.isEnabled)
+        let method = try XCTUnwrap(
+            class_getInstanceMethod(RTCMediaStreamTrack.self, selector)
+        )
+        let originalImplementation = method_getImplementation(method)
+        var wasRead = false
+        let replacement: @convention(block) (RTCMediaStreamTrack) -> Bool = { _ in
+            wasRead = true
+            return true
+        }
+        let replacementImplementation = imp_implementationWithBlock(replacement)
+        method_setImplementation(method, replacementImplementation)
+        defer {
+            method_setImplementation(method, originalImplementation)
+            imp_removeBlock(replacementImplementation)
+        }
+
+        subject.handleViewRendering(for: participant) { _, _ in }
+
+        XCTAssertFalse(wasRead)
     }
 
     // MARK: - Private helpers

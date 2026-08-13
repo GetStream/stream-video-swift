@@ -130,6 +130,67 @@ final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(source.timesCalled(.startRecording), 0)
     }
 
+    func test_setRecording_whenNativeStartUnmutes_restoresMuteBeforePublishingRecording() throws {
+        source.stub(for: \.isMicrophoneMuted, with: true)
+        source.stub(for: \.isRecordingInitialized, with: true)
+        makeSubject()
+        var muteCallCountWhenRecordingWasPublished: Int?
+        subject.isRecordingPublisher
+            .dropFirst()
+            .sink { [weak source] isRecording in
+                guard isRecording else { return }
+                muteCallCountWhenRecordingWasPublished =
+                    source?.timesCalled(.setMicrophoneMuted)
+            }
+            .store(in: &cancellables)
+        source.onInvoke = { [weak source] function in
+            guard function == .startRecording else { return }
+            source?.stub(for: \.isMicrophoneMuted, with: false)
+        }
+
+        try subject.setRecording(true)
+
+        XCTAssertEqual(
+            source.recordedInputPayload(Bool.self, for: .setMicrophoneMuted),
+            [true]
+        )
+        XCTAssertEqual(muteCallCountWhenRecordingWasPublished, 1)
+        XCTAssertTrue(subject.isMicrophoneMuted)
+    }
+
+    func test_setRecording_whenMuteRestorationFails_stopsRecording() {
+        source.stub(for: \.isMicrophoneMuted, with: true)
+        source.stub(for: \.isRecordingInitialized, with: true)
+        source.stub(for: .setMicrophoneMuted, with: -1)
+        makeSubject()
+        source.onInvoke = { [weak source] function in
+            guard function == .startRecording else { return }
+            source?.stub(for: \.isMicrophoneMuted, with: false)
+        }
+
+        XCTAssertThrowsError(try subject.setRecording(true))
+
+        XCTAssertEqual(source.timesCalled(.stopRecording), 1)
+        XCTAssertFalse(subject.isRecording)
+    }
+
+    func test_setRecording_whenMuteRestorationAndRollbackFail_reconcilesState() {
+        source.stub(for: \.isMicrophoneMuted, with: true)
+        source.stub(for: \.isRecordingInitialized, with: true)
+        source.stub(for: .setMicrophoneMuted, with: -1)
+        source.stub(for: .stopRecording, with: -1)
+        makeSubject()
+        source.onInvoke = { [weak source] function in
+            guard function == .startRecording else { return }
+            source?.stub(for: \.isMicrophoneMuted, with: false)
+        }
+
+        XCTAssertThrowsError(try subject.setRecording(true))
+
+        XCTAssertFalse(subject.isRecording)
+        XCTAssertFalse(subject.isMicrophoneMuted)
+    }
+
     func test_setRecording_whenDeactivating_callsStopRecording() throws {
         source.stub(for: \.isRecording, with: true)
         makeSubject()
@@ -159,6 +220,17 @@ final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
         try subject.setMuted(true)
 
         XCTAssertEqual(source.timesCalled(.setMicrophoneMuted), 0)
+    }
+
+    func test_setMuted_whenNativeStateAlreadyMatches_reconcilesCachedState() throws {
+        source.stub(for: \.isMicrophoneMuted, with: true)
+        makeSubject()
+        source.stub(for: \.isMicrophoneMuted, with: false)
+
+        try subject.setMuted(false)
+
+        XCTAssertEqual(source.timesCalled(.setMicrophoneMuted), 0)
+        XCTAssertFalse(subject.isMicrophoneMuted)
     }
 
     func test_setMuted_whenMuting_updatesStateAndPublisher() throws {
