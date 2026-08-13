@@ -193,13 +193,14 @@ final class RTCAudioStore_AVAudioSessionReducerTests: XCTestCase, @unchecked Sen
         XCTAssertEqual(session.timesCalled(.setConfiguration), 1)
     }
 
-    func test_reduce_restoreOutputAfterMediaServicesReset_reappliesCachedOverride() async throws {
+    func test_reduce_restoreOutputAfterMediaServicesReset_livePlayAndRecord_reappliesCachedOverride() async throws {
         let state = makeState(
-            category: .playAndRecord,
-            mode: .voiceChat,
+            category: .init(rawValue: ""),
+            mode: .init(rawValue: ""),
             options: [],
             overrideOutput: .speaker
         )
+        session.category = AVAudioSession.Category.playAndRecord.rawValue
 
         let result = try await subject.reduce(
             state: state,
@@ -219,11 +220,12 @@ final class RTCAudioStore_AVAudioSessionReducerTests: XCTestCase, @unchecked Sen
 
     func test_reduce_restoreOutputAfterMediaServicesReset_nonPlayAndRecord_skipsOverride() async throws {
         let state = makeState(
-            category: .playback,
-            mode: .default,
+            category: .playAndRecord,
+            mode: .voiceChat,
             options: [.defaultToSpeaker],
             overrideOutput: .speaker
         )
+        session.category = AVAudioSession.Category.playback.rawValue
 
         let result = try await subject.reduce(
             state: state,
@@ -276,6 +278,24 @@ final class RTCAudioStore_AVAudioSessionReducerTests: XCTestCase, @unchecked Sen
         let result = try await subject.reduce(
             state: state,
             action: .setCurrentRoute(speakerRoute),
+            file: #file,
+            function: #function,
+            line: #line
+        )
+
+        XCTAssertEqual(result.audioSessionConfiguration.overrideOutputAudioPort, .speaker)
+    }
+
+    func test_reduce_setCurrentRoute_categoryChange_preservesOverridePort() async throws {
+        let state = makeState(overrideOutput: .speaker)
+        let receiverRoute = RTCAudioStore.StoreState.AudioRoute.dummy(
+            outputs: [.dummy(isReceiver: true)],
+            reason: .categoryChange
+        )
+
+        let result = try await subject.reduce(
+            state: state,
+            action: .setCurrentRoute(receiverRoute),
             file: #file,
             function: #function,
             line: #line

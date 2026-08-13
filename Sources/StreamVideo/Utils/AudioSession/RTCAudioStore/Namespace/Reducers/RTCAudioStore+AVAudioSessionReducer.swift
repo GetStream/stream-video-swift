@@ -32,7 +32,8 @@ extension RTCAudioStore.Namespace {
         ) async throws -> State {
             var updatedState = state
 
-            if case let .setCurrentRoute(value) = action {
+            if case let .setCurrentRoute(value) = action,
+               value.reason.isValidRouteChange {
                 updatedState.audioSessionConfiguration.overrideOutputAudioPort = value.isSpeaker ? .speaker : .none
             }
 
@@ -141,7 +142,9 @@ extension RTCAudioStore.Namespace {
             case .restoreOutputAudioPortAfterMediaServicesReset:
                 // WebRTC restores category options. Only play-and-record uses
                 // an explicit output override that is not part of its config.
-                guard state.audioSessionConfiguration.category == .playAndRecord else {
+                // Read the live category because the mirrored store snapshot
+                // can still contain pre-reset values at this callback boundary.
+                guard source.category == AVAudioSession.Category.playAndRecord.rawValue else {
                     return updatedState
                 }
                 // This changes route policy without activating the session, so
