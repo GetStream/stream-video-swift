@@ -64,6 +64,9 @@ final class WebRTCCoordinator: @unchecked Sendable {
     ///   - callSettings: Initial media settings applied before the join flow
     ///     starts.
     ///   - clientEventReporter: Reports join-lifecycle client events.
+    ///   - peerConnectionFactory: An optional preconfigured factory. When
+    ///     omitted, the coordinator creates the standard production factory
+    ///     from `videoConfig`.
     ///   - rtcPeerConnectionCoordinatorFactory: Factory for creating peer
     ///     connection coordinators.
     ///   - webRTCAuthenticator: The authenticator used during WebRTC flows.
@@ -75,17 +78,22 @@ final class WebRTCCoordinator: @unchecked Sendable {
         videoConfig: VideoConfig,
         callSettings: CallSettings,
         clientEventReporter: ClientEventReporting,
+        peerConnectionFactory: PeerConnectionFactory? = nil,
         rtcPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinatorProviding = StreamRTCPeerConnectionCoordinatorFactory(),
         webRTCAuthenticator: WebRTCAuthenticating = WebRTCAuthenticator(),
         callAuthentication: @escaping AuthenticationHandler
     ) {
         let stateMachine = StateMachine.init(.init(coordinator: nil))
+        let peerConnectionFactory = peerConnectionFactory ?? .build(
+            audioProcessingModule: videoConfig.audioProcessingModule
+        )
         stateAdapter = .init(
             user: user,
             apiKey: apiKey,
             callCid: callCid,
             videoConfig: videoConfig,
             callSettings: callSettings,
+            peerConnectionFactory: peerConnectionFactory,
             clientEventReporter: clientEventReporter,
             rtcPeerConnectionCoordinatorFactory: rtcPeerConnectionCoordinatorFactory,
             stagePublisher: stateMachine.publisher.map(\.id).eraseToAnyPublisher()

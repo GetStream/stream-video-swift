@@ -975,9 +975,11 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
             return true
         }()
 
-        try peerConnectionFactory.audioDeviceModule.setEngineAvailability(
-            !sourceIsCallKit || audioStore.state.isActive
-        )
+        let isAudioEngineAvailable = peerConnectionFactory
+            .audioEngineAvailabilityOverride
+            ?? (!sourceIsCallKit || audioStore.state.isActive)
+        try peerConnectionFactory.audioDeviceModule
+            .setEngineAvailability(isAudioEngineAvailable)
 
         try await audioStore.dispatch(
             [

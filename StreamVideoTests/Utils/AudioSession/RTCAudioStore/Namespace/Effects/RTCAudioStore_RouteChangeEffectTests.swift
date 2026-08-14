@@ -65,6 +65,21 @@ final class RTCAudioStore_RouteChangeEffectTests: XCTestCase, @unchecked Sendabl
         XCTAssertEqual(route, expectedRoute)
     }
 
+    func test_mediaServicesReset_dispatchesRestoreOutputAudioPort() async {
+        dispatcherExpectation = expectation(description: "Dispatches route recovery")
+
+        publisher.audioSessionMediaServerReset(session)
+
+        await safeFulfillment(of: [dispatcherExpectation!], timeout: 1)
+
+        let actions = dispatchedActions.flatMap { $0.map(\.wrappedValue) }
+        guard
+            case .avAudioSession(.restoreOutputAudioPortAfterMediaServicesReset) = actions.first
+        else {
+            return XCTFail("Expected route recovery action.")
+        }
+    }
+
     func test_nonRouteEvents_doNotDispatch() async {
         let invertedExpectation = expectation(description: "No dispatch")
         invertedExpectation.isInverted = true

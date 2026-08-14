@@ -382,25 +382,17 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
 
         let creatorFlow = try await creatorUserFlow
             .perform { try await $0.call.create(memberIds: [creatorUserId, participantUserId]) }
+            .perform { try await $0.call.join() }
 
-        try await withThrowingTaskGroup(of: Void.self) { group in
-            group.addTask {
-                try await creatorFlow
-                    .perform { try await $0.call.join() }
-                    .subscribe(for: CustomVideoEvent.self)
-                    .assertEventually { (event: CustomVideoEvent) in event.custom["state"] == "joined" }
-                    .perform { try await $0.call.end() }
+        let participantFlow = try await participantUserFlow
+            .perform { try await $0.call.join() }
+
+        _ = try await creatorFlow.call.end()
+
+        try await participantFlow
+            .assertEventuallyInMainActor(timeout: 30) {
+                $0.call.streamVideo.state.activeCall == nil
             }
-
-            group.addTask {
-                try await participantUserFlow
-                    .perform { try await $0.call.join() }
-                    .perform { try await $0.call.sendCustomEvent(["state": "joined"]) }
-                    .assertEventuallyInMainActor { $0.call.streamVideo.state.activeCall == nil }
-            }
-
-            try await group.waitForAll()
-        }
     }
 
     // MARK: - SendReactions
@@ -820,7 +812,12 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
             group.addTask {
                 try await self
                     .helpers
-                    .callFlow(id: callId, type: .audioRoom, userId: participant, environment: "demo")
+                    .callFlow(
+                        id: callId,
+                        type: .audioRoom,
+                        userId: participant,
+                        environment: "demo"
+                    )
                     .perform { try await $0.call.join(callSettings: .init(audioOn: false, videoOn: false)) }
                     .assertEventuallyInMainActor { $0.call.state.participants.endIndex == 2 }
                     .assertEventuallyInMainActor { $0.call.currentUserHasCapability(.sendAudio) == false }
@@ -993,7 +990,12 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
             group.addTask {
                 try await self
                     .helpers
-                    .callFlow(id: callId, type: .audioRoom, userId: participant, environment: "demo")
+                    .callFlow(
+                        id: callId,
+                        type: .audioRoom,
+                        userId: participant,
+                        environment: "demo"
+                    )
                     .perform { try await $0.call.join(callSettings: .init(audioOn: false, videoOn: false)) }
                     .assertEventuallyInMainActor { $0.call.currentUserHasCapability(.sendVideo) == false }
                     .assertEventuallyInMainActor { $0.call.state.callSettings.videoOn == false }
@@ -1149,32 +1151,34 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
 
         let user2CallFlow = try await helpers
             .callFlow(id: callId, type: .default, userId: user2)
-            .assertEventuallyInMainActor { $0.call.state.sessionId.isEmpty == false }
 
-        let user1CallFlowAfterCallCreation = try await user1CallFlow
+        let user1JoinedFlow = try await user1CallFlow
             .perform { try await $0.call.create(memberIds: [user1, user2]) }
             .perform { try await $0.call.join() }
 
-        let user2SessionId = await user2CallFlow.call.state.sessionId
+        let user2JoinedFlow = try await user2CallFlow
+            .perform { try await $0.call.join() }
+            .assertEventuallyInMainActor { $0.call.state.sessionId.isEmpty == false }
+        let user2SessionId = await user2JoinedFlow.call.state.sessionId
 
-        try await withThrowingTaskGroup(of: Void.self) { group in
-            group.addTask {
-                try await user1CallFlowAfterCallCreation
-                    .subscribe(for: CustomVideoEvent.self)
-                    .assertEventually { (event: CustomVideoEvent) in event.custom["state"] == "joined" }
-                    .perform { try await $0.call.pinForEveryone(userId: user2, sessionId: user2SessionId) }
-                    .assertEventuallyInMainActor { $0.call.state.participantsMap[user2SessionId]?.pin != nil }
+        try await user1JoinedFlow
+            .assertEventuallyInMainActor {
+                $0.call.state.participantsMap[user2SessionId] != nil
+            }
+            .perform {
+                try await $0.call.pinForEveryone(
+                    userId: user2,
+                    sessionId: user2SessionId
+                )
+            }
+            .assertEventuallyInMainActor {
+                $0.call.state.participantsMap[user2SessionId]?.pin != nil
             }
 
-            group.addTask {
-                try await user2CallFlow
-                    .perform { try await $0.call.join() }
-                    .perform { try await $0.call.sendCustomEvent(["state": "joined"]) }
-                    .assertEventuallyInMainActor { $0.call.state.participantsMap[user2SessionId]?.pin != nil }
+        try await user2JoinedFlow
+            .assertEventuallyInMainActor {
+                $0.call.state.participantsMap[user2SessionId]?.pin != nil
             }
-
-            try await group.waitForAll()
-        }
     }
 
     func test_pin_whenUserGetsPinnedLocally_thenCallStateOfLocalParticipantOnlyUpdatesAsExpected() async throws {
@@ -1187,32 +1191,29 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
 
         let user2CallFlow = try await helpers
             .callFlow(id: callId, type: .default, userId: user2)
-            .assertEventuallyInMainActor { $0.call.state.sessionId.isEmpty == false }
 
-        let user1CallFlowAfterCallCreation = try await user1CallFlow
+        let user1JoinedFlow = try await user1CallFlow
             .perform { try await $0.call.create(memberIds: [user1, user2]) }
             .perform { try await $0.call.join() }
 
-        let user2SessionId = await user2CallFlow.call.state.sessionId
+        let user2JoinedFlow = try await user2CallFlow
+            .perform { try await $0.call.join() }
+            .assertEventuallyInMainActor { $0.call.state.sessionId.isEmpty == false }
+        let user2SessionId = await user2JoinedFlow.call.state.sessionId
 
-        try await withThrowingTaskGroup(of: Void.self) { group in
-            group.addTask {
-                try await user1CallFlowAfterCallCreation
-                    .subscribe(for: CustomVideoEvent.self)
-                    .assertEventually { (event: CustomVideoEvent) in event.custom["state"] == "joined" }
-                    .perform { try await $0.call.pin(sessionId: user2SessionId) }
-                    .assertEventuallyInMainActor { $0.call.state.participantsMap[user2SessionId]?.pin?.isLocal == true }
+        try await user1JoinedFlow
+            .assertEventuallyInMainActor {
+                $0.call.state.participantsMap[user2SessionId] != nil
+            }
+            .perform { try await $0.call.pin(sessionId: user2SessionId) }
+            .assertEventuallyInMainActor {
+                $0.call.state.participantsMap[user2SessionId]?.pin?.isLocal == true
             }
 
-            group.addTask {
-                try await user2CallFlow
-                    .perform { try await $0.call.join() }
-                    .perform { try await $0.call.sendCustomEvent(["state": "joined"]) }
-                    .assertEventuallyInMainActor { $0.call.state.participantsMap[user2SessionId]?.pin == nil }
+        try await user2JoinedFlow
+            .assertEventuallyInMainActor {
+                $0.call.state.participantsMap[user2SessionId]?.pin == nil
             }
-
-            try await group.waitForAll()
-        }
     }
 
     // MARK: - Unpin
@@ -1227,34 +1228,50 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
 
         let user2CallFlow = try await helpers
             .callFlow(id: callId, type: .default, userId: user2)
-            .assertEventuallyInMainActor { $0.call.state.sessionId.isEmpty == false }
 
-        let user1CallFlowAfterCallCreation = try await user1CallFlow
+        let user1JoinedFlow = try await user1CallFlow
             .perform { try await $0.call.create(memberIds: [user1, user2]) }
             .perform { try await $0.call.join() }
 
-        let user2SessionId = await user2CallFlow.call.state.sessionId
+        let user2JoinedFlow = try await user2CallFlow
+            .perform { try await $0.call.join() }
+            .assertEventuallyInMainActor { $0.call.state.sessionId.isEmpty == false }
+        let user2SessionId = await user2JoinedFlow.call.state.sessionId
 
-        try await withThrowingTaskGroup(of: Void.self) { group in
-            group.addTask {
-                try await user1CallFlowAfterCallCreation
-                    .subscribe(for: CustomVideoEvent.self)
-                    .assertEventually { (event: CustomVideoEvent) in event.custom["state"] == "joined" }
-                    .perform { try await $0.call.pinForEveryone(userId: user2, sessionId: user2SessionId) }
-                    .assertEventuallyInMainActor { $0.call.state.participantsMap[user2SessionId]?.pin != nil }
-                    .perform { try await $0.call.unpinForEveryone(userId: user2, sessionId: user2SessionId) }
+        try await user1JoinedFlow
+            .assertEventuallyInMainActor {
+                $0.call.state.participantsMap[user2SessionId] != nil
+            }
+            .perform {
+                try await $0.call.pinForEveryone(
+                    userId: user2,
+                    sessionId: user2SessionId
+                )
+            }
+            .assertEventuallyInMainActor {
+                $0.call.state.participantsMap[user2SessionId]?.pin != nil
             }
 
-            group.addTask {
-                try await user2CallFlow
-                    .perform { try await $0.call.join() }
-                    .perform { try await $0.call.sendCustomEvent(["state": "joined"]) }
-                    .assertEventuallyInMainActor { $0.call.state.participantsMap[user2SessionId]?.pin != nil }
-                    .assertEventuallyInMainActor { $0.call.state.participantsMap[user2SessionId]?.pin == nil }
+        try await user2JoinedFlow
+            .assertEventuallyInMainActor {
+                $0.call.state.participantsMap[user2SessionId]?.pin != nil
             }
 
-            try await group.waitForAll()
-        }
+        try await user1JoinedFlow
+            .perform {
+                try await $0.call.unpinForEveryone(
+                    userId: user2,
+                    sessionId: user2SessionId
+                )
+            }
+            .assertEventuallyInMainActor {
+                $0.call.state.participantsMap[user2SessionId]?.pin == nil
+            }
+
+        try await user2JoinedFlow
+            .assertEventuallyInMainActor {
+                $0.call.state.participantsMap[user2SessionId]?.pin == nil
+            }
     }
 
     func test_pin_whenUserGetsUnpinnedLocally_thenCallStateOfLocalParticipantOnlyUpdatesAsExpected() async throws {
@@ -1267,34 +1284,40 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
 
         let user2CallFlow = try await helpers
             .callFlow(id: callId, type: .default, userId: user2)
-            .assertEventuallyInMainActor { $0.call.state.sessionId.isEmpty == false }
 
-        let user1CallFlowAfterCallCreation = try await user1CallFlow
+        let user1JoinedFlow = try await user1CallFlow
             .perform { try await $0.call.create(memberIds: [user1, user2]) }
             .perform { try await $0.call.join() }
 
-        let user2SessionId = await user2CallFlow.call.state.sessionId
+        let user2JoinedFlow = try await user2CallFlow
+            .perform { try await $0.call.join() }
+            .assertEventuallyInMainActor { $0.call.state.sessionId.isEmpty == false }
+        let user2SessionId = await user2JoinedFlow.call.state.sessionId
 
-        try await withThrowingTaskGroup(of: Void.self) { group in
-            group.addTask {
-                try await user1CallFlowAfterCallCreation
-                    .subscribe(for: CustomVideoEvent.self)
-                    .assertEventually { (event: CustomVideoEvent) in event.custom["state"] == "joined" }
-                    .perform { try await $0.call.pin(sessionId: user2SessionId) }
-                    .assertEventuallyInMainActor { $0.call.state.participantsMap[user2SessionId]?.pin?.isLocal == true }
-                    .perform { try await $0.call.unpin(sessionId: user2SessionId) }
-                    .assertEventuallyInMainActor { $0.call.state.participantsMap[user2SessionId]?.pin == nil }
+        try await user1JoinedFlow
+            .assertEventuallyInMainActor {
+                $0.call.state.participantsMap[user2SessionId] != nil
+            }
+            .perform { try await $0.call.pin(sessionId: user2SessionId) }
+            .assertEventuallyInMainActor {
+                $0.call.state.participantsMap[user2SessionId]?.pin?.isLocal == true
             }
 
-            group.addTask {
-                try await user2CallFlow
-                    .perform { try await $0.call.join() }
-                    .perform { try await $0.call.sendCustomEvent(["state": "joined"]) }
-                    .assertEventuallyInMainActor { $0.call.state.participantsMap[user2SessionId]?.pin == nil }
+        try await user2JoinedFlow
+            .assertEventuallyInMainActor {
+                $0.call.state.participantsMap[user2SessionId]?.pin == nil
             }
 
-            try await group.waitForAll()
-        }
+        try await user1JoinedFlow
+            .perform { try await $0.call.unpin(sessionId: user2SessionId) }
+            .assertEventuallyInMainActor {
+                $0.call.state.participantsMap[user2SessionId]?.pin == nil
+            }
+
+        try await user2JoinedFlow
+            .assertEventuallyInMainActor {
+                $0.call.state.participantsMap[user2SessionId]?.pin == nil
+            }
     }
 
     // MARK: - Leave

@@ -101,7 +101,7 @@ class CallController: @unchecked Sendable {
 
         _ = webRTCCoordinator
 
-        Task(disposableBag: disposableBag) { [weak self] in
+        Task(disposableBag: disposableBag) { @MainActor [weak self] in
             guard let self else { return }
             await handleParticipantCountUpdated()
             let participantsPublisher = await webRTCCoordinator.stateAdapter.$participants

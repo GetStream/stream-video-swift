@@ -145,6 +145,7 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
 
     func test_execute_withoutRetries_callStateCallSettingsPreservedFromBeforeJoin() async throws {
         let expectedCallSettings = CallSettings(audioOn: false)
+        self.callController = .init(initialCallSettings: expectedCallSettings)
         self.call?.state.callSettings = expectedCallSettings
 
         let context = Call.StateMachine.Stage.Context(
@@ -201,12 +202,14 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
     }
 
     func test_execute_withoutRetries_updatesCallSettingsManagers() async throws {
+        let expectedCallSettings = CallSettings(audioOn: false)
+        self.callController = .init(initialCallSettings: expectedCallSettings)
         let context = Call.StateMachine.Stage.Context(
             call: call,
             input: .join(
                 .init(
                     create: true,
-                    callSettings: .init(audioOn: false),
+                    callSettings: expectedCallSettings,
                     options: .init(memberIds: [.unique]),
                     ring: true,
                     notify: false,

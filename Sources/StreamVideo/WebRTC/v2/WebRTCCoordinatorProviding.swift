@@ -36,6 +36,21 @@ protocol WebRTCCoordinatorProviding {
 /// `buildCoordinator` method that creates and returns a `WebRTCCoordinator`.
 struct WebRTCCoordinatorFactory: WebRTCCoordinatorProviding {
 
+    /// An optional preconfigured factory forwarded to each coordinator.
+    ///
+    /// A `nil` value preserves the default production WebRTC audio and video
+    /// pipeline.
+    private let peerConnectionFactory: PeerConnectionFactory?
+
+    /// Creates a coordinator factory with an optional peer-connection factory
+    /// override.
+    ///
+    /// - Parameter peerConnectionFactory: A preconfigured factory to forward
+    ///   to coordinators, or `nil` to let each coordinator build its default.
+    init(peerConnectionFactory: PeerConnectionFactory? = nil) {
+        self.peerConnectionFactory = peerConnectionFactory
+    }
+
     /// Builds and returns a `WebRTCCoordinator` using the provided parameters.
     ///
     /// - Parameters:
@@ -64,6 +79,7 @@ struct WebRTCCoordinatorFactory: WebRTCCoordinatorProviding {
             videoConfig: videoConfig,
             callSettings: callSettings,
             clientEventReporter: clientEventReporter,
+            peerConnectionFactory: peerConnectionFactory,
             callAuthentication: callAuthentication
         )
     }

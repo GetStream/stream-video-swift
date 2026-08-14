@@ -7,7 +7,7 @@ import Foundation
 
 extension SystemEnvironment {
   /// A Stream Video version.
-  public static let version: String = "1.51.0-SNAPSHOT"
+  public static let version: String = "1.52.0-SNAPSHOT"
   /// The WebRTC version.
-  public static let webRTCVersion: String = "145.12.0"
+  public static let webRTCVersion: String = "145.15.0"
 }
