@@ -370,6 +370,7 @@
 				TestUtils/UniqueValues.swift,
 				TestUtils/VirtualTime/VirtualTime.swift,
 				TestUtils/VirtualTime/VirtualTimer.swift,
+				"Utilities/Dummy/EncryptionSettingsResponse+Dummy.swift",
 				"Utilities/Dummy/LimitsSettingsResponse+Dummy.swift",
 				"Utilities/Extensions/CVPixelBuffer+Convenience.swift",
 				"Utilities/Extensions/Stream_Video_Sfu_Models_ConnectionQuality+Convenience.swift",
