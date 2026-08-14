@@ -4,10 +4,13 @@
 
 import Foundation
 
-public final class JoinCallRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class JoinCallRequest: @unchecked Sendable, Codable, JSONEncodable {
     /// if true the call will be created if it doesn't exist
     public var create: Bool?
+    /// CallRequest is the payload for creating a call.
     public var data: CallRequest?
+    /// the encryption mode the client intends to use for this join; the join is rejected if it does not match the call's encryption configuration
+    public var e2ee: Bool?
     /// if true, the participant will be marked as publsihing to large audience
     public var hintHighScaleLivestreamPublisher: Bool?
     public var location: String
@@ -24,6 +27,7 @@ public final class JoinCallRequest: @unchecked Sendable, Codable, JSONEncodable,
     public init(
         create: Bool? = nil,
         data: CallRequest? = nil,
+        e2ee: Bool? = nil,
         hintHighScaleLivestreamPublisher: Bool? = nil,
         location: String,
         membersLimit: Int? = nil,
@@ -35,6 +39,7 @@ public final class JoinCallRequest: @unchecked Sendable, Codable, JSONEncodable,
     ) {
         self.create = create
         self.data = data
+        self.e2ee = e2ee
         self.hintHighScaleLivestreamPublisher = hintHighScaleLivestreamPublisher
         self.location = location
         self.membersLimit = membersLimit
@@ -48,6 +53,7 @@ public final class JoinCallRequest: @unchecked Sendable, Codable, JSONEncodable,
     public enum CodingKeys: String, CodingKey, CaseIterable {
         case create
         case data
+        case e2ee
         case hintHighScaleLivestreamPublisher = "hint_high_scale_livestream_publisher"
         case location
         case membersLimit = "members_limit"
@@ -57,23 +63,27 @@ public final class JoinCallRequest: @unchecked Sendable, Codable, JSONEncodable,
         case ring
         case video
     }
+}
 
+extension JoinCallRequest: Hashable {
     public static func == (lhs: JoinCallRequest, rhs: JoinCallRequest) -> Bool {
         lhs.create == rhs.create &&
-            lhs.data == rhs.data &&
-            lhs.hintHighScaleLivestreamPublisher == rhs.hintHighScaleLivestreamPublisher &&
-            lhs.location == rhs.location &&
-            lhs.membersLimit == rhs.membersLimit &&
-            lhs.migratingFrom == rhs.migratingFrom &&
-            lhs.migratingFromList == rhs.migratingFromList &&
-            lhs.notify == rhs.notify &&
-            lhs.ring == rhs.ring &&
-            lhs.video == rhs.video
+        lhs.data == rhs.data &&
+        lhs.e2ee == rhs.e2ee &&
+        lhs.hintHighScaleLivestreamPublisher == rhs.hintHighScaleLivestreamPublisher &&
+        lhs.location == rhs.location &&
+        lhs.membersLimit == rhs.membersLimit &&
+        lhs.migratingFrom == rhs.migratingFrom &&
+        lhs.migratingFromList == rhs.migratingFromList &&
+        lhs.notify == rhs.notify &&
+        lhs.ring == rhs.ring &&
+        lhs.video == rhs.video
     }
 
     public func hash(into hasher: inout Hasher) {
         hasher.combine(create)
         hasher.combine(data)
+        hasher.combine(e2ee)
         hasher.combine(hintHighScaleLivestreamPublisher)
         hasher.combine(location)
         hasher.combine(membersLimit)

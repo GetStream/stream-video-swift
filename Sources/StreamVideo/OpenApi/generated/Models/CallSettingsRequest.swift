@@ -4,10 +4,11 @@
 
 import Foundation
 
-public final class CallSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class CallSettingsRequest: @unchecked Sendable, Codable, JSONEncodable {
     public var audio: AudioSettingsRequest?
     public var backstage: BackstageSettingsRequest?
     public var broadcasting: BroadcastSettingsRequest?
+    public var encryption: EncryptionSettingsRequest?
     public var frameRecording: FrameRecordingSettingsRequest?
     public var geofencing: GeofenceSettingsRequest?
     public var individualRecording: IndividualRecordingSettingsRequest?
@@ -22,10 +23,29 @@ public final class CallSettingsRequest: @unchecked Sendable, Codable, JSONEncoda
     public var transcription: TranscriptionSettingsRequest?
     public var video: VideoSettingsRequest?
 
-    public init(audio: AudioSettingsRequest? = nil, backstage: BackstageSettingsRequest? = nil, broadcasting: BroadcastSettingsRequest? = nil, frameRecording: FrameRecordingSettingsRequest? = nil, geofencing: GeofenceSettingsRequest? = nil, individualRecording: IndividualRecordingSettingsRequest? = nil, ingress: IngressSettingsRequest? = nil, limits: LimitsSettingsRequest? = nil, rawRecording: RawRecordingSettingsRequest? = nil, recording: RecordSettingsRequest? = nil, ring: RingSettingsRequest? = nil, screensharing: ScreensharingSettingsRequest? = nil, session: SessionSettingsRequest? = nil, thumbnails: ThumbnailsSettingsRequest? = nil, transcription: TranscriptionSettingsRequest? = nil, video: VideoSettingsRequest? = nil) {
+    public init(
+        audio: AudioSettingsRequest? = nil,
+        backstage: BackstageSettingsRequest? = nil,
+        broadcasting: BroadcastSettingsRequest? = nil,
+        encryption: EncryptionSettingsRequest? = nil,
+        frameRecording: FrameRecordingSettingsRequest? = nil,
+        geofencing: GeofenceSettingsRequest? = nil,
+        individualRecording: IndividualRecordingSettingsRequest? = nil,
+        ingress: IngressSettingsRequest? = nil,
+        limits: LimitsSettingsRequest? = nil,
+        rawRecording: RawRecordingSettingsRequest? = nil,
+        recording: RecordSettingsRequest? = nil,
+        ring: RingSettingsRequest? = nil,
+        screensharing: ScreensharingSettingsRequest? = nil,
+        session: SessionSettingsRequest? = nil,
+        thumbnails: ThumbnailsSettingsRequest? = nil,
+        transcription: TranscriptionSettingsRequest? = nil,
+        video: VideoSettingsRequest? = nil
+    ) {
         self.audio = audio
         self.backstage = backstage
         self.broadcasting = broadcasting
+        self.encryption = encryption
         self.frameRecording = frameRecording
         self.geofencing = geofencing
         self.individualRecording = individualRecording
@@ -45,6 +65,7 @@ public final class CallSettingsRequest: @unchecked Sendable, Codable, JSONEncoda
         case audio
         case backstage
         case broadcasting
+        case encryption
         case frameRecording = "frame_recording"
         case geofencing
         case individualRecording = "individual_recording"
@@ -59,11 +80,14 @@ public final class CallSettingsRequest: @unchecked Sendable, Codable, JSONEncoda
         case transcription
         case video
     }
+}
 
+extension CallSettingsRequest: Hashable {
     public static func == (lhs: CallSettingsRequest, rhs: CallSettingsRequest) -> Bool {
         lhs.audio == rhs.audio &&
         lhs.backstage == rhs.backstage &&
         lhs.broadcasting == rhs.broadcasting &&
+        lhs.encryption == rhs.encryption &&
         lhs.frameRecording == rhs.frameRecording &&
         lhs.geofencing == rhs.geofencing &&
         lhs.individualRecording == rhs.individualRecording &&
@@ -83,6 +107,7 @@ public final class CallSettingsRequest: @unchecked Sendable, Codable, JSONEncoda
         hasher.combine(audio)
         hasher.combine(backstage)
         hasher.combine(broadcasting)
+        hasher.combine(encryption)
         hasher.combine(frameRecording)
         hasher.combine(geofencing)
         hasher.combine(individualRecording)
