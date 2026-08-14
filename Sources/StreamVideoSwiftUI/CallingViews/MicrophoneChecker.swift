@@ -26,15 +26,7 @@ public final class MicrophoneChecker: ObservableObject {
         audioLevels = [Float](repeating: 0.0, count: valueLimit)
         updateMetersCancellable = audioRecorder
             .$meters
-            .scan([Float](repeating: 0.0, count: valueLimit)) { [audioNormaliser, valueLimit] levels, newMeter in
-                let normalised = audioNormaliser.normalise(newMeter)
-                var result = levels
-                result.append(normalised)
-                if result.count > valueLimit {
-                    result = Array(result.dropFirst())
-                }
-                return result
-            }
+            .compactMap { [weak self] in self?.normaliseAndAppend($0) }
             .receive(on: DispatchQueue.main)
             .assign(to: \.audioLevels, onWeak: self)
     }
@@ -61,7 +53,18 @@ public final class MicrophoneChecker: ObservableObject {
     public func stopListening() async {
         log.warning("Method \(#function) has been deprecated and will be removed in the future.")
     }
+    
+    // MARK: - private
 
+    private func normaliseAndAppend(_ decibel: Float) -> [Float] {
+        let normalisedAudioLevel = audioNormaliser.normalise(decibel)
+        var temp = audioLevels
+        temp.append(normalisedAudioLevel)
+        if temp.count > valueLimit {
+            temp = Array(temp.dropFirst())
+        }
+        return temp
+    }
 }
 
 extension MicrophoneChecker: @unchecked Sendable {}
