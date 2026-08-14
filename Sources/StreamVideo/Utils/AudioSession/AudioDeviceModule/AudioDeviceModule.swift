@@ -361,15 +361,30 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         }
     }
 
-    /// Enables or disables recording on the wrapped audio device module.
+    /// Starts or stops capture while keeping published state synchronized with
+    /// the wrapped audio device module.
+    ///
+    /// Enabling snapshots the requested mute state before native recording
+    /// starts because WebRTC may reset that state while rebuilding its input
+    /// path. The mute state is restored before recording is published so
+    /// observers never receive an active state while restoration is pending.
+    ///
+    /// If mute restoration fails, the native start is rolled back before the
+    /// restoration error is returned. If rollback also fails, the cached
+    /// recording and mute values are refreshed from the native module before
+    /// the rollback error is returned.
+    ///
     /// - Parameter isEnabled: When `true` recording starts, otherwise stops.
-    /// - Throws: `ClientError` when the underlying module reports a failure.
-    /// - Note: Serialized on ``engineQueue`` with other engine mutations.
+    /// - Throws: `ClientError` when start, stop, mute restoration, or rollback
+    ///   fails in the underlying module.
+    /// - Important: Native mutations and publisher updates are serialized on
+    ///   ``engineQueue`` with the other audio-engine operations.
     func setRecording(_ isEnabled: Bool) throws {
         try engineQueue.sync {
             guard isEnabled != isRecording else {
                 return
             }
+            let isMicrophoneMuted = self.isMicrophoneMuted
             if isEnabled {
                 if source.isRecordingInitialized {
                     try throwingExecution("Unable to start recording") {
@@ -386,30 +401,47 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
                 }
             }
 
+            if isEnabled {
+                do {
+                    try setMuted(
+                        isMicrophoneMuted,
+                        startRecordingIfNeeded: false
+                    )
+                } catch let restorationError {
+                    do {
+                        try throwingExecution(
+                            "Unable to stop recording after mute restoration failed"
+                        ) {
+                            source.stopRecording()
+                        }
+                    } catch {
+                        isRecordingSubject.send(source.isRecording)
+                        if source.isMicrophoneMuted != self.isMicrophoneMuted {
+                            isMicrophoneMutedSubject.send(source.isMicrophoneMuted)
+                        }
+                        throw error
+                    }
+                    throw restorationError
+                }
+            }
             isRecordingSubject.send(isEnabled)
         }
     }
 
-    /// Updates the muted state of the microphone for the wrapped module.
+    /// Updates both native and published microphone mute state.
+    ///
+    /// Unmuting starts recording first when capture is stopped. When the native
+    /// state already matches the request, the cached publisher is still
+    /// reconciled because native recording transitions may have changed state
+    /// without updating the wrapper.
+    ///
     /// - Parameter isMuted: `true` to mute the microphone, `false` to unmute.
     /// - Throws: `ClientError` when the underlying module reports a failure.
-    /// - Note: Serialized on ``engineQueue``; re-enters it when it needs to
-    ///   start recording before unmuting.
+    /// - Important: The operation is serialized on ``engineQueue`` and may
+    ///   re-enter it to start recording before an unmute request is applied.
     func setMuted(_ isMuted: Bool) throws {
         try engineQueue.sync {
-            guard isMuted != source.isMicrophoneMuted else {
-                return
-            }
-
-            if !isMuted, !isRecording {
-                try setRecording(true)
-            }
-
-            try throwingExecution("Unable to setMicrophoneMuted:\(isMuted)") {
-                source.setMicrophoneMuted(isMuted)
-            }
-
-            isMicrophoneMutedSubject.send(isMuted)
+            try setMuted(isMuted, startRecordingIfNeeded: true)
         }
     }
 
@@ -417,6 +449,39 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
     /// - Note: Serialized on ``engineQueue`` with other engine mutations.
     func refreshStereoPlayoutState() {
         engineQueue.sync { source.refreshStereoPlayoutState() }
+    }
+
+    /// Applies mute state with explicit control over recording activation.
+    ///
+    /// Normal mute requests may start recording before unmuting. Recording
+    /// recovery disables that behavior because native recording has already
+    /// started while the published recording state is intentionally pending.
+    ///
+    /// - Parameters:
+    ///   - isMuted: The mute state to apply and publish.
+    ///   - startRecordingIfNeeded: Whether an unmute request may start capture.
+    /// - Throws: `ClientError` when recording activation or the native mute
+    ///   operation fails.
+    private func setMuted(
+        _ isMuted: Bool,
+        startRecordingIfNeeded: Bool
+    ) throws {
+        guard isMuted != source.isMicrophoneMuted else {
+            if isMuted != isMicrophoneMuted {
+                isMicrophoneMutedSubject.send(isMuted)
+            }
+            return
+        }
+
+        if !isMuted, startRecordingIfNeeded, !isRecording {
+            try setRecording(true)
+        }
+
+        try throwingExecution("Unable to setMicrophoneMuted:\(isMuted)") {
+            source.setMicrophoneMuted(isMuted)
+        }
+
+        isMicrophoneMutedSubject.send(isMuted)
     }
 
     // MARK: - Audio Buffer injection

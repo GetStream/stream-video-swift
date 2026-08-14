@@ -8,8 +8,18 @@ import StreamWebRTC
 
 extension RTCAudioStore {
 
-    /// Converts audio session interruption callbacks into store actions so the
-    /// audio pipeline can gracefully pause and resume.
+    /// Converts audio-session interruptions into ordered recovery actions.
+    ///
+    /// Interruption start marks the store as interrupted. A resumable end clears
+    /// that state and restarts recording when it was active before the event.
+    /// Muted-speech detection is temporarily disabled around the restart so
+    /// WebRTC rebuilds the input graph instead of treating recovery as a mute
+    /// toggle.
+    ///
+    /// Microphone mute restoration belongs to
+    /// `AudioDeviceModule.setRecording(_:)`, after native recording starts. The
+    /// effect intentionally does not replay a mute snapshot that could be stale
+    /// by the time its queued actions execute.
     final class InterruptionsEffect: StoreEffect<RTCAudioStore.Namespace>, @unchecked Sendable {
 
         private let audioSessionObserver: RTCAudioSessionPublisher
@@ -31,8 +41,14 @@ extension RTCAudioStore {
 
         // MARK: - Private Helpers
 
-        /// Handles the underlying audio session events and dispatches the
-        /// appropriate store actions.
+        /// Builds and dispatches the action sequence for an audio-session event.
+        ///
+        /// A resumable interruption restarts recording only when the store was
+        /// interrupted and recording was previously active. Persistent muted
+        /// speech detection is restored after that restart. Mute state is not
+        /// appended here because recording recovery owns post-start restoration.
+        ///
+        /// - Parameter event: The WebRTC audio-session event to process.
         private func handle(
             _ event: RTCAudioSessionPublisher.Event
         ) {
@@ -56,7 +72,6 @@ extension RTCAudioStore {
                     let state = stateProvider?(),
                     state.audioDeviceModule != nil {
                     let isRecording = state.isRecording
-                    let isMicrophoneMuted = state.isMicrophoneMuted
                     let isMutedSpeechDetectionEnabled = state.isMutedSpeechDetectionEnabled
 
                     if isRecording {
@@ -77,8 +92,6 @@ extension RTCAudioStore {
                             actions.append(.setMutedSpeechDetectionEnabled(true))
                         }
                     }
-
-                    actions.append(.setMicrophoneMuted(isMicrophoneMuted))
                 }
                 dispatcher?.dispatch(actions.map(\.box))
             default:
