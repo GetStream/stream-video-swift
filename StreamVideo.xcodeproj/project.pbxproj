@@ -313,6 +313,7 @@
 				"Utilities/Dummy/EgressHLSResponse+Dummy.swift",
 				"Utilities/Dummy/EgressResponse+Dummy.swift",
 				"Utilities/Dummy/EgressRTMPResponse+Dummy.swift",
+				"Utilities/Dummy/EncryptionSettingsResponse+Dummy.swift",
 				"Utilities/Dummy/FrameRecordingSettingsResponse+Dummy.swift",
 				"Utilities/Dummy/GeofenceSettings+Dummy.swift",
 				"Utilities/Dummy/GetCallResponse+Dummy.swift",
