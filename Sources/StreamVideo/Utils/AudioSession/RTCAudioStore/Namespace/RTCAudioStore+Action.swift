@@ -72,6 +72,10 @@ extension RTCAudioStore {
             )
             case setOverrideOutputAudioPort(AVAudioSession.PortOverride)
 
+            /// Reapplies the cached output-port override after a media-services
+            /// reset without changing the session's activation state.
+            case restoreOutputAudioPortAfterMediaServicesReset
+
             var description: String {
                 switch self {
                 case .systemSetCategory(let category):
@@ -106,6 +110,9 @@ extension RTCAudioStore {
 
                 case .setOverrideOutputAudioPort(let portOverride):
                     return ".setOverrideOutputAudioPort(\(portOverride))"
+
+                case .restoreOutputAudioPortAfterMediaServicesReset:
+                    return ".restoreOutputAudioPortAfterMediaServicesReset"
                 }
             }
         }

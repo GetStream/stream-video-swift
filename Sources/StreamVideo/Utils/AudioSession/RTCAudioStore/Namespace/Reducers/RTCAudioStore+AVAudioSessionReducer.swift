@@ -20,6 +20,9 @@ extension RTCAudioStore.Namespace {
 
         /// Handles `StoreAction.avAudioSession` cases by mutating the session and
         /// returning an updated state snapshot.
+        ///
+        /// Media-services recovery reapplies only the SDK-owned output override;
+        /// WebRTC owns restoration of its configuration and activation state.
         override func reduce(
             state: State,
             action: Action,
@@ -29,7 +32,8 @@ extension RTCAudioStore.Namespace {
         ) async throws -> State {
             var updatedState = state
 
-            if case let .setCurrentRoute(value) = action {
+            if case let .setCurrentRoute(value) = action,
+               value.reason.isValidRouteChange {
                 updatedState.audioSessionConfiguration.overrideOutputAudioPort = value.isSpeaker ? .speaker : .none
             }
 
@@ -132,6 +136,22 @@ extension RTCAudioStore.Namespace {
                     updatedState = try await setDefaultToSpeaker(
                         state: state,
                         speakerOn: value == .speaker
+                    )
+                }
+
+            case .restoreOutputAudioPortAfterMediaServicesReset:
+                // WebRTC restores category options. Only play-and-record uses
+                // an explicit output override that is not part of its config.
+                // Read the live category because the mirrored store snapshot
+                // can still contain pre-reset values at this callback boundary.
+                guard source.category == AVAudioSession.Category.playAndRecord.rawValue else {
+                    return updatedState
+                }
+                // This changes route policy without activating the session, so
+                // a concurrent CallKit deactivation remains authoritative.
+                try source.perform {
+                    try $0.overrideOutputAudioPort(
+                        state.audioSessionConfiguration.overrideOutputAudioPort
                     )
                 }
             }

@@ -9,9 +9,9 @@
 </p>
 <p align="center">
   <img id="stream-video-label" alt="StreamVideo" src="https://img.shields.io/badge/StreamVideo-9.36%20MB-blue"/>
-  <img id="stream-video-swiftui-label" alt="StreamVideoSwiftUI" src="https://img.shields.io/badge/StreamVideoSwiftUI-2.47%20MB-blue"/>
-  <img id="stream-video-uikit-label" alt="StreamVideoUIKit" src="https://img.shields.io/badge/StreamVideoUIKit-2.61%20MB-blue"/>
-  <img id="stream-web-rtc-label" alt="StreamWebRTC" src="https://img.shields.io/badge/StreamWebRTC-11.87%20MB-blue"/>
+  <img id="stream-video-swiftui-label" alt="StreamVideoSwiftUI" src="https://img.shields.io/badge/StreamVideoSwiftUI-2.48%20MB-blue"/>
+  <img id="stream-video-uikit-label" alt="StreamVideoUIKit" src="https://img.shields.io/badge/StreamVideoUIKit-2.62%20MB-blue"/>
+  <img id="stream-web-rtc-label" alt="StreamWebRTC" src="https://img.shields.io/badge/StreamWebRTC-11.88%20MB-blue"/>
 </p>
 <p align="center">
   <a href="https://deepwiki.com/GetStream/stream-video-swift"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>

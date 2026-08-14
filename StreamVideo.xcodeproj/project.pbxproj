@@ -3329,7 +3329,7 @@
 			repositoryURL = "https://github.com/GetStream/stream-video-swift-webrtc.git";
 			requirement = {
 				kind = exactVersion;
-				version = 145.13.0;
+				version = 145.15.0;
 			};
 		};
 		40F445C32A9E1D91004BE3DA /* XCRemoteSwiftPackageReference "stream-chat-swift-test-helpers" */ = {
