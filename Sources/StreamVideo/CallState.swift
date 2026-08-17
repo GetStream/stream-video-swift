@@ -179,6 +179,8 @@ public class CallState: ObservableObject {
         case let .typeCallCreatedEvent(event):
             update(from: event.call)
             mergeMembers(event.members)
+        case let .typeCallDeletedEvent(event):
+            update(from: event.call)
         case let .typeCallEndedEvent(event):
             update(from: event.call)
         case let .typeCallLiveStartedEvent(event):
@@ -263,8 +265,6 @@ public class CallState: ObservableObject {
             // note: health checks are not relevant for call state sync'ing
             break
         case .typeCallUserMutedEvent:
-            break
-        case .typeCallDeletedEvent:
             break
         case .typeCallHLSBroadcastingFailedEvent:
             break

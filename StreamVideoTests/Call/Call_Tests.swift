@@ -95,6 +95,23 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
         XCTAssert(call?.state.session != nil)
     }
 
+    func test_updateState_fromCallDeletedEvent() {
+        // Given
+        let call = streamVideo?.call(callType: callType, callId: callId)
+        let endedAt = Date(timeIntervalSince1970: 100)
+        let event = CallDeletedEvent(
+            call: .dummy(cid: callCid, endedAt: endedAt),
+            callCid: callCid,
+            createdAt: Date()
+        )
+
+        // When
+        call?.state.updateState(from: .typeCallDeletedEvent(event))
+
+        // Then
+        XCTAssertEqual(call?.state.endedAt, endedAt)
+    }
+
     func test_updateState_fromRecordingStartedEvent() {
         // Given
         let call = streamVideo?.call(callType: callType, callId: callId)
