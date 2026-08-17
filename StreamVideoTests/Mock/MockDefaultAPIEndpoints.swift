@@ -54,10 +54,12 @@ final class MockDefaultAPIEndpoints: DefaultAPIEndpoints, Mockable, @unchecked S
         case stopRTMPBroadcast
         case startHLSBroadcasting
         case startClosedCaptions
+        case startFrameRecording
         case startRecording
         case startTranscription
         case stopHLSBroadcasting
         case stopClosedCaptions
+        case stopFrameRecording
         case stopLive
         case stopRecording
         case stopTranscription
@@ -106,10 +108,12 @@ final class MockDefaultAPIEndpoints: DefaultAPIEndpoints, Mockable, @unchecked S
         case stopRTMPBroadcast(type: String, id: String, name: String)
         case startHLSBroadcasting(type: String, id: String)
         case startClosedCaptions(type: String, id: String, request: StartClosedCaptionsRequest)
+        case startFrameRecording(type: String, id: String, request: StartFrameRecordingRequest)
         case startRecording(type: String, id: String, request: StartRecordingRequest)
         case startTranscription(type: String, id: String, request: StartTranscriptionRequest)
         case stopHLSBroadcasting(type: String, id: String)
         case stopClosedCaptions(type: String, id: String, request: StopClosedCaptionsRequest)
+        case stopFrameRecording(type: String, id: String)
         case stopLive(type: String, id: String, request: StopLiveRequest)
         case stopRecording(type: String, id: String)
         case stopTranscription(type: String, id: String, request: StopTranscriptionRequest)
@@ -185,6 +189,8 @@ final class MockDefaultAPIEndpoints: DefaultAPIEndpoints, Mockable, @unchecked S
                 return (type, id)
             case let .startClosedCaptions(type, id, request):
                 return (type, id, request)
+            case let .startFrameRecording(type, id, request):
+                return (type, id, request)
             case let .startRecording(type, id, request):
                 return (type, id, request)
             case let .startTranscription(type, id, request):
@@ -193,6 +199,8 @@ final class MockDefaultAPIEndpoints: DefaultAPIEndpoints, Mockable, @unchecked S
                 return (type, id)
             case let .stopClosedCaptions(type, id, request):
                 return (type, id, request)
+            case let .stopFrameRecording(type, id):
+                return (type, id)
             case let .stopLive(type, id, request):
                 return (type, id, request)
             case let .stopRecording(type, id):
@@ -445,6 +453,17 @@ final class MockDefaultAPIEndpoints: DefaultAPIEndpoints, Mockable, @unchecked S
         return try stubbedResult(for: .startClosedCaptions)
     }
 
+    func startFrameRecording(
+        type: String,
+        id: String,
+        startFrameRecordingRequest: StartFrameRecordingRequest
+    ) async throws -> StartFrameRecordingResponse {
+        stubbedFunctionInput[.startFrameRecording]?.append(
+            .startFrameRecording(type: type, id: id, request: startFrameRecordingRequest)
+        )
+        return try stubbedResult(for: .startFrameRecording)
+    }
+
     func startRecording(
         type: String,
         id: String,
@@ -482,6 +501,11 @@ final class MockDefaultAPIEndpoints: DefaultAPIEndpoints, Mockable, @unchecked S
             .stopClosedCaptions(type: type, id: id, request: stopClosedCaptionsRequest)
         )
         return try stubbedResult(for: .stopClosedCaptions)
+    }
+
+    func stopFrameRecording(type: String, id: String) async throws -> StopFrameRecordingResponse {
+        stubbedFunctionInput[.stopFrameRecording]?.append(.stopFrameRecording(type: type, id: id))
+        return try stubbedResult(for: .stopFrameRecording)
     }
 
     func stopLive(type: String, id: String, stopLiveRequest: StopLiveRequest) async throws -> StopLiveResponse {
