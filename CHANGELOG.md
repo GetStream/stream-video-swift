@@ -5,7 +5,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 # Upcoming
 
 ### ✅ Added
-- Added `Call.delete(hard:)` for deleting a call. Pass `hard: true` to also remove all related data.
+- Added `Call.delete(hard:)` for deleting a call. Pass `hard: true` to also remove all related data. [#1243](https://github.com/GetStream/stream-video-swift/pull/1243)
 
 ### 🐞 Fixed
 - Transient peer-connection disconnections no longer trigger an immediate full rejoin, allowing the existing ICE restart flow to recover the session. [#1231](https://github.com/GetStream/stream-video-swift/pull/1231)
