@@ -864,12 +864,7 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
     }
 
     func test_kickUser_coordinatorWasCalledWithExpectedValues() async throws {
-        let mockCoordinatorClient = MockDefaultAPIEndpoints()
-        let call = Call(
-            from: .init(call: .dummy(), members: [], ownCapabilities: []),
-            coordinatorClient: mockCoordinatorClient,
-            callController: .dummy(defaultAPI: mockCoordinatorClient)
-        )
+        let (call, mockCoordinatorClient) = makeCallWithMockCoordinator()
         let userId = String.unique
 
         _ = try? await call.kickUser(userId: userId)
@@ -886,6 +881,45 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
         XCTAssertEqual(input.2.userId, userId)
     }
 
+    // MARK: - delete
+
+    func test_delete_default_coordinatorWasCalledWithSoftDelete() async throws {
+        try await assertDelete(expectedHard: false) { try await $0.delete() }
+    }
+
+    func test_delete_hardFalse_coordinatorWasCalledWithSoftDelete() async throws {
+        try await assertDelete(expectedHard: false) { try await $0.delete(hard: false) }
+    }
+
+    func test_delete_hardTrue_coordinatorWasCalledWithHardDelete() async throws {
+        try await assertDelete(expectedHard: true) { try await $0.delete(hard: true) }
+    }
+
+    func test_delete_coordinatorSucceeds_returnsResponse() async throws {
+        let (subject, mockCoordinatorClient) = makeCallWithMockCoordinator()
+        let taskId = String.unique
+        mockCoordinatorClient.stub(
+            for: .deleteCall,
+            with: DeleteCallResponse.dummy(taskId: taskId)
+        )
+
+        let response = try await subject.delete(hard: true)
+
+        XCTAssertEqual(response.taskId, taskId)
+    }
+
+    func test_delete_coordinatorFails_throwsError() async throws {
+        let (subject, mockCoordinatorClient) = makeCallWithMockCoordinator()
+        mockCoordinatorClient.stub(for: .deleteCall, with: ClientError())
+
+        do {
+            _ = try await subject.delete()
+            XCTFail("Expected delete to throw.")
+        } catch {
+            XCTAssertTrue(error is ClientError)
+        }
+    }
+
     // MARK: - setVideoFilter
 
     func test_setVideoFilter_moderationVideoAdapterWasUpdated() async {
@@ -900,6 +934,40 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
     }
 
     // MARK: - Private helpers
+
+    private func makeCallWithMockCoordinator() -> (Call, MockDefaultAPIEndpoints) {
+        let mockCoordinatorClient = MockDefaultAPIEndpoints()
+        let call = Call(
+            from: .init(call: .dummy(), members: [], ownCapabilities: []),
+            coordinatorClient: mockCoordinatorClient,
+            callController: .dummy(defaultAPI: mockCoordinatorClient)
+        )
+        return (call, mockCoordinatorClient)
+    }
+
+    private func assertDelete(
+        expectedHard: Bool,
+        file: StaticString = #filePath,
+        line: UInt = #line,
+        operation: (Call) async throws -> DeleteCallResponse
+    ) async throws {
+        let (subject, mockCoordinatorClient) = makeCallWithMockCoordinator()
+
+        _ = try? await operation(subject)
+
+        let input = try XCTUnwrap(
+            mockCoordinatorClient
+                .recordedInputPayload(
+                    (String, String, DeleteCallRequest).self,
+                    for: .deleteCall
+                )?.first,
+            file: file,
+            line: line
+        )
+        XCTAssertEqual(subject.callType, input.0, file: file, line: line)
+        XCTAssertEqual(subject.callId, input.1, file: file, line: line)
+        XCTAssertEqual(input.2.hard, expectedHard, file: file, line: line)
+    }
 
     private func assertUpdateState(
         with steps: [UpdateStateStep],
