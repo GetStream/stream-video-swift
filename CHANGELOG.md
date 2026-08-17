@@ -5,7 +5,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 # Upcoming
 
 ### ✅ Added
-- Added `Call.delete(hard:)` for deleting a call. Pass `hard: true` to also remove all related data. [#1243](https://github.com/GetStream/stream-video-swift/pull/1243)
+- Added `Call.delete(hard:)` for deleting a call. [#1243](https://github.com/GetStream/stream-video-swift/pull/1243)
 - `CallDeletedEvent` now updates `Call.state` instead of being ignored. [#1243](https://github.com/GetStream/stream-video-swift/pull/1243)
 
 ### 🐞 Fixed
