@@ -4,6 +4,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### ✅ Added
+- `StreamVideo.getEdges()` returns the list of edges (datacenters) available for hosting calls, bringing iOS in line with the JavaScript and Android SDKs.
+
 ### 🐞 Fixed
 - Transient peer-connection disconnections no longer trigger an immediate full rejoin, allowing the existing ICE restart flow to recover the session. [#1231](https://github.com/GetStream/stream-video-swift/pull/1231)
 
