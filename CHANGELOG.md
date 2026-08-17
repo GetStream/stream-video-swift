@@ -5,7 +5,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 # Upcoming
 
 ### ✅ Added
-- `Call.startFrameRecording(recordingExternalStorage:)` and `Call.stopFrameRecording()`, along with the `CallState.frameRecordingStatus` property that tracks frame recording for the active call.
+- `Call.startFrameRecording(recordingExternalStorage:)` and `Call.stopFrameRecording()`, along with the `CallState.frameRecordingStatus` property that tracks frame recording for the active call. [#1246](https://github.com/GetStream/stream-video-swift/pull/1246)
 
 ### 🐞 Fixed
 - Transient peer-connection disconnections no longer trigger an immediate full rejoin, allowing the existing ICE restart flow to recover the session. [#1231](https://github.com/GetStream/stream-video-swift/pull/1231)
