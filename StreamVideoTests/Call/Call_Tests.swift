@@ -886,6 +886,36 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
         XCTAssertEqual(input.2.userId, userId)
     }
 
+    // MARK: - deleteRecording
+
+    func test_deleteRecording_coordinatorWasCalledWithExpectedValues() async throws {
+        let mockCoordinatorClient = MockDefaultAPIEndpoints()
+        let call = Call(
+            from: .init(call: .dummy(), members: [], ownCapabilities: []),
+            coordinatorClient: mockCoordinatorClient,
+            callController: .dummy(defaultAPI: mockCoordinatorClient)
+        )
+        let callSessionId = String.unique
+        let filename = String.unique
+
+        _ = try? await call.deleteRecording(
+            callSessionId: callSessionId,
+            filename: filename
+        )
+
+        let input = try XCTUnwrap(
+            mockCoordinatorClient
+                .recordedInputPayload(
+                    (String, String, String, String).self,
+                    for: .deleteRecording
+                )?.first
+        )
+        XCTAssertEqual(call.callType, input.0)
+        XCTAssertEqual(call.callId, input.1)
+        XCTAssertEqual(callSessionId, input.2)
+        XCTAssertEqual(filename, input.3)
+    }
+
     // MARK: - setVideoFilter
 
     func test_setVideoFilter_moderationVideoAdapterWasUpdated() async {
