@@ -68,6 +68,9 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     @Published private(set) var connectOptions: ConnectOptions = .init(iceServers: [])
     @Published private(set) var ownCapabilities: Set<OwnCapability> = []
 
+    /// The latest publishing rights granted by the SFU, if any were received.
+    @Published private(set) var callGrants: CallGrants?
+
     @Published private(set) var sfuAdapter: SFUAdapter?
     @Published private(set) var publisher: RTCPeerConnectionCoordinator?
     @Published private(set) var subscriber: RTCPeerConnectionCoordinator?
@@ -293,6 +296,9 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     /// Sets the anonymous participant count.
     func set(anonymousCount value: UInt32) { self.anonymousCount = value }
 
+    /// Sets the publishing rights granted by the SFU.
+    func set(callGrants value: CallGrants?) { self.callGrants = value }
+
     /// Sets the participant pins.
     func set(participantPins value: [PinInfo]) { self.participantPins = value }
 
@@ -500,6 +506,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         set(token: "")
         set(sessionID: "")
         set(ownCapabilities: [])
+        set(callGrants: nil)
         set(participantsCount: 0)
         set(anonymousCount: 0)
         set(participantPins: [])

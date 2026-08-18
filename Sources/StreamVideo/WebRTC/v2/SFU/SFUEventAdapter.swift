@@ -148,6 +148,14 @@ final class SFUEventAdapter: @unchecked Sendable {
             }
             .sinkTask(queue: processingQueue) { [weak self] in await self?.handleInboundVideoState($0) }
             .store(in: disposableBag)
+
+        sfuAdapter
+            .publisher(eventType: Stream_Video_Sfu_Event_CallGrantsUpdated.self)
+            .log(.debug, subsystems: .sfu) {
+                "Processing SFU event of type:\(type(of: $0)) with grants:\($0.currentGrants) message:\($0.message)."
+            }
+            .sinkTask(queue: processingQueue) { [weak self] in await self?.handleCallGrantsUpdated($0) }
+            .store(in: disposableBag)
     }
 
     // MARK: - Event handlers
@@ -555,5 +563,24 @@ final class SFUEventAdapter: @unchecked Sendable {
 
             return updatedParticipants
         }
+    }
+
+    /// Handles a CallGrantsUpdated event and stores the granted publishing
+    /// rights.
+    ///
+    /// - Parameter event: The CallGrantsUpdated event to handle.
+    ///
+    /// The SFU sends this event when the local participant's publishing rights
+    /// change during a call. The grants take precedence over the capabilities
+    /// reported by the coordinator, so they are stored and later merged into
+    /// `Call.state.ownCapabilities`.
+    private func handleCallGrantsUpdated(
+        _ event: Stream_Video_Sfu_Event_CallGrantsUpdated
+    ) async {
+        guard event.hasCurrentGrants else {
+            return
+        }
+
+        await stateAdapter.set(callGrants: .init(event.currentGrants))
     }
 }

@@ -145,6 +145,26 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         await fulfilmentInMainActor { call.state.isSpeakingWhileMuted }
     }
 
+    func test_setCall_observesCallGrantsUpdates() async throws {
+        let call = await MockCall(.dummy())
+        _ = subject
+        subject.call = call
+
+        await mockWebRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .set(
+                callGrants: .init(
+                    canPublishAudio: true,
+                    canPublishVideo: false,
+                    canScreenshare: false
+                )
+            )
+
+        await fulfilmentInMainActor { call.state.ownCapabilities == [.sendAudio] }
+    }
+
     // MARK: - joinCall
 
     func test_joinCall_coordinatorTransitionsToConnecting() async throws {

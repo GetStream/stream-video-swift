@@ -300,6 +300,71 @@ final class CallState_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(subject.duration, 0)
     }
 
+    // MARK: - update(callGrants:)
+
+    func test_updateCallGrants_appliesGrantsOnOwnCapabilities() {
+        let subject = CallState(.dummy())
+
+        subject.update(
+            callGrants: .init(
+                canPublishAudio: true,
+                canPublishVideo: true,
+                canScreenshare: true
+            )
+        )
+
+        XCTAssertEqual(
+            Set(subject.ownCapabilities),
+            [.sendAudio, .sendVideo, .screenshare]
+        )
+    }
+
+    func test_updateCallGrants_revokedGrants_removesOwnCapabilities() {
+        let subject = CallState(.dummy())
+        subject.ownCapabilities = [.sendAudio, .sendVideo, .screenshare]
+
+        subject.update(
+            callGrants: .init(
+                canPublishAudio: true,
+                canPublishVideo: false,
+                canScreenshare: false
+            )
+        )
+
+        XCTAssertEqual(subject.ownCapabilities, [.sendAudio])
+    }
+
+    func test_updateCallGrants_thenCoordinatorUpdate_grantsTakePrecedence() {
+        let subject = CallState(.dummy())
+        subject.update(
+            callGrants: .init(
+                canPublishAudio: true,
+                canPublishVideo: false,
+                canScreenshare: false
+            )
+        )
+
+        subject.update(
+            from: GetCallResponse.dummy(
+                ownCapabilities: [.sendAudio, .sendVideo, .screenshare, .endCall]
+            )
+        )
+
+        XCTAssertEqual(Set(subject.ownCapabilities), [.sendAudio, .endCall])
+    }
+
+    func test_coordinatorUpdate_withoutGrants_keepsReportedOwnCapabilities() {
+        let subject = CallState(.dummy())
+
+        subject.update(
+            from: GetCallResponse.dummy(
+                ownCapabilities: [.sendAudio, .sendVideo]
+            )
+        )
+
+        XCTAssertEqual(Set(subject.ownCapabilities), [.sendAudio, .sendVideo])
+    }
+
     // MARK: - Private helpers
 
     private func assertParticipantsUpdate(

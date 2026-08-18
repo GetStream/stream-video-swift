@@ -115,6 +115,7 @@ class CallController: @unchecked Sendable {
             await observeStatsReporterUpdates()
             await observeCallSettingsUpdates()
             await observeSpeakingWhileMutedUpdates()
+            await observeCallGrantsUpdates()
         }
     }
 
@@ -826,6 +827,21 @@ class CallController: @unchecked Sendable {
             .log(.debug) { "Speaking while muted updated to \($0)" }
             .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in
                 self?.call?.state.isSpeakingWhileMuted = $0
+            }
+            .store(in: disposableBag)
+    }
+
+    /// Observes the publishing rights granted by the SFU and applies them on
+    /// the call state.
+    private func observeCallGrantsUpdates() async {
+        await webRTCCoordinator
+            .stateAdapter
+            .$callGrants
+            .compactMap { $0 }
+            .removeDuplicates()
+            .log(.debug) { "Call grants updated to \($0)" }
+            .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in
+                self?.call?.state.update(callGrants: $0)
             }
             .store(in: disposableBag)
     }
