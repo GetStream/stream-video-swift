@@ -63,6 +63,9 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     /// A publisher that emits events related to video track changes.
     let subject: PassthroughSubject<TrackEvent, Never>
 
+    /// Shared box used to attach an encryptor after `addTransceiver`.
+    private let e2ee: E2EEAttachmentContext
+
     /// A container for managing cancellable tasks to ensure proper cleanup.
     private let disposableBag = DisposableBag()
 
@@ -86,6 +89,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     ///   - videoCaptureSessionProvider: A provider for managing video capture
     ///     sessions.
     ///   - audioDeviceModule: The audio device module used by video capture.
+    ///   - e2ee: Shared box used to encrypt the local video sender.
     init(
         sessionID: String,
         peerConnection: StreamRTCPeerConnectionProtocol,
@@ -97,7 +101,8 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         subject: PassthroughSubject<TrackEvent, Never>,
         capturerFactory: VideoCapturerProviding = StreamVideoCapturerFactory(),
         videoCaptureSessionProvider: VideoCaptureSessionProvider,
-        audioDeviceModule: AudioDeviceModule
+        audioDeviceModule: AudioDeviceModule,
+        e2ee: E2EEAttachmentContext = .init()
     ) {
         self.sessionID = sessionID
         self.peerConnection = peerConnection
@@ -110,6 +115,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         self.capturerFactory = capturerFactory
         self.videoCaptureSessionProvider = videoCaptureSessionProvider
         self.audioDeviceModule = audioDeviceModule
+        self.e2ee = e2ee
         backgroundMuteAdapter = .init(sessionID: sessionID, sfuAdapter: sfuAdapter)
 
         // Initialize the primary video track, either from the active session or a new source.
@@ -777,6 +783,9 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
     /// Adds or updates a transceiver for a video track.
     ///
+    /// When E2EE is enabled, the encryptor is attached immediately after the
+    /// transceiver is stored so the first encoded frames leave encrypted.
+    ///
     /// - Parameters:
     ///   - options: The publish options for the track.
     ///   - track: The video track to add or update.
@@ -809,6 +818,11 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             transceiver.sender.parameters = params
         }
         transceiverStorage.set(transceiver, track: track, for: options)
+        e2ee.encryptIfNeeded(
+            sender: transceiver.sender,
+            codec: options.codec.e2eeCodecPin,
+            trackType: .video
+        )
     }
 
     private func registerPrimaryTrackIfPossible(_ callSettings: CallSettings) {

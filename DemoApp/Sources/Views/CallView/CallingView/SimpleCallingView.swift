@@ -196,6 +196,21 @@ struct SimpleCallingView: View {
         await call.enableClientCapabilities(clientCapabilities)
     }
 
+    private func setEncryptionIfNeeded(for callId: String) async {
+        let call = streamVideo.call(callType: callType, callId: callId)
+        await AppEnvironment.EncryptionKeys.shared.attachIfNeeded(
+            to: call,
+            userId: streamVideo.user.id
+        )
+    }
+
+    private func prepareCall(id: String) async {
+        await setPreferredVideoCodec(for: id)
+        try? await setAudioSessionPolicyOverride(for: id)
+        await setClientCapabilities(for: id)
+        await setEncryptionIfNeeded(for: id)
+    }
+
     private func parseURLIfRequired(_ text: String) {
         let adapter = DeeplinkAdapter()
         guard
@@ -230,23 +245,17 @@ struct SimpleCallingView: View {
         )
         switch action {
         case .lobby:
-            await setPreferredVideoCodec(for: text)
-            try? await setAudioSessionPolicyOverride(for: text)
-            await setClientCapabilities(for: text)
+            await prepareCall(id: text)
             viewModel.enterLobby(
                 callType: callType,
                 callId: text,
                 members: []
             )
         case .join:
-            await setPreferredVideoCodec(for: text)
-            try? await setAudioSessionPolicyOverride(for: text)
-            await setClientCapabilities(for: text)
+            await prepareCall(id: text)
             viewModel.joinCall(callType: callType, callId: text)
         case let .start(callId):
-            await setPreferredVideoCodec(for: callId)
-            try? await setAudioSessionPolicyOverride(for: callId)
-            await setClientCapabilities(for: callId)
+            await prepareCall(id: callId)
             let highScaleHint = AppEnvironment
                 .highScaleLivestreamPublisherHint
                 .value

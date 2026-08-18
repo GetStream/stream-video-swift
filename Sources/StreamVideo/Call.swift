@@ -148,6 +148,11 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     ///
     /// If the final handoff times out, the SDK leaves the call with reason
     /// `join.timeout` before rethrowing the timeout error.
+    ///
+    /// - Note: Attach E2EE with ``setE2EEManager(_:)`` **before** joining.
+    ///   The join request reports `e2ee: true` when a manager is set, and
+    ///   peer connections created during join attach encrypt/decrypt from
+    ///   that manager. Calling ``setE2EEManager(_:)`` after join throws.
     /// - Parameters:
     ///  - create: whether the call should be created if it doesn't exist.
     ///  - options: configuration options for the call.
@@ -581,6 +586,39 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     public func setVideoFilter(_ videoFilter: VideoFilter?) {
         moderation.setVideoFilter(videoFilter)
         callController.setVideoFilter(videoFilter)
+    }
+
+    /// The E2EE manager for this call, if one was set via ``setE2EEManager(_:)``.
+    ///
+    /// Kept across ``leave(reason:)`` so a later join still reports `e2ee: true`
+    /// and still attaches encrypt/decrypt on the new peer connections.
+    public private(set) var e2eeManager: E2EEManager?
+
+    /// Attaches end-to-end encryption. Must run before ``join``.
+    ///
+    /// ## Overview
+    /// Pass ``EncryptionManager`` for the built-in AES-GCM scheme, or any
+    /// custom ``E2EEManager``. The manager is stored on the call and on the
+    /// WebRTC coordinator so the next join:
+    /// - reports `e2ee: true` on ``JoinCallRequest``
+    /// - attaches encryptors when local transceivers are added
+    /// - attaches decryptors when remote tracks arrive
+    ///
+    /// ## Example
+    /// ```swift
+    /// let e2ee = try EncryptionManager(userId: streamVideo.user.id)
+    /// try await call.setE2EEManager(e2ee)
+    /// try e2ee.setSharedKey(0, rawKey: keyBytes)
+    /// try await call.join()
+    /// ```
+    ///
+    /// - Parameter manager: The encryption manager to attach.
+    /// - Throws: If called after peer connections exist (i.e. after join).
+    ///   Those PCs were already configured without an encryptor, so adopting
+    ///   a manager now would silently publish or receive cleartext.
+    public func setE2EEManager(_ manager: E2EEManager) async throws {
+        try await callController.setE2EEManager(manager)
+        e2eeManager = manager
     }
 
     /// Sets an `AudioFilter` for the current call.

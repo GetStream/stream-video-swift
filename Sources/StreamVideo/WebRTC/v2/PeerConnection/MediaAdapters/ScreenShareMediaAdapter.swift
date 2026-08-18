@@ -47,6 +47,7 @@ final class ScreenShareMediaAdapter: MediaAdapting, @unchecked Sendable {
     ///   - screenShareSessionProvider: Provides access to the active screen
     ///     sharing session.
     ///   - audioDeviceModule: The audio device module used for screen share audio.
+    ///   - e2ee: Shared box used to encrypt the local screenshare sender.
     convenience init(
         sessionID: String,
         peerConnection: StreamRTCPeerConnectionProtocol,
@@ -55,7 +56,8 @@ final class ScreenShareMediaAdapter: MediaAdapting, @unchecked Sendable {
         publishOptions: [PublishOptions.VideoPublishOptions],
         subject: PassthroughSubject<TrackEvent, Never>,
         screenShareSessionProvider: ScreenShareSessionProvider,
-        audioDeviceModule: AudioDeviceModule
+        audioDeviceModule: AudioDeviceModule,
+        e2ee: E2EEAttachmentContext = .init()
     ) {
         self.init(
             sessionID: sessionID,
@@ -69,7 +71,8 @@ final class ScreenShareMediaAdapter: MediaAdapting, @unchecked Sendable {
                 publishOptions: publishOptions,
                 subject: subject,
                 screenShareSessionProvider: screenShareSessionProvider,
-                audioDeviceModule: audioDeviceModule
+                audioDeviceModule: audioDeviceModule,
+                e2ee: e2ee
             ),
             subject: subject
         )
