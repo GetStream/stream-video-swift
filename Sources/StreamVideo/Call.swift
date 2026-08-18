@@ -938,6 +938,46 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         return response.recordings
     }
 
+    // MARK: - Frame recording
+
+    /// Starts frame-by-frame recording of the call, optionally specifying an external storage
+    /// location.
+    ///
+    /// While frame recording is active, the backend periodically captures a frame per published
+    /// track and emits a `CallFrameRecordingFrameReadyEvent` carrying the URL of each captured
+    /// frame. Use ``Call/subscribe(for:)`` to observe those events.
+    ///
+    /// The capture interval, quality and mode are configured through the call type's frame
+    /// recording settings (``FrameRecordingSettingsRequest``) rather than per call.
+    ///
+    /// - Parameter recordingExternalStorage: The external storage location for the captured
+    ///  frames (optional).
+    /// - Returns: `StartFrameRecordingResponse`.
+    /// - Throws: An error if starting frame recording fails.
+    @discardableResult
+    public func startFrameRecording(
+        recordingExternalStorage: String? = nil
+    ) async throws -> StartFrameRecordingResponse {
+        try await coordinatorClient.startFrameRecording(
+            type: callType,
+            id: callId,
+            startFrameRecordingRequest: .init(
+                recordingExternalStorage: recordingExternalStorage
+            )
+        )
+    }
+
+    /// Stops frame-by-frame recording of the call.
+    /// - Returns: `StopFrameRecordingResponse`.
+    /// - Throws: An error if stopping frame recording fails.
+    @discardableResult
+    public func stopFrameRecording() async throws -> StopFrameRecordingResponse {
+        try await coordinatorClient.stopFrameRecording(
+            type: callType,
+            id: callId
+        )
+    }
+
     // MARK: - Broadcasting
 
     /// Starts HLS broadcasting of the call.

@@ -46,6 +46,7 @@ public class CallState: ObservableObject {
     @Published public internal(set) var compositeRecordingStatus: Bool?
     @Published public internal(set) var individualRecordingStatus: Bool?
     @Published public internal(set) var rawRecordingStatus: Bool?
+    @Published public internal(set) var frameRecordingStatus: Bool?
     @Published public internal(set) var blockedUserIds: Set<String> = []
     @Published public internal(set) var settings: CallSettingsResponse?
     @Published public internal(set) var ownCapabilities: [OwnCapability] = [] {
@@ -303,13 +304,14 @@ public class CallState: ObservableObject {
         case .typeAppUpdatedEvent:
             break
         case .typeCallFrameRecordingFailedEvent:
-            break
+            frameRecordingStatus = false
         case .typeCallFrameRecordingFrameReadyEvent:
+            // note: captured frames are exposed via event subscriptions
             break
         case .typeCallFrameRecordingStartedEvent:
-            break
+            frameRecordingStatus = true
         case .typeCallFrameRecordingStoppedEvent:
-            break
+            frameRecordingStatus = false
         case .typeKickedUserEvent:
             break
         case .typeCallStatsReportReadyEvent:
@@ -567,6 +569,7 @@ public class CallState: ObservableObject {
         rawRecordingStatus = egress?.rawRecording?.status == runningStatus
         individualRecordingStatus = egress?.individualRecording?.status == runningStatus
         compositeRecordingStatus = egress?.compositeRecording?.status == runningStatus
+        frameRecordingStatus = egress?.frameRecording?.status == runningStatus
     }
 
     private func configureDuration(

@@ -1281,6 +1281,9 @@ protocol DefaultAPIEndpoints {
     func startClosedCaptions(type: String, id: String, startClosedCaptionsRequest: StartClosedCaptionsRequest) async throws
         -> StartClosedCaptionsResponse
         
+    func startFrameRecording(type: String, id: String, startFrameRecordingRequest: StartFrameRecordingRequest) async throws
+        -> StartFrameRecordingResponse
+        
     func startRecording(
         type: String,
         id: String,
@@ -1295,6 +1298,8 @@ protocol DefaultAPIEndpoints {
         
     func stopClosedCaptions(type: String, id: String, stopClosedCaptionsRequest: StopClosedCaptionsRequest) async throws
         -> StopClosedCaptionsResponse
+        
+    func stopFrameRecording(type: String, id: String) async throws -> StopFrameRecordingResponse
         
     func stopLive(type: String, id: String, stopLiveRequest: StopLiveRequest) async throws -> StopLiveResponse
         
