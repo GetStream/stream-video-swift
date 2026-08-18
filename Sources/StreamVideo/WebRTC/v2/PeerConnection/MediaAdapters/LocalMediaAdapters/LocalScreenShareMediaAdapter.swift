@@ -51,6 +51,9 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
     /// A publisher that emits events related to the screen sharing track.
     let subject: PassthroughSubject<TrackEvent, Never>
 
+    /// Shared box used to attach an encryptor after `addTransceiver`.
+    private let e2ee: E2EEAttachmentContext
+
     /// We only want to register (send our primary track to the subject) only when we are about to publish
     /// for the first time. The property help us keep track of that.
     private var hasRegisteredPrimaryTrack: Bool = false
@@ -68,6 +71,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
     ///   - capturerFactory: Factory for creating video capturers. Defaults to
     ///     `StreamVideoCapturerFactory`.
     ///   - audioDeviceModule: The audio device module used for screen share audio.
+    ///   - e2ee: Shared box used to encrypt the local screenshare sender.
     init(
         sessionID: String,
         peerConnection: StreamRTCPeerConnectionProtocol,
@@ -77,7 +81,8 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
         subject: PassthroughSubject<TrackEvent, Never>,
         screenShareSessionProvider: ScreenShareSessionProvider,
         capturerFactory: VideoCapturerProviding = StreamVideoCapturerFactory(),
-        audioDeviceModule: AudioDeviceModule
+        audioDeviceModule: AudioDeviceModule,
+        e2ee: E2EEAttachmentContext = .init()
     ) {
         self.sessionID = sessionID
         self.peerConnection = peerConnection
@@ -88,6 +93,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
         self.screenShareSessionProvider = screenShareSessionProvider
         self.capturerFactory = capturerFactory
         self.audioDeviceModule = audioDeviceModule
+        self.e2ee = e2ee
 
         // Initialize the primary track, using the existing session's local track if available.
         primaryTrack = {
@@ -448,6 +454,9 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
 
     /// Adds or updates a transceiver for a given track and publishing option.
     ///
+    /// When E2EE is enabled, the encryptor is attached immediately after the
+    /// transceiver is stored so the first encoded frames leave encrypted.
+    ///
     /// - Parameters:
     ///   - options: The publishing options for the track.
     ///   - track: The video track to add or update.
@@ -482,6 +491,11 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
             transceiver.sender.parameters = params
         }
         transceiverStorage.set(transceiver, track: track, for: options)
+        e2ee.encryptIfNeeded(
+            sender: transceiver.sender,
+            codec: options.codec.e2eeCodecPin,
+            trackType: .screenshare
+        )
     }
 
     /// Configures the active screen sharing session with the given type and track.

@@ -88,6 +88,10 @@ struct DemoCallingViewModifier: ViewModifier {
                 await call.updatePublishOptions(
                     preferredVideoCodec: AppEnvironment.preferredVideoCodec.videoCodec
                 )
+                await AppEnvironment.EncryptionKeys.shared.attachIfNeeded(
+                    to: call,
+                    userId: streamVideo.user.id
+                )
                 _ = await Task { @MainActor in
                     viewModel.update(
                         participantsSortComparators: callType == .livestream

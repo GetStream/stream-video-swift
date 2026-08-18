@@ -49,6 +49,9 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     /// A publisher that emits events related to audio tracks.
     let subject: PassthroughSubject<TrackEvent, Never>
 
+    /// Shared box used to attach an encryptor after `addTransceiver`.
+    private let e2ee: E2EEAttachmentContext
+
     private var hasRegisteredPrimaryTrack: Bool = false
     private var ownCapabilities: [OwnCapability] = []
 
@@ -61,13 +64,15 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     ///   - sfuAdapter: The adapter for communicating with the SFU.
     ///   - publishOptions: The options for publishing audio tracks.
     ///   - subject: A publisher that emits track events.
+    ///   - e2ee: Shared box used to encrypt the local audio sender.
     init(
         sessionID: String,
         peerConnection: StreamRTCPeerConnectionProtocol,
         peerConnectionFactory: PeerConnectionFactory,
         sfuAdapter: SFUAdapter,
         publishOptions: [PublishOptions.AudioPublishOptions],
-        subject: PassthroughSubject<TrackEvent, Never>
+        subject: PassthroughSubject<TrackEvent, Never>,
+        e2ee: E2EEAttachmentContext = .init()
     ) {
         self.sessionID = sessionID
         self.peerConnection = peerConnection
@@ -75,6 +80,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         self.sfuAdapter = sfuAdapter
         self.publishOptions = publishOptions
         self.subject = subject
+        self.e2ee = e2ee
 
         // Create the primary audio track for the session.
         let source = peerConnectionFactory.makeAudioSource(.defaultConstraints)
@@ -340,6 +346,9 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
     /// Adds or updates a transceiver for a given audio track and publish option.
     ///
+    /// When E2EE is enabled, the encryptor is attached immediately after the
+    /// transceiver is stored so the first encoded frames leave encrypted.
+    ///
     /// - Parameters:
     ///   - options: The options for publishing the audio track.
     ///   - track: The audio track to be added or updated.
@@ -366,6 +375,11 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             return
         }
         transceiverStorage.set(transceiver, track: track, for: options)
+        e2ee.encryptIfNeeded(
+            sender: transceiver.sender,
+            codec: options.codec.e2eeCodecPin,
+            trackType: .audio
+        )
     }
 
     private func registerPrimaryTrackIfPossible(_ callSettings: CallSettings) {

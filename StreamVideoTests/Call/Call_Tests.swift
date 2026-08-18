@@ -524,6 +524,15 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
 
     // MARK: - join
 
+    func test_setE2EEManager_beforeJoin_storesManager() async throws {
+        let call = try XCTUnwrap(streamVideo?.call(callType: callType, callId: callId))
+        let e2ee = MockE2EEManager()
+
+        try await call.setE2EEManager(e2ee)
+
+        XCTAssertTrue(call.e2eeManager === e2ee)
+    }
+
     func test_join_callControllerWasCalledOnlyOnce() async throws {
         let mockCallController = MockCallController()
         let call = MockCall(.dummy(callController: mockCallController))

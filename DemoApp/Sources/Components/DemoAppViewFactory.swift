@@ -12,6 +12,7 @@ final class DemoAppViewFactory: ViewFactory {
 
     @Injected(\.colors) var colors
     @Injected(\.snapshotTrigger) var snapshotTrigger
+    @Injected(\.streamVideo) var streamVideo
 
     func makeWaitingLocalUserView(viewModel: CallViewModel) -> some View {
         DemoWaitingLocalUserView(viewFactory: self, viewModel: viewModel)
@@ -22,15 +23,37 @@ final class DemoAppViewFactory: ViewFactory {
         lobbyInfo: LobbyInfo,
         callSettings: Binding<CallSettings>
     ) -> some View {
-        DefaultViewFactory
-            .shared
-            .makeLobbyView(
-                viewModel: viewModel,
-                lobbyInfo: lobbyInfo,
-                callSettings: callSettings
-            )
-            .alignedToReadableContentGuide()
-            .background(Appearance.default.colors.lobbyBackground.edgesIgnoringSafeArea(.all))
+        let handleJoinCall = { [streamVideo] in
+            guard case .lobby = viewModel.callingState else { return }
+            Task { @MainActor [streamVideo] in
+                let call = streamVideo.call(
+                    callType: lobbyInfo.callType,
+                    callId: lobbyInfo.callId
+                )
+                await AppEnvironment.EncryptionKeys.shared.attachIfNeeded(
+                    to: call,
+                    userId: streamVideo.user.id
+                )
+                viewModel.startCall(
+                    callType: lobbyInfo.callType,
+                    callId: lobbyInfo.callId,
+                    members: lobbyInfo.participants
+                )
+            }
+        }
+        let handleCloseLobby = {
+            viewModel.hangUp()
+        }
+        return LobbyView(
+            viewFactory: self,
+            callId: lobbyInfo.callId,
+            callType: lobbyInfo.callType,
+            callSettings: callSettings,
+            onJoinCallTap: handleJoinCall,
+            onCloseLobby: handleCloseLobby
+        )
+        .alignedToReadableContentGuide()
+        .background(Appearance.default.colors.lobbyBackground.edgesIgnoringSafeArea(.all))
     }
 
     func makeInnerWaitingLocalUserView(viewModel: CallViewModel) -> AnyView {

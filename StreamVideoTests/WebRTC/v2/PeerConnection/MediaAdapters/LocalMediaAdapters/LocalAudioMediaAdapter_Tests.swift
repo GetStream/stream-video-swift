@@ -18,13 +18,15 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
     private lazy var mockPeerConnection: MockRTCPeerConnection! = .init()
     private lazy var mockSFUStack: MockSFUStack! = .init()
     private lazy var spySubject: PassthroughSubject<TrackEvent, Never>! = .init()
+    private lazy var e2eeContext: E2EEAttachmentContext! = .init()
     private lazy var subject: LocalAudioMediaAdapter! = .init(
         sessionID: sessionId,
         peerConnection: mockPeerConnection,
         peerConnectionFactory: peerConnectionFactory,
         sfuAdapter: mockSFUStack.adapter,
         publishOptions: publishOptions,
-        subject: spySubject
+        subject: spySubject,
+        e2ee: e2eeContext
     )
 
     private var temporaryPeerConnection: RTCPeerConnection?
@@ -34,6 +36,7 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         mockStreamVideo = nil
         mockAudioRecorder = nil
         spySubject = nil
+        e2eeContext = nil
         mockSFUStack = nil
         mockPeerConnection = nil
         peerConnectionFactory = nil
@@ -291,6 +294,24 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         try await subject.didUpdatePublishOptions(.init(audio: publishOptions))
 
         await fulfillment { self.mockPeerConnection.timesCalled(.addTransceiver) == 1 }
+    }
+
+    func test_publish_withE2EEManager_encryptsSender() async throws {
+        let mockE2EE = MockE2EEManager()
+        e2eeContext.manager = mockE2EE
+        publishOptions = [.dummy(codec: .opus)]
+        try publishOptions.forEach { publishOption in
+            mockPeerConnection.stub(
+                for: .addTransceiver,
+                with: try makeTransceiver(of: .audio, audioOptions: publishOption)
+            )
+        }
+
+        try await subject.publish()
+
+        await fulfillment { mockE2EE.encryptCalls.count == 1 }
+        XCTAssertEqual(mockE2EE.encryptCalls.first?.codec, "opus")
+        XCTAssertEqual(mockE2EE.encryptCalls.first?.trackType, .audio)
     }
 
     func test_didUpdatePublishOptions_primaryTrackIsEnabled_newTransceiverAddedForNewPublishOption() async throws {
