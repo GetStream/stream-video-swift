@@ -151,6 +151,7 @@ struct DetailedCallingView<Factory: ViewFactory>: View {
                 resignFirstResponder()
                 Task {
                     await setPreferredVideoCodec(for: text)
+                    await setEncryptionIfNeeded(for: text)
                     if callAction == .joinCall {
                         viewModel.joinCall(callType: callType, callId: text)
                     } else {
@@ -268,6 +269,18 @@ struct DetailedCallingView<Factory: ViewFactory>: View {
         )
         await call.updatePublishOptions(
             preferredVideoCodec: AppEnvironment.preferredVideoCodec.videoCodec
+        )
+    }
+
+    private func setEncryptionIfNeeded(for callId: String) async {
+        let call = streamVideo.call(
+            callType: callType,
+            callId: callId,
+            callSettings: viewModel.callSettings
+        )
+        await AppEnvironment.EncryptionKeys.shared.attachIfNeeded(
+            to: call,
+            userId: streamVideo.user.id
         )
     }
 }

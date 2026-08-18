@@ -89,6 +89,12 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     @Published private(set) var isTracingEnabled: Bool = false
     @Published private(set) var isSpeakingWhileMuted: Bool = false
 
+    /// E2EE manager for this call.
+    ///
+    /// Kept across `cleanUp` / leave so a later join still attaches
+    /// encrypt/decrypt and reports `e2ee: true` on the join request.
+    private(set) var e2eeManager: E2EEManager?
+
     private(set) var clientCapabilities: Set<ClientCapability> = [
         .subscriberVideoPause
     ]
@@ -123,6 +129,20 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         stagePublisher: stagePublisher,
         clientEventReporter: clientEventReporter
     )
+    private var pendingDecryptors: [PendingDecryptor] = []
+
+    /// A remote track that arrived before its participant was known.
+    ///
+    /// Decrypt needs the remote `userId` to select a key. Subscriber tracks
+    /// can appear before the participant list includes that session, so the
+    /// receiver is stored here and flushed from
+    /// ``processEnqueuedOperation(_:functionName:fileName:lineNumber:)``
+    /// once participants are updated.
+    private struct PendingDecryptor {
+        var lookupId: String
+        var trackType: TrackType
+        var receiver: RTCRtpReceiver
+    }
 
     /// Initializes the WebRTC state adapter with user details and connection
     /// configurations.
@@ -353,6 +373,31 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         self.clientCapabilities = self.clientCapabilities.subtracting(capabilities)
     }
 
+    // MARK: - E2EE
+
+    /// Stores the E2EE manager used on the next peer-connection setup.
+    ///
+    /// ## Overview
+    /// Must run before ``configurePeerConnections()``. That method attaches
+    /// the manager to publisher and subscriber via
+    /// ``RTCPeerConnectionCoordinator/attachE2EE(_:)`` so local
+    /// `addTransceiver` encrypts and remote tracks decrypt.
+    ///
+    /// The manager is **not** cleared in ``cleanUp()`` or
+    /// ``cleanUpForReconnection()``. Leave must not drop encryption: the
+    /// next join still reports `e2ee: true` and still attaches transforms.
+    ///
+    /// - Parameter manager: The encryption manager to attach.
+    /// - Throws: If publisher or subscriber already exist. Those PCs were
+    ///   built without an encryptor; adopting a manager now would leave the
+    ///   live session half-encrypted.
+    func setE2EEManager(_ manager: E2EEManager) throws {
+        if publisher != nil || subscriber != nil {
+            throw ClientError("setE2EEManager must be called before join()")
+        }
+        e2eeManager = manager
+    }
+
     // MARK: - Session Management
 
     /// Refreshes the session by setting a new session ID.
@@ -401,6 +446,9 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
             clientCapabilities: clientCapabilities,
             audioDeviceModule: peerConnectionFactory.audioDeviceModule
         )
+        /// Encrypt local tracks added after `setUp`. Must run before
+        /// ``RTCPeerConnectionCoordinator/setUp(with:ownCapabilities:)``.
+        publisher.attachE2EE(e2eeManager)
 
         trace(
             .init(
@@ -431,6 +479,8 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
             clientCapabilities: clientCapabilities,
             audioDeviceModule: peerConnectionFactory.audioDeviceModule
         )
+        /// Decrypt remote tracks as they arrive. Must run before `setUp`.
+        subscriber.attachE2EE(e2eeManager)
 
         trace(
             .init(
@@ -498,6 +548,10 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
 
     /// Cleans up the WebRTC session by closing connections and resetting
     /// states.
+    ///
+    /// Pending decryptors are dropped because their `RTCRtpReceiver`s die
+    /// with the peer connections. ``e2eeManager`` is **kept** so a later
+    /// join still reports `e2ee: true` and still attaches transforms.
     func cleanUp() async {
         screenShareSessionProvider.activeSession = nil
         videoCaptureSessionProvider.activeSession = nil
@@ -510,6 +564,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         self.publisher = nil
         self.subscriber = nil
         self.statsAdapter = nil
+        pendingDecryptors.removeAll()
         await sfuAdapter?.disconnect()
         enqueue { _ in [:] }
         set(sfuAdapter: nil)
@@ -526,6 +581,9 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     }
 
     /// Cleans up the session for reconnection, clearing adapters and tracks.
+    ///
+    /// Pending decryptors are dropped with the old peer connections.
+    /// ``e2eeManager`` is **kept** so the rebuilt PCs still encrypt/decrypt.
     func cleanUpForReconnection() async {
         set(
             participants: participants
@@ -549,6 +607,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         await subscriber?.prepareForClosing()
         publisher = nil
         subscriber = nil
+        pendingDecryptors.removeAll()
         set(sfuAdapter: nil)
         set(statsAdapter: nil)
         set(token: "")
@@ -848,6 +907,9 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         let updated = assignTracks(on: next)
         /// Sends the updated participants to observers while helping publishing streamlined updates.
         set(participants: updated)
+        /// Participant ids may now resolve user ids for tracks that arrived
+        /// earlier; attach any decryptors that were waiting.
+        flushPendingDecryptors()
 
         /// Logs the completion of the participant operation.
         log.debug(
@@ -922,9 +984,93 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         switch event {
         case let .added(id, trackType, track):
             await didAddTrack(track, type: trackType, for: id)
+            if peerConnectionType == .subscriber {
+                if let receiver = subscriber?.rtpReceiver(matching: track) {
+                    attachDecryptor(
+                        lookupId: id,
+                        trackType: trackType,
+                        receiver: receiver
+                    )
+                } else if e2eeManager != nil {
+                    log.warning(
+                        "E2EE decryptor skipped: no RTP receiver for trackId:\(track.trackId) lookupId:\(id) trackType:\(trackType).",
+                        subsystems: .webRTC
+                    )
+                }
+            }
         case let .removed(id, trackType, _):
             await didRemoveTrack(for: id, type: trackType)
         }
+    }
+
+    /// Attaches a decryptor to a subscriber receiver, or queues it until
+    /// the remote participant is known.
+    ///
+    /// Decrypt needs the remote `userId` to select a key. If
+    /// ``userId(for:)`` cannot resolve `lookupId` yet (the track arrived
+    /// before the participant list), the receiver is stored in
+    /// ``pendingDecryptors`` and retried from ``flushPendingDecryptors()``.
+    ///
+    /// - Parameters:
+    ///   - lookupId: Session id or `trackLookupPrefix` for the remote track.
+    ///   - trackType: Replay-window grouping for this track.
+    ///   - receiver: The RTP receiver that owns the remote track.
+    func attachDecryptor(
+        lookupId: String,
+        trackType: TrackType,
+        receiver: RTCRtpReceiver
+    ) {
+        guard let manager = e2eeManager else { return }
+        if let userId = userId(for: lookupId) {
+            do {
+                try manager.decrypt(receiver, userId: userId, trackType: trackType)
+                log.debug(
+                    "E2EE decryptor attached for userId:\(userId) trackType:\(trackType).",
+                    subsystems: .webRTC
+                )
+            } catch {
+                log.error(error, subsystems: .webRTC)
+            }
+        } else {
+            pendingDecryptors.removeAll {
+                $0.lookupId == lookupId && $0.trackType == trackType
+            }
+            pendingDecryptors.append(
+                .init(lookupId: lookupId, trackType: trackType, receiver: receiver)
+            )
+        }
+    }
+
+    /// Retries decryptors that were waiting for a participant `userId`.
+    ///
+    /// Called after every participant-storage update. Items that still
+    /// cannot resolve a user are re-queued by ``attachDecryptor(lookupId:trackType:receiver:)``.
+    private func flushPendingDecryptors() {
+        guard e2eeManager != nil, !pendingDecryptors.isEmpty else { return }
+        let pending = pendingDecryptors
+        pendingDecryptors.removeAll()
+        for item in pending {
+            attachDecryptor(
+                lookupId: item.lookupId,
+                trackType: item.trackType,
+                receiver: item.receiver
+            )
+        }
+    }
+
+    /// Resolves a remote track lookup to the participant's user id.
+    ///
+    /// Matches `sessionId` first, then a non-empty `trackLookupPrefix`.
+    private func userId(for lookupId: String) -> String? {
+        participants.values.first { participant in
+            if participant.sessionId == lookupId {
+                return true
+            }
+            if let prefix = participant.trackLookupPrefix, !prefix.isEmpty, prefix == lookupId {
+                return true
+            }
+            return false
+        }?.user.id
     }
 
     /// Updates the video options and notifies the publisher and subscriber.

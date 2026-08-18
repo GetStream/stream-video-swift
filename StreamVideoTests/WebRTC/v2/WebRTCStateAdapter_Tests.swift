@@ -41,6 +41,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         rtcPeerConnectionCoordinatorFactory: rtcPeerConnectionCoordinatorFactory,
         stagePublisher: stageSubject.eraseToAnyPublisher()
     )
+    private var temporaryPeerConnection: RTCPeerConnection?
 
     // MARK: - Lifecycle
 
@@ -64,6 +65,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         user = nil
         mockPeerConnectionFactory = nil
         mockAudioDeviceModuleSource = nil
+        temporaryPeerConnection = nil
         try await super.tearDown()
     }
 
@@ -1616,6 +1618,85 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
             trackStorage: await subject.trackStorage
         )
         await subject.set(statsAdapter: statsAdapter)
+    }
+
+    // MARK: - E2EE
+
+    func test_setE2EEManager_beforePeerConnections_succeeds() async throws {
+        let mock = MockE2EEManager()
+
+        try await subject.setE2EEManager(mock)
+
+        let stored = await subject.e2eeManager
+        XCTAssertTrue(stored === mock)
+    }
+
+    func test_setE2EEManager_afterPeerConnections_throws() async throws {
+        let sfuStack = MockSFUStack()
+        await subject.set(sfuAdapter: sfuStack.adapter)
+        try await subject.configurePeerConnections()
+
+        do {
+            try await subject.setE2EEManager(MockE2EEManager())
+            XCTFail()
+        } catch {
+            XCTAssertTrue(error is ClientError)
+        }
+    }
+
+    func test_cleanUp_keepsE2EEManager() async throws {
+        let mock = MockE2EEManager()
+        try await subject.setE2EEManager(mock)
+        let sfuStack = MockSFUStack()
+        await subject.set(sfuAdapter: sfuStack.adapter)
+        try await subject.configurePeerConnections()
+
+        await subject.cleanUp()
+
+        let stored = await subject.e2eeManager
+        XCTAssertTrue(stored === mock)
+    }
+
+    func test_attachDecryptor_unknownParticipant_decryptsWhenParticipantArrives() async throws {
+        let mock = MockE2EEManager()
+        try await subject.setE2EEManager(mock)
+        let receiver = try makeReceiver()
+        let lookupId = "lookup-1"
+
+        await subject.attachDecryptor(
+            lookupId: lookupId,
+            trackType: .video,
+            receiver: receiver
+        )
+        XCTAssertEqual(mock.decryptCalls.count, 0)
+
+        let participant = CallParticipant.dummy(
+            userId: "user-1",
+            trackLookupPrefix: lookupId
+        )
+        await subject.enqueue { current in
+            var next = current
+            next[participant.sessionId] = participant
+            return next
+        }
+
+        await fulfillment { mock.decryptCalls.count == 1 }
+        XCTAssertEqual(mock.decryptCalls.first?.userId, "user-1")
+        XCTAssertEqual(mock.decryptCalls.first?.trackType, .video)
+    }
+
+    private func makeReceiver() throws -> RTCRtpReceiver {
+        if temporaryPeerConnection == nil {
+            temporaryPeerConnection = try mockPeerConnectionFactory.makePeerConnection(
+                configuration: .init(),
+                constraints: .defaultConstraints,
+                delegate: nil
+            )
+        }
+        let transceiver = try XCTUnwrap(
+            temporaryPeerConnection?.addTransceiver(of: .video)
+        )
+        return transceiver.receiver
     }
 }
 
