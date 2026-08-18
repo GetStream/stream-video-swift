@@ -5,7 +5,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 # Upcoming
 
 ### 🐞 Fixed
-- Mid-call permission changes from the SFU are now applied on `Call.state.ownCapabilities`, instead of the `callGrantsUpdated` event being ignored.
+- Mid-call permission changes from the SFU are now applied on `Call.state.ownCapabilities`, instead of the `callGrantsUpdated` event being ignored. [#1250](https://github.com/GetStream/stream-video-swift/pull/1250)
 - Transient peer-connection disconnections no longer trigger an immediate full rejoin, allowing the existing ICE restart flow to recover the session. [#1231](https://github.com/GetStream/stream-video-swift/pull/1231)
 
 # [1.51.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.51.0)
