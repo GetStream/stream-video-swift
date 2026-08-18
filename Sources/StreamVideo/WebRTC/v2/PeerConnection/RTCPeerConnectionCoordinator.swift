@@ -57,6 +57,11 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     private let iceAdapter: ICEAdapter
     private let sfuAdapter: SFUAdapter
     private let iceConnectionStateAdapter: ICEConnectionStateAdapter
+    /// Shared E2EE box passed into local media adapters.
+    ///
+    /// Publisher and subscriber coordinators each own one. Local adapters
+    /// encrypt at `addTransceiver` by reading ``E2EEAttachmentContext/manager``.
+    private let e2eeContext: E2EEAttachmentContext
 
     private var callSettings: CallSettings
 
@@ -77,6 +82,38 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     /// This includes ICE servers, SDP semantics, and other connection-related
     /// parameters that define how the peer connection behaves.
     var configuration: RTCConfiguration { peerConnection.configuration }
+
+    /// Installs the call's E2EE manager so local adapters encrypt at
+    /// `addTransceiver` time.
+    ///
+    /// Call this after constructing the coordinator and **before**
+    /// ``setUp(with:ownCapabilities:)``. Local audio, video, and screenshare
+    /// adapters read the manager from ``e2eeContext`` when they add a
+    /// transceiver.
+    ///
+    /// - Parameter manager: The call's E2EE manager, or `nil` to leave
+    ///   tracks unencrypted.
+    func attachE2EE(_ manager: E2EEManager?) {
+        e2eeContext.manager = manager
+    }
+
+    /// The RTP receiver whose track is `track`, if any.
+    ///
+    /// Used to attach an E2EE decryptor when a subscriber track arrives.
+    ///
+    /// Match on `trackId`, not object identity. `RTCRtpReceiver.track`
+    /// allocates a new ObjC wrapper on every read (`mediaTrackForNativeTrack`),
+    /// so `===` against the stream/on-track wrapper never succeeds and the
+    /// decryptor would never attach — encrypted frames then hit the decoder
+    /// (distorted video, silent audio).
+    ///
+    /// - Parameter track: The media stream track to match.
+    /// - Returns: The matching `RTCRtpReceiver`, or `nil` if none.
+    func rtpReceiver(matching track: RTCMediaStreamTrack) -> RTCRtpReceiver? {
+        peerConnection.transceivers.first {
+            $0.receiver.track?.trackId == track.trackId
+        }?.receiver
+    }
 
     // MARK: State
 
@@ -147,7 +184,10 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     ///   - videoCaptureSessionProvider: Provider for video capturing sessions.
     ///   - screenShareSessionProvider: Provider for screen sharing sessions.
     ///   - audioDeviceModule: The audio device module used by media adapters.
-    ///   - tracesAdapter: The adapter used to enqueue traces
+    ///   - tracesAdapter: The adapter used to enqueue traces.
+    ///
+    /// Creates a shared ``E2EEAttachmentContext`` for this peer connection and
+    /// passes it into ``MediaAdapter`` so local transceivers can encrypt.
     convenience init(
         sessionId: String,
         peerType: PeerConnectionType,
@@ -164,6 +204,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         clientCapabilities: Set<ClientCapability>,
         audioDeviceModule: AudioDeviceModule
     ) {
+        let e2eeContext = E2EEAttachmentContext()
         self.init(
             sessionId: sessionId,
             peerType: peerType,
@@ -184,7 +225,8 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
                 publishOptions: publishOptions,
                 videoCaptureSessionProvider: videoCaptureSessionProvider,
                 screenShareSessionProvider: screenShareSessionProvider,
-                audioDeviceModule: audioDeviceModule
+                audioDeviceModule: audioDeviceModule,
+                e2ee: e2eeContext
             ),
             iceAdapter: .init(
                 sessionID: sessionId,
@@ -193,10 +235,29 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
                 sfuAdapter: sfuAdapter
             ),
             iceConnectionStateAdapter: .init(),
-            clientCapabilities: clientCapabilities
+            clientCapabilities: clientCapabilities,
+            e2eeContext: e2eeContext
         )
     }
 
+    /// Designated initializer.
+    ///
+    /// - Parameters:
+    ///   - sessionId: The unique identifier for the session.
+    ///   - peerType: The type of peer connection (publisher or subscriber).
+    ///   - peerConnection: The underlying WebRTC peer connection.
+    ///   - videoOptions: Configuration options for video.
+    ///   - callSettings: Settings for the current call.
+    ///   - audioSettings: Settings for audio processing.
+    ///   - publishOptions: The publishOptions to use to publish the initial tracks.
+    ///   - sfuAdapter: Adapter for communicating with the SFU.
+    ///   - mediaAdapter: Adapter that owns audio, video, and screenshare.
+    ///   - iceAdapter: Adapter for ICE candidate exchange.
+    ///   - iceConnectionStateAdapter: Adapter for ICE connection state.
+    ///   - clientCapabilities: Capabilities advertised to the SFU.
+    ///   - e2eeContext: Shared box local adapters read when encrypting.
+    ///     The convenience initializer creates one and shares it with
+    ///     ``MediaAdapter``.
     init(
         sessionId: String,
         peerType: PeerConnectionType,
@@ -209,7 +270,8 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         mediaAdapter: MediaAdapter,
         iceAdapter: ICEAdapter,
         iceConnectionStateAdapter: ICEConnectionStateAdapter,
-        clientCapabilities: Set<ClientCapability>
+        clientCapabilities: Set<ClientCapability>,
+        e2eeContext: E2EEAttachmentContext = .init()
     ) {
         self.sessionId = sessionId
         self.peerType = peerType
@@ -226,6 +288,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         self.iceAdapter = iceAdapter
         self.iceConnectionStateAdapter = iceConnectionStateAdapter
         self.clientCapabilities = clientCapabilities
+        self.e2eeContext = e2eeContext
 
         // Warm up instances
         iceConnectionStateAdapter.peerConnectionCoordinator = self

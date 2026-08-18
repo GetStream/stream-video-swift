@@ -4,12 +4,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
-### 🐞 Fixed
-- The microphone indicator in the floating local-participant view is now left-aligned when connection quality is unavailable. [#1287](https://github.com/GetStream/stream-video-swift/pull/1287)
+### ✅ Added
+- Added framed AES-GCM end-to-end encryption via `Call.setE2EEManager(_:)` and `EncryptionManager`. Attach the manager before `join()`, or pass `nil` to detach it. [#1249](https://github.com/GetStream/stream-video-swift/pull/1249)
+- `Call.create`, `CallViewModel.startCall`, `joinCall`, and `joinAndRingCall` accept optional `encryption` settings so get-or-create can set mode `auto-on`. [#1249](https://github.com/GetStream/stream-video-swift/pull/1249)
 
 ### 🐞 Fixed
 
 - Fixed a race condition when compressing WebRTC statistics concurrently. [#1311](https://github.com/GetStream/stream-video-swift/pull/1311)
+- The microphone indicator in the floating local-participant view is now left-aligned when connection quality is unavailable. [#1287](https://github.com/GetStream/stream-video-swift/pull/1287)
 
 # [1.53.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.53.0)
 _September 18, 2026_
