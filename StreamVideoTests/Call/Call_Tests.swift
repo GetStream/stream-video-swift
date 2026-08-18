@@ -827,6 +827,30 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
         XCTAssert(call?.state.broadcasting == false)
     }
 
+    func test_stopAllRTMPBroadcasts_coordinatorWasCalledWithExpectedValues() async throws {
+        // Given
+        let mockCoordinatorClient = MockDefaultAPIEndpoints()
+        let subject = Call(
+            from: .init(call: .dummy(), members: [], ownCapabilities: []),
+            coordinatorClient: mockCoordinatorClient,
+            callController: .dummy(defaultAPI: mockCoordinatorClient)
+        )
+
+        // When
+        _ = try? await subject.stopAllRTMPBroadcasts()
+
+        // Then
+        let input = try XCTUnwrap(
+            mockCoordinatorClient
+                .recordedInputPayload(
+                    (String, String).self,
+                    for: .stopAllRTMPBroadcasts
+                )?.first
+        )
+        XCTAssertEqual(subject.callType, input.0)
+        XCTAssertEqual(subject.callId, input.1)
+    }
+
     // MARK: - enableClientCapabilities
 
     func test_enableClientCapabilities_correctlyUpdatesStateAdapter() async throws {

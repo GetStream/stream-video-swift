@@ -1001,6 +1001,14 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         try await coordinatorClient.stopRTMPBroadcast(type: callType, id: callId, name: name)
     }
 
+    /// Stops all RTMP broadcasts of the call.
+    /// - Returns: `StopAllRTMPBroadcastsResponse`.
+    /// - Throws: An error if stopping the RTMP broadcasts fails.
+    @discardableResult
+    public func stopAllRTMPBroadcasts() async throws -> StopAllRTMPBroadcastsResponse {
+        try await coordinatorClient.stopAllRTMPBroadcasts(type: callType, id: callId)
+    }
+
     // MARK: - Events
 
     /// Sends a custom event to the call.
