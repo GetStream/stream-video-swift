@@ -327,7 +327,112 @@ final class CallState_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(subject.frameRecordingStatus, false)
     }
 
+    // MARK: - reactions
+
+    func test_updateState_callReactionEvent_appendsReactionOnSender() {
+        let subject = CallState(.dummy())
+        subject.participantsMap = [
+            "session-1": .dummy(id: "session-1", userId: "sender", sessionId: "session-1"),
+            "session-2": .dummy(id: "session-2", userId: "other", sessionId: "session-2")
+        ]
+
+        subject.updateState(from: .typeCallReactionEvent(makeEvent(userId: "sender", type: ":like:")))
+
+        XCTAssertEqual(subject.participantsMap["session-1"]?.reactions.map(\.type), [":like:"])
+        XCTAssertEqual(subject.participantsMap["session-2"]?.reactions, [])
+    }
+
+    func test_updateState_callReactionEvent_userJoinedFromTwoDevices_appendsOnBothSessions() {
+        let subject = CallState(.dummy())
+        subject.participantsMap = [
+            "session-1": .dummy(id: "session-1", userId: "sender", sessionId: "session-1"),
+            "session-2": .dummy(id: "session-2", userId: "sender", sessionId: "session-2")
+        ]
+
+        subject.updateState(from: .typeCallReactionEvent(makeEvent(userId: "sender", type: ":like:")))
+
+        XCTAssertEqual(subject.participantsMap["session-1"]?.reactions.count, 1)
+        XCTAssertEqual(subject.participantsMap["session-2"]?.reactions.count, 1)
+    }
+
+    func test_updateState_callReactionEvent_senderIsNotAParticipant_doesNotStoreReaction() {
+        let subject = CallState(.dummy())
+        subject.participantsMap = [
+            "session-1": .dummy(id: "session-1", userId: "other", sessionId: "session-1")
+        ]
+
+        subject.updateState(from: .typeCallReactionEvent(makeEvent(userId: "sender", type: ":like:")))
+
+        XCTAssertEqual(subject.participantsMap["session-1"]?.reactions, [])
+    }
+
+    func test_updateState_twoCallReactionEvents_keepsBothInArrivalOrder() {
+        let subject = CallState(.dummy())
+        subject.participantsMap = [
+            "session-1": .dummy(id: "session-1", userId: "sender", sessionId: "session-1")
+        ]
+
+        subject.updateState(from: .typeCallReactionEvent(makeEvent(userId: "sender", type: ":raise-hand:")))
+        subject.updateState(from: .typeCallReactionEvent(makeEvent(userId: "sender", type: ":like:")))
+
+        XCTAssertEqual(
+            subject.participantsMap["session-1"]?.reactions.map(\.type),
+            [":raise-hand:", ":like:"]
+        )
+    }
+
+    func test_consume_removesOnlyTheGivenReaction() {
+        let subject = CallState(.dummy())
+        let raisedHand = CallReaction.dummy(type: ":raise-hand:")
+        let like = CallReaction.dummy(type: ":like:")
+        subject.participantsMap = [
+            "session-1": .dummy(id: "session-1", sessionId: "session-1", reactions: [raisedHand, like])
+        ]
+
+        subject.consume(like, for: "session-1")
+
+        XCTAssertEqual(subject.participantsMap["session-1"]?.reactions.map(\.id), [raisedHand.id])
+    }
+
+    func test_resetReactions_removesEveryReaction() {
+        let subject = CallState(.dummy())
+        subject.participantsMap = [
+            "session-1": .dummy(
+                id: "session-1",
+                sessionId: "session-1",
+                reactions: [.dummy(type: ":raise-hand:"), .dummy(type: ":like:")]
+            )
+        ]
+
+        subject.resetReactions(for: "session-1")
+
+        XCTAssertEqual(subject.participantsMap["session-1"]?.reactions, [])
+    }
+
+    func test_resetReactions_unknownSessionId_doesNotCrash() {
+        let subject = CallState(.dummy())
+        subject.participantsMap = [
+            "session-1": .dummy(id: "session-1", sessionId: "session-1", reactions: [.dummy()])
+        ]
+
+        subject.resetReactions(for: "unknown")
+
+        XCTAssertEqual(subject.participantsMap["session-1"]?.reactions.count, 1)
+    }
+
     // MARK: - Private helpers
+
+    private func makeEvent(userId: String, type: String) -> CallReactionEvent {
+        .init(
+            callCid: "default:123",
+            createdAt: .init(timeIntervalSince1970: 0),
+            reaction: .init(
+                emojiCode: type,
+                type: type,
+                user: .dummy(id: userId)
+            )
+        )
+    }
 
     private func assertParticipantsUpdate(
         initial: [CallParticipant],

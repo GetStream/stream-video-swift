@@ -1175,6 +1175,39 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
         }
     }
 
+    // MARK: - reactions
+
+    func test_consume_removesTheReactionFromTheParticipant() async throws {
+        let call = try XCTUnwrap(streamVideo?.call(callType: callType, callId: callId))
+        let raisedHand = CallReaction.dummy(type: ":raise-hand:")
+        let like = CallReaction.dummy(type: ":like:")
+        call.state.participantsMap = [
+            "session-1": .dummy(id: "session-1", sessionId: "session-1", reactions: [raisedHand, like])
+        ]
+
+        call.consume(like, for: "session-1")
+
+        XCTAssertEqual(
+            call.state.participantsMap["session-1"]?.reactions.map(\.id),
+            [raisedHand.id]
+        )
+    }
+
+    func test_resetReactions_removesEveryReactionFromTheParticipant() async throws {
+        let call = try XCTUnwrap(streamVideo?.call(callType: callType, callId: callId))
+        call.state.participantsMap = [
+            "session-1": .dummy(
+                id: "session-1",
+                sessionId: "session-1",
+                reactions: [.dummy(type: ":raise-hand:"), .dummy(type: ":like:")]
+            )
+        ]
+
+        call.resetReactions(for: "session-1")
+
+        XCTAssertEqual(call.state.participantsMap["session-1"]?.reactions, [])
+    }
+
     // MARK: - setVideoFilter
 
     func test_setVideoFilter_moderationVideoAdapterWasUpdated() async {

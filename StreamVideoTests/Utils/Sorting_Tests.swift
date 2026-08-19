@@ -1131,6 +1131,81 @@ final class Sorting_Tests: XCTestCase, @unchecked Sendable {
         )
     }
 
+    // MARK: - reactionType
+
+    func test_reactionType_allMatching_keepsOrder() {
+        assertSort(
+            [
+                .dummy(reactions: [.dummy(type: ":raise-hand:")]),
+                .dummy(reactions: [.dummy(type: ":raise-hand:")])
+            ],
+            comparator: reactionType(":raise-hand:"),
+            expectedTransformer: { [$0[0], $0[1]] }
+        )
+    }
+
+    func test_reactionType_noneMatching_keepsOrder() {
+        assertSort(
+            [
+                .dummy(reactions: []),
+                .dummy(reactions: [.dummy(type: ":like:")])
+            ],
+            comparator: reactionType(":raise-hand:"),
+            expectedTransformer: { [$0[0], $0[1]] }
+        )
+    }
+
+    func test_reactionType_someMatching_matchingFirst() {
+        assertSort(
+            [
+                .dummy(reactions: [.dummy(type: ":like:")]),
+                .dummy(reactions: [.dummy(type: ":raise-hand:")])
+            ],
+            comparator: reactionType(":raise-hand:"),
+            expectedTransformer: { [$0[1], $0[0]] }
+        )
+    }
+
+    func test_reactionType_matchingIsNotTheLatest_matchingFirst() {
+        assertSort(
+            [
+                .dummy(reactions: [.dummy(type: ":like:")]),
+                .dummy(
+                    reactions: [
+                        .dummy(type: ":raise-hand:"),
+                        .dummy(type: ":like:")
+                    ]
+                )
+            ],
+            comparator: reactionType(":raise-hand:"),
+            expectedTransformer: { [$0[1], $0[0]] }
+        )
+    }
+
+    // MARK: - raisedHand
+
+    func test_raisedHand_androidAndiOSReactionType_matchingFirst() {
+        assertSort(
+            [
+                .dummy(reactions: [.dummy(type: ":like:")]),
+                .dummy(reactions: [.dummy(type: ":raise-hand:")])
+            ],
+            comparator: raisedHand,
+            expectedTransformer: { [$0[1], $0[0]] }
+        )
+    }
+
+    func test_raisedHand_javascriptReactionType_matchingFirst() {
+        assertSort(
+            [
+                .dummy(reactions: [.dummy(type: ":like:")]),
+                .dummy(reactions: [.dummy(type: "raised-hand")])
+            ],
+            comparator: raisedHand,
+            expectedTransformer: { [$0[1], $0[0]] }
+        )
+    }
+
     // MARK: - Private Helpers
 
     private func assertSort(

@@ -61,6 +61,7 @@ public struct VideoParticipantsView<Factory: ViewFactory>: View {
 public enum VideoCallParticipantDecoration: Hashable, CaseIterable {
     case options
     case speaking
+    case reactions
 }
 
 public struct VideoCallParticipantModifier: ViewModifier {
@@ -119,6 +120,11 @@ public struct VideoCallParticipantModifier: ViewModifier {
             .applyDecorationModifierIfRequired(
                 VideoCallParticipantSpeakingModifier(participant: participant, participantCount: participantCount),
                 decoration: .speaking,
+                availableDecorations: decorations
+            )
+            .applyDecorationModifierIfRequired(
+                VideoCallParticipantReactionsModifier(participant: participant, call: call),
+                decoration: .reactions,
                 availableDecorations: decorations
             )
             .clipShape(RoundedRectangle(cornerRadius: 16))

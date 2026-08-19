@@ -10,9 +10,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `CallDeletedEvent` now updates `Call.state` instead of being ignored. [#1243](https://github.com/GetStream/stream-video-swift/pull/1243)
 - `Call.startFrameRecording(recordingExternalStorage:)` and `Call.stopFrameRecording()`, along with the `CallState.frameRecordingStatus` property that tracks frame recording for the active call. [#1246](https://github.com/GetStream/stream-video-swift/pull/1246)
 - `Call.stopAllRTMPBroadcasts()` to stop every RTMP-out broadcast of a call in one call, matching the JavaScript SDK's `stopAllRTMPBroadcasts`.
+- Reactions received during a call are now stored on `CallParticipant.reactions`, instead of the `call.reaction_new` event being ignored. Added `Call.consume(_:for:)` and `Call.resetReactions(for:)` to remove them, the `reactionType(_:)` and `raisedHand` participant sort comparators, and a `.reactions` participant decoration that presents them.
 
 ### 🐞 Fixed
 - Transient peer-connection disconnections no longer trigger an immediate full rejoin, allowing the existing ICE restart flow to recover the session. [#1231](https://github.com/GetStream/stream-video-swift/pull/1231)
+- `CallParticipant.withUpdated(...)` no longer resets `source` to `.webRTCUnspecified`, which previously broke the `videoIngressSource` and `participantSource` sort comparators after any participant update.
 
 # [1.51.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.51.0)
 _August 13, 2026_

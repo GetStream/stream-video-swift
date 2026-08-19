@@ -152,6 +152,8 @@ public class CallState: ObservableObject {
     /// help customize logic, analytics, and UI based on how the call was started.
     var joinSource: JoinSource?
 
+    @Injected(\.uuidFactory) private var uuidFactory
+
     private var durationCancellable: AnyCancellable?
     private nonisolated let disposableBag = DisposableBag()
 
@@ -200,8 +202,8 @@ public class CallState: ObservableObject {
         case let .typeCallNotificationEvent(event):
             mergeMembers(event.members)
             update(from: event.call)
-        case .typeCallReactionEvent:
-            break
+        case let .typeCallReactionEvent(event):
+            add(reaction: event.reaction, createdAt: event.createdAt)
         case let .typeCallRecordingStartedEvent(event):
             if recordingState != .recording {
                 recordingState = .recording
@@ -501,6 +503,75 @@ public class CallState: ObservableObject {
 
     internal func update(closedCaptions: [CallClosedCaption]) {
         self.closedCaptions = closedCaptions
+    }
+
+    /// Appends a received reaction on every participant of the sending user.
+    ///
+    /// A user can join from more than one device, so the reaction is added on
+    /// each session that belongs to them.
+    ///
+    /// - Parameters:
+    ///   - response: The reaction payload received with the event.
+    ///   - createdAt: The date the reaction was received.
+    internal func add(reaction response: ReactionResponse, createdAt: Date) {
+        let reaction = CallReaction(
+            response,
+            id: uuidFactory.get().uuidString,
+            createdAt: createdAt
+        )
+        let sessionIds = participantsMap
+            .filter { $0.value.userId == reaction.user.id }
+            .map(\.key)
+
+        guard !sessionIds.isEmpty else {
+            log.debug(
+                """
+                Received reaction type:\(reaction.type) from user:\(reaction.user.id) \
+                who isn't a participant in the call.
+                """
+            )
+            return
+        }
+
+        /// The map is updated once, so participants are re-sorted a single time
+        /// even when the user has joined from more than one device.
+        var updated = participantsMap
+        for sessionId in sessionIds {
+            guard let participant = updated[sessionId] else { continue }
+            updated[sessionId] = participant
+                .withUpdated(reactions: participant.reactions + [reaction])
+        }
+        participantsMap = updated
+    }
+
+    /// Removes a single reaction from the participant with the given session id.
+    ///
+    /// - Parameters:
+    ///   - reaction: The reaction to remove.
+    ///   - sessionId: The session id of the participant holding the reaction.
+    internal func consume(_ reaction: CallReaction, for sessionId: String) {
+        guard
+            let participant = participantsMap[sessionId],
+            participant.reactions.contains(where: { $0.id == reaction.id })
+        else {
+            return
+        }
+        participantsMap[sessionId] = participant.withUpdated(
+            reactions: participant.reactions.filter { $0.id != reaction.id }
+        )
+    }
+
+    /// Removes every reaction from the participant with the given session id.
+    ///
+    /// - Parameter sessionId: The session id of the participant to reset.
+    internal func resetReactions(for sessionId: String) {
+        guard
+            let participant = participantsMap[sessionId],
+            !participant.reactions.isEmpty
+        else {
+            return
+        }
+        participantsMap[sessionId] = participant.withUpdated(reactions: [])
     }
 
     private func updateOwnCapabilities(_ event: UpdatedCallPermissionsEvent) {

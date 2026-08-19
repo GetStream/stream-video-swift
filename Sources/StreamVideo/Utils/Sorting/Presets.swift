@@ -21,6 +21,7 @@ public nonisolated(unsafe) let defaultSortPreset = [
             [
                 dominantSpeaker,
                 speaking,
+                raisedHand,
                 publishingVideo,
                 publishingAudio
             ]
@@ -40,6 +41,7 @@ public nonisolated(unsafe) let speakerLayoutSortPreset = [
         combineComparators(
             [
                 speaking,
+                raisedHand,
                 videoIngressSource,
                 publishingVideo,
                 publishingAudio
@@ -59,6 +61,7 @@ public nonisolated(unsafe) let paginatedLayoutSortPreset = [
             [
                 dominantSpeaker,
                 speaking,
+                raisedHand,
                 videoIngressSource,
                 publishingVideo,
                 publishingAudio
@@ -75,6 +78,7 @@ public nonisolated(unsafe) let livestreamOrAudioRoomSortPreset = [
             [
                 dominantSpeaker,
                 speaking,
+                raisedHand,
                 videoIngressSource,
                 publishingVideo,
                 publishingAudio

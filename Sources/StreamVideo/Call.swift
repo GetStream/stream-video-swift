@@ -1099,6 +1099,29 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         )
     }
 
+    /// Removes a reaction from the participant that sent it.
+    ///
+    /// Received reactions are kept on ``CallParticipant/reactions`` until the
+    /// application removes them, which lets short-lived reactions and sticky
+    /// ones, such as a raised hand, coexist. Call this once a reaction has been
+    /// presented.
+    ///
+    /// - Parameters:
+    ///   - reaction: The reaction to remove.
+    ///   - sessionId: The session id of the participant holding the reaction.
+    @MainActor
+    public func consume(_ reaction: CallReaction, for sessionId: String) {
+        state.consume(reaction, for: sessionId)
+    }
+
+    /// Removes every reaction from the participant with the given session id.
+    ///
+    /// - Parameter sessionId: The session id of the participant to reset.
+    @MainActor
+    public func resetReactions(for sessionId: String) {
+        state.resetReactions(for: sessionId)
+    }
+
     // MARK: - Query members methods
 
     internal func queryMembers(

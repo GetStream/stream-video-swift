@@ -57,6 +57,45 @@ public nonisolated(unsafe) let pinned: StreamSortComparator<CallParticipant> = {
     return .orderedSame
 }
 
+/// The reaction types the SDKs use for a raised hand.
+///
+/// The value differs across platforms: the JavaScript SDK sends
+/// `raised-hand` as the reaction type and `:raise-hand:` as the emoji code,
+/// while the Android SDK and the iOS demo application send `:raise-hand:` as
+/// the type. ``raisedHand`` matches all of them so ordering works in a call
+/// with participants from any platform.
+public let raisedHandReactionTypes: Set<String> = [
+    "raised-hand",
+    ":raise-hand:"
+]
+
+/// A comparator creator which sets up a comparator prioritizing participants
+/// who sent a reaction of the given type.
+public nonisolated func reactionType(_ type: String) -> StreamSortComparator<CallParticipant> {
+    reactionTypes([type])
+}
+
+/// A comparator creator which sets up a comparator prioritizing participants
+/// who sent a reaction matching any of the given types.
+public nonisolated func reactionTypes(_ types: Set<String>) -> StreamSortComparator<CallParticipant> {
+    { a, b in
+        /// Most participants hold no reactions for most of a call, so this
+        /// avoids the lookups on the hot path of sorting large calls.
+        if a.reactions.isEmpty, b.reactions.isEmpty { return .orderedSame }
+
+        let aHas = a.reactions.contains { types.contains($0.type) }
+        let bHas = b.reactions.contains { types.contains($0.type) }
+        if aHas && !bHas { return .orderedAscending }
+        if !aHas && bHas { return .orderedDescending }
+        return .orderedSame
+    }
+}
+
+/// A comparator which sorts participants with a raised hand first.
+public nonisolated(unsafe) let raisedHand: StreamSortComparator<CallParticipant> = reactionTypes(
+    raisedHandReactionTypes
+)
+
 /// A comparator creator which sets up a comparator prioritizing participants
 /// who have a specific role.
 public nonisolated func roles(_ roles: [String] = ["admin", "host", "speaker"]) -> StreamSortComparator<CallParticipant> {

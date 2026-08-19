@@ -60,6 +60,13 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
     /// to `.webRTCUnspecified`.
     public var source: ParticipantSource
 
+    /// The reactions this participant sent, oldest first.
+    ///
+    /// Reactions are kept until the application removes them with
+    /// ``Call/consume(_:for:)`` or ``Call/resetReactions(for:)``, so a sticky
+    /// reaction such as a raised hand survives later ones.
+    public var reactions: [CallReaction]
+
     /// The user's id. This is not necessarily unique, since a user can join
     /// from multiple devices.
     public var userId: String {
@@ -100,7 +107,8 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
         audioLevels: [Float],
         pin: PinInfo?,
         pausedTracks: Set<TrackType>,
-        source: ParticipantSource = .webRTCUnspecified
+        source: ParticipantSource = .webRTCUnspecified,
+        reactions: [CallReaction] = []
     ) {
         user = User(
             id: userId,
@@ -128,6 +136,7 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
         self.pin = pin
         self.pausedTracks = pausedTracks
         self.source = source
+        self.reactions = reactions
     }
 
     public static func == (lhs: CallParticipant, rhs: CallParticipant) -> Bool {
@@ -151,7 +160,9 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
             lhs.audioTrack === rhs.audioTrack &&
             lhs.track === rhs.track &&
             lhs.screenshareTrack === rhs.screenshareTrack &&
-            lhs.pausedTracks == rhs.pausedTracks
+            lhs.pausedTracks == rhs.pausedTracks &&
+            lhs.source == rhs.source &&
+            lhs.reactions == rhs.reactions
     }
 
     /// Indicates whether any pin is applied to this participant.
@@ -194,7 +205,9 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
             audioLevel: audioLevel,
             audioLevels: audioLevels,
             pin: pin,
-            pausedTracks: pausedTracks
+            pausedTracks: pausedTracks,
+            source: source,
+            reactions: reactions
         )
     }
 
@@ -223,7 +236,9 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
             audioLevel: audioLevel,
             audioLevels: audioLevels,
             pin: pin,
-            pausedTracks: pausedTracks
+            pausedTracks: pausedTracks,
+            source: source,
+            reactions: reactions
         )
     }
 
@@ -251,7 +266,9 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
             audioLevel: audioLevel,
             audioLevels: audioLevels,
             pin: pin,
-            pausedTracks: pausedTracks
+            pausedTracks: pausedTracks,
+            source: source,
+            reactions: reactions
         )
     }
 
@@ -279,7 +296,9 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
             audioLevel: audioLevel,
             audioLevels: audioLevels,
             pin: pin,
-            pausedTracks: pausedTracks
+            pausedTracks: pausedTracks,
+            source: source,
+            reactions: reactions
         )
     }
 
@@ -307,7 +326,9 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
             audioLevel: audioLevel,
             audioLevels: audioLevels,
             pin: pin,
-            pausedTracks: pausedTracks
+            pausedTracks: pausedTracks,
+            source: source,
+            reactions: reactions
         )
     }
 
@@ -335,7 +356,9 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
             audioLevel: audioLevel,
             audioLevels: audioLevels,
             pin: pin,
-            pausedTracks: pausedTracks
+            pausedTracks: pausedTracks,
+            source: source,
+            reactions: reactions
         )
     }
 
@@ -363,7 +386,9 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
             audioLevel: audioLevel,
             audioLevels: audioLevels,
             pin: pin,
-            pausedTracks: pausedTracks
+            pausedTracks: pausedTracks,
+            source: source,
+            reactions: reactions
         )
     }
 
@@ -391,7 +416,9 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
             audioLevel: audioLevel,
             audioLevels: audioLevels,
             pin: pin,
-            pausedTracks: pausedTracks
+            pausedTracks: pausedTracks,
+            source: source,
+            reactions: reactions
         )
     }
 
@@ -419,7 +446,9 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
             audioLevel: audioLevel,
             audioLevels: audioLevels,
             pin: pin,
-            pausedTracks: pausedTracks
+            pausedTracks: pausedTracks,
+            source: source,
+            reactions: reactions
         )
     }
 
@@ -456,7 +485,9 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
             audioLevel: audioLevel,
             audioLevels: levels,
             pin: pin,
-            pausedTracks: pausedTracks
+            pausedTracks: pausedTracks,
+            source: source,
+            reactions: reactions
         )
     }
 
@@ -484,7 +515,9 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
             audioLevel: audioLevel,
             audioLevels: audioLevels,
             pin: pin,
-            pausedTracks: pausedTracks
+            pausedTracks: pausedTracks,
+            source: source,
+            reactions: reactions
         )
     }
 
@@ -512,7 +545,9 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
             audioLevel: audioLevel,
             audioLevels: audioLevels,
             pin: pin,
-            pausedTracks: pausedTracks
+            pausedTracks: pausedTracks,
+            source: source,
+            reactions: reactions
         )
     }
 
@@ -540,7 +575,40 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
             audioLevel: audioLevel,
             audioLevels: audioLevels,
             pin: pin,
-            pausedTracks: pausedTracks
+            pausedTracks: pausedTracks,
+            source: source,
+            reactions: reactions
+        )
+    }
+
+    /// Returns a copy with the participant's reactions updated.
+    public func withUpdated(reactions: [CallReaction]) -> CallParticipant {
+        CallParticipant(
+            id: id,
+            userId: userId,
+            roles: roles,
+            name: name,
+            profileImageURL: profileImageURL,
+            trackLookupPrefix: trackLookupPrefix,
+            hasVideo: hasVideo,
+            hasAudio: hasAudio,
+            isScreenSharing: isScreensharing,
+            showTrack: showTrack,
+            audioTrack: audioTrack,
+            track: track,
+            trackSize: trackSize,
+            screenshareTrack: screenshareTrack,
+            isSpeaking: isSpeaking,
+            isDominantSpeaker: isDominantSpeaker,
+            sessionId: sessionId,
+            connectionQuality: connectionQuality,
+            joinedAt: joinedAt,
+            audioLevel: audioLevel,
+            audioLevels: audioLevels,
+            pin: pin,
+            pausedTracks: pausedTracks,
+            source: source,
+            reactions: reactions
         )
     }
 

@@ -131,4 +131,36 @@ final class CallParticipants_Tests: XCTestCase, @unchecked Sendable {
 
         XCTAssertNotEqual(participantA, participantB)
     }
+
+    // MARK: - withUpdated
+
+    func test_withUpdated_preservesSource() {
+        let subject = CallParticipant.dummy(source: .rtmp)
+
+        XCTAssertEqual(subject.withUpdated(showTrack: true).source, .rtmp)
+        XCTAssertEqual(subject.withUpdated(audio: true).source, .rtmp)
+        XCTAssertEqual(subject.withUpdated(trackSize: .init(width: 1, height: 1)).source, .rtmp)
+    }
+
+    func test_withUpdated_preservesReactions() {
+        let reaction = CallReaction.dummy(type: ":raise-hand:")
+        let subject = CallParticipant.dummy(reactions: [reaction])
+
+        XCTAssertEqual(subject.withUpdated(showTrack: true).reactions, [reaction])
+        XCTAssertEqual(subject.withUpdated(audio: true).reactions, [reaction])
+        XCTAssertEqual(subject.withUpdated(video: true).reactions, [reaction])
+    }
+
+    func test_withUpdated_reactions_replacesReactions() {
+        let reaction = CallReaction.dummy(type: ":like:")
+        let subject = CallParticipant.dummy(reactions: [.dummy(type: ":raise-hand:")])
+
+        XCTAssertEqual(subject.withUpdated(reactions: [reaction]).reactions, [reaction])
+    }
+
+    func test_isEqual_participantsWithDifferentReactionsAreNotEqual() {
+        let subject = CallParticipant.dummy(id: "1", reactions: [])
+
+        XCTAssertNotEqual(subject, subject.withUpdated(reactions: [.dummy()]))
+    }
 }
