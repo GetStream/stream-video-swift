@@ -5,6 +5,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 # Upcoming
 
 ### ✅ Added
+- Added framed AES-GCM end-to-end encryption via `Call.setE2EEManager(_:)` and `EncryptionManager`. Attach the manager before `join()`. [#1249](https://github.com/GetStream/stream-video-swift/pull/1249)
 - `StreamVideo.getEdges()` returns the list of edges (datacenters) available for hosting calls [#1247](https://github.com/GetStream/stream-video-swift/pull/1247).
 - `Call.deleteRecording(callSessionId:filename:)` for deleting a recording of a call session [#1244](https://github.com/GetStream/stream-video-swift/pull/1244).
 - Added `Call.delete(hard:)` for deleting a call. [#1243](https://github.com/GetStream/stream-video-swift/pull/1243)

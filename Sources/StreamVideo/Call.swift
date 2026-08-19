@@ -588,18 +588,12 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         callController.setVideoFilter(videoFilter)
     }
 
-    /// The E2EE manager for this call, if one was set via ``setE2EEManager(_:)``.
-    ///
-    /// Kept across ``leave(reason:)`` so a later join still reports `e2ee: true`
-    /// and still attaches encrypt/decrypt on the new peer connections.
-    public private(set) var e2eeManager: E2EEManager?
-
     /// Attaches end-to-end encryption. Must run before ``join``.
     ///
     /// ## Overview
     /// Pass ``EncryptionManager`` for the built-in AES-GCM scheme, or any
-    /// custom ``E2EEManager``. The manager is stored on the call and on the
-    /// WebRTC coordinator so the next join:
+    /// custom ``E2EEManager``. The manager is stored on the WebRTC session
+    /// so join:
     /// - reports `e2ee: true` on ``JoinCallRequest``
     /// - attaches encryptors when local transceivers are added
     /// - attaches decryptors when remote tracks arrive
@@ -618,7 +612,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     ///   a manager now would silently publish or receive cleartext.
     public func setE2EEManager(_ manager: E2EEManager) async throws {
         try await callController.setE2EEManager(manager)
-        e2eeManager = manager
     }
 
     /// Sets an `AudioFilter` for the current call.
