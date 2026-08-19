@@ -300,6 +300,33 @@ final class CallState_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(subject.duration, 0)
     }
 
+    // MARK: - Frame recording
+
+    func test_update_fromCallResponse_withRunningFrameRecording_setsFrameRecordingStatus() {
+        let subject = CallState(.dummy())
+
+        subject.update(
+            from: CallResponse.dummy(
+                egress: .dummy(frameRecording: .init(status: "running"))
+            )
+        )
+
+        XCTAssertEqual(subject.frameRecordingStatus, true)
+    }
+
+    func test_update_fromCallResponse_withoutFrameRecording_resetsFrameRecordingStatus() {
+        let subject = CallState(.dummy())
+        subject.update(
+            from: CallResponse.dummy(
+                egress: .dummy(frameRecording: .init(status: "running"))
+            )
+        )
+
+        subject.update(from: CallResponse.dummy(egress: .dummy()))
+
+        XCTAssertEqual(subject.frameRecordingStatus, false)
+    }
+
     // MARK: - Private helpers
 
     private func assertParticipantsUpdate(
