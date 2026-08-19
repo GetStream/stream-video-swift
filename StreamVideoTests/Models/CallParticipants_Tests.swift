@@ -131,4 +131,23 @@ final class CallParticipants_Tests: XCTestCase, @unchecked Sendable {
 
         XCTAssertNotEqual(participantA, participantB)
     }
+
+    // MARK: - withUpdated
+
+    func test_withUpdated_preservesSource() {
+        let subject = CallParticipant.dummy(source: .rtmp)
+
+        XCTAssertEqual(subject.withUpdated(showTrack: true).source, .rtmp)
+        XCTAssertEqual(subject.withUpdated(audio: true).source, .rtmp)
+        XCTAssertEqual(subject.withUpdated(video: true).source, .rtmp)
+        XCTAssertEqual(subject.withUpdated(trackSize: .init(width: 1, height: 1)).source, .rtmp)
+        XCTAssertEqual(subject.withUpdated(dominantSpeaker: true).source, .rtmp)
+    }
+
+    func test_isEqual_participantsWithDifferentSourceAreNotEqual() {
+        let subject = CallParticipant.dummy(id: "1", source: .rtmp)
+        let other = CallParticipant.dummy(id: "1", source: .webRTCUnspecified)
+
+        XCTAssertNotEqual(subject, other)
+    }
 }
