@@ -351,13 +351,26 @@ private final class NativeE2EEEventForwarder: NSObject, RTCEncryptionManagerDele
         .joined(separator: " ")
         let message = "E2EE \(mapped.name) userId:\(mapped.userId) \(detail)"
             .trimmingCharacters(in: .whitespaces)
-        if mapped.name.contains("fail")
-            || mapped.name.contains("missing")
-            || mapped.name.contains("stalled") {
+        if e2eeEventLogsAsWarning(event.type) {
             log.warning(message, subsystems: .webRTC)
         } else {
             log.debug(message, subsystems: .webRTC)
         }
         handler(mapped)
+    }
+}
+
+/// Native already throttles unencrypted_frame and unsupported_version.
+func e2eeEventLogsAsWarning(_ type: RTCE2eeEventType) -> Bool {
+    switch type {
+    case .unencryptedFrame,
+         .unsupportedVersion,
+         .encryptionFailed,
+         .decryptionFailed,
+         .missingKey,
+         .decryptionStalled:
+        return true
+    default:
+        return false
     }
 }
