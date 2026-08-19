@@ -23,37 +23,12 @@ final class DemoAppViewFactory: ViewFactory {
         lobbyInfo: LobbyInfo,
         callSettings: Binding<CallSettings>
     ) -> some View {
-        let handleJoinCall = { [streamVideo] in
-            guard case .lobby = viewModel.callingState else { return }
-            Task { @MainActor [streamVideo] in
-                let call = streamVideo.call(
-                    callType: lobbyInfo.callType,
-                    callId: lobbyInfo.callId
-                )
-                await AppEnvironment.EncryptionKeys.shared.attachIfNeeded(
-                    to: call,
-                    userId: streamVideo.user.id
-                )
-                viewModel.startCall(
-                    callType: lobbyInfo.callType,
-                    callId: lobbyInfo.callId,
-                    members: lobbyInfo.participants
-                )
-            }
-        }
-        let handleCloseLobby = {
-            viewModel.hangUp()
-        }
-        return LobbyView(
+        DemoLobbyView(
             viewFactory: self,
-            callId: lobbyInfo.callId,
-            callType: lobbyInfo.callType,
-            callSettings: callSettings,
-            onJoinCallTap: handleJoinCall,
-            onCloseLobby: handleCloseLobby
+            viewModel: viewModel,
+            lobbyInfo: lobbyInfo,
+            callSettings: callSettings
         )
-        .alignedToReadableContentGuide()
-        .background(Appearance.default.colors.lobbyBackground.edgesIgnoringSafeArea(.all))
     }
 
     func makeInnerWaitingLocalUserView(viewModel: CallViewModel) -> AnyView {

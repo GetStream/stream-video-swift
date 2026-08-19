@@ -428,6 +428,8 @@ open class CallViewModel: ObservableObject {
     ///   high-scale livestream publisher when backend routing needs it.
     ///  - video: A boolean indicating if the call will be video or only audio. Still requires appropriate
     ///   setting of ``CallSettings`.`
+    ///  - encryption: Optional encryption settings applied on get-or-create
+    ///   (`auto-on` to require framed AES-GCM E2EE).
     public func startCall(
         callType: String,
         callId: String,
@@ -440,7 +442,8 @@ open class CallViewModel: ObservableObject {
         backstage: BackstageSettingsRequest? = nil,
         highScaleLivestreamPublisherHint: Bool? = nil,
         customData: [String: RawJSON]? = nil,
-        video: Bool? = nil
+        video: Bool? = nil,
+        encryption: EncryptionSettingsRequest? = nil
     ) {
         // Drop any coordinator left over from a previous call so this start
         // begins from a clean `.creating` state.
@@ -462,7 +465,8 @@ open class CallViewModel: ObservableObject {
                 startsAt: startsAt,
                 backstage: backstage,
                 highScaleLivestreamPublisherHint: highScaleLivestreamPublisherHint,
-                customData: customData
+                customData: customData,
+                encryption: encryption
             )
         } else {
             /// If no CallSettings have been provided, we skip passing the default ones, in order to
@@ -487,7 +491,8 @@ open class CallViewModel: ObservableObject {
                         ring: ring,
                         maxDuration: maxDuration,
                         maxParticipants: maxParticipants,
-                        video: video
+                        video: video,
+                        encryption: encryption
                     )
 
                     // Create succeeded. Announce it to the coordinator: this
@@ -523,17 +528,22 @@ open class CallViewModel: ObservableObject {
     /// - Parameters:
     ///  - callType: the type of the call.
     ///  - callId: the id of the call.
+    ///  - customData: Optional custom payload to associate with the call on creation.
+    ///  - encryption: Optional encryption settings applied on get-or-create
+    ///   (`auto-on` to require framed AES-GCM E2EE).
     public func joinCall(
         callType: String,
         callId: String,
-        customData: [String: RawJSON]? = nil
+        customData: [String: RawJSON]? = nil,
+        encryption: EncryptionSettingsRequest? = nil
     ) {
         setCallingState(.joining)
         enterCall(
             callType: callType,
             callId: callId,
             members: [],
-            customData: customData
+            customData: customData,
+            encryption: encryption
         )
     }
     
@@ -548,6 +558,8 @@ open class CallViewModel: ObservableObject {
     ///   - startsAt: An optional scheduled start time for the call.
     ///   - customData: Optional custom payload to associate with the call on creation.
     ///   - video: Optional flag indicating whether the ring should suggest a video call.
+    ///   - encryption: Optional encryption settings applied on get-or-create
+    ///    (`auto-on` to require framed AES-GCM E2EE).
     public func joinAndRingCall(
         callType: String,
         callId: String,
@@ -557,7 +569,8 @@ open class CallViewModel: ObservableObject {
         maxParticipants: Int? = nil,
         startsAt: Date? = nil,
         customData: [String: RawJSON]? = nil,
-        video: Bool? = nil
+        video: Bool? = nil,
+        encryption: EncryptionSettingsRequest? = nil
     ) {
         outgoingCallMembers = members
         skipCallStateUpdates = true
@@ -583,7 +596,7 @@ open class CallViewModel: ObservableObject {
                 if maxDuration != nil || maxParticipants != nil {
                     limits = .init(maxDurationSeconds: maxDuration, maxParticipants: maxParticipants)
                 }
-                settingsRequest = .init(limits: limits)
+                settingsRequest = .init(encryption: encryption, limits: limits)
                 let options = CreateCallOptions(
                     members: membersRequest,
                     custom: customData,
@@ -923,7 +936,8 @@ open class CallViewModel: ObservableObject {
         backstage: BackstageSettingsRequest? = nil,
         highScaleLivestreamPublisherHint: Bool? = nil,
         customData: [String: RawJSON]? = nil,
-        policy: WebRTCJoinPolicy = .default
+        policy: WebRTCJoinPolicy = .default,
+        encryption: EncryptionSettingsRequest? = nil
     ) {
         if enteringCallTask != nil || callingState == .inCall {
             return
@@ -943,7 +957,11 @@ open class CallViewModel: ObservableObject {
                 if maxDuration != nil || maxParticipants != nil {
                     limits = .init(maxDurationSeconds: maxDuration, maxParticipants: maxParticipants)
                 }
-                settingsRequest = .init(backstage: backstage, limits: limits)
+                settingsRequest = .init(
+                    backstage: backstage,
+                    encryption: encryption,
+                    limits: limits
+                )
                 let options = CreateCallOptions(
                     members: members,
                     custom: customData,

@@ -248,14 +248,16 @@ class CallController: @unchecked Sendable {
         )
     }
 
-    /// Attaches an E2EE manager. Must run before peer connections exist.
+    /// Attaches or clears an E2EE manager. Must run before peer connections
+    /// exist.
     ///
     /// Forwards to ``WebRTCStateAdapter/setE2EEManager(_:)``. Join then
     /// reads that same instance for ``JoinCallRequest.e2ee``.
     ///
-    /// - Parameter manager: The encryption manager to attach.
+    /// - Parameter manager: The encryption manager to attach, or `nil`
+    ///   to clear it.
     /// - Throws: If publisher or subscriber peer connections already exist.
-    func setE2EEManager(_ manager: E2EEManager) async throws {
+    func setE2EEManager(_ manager: E2EEManager?) async throws {
         try await webRTCCoordinator.stateAdapter.setE2EEManager(manager)
     }
 

@@ -70,7 +70,8 @@ internal struct DemoCallContainerView: View {
                     callId: callId,
                     members: [.init(user: .init(id: name))],
                     ring: true,
-                    highScaleLivestreamPublisherHint: highScaleHint
+                    highScaleLivestreamPublisherHint: highScaleHint,
+                    encryption: AppEnvironment.EncryptionKeys.shared.encryptionRequest
                 )
             }
         }

@@ -10,7 +10,8 @@ import SwiftUI
 extension AppEnvironment {
 
     /// Debug-menu storage for framed AES-GCM shared keys used when preparing a call.
-    final class EncryptionKeys: ObservableObject, @unchecked Sendable {
+    @MainActor
+    final class EncryptionKeys: ObservableObject {
         static let shared = EncryptionKeys()
 
         enum Prompt: String, Identifiable, Equatable, Sendable {
@@ -22,6 +23,8 @@ extension AppEnvironment {
 
         /// Shared keys in trailer order (`keyIndex` 0, 1, 2, …). Empty means E2EE is off.
         @Published var values: [Data] = []
+        /// Passphrase or hex shown in the lobby field and invite URL. Empty when using many keys.
+        @Published var passphrase: String = ""
         @Published var prompt: Prompt?
 
         var menuTitle: String {
@@ -35,6 +38,21 @@ extension AppEnvironment {
             }
         }
 
+        var wantsEncryption: Bool {
+            !values.isEmpty || !shareKey.isEmpty
+        }
+
+        var shareKey: String {
+            let trimmed = passphrase.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !trimmed.isEmpty { return trimmed }
+            return values.first.map(DemoHex.string(from:)) ?? ""
+        }
+
+        /// Get-or-create override so new calls are created with `auto-on`.
+        var encryptionRequest: EncryptionSettingsRequest? {
+            wantsEncryption ? .init(mode: .autoOn) : nil
+        }
+
         /// Parses pasted hex or a web-style passphrase into shared keys.
         func apply(_ raw: String, from prompt: Prompt) throws {
             let keys: [Data]
@@ -46,6 +64,9 @@ extension AppEnvironment {
             }
             try Self.validate(keys)
             values = keys
+            passphrase = prompt == .oneKey
+                ? raw.trimmingCharacters(in: .whitespacesAndNewlines)
+                : ""
             self.prompt = nil
             log.debug(
                 "Demo encryption keys saved: \(keys.count) key(s), \(keys[0].count) bytes.",
@@ -53,14 +74,46 @@ extension AppEnvironment {
             )
         }
 
+        func applyPassphraseField(_ raw: String) {
+            passphrase = raw
+            let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !trimmed.isEmpty else {
+                values = []
+                return
+            }
+            values = (try? [DemoHex.material(from: trimmed)]) ?? []
+        }
+
+        func generatePassphrase() {
+            try? apply(DemoPassphrase.random(), from: .oneKey)
+        }
+
+        func applyDeeplink(_ info: DeeplinkInfo) {
+            guard let key = info.encryptionKey?
+                .trimmingCharacters(in: .whitespacesAndNewlines),
+                !key.isEmpty
+            else { return }
+            applyPassphraseField(key)
+        }
+
+        func inviteURL(callId: String, callType: String) -> URL {
+            var url = AppEnvironment.baseURL.joinLink(callId, callType: callType)
+            let key = shareKey
+            if !key.isEmpty {
+                url = url.addQueryParameter("encryption_key", value: key)
+            }
+            return url
+        }
+
         func clear() {
             values = []
+            passphrase = ""
             prompt = nil
         }
 
         /// Asks the root debug menu to show the hex editor after UIMenu dismisses.
         func request(_ prompt: Prompt) {
-            Task { [weak self] in
+            Task { @MainActor [weak self] in
                 try await Task.sleep(nanoseconds: 350_000_000)
                 self?.prompt = prompt
             }
@@ -68,13 +121,19 @@ extension AppEnvironment {
 
         /// Attaches ``EncryptionManager`` with the stored shared keys before join.
         ///
-        /// No-ops when the list is empty. Uses AES-128 or AES-256 from the first
-        /// key's length; mixed lengths are rejected.
+        /// When the list is empty, detaches any manager left on the cached
+        /// ``Call`` so join reports `e2ee: false`. Uses AES-128 or AES-256
+        /// from the first key's length; mixed lengths are rejected.
         func attachIfNeeded(to call: Call, userId: String) async {
+            if !passphrase.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+               values.isEmpty {
+                applyPassphraseField(passphrase)
+            }
             let keys = values
             guard !keys.isEmpty else {
+                try? await call.setE2EEManager(nil)
                 log.debug(
-                    "Demo E2EE skipped: no encryption keys in debug menu.",
+                    "Demo E2EE skipped: no encryption keys.",
                     subsystems: .webRTC
                 )
                 return
@@ -325,5 +384,24 @@ enum DemoHex {
         }
         guard status == kCCSuccess else { throw EncryptionKeyError.derivationFailed }
         return Data(derived)
+    }
+}
+
+/// Three hyphenated words, same shape as the web dogfood passphrase.
+enum DemoPassphrase {
+    static let words = [
+        "able", "acid", "anger", "apple", "arrow", "beach", "berry", "bird",
+        "blade", "brave", "brick", "brook", "cider", "cloud", "coral", "crane",
+        "creek", "delta", "dune", "eagle", "ember", "field", "flame", "flint",
+        "frost", "glade", "grove", "haven", "honey", "ivory", "jade", "maple",
+        "meadow", "melon", "moss", "noble", "north", "olive", "orbit", "otter",
+        "pearl", "pine", "plaid", "plume", "pond", "quartz", "rain", "ridge",
+        "river", "robin", "rover", "sable", "sage", "shore", "silk", "slate",
+        "solar", "spark", "stone", "storm", "tide", "tiger", "trail", "vapor",
+        "violet", "willow", "wind", "wolf"
+    ]
+
+    static func random() -> String {
+        Array(words.shuffled().prefix(3)).joined(separator: "-")
     }
 }

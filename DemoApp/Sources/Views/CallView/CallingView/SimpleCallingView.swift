@@ -156,6 +156,8 @@ struct SimpleCallingView: View {
             return
         }
 
+        AppEnvironment.EncryptionKeys.shared.applyDeeplink(deeplinkInfo)
+
         if
             deeplinkInfo.baseURL == AppEnvironment.baseURL || (deeplinkInfo.baseURL == .legacy && AppEnvironment.baseURL == .pronto)
         {
@@ -208,19 +210,20 @@ struct SimpleCallingView: View {
         await setPreferredVideoCodec(for: id)
         try? await setAudioSessionPolicyOverride(for: id)
         await setClientCapabilities(for: id)
-        await setEncryptionIfNeeded(for: id)
     }
 
     private func parseURLIfRequired(_ text: String) {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         let adapter = DeeplinkAdapter()
-        guard
-            let url = URL(string: text),
-            adapter.canHandle(url: url)
-        else {
-            return
-        }
+        let url = URLComponents(string: trimmed)?.url ?? URL(string: trimmed)
+        guard let url, adapter.canHandle(url: url) else { return }
 
-        let deeplinkInfo = adapter.handle(url: url).deeplinkInfo
+        var deeplinkInfo = adapter.handle(url: url).deeplinkInfo
+        if deeplinkInfo.encryptionKey?.isEmpty ?? true {
+            deeplinkInfo.encryptionKey = DeeplinkAdapter.encryptionKey(
+                fromRaw: trimmed
+            )
+        }
         guard !deeplinkInfo.callId.isEmpty else { return }
 
         handleDeeplink(deeplinkInfo)
@@ -253,9 +256,15 @@ struct SimpleCallingView: View {
             )
         case .join:
             await prepareCall(id: text)
-            viewModel.joinCall(callType: callType, callId: text)
+            await setEncryptionIfNeeded(for: text)
+            viewModel.joinCall(
+                callType: callType,
+                callId: text,
+                encryption: AppEnvironment.EncryptionKeys.shared.encryptionRequest
+            )
         case let .start(callId):
             await prepareCall(id: callId)
+            await setEncryptionIfNeeded(for: callId)
             let highScaleHint = AppEnvironment
                 .highScaleLivestreamPublisherHint
                 .value
@@ -266,7 +275,8 @@ struct SimpleCallingView: View {
                 ring: false,
                 maxDuration: AppEnvironment.callExpiration.duration,
                 highScaleLivestreamPublisherHint: highScaleHint,
-                video: viewModel.callSettings.videoOn
+                video: viewModel.callSettings.videoOn,
+                encryption: AppEnvironment.EncryptionKeys.shared.encryptionRequest
             )
         }
     }
