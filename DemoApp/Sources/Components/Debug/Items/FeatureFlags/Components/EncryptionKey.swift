@@ -114,7 +114,7 @@ extension AppEnvironment {
         /// Asks the root debug menu to show the hex editor after UIMenu dismisses.
         func request(_ prompt: Prompt) {
             Task { @MainActor [weak self] in
-                try await Task.sleep(nanoseconds: 350_000_000)
+                try? await Task.sleep(nanoseconds: 350_000_000)
                 self?.prompt = prompt
             }
         }
