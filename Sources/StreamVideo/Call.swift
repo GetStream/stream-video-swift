@@ -831,6 +831,28 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         try await coordinatorClient.endCall(type: callType, id: callId)
     }
 
+    /// Deletes the call.
+    ///
+    /// Unlike ``end()``, which only stops the active session, deleting removes
+    /// the call itself. The backend emits a `CallDeletedEvent` to the remaining
+    /// members. Participants that are still in the call are not detached
+    /// automatically, so call ``leave(reason:)`` if the current user has joined.
+    ///
+    /// - Parameter hard: When `true`, the call is hard deleted along with all
+    ///   related data (recordings, transcriptions, session history). Hard
+    ///   deletion is performed asynchronously on the backend, in which case
+    ///   `DeleteCallResponse.taskId` identifies the task. Defaults to `false`.
+    /// - Returns: A `DeleteCallResponse` describing the deleted call.
+    /// - Throws: An error if deleting the call fails.
+    @discardableResult
+    public func delete(hard: Bool = false) async throws -> DeleteCallResponse {
+        try await coordinatorClient.deleteCall(
+            type: callType,
+            id: callId,
+            deleteCallRequest: DeleteCallRequest(hard: hard)
+        )
+    }
+
     /// Blocks a user in a call.
     /// - Parameters:
     ///   - userId: The ID of the user to block.

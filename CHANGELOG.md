@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 # Upcoming
 
 ### ✅ Added
+- Added `Call.delete(hard:)` for deleting a call. [#1243](https://github.com/GetStream/stream-video-swift/pull/1243)
+- `CallDeletedEvent` now updates `Call.state` instead of being ignored. [#1243](https://github.com/GetStream/stream-video-swift/pull/1243)
 - `Call.startFrameRecording(recordingExternalStorage:)` and `Call.stopFrameRecording()`, along with the `CallState.frameRecordingStatus` property that tracks frame recording for the active call. [#1246](https://github.com/GetStream/stream-video-swift/pull/1246)
 - `Call.stopAllRTMPBroadcasts()` to stop every RTMP-out broadcast of a call in one call, matching the JavaScript SDK's `stopAllRTMPBroadcasts`.
 
