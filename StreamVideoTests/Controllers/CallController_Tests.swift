@@ -145,7 +145,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         await fulfilmentInMainActor { call.state.isSpeakingWhileMuted }
     }
 
-    func test_setCall_observesCallGrantsUpdates() async throws {
+    func test_setCall_ownCapabilitiesUpdatedOnStateAdapter_updatesCallState() async throws {
         let call = await MockCall(.dummy())
         _ = subject
         subject.call = call
@@ -154,13 +154,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
             .mockCoordinatorStack
             .coordinator
             .stateAdapter
-            .set(
-                callGrants: .init(
-                    canPublishAudio: true,
-                    canPublishVideo: false,
-                    canScreenshare: false
-                )
-            )
+            .enqueueOwnCapabilities { [.sendAudio] }
 
         await fulfilmentInMainActor { call.state.ownCapabilities == [.sendAudio] }
     }

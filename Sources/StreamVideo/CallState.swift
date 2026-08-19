@@ -151,9 +151,6 @@ public class CallState: ObservableObject {
     /// help customize logic, analytics, and UI based on how the call was started.
     var joinSource: JoinSource?
 
-    /// The latest publishing rights granted by the SFU, if any were received.
-    private var callGrants: CallGrants?
-
     private var durationCancellable: AnyCancellable?
     private nonisolated let disposableBag = DisposableBag()
 
@@ -389,7 +386,7 @@ public class CallState: ObservableObject {
     ) {
         update(from: response.call, file: file, function: function, line: line)
         mergeMembers(response.members)
-        setOwnCapabilities(response.ownCapabilities)
+        ownCapabilities = response.ownCapabilities
     }
     
     internal func update(
@@ -400,7 +397,7 @@ public class CallState: ObservableObject {
     ) {
         update(from: response.call, file: file, function: function, line: line)
         mergeMembers(response.members)
-        setOwnCapabilities(response.ownCapabilities)
+        ownCapabilities = response.ownCapabilities
         statsCollectionInterval = response.statsOptions.reportingIntervalMs / 1000
     }
     
@@ -412,7 +409,7 @@ public class CallState: ObservableObject {
     ) {
         update(from: response.call, file: file, function: function, line: line)
         mergeMembers(response.members)
-        setOwnCapabilities(response.ownCapabilities)
+        ownCapabilities = response.ownCapabilities
     }
     
     internal func update(
@@ -423,7 +420,7 @@ public class CallState: ObservableObject {
     ) {
         update(from: response.call, file: file, function: function, line: line)
         mergeMembers(response.members)
-        setOwnCapabilities(response.ownCapabilities)
+        ownCapabilities = response.ownCapabilities
     }
     
     internal func update(
@@ -434,7 +431,7 @@ public class CallState: ObservableObject {
     ) {
         update(from: response.call, file: file, function: function, line: line)
         mergeMembers(response.members)
-        setOwnCapabilities(response.ownCapabilities)
+        ownCapabilities = response.ownCapabilities
     }
     
     internal func update(
@@ -504,33 +501,13 @@ public class CallState: ObservableObject {
         self.closedCaptions = closedCaptions
     }
 
-    /// Applies the publishing rights granted by the SFU.
-    ///
-    /// Grants take precedence over the capabilities reported by the
-    /// coordinator, so they are stored and re-applied whenever the coordinator
-    /// sends a new set of capabilities.
-    ///
-    /// - Parameter callGrants: The grants received from the SFU.
-    internal func update(callGrants: CallGrants) {
-        self.callGrants = callGrants
-        ownCapabilities = callGrants.applied(to: ownCapabilities)
-    }
-
-    /// Stores the capabilities reported by the coordinator, with the latest SFU
-    /// grants applied on top.
-    ///
-    /// - Parameter value: The capabilities reported by the coordinator.
-    private func setOwnCapabilities(_ value: [OwnCapability]) {
-        ownCapabilities = callGrants?.applied(to: value) ?? value
-    }
-
     private func updateOwnCapabilities(_ event: UpdatedCallPermissionsEvent) {
         guard
             event.user.id == streamVideoSession.user.id
         else {
             return
         }
-        setOwnCapabilities(event.ownCapabilities)
+        ownCapabilities = event.ownCapabilities
     }
     
     private func didUpdate(_ newParticipants: [CallParticipant]) {

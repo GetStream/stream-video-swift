@@ -115,7 +115,7 @@ class CallController: @unchecked Sendable {
             await observeStatsReporterUpdates()
             await observeCallSettingsUpdates()
             await observeSpeakingWhileMutedUpdates()
-            await observeCallGrantsUpdates()
+            await observeOwnCapabilitiesUpdates()
         }
     }
 
@@ -831,17 +831,26 @@ class CallController: @unchecked Sendable {
             .store(in: disposableBag)
     }
 
-    /// Observes the publishing rights granted by the SFU and applies them on
-    /// the call state.
-    private func observeCallGrantsUpdates() async {
+    /// Observes own capability changes that originate below the call state, such
+    /// as the publishing rights the SFU grants or revokes mid-call, and applies
+    /// them on the call state.
+    ///
+    /// Capability updates that flow the other way, from the call state down to
+    /// the WebRTC layer, are skipped here because the value is already in sync.
+    private func observeOwnCapabilitiesUpdates() async {
         await webRTCCoordinator
             .stateAdapter
-            .$callGrants
-            .compactMap { $0 }
+            .$ownCapabilities
             .removeDuplicates()
-            .log(.debug) { "Call grants updated to \($0)" }
-            .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in
-                self?.call?.state.update(callGrants: $0)
+            .log(.debug) { "OwnCapabilities updated to \($0)" }
+            .sinkTask(storeIn: disposableBag) { @MainActor [weak self] value in
+                guard
+                    let state = self?.call?.state,
+                    Set(state.ownCapabilities) != value
+                else {
+                    return
+                }
+                state.ownCapabilities = Array(value)
             }
             .store(in: disposableBag)
     }

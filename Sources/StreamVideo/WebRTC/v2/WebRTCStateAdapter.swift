@@ -68,9 +68,6 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     @Published private(set) var connectOptions: ConnectOptions = .init(iceServers: [])
     @Published private(set) var ownCapabilities: Set<OwnCapability> = []
 
-    /// The latest publishing rights granted by the SFU, if any were received.
-    @Published private(set) var callGrants: CallGrants?
-
     @Published private(set) var sfuAdapter: SFUAdapter?
     @Published private(set) var publisher: RTCPeerConnectionCoordinator?
     @Published private(set) var subscriber: RTCPeerConnectionCoordinator?
@@ -296,9 +293,6 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     /// Sets the anonymous participant count.
     func set(anonymousCount value: UInt32) { self.anonymousCount = value }
 
-    /// Sets the publishing rights granted by the SFU.
-    func set(callGrants value: CallGrants?) { self.callGrants = value }
-
     /// Sets the participant pins.
     func set(participantPins value: [PinInfo]) { self.participantPins = value }
 
@@ -506,7 +500,6 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         set(token: "")
         set(sessionID: "")
         set(ownCapabilities: [])
-        set(callGrants: nil)
         set(participantsCount: 0)
         set(anonymousCount: 0)
         set(participantPins: [])
@@ -795,6 +788,29 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
                 log.error(error, subsystems: .webRTC)
             }
         }
+    }
+
+    /// Enqueues an own capabilities update derived from the current set.
+    ///
+    /// Use this variant when the new capabilities depend on the existing ones,
+    /// such as when the SFU grants or revokes individual publishing rights. The
+    /// current set is read and replaced without suspension, so concurrent
+    /// updates cannot interleave.
+    ///
+    /// - Parameter operation: Receives the current capabilities and returns the
+    ///   new ones.
+    func enqueueOwnCapabilities(
+        functionName: StaticString = #function,
+        fileName: StaticString = #fileID,
+        lineNumber: UInt = #line,
+        _ operation: @Sendable @escaping (Set<OwnCapability>) -> Set<OwnCapability>
+    ) async {
+        let newValue = operation(ownCapabilities)
+        await enqueueOwnCapabilities(
+            functionName: functionName,
+            fileName: fileName,
+            lineNumber: lineNumber
+        ) { newValue }
     }
 
     func trace(_ trace: WebRTCTrace) {

@@ -565,15 +565,15 @@ final class SFUEventAdapter: @unchecked Sendable {
         }
     }
 
-    /// Handles a CallGrantsUpdated event and stores the granted publishing
-    /// rights.
+    /// Handles a CallGrantsUpdated event and applies the granted publishing
+    /// rights on the own capabilities.
     ///
     /// - Parameter event: The CallGrantsUpdated event to handle.
     ///
     /// The SFU sends this event when the local participant's publishing rights
-    /// change during a call. The grants take precedence over the capabilities
-    /// reported by the coordinator, so they are stored and later merged into
-    /// `Call.state.ownCapabilities`.
+    /// change during a call. Applying the grants through the state adapter also
+    /// mutes the affected tracks and stops screensharing when a right is
+    /// revoked.
     private func handleCallGrantsUpdated(
         _ event: Stream_Video_Sfu_Event_CallGrantsUpdated
     ) async {
@@ -581,6 +581,7 @@ final class SFUEventAdapter: @unchecked Sendable {
             return
         }
 
-        await stateAdapter.set(callGrants: .init(event.currentGrants))
+        let grants = event.currentGrants
+        await stateAdapter.enqueueOwnCapabilities { grants.applied(to: $0) }
     }
 }
