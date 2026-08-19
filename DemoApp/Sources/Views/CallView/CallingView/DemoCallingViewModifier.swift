@@ -98,7 +98,11 @@ struct DemoCallingViewModifier: ViewModifier {
                             ? livestreamOrAudioRoomSortPreset
                             : defaultSortPreset
                     )
-                    viewModel.joinCall(callType: callType, callId: callId)
+                    viewModel.joinCall(
+                        callType: callType,
+                        callId: callId,
+                        encryption: AppEnvironment.EncryptionKeys.shared.encryptionRequest
+                    )
                 }.result
             } catch {
                 log.error(error)
@@ -117,6 +121,7 @@ struct DemoCallingViewModifier: ViewModifier {
 
         callType = resolvedCallType
         text.wrappedValue = deeplinkInfo.callId
+        AppEnvironment.EncryptionKeys.shared.applyDeeplink(deeplinkInfo)
         appState.deeplinkInfo = .empty
         joinCallIfNeeded(with: deeplinkInfo.callId, callType: resolvedCallType)
     }

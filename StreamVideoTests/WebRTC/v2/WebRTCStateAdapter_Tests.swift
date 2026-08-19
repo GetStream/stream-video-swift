@@ -1631,6 +1631,15 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertTrue(stored === mock)
     }
 
+    func test_setE2EEManager_nil_beforePeerConnections_clears() async throws {
+        try await subject.setE2EEManager(MockE2EEManager())
+
+        try await subject.setE2EEManager(nil)
+
+        let stored = await subject.e2eeManager
+        XCTAssertNil(stored)
+    }
+
     func test_setE2EEManager_afterPeerConnections_throws() async throws {
         let sfuStack = MockSFUStack()
         await subject.set(sfuAdapter: sfuStack.adapter)

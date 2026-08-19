@@ -381,11 +381,12 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     /// Kept across ``cleanUpForReconnection()`` so rebuilt peer connections
     /// stay encrypted.
     ///
-    /// - Parameter manager: The encryption manager to attach.
+    /// - Parameter manager: The encryption manager to attach, or `nil`
+    ///   to clear it before join.
     /// - Throws: If publisher or subscriber already exist. Those PCs were
     ///   built without an encryptor; adopting a manager now would leave the
     ///   live session half-encrypted.
-    func setE2EEManager(_ manager: E2EEManager) throws {
+    func setE2EEManager(_ manager: E2EEManager?) throws {
         if publisher != nil || subscriber != nil {
             throw ClientError("setE2EEManager must be called before join()")
         }
