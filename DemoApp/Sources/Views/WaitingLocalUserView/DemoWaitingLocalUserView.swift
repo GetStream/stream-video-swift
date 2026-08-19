@@ -123,9 +123,8 @@ struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
     }
 
     private var callLink: String {
-        AppEnvironment
-            .baseURL
-            .joinLink(callId, callType: callType)
+        AppEnvironment.EncryptionKeys.shared
+            .inviteURL(callId: callId, callType: callType)
             .absoluteString
     }
 
