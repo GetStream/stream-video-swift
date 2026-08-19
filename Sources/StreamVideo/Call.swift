@@ -960,6 +960,31 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         return response.recordings
     }
 
+    /// Deletes a recording of the call.
+    ///
+    /// Recordings are stored per call session, so deleting one requires both
+    /// the session it belongs to and its filename. The filename comes from
+    /// ``CallRecording/filename`` as returned by ``listRecordings()``, while
+    /// the session id is available in `state.session?.id` for the ongoing
+    /// session.
+    /// - Parameters:
+    ///   - callSessionId: the id of the call session the recording belongs to.
+    ///   - filename: the filename of the recording to delete.
+    /// - Returns: `DeleteRecordingResponse`.
+    /// - Throws: An error if the recording can't be deleted.
+    @discardableResult
+    public func deleteRecording(
+        callSessionId: String,
+        filename: String
+    ) async throws -> DeleteRecordingResponse {
+        try await coordinatorClient.deleteRecording(
+            type: callType,
+            id: callId,
+            session: callSessionId,
+            filename: filename
+        )
+    }
+  
     // MARK: - Frame recording
 
     /// Starts frame-by-frame recording of the call, optionally specifying an external storage
