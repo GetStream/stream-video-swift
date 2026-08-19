@@ -337,7 +337,13 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     public func listDevices() async throws -> [Device] {
         try await coordinatorClient.listDevices().devices
     }
-    
+
+    /// Lists the edges (datacenters) available for hosting calls.
+    /// - Returns: an array of `EdgeResponse`s.
+    public func getEdges() async throws -> [EdgeResponse] {
+        try await coordinatorClient.getEdges().edges
+    }
+
     /// Disconnects the current `StreamVideo` client.
     public func disconnect() async {
         await webSocketClient?.disconnect()
