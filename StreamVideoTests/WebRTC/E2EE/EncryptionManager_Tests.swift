@@ -48,4 +48,19 @@ final class EncryptionManager_Tests: XCTestCase, @unchecked Sendable {
 
         try subject.setSharedKey(0, rawKey: Data(repeating: 1, count: 16))
     }
+
+    func test_eventLog_cleartextAndFailures_warn() {
+        XCTAssertTrue(e2eeEventLogsAsWarning(.unencryptedFrame))
+        XCTAssertTrue(e2eeEventLogsAsWarning(.unsupportedVersion))
+        XCTAssertTrue(e2eeEventLogsAsWarning(.encryptionFailed))
+        XCTAssertTrue(e2eeEventLogsAsWarning(.decryptionFailed))
+        XCTAssertTrue(e2eeEventLogsAsWarning(.missingKey))
+        XCTAssertTrue(e2eeEventLogsAsWarning(.decryptionStalled))
+    }
+
+    func test_eventLog_keyStateAndPerf_debug() {
+        XCTAssertFalse(e2eeEventLogsAsWarning(.keyState))
+        XCTAssertFalse(e2eeEventLogsAsWarning(.perfReport))
+        XCTAssertFalse(e2eeEventLogsAsWarning(.decryptionResumed))
+    }
 }
