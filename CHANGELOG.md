@@ -4,6 +4,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### ✅ Added
+- Added framed AES-GCM end-to-end encryption via `Call.setE2EEManager(_:)` and `EncryptionManager`. Attach the manager before `join()`. [#1249](https://github.com/GetStream/stream-video-swift/pull/1249)
+
 ### 🔄 Changed
 
 # [1.53.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.53.0)
