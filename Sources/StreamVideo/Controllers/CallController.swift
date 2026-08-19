@@ -70,9 +70,6 @@ class CallController: @unchecked Sendable {
     private let webRTCCoordinatorFactory: WebRTCCoordinatorProviding
     private var cachedLocation: String?
     private let initialCallSettings: CallSettings
-    /// E2EE manager used when building ``JoinCallRequest``. Kept across leave
-    /// so a later join still reports `e2ee: true`.
-    private var e2eeManager: E2EEManager?
 
     private var webRTCClientSessionIDObserver: AnyCancellable?
     private var webRTCClientStateObserver: AnyCancellable?
@@ -253,15 +250,13 @@ class CallController: @unchecked Sendable {
 
     /// Attaches an E2EE manager. Must run before peer connections exist.
     ///
-    /// Forwards to ``WebRTCStateAdapter/setE2EEManager(_:)`` and keeps a
-    /// local copy so ``authenticateCall(create:ring:migratingFrom:migratingFromList:notify:options:)``
-    /// can set `JoinCallRequest.e2ee`.
+    /// Forwards to ``WebRTCStateAdapter/setE2EEManager(_:)``. Join then
+    /// reads that same instance for ``JoinCallRequest.e2ee``.
     ///
     /// - Parameter manager: The encryption manager to attach.
     /// - Throws: If publisher or subscriber peer connections already exist.
     func setE2EEManager(_ manager: E2EEManager) async throws {
         try await webRTCCoordinator.stateAdapter.setE2EEManager(manager)
-        e2eeManager = manager
     }
 
     /// Sets a `videoFilter` for the current call.
@@ -657,9 +652,8 @@ class CallController: @unchecked Sendable {
     /// - Returns: The backend join response used to continue the WebRTC flow.
     /// - Throws: An error if location fetch or join request fails.
     ///
-    /// - Note: `JoinCallRequest.e2ee` is `true` whenever an E2EE manager was
-    ///   set via ``setE2EEManager(_:)``, including after leave, because the
-    ///   manager is kept across sessions.
+    /// - Note: `JoinCallRequest.e2ee` is `true` when an E2EE manager is set
+    ///   on ``WebRTCStateAdapter``.
     private func authenticateCall(
         create: Bool,
         ring: Bool,
@@ -688,7 +682,7 @@ class CallController: @unchecked Sendable {
         let joinCall = JoinCallRequest(
             create: create,
             data: callRequest,
-            e2ee: e2eeManager != nil,
+            e2ee: await webRTCCoordinator.stateAdapter.e2eeManager != nil,
             hintHighScaleLivestreamPublisher: options?.highScaleLivestreamPublisherHint,
             location: location,
             migratingFrom: migratingFrom,

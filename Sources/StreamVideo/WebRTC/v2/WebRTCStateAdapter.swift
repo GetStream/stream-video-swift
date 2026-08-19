@@ -81,10 +81,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     @Published private(set) var isTracingEnabled: Bool = false
     @Published private(set) var isSpeakingWhileMuted: Bool = false
 
-    /// E2EE manager for this call.
-    ///
-    /// Kept across `cleanUp` / leave so a later join still attaches
-    /// encrypt/decrypt and reports `e2ee: true` on the join request.
+    /// E2EE manager for this session.
     private(set) var e2eeManager: E2EEManager?
 
     private(set) var clientCapabilities: Set<ClientCapability> = [
@@ -361,15 +358,12 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
 
     /// Stores the E2EE manager used on the next peer-connection setup.
     ///
-    /// ## Overview
     /// Must run before ``configurePeerConnections()``. That method attaches
     /// the manager to publisher and subscriber via
-    /// ``RTCPeerConnectionCoordinator/attachE2EE(_:)`` so local
-    /// `addTransceiver` encrypts and remote tracks decrypt.
+    /// ``RTCPeerConnectionCoordinator/attachE2EE(_:)``.
     ///
-    /// The manager is **not** cleared in ``cleanUp()`` or
-    /// ``cleanUpForReconnection()``. Leave must not drop encryption: the
-    /// next join still reports `e2ee: true` and still attaches transforms.
+    /// Kept across ``cleanUpForReconnection()`` so rebuilt peer connections
+    /// stay encrypted.
     ///
     /// - Parameter manager: The encryption manager to attach.
     /// - Throws: If publisher or subscriber already exist. Those PCs were
@@ -534,8 +528,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     /// states.
     ///
     /// Pending decryptors are dropped because their `RTCRtpReceiver`s die
-    /// with the peer connections. ``e2eeManager`` is **kept** so a later
-    /// join still reports `e2ee: true` and still attaches transforms.
+    /// with the peer connections.
     func cleanUp() async {
         screenShareSessionProvider.activeSession = nil
         videoCaptureSessionProvider.activeSession = nil
