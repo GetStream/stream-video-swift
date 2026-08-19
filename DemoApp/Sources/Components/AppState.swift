@@ -37,7 +37,12 @@ final class AppState: ObservableObject {
 
     @Published var loading = false
     @Published var activeCall: Call? {
-        didSet { didUpdate(activeCall: activeCall) }
+        didSet {
+            if oldValue != nil, activeCall == nil {
+                AppEnvironment.EncryptionKeys.shared.clear()
+            }
+            didUpdate(activeCall: activeCall)
+        }
     }
 
     @Published var activeAnonymousCallId: String = ""

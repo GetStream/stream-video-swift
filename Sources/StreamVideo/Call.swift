@@ -344,6 +344,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     ///   - video: A boolean indicating if the call will be video or only audio. Still requires appropriate
     ///   - transcription: An object to override the transcription Call settings from the dashboard.
     ///   setting of ``CallSettings`.`
+    ///   - encryption: Optional encryption settings applied on get-or-create
+    ///    (`auto-on` to require framed AES-GCM E2EE).
     /// - Returns: A `CallResponse` object representing the created call.
     /// - Throws: An error if the call creation fails.
     @discardableResult
@@ -359,7 +361,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         maxParticipants: Int? = nil,
         backstage: BackstageSettingsRequest? = nil,
         video: Bool? = nil,
-        transcription: TranscriptionSettingsRequest? = nil
+        transcription: TranscriptionSettingsRequest? = nil,
+        encryption: EncryptionSettingsRequest? = nil
     ) async throws -> CallResponse {
         let membersFromMemberIds = memberIds?
             .map { MemberRequest(userId: $0) } ?? []
@@ -380,6 +383,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
         settingsOverride = CallSettingsRequest(
             backstage: backstage,
+            encryption: encryption,
             limits: limits,
             transcription: transcription
         )
@@ -588,7 +592,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         callController.setVideoFilter(videoFilter)
     }
 
-    /// Attaches end-to-end encryption. Must run before ``join``.
+    /// Attaches or clears end-to-end encryption. Must run before ``join``.
     ///
     /// ## Overview
     /// Pass ``EncryptionManager`` for the built-in AES-GCM scheme, or any
@@ -598,6 +602,9 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// - attaches encryptors when local transceivers are added
     /// - attaches decryptors when remote tracks arrive
     ///
+    /// Pass `nil` to detach a manager that was set earlier (for example
+    /// after toggling encryption off in a pre-join lobby).
+    ///
     /// ## Example
     /// ```swift
     /// let e2ee = try EncryptionManager(userId: streamVideo.user.id)
@@ -606,11 +613,12 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// try await call.join()
     /// ```
     ///
-    /// - Parameter manager: The encryption manager to attach.
+    /// - Parameter manager: The encryption manager to attach, or `nil`
+    ///   to clear it.
     /// - Throws: If called after peer connections exist (i.e. after join).
     ///   Those PCs were already configured without an encryptor, so adopting
     ///   a manager now would silently publish or receive cleartext.
-    public func setE2EEManager(_ manager: E2EEManager) async throws {
+    public func setE2EEManager(_ manager: E2EEManager?) async throws {
         try await callController.setE2EEManager(manager)
     }
 

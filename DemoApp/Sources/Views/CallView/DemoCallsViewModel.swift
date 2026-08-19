@@ -82,7 +82,8 @@ class DemoCallsViewModel: ObservableObject {
                 callId: callId,
                 members: members,
                 ring: true,
-                highScaleLivestreamPublisherHint: highScaleHint
+                highScaleLivestreamPublisherHint: highScaleHint,
+                encryption: AppEnvironment.EncryptionKeys.shared.encryptionRequest
             )
         }
     }
