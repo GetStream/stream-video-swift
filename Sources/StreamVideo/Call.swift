@@ -831,6 +831,28 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         try await coordinatorClient.endCall(type: callType, id: callId)
     }
 
+    /// Deletes the call.
+    ///
+    /// Unlike ``end()``, which only stops the active session, deleting removes
+    /// the call itself. The backend emits a `CallDeletedEvent` to the remaining
+    /// members. Participants that are still in the call are not detached
+    /// automatically, so call ``leave(reason:)`` if the current user has joined.
+    ///
+    /// - Parameter hard: When `true`, the call is hard deleted along with all
+    ///   related data (recordings, transcriptions, session history). Hard
+    ///   deletion is performed asynchronously on the backend, in which case
+    ///   `DeleteCallResponse.taskId` identifies the task. Defaults to `false`.
+    /// - Returns: A `DeleteCallResponse` describing the deleted call.
+    /// - Throws: An error if deleting the call fails.
+    @discardableResult
+    public func delete(hard: Bool = false) async throws -> DeleteCallResponse {
+        try await coordinatorClient.deleteCall(
+            type: callType,
+            id: callId,
+            deleteCallRequest: DeleteCallRequest(hard: hard)
+        )
+    }
+
     /// Blocks a user in a call.
     /// - Parameters:
     ///   - userId: The ID of the user to block.
@@ -960,6 +982,46 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             id: callId,
             session: callSessionId,
             filename: filename
+        )
+    }
+  
+    // MARK: - Frame recording
+
+    /// Starts frame-by-frame recording of the call, optionally specifying an external storage
+    /// location.
+    ///
+    /// While frame recording is active, the backend periodically captures a frame per published
+    /// track and emits a `CallFrameRecordingFrameReadyEvent` carrying the URL of each captured
+    /// frame. Use ``Call/subscribe(for:)`` to observe those events.
+    ///
+    /// The capture interval, quality and mode are configured through the call type's frame
+    /// recording settings (``FrameRecordingSettingsRequest``) rather than per call.
+    ///
+    /// - Parameter recordingExternalStorage: The external storage location for the captured
+    ///  frames (optional).
+    /// - Returns: `StartFrameRecordingResponse`.
+    /// - Throws: An error if starting frame recording fails.
+    @discardableResult
+    public func startFrameRecording(
+        recordingExternalStorage: String? = nil
+    ) async throws -> StartFrameRecordingResponse {
+        try await coordinatorClient.startFrameRecording(
+            type: callType,
+            id: callId,
+            startFrameRecordingRequest: .init(
+                recordingExternalStorage: recordingExternalStorage
+            )
+        )
+    }
+
+    /// Stops frame-by-frame recording of the call.
+    /// - Returns: `StopFrameRecordingResponse`.
+    /// - Throws: An error if stopping frame recording fails.
+    @discardableResult
+    public func stopFrameRecording() async throws -> StopFrameRecordingResponse {
+        try await coordinatorClient.stopFrameRecording(
+            type: callType,
+            id: callId
         )
     }
 

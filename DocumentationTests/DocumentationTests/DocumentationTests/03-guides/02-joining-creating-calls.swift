@@ -16,6 +16,10 @@ private func content() {
     }
 
     asyncContainer {
+        try await call.delete()
+    }
+
+    asyncContainer {
         // create
         let call = streamVideo.call(callType: "default", callId: "123")
         let result = try await call.create()
@@ -26,6 +30,9 @@ private func content() {
 
         // get
         let getResult = try await call.get()
+
+        // delete
+        let deleteResult = try await call.delete()
     }
 
     asyncContainer {
