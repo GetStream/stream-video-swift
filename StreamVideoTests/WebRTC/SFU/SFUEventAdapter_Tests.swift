@@ -888,6 +888,41 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
         }
     }
 
+    // MARK: callGrantsUpdated
+
+    func test_handleCallGrantsUpdated_revokedGrant_updatesOwnCapabilities() async throws {
+        await stateAdapter.enqueueOwnCapabilities {
+            [.sendAudio, .sendVideo, .screenshare, .endCall]
+        }
+        var event = Stream_Video_Sfu_Event_CallGrantsUpdated()
+        event.currentGrants = .init()
+        event.currentGrants.canPublishAudio = true
+        event.currentGrants.canPublishVideo = false
+        event.currentGrants.canScreenshare = false
+
+        try await assert(
+            event,
+            payload: .callGrantsUpdated(event),
+            initialState: [:]
+        ) { _ in
+            await self.stateAdapter.ownCapabilities == [.sendAudio, .endCall]
+        }
+    }
+
+    func test_handleCallGrantsUpdated_withoutGrants_doesNotUpdateOwnCapabilities() async throws {
+        await stateAdapter.enqueueOwnCapabilities { [.sendAudio, .sendVideo] }
+        var event = Stream_Video_Sfu_Event_CallGrantsUpdated()
+        event.message = .unique
+
+        try await assert(
+            event,
+            payload: .callGrantsUpdated(event),
+            initialState: [:]
+        ) { _ in
+            await self.stateAdapter.ownCapabilities == [.sendAudio, .sendVideo]
+        }
+    }
+
     // MARK: - Private helpers
 
     private func assert<T>(

@@ -239,6 +239,25 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         }
     }
 
+    func test_enqueueOwnCapabilities_derivedFromCurrentSet_revokesSendAudioCapability_turnsAudioOff() async throws {
+        await subject.enqueueOwnCapabilities { [.sendAudio, .sendVideo] }
+        await subject.enqueueCallSettings { _ in CallSettings(audioOn: true, videoOn: true) }
+
+        await fulfillment {
+            let currentSettings = await self.subject.callSettings
+            return currentSettings.audioOn && currentSettings.videoOn
+        }
+
+        await subject.enqueueOwnCapabilities { $0.subtracting([.sendAudio]) }
+
+        await fulfillment {
+            let currentSettings = await self.subject.callSettings
+            return currentSettings.audioOn == false && currentSettings.videoOn
+        }
+        let ownCapabilities = await subject.ownCapabilities
+        XCTAssertEqual(ownCapabilities, [.sendVideo])
+    }
+
     func test_enqueueOwnCapabilities_revokesSendAudioCapability_turnsAudioOff() async throws {
         await subject.enqueueOwnCapabilities { [.sendAudio, .sendVideo] }
         await subject.enqueueCallSettings { _ in CallSettings(audioOn: true, videoOn: true) }
