@@ -346,6 +346,43 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
         XCTAssert(streamVideo.state.connection == .initialized)
     }
 
+    // MARK: - getEdges
+
+    func test_streamVideo_getEdges_returnsUnwrappedEdges() async throws {
+        // Given
+        let expected = makeEdgeResponse()
+        let httpClient = HTTPClient_Mock()
+        httpClient.dataResponses = [
+            try JSONEncoder.streamCore.encode(
+                GetEdgesResponse(duration: "1", edges: [expected])
+            )
+        ]
+        let streamVideo = StreamVideo.mock(httpClient: httpClient)
+        self.streamVideo = streamVideo
+
+        // When
+        let edges = try await streamVideo.getEdges()
+
+        // Then
+        XCTAssertEqual(edges, [expected])
+    }
+
+    func test_streamVideo_getEdges_propagatesFailure() async throws {
+        // Given
+        let httpClient = HTTPClient_Mock()
+        let streamVideo = StreamVideo.mock(httpClient: httpClient)
+        self.streamVideo = streamVideo
+
+        // When
+        do {
+            _ = try await streamVideo.getEdges()
+            XCTFail("getEdges should fail when no response is available")
+        } catch {
+            // Then
+            XCTAssertEqual(httpClient.requestCounter, 1)
+        }
+    }
+
     // MARK: - Event Publisher & Subscribe Tests
 
     func test_eventPublisher_filtersOnlyCoordinatorEvents() async {
@@ -500,6 +537,21 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
             role: "user",
             teams: [],
             updatedAt: Date()
+        )
+    }
+
+    private func makeEdgeResponse() -> EdgeResponse {
+        EdgeResponse(
+            continentCode: "EU",
+            countryIsoCode: "NL",
+            green: 1,
+            id: "amsterdam",
+            latencyTestUrl: "https://latency.stream-io-video.com/amsterdam",
+            latitude: 52.3676,
+            longitude: 4.9041,
+            red: 3,
+            subdivisionIsoCode: "NH",
+            yellow: 2
         )
     }
 

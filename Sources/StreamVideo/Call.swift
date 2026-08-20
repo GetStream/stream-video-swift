@@ -831,6 +831,28 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         try await coordinatorClient.endCall(type: callType, id: callId)
     }
 
+    /// Deletes the call.
+    ///
+    /// Unlike ``end()``, which only stops the active session, deleting removes
+    /// the call itself. The backend emits a `CallDeletedEvent` to the remaining
+    /// members. Participants that are still in the call are not detached
+    /// automatically, so call ``leave(reason:)`` if the current user has joined.
+    ///
+    /// - Parameter hard: When `true`, the call is hard deleted along with all
+    ///   related data (recordings, transcriptions, session history). Hard
+    ///   deletion is performed asynchronously on the backend, in which case
+    ///   `DeleteCallResponse.taskId` identifies the task. Defaults to `false`.
+    /// - Returns: A `DeleteCallResponse` describing the deleted call.
+    /// - Throws: An error if deleting the call fails.
+    @discardableResult
+    public func delete(hard: Bool = false) async throws -> DeleteCallResponse {
+        try await coordinatorClient.deleteCall(
+            type: callType,
+            id: callId,
+            deleteCallRequest: DeleteCallRequest(hard: hard)
+        )
+    }
+
     /// Blocks a user in a call.
     /// - Parameters:
     ///   - userId: The ID of the user to block.
@@ -938,6 +960,71 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         return response.recordings
     }
 
+    /// Deletes a recording of the call.
+    ///
+    /// Recordings are stored per call session, so deleting one requires both
+    /// the session it belongs to and its filename. The filename comes from
+    /// ``CallRecording/filename`` as returned by ``listRecordings()``, while
+    /// the session id is available in `state.session?.id` for the ongoing
+    /// session.
+    /// - Parameters:
+    ///   - callSessionId: the id of the call session the recording belongs to.
+    ///   - filename: the filename of the recording to delete.
+    /// - Returns: `DeleteRecordingResponse`.
+    /// - Throws: An error if the recording can't be deleted.
+    @discardableResult
+    public func deleteRecording(
+        callSessionId: String,
+        filename: String
+    ) async throws -> DeleteRecordingResponse {
+        try await coordinatorClient.deleteRecording(
+            type: callType,
+            id: callId,
+            session: callSessionId,
+            filename: filename
+        )
+    }
+  
+    // MARK: - Frame recording
+
+    /// Starts frame-by-frame recording of the call, optionally specifying an external storage
+    /// location.
+    ///
+    /// While frame recording is active, the backend periodically captures a frame per published
+    /// track and emits a `CallFrameRecordingFrameReadyEvent` carrying the URL of each captured
+    /// frame. Use ``Call/subscribe(for:)`` to observe those events.
+    ///
+    /// The capture interval, quality and mode are configured through the call type's frame
+    /// recording settings (``FrameRecordingSettingsRequest``) rather than per call.
+    ///
+    /// - Parameter recordingExternalStorage: The external storage location for the captured
+    ///  frames (optional).
+    /// - Returns: `StartFrameRecordingResponse`.
+    /// - Throws: An error if starting frame recording fails.
+    @discardableResult
+    public func startFrameRecording(
+        recordingExternalStorage: String? = nil
+    ) async throws -> StartFrameRecordingResponse {
+        try await coordinatorClient.startFrameRecording(
+            type: callType,
+            id: callId,
+            startFrameRecordingRequest: .init(
+                recordingExternalStorage: recordingExternalStorage
+            )
+        )
+    }
+
+    /// Stops frame-by-frame recording of the call.
+    /// - Returns: `StopFrameRecordingResponse`.
+    /// - Throws: An error if stopping frame recording fails.
+    @discardableResult
+    public func stopFrameRecording() async throws -> StopFrameRecordingResponse {
+        try await coordinatorClient.stopFrameRecording(
+            type: callType,
+            id: callId
+        )
+    }
+
     // MARK: - Broadcasting
 
     /// Starts HLS broadcasting of the call.
@@ -974,6 +1061,14 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     @discardableResult
     public func stopRTMPBroadcasts(name: String) async throws -> StopRTMPBroadcastsResponse {
         try await coordinatorClient.stopRTMPBroadcast(type: callType, id: callId, name: name)
+    }
+
+    /// Stops all RTMP broadcasts of the call.
+    /// - Returns: `StopAllRTMPBroadcastsResponse`.
+    /// - Throws: An error if stopping the RTMP broadcasts fails.
+    @discardableResult
+    public func stopAllRTMPBroadcasts() async throws -> StopAllRTMPBroadcastsResponse {
+        try await coordinatorClient.stopAllRTMPBroadcasts(type: callType, id: callId)
     }
 
     // MARK: - Events

@@ -4,8 +4,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### ✅ Added
+- `StreamVideo.getEdges()` returns the list of edges (datacenters) available for hosting calls [#1247](https://github.com/GetStream/stream-video-swift/pull/1247).
+- `Call.deleteRecording(callSessionId:filename:)` for deleting a recording of a call session [#1244](https://github.com/GetStream/stream-video-swift/pull/1244).
+- Added `Call.delete(hard:)` for deleting a call. [#1243](https://github.com/GetStream/stream-video-swift/pull/1243)
+- `CallDeletedEvent` now updates `Call.state` instead of being ignored. [#1243](https://github.com/GetStream/stream-video-swift/pull/1243)
+- `Call.startFrameRecording(recordingExternalStorage:)` and `Call.stopFrameRecording()`, along with the `CallState.frameRecordingStatus` property that tracks frame recording for the active call. [#1246](https://github.com/GetStream/stream-video-swift/pull/1246)
+- `Call.stopAllRTMPBroadcasts()` to stop every RTMP-out broadcast of a call in one call [#1245](https://github.com/GetStream/stream-video-swift/pull/1245).
+
 ### 🐞 Fixed
 - Transient peer-connection disconnections no longer trigger an immediate full rejoin, allowing the existing ICE restart flow to recover the session. [#1231](https://github.com/GetStream/stream-video-swift/pull/1231)
+- `CallParticipant.withUpdated(...)` no longer resets `source` to `.webRTCUnspecified`, which previously broke the `videoIngressSource` and `participantSource` sort comparators after any participant update. `source` is now also part of `CallParticipant` equality. [#1251](https://github.com/GetStream/stream-video-swift/pull/1251)
 
 # [1.51.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.51.0)
 _August 13, 2026_
