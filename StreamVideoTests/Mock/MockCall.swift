@@ -46,6 +46,8 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
 
         case setVideoFilter(videoFilter: VideoFilter?)
 
+        case get
+
         var payload: Any {
             switch self {
             case let .join(create, options, ring, notify, callSettings, policy):
@@ -68,6 +70,9 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
 
             case let .setVideoFilter(videoFilter):
                 return videoFilter ?? NSNull()
+
+            case .get:
+                return NSNull()
             }
         }
     }
@@ -213,7 +218,8 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
         ring: Bool = false,
         notify: Bool = false
     ) async throws -> GetCallResponse {
-        stubbedFunction[.get] as! GetCallResponse
+        stubbedFunctionInput[.get]?.append(.get)
+        return stubbedFunction[.get] as! GetCallResponse
     }
 
     override func accept() async throws -> AcceptCallResponse {

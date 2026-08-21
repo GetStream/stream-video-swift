@@ -77,6 +77,11 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     public lazy var rejectionReasonProvider: RejectionReasonProviding = StreamRejectionReasonProvider(self)
 
     private let eventSubject: PassthroughSubject<WrappedEvent, Never> = .init()
+    /// All coordinator events, including internal ones such as
+    /// ``WSConnected``. `eventPublisher()` drops those internal events.
+    var rawEventPublisher: AnyPublisher<WrappedEvent, Never> {
+        eventSubject.eraseToAnyPublisher()
+    }
 
     private let tokenSubject: CurrentValueSubject<UserToken, Never>
     var tokenPublisher: AnyPublisher<UserToken, Never> { tokenSubject.eraseToAnyPublisher() }
@@ -115,6 +120,10 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     private let disposableBag = DisposableBag()
 
     private lazy var idleTimerAdapter = IdleTimerAdapter(self)
+    /// Reloads `state.ringingCall` from the coordinator whenever the
+    /// WebSocket reconnects, so a missed accept/reject/end is not stuck
+    /// on a stale local copy.
+    private lazy var ringingCallRecoveryAdapter = RingingCallRecoveryAdapter(self)
 
     /// Initializes a new instance of `StreamVideo` with the specified parameters.
     /// - Parameters:
@@ -208,6 +217,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         _ = eventNotificationCenter
         _ = idleTimerAdapter
         _ = battery
+        _ = ringingCallRecoveryAdapter
 
         if user.type != .anonymous {
             let userAuth = UserAuth { [weak self] in
