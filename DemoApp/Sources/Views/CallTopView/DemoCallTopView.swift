@@ -205,3 +205,13 @@ private struct ShadowModifier: ViewModifier {
             .shadow(color: Color.black.opacity(0.1), radius: 1, x: 0, y: 1)
     }
 }
+
+final class DemoCallDurationViewStyle: CallDurationView.Style, @unchecked Sendable {
+    override func makeBody(configuration: CallDurationView.Configuration) -> AnyView {
+        AnyView(
+            super
+                .makeBody(configuration: configuration)
+                .background(Color.red)
+        )
+    }
+}

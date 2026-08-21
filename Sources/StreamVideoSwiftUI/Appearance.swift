@@ -11,7 +11,7 @@ public class Appearance {
     public var images: Images
     public var fonts: Fonts
     public var sounds: Sounds
-    
+
     public init(
         colors: Colors = Colors(),
         images: Images = Images(),

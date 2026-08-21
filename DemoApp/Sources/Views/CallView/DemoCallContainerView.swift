@@ -46,6 +46,7 @@ internal struct DemoCallContainerView: View {
                 NSStringFromClass(INStartCallIntent.self),
                 perform: didContinueUserActivity(_:)
             )
+            .environment(\.callDurationViewStyle, DemoCallDurationViewStyle())
     }
 
     private func didContinueUserActivity(_ userActivity: NSUserActivity) {
