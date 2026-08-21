@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Call.stopAllRTMPBroadcasts()` to stop every RTMP-out broadcast of a call in one call [#1245](https://github.com/GetStream/stream-video-swift/pull/1245).
 
 ### 🐞 Fixed
+- After a WebSocket reconnect during ringing, the SDK reloads the ringing call and applies accept, reject, or end from the refreshed session so the caller is not stuck on stale local state. [#1253](https://github.com/GetStream/stream-video-swift/pull/1253)
 - Transient peer-connection disconnections no longer trigger an immediate full rejoin, allowing the existing ICE restart flow to recover the session. [#1231](https://github.com/GetStream/stream-video-swift/pull/1231)
 - `CallParticipant.withUpdated(...)` no longer resets `source` to `.webRTCUnspecified`, which previously broke the `videoIngressSource` and `participantSource` sort comparators after any participant update. `source` is now also part of `CallParticipant` equality. [#1251](https://github.com/GetStream/stream-video-swift/pull/1251)
 
