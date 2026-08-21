@@ -6,7 +6,7 @@ import StreamVideo
 import SwiftUI
 
 @available(iOS, introduced: 13, obsoleted: 14)
-public struct LobbyView_iOS13<Factory: ViewFactory>: View {
+public struct LobbyView_iOS13<Factory: ViewFactory, SettingsView: View>: View {
 
     @ObservedObject var callViewModel: CallViewModel
     @BackportStateObject var viewModel: LobbyViewModel
@@ -16,6 +16,7 @@ public struct LobbyView_iOS13<Factory: ViewFactory>: View {
     var callId: String
     var callType: String
     @Binding var callSettings: CallSettings
+    var callSettingsView: (Binding<CallSettings>) -> SettingsView
     var onJoinCallTap: () -> Void
     var onCloseLobby: () -> Void
     
@@ -25,6 +26,7 @@ public struct LobbyView_iOS13<Factory: ViewFactory>: View {
         callId: String,
         callType: String,
         callSettings: Binding<CallSettings>,
+        callSettingsView: @escaping (Binding<CallSettings>) -> SettingsView,
         onJoinCallTap: @escaping () -> Void,
         onCloseLobby: @escaping () -> Void
     ) {
@@ -41,6 +43,7 @@ public struct LobbyView_iOS13<Factory: ViewFactory>: View {
         self.viewFactory = viewFactory
         self.callId = callId
         self.callType = callType
+        self.callSettingsView = callSettingsView
         self.onJoinCallTap = onJoinCallTap
         self.onCloseLobby = onCloseLobby
     }
@@ -53,9 +56,34 @@ public struct LobbyView_iOS13<Factory: ViewFactory>: View {
             callId: callId,
             callType: callType,
             callSettings: $callSettings,
+            callSettingsView: callSettingsView,
             onJoinCallTap: onJoinCallTap,
             onCloseLobby: onCloseLobby
         )
         .onChange(of: callSettings) { viewModel.didUpdate(callSettings: $0) }
+    }
+}
+
+@available(iOS, introduced: 13, obsoleted: 14)
+extension LobbyView_iOS13 where SettingsView == CallSettingsView {
+    init(
+        viewFactory: Factory = DefaultViewFactory.shared,
+        callViewModel: CallViewModel,
+        callId: String,
+        callType: String,
+        callSettings: Binding<CallSettings>,
+        onJoinCallTap: @escaping () -> Void,
+        onCloseLobby: @escaping () -> Void
+    ) {
+        self.init(
+            viewFactory: viewFactory,
+            callViewModel: callViewModel,
+            callId: callId,
+            callType: callType,
+            callSettings: callSettings,
+            callSettingsView: { CallSettingsView(callSettings: $0) },
+            onJoinCallTap: onJoinCallTap,
+            onCloseLobby: onCloseLobby
+        )
     }
 }
