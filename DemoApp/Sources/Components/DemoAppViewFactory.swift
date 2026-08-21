@@ -18,16 +18,41 @@ final class DemoAppViewFactory: ViewFactory {
         DemoWaitingLocalUserView(viewFactory: self, viewModel: viewModel)
     }
 
+    @ViewBuilder
     func makeLobbyView(
         viewModel: CallViewModel,
         lobbyInfo: LobbyInfo,
         callSettings: Binding<CallSettings>
     ) -> some View {
-        DemoLobbyView(
+        let handleJoinCall = { [streamVideo] in
+            guard case .lobby = viewModel.callingState else { return }
+            Task { @MainActor [streamVideo] in
+                let keys = AppEnvironment.EncryptionKeys.shared
+                let call = streamVideo.call(
+                    callType: lobbyInfo.callType,
+                    callId: lobbyInfo.callId
+                )
+                await keys.attachIfNeeded(to: call, userId: streamVideo.user.id)
+                viewModel.startCall(
+                    callType: lobbyInfo.callType,
+                    callId: lobbyInfo.callId,
+                    members: lobbyInfo.participants,
+                    encryption: keys.encryptionRequest
+                )
+            }
+        }
+        let handleCloseLobby = {
+            viewModel.hangUp()
+        }
+
+        LobbyView(
             viewFactory: self,
-            viewModel: viewModel,
-            lobbyInfo: lobbyInfo,
-            callSettings: callSettings
+            callId: lobbyInfo.callId,
+            callType: lobbyInfo.callType,
+            callSettings: callSettings,
+            callSettingsView: { DemoCallSettingsView(callSettings: $0) },
+            onJoinCallTap: handleJoinCall,
+            onCloseLobby: handleCloseLobby
         )
     }
 
