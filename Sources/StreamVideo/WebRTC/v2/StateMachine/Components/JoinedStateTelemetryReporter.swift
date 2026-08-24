@@ -40,7 +40,6 @@ struct JoinedStateTelemetryReporter {
             case .regular:
                 return .connectionTimeSeconds(duration)
             case .fast:
-                var reconnection = Stream_Video_Sfu_Signal_Reconnection()
                 reconnection.strategy = .fast
                 return .reconnection(reconnection)
             case .rejoin:
