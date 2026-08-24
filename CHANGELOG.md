@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Transient peer-connection disconnections no longer trigger an immediate full rejoin, allowing the existing ICE restart flow to recover the session. [#1231](https://github.com/GetStream/stream-video-swift/pull/1231)
 - `CallParticipant.withUpdated(...)` no longer resets `source` to `.webRTCUnspecified`, which previously broke the `videoIngressSource` and `participantSource` sort comparators after any participant update. `source` is now also part of `CallParticipant` equality. [#1251](https://github.com/GetStream/stream-video-swift/pull/1251)
 - Fast reconnects no longer report a duration of zero in SFU telemetry. The `.fast` branch of the join telemetry shadowed the value that carried the elapsed time, so `timeSeconds` was always `0`. [#1255](https://github.com/GetStream/stream-video-swift/pull/1255)
+- `Call.collectUserFeedback(rating:reason:custom:)` now reports the call's user session id, so feedback can be correlated with the call session and its stats on the backend. The id is retained after the call ends, which makes it available to post-call rating screens. [#1254](https://github.com/GetStream/stream-video-swift/pull/1254)
 
 # [1.51.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.51.0)
 _August 13, 2026_
