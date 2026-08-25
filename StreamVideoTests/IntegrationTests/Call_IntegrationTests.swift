@@ -71,6 +71,20 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
             .assertEventually { try await $0.client.listDevices().isEmpty }
     }
 
+    // MARK: - Get Edges
+
+    /// Note: the coordinator currently returns an empty `latencyTestUrl` for
+    /// every edge — latency-based edge selection happens server-side — so this
+    /// only asserts the fields the API actually populates.
+    func test_getEdges_returnsEdgesWithIdentifierAndLocation() async throws {
+        try await helpers
+            .callFlow(id: .unique, type: .default, userId: .unique)
+            .perform { try await $0.client.getEdges() }
+            .assert { !$0.value.isEmpty }
+            .assert { $0.value.allSatisfy { edge in !edge.id.isEmpty } }
+            .assert { $0.value.allSatisfy { edge in !edge.continentCode.isEmpty && !edge.countryIsoCode.isEmpty } }
+    }
+
     // MARK: Create
 
     func test_create_callContainsExpectedMembers() async throws {

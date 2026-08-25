@@ -624,6 +624,43 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         }
     }
 
+    // MARK: - collectUserFeedback
+
+    func test_collectUserFeedback_duringCall_reportsSessionId() async throws {
+        let (subject, defaultAPI, factory) = makeSubjectWithMockAPI()
+        let call = await MockCall(.dummy())
+        subject.call = call
+        let expected = await setSessionId(.unique, on: factory, observedBy: call)
+        defaultAPI.stub(for: .collectUserFeedback, with: CollectUserFeedbackResponse(duration: ""))
+
+        _ = try await subject.collectUserFeedback(rating: 5)
+
+        XCTAssertEqual(try collectedFeedbackRequest(from: defaultAPI).userSessionId, expected)
+    }
+
+    func test_collectUserFeedback_afterCallEnded_reportsSessionIdOfEndedSession() async throws {
+        let (subject, defaultAPI, factory) = makeSubjectWithMockAPI()
+        let call = await MockCall(.dummy())
+        subject.call = call
+        let expected = await setSessionId(.unique, on: factory, observedBy: call)
+        /// The state adapter resets its session id while the call is torn down,
+        /// but a post-call rating screen collects the feedback afterwards.
+        subject.cleanUp()
+        await fulfillment {
+            await factory
+                .mockCoordinatorStack
+                .coordinator
+                .stateAdapter
+                .sessionID
+                .isEmpty
+        }
+        defaultAPI.stub(for: .collectUserFeedback, with: CollectUserFeedbackResponse(duration: ""))
+
+        _ = try await subject.collectUserFeedback(rating: 5)
+
+        XCTAssertEqual(try collectedFeedbackRequest(from: defaultAPI).userSessionId, expected)
+    }
+
     // MARK: - cleanUp
 
     func test_cleanUp_callIsNil() async throws {
@@ -1266,6 +1303,57 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
     }
 
     // MARK: - Private helpers
+
+    private func makeSubjectWithMockAPI() -> (
+        CallController,
+        MockDefaultAPIEndpoints,
+        MockWebRTCCoordinatorFactory
+    ) {
+        let defaultAPI = MockDefaultAPIEndpoints()
+        let webRTCCoordinatorFactory = MockWebRTCCoordinatorFactory(
+            videoConfig: Self.videoConfig
+        )
+        let subject = CallController(
+            defaultAPI: defaultAPI,
+            user: user,
+            callId: callId,
+            callType: callType,
+            apiKey: apiKey,
+            videoConfig: Self.videoConfig,
+            initialCallSettings: initialCallSettings,
+            cachedLocation: cachedLocation,
+            webRTCCoordinatorFactory: webRTCCoordinatorFactory
+        )
+        return (subject, defaultAPI, webRTCCoordinatorFactory)
+    }
+
+    /// Sets the session id on the state adapter and waits until the controller
+    /// has observed it, using the call state that the same observation updates.
+    @discardableResult
+    private func setSessionId(
+        _ value: String,
+        on factory: MockWebRTCCoordinatorFactory,
+        observedBy call: MockCall
+    ) async -> String {
+        await factory.mockCoordinatorStack.coordinator.stateAdapter.set(sessionID: value)
+        await fulfilmentInMainActor { call.state.sessionId == value }
+        return value
+    }
+
+    private func collectedFeedbackRequest(
+        from defaultAPI: MockDefaultAPIEndpoints,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) throws -> CollectUserFeedbackRequest {
+        try XCTUnwrap(
+            defaultAPI.recordedInputPayload(
+                (String, String, CollectUserFeedbackRequest).self,
+                for: .collectUserFeedback
+            )?.first?.2,
+            file: file,
+            line: line
+        )
+    }
 
     private func assertTransitionToStage(
         _ id: WebRTCCoordinator.StateMachine.Stage.ID,

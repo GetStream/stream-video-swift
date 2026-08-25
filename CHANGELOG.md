@@ -4,9 +4,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### ✅ Added
+- `StreamVideo.getEdges()` returns the list of edges (datacenters) available for hosting calls [#1247](https://github.com/GetStream/stream-video-swift/pull/1247).
+- `Call.deleteRecording(callSessionId:filename:)` for deleting a recording of a call session [#1244](https://github.com/GetStream/stream-video-swift/pull/1244).
+- Added `Call.delete(hard:)` for deleting a call. [#1243](https://github.com/GetStream/stream-video-swift/pull/1243)
+- `CallDeletedEvent` now updates `Call.state` instead of being ignored. [#1243](https://github.com/GetStream/stream-video-swift/pull/1243)
+- `Call.startFrameRecording(recordingExternalStorage:)` and `Call.stopFrameRecording()`, along with the `CallState.frameRecordingStatus` property that tracks frame recording for the active call. [#1246](https://github.com/GetStream/stream-video-swift/pull/1246)
+- `Call.stopAllRTMPBroadcasts()` to stop every RTMP-out broadcast of a call in one call [#1245](https://github.com/GetStream/stream-video-swift/pull/1245).
+
 ### 🐞 Fixed
 - Mid-call permission changes from the SFU are now applied on `Call.state.ownCapabilities`, instead of the `callGrantsUpdated` event being ignored. [#1250](https://github.com/GetStream/stream-video-swift/pull/1250)
 - Transient peer-connection disconnections no longer trigger an immediate full rejoin, allowing the existing ICE restart flow to recover the session. [#1231](https://github.com/GetStream/stream-video-swift/pull/1231)
+- `CallParticipant.withUpdated(...)` no longer resets `source` to `.webRTCUnspecified`, which previously broke the `videoIngressSource` and `participantSource` sort comparators after any participant update. `source` is now also part of `CallParticipant` equality. [#1251](https://github.com/GetStream/stream-video-swift/pull/1251)
+- Fast reconnects no longer report a duration of zero in SFU telemetry. The `.fast` branch of the join telemetry shadowed the value that carried the elapsed time, so `timeSeconds` was always `0`. [#1255](https://github.com/GetStream/stream-video-swift/pull/1255)
+- `Call.collectUserFeedback(rating:reason:custom:)` now reports the call's user session id, so feedback can be correlated with the call session and its stats on the backend. The id is retained after the call ends, which makes it available to post-call rating screens. [#1254](https://github.com/GetStream/stream-video-swift/pull/1254)
 
 # [1.51.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.51.0)
 _August 13, 2026_

@@ -95,6 +95,23 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
         XCTAssert(call?.state.session != nil)
     }
 
+    func test_updateState_fromCallDeletedEvent() {
+        // Given
+        let call = streamVideo?.call(callType: callType, callId: callId)
+        let endedAt = Date(timeIntervalSince1970: 100)
+        let event = CallDeletedEvent(
+            call: .dummy(cid: callCid, endedAt: endedAt),
+            callCid: callCid,
+            createdAt: Date()
+        )
+
+        // When
+        call?.state.updateState(from: .typeCallDeletedEvent(event))
+
+        // Then
+        XCTAssertEqual(call?.state.endedAt, endedAt)
+    }
+
     func test_updateState_fromRecordingStartedEvent() {
         // Given
         let call = streamVideo?.call(callType: callType, callId: callId)
@@ -365,6 +382,190 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
                     ),
                     keyPath: \.state.transcribing,
                     expected: false
+                )
+            ]
+        )
+    }
+
+    // MARK: - Frame recording
+
+    func test_startFrameRecording_coordinatorWasCalledWithExpectedValues() async throws {
+        let mockCoordinatorClient = MockDefaultAPIEndpoints()
+        let call = Call(
+            from: .init(call: .dummy(), members: [], ownCapabilities: []),
+            coordinatorClient: mockCoordinatorClient,
+            callController: .dummy(defaultAPI: mockCoordinatorClient)
+        )
+        let externalStorage = String.unique
+
+        _ = try? await call.startFrameRecording(
+            recordingExternalStorage: externalStorage
+        )
+
+        let input = try XCTUnwrap(
+            mockCoordinatorClient
+                .recordedInputPayload(
+                    (String, String, StartFrameRecordingRequest).self,
+                    for: .startFrameRecording
+                )?.first
+        )
+        XCTAssertEqual(call.callType, input.0)
+        XCTAssertEqual(call.callId, input.1)
+        XCTAssertEqual(input.2.recordingExternalStorage, externalStorage)
+    }
+
+    func test_startFrameRecording_withoutExternalStorage_coordinatorWasCalledWithExpectedValues() async throws {
+        let mockCoordinatorClient = MockDefaultAPIEndpoints()
+        let call = Call(
+            from: .init(call: .dummy(), members: [], ownCapabilities: []),
+            coordinatorClient: mockCoordinatorClient,
+            callController: .dummy(defaultAPI: mockCoordinatorClient)
+        )
+
+        _ = try? await call.startFrameRecording()
+
+        let input = try XCTUnwrap(
+            mockCoordinatorClient
+                .recordedInputPayload(
+                    (String, String, StartFrameRecordingRequest).self,
+                    for: .startFrameRecording
+                )?.first
+        )
+        XCTAssertNil(input.2.recordingExternalStorage)
+    }
+
+    func test_stopFrameRecording_coordinatorWasCalledWithExpectedValues() async throws {
+        let mockCoordinatorClient = MockDefaultAPIEndpoints()
+        let call = Call(
+            from: .init(call: .dummy(), members: [], ownCapabilities: []),
+            coordinatorClient: mockCoordinatorClient,
+            callController: .dummy(defaultAPI: mockCoordinatorClient)
+        )
+
+        _ = try? await call.stopFrameRecording()
+
+        let input = try XCTUnwrap(
+            mockCoordinatorClient
+                .recordedInputPayload(
+                    (String, String).self,
+                    for: .stopFrameRecording
+                )?.first
+        )
+        XCTAssertEqual(call.callType, input.0)
+        XCTAssertEqual(call.callId, input.1)
+    }
+
+    func test_updateState_fromFrameRecordingStartedEvent() async throws {
+        try await assertUpdateState(
+            with: [
+                .init(
+                    event: .typeCallFrameRecordingStartedEvent(
+                        .init(
+                            call: .dummy(),
+                            callCid: callCid,
+                            createdAt: .init(),
+                            egressId: .unique
+                        )
+                    ),
+                    keyPath: \.state.frameRecordingStatus,
+                    expected: true
+                )
+            ]
+        )
+    }
+
+    func test_updateState_frameRecordingStarted_fromFrameRecordingStoppedEvent() async throws {
+        try await assertUpdateState(
+            with: [
+                .init(
+                    event: .typeCallFrameRecordingStartedEvent(
+                        .init(
+                            call: .dummy(),
+                            callCid: callCid,
+                            createdAt: .init(),
+                            egressId: .unique
+                        )
+                    ),
+                    keyPath: \.state.frameRecordingStatus,
+                    expected: true
+                ),
+                .init(
+                    event: .typeCallFrameRecordingStoppedEvent(
+                        .init(
+                            call: .dummy(),
+                            callCid: callCid,
+                            createdAt: .init(),
+                            egressId: .unique
+                        )
+                    ),
+                    keyPath: \.state.frameRecordingStatus,
+                    expected: false
+                )
+            ]
+        )
+    }
+
+    func test_updateState_frameRecordingStarted_fromFrameRecordingFailedEvent() async throws {
+        try await assertUpdateState(
+            with: [
+                .init(
+                    event: .typeCallFrameRecordingStartedEvent(
+                        .init(
+                            call: .dummy(),
+                            callCid: callCid,
+                            createdAt: .init(),
+                            egressId: .unique
+                        )
+                    ),
+                    keyPath: \.state.frameRecordingStatus,
+                    expected: true
+                ),
+                .init(
+                    event: .typeCallFrameRecordingFailedEvent(
+                        .init(
+                            call: .dummy(),
+                            callCid: callCid,
+                            createdAt: .init(),
+                            egressId: .unique
+                        )
+                    ),
+                    keyPath: \.state.frameRecordingStatus,
+                    expected: false
+                )
+            ]
+        )
+    }
+
+    func test_updateState_frameRecordingStarted_fromFrameReadyEvent_statusRemainsUnchanged() async throws {
+        try await assertUpdateState(
+            with: [
+                .init(
+                    event: .typeCallFrameRecordingStartedEvent(
+                        .init(
+                            call: .dummy(),
+                            callCid: callCid,
+                            createdAt: .init(),
+                            egressId: .unique
+                        )
+                    ),
+                    keyPath: \.state.frameRecordingStatus,
+                    expected: true
+                ),
+                .init(
+                    event: .typeCallFrameRecordingFrameReadyEvent(
+                        .init(
+                            callCid: callCid,
+                            capturedAt: .init(),
+                            createdAt: .init(),
+                            egressId: .unique,
+                            sessionId: .unique,
+                            trackType: "TRACK_TYPE_VIDEO",
+                            url: .unique,
+                            users: [:]
+                        )
+                    ),
+                    keyPath: \.state.frameRecordingStatus,
+                    expected: true
                 )
             ]
         )
@@ -827,6 +1028,30 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
         XCTAssert(call?.state.broadcasting == false)
     }
 
+    func test_stopAllRTMPBroadcasts_coordinatorWasCalledWithExpectedValues() async throws {
+        // Given
+        let mockCoordinatorClient = MockDefaultAPIEndpoints()
+        let subject = Call(
+            from: .init(call: .dummy(), members: [], ownCapabilities: []),
+            coordinatorClient: mockCoordinatorClient,
+            callController: .dummy(defaultAPI: mockCoordinatorClient)
+        )
+
+        // When
+        _ = try? await subject.stopAllRTMPBroadcasts()
+
+        // Then
+        let input = try XCTUnwrap(
+            mockCoordinatorClient
+                .recordedInputPayload(
+                    (String, String).self,
+                    for: .stopAllRTMPBroadcasts
+                )?.first
+        )
+        XCTAssertEqual(subject.callType, input.0)
+        XCTAssertEqual(subject.callId, input.1)
+    }
+
     // MARK: - enableClientCapabilities
 
     func test_enableClientCapabilities_correctlyUpdatesStateAdapter() async throws {
@@ -864,12 +1089,7 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
     }
 
     func test_kickUser_coordinatorWasCalledWithExpectedValues() async throws {
-        let mockCoordinatorClient = MockDefaultAPIEndpoints()
-        let call = Call(
-            from: .init(call: .dummy(), members: [], ownCapabilities: []),
-            coordinatorClient: mockCoordinatorClient,
-            callController: .dummy(defaultAPI: mockCoordinatorClient)
-        )
+        let (call, mockCoordinatorClient) = makeCallWithMockCoordinator()
         let userId = String.unique
 
         _ = try? await call.kickUser(userId: userId)
@@ -886,6 +1106,75 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
         XCTAssertEqual(input.2.userId, userId)
     }
 
+    // MARK: - deleteRecording
+
+    func test_deleteRecording_coordinatorWasCalledWithExpectedValues() async throws {
+        let mockCoordinatorClient = MockDefaultAPIEndpoints()
+        let call = Call(
+            from: .init(call: .dummy(), members: [], ownCapabilities: []),
+            coordinatorClient: mockCoordinatorClient,
+            callController: .dummy(defaultAPI: mockCoordinatorClient)
+        )
+        let callSessionId = String.unique
+        let filename = String.unique
+
+        _ = try? await call.deleteRecording(
+            callSessionId: callSessionId,
+            filename: filename
+        )
+
+        let input = try XCTUnwrap(
+            mockCoordinatorClient
+                .recordedInputPayload(
+                    (String, String, String, String).self,
+                    for: .deleteRecording
+                )?.first
+        )
+        XCTAssertEqual(call.callType, input.0)
+        XCTAssertEqual(call.callId, input.1)
+        XCTAssertEqual(callSessionId, input.2)
+        XCTAssertEqual(filename, input.3)
+    }
+  
+    // MARK: - delete
+
+    func test_delete_default_coordinatorWasCalledWithSoftDelete() async throws {
+        try await assertDelete(expectedHard: false) { try await $0.delete() }
+    }
+
+    func test_delete_hardFalse_coordinatorWasCalledWithSoftDelete() async throws {
+        try await assertDelete(expectedHard: false) { try await $0.delete(hard: false) }
+    }
+
+    func test_delete_hardTrue_coordinatorWasCalledWithHardDelete() async throws {
+        try await assertDelete(expectedHard: true) { try await $0.delete(hard: true) }
+    }
+
+    func test_delete_coordinatorSucceeds_returnsResponse() async throws {
+        let (subject, mockCoordinatorClient) = makeCallWithMockCoordinator()
+        let taskId = String.unique
+        mockCoordinatorClient.stub(
+            for: .deleteCall,
+            with: DeleteCallResponse.dummy(taskId: taskId)
+        )
+
+        let response = try await subject.delete(hard: true)
+
+        XCTAssertEqual(response.taskId, taskId)
+    }
+
+    func test_delete_coordinatorFails_throwsError() async throws {
+        let (subject, mockCoordinatorClient) = makeCallWithMockCoordinator()
+        mockCoordinatorClient.stub(for: .deleteCall, with: ClientError())
+
+        do {
+            _ = try await subject.delete()
+            XCTFail("Expected delete to throw.")
+        } catch {
+            XCTAssertTrue(error is ClientError)
+        }
+    }
+
     // MARK: - setVideoFilter
 
     func test_setVideoFilter_moderationVideoAdapterWasUpdated() async {
@@ -900,6 +1189,40 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
     }
 
     // MARK: - Private helpers
+
+    private func makeCallWithMockCoordinator() -> (Call, MockDefaultAPIEndpoints) {
+        let mockCoordinatorClient = MockDefaultAPIEndpoints()
+        let call = Call(
+            from: .init(call: .dummy(), members: [], ownCapabilities: []),
+            coordinatorClient: mockCoordinatorClient,
+            callController: .dummy(defaultAPI: mockCoordinatorClient)
+        )
+        return (call, mockCoordinatorClient)
+    }
+
+    private func assertDelete(
+        expectedHard: Bool,
+        file: StaticString = #filePath,
+        line: UInt = #line,
+        operation: (Call) async throws -> DeleteCallResponse
+    ) async throws {
+        let (subject, mockCoordinatorClient) = makeCallWithMockCoordinator()
+
+        _ = try? await operation(subject)
+
+        let input = try XCTUnwrap(
+            mockCoordinatorClient
+                .recordedInputPayload(
+                    (String, String, DeleteCallRequest).self,
+                    for: .deleteCall
+                )?.first,
+            file: file,
+            line: line
+        )
+        XCTAssertEqual(subject.callType, input.0, file: file, line: line)
+        XCTAssertEqual(subject.callId, input.1, file: file, line: line)
+        XCTAssertEqual(input.2.hard, expectedHard, file: file, line: line)
+    }
 
     private func assertUpdateState(
         with steps: [UpdateStateStep],

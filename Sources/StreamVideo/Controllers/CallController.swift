@@ -76,6 +76,14 @@ class CallController: @unchecked Sendable {
     private var webRTCParticipantsObserver: AnyCancellable?
     private var participants: CollectionDelayedUpdateObserver<[String: CallParticipant]>?
 
+    /// The latest non-empty session id observed for this call.
+    ///
+    /// `WebRTCStateAdapter.cleanUp()` resets the session id while the call is
+    /// torn down, but user feedback is usually collected *after* the call has
+    /// ended. Retaining the id here keeps it available to
+    /// ``collectUserFeedback(custom:rating:reason:)``.
+    @Atomic private var lastSessionId: String?
+
     private let disposableBag = DisposableBag()
 
     init(
@@ -480,6 +488,11 @@ class CallController: @unchecked Sendable {
 
     /// Collects user feedback asynchronously.
     ///
+    /// The submission carries the call's session id, which allows the feedback
+    /// to be correlated with the call session (and its stats) on the backend.
+    /// It is reported even when the feedback is collected after the call
+    /// ended, which is the common case for a post-call rating screen.
+    ///
     /// - Parameters:
     ///   - custom: Optional custom data in the form of a dictionary of String keys and RawJSON values.
     ///   - rating: Optional rating provided by the user.
@@ -499,7 +512,8 @@ class CallController: @unchecked Sendable {
                 rating: rating,
                 reason: reason,
                 sdk: SystemEnvironment.sdkName,
-                sdkVersion: SystemEnvironment.version
+                sdkVersion: SystemEnvironment.version,
+                userSessionId: lastSessionId
             )
         )
     }
@@ -791,7 +805,16 @@ class CallController: @unchecked Sendable {
         webRTCClientSessionIDObserver = await webRTCCoordinator
             .stateAdapter
             .$sessionID
-            .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in self?.call?.state.sessionId = $0 }
+            .sinkTask(storeIn: disposableBag) { @MainActor [weak self] sessionId in
+                guard let self else { return }
+                call?.state.sessionId = sessionId
+                /// The empty value emitted during cleanUp is skipped on
+                /// purpose, so that feedback collected after the call ended
+                /// still reports the session it refers to.
+                if !sessionId.isEmpty {
+                    lastSessionId = sessionId
+                }
+            }
     }
 
     private func observeStatsReporterUpdates() async {
