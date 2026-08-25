@@ -18,6 +18,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fast reconnects no longer report a duration of zero in SFU telemetry. The `.fast` branch of the join telemetry shadowed the value that carried the elapsed time, so `timeSeconds` was always `0`. [#1255](https://github.com/GetStream/stream-video-swift/pull/1255)
 - `Call.collectUserFeedback(rating:reason:custom:)` now reports the call's user session id, so feedback can be correlated with the call session and its stats on the backend. The id is retained after the call ends, which makes it available to post-call rating screens. [#1254](https://github.com/GetStream/stream-video-swift/pull/1254)
 
+### 🔄 Changed
+- `defaultSortPreset` and `speakerLayoutSortPreset` now rank screensharing participants above pinned ones. Previously a pinned participant would lead the call even while somebody else was sharing their screen. [#1256](https://github.com/GetStream/stream-video-swift/pull/1256)
+
 # [1.51.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.51.0)
 _August 13, 2026_
 
