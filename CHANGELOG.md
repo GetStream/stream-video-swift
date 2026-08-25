@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Call.stopAllRTMPBroadcasts()` to stop every RTMP-out broadcast of a call in one call [#1245](https://github.com/GetStream/stream-video-swift/pull/1245).
 
 ### 🐞 Fixed
+- Mid-call permission changes from the SFU are now applied on `Call.state.ownCapabilities`, instead of the `callGrantsUpdated` event being ignored. [#1250](https://github.com/GetStream/stream-video-swift/pull/1250)
 - Transient peer-connection disconnections no longer trigger an immediate full rejoin, allowing the existing ICE restart flow to recover the session. [#1231](https://github.com/GetStream/stream-video-swift/pull/1231)
 - `CallParticipant.withUpdated(...)` no longer resets `source` to `.webRTCUnspecified`, which previously broke the `videoIngressSource` and `participantSource` sort comparators after any participant update. `source` is now also part of `CallParticipant` equality. [#1251](https://github.com/GetStream/stream-video-swift/pull/1251)
 - Fast reconnects no longer report a duration of zero in SFU telemetry. The `.fast` branch of the join telemetry shadowed the value that carried the elapsed time, so `timeSeconds` was always `0`. [#1255](https://github.com/GetStream/stream-video-swift/pull/1255)
