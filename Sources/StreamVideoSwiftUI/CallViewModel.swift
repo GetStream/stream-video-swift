@@ -276,6 +276,16 @@ open class CallViewModel: ObservableObject {
     /// ``OutgoingRingCreationCoordinator``.
     private var ringCreationCoordinator: OutgoingRingCreationCoordinator?
 
+    /// Replays accept/reject/end from `Call.state.session` after a
+    /// reconnect `GET`. Those coordinator events are not resent on the
+    /// socket, and `CallViewModel` still joins only from them.
+    private lazy var ringingFlowRecoveryAdapter: RingingFlowRecoveryAdapter = .init(
+        streamVideo,
+        onAccepted: { [weak self] in self?.handleAcceptedEvent($0) },
+        onRejected: { [weak self] in self?.handleRejectedEvent($0) },
+        onEnded: { [weak self] in self?.handleEndedEvent($0) }
+    )
+
     public init(
         participantsLayout: ParticipantsLayout = .grid,
         callSettings: CallSettings? = nil
@@ -293,6 +303,7 @@ open class CallViewModel: ObservableObject {
         participantAutoLeavePolicy.onPolicyTriggered = { [weak self] in self?.participantAutoLeavePolicyTriggered() }
 
         _ = participantEventResetAdapter
+        _ = ringingFlowRecoveryAdapter
 
         // Hop to the main queue before running operators defined inside this
         // @MainActor type. This keeps the pipeline actor-safe and allows the
