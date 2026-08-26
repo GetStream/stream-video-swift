@@ -640,6 +640,45 @@ final class Sorting_Tests: XCTestCase, @unchecked Sendable {
         )
     }
 
+    // MARK: - screenSharing vs pinned precedence
+
+    /// A screensharing participant outranks a pinned one in the default preset.
+    func test_defaultComparators_pinnedAndScreenSharing_screenSharingComesFirst() {
+        assertSort(
+            [
+                .dummy(userId: "A", isScreenSharing: false, pin: PinInfo(isLocal: true, pinnedAt: Date())),
+                .dummy(userId: "B", isScreenSharing: true, pin: nil)
+            ],
+            comparator: combineComparators(defaultSortPreset),
+            expectedTransformer: { [$0[1], $0[0]] }
+        )
+    }
+
+    /// The speaker layout preset ranks screen sharing above pinning too.
+    func test_speakerLayoutComparators_pinnedAndScreenSharing_screenSharingComesFirst() {
+        assertSort(
+            [
+                .dummy(userId: "A", isScreenSharing: false, pin: PinInfo(isLocal: true, pinnedAt: Date())),
+                .dummy(userId: "B", isScreenSharing: true, pin: nil)
+            ],
+            comparator: combineComparators(speakerLayoutSortPreset),
+            expectedTransformer: { [$0[1], $0[0]] }
+        )
+    }
+
+    /// The paginated preset does not rank screen sharing at all, so a pinned
+    /// participant keeps leading there.
+    func test_paginatedComparators_pinnedAndScreenSharing_pinnedComesFirst() {
+        assertSort(
+            [
+                .dummy(userId: "A", isScreenSharing: true, pin: nil),
+                .dummy(userId: "B", isScreenSharing: false, pin: PinInfo(isLocal: true, pinnedAt: Date()))
+            ],
+            comparator: combineComparators(paginatedLayoutSortPreset),
+            expectedTransformer: { [$0[1], $0[0]] }
+        )
+    }
+
     // MARK: - defaultComparators
 
     /// Test the `defaultComparators` mixed: considering both `pinned` and `ifInvisible` for `publishingVideo`.

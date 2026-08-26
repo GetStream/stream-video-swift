@@ -1130,6 +1130,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             XCTFail()
         case let .reconnection(reconnection):
             XCTAssertEqual(reconnection.strategy, .rejoin)
+            XCTAssertGreaterThan(reconnection.timeSeconds, 0)
         case .none:
             XCTFail()
         }
@@ -1337,6 +1338,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             XCTFail()
         case let .reconnection(reconnection):
             XCTAssertEqual(reconnection.strategy, .fast)
+            XCTAssertGreaterThan(reconnection.timeSeconds, 0)
         case .none:
             XCTFail()
         }
@@ -1779,6 +1781,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             XCTFail()
         case let .reconnection(reconnection):
             XCTAssertEqual(reconnection.strategy, .migrate)
+            XCTAssertGreaterThan(reconnection.timeSeconds, 0)
         case .none:
             XCTFail()
         }
