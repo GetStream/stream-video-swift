@@ -2,7 +2,6 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
-import AVFoundation
 import Combine
 import Foundation
 import StreamVideo
@@ -46,14 +45,6 @@ public final class MicrophoneChecker: ObservableObject {
         return true
     }
 
-    public func startListening(ignoreActiveCall: Bool = false) async {
-        log.warning("Method \(#function) has been deprecated and will be removed in the future.")
-    }
-
-    public func stopListening() async {
-        log.warning("Method \(#function) has been deprecated and will be removed in the future.")
-    }
-    
     // MARK: - private
 
     private func normaliseAndAppend(_ decibel: Float) -> [Float] {

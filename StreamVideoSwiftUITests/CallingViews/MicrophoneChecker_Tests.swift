@@ -2,8 +2,6 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
-import AVFoundation
-import Combine
 import Foundation
 @testable import StreamVideo
 @testable import StreamVideoSwiftUI
@@ -22,7 +20,6 @@ final class MicrophoneChecker_Tests: XCTestCase, @unchecked Sendable {
     }
 
     override func tearDown() async throws {
-        await subject.stopListening()
         InjectedValues[\.callAudioRecorder] = StreamCallAudioRecorder()
         mockAudioRecorder = nil
         mockStreamVideo = nil
@@ -32,7 +29,7 @@ final class MicrophoneChecker_Tests: XCTestCase, @unchecked Sendable {
 
     // MARK: - init
 
-    func test_startListeningAndPostAudioLevels_microphoneCheckerHasExpectedValues() async throws {
+    func test_audioLevelsPostedFromRecorder_microphoneCheckerHasExpectedValues() async throws {
         mockAudioRecorder.startRecording(ignoreActiveCall: true)
 
         let inputs = [
