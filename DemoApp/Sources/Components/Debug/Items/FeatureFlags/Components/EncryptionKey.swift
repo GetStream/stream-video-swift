@@ -45,7 +45,8 @@ extension AppEnvironment {
         var shareKey: String {
             let trimmed = passphrase.trimmingCharacters(in: .whitespacesAndNewlines)
             if !trimmed.isEmpty { return trimmed }
-            return values.first.map(DemoHex.string(from:)) ?? ""
+            guard values.count == 1, let key = values.first else { return "" }
+            return DemoHex.string(from: key)
         }
 
         /// Get-or-create override so new calls are created with `auto-on`.

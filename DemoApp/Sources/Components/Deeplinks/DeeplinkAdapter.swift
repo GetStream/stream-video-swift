@@ -120,9 +120,7 @@ struct DeeplinkAdapter {
             let end = rest.firstIndex {
                 $0 == "&" || $0 == "#" || $0.isNewline || $0 == " "
             } ?? rest.endIndex
-            var value = String(rest[..<end])
-            value = value.removingPercentEncoding ?? value
-            let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+            let trimmed = formDecoded(String(rest[..<end]))
             if !trimmed.isEmpty { return trimmed }
         }
         return nil
@@ -132,12 +130,18 @@ struct DeeplinkAdapter {
         fromQueryItems params: [String: String]
     ) -> String? {
         for name in ["encryption_key", "encryption_keys", "encryptionKey"] {
-            if let value = params[name]?.trimmingCharacters(
-                in: .whitespacesAndNewlines
-            ), !value.isEmpty {
-                return value.removingPercentEncoding ?? value
+            if let value = params[name] {
+                let decoded = formDecoded(value)
+                if !decoded.isEmpty { return decoded }
             }
         }
         return nil
+    }
+
+    /// `+` is a space in form-urlencoded query values (`able+acid+anger`).
+    private static func formDecoded(_ value: String) -> String {
+        let plusAsSpace = value.replacingOccurrences(of: "+", with: " ")
+        return (plusAsSpace.removingPercentEncoding ?? plusAsSpace)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }

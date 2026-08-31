@@ -128,6 +128,7 @@ struct DemoLobbyEncryptionSection: View {
                                 )
                         }
                         .buttonStyle(BorderlessButtonStyle())
+                        .accessibilityLabel("Generate a new shared key")
                         .accessibility(identifier: "e2eeNewKey")
                     }
                 }

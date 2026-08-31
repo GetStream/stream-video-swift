@@ -594,30 +594,11 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
     /// Attaches or clears end-to-end encryption. Must run before ``join``.
     ///
-    /// ## Overview
-    /// Pass ``EncryptionManager`` for the built-in AES-GCM scheme, or any
-    /// custom ``E2EEManager``. The manager is stored on the WebRTC session
-    /// so join:
-    /// - reports `e2ee: true` on ``JoinCallRequest``
-    /// - attaches encryptors when local transceivers are added
-    /// - attaches decryptors when remote tracks arrive
-    ///
-    /// Pass `nil` to detach a manager that was set earlier (for example
-    /// after toggling encryption off in a pre-join lobby).
-    ///
-    /// ## Example
-    /// ```swift
-    /// let e2ee = try EncryptionManager(userId: streamVideo.user.id)
-    /// try await call.setE2EEManager(e2ee)
-    /// try e2ee.setSharedKey(0, rawKey: keyBytes)
-    /// try await call.join()
-    /// ```
-    ///
+    /// Pass ``EncryptionManager`` (or any ``E2EEManager``) before joining,
+    /// or `nil` to detach. Throws if peer connections already exist.
     /// - Parameter manager: The encryption manager to attach, or `nil`
     ///   to clear it.
-    /// - Throws: If called after peer connections exist (i.e. after join).
-    ///   Those PCs were already configured without an encryptor, so adopting
-    ///   a manager now would silently publish or receive cleartext.
+    /// - Throws: If called after join.
     public func setE2EEManager(_ manager: E2EEManager?) async throws {
         try await callController.setE2EEManager(manager)
     }
