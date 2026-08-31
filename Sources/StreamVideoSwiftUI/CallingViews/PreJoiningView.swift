@@ -146,7 +146,7 @@ struct LobbyContentView<Factory: ViewFactory, SettingsView: View>: View {
 @available(iOS 14.0, *)
 extension LobbyView where SettingsView == CallSettingsView {
     init(
-        viewFactory: Factory,
+        viewFactory: Factory = DefaultViewFactory.shared,
         viewModel: LobbyViewModel? = nil,
         callId: String,
         callType: String,
