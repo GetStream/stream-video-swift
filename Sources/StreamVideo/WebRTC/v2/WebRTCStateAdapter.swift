@@ -756,7 +756,48 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         lineNumber: UInt = #line,
         _ operation: @Sendable @escaping () -> Set<OwnCapability>
     ) async {
-        let newValue = operation()
+        await apply(
+            ownCapabilities: operation(),
+            functionName: functionName,
+            fileName: fileName,
+            lineNumber: lineNumber
+        )
+    }
+
+    /// Enqueues an own capabilities update derived from the current set.
+    ///
+    /// Use this variant when the new capabilities depend on the existing ones,
+    /// such as when the SFU grants or revokes individual publishing rights. The
+    /// current set is read and replaced without suspension, so concurrent
+    /// updates cannot interleave.
+    ///
+    /// - Parameter operation: Receives the current capabilities and returns the
+    ///   new ones.
+    func enqueueOwnCapabilities(
+        functionName: StaticString = #function,
+        fileName: StaticString = #fileID,
+        lineNumber: UInt = #line,
+        _ operation: @Sendable @escaping (Set<OwnCapability>) -> Set<OwnCapability>
+    ) async {
+        await apply(
+            ownCapabilities: operation(ownCapabilities),
+            functionName: functionName,
+            fileName: fileName,
+            lineNumber: lineNumber
+        )
+    }
+
+    /// Applies a new own capabilities set and propagates the side effects.
+    ///
+    /// The set is stored, forwarded to the publisher, used to turn off audio or
+    /// video when the matching capability is missing and stops an active
+    /// screen sharing session when the screenshare capability is removed.
+    private func apply(
+        ownCapabilities newValue: Set<OwnCapability>,
+        functionName: StaticString,
+        fileName: StaticString,
+        lineNumber: UInt
+    ) async {
         set(ownCapabilities: newValue)
 
         publisher?.didUpdateOwnCapabilities(newValue)
@@ -788,29 +829,6 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
                 log.error(error, subsystems: .webRTC)
             }
         }
-    }
-
-    /// Enqueues an own capabilities update derived from the current set.
-    ///
-    /// Use this variant when the new capabilities depend on the existing ones,
-    /// such as when the SFU grants or revokes individual publishing rights. The
-    /// current set is read and replaced without suspension, so concurrent
-    /// updates cannot interleave.
-    ///
-    /// - Parameter operation: Receives the current capabilities and returns the
-    ///   new ones.
-    func enqueueOwnCapabilities(
-        functionName: StaticString = #function,
-        fileName: StaticString = #fileID,
-        lineNumber: UInt = #line,
-        _ operation: @Sendable @escaping (Set<OwnCapability>) -> Set<OwnCapability>
-    ) async {
-        let newValue = operation(ownCapabilities)
-        await enqueueOwnCapabilities(
-            functionName: functionName,
-            fileName: fileName,
-            lineNumber: lineNumber
-        ) { newValue }
     }
 
     func trace(_ trace: WebRTCTrace) {
