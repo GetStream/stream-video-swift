@@ -76,14 +76,6 @@ class CallController: @unchecked Sendable {
     private var webRTCParticipantsObserver: AnyCancellable?
     private var participants: CollectionDelayedUpdateObserver<[String: CallParticipant]>?
 
-    /// The latest non-empty session id observed for this call.
-    ///
-    /// `WebRTCStateAdapter.cleanUp()` resets the session id while the call is
-    /// torn down, but user feedback is usually collected *after* the call has
-    /// ended. Retaining the id here keeps it available to
-    /// ``collectUserFeedback(custom:rating:reason:)``.
-    @Atomic private var lastSessionId: String?
-
     private let disposableBag = DisposableBag()
 
     init(
@@ -512,7 +504,7 @@ class CallController: @unchecked Sendable {
                 reason: reason,
                 sdk: SystemEnvironment.sdkName,
                 sdkVersion: SystemEnvironment.version,
-                userSessionId: lastSessionId
+                userSessionId: await webRTCCoordinator.stateAdapter.lastSessionID
             )
         )
     }
@@ -804,16 +796,7 @@ class CallController: @unchecked Sendable {
         webRTCClientSessionIDObserver = await webRTCCoordinator
             .stateAdapter
             .$sessionID
-            .sinkTask(storeIn: disposableBag) { @MainActor [weak self] sessionId in
-                guard let self else { return }
-                call?.state.sessionId = sessionId
-                /// The empty value emitted during cleanUp is skipped on
-                /// purpose, so that feedback collected after the call ended
-                /// still reports the session it refers to.
-                if !sessionId.isEmpty {
-                    lastSessionId = sessionId
-                }
-            }
+            .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in self?.call?.state.sessionId = $0 }
     }
 
     private func observeStatsReporterUpdates() async {
