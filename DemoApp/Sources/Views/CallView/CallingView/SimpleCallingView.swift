@@ -156,11 +156,11 @@ struct SimpleCallingView: View {
             return
         }
 
-        AppEnvironment.EncryptionKeys.shared.applyDeeplink(deeplinkInfo)
-
         if
             deeplinkInfo.baseURL == AppEnvironment.baseURL || (deeplinkInfo.baseURL == .legacy && AppEnvironment.baseURL == .pronto)
         {
+            AppEnvironment.EncryptionKeys.shared.applyDeeplink(deeplinkInfo)
+
             if !Set(AppEnvironment.availableCallTypes).contains(deeplinkInfo.callType) {
                 AppEnvironment.availableCallTypes.append(deeplinkInfo.callType)
             }
