@@ -109,6 +109,26 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         await assertEqualAsync(await subject.sessionID, expected)
     }
 
+    func test_setSessionID_shouldUpdateLastSessionID() async throws {
+        let expected = String.unique
+
+        await subject.set(sessionID: expected)
+
+        let lastSessionID = await subject.lastSessionID
+        XCTAssertEqual(lastSessionID, expected)
+    }
+
+    func test_setSessionID_withEmptyValue_shouldNotUpdateLastSessionID() async throws {
+        let expected = String.unique
+        await subject.set(sessionID: expected)
+
+        await subject.set(sessionID: "")
+
+        await assertEqualAsync(await subject.sessionID, "")
+        let lastSessionID = await subject.lastSessionID
+        XCTAssertEqual(lastSessionID, expected)
+    }
+
     // MARK: - setIsTracingEnabled
 
     func test_setIsTracingEnabled_shouldUpdateIsTracingEnabled() async throws {
@@ -812,6 +832,9 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         await assertNilAsync(await subject.sfuAdapter)
         await assertEqualAsync(await subject.token, "")
         await assertEqualAsync(await subject.sessionID, "")
+        /// The session that just ended remains available for consumers that
+        /// run after cleanUp (e.g. user feedback collection).
+        await assertFalseAsync(await subject.lastSessionID.isEmpty)
         await assertEqualAsync(await subject.ownCapabilities, [])
         await assertEqualAsync(await subject.participants, [:])
         await assertEqualAsync(await subject.participantsCount, 0)

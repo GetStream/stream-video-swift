@@ -614,9 +614,8 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
 
     func test_collectUserFeedback_duringCall_reportsSessionId() async throws {
         let (subject, defaultAPI, factory) = makeSubjectWithMockAPI()
-        let call = await MockCall(.dummy())
-        subject.call = call
-        let expected = await setSessionId(.unique, on: factory, observedBy: call)
+        let expected = String.unique
+        await factory.mockCoordinatorStack.coordinator.stateAdapter.set(sessionID: expected)
         defaultAPI.stub(for: .collectUserFeedback, with: CollectUserFeedbackResponse(duration: ""))
 
         _ = try await subject.collectUserFeedback(rating: 5)
@@ -628,7 +627,8 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         let (subject, defaultAPI, factory) = makeSubjectWithMockAPI()
         let call = await MockCall(.dummy())
         subject.call = call
-        let expected = await setSessionId(.unique, on: factory, observedBy: call)
+        let expected = String.unique
+        await factory.mockCoordinatorStack.coordinator.stateAdapter.set(sessionID: expected)
         /// The state adapter resets its session id while the call is torn down,
         /// but a post-call rating screen collects the feedback afterwards.
         subject.cleanUp()
@@ -1311,19 +1311,6 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
             webRTCCoordinatorFactory: webRTCCoordinatorFactory
         )
         return (subject, defaultAPI, webRTCCoordinatorFactory)
-    }
-
-    /// Sets the session id on the state adapter and waits until the controller
-    /// has observed it, using the call state that the same observation updates.
-    @discardableResult
-    private func setSessionId(
-        _ value: String,
-        on factory: MockWebRTCCoordinatorFactory,
-        observedBy call: MockCall
-    ) async -> String {
-        await factory.mockCoordinatorStack.coordinator.stateAdapter.set(sessionID: value)
-        await fulfilmentInMainActor { call.state.sessionId == value }
-        return value
     }
 
     private func collectedFeedbackRequest(
