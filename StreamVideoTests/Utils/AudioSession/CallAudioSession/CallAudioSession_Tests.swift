@@ -563,9 +563,9 @@ final class CallAudioSession_Tests: XCTestCase, @unchecked Sendable {
         }
     }
 
-    // MARK: - music mode
+    // MARK: - audio bitrate profile
 
-    func test_setMusicModeEnabled_overridesVoiceChatToDefault() async {
+    func test_setAudioBitrateProfile_music_overridesVoiceChatToDefault() async throws {
         let callSettingsSubject = PassthroughSubject<CallSettings, Never>()
         let capabilitiesSubject = PassthroughSubject<Set<OwnCapability>, Never>()
         let delegate = SpyAudioSessionAdapterDelegate()
@@ -598,8 +598,8 @@ final class CallAudioSession_Tests: XCTestCase, @unchecked Sendable {
                 == .voiceChat
         }
 
-        await subject.setMusicModeEnabled(
-            true,
+        try await subject.setAudioBitrateProfile(
+            .musicHighQuality,
             callSettings: callSettings,
             ownCapabilities: [.sendAudio]
         )
@@ -609,8 +609,8 @@ final class CallAudioSession_Tests: XCTestCase, @unchecked Sendable {
                 == .default
         }
 
-        await subject.setMusicModeEnabled(
-            false,
+        try await subject.setAudioBitrateProfile(
+            .voiceStandard,
             callSettings: callSettings,
             ownCapabilities: [.sendAudio]
         )
@@ -621,7 +621,7 @@ final class CallAudioSession_Tests: XCTestCase, @unchecked Sendable {
         }
     }
 
-    func test_routeChange_whileMusicMode_keepsDefaultMode() async {
+    func test_routeChange_whileMusicMode_keepsDefaultMode() async throws {
         let callSettingsSubject = PassthroughSubject<CallSettings, Never>()
         let capabilitiesSubject = PassthroughSubject<Set<OwnCapability>, Never>()
         let delegate = SpyAudioSessionAdapterDelegate()
@@ -654,8 +654,8 @@ final class CallAudioSession_Tests: XCTestCase, @unchecked Sendable {
                 == .voiceChat
         }
 
-        await subject.setMusicModeEnabled(
-            true,
+        try await subject.setAudioBitrateProfile(
+            .musicHighQuality,
             callSettings: callSettings,
             ownCapabilities: [.sendAudio]
         )
