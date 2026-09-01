@@ -394,6 +394,12 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         on transceiver: RTCRtpTransceiver
     ) {
         let params = transceiver.sender.parameters
+        if bitrate <= 0 {
+            guard !params.encodings.isEmpty else { return }
+            params.encodings.forEach { $0.maxBitrateBps = nil }
+            transceiver.sender.parameters = params
+            return
+        }
         if params.encodings.isEmpty {
             let encoding = RTCRtpEncodingParameters()
             encoding.isActive = true

@@ -590,6 +590,7 @@ final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
 
     func test_didDisableEngine_whenRecordingRemains_keepsInputGraphUntilRelease() {
         makeSubject()
+        source.stub(for: \.isVoiceProcessingEnabled, with: false)
         let live = configureInput()
 
         _ = subject.audioDeviceModule(
@@ -608,6 +609,7 @@ final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
 
     func test_didStopEngine_whenRecordingRemains_keepsInputGraphUntilRelease() {
         makeSubject()
+        source.stub(for: \.isVoiceProcessingEnabled, with: false)
         let live = configureInput()
 
         _ = subject.audioDeviceModule(
@@ -620,6 +622,36 @@ final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(audioEngineNodeAdapter.timesCalled(.uninstall), 0)
 
         _ = subject.audioDeviceModule(.init(), willReleaseEngine: live.engine)
+
+        XCTAssertEqual(audioEngineNodeAdapter.timesCalled(.uninstall), 1)
+    }
+
+    func test_didDisableEngine_whenVoiceProcessingEnabledAndRecordingRemains_tearsDownInputGraph() {
+        makeSubject()
+        source.stub(for: \.isVoiceProcessingEnabled, with: true)
+        let live = configureInput()
+
+        _ = subject.audioDeviceModule(
+            .init(),
+            didDisableEngine: live.engine,
+            isPlayoutEnabled: false,
+            isRecordingEnabled: true
+        )
+
+        XCTAssertEqual(audioEngineNodeAdapter.timesCalled(.uninstall), 1)
+    }
+
+    func test_didStopEngine_whenVoiceProcessingEnabledAndRecordingRemains_tearsDownInputGraph() {
+        makeSubject()
+        source.stub(for: \.isVoiceProcessingEnabled, with: true)
+        let live = configureInput()
+
+        _ = subject.audioDeviceModule(
+            .init(),
+            didStopEngine: live.engine,
+            isPlayoutEnabled: false,
+            isRecordingEnabled: true
+        )
 
         XCTAssertEqual(audioEngineNodeAdapter.timesCalled(.uninstall), 1)
     }
