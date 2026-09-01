@@ -99,10 +99,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     private var videoFilter: VideoFilter?
     /// Requested capture/publish profile. Kept across reconnects, reset on leave.
     private(set) var audioBitrateProfile: AudioBitrateProfile = .voiceStandard
-    /// Last music-capture flag applied to the session/ADM.
-    private var lastMusicCaptureEnabled = false
-    /// Filter cleared while music capture is active, restored on voice.
-    private var restoredAudioFilter: AudioFilter?
+    nonisolated let audioBitrateProfileApplicator: AudioBitrateProfileApplicator
 
     private let rtcPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinatorProviding
     private let disposableBag = DisposableBag()
@@ -222,6 +219,13 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         self.screenShareSessionProvider = screenShareSessionProvider
         self.audioSession = .init()
         self.stagePublisher = stagePublisher
+        self.audioBitrateProfileApplicator = AudioBitrateProfileApplicator(
+            audioSession: audioSession,
+            audioProcessingModule: videoConfig.audioProcessingModule,
+            audioDeviceModule: { [peerConnectionFactory] in
+                peerConnectionFactory.audioDeviceModule
+            }
+        )
 
         peerConnectionFactory
             .setFrameBufferPolicy(
@@ -350,9 +354,20 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     }
 
     /// Applies an in-call audio bitrate/processing profile.
-    func setAudioBitrateProfile(_ profile: AudioBitrateProfile) async {
+    func setAudioBitrateProfile(_ profile: AudioBitrateProfile) async throws {
+        let previous = audioBitrateProfile
         audioBitrateProfile = profile
-        await applyAudioBitrateProfile()
+        do {
+            try await applyAudioBitrateProfile()
+        } catch {
+            audioBitrateProfile = previous
+            throw error
+        }
+    }
+
+    /// Applies an audio filter, or stashes it while music capture is active.
+    func setAudioFilter(_ audioFilter: AudioFilter?) {
+        audioBitrateProfileApplicator.setAudioFilter(audioFilter)
     }
 
     // MARK: - Client Capabilities
@@ -497,7 +512,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         try await restoreScreenSharing()
         publisher.setVideoFilter(videoFilter)
         publisher.completeSetUp()
-        await applyAudioBitrateProfile()
+        try await applyAudioBitrateProfile()
 
         try await subscriber.setUp(
             with: callSettings,
@@ -952,72 +967,23 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         publisher?.publishOptions = publishOptions
     }
 
-    /// Restores voice processing, software NS/HPF, and any stashed audio filter.
+    /// Restores voice processing and software NS/HPF. Stashed filters are
+    /// dropped so leave cannot reinstall them on the shared module.
     private func resetAudioBitrateProfile() async {
+        audioBitrateProfileApplicator.discardStashedAudioFilter()
         audioBitrateProfile = .voiceStandard
-        if let restoredAudioFilter {
-            videoConfig.audioProcessingModule.setAudioFilter(restoredAudioFilter)
-            self.restoredAudioFilter = nil
-        }
-        applySoftwareProcessing(enabled: true)
-        await applyMusicCapturePolicy()
+        try? await applyAudioBitrateProfile()
     }
 
     /// Applies bitrate, software processing, VP policy, and audio-filter rules.
-    private func applyAudioBitrateProfile() async {
-        applySoftwareProcessing(enabled: !audioBitrateProfile.isMusic)
-        applyAudioFilterPolicy()
-        await applyMusicCapturePolicy()
-        let bitrate = publishOptions.audio.first?.bitrate(for: audioBitrateProfile)
-            ?? audioBitrateProfile.defaultBitrate
-        await publisher?.setAudioMaxBitrate(bitrate)
-    }
-
-    private func applySoftwareProcessing(enabled: Bool) {
-        let config = videoConfig.audioProcessingModule.config
-        config.isNoiseSuppressionEnabled = enabled
-        config.isHighpassFilterEnabled = enabled
-        videoConfig.audioProcessingModule.config = config
-    }
-
-    private func applyAudioFilterPolicy() {
-        let module = videoConfig.audioProcessingModule
-        if audioBitrateProfile.isMusic {
-            if restoredAudioFilter == nil {
-                restoredAudioFilter = module.activeAudioFilter
-            }
-            module.setAudioFilter(nil)
-        } else if let restoredAudioFilter {
-            module.setAudioFilter(restoredAudioFilter)
-            self.restoredAudioFilter = nil
-        }
-    }
-
-    private func applyMusicCapturePolicy() async {
-        let isMusic = audioBitrateProfile.isMusic
-        let didToggle = isMusic != lastMusicCaptureEnabled
-        lastMusicCaptureEnabled = isMusic
-
-        await audioSession.setMusicModeEnabled(
-            isMusic,
+    private func applyAudioBitrateProfile() async throws {
+        try await audioBitrateProfileApplicator.apply(
+            profile: audioBitrateProfile,
             callSettings: callSettings,
-            ownCapabilities: ownCapabilities
+            ownCapabilities: ownCapabilities,
+            publishOptions: publishOptions,
+            publisher: publisher
         )
-        let audioDeviceModule = peerConnectionFactory.audioDeviceModule
-        audioDeviceModule.setMusicCaptureEnabled(isMusic)
-
-        guard didToggle, publisher != nil else { return }
-        restorePlayoutAfterVoiceProcessingChange(audioDeviceModule)
-    }
-
-    /// Disabling Voice Processing unlinks I/O and drops output. Recording
-    /// is already rebuilt by that recreate; bouncing it disconnects the
-    /// new input graph. Only playout needs to be brought back.
-    private func restorePlayoutAfterVoiceProcessingChange(
-        _ audioDeviceModule: AudioDeviceModule
-    ) {
-        guard callSettings.audioOutputOn else { return }
-        audioDeviceModule.resetPlayout()
     }
 
     // MARK: Participant Operations

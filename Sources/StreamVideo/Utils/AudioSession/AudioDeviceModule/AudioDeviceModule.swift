@@ -176,8 +176,8 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
     /// throw and crash the app. This lock keeps those operations mutually
     /// exclusive. It is recursive because `setMuted` calls `setRecording`.
     private let engineQueue = RecursiveQueue()
-    /// `true` while music-safe capture is requested.
-    private var isMusicCaptureEnabled = false
+    /// Capture/publish profile that drives Voice Processing.
+    private var audioBitrateProfile: AudioBitrateProfile = .voiceStandard
 
     /// Serial queue used to deliver events to observers.
     private let dispatchQueue: DispatchQueue
@@ -279,21 +279,51 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         }
     }
 
-    /// Applies the in-call music capture policy to Voice Processing.
+    /// Applies the in-call audio bitrate profile to Voice Processing.
     ///
     /// Music disables VP (not just bypass). Bypass is a live-graph flag and
     /// does not rebuild I/O after the session leaves VoiceChat. Disabling VP
     /// recreates the engine on Remote I/O, same as stereo playout. Echo on
     /// speaker is the cost until software AEC exists.
-    /// - Parameter enabled: `true` when music/hi-fi capture is requested.
-    func setMusicCaptureEnabled(_ enabled: Bool) {
+    ///
+    /// Playout is restored on this same queue when music actually toggles
+    /// and output is already running, initialized, or requested by the
+    /// caller. Do not call ``resetPlayout()`` from here; that would
+    /// re-enter ``engineQueue``.
+    func setAudioBitrateProfile(
+        _ profile: AudioBitrateProfile,
+        restorePlayout: Bool = false
+    ) {
         engineQueue.sync {
-            isMusicCaptureEnabled = enabled
+            let didToggleMusic = profile.isMusic != audioBitrateProfile.isMusic
+            let shouldRestorePlayout = didToggleMusic
+                && (
+                    restorePlayout
+                        || isPlaying
+                        || source.isPlaying
+                        || source.isPlayoutInitialized
+                )
+            // VP toggle recreates the engine. Starting that graph while
+            // mixer-muted leaves AURemoteIO idle; a later unmute only
+            // sets volume and capture stays silent.
+            let restoreMuteAfterEngineRebuild = didToggleMusic
+                && isMicrophoneMuted
+            audioBitrateProfile = profile
+            if restoreMuteAfterEngineRebuild {
+                _ = source.setMicrophoneMuted(false)
+            }
             applyVoiceProcessingPolicyLocked()
-            if enabled {
-                _ = source.setVoiceProcessingEnabled(false)
-            } else if !source.prefersStereoPlayout {
-                _ = source.setVoiceProcessingEnabled(true)
+            let voiceProcessingEnabled = !profile.isMusic
+                && !source.prefersStereoPlayout
+            if didToggleMusic
+                || source.isVoiceProcessingEnabled != voiceProcessingEnabled {
+                _ = source.setVoiceProcessingEnabled(voiceProcessingEnabled)
+            }
+            if shouldRestorePlayout {
+                resetPlayoutLocked()
+            }
+            if restoreMuteAfterEngineRebuild {
+                _ = source.setMicrophoneMuted(true)
             }
         }
     }
@@ -304,8 +334,9 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
     /// disables the whole unit. Echo on speaker is the ceiling; software AEC
     /// when VP is off is the upgrade.
     private func applyVoiceProcessingPolicyLocked() {
-        let bypass = source.prefersStereoPlayout || isMusicCaptureEnabled
-        source.isVoiceProcessingAGCEnabled = !isMusicCaptureEnabled
+        let isMusic = audioBitrateProfile.isMusic
+        let bypass = source.prefersStereoPlayout || isMusic
+        source.isVoiceProcessingAGCEnabled = !isMusic
         source.isVoiceProcessingBypassed = bypass
         _ = source.setMuteMode(bypass ? .inputMixer : .voiceProcessing)
     }
@@ -374,20 +405,23 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
     /// state still reports `isPlaying == true` after a failed engine start.
     /// - Note: Serialized on ``engineQueue`` with other engine mutations.
     func resetPlayout() {
-        engineQueue.sync {
-            log.throwing(subsystems: .audioSession) {
-                try throwingExecution("Unable to stop playout") {
-                    source.stopPlayout()
-                }
+        engineQueue.sync { resetPlayoutLocked() }
+    }
 
-                if source.isPlayoutInitialized {
-                    try throwingExecution("Unable to start playout") {
-                        source.startPlayout()
-                    }
-                } else {
-                    try throwingExecution("Unable to initAndStart playout") {
-                        source.initAndStartPlayout()
-                    }
+    /// Restarts playout. Caller must already be on ``engineQueue``.
+    private func resetPlayoutLocked() {
+        log.throwing(subsystems: .audioSession) {
+            try throwingExecution("Unable to stop playout") {
+                source.stopPlayout()
+            }
+
+            if source.isPlayoutInitialized {
+                try throwingExecution("Unable to start playout") {
+                    source.startPlayout()
+                }
+            } else {
+                try throwingExecution("Unable to initAndStart playout") {
+                    source.initAndStartPlayout()
                 }
             }
         }

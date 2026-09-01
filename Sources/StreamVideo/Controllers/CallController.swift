@@ -218,7 +218,7 @@ class CallController: @unchecked Sendable {
     /// have not been loaded yet.
     func setAudioBitrateProfile(_ profile: AudioBitrateProfile) async throws {
         try await ensureHiFiAudioEnabled()
-        await webRTCCoordinator.setAudioBitrateProfile(profile)
+        try await webRTCCoordinator.setAudioBitrateProfile(profile)
     }
 
     /// Changes the video state for the current user.
@@ -264,6 +264,13 @@ class CallController: @unchecked Sendable {
             guard let self else { return }
             await webRTCCoordinator.setVideoFilter(videoFilter)
         }
+    }
+
+    /// Sets an `audioFilter` for the current call.
+    /// - Parameter audioFilter: An `AudioFilter` instance to apply, or `nil`
+    ///   to clear it.
+    func setAudioFilter(_ audioFilter: AudioFilter?) {
+        webRTCCoordinator.setAudioFilter(audioFilter)
     }
 
     /// Starts screensharing for the current call.

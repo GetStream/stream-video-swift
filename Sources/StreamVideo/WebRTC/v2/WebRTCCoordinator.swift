@@ -230,8 +230,8 @@ final class WebRTCCoordinator: @unchecked Sendable {
     }
 
     /// Applies an in-call audio bitrate/processing profile.
-    func setAudioBitrateProfile(_ profile: AudioBitrateProfile) async {
-        await stateAdapter.setAudioBitrateProfile(profile)
+    func setAudioBitrateProfile(_ profile: AudioBitrateProfile) async throws {
+        try await stateAdapter.setAudioBitrateProfile(profile)
     }
 
     /// Updates the visibility of a participant's track.
@@ -285,6 +285,13 @@ final class WebRTCCoordinator: @unchecked Sendable {
     /// - Parameter videoFilter: The filter to be applied on the video.
     func setVideoFilter(_ videoFilter: VideoFilter?) async {
         await stateAdapter.set(videoFilter: videoFilter)
+    }
+
+    /// Sets an audio filter for the call.
+    ///
+    /// - Parameter audioFilter: The filter to apply, or `nil` to clear it.
+    func setAudioFilter(_ audioFilter: AudioFilter?) {
+        stateAdapter.audioBitrateProfileApplicator.setAudioFilter(audioFilter)
     }
 
     // MARK: - Screensharing

@@ -275,10 +275,10 @@ final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(recordedPreparedFlags, [false])
     }
 
-    func test_setMusicCaptureEnabled_bypassesVPAndDisablesAGC() {
+    func test_setAudioBitrateProfile_music_bypassesVPAndDisablesAGC() {
         makeSubject()
 
-        subject.setMusicCaptureEnabled(true)
+        subject.setAudioBitrateProfile(.musicHighQuality)
 
         XCTAssertFalse(source.isVoiceProcessingAGCEnabled)
         XCTAssertTrue(source.isVoiceProcessingBypassed)
@@ -293,11 +293,11 @@ final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
         )
     }
 
-    func test_setMusicCaptureEnabled_disabled_restoresAGC() {
+    func test_setAudioBitrateProfile_voice_restoresAGC() {
         makeSubject()
-        subject.setMusicCaptureEnabled(true)
+        subject.setAudioBitrateProfile(.musicHighQuality)
 
-        subject.setMusicCaptureEnabled(false)
+        subject.setAudioBitrateProfile(.voiceStandard)
 
         XCTAssertTrue(source.isVoiceProcessingAGCEnabled)
         XCTAssertFalse(source.isVoiceProcessingBypassed)
@@ -312,17 +312,96 @@ final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
         )
     }
 
-    func test_setMusicCaptureEnabled_disabled_withStereo_keepsVPDisabled() {
+    func test_setAudioBitrateProfile_voice_withStereo_keepsVPDisabled() {
         makeSubject()
         subject.setStereoPlayoutPreference(true)
-        subject.setMusicCaptureEnabled(true)
+        subject.setAudioBitrateProfile(.musicHighQuality)
 
-        subject.setMusicCaptureEnabled(false)
+        subject.setAudioBitrateProfile(.voiceStandard)
 
         XCTAssertEqual(
             source.recordedInputPayload(Bool.self, for: .setVoiceProcessingEnabled)?.last,
             false
         )
+    }
+
+    func test_setAudioBitrateProfile_voiceStandard_doesNotRestorePlayout() {
+        source.stub(for: \.isPlaying, with: true)
+        makeSubject()
+
+        subject.setAudioBitrateProfile(.voiceStandard)
+
+        XCTAssertEqual(source.timesCalled(.stopPlayout), 0)
+        XCTAssertEqual(source.timesCalled(.initAndStartPlayout), 0)
+        XCTAssertEqual(source.timesCalled(.startPlayout), 0)
+    }
+
+    func test_setAudioBitrateProfile_music_restoresPlayoutWhenPlaying() {
+        source.stub(for: \.isPlaying, with: true)
+        makeSubject()
+
+        subject.setAudioBitrateProfile(.musicHighQuality)
+
+        XCTAssertEqual(source.timesCalled(.stopPlayout), 1)
+        XCTAssertEqual(source.timesCalled(.initAndStartPlayout), 1)
+        XCTAssertEqual(source.timesCalled(.startPlayout), 0)
+    }
+
+    func test_setAudioBitrateProfile_music_restoresPlayoutWhenInitialized() {
+        source.stub(for: \.isPlayoutInitialized, with: true)
+        makeSubject()
+
+        subject.setAudioBitrateProfile(.musicHighQuality)
+
+        XCTAssertEqual(source.timesCalled(.stopPlayout), 1)
+        XCTAssertEqual(source.timesCalled(.startPlayout), 1)
+        XCTAssertEqual(source.timesCalled(.initAndStartPlayout), 0)
+    }
+
+    func test_setAudioBitrateProfile_music_skipsPlayoutRestoreWhenIdle() {
+        makeSubject()
+
+        subject.setAudioBitrateProfile(.musicHighQuality)
+
+        XCTAssertEqual(source.timesCalled(.stopPlayout), 0)
+        XCTAssertEqual(source.timesCalled(.initAndStartPlayout), 0)
+        XCTAssertEqual(source.timesCalled(.startPlayout), 0)
+    }
+
+    func test_setAudioBitrateProfile_music_restoresPlayoutWhenRequested() {
+        makeSubject()
+
+        subject.setAudioBitrateProfile(
+            .musicHighQuality,
+            restorePlayout: true
+        )
+
+        XCTAssertEqual(source.timesCalled(.stopPlayout), 1)
+        XCTAssertEqual(source.timesCalled(.initAndStartPlayout), 1)
+        XCTAssertEqual(source.timesCalled(.startPlayout), 0)
+    }
+
+    func test_setAudioBitrateProfile_music_whileMuted_liftsMuteAroundVPToggle() throws {
+        source.stub(for: \.isMicrophoneMuted, with: false)
+        makeSubject()
+        try subject.setMuted(true)
+
+        subject.setAudioBitrateProfile(.musicHighQuality)
+        subject.setAudioBitrateProfile(.voiceStandard)
+
+        XCTAssertEqual(
+            source.recordedInputPayload(Bool.self, for: .setMicrophoneMuted),
+            [true, false, true, false, true]
+        )
+        XCTAssertTrue(subject.isMicrophoneMuted)
+    }
+
+    func test_setAudioBitrateProfile_music_whileUnmuted_doesNotTouchMute() {
+        makeSubject()
+
+        subject.setAudioBitrateProfile(.musicHighQuality)
+
+        XCTAssertEqual(source.timesCalled(.setMicrophoneMuted), 0)
     }
 
     func test_setMutedSpeechDetectionEnabled_updatesRecordingAlwaysPreparedMode() throws {

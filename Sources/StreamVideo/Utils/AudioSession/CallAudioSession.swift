@@ -69,9 +69,9 @@ final class CallAudioSession: @unchecked Sendable {
     private var lastCallSettings: CallSettings?
     private var lastOwnCapabilities: Set<OwnCapability>?
     private var isSpeakingWhileMuted = false
-    /// When `true`, play-and-record uses `.default` instead of VoiceChat so
-    /// Apple Voice Processing can actually be bypassed.
-    private var isMusicModeEnabled = false
+    /// Play-and-record uses `.default` instead of VoiceChat while this is a
+    /// music profile, so Apple Voice Processing can actually be disabled.
+    private var audioBitrateProfile: AudioBitrateProfile = .voiceStandard
 
     init(policy: AudioSessionPolicy = DefaultAudioSessionPolicy()) {
         self.policy = policy
@@ -174,31 +174,37 @@ final class CallAudioSession: @unchecked Sendable {
         )
     }
 
-    /// Leaves VoiceChat while music capture is on, and restores it after.
+    /// Applies the in-call audio bitrate profile to the session.
     ///
-    /// Apple keeps Voice Processing attached for `.voiceChat`. The ADM can
-    /// only disable VP after this mode change has been applied.
-    func setMusicModeEnabled(
-        _ enabled: Bool,
+    /// Music leaves VoiceChat immediately (not through the 250ms debounce)
+    /// so Voice Processing can be disabled afterward. Route and settings
+    /// updates re-enter ``resolvedConfiguration`` with the stored profile.
+    func setAudioBitrateProfile(
+        _ profile: AudioBitrateProfile,
         callSettings: CallSettings? = nil,
         ownCapabilities: Set<OwnCapability>? = nil
-    ) async {
-        isMusicModeEnabled = enabled
+    ) async throws {
+        let previous = audioBitrateProfile
+        audioBitrateProfile = profile
         let settings = callSettings ?? lastCallSettings
         let capabilities = ownCapabilities ?? lastOwnCapabilities
         guard delegate != nil, let settings, let capabilities else {
             return
         }
 
-        let task = applyConfiguration(
-            resolvedConfiguration(
-                for: settings,
+        do {
+            try await applyConfiguration(
+                resolvedConfiguration(
+                    for: settings,
+                    ownCapabilities: capabilities
+                ),
+                callSettings: settings,
                 ownCapabilities: capabilities
-            ),
-            callSettings: settings,
-            ownCapabilities: capabilities
-        )
-        try? await task.result()
+            ).result()
+        } catch {
+            audioBitrateProfile = previous
+            throw error
+        }
     }
 
     // MARK: - Private Helpers
@@ -452,7 +458,8 @@ final class CallAudioSession: @unchecked Sendable {
             for: callSettings,
             ownCapabilities: ownCapabilities
         )
-        guard isMusicModeEnabled, configuration.category == .playAndRecord else {
+        guard audioBitrateProfile.isMusic,
+              configuration.category == .playAndRecord else {
             return configuration
         }
         return AudioSessionConfiguration(
