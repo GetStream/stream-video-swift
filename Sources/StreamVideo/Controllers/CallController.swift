@@ -212,6 +212,15 @@ class CallController: @unchecked Sendable {
         )
     }
 
+    /// Applies an in-call audio bitrate/processing profile.
+    ///
+    /// Requires dashboard `hifi_audio_enabled`. Fetches call settings when they
+    /// have not been loaded yet.
+    func setAudioBitrateProfile(_ profile: AudioBitrateProfile) async throws {
+        try await ensureHiFiAudioEnabled()
+        await webRTCCoordinator.setAudioBitrateProfile(profile)
+    }
+
     /// Changes the video state for the current user.
     /// - Parameter isEnabled: whether video should be enabled.
     func changeVideoState(isEnabled: Bool) async throws {
@@ -687,6 +696,22 @@ class CallController: @unchecked Sendable {
             id: callId,
             joinCallRequest: joinCall
         )
+    }
+
+    private func ensureHiFiAudioEnabled() async throws {
+        guard let call else {
+            throw ClientError("Call is not available.")
+        }
+        if let settings = await call.state.settings {
+            guard settings.audio.hifiAudioEnabled == true else {
+                throw ClientError("Hi-fi audio is not enabled on dashboard settings.")
+            }
+            return
+        }
+        _ = try await call.get()
+        guard await call.state.settings?.audio.hifiAudioEnabled == true else {
+            throw ClientError("Hi-fi audio is not enabled on dashboard settings.")
+        }
     }
 
     private func prefetchLocation() {

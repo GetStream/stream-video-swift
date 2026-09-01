@@ -17,7 +17,7 @@ protocol RTCAudioDeviceModuleControlling: AnyObject {
     var isStereoPlayoutEnabled: Bool { get }
     var isVoiceProcessingBypassed: Bool { get set }
     var isVoiceProcessingEnabled: Bool { get }
-    var isVoiceProcessingAGCEnabled: Bool { get }
+    var isVoiceProcessingAGCEnabled: Bool { get set }
     var isRecordingAlwaysPreparedMode: Bool { get }
     var prefersStereoPlayout: Bool { get set }
 
@@ -31,6 +31,7 @@ protocol RTCAudioDeviceModuleControlling: AnyObject {
     func stopRecording() -> Int
     func refreshStereoPlayoutState()
     func setMuteMode(_ mode: RTCAudioEngineMuteMode) -> Int
+    func setVoiceProcessingEnabled(_ enabled: Bool) -> Int
     func setRecordingAlwaysPreparedMode(_ alwaysPreparedRecording: Bool) -> Int
     func setEngineAvailability(_ availability: RTCAudioEngineAvailability) -> Int
 }

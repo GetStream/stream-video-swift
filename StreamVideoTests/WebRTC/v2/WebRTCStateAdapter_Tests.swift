@@ -52,6 +52,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
 
     override func tearDown() async throws {
         await subject.cleanUp()
+        Self.videoConfig.audioProcessingModule.setAudioFilter(nil)
         mockAudioStore.dismantle()
         mockPermissions.dismantle()
         subject = nil
@@ -950,6 +951,76 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         await subject.cleanUpForReconnection()
 
         await assertEqualAsync(await subject.callSettings.cameraPosition, .back)
+    }
+
+    // MARK: - setAudioBitrateProfile
+
+    func test_setAudioBitrateProfile_music_disablesSoftwareProcessingAndVPAGC() async {
+        await subject.setAudioBitrateProfile(.musicHighQuality)
+
+        await assertEqualAsync(await subject.audioBitrateProfile, .musicHighQuality)
+        XCTAssertFalse(Self.videoConfig.audioProcessingModule.config.isNoiseSuppressionEnabled)
+        XCTAssertFalse(Self.videoConfig.audioProcessingModule.config.isHighpassFilterEnabled)
+        XCTAssertFalse(mockAudioDeviceModuleSource.isVoiceProcessingAGCEnabled)
+        XCTAssertTrue(mockAudioDeviceModuleSource.isVoiceProcessingBypassed)
+        XCTAssertEqual(
+            mockAudioDeviceModuleSource.recordedInputPayload(
+                Bool.self,
+                for: .setVoiceProcessingEnabled
+            ),
+            [false]
+        )
+    }
+
+    func test_setAudioBitrateProfile_music_restoresPlayoutWhenPublisherExists() async throws {
+        try await prepare()
+        let recordingBefore = mockAudioDeviceModuleSource
+            .timesCalled(.initAndStartRecording)
+        let playoutBefore = mockAudioDeviceModuleSource
+            .timesCalled(.initAndStartPlayout)
+
+        await subject.setAudioBitrateProfile(.musicHighQuality)
+
+        XCTAssertEqual(
+            mockAudioDeviceModuleSource.timesCalled(.initAndStartRecording),
+            recordingBefore
+        )
+        XCTAssertEqual(
+            mockAudioDeviceModuleSource.timesCalled(.initAndStartPlayout),
+            playoutBefore + 1
+        )
+    }
+
+    func test_setAudioBitrateProfile_music_clearsAndRestoresAudioFilter() async {
+        let filter = MockAudioFilter(id: "nc")
+        Self.videoConfig.audioProcessingModule.setAudioFilter(filter)
+
+        await subject.setAudioBitrateProfile(.musicHighQuality)
+        XCTAssertNil(Self.videoConfig.audioProcessingModule.activeAudioFilter)
+
+        await subject.setAudioBitrateProfile(.voiceStandard)
+        XCTAssertEqual(Self.videoConfig.audioProcessingModule.activeAudioFilter?.id, "nc")
+    }
+
+    func test_cleanUp_resetsAudioBitrateProfileAndSoftwareProcessing() async {
+        await subject.setAudioBitrateProfile(.musicHighQuality)
+
+        await subject.cleanUp()
+
+        await assertEqualAsync(await subject.audioBitrateProfile, .voiceStandard)
+        XCTAssertTrue(Self.videoConfig.audioProcessingModule.config.isNoiseSuppressionEnabled)
+        XCTAssertTrue(Self.videoConfig.audioProcessingModule.config.isHighpassFilterEnabled)
+        XCTAssertTrue(mockAudioDeviceModuleSource.isVoiceProcessingAGCEnabled)
+        XCTAssertFalse(mockAudioDeviceModuleSource.isVoiceProcessingBypassed)
+    }
+
+    func test_cleanUpForReconnection_keepsAudioBitrateProfile() async {
+        await subject.setAudioBitrateProfile(.musicHighQuality)
+
+        await subject.cleanUpForReconnection()
+
+        await assertEqualAsync(await subject.audioBitrateProfile, .musicHighQuality)
+        XCTAssertFalse(Self.videoConfig.audioProcessingModule.config.isNoiseSuppressionEnabled)
     }
 
     // MARK: - didAddTrack

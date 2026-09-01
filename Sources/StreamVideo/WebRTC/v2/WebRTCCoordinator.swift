@@ -229,6 +229,11 @@ final class WebRTCCoordinator: @unchecked Sendable {
             .enqueueCallSettings { $0.withUpdatedSpeakerState(isEnabled) }
     }
 
+    /// Applies an in-call audio bitrate/processing profile.
+    func setAudioBitrateProfile(_ profile: AudioBitrateProfile) async {
+        await stateAdapter.setAudioBitrateProfile(profile)
+    }
+
     /// Updates the visibility of a participant's track.
     ///
     /// - Parameters:

@@ -176,6 +176,8 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
     /// throw and crash the app. This lock keeps those operations mutually
     /// exclusive. It is recursive because `setMuted` calls `setRecording`.
     private let engineQueue = RecursiveQueue()
+    /// `true` while music-safe capture is requested.
+    private var isMusicCaptureEnabled = false
 
     /// Serial queue used to deliver events to observers.
     private let dispatchQueue: DispatchQueue
@@ -269,13 +271,43 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         /// - `.restartEngine`: rebuilds the whole graph and requires explicit calling of
         /// `initAndStartRecording` .
         engineQueue.sync {
-            _ = source.setMuteMode(isPreferred ? .inputMixer : .voiceProcessing)
             if isPreferred {
                 _ = source.setRecordingAlwaysPreparedMode(false)
             }
             source.prefersStereoPlayout = isPreferred
-            source.isVoiceProcessingBypassed = isPreferred
+            applyVoiceProcessingPolicyLocked()
         }
+    }
+
+    /// Applies the in-call music capture policy to Voice Processing.
+    ///
+    /// Music disables VP (not just bypass). Bypass is a live-graph flag and
+    /// does not rebuild I/O after the session leaves VoiceChat. Disabling VP
+    /// recreates the engine on Remote I/O, same as stereo playout. Echo on
+    /// speaker is the cost until software AEC exists.
+    /// - Parameter enabled: `true` when music/hi-fi capture is requested.
+    func setMusicCaptureEnabled(_ enabled: Bool) {
+        engineQueue.sync {
+            isMusicCaptureEnabled = enabled
+            applyVoiceProcessingPolicyLocked()
+            if enabled {
+                _ = source.setVoiceProcessingEnabled(false)
+            } else if !source.prefersStereoPlayout {
+                _ = source.setVoiceProcessingEnabled(true)
+            }
+        }
+    }
+
+    /// Composes stereo playout and music capture into one VP/mute configuration.
+    ///
+    /// ponytail: Apple Voice Processing is one bundle (AEC+NS+AGC). Music
+    /// disables the whole unit. Echo on speaker is the ceiling; software AEC
+    /// when VP is off is the upgrade.
+    private func applyVoiceProcessingPolicyLocked() {
+        let bypass = source.prefersStereoPlayout || isMusicCaptureEnabled
+        source.isVoiceProcessingAGCEnabled = !isMusicCaptureEnabled
+        source.isVoiceProcessingBypassed = bypass
+        _ = source.setMuteMode(bypass ? .inputMixer : .voiceProcessing)
     }
 
     /// Enables or disables WebRTC muted speech detection.
@@ -582,7 +614,7 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         )
         isPlayingSubject.send(isPlayoutEnabled)
         isRecordingSubject.send(isRecordingEnabled)
-        audioBufferRenderer.reset()
+        handleEngineStoppedOrDisabled(isRecordingEnabled: isRecordingEnabled)
         return Constant.successResult
     }
 
@@ -603,8 +635,7 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         )
         isPlayingSubject.send(isPlayoutEnabled)
         isRecordingSubject.send(isRecordingEnabled)
-        audioBufferRenderer.reset()
-        engineInputContext = nil
+        handleEngineStoppedOrDisabled(isRecordingEnabled: isRecordingEnabled)
         return Constant.successResult
     }
 
@@ -620,10 +651,27 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
             return retainedEngines
         }
         subject.send(.willReleaseAudioEngine(engine))
+        if engineInputContext?.engine === engine {
+            tearDownInputGraph()
+        }
+        return Constant.successResult
+    }
+
+    /// VP disable unlinks I/O, so WebRTC reports a disable while input is
+    /// still live. Resetting the injector in that window disconnects the
+    /// mic from the sink and capture stays silent.
+    private func handleEngineStoppedOrDisabled(isRecordingEnabled: Bool) {
+        if isRecordingEnabled {
+            audioBufferRenderer.stop()
+            return
+        }
+        tearDownInputGraph()
+    }
+
+    private func tearDownInputGraph() {
         audioLevelsAdapter.uninstall(on: 0)
         audioBufferRenderer.reset()
         engineInputContext = nil
-        return Constant.successResult
     }
 
     /// Keeps observers informed when WebRTC sets up the input graph and installs

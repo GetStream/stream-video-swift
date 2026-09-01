@@ -121,6 +121,12 @@ extension RTCRtpTransceiverInit {
         self.init()
         self.direction = direction
         self.streamIds = streamIds
+        if audioOptions.bitrate > 0 {
+            let encoding = RTCRtpEncodingParameters()
+            encoding.isActive = true
+            encoding.maxBitrateBps = audioOptions.bitrate as NSNumber
+            sendEncodings = [encoding]
+        }
 
         log.debug(
             """

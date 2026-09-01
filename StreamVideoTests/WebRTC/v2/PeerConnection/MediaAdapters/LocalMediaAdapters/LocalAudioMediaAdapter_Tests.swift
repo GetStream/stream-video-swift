@@ -478,6 +478,20 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertFalse(mockAudioRecorder.isRecording)
     }
 
+    // MARK: - setMaxBitrate
+
+    func test_setMaxBitrate_updatesSenderEncodings() async throws {
+        publishOptions = [.dummy(codec: .opus, bitrate: 64_000)]
+        let transceiver = try makeTransceiver(of: .audio, audioOptions: publishOptions[0])
+        mockPeerConnection.stub(for: .addTransceiver, with: transceiver)
+        try await subject.publish()
+        await fulfillment { self.mockPeerConnection.timesCalled(.addTransceiver) == 1 }
+
+        await subject.setMaxBitrate(128_000)
+
+        XCTAssertEqual(transceiver.sender.parameters.encodings.first?.maxBitrateBps, 128_000)
+    }
+
     // MARK: - Private
 
     private func assertTrackEvent(

@@ -9,6 +9,7 @@ extension AudioSettings {
     static func dummy(
         accessRequestEnabled: Bool = false,
         defaultDevice: DefaultDevice = .speaker,
+        hifiAudioEnabled: Bool? = nil,
         micDefaultOn: Bool = false,
         opusDtxEnabled: Bool = false,
         redundantCodingEnabled: Bool = false,
@@ -17,6 +18,7 @@ extension AudioSettings {
         .init(
             accessRequestEnabled: accessRequestEnabled,
             defaultDevice: defaultDevice,
+            hifiAudioEnabled: hifiAudioEnabled,
             micDefaultOn: micDefaultOn,
             opusDtxEnabled: opusDtxEnabled,
             redundantCodingEnabled: redundantCodingEnabled,

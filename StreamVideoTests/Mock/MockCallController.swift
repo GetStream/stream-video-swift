@@ -19,6 +19,7 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
         case updateOwnCapabilities
         case enableClientCapabilities
         case disableClientCapabilities
+        case setAudioBitrateProfile
     }
 
     enum MockFunctionInputKey: Payloadable {
@@ -53,6 +54,8 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
 
         case disableClientCapabilities(Set<ClientCapability>)
 
+        case setAudioBitrateProfile(AudioBitrateProfile)
+
         var payload: Any {
             switch self {
             case let .setDisconnectionTimeout(timeout):
@@ -85,6 +88,8 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
             case let .enableClientCapabilities(value):
                 return value
             case let .disableClientCapabilities(value):
+                return value
+            case let .setAudioBitrateProfile(value):
                 return value
             }
         }
@@ -219,5 +224,13 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
     ) async {
         stubbedFunctionInput[.disableClientCapabilities]?
             .append(.disableClientCapabilities(capabilities))
+    }
+
+    override func setAudioBitrateProfile(_ profile: AudioBitrateProfile) async throws {
+        stubbedFunctionInput[.setAudioBitrateProfile]?
+            .append(.setAudioBitrateProfile(profile))
+        if let error = stubbedFunction[.setAudioBitrateProfile] as? Error {
+            throw error
+        }
     }
 }

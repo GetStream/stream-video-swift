@@ -97,6 +97,12 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     private(set) var initialCallSettings: CallSettings?
 
     private var videoFilter: VideoFilter?
+    /// Requested capture/publish profile. Kept across reconnects, reset on leave.
+    private(set) var audioBitrateProfile: AudioBitrateProfile = .voiceStandard
+    /// Last music-capture flag applied to the session/ADM.
+    private var lastMusicCaptureEnabled = false
+    /// Filter cleared while music capture is active, restored on voice.
+    private var restoredAudioFilter: AudioFilter?
 
     private let rtcPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinatorProviding
     private let disposableBag = DisposableBag()
@@ -343,6 +349,12 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         )
     }
 
+    /// Applies an in-call audio bitrate/processing profile.
+    func setAudioBitrateProfile(_ profile: AudioBitrateProfile) async {
+        audioBitrateProfile = profile
+        await applyAudioBitrateProfile()
+    }
+
     // MARK: - Client Capabilities
 
     func enableClientCapabilities(_ capabilities: Set<ClientCapability>) {
@@ -485,6 +497,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         try await restoreScreenSharing()
         publisher.setVideoFilter(videoFilter)
         publisher.completeSetUp()
+        await applyAudioBitrateProfile()
 
         try await subscriber.setUp(
             with: callSettings,
@@ -523,6 +536,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         await set(clientEventDetails: .init())
         trackStorage.removeAll()
         permissionsAdapter.cleanUp()
+        await resetAudioBitrateProfile()
     }
 
     /// Cleans up the session for reconnection, clearing adapters and tracks.
@@ -936,6 +950,74 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     /// Updates the publish options and notifies the publisher.
     private func didUpdate(publishOptions: PublishOptions) {
         publisher?.publishOptions = publishOptions
+    }
+
+    /// Restores voice processing, software NS/HPF, and any stashed audio filter.
+    private func resetAudioBitrateProfile() async {
+        audioBitrateProfile = .voiceStandard
+        if let restoredAudioFilter {
+            videoConfig.audioProcessingModule.setAudioFilter(restoredAudioFilter)
+            self.restoredAudioFilter = nil
+        }
+        applySoftwareProcessing(enabled: true)
+        await applyMusicCapturePolicy()
+    }
+
+    /// Applies bitrate, software processing, VP policy, and audio-filter rules.
+    private func applyAudioBitrateProfile() async {
+        applySoftwareProcessing(enabled: !audioBitrateProfile.isMusic)
+        applyAudioFilterPolicy()
+        await applyMusicCapturePolicy()
+        let bitrate = publishOptions.audio.first?.bitrate(for: audioBitrateProfile)
+            ?? audioBitrateProfile.defaultBitrate
+        await publisher?.setAudioMaxBitrate(bitrate)
+    }
+
+    private func applySoftwareProcessing(enabled: Bool) {
+        let config = videoConfig.audioProcessingModule.config
+        config.isNoiseSuppressionEnabled = enabled
+        config.isHighpassFilterEnabled = enabled
+        videoConfig.audioProcessingModule.config = config
+    }
+
+    private func applyAudioFilterPolicy() {
+        let module = videoConfig.audioProcessingModule
+        if audioBitrateProfile.isMusic {
+            if restoredAudioFilter == nil {
+                restoredAudioFilter = module.activeAudioFilter
+            }
+            module.setAudioFilter(nil)
+        } else if let restoredAudioFilter {
+            module.setAudioFilter(restoredAudioFilter)
+            self.restoredAudioFilter = nil
+        }
+    }
+
+    private func applyMusicCapturePolicy() async {
+        let isMusic = audioBitrateProfile.isMusic
+        let didToggle = isMusic != lastMusicCaptureEnabled
+        lastMusicCaptureEnabled = isMusic
+
+        await audioSession.setMusicModeEnabled(
+            isMusic,
+            callSettings: callSettings,
+            ownCapabilities: ownCapabilities
+        )
+        let audioDeviceModule = peerConnectionFactory.audioDeviceModule
+        audioDeviceModule.setMusicCaptureEnabled(isMusic)
+
+        guard didToggle, publisher != nil else { return }
+        restorePlayoutAfterVoiceProcessingChange(audioDeviceModule)
+    }
+
+    /// Disabling Voice Processing unlinks I/O and drops output. Recording
+    /// is already rebuilt by that recreate; bouncing it disconnects the
+    /// new input graph. Only playout needs to be brought back.
+    private func restorePlayoutAfterVoiceProcessingChange(
+        _ audioDeviceModule: AudioDeviceModule
+    ) {
+        guard callSettings.audioOutputOn else { return }
+        audioDeviceModule.resetPlayout()
     }
 
     // MARK: Participant Operations
