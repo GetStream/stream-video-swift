@@ -588,9 +588,11 @@ final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(audioEngineNodeAdapter.timesCalled(.uninstall), 1)
     }
 
-    func test_didDisableEngine_whenRecordingRemains_keepsInputGraphUntilRelease() {
+    func test_didDisableEngine_musicRecordingRemains_keepsInputGraphUntilRelease() {
         makeSubject()
-        source.stub(for: \.isVoiceProcessingEnabled, with: false)
+        subject.setAudioBitrateProfile(.musicHighQuality)
+        // WebRTC still reports VP on while the engine is rebuilt.
+        source.stub(for: \.isVoiceProcessingEnabled, with: true)
         let live = configureInput()
 
         _ = subject.audioDeviceModule(
@@ -607,9 +609,10 @@ final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(audioEngineNodeAdapter.timesCalled(.uninstall), 1)
     }
 
-    func test_didStopEngine_whenRecordingRemains_keepsInputGraphUntilRelease() {
+    func test_didStopEngine_musicRecordingRemains_keepsInputGraphUntilRelease() {
         makeSubject()
-        source.stub(for: \.isVoiceProcessingEnabled, with: false)
+        subject.setAudioBitrateProfile(.musicHighQuality)
+        source.stub(for: \.isVoiceProcessingEnabled, with: true)
         let live = configureInput()
 
         _ = subject.audioDeviceModule(
@@ -624,6 +627,22 @@ final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
         _ = subject.audioDeviceModule(.init(), willReleaseEngine: live.engine)
 
         XCTAssertEqual(audioEngineNodeAdapter.timesCalled(.uninstall), 1)
+    }
+
+    func test_didDisableEngine_stereoRecordingRemains_keepsInputGraphUntilRelease() {
+        makeSubject()
+        subject.setStereoPlayoutPreference(true)
+        source.stub(for: \.isVoiceProcessingEnabled, with: true)
+        let live = configureInput()
+
+        _ = subject.audioDeviceModule(
+            .init(),
+            didDisableEngine: live.engine,
+            isPlayoutEnabled: false,
+            isRecordingEnabled: true
+        )
+
+        XCTAssertEqual(audioEngineNodeAdapter.timesCalled(.uninstall), 0)
     }
 
     func test_didDisableEngine_whenVoiceProcessingEnabledAndRecordingRemains_tearsDownInputGraph() {

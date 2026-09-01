@@ -691,12 +691,14 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         return Constant.successResult
     }
 
-    /// VP disable unlinks I/O, so WebRTC reports a disable while input is
-    /// still live. Resetting the injector in that window disconnects the
-    /// mic from the sink and capture stays silent. VoiceChat keeps VP on
-    /// and must tear down like before this change.
+    /// VP disable unlinks I/O. WebRTC reports didStop/didDisable while
+    /// input is still live and `isVoiceProcessingEnabled` is still true.
+    /// Tearing down in that window uninstalls the mic tap and capture
+    /// stays at -160. Skip teardown when this session asked for VP off
+    /// (music or stereo). Voice keeps VP on and still tears down.
     private func handleEngineStoppedOrDisabled(isRecordingEnabled: Bool) {
-        if isRecordingEnabled, !source.isVoiceProcessingEnabled {
+        if isRecordingEnabled,
+           audioBitrateProfile.isMusic || source.prefersStereoPlayout {
             audioBufferRenderer.stop()
             return
         }

@@ -7,10 +7,10 @@ import Foundation
 /// Applies an ``AudioBitrateProfile`` to the session, ADM, software
 /// processing, and published bitrate.
 ///
-/// Owns the live audio-filter policy so music can stash filters without
-/// `Call` knowing what music is. Default voice is a no-op: join and leave
-/// do not touch session, ADM, APM, or bitrate unless this session has
-/// applied music.
+/// Owns the live audio-filter policy so music and screenshare can
+/// suppress filters without `Call` knowing about either. Default voice
+/// is a no-op: join and leave do not touch session, ADM, APM, or bitrate
+/// unless this session has applied music.
 final class AudioBitrateProfileApplicator: @unchecked Sendable {
 
     private let audioSession: CallAudioSession
@@ -18,7 +18,10 @@ final class AudioBitrateProfileApplicator: @unchecked Sendable {
     private let audioDeviceModule: () -> AudioDeviceModule
     private let lock = NSLock()
     private var profile: AudioBitrateProfile = .voiceStandard
-    private var restoredAudioFilter: AudioFilter?
+    /// Last filter requested by `Call.setAudioFilter`. Live output is
+    /// suppressed while music or screenshare is active.
+    private var intendedFilter: AudioFilter?
+    private var isScreenShareActive = false
     /// Bitrate in force before music; `0` means encodings had no cap.
     private var restoredBitrate: Int?
 
@@ -57,7 +60,7 @@ final class AudioBitrateProfileApplicator: @unchecked Sendable {
                 restorePlayout: callSettings.audioOutputOn && publisher != nil
             )
             applySoftwareProcessing(enabled: !profile.isMusic)
-            applyAudioFilterPolicy()
+            applyLiveFilter()
             return consumeBitrate(
                 profile: profile,
                 publishOptions: publishOptions
@@ -69,16 +72,21 @@ final class AudioBitrateProfileApplicator: @unchecked Sendable {
         }
     }
 
-    /// Writes the filter unless music is on, in which case it is stashed
-    /// and applied when the profile returns to voice.
+    /// Records the requested filter and writes it unless music or
+    /// screenshare is suppressing live processing.
     func setAudioFilter(_ filter: AudioFilter?) {
         withLock {
-            if profile.isMusic {
-                restoredAudioFilter = filter
-                return
-            }
-            restoredAudioFilter = nil
-            audioProcessingModule.setAudioFilter(filter)
+            intendedFilter = filter
+            applyLiveFilter()
+        }
+    }
+
+    /// Screenshare start/stop suspend the live filter without replacing
+    /// the intended (or music-stashed) filter.
+    func setScreenShareActive(_ isActive: Bool) {
+        withLock {
+            isScreenShareActive = isActive
+            applyLiveFilter()
         }
     }
 
@@ -86,7 +94,10 @@ final class AudioBitrateProfileApplicator: @unchecked Sendable {
     /// processing module. Does not write the module; never-music calls
     /// must not clear an unrelated filter.
     func discardStashedAudioFilter() {
-        withLock { restoredAudioFilter = nil }
+        withLock {
+            intendedFilter = nil
+            isScreenShareActive = false
+        }
     }
 
     private func withLock<T>(_ body: () -> T) -> T {
@@ -102,15 +113,15 @@ final class AudioBitrateProfileApplicator: @unchecked Sendable {
         audioProcessingModule.config = config
     }
 
-    private func applyAudioFilterPolicy() {
-        if profile.isMusic {
-            if restoredAudioFilter == nil {
-                restoredAudioFilter = audioProcessingModule.activeAudioFilter
+    private func applyLiveFilter() {
+        if profile.isMusic || isScreenShareActive {
+            if intendedFilter == nil,
+               let live = audioProcessingModule.activeAudioFilter {
+                intendedFilter = live
             }
             audioProcessingModule.setAudioFilter(nil)
-        } else if let restoredAudioFilter {
-            audioProcessingModule.setAudioFilter(restoredAudioFilter)
-            self.restoredAudioFilter = nil
+        } else {
+            audioProcessingModule.setAudioFilter(intendedFilter)
         }
     }
 
@@ -132,5 +143,16 @@ final class AudioBitrateProfileApplicator: @unchecked Sendable {
             return restoredBitrate
         }
         return nil
+    }
+}
+
+enum CallAudioFilterPolicyKey: InjectionKey {
+    nonisolated(unsafe) static var currentValue: AudioBitrateProfileApplicator?
+}
+
+extension InjectedValues {
+    var callAudioFilterPolicy: AudioBitrateProfileApplicator? {
+        get { Self[CallAudioFilterPolicyKey.self] }
+        set { Self[CallAudioFilterPolicyKey.self] = newValue }
     }
 }

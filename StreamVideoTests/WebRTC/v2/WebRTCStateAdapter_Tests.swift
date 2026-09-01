@@ -1014,6 +1014,45 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(Self.videoConfig.audioProcessingModule.activeAudioFilter?.id, "nc")
     }
 
+    func test_setScreenShareActive_voice_clearsAndRestoresAudioFilter() {
+        let filter = MockAudioFilter(id: "nc")
+        subject.setAudioFilter(filter)
+
+        subject.audioBitrateProfileApplicator.setScreenShareActive(true)
+        XCTAssertNil(Self.videoConfig.audioProcessingModule.activeAudioFilter)
+
+        subject.audioBitrateProfileApplicator.setScreenShareActive(false)
+        XCTAssertEqual(Self.videoConfig.audioProcessingModule.activeAudioFilter?.id, "nc")
+    }
+
+    func test_setScreenShareActive_whileMusic_doesNotClobberStashedFilter(
+    ) async throws {
+        let filter = MockAudioFilter(id: "nc")
+        subject.setAudioFilter(filter)
+        try await subject.setAudioBitrateProfile(.musicHighQuality)
+
+        subject.audioBitrateProfileApplicator.setScreenShareActive(true)
+        subject.audioBitrateProfileApplicator.setScreenShareActive(false)
+
+        try await subject.setAudioBitrateProfile(.voiceStandard)
+        XCTAssertEqual(Self.videoConfig.audioProcessingModule.activeAudioFilter?.id, "nc")
+    }
+
+    func test_setAudioBitrateProfile_music_whileScreenShareActive_restoresFilterAfterVoice(
+    ) async throws {
+        let filter = MockAudioFilter(id: "nc")
+        subject.setAudioFilter(filter)
+        subject.audioBitrateProfileApplicator.setScreenShareActive(true)
+        XCTAssertNil(Self.videoConfig.audioProcessingModule.activeAudioFilter)
+
+        try await subject.setAudioBitrateProfile(.musicHighQuality)
+        subject.audioBitrateProfileApplicator.setScreenShareActive(false)
+        XCTAssertNil(Self.videoConfig.audioProcessingModule.activeAudioFilter)
+
+        try await subject.setAudioBitrateProfile(.voiceStandard)
+        XCTAssertEqual(Self.videoConfig.audioProcessingModule.activeAudioFilter?.id, "nc")
+    }
+
     func test_cleanUp_resetsAudioBitrateProfileAndSoftwareProcessing() async throws {
         try await subject.setAudioBitrateProfile(.musicHighQuality)
 
