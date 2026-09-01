@@ -366,7 +366,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     }
 
     /// Applies an audio filter, or stashes it while music capture is active.
-    func setAudioFilter(_ audioFilter: AudioFilter?) {
+    nonisolated func setAudioFilter(_ audioFilter: AudioFilter?) {
         audioBitrateProfileApplicator.setAudioFilter(audioFilter)
     }
 
@@ -967,8 +967,8 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         publisher?.publishOptions = publishOptions
     }
 
-    /// Restores voice processing and software NS/HPF. Stashed filters are
-    /// dropped so leave cannot reinstall them on the shared module.
+    /// Restores voice processing and software NS/HPF after music. No-op
+    /// when this session never left ``.voiceStandard``.
     private func resetAudioBitrateProfile() async {
         audioBitrateProfileApplicator.discardStashedAudioFilter()
         audioBitrateProfile = .voiceStandard

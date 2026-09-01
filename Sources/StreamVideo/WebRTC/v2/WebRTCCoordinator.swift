@@ -291,7 +291,7 @@ final class WebRTCCoordinator: @unchecked Sendable {
     ///
     /// - Parameter audioFilter: The filter to apply, or `nil` to clear it.
     func setAudioFilter(_ audioFilter: AudioFilter?) {
-        stateAdapter.audioBitrateProfileApplicator.setAudioFilter(audioFilter)
+        stateAdapter.setAudioFilter(audioFilter)
     }
 
     // MARK: - Screensharing
