@@ -18,6 +18,8 @@ struct PublishOptions: Sendable, Hashable {
         var codec: AudioCodec
         /// Bitrate allocated for the audio stream, measured in bits per second.
         var bitrate: Int
+        /// Bitrate per audio quality profile, when the SFU advertises them.
+        var bitrateProfiles: [AudioBitrateProfile: Int]
 
         /// A string representation of the audio publish options.
         var description: String {
@@ -31,6 +33,13 @@ struct PublishOptions: Sendable, Hashable {
             id = Int(publishOption.id)
             codec = .init(publishOption.codec)
             bitrate = Int(publishOption.bitrate)
+            bitrateProfiles = Dictionary(
+                publishOption.audioBitrateProfiles.compactMap { item -> (AudioBitrateProfile, Int)? in
+                    guard let profile = AudioBitrateProfile(item.profile) else { return nil }
+                    return (profile, Int(item.bitrate))
+                },
+                uniquingKeysWith: { _, last in last }
+            )
         }
 
         /// Initializes audio options with specific parameters.
@@ -39,14 +48,28 @@ struct PublishOptions: Sendable, Hashable {
         ///   - id: Unique identifier for the audio stream.
         ///   - codec: Codec for the audio stream.
         ///   - bitrate: Bitrate for the audio stream. Defaults to `0`.
+        ///   - bitrateProfiles: Optional SFU profile-to-bitrate map.
         init(
             id: Int = 0,
             codec: AudioCodec,
-            bitrate: Int = 0
+            bitrate: Int = 0,
+            bitrateProfiles: [AudioBitrateProfile: Int] = [:]
         ) {
             self.id = id
             self.codec = codec
             self.bitrate = bitrate
+            self.bitrateProfiles = bitrateProfiles
+        }
+
+        /// Bitrate for `profile`, preferring SFU mappings then the option bitrate.
+        func bitrate(for profile: AudioBitrateProfile) -> Int {
+            if let mapped = bitrateProfiles[profile], mapped > 0 {
+                return mapped
+            }
+            if profile == .voiceStandard, bitrate > 0 {
+                return bitrate
+            }
+            return profile.defaultBitrate
         }
 
         /// Combines properties into a hash value for use in hash-based collections.

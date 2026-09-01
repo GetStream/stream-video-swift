@@ -276,6 +276,11 @@ final class MediaAdapter {
             while await group.next() != nil {}
         }
     }
+
+    /// Updates the local audio sender bitrate without renegotiation.
+    func setAudioMaxBitrate(_ bitrate: Int) async {
+        await audioMediaAdapter.setMaxBitrate(bitrate)
+    }
     
     // MARK: - Video
     

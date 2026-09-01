@@ -336,6 +336,17 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         with layerSettings: [Stream_Video_Sfu_Event_AudioSender]
     ) { /* No-op */ }
 
+    /// Updates `maxBitrateBps` on every local audio sender.
+    ///
+    /// Applied through RTP parameters so it does not require renegotiation.
+    /// - Parameter bitrate: Target bitrate in bits per second.
+    func setMaxBitrate(_ bitrate: Int) async {
+        try? await processingQueue.addSynchronousTaskOperation { [weak self] in
+            guard let self else { return }
+            applyMaxBitrate(bitrate)
+        }
+    }
+
     // MARK: - Private Helpers
 
     /// Adds or updates a transceiver for a given audio track and publish option.
@@ -366,6 +377,32 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             return
         }
         transceiverStorage.set(transceiver, track: track, for: options)
+        if options.bitrate > 0 {
+            applyMaxBitrate(options.bitrate, on: transceiver)
+        }
+    }
+
+    private func applyMaxBitrate(_ bitrate: Int) {
+        transceiverStorage.forEach { _, value in
+            applyMaxBitrate(bitrate, on: value.transceiver)
+        }
+        log.debug("Local audio maxBitrateBps set to \(bitrate).", subsystems: .webRTC)
+    }
+
+    private func applyMaxBitrate(
+        _ bitrate: Int,
+        on transceiver: RTCRtpTransceiver
+    ) {
+        let params = transceiver.sender.parameters
+        if params.encodings.isEmpty {
+            let encoding = RTCRtpEncodingParameters()
+            encoding.isActive = true
+            encoding.maxBitrateBps = bitrate as NSNumber
+            params.encodings = [encoding]
+        } else {
+            params.encodings.forEach { $0.maxBitrateBps = bitrate as NSNumber }
+        }
+        transceiver.sender.parameters = params
     }
 
     private func registerPrimaryTrackIfPossible(_ callSettings: CallSettings) {

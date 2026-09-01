@@ -60,7 +60,9 @@ final class RTCRtpTransceiverInit_ConvenienceTests: XCTestCase, @unchecked Senda
 
         XCTAssertEqual(transceiverInit.direction, .sendRecv)
         XCTAssertEqual(transceiverInit.streamIds, ["audio-stream"])
-        XCTAssertEqual(transceiverInit.sendEncodings.count, 0)
+        XCTAssertEqual(transceiverInit.sendEncodings.count, 1)
+        XCTAssertEqual(transceiverInit.sendEncodings[0].maxBitrateBps, 64000)
+        XCTAssertTrue(transceiverInit.sendEncodings[0].isActive)
     }
 
     // MARK: - degradationPreference

@@ -275,6 +275,56 @@ final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(recordedPreparedFlags, [false])
     }
 
+    func test_setMusicCaptureEnabled_bypassesVPAndDisablesAGC() {
+        makeSubject()
+
+        subject.setMusicCaptureEnabled(true)
+
+        XCTAssertFalse(source.isVoiceProcessingAGCEnabled)
+        XCTAssertTrue(source.isVoiceProcessingBypassed)
+        XCTAssertFalse(source.isVoiceProcessingEnabled)
+        XCTAssertEqual(
+            source.recordedInputPayload(Bool.self, for: .setVoiceProcessingEnabled),
+            [false]
+        )
+        XCTAssertEqual(
+            source.recordedInputPayload(RTCAudioEngineMuteMode.self, for: .setMuteMode),
+            [.inputMixer]
+        )
+    }
+
+    func test_setMusicCaptureEnabled_disabled_restoresAGC() {
+        makeSubject()
+        subject.setMusicCaptureEnabled(true)
+
+        subject.setMusicCaptureEnabled(false)
+
+        XCTAssertTrue(source.isVoiceProcessingAGCEnabled)
+        XCTAssertFalse(source.isVoiceProcessingBypassed)
+        XCTAssertTrue(source.isVoiceProcessingEnabled)
+        XCTAssertEqual(
+            source.recordedInputPayload(Bool.self, for: .setVoiceProcessingEnabled)?.last,
+            true
+        )
+        XCTAssertEqual(
+            source.recordedInputPayload(RTCAudioEngineMuteMode.self, for: .setMuteMode)?.last,
+            .voiceProcessing
+        )
+    }
+
+    func test_setMusicCaptureEnabled_disabled_withStereo_keepsVPDisabled() {
+        makeSubject()
+        subject.setStereoPlayoutPreference(true)
+        subject.setMusicCaptureEnabled(true)
+
+        subject.setMusicCaptureEnabled(false)
+
+        XCTAssertEqual(
+            source.recordedInputPayload(Bool.self, for: .setVoiceProcessingEnabled)?.last,
+            false
+        )
+    }
+
     func test_setMutedSpeechDetectionEnabled_updatesRecordingAlwaysPreparedMode() throws {
         source.stub(for: \.isRecordingAlwaysPreparedMode, with: false)
         makeSubject()
@@ -432,14 +482,67 @@ final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
 
     func test_willReleaseEngine_emitsEventAndUninstallsTap() async {
         makeSubject()
-        let engine = AVAudioEngine()
+        let engine = configureInput().engine
 
         await expectEvent(.willReleaseAudioEngine(engine)) {
             _ = subject.audioDeviceModule($0, willReleaseEngine: engine)
         }
 
         XCTAssertEqual(audioEngineNodeAdapter.timesCalled(.uninstall), 1)
-        XCTAssertEqual(audioEngineNodeAdapter.recordedInputPayload(Int.self, for: .uninstall)?.first, 0)
+        XCTAssertEqual(
+            audioEngineNodeAdapter.recordedInputPayload(Int.self, for: .uninstall)?.first,
+            0
+        )
+    }
+
+    func test_willReleaseEngine_whenDifferentEngine_doesNotUninstallLiveTap() {
+        makeSubject()
+        let live = configureInput()
+        let stale = AVAudioEngine()
+
+        _ = subject.audioDeviceModule(.init(), willReleaseEngine: stale)
+
+        XCTAssertEqual(audioEngineNodeAdapter.timesCalled(.uninstall), 0)
+
+        _ = subject.audioDeviceModule(.init(), willReleaseEngine: live.engine)
+
+        XCTAssertEqual(audioEngineNodeAdapter.timesCalled(.uninstall), 1)
+    }
+
+    func test_didDisableEngine_whenRecordingRemains_keepsInputGraphUntilRelease() {
+        makeSubject()
+        let live = configureInput()
+
+        _ = subject.audioDeviceModule(
+            .init(),
+            didDisableEngine: live.engine,
+            isPlayoutEnabled: false,
+            isRecordingEnabled: true
+        )
+
+        XCTAssertEqual(audioEngineNodeAdapter.timesCalled(.uninstall), 0)
+
+        _ = subject.audioDeviceModule(.init(), willReleaseEngine: live.engine)
+
+        XCTAssertEqual(audioEngineNodeAdapter.timesCalled(.uninstall), 1)
+    }
+
+    func test_didStopEngine_whenRecordingRemains_keepsInputGraphUntilRelease() {
+        makeSubject()
+        let live = configureInput()
+
+        _ = subject.audioDeviceModule(
+            .init(),
+            didStopEngine: live.engine,
+            isPlayoutEnabled: false,
+            isRecordingEnabled: true
+        )
+
+        XCTAssertEqual(audioEngineNodeAdapter.timesCalled(.uninstall), 0)
+
+        _ = subject.audioDeviceModule(.init(), willReleaseEngine: live.engine)
+
+        XCTAssertEqual(audioEngineNodeAdapter.timesCalled(.uninstall), 1)
     }
 
     func test_didCreateEngine_whenReplacingEngine_retainsPreviousEngineUntilRelease() {
@@ -590,6 +693,28 @@ final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
         )
         subject = module
         return module
+    }
+
+    @discardableResult
+    private func configureInput(
+        engine: AVAudioEngine = AVAudioEngine(),
+        destination: AVAudioMixerNode = AVAudioMixerNode()
+    ) -> (engine: AVAudioEngine, destination: AVAudioMixerNode) {
+        let format = AVAudioFormat(
+            commonFormat: .pcmFormatFloat32,
+            sampleRate: 48000,
+            channels: 1,
+            interleaved: false
+        )!
+        _ = subject.audioDeviceModule(
+            .init(),
+            engine: engine,
+            configureInputFromSource: nil,
+            toDestination: destination,
+            format: format,
+            context: [:]
+        )
+        return (engine, destination)
     }
 
     private func expectEvent(

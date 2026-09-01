@@ -69,6 +69,9 @@ final class CallAudioSession: @unchecked Sendable {
     private var lastCallSettings: CallSettings?
     private var lastOwnCapabilities: Set<OwnCapability>?
     private var isSpeakingWhileMuted = false
+    /// When `true`, play-and-record uses `.default` instead of VoiceChat so
+    /// Apple Voice Processing can actually be bypassed.
+    private var isMusicModeEnabled = false
 
     init(policy: AudioSessionPolicy = DefaultAudioSessionPolicy()) {
         self.policy = policy
@@ -169,6 +172,33 @@ final class CallAudioSession: @unchecked Sendable {
                 currentRoute: audioStore.state.currentRoute
             )
         )
+    }
+
+    /// Leaves VoiceChat while music capture is on, and restores it after.
+    ///
+    /// Apple keeps Voice Processing attached for `.voiceChat`. The ADM can
+    /// only disable VP after this mode change has been applied.
+    func setMusicModeEnabled(
+        _ enabled: Bool,
+        callSettings: CallSettings? = nil,
+        ownCapabilities: Set<OwnCapability>? = nil
+    ) async {
+        isMusicModeEnabled = enabled
+        let settings = callSettings ?? lastCallSettings
+        let capabilities = ownCapabilities ?? lastOwnCapabilities
+        guard delegate != nil, let settings, let capabilities else {
+            return
+        }
+
+        let task = applyConfiguration(
+            resolvedConfiguration(
+                for: settings,
+                ownCapabilities: capabilities
+            ),
+            callSettings: settings,
+            ownCapabilities: capabilities
+        )
+        try? await task.result()
     }
 
     // MARK: - Private Helpers
@@ -400,7 +430,7 @@ final class CallAudioSession: @unchecked Sendable {
         defer { statsAdapter?.trace(.init(audioSession: traceRepresentation)) }
 
         applyConfiguration(
-            policy.configuration(
+            resolvedConfiguration(
                 for: callSettings,
                 ownCapabilities: ownCapabilities
             ),
@@ -412,8 +442,31 @@ final class CallAudioSession: @unchecked Sendable {
         )
     }
 
+    /// Leaves VoiceChat while music is on so Apple will actually allow VP
+    /// to be bypassed. Playback-only configs are left alone.
+    private func resolvedConfiguration(
+        for callSettings: CallSettings,
+        ownCapabilities: Set<OwnCapability>
+    ) -> AudioSessionConfiguration {
+        let configuration = policy.configuration(
+            for: callSettings,
+            ownCapabilities: ownCapabilities
+        )
+        guard isMusicModeEnabled, configuration.category == .playAndRecord else {
+            return configuration
+        }
+        return AudioSessionConfiguration(
+            isActive: configuration.isActive,
+            category: configuration.category,
+            mode: .default,
+            options: configuration.options,
+            overrideOutputAudioPort: configuration.overrideOutputAudioPort
+        )
+    }
+
     /// Breaks the configuration into store actions so reducers update the
     /// audio session and our own bookkeeping in a single dispatch.
+    @discardableResult
     private func applyConfiguration(
         _ configuration: AudioSessionConfiguration,
         callSettings: CallSettings,
@@ -421,7 +474,7 @@ final class CallAudioSession: @unchecked Sendable {
         file: StaticString = #file,
         function: StaticString = #function,
         line: UInt = #line
-    ) {
+    ) -> StoreTask<RTCAudioStore.Namespace> {
         log.debug(
             "CallAudioSession will apply configuration:\(configuration)",
             subsystems: .audioSession,
@@ -486,7 +539,7 @@ final class CallAudioSession: @unchecked Sendable {
             ))
         ])
 
-        audioStore.dispatch(
+        let task = audioStore.dispatch(
             actions,
             file: file,
             function: function,
@@ -500,6 +553,8 @@ final class CallAudioSession: @unchecked Sendable {
         if !mutedSpeechDetectionEnabled {
             setSpeakingWhileMuted(false)
         }
+
+        return task
     }
 
     private func shouldEnableMutedSpeechDetection(

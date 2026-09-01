@@ -1819,8 +1819,9 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                     )
                 setAudioFilter(nil)
             case .autoOn
-                where audioProcessingModule.activeAudioFilter?.id != noiseCancellationFilter.id && streamVideo
-                .isHardwareAccelerationAvailable:
+                where audioProcessingModule.activeAudioFilter?.id != noiseCancellationFilter.id
+                && streamVideo.isHardwareAccelerationAvailable
+                && !microphone.audioBitrateProfile.isMusic:
                 /// Activate noiseCancellationFilter if mode is autoOn,  hardwareAcceleration is
                 /// available and the noiseCancellation audioFilter isn't already enabled.
                 log

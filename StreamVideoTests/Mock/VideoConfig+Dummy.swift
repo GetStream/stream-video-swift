@@ -18,7 +18,8 @@ final class MockAudioProcessingModule: NSObject, AudioProcessingModule, @uncheck
     var config: RTCAudioProcessingConfig = .init()
     static let shared = MockAudioProcessingModule()
     override private init() {}
-    var activeAudioFilter: AudioFilter? { nil }
-    func setAudioFilter(_ filter: AudioFilter?) {}
+    private var audioFilter: AudioFilter?
+    var activeAudioFilter: AudioFilter? { audioFilter }
+    func setAudioFilter(_ filter: AudioFilter?) { audioFilter = filter }
     func apply(_ config: RTCAudioProcessingConfig) {}
 }

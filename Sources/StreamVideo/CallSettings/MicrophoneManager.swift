@@ -11,6 +11,8 @@ public final class MicrophoneManager: ObservableObject, CallSettingsManager, @un
     internal let callController: CallController
     /// The status of the microphone.
     @Published public internal(set) var status: CallSettingsStatus
+    /// The in-call audio capture/publish profile.
+    @Published public internal(set) var audioBitrateProfile: AudioBitrateProfile = .voiceStandard
     let state = CallSettingsState()
     
     init(callController: CallController, initialStatus: CallSettingsStatus) {
@@ -58,6 +60,15 @@ public final class MicrophoneManager: ObservableObject, CallSettingsManager, @un
             function: function,
             line: line
         )
+    }
+
+    /// Sets the in-call audio bitrate/processing profile.
+    ///
+    /// Allowed after join. Requires dashboard `hifi_audio_enabled`.
+    public func setAudioBitrateProfile(_ profile: AudioBitrateProfile) async throws {
+        guard profile != audioBitrateProfile else { return }
+        try await callController.setAudioBitrateProfile(profile)
+        await MainActor.run { audioBitrateProfile = profile }
     }
     
     // MARK: - private

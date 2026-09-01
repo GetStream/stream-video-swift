@@ -36,6 +36,7 @@ final class MockRTCPeerConnectionCoordinator:
         case zoom
         case trackInfo
         case statsReport
+        case setAudioMaxBitrate
     }
 
     enum MockFunctionInputKey: Payloadable {
@@ -59,6 +60,7 @@ final class MockRTCPeerConnectionCoordinator:
         case zoom(factor: CGFloat)
         case trackInfo(trackType: TrackType)
         case statsReport
+        case setAudioMaxBitrate(Int)
 
         var payload: Any {
             switch self {
@@ -102,6 +104,8 @@ final class MockRTCPeerConnectionCoordinator:
                 return trackType
             case .statsReport:
                 return ()
+            case let .setAudioMaxBitrate(bitrate):
+                return bitrate
             }
         }
     }
@@ -260,6 +264,12 @@ final class MockRTCPeerConnectionCoordinator:
             .setVideoFilter(
                 videoFilter: videoFilter
             )
+        )
+    }
+
+    override func setAudioMaxBitrate(_ bitrate: Int) async {
+        stubbedFunctionInput[.setAudioMaxBitrate]?.append(
+            .setAudioMaxBitrate(bitrate)
         )
     }
 
