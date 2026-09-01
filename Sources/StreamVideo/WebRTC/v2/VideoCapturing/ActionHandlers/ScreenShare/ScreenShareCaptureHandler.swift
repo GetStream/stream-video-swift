@@ -11,7 +11,7 @@ import StreamWebRTC
 /// Handles ReplayKit screen capture and forwards frames to WebRTC.
 final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandler, RPScreenRecorderDelegate, @unchecked Sendable {
 
-    @Injected(\.audioFilterProcessingModule) private var audioFilterProcessingModule
+    @Injected(\.callAudioFilterPolicy) private var callAudioFilterPolicy
 
     @Atomic private var isRecording: Bool = false
     private var activeSession: Session?
@@ -22,7 +22,6 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
         label: "io.getstream.screenshare.audio.processing",
         qos: .userInitiated
     )
-    private var audioFilterBeforeScreensharingAudio: AudioFilter?
 
     private struct Session {
         var videoCapturer: RTCVideoCapturer
@@ -117,23 +116,27 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
         recorder.isMicrophoneEnabled = false
         recorder.isCameraEnabled = false
 
-        audioFilterBeforeScreensharingAudio = audioFilterProcessingModule.activeAudioFilter
-        audioFilterProcessingModule.setAudioFilter(nil)
+        callAudioFilterPolicy?.setScreenShareActive(true)
 
-        try await Task { @MainActor [weak self] in
-            try await self?.startCapture { [weak self] sampleBuffer,
-                sampleBufferType,
-                error in
-                if let error {
-                    log.error(error, subsystems: .videoCapturer)
-                } else {
-                    self?.didReceive(
-                        sampleBuffer: sampleBuffer,
-                        sampleBufferType: sampleBufferType
-                    )
+        do {
+            try await Task { @MainActor [weak self] in
+                try await self?.startCapture { [weak self] sampleBuffer,
+                    sampleBufferType,
+                    error in
+                    if let error {
+                        log.error(error, subsystems: .videoCapturer)
+                    } else {
+                        self?.didReceive(
+                            sampleBuffer: sampleBuffer,
+                            sampleBufferType: sampleBufferType
+                        )
+                    }
                 }
-            }
-        }.value
+            }.value
+        } catch {
+            callAudioFilterPolicy?.setScreenShareActive(false)
+            throw error
+        }
 
         activeSession = .init(
             videoCapturer: videoCapturer,
@@ -249,7 +252,7 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
         audioDeviceModule.enqueue(sampleBuffer)
     }
 
-    /// Stops ReplayKit capture and restores audio filters.
+    /// Stops ReplayKit capture and lifts the screenshare filter suspend.
     private func stop() async throws {
         guard
             isRecording == true
@@ -257,9 +260,7 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
             return
         }
 
-        // Restore the previously disabled filter
-        audioFilterProcessingModule.setAudioFilter(audioFilterBeforeScreensharingAudio)
-        audioFilterBeforeScreensharingAudio = nil
+        callAudioFilterPolicy?.setScreenShareActive(false)
 
         try await recorder.stopCapture()
         activeSession = nil

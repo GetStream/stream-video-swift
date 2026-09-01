@@ -226,6 +226,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
                 peerConnectionFactory.audioDeviceModule
             }
         )
+        InjectedValues[\.callAudioFilterPolicy] = audioBitrateProfileApplicator
 
         peerConnectionFactory
             .setFrameBufferPolicy(
@@ -552,6 +553,10 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         trackStorage.removeAll()
         permissionsAdapter.cleanUp()
         await resetAudioBitrateProfile()
+        if InjectedValues[\.callAudioFilterPolicy]
+            === audioBitrateProfileApplicator {
+            InjectedValues[\.callAudioFilterPolicy] = nil
+        }
     }
 
     /// Cleans up the session for reconnection, clearing adapters and tracks.
