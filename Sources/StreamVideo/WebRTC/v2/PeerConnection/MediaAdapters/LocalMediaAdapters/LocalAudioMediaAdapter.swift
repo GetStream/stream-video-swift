@@ -128,9 +128,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     /// through call settings updates) and not called directly by external
     /// consumers.
     func publish() async throws {
-        guard
-            !primaryTrack.isEnabled
-        else {
+        guard !primaryTrack.isEnabled else {
             return
         }
 
@@ -205,24 +203,23 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             registerPrimaryTrackIfPossible(settings)
 
             guard lastUpdatedCallSettings != settings.audio else { return }
-            
+
             let isMuted = !settings.audioOn
-            let isLocalMuted = !primaryTrack.isEnabled
-            
-            if isMuted != isLocalMuted {
+            if lastUpdatedCallSettings?.micOn != settings.audio.micOn {
                 try await sfuAdapter.updateTrackMuteState(
                     .audio,
                     isMuted: isMuted,
                     for: sessionID
                 )
             }
-            
-            if isMuted, primaryTrack.isEnabled {
-                try await unpublish()
-            } else if !isMuted {
+
+            // Keep the send track enabled while muted so ChannelSend keeps
+            // draining silence. Unpublishing parks pre-mute frames and they
+            // leak after unmute.
+            if !isMuted {
                 try await publish()
             }
-            
+
             lastUpdatedCallSettings = settings.audio
         }
     }
@@ -377,9 +374,6 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             return
         }
         transceiverStorage.set(transceiver, track: track, for: options)
-        if options.bitrate > 0 {
-            applyMaxBitrate(options.bitrate, on: transceiver)
-        }
     }
 
     private func applyMaxBitrate(_ bitrate: Int) {

@@ -241,6 +241,52 @@ final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
 
         XCTAssertEqual(source.timesCalled(.setMicrophoneMuted), 1)
         XCTAssertTrue(subject.isMicrophoneMuted)
+        XCTAssertEqual(
+            source.recordedInputPayload(
+                RTCAudioEngineMuteMode.self,
+                for: .setMuteMode
+            ),
+            [.inputMixer]
+        )
+    }
+
+    func test_setMuted_unmuteAfterVoiceMute_keepsInputMixerMuteMode() throws {
+        source.stub(for: \.isMicrophoneMuted, with: false)
+        makeSubject()
+        try subject.setMuted(true)
+        source.stub(for: \.isMicrophoneMuted, with: true)
+
+        try subject.setMuted(false)
+
+        XCTAssertEqual(
+            source.recordedInputPayload(
+                RTCAudioEngineMuteMode.self,
+                for: .setMuteMode
+            ),
+            [.inputMixer, .inputMixer]
+        )
+        XCTAssertEqual(
+            source.recordedInputPayload(Bool.self, for: .setMicrophoneMuted),
+            [true, false]
+        )
+        XCTAssertFalse(subject.isMicrophoneMuted)
+    }
+
+    func test_setMuted_neverMusicUnmute_doesNotStopRecording() throws {
+        source.stub(for: \.isMicrophoneMuted, with: false)
+        source.stub(for: \.isRecordingInitialized, with: true)
+        makeSubject()
+        try subject.setRecording(true)
+        try subject.setMuted(true)
+        source.stub(for: \.isMicrophoneMuted, with: true)
+        let stopCount = source.timesCalled(.stopRecording)
+
+        try subject.setMuted(false)
+
+        XCTAssertEqual(source.timesCalled(.stopRecording), stopCount)
+        XCTAssertEqual(source.timesCalled(.setMicrophoneMuted), 2)
+        XCTAssertEqual(source.timesCalled(.stopPlayout), 0)
+        XCTAssertFalse(subject.isMicrophoneMuted)
     }
 
     func test_setMuted_whenUnmutingWhileRecordingStopped_startsRecordingBeforeUnmuting() throws {
@@ -268,17 +314,20 @@ final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertFalse(source.prefersStereoPlayout)
         XCTAssertFalse(source.isVoiceProcessingBypassed)
 
-        let recordedModes = source.recordedInputPayload(RTCAudioEngineMuteMode.self, for: .setMuteMode)
-        XCTAssertEqual(recordedModes, [.inputMixer, .voiceProcessing])
+        let recordedModes = source.recordedInputPayload(
+            RTCAudioEngineMuteMode.self,
+            for: .setMuteMode
+        )
+        XCTAssertEqual(recordedModes, [.inputMixer, .inputMixer])
 
         let recordedPreparedFlags = source.recordedInputPayload(Bool.self, for: .setRecordingAlwaysPreparedMode)
         XCTAssertEqual(recordedPreparedFlags, [false])
     }
 
-    func test_setAudioBitrateProfile_music_bypassesVPAndDisablesAGC() {
+    func test_setMusicCaptureEnabled_music_bypassesVPAndDisablesAGC() {
         makeSubject()
 
-        subject.setAudioBitrateProfile(.musicHighQuality)
+        subject.setMusicCaptureEnabled(true)
 
         XCTAssertFalse(source.isVoiceProcessingAGCEnabled)
         XCTAssertTrue(source.isVoiceProcessingBypassed)
@@ -293,11 +342,11 @@ final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
         )
     }
 
-    func test_setAudioBitrateProfile_voice_restoresAGC() {
+    func test_setMusicCaptureEnabled_voice_restoresAGC() {
         makeSubject()
-        subject.setAudioBitrateProfile(.musicHighQuality)
+        subject.setMusicCaptureEnabled(true)
 
-        subject.setAudioBitrateProfile(.voiceStandard)
+        subject.setMusicCaptureEnabled(false)
 
         XCTAssertTrue(source.isVoiceProcessingAGCEnabled)
         XCTAssertFalse(source.isVoiceProcessingBypassed)
@@ -307,17 +356,20 @@ final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
             true
         )
         XCTAssertEqual(
-            source.recordedInputPayload(RTCAudioEngineMuteMode.self, for: .setMuteMode)?.last,
-            .voiceProcessing
+            source.recordedInputPayload(
+                RTCAudioEngineMuteMode.self,
+                for: .setMuteMode
+            )?.last,
+            .inputMixer
         )
     }
 
-    func test_setAudioBitrateProfile_voice_withStereo_keepsVPDisabled() {
+    func test_setMusicCaptureEnabled_voice_withStereo_keepsVPDisabled() {
         makeSubject()
         subject.setStereoPlayoutPreference(true)
-        subject.setAudioBitrateProfile(.musicHighQuality)
+        subject.setMusicCaptureEnabled(true)
 
-        subject.setAudioBitrateProfile(.voiceStandard)
+        subject.setMusicCaptureEnabled(false)
 
         XCTAssertEqual(
             source.recordedInputPayload(Bool.self, for: .setVoiceProcessingEnabled)?.last,
@@ -325,54 +377,54 @@ final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
         )
     }
 
-    func test_setAudioBitrateProfile_voiceStandard_doesNotRestorePlayout() {
+    func test_setMusicCaptureEnabled_voiceStandard_doesNotRestorePlayout() {
         source.stub(for: \.isPlaying, with: true)
         makeSubject()
 
-        subject.setAudioBitrateProfile(.voiceStandard)
+        subject.setMusicCaptureEnabled(false)
 
         XCTAssertEqual(source.timesCalled(.stopPlayout), 0)
         XCTAssertEqual(source.timesCalled(.initAndStartPlayout), 0)
         XCTAssertEqual(source.timesCalled(.startPlayout), 0)
     }
 
-    func test_setAudioBitrateProfile_music_restoresPlayoutWhenPlaying() {
+    func test_setMusicCaptureEnabled_music_restoresPlayoutWhenPlaying() {
         source.stub(for: \.isPlaying, with: true)
         makeSubject()
 
-        subject.setAudioBitrateProfile(.musicHighQuality)
+        subject.setMusicCaptureEnabled(true)
 
         XCTAssertEqual(source.timesCalled(.stopPlayout), 1)
         XCTAssertEqual(source.timesCalled(.initAndStartPlayout), 1)
         XCTAssertEqual(source.timesCalled(.startPlayout), 0)
     }
 
-    func test_setAudioBitrateProfile_music_restoresPlayoutWhenInitialized() {
+    func test_setMusicCaptureEnabled_music_restoresPlayoutWhenInitialized() {
         source.stub(for: \.isPlayoutInitialized, with: true)
         makeSubject()
 
-        subject.setAudioBitrateProfile(.musicHighQuality)
+        subject.setMusicCaptureEnabled(true)
 
         XCTAssertEqual(source.timesCalled(.stopPlayout), 1)
         XCTAssertEqual(source.timesCalled(.startPlayout), 1)
         XCTAssertEqual(source.timesCalled(.initAndStartPlayout), 0)
     }
 
-    func test_setAudioBitrateProfile_music_skipsPlayoutRestoreWhenIdle() {
+    func test_setMusicCaptureEnabled_music_skipsPlayoutRestoreWhenIdle() {
         makeSubject()
 
-        subject.setAudioBitrateProfile(.musicHighQuality)
+        subject.setMusicCaptureEnabled(true)
 
         XCTAssertEqual(source.timesCalled(.stopPlayout), 0)
         XCTAssertEqual(source.timesCalled(.initAndStartPlayout), 0)
         XCTAssertEqual(source.timesCalled(.startPlayout), 0)
     }
 
-    func test_setAudioBitrateProfile_music_restoresPlayoutWhenRequested() {
+    func test_setMusicCaptureEnabled_music_restoresPlayoutWhenRequested() {
         makeSubject()
 
-        subject.setAudioBitrateProfile(
-            .musicHighQuality,
+        subject.setMusicCaptureEnabled(
+            true,
             restorePlayout: true
         )
 
@@ -381,25 +433,81 @@ final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(source.timesCalled(.startPlayout), 0)
     }
 
-    func test_setAudioBitrateProfile_music_whileMuted_liftsMuteAroundVPToggle() throws {
+    func test_setMusicCaptureEnabled_music_whileMuted_doesNotLiftMuteOrToggleVP(
+    ) throws {
         source.stub(for: \.isMicrophoneMuted, with: false)
         makeSubject()
         try subject.setMuted(true)
+        source.stub(for: \.isMicrophoneMuted, with: true)
+        let vpCount = source.timesCalled(.setVoiceProcessingEnabled)
 
-        subject.setAudioBitrateProfile(.musicHighQuality)
-        subject.setAudioBitrateProfile(.voiceStandard)
+        subject.setMusicCaptureEnabled(true)
+        subject.setMusicCaptureEnabled(false)
 
+        XCTAssertEqual(source.timesCalled(.setVoiceProcessingEnabled), vpCount)
         XCTAssertEqual(
-            source.recordedInputPayload(Bool.self, for: .setMicrophoneMuted),
-            [true, false, true, false, true]
+            source.recordedInputPayload(Bool.self, for: .setMicrophoneMuted)?
+                .contains(false),
+            false
         )
         XCTAssertTrue(subject.isMicrophoneMuted)
     }
 
-    func test_setAudioBitrateProfile_music_whileUnmuted_doesNotTouchMute() {
+    func test_setMusicCaptureEnabled_musicOffWhileMuted_enablesVPOnUnmute(
+    ) throws {
+        source.stub(for: \.isMicrophoneMuted, with: false)
+        source.stub(for: \.isRecordingInitialized, with: true)
+        makeSubject()
+        try subject.setRecording(true)
+        subject.setMusicCaptureEnabled(true)
+        try subject.setMuted(true)
+        source.stub(for: \.isMicrophoneMuted, with: true)
+        let vpCount = source.timesCalled(.setVoiceProcessingEnabled)
+        let stopCount = source.timesCalled(.stopRecording)
+
+        subject.setMusicCaptureEnabled(false)
+
+        XCTAssertEqual(source.timesCalled(.setVoiceProcessingEnabled), vpCount)
+
+        try subject.setMuted(false)
+
+        XCTAssertEqual(
+            source.recordedInputPayload(Bool.self, for: .setVoiceProcessingEnabled)?
+                .last,
+            true
+        )
+        XCTAssertEqual(
+            source.recordedInputPayload(
+                RTCAudioEngineMuteMode.self,
+                for: .setMuteMode
+            )?.last,
+            .inputMixer
+        )
+        XCTAssertEqual(source.timesCalled(.stopRecording), stopCount)
+        XCTAssertFalse(subject.isMicrophoneMuted)
+    }
+
+    func test_setMusicCaptureEnabled_musicWhileMuted_restoresPlayoutOnUnmute(
+    ) throws {
+        source.stub(for: \.isPlaying, with: true)
+        makeSubject()
+        try subject.setMuted(true)
+        source.stub(for: \.isMicrophoneMuted, with: true)
+
+        subject.setMusicCaptureEnabled(true)
+
+        XCTAssertEqual(source.timesCalled(.stopPlayout), 0)
+
+        try subject.setMuted(false)
+
+        XCTAssertEqual(source.timesCalled(.stopPlayout), 1)
+        XCTAssertEqual(source.timesCalled(.initAndStartPlayout), 1)
+    }
+
+    func test_setMusicCaptureEnabled_music_whileUnmuted_doesNotTouchMute() {
         makeSubject()
 
-        subject.setAudioBitrateProfile(.musicHighQuality)
+        subject.setMusicCaptureEnabled(true)
 
         XCTAssertEqual(source.timesCalled(.setMicrophoneMuted), 0)
     }
@@ -590,7 +698,7 @@ final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
 
     func test_didDisableEngine_musicRecordingRemains_keepsInputGraphUntilRelease() {
         makeSubject()
-        subject.setAudioBitrateProfile(.musicHighQuality)
+        subject.setMusicCaptureEnabled(true)
         // WebRTC still reports VP on while the engine is rebuilt.
         source.stub(for: \.isVoiceProcessingEnabled, with: true)
         let live = configureInput()
@@ -611,7 +719,7 @@ final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
 
     func test_didStopEngine_musicRecordingRemains_keepsInputGraphUntilRelease() {
         makeSubject()
-        subject.setAudioBitrateProfile(.musicHighQuality)
+        subject.setMusicCaptureEnabled(true)
         source.stub(for: \.isVoiceProcessingEnabled, with: true)
         let live = configureInput()
 
@@ -645,7 +753,8 @@ final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(audioEngineNodeAdapter.timesCalled(.uninstall), 0)
     }
 
-    func test_didDisableEngine_whenVoiceProcessingEnabledAndRecordingRemains_tearsDownInputGraph() {
+    func test_didDisableEngine_whenVoiceProcessingEnabledAndRecordingRemains_doesNotUninstallTap(
+    ) {
         makeSubject()
         source.stub(for: \.isVoiceProcessingEnabled, with: true)
         let live = configureInput()
@@ -657,10 +766,11 @@ final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
             isRecordingEnabled: true
         )
 
-        XCTAssertEqual(audioEngineNodeAdapter.timesCalled(.uninstall), 1)
+        XCTAssertEqual(audioEngineNodeAdapter.timesCalled(.uninstall), 0)
     }
 
-    func test_didStopEngine_whenVoiceProcessingEnabledAndRecordingRemains_tearsDownInputGraph() {
+    func test_didStopEngine_whenVoiceProcessingEnabledAndRecordingRemains_doesNotUninstallTap(
+    ) {
         makeSubject()
         source.stub(for: \.isVoiceProcessingEnabled, with: true)
         let live = configureInput()
@@ -671,6 +781,24 @@ final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
             isPlayoutEnabled: false,
             isRecordingEnabled: true
         )
+
+        XCTAssertEqual(audioEngineNodeAdapter.timesCalled(.uninstall), 0)
+    }
+
+    func test_didDisableEngine_thenWillRelease_uninstallsTap() {
+        makeSubject()
+        let live = configureInput()
+
+        _ = subject.audioDeviceModule(
+            .init(),
+            didDisableEngine: live.engine,
+            isPlayoutEnabled: false,
+            isRecordingEnabled: true
+        )
+
+        XCTAssertEqual(audioEngineNodeAdapter.timesCalled(.uninstall), 0)
+
+        _ = subject.audioDeviceModule(.init(), willReleaseEngine: live.engine)
 
         XCTAssertEqual(audioEngineNodeAdapter.timesCalled(.uninstall), 1)
     }
