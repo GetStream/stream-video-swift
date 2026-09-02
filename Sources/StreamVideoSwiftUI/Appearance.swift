@@ -25,8 +25,15 @@ public class Appearance {
     }
     
     /// Provider for custom localization which is dependent on App Bundle.
-    public nonisolated(unsafe) static var localizationProvider: (_ key: String, _ table: String) -> String = { key, table in
-        Bundle.streamVideoUI.localizedString(forKey: key, value: nil, table: table)
+    public nonisolated(unsafe) static var localizationProvider: (
+        _ key: String,
+        _ table: String
+    ) -> String = { key, table in
+        Bundle.streamVideoUI.localizedString(
+            forKey: key,
+            value: nil,
+            table: table
+        )
     }
 }
 

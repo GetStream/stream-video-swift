@@ -6,6 +6,11 @@ import SwiftUI
 import UIKit
 
 /// Provides the colors used throughout the SDK.
+///
+/// Existing views still read this bag from ``Appearance/colors``.
+/// Video-specific design-system tokens live on
+/// ``VideoAppearance/Colors``; shared tokens live on
+/// ``DesignSystemTokens``.
 public struct Colors {
     
     public init() { /* Public init. */ }
