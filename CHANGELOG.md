@@ -2,6 +2,14 @@
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+# 2.0.0
+
+### ✅ Added
+- New `DesignSystemTokens` in `StreamCoreUI` is used in `VideoAppearance` for primitive UI tokens [#1258](https://github.com/GetStream/stream-video-swift/pull/1258)
+
+### 🔄 Changed
+- The `Appearance` object has been replaced with `VideoAppearance` object [#1258](https://github.com/GetStream/stream-video-swift/pull/1258)
+
 # Upcoming
 
 ### ✅ Added
