@@ -42,6 +42,9 @@ final class ScreenShareSessionProvider: @unchecked Sendable {
         }
     }
 
+    /// Suspends live audio filters while in-app screenshare audio is active.
+    var setScreenShareActive: ((Bool) -> Void)?
+
     /// Cleans up resources when the instance is deallocated.
     ///
     /// This deinitializer ensures that any active capture is stopped when the provider is destroyed.

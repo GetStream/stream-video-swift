@@ -994,7 +994,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
 
     func test_setAudioBitrateProfile_music_clearsAndRestoresAudioFilter() async throws {
         let filter = MockAudioFilter(id: "nc")
-        Self.videoConfig.audioProcessingModule.setAudioFilter(filter)
+        subject.setAudioFilter(filter)
 
         try await subject.setAudioBitrateProfile(.musicHighQuality)
         XCTAssertNil(Self.videoConfig.audioProcessingModule.activeAudioFilter)
@@ -1067,7 +1067,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
 
     func test_cleanUp_dropsStashedAudioFilter() async throws {
         let filter = MockAudioFilter(id: "nc")
-        Self.videoConfig.audioProcessingModule.setAudioFilter(filter)
+        subject.setAudioFilter(filter)
         try await subject.setAudioBitrateProfile(.musicHighQuality)
 
         await subject.cleanUp()
@@ -1107,6 +1107,91 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         )
 
         try await subject.setAudioBitrateProfile(.musicHighQuality)
+        try await subject.setAudioBitrateProfile(.voiceStandard)
+
+        XCTAssertEqual(
+            mockPublisher.recordedInputPayload(
+                Int.self,
+                for: .setAudioMaxBitrate
+            ),
+            [128_000, 64_000]
+        )
+    }
+
+    func test_setAudioBitrateProfile_voiceHighQuality_setsBitrateWithoutDisablingVP(
+    ) async throws {
+        try await prepare()
+        await subject.set(
+            publishOptions: .dummy(
+                audio: [.dummy(codec: .opus, bitrate: 64_000)]
+            )
+        )
+        let mockPublisher = try await XCTAsyncUnwrap(
+            await subject.publisher as? MockRTCPeerConnectionCoordinator
+        )
+        let vpCalls = mockAudioDeviceModuleSource
+            .timesCalled(.setVoiceProcessingEnabled)
+        let agcEnabled = mockAudioDeviceModuleSource
+            .isVoiceProcessingAGCEnabled
+        let vpBypassed = mockAudioDeviceModuleSource
+            .isVoiceProcessingBypassed
+        let nsEnabled = Self.videoConfig.audioProcessingModule.config
+            .isNoiseSuppressionEnabled
+        let hpfEnabled = Self.videoConfig.audioProcessingModule.config
+            .isHighpassFilterEnabled
+
+        try await subject.setAudioBitrateProfile(.voiceHighQuality)
+
+        await assertEqualAsync(
+            await subject.audioBitrateProfile,
+            .voiceHighQuality
+        )
+        XCTAssertEqual(
+            mockPublisher.recordedInputPayload(
+                Int.self,
+                for: .setAudioMaxBitrate
+            ),
+            [128_000]
+        )
+        XCTAssertEqual(
+            mockAudioDeviceModuleSource.timesCalled(
+                .setVoiceProcessingEnabled
+            ),
+            vpCalls
+        )
+        XCTAssertEqual(
+            mockAudioDeviceModuleSource.isVoiceProcessingAGCEnabled,
+            agcEnabled
+        )
+        XCTAssertEqual(
+            mockAudioDeviceModuleSource.isVoiceProcessingBypassed,
+            vpBypassed
+        )
+        XCTAssertEqual(
+            Self.videoConfig.audioProcessingModule.config
+                .isNoiseSuppressionEnabled,
+            nsEnabled
+        )
+        XCTAssertEqual(
+            Self.videoConfig.audioProcessingModule.config
+                .isHighpassFilterEnabled,
+            hpfEnabled
+        )
+    }
+
+    func test_setAudioBitrateProfile_voiceHighQuality_restoresPreviousBitrate(
+    ) async throws {
+        try await prepare()
+        await subject.set(
+            publishOptions: .dummy(
+                audio: [.dummy(codec: .opus, bitrate: 64_000)]
+            )
+        )
+        let mockPublisher = try await XCTAsyncUnwrap(
+            await subject.publisher as? MockRTCPeerConnectionCoordinator
+        )
+
+        try await subject.setAudioBitrateProfile(.voiceHighQuality)
         try await subject.setAudioBitrateProfile(.voiceStandard)
 
         XCTAssertEqual(

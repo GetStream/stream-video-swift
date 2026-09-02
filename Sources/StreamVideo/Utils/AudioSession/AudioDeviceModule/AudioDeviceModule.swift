@@ -176,8 +176,12 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
     /// throw and crash the app. This lock keeps those operations mutually
     /// exclusive. It is recursive because `setMuted` calls `setRecording`.
     private let engineQueue = RecursiveQueue()
-    /// Capture/publish profile that drives Voice Processing.
-    private var audioBitrateProfile: AudioBitrateProfile = .voiceStandard
+    /// `true` while music capture has asked for Voice Processing off.
+    private var isMusicCaptureEnabled = false
+    /// Music or stereo changed while muted; apply VP/mute mode on unmute.
+    private var pendingCapturePolicyApply = false
+    /// Playout restore skipped because a music toggle happened while muted.
+    private var pendingPlayoutRestore = false
 
     /// Serial queue used to deliver events to observers.
     private let dispatchQueue: DispatchQueue
@@ -264,12 +268,9 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
     /// - Parameter isPreferred: `true` when stereo output should be used.
     /// - Note: Serialized on ``engineQueue`` with other engine mutations.
     func setStereoPlayoutPreference(_ isPreferred: Bool) {
-        /// - Important: `.voiceProcessing` requires VP to be enabled in order to mute and
-        /// `.restartEngine` rebuilds the whole graph. Each of them has different issues:
-        /// - `.voiceProcessing`: as it requires VP to be enabled in order to mute/unmute that
-        /// means that for outputs where VP is disabled (e.g. stereo) we cannot mute/unmute.
-        /// - `.restartEngine`: rebuilds the whole graph and requires explicit calling of
-        /// `initAndStartRecording` .
+        /// Mute is always `.inputMixer`. `.voiceProcessing` freezes Apple's
+        /// AEC delay line and dumps pre-mute audio on unmute. `.restartEngine`
+        /// rebuilds the graph and needs `initAndStartRecording`.
         engineQueue.sync {
             if isPreferred {
                 _ = source.setRecordingAlwaysPreparedMode(false)
@@ -279,7 +280,7 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         }
     }
 
-    /// Applies the in-call audio bitrate profile to Voice Processing.
+    /// Applies the in-call music capture policy to Voice Processing.
     ///
     /// Music disables VP (not just bypass). Bypass is a live-graph flag and
     /// does not rebuild I/O after the session leaves VoiceChat. Disabling VP
@@ -290,12 +291,15 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
     /// and output is already running, initialized, or requested by the
     /// caller. Do not call ``resetPlayout()`` from here; that would
     /// re-enter ``engineQueue``.
-    func setAudioBitrateProfile(
-        _ profile: AudioBitrateProfile,
+    ///
+    /// LiveKit: never recreate Voice Processing while muted. Music-off
+    /// while muted only stores the flag; VP comes back on unmute.
+    func setMusicCaptureEnabled(
+        _ isEnabled: Bool,
         restorePlayout: Bool = false
     ) {
         engineQueue.sync {
-            let didToggleMusic = profile.isMusic != audioBitrateProfile.isMusic
+            let didToggleMusic = isEnabled != isMusicCaptureEnabled
             let shouldRestorePlayout = didToggleMusic
                 && (
                     restorePlayout
@@ -303,28 +307,17 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
                         || source.isPlaying
                         || source.isPlayoutInitialized
                 )
-            // VP toggle recreates the engine. Starting that graph while
-            // mixer-muted leaves AURemoteIO idle; a later unmute only
-            // sets volume and capture stays silent.
-            let restoreMuteAfterEngineRebuild = didToggleMusic
-                && isMicrophoneMuted
-            audioBitrateProfile = profile
-            if restoreMuteAfterEngineRebuild {
-                _ = source.setMicrophoneMuted(false)
+            isMusicCaptureEnabled = isEnabled
+            if isMicrophoneMuted {
+                pendingCapturePolicyApply = true
+                if shouldRestorePlayout {
+                    pendingPlayoutRestore = true
+                }
+                return
             }
-            applyVoiceProcessingPolicyLocked()
-            let voiceProcessingEnabled = !profile.isMusic
-                && !source.prefersStereoPlayout
-            if didToggleMusic
-                || source.isVoiceProcessingEnabled != voiceProcessingEnabled {
-                _ = source.setVoiceProcessingEnabled(voiceProcessingEnabled)
-            }
-            if shouldRestorePlayout {
-                resetPlayoutLocked()
-            }
-            if restoreMuteAfterEngineRebuild {
-                _ = source.setMicrophoneMuted(true)
-            }
+            applyCapturePolicyLocked(
+                restorePlayout: shouldRestorePlayout
+            )
         }
     }
 
@@ -333,12 +326,28 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
     /// ponytail: Apple Voice Processing is one bundle (AEC+NS+AGC). Music
     /// disables the whole unit. Echo on speaker is the ceiling; software AEC
     /// when VP is off is the upgrade.
+    ///
+    /// Mute is LiveKit `.inputMixer`, not `.voiceProcessing`. VP mute
+    /// (`isVoiceProcessingInputMuted`) freezes the AEC delay line, so unmute
+    /// plays the word from before mute. Mixer mute keeps VP running.
+    /// Apple muted-speech detection will not fire; mic indicator stays on.
     private func applyVoiceProcessingPolicyLocked() {
-        let isMusic = audioBitrateProfile.isMusic
-        let bypass = source.prefersStereoPlayout || isMusic
-        source.isVoiceProcessingAGCEnabled = !isMusic
+        let bypass = source.prefersStereoPlayout || isMusicCaptureEnabled
+        source.isVoiceProcessingAGCEnabled = !isMusicCaptureEnabled
         source.isVoiceProcessingBypassed = bypass
-        _ = source.setMuteMode(bypass ? .inputMixer : .voiceProcessing)
+        _ = source.setMuteMode(.inputMixer)
+    }
+
+    /// Applies VP enablement and mute mode for the current music/stereo
+    /// flags. Caller must already be on ``engineQueue``.
+    private func applyCapturePolicyLocked(restorePlayout: Bool) {
+        let voiceProcessingEnabled = !isMusicCaptureEnabled
+            && !source.prefersStereoPlayout
+        _ = source.setVoiceProcessingEnabled(voiceProcessingEnabled)
+        applyVoiceProcessingPolicyLocked()
+        if restorePlayout {
+            resetPlayoutLocked()
+        }
     }
 
     /// Enables or disables WebRTC muted speech detection.
@@ -536,6 +545,7 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
             if isMuted != isMicrophoneMuted {
                 isMicrophoneMutedSubject.send(isMuted)
             }
+            applyDeferredCapturePolicyLocked(isMuted: isMuted)
             return
         }
 
@@ -543,11 +553,30 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
             try setRecording(true)
         }
 
+        // WebRTC defaults to `.voiceProcessing` mute. Set mixer mute before
+        // the native mute flip so the first mute never freezes Apple's
+        // delay line. applyVoiceProcessingPolicyLocked may not have run yet
+        // on a never-music call.
+        _ = source.setMuteMode(.inputMixer)
+
         try throwingExecution("Unable to setMicrophoneMuted:\(isMuted)") {
             source.setMicrophoneMuted(isMuted)
         }
 
         isMicrophoneMutedSubject.send(isMuted)
+        applyDeferredCapturePolicyLocked(isMuted: isMuted)
+    }
+
+    /// Music toggles while muted do not rebuild VP. Apply them after unmute.
+    private func applyDeferredCapturePolicyLocked(isMuted: Bool) {
+        guard !isMuted else { return }
+        guard pendingCapturePolicyApply || pendingPlayoutRestore else {
+            return
+        }
+        pendingCapturePolicyApply = false
+        let restorePlayout = pendingPlayoutRestore
+        pendingPlayoutRestore = false
+        applyCapturePolicyLocked(restorePlayout: restorePlayout)
     }
 
     // MARK: - Audio Buffer injection
@@ -648,7 +677,10 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         )
         isPlayingSubject.send(isPlayoutEnabled)
         isRecordingSubject.send(isRecordingEnabled)
-        handleEngineStoppedOrDisabled(isRecordingEnabled: isRecordingEnabled)
+        handleEngineStoppedOrDisabled(
+            isRecordingEnabled: isRecordingEnabled,
+            clearInputContext: false
+        )
         return Constant.successResult
     }
 
@@ -669,7 +701,10 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         )
         isPlayingSubject.send(isPlayoutEnabled)
         isRecordingSubject.send(isRecordingEnabled)
-        handleEngineStoppedOrDisabled(isRecordingEnabled: isRecordingEnabled)
+        handleEngineStoppedOrDisabled(
+            isRecordingEnabled: isRecordingEnabled,
+            clearInputContext: true
+        )
         return Constant.successResult
     }
 
@@ -685,24 +720,36 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
             return retainedEngines
         }
         subject.send(.willReleaseAudioEngine(engine))
-        if engineInputContext?.engine === engine {
+        // Uninstall unless a different live engine still owns the tap
+        // (music/stereo keep-graph). Voice disable nils the context, so
+        // that release still uninstalls.
+        let liveEngine = engineInputContext?.engine
+        if liveEngine == nil || liveEngine === engine {
             tearDownInputGraph()
         }
         return Constant.successResult
     }
 
     /// VP disable unlinks I/O. WebRTC reports didStop/didDisable while
-    /// input is still live and `isVoiceProcessingEnabled` is still true.
-    /// Tearing down in that window uninstalls the mic tap and capture
-    /// stays at -160. Skip teardown when this session asked for VP off
-    /// (music or stereo). Voice keeps VP on and still tears down.
-    private func handleEngineStoppedOrDisabled(isRecordingEnabled: Bool) {
+    /// input is still live. Resetting the injector in that window
+    /// disconnects the mic from the sink and capture stays silent.
+    /// Skip graph teardown when this session asked for VP off (music or
+    /// stereo). Voice matches ``develop``: stop resets the injector,
+    /// disable also drops the input context, and only release uninstalls
+    /// the levels tap.
+    private func handleEngineStoppedOrDisabled(
+        isRecordingEnabled: Bool,
+        clearInputContext: Bool
+    ) {
         if isRecordingEnabled,
-           audioBitrateProfile.isMusic || source.prefersStereoPlayout {
+           isMusicCaptureEnabled || source.prefersStereoPlayout {
             audioBufferRenderer.stop()
             return
         }
-        tearDownInputGraph()
+        audioBufferRenderer.reset()
+        if clearInputContext {
+            engineInputContext = nil
+        }
     }
 
     private func tearDownInputGraph() {

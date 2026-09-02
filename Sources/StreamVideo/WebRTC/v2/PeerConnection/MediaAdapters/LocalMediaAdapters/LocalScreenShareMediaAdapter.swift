@@ -501,7 +501,9 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
                 screenSharingType,
                 source: track.source,
                 audioDeviceModule: audioDeviceModule,
-                includeAudio: includeAudio
+                includeAudio: includeAudio,
+                setScreenShareActive:
+                    screenShareSessionProvider.setScreenShareActive
             )
             capturer = videoCapturer
 
@@ -520,7 +522,9 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
                 screenSharingType,
                 source: track.source,
                 audioDeviceModule: audioDeviceModule,
-                includeAudio: includeAudio
+                includeAudio: includeAudio,
+                setScreenShareActive:
+                    screenShareSessionProvider.setScreenShareActive
             )
             capturer = videoCapturer
 

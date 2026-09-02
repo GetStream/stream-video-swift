@@ -170,10 +170,13 @@ final class StreamVideoCapturer: StreamVideoCapturing, @unchecked Sendable {
     ///   - audioDeviceModule: The audio device module for capture coordination.
     ///   - includeAudio: Whether to capture app audio during screen sharing.
     ///     Only valid for `.inApp`; ignored otherwise.
+    ///   - setScreenShareActive: Suspends live audio filters while in-app
+    ///     screenshare audio is running.
     static func screenShareCapturer(
         with videoSource: RTCVideoSource,
         audioDeviceModule: AudioDeviceModule,
-        includeAudio: Bool
+        includeAudio: Bool,
+        setScreenShareActive: ((Bool) -> Void)? = nil
     ) -> StreamVideoCapturer {
         .init(
             videoSource: videoSource,
@@ -181,7 +184,10 @@ final class StreamVideoCapturer: StreamVideoCapturing, @unchecked Sendable {
             videoCapturerDelegate: videoSource,
             audioDeviceModule: audioDeviceModule,
             actionHandlers: [
-                ScreenShareCaptureHandler(includeAudio: includeAudio)
+                ScreenShareCaptureHandler(
+                    includeAudio: includeAudio,
+                    setScreenShareActive: setScreenShareActive
+                )
             ]
         )
     }

@@ -10,7 +10,7 @@ import Foundation
 /// Owns the live audio-filter policy so music and screenshare can
 /// suppress filters without `Call` knowing about either. Default voice
 /// is a no-op: join and leave do not touch session, ADM, APM, or bitrate
-/// unless this session has applied music.
+/// unless this session has applied a non-default profile.
 final class AudioBitrateProfileApplicator: @unchecked Sendable {
 
     private let audioSession: CallAudioSession
@@ -22,7 +22,8 @@ final class AudioBitrateProfileApplicator: @unchecked Sendable {
     /// suppressed while music or screenshare is active.
     private var intendedFilter: AudioFilter?
     private var isScreenShareActive = false
-    /// Bitrate in force before music; `0` means encodings had no cap.
+    /// Bitrate in force before a non-default profile; `0` means encodings
+    /// had no cap.
     private var restoredBitrate: Int?
 
     init(
@@ -43,24 +44,30 @@ final class AudioBitrateProfileApplicator: @unchecked Sendable {
         publisher: RTCPeerConnectionCoordinator?
     ) async throws {
         let previous = withLock { self.profile }
-        guard profile.isMusic || previous.isMusic else {
+        let needsProcessing = profile.isMusic || previous.isMusic
+        let needsBitrate = profile != .voiceStandard || previous != .voiceStandard
+        guard needsProcessing || needsBitrate else {
             return
         }
 
-        try await audioSession.setAudioBitrateProfile(
-            profile,
-            callSettings: callSettings,
-            ownCapabilities: ownCapabilities
-        )
+        if needsProcessing {
+            try await audioSession.setAudioBitrateProfile(
+                profile,
+                callSettings: callSettings,
+                ownCapabilities: ownCapabilities
+            )
+        }
 
         let bitrateToApply: Int? = withLock {
             self.profile = profile
-            audioDeviceModule().setAudioBitrateProfile(
-                profile,
-                restorePlayout: callSettings.audioOutputOn && publisher != nil
-            )
-            applySoftwareProcessing(enabled: !profile.isMusic)
-            applyLiveFilter()
+            if needsProcessing {
+                audioDeviceModule().setMusicCaptureEnabled(
+                    profile.isMusic,
+                    restorePlayout: callSettings.audioOutputOn && publisher != nil
+                )
+                applySoftwareProcessing(enabled: !profile.isMusic)
+                applyLiveFilter()
+            }
             return consumeBitrate(
                 profile: profile,
                 publishOptions: publishOptions
@@ -115,23 +122,20 @@ final class AudioBitrateProfileApplicator: @unchecked Sendable {
 
     private func applyLiveFilter() {
         if profile.isMusic || isScreenShareActive {
-            if intendedFilter == nil,
-               let live = audioProcessingModule.activeAudioFilter {
-                intendedFilter = live
-            }
             audioProcessingModule.setAudioFilter(nil)
         } else {
             audioProcessingModule.setAudioFilter(intendedFilter)
         }
     }
 
-    /// Music sets the profile bitrate. Leaving music restores the pre-music
-    /// cap (`0` clears `maxBitrateBps`).
+    /// Non-default profiles set the mapped bitrate. Returning to
+    /// ``voiceStandard`` restores the pre-profile cap (`0` clears
+    /// `maxBitrateBps`).
     private func consumeBitrate(
         profile: AudioBitrateProfile,
         publishOptions: PublishOptions
     ) -> Int? {
-        if profile.isMusic {
+        if profile != .voiceStandard {
             if restoredBitrate == nil {
                 restoredBitrate = publishOptions.audio.first?.bitrate ?? 0
             }
@@ -143,16 +147,5 @@ final class AudioBitrateProfileApplicator: @unchecked Sendable {
             return restoredBitrate
         }
         return nil
-    }
-}
-
-enum CallAudioFilterPolicyKey: InjectionKey {
-    nonisolated(unsafe) static var currentValue: AudioBitrateProfileApplicator?
-}
-
-extension InjectedValues {
-    var callAudioFilterPolicy: AudioBitrateProfileApplicator? {
-        get { Self[CallAudioFilterPolicyKey.self] }
-        set { Self[CallAudioFilterPolicyKey.self] = newValue }
     }
 }
