@@ -10,5 +10,4 @@ runs:
       id: spm-cache
       with:
         path: spm_cache
-        key: ${{ env.IMAGE }}-spm-${{ hashFiles('**/Package.resolved') }}
-        restore-keys: ${{ env.IMAGE }}-spm-
+        key: ${{ env.IMAGE }}-spm-${{ hashFiles('Package.swift') }}

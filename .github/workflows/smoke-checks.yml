@@ -167,6 +167,8 @@ jobs:
     if: ${{ github.event.inputs.record_snapshots_swiftui != 'true' && github.event.inputs.record_snapshots_uikit != 'true' }}
     steps:
     - uses: actions/checkout@v4.1.1
+      with:
+        fetch-depth: 0
     - uses: ./.github/actions/bootstrap
       env:
         INSTALL_INTERFACE_ANALYZER: true
