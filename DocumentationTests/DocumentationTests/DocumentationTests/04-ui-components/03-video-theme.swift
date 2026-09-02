@@ -10,6 +10,13 @@ import SwiftUI
 @MainActor
 private func content() {
     container {
+        let tokens = DesignSystemTokens()
+        tokens.colors.accentPrimary = .red
+        let appearance = VideoAppearance(tokens: tokens)
+        appearance.colors.indicatorSpeaking = .green
+    }
+
+    container {
         let streamBlue = UIColor(red: 0, green: 108.0 / 255.0, blue: 255.0 / 255.0, alpha: 1)
         var colors = Colors()
         colors.tintColor = Color(streamBlue)

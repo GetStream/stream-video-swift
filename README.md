@@ -138,7 +138,7 @@ You can customize the look and feel of the screens presented in the calling flow
 
 Most of our components are public, so you can use them as building blocks if you want to build your custom UI.
 
-All the texts, images, fonts and sounds used in the SDK are configurable via our `Appearance` class, to help you brand the views to be inline with your hosting app.
+All the texts, images, fonts and sounds used in the SDK are configurable via `VideoAppearance`. Shared color and layout tokens live on `DesignSystemTokens` from StreamCoreUI; pass the same instance into Chat later so both SDKs reskin together.
 
 ### UIKit SDK
 
