@@ -5,17 +5,12 @@
 import Foundation
 import StreamWebRTC
 
-/// Desired music vs last successfully applied Voice Processing policy.
+/// Desired music vs last successful Voice Processing apply.
 ///
-/// ``AudioDeviceModule/setMusicCaptureEnabled(_:restorePlayout:)`` used
-/// one flag for both. Direct VP failure reverted it so retry applied;
-/// unmute-deferred apply cleared pending first and left the flag
-/// matching, so retry no-oped. This type keeps desired until apply
-/// succeeds, and pending until then too.
-///
-/// Stereo preference is a live-graph overlay (bypass only). It is not
-/// stored here. Capture apply with stereo after leaving music is
-/// ``Applied/voiceWhileStereo``: VP stays disabled, AGC returns.
+/// Desired stays set until apply succeeds so a failed unmute-deferred
+/// apply can retry. Stereo preference is a live-graph overlay (bypass
+/// only) and is not stored here. Leaving music while stereo is preferred
+/// records ``Applied/voiceWhileStereo``: VP stays off, AGC returns.
 struct MusicCapturePolicy {
 
     /// Last successful music-toggle apply to the ADM.
@@ -28,6 +23,7 @@ struct MusicCapturePolicy {
         /// bypassed.
         case voiceWhileStereo
 
+        /// `true` only for the music apply, not ``voiceWhileStereo``.
         var isMusic: Bool { self == .music }
     }
 
@@ -52,6 +48,7 @@ struct MusicCapturePolicy {
         var agcEnabled: Bool
         var bypassVoiceProcessing: Bool
 
+        /// Mixer mute when VP is bypassed; Voice Processing mute otherwise.
         var muteMode: RTCAudioEngineMuteMode {
             bypassVoiceProcessing ? .inputMixer : .voiceProcessing
         }
@@ -116,12 +113,6 @@ struct MusicCapturePolicy {
         desiredMusicEnabled
             || stereoPreferred
             || applied == .voiceWhileStereo
-    }
-
-    func muteMode(stereoPreferred: Bool) -> RTCAudioEngineMuteMode {
-        bypassVoiceProcessing(stereoPreferred: stereoPreferred)
-            ? .inputMixer
-            : .voiceProcessing
     }
 
     /// Music-exit left VP off for stereo. Stereo-off must re-enable VP;

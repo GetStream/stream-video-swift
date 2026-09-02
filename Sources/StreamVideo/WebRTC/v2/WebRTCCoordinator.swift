@@ -230,6 +230,9 @@ final class WebRTCCoordinator: @unchecked Sendable {
     }
 
     /// Applies an in-call audio bitrate/processing profile.
+    ///
+    /// The applicator is the source of truth. A throw means session, ADM,
+    /// and stored profile were rolled back there.
     func setAudioBitrateProfile(_ profile: AudioBitrateProfile) async throws {
         try await stateAdapter.setAudioBitrateProfile(profile)
     }
@@ -289,9 +292,17 @@ final class WebRTCCoordinator: @unchecked Sendable {
 
     /// Sets an audio filter for the call.
     ///
+    /// The applicator stashes the filter while music or screenshare is
+    /// suppressing live processing.
     /// - Parameter audioFilter: The filter to apply, or `nil` to clear it.
     func setAudioFilter(_ audioFilter: AudioFilter?) {
         stateAdapter.setAudioFilter(audioFilter)
+    }
+
+    /// Filter last requested by `Call.setAudioFilter`, including while
+    /// music or screenshare stash live output.
+    var requestedAudioFilter: AudioFilter? {
+        stateAdapter.requestedAudioFilter
     }
 
     // MARK: - Screensharing

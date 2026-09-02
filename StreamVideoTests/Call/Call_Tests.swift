@@ -1188,6 +1188,48 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
         XCTAssertEqual(call.recordedInputPayload(VideoFilter.self, for: .setVideoFilter)?.first, mockVideoFilter)
     }
 
+    // MARK: - Noise cancellation
+
+    func test_noiseCancellationDisabled_clearsStashedFilter() async {
+        let noiseCancellationFilter = NoiseCancellationFilter(
+            name: "nc",
+            initialize: { _, _ in },
+            process: { _, _, _, _ in },
+            release: {}
+        )
+        streamVideo = StreamVideo.mock(
+            httpClient: httpClient,
+            videoConfig: .dummy(
+                noiseCancellationFilter: noiseCancellationFilter
+            )
+        )
+        let callController = MockCallController()
+        let call = Call.dummy(callController: callController)
+
+        call.update(reconnectionStatus: .connected)
+        await fulfilmentInMainActor {
+            call.state.reconnectionStatus == .connected
+        }
+        call.state.session = .dummy()
+        call.setAudioFilter(noiseCancellationFilter)
+        streamVideo.videoConfig.audioProcessingModule.setAudioFilter(nil)
+        XCTAssertEqual(callController.requestedAudioFilter?.id, "nc")
+        XCTAssertNil(
+            streamVideo.videoConfig.audioProcessingModule.activeAudioFilter
+        )
+
+        call.state.settings = .dummy(
+            audio: .dummy(
+                noiseCancellation: .init(mode: .disabled)
+            )
+        )
+
+        await fulfilmentInMainActor {
+            callController.requestedAudioFilter == nil
+        }
+        streamVideo.videoConfig.audioProcessingModule.setAudioFilter(nil)
+    }
+
     // MARK: - Private helpers
 
     private func makeCallWithMockCoordinator() -> (Call, MockDefaultAPIEndpoints) {

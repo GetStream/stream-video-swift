@@ -81,6 +81,8 @@ extension Call.StateMachine.Stage {
             input.resetAudioFilter()
 
             Task(disposableBag: disposableBag) { @MainActor [weak self, call] in
+                // Cached Call + leave + join: clear published music so
+                // the next set is not a no-op at the manager guard.
                 await call.microphone.resetAudioBitrateProfile()
                 guard let self else {
                     return

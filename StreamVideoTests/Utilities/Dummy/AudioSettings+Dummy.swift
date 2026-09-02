@@ -11,6 +11,7 @@ extension AudioSettings {
         defaultDevice: DefaultDevice = .speaker,
         hifiAudioEnabled: Bool? = nil,
         micDefaultOn: Bool = false,
+        noiseCancellation: NoiseCancellationSettingsRequest? = nil,
         opusDtxEnabled: Bool = false,
         redundantCodingEnabled: Bool = false,
         speakerDefaultOn: Bool = false
@@ -20,6 +21,7 @@ extension AudioSettings {
             defaultDevice: defaultDevice,
             hifiAudioEnabled: hifiAudioEnabled,
             micDefaultOn: micDefaultOn,
+            noiseCancellation: noiseCancellation,
             opusDtxEnabled: opusDtxEnabled,
             redundantCodingEnabled: redundantCodingEnabled,
             speakerDefaultOn: speakerDefaultOn

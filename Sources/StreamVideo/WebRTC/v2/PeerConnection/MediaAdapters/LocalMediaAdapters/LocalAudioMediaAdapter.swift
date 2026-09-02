@@ -342,8 +342,9 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     /// Updates `maxBitrateBps` on every local audio sender.
     ///
     /// Applied through RTP parameters so it does not require renegotiation.
-    /// `bitrate <= 0` clears the cap (`maxBitrateBps = nil`). Encoded on
-    /// the processing queue because sender parameters are not thread-safe.
+    /// `bitrate <= 0` stores `0` and clears `maxBitrateBps` on encodings.
+    /// Encoded on the processing queue because sender parameters are not
+    /// thread-safe.
     /// - Parameter bitrate: Target bitrate in bits per second.
     func setMaxBitrate(_ bitrate: Int) async {
         try? await processingQueue.addSynchronousTaskOperation { [weak self] in

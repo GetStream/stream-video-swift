@@ -54,11 +54,21 @@ final class AudioBitrateProfileApplicator: @unchecked Sendable {
     /// Last filter requested by `Call.setAudioFilter`. Live output is
     /// suppressed while music or screenshare is active.
     private var intendedFilter: AudioFilter?
+
+    /// Filter `Call.setAudioFilter` last asked for, including while live
+    /// output is suppressed.
+    var requestedAudioFilter: AudioFilter? {
+        lock.sync { intendedFilter }
+    }
     private var isScreenShareActive = false
     /// Bitrate in force before a non-default profile; `0` means encodings
     /// had no cap.
     private var restoredBitrate: Int?
 
+    /// - Parameters:
+    ///   - audioSession: Call session used to leave or restore VoiceChat.
+    ///   - audioProcessingModule: Software NS/HPF and live filter owner.
+    ///   - audioDeviceModule: Lazy ADM lookup for Voice Processing.
     init(
         audioSession: CallAudioSession,
         audioProcessingModule: AudioProcessingModule,
@@ -84,6 +94,11 @@ final class AudioBitrateProfileApplicator: @unchecked Sendable {
     /// and will not install a live filter onto the graph being torn down.
     /// If VP disable throws, session and `storedProfile` roll back so the
     /// call is not left in VoiceChat-off / VP-on.
+    ///
+    /// - Parameters:
+    ///   - profile: Requested capture/publish profile.
+    ///   - context: ``setProfile`` no-ops when already applied;
+    ///     ``rebind`` still stamps bitrate on a new publisher.
     func apply(
         profile: AudioBitrateProfile,
         callSettings: CallSettings,
@@ -194,6 +209,8 @@ final class AudioBitrateProfileApplicator: @unchecked Sendable {
             )
     }
 
+    /// Maps previous → requested into the smallest set of side effects.
+    /// Never-music ``voiceStandard`` is ``ApplyWork/none``.
     private func applyWork(
         profile: AudioBitrateProfile,
         previous: AudioBitrateProfile
@@ -210,6 +227,8 @@ final class AudioBitrateProfileApplicator: @unchecked Sendable {
         return .none
     }
 
+    /// Session → commit profile → ADM VP → APM/filter/bitrate.
+    /// Rolls session and stored profile back if VP disable throws.
     private func applyProcessing(
         profile: AudioBitrateProfile,
         previous: AudioBitrateProfile,

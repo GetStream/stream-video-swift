@@ -61,7 +61,11 @@ struct PublishOptions: Sendable, Hashable {
             self.bitrateProfiles = bitrateProfiles
         }
 
-        /// Bitrate for `profile`, preferring SFU mappings then the option bitrate.
+        /// Bitrate for `profile`.
+        ///
+        /// Prefers the SFU profile map, then this option's bitrate for
+        /// ``AudioBitrateProfile/voiceStandard``, then
+        /// ``AudioBitrateProfile/defaultBitrate``.
         func bitrate(for profile: AudioBitrateProfile) -> Int {
             if let mapped = bitrateProfiles[profile], mapped > 0 {
                 return mapped

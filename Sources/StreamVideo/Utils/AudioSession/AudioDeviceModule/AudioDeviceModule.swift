@@ -347,12 +347,12 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
     /// when VP is off is the upgrade.
     private func applyVoiceProcessingPolicyLocked() {
         let stereo = source.prefersStereoPlayout
-        source.isVoiceProcessingBypassed =
-            musicCapturePolicy.bypassVoiceProcessing(
-                stereoPreferred: stereo
-            )
+        let bypass = musicCapturePolicy.bypassVoiceProcessing(
+            stereoPreferred: stereo
+        )
+        source.isVoiceProcessingBypassed = bypass
         _ = source.setMuteMode(
-            musicCapturePolicy.muteMode(stereoPreferred: stereo)
+            bypass ? .inputMixer : .voiceProcessing
         )
     }
 
@@ -774,11 +774,10 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
     }
 
     /// VP disable unlinks I/O. WebRTC reports didStop/didDisable while
-    /// input is still live. Resetting the injector in that window
-    /// disconnects the mic. Keep the graph only for **music** (the path
-    /// that actually calls `setVoiceProcessingEnabled(false)`). Stereo
-    /// only bypasses VP and must match `develop`: reset on stop, nil
-    /// context on disable.
+    /// input is still live; resetting the injector then disconnects the
+    /// mic. Keep the graph only for music, and only while recording is
+    /// still live. Never-music stop still resets the renderer; disable
+    /// still nils `engineInputContext`. Stereo only bypasses VP.
     private func handleEngineStoppedOrDisabled(
         isRecordingEnabled: Bool,
         clearInputContext: Bool
