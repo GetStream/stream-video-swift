@@ -39,8 +39,6 @@ protocol VideoCapturerProviding {
     ///   - audioDeviceModule: The audio device module used by the capturer.
     ///   - includeAudio: Whether to capture app audio during screen sharing.
     ///     Only valid for `.inApp`; ignored otherwise.
-    ///   - setScreenShareActive: Suspends live audio filters while in-app
-    ///     screenshare audio is running. Ignored for `.broadcast`.
     /// - Returns: An instance of `StreamVideoCapturer` for managing screen sharing.
     ///
     /// Depending on the screen sharing type, this method creates a capturer that
@@ -49,8 +47,7 @@ protocol VideoCapturerProviding {
         _ type: ScreensharingType,
         source: RTCVideoSource,
         audioDeviceModule: AudioDeviceModule,
-        includeAudio: Bool,
-        setScreenShareActive: ((Bool) -> Void)?
+        includeAudio: Bool
     ) -> StreamVideoCapturing
 }
 
@@ -94,8 +91,6 @@ final class StreamVideoCapturerFactory: VideoCapturerProviding {
     ///   - audioDeviceModule: The audio device module used by the capturer.
     ///   - includeAudio: Whether to capture app audio during screen sharing.
     ///     Only valid for `.inApp`; ignored otherwise.
-    ///   - setScreenShareActive: Suspends live audio filters while in-app
-    ///     screenshare audio is running. Ignored for `.broadcast`.
     /// - Returns: A `StreamVideoCapturer` instance configured for screen sharing.
     ///
     /// This method dynamically creates a capturer based on the screen sharing type:
@@ -107,16 +102,14 @@ final class StreamVideoCapturerFactory: VideoCapturerProviding {
         _ type: ScreensharingType,
         source: RTCVideoSource,
         audioDeviceModule: AudioDeviceModule,
-        includeAudio: Bool,
-        setScreenShareActive: ((Bool) -> Void)?
+        includeAudio: Bool
     ) -> StreamVideoCapturing {
         switch type {
         case .inApp:
             return StreamVideoCapturer.screenShareCapturer(
                 with: source,
                 audioDeviceModule: audioDeviceModule,
-                includeAudio: includeAudio,
-                setScreenShareActive: setScreenShareActive
+                includeAudio: includeAudio
             )
         case .broadcast:
             return StreamVideoCapturer.broadcastCapturer(

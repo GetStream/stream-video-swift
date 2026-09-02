@@ -51,6 +51,9 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
     private var hasRegisteredPrimaryTrack: Bool = false
     private var ownCapabilities: [OwnCapability] = []
+    /// Live cap applied to senders created after ``setMaxBitrate``. `0`
+    /// means no cap. Rebind/publish can run before any transceiver exists.
+    private var maxBitrateBps = 0
 
     /// Initializes a new instance of `LocalAudioMediaAdapter`.
     ///
@@ -128,7 +131,9 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     /// through call settings updates) and not called directly by external
     /// consumers.
     func publish() async throws {
-        guard !primaryTrack.isEnabled else {
+        guard
+            !primaryTrack.isEnabled
+        else {
             return
         }
 
@@ -205,7 +210,9 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             guard lastUpdatedCallSettings != settings.audio else { return }
 
             let isMuted = !settings.audioOn
-            if lastUpdatedCallSettings?.micOn != settings.audio.micOn {
+            let isLocalMuted = !primaryTrack.isEnabled
+
+            if isMuted != isLocalMuted {
                 try await sfuAdapter.updateTrackMuteState(
                     .audio,
                     isMuted: isMuted,
@@ -213,10 +220,9 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                 )
             }
 
-            // Keep the send track enabled while muted so ChannelSend keeps
-            // draining silence. Unpublishing parks pre-mute frames and they
-            // leak after unmute.
-            if !isMuted {
+            if isMuted, primaryTrack.isEnabled {
+                try await unpublish()
+            } else if !isMuted {
                 try await publish()
             }
 
@@ -336,11 +342,20 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     /// Updates `maxBitrateBps` on every local audio sender.
     ///
     /// Applied through RTP parameters so it does not require renegotiation.
+    /// `bitrate <= 0` clears the cap (`maxBitrateBps = nil`). Encoded on
+    /// the processing queue because sender parameters are not thread-safe.
     /// - Parameter bitrate: Target bitrate in bits per second.
     func setMaxBitrate(_ bitrate: Int) async {
         try? await processingQueue.addSynchronousTaskOperation { [weak self] in
             guard let self else { return }
-            applyMaxBitrate(bitrate)
+            maxBitrateBps = bitrate
+            transceiverStorage.forEach { _, value in
+                applyMaxBitrate(bitrate, on: value.transceiver)
+            }
+            log.debug(
+                "Local audio maxBitrateBps set to \(bitrate).",
+                subsystems: .webRTC
+            )
         }
     }
 
@@ -374,15 +389,12 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             return
         }
         transceiverStorage.set(transceiver, track: track, for: options)
+        applyMaxBitrate(maxBitrateBps, on: transceiver)
     }
 
-    private func applyMaxBitrate(_ bitrate: Int) {
-        transceiverStorage.forEach { _, value in
-            applyMaxBitrate(bitrate, on: value.transceiver)
-        }
-        log.debug("Local audio maxBitrateBps set to \(bitrate).", subsystems: .webRTC)
-    }
-
+    /// Writes `maxBitrateBps` on one sender. `bitrate <= 0` clears the
+    /// cap. An empty encodings list gets a single active encoding so the
+    /// cap is not dropped on a sender that has not negotiated yet.
     private func applyMaxBitrate(
         _ bitrate: Int,
         on transceiver: RTCRtpTransceiver

@@ -65,10 +65,21 @@ public final class MicrophoneManager: ObservableObject, CallSettingsManager, @un
     /// Sets the in-call audio bitrate/processing profile.
     ///
     /// Allowed after join. Requires dashboard `hifi_audio_enabled`.
+    /// Same-profile calls return here so the applicator does not rebuild
+    /// the session; reconnect uses ``AudioBitrateApplyContext/rebind``
+    /// instead of this API.
     public func setAudioBitrateProfile(_ profile: AudioBitrateProfile) async throws {
         guard profile != audioBitrateProfile else { return }
         try await callController.setAudioBitrateProfile(profile)
         await MainActor.run { audioBitrateProfile = profile }
+    }
+
+    /// Resets the published profile on leave without touching WebRTC.
+    ///
+    /// ``Call.microphone`` outlives the peer connection. Leave must
+    /// clear the cached value so a later music set is not a no-op.
+    func resetAudioBitrateProfile() async {
+        await MainActor.run { audioBitrateProfile = .voiceStandard }
     }
     
     // MARK: - private

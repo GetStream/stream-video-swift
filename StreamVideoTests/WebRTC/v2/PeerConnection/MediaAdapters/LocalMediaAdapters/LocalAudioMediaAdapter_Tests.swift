@@ -96,26 +96,14 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
 
     // MARK: - didUpdateCallSettings(_:)
 
-    func test_didUpdateCallSettings_audioOnFalse_sendsMuteWithoutUnpublishing() async throws {
+    func test_didUpdateCallSettings_isEnabledSameAsCallSettings_noOperation() async throws {
         try await subject.setUp(
             with: .init(audioOn: true),
             ownCapabilities: [.sendAudio]
         )
-        subject.primaryTrack.isEnabled = true
 
         try await subject.didUpdateCallSettings(.init(audioOn: false))
-        await fulfillment {
-            self.mockSFUStack.service.updateMuteStatesWasCalledWithRequest != nil
-        }
 
-        let request = try XCTUnwrap(
-            mockSFUStack.service.updateMuteStatesWasCalledWithRequest
-        )
-        XCTAssertEqual(request.sessionID, sessionId)
-        XCTAssertEqual(request.muteStates.count, 1)
-        XCTAssertEqual(request.muteStates[0].trackType, .audio)
-        XCTAssertTrue(request.muteStates[0].muted)
-        XCTAssertTrue(subject.primaryTrack.isEnabled)
         XCTAssertNil(mockSFUStack.service.updateSubscriptionsWasCalledWithRequest)
     }
 
@@ -192,7 +180,6 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(request.muteStates.count, 1)
         XCTAssertEqual(request.muteStates[0].trackType, .audio)
         XCTAssertTrue(request.muteStates[0].muted)
-        XCTAssertTrue(subject.primaryTrack.isEnabled)
     }
 
     func test_didUpdateCallSettings_isEnabledTrueCallSettingsFalseAndThenCallSettingsTrue_trackWasNotAddedAgain() async throws {
@@ -213,16 +200,8 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
             XCTAssertEqual(trackType, .audio)
             XCTAssertTrue(track is RTCAudioTrack)
         }
-        try await subject.didUpdateCallSettings(.init(audioOn: true))
-        await fulfillment {
-            self.subject.primaryTrack.isEnabled
-        }
-
         try await subject.didUpdateCallSettings(.init(audioOn: false))
-        await fulfillment {
-            self.mockSFUStack.service.updateMuteStatesWasCalledWithRequest?.muteStates.first?.muted == true
-        }
-        XCTAssertTrue(subject.primaryTrack.isEnabled)
+        await fulfillment { self.subject.primaryTrack.isEnabled == false }
 
         try await assertTrackEvent(isInverted: true) {
             switch $0 {
@@ -235,10 +214,7 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
             try await subject.didUpdateCallSettings(.init(audioOn: true))
         }
 
-        await fulfillment {
-            self.mockSFUStack.service.updateMuteStatesWasCalledWithRequest?.muteStates.first?.muted == false
-        }
-        XCTAssertTrue(subject.primaryTrack.isEnabled)
+        await fulfillment { self.subject.primaryTrack.isEnabled == true }
     }
 
     // MARK: - didUpdateOwnCapabilities
@@ -546,6 +522,65 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         await subject.setMaxBitrate(0)
 
         XCTAssertNil(transceiver.sender.parameters.encodings.first?.maxBitrateBps)
+    }
+
+    func test_setMaxBitrate_beforePublish_appliesCapToNewTransceiver(
+    ) async throws {
+        publishOptions = [.dummy(codec: .opus, bitrate: 64_000)]
+        let transceiver = try makeTransceiver(
+            of: .audio,
+            audioOptions: publishOptions[0]
+        )
+        mockPeerConnection.stub(for: .addTransceiver, with: transceiver)
+
+        await subject.setMaxBitrate(128_000)
+        try await subject.publish()
+        await fulfillment {
+            self.mockPeerConnection.timesCalled(.addTransceiver) == 1
+        }
+
+        XCTAssertEqual(
+            transceiver.sender.parameters.encodings.first?.maxBitrateBps,
+            128_000
+        )
+    }
+
+    func test_setMaxBitrate_beforeDidUpdatePublishOptions_appliesCapToNewTransceiver(
+    ) async throws {
+        publishOptions = [.dummy(id: 0, codec: .opus, bitrate: 64_000)]
+        let opusTransceiver = try makeTransceiver(
+            of: .audio,
+            audioOptions: publishOptions[0]
+        )
+        mockPeerConnection.stub(for: .addTransceiver, with: opusTransceiver)
+        try await subject.publish()
+        await fulfillment {
+            self.mockPeerConnection.timesCalled(.addTransceiver) == 1
+        }
+
+        await subject.setMaxBitrate(128_000)
+
+        let redOptions = PublishOptions.AudioPublishOptions.dummy(
+            id: 1,
+            codec: .red,
+            bitrate: 64_000
+        )
+        let redTransceiver = try makeTransceiver(
+            of: .audio,
+            audioOptions: redOptions
+        )
+        mockPeerConnection.stub(for: .addTransceiver, with: redTransceiver)
+        try await subject.didUpdatePublishOptions(
+            .dummy(audio: [publishOptions[0], redOptions])
+        )
+        await fulfillment {
+            self.mockPeerConnection.timesCalled(.addTransceiver) == 2
+        }
+
+        XCTAssertEqual(
+            redTransceiver.sender.parameters.encodings.first?.maxBitrateBps,
+            128_000
+        )
     }
 
     // MARK: - Private

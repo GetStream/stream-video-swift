@@ -170,13 +170,10 @@ final class StreamVideoCapturer: StreamVideoCapturing, @unchecked Sendable {
     ///   - audioDeviceModule: The audio device module for capture coordination.
     ///   - includeAudio: Whether to capture app audio during screen sharing.
     ///     Only valid for `.inApp`; ignored otherwise.
-    ///   - setScreenShareActive: Suspends live audio filters while in-app
-    ///     screenshare audio is running.
     static func screenShareCapturer(
         with videoSource: RTCVideoSource,
         audioDeviceModule: AudioDeviceModule,
-        includeAudio: Bool,
-        setScreenShareActive: ((Bool) -> Void)? = nil
+        includeAudio: Bool
     ) -> StreamVideoCapturer {
         .init(
             videoSource: videoSource,
@@ -185,8 +182,7 @@ final class StreamVideoCapturer: StreamVideoCapturing, @unchecked Sendable {
             audioDeviceModule: audioDeviceModule,
             actionHandlers: [
                 ScreenShareCaptureHandler(
-                    includeAudio: includeAudio,
-                    setScreenShareActive: setScreenShareActive
+                    includeAudio: includeAudio
                 )
             ]
         )
@@ -365,6 +361,15 @@ final class StreamVideoCapturer: StreamVideoCapturing, @unchecked Sendable {
 
     func actionHandler<T: StreamVideoCapturerActionHandler>() -> T? {
         actionHandlers.first { $0 is T } as? T
+    }
+
+    /// Attaches the screenshare audio-filter gate to the in-app handler.
+    /// Broadcast capturers have no handler; this is a no-op for them.
+    func setAudioFilterGate(
+        _ audioFilterGate: ScreenShareAudioFilterGate?
+    ) {
+        let handler: ScreenShareCaptureHandler? = actionHandler()
+        handler?.setAudioFilterGate(audioFilterGate)
     }
 
     func supportsBackgrounding() -> Bool {

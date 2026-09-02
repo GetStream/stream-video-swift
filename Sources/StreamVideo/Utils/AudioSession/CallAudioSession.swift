@@ -177,37 +177,71 @@ final class CallAudioSession: @unchecked Sendable {
     /// Applies the in-call audio bitrate profile to the session.
     ///
     /// Music leaves VoiceChat immediately (not through the 250ms debounce)
-    /// so Voice Processing can be disabled afterward. Route and settings
-    /// updates re-enter ``resolvedConfiguration`` with the stored profile.
+    /// so Apple will allow `setVoiceProcessingEnabled(false)` afterward.
+    /// Bypass-only does not rebuild I/O after VoiceChat. Route and
+    /// settings updates re-enter ``resolvedConfiguration`` with the stored
+    /// profile so `.default` sticks while music is on.
+    ///
+    /// On configuration failure the stored profile is restored so later
+    /// `didUpdate` calls do not keep applying a mode we never reached.
     func setAudioBitrateProfile(
         _ profile: AudioBitrateProfile,
-        callSettings: CallSettings? = nil,
-        ownCapabilities: Set<OwnCapability>? = nil
+        callSettings: CallSettings,
+        ownCapabilities: Set<OwnCapability>
+    ) async throws {
+        try await applyAudioBitrateProfile(
+            profile,
+            callSettings: callSettings,
+            ownCapabilities: ownCapabilities,
+            restorePreviousOnFailure: true
+        )
+    }
+
+    /// Teardown / ADM-failure rollback. Keeps `profile` even if session
+    /// apply fails so music cannot restick in `resolvedConfiguration`.
+    func commitAudioBitrateProfile(
+        _ profile: AudioBitrateProfile,
+        callSettings: CallSettings,
+        ownCapabilities: Set<OwnCapability>
+    ) async throws {
+        try await applyAudioBitrateProfile(
+            profile,
+            callSettings: callSettings,
+            ownCapabilities: ownCapabilities,
+            restorePreviousOnFailure: false
+        )
+    }
+
+    // MARK: - Private Helpers
+
+    private func applyAudioBitrateProfile(
+        _ profile: AudioBitrateProfile,
+        callSettings: CallSettings,
+        ownCapabilities: Set<OwnCapability>,
+        restorePreviousOnFailure: Bool
     ) async throws {
         let previous = audioBitrateProfile
         audioBitrateProfile = profile
-        let settings = callSettings ?? lastCallSettings
-        let capabilities = ownCapabilities ?? lastOwnCapabilities
-        guard delegate != nil, let settings, let capabilities else {
+        guard delegate != nil else {
             return
         }
 
         do {
             try await applyConfiguration(
                 resolvedConfiguration(
-                    for: settings,
-                    ownCapabilities: capabilities
+                    for: callSettings,
+                    ownCapabilities: ownCapabilities
                 ),
-                callSettings: settings,
-                ownCapabilities: capabilities
+                callSettings: callSettings,
+                ownCapabilities: ownCapabilities
             ).result()
         } catch {
-            audioBitrateProfile = previous
+            if restorePreviousOnFailure {
+                audioBitrateProfile = previous
+            }
             throw error
         }
     }
-
-    // MARK: - Private Helpers
 
     private func scheduleDeferredActivation(
         callSettingsPublisher: AnyPublisher<CallSettings, Never>,
@@ -448,13 +482,14 @@ final class CallAudioSession: @unchecked Sendable {
         )
     }
 
-    /// Leaves VoiceChat while music is on so Apple will actually allow VP
-    /// to be bypassed. Playback-only configs are left alone.
+    /// Music leaves VoiceChat (`playAndRecord` + `.default`) so Apple will
+    /// allow VP to be **disabled**, not only bypassed. Playback-only
+    /// configs are left alone; they are not VoiceChat.
     private func resolvedConfiguration(
         for callSettings: CallSettings,
         ownCapabilities: Set<OwnCapability>
     ) -> AudioSessionConfiguration {
-        let configuration = policy.configuration(
+        var configuration = policy.configuration(
             for: callSettings,
             ownCapabilities: ownCapabilities
         )
@@ -462,13 +497,8 @@ final class CallAudioSession: @unchecked Sendable {
               configuration.category == .playAndRecord else {
             return configuration
         }
-        return AudioSessionConfiguration(
-            isActive: configuration.isActive,
-            category: configuration.category,
-            mode: .default,
-            options: configuration.options,
-            overrideOutputAudioPort: configuration.overrideOutputAudioPort
-        )
+        configuration.mode = .default
+        return configuration
     }
 
     /// Breaks the configuration into store actions so reducers update the
