@@ -15,7 +15,9 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
     private var activeSession: Session?
     private let recorder: RPScreenRecorder
     private let includeAudio: Bool
-    private let setScreenShareActive: ((Bool) -> Void)?
+    /// Named filter gate so capture start/stop do not take a raw closure.
+    /// Nil until attached after capturer build, and for broadcast.
+    private var audioFilterGate: ScreenShareAudioFilterGate?
     private let disposableBag = DisposableBag()
     private let audioProcessingQueue = DispatchQueue(
         label: "io.getstream.screenshare.audio.processing",
@@ -33,18 +35,25 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
     ///   - recorder: The ReplayKit recorder to use. Defaults to `.shared()`.
     ///   - includeAudio: Whether to capture app audio during screen sharing.
     ///     Only valid for `.inApp`; ignored otherwise.
-    ///   - setScreenShareActive: Suspends live audio filters while in-app
-    ///     screenshare audio is running.
+    ///   - audioFilterGate: Suspends live audio filters while in-app
+    ///     screenshare audio is running. Restoring does not override music.
+    ///     Defaults to `nil`; attach after capturer build via
+    ///     ``setAudioFilterGate(_:)``.
     init(
         recorder: RPScreenRecorder = .shared(),
         includeAudio: Bool,
-        setScreenShareActive: ((Bool) -> Void)? = nil
+        audioFilterGate: ScreenShareAudioFilterGate? = nil
     ) {
         self.recorder = recorder
         self.includeAudio = includeAudio
-        self.setScreenShareActive = setScreenShareActive
+        self.audioFilterGate = audioFilterGate
         super.init()
         recorder.delegate = self
+    }
+
+    /// Attaches the session provider's filter gate after capturer build.
+    func setAudioFilterGate(_ audioFilterGate: ScreenShareAudioFilterGate?) {
+        self.audioFilterGate = audioFilterGate
     }
 
     // MARK: - RPScreenRecorderDelegate
@@ -122,7 +131,7 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
         recorder.isMicrophoneEnabled = false
         recorder.isCameraEnabled = false
 
-        setScreenShareActive?(true)
+        audioFilterGate?.setActive(true)
 
         do {
             try await Task { @MainActor [weak self] in
@@ -140,7 +149,7 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
                 }
             }.value
         } catch {
-            setScreenShareActive?(false)
+            audioFilterGate?.setActive(false)
             throw error
         }
 
@@ -266,7 +275,7 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
             return
         }
 
-        setScreenShareActive?(false)
+        audioFilterGate?.setActive(false)
 
         try await recorder.stopCapture()
         activeSession = nil

@@ -81,6 +81,7 @@ extension Call.StateMachine.Stage {
             input.resetAudioFilter()
 
             Task(disposableBag: disposableBag) { @MainActor [weak self, call] in
+                await call.microphone.resetAudioBitrateProfile()
                 guard let self else {
                     return
                 }

@@ -57,8 +57,7 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable 
                 .broadcast,
                 source: track.source,
                 audioDeviceModule: .init(mockAudioDeviceModule),
-                includeAudio: true,
-                setScreenShareActive: nil
+                includeAudio: true
             ),
             includeAudio: true
         )

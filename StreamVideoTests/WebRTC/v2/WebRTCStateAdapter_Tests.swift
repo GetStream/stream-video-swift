@@ -1014,14 +1014,16 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(Self.videoConfig.audioProcessingModule.activeAudioFilter?.id, "nc")
     }
 
-    func test_setScreenShareActive_voice_clearsAndRestoresAudioFilter() {
+    func test_setScreenShareActive_voice_clearsAndRestoresAudioFilter() async throws {
         let filter = MockAudioFilter(id: "nc")
         subject.setAudioFilter(filter)
 
-        subject.audioBitrateProfileApplicator.setScreenShareActive(true)
+        let provider = await subject.screenShareSessionProvider
+        let gate = try XCTUnwrap(provider.audioFilterGate)
+        gate.setActive(true)
         XCTAssertNil(Self.videoConfig.audioProcessingModule.activeAudioFilter)
 
-        subject.audioBitrateProfileApplicator.setScreenShareActive(false)
+        gate.setActive(false)
         XCTAssertEqual(Self.videoConfig.audioProcessingModule.activeAudioFilter?.id, "nc")
     }
 
@@ -1031,8 +1033,10 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         subject.setAudioFilter(filter)
         try await subject.setAudioBitrateProfile(.musicHighQuality)
 
-        subject.audioBitrateProfileApplicator.setScreenShareActive(true)
-        subject.audioBitrateProfileApplicator.setScreenShareActive(false)
+        let provider = await subject.screenShareSessionProvider
+        let gate = try XCTUnwrap(provider.audioFilterGate)
+        gate.setActive(true)
+        gate.setActive(false)
 
         try await subject.setAudioBitrateProfile(.voiceStandard)
         XCTAssertEqual(Self.videoConfig.audioProcessingModule.activeAudioFilter?.id, "nc")
@@ -1042,11 +1046,13 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
     ) async throws {
         let filter = MockAudioFilter(id: "nc")
         subject.setAudioFilter(filter)
-        subject.audioBitrateProfileApplicator.setScreenShareActive(true)
+        let provider = await subject.screenShareSessionProvider
+        let gate = try XCTUnwrap(provider.audioFilterGate)
+        gate.setActive(true)
         XCTAssertNil(Self.videoConfig.audioProcessingModule.activeAudioFilter)
 
         try await subject.setAudioBitrateProfile(.musicHighQuality)
-        subject.audioBitrateProfileApplicator.setScreenShareActive(false)
+        gate.setActive(false)
         XCTAssertNil(Self.videoConfig.audioProcessingModule.activeAudioFilter)
 
         try await subject.setAudioBitrateProfile(.voiceStandard)
@@ -1231,6 +1237,45 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         )
     }
 
+    func test_setAudioBitrateProfile_sameMusicProfile_doesNotReapplyVP(
+    ) async throws {
+        try await subject.setAudioBitrateProfile(.musicHighQuality)
+        let vpCount = mockAudioDeviceModuleSource.timesCalled(
+            .setVoiceProcessingEnabled
+        )
+
+        try await subject.setAudioBitrateProfile(.musicHighQuality)
+
+        XCTAssertEqual(
+            mockAudioDeviceModuleSource.timesCalled(
+                .setVoiceProcessingEnabled
+            ),
+            vpCount
+        )
+        await assertEqualAsync(
+            await subject.audioBitrateProfile,
+            .musicHighQuality
+        )
+    }
+
+    func test_setAudioBitrateProfile_music_whenVPDisableFails_keepsVoiceProfile(
+    ) async throws {
+        mockAudioDeviceModuleSource.stub(
+            for: .setVoiceProcessingEnabled,
+            with: 1
+        )
+
+        do {
+            try await subject.setAudioBitrateProfile(.musicHighQuality)
+            XCTFail("VP disable must throw so music is not half-applied.")
+        } catch {
+            await assertEqualAsync(
+                await subject.audioBitrateProfile,
+                .voiceStandard
+            )
+        }
+    }
+
     func test_cleanUp_withoutMusic_doesNotMutateSoftwareProcessingOrFilter(
     ) async throws {
         let module = Self.videoConfig.audioProcessingModule
@@ -1252,6 +1297,30 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         )
         module.config.isNoiseSuppressionEnabled = true
         module.config.isHighpassFilterEnabled = true
+    }
+
+    func test_cleanUp_whenMusicRestoreThrows_restoresSoftwareProcessing(
+    ) async throws {
+        try await subject.setAudioBitrateProfile(.musicHighQuality)
+        mockAudioDeviceModuleSource.stub(
+            for: .setVoiceProcessingEnabled,
+            with: 1
+        )
+
+        await subject.cleanUp()
+
+        await assertEqualAsync(
+            await subject.audioBitrateProfile,
+            .voiceStandard
+        )
+        XCTAssertTrue(
+            Self.videoConfig.audioProcessingModule.config
+                .isNoiseSuppressionEnabled
+        )
+        XCTAssertTrue(
+            Self.videoConfig.audioProcessingModule.config
+                .isHighpassFilterEnabled
+        )
     }
 
     // MARK: - didAddTrack

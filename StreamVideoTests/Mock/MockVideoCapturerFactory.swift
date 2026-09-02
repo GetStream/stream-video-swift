@@ -78,8 +78,7 @@ final class MockVideoCapturerFactory: VideoCapturerProviding, Mockable, @uncheck
         _ type: ScreensharingType,
         source: RTCVideoSource,
         audioDeviceModule: AudioDeviceModule,
-        includeAudio: Bool,
-        setScreenShareActive _: ((Bool) -> Void)?
+        includeAudio: Bool
     ) -> StreamVideoCapturing {
         stubbedFunctionInput[.buildScreenCapturer]?
             .append(

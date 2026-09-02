@@ -97,9 +97,13 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     private(set) var initialCallSettings: CallSettings?
 
     private var videoFilter: VideoFilter?
-    /// Requested capture/publish profile. Kept across reconnects, reset on leave.
-    private(set) var audioBitrateProfile: AudioBitrateProfile = .voiceStandard
-    nonisolated let audioBitrateProfileApplicator: AudioBitrateProfileApplicator
+    /// Requested capture/publish profile. The applicator is the source of
+    /// truth so a failed apply cannot briefly publish the new value.
+    /// Kept across reconnects; leave resets it through the applicator.
+    var audioBitrateProfile: AudioBitrateProfile {
+        audioBitrateProfileApplicator.profile
+    }
+    private nonisolated let audioBitrateProfileApplicator: AudioBitrateProfileApplicator
 
     private let rtcPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinatorProviding
     private let disposableBag = DisposableBag()
@@ -222,14 +226,18 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         self.audioBitrateProfileApplicator = AudioBitrateProfileApplicator(
             audioSession: audioSession,
             audioProcessingModule: videoConfig.audioProcessingModule,
-            audioDeviceModule: { [peerConnectionFactory] in
+            audioDeviceModule: AudioDeviceModuleProvider {
+                [peerConnectionFactory] in
                 peerConnectionFactory.audioDeviceModule
             }
         )
-        screenShareSessionProvider.setScreenShareActive = {
-            [audioBitrateProfileApplicator] in
-            audioBitrateProfileApplicator.setScreenShareActive($0)
-        }
+        // One named gate instead of a raw closure hopping through the
+        // capturer factory. Music still wins if both suppress filters.
+        screenShareSessionProvider.audioFilterGate =
+            ScreenShareAudioFilterGate {
+                [audioBitrateProfileApplicator] isActive in
+                audioBitrateProfileApplicator.setScreenShareActive(isActive)
+            }
 
         peerConnectionFactory
             .setFrameBufferPolicy(
@@ -358,18 +366,16 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     }
 
     /// Applies an in-call audio bitrate/processing profile.
+    ///
+    /// The applicator stores the profile. On throw, session + ADM + stored
+    /// profile have already been rolled back there; this method does not
+    /// keep a second copy to rewind.
     func setAudioBitrateProfile(_ profile: AudioBitrateProfile) async throws {
-        let previous = audioBitrateProfile
-        audioBitrateProfile = profile
-        do {
-            try await applyAudioBitrateProfile()
-        } catch {
-            audioBitrateProfile = previous
-            throw error
-        }
+        try await applyAudioBitrateProfile(profile, context: .setProfile)
     }
 
-    /// Applies an audio filter, or stashes it while music capture is active.
+    /// Applies an audio filter, or stashes it while music or screenshare
+    /// is suppressing live processing.
     nonisolated func setAudioFilter(_ audioFilter: AudioFilter?) {
         audioBitrateProfileApplicator.setAudioFilter(audioFilter)
     }
@@ -516,7 +522,12 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         try await restoreScreenSharing()
         publisher.setVideoFilter(videoFilter)
         publisher.completeSetUp()
-        try await applyAudioBitrateProfile()
+        // Rebind: new senders need the live bitrate even if music is
+        // already on. Session is re-asserted; VP no-ops if unchanged.
+        try await applyAudioBitrateProfile(
+            audioBitrateProfile,
+            context: .rebind
+        )
 
         try await subscriber.setUp(
             with: callSettings,
@@ -536,6 +547,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         pendingPeerConnectionTracesDisposableBag.removeAll()
         peerConnectionsDisposableBag.removeAll()
         disposableBag.removeAll()
+        await resetAudioBitrateProfile()
         await audioSession.deactivate()
         await publisher?.close()
         await subscriber?.close()
@@ -555,7 +567,6 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         await set(clientEventDetails: .init())
         trackStorage.removeAll()
         permissionsAdapter.cleanUp()
-        await resetAudioBitrateProfile()
     }
 
     /// Cleans up the session for reconnection, clearing adapters and tracks.
@@ -972,21 +983,27 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     }
 
     /// Restores voice processing and software NS/HPF after music. No-op
-    /// when this session never left ``.voiceStandard``.
+    /// when this session never left ``.voiceStandard``. Cannot restick
+    /// music if ADM restore throws.
     private func resetAudioBitrateProfile() async {
         audioBitrateProfileApplicator.discardStashedAudioFilter()
-        audioBitrateProfile = .voiceStandard
-        try? await applyAudioBitrateProfile()
+        await audioBitrateProfileApplicator.resetToVoice(
+            callSettings: callSettings,
+            ownCapabilities: ownCapabilities
+        )
     }
 
-    /// Applies bitrate, software processing, VP policy, and audio-filter rules.
-    private func applyAudioBitrateProfile() async throws {
+    private func applyAudioBitrateProfile(
+        _ profile: AudioBitrateProfile,
+        context: AudioBitrateApplyContext
+    ) async throws {
         try await audioBitrateProfileApplicator.apply(
-            profile: audioBitrateProfile,
+            profile: profile,
             callSettings: callSettings,
             ownCapabilities: ownCapabilities,
             publishOptions: publishOptions,
-            publisher: publisher
+            publisher: publisher,
+            context: context
         )
     }
 

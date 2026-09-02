@@ -4,6 +4,25 @@
 
 import Foundation
 
+/// Why ``AudioBitrateProfileApplicator/apply`` is running.
+///
+/// ``setProfile`` and ``rebind`` share one apply function so reconnect
+/// cannot silently skip bitrate on a new publisher. A naive
+/// `profile == previous` early-return at the top of `apply` would do
+/// that: music is still on, but `maxBitrateBps` never lands on the new
+/// senders. ``rebind`` still skips Voice Processing when the profile did
+/// not *cross* music; it re-asserts the session (VoiceChat vs `.default`)
+/// and the live bitrate.
+enum AudioBitrateApplyContext: Sendable {
+    /// User or API changed the profile. No-op when the stored profile
+    /// already matches so a second tap does not rebuild AVAudioSession.
+    case setProfile
+    /// New publisher after join or reconnect. Re-assert session (if this
+    /// session is in or leaving music) and bitrate even when the enum
+    /// did not change.
+    case rebind
+}
+
 /// Applies an ``AudioBitrateProfile`` to the session, ADM, software
 /// processing, and published bitrate.
 ///
@@ -13,11 +32,25 @@ import Foundation
 /// unless this session has applied a non-default profile.
 final class AudioBitrateProfileApplicator: @unchecked Sendable {
 
+    /// What this apply must actually touch. Derived from the previous and
+    /// requested profiles so we do not keep a parallel pair of bools
+    /// (`needsProcessing` / `needsBitrate`) that can drift.
+    private enum ApplyWork {
+        /// Never-music ``voiceStandard``: join and leave must be a no-op.
+        case none
+        /// ``voiceHighQuality``: bitrate only; session, VP, NS/HPF stay.
+        case bitrateOnly
+        /// Crossing music in either direction: session + ADM + APM +
+        /// bitrate. Music is never ``voiceStandard``, so processing
+        /// always includes a bitrate write.
+        case processing
+    }
+
     private let audioSession: CallAudioSession
     private let audioProcessingModule: AudioProcessingModule
-    private let audioDeviceModule: () -> AudioDeviceModule
-    private let lock = NSLock()
-    private var profile: AudioBitrateProfile = .voiceStandard
+    private let audioDeviceModule: AudioDeviceModuleProvider
+    private let lock = UnfairQueue()
+    private var storedProfile: AudioBitrateProfile = .voiceStandard
     /// Last filter requested by `Call.setAudioFilter`. Live output is
     /// suppressed while music or screenshare is active.
     private var intendedFilter: AudioFilter?
@@ -29,60 +62,73 @@ final class AudioBitrateProfileApplicator: @unchecked Sendable {
     init(
         audioSession: CallAudioSession,
         audioProcessingModule: AudioProcessingModule,
-        audioDeviceModule: @escaping () -> AudioDeviceModule
+        audioDeviceModule: AudioDeviceModuleProvider
     ) {
         self.audioSession = audioSession
         self.audioProcessingModule = audioProcessingModule
         self.audioDeviceModule = audioDeviceModule
     }
 
+    /// Profile last committed after a successful apply. This is the single
+    /// source of truth; ``WebRTCStateAdapter`` does not keep a copy so a
+    /// failed apply cannot briefly publish the new value.
+    var profile: AudioBitrateProfile {
+        lock.sync { storedProfile }
+    }
+
+    /// Applies `profile` to session, ADM, software processing, and bitrate.
+    ///
+    /// Processing order is session (leave VoiceChat) → commit profile →
+    /// ADM VP disable → APM/filter/bitrate. Profile is committed before
+    /// ADM so ``setAudioFilter`` during the VP rebuild already sees music
+    /// and will not install a live filter onto the graph being torn down.
+    /// If VP disable throws, session and `storedProfile` roll back so the
+    /// call is not left in VoiceChat-off / VP-on.
     func apply(
         profile: AudioBitrateProfile,
         callSettings: CallSettings,
         ownCapabilities: Set<OwnCapability>,
         publishOptions: PublishOptions,
-        publisher: RTCPeerConnectionCoordinator?
+        publisher: RTCPeerConnectionCoordinator?,
+        context: AudioBitrateApplyContext
     ) async throws {
-        let previous = withLock { self.profile }
-        let needsProcessing = profile.isMusic || previous.isMusic
-        let needsBitrate = profile != .voiceStandard || previous != .voiceStandard
-        guard needsProcessing || needsBitrate else {
+        let previous = lock.sync { storedProfile }
+        // Duplicate user/API sets must not rebuild the session. Rebind
+        // of the same profile still runs so a new publisher gets bitrate.
+        if context == .setProfile, profile == previous {
             return
         }
 
-        if needsProcessing {
-            try await audioSession.setAudioBitrateProfile(
-                profile,
-                callSettings: callSettings,
-                ownCapabilities: ownCapabilities
-            )
-        }
-
-        let bitrateToApply: Int? = withLock {
-            self.profile = profile
-            if needsProcessing {
-                audioDeviceModule().setMusicCaptureEnabled(
-                    profile.isMusic,
-                    restorePlayout: callSettings.audioOutputOn && publisher != nil
+        switch applyWork(profile: profile, previous: previous) {
+        case .none:
+            return
+        case .bitrateOnly:
+            let bitrateToApply = lock.sync { () -> Int? in
+                storedProfile = profile
+                return consumeBitrate(
+                    profile: profile,
+                    publishOptions: publishOptions
                 )
-                applySoftwareProcessing(enabled: !profile.isMusic)
-                applyLiveFilter()
             }
-            return consumeBitrate(
+            if let bitrateToApply {
+                await publisher?.setAudioMaxBitrate(bitrateToApply)
+            }
+        case .processing:
+            try await applyProcessing(
                 profile: profile,
-                publishOptions: publishOptions
+                previous: previous,
+                callSettings: callSettings,
+                ownCapabilities: ownCapabilities,
+                publishOptions: publishOptions,
+                publisher: publisher
             )
-        }
-
-        if let bitrateToApply {
-            await publisher?.setAudioMaxBitrate(bitrateToApply)
         }
     }
 
     /// Records the requested filter and writes it unless music or
     /// screenshare is suppressing live processing.
     func setAudioFilter(_ filter: AudioFilter?) {
-        withLock {
+        lock.sync {
             intendedFilter = filter
             applyLiveFilter()
         }
@@ -91,7 +137,7 @@ final class AudioBitrateProfileApplicator: @unchecked Sendable {
     /// Screenshare start/stop suspend the live filter without replacing
     /// the intended (or music-stashed) filter.
     func setScreenShareActive(_ isActive: Bool) {
-        withLock {
+        lock.sync {
             isScreenShareActive = isActive
             applyLiveFilter()
         }
@@ -101,27 +147,130 @@ final class AudioBitrateProfileApplicator: @unchecked Sendable {
     /// processing module. Does not write the module; never-music calls
     /// must not clear an unrelated filter.
     func discardStashedAudioFilter() {
-        withLock {
+        lock.sync {
             intendedFilter = nil
             isScreenShareActive = false
         }
     }
 
-    private func withLock<T>(_ body: () -> T) -> T {
-        lock.lock()
-        defer { lock.unlock() }
-        return body()
+    /// Teardown to ``.voiceStandard`` that cannot restick music.
+    ///
+    /// Never-music leave is a no-op for session, ADM, and APM. After
+    /// music, NS/HPF are restored even if ADM throws; the session is
+    /// written with ``CallAudioSession/commitAudioBitrateProfile`` so a
+    /// failed apply cannot put music back.
+    func resetToVoice(
+        callSettings: CallSettings,
+        ownCapabilities: Set<OwnCapability>
+    ) async {
+        let previous = lock.sync { storedProfile }
+        if previous == .voiceStandard {
+            return
+        }
+
+        lock.sync {
+            storedProfile = .voiceStandard
+            restoredBitrate = nil
+            if previous.isMusic {
+                let config = audioProcessingModule.config
+                config.isNoiseSuppressionEnabled = true
+                config.isHighpassFilterEnabled = true
+                audioProcessingModule.config = config
+                applyLiveFilter()
+            }
+        }
+
+        guard previous.isMusic else { return }
+
+        try? await audioSession.commitAudioBitrateProfile(
+            .voiceStandard,
+            callSettings: callSettings,
+            ownCapabilities: ownCapabilities
+        )
+        _ = try? audioDeviceModule.audioDeviceModule()
+            .setMusicCaptureEnabled(
+                false,
+                restorePlayout: false
+            )
     }
 
-    private func applySoftwareProcessing(enabled: Bool) {
-        let config = audioProcessingModule.config
-        config.isNoiseSuppressionEnabled = enabled
-        config.isHighpassFilterEnabled = enabled
-        audioProcessingModule.config = config
+    private func applyWork(
+        profile: AudioBitrateProfile,
+        previous: AudioBitrateProfile
+    ) -> ApplyWork {
+        let needsProcessing = profile.isMusic || previous.isMusic
+        let needsBitrate = profile != .voiceStandard
+            || previous != .voiceStandard
+        if needsProcessing {
+            return .processing
+        }
+        if needsBitrate {
+            return .bitrateOnly
+        }
+        return .none
     }
 
+    private func applyProcessing(
+        profile: AudioBitrateProfile,
+        previous: AudioBitrateProfile,
+        callSettings: CallSettings,
+        ownCapabilities: Set<OwnCapability>,
+        publishOptions: PublishOptions,
+        publisher: RTCPeerConnectionCoordinator?
+    ) async throws {
+        // Session first: Apple will not actually disable VP until the
+        // category/mode has left VoiceChat. Session rolls itself back if
+        // this throws, so `storedProfile` stays `previous`.
+        try await audioSession.setAudioBitrateProfile(
+            profile,
+            callSettings: callSettings,
+            ownCapabilities: ownCapabilities
+        )
+        lock.sync { storedProfile = profile }
+        do {
+            try audioDeviceModule.audioDeviceModule().setMusicCaptureEnabled(
+                profile.isMusic,
+                restorePlayout: callSettings.audioOutputOn && publisher != nil
+            )
+        } catch {
+            // VP disable failed after VoiceChat was already left. Put the
+            // session and stored profile back so callers see a throw, not
+            // a half-applied music mode. Do not restick music if that
+            // voice apply fails.
+            try? await audioSession.commitAudioBitrateProfile(
+                previous,
+                callSettings: callSettings,
+                ownCapabilities: ownCapabilities
+            )
+            lock.sync {
+                storedProfile = previous
+                // Profile is voice again; reinstall the intended filter if
+                // a setAudioFilter raced during the failed VP rebuild.
+                applyLiveFilter()
+            }
+            throw error
+        }
+
+        let bitrateToApply: Int? = lock.sync {
+            let config = audioProcessingModule.config
+            config.isNoiseSuppressionEnabled = !profile.isMusic
+            config.isHighpassFilterEnabled = !profile.isMusic
+            audioProcessingModule.config = config
+            applyLiveFilter()
+            return consumeBitrate(
+                profile: profile,
+                publishOptions: publishOptions
+            )
+        }
+        if let bitrateToApply {
+            await publisher?.setAudioMaxBitrate(bitrateToApply)
+        }
+    }
+
+    /// Caller must already hold `lock`. Reads `storedProfile` directly so
+    /// we do not re-enter ``UnfairQueue``.
     private func applyLiveFilter() {
-        if profile.isMusic || isScreenShareActive {
+        if storedProfile.isMusic || isScreenShareActive {
             audioProcessingModule.setAudioFilter(nil)
         } else {
             audioProcessingModule.setAudioFilter(intendedFilter)
@@ -130,7 +279,8 @@ final class AudioBitrateProfileApplicator: @unchecked Sendable {
 
     /// Non-default profiles set the mapped bitrate. Returning to
     /// ``voiceStandard`` restores the pre-profile cap (`0` clears
-    /// `maxBitrateBps`).
+    /// `maxBitrateBps`). ``rebind`` with music still on hits the first
+    /// branch again so a new publisher gets the same cap.
     private func consumeBitrate(
         profile: AudioBitrateProfile,
         publishOptions: PublishOptions

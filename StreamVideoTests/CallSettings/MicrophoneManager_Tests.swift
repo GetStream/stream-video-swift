@@ -149,4 +149,23 @@ final class MicrophoneManager_Tests: XCTestCase, @unchecked Sendable {
 
         XCTAssertEqual(callController.timesCalled(.setAudioBitrateProfile), 0)
     }
+
+    func test_resetAudioBitrateProfile_allowsSettingMusicAgain() async throws {
+        let callController = MockCallController()
+        let subject = MicrophoneManager(
+            callController: callController,
+            initialStatus: .enabled
+        )
+        try await subject.setAudioBitrateProfile(.musicHighQuality)
+
+        await subject.resetAudioBitrateProfile()
+
+        XCTAssertEqual(subject.audioBitrateProfile, .voiceStandard)
+        XCTAssertEqual(callController.timesCalled(.setAudioBitrateProfile), 1)
+
+        try await subject.setAudioBitrateProfile(.musicHighQuality)
+
+        XCTAssertEqual(subject.audioBitrateProfile, .musicHighQuality)
+        XCTAssertEqual(callController.timesCalled(.setAudioBitrateProfile), 2)
+    }
 }

@@ -7,14 +7,16 @@ import Foundation
 /// Audio capture/publish quality profile.
 ///
 /// ``musicHighQuality`` is the in-call music path: software NS/HPF off, the
-/// audio session leaves VoiceChat, Voice Processing is disabled, and a
-/// higher Opus bitrate is used. Voice profiles keep platform processing on.
+/// audio session leaves VoiceChat, Voice Processing is disabled (not only
+/// bypassed), and a higher Opus bitrate is used. Voice profiles keep
+/// platform processing on. ``voiceHighQuality`` is bitrate-only; it is
+/// not music.
 public enum AudioBitrateProfile: Sendable, Hashable, CaseIterable {
     /// Default voice capture at 64 kbps.
     case voiceStandard
     /// Voice capture at 128 kbps with processing still enabled.
     case voiceHighQuality
-    /// Music-safe capture at 128 kbps with speech processing reduced.
+    /// Music capture at 128 kbps with speech processing disabled.
     case musicHighQuality
 
     /// Fallback bitrate when the SFU does not advertise a profile mapping.
@@ -27,7 +29,9 @@ public enum AudioBitrateProfile: Sendable, Hashable, CaseIterable {
         }
     }
 
-    /// `true` when this profile should disable speech-oriented processing.
+    /// `true` when this profile should disable speech-oriented processing
+    /// (session, VP, NS/HPF, live filters). Bitrate-only profiles return
+    /// `false`.
     var isMusic: Bool { self == .musicHighQuality }
 }
 

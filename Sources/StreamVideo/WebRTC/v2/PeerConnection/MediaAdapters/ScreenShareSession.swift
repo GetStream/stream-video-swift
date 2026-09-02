@@ -42,8 +42,11 @@ final class ScreenShareSessionProvider: @unchecked Sendable {
         }
     }
 
-    /// Suspends live audio filters while in-app screenshare audio is active.
-    var setScreenShareActive: ((Bool) -> Void)?
+    /// Gate that suspends live audio filters while in-app screenshare
+    /// audio is captured. Optional so broadcast capture (no app audio)
+    /// does not need a dummy callback. Set by ``WebRTCStateAdapter`` to
+    /// the session's ``AudioBitrateProfileApplicator``.
+    var audioFilterGate: ScreenShareAudioFilterGate?
 
     /// Cleans up resources when the instance is deallocated.
     ///
