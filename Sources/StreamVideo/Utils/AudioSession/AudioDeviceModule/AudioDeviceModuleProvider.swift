@@ -4,17 +4,17 @@
 
 import Foundation
 
-/// Resolves the live ``AudioDeviceModule`` after the peer-connection
-/// factory has created it.
+/// Looks up the live ``AudioDeviceModule`` after the peer-connection
+/// factory has built it.
 ///
-/// The ADM does not exist when ``WebRTCStateAdapter`` is constructed; the
-/// factory builds it lazily. This type holds that lookup so the bitrate
-/// applicator never takes a bare `() -> AudioDeviceModule` through its
-/// initializer. Call ``audioDeviceModule()`` at apply time.
+/// The factory creates the module lazily, so apply-time lookup is
+/// required. Call ``audioDeviceModule()`` when applying a capture policy,
+/// not at adapter construction.
 struct AudioDeviceModuleProvider: Sendable {
 
     private let resolve: @Sendable () -> AudioDeviceModule
 
+    /// - Parameter resolve: Looked up at apply time, not construction.
     init(_ resolve: @escaping @Sendable () -> AudioDeviceModule) {
         self.resolve = resolve
     }

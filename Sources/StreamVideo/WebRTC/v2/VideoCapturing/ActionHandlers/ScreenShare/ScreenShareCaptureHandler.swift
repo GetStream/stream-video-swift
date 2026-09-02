@@ -15,8 +15,8 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
     private var activeSession: Session?
     private let recorder: RPScreenRecorder
     private let includeAudio: Bool
-    /// Named filter gate so capture start/stop do not take a raw closure.
-    /// Nil until attached after capturer build, and for broadcast.
+    /// Nil until ``setAudioFilterGate(_:)`` after capturer build, and for
+    /// broadcast (no in-app audio).
     private var audioFilterGate: ScreenShareAudioFilterGate?
     private let disposableBag = DisposableBag()
     private let audioProcessingQueue = DispatchQueue(
@@ -35,23 +35,20 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
     ///   - recorder: The ReplayKit recorder to use. Defaults to `.shared()`.
     ///   - includeAudio: Whether to capture app audio during screen sharing.
     ///     Only valid for `.inApp`; ignored otherwise.
-    ///   - audioFilterGate: Suspends live audio filters while in-app
-    ///     screenshare audio is running. Restoring does not override music.
-    ///     Defaults to `nil`; attach after capturer build via
-    ///     ``setAudioFilterGate(_:)``.
     init(
         recorder: RPScreenRecorder = .shared(),
-        includeAudio: Bool,
-        audioFilterGate: ScreenShareAudioFilterGate? = nil
+        includeAudio: Bool
     ) {
         self.recorder = recorder
         self.includeAudio = includeAudio
-        self.audioFilterGate = audioFilterGate
         super.init()
         recorder.delegate = self
     }
 
     /// Attaches the session provider's filter gate after capturer build.
+    /// Not part of ``init`` because the factory must not depend on audio
+    /// filter types; ``LocalScreenShareMediaAdapter`` wires it on the
+    /// built capturer.
     func setAudioFilterGate(_ audioFilterGate: ScreenShareAudioFilterGate?) {
         self.audioFilterGate = audioFilterGate
     }

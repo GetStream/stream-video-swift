@@ -1009,9 +1009,35 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         let filter = MockAudioFilter(id: "nc")
         subject.setAudioFilter(filter)
         XCTAssertNil(Self.videoConfig.audioProcessingModule.activeAudioFilter)
+        XCTAssertEqual(subject.requestedAudioFilter?.id, "nc")
 
         try await subject.setAudioBitrateProfile(.voiceStandard)
         XCTAssertEqual(Self.videoConfig.audioProcessingModule.activeAudioFilter?.id, "nc")
+    }
+
+    func test_setAudioFilter_nil_whileMusic_doesNotRestoreOnVoice() async throws {
+        let filter = MockAudioFilter(id: "nc")
+        subject.setAudioFilter(filter)
+        try await subject.setAudioBitrateProfile(.musicHighQuality)
+
+        subject.setAudioFilter(nil)
+
+        try await subject.setAudioBitrateProfile(.voiceStandard)
+        XCTAssertNil(Self.videoConfig.audioProcessingModule.activeAudioFilter)
+    }
+
+    func test_setAudioFilter_nil_whileScreenShare_doesNotRestoreOnStop(
+    ) async throws {
+        let filter = MockAudioFilter(id: "nc")
+        subject.setAudioFilter(filter)
+        let provider = await subject.screenShareSessionProvider
+        let gate = try XCTUnwrap(provider.audioFilterGate)
+        gate.setActive(true)
+
+        subject.setAudioFilter(nil)
+        gate.setActive(false)
+
+        XCTAssertNil(Self.videoConfig.audioProcessingModule.activeAudioFilter)
     }
 
     func test_setScreenShareActive_voice_clearsAndRestoresAudioFilter() async throws {

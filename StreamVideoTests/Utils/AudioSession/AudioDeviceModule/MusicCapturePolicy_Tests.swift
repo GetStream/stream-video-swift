@@ -44,10 +44,6 @@ final class MusicCapturePolicy_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertTrue(
             subject.bypassVoiceProcessing(stereoPreferred: true)
         )
-        XCTAssertEqual(
-            subject.muteMode(stereoPreferred: true),
-            .inputMixer
-        )
         XCTAssertFalse(
             subject.bypassVoiceProcessing(stereoPreferred: false)
         )

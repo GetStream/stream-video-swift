@@ -231,8 +231,8 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
                 peerConnectionFactory.audioDeviceModule
             }
         )
-        // One named gate instead of a raw closure hopping through the
-        // capturer factory. Music still wins if both suppress filters.
+        // In-app screenshare audio suspends the live filter; music still
+        // wins if both are active.
         screenShareSessionProvider.audioFilterGate =
             ScreenShareAudioFilterGate {
                 [audioBitrateProfileApplicator] isActive in
@@ -378,6 +378,12 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     /// is suppressing live processing.
     nonisolated func setAudioFilter(_ audioFilter: AudioFilter?) {
         audioBitrateProfileApplicator.setAudioFilter(audioFilter)
+    }
+
+    /// Filter last requested by `Call.setAudioFilter`, including while
+    /// music or screenshare stash live output.
+    nonisolated var requestedAudioFilter: AudioFilter? {
+        audioBitrateProfileApplicator.requestedAudioFilter
     }
 
     // MARK: - Client Capabilities
@@ -547,6 +553,8 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         pendingPeerConnectionTracesDisposableBag.removeAll()
         peerConnectionsDisposableBag.removeAll()
         disposableBag.removeAll()
+        // Restore VP/APM before deactivating so the next never-music
+        // call does not inherit a music session.
         await resetAudioBitrateProfile()
         await audioSession.deactivate()
         await publisher?.close()

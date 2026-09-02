@@ -5,6 +5,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 # Upcoming
 
 ### ✅ Added
+- `MicrophoneManager.setAudioBitrateProfile(_:)` switches in-call capture between voice and music (hi-fi). Requires dashboard `hifi_audio_enabled`. Music disables Apple Voice Processing and software NS/HPF, and raises the audio bitrate to 128 kbps. [#1260](https://github.com/GetStream/stream-video-swift/pull/1260)
 - `StreamVideo.getEdges()` returns the list of edges (datacenters) available for hosting calls [#1247](https://github.com/GetStream/stream-video-swift/pull/1247).
 - `Call.deleteRecording(callSessionId:filename:)` for deleting a recording of a call session [#1244](https://github.com/GetStream/stream-video-swift/pull/1244).
 - Added `Call.delete(hard:)` for deleting a call. [#1243](https://github.com/GetStream/stream-video-swift/pull/1243)

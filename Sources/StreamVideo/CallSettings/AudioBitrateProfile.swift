@@ -37,6 +37,7 @@ public enum AudioBitrateProfile: Sendable, Hashable, CaseIterable {
 
 extension AudioBitrateProfile {
 
+    /// Maps an SFU profile; unrecognized values are dropped.
     init?(_ sfuProfile: Stream_Video_Sfu_Models_AudioBitrateProfile) {
         switch sfuProfile {
         case .voiceStandardUnspecified:
@@ -50,6 +51,8 @@ extension AudioBitrateProfile {
         }
     }
 
+    /// Wire value sent to the SFU. ``voiceStandard`` maps to the
+    /// unspecified default so older SFUs keep working.
     var sfuProfile: Stream_Video_Sfu_Models_AudioBitrateProfile {
         switch self {
         case .voiceStandard:

@@ -62,12 +62,18 @@ public final class MicrophoneManager: ObservableObject, CallSettingsManager, @un
         )
     }
 
-    /// Sets the in-call audio bitrate/processing profile.
+    /// Sets the in-call audio capture and publish profile.
     ///
     /// Allowed after join. Requires dashboard `hifi_audio_enabled`.
-    /// Same-profile calls return here so the applicator does not rebuild
-    /// the session; reconnect uses ``AudioBitrateApplyContext/rebind``
-    /// instead of this API.
+    /// Published as ``audioBitrateProfile``. Same-profile calls are a
+    /// no-op. The value survives reconnect. Leave resets it to
+    /// ``AudioBitrateProfile/voiceStandard`` so a later music set on a
+    /// cached `Call` is not a no-op. Reconnect re-applies bitrate on the
+    /// new publisher.
+    ///
+    /// - Parameter profile: Voice or music capture profile.
+    /// - Throws: `ClientError` when the call is missing, hi-fi is off on
+    ///   the dashboard, or Voice Processing cannot be applied.
     public func setAudioBitrateProfile(_ profile: AudioBitrateProfile) async throws {
         guard profile != audioBitrateProfile else { return }
         try await callController.setAudioBitrateProfile(profile)
