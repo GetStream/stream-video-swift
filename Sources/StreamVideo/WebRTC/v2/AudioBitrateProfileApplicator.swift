@@ -32,20 +32,6 @@ enum AudioBitrateApplyContext: Sendable {
 /// unless this session has applied a non-default profile.
 final class AudioBitrateProfileApplicator: @unchecked Sendable {
 
-    /// What this apply must actually touch. Derived from the previous and
-    /// requested profiles so we do not keep a parallel pair of bools
-    /// (`needsProcessing` / `needsBitrate`) that can drift.
-    private enum ApplyWork {
-        /// Never-music ``voiceStandard``: join and leave must be a no-op.
-        case none
-        /// ``voiceHighQuality``: bitrate only; session, VP, NS/HPF stay.
-        case bitrateOnly
-        /// Crossing music in either direction: session + ADM + APM +
-        /// bitrate. Music is never ``voiceStandard``, so processing
-        /// always includes a bitrate write.
-        case processing
-    }
-
     private struct AudioProcessingState {
         let isNoiseSuppressionEnabled: Bool
         let isHighpassFilterEnabled: Bool
@@ -77,7 +63,7 @@ final class AudioBitrateProfileApplicator: @unchecked Sendable {
     init(
         audioSession: CallAudioSession,
         audioProcessingModule: AudioProcessingModule,
-        audioDeviceModule: AudioDeviceModuleProvider
+        audioDeviceModule: @escaping AudioDeviceModuleProvider
     ) {
         self.audioSession = audioSession
         self.audioProcessingModule = audioProcessingModule
@@ -136,13 +122,7 @@ final class AudioBitrateProfileApplicator: @unchecked Sendable {
             return
         }
 
-        switch applyWork(profile: profile, previous: previous) {
-        case .none:
-            return
-        case .bitrateOnly:
-            lock.sync { storedProfile = profile }
-            await publisher?.setAudioMaxBitrate(for: profile)
-        case .processing:
+        if profile.isMusic || previous.isMusic {
             try await applyProcessing(
                 profile: profile,
                 previous: previous,
@@ -150,7 +130,13 @@ final class AudioBitrateProfileApplicator: @unchecked Sendable {
                 ownCapabilities: ownCapabilities,
                 publisher: publisher
             )
+            return
         }
+        guard profile != .voiceStandard || previous != .voiceStandard else {
+            return
+        }
+        lock.sync { storedProfile = profile }
+        await publisher?.setAudioMaxBitrate(for: profile)
     }
 
     /// Records the requested filter and writes it unless music or
@@ -223,26 +209,8 @@ final class AudioBitrateProfileApplicator: @unchecked Sendable {
             callSettings: callSettings,
             ownCapabilities: ownCapabilities
         )
-        _ = try? audioDeviceModule.audioDeviceModule()
+        _ = try? audioDeviceModule()
             .setMusicCaptureEnabled(false)
-    }
-
-    /// Maps previous → requested into the smallest set of side effects.
-    /// Never-music ``voiceStandard`` is ``ApplyWork/none``.
-    private func applyWork(
-        profile: AudioBitrateProfile,
-        previous: AudioBitrateProfile
-    ) -> ApplyWork {
-        let needsProcessing = profile.isMusic || previous.isMusic
-        let needsBitrate = profile != .voiceStandard
-            || previous != .voiceStandard
-        if needsProcessing {
-            return .processing
-        }
-        if needsBitrate {
-            return .bitrateOnly
-        }
-        return .none
     }
 
     /// Session → commit profile → ADM VP → APM/filter/bitrate.
@@ -264,7 +232,7 @@ final class AudioBitrateProfileApplicator: @unchecked Sendable {
         )
         lock.sync { storedProfile = profile }
         do {
-            try audioDeviceModule.audioDeviceModule()
+            try audioDeviceModule()
                 .setMusicCaptureEnabled(profile.isMusic)
         } catch {
             // VP disable failed after VoiceChat was already left. Put the

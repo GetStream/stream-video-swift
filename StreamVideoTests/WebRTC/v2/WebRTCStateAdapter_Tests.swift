@@ -1070,10 +1070,10 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         subject.setAudioFilter(filter)
         let provider = await subject.screenShareSessionProvider
         let gate = try XCTUnwrap(provider.audioFilterGate)
-        gate.setActive(true)
+        gate(true)
 
         subject.setAudioFilter(nil)
-        gate.setActive(false)
+        gate(false)
 
         XCTAssertNil(Self.videoConfig.audioProcessingModule.activeAudioFilter)
     }
@@ -1084,10 +1084,10 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
 
         let provider = await subject.screenShareSessionProvider
         let gate = try XCTUnwrap(provider.audioFilterGate)
-        gate.setActive(true)
+        gate(true)
         XCTAssertNil(Self.videoConfig.audioProcessingModule.activeAudioFilter)
 
-        gate.setActive(false)
+        gate(false)
         XCTAssertEqual(Self.videoConfig.audioProcessingModule.activeAudioFilter?.id, "nc")
     }
 
@@ -1099,8 +1099,8 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
 
         let provider = await subject.screenShareSessionProvider
         let gate = try XCTUnwrap(provider.audioFilterGate)
-        gate.setActive(true)
-        gate.setActive(false)
+        gate(true)
+        gate(false)
 
         try await subject.setAudioBitrateProfile(.voiceStandard)
         XCTAssertEqual(Self.videoConfig.audioProcessingModule.activeAudioFilter?.id, "nc")
@@ -1112,11 +1112,11 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         subject.setAudioFilter(filter)
         let provider = await subject.screenShareSessionProvider
         let gate = try XCTUnwrap(provider.audioFilterGate)
-        gate.setActive(true)
+        gate(true)
         XCTAssertNil(Self.videoConfig.audioProcessingModule.activeAudioFilter)
 
         try await subject.setAudioBitrateProfile(.musicHighQuality)
-        gate.setActive(false)
+        gate(false)
         XCTAssertNil(Self.videoConfig.audioProcessingModule.activeAudioFilter)
 
         try await subject.setAudioBitrateProfile(.voiceStandard)

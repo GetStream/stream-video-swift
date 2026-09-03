@@ -13,19 +13,13 @@ struct DemoMusicModeButtonView: View {
 
     var body: some View {
         if let call = viewModel.call {
-            Content(call: call)
+            Content(microphone: call.microphone)
         }
     }
 
     private struct Content: View {
-        let call: Call
         @ObservedObject var microphone: MicrophoneManager
         @State private var errorLabel: String?
-
-        init(call: Call) {
-            self.call = call
-            microphone = call.microphone
-        }
 
         var body: some View {
             DemoMoreControlListButtonView(
@@ -51,7 +45,7 @@ struct DemoMusicModeButtonView: View {
                 ? .voiceStandard
                 : .musicHighQuality
             do {
-                try await call.microphone.setAudioBitrateProfile(next)
+                try await microphone.setAudioBitrateProfile(next)
                 errorLabel = nil
             } catch {
                 errorLabel = error.localizedDescription

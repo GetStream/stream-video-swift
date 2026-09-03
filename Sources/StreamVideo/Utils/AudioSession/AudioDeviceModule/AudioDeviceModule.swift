@@ -804,7 +804,7 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         isRecordingEnabled: Bool,
         clearInputContext: Bool
     ) {
-        if isRecordingEnabled, musicCapturePolicy.isMusicCaptureEnabled {
+        if isRecordingEnabled, musicCapturePolicy.desiredMusicEnabled {
             audioBufferRenderer.stop()
             return
         }

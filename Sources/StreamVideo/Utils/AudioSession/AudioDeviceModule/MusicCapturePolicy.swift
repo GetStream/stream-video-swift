@@ -26,11 +26,6 @@ struct MusicCapturePolicy {
         var isMusic: Bool { self == .music }
     }
 
-    enum Pending: Equatable {
-        case none
-        case applyVoiceProcessing(restorePlayout: Bool)
-    }
-
     /// Knobs for one capture-policy apply (music toggle / unmute).
     ///
     /// Stereo *preference* never uses this: it only bypasses VP.
@@ -69,22 +64,13 @@ struct MusicCapturePolicy {
 
     private(set) var desiredMusicEnabled = false
     private(set) var applied: Applied = .voice
-    private(set) var pending: Pending = .none
-
-    /// Keep-graph and other music-only engine behavior follow desired
-    /// music, including a muted toggle that has not applied yet.
-    var isMusicCaptureEnabled: Bool { desiredMusicEnabled }
+    private var pendingPlayoutRestore: Bool?
 
     /// `true` when unmute (or a retry) still owes a capture apply.
-    var hasPendingApply: Bool { pending != .none }
+    var hasPendingApply: Bool { pendingPlayoutRestore != nil }
 
     /// Sticky playout restore from a muted toggle. `false` if none.
-    var pendingRestorePlayout: Bool {
-        if case .applyVoiceProcessing(let restore) = pending {
-            return restore
-        }
-        return false
-    }
+    var pendingRestorePlayout: Bool { pendingPlayoutRestore ?? false }
 
     /// Knobs for rolling back to the last successful apply.
     var appliedConfiguration: Configuration {
@@ -143,18 +129,11 @@ struct MusicCapturePolicy {
         guard isMuted else { return }
         if (applied == .voice && !isEnabled)
             || (applied == .music && isEnabled) {
-            pending = .none
+            pendingPlayoutRestore = nil
             return
         }
-        let pendingRestore: Bool
-        if case .applyVoiceProcessing(let existing) = pending {
-            pendingRestore = existing || restorePlayout
-        } else {
-            pendingRestore = restorePlayout
-        }
-        pending = .applyVoiceProcessing(
-            restorePlayout: pendingRestore
-        )
+        pendingPlayoutRestore = (pendingPlayoutRestore ?? false)
+            || restorePlayout
     }
 
     /// Call only after VP/AGC/bypass applied without throwing.
@@ -166,6 +145,6 @@ struct MusicCapturePolicy {
         } else {
             applied = .voice
         }
-        pending = .none
+        pendingPlayoutRestore = nil
     }
 }
