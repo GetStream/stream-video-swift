@@ -438,8 +438,8 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     }
 
     /// Updates the local audio sender bitrate without renegotiation.
-    func setAudioMaxBitrate(_ bitrate: Int) async {
-        await mediaAdapter.setAudioMaxBitrate(bitrate)
+    func setAudioMaxBitrate(for profile: AudioBitrateProfile) async {
+        await mediaAdapter.setAudioMaxBitrate(for: profile)
     }
 
     /// Updates the publish options for the peer connection.

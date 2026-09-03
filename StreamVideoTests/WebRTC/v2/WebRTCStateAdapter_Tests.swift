@@ -972,6 +972,26 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         )
     }
 
+    func test_setAudioBitrateProfile_voice_restoresPreviousSoftwareProcessing() async throws {
+        let module = Self.videoConfig.audioProcessingModule
+        let originalNoiseSuppression = module.config.isNoiseSuppressionEnabled
+        let originalHighpassFilter = module.config.isHighpassFilterEnabled
+        defer {
+            module.config.isNoiseSuppressionEnabled = originalNoiseSuppression
+            module.config.isHighpassFilterEnabled = originalHighpassFilter
+        }
+        let config = module.config
+        config.isNoiseSuppressionEnabled = false
+        config.isHighpassFilterEnabled = true
+        module.config = config
+
+        try await subject.setAudioBitrateProfile(.musicHighQuality)
+        try await subject.setAudioBitrateProfile(.voiceStandard)
+
+        XCTAssertFalse(module.config.isNoiseSuppressionEnabled)
+        XCTAssertTrue(module.config.isHighpassFilterEnabled)
+    }
+
     func test_setAudioBitrateProfile_music_restoresPlayoutWhenPublisherExists() async throws {
         try await prepare()
         mockAudioDeviceModuleSource.stub(for: \.isPlaying, with: true)
@@ -1086,6 +1106,15 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
     }
 
     func test_cleanUp_resetsAudioBitrateProfileAndSoftwareProcessing() async throws {
+        let module = Self.videoConfig.audioProcessingModule
+        let originalNoiseSuppression = module.config.isNoiseSuppressionEnabled
+        let originalHighpassFilter = module.config.isHighpassFilterEnabled
+        module.config.isNoiseSuppressionEnabled = true
+        module.config.isHighpassFilterEnabled = true
+        defer {
+            module.config.isNoiseSuppressionEnabled = originalNoiseSuppression
+            module.config.isHighpassFilterEnabled = originalHighpassFilter
+        }
         try await subject.setAudioBitrateProfile(.musicHighQuality)
 
         await subject.cleanUp()
@@ -1131,7 +1160,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         try await prepare()
         await subject.set(
             publishOptions: .dummy(
-                audio: [.dummy(codec: .opus, bitrate: 64_000)]
+                audio: [.dummy(codec: .opus, bitrate: 64000)]
             )
         )
         let mockPublisher = try await XCTAsyncUnwrap(
@@ -1143,10 +1172,10 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
 
         XCTAssertEqual(
             mockPublisher.recordedInputPayload(
-                Int.self,
+                AudioBitrateProfile.self,
                 for: .setAudioMaxBitrate
             ),
-            [128_000, 64_000]
+            [.musicHighQuality, .voiceStandard]
         )
     }
 
@@ -1155,7 +1184,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         try await prepare()
         await subject.set(
             publishOptions: .dummy(
-                audio: [.dummy(codec: .opus, bitrate: 64_000)]
+                audio: [.dummy(codec: .opus, bitrate: 64000)]
             )
         )
         let mockPublisher = try await XCTAsyncUnwrap(
@@ -1180,10 +1209,10 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         )
         XCTAssertEqual(
             mockPublisher.recordedInputPayload(
-                Int.self,
+                AudioBitrateProfile.self,
                 for: .setAudioMaxBitrate
             ),
-            [128_000]
+            [.voiceHighQuality]
         )
         XCTAssertEqual(
             mockAudioDeviceModuleSource.timesCalled(
@@ -1216,7 +1245,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         try await prepare()
         await subject.set(
             publishOptions: .dummy(
-                audio: [.dummy(codec: .opus, bitrate: 64_000)]
+                audio: [.dummy(codec: .opus, bitrate: 64000)]
             )
         )
         let mockPublisher = try await XCTAsyncUnwrap(
@@ -1228,10 +1257,10 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
 
         XCTAssertEqual(
             mockPublisher.recordedInputPayload(
-                Int.self,
+                AudioBitrateProfile.self,
                 for: .setAudioMaxBitrate
             ),
-            [128_000, 64_000]
+            [.voiceHighQuality, .voiceStandard]
         )
     }
 
@@ -1240,7 +1269,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         try await prepare()
         await subject.set(
             publishOptions: .dummy(
-                audio: [.dummy(codec: .opus, bitrate: 64_000)]
+                audio: [.dummy(codec: .opus, bitrate: 64000)]
             )
         )
         try await subject.setAudioBitrateProfile(.musicHighQuality)
@@ -1256,10 +1285,10 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(mockPublisher.timesCalled(.setAudioMaxBitrate), 1)
         XCTAssertEqual(
             mockPublisher.recordedInputPayload(
-                Int.self,
+                AudioBitrateProfile.self,
                 for: .setAudioMaxBitrate
             ),
-            [128_000]
+            [.musicHighQuality]
         )
     }
 
@@ -1327,6 +1356,15 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
 
     func test_cleanUp_whenMusicRestoreThrows_restoresSoftwareProcessing(
     ) async throws {
+        let module = Self.videoConfig.audioProcessingModule
+        let originalNoiseSuppression = module.config.isNoiseSuppressionEnabled
+        let originalHighpassFilter = module.config.isHighpassFilterEnabled
+        module.config.isNoiseSuppressionEnabled = true
+        module.config.isHighpassFilterEnabled = true
+        defer {
+            module.config.isNoiseSuppressionEnabled = originalNoiseSuppression
+            module.config.isHighpassFilterEnabled = originalHighpassFilter
+        }
         try await subject.setAudioBitrateProfile(.musicHighQuality)
         mockAudioDeviceModuleSource.stub(
             for: .setVoiceProcessingEnabled,

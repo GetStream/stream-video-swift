@@ -150,6 +150,11 @@ struct MusicCapturePolicy {
     ) {
         desiredMusicEnabled = isEnabled
         guard isMuted else { return }
+        if (applied == .voice && !isEnabled)
+            || (applied == .music && isEnabled) {
+            pending = .none
+            return
+        }
         let pendingRestore: Bool
         if case .applyVoiceProcessing(let existing) = pending {
             pendingRestore = existing || restorePlayout

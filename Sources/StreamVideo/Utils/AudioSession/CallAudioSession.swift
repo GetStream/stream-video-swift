@@ -220,26 +220,29 @@ final class CallAudioSession: @unchecked Sendable {
         ownCapabilities: Set<OwnCapability>,
         restorePreviousOnFailure: Bool
     ) async throws {
-        let previous = audioBitrateProfile
-        audioBitrateProfile = profile
-        guard delegate != nil else {
-            return
-        }
-
-        do {
-            try await applyConfiguration(
-                resolvedConfiguration(
-                    for: callSettings,
-                    ownCapabilities: ownCapabilities
-                ),
-                callSettings: callSettings,
-                ownCapabilities: ownCapabilities
-            ).result()
-        } catch {
-            if restorePreviousOnFailure {
-                audioBitrateProfile = previous
+        try await processingQueue.addSynchronousTaskOperation { [weak self] in
+            guard let self else { return }
+            let previous = audioBitrateProfile
+            audioBitrateProfile = profile
+            guard delegate != nil else {
+                return
             }
-            throw error
+
+            do {
+                try await applyConfiguration(
+                    resolvedConfiguration(
+                        for: callSettings,
+                        ownCapabilities: ownCapabilities
+                    ),
+                    callSettings: callSettings,
+                    ownCapabilities: ownCapabilities
+                ).result()
+            } catch {
+                if restorePreviousOnFailure {
+                    audioBitrateProfile = previous
+                }
+                throw error
+            }
         }
     }
 

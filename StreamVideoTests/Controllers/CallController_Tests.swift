@@ -145,6 +145,31 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         await fulfilmentInMainActor { call.state.isSpeakingWhileMuted }
     }
 
+    func test_setAudioBitrateProfile_beforeJoin_throwsWithoutChangingProfile() async {
+        subject.call = await MockCall(.dummy())
+
+        do {
+            try await subject.setAudioBitrateProfile(.musicHighQuality)
+            XCTFail("Expected a joined-call error.")
+        } catch let error as ClientError {
+            XCTAssertEqual(
+                error.localizedDescription,
+                "Audio bitrate profiles require a joined call."
+            )
+        } catch {
+            XCTFail("Expected ClientError, got \(error).")
+        }
+
+        await assertEqualAsync(
+            await mockWebRTCCoordinatorFactory
+                .mockCoordinatorStack
+                .coordinator
+                .stateAdapter
+                .audioBitrateProfile,
+            .voiceStandard
+        )
+    }
+
     // MARK: - joinCall
 
     func test_joinCall_coordinatorTransitionsToConnecting() async throws {

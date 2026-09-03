@@ -103,6 +103,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     var audioBitrateProfile: AudioBitrateProfile {
         audioBitrateProfileApplicator.profile
     }
+
     private nonisolated let audioBitrateProfileApplicator: AudioBitrateProfileApplicator
 
     private let rtcPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinatorProviding
@@ -1009,7 +1010,6 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
             profile: profile,
             callSettings: callSettings,
             ownCapabilities: ownCapabilities,
-            publishOptions: publishOptions,
             publisher: publisher,
             context: context
         )

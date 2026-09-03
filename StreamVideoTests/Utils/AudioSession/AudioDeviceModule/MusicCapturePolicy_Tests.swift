@@ -89,6 +89,14 @@ final class MusicCapturePolicy_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertFalse(subject.hasPendingApply)
     }
 
+    func test_setDesiredMusic_whileMutedReturningToAppliedState_clearsPending() {
+        subject.setDesiredMusic(true, restorePlayout: true, isMuted: true)
+        subject.setDesiredMusic(false, restorePlayout: false, isMuted: true)
+
+        XCTAssertFalse(subject.hasPendingApply)
+        XCTAssertFalse(subject.isMusicCaptureEnabled)
+    }
+
     func test_markApplied_whenLeavingMusicWithStereo_isVoiceWhileStereo() {
         subject.setDesiredMusic(true, restorePlayout: false, isMuted: false)
         subject.markApplied(stereoPreferred: false)

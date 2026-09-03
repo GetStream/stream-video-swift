@@ -219,6 +219,9 @@ class CallController: @unchecked Sendable {
     /// session, ADM, and stored profile; a throw means those were rolled
     /// back.
     func setAudioBitrateProfile(_ profile: AudioBitrateProfile) async throws {
+        guard let call, await call.state.session != nil else {
+            throw ClientError("Audio bitrate profiles require a joined call.")
+        }
         try await ensureHiFiAudioEnabled()
         try await webRTCCoordinator.setAudioBitrateProfile(profile)
     }

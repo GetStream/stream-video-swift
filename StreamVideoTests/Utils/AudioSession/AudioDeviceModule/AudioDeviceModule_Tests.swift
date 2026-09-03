@@ -560,6 +560,10 @@ final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
             false
         )
         XCTAssertTrue(subject.isMicrophoneMuted)
+
+        try subject.setMuted(false)
+
+        XCTAssertEqual(source.timesCalled(.setVoiceProcessingEnabled), vpCount)
     }
 
     func test_setMusicCaptureEnabled_musicOffWhileMuted_enablesVPOnUnmute(

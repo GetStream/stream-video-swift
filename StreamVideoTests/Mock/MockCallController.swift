@@ -100,6 +100,7 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
     @Atomic var stubbedFunctionInput: [FunctionKey: [MockFunctionInputKey]] = FunctionKey
         .allCases
         .reduce(into: [FunctionKey: [MockFunctionInputKey]]()) { $0[$1] = [] }
+    var setAudioBitrateProfileHandler: (@Sendable (AudioBitrateProfile) async throws -> Void)?
 
     convenience init(initialCallSettings: CallSettings = .default) {
         self.init(
@@ -229,6 +230,7 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
     override func setAudioBitrateProfile(_ profile: AudioBitrateProfile) async throws {
         stubbedFunctionInput[.setAudioBitrateProfile]?
             .append(.setAudioBitrateProfile(profile))
+        try await setAudioBitrateProfileHandler?(profile)
         if let error = stubbedFunction[.setAudioBitrateProfile] as? Error {
             throw error
         }
