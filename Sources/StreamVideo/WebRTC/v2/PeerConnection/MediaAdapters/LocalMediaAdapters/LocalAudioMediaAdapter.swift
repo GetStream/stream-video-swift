@@ -393,6 +393,9 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         profile: AudioBitrateProfile
     ) -> Int? {
         if profile == .voiceStandard {
+            if let mapped = options.bitrateProfiles[profile], mapped > 0 {
+                return mapped
+            }
             return restoredBitrates[options]
         }
         if restoredBitrates[options] == nil {

@@ -7,10 +7,9 @@ import StreamWebRTC
 
 /// Desired music vs last successful Voice Processing apply.
 ///
-/// Desired stays set until apply succeeds so a failed unmute-deferred
-/// apply can retry. Stereo preference is a live-graph overlay (bypass
-/// only) and is not stored here. Leaving music while stereo is preferred
-/// records ``Applied/voiceWhileStereo``: VP stays off, AGC returns.
+/// Stereo preference is a live-graph overlay (bypass only) and is not stored
+/// here. Leaving music while stereo is preferred records
+/// ``Applied/voiceWhileStereo``: VP stays off, AGC returns.
 struct MusicCapturePolicy {
 
     /// Last successful music-toggle apply to the ADM.
@@ -27,15 +26,8 @@ struct MusicCapturePolicy {
         var isMusic: Bool { self == .music }
     }
 
-    /// VP work that could not run because the mic was muted.
-    ///
-    /// Mute → music → unmute was silent when we rebuilt VP against mixer
-    /// volume 0: AURemoteIO never started. Store the work here and apply
-    /// it on unmute.
     enum Pending: Equatable {
         case none
-        /// Apply after unmute. `restorePlayout` is sticky: any muted
-        /// toggle that asked for a restart wins.
         case applyVoiceProcessing(restorePlayout: Bool)
     }
 
@@ -134,9 +126,8 @@ struct MusicCapturePolicy {
 
     /// `true` when this request must apply (or defer), not no-op.
     ///
-    /// Same desired after a failed apply still returns `true` because
-    /// ``applied`` has not caught up. Stereo preference alone does not
-    /// count: never-music stereo only bypasses VP.
+    /// Stereo preference alone does not count: never-music stereo only
+    /// bypasses VP.
     func needsCaptureApply(desiredMusic: Bool) -> Bool {
         desiredMusic != desiredMusicEnabled
             || applied.isMusic != desiredMusic
