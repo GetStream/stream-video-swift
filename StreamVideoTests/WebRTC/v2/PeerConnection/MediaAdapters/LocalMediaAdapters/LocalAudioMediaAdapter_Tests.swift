@@ -550,7 +550,10 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
                 id: 0,
                 codec: .opus,
                 bitrate: 64000,
-                bitrateProfiles: [.musicHighQuality: 128_000]
+                bitrateProfiles: [
+                    .voiceStandard: 56000,
+                    .musicHighQuality: 128_000
+                ]
             ),
             .init(
                 id: 1,
@@ -586,7 +589,7 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
 
         XCTAssertEqual(
             transceivers[0].sender.parameters.encodings.first?.maxBitrateBps,
-            64000
+            56000
         )
         XCTAssertEqual(
             transceivers[1].sender.parameters.encodings.first?.maxBitrateBps,

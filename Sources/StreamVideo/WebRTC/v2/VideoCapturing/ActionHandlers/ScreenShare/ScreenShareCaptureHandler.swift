@@ -50,7 +50,7 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
     /// filter types; ``LocalScreenShareMediaAdapter`` wires it on the
     /// built capturer.
     func setAudioFilterGate(_ audioFilterGate: ScreenShareAudioFilterGate?) {
-        self.audioFilterGate = audioFilterGate
+        self.audioFilterGate = includeAudio ? audioFilterGate : nil
     }
 
     // MARK: - RPScreenRecorderDelegate
@@ -272,11 +272,14 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
             return
         }
 
-        audioFilterGate?.setActive(false)
-
+        defer {
+            if !recorder.isRecording {
+                audioFilterGate?.setActive(false)
+                activeSession = nil
+                isRecording = false
+            }
+        }
         try await recorder.stopCapture()
-        activeSession = nil
-        isRecording = false
     }
 
     @MainActor

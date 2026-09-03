@@ -1011,7 +1011,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertTrue(module.config.isHighpassFilterEnabled)
     }
 
-    func test_setAudioBitrateProfile_music_restoresPlayoutWhenPublisherExists() async throws {
+    func test_setAudioBitrateProfile_music_restoresActivePlayout() async throws {
         try await prepare()
         mockAudioDeviceModuleSource.stub(for: \.isPlaying, with: true)
         let recordingBefore = mockAudioDeviceModuleSource
@@ -1028,6 +1028,24 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(
             mockAudioDeviceModuleSource.timesCalled(.initAndStartPlayout),
             playoutBefore + 1
+        )
+    }
+
+    func test_setAudioBitrateProfile_music_doesNotRestartStoppedPlayout(
+    ) async throws {
+        try await prepare()
+        mockAudioDeviceModuleSource.stub(
+            for: \.isPlayoutInitialized,
+            with: true
+        )
+        let playoutBefore = mockAudioDeviceModuleSource
+            .timesCalled(.startPlayout)
+
+        try await subject.setAudioBitrateProfile(.musicHighQuality)
+
+        XCTAssertEqual(
+            mockAudioDeviceModuleSource.timesCalled(.startPlayout),
+            playoutBefore
         )
     }
 
