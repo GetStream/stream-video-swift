@@ -1569,7 +1569,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
             }
     }
 
-    func test_joinedCall_musicWhileMuted_unmutingKeepsMusicProfile(
+    func test_joinedCall_musicSurvivesMuteAndUnmute(
     ) async throws {
         helpers.permissions.setMicrophonePermission(isGranted: true)
         let processing = resetSharedAudioProcessingModule()

@@ -17,9 +17,7 @@ final class StreamVideoCapturer_AudioFilterGate_Tests: XCTestCase,
             includeAudio: true
         )
 
-        subject.setAudioFilterGate(
-            ScreenShareAudioFilterGate { _ in }
-        )
+        subject.setAudioFilterGate { _ in }
 
         let handler: ScreenShareCaptureHandler? = subject.actionHandler()
         XCTAssertNotNil(handler)
@@ -32,9 +30,7 @@ final class StreamVideoCapturer_AudioFilterGate_Tests: XCTestCase,
             audioDeviceModule: .init(MockRTCAudioDeviceModule())
         )
 
-        subject.setAudioFilterGate(
-            ScreenShareAudioFilterGate { _ in }
-        )
+        subject.setAudioFilterGate { _ in }
 
         let handler: ScreenShareCaptureHandler? = subject.actionHandler()
         XCTAssertNil(handler)

@@ -128,7 +128,7 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
         recorder.isMicrophoneEnabled = false
         recorder.isCameraEnabled = false
 
-        audioFilterGate?.setActive(true)
+        audioFilterGate?(true)
 
         do {
             try await Task { @MainActor [weak self] in
@@ -146,7 +146,7 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
                 }
             }.value
         } catch {
-            audioFilterGate?.setActive(false)
+            audioFilterGate?(false)
             throw error
         }
 
@@ -274,7 +274,7 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
 
         defer {
             if !recorder.isRecording {
-                audioFilterGate?.setActive(false)
+                audioFilterGate?(false)
                 activeSession = nil
                 isRecording = false
             }

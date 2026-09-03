@@ -227,18 +227,16 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         self.audioBitrateProfileApplicator = AudioBitrateProfileApplicator(
             audioSession: audioSession,
             audioProcessingModule: videoConfig.audioProcessingModule,
-            audioDeviceModule: AudioDeviceModuleProvider {
-                [peerConnectionFactory] in
+            audioDeviceModule: { [peerConnectionFactory] in
                 peerConnectionFactory.audioDeviceModule
             }
         )
         // In-app screenshare audio suspends the live filter; music still
         // wins if both are active.
-        screenShareSessionProvider.audioFilterGate =
-            ScreenShareAudioFilterGate {
-                [audioBitrateProfileApplicator] isActive in
-                audioBitrateProfileApplicator.setScreenShareActive(isActive)
-            }
+        screenShareSessionProvider.audioFilterGate = {
+            [audioBitrateProfileApplicator] isActive in
+            audioBitrateProfileApplicator.setScreenShareActive(isActive)
+        }
 
         peerConnectionFactory
             .setFrameBufferPolicy(
