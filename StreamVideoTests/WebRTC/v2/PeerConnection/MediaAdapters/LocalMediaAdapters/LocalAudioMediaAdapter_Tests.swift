@@ -500,40 +500,137 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
 
     // MARK: - setMaxBitrate
 
-    func test_setMaxBitrate_updatesSenderEncodings() async throws {
-        publishOptions = [.dummy(codec: .opus, bitrate: 64_000)]
-        let transceiver = try makeTransceiver(of: .audio, audioOptions: publishOptions[0])
-        mockPeerConnection.stub(for: .addTransceiver, with: transceiver)
-        try await subject.publish()
-        await fulfillment { self.mockPeerConnection.timesCalled(.addTransceiver) == 1 }
-
-        await subject.setMaxBitrate(128_000)
-
-        XCTAssertEqual(transceiver.sender.parameters.encodings.first?.maxBitrateBps, 128_000)
-    }
-
-    func test_setMaxBitrate_zeroClearsMaxBitrateBps() async throws {
-        publishOptions = [.dummy(codec: .opus, bitrate: 64_000)]
-        let transceiver = try makeTransceiver(of: .audio, audioOptions: publishOptions[0])
-        mockPeerConnection.stub(for: .addTransceiver, with: transceiver)
-        try await subject.publish()
-        await fulfillment { self.mockPeerConnection.timesCalled(.addTransceiver) == 1 }
-
-        await subject.setMaxBitrate(0)
-
-        XCTAssertNil(transceiver.sender.parameters.encodings.first?.maxBitrateBps)
-    }
-
-    func test_setMaxBitrate_beforePublish_appliesCapToNewTransceiver(
-    ) async throws {
-        publishOptions = [.dummy(codec: .opus, bitrate: 64_000)]
+    func test_publish_defaultProfile_doesNotSetSenderBitrate() async throws {
+        publishOptions = [
+            .init(
+                id: 0,
+                codec: .opus,
+                bitrate: 64000,
+                bitrateProfiles: [.musicHighQuality: 128_000]
+            )
+        ]
         let transceiver = try makeTransceiver(
             of: .audio,
             audioOptions: publishOptions[0]
         )
         mockPeerConnection.stub(for: .addTransceiver, with: transceiver)
 
-        await subject.setMaxBitrate(128_000)
+        try await subject.publish()
+        await fulfillment {
+            self.mockPeerConnection.timesCalled(.addTransceiver) == 1
+        }
+
+        XCTAssertNil(
+            transceiver.sender.parameters.encodings.first?.maxBitrateBps
+        )
+    }
+
+    func test_setMaxBitrate_updatesSenderEncodings() async throws {
+        publishOptions = [
+            .init(
+                id: 0,
+                codec: .opus,
+                bitrate: 64000,
+                bitrateProfiles: [.musicHighQuality: 128_000]
+            )
+        ]
+        let transceiver = try makeTransceiver(of: .audio, audioOptions: publishOptions[0])
+        mockPeerConnection.stub(for: .addTransceiver, with: transceiver)
+        try await subject.publish()
+        await fulfillment { self.mockPeerConnection.timesCalled(.addTransceiver) == 1 }
+
+        await subject.setMaxBitrate(for: .musicHighQuality)
+
+        XCTAssertEqual(transceiver.sender.parameters.encodings.first?.maxBitrateBps, 128_000)
+    }
+
+    func test_setMaxBitrate_appliesEachCodecProfileAndRestoresItsCap() async throws {
+        publishOptions = [
+            .init(
+                id: 0,
+                codec: .opus,
+                bitrate: 64000,
+                bitrateProfiles: [.musicHighQuality: 128_000]
+            ),
+            .init(
+                id: 1,
+                codec: .red,
+                bitrate: 48000,
+                bitrateProfiles: [.musicHighQuality: 96000]
+            )
+        ]
+        let transceivers = try publishOptions.map {
+            try makeTransceiver(of: .audio, audioOptions: $0)
+        }
+        mockPeerConnection.stub(
+            for: .addTransceiver,
+            with: StubVariantResultProvider { transceivers[$0 - 1] }
+        )
+        try await subject.publish()
+        await fulfillment {
+            self.mockPeerConnection.timesCalled(.addTransceiver) == 2
+        }
+
+        await subject.setMaxBitrate(for: .musicHighQuality)
+
+        XCTAssertEqual(
+            transceivers[0].sender.parameters.encodings.first?.maxBitrateBps,
+            128_000
+        )
+        XCTAssertEqual(
+            transceivers[1].sender.parameters.encodings.first?.maxBitrateBps,
+            96000
+        )
+
+        await subject.setMaxBitrate(for: .voiceStandard)
+
+        XCTAssertEqual(
+            transceivers[0].sender.parameters.encodings.first?.maxBitrateBps,
+            64000
+        )
+        XCTAssertEqual(
+            transceivers[1].sender.parameters.encodings.first?.maxBitrateBps,
+            48000
+        )
+    }
+
+    func test_setMaxBitrate_zeroClearsMaxBitrateBps() async throws {
+        publishOptions = [
+            .init(
+                id: 0,
+                codec: .opus,
+                bitrate: 0,
+                bitrateProfiles: [.musicHighQuality: 128_000]
+            )
+        ]
+        let transceiver = try makeTransceiver(of: .audio, audioOptions: publishOptions[0])
+        mockPeerConnection.stub(for: .addTransceiver, with: transceiver)
+        try await subject.publish()
+        await fulfillment { self.mockPeerConnection.timesCalled(.addTransceiver) == 1 }
+
+        await subject.setMaxBitrate(for: .musicHighQuality)
+        await subject.setMaxBitrate(for: .voiceStandard)
+
+        XCTAssertNil(transceiver.sender.parameters.encodings.first?.maxBitrateBps)
+    }
+
+    func test_setMaxBitrate_beforePublish_appliesCapToNewTransceiver(
+    ) async throws {
+        publishOptions = [
+            .init(
+                id: 0,
+                codec: .opus,
+                bitrate: 64000,
+                bitrateProfiles: [.musicHighQuality: 128_000]
+            )
+        ]
+        let transceiver = try makeTransceiver(
+            of: .audio,
+            audioOptions: publishOptions[0]
+        )
+        mockPeerConnection.stub(for: .addTransceiver, with: transceiver)
+
+        await subject.setMaxBitrate(for: .musicHighQuality)
         try await subject.publish()
         await fulfillment {
             self.mockPeerConnection.timesCalled(.addTransceiver) == 1
@@ -547,7 +644,14 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
 
     func test_setMaxBitrate_beforeDidUpdatePublishOptions_appliesCapToNewTransceiver(
     ) async throws {
-        publishOptions = [.dummy(id: 0, codec: .opus, bitrate: 64_000)]
+        publishOptions = [
+            .init(
+                id: 0,
+                codec: .opus,
+                bitrate: 64000,
+                bitrateProfiles: [.musicHighQuality: 128_000]
+            )
+        ]
         let opusTransceiver = try makeTransceiver(
             of: .audio,
             audioOptions: publishOptions[0]
@@ -558,12 +662,13 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
             self.mockPeerConnection.timesCalled(.addTransceiver) == 1
         }
 
-        await subject.setMaxBitrate(128_000)
+        await subject.setMaxBitrate(for: .musicHighQuality)
 
-        let redOptions = PublishOptions.AudioPublishOptions.dummy(
+        let redOptions = PublishOptions.AudioPublishOptions(
             id: 1,
             codec: .red,
-            bitrate: 64_000
+            bitrate: 48000,
+            bitrateProfiles: [.musicHighQuality: 96000]
         )
         let redTransceiver = try makeTransceiver(
             of: .audio,
@@ -579,7 +684,7 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
 
         XCTAssertEqual(
             redTransceiver.sender.parameters.encodings.first?.maxBitrateBps,
-            128_000
+            96000
         )
     }
 

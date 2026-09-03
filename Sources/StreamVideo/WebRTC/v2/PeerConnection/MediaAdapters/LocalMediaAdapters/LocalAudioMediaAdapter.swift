@@ -51,9 +51,8 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
     private var hasRegisteredPrimaryTrack: Bool = false
     private var ownCapabilities: [OwnCapability] = []
-    /// Live cap applied to senders created after ``setMaxBitrate``. `0`
-    /// means no cap. Rebind/publish can run before any transceiver exists.
-    private var maxBitrateBps = 0
+    private var audioBitrateProfile: AudioBitrateProfile = .voiceStandard
+    private var restoredBitrates: [PublishOptions.AudioPublishOptions: Int] = [:]
 
     /// Initializes a new instance of `LocalAudioMediaAdapter`.
     ///
@@ -339,24 +338,18 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         with layerSettings: [Stream_Video_Sfu_Event_AudioSender]
     ) { /* No-op */ }
 
-    /// Updates `maxBitrateBps` on every local audio sender.
-    ///
-    /// Applied through RTP parameters so it does not require renegotiation.
-    /// `bitrate <= 0` stores `0` and clears `maxBitrateBps` on encodings.
-    /// Encoded on the processing queue because sender parameters are not
-    /// thread-safe.
-    /// - Parameter bitrate: Target bitrate in bits per second.
-    func setMaxBitrate(_ bitrate: Int) async {
+    func setMaxBitrate(for profile: AudioBitrateProfile) async {
         try? await processingQueue.addSynchronousTaskOperation { [weak self] in
             guard let self else { return }
-            maxBitrateBps = bitrate
-            transceiverStorage.forEach { _, value in
-                applyMaxBitrate(bitrate, on: value.transceiver)
+            audioBitrateProfile = profile
+            transceiverStorage.forEach { options, value in
+                if let bitrate = bitrate(for: options, profile: profile) {
+                    applyMaxBitrate(bitrate, on: value.transceiver)
+                }
             }
-            log.debug(
-                "Local audio maxBitrateBps set to \(bitrate).",
-                subsystems: .webRTC
-            )
+            if profile == .voiceStandard {
+                restoredBitrates.removeAll()
+            }
         }
     }
 
@@ -390,7 +383,22 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             return
         }
         transceiverStorage.set(transceiver, track: track, for: options)
-        applyMaxBitrate(maxBitrateBps, on: transceiver)
+        if let bitrate = bitrate(for: options, profile: audioBitrateProfile) {
+            applyMaxBitrate(bitrate, on: transceiver)
+        }
+    }
+
+    private func bitrate(
+        for options: PublishOptions.AudioPublishOptions,
+        profile: AudioBitrateProfile
+    ) -> Int? {
+        if profile == .voiceStandard {
+            return restoredBitrates[options]
+        }
+        if restoredBitrates[options] == nil {
+            restoredBitrates[options] = options.bitrate
+        }
+        return options.bitrate(for: profile)
     }
 
     /// Writes `maxBitrateBps` on one sender. `bitrate <= 0` clears the

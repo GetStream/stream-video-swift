@@ -150,6 +150,43 @@ final class MicrophoneManager_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(callController.timesCalled(.setAudioBitrateProfile), 0)
     }
 
+    func test_setAudioBitrateProfile_rapidChanges_appliesLatestProfile() async throws {
+        let callController = MockCallController()
+        let releaseMusic = AsyncStream<Void>.makeStream()
+        let musicStarted = Atomic<Bool>(wrappedValue: false)
+        callController.setAudioBitrateProfileHandler = { profile in
+            guard profile.isMusic else { return }
+            musicStarted.wrappedValue = true
+            for await _ in releaseMusic.stream { break }
+        }
+        let subject = MicrophoneManager(
+            callController: callController,
+            initialStatus: .enabled
+        )
+
+        let music = Task {
+            try await subject.setAudioBitrateProfile(.musicHighQuality)
+        }
+        await fulfillment { musicStarted.wrappedValue }
+        let voice = Task {
+            try await subject.setAudioBitrateProfile(.voiceStandard)
+        }
+        releaseMusic.continuation.yield()
+        releaseMusic.continuation.finish()
+
+        try await music.value
+        try await voice.value
+
+        XCTAssertEqual(subject.audioBitrateProfile, .voiceStandard)
+        XCTAssertEqual(
+            callController.recordedInputPayload(
+                AudioBitrateProfile.self,
+                for: .setAudioBitrateProfile
+            ),
+            [.musicHighQuality, .voiceStandard]
+        )
+    }
+
     func test_resetAudioBitrateProfile_allowsSettingMusicAgain() async throws {
         let callController = MockCallController()
         let subject = MicrophoneManager(

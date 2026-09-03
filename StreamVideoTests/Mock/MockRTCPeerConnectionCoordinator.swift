@@ -60,7 +60,7 @@ final class MockRTCPeerConnectionCoordinator:
         case zoom(factor: CGFloat)
         case trackInfo(trackType: TrackType)
         case statsReport
-        case setAudioMaxBitrate(Int)
+        case setAudioMaxBitrate(AudioBitrateProfile)
 
         var payload: Any {
             switch self {
@@ -267,9 +267,9 @@ final class MockRTCPeerConnectionCoordinator:
         )
     }
 
-    override func setAudioMaxBitrate(_ bitrate: Int) async {
+    override func setAudioMaxBitrate(for profile: AudioBitrateProfile) async {
         stubbedFunctionInput[.setAudioMaxBitrate]?.append(
-            .setAudioMaxBitrate(bitrate)
+            .setAudioMaxBitrate(profile)
         )
     }
 

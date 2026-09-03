@@ -278,8 +278,8 @@ final class MediaAdapter {
     }
 
     /// Updates the local audio sender bitrate without renegotiation.
-    func setAudioMaxBitrate(_ bitrate: Int) async {
-        await audioMediaAdapter.setMaxBitrate(bitrate)
+    func setAudioMaxBitrate(for profile: AudioBitrateProfile) async {
+        await audioMediaAdapter.setMaxBitrate(for: profile)
     }
     
     // MARK: - Video

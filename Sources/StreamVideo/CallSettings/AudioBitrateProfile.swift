@@ -23,7 +23,7 @@ public enum AudioBitrateProfile: Sendable, Hashable, CaseIterable {
     public var defaultBitrate: Int {
         switch self {
         case .voiceStandard:
-            return 64_000
+            return 64000
         case .voiceHighQuality, .musicHighQuality:
             return 128_000
         }

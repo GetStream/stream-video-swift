@@ -46,9 +46,15 @@ final class AudioBitrateProfileApplicator: @unchecked Sendable {
         case processing
     }
 
+    private struct AudioProcessingState {
+        let isNoiseSuppressionEnabled: Bool
+        let isHighpassFilterEnabled: Bool
+    }
+
     private let audioSession: CallAudioSession
     private let audioProcessingModule: AudioProcessingModule
     private let audioDeviceModule: AudioDeviceModuleProvider
+    private let transitionQueue = OperationQueue(maxConcurrentOperationCount: 1)
     private let lock = UnfairQueue()
     private var storedProfile: AudioBitrateProfile = .voiceStandard
     /// Last filter requested by `Call.setAudioFilter`. Live output is
@@ -60,10 +66,9 @@ final class AudioBitrateProfileApplicator: @unchecked Sendable {
     var requestedAudioFilter: AudioFilter? {
         lock.sync { intendedFilter }
     }
+
     private var isScreenShareActive = false
-    /// Bitrate in force before a non-default profile; `0` means encodings
-    /// had no cap.
-    private var restoredBitrate: Int?
+    private var restoredAudioProcessing: AudioProcessingState?
 
     /// - Parameters:
     ///   - audioSession: Call session used to leave or restore VoiceChat.
@@ -103,7 +108,24 @@ final class AudioBitrateProfileApplicator: @unchecked Sendable {
         profile: AudioBitrateProfile,
         callSettings: CallSettings,
         ownCapabilities: Set<OwnCapability>,
-        publishOptions: PublishOptions,
+        publisher: RTCPeerConnectionCoordinator?,
+        context: AudioBitrateApplyContext
+    ) async throws {
+        try await transitionQueue.addSynchronousTaskOperation { [self] in
+            try await applySerially(
+                profile: profile,
+                callSettings: callSettings,
+                ownCapabilities: ownCapabilities,
+                publisher: publisher,
+                context: context
+            )
+        }
+    }
+
+    private func applySerially(
+        profile: AudioBitrateProfile,
+        callSettings: CallSettings,
+        ownCapabilities: Set<OwnCapability>,
         publisher: RTCPeerConnectionCoordinator?,
         context: AudioBitrateApplyContext
     ) async throws {
@@ -118,23 +140,14 @@ final class AudioBitrateProfileApplicator: @unchecked Sendable {
         case .none:
             return
         case .bitrateOnly:
-            let bitrateToApply = lock.sync { () -> Int? in
-                storedProfile = profile
-                return consumeBitrate(
-                    profile: profile,
-                    publishOptions: publishOptions
-                )
-            }
-            if let bitrateToApply {
-                await publisher?.setAudioMaxBitrate(bitrateToApply)
-            }
+            lock.sync { storedProfile = profile }
+            await publisher?.setAudioMaxBitrate(for: profile)
         case .processing:
             try await applyProcessing(
                 profile: profile,
                 previous: previous,
                 callSettings: callSettings,
                 ownCapabilities: ownCapabilities,
-                publishOptions: publishOptions,
                 publisher: publisher
             )
         }
@@ -178,6 +191,18 @@ final class AudioBitrateProfileApplicator: @unchecked Sendable {
         callSettings: CallSettings,
         ownCapabilities: Set<OwnCapability>
     ) async {
+        try? await transitionQueue.addSynchronousTaskOperation { [self] in
+            await resetToVoiceSerially(
+                callSettings: callSettings,
+                ownCapabilities: ownCapabilities
+            )
+        }
+    }
+
+    private func resetToVoiceSerially(
+        callSettings: CallSettings,
+        ownCapabilities: Set<OwnCapability>
+    ) async {
         let previous = lock.sync { storedProfile }
         if previous == .voiceStandard {
             return
@@ -185,12 +210,8 @@ final class AudioBitrateProfileApplicator: @unchecked Sendable {
 
         lock.sync {
             storedProfile = .voiceStandard
-            restoredBitrate = nil
             if previous.isMusic {
-                let config = audioProcessingModule.config
-                config.isNoiseSuppressionEnabled = true
-                config.isHighpassFilterEnabled = true
-                audioProcessingModule.config = config
+                restoreAudioProcessing()
                 applyLiveFilter()
             }
         }
@@ -234,7 +255,6 @@ final class AudioBitrateProfileApplicator: @unchecked Sendable {
         previous: AudioBitrateProfile,
         callSettings: CallSettings,
         ownCapabilities: Set<OwnCapability>,
-        publishOptions: PublishOptions,
         publisher: RTCPeerConnectionCoordinator?
     ) async throws {
         // Session first: Apple will not actually disable VP until the
@@ -270,20 +290,24 @@ final class AudioBitrateProfileApplicator: @unchecked Sendable {
             throw error
         }
 
-        let bitrateToApply: Int? = lock.sync {
-            let config = audioProcessingModule.config
-            config.isNoiseSuppressionEnabled = !profile.isMusic
-            config.isHighpassFilterEnabled = !profile.isMusic
-            audioProcessingModule.config = config
+        lock.sync {
+            if profile.isMusic {
+                let config = audioProcessingModule.config
+                if restoredAudioProcessing == nil {
+                    restoredAudioProcessing = .init(
+                        isNoiseSuppressionEnabled: config.isNoiseSuppressionEnabled,
+                        isHighpassFilterEnabled: config.isHighpassFilterEnabled
+                    )
+                }
+                config.isNoiseSuppressionEnabled = false
+                config.isHighpassFilterEnabled = false
+                audioProcessingModule.config = config
+            } else {
+                restoreAudioProcessing()
+            }
             applyLiveFilter()
-            return consumeBitrate(
-                profile: profile,
-                publishOptions: publishOptions
-            )
         }
-        if let bitrateToApply {
-            await publisher?.setAudioMaxBitrate(bitrateToApply)
-        }
+        await publisher?.setAudioMaxBitrate(for: profile)
     }
 
     /// Caller must already hold `lock`. Reads `storedProfile` directly so
@@ -296,25 +320,14 @@ final class AudioBitrateProfileApplicator: @unchecked Sendable {
         }
     }
 
-    /// Non-default profiles set the mapped bitrate. Returning to
-    /// ``voiceStandard`` restores the pre-profile cap (`0` clears
-    /// `maxBitrateBps`). ``rebind`` with music still on hits the first
-    /// branch again so a new publisher gets the same cap.
-    private func consumeBitrate(
-        profile: AudioBitrateProfile,
-        publishOptions: PublishOptions
-    ) -> Int? {
-        if profile != .voiceStandard {
-            if restoredBitrate == nil {
-                restoredBitrate = publishOptions.audio.first?.bitrate ?? 0
-            }
-            return publishOptions.audio.first?.bitrate(for: profile)
-                ?? profile.defaultBitrate
-        }
-        if let restoredBitrate {
-            self.restoredBitrate = nil
-            return restoredBitrate
-        }
-        return nil
+    private func restoreAudioProcessing() {
+        guard let restoredAudioProcessing else { return }
+        let config = audioProcessingModule.config
+        config.isNoiseSuppressionEnabled = restoredAudioProcessing
+            .isNoiseSuppressionEnabled
+        config.isHighpassFilterEnabled = restoredAudioProcessing
+            .isHighpassFilterEnabled
+        audioProcessingModule.config = config
+        self.restoredAudioProcessing = nil
     }
 }

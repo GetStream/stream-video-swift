@@ -1811,9 +1811,9 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         let noiseCancellationFilterId = noiseCancellationFilter.id
         let isNoiseCancellationFilterInUse =
             audioProcessingModule.activeAudioFilter?.id
-            == noiseCancellationFilterId
-            || callController.requestedAudioFilter?.id
-            == noiseCancellationFilterId
+                == noiseCancellationFilterId
+                || callController.requestedAudioFilter?.id
+                == noiseCancellationFilterId
 
         if let value {
             switch value.mode {

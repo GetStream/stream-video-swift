@@ -8,7 +8,7 @@ import XCTest
 final class AudioBitrateProfile_Tests: XCTestCase, @unchecked Sendable {
 
     func test_defaultBitrate_matchesVoiceAndMusicRates() {
-        XCTAssertEqual(AudioBitrateProfile.voiceStandard.defaultBitrate, 64_000)
+        XCTAssertEqual(AudioBitrateProfile.voiceStandard.defaultBitrate, 64000)
         XCTAssertEqual(AudioBitrateProfile.voiceHighQuality.defaultBitrate, 128_000)
         XCTAssertEqual(AudioBitrateProfile.musicHighQuality.defaultBitrate, 128_000)
     }
@@ -26,14 +26,14 @@ final class AudioBitrateProfile_Tests: XCTestCase, @unchecked Sendable {
     func test_bitrateFor_prefersSFUMapping() {
         let options = PublishOptions.AudioPublishOptions(
             codec: .opus,
-            bitrate: 64_000,
+            bitrate: 64000,
             bitrateProfiles: [
-                .voiceStandard: 48_000,
+                .voiceStandard: 48000,
                 .musicHighQuality: 192_000
             ]
         )
 
-        XCTAssertEqual(options.bitrate(for: .voiceStandard), 48_000)
+        XCTAssertEqual(options.bitrate(for: .voiceStandard), 48000)
         XCTAssertEqual(options.bitrate(for: .musicHighQuality), 192_000)
         XCTAssertEqual(options.bitrate(for: .voiceHighQuality), 128_000)
     }
@@ -41,10 +41,10 @@ final class AudioBitrateProfile_Tests: XCTestCase, @unchecked Sendable {
     func test_bitrateFor_voiceStandardFallsBackToOptionBitrate() {
         let options = PublishOptions.AudioPublishOptions(
             codec: .opus,
-            bitrate: 64_000
+            bitrate: 64000
         )
 
-        XCTAssertEqual(options.bitrate(for: .voiceStandard), 64_000)
+        XCTAssertEqual(options.bitrate(for: .voiceStandard), 64000)
         XCTAssertEqual(options.bitrate(for: .musicHighQuality), 128_000)
     }
 }
