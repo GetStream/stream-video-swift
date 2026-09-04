@@ -3378,8 +3378,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/GetStream/stream-core-swift.git";
 			requirement = {
-				kind = branch;
-				branch = "core-ui-design-fonts";
+				kind = revision;
+				revision = fecb30ec066d29b4fd4acd3d9b6039558057d91f;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

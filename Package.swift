@@ -24,10 +24,11 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/apple/swift-protobuf.git", exact: "1.30.0"),
         .package(url: "https://github.com/GetStream/stream-video-swift-webrtc.git", exact: "145.15.0"),
-        // Temporary branch pin until fonts land in develop and ship in a tag.
+        // Temporary pin to the develop commit that added StreamCoreUI
+        // fonts. Restore `from:` once they ship in a tag.
         .package(
             url: "https://github.com/GetStream/stream-core-swift.git",
-            branch: "core-ui-design-fonts"
+            revision: "fecb30ec066d29b4fd4acd3d9b6039558057d91f"
         )
     ],
     targets: [
