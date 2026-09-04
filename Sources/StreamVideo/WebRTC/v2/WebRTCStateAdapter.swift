@@ -529,10 +529,16 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         publisher.completeSetUp()
         // Rebind: new senders need the live bitrate even if music is
         // already on. Session is re-asserted; VP no-ops if unchanged.
-        try await applyAudioBitrateProfile(
-            audioBitrateProfile,
-            context: .rebind
-        )
+        // Do not skip subscriber setup if session/ADM rebind throws;
+        // the applicator rolls the profile back.
+        do {
+            try await applyAudioBitrateProfile(
+                audioBitrateProfile,
+                context: .rebind
+            )
+        } catch {
+            log.error(error, subsystems: .webRTC)
+        }
 
         try await subscriber.setUp(
             with: callSettings,

@@ -214,15 +214,19 @@ class CallController: @unchecked Sendable {
 
     /// Applies an in-call audio bitrate/processing profile.
     ///
-    /// Requires dashboard `hifi_audio_enabled`. Fetches call settings when
-    /// they have not been loaded yet. The coordinator/applicator owns
+    /// Hi-fi profiles require dashboard `hifi_audio_enabled`.
+    /// ``AudioBitrateProfile/voiceStandard`` does not, so a mid-call
+    /// dashboard disable can still restore voice. Fetches call settings
+    /// when they have not been loaded yet. The coordinator/applicator owns
     /// session, ADM, and stored profile; a throw means those were rolled
     /// back.
     func setAudioBitrateProfile(_ profile: AudioBitrateProfile) async throws {
         guard let call, await call.state.session != nil else {
             throw ClientError("Audio bitrate profiles require a joined call.")
         }
-        try await ensureHiFiAudioEnabled()
+        if profile != .voiceStandard {
+            try await ensureHiFiAudioEnabled()
+        }
         try await webRTCCoordinator.setAudioBitrateProfile(profile)
     }
 

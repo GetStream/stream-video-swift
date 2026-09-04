@@ -273,6 +273,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                         $0.value.transceiver.sender.track = nil
                     }
                 }
+            applyCurrentProfileBitrate()
 
             log.debug(
                 """
@@ -342,11 +343,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         try? await processingQueue.addSynchronousTaskOperation { [weak self] in
             guard let self else { return }
             audioBitrateProfile = profile
-            transceiverStorage.forEach { options, value in
-                if let bitrate = bitrate(for: options, profile: profile) {
-                    applyMaxBitrate(bitrate, on: value.transceiver)
-                }
-            }
+            applyCurrentProfileBitrate()
             if profile == .voiceStandard {
                 restoredBitrates.removeAll()
             }
@@ -383,7 +380,24 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             return
         }
         transceiverStorage.set(transceiver, track: track, for: options)
-        if let bitrate = bitrate(for: options, profile: audioBitrateProfile) {
+        applyProfileBitrate(for: options, on: transceiver)
+    }
+
+    /// Uses live `publishOptions`, not the storage key. Equality is only
+    /// id+codec, so an SFU profile-map refresh would otherwise keep the
+    /// stale bitrate.
+    private func applyCurrentProfileBitrate() {
+        transceiverStorage.forEach { options, value in
+            applyProfileBitrate(for: options, on: value.transceiver)
+        }
+    }
+
+    private func applyProfileBitrate(
+        for options: PublishOptions.AudioPublishOptions,
+        on transceiver: RTCRtpTransceiver
+    ) {
+        let current = publishOptions.first { $0 == options } ?? options
+        if let bitrate = bitrate(for: current, profile: audioBitrateProfile) {
             applyMaxBitrate(bitrate, on: transceiver)
         }
     }

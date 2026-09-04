@@ -1203,6 +1203,9 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
                 noiseCancellationFilter: noiseCancellationFilter
             )
         )
+        defer {
+            streamVideo?.videoConfig.audioProcessingModule.setAudioFilter(nil)
+        }
         let callController = MockCallController()
         let call = Call.dummy(callController: callController)
 
@@ -1227,7 +1230,6 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
         await fulfilmentInMainActor {
             callController.requestedAudioFilter == nil
         }
-        streamVideo.videoConfig.audioProcessingModule.setAudioFilter(nil)
     }
 
     // MARK: - Private helpers

@@ -691,6 +691,44 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         )
     }
 
+    func test_setMaxBitrate_publishOptionsProfileMapChange_usesCurrentBitrate(
+    ) async throws {
+        let initial = PublishOptions.AudioPublishOptions(
+            id: 0,
+            codec: .opus,
+            bitrate: 64000,
+            bitrateProfiles: [.musicHighQuality: 128_000]
+        )
+        publishOptions = [initial]
+        let transceiver = try makeTransceiver(
+            of: .audio,
+            audioOptions: initial
+        )
+        mockPeerConnection.stub(for: .addTransceiver, with: transceiver)
+        try await subject.publish()
+        await fulfillment {
+            self.mockPeerConnection.timesCalled(.addTransceiver) == 1
+        }
+        await subject.setMaxBitrate(for: .musicHighQuality)
+        XCTAssertEqual(
+            transceiver.sender.parameters.encodings.first?.maxBitrateBps,
+            128_000
+        )
+
+        let updated = PublishOptions.AudioPublishOptions(
+            id: 0,
+            codec: .opus,
+            bitrate: 64000,
+            bitrateProfiles: [.musicHighQuality: 192_000]
+        )
+        try await subject.didUpdatePublishOptions(.dummy(audio: [updated]))
+
+        await fulfillment {
+            transceiver.sender.parameters.encodings.first?.maxBitrateBps
+                == 192_000
+        }
+    }
+
     // MARK: - Private
 
     private func assertTrackEvent(
