@@ -314,6 +314,28 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(mockE2EE.encryptCalls.first?.trackType, .audio)
     }
 
+    func test_publish_encryptThrows_doesNotAnnounceTrack() async throws {
+        let mockE2EE = MockE2EEManager()
+        mockE2EE.encryptError = ClientError("E2EE encrypt attach failed.")
+        e2eeContext.manager = mockE2EE
+        publishOptions = [.dummy(codec: .opus)]
+        let transceiver = try makeTransceiver(
+            of: .audio,
+            audioOptions: .dummy(codec: .opus)
+        )
+        mockPeerConnection.stub(for: .addTransceiver, with: transceiver)
+
+        _ = await XCTAssertThrowsErrorAsync {
+            try await subject.publish()
+        }
+
+        XCTAssertEqual(mockE2EE.encryptCalls.count, 1)
+        XCTAssertFalse(subject.primaryTrack.isEnabled)
+        XCTAssertTrue(subject.trackInfo(for: .allAvailable).isEmpty)
+        XCTAssertTrue(subject.trackInfo(for: .lastPublishOptions).isEmpty)
+        XCTAssertNil(transceiver.sender.track)
+    }
+
     func test_didUpdatePublishOptions_primaryTrackIsEnabled_newTransceiverAddedForNewPublishOption() async throws {
         publishOptions = [.dummy(id: 0, codec: .opus)]
         try publishOptions.forEach { publishOption in

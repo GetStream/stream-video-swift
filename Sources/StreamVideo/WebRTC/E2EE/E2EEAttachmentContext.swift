@@ -30,8 +30,9 @@ final class E2EEAttachmentContext: @unchecked Sendable {
 
     /// Attaches an encryptor to `sender` when a manager is set.
     ///
-    /// Failures are logged and not rethrown: a missing key or disposed
-    /// manager must not abort transceiver creation.
+    /// Matches JS `Publisher.addTransceiver`: attach failure is fail-closed.
+    /// The sender track is cleared and the error is rethrown so the
+    /// transceiver is not stored or announced.
     ///
     /// - Parameters:
     ///   - sender: The RTP sender on the newly added transceiver.
@@ -42,7 +43,7 @@ final class E2EEAttachmentContext: @unchecked Sendable {
         sender: RTCRtpSender,
         codec: String?,
         trackType: TrackType
-    ) {
+    ) throws {
         guard let manager else { return }
         do {
             try manager.encrypt(sender, codec: codec, trackType: trackType)
@@ -51,7 +52,9 @@ final class E2EEAttachmentContext: @unchecked Sendable {
                 subsystems: .webRTC
             )
         } catch {
+            sender.track = nil
             log.error(error, subsystems: .webRTC)
+            throw error
         }
     }
 }
