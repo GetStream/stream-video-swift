@@ -49,6 +49,13 @@ final class Appearance_DesignSystem_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(subject.tokens.layout.spacingMd, 99)
     }
 
+    func test_tokens_fontWrite_readsBack() {
+        let custom = Font.system(size: 99)
+        subject.tokens.fonts.body = custom
+
+        XCTAssertEqual(subject.tokens.fonts.body, custom)
+    }
+
     // MARK: - Cascade
 
     func test_sharedTokenOverriddenBeforeFirstRead_videoColorUsesOverride() {
