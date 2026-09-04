@@ -10,8 +10,9 @@ import SwiftUI
 ///
 /// Shared color and layout tokens come from ``DesignSystemTokens``. Pass
 /// the same instance into Chat's appearance so both SDKs reskin together.
-/// Video-only colors live on ``colors``. Existing views still use
-/// ``Appearance`` until they migrate.
+/// Video-only colors live on ``colors``. Shared typography is
+/// ``tokens/fonts``. Existing views still use ``Appearance/fonts``
+/// until they migrate.
 ///
 /// ```swift
 /// let tokens = DesignSystemTokens()
