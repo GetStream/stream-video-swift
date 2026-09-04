@@ -270,6 +270,79 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         XCTAssertEqual(request.hintHighScaleLivestreamPublisher, true)
     }
 
+    func test_joinCall_withE2EEManager_setsJoinRequestE2EE() async throws {
+        let defaultAPI = MockDefaultAPIEndpoints()
+        let webRTCCoordinatorFactory = MockWebRTCCoordinatorFactory(
+            videoConfig: Self.videoConfig
+        )
+        let subject = CallController(
+            defaultAPI: defaultAPI,
+            user: user,
+            callId: callId,
+            callType: callType,
+            apiKey: apiKey,
+            videoConfig: Self.videoConfig,
+            initialCallSettings: initialCallSettings,
+            cachedLocation: cachedLocation,
+            webRTCCoordinatorFactory: webRTCCoordinatorFactory
+        )
+        try await subject.setE2EEManager(MockE2EEManager())
+        let expectedResponse = JoinCallResponse.dummy()
+        defaultAPI.stub(for: .joinCall, with: expectedResponse)
+        webRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .coordinator
+            .stateMachine
+            .currentStage
+            .context
+            .authenticator = CallAuthenticationBackedWebRTCAuthenticator(
+                sfuAdapter: webRTCCoordinatorFactory
+                    .mockCoordinatorStack
+                    .sfuStack
+                    .adapter
+            )
+
+        let joinTask = Task {
+            try await subject.joinCall(
+                create: true,
+                callSettings: nil,
+                options: nil,
+                ring: false,
+                notify: false,
+                source: .inApp
+            )
+        }
+
+        await fulfillment {
+            defaultAPI.timesCalled(.joinCall) == 1
+        }
+
+        await fulfillment {
+            webRTCCoordinatorFactory
+                .mockCoordinatorStack
+                .coordinator
+                .stateMachine
+                .currentStage
+                .id == .joining
+        }
+        webRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .sfuStack
+            .setConnectionState(to: .connected(healthCheckInfo: .init()))
+        webRTCCoordinatorFactory.mockCoordinatorStack.joinResponse([])
+
+        _ = try await joinTask.value
+
+        let request = try XCTUnwrap(
+            defaultAPI.recordedInputPayload(
+                (String, String, JoinCallRequest).self,
+                for: .joinCall
+            )?.first?.2
+        )
+
+        XCTAssertEqual(request.e2ee, true)
+    }
+
     func test_joinCall_withoutHighScaleHint_clearsRequestHint() async throws {
         let defaultAPI = MockDefaultAPIEndpoints()
         let webRTCCoordinatorFactory = MockWebRTCCoordinatorFactory(

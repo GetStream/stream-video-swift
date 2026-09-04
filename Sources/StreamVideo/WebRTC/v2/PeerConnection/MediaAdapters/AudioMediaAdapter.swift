@@ -42,13 +42,15 @@ final class AudioMediaAdapter: MediaAdapting, @unchecked Sendable {
     ///   - sfuAdapter: The adapter for communicating with the SFU.
     ///   - publishOptions: The options for publishing audio.
     ///   - subject: A subject for publishing track events.
+    ///   - e2ee: Shared box used to encrypt the local audio sender.
     convenience init(
         sessionID: String,
         peerConnection: StreamRTCPeerConnectionProtocol,
         peerConnectionFactory: PeerConnectionFactory,
         sfuAdapter: SFUAdapter,
         publishOptions: [PublishOptions.AudioPublishOptions],
-        subject: PassthroughSubject<TrackEvent, Never>
+        subject: PassthroughSubject<TrackEvent, Never>,
+        e2ee: E2EEAttachmentContext = .init()
     ) {
         self.init(
             sessionID: sessionID,
@@ -60,7 +62,8 @@ final class AudioMediaAdapter: MediaAdapting, @unchecked Sendable {
                 peerConnectionFactory: peerConnectionFactory,
                 sfuAdapter: sfuAdapter,
                 publishOptions: publishOptions,
-                subject: subject
+                subject: subject,
+                e2ee: e2ee
             ),
             subject: subject
         )

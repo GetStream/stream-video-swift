@@ -70,12 +70,21 @@ class DemoCallsViewModel: ObservableObject {
         let highScaleHint = AppEnvironment
             .highScaleLivestreamPublisherHint
             .value
-        callViewModel.startCall(
-            callType: .default,
-            callId: UUID().uuidString,
-            members: members,
-            ring: true,
-            highScaleLivestreamPublisherHint: highScaleHint
-        )
+        let callId = UUID().uuidString
+        Task {
+            let call = streamVideo.call(callType: .default, callId: callId)
+            await AppEnvironment.EncryptionKeys.shared.attachIfNeeded(
+                to: call,
+                userId: streamVideo.user.id
+            )
+            callViewModel.startCall(
+                callType: .default,
+                callId: callId,
+                members: members,
+                ring: true,
+                highScaleLivestreamPublisherHint: highScaleHint,
+                encryption: AppEnvironment.EncryptionKeys.shared.encryptionRequest
+            )
+        }
     }
 }

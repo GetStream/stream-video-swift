@@ -152,7 +152,8 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
         maxParticipants: Int? = nil,
         backstage: BackstageSettingsRequest? = nil,
         video: Bool? = nil,
-        transcription: TranscriptionSettingsRequest? = nil
+        transcription: TranscriptionSettingsRequest? = nil,
+        encryption: EncryptionSettingsRequest? = nil
     ) async throws -> CallResponse {
         createGate.sync { isCreateInFlight = true }
         onCreateStarted?()
@@ -194,7 +195,8 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
                 maxParticipants: maxParticipants,
                 backstage: backstage,
                 video: video,
-                transcription: transcription
+                transcription: transcription,
+                encryption: encryption
             )
         }
     }

@@ -17,6 +17,7 @@ final class AppState: ObservableObject {
     // MARK: - Properties
 
     private var activeCallCancellable: AnyCancellable?
+    private var ringingCallCancellable: AnyCancellable?
     private var callKitDeviceTokenObservation: AnyCancellable?
 
     // MARK: Published
@@ -36,7 +37,12 @@ final class AppState: ObservableObject {
 
     @Published var loading = false
     @Published var activeCall: Call? {
-        didSet { didUpdate(activeCall: activeCall) }
+        didSet {
+            if oldValue != nil, activeCall == nil {
+                AppEnvironment.EncryptionKeys.shared.clear()
+            }
+            didUpdate(activeCall: activeCall)
+        }
     }
 
     @Published var activeAnonymousCallId: String = ""
@@ -74,6 +80,8 @@ final class AppState: ObservableObject {
             deferSetVoipDevice = false
             activeCallCancellable?.cancel()
             activeCallCancellable = nil
+            ringingCallCancellable?.cancel()
+            ringingCallCancellable = nil
 
             // Update the streamVideo used by CallKitAdapter to configure proper
             // VoIP handling.
@@ -85,6 +93,14 @@ final class AppState: ObservableObject {
                     .$activeCall
                     .receive(on: DispatchQueue.main)
                     .sink { [weak self] in self?.activeCall = $0 }
+
+                ringingCallCancellable = streamVideo
+                    .state
+                    .$ringingCall
+                    .receive(on: DispatchQueue.main)
+                    .sink { [weak self] call in
+                        self?.didUpdate(ringingCall: call)
+                    }
             }
         }
     }
@@ -209,6 +225,22 @@ final class AppState: ObservableObject {
 
     private func didUpdate(videoFilter: VideoFilter?) {
         activeCall?.setVideoFilter(videoFilter)
+    }
+
+    private func didUpdate(ringingCall: Call?) {
+        guard
+            let ringingCall,
+            let userId = currentUser?.id ?? streamVideo?.user.id
+        else {
+            return
+        }
+
+        Task {
+            await AppEnvironment.EncryptionKeys.shared.attachIfNeeded(
+                to: ringingCall,
+                userId: userId
+            )
+        }
     }
 
     private func didUpdate(activeCall: Call?) {
