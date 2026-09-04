@@ -261,16 +261,37 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
 
     /// Switches between stereo and mono playout while keeping the recording
     /// state consistent across reinitializations.
+    ///
+    /// Pass `restoringVoiceProcessing: false` when installing an ADM on the
+    /// audio store queue. ``setVoiceProcessingEnabled`` can block that
+    /// queue and stall join. Live stereo toggles keep the default.
+    ///
     /// - Parameter isPreferred: `true` when stereo output should be used.
+    /// - Parameter restoringVoiceProcessing: When `false`, only mute mode,
+    ///   preference, and bypass are applied.
     /// - Note: Serialized on ``engineQueue`` with other engine mutations.
-    func setStereoPlayoutPreference(_ isPreferred: Bool) {
+    func setStereoPlayoutPreference(
+        _ isPreferred: Bool,
+        restoringVoiceProcessing: Bool = true
+    ) {
         engineQueue.sync {
-            if isPreferred {
-                _ = source.setRecordingAlwaysPreparedMode(false)
+            applyStereoPlayoutPreferenceLocked(isPreferred)
+            if restoringVoiceProcessing {
+                restoreVoiceProcessingAfterStereoLocked()
             }
-            source.prefersStereoPlayout = isPreferred
-            restoreVoiceProcessingAfterStereoLocked()
         }
+    }
+
+    /// Mute mode, stereo preference, and VP bypass. Does not rebuild I/O.
+    private func applyStereoPlayoutPreferenceLocked(_ isPreferred: Bool) {
+        _ = source.setMuteMode(
+            isPreferred ? .inputMixer : .voiceProcessing
+        )
+        if isPreferred {
+            _ = source.setRecordingAlwaysPreparedMode(false)
+        }
+        source.prefersStereoPlayout = isPreferred
+        source.isVoiceProcessingBypassed = isPreferred
     }
 
     /// Applies the in-call music capture policy to Voice Processing.
@@ -310,8 +331,8 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         }
     }
 
-    /// Stereo overlay, or a capture apply when leaving
-    /// ``MusicCapturePolicy.Applied/voiceWhileStereo``.
+    /// Re-applies mute mode after stereo changes, or rebuilds VP when
+    /// leaving ``MusicCapturePolicy.Applied/voiceWhileStereo``.
     ///
     /// Never-music stereo only bypasses. Music-exit with stereo left VP
     /// disabled; stereo-off must `setVoiceProcessingEnabled(true)`.
