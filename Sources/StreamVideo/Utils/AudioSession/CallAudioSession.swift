@@ -69,6 +69,9 @@ final class CallAudioSession: @unchecked Sendable {
     private var lastCallSettings: CallSettings?
     private var lastOwnCapabilities: Set<OwnCapability>?
     private var isSpeakingWhileMuted = false
+    /// Play-and-record uses `.default` instead of VoiceChat while this is a
+    /// music profile, so Apple Voice Processing can actually be disabled.
+    private var audioBitrateProfile: AudioBitrateProfile = .voiceStandard
 
     init(policy: AudioSessionPolicy = DefaultAudioSessionPolicy()) {
         self.policy = policy
@@ -171,7 +174,77 @@ final class CallAudioSession: @unchecked Sendable {
         )
     }
 
+    /// Applies the in-call audio bitrate profile to the session.
+    ///
+    /// Music leaves VoiceChat immediately (not through the 250ms debounce)
+    /// so Apple will allow `setVoiceProcessingEnabled(false)` afterward.
+    /// Bypass-only does not rebuild I/O after VoiceChat. Route and
+    /// settings updates re-enter ``resolvedConfiguration`` with the stored
+    /// profile so `.default` sticks while music is on.
+    ///
+    /// On configuration failure the stored profile is restored so later
+    /// `didUpdate` calls do not keep applying a mode we never reached.
+    func setAudioBitrateProfile(
+        _ profile: AudioBitrateProfile,
+        callSettings: CallSettings,
+        ownCapabilities: Set<OwnCapability>
+    ) async throws {
+        try await applyAudioBitrateProfile(
+            profile,
+            callSettings: callSettings,
+            ownCapabilities: ownCapabilities,
+            restorePreviousOnFailure: true
+        )
+    }
+
+    /// Teardown / ADM-failure rollback. Keeps `profile` even if session
+    /// apply fails so music cannot restick in `resolvedConfiguration`.
+    func commitAudioBitrateProfile(
+        _ profile: AudioBitrateProfile,
+        callSettings: CallSettings,
+        ownCapabilities: Set<OwnCapability>
+    ) async throws {
+        try await applyAudioBitrateProfile(
+            profile,
+            callSettings: callSettings,
+            ownCapabilities: ownCapabilities,
+            restorePreviousOnFailure: false
+        )
+    }
+
     // MARK: - Private Helpers
+
+    private func applyAudioBitrateProfile(
+        _ profile: AudioBitrateProfile,
+        callSettings: CallSettings,
+        ownCapabilities: Set<OwnCapability>,
+        restorePreviousOnFailure: Bool
+    ) async throws {
+        try await processingQueue.addSynchronousTaskOperation { [weak self] in
+            guard let self else { return }
+            let previous = audioBitrateProfile
+            audioBitrateProfile = profile
+            guard delegate != nil else {
+                return
+            }
+
+            do {
+                try await applyConfiguration(
+                    resolvedConfiguration(
+                        for: callSettings,
+                        ownCapabilities: ownCapabilities
+                    ),
+                    callSettings: callSettings,
+                    ownCapabilities: ownCapabilities
+                ).result()
+            } catch {
+                if restorePreviousOnFailure {
+                    audioBitrateProfile = previous
+                }
+                throw error
+            }
+        }
+    }
 
     private func scheduleDeferredActivation(
         callSettingsPublisher: AnyPublisher<CallSettings, Never>,
@@ -400,7 +473,7 @@ final class CallAudioSession: @unchecked Sendable {
         defer { statsAdapter?.trace(.init(audioSession: traceRepresentation)) }
 
         applyConfiguration(
-            policy.configuration(
+            resolvedConfiguration(
                 for: callSettings,
                 ownCapabilities: ownCapabilities
             ),
@@ -412,8 +485,28 @@ final class CallAudioSession: @unchecked Sendable {
         )
     }
 
+    /// Music leaves VoiceChat (`playAndRecord` + `.default`) so Apple will
+    /// allow VP to be **disabled**, not only bypassed. Playback-only
+    /// configs are left alone; they are not VoiceChat.
+    private func resolvedConfiguration(
+        for callSettings: CallSettings,
+        ownCapabilities: Set<OwnCapability>
+    ) -> AudioSessionConfiguration {
+        var configuration = policy.configuration(
+            for: callSettings,
+            ownCapabilities: ownCapabilities
+        )
+        guard audioBitrateProfile.isMusic,
+              configuration.category == .playAndRecord else {
+            return configuration
+        }
+        configuration.mode = .default
+        return configuration
+    }
+
     /// Breaks the configuration into store actions so reducers update the
     /// audio session and our own bookkeeping in a single dispatch.
+    @discardableResult
     private func applyConfiguration(
         _ configuration: AudioSessionConfiguration,
         callSettings: CallSettings,
@@ -421,7 +514,7 @@ final class CallAudioSession: @unchecked Sendable {
         file: StaticString = #file,
         function: StaticString = #function,
         line: UInt = #line
-    ) {
+    ) -> StoreTask<RTCAudioStore.Namespace> {
         log.debug(
             "CallAudioSession will apply configuration:\(configuration)",
             subsystems: .audioSession,
@@ -486,7 +579,7 @@ final class CallAudioSession: @unchecked Sendable {
             ))
         ])
 
-        audioStore.dispatch(
+        let task = audioStore.dispatch(
             actions,
             file: file,
             function: function,
@@ -500,6 +593,8 @@ final class CallAudioSession: @unchecked Sendable {
         if !mutedSpeechDetectionEnabled {
             setSpeakingWhileMuted(false)
         }
+
+        return task
     }
 
     private func shouldEnableMutedSpeechDetection(

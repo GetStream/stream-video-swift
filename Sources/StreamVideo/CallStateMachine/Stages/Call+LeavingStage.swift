@@ -104,6 +104,10 @@ extension Call.StateMachine.Stage {
                 }
 
                 postNotification(with: CallNotification.callEnded, object: call)
+                // After idle/`callEnded` so an in-flight profile apply cannot
+                // delay teardown. Still queued so a cached Call rejoin is
+                // not a music no-op.
+                await call.microphone.resetAudioBitrateProfile()
             }
         }
     }

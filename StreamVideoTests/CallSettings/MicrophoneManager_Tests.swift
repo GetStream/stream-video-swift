@@ -96,4 +96,113 @@ final class MicrophoneManager_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(subject.status, .disabled)
         XCTAssertEqual(callController.timesCalled(.changeAudioState), 0)
     }
+
+    // MARK: - setAudioBitrateProfile
+
+    func test_setAudioBitrateProfile_updatesPublishedValueOnSuccess() async throws {
+        let callController = MockCallController()
+        let subject = MicrophoneManager(
+            callController: callController,
+            initialStatus: .enabled
+        )
+
+        try await subject.setAudioBitrateProfile(.musicHighQuality)
+
+        XCTAssertEqual(subject.audioBitrateProfile, .musicHighQuality)
+        XCTAssertEqual(callController.timesCalled(.setAudioBitrateProfile), 1)
+        XCTAssertEqual(
+            callController
+                .recordedInputPayload(AudioBitrateProfile.self, for: .setAudioBitrateProfile)?
+                .first,
+            .musicHighQuality
+        )
+    }
+
+    func test_setAudioBitrateProfile_doesNotUpdatePublishedValueOnFailure() async throws {
+        let callController = MockCallController()
+        callController.stub(
+            for: .setAudioBitrateProfile,
+            with: ClientError("Hi-fi audio is not enabled on dashboard settings.")
+        )
+        let subject = MicrophoneManager(
+            callController: callController,
+            initialStatus: .enabled
+        )
+
+        do {
+            try await subject.setAudioBitrateProfile(.musicHighQuality)
+            XCTFail("Expected setAudioBitrateProfile to throw.")
+        } catch {
+            XCTAssertEqual(subject.audioBitrateProfile, .voiceStandard)
+            XCTAssertEqual(callController.timesCalled(.setAudioBitrateProfile), 1)
+        }
+    }
+
+    func test_setAudioBitrateProfile_sameProfile_doesNotCallController() async throws {
+        let callController = MockCallController()
+        let subject = MicrophoneManager(
+            callController: callController,
+            initialStatus: .enabled
+        )
+
+        try await subject.setAudioBitrateProfile(.voiceStandard)
+
+        XCTAssertEqual(callController.timesCalled(.setAudioBitrateProfile), 0)
+    }
+
+    func test_setAudioBitrateProfile_rapidChanges_appliesLatestProfile() async throws {
+        let callController = MockCallController()
+        let releaseMusic = AsyncStream<Void>.makeStream()
+        let musicStarted = Atomic<Bool>(wrappedValue: false)
+        callController.setAudioBitrateProfileHandler = { profile in
+            guard profile.isMusic else { return }
+            musicStarted.wrappedValue = true
+            for await _ in releaseMusic.stream { break }
+        }
+        let subject = MicrophoneManager(
+            callController: callController,
+            initialStatus: .enabled
+        )
+
+        let music = Task {
+            try await subject.setAudioBitrateProfile(.musicHighQuality)
+        }
+        await fulfillment { musicStarted.wrappedValue }
+        let voice = Task {
+            try await subject.setAudioBitrateProfile(.voiceStandard)
+        }
+        releaseMusic.continuation.yield()
+        releaseMusic.continuation.finish()
+
+        try await music.value
+        try await voice.value
+
+        XCTAssertEqual(subject.audioBitrateProfile, .voiceStandard)
+        XCTAssertEqual(
+            callController.recordedInputPayload(
+                AudioBitrateProfile.self,
+                for: .setAudioBitrateProfile
+            ),
+            [.musicHighQuality, .voiceStandard]
+        )
+    }
+
+    func test_resetAudioBitrateProfile_allowsSettingMusicAgain() async throws {
+        let callController = MockCallController()
+        let subject = MicrophoneManager(
+            callController: callController,
+            initialStatus: .enabled
+        )
+        try await subject.setAudioBitrateProfile(.musicHighQuality)
+
+        await subject.resetAudioBitrateProfile()
+
+        XCTAssertEqual(subject.audioBitrateProfile, .voiceStandard)
+        XCTAssertEqual(callController.timesCalled(.setAudioBitrateProfile), 1)
+
+        try await subject.setAudioBitrateProfile(.musicHighQuality)
+
+        XCTAssertEqual(subject.audioBitrateProfile, .musicHighQuality)
+        XCTAssertEqual(callController.timesCalled(.setAudioBitrateProfile), 2)
+    }
 }

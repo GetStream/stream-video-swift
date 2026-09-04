@@ -181,7 +181,9 @@ final class StreamVideoCapturer: StreamVideoCapturing, @unchecked Sendable {
             videoCapturerDelegate: videoSource,
             audioDeviceModule: audioDeviceModule,
             actionHandlers: [
-                ScreenShareCaptureHandler(includeAudio: includeAudio)
+                ScreenShareCaptureHandler(
+                    includeAudio: includeAudio
+                )
             ]
         )
     }
@@ -359,6 +361,15 @@ final class StreamVideoCapturer: StreamVideoCapturing, @unchecked Sendable {
 
     func actionHandler<T: StreamVideoCapturerActionHandler>() -> T? {
         actionHandlers.first { $0 is T } as? T
+    }
+
+    /// Attaches the screenshare audio-filter gate to the in-app handler.
+    /// Broadcast capturers have no handler; this is a no-op for them.
+    func setAudioFilterGate(
+        _ audioFilterGate: ScreenShareAudioFilterGate?
+    ) {
+        let handler: ScreenShareCaptureHandler? = actionHandler()
+        handler?.setAudioFilterGate(audioFilterGate)
     }
 
     func supportsBackgrounding() -> Bool {

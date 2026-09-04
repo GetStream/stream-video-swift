@@ -20,13 +20,14 @@ extension StreamVideo {
     
     static func mock(
         httpClient: HTTPClient,
-        callController: CallController? = nil
+        callController: CallController? = nil,
+        videoConfig: VideoConfig = .dummy()
     ) -> StreamVideo {
         let streamVideo = StreamVideo(
             apiKey: apiKey,
             user: mockUser,
             token: mockToken,
-            videoConfig: .dummy(),
+            videoConfig: videoConfig,
             tokenProvider: { result in
                 result(.success(mockToken))
             },
