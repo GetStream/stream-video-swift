@@ -162,7 +162,8 @@ extension RTCAudioStore {
             }
 
             audioDeviceModule.setStereoPlayoutPreference(
-                state.stereoConfiguration.playout.preferred
+                state.stereoConfiguration.playout.preferred,
+                restoringVoiceProcessing: false
             )
 
             audioDeviceModule

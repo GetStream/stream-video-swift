@@ -286,11 +286,20 @@ final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertFalse(source.prefersStereoPlayout)
         XCTAssertFalse(source.isVoiceProcessingBypassed)
 
+        // Preference then restore each apply mute mode (on, then off).
         let recordedModes = source.recordedInputPayload(
             RTCAudioEngineMuteMode.self,
             for: .setMuteMode
         )
-        XCTAssertEqual(recordedModes, [.inputMixer, .voiceProcessing])
+        XCTAssertEqual(
+            recordedModes,
+            [
+                .inputMixer,
+                .inputMixer,
+                .voiceProcessing,
+                .voiceProcessing
+            ]
+        )
 
         XCTAssertEqual(source.timesCalled(.setVoiceProcessingEnabled), 0)
 
@@ -299,6 +308,26 @@ final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
             for: .setRecordingAlwaysPreparedMode
         )
         XCTAssertEqual(recordedPreparedFlags, [false])
+    }
+
+    func test_setStereoPlayoutPreference_withoutRestoringVoiceProcessing_doesNotRebuildVoiceProcessing() {
+        makeSubject()
+
+        subject.setStereoPlayoutPreference(
+            true,
+            restoringVoiceProcessing: false
+        )
+
+        XCTAssertTrue(source.prefersStereoPlayout)
+        XCTAssertTrue(source.isVoiceProcessingBypassed)
+        XCTAssertEqual(source.timesCalled(.setVoiceProcessingEnabled), 0)
+        XCTAssertEqual(
+            source.recordedInputPayload(
+                RTCAudioEngineMuteMode.self,
+                for: .setMuteMode
+            ),
+            [.inputMixer]
+        )
     }
 
     func test_setMusicCaptureEnabled_music_bypassesVPAndDisablesAGC() throws {
