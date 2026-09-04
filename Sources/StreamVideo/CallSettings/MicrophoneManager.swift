@@ -65,7 +65,8 @@ public final class MicrophoneManager: ObservableObject, CallSettingsManager, @un
 
     /// Sets the in-call audio capture and publish profile.
     ///
-    /// Allowed after join. Requires dashboard `hifi_audio_enabled`.
+    /// Allowed after join. Hi-fi profiles require dashboard
+    /// `hifi_audio_enabled`; ``AudioBitrateProfile/voiceStandard`` does not.
     /// Published as ``audioBitrateProfile``. Same-profile calls are a
     /// no-op. The value survives reconnect. Leave resets it to
     /// ``AudioBitrateProfile/voiceStandard`` so a later music set on a

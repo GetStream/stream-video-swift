@@ -81,9 +81,6 @@ extension Call.StateMachine.Stage {
             input.resetAudioFilter()
 
             Task(disposableBag: disposableBag) { @MainActor [weak self, call] in
-                // Cached Call + leave + join: clear published music so
-                // the next set is not a no-op at the manager guard.
-                await call.microphone.resetAudioBitrateProfile()
                 guard let self else {
                     return
                 }
@@ -107,6 +104,10 @@ extension Call.StateMachine.Stage {
                 }
 
                 postNotification(with: CallNotification.callEnded, object: call)
+                // After idle/`callEnded` so an in-flight profile apply cannot
+                // delay teardown. Still queued so a cached Call rejoin is
+                // not a music no-op.
+                await call.microphone.resetAudioBitrateProfile()
             }
         }
     }
