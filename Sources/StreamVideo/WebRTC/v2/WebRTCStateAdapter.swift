@@ -49,8 +49,16 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     let audioSession: CallAudioSession
     let trackStorage: WebRTCTrackStorage = .init()
 
+    /// The latest non-empty session id observed during the call's lifetime.
+    ///
+    /// ``cleanUp()`` resets ``sessionID`` while the call is torn down, but
+    /// consumers may need to refer to the session that just ended (e.g. user
+    /// feedback is usually collected *after* the call has ended). This
+    /// property retains the id for them.
+    private(set) var lastSessionID: String
+
     /// Published properties that represent different parts of the WebRTC state.
-    @Published private(set) var sessionID: String = UUID().uuidString
+    @Published private(set) var sessionID: String
     @Published private(set) var token: String = ""
     @Published private(set) var callSettings: CallSettings
     @Published private(set) var audioSettings: AudioSettings = .init()
@@ -196,6 +204,9 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         self.apiKey = apiKey
         self.callCid = callCid
         self.videoConfig = videoConfig
+        let sessionID = UUID().uuidString
+        self._sessionID = .init(initialValue: sessionID)
+        self.lastSessionID = sessionID
         self._callSettings = .init(initialValue: callSettings)
         let peerConnectionFactory = peerConnectionFactory
         self.peerConnectionFactory = peerConnectionFactory
@@ -225,6 +236,11 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     /// Sets the session ID.
     func set(sessionID value: String) {
         self.sessionID = value
+        /// The empty value set during ``cleanUp()`` is skipped on purpose, so
+        /// that ``lastSessionID`` keeps pointing to the session that ended.
+        if !value.isEmpty {
+            lastSessionID = value
+        }
     }
 
     /// Sets the call settings.

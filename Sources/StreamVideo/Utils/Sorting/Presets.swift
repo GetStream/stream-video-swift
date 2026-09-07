@@ -14,8 +14,8 @@ public nonisolated(unsafe) let ifInvisible = ifInvisibleBy
 
 /// The default sorting preset.
 public nonisolated(unsafe) let defaultSortPreset = [
-    pinned,
     screenSharing,
+    pinned,
     ifInvisibleBy(
         combineComparators(
             [
@@ -33,8 +33,8 @@ public nonisolated(unsafe) let defaultComparators = defaultSortPreset
 
 /// The sorting preset for speaker layout.
 public nonisolated(unsafe) let speakerLayoutSortPreset = [
-    pinned,
     screenSharing,
+    pinned,
     dominantSpeaker,
     ifInvisibleBy(
         combineComparators(
