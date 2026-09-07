@@ -11,8 +11,13 @@ import SwiftUI
 public final class BackportStateObject<ObjectType: ObservableObject & Sendable>: DynamicProperty, @unchecked Sendable
     where ObjectType.ObjectWillChangePublisher == ObservableObjectPublisher {
     
-    /// Wrapper that helps with initialising without actually having an ObservableObject yet
-    private class ObservedObjectWrapper: ObservableObject, @unchecked Sendable {
+    /// Wrapper that helps with initialising without actually having an
+    /// ObservableObject yet.
+    ///
+    /// Not `private` on purpose: since the iOS 27 SDK, `@State` expands to a
+    /// macro that synthesises a non-private `LazyState<Value>` storage peer,
+    /// which fails to compile when `Value` is a private type.
+    final class ObservedObjectWrapper: ObservableObject, @unchecked Sendable {
         @PublishedObject var wrappedObject: ObjectType? = nil
         init() {}
     }
