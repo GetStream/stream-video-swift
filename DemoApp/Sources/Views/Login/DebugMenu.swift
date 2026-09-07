@@ -5,6 +5,7 @@
 import Foundation
 import GDPerformanceView_Swift
 import StreamVideo
+import StreamVideoSwiftUI
 import SwiftUI
 
 @MainActor
