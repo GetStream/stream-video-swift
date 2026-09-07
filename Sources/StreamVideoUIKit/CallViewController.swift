@@ -106,7 +106,7 @@ final class CallViewContainer: UIView {
         embed(uiView)
     }
     
-    @available(iOS, introduced: 13, obsoleted: 14)
+    @available(iOS 13.0, *)
     init<Factory: ViewFactory>(view: CallContainer_iOS13<Factory>, frame: CGRect) {
         let uiView = UIHostingController(rootView: view).view!
         uiView.backgroundColor = .clear

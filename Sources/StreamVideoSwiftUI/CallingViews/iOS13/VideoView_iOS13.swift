@@ -5,7 +5,7 @@
 import StreamVideo
 import SwiftUI
 
-@available(iOS, introduced: 13, obsoleted: 14)
+@available(iOS 13.0, *)
 public struct CallContainer_iOS13<Factory: ViewFactory>: View {
     
     @Injected(\.utils) var utils

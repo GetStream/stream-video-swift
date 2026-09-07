@@ -73,7 +73,7 @@ public struct LocalParticipantViewModifier: ViewModifier {
     }
 }
 
-@available(iOS, introduced: 13, obsoleted: 14)
+@available(iOS 13.0, *)
 public struct LocalParticipantViewModifier_iOS13: ViewModifier {
 
     private let localParticipant: CallParticipant

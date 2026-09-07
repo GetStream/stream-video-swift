@@ -5,7 +5,7 @@
 import StreamVideo
 import SwiftUI
 
-@available(iOS, introduced: 13, obsoleted: 14)
+@available(iOS 13.0, *)
 public struct LobbyView_iOS13<Factory: ViewFactory>: View {
 
     @ObservedObject var callViewModel: CallViewModel
