@@ -249,6 +249,19 @@ class CallController: @unchecked Sendable {
         )
     }
 
+    /// Attaches or clears an E2EE manager. Must run before peer connections
+    /// exist.
+    ///
+    /// Forwards to ``WebRTCStateAdapter/setE2EEManager(_:)``. Join then
+    /// reads that same instance for ``JoinCallRequest.e2ee``.
+    ///
+    /// - Parameter manager: The encryption manager to attach, or `nil`
+    ///   to clear it.
+    /// - Throws: If publisher or subscriber peer connections already exist.
+    func setE2EEManager(_ manager: E2EEManager?) async throws {
+        try await webRTCCoordinator.stateAdapter.setE2EEManager(manager)
+    }
+
     /// Sets a `videoFilter` for the current call.
     /// - Parameter videoFilter: A `VideoFilter` instance representing the video filter to set.
     func setVideoFilter(_ videoFilter: VideoFilter?) {
@@ -647,6 +660,9 @@ class CallController: @unchecked Sendable {
     ///   - options: Additional call creation options and join-only hints.
     /// - Returns: The backend join response used to continue the WebRTC flow.
     /// - Throws: An error if location fetch or join request fails.
+    ///
+    /// - Note: `JoinCallRequest.e2ee` is `true` when an E2EE manager is set
+    ///   on ``WebRTCStateAdapter``.
     private func authenticateCall(
         create: Bool,
         ring: Bool,
@@ -675,6 +691,7 @@ class CallController: @unchecked Sendable {
         let joinCall = JoinCallRequest(
             create: create,
             data: callRequest,
+            e2ee: await webRTCCoordinator.stateAdapter.e2eeManager != nil,
             hintHighScaleLivestreamPublisher: options?.highScaleLivestreamPublisherHint,
             location: location,
             migratingFrom: migratingFrom,

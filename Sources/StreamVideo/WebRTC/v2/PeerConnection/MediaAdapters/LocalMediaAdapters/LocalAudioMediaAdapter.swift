@@ -49,6 +49,9 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     /// A publisher that emits events related to audio tracks.
     let subject: PassthroughSubject<TrackEvent, Never>
 
+    /// Shared box used to attach an encryptor after `addTransceiver`.
+    private let e2ee: E2EEAttachmentContext
+
     private var hasRegisteredPrimaryTrack: Bool = false
     private var ownCapabilities: [OwnCapability] = []
 
@@ -61,13 +64,15 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     ///   - sfuAdapter: The adapter for communicating with the SFU.
     ///   - publishOptions: The options for publishing audio tracks.
     ///   - subject: A publisher that emits track events.
+    ///   - e2ee: Shared box used to encrypt the local audio sender.
     init(
         sessionID: String,
         peerConnection: StreamRTCPeerConnectionProtocol,
         peerConnectionFactory: PeerConnectionFactory,
         sfuAdapter: SFUAdapter,
         publishOptions: [PublishOptions.AudioPublishOptions],
-        subject: PassthroughSubject<TrackEvent, Never>
+        subject: PassthroughSubject<TrackEvent, Never>,
+        e2ee: E2EEAttachmentContext = .init()
     ) {
         self.sessionID = sessionID
         self.peerConnection = peerConnection
@@ -75,6 +80,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         self.sfuAdapter = sfuAdapter
         self.publishOptions = publishOptions
         self.subject = subject
+        self.e2ee = e2ee
 
         // Create the primary audio track for the session.
         let source = peerConnectionFactory.makeAudioSource(.defaultConstraints)
@@ -135,36 +141,40 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         }
 
         primaryTrack.isEnabled = true
-
-        publishOptions.forEach {
-            self.addTransceiverIfRequired(
-                for: $0,
-                with: self.primaryTrack.clone(from: self.peerConnectionFactory)
-            )
-        }
-
-        let activePublishOptions = Set(self.publishOptions)
-        transceiverStorage
-            .forEach {
-                if activePublishOptions.contains($0.key) {
-                    $0.value.track.isEnabled = true
-                    $0.value.transceiver.sender.track = $0.value.track
-                } else {
-                    $0.value.track.isEnabled = false
-                    $0.value.transceiver.sender.track = nil
-                }
+        do {
+            for options in publishOptions {
+                try addTransceiverIfRequired(
+                    for: options,
+                    with: primaryTrack.clone(from: peerConnectionFactory)
+                )
             }
 
-        audioRecorder.startRecording()
+            let activePublishOptions = Set(self.publishOptions)
+            transceiverStorage
+                .forEach {
+                    if activePublishOptions.contains($0.key) {
+                        $0.value.track.isEnabled = true
+                        $0.value.transceiver.sender.track = $0.value.track
+                    } else {
+                        $0.value.track.isEnabled = false
+                        $0.value.transceiver.sender.track = nil
+                    }
+                }
 
-        log.debug(
-            """
-            Local audio tracks are now published:
-                primary: \(primaryTrack.trackId) isEnabled:\(primaryTrack.isEnabled)
-                clones: \(transceiverStorage.map(\.value.track.trackId).joined(separator: ","))
-            """,
-            subsystems: .webRTC
-        )
+            audioRecorder.startRecording()
+
+            log.debug(
+                """
+                Local audio tracks are now published:
+                    primary: \(primaryTrack.trackId) isEnabled:\(primaryTrack.isEnabled)
+                    clones: \(transceiverStorage.map(\.value.track.trackId).joined(separator: ","))
+                """,
+                subsystems: .webRTC
+            )
+        } catch {
+            primaryTrack.isEnabled = false
+            throw error
+        }
     }
 
     /// Stops publishing the local audio track.
@@ -245,7 +255,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     func didUpdatePublishOptions(
         _ publishOptions: PublishOptions
     ) async throws {
-        processingQueue.addTaskOperation { [weak self] in
+        try await processingQueue.addSynchronousTaskOperation { [weak self] in
             guard let self else { return }
 
             self.publishOptions = publishOptions.audio
@@ -253,7 +263,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             guard primaryTrack.isEnabled else { return }
 
             for option in self.publishOptions {
-                addTransceiverIfRequired(
+                try addTransceiverIfRequired(
                     for: option,
                     with: primaryTrack.clone(from: peerConnectionFactory)
                 )
@@ -340,13 +350,17 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
     /// Adds or updates a transceiver for a given audio track and publish option.
     ///
+    /// When E2EE is enabled, the encryptor is attached before the transceiver
+    /// is stored. Attach failure clears the sender track and throws so
+    /// the track is not announced.
+    ///
     /// - Parameters:
     ///   - options: The options for publishing the audio track.
     ///   - track: The audio track to be added or updated.
     private func addTransceiverIfRequired(
         for options: PublishOptions.AudioPublishOptions,
         with track: RTCAudioTrack
-    ) {
+    ) throws {
         guard !transceiverStorage.contains(key: options) else {
             return
         }
@@ -365,6 +379,11 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             log.warning("Unable to create transceiver for options:\(options).", subsystems: .webRTC)
             return
         }
+        try e2ee.encryptIfNeeded(
+            sender: transceiver.sender,
+            codec: options.codec.e2eeCodecPin,
+            trackType: .audio
+        )
         transceiverStorage.set(transceiver, track: track, for: options)
     }
 

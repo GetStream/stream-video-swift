@@ -13,6 +13,7 @@ struct DebugMenu: View {
     @Injected(\.colors) var colors
 
     private var appState = AppState.shared
+    @ObservedObject private var encryptionKeys = AppEnvironment.EncryptionKeys.shared
 
     @State private var loggedInView = AppEnvironment.loggedInView {
         didSet { AppEnvironment.loggedInView = loggedInView }
@@ -416,6 +417,11 @@ struct DebugMenu: View {
                 }
             }
         )
+        .sheet(item: $encryptionKeys.prompt) { prompt in
+            NavigationView {
+                EncryptionKeyEditorView(prompt: prompt)
+            }
+        }
     }
 
     @ViewBuilder

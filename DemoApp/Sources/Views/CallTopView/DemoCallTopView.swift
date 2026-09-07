@@ -44,7 +44,10 @@ struct DemoCallTopView<Factory: ViewFactory>: View {
 
             if !isCallLivestream {
                 HStack(alignment: .center) {
-                    CallDurationView(viewModel)
+                    DemoCallDurationView(
+                        viewModel: viewModel,
+                        isEncrypted: isEncrypted
+                    )
                 }
                 .frame(height: 44)
                 .frame(maxWidth: .infinity)
@@ -66,6 +69,10 @@ struct DemoCallTopView<Factory: ViewFactory>: View {
     private var isCallLivestream: Bool {
         guard let call = viewModel.call else { return false }
         return call.callType == .livestream
+    }
+
+    private var isEncrypted: Bool {
+        viewModel.call?.state.settings?.encryption.mode == .autoOn
     }
 
     private var hideLayoutMenu: Bool {
@@ -137,6 +144,85 @@ struct DemoCallTopView<Factory: ViewFactory>: View {
         } else {
             EmptyView()
         }
+    }
+}
+
+private struct DemoCallDurationView: View {
+    @Injected(\.colors) private var colors
+    @Injected(\.images) private var images
+    @Injected(\.fonts) private var fonts
+    @Injected(\.formatters.mediaDuration) private var formatter
+
+    @ObservedObject var viewModel: CallViewModel
+    var isEncrypted: Bool
+
+    @State private var duration: TimeInterval
+
+    init(viewModel: CallViewModel, isEncrypted: Bool) {
+        self.viewModel = viewModel
+        self.isEncrypted = isEncrypted
+        _duration = .init(
+            initialValue: viewModel.call?.state.duration ?? 0
+        )
+    }
+
+    var body: some View {
+        Group {
+            switch viewModel.callingState {
+            case .outgoing:
+                CallDurationView(viewModel)
+            case .inCall:
+                inCallChip
+            default:
+                EmptyView()
+            }
+        }
+        .onReceive(viewModel.call?.state.$duration) { duration = $0 }
+    }
+
+    @ViewBuilder
+    private var inCallChip: some View {
+        if duration > 0, let formatted = formatter.format(duration) {
+            HStack(spacing: 4) {
+                if isEncrypted {
+                    Image(systemName: lockSymbol)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 12)
+                        .foregroundColor(colors.accentGreen)
+                        .accessibility(identifier: "e2eeEncryptedBadge")
+                }
+                if viewModel.recordingState == .recording {
+                    images.recordIcon
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 12)
+                        .foregroundColor(colors.inactiveCallControl)
+                }
+                Text(formatted)
+                    .font(fonts.bodyBold.monospacedDigit())
+                    .foregroundColor(Color(colors.callDurationColor))
+                    .minimumScaleFactor(0.2)
+                    .lineLimit(1)
+                    .layoutPriority(2)
+            }
+            .padding(.horizontal)
+            .padding(.vertical, 4)
+            .background(Color(colors.participantBackground))
+            .clipShape(Capsule())
+            .accessibility(
+                identifier: viewModel.recordingState == .recording
+                    ? "recordingView"
+                    : "callDurationView"
+            )
+        }
+    }
+
+    private var lockSymbol: String {
+        if #available(iOS 16.0, *) {
+            return "lock.shield"
+        }
+        return "lock.fill"
     }
 }
 

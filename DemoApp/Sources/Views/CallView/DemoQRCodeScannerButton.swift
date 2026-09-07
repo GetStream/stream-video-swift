@@ -40,7 +40,13 @@ struct DemoQRCodeScannerButton: View {
                 case let .success(scanResult):
                     if let url = URL(string: scanResult.string), url.isWeb {
                         if deeplinkAdapter.canHandle(url: url) {
-                            let deeplinkInfo = deeplinkAdapter.handle(url: url).deeplinkInfo
+                            var deeplinkInfo = deeplinkAdapter
+                                .handle(url: url)
+                                .deeplinkInfo
+                            if deeplinkInfo.encryptionKey?.isEmpty ?? true {
+                                deeplinkInfo.encryptionKey = DeeplinkAdapter
+                                    .encryptionKey(fromRaw: scanResult.string)
+                            }
                             completion(deeplinkInfo)
                         } else {
                             viewModel.toast = Toast(style: .error, message: "The recognised URL from the QR code isn't supported.")

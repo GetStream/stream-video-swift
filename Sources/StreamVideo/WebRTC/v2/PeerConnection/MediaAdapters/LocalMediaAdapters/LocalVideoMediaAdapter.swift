@@ -63,6 +63,9 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     /// A publisher that emits events related to video track changes.
     let subject: PassthroughSubject<TrackEvent, Never>
 
+    /// Shared box used to attach an encryptor after `addTransceiver`.
+    private let e2ee: E2EEAttachmentContext
+
     /// A container for managing cancellable tasks to ensure proper cleanup.
     private let disposableBag = DisposableBag()
 
@@ -86,6 +89,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     ///   - videoCaptureSessionProvider: A provider for managing video capture
     ///     sessions.
     ///   - audioDeviceModule: The audio device module used by video capture.
+    ///   - e2ee: Shared box used to encrypt the local video sender.
     init(
         sessionID: String,
         peerConnection: StreamRTCPeerConnectionProtocol,
@@ -97,7 +101,8 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         subject: PassthroughSubject<TrackEvent, Never>,
         capturerFactory: VideoCapturerProviding = StreamVideoCapturerFactory(),
         videoCaptureSessionProvider: VideoCaptureSessionProvider,
-        audioDeviceModule: AudioDeviceModule
+        audioDeviceModule: AudioDeviceModule,
+        e2ee: E2EEAttachmentContext = .init()
     ) {
         self.sessionID = sessionID
         self.peerConnection = peerConnection
@@ -110,6 +115,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         self.capturerFactory = capturerFactory
         self.videoCaptureSessionProvider = videoCaptureSessionProvider
         self.audioDeviceModule = audioDeviceModule
+        self.e2ee = e2ee
         backgroundMuteAdapter = .init(sessionID: sessionID, sfuAdapter: sfuAdapter)
 
         // Initialize the primary video track, either from the active session or a new source.
@@ -233,38 +239,40 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         try await startVideoCapturingSession()
 
         primaryTrack.isEnabled = true
-
-        publishOptions
-            .forEach {
-                self.addTransceiverIfRequired(
-                    for: $0,
-                    with: self
-                        .primaryTrack
-                        .clone(from: self.peerConnectionFactory)
+        do {
+            for options in publishOptions {
+                try addTransceiverIfRequired(
+                    for: options,
+                    with: primaryTrack.clone(from: peerConnectionFactory)
                 )
             }
 
-        let activePublishOptions = Set(self.publishOptions)
+            let activePublishOptions = Set(self.publishOptions)
 
-        transceiverStorage
-            .forEach {
-                if activePublishOptions.contains($0.key) {
-                    $0.value.track.isEnabled = true
-                    $0.value.transceiver.sender.track = $0.value.track
-                } else {
-                    $0.value.track.isEnabled = false
-                    $0.value.transceiver.sender.track = nil
+            transceiverStorage
+                .forEach {
+                    if activePublishOptions.contains($0.key) {
+                        $0.value.track.isEnabled = true
+                        $0.value.transceiver.sender.track = $0.value.track
+                    } else {
+                        $0.value.track.isEnabled = false
+                        $0.value.transceiver.sender.track = nil
+                    }
                 }
-            }
 
-        log.debug(
-            """
-            Local videoTracks are now published
-                primary: \(primaryTrack.trackId) isEnabled:\(primaryTrack.isEnabled)
-                clones: \(transceiverStorage.map(\.value.track.trackId).joined(separator: ","))
-            """,
-            subsystems: .webRTC
-        )
+            log.debug(
+                """
+                Local videoTracks are now published
+                    primary: \(primaryTrack.trackId) isEnabled:\(primaryTrack.isEnabled)
+                    clones: \(transceiverStorage.map(\.value.track.trackId).joined(separator: ","))
+                """,
+                subsystems: .webRTC
+            )
+        } catch {
+            primaryTrack.isEnabled = false
+            _ = try? await stopVideoCapturingSession()
+            throw error
+        }
     }
 
     /// Stops publishing the local video track.
@@ -302,7 +310,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     func didUpdatePublishOptions(
         _ publishOptions: PublishOptions
     ) async throws {
-        processingQueue.addTaskOperation { [weak self] in
+        try await processingQueue.addSynchronousTaskOperation { [weak self] in
             guard let self else { return }
 
             self.publishOptions = publishOptions.video
@@ -314,7 +322,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             }
 
             for publishOption in self.publishOptions {
-                addTransceiverIfRequired(
+                try addTransceiverIfRequired(
                     for: publishOption,
                     with: primaryTrack.clone(from: peerConnectionFactory)
                 )
@@ -777,13 +785,17 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
     /// Adds or updates a transceiver for a video track.
     ///
+    /// When E2EE is enabled, the encryptor is attached before the transceiver
+    /// is stored. Attach failure clears the sender track and throws so
+    /// the track is not announced.
+    ///
     /// - Parameters:
     ///   - options: The publish options for the track.
     ///   - track: The video track to add or update.
     private func addTransceiverIfRequired(
         for options: PublishOptions.VideoPublishOptions,
         with track: RTCVideoTrack
-    ) {
+    ) throws {
         guard !transceiverStorage.contains(key: options) else {
             return
         }
@@ -808,6 +820,11 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         if params.setDegradationPreference(options.degradationPreference) {
             transceiver.sender.parameters = params
         }
+        try e2ee.encryptIfNeeded(
+            sender: transceiver.sender,
+            codec: options.codec.e2eeCodecPin,
+            trackType: .video
+        )
         transceiverStorage.set(transceiver, track: track, for: options)
     }
 

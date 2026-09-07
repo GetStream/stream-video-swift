@@ -11,6 +11,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `CallDeletedEvent` now updates `Call.state` instead of being ignored. [#1243](https://github.com/GetStream/stream-video-swift/pull/1243)
 - `Call.startFrameRecording(recordingExternalStorage:)` and `Call.stopFrameRecording()`, along with the `CallState.frameRecordingStatus` property that tracks frame recording for the active call. [#1246](https://github.com/GetStream/stream-video-swift/pull/1246)
 - `Call.stopAllRTMPBroadcasts()` to stop every RTMP-out broadcast of a call in one call [#1245](https://github.com/GetStream/stream-video-swift/pull/1245).
+- Added framed AES-GCM end-to-end encryption via `Call.setE2EEManager(_:)` and `EncryptionManager`. Attach the manager before `join()`, or pass `nil` to detach it. [#1249](https://github.com/GetStream/stream-video-swift/pull/1249)
+- `Call.create`, `CallViewModel.startCall`, `joinCall`, and `joinAndRingCall` accept optional `encryption` settings so get-or-create can set mode `auto-on`. [#1249](https://github.com/GetStream/stream-video-swift/pull/1249)
 
 ### 🐞 Fixed
 - Mid-call permission changes from the SFU are now applied on `Call.state.ownCapabilities`, instead of the `callGrantsUpdated` event being ignored. [#1250](https://github.com/GetStream/stream-video-swift/pull/1250)

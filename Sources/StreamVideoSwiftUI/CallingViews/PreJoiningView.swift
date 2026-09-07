@@ -6,7 +6,7 @@ import StreamVideo
 import SwiftUI
 
 @available(iOS 14.0, *)
-public struct LobbyView<Factory: ViewFactory>: View {
+public struct LobbyView<Factory: ViewFactory, SettingsView: View>: View {
 
     @StateObject var viewModel: LobbyViewModel
     @StateObject var microphoneChecker = MicrophoneChecker()
@@ -15,6 +15,7 @@ public struct LobbyView<Factory: ViewFactory>: View {
     var callId: String
     var callType: String
     @Binding var callSettings: CallSettings
+    var callSettingsView: (Binding<CallSettings>) -> SettingsView
     var onJoinCallTap: () -> Void
     var onCloseLobby: () -> Void
         
@@ -24,6 +25,7 @@ public struct LobbyView<Factory: ViewFactory>: View {
         callId: String,
         callType: String,
         callSettings: Binding<CallSettings>,
+        callSettingsView: @escaping (Binding<CallSettings>) -> SettingsView,
         onJoinCallTap: @escaping () -> Void,
         onCloseLobby: @escaping () -> Void
     ) {
@@ -32,6 +34,7 @@ public struct LobbyView<Factory: ViewFactory>: View {
         self.callType = callType
         self.onJoinCallTap = onJoinCallTap
         self.onCloseLobby = onCloseLobby
+        self.callSettingsView = callSettingsView
         _callSettings = callSettings
         _viewModel = StateObject(
             wrappedValue: viewModel ?? LobbyViewModel(
@@ -51,6 +54,7 @@ public struct LobbyView<Factory: ViewFactory>: View {
             callId: callId,
             callType: callType,
             callSettings: $callSettings,
+            callSettingsView: callSettingsView,
             onJoinCallTap: onJoinCallTap,
             onCloseLobby: onCloseLobby
         )
@@ -59,7 +63,7 @@ public struct LobbyView<Factory: ViewFactory>: View {
     }
 }
 
-struct LobbyContentView<Factory: ViewFactory>: View {
+struct LobbyContentView<Factory: ViewFactory, SettingsView: View>: View {
 
     @Injected(\.images) var images
     @Injected(\.colors) var colors
@@ -72,6 +76,7 @@ struct LobbyContentView<Factory: ViewFactory>: View {
     var callId: String
     var callType: String
     @Binding var callSettings: CallSettings
+    var callSettingsView: (Binding<CallSettings>) -> SettingsView
     var onJoinCallTap: () -> Void
     var onCloseLobby: () -> Void
     
@@ -116,7 +121,7 @@ struct LobbyContentView<Factory: ViewFactory>: View {
                         .foregroundColor(colors.text)
                 }
 
-                CallSettingsView(callSettings: $callSettings)
+                callSettingsView($callSettings)
 
                 JoinCallView(
                     viewFactory: viewFactory,
@@ -135,6 +140,30 @@ struct LobbyContentView<Factory: ViewFactory>: View {
             viewModel.stopCamera()
             viewModel.cleanUp()
         }
+    }
+}
+
+@available(iOS 14.0, *)
+extension LobbyView where SettingsView == CallSettingsView {
+    init(
+        viewFactory: Factory = DefaultViewFactory.shared,
+        viewModel: LobbyViewModel? = nil,
+        callId: String,
+        callType: String,
+        callSettings: Binding<CallSettings>,
+        onJoinCallTap: @escaping () -> Void,
+        onCloseLobby: @escaping () -> Void
+    ) {
+        self.init(
+            viewFactory: viewFactory,
+            viewModel: viewModel,
+            callId: callId,
+            callType: callType,
+            callSettings: callSettings,
+            callSettingsView: { CallSettingsView(callSettings: $0) },
+            onJoinCallTap: onJoinCallTap,
+            onCloseLobby: onCloseLobby
+        )
     }
 }
 

@@ -152,7 +152,12 @@ struct DetailedCallingView<Factory: ViewFactory>: View {
                 Task {
                     await setPreferredVideoCodec(for: text)
                     if callAction == .joinCall {
-                        viewModel.joinCall(callType: callType, callId: text)
+                        await setEncryptionIfNeeded(for: text)
+                        viewModel.joinCall(
+                            callType: callType,
+                            callId: text,
+                            encryption: AppEnvironment.EncryptionKeys.shared.encryptionRequest
+                        )
                     } else {
                         if callFlow == .lobby {
                             viewModel.enterLobby(
@@ -161,13 +166,16 @@ struct DetailedCallingView<Factory: ViewFactory>: View {
                                 members: members
                             )
                         } else if callFlow == .joinAndRing {
+                            await setEncryptionIfNeeded(for: text)
                             viewModel.joinAndRingCall(
                                 callType: callType,
                                 callId: text,
                                 members: members,
-                                video: viewModel.callSettings.videoOn
+                                video: viewModel.callSettings.videoOn,
+                                encryption: AppEnvironment.EncryptionKeys.shared.encryptionRequest
                             )
                         } else {
+                            await setEncryptionIfNeeded(for: text)
                             let highScaleHint = AppEnvironment
                                 .highScaleLivestreamPublisherHint
                                 .value
@@ -177,7 +185,8 @@ struct DetailedCallingView<Factory: ViewFactory>: View {
                                 members: members,
                                 ring: callFlow == .ringEvents,
                                 highScaleLivestreamPublisherHint: highScaleHint,
-                                video: viewModel.callSettings.videoOn
+                                video: viewModel.callSettings.videoOn,
+                                encryption: AppEnvironment.EncryptionKeys.shared.encryptionRequest
                             )
                         }
                     }
@@ -268,6 +277,18 @@ struct DetailedCallingView<Factory: ViewFactory>: View {
         )
         await call.updatePublishOptions(
             preferredVideoCodec: AppEnvironment.preferredVideoCodec.videoCodec
+        )
+    }
+
+    private func setEncryptionIfNeeded(for callId: String) async {
+        let call = streamVideo.call(
+            callType: callType,
+            callId: callId,
+            callSettings: viewModel.callSettings
+        )
+        await AppEnvironment.EncryptionKeys.shared.attachIfNeeded(
+            to: call,
+            userId: streamVideo.user.id
         )
     }
 }
