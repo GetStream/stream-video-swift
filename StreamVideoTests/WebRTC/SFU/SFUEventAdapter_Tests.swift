@@ -121,7 +121,7 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
 
     func test_handleChangePublishQuality_givenEvent_whenPublished_thenUpdatesPublisherQuality() async throws {
         try await stateAdapter.configurePeerConnections()
-        let publisher = await stateAdapter.publisher
+        let publisher = await stateAdapter!.publisher
 
         let participantA = CallParticipant.dummy()
         let participantB = CallParticipant.dummy()
