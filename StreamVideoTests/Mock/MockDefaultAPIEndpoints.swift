@@ -78,6 +78,7 @@ final class MockDefaultAPIEndpoints: DefaultAPIEndpoints, Mockable, @unchecked S
         case videoConnect
         case ringCall
         case clientCallEvent
+        case getCallRingState
     }
 
     enum MockFunctionInputKey: Payloadable {
@@ -132,6 +133,7 @@ final class MockDefaultAPIEndpoints: DefaultAPIEndpoints, Mockable, @unchecked S
         case videoConnect
         case ringCall(request: RingCallRequest)
         case clientCallEvent(request: ReportClientEventRequest)
+        case getCallRingState(type: String, id: String, callSessionId: String)
 
         var payload: Any {
             switch self {
@@ -237,6 +239,8 @@ final class MockDefaultAPIEndpoints: DefaultAPIEndpoints, Mockable, @unchecked S
                 return request
             case let .clientCallEvent(request: request):
                 return request
+            case let .getCallRingState(type, id, callSessionId):
+                return (type, id, callSessionId)
             }
         }
     }
@@ -625,5 +629,12 @@ final class MockDefaultAPIEndpoints: DefaultAPIEndpoints, Mockable, @unchecked S
             return value
         }
         return try stubbedResult(for: .clientCallEvent)
+    }
+
+    func getCallRingState(type: String, id: String, callSessionId: String) async throws -> GetCallRingStateResponse {
+        stubbedFunctionInput[.getCallRingState]?.append(
+            .getCallRingState(type: type, id: id, callSessionId: callSessionId)
+        )
+        return try stubbedResult(for: .getCallRingState)
     }
 }
