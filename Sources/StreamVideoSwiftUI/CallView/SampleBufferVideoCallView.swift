@@ -37,6 +37,10 @@ final class SampleBufferVideoCallView: UIView {
     }
 }
 
+/// Main actor isolated because the iOS 27 SDK annotates
+/// `AVSampleBufferDisplayLayer` with `NS_SWIFT_UI_ACTOR`, so a nonisolated
+/// conformance crosses into main actor isolated code.
+@MainActor
 protocol SampleBufferVideoRendering {
     @available(iOS 14.0, *)
     var requiresFlushToResumeDecoding: Bool { get }
