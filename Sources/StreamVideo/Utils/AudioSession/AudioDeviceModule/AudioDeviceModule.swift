@@ -176,6 +176,8 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
     /// throw and crash the app. This lock keeps those operations mutually
     /// exclusive. It is recursive because `setMuted` calls `setRecording`.
     private let engineQueue = RecursiveQueue()
+    /// Desired music vs last successful VP apply, including muted defer.
+    @Atomic private var musicCapturePolicy = MusicCapturePolicy()
 
     /// Serial queue used to deliver events to observers.
     private let dispatchQueue: DispatchQueue
@@ -259,22 +261,161 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
 
     /// Switches between stereo and mono playout while keeping the recording
     /// state consistent across reinitializations.
+    ///
+    /// Pass `restoringVoiceProcessing: false` when installing an ADM on the
+    /// audio store queue. ``setVoiceProcessingEnabled`` can block that
+    /// queue and stall join. Live stereo toggles keep the default.
+    ///
     /// - Parameter isPreferred: `true` when stereo output should be used.
+    /// - Parameter restoringVoiceProcessing: When `false`, only mute mode,
+    ///   preference, and bypass are applied.
     /// - Note: Serialized on ``engineQueue`` with other engine mutations.
-    func setStereoPlayoutPreference(_ isPreferred: Bool) {
-        /// - Important: `.voiceProcessing` requires VP to be enabled in order to mute and
-        /// `.restartEngine` rebuilds the whole graph. Each of them has different issues:
-        /// - `.voiceProcessing`: as it requires VP to be enabled in order to mute/unmute that
-        /// means that for outputs where VP is disabled (e.g. stereo) we cannot mute/unmute.
-        /// - `.restartEngine`: rebuilds the whole graph and requires explicit calling of
-        /// `initAndStartRecording` .
+    func setStereoPlayoutPreference(
+        _ isPreferred: Bool,
+        restoringVoiceProcessing: Bool = true
+    ) {
         engineQueue.sync {
-            _ = source.setMuteMode(isPreferred ? .inputMixer : .voiceProcessing)
-            if isPreferred {
-                _ = source.setRecordingAlwaysPreparedMode(false)
+            applyStereoPlayoutPreferenceLocked(isPreferred)
+            if restoringVoiceProcessing {
+                restoreVoiceProcessingAfterStereoLocked()
             }
-            source.prefersStereoPlayout = isPreferred
-            source.isVoiceProcessingBypassed = isPreferred
+        }
+    }
+
+    /// Mute mode, stereo preference, and VP bypass. Does not rebuild I/O.
+    private func applyStereoPlayoutPreferenceLocked(_ isPreferred: Bool) {
+        _ = source.setMuteMode(
+            isPreferred ? .inputMixer : .voiceProcessing
+        )
+        if isPreferred {
+            _ = source.setRecordingAlwaysPreparedMode(false)
+        }
+        source.prefersStereoPlayout = isPreferred
+        source.isVoiceProcessingBypassed = isPreferred
+    }
+
+    /// Applies the in-call music capture policy to Voice Processing.
+    ///
+    /// Music disables VP (not just bypass) so I/O recreates on Remote I/O
+    /// after the session leaves VoiceChat. Bypass is a live-graph flag and
+    /// does not rebuild I/O. Echo on speaker is the cost until software
+    /// AEC exists.
+    ///
+    /// - Throws: `ClientError` when WebRTC returns a non-zero code from
+    ///   `setVoiceProcessingEnabled`. The applicator rolls the session
+    ///   back so the call is not left VoiceChat-off / VP-on.
+    /// - Note: While muted, pending is stored and applied on unmute.
+    func setMusicCaptureEnabled(_ isEnabled: Bool) throws {
+        try engineQueue.sync {
+            guard musicCapturePolicy.needsCaptureApply(
+                desiredMusic: isEnabled
+            ) else { return }
+            let shouldRestorePlayout = isPlaying
+                || source.isPlaying
+                || musicCapturePolicy.pendingRestorePlayout
+            let previousPolicy = musicCapturePolicy
+            musicCapturePolicy.setDesiredMusic(
+                isEnabled,
+                restorePlayout: shouldRestorePlayout,
+                isMuted: isMicrophoneMuted
+            )
+            guard !isMicrophoneMuted else { return }
+            do {
+                try applyDesiredCapturePolicyLocked(
+                    restorePlayout: shouldRestorePlayout
+                )
+            } catch {
+                musicCapturePolicy = previousPolicy
+                throw error
+            }
+        }
+    }
+
+    /// Re-applies mute mode after stereo changes, or rebuilds VP when
+    /// leaving ``MusicCapturePolicy.Applied/voiceWhileStereo``.
+    ///
+    /// Never-music stereo only bypasses. Music-exit with stereo left VP
+    /// disabled; stereo-off must `setVoiceProcessingEnabled(true)`.
+    private func restoreVoiceProcessingAfterStereoLocked() {
+        let stereo = source.prefersStereoPlayout
+        let restorePlayout = isPlaying
+            || source.isPlaying
+            || musicCapturePolicy.pendingRestorePlayout
+        guard musicCapturePolicy.needsVoiceProcessingRestore(
+            stereoPreferred: stereo
+        ) else {
+            applyVoiceProcessingPolicyLocked()
+            return
+        }
+        if isMicrophoneMuted {
+            musicCapturePolicy.setDesiredMusic(
+                false,
+                restorePlayout: restorePlayout,
+                isMuted: true
+            )
+            applyVoiceProcessingPolicyLocked()
+            return
+        }
+        do {
+            try applyDesiredCapturePolicyLocked(
+                restorePlayout: restorePlayout
+            )
+        } catch {
+            applyVoiceProcessingPolicyLocked()
+        }
+    }
+
+    /// Stereo only *bypasses* VP; music *disables* it on capture apply.
+    /// Must not call `setVoiceProcessingEnabled` (never-music stereo).
+    private func applyVoiceProcessingPolicyLocked() {
+        let stereo = source.prefersStereoPlayout
+        let bypass = musicCapturePolicy.bypassVoiceProcessing(
+            stereoPreferred: stereo
+        )
+        source.isVoiceProcessingBypassed = bypass
+        _ = source.setMuteMode(
+            bypass ? .inputMixer : .voiceProcessing
+        )
+    }
+
+    /// Marks applied on success; rolls back to last success on throw.
+    private func applyDesiredCapturePolicyLocked(
+        restorePlayout: Bool
+    ) throws {
+        do {
+            try applyCapturePolicyLocked(
+                musicCapturePolicy.configuration(
+                    stereoPreferred: source.prefersStereoPlayout
+                ),
+                restorePlayout: restorePlayout
+            )
+            musicCapturePolicy.markApplied(
+                stereoPreferred: source.prefersStereoPlayout
+            )
+        } catch {
+            try? applyCapturePolicyLocked(
+                musicCapturePolicy.appliedConfiguration,
+                restorePlayout: false
+            )
+            throw error
+        }
+    }
+
+    private func applyCapturePolicyLocked(
+        _ configuration: MusicCapturePolicy.Configuration,
+        restorePlayout: Bool
+    ) throws {
+        try throwingExecution("Unable to setVoiceProcessingEnabled") {
+            source.setVoiceProcessingEnabled(
+                configuration.voiceProcessingEnabled
+            )
+        }
+        source.isVoiceProcessingAGCEnabled = configuration.agcEnabled
+        source.isVoiceProcessingBypassed =
+            configuration.bypassVoiceProcessing
+        _ = source.setMuteMode(configuration.muteMode)
+        if restorePlayout {
+            try resetPlayoutLocked()
         }
     }
 
@@ -344,19 +485,24 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
     func resetPlayout() {
         engineQueue.sync {
             log.throwing(subsystems: .audioSession) {
-                try throwingExecution("Unable to stop playout") {
-                    source.stopPlayout()
-                }
+                try resetPlayoutLocked()
+            }
+        }
+    }
 
-                if source.isPlayoutInitialized {
-                    try throwingExecution("Unable to start playout") {
-                        source.startPlayout()
-                    }
-                } else {
-                    try throwingExecution("Unable to initAndStart playout") {
-                        source.initAndStartPlayout()
-                    }
-                }
+    /// Restarts playout. Caller must already be on ``engineQueue``.
+    private func resetPlayoutLocked() throws {
+        try throwingExecution("Unable to stop playout") {
+            source.stopPlayout()
+        }
+
+        if source.isPlayoutInitialized {
+            try throwingExecution("Unable to start playout") {
+                source.startPlayout()
+            }
+        } else {
+            try throwingExecution("Unable to initAndStart playout") {
+                source.initAndStartPlayout()
             }
         }
     }
@@ -470,6 +616,9 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
             if isMuted != isMicrophoneMuted {
                 isMicrophoneMutedSubject.send(isMuted)
             }
+            if !isMuted {
+                try applyDeferredCapturePolicyLocked()
+            }
             return
         }
 
@@ -482,6 +631,28 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         }
 
         isMicrophoneMutedSubject.send(isMuted)
+        if !isMuted {
+            try applyDeferredCapturePolicyLocked()
+        }
+    }
+
+    /// Apply muted music toggles after unmute. Pending stays until success.
+    private func applyDeferredCapturePolicyLocked() throws {
+        guard musicCapturePolicy.hasPendingApply else { return }
+        do {
+            try applyDesiredCapturePolicyLocked(
+                restorePlayout: musicCapturePolicy.pendingRestorePlayout
+            )
+        } catch {
+            let capturePolicyError = error
+            try throwingExecution(
+                "Unable to restore microphone mute after capture policy failure"
+            ) {
+                source.setMicrophoneMuted(true)
+            }
+            isMicrophoneMutedSubject.send(true)
+            throw capturePolicyError
+        }
     }
 
     // MARK: - Audio Buffer injection
@@ -573,6 +744,10 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         isPlayoutEnabled: Bool,
         isRecordingEnabled: Bool
     ) -> Int {
+        if let liveEngine = engineInputContext?.engine,
+           liveEngine !== engine {
+            return Constant.successResult
+        }
         subject.send(
             .didStopAudioEngine(
                 engine,
@@ -582,7 +757,10 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         )
         isPlayingSubject.send(isPlayoutEnabled)
         isRecordingSubject.send(isRecordingEnabled)
-        audioBufferRenderer.reset()
+        handleEngineStoppedOrDisabled(
+            isRecordingEnabled: isRecordingEnabled,
+            clearInputContext: false
+        )
         return Constant.successResult
     }
 
@@ -594,6 +772,10 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         isPlayoutEnabled: Bool,
         isRecordingEnabled: Bool
     ) -> Int {
+        if let liveEngine = engineInputContext?.engine,
+           liveEngine !== engine {
+            return Constant.successResult
+        }
         subject.send(
             .didDisableAudioEngine(
                 engine,
@@ -603,8 +785,10 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         )
         isPlayingSubject.send(isPlayoutEnabled)
         isRecordingSubject.send(isRecordingEnabled)
-        audioBufferRenderer.reset()
-        engineInputContext = nil
+        handleEngineStoppedOrDisabled(
+            isRecordingEnabled: isRecordingEnabled,
+            clearInputContext: true
+        )
         return Constant.successResult
     }
 
@@ -620,10 +804,35 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
             return retainedEngines
         }
         subject.send(.willReleaseAudioEngine(engine))
-        audioLevelsAdapter.uninstall(on: 0)
-        audioBufferRenderer.reset()
-        engineInputContext = nil
+        // Uninstall unless a different live engine still owns the tap
+        // (music keep-graph). Voice disable nils the context, so that
+        // release still uninstalls.
+        let liveEngine = engineInputContext?.engine
+        if liveEngine == nil || liveEngine === engine {
+            audioLevelsAdapter.uninstall(on: 0)
+            audioBufferRenderer.reset()
+            engineInputContext = nil
+        }
         return Constant.successResult
+    }
+
+    /// VP disable unlinks I/O. WebRTC reports didStop/didDisable while
+    /// input is still live; resetting the injector then disconnects the
+    /// mic. Keep the graph only for music, and only while recording is
+    /// still live. Never-music stop still resets the renderer; disable
+    /// still nils `engineInputContext`. Stereo only bypasses VP.
+    private func handleEngineStoppedOrDisabled(
+        isRecordingEnabled: Bool,
+        clearInputContext: Bool
+    ) {
+        if isRecordingEnabled, musicCapturePolicy.desiredMusicEnabled {
+            audioBufferRenderer.stop()
+            return
+        }
+        audioBufferRenderer.reset()
+        if clearInputContext {
+            engineInputContext = nil
+        }
     }
 
     /// Keeps observers informed when WebRTC sets up the input graph and installs

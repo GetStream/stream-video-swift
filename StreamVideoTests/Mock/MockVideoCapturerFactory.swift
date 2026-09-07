@@ -73,7 +73,7 @@ final class MockVideoCapturerFactory: VideoCapturerProviding, Mockable, @uncheck
             )
         return stubbedFunction[.buildCameraCapturer] as! StreamVideoCapturing
     }
-    
+
     func buildScreenCapturer(
         _ type: ScreensharingType,
         source: RTCVideoSource,

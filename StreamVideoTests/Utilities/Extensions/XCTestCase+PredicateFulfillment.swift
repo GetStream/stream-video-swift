@@ -79,6 +79,7 @@ extension XCTestCase {
         let stepInterval = 0.1
         let maxIterations = Int(timeout / stepInterval)
         let waitExpectation = expectation(description: "Wait for completion.")
+        waitExpectation.assertForOverFulfill = false
         let store = Store()
         store.cancellable = Foundation
             .Timer

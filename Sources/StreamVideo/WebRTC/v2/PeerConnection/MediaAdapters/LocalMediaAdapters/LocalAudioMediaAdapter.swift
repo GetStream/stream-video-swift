@@ -51,6 +51,8 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
     private var hasRegisteredPrimaryTrack: Bool = false
     private var ownCapabilities: [OwnCapability] = []
+    private var audioBitrateProfile: AudioBitrateProfile = .voiceStandard
+    private var restoredBitrates: [PublishOptions.AudioPublishOptions: Int] = [:]
 
     /// Initializes a new instance of `LocalAudioMediaAdapter`.
     ///
@@ -205,10 +207,10 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             registerPrimaryTrackIfPossible(settings)
 
             guard lastUpdatedCallSettings != settings.audio else { return }
-            
+
             let isMuted = !settings.audioOn
             let isLocalMuted = !primaryTrack.isEnabled
-            
+
             if isMuted != isLocalMuted {
                 try await sfuAdapter.updateTrackMuteState(
                     .audio,
@@ -216,13 +218,13 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                     for: sessionID
                 )
             }
-            
+
             if isMuted, primaryTrack.isEnabled {
                 try await unpublish()
             } else if !isMuted {
                 try await publish()
             }
-            
+
             lastUpdatedCallSettings = settings.audio
         }
     }
@@ -271,6 +273,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                         $0.value.transceiver.sender.track = nil
                     }
                 }
+            applyCurrentProfileBitrate()
 
             log.debug(
                 """
@@ -336,6 +339,17 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         with layerSettings: [Stream_Video_Sfu_Event_AudioSender]
     ) { /* No-op */ }
 
+    func setMaxBitrate(for profile: AudioBitrateProfile) async {
+        try? await processingQueue.addSynchronousTaskOperation { [weak self] in
+            guard let self else { return }
+            audioBitrateProfile = profile
+            applyCurrentProfileBitrate()
+            if profile == .voiceStandard {
+                restoredBitrates.removeAll()
+            }
+        }
+    }
+
     // MARK: - Private Helpers
 
     /// Adds or updates a transceiver for a given audio track and publish option.
@@ -366,6 +380,67 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             return
         }
         transceiverStorage.set(transceiver, track: track, for: options)
+        applyProfileBitrate(for: options, on: transceiver)
+    }
+
+    /// Uses live `publishOptions`, not the storage key. Equality is only
+    /// id+codec, so an SFU profile-map refresh would otherwise keep the
+    /// stale bitrate.
+    private func applyCurrentProfileBitrate() {
+        transceiverStorage.forEach { options, value in
+            applyProfileBitrate(for: options, on: value.transceiver)
+        }
+    }
+
+    private func applyProfileBitrate(
+        for options: PublishOptions.AudioPublishOptions,
+        on transceiver: RTCRtpTransceiver
+    ) {
+        let current = publishOptions.first { $0 == options } ?? options
+        if let bitrate = bitrate(for: current, profile: audioBitrateProfile) {
+            applyMaxBitrate(bitrate, on: transceiver)
+        }
+    }
+
+    private func bitrate(
+        for options: PublishOptions.AudioPublishOptions,
+        profile: AudioBitrateProfile
+    ) -> Int? {
+        if profile == .voiceStandard {
+            if let mapped = options.bitrateProfiles[profile], mapped > 0 {
+                return mapped
+            }
+            return restoredBitrates[options]
+        }
+        if restoredBitrates[options] == nil {
+            restoredBitrates[options] = options.bitrate
+        }
+        return options.bitrate(for: profile)
+    }
+
+    /// Writes `maxBitrateBps` on one sender. `bitrate <= 0` clears the
+    /// cap. An empty encodings list gets a single active encoding so the
+    /// cap is not dropped on a sender that has not negotiated yet.
+    private func applyMaxBitrate(
+        _ bitrate: Int,
+        on transceiver: RTCRtpTransceiver
+    ) {
+        let params = transceiver.sender.parameters
+        if bitrate <= 0 {
+            guard !params.encodings.isEmpty else { return }
+            params.encodings.forEach { $0.maxBitrateBps = nil }
+            transceiver.sender.parameters = params
+            return
+        }
+        if params.encodings.isEmpty {
+            let encoding = RTCRtpEncodingParameters()
+            encoding.isActive = true
+            encoding.maxBitrateBps = bitrate as NSNumber
+            params.encodings = [encoding]
+        } else {
+            params.encodings.forEach { $0.maxBitrateBps = bitrate as NSNumber }
+        }
+        transceiver.sender.parameters = params
     }
 
     private func registerPrimaryTrackIfPossible(_ callSettings: CallSettings) {

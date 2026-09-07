@@ -1462,4 +1462,225 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
             try await group.waitForAll()
         }
     }
+
+    // MARK: - Audio bitrate profile
+
+    func test_joinedCall_setMusicHighQuality_disablesSoftwareProcessingAndPublishesProfile(
+    ) async throws {
+        helpers.permissions.setMicrophonePermission(isGranted: true)
+        let processing = resetSharedAudioProcessingModule()
+        defer { resetSharedAudioProcessingModule() }
+
+        try await helpers
+            .callFlow(id: .unique, type: .default, userId: .unique)
+            .perform { try await $0.call.create() }
+            .perform { try await self.enableHiFiAudio(on: $0.call) }
+            .perform {
+                try await $0.call.join(
+                    callSettings: .init(audioOn: true, videoOn: false)
+                )
+            }
+            .assertEventuallyInMainActor { $0.call.state.session != nil }
+            .perform {
+                try await $0.call.microphone
+                    .setAudioBitrateProfile(.musicHighQuality)
+            }
+            .assertEventuallyInMainActor {
+                $0.call.microphone.audioBitrateProfile == .musicHighQuality
+            }
+            .assert { _ in
+                processing.config.isNoiseSuppressionEnabled == false
+                    && processing.config.isHighpassFilterEnabled == false
+            }
+            .assertEventually { _ in
+                InjectedValues[\.audioStore]
+                    .state
+                    .audioDeviceModule?
+                    .isVoiceProcessingEnabled == false
+            }
+    }
+
+    func test_joinedCall_setAudioFilterDuringMusic_stashesUntilVoice(
+    ) async throws {
+        helpers.permissions.setMicrophonePermission(isGranted: true)
+        let processing = resetSharedAudioProcessingModule()
+        defer { resetSharedAudioProcessingModule() }
+        let filter = MockAudioFilter(id: "nc")
+
+        try await helpers
+            .callFlow(id: .unique, type: .default, userId: .unique)
+            .perform { try await $0.call.create() }
+            .perform { try await self.enableHiFiAudio(on: $0.call) }
+            .perform {
+                try await $0.call.join(
+                    callSettings: .init(audioOn: true, videoOn: false)
+                )
+            }
+            .assertEventuallyInMainActor { $0.call.state.session != nil }
+            .perform { $0.call.setAudioFilter(filter) }
+            .assert { _ in processing.activeAudioFilter?.id == "nc" }
+            .perform {
+                try await $0.call.microphone
+                    .setAudioBitrateProfile(.musicHighQuality)
+            }
+            .assert { _ in processing.activeAudioFilter == nil }
+            .perform {
+                try await $0.call.microphone
+                    .setAudioBitrateProfile(.voiceStandard)
+            }
+            .assert { _ in processing.activeAudioFilter?.id == "nc" }
+    }
+
+    func test_joinedCall_musicThenLeave_resetsPublishedProfileAndSoftwareProcessing(
+    ) async throws {
+        helpers.permissions.setMicrophonePermission(isGranted: true)
+        let processing = resetSharedAudioProcessingModule()
+        defer { resetSharedAudioProcessingModule() }
+
+        try await helpers
+            .callFlow(id: .unique, type: .default, userId: .unique)
+            .perform { try await $0.call.create() }
+            .perform { try await self.enableHiFiAudio(on: $0.call) }
+            .perform {
+                try await $0.call.join(
+                    callSettings: .init(audioOn: true, videoOn: false)
+                )
+            }
+            .assertEventuallyInMainActor { $0.call.state.session != nil }
+            .perform {
+                try await $0.call.microphone
+                    .setAudioBitrateProfile(.musicHighQuality)
+            }
+            .performWithoutValueOverride { $0.call.leave() }
+            .assertEventuallyInMainActor {
+                $0.call.microphone.audioBitrateProfile == .voiceStandard
+            }
+            .assertEventually { _ in
+                processing.config.isNoiseSuppressionEnabled
+                    && processing.config.isHighpassFilterEnabled
+            }
+    }
+
+    func test_joinedCall_musicSurvivesMuteAndUnmute(
+    ) async throws {
+        helpers.permissions.setMicrophonePermission(isGranted: true)
+        let processing = resetSharedAudioProcessingModule()
+        defer { resetSharedAudioProcessingModule() }
+
+        try await helpers
+            .callFlow(id: .unique, type: .default, userId: .unique)
+            .perform { try await $0.call.create() }
+            .perform { try await self.enableHiFiAudio(on: $0.call) }
+            .perform {
+                try await $0.call.join(
+                    callSettings: .init(audioOn: true, videoOn: false)
+                )
+            }
+            .assertEventuallyInMainActor { $0.call.state.session != nil }
+            .perform {
+                try await $0.call.microphone
+                    .setAudioBitrateProfile(.musicHighQuality)
+            }
+            .perform { try await $0.call.microphone.disable() }
+            .assertEventuallyInMainActor {
+                $0.call.state.callSettings.audioOn == false
+            }
+            .assertEventuallyInMainActor {
+                $0.call.microphone.audioBitrateProfile == .musicHighQuality
+            }
+            .perform { try await $0.call.microphone.enable() }
+            .assertEventuallyInMainActor { $0.call.state.callSettings.audioOn }
+            .assertEventuallyInMainActor {
+                $0.call.microphone.audioBitrateProfile == .musicHighQuality
+            }
+            .assert { _ in
+                processing.config.isNoiseSuppressionEnabled == false
+                    && processing.config.isHighpassFilterEnabled == false
+            }
+    }
+
+    func test_joinedCall_musicThenRejoin_keepsMusicProcessingAndPublishedProfile(
+    ) async throws {
+        helpers.permissions.setMicrophonePermission(isGranted: true)
+        let processing = resetSharedAudioProcessingModule()
+        defer { resetSharedAudioProcessingModule() }
+
+        try await helpers
+            .callFlow(id: .unique, type: .default, userId: .unique)
+            .perform { try await $0.call.create() }
+            .perform { try await self.enableHiFiAudio(on: $0.call) }
+            .perform {
+                try await $0.call.join(
+                    callSettings: .init(audioOn: true, videoOn: false)
+                )
+            }
+            .assertEventuallyInMainActor { $0.call.state.session != nil }
+            .perform {
+                try await $0.call.microphone
+                    .setAudioBitrateProfile(.musicHighQuality)
+            }
+            .assertEventuallyInMainActor {
+                $0.call.microphone.audioBitrateProfile == .musicHighQuality
+            }
+            .performWithoutValueOverride { _ in
+                NotificationCenter.default.post(
+                    name: .init("video.getstream.io.reconnect.rejoin"),
+                    object: nil
+                )
+            }
+            .assertEventuallyInMainActor {
+                $0.call.state.reconnectionStatus == .reconnecting
+            }
+            .assertEventuallyInMainActor(timeout: 30) {
+                $0.call.state.reconnectionStatus == .connected
+            }
+            .assertEventuallyInMainActor {
+                $0.call.microphone.audioBitrateProfile == .musicHighQuality
+            }
+            .assert { _ in
+                processing.config.isNoiseSuppressionEnabled == false
+                    && processing.config.isHighpassFilterEnabled == false
+            }
+    }
+}
+
+private extension Call_IntegrationTests {
+    @discardableResult
+    func resetSharedAudioProcessingModule() -> AudioProcessingModule {
+        let module = Helpers.StreamVideoHelper.videoConfig
+            .audioProcessingModule
+        let config = module.config
+        config.isNoiseSuppressionEnabled = true
+        config.isHighpassFilterEnabled = true
+        module.config = config
+        module.setAudioFilter(nil)
+        return module
+    }
+
+    func enableHiFiAudio(on call: Call) async throws {
+        let alreadyEnabled = await MainActor.run {
+            call.state.settings?.audio.hifiAudioEnabled == true
+        }
+        if alreadyEnabled {
+            return
+        }
+
+        _ = try await call.update(
+            settingsOverride: .init(
+                audio: .init(
+                    defaultDevice: .speaker,
+                    hifiAudioEnabled: true
+                )
+            )
+        )
+
+        let enabled = await MainActor.run {
+            call.state.settings?.audio.hifiAudioEnabled == true
+        }
+        guard enabled else {
+            throw ClientError(
+                "Hi-fi audio was not enabled after settings override."
+            )
+        }
+    }
 }

@@ -212,6 +212,24 @@ class CallController: @unchecked Sendable {
         )
     }
 
+    /// Applies an in-call audio bitrate/processing profile.
+    ///
+    /// Hi-fi profiles require dashboard `hifi_audio_enabled`.
+    /// ``AudioBitrateProfile/voiceStandard`` does not, so a mid-call
+    /// dashboard disable can still restore voice. Fetches call settings
+    /// when they have not been loaded yet. The coordinator/applicator owns
+    /// session, ADM, and stored profile; a throw means those were rolled
+    /// back.
+    func setAudioBitrateProfile(_ profile: AudioBitrateProfile) async throws {
+        guard let call, await call.state.session != nil else {
+            throw ClientError("Audio bitrate profiles require a joined call.")
+        }
+        if profile != .voiceStandard {
+            try await ensureHiFiAudioEnabled()
+        }
+        try await webRTCCoordinator.setAudioBitrateProfile(profile)
+    }
+
     /// Changes the video state for the current user.
     /// - Parameter isEnabled: whether video should be enabled.
     func changeVideoState(isEnabled: Bool) async throws {
@@ -255,6 +273,22 @@ class CallController: @unchecked Sendable {
             guard let self else { return }
             await webRTCCoordinator.setVideoFilter(videoFilter)
         }
+    }
+
+    /// Sets an `audioFilter` for the current call.
+    ///
+    /// Forwards to the applicator so music and screenshare can suppress
+    /// live output without `Call` knowing about either.
+    /// - Parameter audioFilter: An `AudioFilter` instance to apply, or
+    ///   `nil` to clear it.
+    func setAudioFilter(_ audioFilter: AudioFilter?) {
+        webRTCCoordinator.setAudioFilter(audioFilter)
+    }
+
+    /// Filter last requested by `Call.setAudioFilter`, including while
+    /// music or screenshare stash live output.
+    var requestedAudioFilter: AudioFilter? {
+        webRTCCoordinator.requestedAudioFilter
     }
 
     /// Starts screensharing for the current call.
@@ -687,6 +721,24 @@ class CallController: @unchecked Sendable {
             id: callId,
             joinCallRequest: joinCall
         )
+    }
+
+    /// Dashboard gate for music / hi-fi profiles. Fetches call settings
+    /// once if they have not been loaded yet.
+    private func ensureHiFiAudioEnabled() async throws {
+        guard let call else {
+            throw ClientError("Call is not available.")
+        }
+        if let settings = await call.state.settings {
+            guard settings.audio.hifiAudioEnabled == true else {
+                throw ClientError("Hi-fi audio is not enabled on dashboard settings.")
+            }
+            return
+        }
+        _ = try await call.get()
+        guard await call.state.settings?.audio.hifiAudioEnabled == true else {
+            throw ClientError("Hi-fi audio is not enabled on dashboard settings.")
+        }
     }
 
     private func prefetchLocation() {
