@@ -99,11 +99,8 @@ public struct PermissionsPromptView: View {
                 }
                 .minimumScaleFactor(0.7)
             } else {
-                HStack(alignment: .center, spacing: 4) {
-                    Image(systemName: "gear")
-                    Text(L10n.Call.Permissions.Missing.Cta.title)
-                }
-                .minimumScaleFactor(0.7)
+                GoToSettingsLabel_iOS13()
+                    .minimumScaleFactor(0.7)
             }
         }
         .padding(.vertical, 4)
@@ -133,5 +130,23 @@ public struct PermissionsPromptView: View {
 
     private var isMissingMicrophonePermission: Bool {
         requiresMicrophonePermission && !permissions.hasMicrophonePermission && !permissions.canRequestMicrophonePermission
+    }
+}
+
+/// The go-to-settings button label used on iOS 13, where `Label` is
+/// unavailable.
+///
+/// Lives in its own view on purpose. A multi-child `ViewBuilder` written
+/// directly in the `else` branch of an `#available` check does not compile
+/// against the iOS 27 SDK, which resolves the block to a `TupleContent`
+/// whose `View` conformance requires iOS 26.
+@available(iOS 13.0, *)
+private struct GoToSettingsLabel_iOS13: View {
+
+    var body: some View {
+        HStack(alignment: .center, spacing: 4) {
+            Image(systemName: "gear")
+            Text(L10n.Call.Permissions.Missing.Cta.title)
+        }
     }
 }
