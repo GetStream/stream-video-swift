@@ -10,7 +10,7 @@ extension AppEnvironment {
     /// Wraps a debug menu view in an identifiable container.
     struct FeatureFlag: Identifiable {
         var id: UUID = .init()
-        var viewProvider: () -> AnyView
+        var viewProvider: @MainActor () -> AnyView
     }
 
     nonisolated(unsafe) static var featureFlags: [FeatureFlag] = [

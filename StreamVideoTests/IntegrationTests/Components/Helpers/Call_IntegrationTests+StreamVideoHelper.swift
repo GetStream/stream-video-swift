@@ -57,10 +57,12 @@ extension Call_IntegrationTests.Helpers {
             }()
 
             let currentStreamVideo = StreamVideoProviderKey.currentValue
-            let result = {
-                if clientResolutionMode == .default, let existingClient = registeredClients[userId] {
+            let result = await {
+                let existingClient = registeredClients[userId]
+                if clientResolutionMode == .default, let existingClient {
                     return existingClient
                 } else {
+                    await existingClient?.disconnect()
                     return StreamVideo(
                         apiKey: apiKey,
                         user: User(id: userId),

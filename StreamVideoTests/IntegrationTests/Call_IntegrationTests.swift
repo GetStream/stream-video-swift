@@ -1352,7 +1352,13 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
 
         for _ in 0..<cycles {
             try await helpers
-                .callFlow(id: .unique, type: .default, userId: userId)
+                .callFlow(
+                    id: .unique,
+                    type: .default,
+                    userId: userId,
+                    // Reuse one client for join/leave cycles.
+                    clientResolutionMode: .default
+                )
                 .perform { try await $0.call.create(memberIds: [userId]) }
                 .perform { try await $0.call.join(callSettings: .init(audioOn: true, speakerOn: routeVariant == .speakerEnabled)) }
                 .perform { $0.call.leave() }

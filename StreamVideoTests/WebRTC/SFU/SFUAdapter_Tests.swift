@@ -175,7 +175,7 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
         _ = subject
         var received: [Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload] = []
         let newEventReceived = expectation(description: "New socket event received.")
-        let cancellable = subject.publisher.sink {
+        let cancellable = subject!.publisher.sink {
             received.append($0)
             newEventReceived.fulfill()
         }
@@ -603,7 +603,7 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
         _ = subject
 
         let bucket = ConsumableBucket(
-            subject.publisher.eraseToAnyPublisher()
+            subject!.publisher.eraseToAnyPublisher()
         )
 
         var offer = Stream_Video_Sfu_Event_SubscriberOffer()
