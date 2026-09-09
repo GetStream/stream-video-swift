@@ -69,6 +69,8 @@ extension Call_IntegrationTests {
         }
 
         mutating func dismantle() async throws {
+            restoreAudioSessionReadinessWatchdog()
+
             if duringDismantleObservedAllCallEnded {
                 for call in registeredCalls.values {
                     call.leave()
@@ -95,6 +97,19 @@ extension Call_IntegrationTests {
         }
 
         // MARK: - CallFlow
+
+        // Inactive never becomes ready; Joined watchdog
+        // rejoin is the join-miss. Stub interval only.
+        func stubAudioSessionReadinessWatchdogForJoinMiss() {
+            WebRTCConfiguration.timeout.audioSessionReadinessWatchdog = 3600
+        }
+
+        // Production 10s. No-op if never stubbed.
+        func restoreAudioSessionReadinessWatchdog() {
+            WebRTCConfiguration.timeout.audioSessionReadinessWatchdog =
+                WebRTCConfiguration.Timeout.production
+                    .audioSessionReadinessWatchdog
+        }
 
         mutating func callFlow(
             id: String,
