@@ -104,7 +104,8 @@ extension Call_IntegrationTests {
             clientResolutionMode: StreamVideoHelper.ClientResolutionMode = .ignoreCache,
             streamVideoEnvironment: StreamVideo.Environment = .silentAudioDevice,
             overrideAPIKey: String? = nil,
-            overrideToken: String? = nil
+            overrideToken: String? = nil,
+            audioSessionPolicy: AudioSessionPolicy = InactiveAudioSessionPolicy()
         ) async throws -> CallFlow<Void> {
             let authentication = try await authentication
                 .authenticate(userId: userId, environment: environment)
@@ -118,7 +119,7 @@ extension Call_IntegrationTests {
                 streamVideoEnvironment: streamVideoEnvironment
             )
             let call = client.call(callType: type, callId: id)
-            await call.updateAudioSessionPolicy(InactiveAudioSessionPolicy())
+            await call.updateAudioSessionPolicy(audioSessionPolicy)
             registeredCalls[userId] = call
             return .init(
                 client: client,

@@ -272,13 +272,13 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
 
         // Initial CallFlow
         _ = try await helpers
-            .callFlow(id: callId, type: .default, userId: user1)
+            .callFlow(id: callId, type: .default, userId: user1, audioSessionPolicy: DefaultAudioSessionPolicy())
             .perform { try await $0.call.create(memberIds: [user1]) }
             .assertEventuallyInMainActor { $0.call.state.members.endIndex == 1 }
 
         // Second CallFlow that uses a new StreamVideo client
         try await helpers
-            .callFlow(id: callId, type: .default, userId: user2)
+            .callFlow(id: callId, type: .default, userId: user2, audioSessionPolicy: DefaultAudioSessionPolicy())
             .perform { try await $0.call.get() }
             .assertEventuallyInMainActor { $0.call.state.members.endIndex == 1 && $0.call.state.members.first?.user.id == user1 }
             .perform { try await $0.call.addMembers(ids: [user2]) }
@@ -384,14 +384,16 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
             .callFlow(
                 id: callId,
                 type: .default,
-                userId: creatorUserId
+                userId: creatorUserId,
+                audioSessionPolicy: DefaultAudioSessionPolicy()
             )
 
         let participantUserFlow = try await helpers
             .callFlow(
                 id: callId,
                 type: .default,
-                userId: participantUserId
+                userId: participantUserId,
+                audioSessionPolicy: DefaultAudioSessionPolicy()
             )
 
         let creatorFlow = try await creatorUserFlow
@@ -492,9 +494,9 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         let user2 = String.unique
 
         let user1CallFlow = try await helpers
-            .callFlow(id: callId, type: .default, userId: user1)
+            .callFlow(id: callId, type: .default, userId: user1, audioSessionPolicy: DefaultAudioSessionPolicy())
         let user2CallFlow = try await helpers
-            .callFlow(id: callId, type: .default, userId: user2)
+            .callFlow(id: callId, type: .default, userId: user2, audioSessionPolicy: DefaultAudioSessionPolicy())
 
         try await withThrowingTaskGroup(of: Void.self) { group in
             group.addTask {
@@ -529,9 +531,9 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         let user2 = String.unique
 
         let user1CallFlow = try await helpers
-            .callFlow(id: callId, type: .default, userId: user1)
+            .callFlow(id: callId, type: .default, userId: user1, audioSessionPolicy: DefaultAudioSessionPolicy())
         let user2CallFlow = try await helpers
-            .callFlow(id: callId, type: .default, userId: user2)
+            .callFlow(id: callId, type: .default, userId: user2, audioSessionPolicy: DefaultAudioSessionPolicy())
 
         let user1CallFlowAfterCallCreation = try await user1CallFlow
             .perform { try await $0.call.create(memberIds: [user1, user2]) }
@@ -567,9 +569,9 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         let user2 = String.unique
 
         let user1CallFlow = try await helpers
-            .callFlow(id: callId, type: .default, userId: user1)
+            .callFlow(id: callId, type: .default, userId: user1, audioSessionPolicy: DefaultAudioSessionPolicy())
         let user2CallFlow = try await helpers
-            .callFlow(id: callId, type: .default, userId: user2)
+            .callFlow(id: callId, type: .default, userId: user2, audioSessionPolicy: DefaultAudioSessionPolicy())
             .perform { $0.client.subscribe(for: CallRingEvent.self) }
 
         // We are joining first to be able to mock the permissions only for the
@@ -607,12 +609,24 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         let participant = String.unique
 
         try await helpers
-            .callFlow(id: callId, type: .livestream, userId: .unique, environment: "demo")
+            .callFlow(
+                id: callId,
+                type: .livestream,
+                userId: .unique,
+                environment: "demo",
+                audioSessionPolicy: DefaultAudioSessionPolicy()
+            )
             .perform { try await $0.call.create(backstage: .init(enabled: true)) }
             .perform { try await $0.call.join() }
 
         try await helpers
-            .callFlow(id: callId, type: .livestream, userId: participant, environment: "demo")
+            .callFlow(
+                id: callId,
+                type: .livestream,
+                userId: participant,
+                environment: "demo",
+                audioSessionPolicy: DefaultAudioSessionPolicy()
+            )
             .performWithErrorExpectation { try await $0.call.join() }
             .tryMap { $0.value as? APIError }
             .assert { $0.value.code == 17 }
@@ -638,10 +652,22 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         let participant = String.unique
 
         let creatorCallFlow = try await helpers
-            .callFlow(id: callId, type: .livestream, userId: creator, environment: "demo")
+            .callFlow(
+                id: callId,
+                type: .livestream,
+                userId: creator,
+                environment: "demo",
+                audioSessionPolicy: DefaultAudioSessionPolicy()
+            )
 
         let otherHostCallFlow = try await helpers
-            .callFlow(id: callId, type: .livestream, userId: otherHost, environment: "demo")
+            .callFlow(
+                id: callId,
+                type: .livestream,
+                userId: otherHost,
+                environment: "demo",
+                audioSessionPolicy: DefaultAudioSessionPolicy()
+            )
 
         _ = try await creatorCallFlow
             .perform { try await $0.call.create(
@@ -657,7 +683,13 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
             .assertEventuallyInMainActor { $0.call.state.sessionId.isEmpty == false }
 
         try await helpers
-            .callFlow(id: callId, type: .livestream, userId: participant, environment: "demo")
+            .callFlow(
+                id: callId,
+                type: .livestream,
+                userId: participant,
+                environment: "demo",
+                audioSessionPolicy: DefaultAudioSessionPolicy()
+            )
             .performWithErrorExpectation { try await $0.call.join() }
             .tryMap { $0.value as? APIError }
             .assert { $0.value.code == 17 }
@@ -676,7 +708,13 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         let joiningDate = Date(timeIntervalSinceNow: joinAheadTimeSeconds + 2)
 
         try await helpers
-            .callFlow(id: callId, type: .livestream, userId: .unique, environment: "demo")
+            .callFlow(
+                id: callId,
+                type: .livestream,
+                userId: .unique,
+                environment: "demo",
+                audioSessionPolicy: DefaultAudioSessionPolicy()
+            )
             .perform {
                 try await $0.call.create(
                     startsAt: startingDate,
@@ -690,7 +728,13 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
 
         try await self
             .helpers
-            .callFlow(id: callId, type: .livestream, userId: participant, environment: "demo")
+            .callFlow(
+                id: callId,
+                type: .livestream,
+                userId: participant,
+                environment: "demo",
+                audioSessionPolicy: DefaultAudioSessionPolicy()
+            )
             .performWithErrorExpectation { try await $0.call.join() }
             .assertEventually { _ in Date() >= joiningDate }
             .perform { try await $0.call.join() }
@@ -704,12 +748,24 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         let host = String.unique
 
         let hostCallFlow = try await helpers
-            .callFlow(id: callId, type: .audioRoom, userId: host, environment: "demo")
+            .callFlow(
+                id: callId,
+                type: .audioRoom,
+                userId: host,
+                environment: "demo",
+                audioSessionPolicy: DefaultAudioSessionPolicy()
+            )
             .perform { try await $0.call.create(memberIds: [host], backstage: .init(enabled: false)) }
             .perform { try await $0.call.join() }
 
         let participantCallFlow = try await helpers
-            .callFlow(id: callId, type: .audioRoom, userId: .unique, environment: "demo")
+            .callFlow(
+                id: callId,
+                type: .audioRoom,
+                userId: .unique,
+                environment: "demo",
+                audioSessionPolicy: DefaultAudioSessionPolicy()
+            )
 
         try await withThrowingTaskGroup(of: Void.self) { group in
             group.addTask {
@@ -737,12 +793,24 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         let host = String.unique
 
         let hostCallFlow = try await helpers
-            .callFlow(id: callId, type: .audioRoom, userId: host, environment: "demo")
+            .callFlow(
+                id: callId,
+                type: .audioRoom,
+                userId: host,
+                environment: "demo",
+                audioSessionPolicy: DefaultAudioSessionPolicy()
+            )
             .perform { try await $0.call.create(memberIds: [host], backstage: .init(enabled: false)) }
             .perform { try await $0.call.join() }
 
         let participantCallFlow = try await helpers
-            .callFlow(id: callId, type: .audioRoom, userId: .unique, environment: "demo")
+            .callFlow(
+                id: callId,
+                type: .audioRoom,
+                userId: .unique,
+                environment: "demo",
+                audioSessionPolicy: DefaultAudioSessionPolicy()
+            )
 
         try await withThrowingTaskGroup(of: Void.self) { group in
             group.addTask {
@@ -772,13 +840,13 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         let participant = "participant"
 
         let hostCallFlow = try await helpers
-            .callFlow(id: callId, type: .audioRoom, userId: host)
+            .callFlow(id: callId, type: .audioRoom, userId: host, audioSessionPolicy: DefaultAudioSessionPolicy())
             .perform { try await $0.call.create(members: [.init(role: "host", userId: host)], backstage: .init(enabled: false)) }
             .perform { try await $0.call.join() }
             .assertEventuallyInMainActor { $0.call.state.ownCapabilities.contains(.updateCallPermissions) }
 
         let participantCallFlow = try await helpers
-            .callFlow(id: callId, type: .audioRoom, userId: participant)
+            .callFlow(id: callId, type: .audioRoom, userId: participant, audioSessionPolicy: DefaultAudioSessionPolicy())
 
         try await withThrowingTaskGroup(of: Void.self) { group in
             group.addTask {
@@ -811,7 +879,13 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         let participant = String.unique
 
         let hostCallFlow = try await helpers
-            .callFlow(id: callId, type: .audioRoom, userId: host, environment: "demo")
+            .callFlow(
+                id: callId,
+                type: .audioRoom,
+                userId: host,
+                environment: "demo",
+                audioSessionPolicy: DefaultAudioSessionPolicy()
+            )
             .perform { try await $0.call.create(memberIds: [host], backstage: .init(enabled: false)) }
             .perform { try await $0.call.join(callSettings: .init(audioOn: true, videoOn: false)) }
 
@@ -830,7 +904,8 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
                         id: callId,
                         type: .audioRoom,
                         userId: participant,
-                        environment: "demo"
+                        environment: "demo",
+                        audioSessionPolicy: DefaultAudioSessionPolicy()
                     )
                     .perform { try await $0.call.join(callSettings: .init(audioOn: false, videoOn: false)) }
                     .assertEventuallyInMainActor { $0.call.state.participants.endIndex == 2 }
@@ -852,13 +927,25 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         let participant = String.unique
 
         let hostCallFlow = try await helpers
-            .callFlow(id: callId, type: .audioRoom, userId: host, environment: "demo")
+            .callFlow(
+                id: callId,
+                type: .audioRoom,
+                userId: host,
+                environment: "demo",
+                audioSessionPolicy: DefaultAudioSessionPolicy()
+            )
             .perform { try await $0.call.create(memberIds: [host], backstage: .init(enabled: false)) }
             .perform { try await $0.call.join(callSettings: .init(audioOn: true, videoOn: false)) }
 
         let participantCallFlow = try await self
             .helpers
-            .callFlow(id: callId, type: .audioRoom, userId: participant, environment: "demo")
+            .callFlow(
+                id: callId,
+                type: .audioRoom,
+                userId: participant,
+                environment: "demo",
+                audioSessionPolicy: DefaultAudioSessionPolicy()
+            )
 
         try await withThrowingTaskGroup(of: Void.self) { group in
             group.addTask {
@@ -892,7 +979,13 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         let participant = String.unique
 
         let hostCallFlow = try await helpers
-            .callFlow(id: callId, type: .audioRoom, userId: host, environment: "demo")
+            .callFlow(
+                id: callId,
+                type: .audioRoom,
+                userId: host,
+                environment: "demo",
+                audioSessionPolicy: DefaultAudioSessionPolicy()
+            )
             .perform { try await $0.call.create(memberIds: [host], backstage: .init(enabled: false)) }
             .perform { try await $0.call.join(callSettings: .init(audioOn: true, videoOn: false)) }
 
@@ -912,7 +1005,13 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
             group.addTask {
                 try await self
                     .helpers
-                    .callFlow(id: callId, type: .audioRoom, userId: participant, environment: "demo")
+                    .callFlow(
+                        id: callId,
+                        type: .audioRoom,
+                        userId: participant,
+                        environment: "demo",
+                        audioSessionPolicy: DefaultAudioSessionPolicy()
+                    )
                     .perform { try await $0.call.join(callSettings: .init(audioOn: false, videoOn: false)) }
                     .assertEventuallyInMainActor { $0.call.state.participants.endIndex == 2 }
                     .assertEventuallyInMainActor { $0.call.currentUserHasCapability(.sendAudio) == false }
@@ -935,14 +1034,26 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         let participant = String.unique
 
         let hostCallFlow = try await helpers
-            .callFlow(id: callId, type: .audioRoom, userId: host, environment: "demo")
+            .callFlow(
+                id: callId,
+                type: .audioRoom,
+                userId: host,
+                environment: "demo",
+                audioSessionPolicy: DefaultAudioSessionPolicy()
+            )
             .perform { try await $0.call.create(memberIds: [host], backstage: .init(enabled: false)) }
             .perform { try await $0.call.join(callSettings: .init(audioOn: true, videoOn: false)) }
             .assertEventuallyInMainActor { $0.call.state.ownCapabilities.contains(.updateCallPermissions) }
 
         let participantCallFlow = try await self
             .helpers
-            .callFlow(id: callId, type: .audioRoom, userId: participant, environment: "demo")
+            .callFlow(
+                id: callId,
+                type: .audioRoom,
+                userId: participant,
+                environment: "demo",
+                audioSessionPolicy: DefaultAudioSessionPolicy()
+            )
 
         try await withThrowingTaskGroup(of: Void.self) { group in
             group.addTask {
@@ -986,7 +1097,13 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         let participant = String.unique
 
         let hostCallFlow = try await helpers
-            .callFlow(id: callId, type: .audioRoom, userId: host, environment: "demo")
+            .callFlow(
+                id: callId,
+                type: .audioRoom,
+                userId: host,
+                environment: "demo",
+                audioSessionPolicy: DefaultAudioSessionPolicy()
+            )
             .perform { try await $0.call.create(memberIds: [host], backstage: .init(enabled: false)) }
             .perform { try await $0.call.join(callSettings: .init(audioOn: true, videoOn: false)) }
 
@@ -1008,7 +1125,8 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
                         id: callId,
                         type: .audioRoom,
                         userId: participant,
-                        environment: "demo"
+                        environment: "demo",
+                        audioSessionPolicy: DefaultAudioSessionPolicy()
                     )
                     .perform { try await $0.call.join(callSettings: .init(audioOn: false, videoOn: false)) }
                     .assertEventuallyInMainActor { $0.call.currentUserHasCapability(.sendVideo) == false }
@@ -1072,10 +1190,10 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         let participant = String.unique
 
         let creatorCallFlow = try await helpers
-            .callFlow(id: callId, type: .default, userId: creator)
+            .callFlow(id: callId, type: .default, userId: creator, audioSessionPolicy: DefaultAudioSessionPolicy())
 
         let participantCallFlow = try await helpers
-            .callFlow(id: callId, type: .default, userId: participant)
+            .callFlow(id: callId, type: .default, userId: participant, audioSessionPolicy: DefaultAudioSessionPolicy())
 
         let creatorJoinedCallFlow = try await creatorCallFlow
             .perform {
@@ -1117,7 +1235,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
             .assertEventuallyInMainActor { $0.call.state.participants.endIndex == 1 }
 
         let participantRejoinedFlow = try await helpers
-            .callFlow(id: callId, type: .default, userId: participant)
+            .callFlow(id: callId, type: .default, userId: participant, audioSessionPolicy: DefaultAudioSessionPolicy())
             .perform {
                 try await $0.call.join()
             }
@@ -1161,10 +1279,10 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         let user2 = String.unique
 
         let user1CallFlow = try await helpers
-            .callFlow(id: callId, type: .default, userId: user1)
+            .callFlow(id: callId, type: .default, userId: user1, audioSessionPolicy: DefaultAudioSessionPolicy())
 
         let user2CallFlow = try await helpers
-            .callFlow(id: callId, type: .default, userId: user2)
+            .callFlow(id: callId, type: .default, userId: user2, audioSessionPolicy: DefaultAudioSessionPolicy())
 
         let user1JoinedFlow = try await user1CallFlow
             .perform { try await $0.call.create(memberIds: [user1, user2]) }
@@ -1201,10 +1319,10 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         let user2 = String.unique
 
         let user1CallFlow = try await helpers
-            .callFlow(id: callId, type: .default, userId: user1)
+            .callFlow(id: callId, type: .default, userId: user1, audioSessionPolicy: DefaultAudioSessionPolicy())
 
         let user2CallFlow = try await helpers
-            .callFlow(id: callId, type: .default, userId: user2)
+            .callFlow(id: callId, type: .default, userId: user2, audioSessionPolicy: DefaultAudioSessionPolicy())
 
         let user1JoinedFlow = try await user1CallFlow
             .perform { try await $0.call.create(memberIds: [user1, user2]) }
@@ -1238,10 +1356,10 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         let user2 = String.unique
 
         let user1CallFlow = try await helpers
-            .callFlow(id: callId, type: .default, userId: user1)
+            .callFlow(id: callId, type: .default, userId: user1, audioSessionPolicy: DefaultAudioSessionPolicy())
 
         let user2CallFlow = try await helpers
-            .callFlow(id: callId, type: .default, userId: user2)
+            .callFlow(id: callId, type: .default, userId: user2, audioSessionPolicy: DefaultAudioSessionPolicy())
 
         let user1JoinedFlow = try await user1CallFlow
             .perform { try await $0.call.create(memberIds: [user1, user2]) }
@@ -1294,10 +1412,10 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         let user2 = String.unique
 
         let user1CallFlow = try await helpers
-            .callFlow(id: callId, type: .default, userId: user1)
+            .callFlow(id: callId, type: .default, userId: user1, audioSessionPolicy: DefaultAudioSessionPolicy())
 
         let user2CallFlow = try await helpers
-            .callFlow(id: callId, type: .default, userId: user2)
+            .callFlow(id: callId, type: .default, userId: user2, audioSessionPolicy: DefaultAudioSessionPolicy())
 
         let user1JoinedFlow = try await user1CallFlow
             .perform { try await $0.call.create(memberIds: [user1, user2]) }
@@ -1377,10 +1495,10 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         helpers.permissions.setMicrophonePermission(isGranted: true)
 
         let user1CallFlow = try await helpers
-            .callFlow(id: callId, type: .audioRoom, userId: user1)
+            .callFlow(id: callId, type: .audioRoom, userId: user1, audioSessionPolicy: DefaultAudioSessionPolicy())
 
         let user2CallFlow = try await helpers
-            .callFlow(id: callId, type: .audioRoom, userId: user2)
+            .callFlow(id: callId, type: .audioRoom, userId: user2, audioSessionPolicy: DefaultAudioSessionPolicy())
 
         let user1CallFlowAfterCallCreation = try await user1CallFlow
             .perform { try await $0.call.create(memberIds: [user1, user2]) }
@@ -1429,10 +1547,10 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         helpers.permissions.setMicrophonePermission(isGranted: true)
 
         let user1CallFlow = try await helpers
-            .callFlow(id: callId, type: .audioRoom, userId: user1)
+            .callFlow(id: callId, type: .audioRoom, userId: user1, audioSessionPolicy: DefaultAudioSessionPolicy())
 
         let user2CallFlow = try await helpers
-            .callFlow(id: callId, type: .audioRoom, userId: user2)
+            .callFlow(id: callId, type: .audioRoom, userId: user2, audioSessionPolicy: DefaultAudioSessionPolicy())
             .assertEventuallyInMainActor { $0.call.state.sessionId.isEmpty == false }
 
         let user1CallFlowAfterCallCreation = try await user1CallFlow
