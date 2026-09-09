@@ -381,18 +381,10 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         helpers.duringDismantleObservedAllCallEnded = false
 
         let creatorUserFlow = try await helpers
-            .callFlow(
-                id: callId,
-                type: .default,
-                userId: creatorUserId
-            )
+            .callFlow(id: callId, type: .default, userId: creatorUserId)
 
         let participantUserFlow = try await helpers
-            .callFlow(
-                id: callId,
-                type: .default,
-                userId: participantUserId
-            )
+            .callFlow(id: callId, type: .default, userId: participantUserId)
 
         let creatorFlow = try await creatorUserFlow
             .perform { try await $0.call.create(memberIds: [creatorUserId, participantUserId]) }
@@ -826,12 +818,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
             group.addTask {
                 try await self
                     .helpers
-                    .callFlow(
-                        id: callId,
-                        type: .audioRoom,
-                        userId: participant,
-                        environment: "demo"
-                    )
+                    .callFlow(id: callId, type: .audioRoom, userId: participant, environment: "demo")
                     .perform { try await $0.call.join(callSettings: .init(audioOn: false, videoOn: false)) }
                     .assertEventuallyInMainActor { $0.call.state.participants.endIndex == 2 }
                     .assertEventuallyInMainActor { $0.call.currentUserHasCapability(.sendAudio) == false }
@@ -1004,12 +991,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
             group.addTask {
                 try await self
                     .helpers
-                    .callFlow(
-                        id: callId,
-                        type: .audioRoom,
-                        userId: participant,
-                        environment: "demo"
-                    )
+                    .callFlow(id: callId, type: .audioRoom, userId: participant, environment: "demo")
                     .perform { try await $0.call.join(callSettings: .init(audioOn: false, videoOn: false)) }
                     .assertEventuallyInMainActor { $0.call.currentUserHasCapability(.sendVideo) == false }
                     .assertEventuallyInMainActor { $0.call.state.callSettings.videoOn == false }
