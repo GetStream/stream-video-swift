@@ -97,6 +97,7 @@ class Stream_Video_Sfu_Signal_SignalServer: @unchecked Sendable {
         var request = URLRequest(url: url)
         request.setValue("application/protobuf", forHTTPHeaderField: "Content-Type")
         request.setValue("Bearer \(token)", forHTTPHeaderField: "authorization")
+        request.setValue(SystemEnvironment.xStreamClientHeader, forHTTPHeaderField: "X-Stream-Client")
         request.httpMethod = "POST"
         return request
     }
