@@ -42,7 +42,7 @@ Access paths on `VideoAppearance`:
 
 `VideoAppearance.Colors.init` defaults to `DesignSystemTokens()`, so `Colors()` works without supplying tokens.
 
-Token split and re-sync rules live in Core: `Sources/StreamCoreUI/DesignSystem/TokenScope.md`. Do not add Chat (`chat*`) tokens to this SDK.
+Token ownership lives in `design-system-tokens`. Video consumes Core plus `tokens/video` (`VideoAppearance.Colors`). Do not add Chat tokens to this SDK.
 
 ### Mixed Chat + Video apps
 
