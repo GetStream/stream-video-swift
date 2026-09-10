@@ -2,47 +2,52 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+// This file is auto-generated. Do not edit.
+
 import StreamCoreUI
 import UIKit
 
-/// Video-specific color tokens, derived from ``DesignSystemTokens/Colors``.
-///
-/// Read them on the Video appearance:
-/// `videoAppearance.colors.indicatorSpeaking`.
 extension VideoAppearance {
+    /// VideoAppearance color tokens derived from StreamCoreUI.
     public final class Colors {
         private let colors: DesignSystemTokens.Colors
 
         // MARK: - Control
 
-        public lazy var controlAcceptCallBackground: UIColor = colors
-            .accentSuccess
-        public lazy var controlAcceptCallText: UIColor = colors.textOnAccent
-        public lazy var controlVideoBackgroundControlBackground: UIColor = colors
-            .backgroundCoreSurfaceSubtle
-        public lazy var controlVideoBackgroundControlBackgroundSelected: UIColor =
-            colors.accentPrimary
-        public lazy var controlVideoBackgroundControlText: UIColor = colors
-            .textPrimary
-        public lazy var controlVideoBackgroundControlTextSelected: UIColor =
+        public lazy var controlAcceptCallButtonBackground: UIColor =
+            colors.accentSuccess
+        public lazy var controlAcceptCallButtonText: UIColor =
+            colors.textOnAccent
+        public lazy var controlCallControlErrorBadgeBackground: UIColor =
+            colors.accentWarning
+        public lazy var controlCallControlErrorBadgeText: UIColor = UIColor(
+            red: 0,
+            green: 0,
+            blue: 0,
+            alpha: 1
+        )
+        public lazy var controlDeclineCallButtonBackground: UIColor =
+            colors.accentError
+        public lazy var controlDeclineCallButtonText: UIColor =
             colors.textOnAccent
 
         // MARK: - Indicator
 
-        public lazy var indicatorFair: UIColor = colors.accentWarning
-        public lazy var indicatorGreat: UIColor = colors.accentSuccess
-        public lazy var indicatorPoor: UIColor = colors.accentError
-        public lazy var indicatorSpeaking: UIColor = colors.palette.brand300
-
-        // MARK: - Label
-
-        public lazy var labelBackgroundNeutral: UIColor = colors.palette.chrome150
-        public lazy var labelBackgroundPrimary: UIColor = colors.palette.brand150
-        public lazy var labelTextNeutral: UIColor = colors.textPrimary
-        public lazy var labelTextPrimary: UIColor = colors.palette.brand900
+        public lazy var indicatorConnectionQualityFair: UIColor =
+            colors.accentWarning
+        public lazy var indicatorConnectionQualityGreat: UIColor =
+            colors.accentSuccess
+        public lazy var indicatorConnectionQualityPoor: UIColor =
+            colors.accentError
+        public lazy var indicatorMicrophoneLevelBarActive: UIColor =
+            colors.palette.brand400
+        public lazy var indicatorMicrophoneLevelBarInactive: UIColor =
+            colors.palette.chrome200
+        public lazy var indicatorSoundIndicatorSpeaking: UIColor =
+            colors.palette.brand400
 
         public init(tokens: DesignSystemTokens = DesignSystemTokens()) {
-            self.colors = tokens.colors
+            colors = tokens.colors
         }
     }
 }

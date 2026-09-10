@@ -13,7 +13,7 @@ private func content() {
         let tokens = DesignSystemTokens()
         tokens.colors.accentPrimary = .red
         let appearance = VideoAppearance(tokens: tokens)
-        appearance.colors.indicatorSpeaking = .green
+        appearance.colors.indicatorSoundIndicatorSpeaking = .green
     }
 
     container {

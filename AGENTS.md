@@ -17,7 +17,7 @@ v2 introduces a **shared design-token system** so Chat and Video can reskin from
 ### Types and ownership
 
 - **`DesignSystemTokens`** (Core, class): `tokens.colors` (semantic colors plus `tokens.colors.palette` for brand/chrome ramps), `tokens.layout` (spacing, radii, strokes, elevations), and `tokens.fonts` (shared SwiftUI typography). Override color ramps **before the first read**. Colors stay on UIKit `UIColor`; fonts stay on SwiftUI `Font`. UIKit `UIFont` faces stay on product UIKit SDKs (for example StreamChatUI).
-- **`VideoAppearance`**: Video’s design-system type. Holds `tokens: DesignSystemTokens` and `colors: VideoAppearance.Colors` (14 Video-only colors). No images or sounds. Video owns **no** layout or font tokens; layout and shared fonts come from `tokens`.
+- **`VideoAppearance`**: Video’s design-system type. Holds `tokens: DesignSystemTokens` and `colors: VideoAppearance.Colors` (Video-only colors from `tokens/video`). No images or sounds. Video owns **no** layout or font tokens; layout and shared fonts come from `tokens`. Labels and other shared semantics live on `tokens.colors`.
 - **`Appearance`** (legacy): existing SwiftUI `Colors` struct plus images, fonts, and sounds. `@Injected(\.appearance)` / `@Injected(\.fonts)` and `StreamVideoUI(..., appearance:)` still take this type. Shared typography lives on `videoAppearance.tokens.fonts`. **Do not migrate existing views** onto `VideoAppearance` or `tokens.fonts` unless the task explicitly asks.
 
 Product prefix is **Video**, not Call. Use `VideoAppearance` / `VideoAppearance.Colors`.
@@ -28,7 +28,7 @@ tokens.colors.palette.brand500 = .red
 tokens.layout.spacingMd = 16
 
 let videoAppearance = VideoAppearance(tokens: tokens)
-videoAppearance.colors.indicatorSpeaking = .green
+videoAppearance.colors.indicatorSoundIndicatorSpeaking = .green
 
 // Existing views, until they migrate:
 let appearance = Appearance(colors: colors, images: images, fonts: fonts, sounds: sounds)
@@ -38,11 +38,11 @@ StreamVideoUI(streamVideo: streamVideo, appearance: appearance)
 Access paths on `VideoAppearance`:
 
 - Shared: `videoAppearance.tokens.colors.accentPrimary`, `videoAppearance.tokens.layout.spacingMd`, `videoAppearance.tokens.fonts.body`
-- Video-only: `videoAppearance.colors.controlAcceptCallBackground`
+- Video-only: `videoAppearance.colors.controlAcceptCallButtonBackground`
 
 `VideoAppearance.Colors.init` defaults to `DesignSystemTokens()`, so `Colors()` works without supplying tokens.
 
-Token split and re-sync rules live in Core: `Sources/StreamCoreUI/DesignSystem/TokenScope.md`. Do not add Chat (`chat*`) tokens to this SDK.
+Token ownership lives in `design-system-tokens`. Video consumes Core plus `tokens/video` (`VideoAppearance.Colors`). Do not add Chat tokens to this SDK.
 
 ### Mixed Chat + Video apps
 
@@ -58,7 +58,7 @@ struct InboxHeader: View {
     var body: some View {
         HStack(spacing: videoAppearance.tokens.layout.spacingMd) {
             Label("3 missed", systemImage: "phone.down.fill")
-                .background(Color(videoAppearance.colors.controlAcceptCallBackground))
+                .background(Color(videoAppearance.colors.controlAcceptCallButtonBackground))
             Label("2 unread", systemImage: "message.fill")
                 .foregroundColor(Color(chatAppearance.tokens.colors.textPrimary))
         }
