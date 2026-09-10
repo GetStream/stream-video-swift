@@ -60,23 +60,32 @@ final class Appearance_DesignSystem_Tests: XCTestCase, @unchecked Sendable {
 
     func test_sharedTokenOverriddenBeforeFirstRead_videoColorUsesOverride() {
         let tokens = DesignSystemTokens()
-        tokens.colors.palette.brand300 = .magenta
+        tokens.colors.palette.brand400 = .magenta
         subject = VideoAppearance(tokens: tokens)
 
-        XCTAssertEqual(subject.colors.indicatorSpeaking, .magenta)
+        XCTAssertEqual(
+            subject.colors.indicatorSoundIndicatorSpeaking,
+            .magenta
+        )
     }
 
     func test_videoColorOverridden_readsBackOverride() {
-        subject.colors.indicatorSpeaking = .magenta
+        subject.colors.indicatorSoundIndicatorSpeaking = .magenta
 
-        XCTAssertEqual(subject.colors.indicatorSpeaking, .magenta)
+        XCTAssertEqual(
+            subject.colors.indicatorSoundIndicatorSpeaking,
+            .magenta
+        )
     }
 
     func test_colorsInit_withoutTokens_usesDefaultDesignSystemTokens() {
         let colors = VideoAppearance.Colors()
-        let expected = DesignSystemTokens().colors.palette.brand300
+        let expected = DesignSystemTokens().colors.palette.brand400
 
-        assertEqualDynamicColor(colors.indicatorSpeaking, expected)
+        assertEqualDynamicColor(
+            colors.indicatorSoundIndicatorSpeaking,
+            expected
+        )
     }
 
     // Dynamic `UIColor(light:dark:)` instances are not `==` even when they
