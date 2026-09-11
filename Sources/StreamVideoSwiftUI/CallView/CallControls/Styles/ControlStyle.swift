@@ -26,9 +26,16 @@ public struct ToggleControlStyle {
     public var enabled: ControlStyle
     /// The style when the control is disabled.
     public var disabled: ControlStyle
+    /// The style when the required device permission was denied.
+    public var permissionDenied: ControlStyle
 
-    public init(enabled: ControlStyle, disabled: ControlStyle) {
+    public init(
+        enabled: ControlStyle,
+        disabled: ControlStyle,
+        permissionDenied: ControlStyle? = nil
+    ) {
         self.enabled = enabled
         self.disabled = disabled
+        self.permissionDenied = permissionDenied ?? disabled
     }
 }

@@ -14,6 +14,7 @@ public struct StatelessVideoIconView: View {
 
     @Injected(\.images) private var images
     @Injected(\.permissions) private var permissions
+    @Injected(\.videoAppearance) private var videoAppearance
 
     /// The associated call for the video icon.
     public weak var call: Call?
@@ -60,7 +61,13 @@ public struct StatelessVideoIconView: View {
     public var body: some View {
         Button(
             action: { actionHandler?() },
-            label: { label(isEnabled: callSettings.videoOn, hasPermission: hasPermission) }
+            label: {
+                label(
+                    isEnabled: callSettings.videoOn,
+                    hasPermission: hasPermission,
+                    canRequestPermission: canRequestPermission
+                )
+            }
         )
         .disabled(!hasPermission && !canRequestPermission)
         .accessibility(identifier: "cameraToggle")
@@ -72,22 +79,50 @@ public struct StatelessVideoIconView: View {
     // MARK: - Private Helpers
 
     @ViewBuilder
-    private func label(isEnabled: Bool, hasPermission: Bool) -> some View {
+    private func label(
+        isEnabled: Bool,
+        hasPermission: Bool,
+        canRequestPermission: Bool
+    ) -> some View {
+        let style = controlStyle(
+            isEnabled: isEnabled,
+            hasPermission: hasPermission,
+            canRequestPermission: canRequestPermission
+        )
         let content = CallIconView(
-            icon: isEnabled && hasPermission
-                ? controlStyle.enabled.icon
-                : controlStyle.disabled.icon,
+            icon: style.icon,
             size: size,
-            iconStyle: isEnabled && hasPermission
-                ? controlStyle.enabled.iconStyle
-                : controlStyle.disabled.iconStyle
+            iconStyle: style.iconStyle
         )
 
         if hasPermission || canRequestPermission {
             content
         } else {
             content
-                .badge(Image(systemName: "exclamationmark"), background: .orange)
+                .badge(
+                    videoAppearance.images.callControlErrorBadge,
+                    foreground: Color(
+                        videoAppearance.colors.controlCallControlErrorBadgeText
+                    ),
+                    background: Color(
+                        videoAppearance.colors
+                            .controlCallControlErrorBadgeBackground
+                    )
+                )
+        }
+    }
+
+    private func controlStyle(
+        isEnabled: Bool,
+        hasPermission: Bool,
+        canRequestPermission: Bool
+    ) -> ControlStyle {
+        if !hasPermission, !canRequestPermission {
+            return controlStyle.permissionDenied
+        } else if isEnabled, hasPermission {
+            return controlStyle.enabled
+        } else {
+            return controlStyle.disabled
         }
     }
 }

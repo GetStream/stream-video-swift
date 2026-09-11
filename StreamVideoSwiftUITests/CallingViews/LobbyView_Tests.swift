@@ -13,6 +13,11 @@ final class LobbyView_Tests: StreamVideoUITestCase, @unchecked Sendable {
 
     private nonisolated(unsafe) var mockPermissions: MockPermissionsStore! = .init()
 
+    override func setUp() async throws {
+        try await super.setUp()
+        InjectedValues[\.permissions] = mockPermissions.permissionsStore
+    }
+
     override func tearDown() {
         mockPermissions = nil
         super.tearDown()
@@ -33,5 +38,52 @@ final class LobbyView_Tests: StreamVideoUITestCase, @unchecked Sendable {
             )
             AssertSnapshot(view, variants: snapshotVariants, suffix: "with_\(count)_participants")
         }
+    }
+
+    func test_lobbyView_micAndCameraOff_snapshot() throws {
+        let view = LobbyView(
+            callId: callId,
+            callType: callType,
+            callSettings: .constant(
+                CallSettings(audioOn: false, videoOn: false)
+            ),
+            onJoinCallTap: {},
+            onCloseLobby: {}
+        )
+
+        AssertSnapshot(
+            view,
+            variants: snapshotVariants,
+            suffix: "mic_and_camera_off"
+        )
+    }
+
+    func test_lobbyView_micAndCameraPermissionDenied_snapshot() async throws {
+        mockPermissions.stubMicrophonePermission(.denied)
+        mockPermissions.stubCameraPermission(.denied)
+        await fulfillment {
+            !self.mockPermissions.permissionsStore.hasMicrophonePermission
+                && !self.mockPermissions.permissionsStore
+                .canRequestMicrophonePermission
+                && !self.mockPermissions.permissionsStore.hasCameraPermission
+                && !self.mockPermissions.permissionsStore
+                .canRequestCameraPermission
+        }
+
+        let view = LobbyView(
+            callId: callId,
+            callType: callType,
+            callSettings: .constant(
+                CallSettings(audioOn: false, videoOn: false)
+            ),
+            onJoinCallTap: {},
+            onCloseLobby: {}
+        )
+
+        AssertSnapshot(
+            view,
+            variants: snapshotVariants,
+            suffix: "mic_and_camera_permission_denied"
+        )
     }
 }

@@ -33,8 +33,31 @@ public final class VideoAppearance {
     /// Video-specific colors, derived from ``tokens``.
     public var colors: Colors
 
-    public init(tokens: DesignSystemTokens = DesignSystemTokens()) {
+    /// The images the Video SDK renders. Icons stay on the product SDK.
+    public var images: Images
+
+    public init(
+        tokens: DesignSystemTokens = DesignSystemTokens(),
+        images: Images = Images()
+    ) {
         self.tokens = tokens
         self.colors = Colors(tokens: tokens)
+        self.images = images
+    }
+}
+
+enum VideoAppearanceKey: InjectionKey {
+    nonisolated(unsafe) static var currentValue = VideoAppearance.shared
+}
+
+extension InjectedValues {
+    /// Provides access to Video's design-system appearance.
+    public var videoAppearance: VideoAppearance {
+        get {
+            Self[VideoAppearanceKey.self]
+        }
+        set {
+            Self[VideoAppearanceKey.self] = newValue
+        }
     }
 }

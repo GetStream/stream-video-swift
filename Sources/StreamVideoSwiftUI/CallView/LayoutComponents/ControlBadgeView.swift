@@ -8,7 +8,7 @@ import SwiftUI
 
 /// A view representing a control badge displaying a value.
 public struct ControlBadgeView: View {
-    @Injected(\.colors) private var colors
+    @Injected(\.videoAppearance) private var videoAppearance
 
     enum Content {
         case text(String, foreground: Color, background: Color)
@@ -47,9 +47,12 @@ public struct ControlBadgeView: View {
     public var body: some View {
         TopRightView {
             contentView
-                .frame(width: 14, height: 14)
-                .padding(2)
-                .font(.system(size: 12))
+                .frame(
+                    width: videoAppearance.tokens.layout.iconSizeSm,
+                    height: videoAppearance.tokens.layout.iconSizeSm
+                )
+                .padding(videoAppearance.tokens.layout.spacingXxxs)
+                .font(videoAppearance.tokens.fonts.caption1)
                 .foregroundColor(foregroundColor)
                 .background(Circle().fill(backgroundColor))
         }
