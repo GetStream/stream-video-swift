@@ -128,10 +128,6 @@ internal enum L10n {
   }
 
   internal enum WaitingRoom {
-    /// Camera preview
-    internal static var cameraPreview: String { L10n.tr("Localizable", "waiting-room.camera-preview") }
-    /// Close lobby
-    internal static var close: String { L10n.tr("Localizable", "waiting-room.close") }
     /// It seems you are having issues with your internet connection.
     internal static var connectionIssues: String { L10n.tr("Localizable", "waiting-room.connection-issues") }
     /// You are about to join a call.
@@ -142,27 +138,13 @@ internal enum L10n {
     internal static func numberOfParticipants(_ p1: Int) -> String {
       return L10n.tr("Localizable", "waiting-room.number-of-participants", p1)
     }
-    /// Set up your call
-    internal static var setup: String { L10n.tr("Localizable", "waiting-room.setup") }
-    /// Start Call
-    internal static var start: String { L10n.tr("Localizable", "waiting-room.start") }
     /// Setup your audio and video
     internal static var subtitle: String { L10n.tr("Localizable", "waiting-room.subtitle") }
     /// Before Joining
     internal static var title: String { L10n.tr("Localizable", "waiting-room.title") }
-    internal enum Camera {
-      /// Turn camera off
-      internal static var turnOff: String { L10n.tr("Localizable", "waiting-room.camera.turn-off") }
-      /// Turn camera on
-      internal static var turnOn: String { L10n.tr("Localizable", "waiting-room.camera.turn-on") }
-    }
     internal enum Mic {
       /// Your microphone doesn't seem to be working. Make sure you have all permissions accepted.
       internal static var notWorking: String { L10n.tr("Localizable", "waiting-room.mic.not-working") }
-      /// Turn microphone off
-      internal static var turnOff: String { L10n.tr("Localizable", "waiting-room.mic.turn-off") }
-      /// Turn microphone on
-      internal static var turnOn: String { L10n.tr("Localizable", "waiting-room.mic.turn-on") }
     }
   }
 }
