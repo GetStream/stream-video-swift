@@ -185,9 +185,9 @@ struct CameraCheckView<Factory: ViewFactory>: View {
             }
             .frame(width: proxy.size.width, height: proxy.size.height)
             .overlay(
-                VStack(spacing: tokens.layout.spacingNone) {
+                VStack(spacing: 0) {
                     Spacer()
-                    HStack(spacing: tokens.layout.spacingNone) {
+                    HStack(spacing: 0) {
                         MicrophoneCheckView(
                             audioLevels: microphoneChecker.audioLevels,
                             microphoneOn: callSettings.audioOn,
