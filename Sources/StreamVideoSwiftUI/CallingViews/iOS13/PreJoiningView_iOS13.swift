@@ -50,8 +50,6 @@ public struct LobbyView_iOS13<Factory: ViewFactory>: View {
             viewModel: viewModel,
             microphoneChecker: microphoneChecker,
             viewFactory: viewFactory,
-            callId: callId,
-            callType: callType,
             callSettings: $callSettings,
             onJoinCallTap: onJoinCallTap,
             onCloseLobby: onCloseLobby
