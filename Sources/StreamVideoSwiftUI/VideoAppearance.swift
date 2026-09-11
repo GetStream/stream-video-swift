@@ -33,9 +33,16 @@ public final class VideoAppearance {
     /// Video-specific colors, derived from ``tokens``.
     public var colors: Colors
 
-    public init(tokens: DesignSystemTokens = DesignSystemTokens()) {
+    /// The images the Video SDK renders. Icons stay on the product SDK.
+    public var images: Images
+
+    public init(
+        tokens: DesignSystemTokens = DesignSystemTokens(),
+        images: Images = Images()
+    ) {
         self.tokens = tokens
         self.colors = Colors(tokens: tokens)
+        self.images = images
     }
 }
 
