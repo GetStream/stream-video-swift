@@ -17,7 +17,7 @@ v2 introduces a **shared design-token system** so Chat and Video can reskin from
 ### Types and ownership
 
 - **`DesignSystemTokens`** (Core, class): `tokens.colors` (semantic colors plus `tokens.colors.palette` for brand/chrome ramps), `tokens.layout` (spacing, radii, strokes, elevations), and `tokens.fonts` (shared SwiftUI typography). Override color ramps **before the first read**. Colors stay on UIKit `UIColor`; fonts stay on SwiftUI `Font`. UIKit `UIFont` faces stay on product UIKit SDKs (for example StreamChatUI).
-- **`VideoAppearance`**: Video’s design-system type. Holds `tokens: DesignSystemTokens` and `colors: VideoAppearance.Colors` (Video-only colors from `tokens/video`). No images or sounds. Video owns **no** layout or font tokens; layout and shared fonts come from `tokens`. Labels and other shared semantics live on `tokens.colors`.
+- **`VideoAppearance`**: Video’s design-system type. Holds `tokens: DesignSystemTokens`, `colors: VideoAppearance.Colors` (Video-only colors from `tokens/video`), and `images: Images` (Video’s own icons, mirroring Chat’s `appearance.images`). No sounds. Video owns **no** layout or font tokens; layout and shared fonts come from `tokens`. Labels and other shared semantics live on `tokens.colors`.
 - **`Appearance`** (legacy): existing SwiftUI `Colors` struct plus images, fonts, and sounds. `@Injected(\.appearance)` / `@Injected(\.fonts)` and `StreamVideoUI(..., appearance:)` still take this type. Shared typography lives on `videoAppearance.tokens.fonts`. Migrated views use `@Injected(\.videoAppearance)`; other views continue using the legacy appearance until explicitly migrated.
 
 Product prefix is **Video**, not Call. Use `VideoAppearance` / `VideoAppearance.Colors`.
@@ -81,6 +81,8 @@ Do:
 - Use Figma variable names as a lookup (`core/button/secondary/bg` → `tokens.colors.buttonSecondaryBackground`, `typography` styles → `tokens.fonts.*`).
 - Replace hardcoded numbers *and* implicit SwiftUI defaults: bare `.padding()` is 16pt (`tokens.layout.spacingMd`). Give `VStack` / `HStack` an explicit spacing token instead of relying on the system default.
 - Replace legacy `CallIconStyle.primary` / `.transparent` (hardcoded white/black) with a `CallIconStyle` built from the tokens Figma assigns to that control (lobby mic/camera use secondary button bg/text).
+- Read icons from `videoAppearance.images`; never inline `Image(systemName:)` in a migrated view.
+- Re-record **existing** snapshots that cover the state you restyled before adding new ones; a shared control change (badges, `CallIconStyle`) reaches every suite that renders it.
 - Keep snapshot tests for the screen; record with `-configuration Test` (the `STREAM_TESTS` flag lives only on Test). Prefer updating existing snapshot filenames so Git shows a before/after image diff.
 
 Do not:
