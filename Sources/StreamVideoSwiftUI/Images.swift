@@ -30,6 +30,8 @@ public class Images {
     public var participantsIcon = Image(systemName: "person.2.fill")
     public var layoutSelectorIcon = Image(systemName: "circle.grid.2x2.fill")
     public var screenshareIcon = Image(systemName: "square.and.arrow.up.circle.fill")
+    /// The language icon displayed in the lobby.
+    public var lobbyLanguage = Image("lobbyLanguage", bundle: .streamVideoUI)
 
     private static var toggleCameraImageName: String {
         if #available(iOS 14, *) {

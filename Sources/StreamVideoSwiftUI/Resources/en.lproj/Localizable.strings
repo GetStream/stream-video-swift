@@ -33,9 +33,17 @@
 "waiting-room.title" = "Before Joining";
 "waiting-room.subtitle" = "Setup your audio and video";
 "waiting-room.join" = "Join Call";
+"waiting-room.start" = "Start Call";
+"waiting-room.setup" = "Set up your call";
+"waiting-room.close" = "Close lobby";
+"waiting-room.camera-preview" = "Camera preview";
 "waiting-room.description" = "You are about to join a call.";
 "waiting-room.connection-issues" = "It seems you are having issues with your internet connection.";
 "waiting-room.mic.not-working" = "Your microphone doesn't seem to be working. Make sure you have all permissions accepted.";
+"waiting-room.mic.turn-off" = "Turn microphone off";
+"waiting-room.mic.turn-on" = "Turn microphone on";
+"waiting-room.camera.turn-off" = "Turn camera off";
+"waiting-room.camera.turn-on" = "Turn camera on";
 
 "alert.error.title" = "Something went wrong.";
 "alert.error.message" = "The operation couldn't be completed.";

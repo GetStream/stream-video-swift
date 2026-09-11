@@ -38,3 +38,19 @@ public final class VideoAppearance {
         self.colors = Colors(tokens: tokens)
     }
 }
+
+enum VideoAppearanceKey: InjectionKey {
+    nonisolated(unsafe) static var currentValue = VideoAppearance.shared
+}
+
+extension InjectedValues {
+    /// Provides access to Video's design-system appearance.
+    public var videoAppearance: VideoAppearance {
+        get {
+            Self[VideoAppearanceKey.self]
+        }
+        set {
+            Self[VideoAppearanceKey.self] = newValue
+        }
+    }
+}
