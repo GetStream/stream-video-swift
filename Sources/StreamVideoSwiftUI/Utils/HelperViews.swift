@@ -16,7 +16,12 @@ struct Spacing: View {
     }
 }
 
+/// A circular call-control icon.
+///
+/// SF Symbols use design-system sizing. Other images retain their intrinsic size.
 public struct CallIconView: View {
+    @Injected(\.videoAppearance) private var videoAppearance
+
     var icon: Image
     var size: CGFloat = 64
     var iconStyle: CallIconStyle = .primary
@@ -33,9 +38,7 @@ public struct CallIconView: View {
                 iconStyle.backgroundColor.opacity(iconStyle.opacity)
             )
             icon
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(maxWidth: 22, maxHeight: 20)
+                .font(.system(size: videoAppearance.tokens.layout.iconSizeSm))
                 .foregroundColor(iconStyle.foregroundColor)
         }
         .frame(width: size, height: size)
