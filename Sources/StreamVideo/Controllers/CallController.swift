@@ -840,6 +840,10 @@ class CallController: @unchecked Sendable {
                         .webRTCCoordinator
                         .stateMachine
                         .transition(.blocked(self.webRTCCoordinator.stateMachine.currentStage.context))
+                    // Blocked cleans the coordinator without Call.leave(),
+                    // so reset the published profile or a later music set
+                    // on this Call is a no-op.
+                    await self.call?.microphone.resetAudioBitrateProfile()
                 }
                 .store(in: disposableBag, key: DisposableKey.currentUserBlocked.rawValue)
         }

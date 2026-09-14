@@ -18,7 +18,6 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
     /// Nil until ``setAudioFilterGate(_:)`` after capturer build, and for
     /// broadcast (no in-app audio).
     private var audioFilterGate: ScreenShareAudioFilterGate?
-    private let disposableBag = DisposableBag()
     private let audioProcessingQueue = DispatchQueue(
         label: "io.getstream.screenshare.audio.processing",
         qos: .userInitiated
@@ -63,7 +62,9 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
         )
     }
 
-    /// Handles ReplayKit stop events and tears down capture on error.
+    /// Handles ReplayKit stop events. Capture has already stopped; do not
+    /// call `stopCapture` again. Lift the filter gate even when `error`
+    /// is nil.
     func screenRecorder(
         _ screenRecorder: RPScreenRecorder,
         didStopRecordingWith previewViewController: RPPreviewViewController?,
@@ -71,14 +72,8 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
     ) {
         if let error {
             log.error(error, subsystems: .videoCapturer)
-            Task(disposableBag: disposableBag) { [weak self] in
-                do {
-                    try await self?.stop()
-                } catch {
-                    log.error(error, subsystems: .videoCapturer)
-                }
-            }
         }
+        finishCapture()
     }
 
     // MARK: - StreamVideoCapturerActionHandler
@@ -265,21 +260,28 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
     }
 
     /// Stops ReplayKit capture and lifts the screenshare filter suspend.
+    ///
+    /// `stopCapture` completion means capture has stopped, including when
+    /// it supplies an error. Do not use `recorder.isRecording` as a second
+    /// source of truth; that flag can lag and leave live filters suppressed.
     private func stop() async throws {
-        guard
-            isRecording == true
-        else {
+        guard isRecording else {
             return
         }
 
-        defer {
-            if !recorder.isRecording {
-                audioFilterGate?(false)
-                activeSession = nil
-                isRecording = false
-            }
-        }
+        defer { finishCapture() }
         try await recorder.stopCapture()
+    }
+
+    /// Terminal cleanup after capture has stopped. Idempotent. Does not
+    /// call `stopCapture`.
+    private func finishCapture() {
+        guard isRecording else {
+            return
+        }
+        audioFilterGate?(false)
+        activeSession = nil
+        isRecording = false
     }
 
     @MainActor

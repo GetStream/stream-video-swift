@@ -418,25 +418,19 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         return options.bitrate(for: profile)
     }
 
-    /// Writes `maxBitrateBps` on one sender. `bitrate <= 0` clears the
-    /// cap. An empty encodings list gets a single active encoding so the
-    /// cap is not dropped on a sender that has not negotiated yet.
+    /// Writes `maxBitrateBps` on the sender's existing encodings.
+    /// `bitrate <= 0` clears the cap. An empty encodings list is left
+    /// unchanged: synthesizing one encoding would change the send-encoding
+    /// count and libwebrtc rejects that assignment. New transceivers are
+    /// stamped again from ``addTransceiverIfRequired``.
     private func applyMaxBitrate(
         _ bitrate: Int,
         on transceiver: RTCRtpTransceiver
     ) {
         let params = transceiver.sender.parameters
+        guard !params.encodings.isEmpty else { return }
         if bitrate <= 0 {
-            guard !params.encodings.isEmpty else { return }
             params.encodings.forEach { $0.maxBitrateBps = nil }
-            transceiver.sender.parameters = params
-            return
-        }
-        if params.encodings.isEmpty {
-            let encoding = RTCRtpEncodingParameters()
-            encoding.isActive = true
-            encoding.maxBitrateBps = bitrate as NSNumber
-            params.encodings = [encoding]
         } else {
             params.encodings.forEach { $0.maxBitrateBps = bitrate as NSNumber }
         }

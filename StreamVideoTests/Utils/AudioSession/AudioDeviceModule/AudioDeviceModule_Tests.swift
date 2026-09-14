@@ -496,7 +496,31 @@ final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
         source.stub(for: .startPlayout, with: 0)
         try subject.setMusicCaptureEnabled(true)
 
-        XCTAssertEqual(source.timesCalled(.startPlayout), 2)
+        XCTAssertEqual(source.timesCalled(.startPlayout), 3)
+        XCTAssertFalse(source.isVoiceProcessingEnabled)
+    }
+
+    func test_setMusicCaptureEnabled_whenPlayoutRestartFails_andEngineStopped_retryRestartsPlayout(
+    ) throws {
+        source.stub(for: \.isPlaying, with: true)
+        source.stub(for: \.isPlayoutInitialized, with: true)
+        source.stub(for: .startPlayout, with: 1)
+        makeSubject()
+
+        XCTAssertThrowsError(try subject.setMusicCaptureEnabled(true))
+
+        source.stub(for: \.isPlaying, with: false)
+        _ = subject.audioDeviceModule(
+            .init(),
+            didStopEngine: AVAudioEngine(),
+            isPlayoutEnabled: false,
+            isRecordingEnabled: false
+        )
+        source.stub(for: .startPlayout, with: 0)
+
+        try subject.setMusicCaptureEnabled(true)
+
+        XCTAssertEqual(source.timesCalled(.startPlayout), 3)
         XCTAssertFalse(source.isVoiceProcessingEnabled)
     }
 

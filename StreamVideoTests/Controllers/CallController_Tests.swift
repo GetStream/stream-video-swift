@@ -1244,6 +1244,43 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         } handler: { _ in }
     }
 
+    func test_blockedEventReceived_forCurrentUser_resetsPublishedAudioBitrateProfile(
+    ) async throws {
+        let call = streamVideo.call(callType: .default, callId: .unique)
+        subject.call = call
+        await wait(for: 1)
+        await MainActor.run {
+            call.microphone.audioBitrateProfile = .musicHighQuality
+        }
+        mockWebRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .coordinator
+            .stateMachine
+            .transition(MockTestOnlyStage())
+
+        await assertTransitionToStage(.blocked) {
+            await call.onEvent(
+                .coordinatorEvent(
+                    .typeBlockedUserEvent(
+                        .init(
+                            callCid: call.cId,
+                            createdAt: .distantPast,
+                            user: .dummy(
+                                id: self.user.id
+                            )
+                        )
+                    )
+                )
+            )
+        } handler: { _ in }
+
+        await fulfillment {
+            await MainActor.run {
+                call.microphone.audioBitrateProfile == .voiceStandard
+            }
+        }
+    }
+
     // MARK: - subscribeToParticipantsCountUpdatesEvent
 
     @MainActor

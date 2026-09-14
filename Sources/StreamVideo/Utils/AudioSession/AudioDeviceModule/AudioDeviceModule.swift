@@ -178,6 +178,10 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
     private let engineQueue = RecursiveQueue()
     /// Desired music vs last successful VP apply, including muted defer.
     @Atomic private var musicCapturePolicy = MusicCapturePolicy()
+    /// True after `stopPlayout` succeeded and start has not. Kept off
+    /// ``MusicCapturePolicy`` because rolling back that policy would
+    /// clear restart debt together with a deferred capture apply.
+    private var playoutRestartOwed = false
 
     /// Serial queue used to deliver events to observers.
     private let dispatchQueue: DispatchQueue
@@ -310,9 +314,7 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
             guard musicCapturePolicy.needsCaptureApply(
                 desiredMusic: isEnabled
             ) else { return }
-            let shouldRestorePlayout = isPlaying
-                || source.isPlaying
-                || musicCapturePolicy.pendingRestorePlayout
+            let shouldRestorePlayout = shouldRestorePlayoutLocked()
             let previousPolicy = musicCapturePolicy
             musicCapturePolicy.setDesiredMusic(
                 isEnabled,
@@ -338,9 +340,7 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
     /// disabled; stereo-off must `setVoiceProcessingEnabled(true)`.
     private func restoreVoiceProcessingAfterStereoLocked() {
         let stereo = source.prefersStereoPlayout
-        let restorePlayout = isPlaying
-            || source.isPlaying
-            || musicCapturePolicy.pendingRestorePlayout
+        let restorePlayout = shouldRestorePlayoutLocked()
         guard musicCapturePolicy.needsVoiceProcessingRestore(
             stereoPreferred: stereo
         ) else {
@@ -397,6 +397,9 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
                 musicCapturePolicy.appliedConfiguration,
                 restorePlayout: false
             )
+            if playoutRestartOwed {
+                try? completePlayoutRestartLocked()
+            }
             throw error
         }
     }
@@ -495,7 +498,13 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         try throwingExecution("Unable to stop playout") {
             source.stopPlayout()
         }
+        playoutRestartOwed = true
+        try completePlayoutRestartLocked()
+    }
 
+    /// Completes a playout restart after a successful stop. Clears debt
+    /// only after start succeeds.
+    private func completePlayoutRestartLocked() throws {
         if source.isPlayoutInitialized {
             try throwingExecution("Unable to start playout") {
                 source.startPlayout()
@@ -505,6 +514,14 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
                 source.initAndStartPlayout()
             }
         }
+        playoutRestartOwed = false
+    }
+
+    private func shouldRestorePlayoutLocked() -> Bool {
+        isPlaying
+            || source.isPlaying
+            || musicCapturePolicy.pendingRestorePlayout
+            || playoutRestartOwed
     }
 
     /// Starts or stops capture while keeping published state synchronized with
@@ -641,7 +658,7 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         guard musicCapturePolicy.hasPendingApply else { return }
         do {
             try applyDesiredCapturePolicyLocked(
-                restorePlayout: musicCapturePolicy.pendingRestorePlayout
+                restorePlayout: shouldRestorePlayoutLocked()
             )
         } catch {
             let capturePolicyError = error

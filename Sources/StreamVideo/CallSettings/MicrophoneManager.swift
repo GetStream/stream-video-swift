@@ -68,10 +68,10 @@ public final class MicrophoneManager: ObservableObject, CallSettingsManager, @un
     /// Allowed after join. Hi-fi profiles require dashboard
     /// `hifi_audio_enabled`; ``AudioBitrateProfile/voiceStandard`` does not.
     /// Published as ``audioBitrateProfile``. Same-profile calls are a
-    /// no-op. The value survives reconnect. Leave resets it to
-    /// ``AudioBitrateProfile/voiceStandard`` so a later music set on a
-    /// cached `Call` is not a no-op. Reconnect re-applies bitrate on the
-    /// new publisher.
+    /// no-op. The value survives reconnect. Leave and blocked-user
+    /// cleanup reset it to ``AudioBitrateProfile/voiceStandard`` so a
+    /// later music set on a cached `Call` is not a no-op. Reconnect
+    /// re-applies bitrate on the new publisher.
     ///
     /// - Parameter profile: Voice or music capture profile.
     /// - Throws: `ClientError` when the call is missing, hi-fi is off on
@@ -85,10 +85,11 @@ public final class MicrophoneManager: ObservableObject, CallSettingsManager, @un
         }
     }
 
-    /// Resets the published profile on leave without touching WebRTC.
+    /// Resets the published profile without touching WebRTC.
     ///
-    /// ``Call.microphone`` outlives the peer connection. Leave must
-    /// clear the cached value so a later music set is not a no-op.
+    /// ``Call.microphone`` outlives the peer connection. Leave and
+    /// blocked-user cleanup must clear the cached value so a later
+    /// music set is not a no-op.
     func resetAudioBitrateProfile() async {
         try? await audioBitrateProfileQueue.addSynchronousTaskOperation { [self] in
             await MainActor.run { audioBitrateProfile = .voiceStandard }
