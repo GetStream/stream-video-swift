@@ -18,7 +18,7 @@ import SwiftUI
 /// let tokens = DesignSystemTokens()
 /// tokens.colors.accentPrimary = .red
 /// let appearance = VideoAppearance(tokens: tokens)
-/// appearance.colors.indicatorSpeaking = .green
+/// appearance.colors.indicatorSoundIndicatorSpeaking = .green
 /// ```
 public final class VideoAppearance {
     /// The instance the Video SDK uses unless it is given another one.
