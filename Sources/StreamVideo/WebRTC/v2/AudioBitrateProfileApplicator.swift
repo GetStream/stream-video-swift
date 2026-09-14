@@ -133,6 +133,7 @@ final class AudioBitrateProfileApplicator: @unchecked Sendable {
             return
         }
         guard profile != .voiceStandard || previous != .voiceStandard else {
+            try audioDeviceModule().setMusicCaptureEnabled(false)
             return
         }
         lock.sync { storedProfile = profile }
