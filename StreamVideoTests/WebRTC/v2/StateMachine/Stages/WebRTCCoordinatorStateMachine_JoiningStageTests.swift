@@ -108,6 +108,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
         let previousTimeout = WebRTCConfiguration.timeout
         let mockAudioStore = MockRTCAudioStore()
         mockAudioStore.makeShared()
+        subject.context.audioSessionWatchdog = .init()
         defer {
             WebRTCConfiguration.timeout = previousTimeout
             mockAudioStore.dismantle()

@@ -159,6 +159,77 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         await fulfilmentInMainActor { call.state.ownCapabilities == [.sendAudio] }
     }
 
+    func test_setAudioBitrateProfile_beforeJoin_throwsWithoutChangingProfile() async {
+        subject.call = await MockCall(.dummy())
+
+        do {
+            try await subject.setAudioBitrateProfile(.musicHighQuality)
+            XCTFail("Expected a joined-call error.")
+        } catch let error as ClientError {
+            XCTAssertEqual(
+                error.localizedDescription,
+                "Audio bitrate profiles require a joined call."
+            )
+        } catch {
+            XCTFail("Expected ClientError, got \(error).")
+        }
+
+        await assertEqualAsync(
+            await mockWebRTCCoordinatorFactory
+                .mockCoordinatorStack
+                .coordinator
+                .stateAdapter
+                .audioBitrateProfile,
+            .voiceStandard
+        )
+    }
+
+    func test_setAudioBitrateProfile_hifiDisabled_musicThrows() async {
+        let call = await MockCall(.dummy())
+        await MainActor.run {
+            call.state.session = .dummy()
+            call.state.settings = .dummy(
+                audio: .dummy(hifiAudioEnabled: false)
+            )
+        }
+        subject.call = call
+
+        do {
+            try await subject.setAudioBitrateProfile(.musicHighQuality)
+            XCTFail("Expected a hi-fi entitlement error.")
+        } catch let error as ClientError {
+            XCTAssertEqual(
+                error.localizedDescription,
+                "Hi-fi audio is not enabled on dashboard settings."
+            )
+        } catch {
+            XCTFail("Expected ClientError, got \(error).")
+        }
+    }
+
+    func test_setAudioBitrateProfile_hifiDisabled_voiceStandardDoesNotThrow(
+    ) async throws {
+        let call = await MockCall(.dummy())
+        await MainActor.run {
+            call.state.session = .dummy()
+            call.state.settings = .dummy(
+                audio: .dummy(hifiAudioEnabled: false)
+            )
+        }
+        subject.call = call
+
+        try await subject.setAudioBitrateProfile(.voiceStandard)
+
+        await assertEqualAsync(
+            await mockWebRTCCoordinatorFactory
+                .mockCoordinatorStack
+                .coordinator
+                .stateAdapter
+                .audioBitrateProfile,
+            .voiceStandard
+        )
+    }
+
     // MARK: - joinCall
 
     func test_joinCall_coordinatorTransitionsToConnecting() async throws {
@@ -1171,6 +1242,43 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
                 )
             )
         } handler: { _ in }
+    }
+
+    func test_blockedEventReceived_forCurrentUser_resetsPublishedAudioBitrateProfile(
+    ) async throws {
+        let call = streamVideo.call(callType: .default, callId: .unique)
+        subject.call = call
+        await wait(for: 1)
+        await MainActor.run {
+            call.microphone.audioBitrateProfile = .musicHighQuality
+        }
+        mockWebRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .coordinator
+            .stateMachine
+            .transition(MockTestOnlyStage())
+
+        await assertTransitionToStage(.blocked) {
+            await call.onEvent(
+                .coordinatorEvent(
+                    .typeBlockedUserEvent(
+                        .init(
+                            callCid: call.cId,
+                            createdAt: .distantPast,
+                            user: .dummy(
+                                id: self.user.id
+                            )
+                        )
+                    )
+                )
+            )
+        } handler: { _ in }
+
+        await fulfillment {
+            await MainActor.run {
+                call.microphone.audioBitrateProfile == .voiceStandard
+            }
+        }
     }
 
     // MARK: - subscribeToParticipantsCountUpdatesEvent
