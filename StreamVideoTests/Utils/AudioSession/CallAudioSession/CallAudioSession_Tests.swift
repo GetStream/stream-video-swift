@@ -621,6 +621,54 @@ final class CallAudioSession_Tests: XCTestCase, @unchecked Sendable {
         }
     }
 
+    func test_setAudioBitrateProfile_inactiveSession_doesNotMutateCategory(
+    ) async throws {
+        let callSettingsSubject = PassthroughSubject<CallSettings, Never>()
+        let capabilitiesSubject = PassthroughSubject<Set<OwnCapability>, Never>()
+        let delegate = SpyAudioSessionAdapterDelegate()
+        let policy = MockAudioSessionPolicy()
+        let policyConfiguration = AudioSessionConfiguration(
+            isActive: false,
+            category: .playAndRecord,
+            mode: .voiceChat,
+            options: [.allowBluetoothHFP],
+            overrideOutputAudioPort: .none
+        )
+        policy.stub(for: .configuration, with: policyConfiguration)
+
+        subject = .init(policy: policy)
+        await claimOwnership(of: subject)
+        await fulfillment {
+            self.mockAudioStore.audioStore.state.audioSessionConfiguration.mode
+                == .voiceChat
+        }
+        subject.activate(
+            callSettingsPublisher: callSettingsSubject.eraseToAnyPublisher(),
+            ownCapabilitiesPublisher: capabilitiesSubject.eraseToAnyPublisher(),
+            delegate: delegate,
+            statsAdapter: nil,
+            shouldSetActive: false
+        )
+
+        let callSettings = CallSettings(audioOn: true, speakerOn: true)
+        try await subject.setAudioBitrateProfile(
+            .musicHighQuality,
+            callSettings: callSettings,
+            ownCapabilities: [.sendAudio]
+        )
+
+        XCTAssertEqual(
+            mockAudioStore.audioStore.state.audioSessionConfiguration.mode,
+            .voiceChat
+        )
+        XCTAssertFalse(
+            subject.shouldApplyVoiceProcessing(
+                callSettings: callSettings,
+                ownCapabilities: [.sendAudio]
+            )
+        )
+    }
+
     func test_routeChange_whileMusicMode_keepsDefaultMode() async throws {
         let callSettingsSubject = PassthroughSubject<CallSettings, Never>()
         let capabilitiesSubject = PassthroughSubject<Set<OwnCapability>, Never>()

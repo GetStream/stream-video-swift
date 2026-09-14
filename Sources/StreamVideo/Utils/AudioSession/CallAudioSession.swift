@@ -212,6 +212,18 @@ final class CallAudioSession: @unchecked Sendable {
         )
     }
 
+    /// Voice Processing I/O rebuild needs an active session. Inactive
+    /// policies skip it: `setVoiceProcessingEnabled` can block CoreAudio.
+    func shouldApplyVoiceProcessing(
+        callSettings: CallSettings,
+        ownCapabilities: Set<OwnCapability>
+    ) -> Bool {
+        policy.configuration(
+            for: callSettings,
+            ownCapabilities: ownCapabilities
+        ).isActive
+    }
+
     // MARK: - Private Helpers
 
     private func applyAudioBitrateProfile(
@@ -228,12 +240,22 @@ final class CallAudioSession: @unchecked Sendable {
                 return
             }
 
+            let configuration = resolvedConfiguration(
+                for: callSettings,
+                ownCapabilities: ownCapabilities
+            )
+            lastCallSettings = callSettings
+            lastOwnCapabilities = ownCapabilities
+            // Inactive session: store the profile for the next activation.
+            // Applying category/mode or stopping playout here can hang
+            // CoreAudio and poison later tests on the same process.
+            guard configuration.isActive else {
+                return
+            }
+
             do {
                 try await applyConfiguration(
-                    resolvedConfiguration(
-                        for: callSettings,
-                        ownCapabilities: ownCapabilities
-                    ),
+                    configuration,
                     callSettings: callSettings,
                     ownCapabilities: ownCapabilities
                 ).result()

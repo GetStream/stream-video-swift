@@ -1350,6 +1350,46 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         )
     }
 
+    func test_setAudioBitrateProfile_music_whenSessionInactive_skipsVPRebuild(
+    ) async throws {
+        let policy = MockAudioSessionPolicy()
+        policy.stub(
+            for: .configuration,
+            with: AudioSessionConfiguration(
+                isActive: false,
+                category: .playAndRecord,
+                mode: .voiceChat,
+                options: [],
+                overrideOutputAudioPort: .none
+            )
+        )
+        await subject.audioSession.didUpdatePolicy(
+            policy,
+            callSettings: callSettings,
+            ownCapabilities: [.sendAudio]
+        )
+        let vpCount = mockAudioDeviceModuleSource.timesCalled(
+            .setVoiceProcessingEnabled
+        )
+
+        try await subject.setAudioBitrateProfile(.musicHighQuality)
+
+        await assertEqualAsync(
+            await subject.audioBitrateProfile,
+            .musicHighQuality
+        )
+        XCTAssertFalse(
+            Self.videoConfig.audioProcessingModule.config
+                .isNoiseSuppressionEnabled
+        )
+        XCTAssertEqual(
+            mockAudioDeviceModuleSource.timesCalled(
+                .setVoiceProcessingEnabled
+            ),
+            vpCount
+        )
+    }
+
     func test_setAudioBitrateProfile_music_whenVPDisableFails_keepsVoiceProfile(
     ) async throws {
         mockAudioDeviceModuleSource.stub(

@@ -1500,12 +1500,6 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
                 processing.config.isNoiseSuppressionEnabled == false
                     && processing.config.isHighpassFilterEnabled == false
             }
-            .assertEventually { _ in
-                InjectedValues[\.audioStore]
-                    .state
-                    .audioDeviceModule?
-                    .isVoiceProcessingEnabled == false
-            }
     }
 
     func test_joinedCall_setAudioFilterDuringMusic_stashesUntilVoice(

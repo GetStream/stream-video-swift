@@ -210,6 +210,12 @@ final class AudioBitrateProfileApplicator: @unchecked Sendable {
             callSettings: callSettings,
             ownCapabilities: ownCapabilities
         )
+        guard audioSession.shouldApplyVoiceProcessing(
+            callSettings: callSettings,
+            ownCapabilities: ownCapabilities
+        ) else {
+            return
+        }
         _ = try? audioDeviceModule()
             .setMusicCaptureEnabled(false)
     }
@@ -233,8 +239,13 @@ final class AudioBitrateProfileApplicator: @unchecked Sendable {
         )
         lock.sync { storedProfile = profile }
         do {
-            try audioDeviceModule()
-                .setMusicCaptureEnabled(profile.isMusic)
+            if audioSession.shouldApplyVoiceProcessing(
+                callSettings: callSettings,
+                ownCapabilities: ownCapabilities
+            ) {
+                try audioDeviceModule()
+                    .setMusicCaptureEnabled(profile.isMusic)
+            }
         } catch {
             // VP disable failed after VoiceChat was already left. Put the
             // session and stored profile back so callers see a throw, not
