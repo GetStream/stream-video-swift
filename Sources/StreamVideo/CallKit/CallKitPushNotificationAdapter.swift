@@ -41,6 +41,31 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
 
     @Injected(\.callKitService) private var callKitService
 
+    private var activeSystemCallingService: SystemCallingService {
+        #if canImport(LiveCommunicationKit)
+        if #available(iOS 27.0, *), shouldUseLiveCommunicationKit {
+            return InjectedValues[\.liveCommunicationKitService]
+        }
+        #endif
+        return callKitService
+    }
+
+    private var configuredStreamVideo: StreamVideo? {
+        if let streamVideo = callKitService.streamVideo {
+            return streamVideo
+        }
+        #if canImport(LiveCommunicationKit)
+        if #available(iOS 27.0, *) {
+            return InjectedValues[\.liveCommunicationKitService].streamVideo
+        }
+        #endif
+        return nil
+    }
+
+    private var shouldUseLiveCommunicationKit: Bool {
+        configuredStreamVideo?.videoConfig.useLiveCommunicationKit ?? true
+    }
+
     /// The push registry used for VoIP push notifications.
     open private(set) lazy var registry: PKPushRegistry = .init(queue: .init(label: "io.getstream.voip"))
 
@@ -123,7 +148,7 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
 
         let sendableCompletion = UncheckedSendableBox(completion)
 
-        callKitService.reportIncomingCall(
+        activeSystemCallingService.reportIncomingCall(
             content.cid,
             localizedCallerName: content.localizedCallerName,
             callerId: content.callerId,

@@ -493,6 +493,26 @@ final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(payload?.1, 1024)
     }
 
+    func test_configureInputFromSource_whenFormatIsInvalid_skipsTapAndUninstallsExistingTap() {
+        makeSubject()
+        let result = subject.audioDeviceModule(
+            .init(),
+            engine: AVAudioEngine(),
+            configureInputFromSource: nil,
+            toDestination: AVAudioMixerNode(),
+            format: makeInvalidAudioFormat(),
+            context: [:]
+        )
+
+        XCTAssertEqual(result, AudioDeviceModule.Constant.successResult)
+        XCTAssertEqual(audioEngineNodeAdapter.timesCalled(.installInputTap), 0)
+        XCTAssertEqual(audioEngineNodeAdapter.timesCalled(.uninstall), 1)
+        XCTAssertEqual(
+            audioEngineNodeAdapter.recordedInputPayload(Int.self, for: .uninstall)?.first,
+            0
+        )
+    }
+
     func test_configureInputFromSource_emitsEvent() async {
         makeSubject()
         let engine = AVAudioEngine()
@@ -592,16 +612,26 @@ final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
         return module
     }
 
+    private func makeInvalidAudioFormat() -> AVAudioFormat {
+        AVAudioFormat(
+            commonFormat: .pcmFormatFloat32,
+            sampleRate: 0,
+            channels: 0,
+            interleaved: false
+        )!
+    }
+
     private func expectEvent(
         _ expectedEvent: AudioDeviceModule.Event,
         isPlayoutEnabled: Bool? = nil,
         isRecordingEnabled: Bool? = nil,
         operation: (RTCAudioDeviceModule) -> Void,
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) async {
         guard subject != nil else {
-            XCTFail("Subject not initialized", file: file, line: line)
+            let failureFile = file
+            XCTFail("Subject not initialized", file: failureFile, line: line)
             return
         }
 
@@ -634,7 +664,8 @@ final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
         }
 
         operation(.init())
-        await safeFulfillment(of: expectations, file: file, line: line)
+        let fulfillmentFile = file
+        await safeFulfillment(of: expectations, file: fulfillmentFile, line: line)
         cancellables.removeAll()
     }
 }

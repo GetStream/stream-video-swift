@@ -47,6 +47,13 @@ final class AudioEngineLevelNodeAdapter: AudioEngineNodeAdapting {
         bufferSize: UInt32 = 1024
     ) {
         guard let mixer = node as? AVAudioMixerNode, inputTap == nil else { return }
+        guard format.sampleRate > 0, format.channelCount > 0 else {
+            log.warning(
+                "Skipping input tap installation because the format is invalid: \(format).",
+                subsystems: .audioRecording
+            )
+            return
+        }
 
         mixer.installTap(
             onBus: bus,

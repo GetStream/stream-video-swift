@@ -21,6 +21,12 @@ public final class VideoConfig: Sendable {
     public let usesProcessingPipeline: Bool
     public let usesNewCapturingPipeline: Bool
 
+    /// Enables LiveCommunicationKit instead of CallKit when available.
+    ///
+    /// LiveCommunicationKit is only used on supported OS versions. Older OS
+    /// versions continue to use CallKit regardless of this value.
+    public let useLiveCommunicationKit: Bool
+
     /// Initializes a new instance of `VideoConfig` with the specified parameters.
     /// - Parameters:
     ///   - videoFilters: An array of `VideoFilter` objects representing the filters to apply to the video.
@@ -30,18 +36,23 @@ public final class VideoConfig: Sendable {
     ///   - audioProcessingModule: Provide your own audio processing or fallback to the
     ///     default one.
     ///   - usesProcessingPipeline: Enables capture-time processing for camera frames.
+    ///   - usesNewCapturingPipeline: Enables the newer camera capture pipeline.
+    ///   - useLiveCommunicationKit: Enables LiveCommunicationKit on supported OS
+    ///     versions. Defaults to `true`.
     /// - Returns: A new instance of `VideoConfig`.
     public init(
         videoFilters: [VideoFilter] = [],
         noiseCancellationFilter: NoiseCancellationFilter? = nil,
         audioProcessingModule: AudioProcessingModule? = nil,
         usesProcessingPipeline: Bool = true,
-        usesNewCapturingPipeline: Bool = true
+        usesNewCapturingPipeline: Bool = true,
+        useLiveCommunicationKit: Bool = true
     ) {
         self.videoFilters = videoFilters
         self.noiseCancellationFilter = noiseCancellationFilter
         self.audioProcessingModule = audioProcessingModule ?? InjectedValues[\.audioFilterProcessingModule]
         self.usesProcessingPipeline = usesProcessingPipeline
         self.usesNewCapturingPipeline = usesNewCapturingPipeline
+        self.useLiveCommunicationKit = useLiveCommunicationKit
     }
 }

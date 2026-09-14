@@ -566,7 +566,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             eventNotificationCenter: eventNotificationCenter,
             sessionConfiguration: config,
             connectPayloadProvider: { [weak self] in self?.makeConnectPayload() },
-            hasActiveCall: { InjectedValues[\.callKitService].callCount > 0 }
+            hasActiveCall: { Self.hasActiveSystemCall() }
         )
 
         // The publisher fires on StreamCore's callback thread; hop to main since
@@ -577,6 +577,21 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             .sink { [weak self] in self?.handleConnectionStateChange($0) }
 
         return webSocketClient
+    }
+
+    /// Reports whether a system-level (VoIP) call is currently active.
+    ///
+    /// Used by `CallKitReconnectionPolicy` to keep the coordinator socket
+    /// recovering while the app is backgrounded during a call. When
+    /// LiveCommunicationKit is available it owns the call, so its call count is
+    /// the authoritative one; otherwise we fall back to CallKit.
+    private static func hasActiveSystemCall() -> Bool {
+        #if canImport(LiveCommunicationKit)
+        if #available(iOS 27.0, *) {
+            return InjectedValues[\.liveCommunicationKitService].callCount > 0
+        }
+        #endif
+        return InjectedValues[\.callKitService].callCount > 0
     }
 
     /// Builds the coordinator connect payload (auth) sent once the socket opens.

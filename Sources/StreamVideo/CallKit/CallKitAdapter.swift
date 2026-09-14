@@ -17,36 +17,36 @@ open class CallKitAdapter {
 
     /// The icon data used as the template for CallKit.
     open var iconTemplateImageData: Data? {
-        get { callKitService.iconTemplateImageData }
-        set { callKitService.iconTemplateImageData = newValue }
+        get { activeSystemCallingService.iconTemplateImageData }
+        set { updateSystemCallingServices { $0.iconTemplateImageData = newValue } }
     }
 
     /// The ringtone sound to use for CallKit ringing calls.
     open var ringtoneSound: String? {
-        get { callKitService.ringtoneSound }
-        set { callKitService.ringtoneSound = newValue }
+        get { activeSystemCallingService.ringtoneSound }
+        set { updateSystemCallingServices { $0.ringtoneSound = newValue } }
     }
 
     /// Configure whether calls should appear in the Recents app.
     open var includesCallsInRecents: Bool {
-        get { callKitService.includesCallsInRecents }
-        set { callKitService.includesCallsInRecents = newValue }
+        get { activeSystemCallingService.includesCallsInRecents }
+        set { updateSystemCallingServices { $0.includesCallsInRecents = newValue } }
     }
 
-    /// The callSettings to use when joining a call (after accepting it on CallKit)
-    /// default: nil
+    /// The callSettings to use when joining a call after accepting it on the
+    /// system calling UI. Default: `nil`.
     open var callSettings: CallSettings? {
-        didSet { callKitService.callSettings = callSettings }
+        didSet { updateSystemCallingServices { $0.callSettings = callSettings } }
     }
 
-    /// The policy that decides if a CallKit-managed call should leave
+    /// The policy that decides if a system-managed call should leave
     /// automatically when participant state changes.
     open var participantAutoLeavePolicy: ParticipantAutoLeavePolicy {
-        get { callKitService.participantAutoLeavePolicy }
-        set { callKitService.participantAutoLeavePolicy = newValue }
+        get { activeSystemCallingService.participantAutoLeavePolicy }
+        set { updateSystemCallingServices { $0.participantAutoLeavePolicy = newValue } }
     }
 
-    /// The policy defining the availability of CallKit services.
+    /// The policy defining the availability of system calling services.
     ///
     /// - Default: `.regionBased`
     public var availabilityPolicy: CallKitAvailabilityPolicy = .regionBased
@@ -64,8 +64,8 @@ open class CallKitAdapter {
     /// join flow, such as waiting for another participant or validating an
     /// external precondition. Throw from the interceptor to fail the join.
     public var callJoinInterceptor: CallJoinIntercepting? {
-        get { callKitService.callJoinInterceptor }
-        set { callKitService.callJoinInterceptor = newValue }
+        get { activeSystemCallingService.callJoinInterceptor }
+        set { updateSystemCallingServices { $0.callJoinInterceptor = newValue } }
     }
 
     /// Initializes the `CallKitAdapter`.
@@ -87,6 +87,47 @@ open class CallKitAdapter {
         callKitPushNotificationAdapter.unregister()
     }
 
+    private var activeSystemCallingService: SystemCallingService {
+        #if canImport(LiveCommunicationKit)
+        if #available(iOS 27.0, *), shouldUseLiveCommunicationKit {
+            return InjectedValues[\.liveCommunicationKitService]
+        }
+        #endif
+        return callKitService
+    }
+
+    private var shouldUseLiveCommunicationKit: Bool {
+        streamVideo?.videoConfig.useLiveCommunicationKit ?? true
+    }
+
+    private func updateSystemCallingServices(
+        _ update: (SystemCallingService) -> Void
+    ) {
+        update(callKitService)
+        #if canImport(LiveCommunicationKit)
+        if #available(iOS 27.0, *) {
+            update(InjectedValues[\.liveCommunicationKitService])
+        }
+        #endif
+    }
+
+    private func updateSystemCallingServices(with streamVideo: StreamVideo?) {
+        guard let streamVideo else {
+            updateSystemCallingServices { $0.streamVideo = nil }
+            return
+        }
+
+        let useLiveCommunicationKit = streamVideo.videoConfig.useLiveCommunicationKit
+        callKitService.streamVideo = useLiveCommunicationKit ? nil : streamVideo
+        #if canImport(LiveCommunicationKit)
+        if #available(iOS 27.0, *) {
+            InjectedValues[\.liveCommunicationKitService].streamVideo = useLiveCommunicationKit
+                ? streamVideo
+                : nil
+        }
+        #endif
+    }
+
     private func didUpdate(_ streamVideo: StreamVideo?) {
         guard availabilityPolicy.policy.isAvailable else {
             log
@@ -96,7 +137,7 @@ open class CallKitAdapter {
             return
         }
 
-        callKitService.streamVideo = streamVideo
+        updateSystemCallingServices(with: streamVideo)
 
         guard streamVideo != nil else {
             unregisterForIncomingCalls()

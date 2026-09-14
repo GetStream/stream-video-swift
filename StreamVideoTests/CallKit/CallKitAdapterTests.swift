@@ -9,6 +9,9 @@ final class CallKitAdapterTests: XCTestCase, @unchecked Sendable {
 
     private lazy var callKitPushNotificationAdapter: MockCallKitPushNotificationAdapter! = .init()
     private lazy var callKitService: MockCallKitService! = .init()
+    #if canImport(LiveCommunicationKit)
+    private var liveCommunicationKitService: AnyObject?
+    #endif
     private lazy var subject: CallKitAdapter! = .init()
 
     @MainActor
@@ -17,12 +20,22 @@ final class CallKitAdapterTests: XCTestCase, @unchecked Sendable {
         _ = MockStreamVideo()
         InjectedValues[\.callKitPushNotificationAdapter] = callKitPushNotificationAdapter
         InjectedValues[\.callKitService] = callKitService
+        #if canImport(LiveCommunicationKit)
+        if #available(iOS 27.0, *) {
+            let liveCommunicationKitService = MockLiveCommunicationKitService()
+            self.liveCommunicationKitService = liveCommunicationKitService
+            InjectedValues[\.liveCommunicationKitService] = liveCommunicationKitService
+        }
+        #endif
         CurrentDevice.currentValue.didUpdate(.phone)
     }
 
     override func tearDown() {
         callKitPushNotificationAdapter = nil
         callKitService = nil
+        #if canImport(LiveCommunicationKit)
+        liveCommunicationKitService = nil
+        #endif
         subject = nil
         super.tearDown()
     }
@@ -57,7 +70,36 @@ final class CallKitAdapterTests: XCTestCase, @unchecked Sendable {
         subject.streamVideo = streamVideo
 
         // Then
+        #if canImport(LiveCommunicationKit)
+        if
+            #available(iOS 27.0, *),
+            let liveCommunicationKitService = liveCommunicationKitService as? MockLiveCommunicationKitService {
+            XCTAssertNil(callKitService.streamVideo)
+            XCTAssertTrue(liveCommunicationKitService.streamVideo === streamVideo)
+            XCTAssertTrue(callKitPushNotificationAdapter.registerWasCalled)
+            return
+        }
+        #endif
         XCTAssertTrue(callKitService.streamVideo === streamVideo)
+        XCTAssertTrue(callKitPushNotificationAdapter.registerWasCalled)
+    }
+
+    func test_didUpdate_streamVideoUseLiveCommunicationKitFalse_callKitServiceWasUpdatedOnly() {
+        // Given
+        let streamVideo = MockStreamVideo(videoConfig: .dummy(useLiveCommunicationKit: false))
+
+        // When
+        subject.streamVideo = streamVideo
+
+        // Then
+        XCTAssertTrue(callKitService.streamVideo === streamVideo)
+        #if canImport(LiveCommunicationKit)
+        if
+            #available(iOS 27.0, *),
+            let liveCommunicationKitService = liveCommunicationKitService as? MockLiveCommunicationKitService {
+            XCTAssertNil(liveCommunicationKitService.streamVideo)
+        }
+        #endif
         XCTAssertTrue(callKitPushNotificationAdapter.registerWasCalled)
     }
 
@@ -130,6 +172,11 @@ final class CallKitAdapterTests: XCTestCase, @unchecked Sendable {
         return client
     }
 }
+
+#if canImport(LiveCommunicationKit)
+@available(iOS 27.0, *)
+private final class MockLiveCommunicationKitService: LiveCommunicationKitService, @unchecked Sendable {}
+#endif
 
 private final class MockParticipantAutoLeavePolicy:
     ParticipantAutoLeavePolicy,

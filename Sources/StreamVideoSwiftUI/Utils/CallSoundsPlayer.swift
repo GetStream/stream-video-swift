@@ -11,7 +11,8 @@ open class CallSoundsPlayer {
     
     @Injected(\.sounds) private var sounds
     
-    private var audioPlayer: AVAudioPlayer?
+    private let playback = CallSoundsPlayerPlayback()
+    private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
     
     public init() {}
 
@@ -27,8 +28,10 @@ open class CallSoundsPlayer {
     
     /// Stops playing the ongoing sound.
     open func stopOngoingSound() {
-        audioPlayer?.stop()
-        audioPlayer = nil
+        let playback = playback
+        processingQueue.addTaskOperation {
+            await playback.stop()
+        }
     }
     
     // MARK: - private
@@ -39,8 +42,31 @@ open class CallSoundsPlayer {
             log.warning("There's no sound available")
             return
         }
-        audioPlayer = try? AVAudioPlayer(contentsOf: soundURL)
-        audioPlayer?.numberOfLoops = 10
-        audioPlayer?.play()
+
+        let playback = playback
+        processingQueue.addTaskOperation {
+            await playback.play(soundURL)
+        }
+    }
+}
+
+private actor CallSoundsPlayerPlayback {
+    private var audioPlayer: AVAudioPlayer?
+
+    func stop() {
+        audioPlayer?.stop()
+        audioPlayer = nil
+    }
+
+    func play(_ soundURL: URL) {
+        audioPlayer?.stop()
+
+        guard let audioPlayer = try? AVAudioPlayer(contentsOf: soundURL) else {
+            return
+        }
+
+        audioPlayer.numberOfLoops = 10
+        self.audioPlayer = audioPlayer
+        audioPlayer.play()
     }
 }
