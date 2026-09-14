@@ -4,16 +4,20 @@
 
 import Foundation
 
-public final class CallSettingsResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class CallSettingsResponse: @unchecked Sendable, Codable, JSONEncodable {
     public var audio: AudioSettings
     public var backstage: BackstageSettings
+    /// BroadcastSettingsResponse is the payload for broadcasting settings
     public var broadcasting: BroadcastSettingsResponse
+    /// EncryptionSettings is the payload for end-to-end encryption settings
+    public var encryption: EncryptionSettingsResponse
     public var frameRecording: FrameRecordingSettingsResponse
     public var geofencing: GeofenceSettings
     public var individualRecording: IndividualRecordingSettingsResponse
     public var ingress: IngressSettingsResponse?
     public var limits: LimitsSettingsResponse
     public var rawRecording: RawRecordingSettingsResponse
+    /// RecordSettings is the payload for recording settings
     public var recording: RecordSettingsResponse
     public var ring: RingSettings
     public var screensharing: ScreensharingSettings
@@ -22,10 +26,29 @@ public final class CallSettingsResponse: @unchecked Sendable, Codable, JSONEncod
     public var transcription: TranscriptionSettings
     public var video: VideoSettings
 
-    public init(audio: AudioSettings, backstage: BackstageSettings, broadcasting: BroadcastSettingsResponse, frameRecording: FrameRecordingSettingsResponse, geofencing: GeofenceSettings, individualRecording: IndividualRecordingSettingsResponse, ingress: IngressSettingsResponse? = nil, limits: LimitsSettingsResponse, rawRecording: RawRecordingSettingsResponse, recording: RecordSettingsResponse, ring: RingSettings, screensharing: ScreensharingSettings, session: SessionSettingsResponse, thumbnails: ThumbnailsSettings, transcription: TranscriptionSettings, video: VideoSettings) {
+    public init(
+        audio: AudioSettings,
+        backstage: BackstageSettings,
+        broadcasting: BroadcastSettingsResponse,
+        encryption: EncryptionSettingsResponse,
+        frameRecording: FrameRecordingSettingsResponse,
+        geofencing: GeofenceSettings,
+        individualRecording: IndividualRecordingSettingsResponse,
+        ingress: IngressSettingsResponse? = nil,
+        limits: LimitsSettingsResponse,
+        rawRecording: RawRecordingSettingsResponse,
+        recording: RecordSettingsResponse,
+        ring: RingSettings,
+        screensharing: ScreensharingSettings,
+        session: SessionSettingsResponse,
+        thumbnails: ThumbnailsSettings,
+        transcription: TranscriptionSettings,
+        video: VideoSettings
+    ) {
         self.audio = audio
         self.backstage = backstage
         self.broadcasting = broadcasting
+        self.encryption = encryption
         self.frameRecording = frameRecording
         self.geofencing = geofencing
         self.individualRecording = individualRecording
@@ -45,6 +68,7 @@ public final class CallSettingsResponse: @unchecked Sendable, Codable, JSONEncod
         case audio
         case backstage
         case broadcasting
+        case encryption
         case frameRecording = "frame_recording"
         case geofencing
         case individualRecording = "individual_recording"
@@ -59,11 +83,14 @@ public final class CallSettingsResponse: @unchecked Sendable, Codable, JSONEncod
         case transcription
         case video
     }
+}
 
+extension CallSettingsResponse: Hashable {
     public static func == (lhs: CallSettingsResponse, rhs: CallSettingsResponse) -> Bool {
         lhs.audio == rhs.audio &&
         lhs.backstage == rhs.backstage &&
         lhs.broadcasting == rhs.broadcasting &&
+        lhs.encryption == rhs.encryption &&
         lhs.frameRecording == rhs.frameRecording &&
         lhs.geofencing == rhs.geofencing &&
         lhs.individualRecording == rhs.individualRecording &&
@@ -83,6 +110,7 @@ public final class CallSettingsResponse: @unchecked Sendable, Codable, JSONEncod
         hasher.combine(audio)
         hasher.combine(backstage)
         hasher.combine(broadcasting)
+        hasher.combine(encryption)
         hasher.combine(frameRecording)
         hasher.combine(geofencing)
         hasher.combine(individualRecording)

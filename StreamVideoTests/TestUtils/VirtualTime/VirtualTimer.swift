@@ -4,10 +4,10 @@
 
 import Combine
 import Foundation
+import StreamCore
 @testable import StreamVideo
-import protocol StreamVideo.Timer
 
-struct VirtualTimeTimer: Timer {
+struct VirtualTimeTimer: TimerScheduling {
     nonisolated(unsafe) static var time: VirtualTime!
 
     static func invalidate() {

@@ -3,6 +3,7 @@
 //
 
 import Combine
+import StreamCore
 @testable @preconcurrency import StreamVideo
 import XCTest
 
@@ -16,7 +17,7 @@ final class TimerPublisher_Tests: XCTestCase, @unchecked Sendable {
     func test_receive_whenSubscribed_emitsDates() async {
         let expectation = expectation(description: "Should emit at least one value")
 
-        let subject = TimerPublisher(interval: 0.2)
+        let subject = DefaultTimer.publish(every: 0.2)
 
         subject
             .prefix(3)
@@ -34,7 +35,7 @@ final class TimerPublisher_Tests: XCTestCase, @unchecked Sendable {
     // MARK: - Suspends timer when all subscriptions are cancelled
 
     func test_receive_whenSubscriptionCancelled_timerSuspends() async throws {
-        let subject = TimerPublisher(interval: 0.2)
+        let subject = DefaultTimer.publish(every: 0.2)
 
         let expectation = expectation(description: "Timer should suspend after cancel")
 
@@ -60,7 +61,7 @@ final class TimerPublisher_Tests: XCTestCase, @unchecked Sendable {
     // MARK: - Resumes timer after new subscription
 
     func test_receive_whenResubscribed_timerResumes() async {
-        let subject = TimerPublisher(interval: 0.2)
+        let subject = DefaultTimer.publish(every: 0.2)
 
         let firstValueExpectation = expectation(description: "Should receive first value")
         let expectation = expectation(description: "Should receive values after resubscription")

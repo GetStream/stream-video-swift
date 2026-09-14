@@ -92,6 +92,30 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
         XCTAssertTrue(iceConnectionStateAdapter.peerConnectionCoordinator === subject)
     }
 
+    func test_disconnectedPublisher_peerConnectionDisconnected_doesNotPublish() {
+        var receivedEvents = 0
+        let cancellable = subject.disconnectedPublisher.sink { receivedEvents += 1 }
+
+        mockPeerConnection.subject.send(
+            StreamRTCPeerConnection.DidChangeConnectionStateEvent(state: .disconnected)
+        )
+
+        XCTAssertEqual(receivedEvents, 0)
+        cancellable.cancel()
+    }
+
+    func test_disconnectedPublisher_peerConnectionFailed_publishes() {
+        var receivedEvents = 0
+        let cancellable = subject.disconnectedPublisher.sink { receivedEvents += 1 }
+
+        mockPeerConnection.subject.send(
+            StreamRTCPeerConnection.DidChangeConnectionStateEvent(state: .failed)
+        )
+
+        XCTAssertEqual(receivedEvents, 1)
+        cancellable.cancel()
+    }
+
     // MARK: - isHealthy
 
     func test_isHealthy_ICEConnectionFailed_ConnectionStateHealthy_returnsFalse() {
@@ -182,7 +206,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
         mockPeerConnection.stub(for: .offer, with: offer)
 
         let expectation = self.expectation(description: "CreateOfferEvent was not received.")
-        let cancellable: AnyCancellable? = mockPeerConnection
+        let cancellable: AnyCancellable? = mockPeerConnection!
             .publisher
             .compactMap { $0 as? StreamRTCPeerConnection.CreateOfferEvent }
             .filter { $0.sessionDescription.sdp == offer.sdp }
@@ -209,7 +233,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
         mockPeerConnection.stub(for: .answer, with: answer)
 
         let expectation = self.expectation(description: "CreateAnswerEvent was not received.")
-        let cancellable: AnyCancellable? = mockPeerConnection
+        let cancellable: AnyCancellable? = mockPeerConnection!
             .publisher
             .compactMap { $0 as? StreamRTCPeerConnection.CreateAnswerEvent }
             .filter { $0.sessionDescription.sdp == answer.sdp }
@@ -236,7 +260,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
         mockPeerConnection.stub(for: .setLocalDescription, with: value)
 
         let expectation = self.expectation(description: "setLocalDescription was not received.")
-        let cancellable: AnyCancellable? = mockPeerConnection
+        let cancellable: AnyCancellable? = mockPeerConnection!
             .publisher
             .compactMap { $0 as? StreamRTCPeerConnection.SetLocalDescriptionEvent }
             .filter { $0.sessionDescription.sdp == value.sdp }
@@ -263,7 +287,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
         mockPeerConnection.stub(for: .setRemoteDescription, with: value)
 
         let expectation = self.expectation(description: "setRemoteDescription was not received.")
-        let cancellable: AnyCancellable? = mockPeerConnection
+        let cancellable: AnyCancellable? = mockPeerConnection!
             .publisher
             .compactMap { $0 as? StreamRTCPeerConnection.SetRemoteDescriptionEvent }
             .filter { $0.sessionDescription.sdp == value.sdp }
@@ -285,7 +309,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
 
     func test_close_eventWasPublished() async throws {
         let expectation = self.expectation(description: "CloseEvent was not received.")
-        let cancellable: AnyCancellable? = mockPeerConnection
+        let cancellable: AnyCancellable? = mockPeerConnection!
             .publisher
             .compactMap { $0 as? StreamRTCPeerConnection.CloseEvent }
             .sink { _ in expectation.fulfill() }
@@ -621,7 +645,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
     func test_handleSubscriberOffer_subjectIsPublisher_doesNotCallSetRemoteDescription() async throws {
         _ = subject
 
-        mockSFUStack.receiveEvent(.sfuEvent(.subscriberOffer(Stream_Video_Sfu_Event_SubscriberOffer())))
+        mockSFUStack.receiveEvent(.subscriberOffer(Stream_Video_Sfu_Event_SubscriberOffer()))
 
         await wait(for: 1)
         XCTAssertEqual(mockPeerConnection?.timesCalled(.setRemoteDescription), 0)
@@ -635,7 +659,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
 
         var offer = Stream_Video_Sfu_Event_SubscriberOffer()
         offer.sdp = .unique
-        mockSFUStack.receiveEvent(.sfuEvent(.subscriberOffer(offer)))
+        mockSFUStack.receiveEvent(.subscriberOffer(offer))
 
         await fulfillment { [mockPeerConnection] in
             mockPeerConnection?.timesCalled(.setRemoteDescription) == 1
@@ -656,7 +680,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
 
         var offer = Stream_Video_Sfu_Event_SubscriberOffer()
         offer.sdp = .unique
-        mockSFUStack.receiveEvent(.sfuEvent(.subscriberOffer(offer)))
+        mockSFUStack.receiveEvent(.subscriberOffer(offer))
 
         await fulfillment { [mockPeerConnection] in
             mockPeerConnection?.timesCalled(.answer) == 1
@@ -671,7 +695,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
 
         var offer = Stream_Video_Sfu_Event_SubscriberOffer()
         offer.sdp = .unique
-        mockSFUStack.receiveEvent(.sfuEvent(.subscriberOffer(offer)))
+        mockSFUStack.receiveEvent(.subscriberOffer(offer))
 
         await fulfillment { [mockPeerConnection] in
             mockPeerConnection?.timesCalled(.setLocalDescription) == 1
@@ -696,7 +720,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
             with: RTCSessionDescription(type: .offer, sdp: sdp)
         )
 
-        mockSFUStack.receiveEvent(.sfuEvent(.subscriberOffer(Stream_Video_Sfu_Event_SubscriberOffer())))
+        mockSFUStack.receiveEvent(.subscriberOffer(Stream_Video_Sfu_Event_SubscriberOffer()))
 
         await fulfillment { [mockSFUStack] in
             mockSFUStack?.service.sendAnswerWasCalledWithRequest != nil
@@ -751,7 +775,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
     func test_restartICE_subjectIsPublisher_eventWasPublished() async throws {
         _ = subject
         let expectation = self.expectation(description: "RestartICEEvent was not received.")
-        let cancellable: AnyCancellable? = mockPeerConnection
+        let cancellable: AnyCancellable? = mockPeerConnection!
             .publisher
             .compactMap { $0 as? StreamRTCPeerConnection.RestartICEEvent }
             .sink { _ in expectation.fulfill() }
@@ -781,7 +805,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
         peerType = .subscriber
         _ = subject
         let expectation = self.expectation(description: "RestartICEEvent was not received.")
-        let cancellable: AnyCancellable? = mockPeerConnection
+        let cancellable: AnyCancellable? = mockPeerConnection!
             .publisher
             .compactMap { $0 as? StreamRTCPeerConnection.RestartICEEvent }
             .sink { _ in expectation.fulfill() }
@@ -802,7 +826,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
 
         var payload = Stream_Video_Sfu_Event_ICERestart()
         payload.peerType = .publisherUnspecified
-        mockSFUStack.receiveEvent(.sfuEvent(.iceRestart(payload)))
+        mockSFUStack.receiveEvent(.iceRestart(payload))
 
         await fulfillment { [mockPeerConnection] in
             mockPeerConnection?.timesCalled(.offer) == 1
@@ -822,7 +846,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
 
         var payload = Stream_Video_Sfu_Event_ICERestart()
         payload.peerType = .publisherUnspecified
-        mockSFUStack.receiveEvent(.sfuEvent(.iceRestart(payload)))
+        mockSFUStack.receiveEvent(.iceRestart(payload))
 
         await wait(for: 1)
         XCTAssertEqual(mockPeerConnection?.timesCalled(.offer), 0)
@@ -835,7 +859,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
 
         var payload = Stream_Video_Sfu_Event_ICERestart()
         payload.peerType = .subscriber
-        mockSFUStack.receiveEvent(.sfuEvent(.iceRestart(payload)))
+        mockSFUStack.receiveEvent(.iceRestart(payload))
 
         await wait(for: 1)
         XCTAssertEqual(mockPeerConnection?.timesCalled(.offer), 0)
@@ -849,7 +873,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
 
         var payload = Stream_Video_Sfu_Event_ICERestart()
         payload.peerType = .subscriber
-        mockSFUStack.receiveEvent(.sfuEvent(.iceRestart(payload)))
+        mockSFUStack.receiveEvent(.iceRestart(payload))
 
         await fulfillment { [mockSFUStack] in
             mockSFUStack?.service.iceRestartWasCalledWithRequest?.sessionID == self.sessionId
@@ -863,7 +887,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
 
         var payload = Stream_Video_Sfu_Event_ICERestart()
         payload.peerType = .publisherUnspecified
-        mockSFUStack.receiveEvent(.sfuEvent(.iceRestart(payload)))
+        mockSFUStack.receiveEvent(.iceRestart(payload))
 
         await wait(for: 1)
         XCTAssertNil(mockSFUStack?.service.iceRestartWasCalledWithRequest)

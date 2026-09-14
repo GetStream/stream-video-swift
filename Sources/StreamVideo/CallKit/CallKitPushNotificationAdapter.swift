@@ -41,18 +41,6 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
 
     @Injected(\.callKitService) private var callKitService
 
-    private final class SendableCompletion: @unchecked Sendable {
-        private let completion: () -> Void
-
-        init(_ completion: @escaping () -> Void) {
-            self.completion = completion
-        }
-
-        func callAsFunction() {
-            completion()
-        }
-    }
-
     private var activeSystemCallingService: SystemCallingService {
         #if canImport(LiveCommunicationKit)
         if #available(iOS 27.0, *), shouldUseLiveCommunicationKit {
@@ -136,25 +124,29 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
         }
     }
 
-    /// Delegate method called when the device receives a VoIP push notification.
+    /// Handles a push notification delivered by PushKit.
+    ///
+    /// VoIP pushes complete after CallKit finishes reporting the incoming
+    /// call.
     open nonisolated func pushRegistry(
         _ registry: PKPushRegistry,
         didReceiveIncomingPushWith payload: PKPushPayload,
         for type: PKPushType,
         completion: @escaping () -> Void
     ) {
-        let pushCompletion = SendableCompletion(completion)
         guard type == .voIP else {
-            pushCompletion()
+            completion()
             return
         }
-        
+
         let content = decodePayload(payload)
 
         log
             .debug(
                 "Received VoIP push notification with cid:\(content.cid) callerId:\(content.callerId) callerName:\(content.localizedCallerName)."
             )
+
+        let sendableCompletion = UncheckedSendableBox(completion)
 
         activeSystemCallingService.reportIncomingCall(
             content.cid,
@@ -165,7 +157,7 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
                 if let error {
                     log.error(error, subsystems: .callKit)
                 }
-                pushCompletion()
+                sendableCompletion.value()
             }
         )
     }

@@ -145,6 +145,20 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         await fulfilmentInMainActor { call.state.isSpeakingWhileMuted }
     }
 
+    func test_setCall_ownCapabilitiesUpdatedOnStateAdapter_updatesCallState() async throws {
+        let call = await MockCall(.dummy())
+        _ = subject
+        subject.call = call
+
+        await mockWebRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .enqueueOwnCapabilities { [.sendAudio] }
+
+        await fulfilmentInMainActor { call.state.ownCapabilities == [.sendAudio] }
+    }
+
     // MARK: - joinCall
 
     func test_joinCall_coordinatorTransitionsToConnecting() async throws {
@@ -608,6 +622,43 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
                 expectedError.localizedDescription
             )
         }
+    }
+
+    // MARK: - collectUserFeedback
+
+    func test_collectUserFeedback_duringCall_reportsSessionId() async throws {
+        let (subject, defaultAPI, factory) = makeSubjectWithMockAPI()
+        let expected = String.unique
+        await factory.mockCoordinatorStack.coordinator.stateAdapter.set(sessionID: expected)
+        defaultAPI.stub(for: .collectUserFeedback, with: CollectUserFeedbackResponse(duration: ""))
+
+        _ = try await subject.collectUserFeedback(rating: 5)
+
+        XCTAssertEqual(try collectedFeedbackRequest(from: defaultAPI).userSessionId, expected)
+    }
+
+    func test_collectUserFeedback_afterCallEnded_reportsSessionIdOfEndedSession() async throws {
+        let (subject, defaultAPI, factory) = makeSubjectWithMockAPI()
+        let call = await MockCall(.dummy())
+        subject.call = call
+        let expected = String.unique
+        await factory.mockCoordinatorStack.coordinator.stateAdapter.set(sessionID: expected)
+        /// The state adapter resets its session id while the call is torn down,
+        /// but a post-call rating screen collects the feedback afterwards.
+        subject.cleanUp()
+        await fulfillment {
+            await factory
+                .mockCoordinatorStack
+                .coordinator
+                .stateAdapter
+                .sessionID
+                .isEmpty
+        }
+        defaultAPI.stub(for: .collectUserFeedback, with: CollectUserFeedbackResponse(duration: ""))
+
+        _ = try await subject.collectUserFeedback(rating: 5)
+
+        XCTAssertEqual(try collectedFeedbackRequest(from: defaultAPI).userSessionId, expected)
     }
 
     // MARK: - cleanUp
@@ -1252,6 +1303,44 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
     }
 
     // MARK: - Private helpers
+
+    private func makeSubjectWithMockAPI() -> (
+        CallController,
+        MockDefaultAPIEndpoints,
+        MockWebRTCCoordinatorFactory
+    ) {
+        let defaultAPI = MockDefaultAPIEndpoints()
+        let webRTCCoordinatorFactory = MockWebRTCCoordinatorFactory(
+            videoConfig: Self.videoConfig
+        )
+        let subject = CallController(
+            defaultAPI: defaultAPI,
+            user: user,
+            callId: callId,
+            callType: callType,
+            apiKey: apiKey,
+            videoConfig: Self.videoConfig,
+            initialCallSettings: initialCallSettings,
+            cachedLocation: cachedLocation,
+            webRTCCoordinatorFactory: webRTCCoordinatorFactory
+        )
+        return (subject, defaultAPI, webRTCCoordinatorFactory)
+    }
+
+    private func collectedFeedbackRequest(
+        from defaultAPI: MockDefaultAPIEndpoints,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) throws -> CollectUserFeedbackRequest {
+        try XCTUnwrap(
+            defaultAPI.recordedInputPayload(
+                (String, String, CollectUserFeedbackRequest).self,
+                for: .collectUserFeedback
+            )?.first?.2,
+            file: file,
+            line: line
+        )
+    }
 
     private func assertTransitionToStage(
         _ id: WebRTCCoordinator.StateMachine.Stage.ID,

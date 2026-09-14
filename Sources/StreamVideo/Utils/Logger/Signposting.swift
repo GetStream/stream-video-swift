@@ -4,6 +4,7 @@
 
 import Foundation
 import OSLog
+import StreamCore
 
 public protocol Signposting {
     /// Measures the execution time of a synchronous block using signposts.

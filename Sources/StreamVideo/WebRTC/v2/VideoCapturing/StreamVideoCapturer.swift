@@ -38,6 +38,22 @@ protocol StreamVideoCapturerActionHandler: Sendable {
     /// - Parameter action: The action to handle. Conformers should inspect the
     ///   case and respond only to the actions they support.
     func handle(_ action: StreamVideoCapturer.Action) async throws
+
+    /// Notifies the handler that processing an action failed in the pipeline.
+    ///
+    /// ``StreamVideoCapturer`` invokes this callback for every handler after any
+    /// ``handle(_:)`` implementation throws and before rethrowing the original
+    /// error. A handler that stages state before a later handler runs should
+    /// restore that state here. Handlers without staged state can use the
+    /// default no-op implementation.
+    ///
+    /// - Parameter action: Action whose handler pipeline failed.
+    func handleFailure(for action: StreamVideoCapturer.Action) async
+}
+
+extension StreamVideoCapturerActionHandler {
+    /// Default failure callback for handlers that do not stage rollback state.
+    func handleFailure(for action: StreamVideoCapturer.Action) async {}
 }
 
 final class StreamVideoCapturer: StreamVideoCapturing, @unchecked Sendable {
@@ -508,8 +524,15 @@ final class StreamVideoCapturer: StreamVideoCapturing, @unchecked Sendable {
                 return
             }
             let actionHandlers = self.actionHandlers
-            for actionHandler in actionHandlers {
-                try await actionHandler.handle(action)
+            do {
+                for actionHandler in actionHandlers {
+                    try await actionHandler.handle(action)
+                }
+            } catch {
+                for actionHandler in actionHandlers {
+                    await actionHandler.handleFailure(for: action)
+                }
+                throw error
             }
             log.debug(
                 "VideoCapturer completed execution of action:\(action).",

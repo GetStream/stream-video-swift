@@ -58,6 +58,12 @@
 		84F73848287C196B00A363F4 /* StreamVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F737ED287C13AC00A363F4 /* StreamVideo.framework */; };
 		84F7384D287C198500A363F4 /* StreamVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F737ED287C13AC00A363F4 /* StreamVideo.framework */; };
 		84F7384E287C198500A363F4 /* StreamVideo.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 84F737ED287C13AC00A363F4 /* StreamVideo.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		C0DE0C6E00000000000000C3 /* StreamCore in Frameworks */ = {isa = PBXBuildFile; productRef = C0DE0C6E00000000000000B2 /* StreamCore */; };
+		C0DE0C6E00000000000000C4 /* StreamCore in Frameworks */ = {isa = PBXBuildFile; productRef = C0DE0C6E00000000000000B3 /* StreamCore */; };
+		C0DE0C6E00000000000000C5 /* StreamCore in Frameworks */ = {isa = PBXBuildFile; productRef = C0DE0C6E00000000000000B4 /* StreamCore */; };
+		C0DE0C6E00000000000000C6 /* StreamCore in Frameworks */ = {isa = PBXBuildFile; productRef = C0DE0C6E00000000000000B5 /* StreamCore */; };
+		C0DE0C6E00000000000000C7 /* StreamCore in Frameworks */ = {isa = PBXBuildFile; productRef = C0DE0C6E00000000000000B6 /* StreamCore */; };
+		C0DE0C6E00000000000000C8 /* StreamCore in Frameworks */ = {isa = PBXBuildFile; productRef = C0DE0C6E00000000000000B7 /* StreamCore */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -265,8 +271,6 @@
 			membershipExceptions = (
 				Mock/CallController_Mock.swift,
 				Mock/CallParticipant_Mock.swift,
-				Mock/EventBatcher_Mock.swift,
-				Mock/EventDecoder_Mock.swift,
 				Mock/HTTPClient_Mock.swift,
 				Mock/MockAppStateAdapter.swift,
 				Mock/MockCall.swift,
@@ -285,9 +289,6 @@
 				Mock/StreamVideo_Mock.swift,
 				Mock/StreamVideoCallSession_Mock.swift,
 				"Mock/VideoConfig+Dummy.swift",
-				Mock/WebSocketClientEnvironment_Mock.swift,
-				Mock/WebSocketEngine_Mock.swift,
-				Mock/WebSocketPingController_Mock.swift,
 				StreamVideoTestCase.swift,
 				TestUtils/AssertAsync.swift,
 				TestUtils/AssertDelay.swift,
@@ -312,6 +313,7 @@
 				"Utilities/Dummy/EgressHLSResponse+Dummy.swift",
 				"Utilities/Dummy/EgressResponse+Dummy.swift",
 				"Utilities/Dummy/EgressRTMPResponse+Dummy.swift",
+				"Utilities/Dummy/EncryptionSettingsResponse+Dummy.swift",
 				"Utilities/Dummy/FrameRecordingSettingsResponse+Dummy.swift",
 				"Utilities/Dummy/GeofenceSettings+Dummy.swift",
 				"Utilities/Dummy/GetCallResponse+Dummy.swift",
@@ -356,23 +358,19 @@
 			membershipExceptions = (
 				Mock/CallController_Mock.swift,
 				Mock/CallParticipant_Mock.swift,
-				Mock/EventBatcher_Mock.swift,
-				Mock/EventDecoder_Mock.swift,
 				Mock/HTTPClient_Mock.swift,
 				Mock/MockDefaultAPIEndpoints.swift,
 				Mock/MockFunc.swift,
 				Mock/MockResponseBuilder.swift,
 				Mock/StreamVideo_Mock.swift,
 				"Mock/VideoConfig+Dummy.swift",
-				Mock/WebSocketClientEnvironment_Mock.swift,
-				Mock/WebSocketEngine_Mock.swift,
-				Mock/WebSocketPingController_Mock.swift,
 				TestUtils/AssertAsync.swift,
 				TestUtils/EquatableEvent.swift,
 				TestUtils/Mockable.swift,
 				TestUtils/UniqueValues.swift,
 				TestUtils/VirtualTime/VirtualTime.swift,
 				TestUtils/VirtualTime/VirtualTimer.swift,
+				"Utilities/Dummy/EncryptionSettingsResponse+Dummy.swift",
 				"Utilities/Dummy/LimitsSettingsResponse+Dummy.swift",
 				"Utilities/Extensions/CVPixelBuffer+Convenience.swift",
 				"Utilities/Extensions/Stream_Video_Sfu_Models_ConnectionQuality+Convenience.swift",
@@ -428,6 +426,7 @@
 				Utils/PictureInPicture/MockAVPictureInPictureController.swift,
 				Utils/PictureInPicture/PictureInPictureContentProviderTests.swift,
 				Utils/PictureInPicture/PictureInPictureContentViewTests.swift,
+				Utils/PictureInPicture/PictureInPictureController_Tests.swift,
 				Utils/PictureInPicture/PictureInPictureEnforcedStopAdapterTests.swift,
 				Utils/PictureInPicture/PictureInPictureParticipantModifierTests.swift,
 				Utils/PictureInPicture/PictureInPictureReconnectionViewTests.swift,
@@ -440,6 +439,7 @@
 				Utils/PictureInPicture/StreamPictureInPictureTrackStateAdapterTests.swift,
 				Utils/Resource_Tests.swift,
 				Utils/ReusePool_Tests.swift,
+				Utils/RingingFlowRecoveryAdapter_Tests.swift,
 				Utils/StreamAppStateAdapter/StreamAppStateAdapter_Tests.swift,
 				Utils/StreamMediaDurationFormatter_Tests.swift,
 				Utils/ToastView_Tests.swift,
@@ -549,6 +549,10 @@
 				StreamVideoSwiftUI/CallingViews/CallingParticipantView.swift,
 				StreamVideoSwiftUI/CallingViews/IncomingCallView.swift,
 				StreamVideoSwiftUI/CallingViews/IncomingCallViewModel.swift,
+				StreamVideoSwiftUI/CallingViews/iOS13/BackportStateObject.swift,
+				StreamVideoSwiftUI/CallingViews/iOS13/IncomingCallView_iOS13.swift,
+				StreamVideoSwiftUI/CallingViews/iOS13/PreJoiningView_iOS13.swift,
+				StreamVideoSwiftUI/CallingViews/iOS13/VideoView_iOS13.swift,
 				StreamVideoSwiftUI/CallingViews/JoiningCallView.swift,
 				StreamVideoSwiftUI/CallingViews/LobbyViewModel.swift,
 				StreamVideoSwiftUI/CallingViews/MicrophoneChecker.swift,
@@ -650,6 +654,7 @@
 				StreamVideoSwiftUI/Utils/KeyboardReadable.swift,
 				StreamVideoSwiftUI/Utils/ModifiedContent.swift,
 				StreamVideoSwiftUI/Utils/Modifiers.swift,
+				StreamVideoSwiftUI/Utils/OutgoingRingCreationCoordinator.swift,
 				StreamVideoSwiftUI/Utils/PaddingsConfig.swift,
 				StreamVideoSwiftUI/Utils/ParticipantEventResetAdapter/ParticipantEventResetAdapter.swift,
 				StreamVideoSwiftUI/Utils/PictureInPicture/PictureInPictureBufferTransformer.swift,
@@ -676,6 +681,7 @@
 				StreamVideoSwiftUI/Utils/PictureInPicture/StreamYUVToARGBConversion.swift,
 				"StreamVideoSwiftUI/Utils/PictureInPicture/YpCbCrPixelRange+Default.swift",
 				StreamVideoSwiftUI/Utils/ReusePool.swift,
+				StreamVideoSwiftUI/Utils/RingingFlowRecoveryAdapter.swift,
 				StreamVideoSwiftUI/Utils/SearchBar.swift,
 				StreamVideoSwiftUI/Utils/StreamPixelBufferRepository/StreamPixelBufferPool.swift,
 				StreamVideoSwiftUI/Utils/StreamPixelBufferRepository/StreamPixelBufferRepository.swift,
@@ -714,6 +720,10 @@
 				StreamVideoSwiftUI/CallingViews/CallingParticipantView.swift,
 				StreamVideoSwiftUI/CallingViews/IncomingCallView.swift,
 				StreamVideoSwiftUI/CallingViews/IncomingCallViewModel.swift,
+				StreamVideoSwiftUI/CallingViews/iOS13/BackportStateObject.swift,
+				StreamVideoSwiftUI/CallingViews/iOS13/IncomingCallView_iOS13.swift,
+				StreamVideoSwiftUI/CallingViews/iOS13/PreJoiningView_iOS13.swift,
+				StreamVideoSwiftUI/CallingViews/iOS13/VideoView_iOS13.swift,
 				StreamVideoSwiftUI/CallingViews/JoiningCallView.swift,
 				StreamVideoSwiftUI/CallingViews/LobbyViewModel.swift,
 				StreamVideoSwiftUI/CallingViews/MicrophoneChecker.swift,
@@ -814,6 +824,7 @@
 				StreamVideoSwiftUI/Utils/KeyboardReadable.swift,
 				StreamVideoSwiftUI/Utils/ModifiedContent.swift,
 				StreamVideoSwiftUI/Utils/Modifiers.swift,
+				StreamVideoSwiftUI/Utils/OutgoingRingCreationCoordinator.swift,
 				StreamVideoSwiftUI/Utils/PaddingsConfig.swift,
 				StreamVideoSwiftUI/Utils/ParticipantEventResetAdapter/ParticipantEventResetAdapter.swift,
 				StreamVideoSwiftUI/Utils/PictureInPicture/PictureInPictureBufferTransformer.swift,
@@ -840,6 +851,7 @@
 				StreamVideoSwiftUI/Utils/PictureInPicture/StreamYUVToARGBConversion.swift,
 				"StreamVideoSwiftUI/Utils/PictureInPicture/YpCbCrPixelRange+Default.swift",
 				StreamVideoSwiftUI/Utils/ReusePool.swift,
+				StreamVideoSwiftUI/Utils/RingingFlowRecoveryAdapter.swift,
 				StreamVideoSwiftUI/Utils/SearchBar.swift,
 				StreamVideoSwiftUI/Utils/StreamPixelBufferRepository/StreamPixelBufferPool.swift,
 				StreamVideoSwiftUI/Utils/StreamPixelBufferRepository/StreamPixelBufferRepository.swift,
@@ -1082,6 +1094,7 @@
 			files = (
 				84BE8A5628BE314000B34D2F /* SwiftProtobuf in Frameworks */,
 				40B8FFA72EC393A80061E3F6 /* StreamWebRTC in Frameworks */,
+				C0DE0C6E00000000000000C3 /* StreamCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1091,6 +1104,7 @@
 			files = (
 				84F737F5287C13AD00A363F4 /* StreamVideo.framework in Frameworks */,
 				822FF71B2AEAD0B4000202A7 /* StreamSwiftTestHelpers in Frameworks */,
+				C0DE0C6E00000000000000C8 /* StreamCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1099,6 +1113,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				84F73843287C195600A363F4 /* StreamVideo.framework in Frameworks */,
+				C0DE0C6E00000000000000C4 /* StreamCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1108,6 +1123,7 @@
 			files = (
 				84F7380F287C141000A363F4 /* StreamVideoSwiftUI.framework in Frameworks */,
 				822FF71D2AEAD0BE000202A7 /* StreamSwiftTestHelpers in Frameworks */,
+				C0DE0C6E00000000000000C6 /* StreamCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1117,6 +1133,7 @@
 			files = (
 				841F2C8029429DEC00D8D655 /* StreamVideoSwiftUI.framework in Frameworks */,
 				84F73848287C196B00A363F4 /* StreamVideo.framework in Frameworks */,
+				C0DE0C6E00000000000000C5 /* StreamCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1126,6 +1143,7 @@
 			files = (
 				84F73830287C146D00A363F4 /* StreamVideoUIKit.framework in Frameworks */,
 				822FF71F2AEAD0C4000202A7 /* StreamSwiftTestHelpers in Frameworks */,
+				C0DE0C6E00000000000000C7 /* StreamCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1358,6 +1376,7 @@
 			packageProductDependencies = (
 				84BE8A5528BE314000B34D2F /* SwiftProtobuf */,
 				40B8FFA62EC393A80061E3F6 /* StreamWebRTC */,
+				C0DE0C6E00000000000000B2 /* StreamCore */,
 			);
 			productName = StreamVideo;
 			productReference = 84F737ED287C13AC00A363F4 /* StreamVideo.framework */;
@@ -1382,6 +1401,7 @@
 			name = StreamVideoTests;
 			packageProductDependencies = (
 				822FF71A2AEAD0B4000202A7 /* StreamSwiftTestHelpers */,
+				C0DE0C6E00000000000000B7 /* StreamCore */,
 			);
 			productName = StreamVideoTests;
 			productReference = 84F737F4287C13AD00A363F4 /* StreamVideoTests.xctest */;
@@ -1404,6 +1424,7 @@
 			);
 			name = StreamVideoSwiftUI;
 			packageProductDependencies = (
+				C0DE0C6E00000000000000B3 /* StreamCore */,
 			);
 			productName = StreamVideoSwiftUI;
 			productReference = 84F73807287C141000A363F4 /* StreamVideoSwiftUI.framework */;
@@ -1428,6 +1449,7 @@
 			name = StreamVideoSwiftUITests;
 			packageProductDependencies = (
 				822FF71C2AEAD0BE000202A7 /* StreamSwiftTestHelpers */,
+				C0DE0C6E00000000000000B5 /* StreamCore */,
 			);
 			productName = StreamVideoSwiftUITests;
 			productReference = 84F7380E287C141000A363F4 /* StreamVideoSwiftUITests.xctest */;
@@ -1450,6 +1472,7 @@
 			);
 			name = StreamVideoUIKit;
 			packageProductDependencies = (
+				C0DE0C6E00000000000000B4 /* StreamCore */,
 			);
 			productName = StreamVideoUIKit;
 			productReference = 84F73828287C146D00A363F4 /* StreamVideoUIKit.framework */;
@@ -1474,6 +1497,7 @@
 			name = StreamVideoUIKitTests;
 			packageProductDependencies = (
 				822FF71E2AEAD0C4000202A7 /* StreamSwiftTestHelpers */,
+				C0DE0C6E00000000000000B6 /* StreamCore */,
 			);
 			productName = StreamVideoUIKitTests;
 			productReference = 84F7382F287C146D00A363F4 /* StreamVideoUIKitTests.xctest */;
@@ -1547,6 +1571,7 @@
 				40AC73B22BE0062B00C57517 /* XCRemoteSwiftPackageReference "stream-video-noise-cancellation-swift" */,
 				4014F1012D8C2EBC004E7EFD /* XCRemoteSwiftPackageReference "Gleap-iOS-SDK" */,
 				40B8FFA52EC393A80061E3F6 /* XCRemoteSwiftPackageReference "stream-video-swift-webrtc" */,
+				C0DE0C6E00000000000000A1 /* XCRemoteSwiftPackageReference "stream-core-swift" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 842D8BC42865B31B00801910 /* Products */;
@@ -1884,7 +1909,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -2012,7 +2037,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = EHV7XZLAHA;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = io.getstream.iOS.StreamVideoSwiftUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -2072,7 +2097,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = EHV7XZLAHA;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MARKETING_VERSION = 1.0;
 				OTHER_SWIFT_FLAGS = "-DSTREAM_SNAPSHOT_TESTS";
 				PRODUCT_BUNDLE_IDENTIFIER = io.getstream.iOS.StreamVideoUIKitTests;
@@ -2431,7 +2456,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -2492,7 +2517,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
@@ -2988,7 +3013,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = EHV7XZLAHA;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = io.getstream.iOS.StreamVideoSwiftUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -3007,7 +3032,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = EHV7XZLAHA;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = io.getstream.iOS.StreamVideoSwiftUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -3108,7 +3133,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = EHV7XZLAHA;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MARKETING_VERSION = 1.0;
 				OTHER_SWIFT_FLAGS = "-DSTREAM_SNAPSHOT_TESTS";
 				PRODUCT_BUNDLE_IDENTIFIER = io.getstream.iOS.StreamVideoUIKitTests;
@@ -3127,7 +3152,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = EHV7XZLAHA;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = io.getstream.iOS.StreamVideoUIKitTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -3277,7 +3302,7 @@
 			repositoryURL = "https://github.com/GetStream/stream-chat-swiftui";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 5.5.0;
+				minimumVersion = 5.7.0;
 			};
 		};
 		401A64A62A9DF7B400534ED1 /* XCRemoteSwiftPackageReference "effects-library" */ = {
@@ -3309,7 +3334,7 @@
 			repositoryURL = "https://github.com/GetStream/stream-video-swift-webrtc.git";
 			requirement = {
 				kind = exactVersion;
-				version = 145.8.0;
+				version = 145.15.0;
 			};
 		};
 		40F445C32A9E1D91004BE3DA /* XCRemoteSwiftPackageReference "stream-chat-swift-test-helpers" */ = {
@@ -3342,6 +3367,14 @@
 			requirement = {
 				kind = exactVersion;
 				version = 1.30.0;
+			};
+		};
+		C0DE0C6E00000000000000A1 /* XCRemoteSwiftPackageReference "stream-core-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/GetStream/stream-core-swift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.10.1;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
@@ -3451,6 +3484,36 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 84BE8A5428BE314000B34D2F /* XCRemoteSwiftPackageReference "swift-protobuf" */;
 			productName = SwiftProtobuf;
+		};
+		C0DE0C6E00000000000000B2 /* StreamCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C0DE0C6E00000000000000A1 /* XCRemoteSwiftPackageReference "stream-core-swift" */;
+			productName = StreamCore;
+		};
+		C0DE0C6E00000000000000B3 /* StreamCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C0DE0C6E00000000000000A1 /* XCRemoteSwiftPackageReference "stream-core-swift" */;
+			productName = StreamCore;
+		};
+		C0DE0C6E00000000000000B4 /* StreamCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C0DE0C6E00000000000000A1 /* XCRemoteSwiftPackageReference "stream-core-swift" */;
+			productName = StreamCore;
+		};
+		C0DE0C6E00000000000000B5 /* StreamCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C0DE0C6E00000000000000A1 /* XCRemoteSwiftPackageReference "stream-core-swift" */;
+			productName = StreamCore;
+		};
+		C0DE0C6E00000000000000B6 /* StreamCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C0DE0C6E00000000000000A1 /* XCRemoteSwiftPackageReference "stream-core-swift" */;
+			productName = StreamCore;
+		};
+		C0DE0C6E00000000000000B7 /* StreamCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C0DE0C6E00000000000000A1 /* XCRemoteSwiftPackageReference "stream-core-swift" */;
+			productName = StreamCore;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -24,12 +24,14 @@ extension CallSettingsResponse {
         thumbnails: ThumbnailsSettings = ThumbnailsSettings.dummy(),
         transcription: TranscriptionSettings = TranscriptionSettings.dummy(),
         video: VideoSettings = VideoSettings.dummy(),
-        sessionSettings: SessionSettingsResponse = SessionSettingsResponse.dummy()
+        sessionSettings: SessionSettingsResponse = SessionSettingsResponse.dummy(),
+        encryption: EncryptionSettingsResponse = EncryptionSettingsResponse.dummy()
     ) -> CallSettingsResponse {
         .init(
             audio: audio,
             backstage: backstage,
             broadcasting: broadcasting,
+            encryption: encryption,
             frameRecording: frameRecording,
             geofencing: geofencing,
             individualRecording: individualRecording,

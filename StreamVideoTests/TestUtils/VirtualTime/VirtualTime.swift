@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 @testable import StreamVideo
 import XCTest
 
@@ -10,8 +11,8 @@ import XCTest
 final class VirtualTime {
     typealias Seconds = TimeInterval
 
-    var scheduledTimers: [VirtualTime.TimerControl] = []
-    var timestampToFiredTimers: [TimeInterval: [VirtualTime.TimerControl]] = [:]
+    var scheduledTimers: [VirtualTime.VirtualTimerControl] = []
+    var timestampToFiredTimers: [TimeInterval: [VirtualTime.VirtualTimerControl]] = [:]
 
     var currentTime: Seconds
 
@@ -73,8 +74,12 @@ final class VirtualTime {
         }
     }
 
-    func scheduleTimer(interval: TimeInterval, repeating: Bool, callback: @escaping (TimerControl) -> Void) -> TimerControl {
-        let timer = TimerControl(
+    func scheduleTimer(
+        interval: TimeInterval,
+        repeating: Bool,
+        callback: @escaping (VirtualTimerControl) -> Void
+    ) -> VirtualTimerControl {
+        let timer = VirtualTimerControl(
             scheduledFireTime: currentTime + interval,
             repeatingPeriod: repeating ? interval : 0,
             callback: callback
@@ -91,19 +96,23 @@ final class VirtualTime {
 
 extension VirtualTime {
     /// Internal representation of a timer scheduled with `VirtualTime`. Not meant to be used directly.
-    class TimerControl: RepeatingTimerControl {
+    class VirtualTimerControl: TimerControl, RepeatingTimerControl {
         private(set) var isActive = true
         var isRunning: Bool { isActive }
 
         var repeatingPeriod: TimeInterval
         var scheduledFireTime: TimeInterval
-        var callback: (TimerControl) -> Void
+        var callback: (VirtualTimerControl) -> Void
 
         var isRepeated: Bool {
             repeatingPeriod > 0
         }
 
-        init(scheduledFireTime: TimeInterval, repeatingPeriod: TimeInterval, callback: @escaping (TimerControl) -> Void) {
+        init(
+            scheduledFireTime: TimeInterval,
+            repeatingPeriod: TimeInterval,
+            callback: @escaping (VirtualTimerControl) -> Void
+        ) {
             self.repeatingPeriod = repeatingPeriod
             self.scheduledFireTime = scheduledFireTime
             self.callback = callback

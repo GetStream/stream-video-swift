@@ -22,6 +22,10 @@ final class AVAudioSessionObserver_Tests: XCTestCase, @unchecked Sendable {
         super.tearDown()
     }
 
+    func test_snapshot_renderingModeIsEmpty() {
+        XCTAssertEqual(AVAudioSession.Snapshot().renderingMode, "")
+    }
+
     func test_startObserving_emitsSnapshotsFromTimer() async {
         let observer = AVAudioSessionObserver()
         let expectation = expectation(description: "snapshots")

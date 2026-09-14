@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 
 public final class CallFrameRecordingStoppedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
     public var call: CallResponse

@@ -16,6 +16,10 @@ final class RTCAudioSessionPublisher: NSObject, RTCAudioSessionDelegate, @unchec
 
         case didEndInterruption(shouldResumeSession: Bool)
 
+        /// Indicates that iOS restarted media services and the live audio
+        /// session may need to be restored.
+        case mediaServicesWereReset
+
         case didChangeRoute(
             reason: AVAudioSession.RouteChangeReason,
             from: AVAudioSessionRouteDescription,
@@ -29,6 +33,9 @@ final class RTCAudioSessionPublisher: NSObject, RTCAudioSessionDelegate, @unchec
 
             case (let .didEndInterruption(lhsValue), let .didEndInterruption(rhsValue)):
                 return lhsValue == rhsValue
+
+            case (.mediaServicesWereReset, .mediaServicesWereReset):
+                return true
 
             case (let .didChangeRoute(lReason, lFrom, lTo), let .didChangeRoute(rReason, rFrom, rTo)):
                 return lReason == rReason
@@ -71,6 +78,12 @@ final class RTCAudioSessionPublisher: NSObject, RTCAudioSessionDelegate, @unchec
         shouldResumeSession: Bool
     ) {
         subject.send(.didEndInterruption(shouldResumeSession: shouldResumeSession))
+    }
+
+    /// Publishes a reset event so store effects can restore SDK-owned audio
+    /// session state.
+    func audioSessionMediaServerReset(_ session: RTCAudioSession) {
+        subject.send(.mediaServicesWereReset)
     }
 
     /// Forwards route change notifications and includes the new route in the

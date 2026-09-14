@@ -101,7 +101,7 @@ class CallController: @unchecked Sendable {
 
         _ = webRTCCoordinator
 
-        Task(disposableBag: disposableBag) { [weak self] in
+        Task(disposableBag: disposableBag) { @MainActor [weak self] in
             guard let self else { return }
             await handleParticipantCountUpdated()
             let participantsPublisher = await webRTCCoordinator.stateAdapter.$participants
@@ -115,6 +115,7 @@ class CallController: @unchecked Sendable {
             await observeStatsReporterUpdates()
             await observeCallSettingsUpdates()
             await observeSpeakingWhileMutedUpdates()
+            await observeOwnCapabilitiesUpdates()
         }
     }
 
@@ -479,6 +480,11 @@ class CallController: @unchecked Sendable {
 
     /// Collects user feedback asynchronously.
     ///
+    /// The submission carries the call's session id, which allows the feedback
+    /// to be correlated with the call session (and its stats) on the backend.
+    /// It is reported even when the feedback is collected after the call
+    /// ended, which is the common case for a post-call rating screen.
+    ///
     /// - Parameters:
     ///   - custom: Optional custom data in the form of a dictionary of String keys and RawJSON values.
     ///   - rating: Optional rating provided by the user.
@@ -498,7 +504,8 @@ class CallController: @unchecked Sendable {
                 rating: rating,
                 reason: reason,
                 sdk: SystemEnvironment.sdkName,
-                sdkVersion: SystemEnvironment.version
+                sdkVersion: SystemEnvironment.version,
+                userSessionId: await webRTCCoordinator.stateAdapter.lastSessionID
             )
         )
     }
@@ -826,6 +833,30 @@ class CallController: @unchecked Sendable {
             .log(.debug) { "Speaking while muted updated to \($0)" }
             .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in
                 self?.call?.state.isSpeakingWhileMuted = $0
+            }
+            .store(in: disposableBag)
+    }
+
+    /// Observes own capability changes that originate below the call state, such
+    /// as the publishing rights the SFU grants or revokes mid-call, and applies
+    /// them on the call state.
+    ///
+    /// Capability updates that flow the other way, from the call state down to
+    /// the WebRTC layer, are skipped here because the value is already in sync.
+    private func observeOwnCapabilitiesUpdates() async {
+        await webRTCCoordinator
+            .stateAdapter
+            .$ownCapabilities
+            .removeDuplicates()
+            .log(.debug) { "OwnCapabilities updated to \($0)" }
+            .sinkTask(storeIn: disposableBag) { @MainActor [weak self] value in
+                guard
+                    let state = self?.call?.state,
+                    Set(state.ownCapabilities) != value
+                else {
+                    return
+                }
+                state.ownCapabilities = Array(value)
             }
             .store(in: disposableBag)
     }

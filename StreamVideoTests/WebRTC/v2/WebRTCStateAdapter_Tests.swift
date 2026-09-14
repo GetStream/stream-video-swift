@@ -16,9 +16,10 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
     private lazy var apiKey: String! = .unique
     private lazy var callCid: String! = .unique
     private lazy var callSettings: CallSettings! = .default
+    private lazy var mockAudioDeviceModuleSource: MockRTCAudioDeviceModule! = .init()
     private lazy var mockPeerConnectionFactory: PeerConnectionFactory! = .build(
         audioProcessingModule: Self.videoConfig.audioProcessingModule,
-        audioDeviceModuleSource: MockRTCAudioDeviceModule()
+        audioDeviceModuleSource: mockAudioDeviceModuleSource
     )
     private lazy var rtcPeerConnectionCoordinatorFactory: MockRTCPeerConnectionCoordinatorFactory! =
         .init(peerConnectionFactory: mockPeerConnectionFactory)
@@ -62,6 +63,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         apiKey = nil
         user = nil
         mockPeerConnectionFactory = nil
+        mockAudioDeviceModuleSource = nil
         try await super.tearDown()
     }
 
@@ -105,6 +107,26 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         await subject.set(sessionID: expected)
 
         await assertEqualAsync(await subject.sessionID, expected)
+    }
+
+    func test_setSessionID_shouldUpdateLastSessionID() async throws {
+        let expected = String.unique
+
+        await subject.set(sessionID: expected)
+
+        let lastSessionID = await subject.lastSessionID
+        XCTAssertEqual(lastSessionID, expected)
+    }
+
+    func test_setSessionID_withEmptyValue_shouldNotUpdateLastSessionID() async throws {
+        let expected = String.unique
+        await subject.set(sessionID: expected)
+
+        await subject.set(sessionID: "")
+
+        await assertEqualAsync(await subject.sessionID, "")
+        let lastSessionID = await subject.lastSessionID
+        XCTAssertEqual(lastSessionID, expected)
     }
 
     // MARK: - setIsTracingEnabled
@@ -237,6 +259,25 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         }
     }
 
+    func test_enqueueOwnCapabilities_derivedFromCurrentSet_revokesSendAudioCapability_turnsAudioOff() async throws {
+        await subject.enqueueOwnCapabilities { [.sendAudio, .sendVideo] }
+        await subject.enqueueCallSettings { _ in CallSettings(audioOn: true, videoOn: true) }
+
+        await fulfillment {
+            let currentSettings = await self.subject.callSettings
+            return currentSettings.audioOn && currentSettings.videoOn
+        }
+
+        await subject.enqueueOwnCapabilities { $0.subtracting([.sendAudio]) }
+
+        await fulfillment {
+            let currentSettings = await self.subject.callSettings
+            return currentSettings.audioOn == false && currentSettings.videoOn
+        }
+        let ownCapabilities = await subject.ownCapabilities
+        XCTAssertEqual(ownCapabilities, [.sendVideo])
+    }
+
     func test_enqueueOwnCapabilities_revokesSendAudioCapability_turnsAudioOff() async throws {
         await subject.enqueueOwnCapabilities { [.sendAudio, .sendVideo] }
         await subject.enqueueCallSettings { _ in CallSettings(audioOn: true, videoOn: true) }
@@ -309,7 +350,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         await subject.set(sfuAdapter: sfuStack.adapter)
         await subject.enqueueOwnCapabilities { [.sendAudio, .sendVideo, .screenshare] }
         try await subject.configurePeerConnections()
-        let mockPublisher = try await currentMockPublisher()
+        let mockPublisher = try await XCTAsyncUnwrap(await subject!.publisher as? MockRTCPeerConnectionCoordinator)
 
         let screenShareSessionProvider = await subject.screenShareSessionProvider
         screenShareSessionProvider.activeSession = .init(
@@ -345,7 +386,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         let sfuStack = MockSFUStack()
         await subject.set(sfuAdapter: sfuStack.adapter)
         try await subject.configurePeerConnections()
-        let publisher = try await currentMockPublisher()
+        let publisher = try await XCTAsyncUnwrap(await subject!.publisher as? MockRTCPeerConnectionCoordinator)
         publisher.stubEventSubject.send(
             StreamRTCPeerConnection.CreateOfferEvent(
                 sessionDescription: .init(type: .offer, sdp: "")
@@ -455,7 +496,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
 
         await subject.set(videoFilter: expected)
 
-        let mockPublisher = try await currentMockPublisher()
+        let mockPublisher = try await XCTAsyncUnwrap(await subject!.publisher as? MockRTCPeerConnectionCoordinator)
         XCTAssertEqual(
             mockPublisher.recordedInputPayload(VideoFilter.self, for: .setVideoFilter)?.first?.id,
             expected.id
@@ -528,8 +569,8 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
 
         try await subject.configurePeerConnections()
 
-        let mockPublisher = try await currentMockPublisher()
-        let mockSubscriber = try await currentMockSubscriber()
+        let mockPublisher = try await XCTAsyncUnwrap(await subject!.publisher as? MockRTCPeerConnectionCoordinator)
+        let mockSubscriber = try await XCTAsyncUnwrap(await subject.subscriber as? MockRTCPeerConnectionCoordinator)
 
         await fulfillment {
             mockPublisher.timesCalled(.setUp) == 1
@@ -600,7 +641,6 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
     }
 
     func test_configurePeerConnections_withExistingStatsAdapter_updatesStatsAdapterWithPeerConnections() async throws {
-        let subject = try XCTUnwrap(subject)
         let mockStatsAdapter = MockWebRTCStatsAdapter()
         await subject.set(statsAdapter: mockStatsAdapter)
         let sfuStack = MockSFUStack()
@@ -608,14 +648,13 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
 
         try await subject.configurePeerConnections()
 
-        let publisher = try await requiredPublisher()
-        let subscriber = try await requiredSubscriber()
+        let publisher = try await XCTAsyncUnwrap(await subject!.publisher)
+        let subscriber = try await XCTAsyncUnwrap(await subject.subscriber)
         XCTAssertTrue(mockStatsAdapter.publisher === publisher)
         XCTAssertTrue(mockStatsAdapter.subscriber === subscriber)
     }
 
     func test_configurePeerConnections_withSFU_completesSetUp() async throws {
-        let subject = try XCTUnwrap(subject)
         let sfuStack = MockSFUStack()
         await subject.set(sfuAdapter: sfuStack.adapter)
         let videoFilter = VideoFilter(
@@ -631,10 +670,12 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
 
         try await subject.configurePeerConnections()
 
-        await fulfillment { await self.currentPublisher() != nil }
+        await fulfillment { await self.subject!.publisher != nil }
 
-        let publisher = try await requiredPublisher()
-        let subscriber = try await requiredSubscriber()
+        let _publisher = await subject!.publisher
+        let publisher = try XCTUnwrap(_publisher)
+        let _subscriber = await subject.subscriber
+        let subscriber = try XCTUnwrap(_subscriber)
 
         _ = await Task(timeoutInSeconds: 1) {
             try await publisher.ensureSetUpHasBeenCompleted()
@@ -660,7 +701,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         await subject.enqueueOwnCapabilities { ownCapabilities }
 
         try await subject.configurePeerConnections()
-        let mockPublisher = try await currentMockPublisher()
+        let mockPublisher = try await XCTAsyncUnwrap(await subject!.publisher as? MockRTCPeerConnectionCoordinator)
 
         XCTAssertEqual(
             mockPublisher.recordedInputPayload(
@@ -692,7 +733,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         await subject.enqueueOwnCapabilities { ownCapabilities }
 
         try await subject.configurePeerConnections()
-        let mockPublisher = try await currentMockPublisher()
+        let mockPublisher = try await XCTAsyncUnwrap(await subject!.publisher as? MockRTCPeerConnectionCoordinator)
 
         XCTAssertEqual(mockPublisher.timesCalled(.beginScreenSharing), 0)
     }
@@ -716,6 +757,12 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
 
         await assertTrueAsync(await subject.audioSession.delegate === subject)
         await assertTrueAsync(await subject.audioSession.statsAdapter === statsAdapter)
+        let availability = mockAudioDeviceModuleSource.recordedInputPayload(
+            (Bool, Bool).self,
+            for: .setEngineAvailability
+        )?.last
+        XCTAssertEqual(availability?.0, true)
+        XCTAssertEqual(availability?.1, true)
     }
 
     func test_configureAudioSession_claimsOwnershipAndDispatchesAudioStoreUpdates() async throws {
@@ -762,6 +809,25 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         )
 
         await safeFulfillment(of: [completionExpectation], timeout: 1)
+        let availability = mockAudioDeviceModuleSource.recordedInputPayload(
+            (Bool, Bool).self,
+            for: .setEngineAvailability
+        )?.last
+        XCTAssertEqual(availability?.0, false)
+        XCTAssertEqual(availability?.1, false)
+    }
+
+    func test_configureAudioSession_activeCallKitSource_makesAudioEngineAvailable() async throws {
+        try await mockAudioStore.audioStore.dispatch(.setActive(true)).result()
+
+        try await subject.configureAudioSession(source: .callKit(.init {}))
+
+        let availability = mockAudioDeviceModuleSource.recordedInputPayload(
+            (Bool, Bool).self,
+            for: .setEngineAvailability
+        )?.last
+        XCTAssertEqual(availability?.0, true)
+        XCTAssertEqual(availability?.1, true)
     }
 
     // MARK: - cleanUp
@@ -769,8 +835,8 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
     func test_cleanUp_shouldResetProperties() async throws {
         let sfuStack = MockSFUStack()
         try await prepare(sfuStack: sfuStack)
-        let mockPublisher = try await currentMockPublisher()
-        let mockSubscriber = try await currentMockSubscriber()
+        let mockPublisher = try await XCTAsyncUnwrap(await subject!.publisher as? MockRTCPeerConnectionCoordinator)
+        let mockSubscriber = try await XCTAsyncUnwrap(await subject.subscriber as? MockRTCPeerConnectionCoordinator)
 
         await subject.cleanUp()
 
@@ -778,13 +844,16 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(mockSubscriber.timesCalled(.close), 1)
         XCTAssertEqual(sfuStack.webSocket.timesCalled(.disconnectAsync), 1)
 
-        await fulfillment { await self.currentPublisher() == nil }
-        await assertNilAsync(await currentPublisher())
-        await assertNilAsync(await currentSubscriber())
+        await fulfillment { await self.subject!.publisher == nil }
+        await assertNilAsync(await subject!.publisher)
+        await assertNilAsync(await subject.subscriber)
         await assertNilAsync(await subject.statsAdapter)
         await assertNilAsync(await subject.sfuAdapter)
         await assertEqualAsync(await subject.token, "")
         await assertEqualAsync(await subject.sessionID, "")
+        /// The session that just ended remains available for consumers that
+        /// run after cleanUp (e.g. user feedback collection).
+        await assertFalseAsync(await subject.lastSessionID.isEmpty)
         await assertEqualAsync(await subject.ownCapabilities, [])
         await assertEqualAsync(await subject.participants, [:])
         await assertEqualAsync(await subject.participantsCount, 0)
@@ -839,8 +908,8 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
             participants: participants,
             participantPins: pins
         )
-        let mockPublisher = try await currentMockPublisher()
-        let mockSubscriber = try await currentMockSubscriber()
+        let mockPublisher = try await XCTAsyncUnwrap(await subject!.publisher as? MockRTCPeerConnectionCoordinator)
+        let mockSubscriber = try await XCTAsyncUnwrap(await subject.subscriber as? MockRTCPeerConnectionCoordinator)
         let sessionId = await subject.sessionID
         await subject.didAddTrack(
             await subject.peerConnectionFactory.mockAudioTrack(),
@@ -864,8 +933,8 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(mockPublisher.timesCalled(.close), 0)
         XCTAssertEqual(mockSubscriber.timesCalled(.close), 0)
         XCTAssertEqual(sfuStack.webSocket.timesCalled(.disconnectAsync), 0)
-        await assertNilAsync(await currentPublisher())
-        await assertNilAsync(await currentSubscriber())
+        await assertNilAsync(await subject!.publisher)
+        await assertNilAsync(await subject.subscriber)
         await assertNilAsync(await subject.statsAdapter)
         await assertNilAsync(await subject.sfuAdapter)
         await assertEqualAsync(await subject.token, "")
@@ -1149,8 +1218,8 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         sfuStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
         await subject.set(sfuAdapter: sfuStack.adapter)
         try await subject.configurePeerConnections()
-        let mockPublisher = try await currentMockPublisher()
-        let mockSubscriber = try await currentMockSubscriber()
+        let mockPublisher = try await XCTAsyncUnwrap(await subject!.publisher as? MockRTCPeerConnectionCoordinator)
+        let mockSubscriber = try await XCTAsyncUnwrap(await subject.subscriber as? MockRTCPeerConnectionCoordinator)
         let newVideoOptions = VideoOptions(
             preferredCameraPosition: .back
         )
@@ -1331,7 +1400,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         )
 
         await subject.enqueueCallSettings { _ in newCallSettings }
-        let mockPublisher = try await currentMockPublisher()
+        let mockPublisher = try await XCTAsyncUnwrap(await subject!.publisher as? MockRTCPeerConnectionCoordinator)
 
         await fulfillment {
             mockPublisher.timesCalled(.didUpdateCallSettings) == 1
@@ -1358,7 +1427,9 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
 
         await subject.enqueueCallSettings { _ in .init(videoOn: true) }
 
-        let mockPublisher = try await currentMockPublisher()
+        let mockPublisher = try await XCTAsyncUnwrap(
+            await subject!.publisher as? MockRTCPeerConnectionCoordinator
+        )
         await fulfillment {
             mockPublisher.timesCalled(.didUpdateCallSettings) == 1
         }
@@ -1387,7 +1458,9 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
 
         await subject.enqueueCallSettings { _ in .init(audioOn: true) }
 
-        let mockPublisher = try await currentMockPublisher()
+        let mockPublisher = try await XCTAsyncUnwrap(
+            await subject!.publisher as? MockRTCPeerConnectionCoordinator
+        )
         await fulfillment {
             mockPublisher.timesCalled(.didUpdateCallSettings) == 1
         }
@@ -1420,7 +1493,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
             audioOn: true
         )
 
-        let mockPublisher = try await currentMockPublisher()
+        let mockPublisher = try await XCTAsyncUnwrap(await subject!.publisher as? MockRTCPeerConnectionCoordinator)
         await fulfillment {
             mockPublisher.timesCalled(.didUpdateCallSettings) == 2
         }
@@ -1450,7 +1523,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
             videoOn: true
         )
 
-        let mockPublisher = try await currentMockPublisher()
+        let mockPublisher = try await XCTAsyncUnwrap(await subject!.publisher as? MockRTCPeerConnectionCoordinator)
         await fulfillment {
             mockPublisher.timesCalled(.didUpdateCallSettings) == 2
         }
@@ -1463,56 +1536,6 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
     }
 
     // MARK: - Private helpers
-
-    private func requiredPublisher(
-        file: StaticString = #filePath,
-        line: UInt = #line
-    ) async throws -> RTCPeerConnectionCoordinator {
-        let publisher = await currentPublisher()
-        return try XCTUnwrap(publisher, file: file, line: line)
-    }
-
-    private func currentMockPublisher(
-        file: StaticString = #filePath,
-        line: UInt = #line
-    ) async throws -> MockRTCPeerConnectionCoordinator {
-        let publisher = await currentPublisher()
-        return try XCTUnwrap(
-            publisher as? MockRTCPeerConnectionCoordinator,
-            file: file,
-            line: line
-        )
-    }
-
-    private func currentPublisher() async -> RTCPeerConnectionCoordinator? {
-        guard let subject else { return nil }
-        return await subject.publisher
-    }
-
-    private func requiredSubscriber(
-        file: StaticString = #filePath,
-        line: UInt = #line
-    ) async throws -> RTCPeerConnectionCoordinator {
-        let subscriber = await currentSubscriber()
-        return try XCTUnwrap(subscriber, file: file, line: line)
-    }
-
-    private func currentMockSubscriber(
-        file: StaticString = #filePath,
-        line: UInt = #line
-    ) async throws -> MockRTCPeerConnectionCoordinator {
-        let subscriber = await currentSubscriber()
-        return try XCTUnwrap(
-            subscriber as? MockRTCPeerConnectionCoordinator,
-            file: file,
-            line: line
-        )
-    }
-
-    private func currentSubscriber() async -> RTCPeerConnectionCoordinator? {
-        guard let subject else { return nil }
-        return await subject.subscriber
-    }
 
     private func assertNilAsync<T>(
         _ expression: @autoclosure () async throws -> T?,

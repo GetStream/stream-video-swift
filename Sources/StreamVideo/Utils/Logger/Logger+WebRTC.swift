@@ -2,8 +2,18 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import Foundation
+import StreamCore
 import StreamWebRTC
+
+extension LogConfig {
+    /// Toggles internal WebRTC logging on or off.
+    public static var webRTCLogsEnabled: Bool {
+        get { Logger.WebRTC.mode != .none }
+        set { Logger.WebRTC.mode = newValue ? .all : .none }
+    }
+}
 
 extension Logger {
 
@@ -40,6 +50,8 @@ extension RTCLoggingSeverity {
             self = .warning
         case .error:
             self = .error
+        @unknown default:
+            self = .verbose
         }
     }
 }
@@ -51,8 +63,12 @@ extension Logger.WebRTC {
         private let logger = RTCCallbackLogger()
         private var isRunning = false
         private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
+        private let levelCancellable: AnyCancellable
 
         private init() {
+            levelCancellable = LogConfig.levelPublisher
+                .dropFirst()
+                .sink { severity = .init($0) }
             didUpdate(mode: mode)
         }
 
@@ -92,18 +108,18 @@ extension Logger.WebRTC {
             switch severity {
             case .none, .verbose:
                 if isMessageFromValidFile(trimmedMessage) {
-                    log.debug(trimmedMessage, subsystems: .webRTCInternal)
+                    log.debug(trimmedMessage, subsystems: .webRTC)
                 }
             case .info:
                 if isMessageFromValidFile(trimmedMessage) {
-                    log.info(trimmedMessage, subsystems: .webRTCInternal)
+                    log.info(trimmedMessage, subsystems: .webRTC)
                 }
             case .warning:
-                log.warning(trimmedMessage, subsystems: .webRTCInternal)
+                log.warning(trimmedMessage, subsystems: .webRTC)
             case .error:
-                log.error(trimmedMessage, subsystems: .webRTCInternal)
+                log.error(trimmedMessage, subsystems: .webRTC)
             @unknown default:
-                log.debug(trimmedMessage, subsystems: .webRTCInternal)
+                log.debug(trimmedMessage, subsystems: .webRTC)
             }
         }
 

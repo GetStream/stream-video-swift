@@ -1,7 +1,6 @@
 # StreamVideo iOS
 
 <p align="center">
-  <a href="https://cocoapods.org/pods/StreamVideo"><img src="https://img.shields.io/badge/CocoaPods-compatible-green" /></a>
   <a href="https://www.swift.org/package-manager/"><img src="https://img.shields.io/badge/SPM-compatible-green" /></a>
 </p>
 <p align="center">
@@ -9,10 +8,10 @@
   <a href="https://swift.org"><img src="https://img.shields.io/badge/Swift-5.9%2B-orange.svg" /></a>
 </p>
 <p align="center">
-  <img id="stream-video-label" alt="StreamVideo" src="https://img.shields.io/badge/StreamVideo-10.56%20MB-blue"/>
-  <img id="stream-video-swiftui-label" alt="StreamVideoSwiftUI" src="https://img.shields.io/badge/StreamVideoSwiftUI-2.47%20MB-blue"/>
-  <img id="stream-video-uikit-label" alt="StreamVideoUIKit" src="https://img.shields.io/badge/StreamVideoUIKit-2.6%20MB-blue"/>
-  <img id="stream-web-rtc-label" alt="StreamWebRTC" src="https://img.shields.io/badge/StreamWebRTC-11.87%20MB-blue"/>
+  <img id="stream-video-label" alt="StreamVideo" src="https://img.shields.io/badge/StreamVideo-9.26%20MB-blue"/>
+  <img id="stream-video-swiftui-label" alt="StreamVideoSwiftUI" src="https://img.shields.io/badge/StreamVideoSwiftUI-2.39%20MB-blue"/>
+  <img id="stream-video-uikit-label" alt="StreamVideoUIKit" src="https://img.shields.io/badge/StreamVideoUIKit-2.51%20MB-blue"/>
+  <img id="stream-web-rtc-label" alt="StreamWebRTC" src="https://img.shields.io/badge/StreamWebRTC-11.88%20MB-blue"/>
 </p>
 <p align="center">
   <a href="https://deepwiki.com/GetStream/stream-video-swift"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
@@ -164,7 +163,7 @@ At the moment, all the customizations in the UIKit SDK, need to be done in Swift
 
 ## Chat SDK
 
-We also offer [Chat SDK](https://github.com/GetStream/stream-chat-swift) that seamlessly integrates with our Video SDK. To find out more about this product, please check our [docs](https://getstream.io/chat/docs/ios/). 
+We also offer [Chat SDK](https://github.com/GetStream/stream-chat-swift) that seamlessly integrates with our Video SDK. To find out more about this product, please check our [docs](https://getstream.io/chat/docs/ios/).
 
 ## Roadmap
 

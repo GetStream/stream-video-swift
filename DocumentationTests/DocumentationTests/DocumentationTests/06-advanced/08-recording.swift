@@ -59,6 +59,19 @@ private func content() {
     }
 
     container {
+        @MainActor
+        func deleteRecording(_ recording: CallRecording) {
+            guard let callSessionId = call.state.session?.id else { return }
+            Task {
+                try await call.deleteRecording(
+                    callSessionId: callSessionId,
+                    filename: recording.filename
+                )
+            }
+        }
+    }
+
+    container {
         struct PlayerView: View {
 
             let recording: CallRecording

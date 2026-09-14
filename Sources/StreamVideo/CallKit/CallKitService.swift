@@ -6,6 +6,7 @@ import AVFoundation
 import CallKit
 import Combine
 import Foundation
+import StreamCore
 import StreamWebRTC
 
 /// Manages CallKit integration for VoIP calls.

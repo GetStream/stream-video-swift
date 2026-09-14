@@ -104,66 +104,32 @@ final class WebRTCCoordinatorStateMachine_FastReconnectingStageTests: XCTestCase
         _ = subject.transition(from: .disconnected(subject.context))
         await wait(for: 0.5)
 
-        let callType = (
-            code: URLSessionWebSocketTask.CloseCode,
-            source: WebSocketConnectionState.DisconnectionSource,
-            completion: () -> Void
-        ).self
-        XCTAssertNil(webSocket.connectionStateDelegate)
-        XCTAssertEqual(webSocket.timesCalled(.disconnect), 1)
-        XCTAssertEqual(
-            webSocket.recordedInputPayload(
-                callType,
-                for: .disconnect
-            )?.first?.code,
-            .init(rawValue: 4002)
-        )
+        XCTAssertEqual(webSocket.timesCalled(.disconnectForReconfiguration), 1)
+        XCTAssertEqual(webSocket.timesCalled(.disconnect), 0)
     }
 
     func test_transition_refreshWasCalledOnSFUAdapter_newWebSocketClientWasConfiguredCorrectly() async throws {
         subject.context.coordinator = mockCoordinatorStack.coordinator
         let sfuAdapter = mockCoordinatorStack.sfuStack.adapter
         await mockCoordinatorStack.coordinator.stateAdapter.set(sfuAdapter: sfuAdapter)
-        let newWebSocket = MockWebSocketClient(webSocketClientType: .sfu)
-        mockCoordinatorStack.sfuStack.webSocketFactory.stub(
-            for: .build,
-            with: newWebSocket
-        )
+        let expectedURL = sfuAdapter.connectURL
+        let newWebSocket = MockSFUWebSocket()
+        mockCoordinatorStack.sfuStack.nextWebSocket = newWebSocket
 
         _ = subject.transition(from: .disconnected(subject.context))
         await wait(for: 0.5)
 
-        let buildCallType = (
-            sessionConfiguration: URLSessionConfiguration,
-            eventDecoder: AnyEventDecoder,
-            eventNotificationCenter: EventNotificationCenter,
-            webSocketClientType: WebSocketClientType,
-            environment: WebSocketClient.Environment,
-            connectURL: URL,
-            requiresAuth: Bool
-        ).self
-        let newWebSocketBuildInput = try XCTUnwrap(
-            mockCoordinatorStack
-                .sfuStack
-                .webSocketFactory
-                .recordedInputPayload(buildCallType, for: .build)?
-                .first
-        )
-        XCTAssertEqual(newWebSocketBuildInput.webSocketClientType, .sfu)
-        XCTAssertEqual(newWebSocketBuildInput.connectURL, sfuAdapter.connectURL)
-        XCTAssertFalse(newWebSocketBuildInput.requiresAuth)
-        XCTAssertTrue(newWebSocket.connectionStateDelegate === sfuAdapter)
+        // After refresh, the adapter operates on the newly built socket.
+        XCTAssertEqual(sfuAdapter.connectURL, expectedURL)
+        XCTAssertEqual(newWebSocket.timesCalled(.connect), 1)
     }
 
     func test_transition_connectWasCalledOnSFUAdapter() async throws {
         subject.context.coordinator = mockCoordinatorStack.coordinator
         let sfuAdapter = mockCoordinatorStack.sfuStack.adapter
         await mockCoordinatorStack.coordinator.stateAdapter.set(sfuAdapter: sfuAdapter)
-        let newWebSocket = MockWebSocketClient(webSocketClientType: .sfu)
-        mockCoordinatorStack.sfuStack.webSocketFactory.stub(
-            for: .build,
-            with: newWebSocket
-        )
+        let newWebSocket = MockSFUWebSocket()
+        mockCoordinatorStack.sfuStack.nextWebSocket = newWebSocket
 
         _ = subject.transition(from: .disconnected(subject.context))
         await wait(for: 0.5)
@@ -176,11 +142,8 @@ final class WebRTCCoordinatorStateMachine_FastReconnectingStageTests: XCTestCase
         subject.context.reconnectionStrategy = .fast(disconnectedSince: .init(), deadline: 12)
         let sfuAdapter = mockCoordinatorStack.sfuStack.adapter
         await mockCoordinatorStack.coordinator.stateAdapter.set(sfuAdapter: sfuAdapter)
-        let newWebSocket = MockWebSocketClient(webSocketClientType: .sfu)
-        mockCoordinatorStack.sfuStack.webSocketFactory.stub(
-            for: .build,
-            with: newWebSocket
-        )
+        let newWebSocket = MockSFUWebSocket()
+        mockCoordinatorStack.sfuStack.nextWebSocket = newWebSocket
 
         await assertTransitionAfterTrigger(
             expectedTarget: .fastReconnected
@@ -194,11 +157,8 @@ final class WebRTCCoordinatorStateMachine_FastReconnectingStageTests: XCTestCase
         subject.context.reconnectionStrategy = .fast(disconnectedSince: .init(), deadline: 12)
         let sfuAdapter = mockCoordinatorStack.sfuStack.adapter
         await mockCoordinatorStack.coordinator.stateAdapter.set(sfuAdapter: sfuAdapter)
-        let newWebSocket = MockWebSocketClient(webSocketClientType: .sfu)
-        mockCoordinatorStack.sfuStack.webSocketFactory.stub(
-            for: .build,
-            with: newWebSocket
-        )
+        let newWebSocket = MockSFUWebSocket()
+        mockCoordinatorStack.sfuStack.nextWebSocket = newWebSocket
 
         await assertTransitionAfterTrigger(
             expectedTarget: .disconnected

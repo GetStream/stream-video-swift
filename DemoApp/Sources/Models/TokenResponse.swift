@@ -3,9 +3,8 @@
 //
 
 import Foundation
-import StreamVideo
 
-struct TokenResponse: Codable, ReflectiveStringConvertible {
+struct TokenResponse: Codable {
     let userId: String
     let token: String
     let apiKey: String

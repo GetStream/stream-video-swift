@@ -95,6 +95,22 @@ extension RTCAudioStore {
                     try state.audioDeviceModule?.setPlayout(value)
                 }
 
+            case .callKit(.activate):
+                log.throwing(
+                    "Unable to make the audio engine available.",
+                    subsystems: .audioSession
+                ) {
+                    try state.audioDeviceModule?.setEngineAvailability(true)
+                }
+
+            case .callKit(.deactivate):
+                log.throwing(
+                    "Unable to make the audio engine unavailable.",
+                    subsystems: .audioSession
+                ) {
+                    try state.audioDeviceModule?.setEngineAvailability(false)
+                }
+
             default:
                 break
             }

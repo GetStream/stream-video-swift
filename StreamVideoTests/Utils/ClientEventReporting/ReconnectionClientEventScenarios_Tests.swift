@@ -15,12 +15,10 @@ final class ReconnectionClientEventScenarios_Tests: XCTestCase, @unchecked Senda
             expectedTarget: .disconnected,
             trigger: {
                 harness.stack.sfuStack.receiveEvent(
-                    .sfuEvent(
-                        .error(
-                            SFUEventFactory.error(
-                                code: .internalServerError,
-                                reconnectStrategy: .fast
-                            )
+                    .error(
+                        SFUEventFactory.error(
+                            code: .internalServerError,
+                            reconnectStrategy: .fast
                         )
                     )
                 )
@@ -45,7 +43,7 @@ final class ReconnectionClientEventScenarios_Tests: XCTestCase, @unchecked Senda
                     reconnectStrategy: .rejoin
                 )
                 harness.stack.sfuStack.receiveEvent(
-                    .sfuEvent(.error(error))
+                    .error(error)
                 )
                 harness.stack.sfuStack.setConnectionState(
                     to: .disconnected(
@@ -66,12 +64,10 @@ final class ReconnectionClientEventScenarios_Tests: XCTestCase, @unchecked Senda
             expectedTarget: .disconnected,
             trigger: {
                 harness.stack.sfuStack.receiveEvent(
-                    .sfuEvent(
-                        .error(
-                            SFUEventFactory.error(
-                                code: .internalServerError,
-                                reconnectStrategy: .migrate
-                            )
+                    .error(
+                        SFUEventFactory.error(
+                            code: .internalServerError,
+                            reconnectStrategy: .migrate
                         )
                     )
                 )
@@ -89,7 +85,7 @@ final class ReconnectionClientEventScenarios_Tests: XCTestCase, @unchecked Senda
             expectedTarget: .disconnected,
             trigger: {
                 harness.stack.sfuStack.receiveEvent(
-                    .sfuEvent(.goAway(SFUEventFactory.goAway()))
+                    .goAway(SFUEventFactory.goAway())
                 )
             }
         ) { target in
@@ -105,12 +101,10 @@ final class ReconnectionClientEventScenarios_Tests: XCTestCase, @unchecked Senda
             expectedTarget: .leaving,
             trigger: {
                 harness.stack.sfuStack.receiveEvent(
-                    .sfuEvent(
-                        .error(
-                            SFUEventFactory.error(
-                                code: .internalServerError,
-                                reconnectStrategy: .disconnect
-                            )
+                    .error(
+                        SFUEventFactory.error(
+                            code: .internalServerError,
+                            reconnectStrategy: .disconnect
                         )
                     )
                 )

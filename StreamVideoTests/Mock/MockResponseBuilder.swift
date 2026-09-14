@@ -175,6 +175,7 @@ class MockResponseBuilder: @unchecked Sendable {
             audio: audioSettings,
             backstage: backstageSettings,
             broadcasting: broadcastSettings,
+            encryption: .dummy(),
             frameRecording: frameRecordingSettings,
             geofencing: geofenceSettings,
             individualRecording: individualRecordingSettings,

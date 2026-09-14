@@ -5,6 +5,7 @@
 import AVFoundation
 import Combine
 import Foundation
+import StreamCore
 
 extension StreamCallAudioRecorder.Namespace {
     /// Middleware that manages the `AVAudioRecorder` instance for audio

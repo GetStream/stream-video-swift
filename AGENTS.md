@@ -13,9 +13,8 @@ Agents should optimize for media quality, API stability, backwards compatibility
 - UI frameworks: SwiftUI first; UIKit components may also be present
 - Media stack: WebRTC/AVFoundation under the hood
 - Primary distribution: Swift Package Manager (SPM)
-- Secondary (if applicable): CocoaPods
 - Xcode: 15.x or newer (Apple Silicon supported)
-- Platforms / deployment targets: Use the values set in Package.swift/podspecs; do not lower without approval
+- Platforms / deployment targets: Use the values set in Package.swift; do not lower without approval
 - CI: GitHub Actions (assume PR validation for build + tests + lint)
 - Apple docs helper: Use https://sosumi.ai/ (MCP or direct) for up-to-date
   Apple platform APIs, Swift/Objective-C references, and UI design guidance.

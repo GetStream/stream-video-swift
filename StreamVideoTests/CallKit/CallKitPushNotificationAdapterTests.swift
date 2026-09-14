@@ -195,15 +195,20 @@ final class CallKitPushNotificationAdapterTests: XCTestCase, @unchecked Sendable
         pushPayload.stubDictionaryPayload = payload
 
         let completionWasCalledExpectation = expectation(description: "Completion was called.")
+        var completionCallCount = 0
         subject.pushRegistry(
             subject.registry,
             didReceiveIncomingPushWith: pushPayload,
             for: pushPayload.type,
-            completion: { completionWasCalledExpectation.fulfill() }
+            completion: {
+                completionCallCount += 1
+                completionWasCalledExpectation.fulfill()
+            }
         )
 
         guard contentType == .voIP else {
             await fulfillment(of: [completionWasCalledExpectation])
+            XCTAssertEqual(completionCallCount, 1, file: file, line: line)
             return
         }
 
@@ -213,6 +218,7 @@ final class CallKitPushNotificationAdapterTests: XCTestCase, @unchecked Sendable
             #available(iOS 27.0, *),
             let liveCommunicationKitService = liveCommunicationKitService as? MockLiveCommunicationKitService {
             await fulfillment { liveCommunicationKitService.reportIncomingCallWasCalled != nil }
+            XCTAssertEqual(completionCallCount, 0, file: file, line: line)
 
             if let content {
                 XCTAssertEqual(
@@ -241,6 +247,7 @@ final class CallKitPushNotificationAdapterTests: XCTestCase, @unchecked Sendable
                 )
                 liveCommunicationKitService.reportIncomingCallWasCalled?.completion(nil)
                 await fulfillment(of: [completionWasCalledExpectation])
+                XCTAssertEqual(completionCallCount, 1, file: file, line: line)
             } else {
                 XCTAssertNil(
                     liveCommunicationKitService.reportIncomingCallWasCalled,
@@ -253,6 +260,7 @@ final class CallKitPushNotificationAdapterTests: XCTestCase, @unchecked Sendable
         #endif
 
         await fulfillment { self.callKitService.reportIncomingCallWasCalled != nil }
+        XCTAssertEqual(completionCallCount, 0, file: file, line: line)
 
         if let content {
             XCTAssertEqual(
@@ -279,8 +287,6 @@ final class CallKitPushNotificationAdapterTests: XCTestCase, @unchecked Sendable
                 file: file,
                 line: line
             )
-            callKitService.reportIncomingCallWasCalled?.completion(nil)
-            await fulfillment(of: [completionWasCalledExpectation])
         } else {
             XCTAssertNil(
                 callKitService.reportIncomingCallWasCalled,
@@ -288,6 +294,10 @@ final class CallKitPushNotificationAdapterTests: XCTestCase, @unchecked Sendable
                 line: line
             )
         }
+
+        callKitService.reportIncomingCallWasCalled?.completion(nil)
+        await fulfillment(of: [completionWasCalledExpectation])
+        XCTAssertEqual(completionCallCount, 1, file: file, line: line)
     }
 }
 

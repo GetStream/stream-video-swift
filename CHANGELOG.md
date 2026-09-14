@@ -6,6 +6,56 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🔄 Changed
 
+# [1.52.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.52.0)
+_September 09, 2026_
+
+### ✅ Added
+- Added support for Xcode 27. [#1263](https://github.com/GetStream/stream-video-swift/pull/1263)
+- `StreamVideo.getEdges()` returns the list of edges (datacenters) available for hosting calls [#1247](https://github.com/GetStream/stream-video-swift/pull/1247).
+- `Call.deleteRecording(callSessionId:filename:)` for deleting a recording of a call session [#1244](https://github.com/GetStream/stream-video-swift/pull/1244).
+- Added `Call.delete(hard:)` for deleting a call. [#1243](https://github.com/GetStream/stream-video-swift/pull/1243)
+- `CallDeletedEvent` now updates `Call.state` instead of being ignored. [#1243](https://github.com/GetStream/stream-video-swift/pull/1243)
+- `Call.startFrameRecording(recordingExternalStorage:)` and `Call.stopFrameRecording()`, along with the `CallState.frameRecordingStatus` property that tracks frame recording for the active call. [#1246](https://github.com/GetStream/stream-video-swift/pull/1246)
+- `Call.stopAllRTMPBroadcasts()` to stop every RTMP-out broadcast of a call in one call [#1245](https://github.com/GetStream/stream-video-swift/pull/1245).
+
+### 🐞 Fixed
+- Mid-call permission changes from the SFU are now applied on `Call.state.ownCapabilities`, instead of the `callGrantsUpdated` event being ignored. [#1250](https://github.com/GetStream/stream-video-swift/pull/1250)
+- After a WebSocket reconnect during ringing, the SDK reloads the ringing call and applies accept, reject, or end from the refreshed session so the caller is not stuck on stale local state. [#1253](https://github.com/GetStream/stream-video-swift/pull/1253)
+- Transient peer-connection disconnections no longer trigger an immediate full rejoin, allowing the existing ICE restart flow to recover the session. [#1231](https://github.com/GetStream/stream-video-swift/pull/1231)
+- `CallParticipant.withUpdated(...)` no longer resets `source` to `.webRTCUnspecified`, which previously broke the `videoIngressSource` and `participantSource` sort comparators after any participant update. `source` is now also part of `CallParticipant` equality. [#1251](https://github.com/GetStream/stream-video-swift/pull/1251)
+- Fast reconnects no longer report a duration of zero in SFU telemetry. The `.fast` branch of the join telemetry shadowed the value that carried the elapsed time, so `timeSeconds` was always `0`. [#1255](https://github.com/GetStream/stream-video-swift/pull/1255)
+- `Call.collectUserFeedback(rating:reason:custom:)` now reports the call's user session id, so feedback can be correlated with the call session and its stats on the backend. The id is retained after the call ends, which makes it available to post-call rating screens. [#1254](https://github.com/GetStream/stream-video-swift/pull/1254)
+
+### 🔄 Changed
+- `defaultSortPreset` and `speakerLayoutSortPreset` now rank screensharing participants above pinned ones. Previously a pinned participant would lead the call even while somebody else was sharing their screen. [#1256](https://github.com/GetStream/stream-video-swift/pull/1256)
+
+# [1.51.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.51.0)
+_August 13, 2026_
+
+### 🐞 Fixed
+- Prevent CallKit-driven joins from disconnecting and rejoining while waiting for audio-session activation. [#1218](https://github.com/GetStream/stream-video-swift/pull/1218)
+- Fixed a crash caused by completing a PushKit VoIP notification before CallKit finished reporting its incoming call. [#1221](https://github.com/GetStream/stream-video-swift/pull/1221)
+- Fixed a crash that could occur when setting up call participant observation from a background thread. [#1225](https://github.com/GetStream/stream-video-swift/pull/1225)
+- Fixed microphone state restoration after joining or resuming a call, and prevented participant video rendering from blocking the main thread while querying WebRTC track state. [#1237](https://github.com/GetStream/stream-video-swift/pull/1237)
+
+### 🔄 Changed
+
+# [1.50.1](https://github.com/GetStream/stream-video-swift/releases/tag/1.50.1)
+_July 31, 2026_
+
+### 🐞 Fixed
+- Fixed the SPM resolution failure in 1.50.0 for version-pinned integrations, by pinning StreamCore to a released version instead of a branch. [#1215](https://github.com/GetStream/stream-video-swift/pull/1215)
+
+# [1.50.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.50.0)
+_July 29, 2026_
+
+### 🐞 Fixed
+- Fixed camera flips reverting to the front camera during active calls. [#1206](https://github.com/GetStream/stream-video-swift/pull/1206)
+- Hanging up an outgoing call right after starting it now reliably stops the callee from ringing. [#1207](https://github.com/GetStream/stream-video-swift/pull/1207)
+
+### 🔄 Changed
+- Drop CocoaPods and XCFrameworks support. [#1210](https://github.com/GetStream/stream-video-swift/pull/1210), [#1213](https://github.com/GetStream/stream-video-swift/pull/1213)
+
 # [1.49.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.49.0)
 _July 08, 2026_
 

@@ -50,7 +50,7 @@ final class PictureInPictureContentProviderTests: XCTestCase, @unchecked Sendabl
 
     func test_internetConnectionDrops_contentUpdates() async throws {
         let mockInternetConnection = MockInternetConnection()
-        InternetConnection.currentValue = mockInternetConnection
+        VideoInternetConnection.currentValue = mockInternetConnection
 
         try await assertContentUpdate { _ in
             mockInternetConnection.subject.send(.unavailable)

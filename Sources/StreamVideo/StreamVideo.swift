@@ -4,11 +4,9 @@
 
 import Combine
 import Foundation
+@_exported import StreamCore
 import StreamWebRTC
 import SwiftProtobuf
-
-public typealias UserTokenProvider = @Sendable (@Sendable @escaping (Result<UserToken, Error>) -> Void) -> Void
-public typealias UserTokenUpdater = @Sendable (UserToken) -> Void
 
 /// Main class for interacting with the `StreamVideo` SDK.
 /// Needs to be initalized with a valid api key, user and token (and token provider).
@@ -79,6 +77,11 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     public lazy var rejectionReasonProvider: RejectionReasonProviding = StreamRejectionReasonProvider(self)
 
     private let eventSubject: PassthroughSubject<WrappedEvent, Never> = .init()
+    /// All coordinator events, including internal ones such as
+    /// ``WSConnected``. `eventPublisher()` drops those internal events.
+    var rawEventPublisher: AnyPublisher<WrappedEvent, Never> {
+        eventSubject.eraseToAnyPublisher()
+    }
 
     private let tokenSubject: CurrentValueSubject<UserToken, Never>
     var tokenPublisher: AnyPublisher<UserToken, Never> { tokenSubject.eraseToAnyPublisher() }
@@ -89,32 +92,25 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     private let coordinatorClient: DefaultAPI
     private let apiTransport: DefaultAPITransport
     
-    private var webSocketClient: WebSocketClient? {
-        didSet {
-            setupConnectionRecoveryHandler()
-        }
-    }
-        
+    private var webSocketClient: CoordinatorWebSocket?
+    /// Observes coordinator connection-state changes on the main queue.
+    private var connectionStateCancellable: AnyCancellable?
+
     private let eventsMiddleware = WSEventsMiddleware()
     private var cachedLocation: String?
     private var connectTask: Task<Void, Error>?
 
     /// The notification center used to send and receive notifications about incoming events.
-    private(set) lazy var eventNotificationCenter: EventNotificationCenter = {
-        let center = EventNotificationCenter()
+    private(set) lazy var eventNotificationCenter: DefaultEventNotificationCenter = {
+        let center = DefaultEventNotificationCenter()
         eventsMiddleware.add(subscriber: self)
-        var middlewares: [EventMiddleware] = [
+        let middlewares: [EventMiddleware] = [
             eventsMiddleware
         ]
         center.add(middlewares: middlewares)
         return center
     }()
     
-    /// Background worker that takes care about client connection recovery when the Internet comes back
-    /// OR app transitions from background to foreground.
-    private(set) var connectionRecoveryHandler: ConnectionRecoveryHandler?
-    private(set) var timerType: Timer.Type = DefaultTimer.self
-
     var tokenRetryTimer: TimerControl?
     var tokenExpirationRetryStrategy: RetryStrategy = DefaultRetryStrategy()
         
@@ -124,6 +120,10 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     private let disposableBag = DisposableBag()
 
     private lazy var idleTimerAdapter = IdleTimerAdapter(self)
+    /// Reloads `state.ringingCall` from the coordinator whenever the
+    /// WebSocket reconnects, so a missed accept/reject/end is not stuck
+    /// on a stale local copy.
+    private lazy var ringingCallRecoveryAdapter = RingingCallRecoveryAdapter(self)
 
     /// Initializes a new instance of `StreamVideo` with the specified parameters.
     /// - Parameters:
@@ -217,6 +217,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         _ = eventNotificationCenter
         _ = idleTimerAdapter
         _ = battery
+        _ = ringingCallRecoveryAdapter
 
         if user.type != .anonymous {
             let userAuth = UserAuth { [weak self] in
@@ -346,18 +347,16 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     public func listDevices() async throws -> [Device] {
         try await coordinatorClient.listDevices().devices
     }
-    
+
+    /// Lists the edges (datacenters) available for hosting calls.
+    /// - Returns: an array of `EdgeResponse`s.
+    public func getEdges() async throws -> [EdgeResponse] {
+        try await coordinatorClient.getEdges().edges
+    }
+
     /// Disconnects the current `StreamVideo` client.
     public func disconnect() async {
-        await withCheckedContinuation { [webSocketClient] continuation in
-            if let webSocketClient = webSocketClient {
-                webSocketClient.disconnect {
-                    continuation.resume()
-                }
-            } else {
-                continuation.resume()
-            }
-        }
+        await webSocketClient?.disconnect()
     }
 
     /// Publishes all received video events coming from the coordinator.
@@ -539,7 +538,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             apiKey: apiKey.apiKeyString
         )
         if let connectURL = try? URL(string: Self.endpointConfig.wsEndpoint)?.appendingQueryItems(queryParams) {
-            webSocketClient = makeWebSocketClient(url: connectURL, apiKey: apiKey)
+            webSocketClient = makeWebSocketClient(url: connectURL)
             webSocketClient?.connect()
         } else {
             throw ClientError.Unknown()
@@ -559,32 +558,54 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         }
     }
     
-    private func makeWebSocketClient(
-        url: URL,
-        apiKey: APIKey
-    ) -> WebSocketClient {
-        let webSocketClient = environment.webSocketClientBuilder(eventNotificationCenter, url)
-        
-        webSocketClient.connectionStateDelegate = self
-        webSocketClient.onWSConnectionEstablished = { [weak self, weak webSocketClient] in
-            guard let self = self, let webSocketClient else { return }
+    private func makeWebSocketClient(url: URL) -> CoordinatorWebSocket {
+        let config = URLSessionConfiguration.default
+        config.waitsForConnectivity = false
+        let webSocketClient = CoordinatorWebSocket(
+            url: url,
+            eventNotificationCenter: eventNotificationCenter,
+            sessionConfiguration: config,
+            connectPayloadProvider: { [weak self] in self?.makeConnectPayload() },
+            hasActiveCall: { Self.hasActiveSystemCall() }
+        )
 
-            let connectUserRequest = ConnectUserDetailsRequest(
-                custom: self.user.customData,
-                id: self.user.id,
-                image: self.user.imageURL?.absoluteString,
-                name: self.user.originalName
-            )
-            
-            let authRequest = WSAuthMessageRequest(
-                token: self.token.rawValue,
-                userDetails: connectUserRequest
-            )
+        // The publisher fires on StreamCore's callback thread; hop to main since
+        // `handleConnectionStateChange` mutates the `@Published` `state.connection`.
+        connectionStateCancellable = webSocketClient
+            .connectionStatePublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in self?.handleConnectionStateChange($0) }
 
-            webSocketClient.engine?.send(jsonMessage: authRequest)
-        }
-        
         return webSocketClient
+    }
+
+    /// Reports whether a system-level (VoIP) call is currently active.
+    ///
+    /// Used by `CallKitReconnectionPolicy` to keep the coordinator socket
+    /// recovering while the app is backgrounded during a call. When
+    /// LiveCommunicationKit is available it owns the call, so its call count is
+    /// the authoritative one; otherwise we fall back to CallKit.
+    private static func hasActiveSystemCall() -> Bool {
+        #if canImport(LiveCommunicationKit)
+        if #available(iOS 27.0, *) {
+            return InjectedValues[\.liveCommunicationKitService].callCount > 0
+        }
+        #endif
+        return InjectedValues[\.callKitService].callCount > 0
+    }
+
+    /// Builds the coordinator connect payload (auth) sent once the socket opens.
+    private func makeConnectPayload() -> (any Codable)? {
+        let connectUserRequest = ConnectUserDetailsRequest(
+            custom: user.customData,
+            id: user.id,
+            image: user.imageURL?.absoluteString,
+            name: user.originalName
+        )
+        return WSAuthMessageRequest(
+            token: token.rawValue,
+            userDetails: connectUserRequest
+        )
     }
     
     private func loadConnectionId() async -> String {
@@ -614,8 +635,8 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     
     private func loadConnectionIdFromHealthcheck() -> String? {
         guard
-            case let .connected(healthCheckInfo: healtCheckInfo) = webSocketClient?.connectionState,
-            let connectionId = healtCheckInfo.coordinatorHealthCheck?.connectionId
+            case let .connected(healthCheckInfo: healthCheckInfo) = webSocketClient?.connectionState,
+            let connectionId = healthCheckInfo.connectionId
         else {
             return nil
         }
@@ -680,18 +701,6 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         log.debug("Sending request to save device")
 
         return try await coordinatorClient.createDevice(createDeviceRequest: createDeviceRequest)
-    }
-    
-    private func setupConnectionRecoveryHandler() {
-        guard let webSocketClient = webSocketClient else {
-            return
-        }
-
-        connectionRecoveryHandler = nil
-        connectionRecoveryHandler = environment.connectionRecoveryHandlerBuilder(
-            webSocketClient,
-            eventNotificationCenter
-        )
     }
     
     private func connectUser(isInitial: Bool = false) async throws {
@@ -769,32 +778,30 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     }
 }
 
-extension StreamVideo: ConnectionStateDelegate {
-    
-    func webSocketClient(
-        _ client: WebSocketClient,
-        didUpdateConnectionState state: WebSocketConnectionState
+extension StreamVideo {
+
+    private func handleConnectionStateChange(
+        _ state: WebSocketConnectionState
     ) {
-        self.state.connection = ConnectionStatus(webSocketConnectionState: state)
+        self.state.connection = ConnectionStatus(
+            videoWebSocketConnectionState: state
+        )
         switch state {
         case let .disconnected(source):
-            if let serverError = source.serverError {
-                if serverError.isInvalidTokenError {
-                    Task(disposableBag: disposableBag) { [weak self] in
-                        guard let self else {
-                            return
-                        }
-                        do {
-                            guard let apiTransport = apiTransport as? URLSessionTransport else { return }
-                            self.tokenSubject.send(try await apiTransport.refreshToken())
-                            log.debug("user token updated, will reconnect ws")
-                            webSocketClient?.connect()
-                        } catch {
-                            log.error("Error refreshing token, will disconnect ws connection", error: error)
-                        }
+            if let serverError = source.serverError,
+               serverError.isInvalidTokenError || serverError.isTokenExpiredError {
+                Task(disposableBag: disposableBag) { [weak self] in
+                    guard let self else {
+                        return
                     }
-                } else {
-                    connectionRecoveryHandler?.webSocketClient(client, didUpdateConnectionState: state)
+                    do {
+                        guard let apiTransport = apiTransport as? URLSessionTransport else { return }
+                        self.tokenSubject.send(try await apiTransport.refreshToken())
+                        log.debug("user token updated, will reconnect ws")
+                        webSocketClient?.connect()
+                    } catch {
+                        log.error("Error refreshing token, will disconnect ws connection", error: error)
+                    }
                 }
             }
             eventSubject.send(.internalEvent(WSDisconnected()))

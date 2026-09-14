@@ -11,6 +11,11 @@ final class PeerConnectionFactory: @unchecked Sendable {
     
     /// The audio processing module associated with this factory.
     private let audioProcessingModule: RTCAudioProcessingModule
+
+    /// Overrides WebRTC audio-engine availability for controlled environments.
+    ///
+    /// A `nil` value preserves the runtime decision made by the call flow.
+    let audioEngineAvailabilityOverride: Bool?
     /// Backing storage for the audio device module.
     ///
     /// Kept optional so we can release it explicitly in `deinit` before
@@ -39,7 +44,7 @@ final class PeerConnectionFactory: @unchecked Sendable {
             audioProcessingModule: audioProcessingModule
         )
     }()
-    
+
     /// Lazy-loaded default video encoder factory.
     private nonisolated(unsafe) static let defaultEncoder = RTCDefaultVideoEncoderFactory()
 
@@ -62,18 +67,25 @@ final class PeerConnectionFactory: @unchecked Sendable {
     /// - Returns: A PeerConnectionFactory instance.
     static func build(
         audioProcessingModule: RTCAudioProcessingModule,
-        audioDeviceModuleSource: RTCAudioDeviceModuleControlling? = nil
+        audioDeviceModuleSource: RTCAudioDeviceModuleControlling? = nil,
+        audioEngineAvailabilityOverride: Bool? = nil
     ) -> PeerConnectionFactory {
-        return .init(audioProcessingModule, audioDeviceModuleSource: audioDeviceModuleSource)
+        return .init(
+            audioProcessingModule,
+            audioDeviceModuleSource: audioDeviceModuleSource,
+            audioEngineAvailabilityOverride: audioEngineAvailabilityOverride
+        )
     }
     
     /// Private initializer to ensure instances are created through the `build` method.
     /// - Parameter audioProcessingModule: The RTCAudioProcessingModule to use.
     private init(
         _ audioProcessingModule: RTCAudioProcessingModule,
-        audioDeviceModuleSource: RTCAudioDeviceModuleControlling?
+        audioDeviceModuleSource: RTCAudioDeviceModuleControlling?,
+        audioEngineAvailabilityOverride: Bool?
     ) {
         self.audioProcessingModule = audioProcessingModule
+        self.audioEngineAvailabilityOverride = audioEngineAvailabilityOverride
         _ = factory
 
         if let audioDeviceModuleSource {

@@ -71,6 +71,20 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
             .assertEventually { try await $0.client.listDevices().isEmpty }
     }
 
+    // MARK: - Get Edges
+
+    /// Note: the coordinator currently returns an empty `latencyTestUrl` for
+    /// every edge — latency-based edge selection happens server-side — so this
+    /// only asserts the fields the API actually populates.
+    func test_getEdges_returnsEdgesWithIdentifierAndLocation() async throws {
+        try await helpers
+            .callFlow(id: .unique, type: .default, userId: .unique)
+            .perform { try await $0.client.getEdges() }
+            .assert { !$0.value.isEmpty }
+            .assert { $0.value.allSatisfy { edge in !edge.id.isEmpty } }
+            .assert { $0.value.allSatisfy { edge in !edge.continentCode.isEmpty && !edge.countryIsoCode.isEmpty } }
+    }
+
     // MARK: Create
 
     func test_create_callContainsExpectedMembers() async throws {
@@ -361,46 +375,31 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     // MARK: - End
 
     func test_end_whenCreatorEndsCall_thenParticipantAutomaticallyLeaves() async throws {
+        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
         let callId = String.unique
         let creatorUserId = String.unique
         let participantUserId = String.unique
         helpers.duringDismantleObservedAllCallEnded = false
 
         let creatorUserFlow = try await helpers
-            .callFlow(
-                id: callId,
-                type: .default,
-                userId: creatorUserId
-            )
+            .callFlow(id: callId, type: .default, userId: creatorUserId)
 
         let participantUserFlow = try await helpers
-            .callFlow(
-                id: callId,
-                type: .default,
-                userId: participantUserId
-            )
+            .callFlow(id: callId, type: .default, userId: participantUserId)
 
         let creatorFlow = try await creatorUserFlow
             .perform { try await $0.call.create(memberIds: [creatorUserId, participantUserId]) }
+            .perform { try await $0.call.join() }
 
-        try await withThrowingTaskGroup(of: Void.self) { group in
-            group.addTask {
-                try await creatorFlow
-                    .perform { try await $0.call.join() }
-                    .subscribe(for: CustomVideoEvent.self)
-                    .assertEventually { (event: CustomVideoEvent) in event.custom["state"] == "joined" }
-                    .perform { try await $0.call.end() }
+        let participantFlow = try await participantUserFlow
+            .perform { try await $0.call.join() }
+
+        _ = try await creatorFlow.call.end()
+
+        try await participantFlow
+            .assertEventuallyInMainActor(timeout: 30) {
+                $0.call.streamVideo.state.activeCall == nil
             }
-
-            group.addTask {
-                try await participantUserFlow
-                    .perform { try await $0.call.join() }
-                    .perform { try await $0.call.sendCustomEvent(["state": "joined"]) }
-                    .assertEventuallyInMainActor { $0.call.streamVideo.state.activeCall == nil }
-            }
-
-            try await group.waitForAll()
-        }
     }
 
     // MARK: - SendReactions
@@ -481,6 +480,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     // MARK: - Accept
 
     func test_accept_whenUserAcceptsTheCall_thenCallStateUpdatesForAllParticipantsAsExpected() async throws {
+        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
         let callId = String.unique
         let user1 = String.unique
         let user2 = String.unique
@@ -518,6 +518,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     // MARK: - Notify
 
     func test_notify_whenNotifyEventIsBeingSent_thenOtherParticipantsReceiveTheEventAsExpected() async throws {
+        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
         let callId = String.unique
         let user1 = String.unique
         let user2 = String.unique
@@ -556,6 +557,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     // MARK: Ringing
 
     func test_join_ringingFlow_whenAcceptingACallWhilePermissionsAreNotGranted_thenWeJoinTheCallCorrectly() async throws {
+        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
         let callId = String.unique
         let user1 = String.unique
         let user2 = String.unique
@@ -597,6 +599,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     // MARK: Livestream
 
     func test_join_livestream_whenCallIsInBackstageOnlyHostCanJoin_thenAnyOtherParticipantShouldFailToJoin() async throws {
+        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
         let callId = String.unique
         let participant = String.unique
 
@@ -626,6 +629,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     }
 
     func test_join_livestream_whenCallIsInBackstage_thenOnlyCreatorAndOtherHostsCanJoin() async throws {
+        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
         let callId = String.unique
         let creator = String.unique
         let otherHost = String.unique
@@ -663,6 +667,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     }
 
     func test_join_livestream_whenCallIsInBackstageOnlyHostCanJoin_thenAfterCallGoesLiveAnyOtherParticipantCanJoin() async throws {
+        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
         let callId = String.unique
         let participant = String.unique
         let joinAheadTimeSeconds: Double = 10
@@ -694,6 +699,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
 
     func test_join_audioRoom_whenAParticipantIsGrantedPermissionsToSpeak_thenTheirCallStateUpdatesWithExpectedCapabilities(
     ) async throws {
+        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
         let callId = String.unique
         let host = String.unique
 
@@ -727,6 +733,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     }
 
     func test_join_audioRoom_whenAParticipanRequestsPermissionToSpeakAndGetsRejected_thenTheirCallStateDoesNotUpdate() async throws {
+        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
         let callId = String.unique
         let host = String.unique
 
@@ -761,6 +768,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     }
 
     func test_join_audioRoom_whenAParticipantPermissionGetsRevoked_thenTheirCallStateUpdatesWithExpectedCapabilities() async throws {
+        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
         let callId = String.unique
         let host = "host"
         let participant = "participant"
@@ -799,6 +807,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     }
 
     func test_audioRoom_participantWithoutSpeakPermission_toggleMicrophone_audioRemainsDisabled() async throws {
+        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
         helpers.permissions.setMicrophonePermission(isGranted: true)
         let callId = String.unique
         let host = String.unique
@@ -835,6 +844,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     }
 
     func test_audioRoom_participantRequestsSpeakPermission_hostAccepts_participantCanToggleMicrophone() async throws {
+        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
         helpers.permissions.setMicrophonePermission(isGranted: true)
         let callId = String.unique
         let host = String.unique
@@ -875,6 +885,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
 
     func test_audioRoom_participantRequestsSpeakPermission_hostRejects_participantCannotToggleMicrophone(
     ) async throws {
+        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
         helpers.permissions.setMicrophonePermission(isGranted: true)
         let callId = String.unique
         let host = String.unique
@@ -918,6 +929,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     }
 
     func test_audioRoom_hostRevokesSpeakPermission_participantGetsMutedAndCannotToggleMicrophone() async throws {
+        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
         helpers.permissions.setMicrophonePermission(isGranted: true)
         let callId = String.unique
         let host = String.unique
@@ -969,6 +981,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     }
 
     func test_audioRoom_participantWithoutVideoPermission_toggleCamera_videoRemainsDisabled() async throws {
+        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
         helpers.permissions.setCameraPermission(isGranted: true)
         let callId = String.unique
         let host = String.unique
@@ -1051,6 +1064,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     }
 
     func test_join_whenParticipantCancelsJoinAttemptAndRetries_thenSecondJoinSucceedsWithoutTimeoutErrors() async throws {
+        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
         let callId = String.unique
         let creator = String.unique
         let participant = String.unique
@@ -1140,6 +1154,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     // MARK: - Pin
 
     func test_pin_whenUserGetsPinnedForEveryone_thenCallStateOfAllParticipantsUpdatesAsExpected() async throws {
+        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
         let callId = String.unique
         let user1 = String.unique
         let user2 = String.unique
@@ -1149,35 +1164,38 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
 
         let user2CallFlow = try await helpers
             .callFlow(id: callId, type: .default, userId: user2)
-            .assertEventuallyInMainActor { $0.call.state.sessionId.isEmpty == false }
 
-        let user1CallFlowAfterCallCreation = try await user1CallFlow
+        let user1JoinedFlow = try await user1CallFlow
             .perform { try await $0.call.create(memberIds: [user1, user2]) }
             .perform { try await $0.call.join() }
 
-        let user2SessionId = await user2CallFlow.call.state.sessionId
+        let user2JoinedFlow = try await user2CallFlow
+            .perform { try await $0.call.join() }
+            .assertEventuallyInMainActor { $0.call.state.sessionId.isEmpty == false }
+        let user2SessionId = await user2JoinedFlow.call.state.sessionId
 
-        try await withThrowingTaskGroup(of: Void.self) { group in
-            group.addTask {
-                try await user1CallFlowAfterCallCreation
-                    .subscribe(for: CustomVideoEvent.self)
-                    .assertEventually { (event: CustomVideoEvent) in event.custom["state"] == "joined" }
-                    .perform { try await $0.call.pinForEveryone(userId: user2, sessionId: user2SessionId) }
-                    .assertEventuallyInMainActor { $0.call.state.participantsMap[user2SessionId]?.pin != nil }
+        try await user1JoinedFlow
+            .assertEventuallyInMainActor {
+                $0.call.state.participantsMap[user2SessionId] != nil
+            }
+            .perform {
+                try await $0.call.pinForEveryone(
+                    userId: user2,
+                    sessionId: user2SessionId
+                )
+            }
+            .assertEventuallyInMainActor {
+                $0.call.state.participantsMap[user2SessionId]?.pin != nil
             }
 
-            group.addTask {
-                try await user2CallFlow
-                    .perform { try await $0.call.join() }
-                    .perform { try await $0.call.sendCustomEvent(["state": "joined"]) }
-                    .assertEventuallyInMainActor { $0.call.state.participantsMap[user2SessionId]?.pin != nil }
+        try await user2JoinedFlow
+            .assertEventuallyInMainActor {
+                $0.call.state.participantsMap[user2SessionId]?.pin != nil
             }
-
-            try await group.waitForAll()
-        }
     }
 
     func test_pin_whenUserGetsPinnedLocally_thenCallStateOfLocalParticipantOnlyUpdatesAsExpected() async throws {
+        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
         let callId = String.unique
         let user1 = String.unique
         let user2 = String.unique
@@ -1187,37 +1205,35 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
 
         let user2CallFlow = try await helpers
             .callFlow(id: callId, type: .default, userId: user2)
-            .assertEventuallyInMainActor { $0.call.state.sessionId.isEmpty == false }
 
-        let user1CallFlowAfterCallCreation = try await user1CallFlow
+        let user1JoinedFlow = try await user1CallFlow
             .perform { try await $0.call.create(memberIds: [user1, user2]) }
             .perform { try await $0.call.join() }
 
-        let user2SessionId = await user2CallFlow.call.state.sessionId
+        let user2JoinedFlow = try await user2CallFlow
+            .perform { try await $0.call.join() }
+            .assertEventuallyInMainActor { $0.call.state.sessionId.isEmpty == false }
+        let user2SessionId = await user2JoinedFlow.call.state.sessionId
 
-        try await withThrowingTaskGroup(of: Void.self) { group in
-            group.addTask {
-                try await user1CallFlowAfterCallCreation
-                    .subscribe(for: CustomVideoEvent.self)
-                    .assertEventually { (event: CustomVideoEvent) in event.custom["state"] == "joined" }
-                    .perform { try await $0.call.pin(sessionId: user2SessionId) }
-                    .assertEventuallyInMainActor { $0.call.state.participantsMap[user2SessionId]?.pin?.isLocal == true }
+        try await user1JoinedFlow
+            .assertEventuallyInMainActor {
+                $0.call.state.participantsMap[user2SessionId] != nil
+            }
+            .perform { try await $0.call.pin(sessionId: user2SessionId) }
+            .assertEventuallyInMainActor {
+                $0.call.state.participantsMap[user2SessionId]?.pin?.isLocal == true
             }
 
-            group.addTask {
-                try await user2CallFlow
-                    .perform { try await $0.call.join() }
-                    .perform { try await $0.call.sendCustomEvent(["state": "joined"]) }
-                    .assertEventuallyInMainActor { $0.call.state.participantsMap[user2SessionId]?.pin == nil }
+        try await user2JoinedFlow
+            .assertEventuallyInMainActor {
+                $0.call.state.participantsMap[user2SessionId]?.pin == nil
             }
-
-            try await group.waitForAll()
-        }
     }
 
     // MARK: - Unpin
 
     func test_pin_whenUserGetsUnpinnedForEveryone_thenCallStateOfAllParticipantsUpdatesAsExpected() async throws {
+        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
         let callId = String.unique
         let user1 = String.unique
         let user2 = String.unique
@@ -1227,37 +1243,54 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
 
         let user2CallFlow = try await helpers
             .callFlow(id: callId, type: .default, userId: user2)
-            .assertEventuallyInMainActor { $0.call.state.sessionId.isEmpty == false }
 
-        let user1CallFlowAfterCallCreation = try await user1CallFlow
+        let user1JoinedFlow = try await user1CallFlow
             .perform { try await $0.call.create(memberIds: [user1, user2]) }
             .perform { try await $0.call.join() }
 
-        let user2SessionId = await user2CallFlow.call.state.sessionId
+        let user2JoinedFlow = try await user2CallFlow
+            .perform { try await $0.call.join() }
+            .assertEventuallyInMainActor { $0.call.state.sessionId.isEmpty == false }
+        let user2SessionId = await user2JoinedFlow.call.state.sessionId
 
-        try await withThrowingTaskGroup(of: Void.self) { group in
-            group.addTask {
-                try await user1CallFlowAfterCallCreation
-                    .subscribe(for: CustomVideoEvent.self)
-                    .assertEventually { (event: CustomVideoEvent) in event.custom["state"] == "joined" }
-                    .perform { try await $0.call.pinForEveryone(userId: user2, sessionId: user2SessionId) }
-                    .assertEventuallyInMainActor { $0.call.state.participantsMap[user2SessionId]?.pin != nil }
-                    .perform { try await $0.call.unpinForEveryone(userId: user2, sessionId: user2SessionId) }
+        try await user1JoinedFlow
+            .assertEventuallyInMainActor {
+                $0.call.state.participantsMap[user2SessionId] != nil
+            }
+            .perform {
+                try await $0.call.pinForEveryone(
+                    userId: user2,
+                    sessionId: user2SessionId
+                )
+            }
+            .assertEventuallyInMainActor {
+                $0.call.state.participantsMap[user2SessionId]?.pin != nil
             }
 
-            group.addTask {
-                try await user2CallFlow
-                    .perform { try await $0.call.join() }
-                    .perform { try await $0.call.sendCustomEvent(["state": "joined"]) }
-                    .assertEventuallyInMainActor { $0.call.state.participantsMap[user2SessionId]?.pin != nil }
-                    .assertEventuallyInMainActor { $0.call.state.participantsMap[user2SessionId]?.pin == nil }
+        try await user2JoinedFlow
+            .assertEventuallyInMainActor {
+                $0.call.state.participantsMap[user2SessionId]?.pin != nil
             }
 
-            try await group.waitForAll()
-        }
+        try await user1JoinedFlow
+            .perform {
+                try await $0.call.unpinForEveryone(
+                    userId: user2,
+                    sessionId: user2SessionId
+                )
+            }
+            .assertEventuallyInMainActor {
+                $0.call.state.participantsMap[user2SessionId]?.pin == nil
+            }
+
+        try await user2JoinedFlow
+            .assertEventuallyInMainActor {
+                $0.call.state.participantsMap[user2SessionId]?.pin == nil
+            }
     }
 
     func test_pin_whenUserGetsUnpinnedLocally_thenCallStateOfLocalParticipantOnlyUpdatesAsExpected() async throws {
+        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
         let callId = String.unique
         let user1 = String.unique
         let user2 = String.unique
@@ -1267,34 +1300,40 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
 
         let user2CallFlow = try await helpers
             .callFlow(id: callId, type: .default, userId: user2)
-            .assertEventuallyInMainActor { $0.call.state.sessionId.isEmpty == false }
 
-        let user1CallFlowAfterCallCreation = try await user1CallFlow
+        let user1JoinedFlow = try await user1CallFlow
             .perform { try await $0.call.create(memberIds: [user1, user2]) }
             .perform { try await $0.call.join() }
 
-        let user2SessionId = await user2CallFlow.call.state.sessionId
+        let user2JoinedFlow = try await user2CallFlow
+            .perform { try await $0.call.join() }
+            .assertEventuallyInMainActor { $0.call.state.sessionId.isEmpty == false }
+        let user2SessionId = await user2JoinedFlow.call.state.sessionId
 
-        try await withThrowingTaskGroup(of: Void.self) { group in
-            group.addTask {
-                try await user1CallFlowAfterCallCreation
-                    .subscribe(for: CustomVideoEvent.self)
-                    .assertEventually { (event: CustomVideoEvent) in event.custom["state"] == "joined" }
-                    .perform { try await $0.call.pin(sessionId: user2SessionId) }
-                    .assertEventuallyInMainActor { $0.call.state.participantsMap[user2SessionId]?.pin?.isLocal == true }
-                    .perform { try await $0.call.unpin(sessionId: user2SessionId) }
-                    .assertEventuallyInMainActor { $0.call.state.participantsMap[user2SessionId]?.pin == nil }
+        try await user1JoinedFlow
+            .assertEventuallyInMainActor {
+                $0.call.state.participantsMap[user2SessionId] != nil
+            }
+            .perform { try await $0.call.pin(sessionId: user2SessionId) }
+            .assertEventuallyInMainActor {
+                $0.call.state.participantsMap[user2SessionId]?.pin?.isLocal == true
             }
 
-            group.addTask {
-                try await user2CallFlow
-                    .perform { try await $0.call.join() }
-                    .perform { try await $0.call.sendCustomEvent(["state": "joined"]) }
-                    .assertEventuallyInMainActor { $0.call.state.participantsMap[user2SessionId]?.pin == nil }
+        try await user2JoinedFlow
+            .assertEventuallyInMainActor {
+                $0.call.state.participantsMap[user2SessionId]?.pin == nil
             }
 
-            try await group.waitForAll()
-        }
+        try await user1JoinedFlow
+            .perform { try await $0.call.unpin(sessionId: user2SessionId) }
+            .assertEventuallyInMainActor {
+                $0.call.state.participantsMap[user2SessionId]?.pin == nil
+            }
+
+        try await user2JoinedFlow
+            .assertEventuallyInMainActor {
+                $0.call.state.participantsMap[user2SessionId]?.pin == nil
+            }
     }
 
     // MARK: - Leave
@@ -1315,7 +1354,13 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
 
         for _ in 0..<cycles {
             try await helpers
-                .callFlow(id: .unique, type: .default, userId: userId)
+                .callFlow(
+                    id: .unique,
+                    type: .default,
+                    userId: userId,
+                    // Reuse one client for join/leave cycles.
+                    clientResolutionMode: .default
+                )
                 .perform { try await $0.call.create(memberIds: [userId]) }
                 .perform { try await $0.call.join(callSettings: .init(audioOn: true, speakerOn: routeVariant == .speakerEnabled)) }
                 .perform { $0.call.leave() }

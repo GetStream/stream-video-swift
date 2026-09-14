@@ -62,6 +62,18 @@ final class AudioTrackPlayer: NSObject, @unchecked Sendable {
     }
 }
 
+// MARK: - AVAudioPlayerDelegate
+
+extension AudioTrackPlayer: AVAudioPlayerDelegate {
+
+    func audioPlayerDidFinishPlaying(
+        _ player: AVAudioPlayer,
+        successfully flag: Bool
+    ) {
+        stop()
+    }
+}
+
 extension AudioTrackPlayer: InjectionKey {
     nonisolated(unsafe) static var currentValue: AudioTrackPlayer = .init()
 }

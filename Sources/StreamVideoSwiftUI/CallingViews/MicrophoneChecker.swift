@@ -53,7 +53,7 @@ public final class MicrophoneChecker: ObservableObject {
     public func stopListening() async {
         log.warning("Method \(#function) has been deprecated and will be removed in the future.")
     }
-
+    
     // MARK: - private
 
     private func normaliseAndAppend(_ decibel: Float) -> [Float] {

@@ -2,6 +2,7 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import StreamCore
 import Foundation
 
 public final class UserInfoResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {

@@ -252,6 +252,21 @@ final class RTCAudioStore_CoordinatorTests: XCTestCase, @unchecked Sendable {
         )
     }
 
+    func test_avAudioSession_restoreOutputAfterMediaServicesReset_returnsTrue() {
+        let configuration = makeAVAudioSessionConfiguration(
+            category: .playAndRecord,
+            overrideOutputAudioPort: .speaker
+        )
+        let state = makeState(audioSessionConfiguration: configuration)
+
+        XCTAssertTrue(
+            subject.shouldExecute(
+                action: .avAudioSession(.restoreOutputAudioPortAfterMediaServicesReset),
+                state: state
+            )
+        )
+    }
+
     func test_webRTCAudioSession_setAudioEnabled_sameValue_returnsFalse() {
         let configuration = makeWebRTCAudioSessionConfiguration(isAudioEnabled: true)
         let state = makeState(webRTCAudioSessionConfiguration: configuration)

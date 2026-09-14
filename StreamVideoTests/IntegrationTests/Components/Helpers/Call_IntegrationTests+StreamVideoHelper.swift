@@ -42,7 +42,8 @@ extension Call_IntegrationTests.Helpers {
             userId: String,
             connectMode: ConnectMode,
             clientResolutionMode: ClientResolutionMode,
-            clientRegisterMode: ClientRegisterMode
+            clientRegisterMode: ClientRegisterMode,
+            streamVideoEnvironment: StreamVideo.Environment = .silentAudioDevice
         ) async throws -> StreamVideo {
             let autoConnectOnInit = {
                 switch connectMode {
@@ -56,17 +57,20 @@ extension Call_IntegrationTests.Helpers {
             }()
 
             let currentStreamVideo = StreamVideoProviderKey.currentValue
-            let result = {
-                if clientResolutionMode == .default, let existingClient = registeredClients[userId] {
+            let result = await {
+                let existingClient = registeredClients[userId]
+                if clientResolutionMode == .default, let existingClient {
                     return existingClient
                 } else {
+                    await existingClient?.disconnect()
                     return StreamVideo(
                         apiKey: apiKey,
                         user: User(id: userId),
                         token: .init(rawValue: token),
                         videoConfig: videoConfig,
-                        pushNotificationsConfig: pushNotificationConfig,
                         tokenProvider: { _ in },
+                        pushNotificationsConfig: pushNotificationConfig,
+                        environment: streamVideoEnvironment,
                         autoConnectOnInit: autoConnectOnInit
                     )
                 }
@@ -114,5 +118,39 @@ extension Call_IntegrationTests.Helpers {
         func client(for userId: String) -> StreamVideo? {
             registeredClients[userId]
         }
+    }
+}
+
+extension StreamVideo.Environment {
+    static var silentAudioDevice: Self {
+        var environment = Self()
+        environment.callControllerBuilder = {
+            defaultAPI,
+                user,
+                callId,
+                callType,
+                apiKey,
+                videoConfig,
+                initialCallSettings,
+                cachedLocation in
+            let peerConnectionFactory = PeerConnectionFactory.build(
+                audioProcessingModule: videoConfig.audioProcessingModule,
+                audioEngineAvailabilityOverride: false
+            )
+            return CallController(
+                defaultAPI: defaultAPI,
+                user: user,
+                callId: callId,
+                callType: callType,
+                apiKey: apiKey,
+                videoConfig: videoConfig,
+                initialCallSettings: initialCallSettings,
+                cachedLocation: cachedLocation,
+                webRTCCoordinatorFactory: WebRTCCoordinatorFactory(
+                    peerConnectionFactory: peerConnectionFactory
+                )
+            )
+        }
+        return environment
     }
 }

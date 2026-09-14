@@ -43,7 +43,7 @@ final class WebRTCSFUFullObserver_Tests: XCTestCase, @unchecked Sendable {
 
         var error = Stream_Video_Sfu_Event_Error()
         error.error.code = .sfuFull
-        sfuStack.receiveEvent(.sfuEvent(.error(error)))
+        sfuStack.receiveEvent(.error(error))
 
         await fulfillment(of: [transitionExpectation], timeout: defaultTimeout)
         XCTAssertEqual(try XCTUnwrap(subject.shouldMigrateError).error.code, .sfuFull)
@@ -52,7 +52,7 @@ final class WebRTCSFUFullObserver_Tests: XCTestCase, @unchecked Sendable {
     func test_publisher_whenErrorCodeIsNotSFUFull_doesNotEmitOrUpdateState() async {
         var error = Stream_Video_Sfu_Event_Error()
         error.error.code = .participantSignalLost
-        sfuStack.receiveEvent(.sfuEvent(.error(error)))
+        sfuStack.receiveEvent(.error(error))
 
         await wait(for: 0.2)
         XCTAssertNil(subject.shouldMigrateError)

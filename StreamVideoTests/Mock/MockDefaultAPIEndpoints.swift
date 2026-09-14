@@ -54,10 +54,12 @@ final class MockDefaultAPIEndpoints: DefaultAPIEndpoints, Mockable, @unchecked S
         case stopRTMPBroadcast
         case startHLSBroadcasting
         case startClosedCaptions
+        case startFrameRecording
         case startRecording
         case startTranscription
         case stopHLSBroadcasting
         case stopClosedCaptions
+        case stopFrameRecording
         case stopLive
         case stopRecording
         case stopTranscription
@@ -76,6 +78,7 @@ final class MockDefaultAPIEndpoints: DefaultAPIEndpoints, Mockable, @unchecked S
         case videoConnect
         case ringCall
         case clientCallEvent
+        case getCallRingState
     }
 
     enum MockFunctionInputKey: Payloadable {
@@ -106,10 +109,12 @@ final class MockDefaultAPIEndpoints: DefaultAPIEndpoints, Mockable, @unchecked S
         case stopRTMPBroadcast(type: String, id: String, name: String)
         case startHLSBroadcasting(type: String, id: String)
         case startClosedCaptions(type: String, id: String, request: StartClosedCaptionsRequest)
+        case startFrameRecording(type: String, id: String, request: StartFrameRecordingRequest)
         case startRecording(type: String, id: String, request: StartRecordingRequest)
         case startTranscription(type: String, id: String, request: StartTranscriptionRequest)
         case stopHLSBroadcasting(type: String, id: String)
         case stopClosedCaptions(type: String, id: String, request: StopClosedCaptionsRequest)
+        case stopFrameRecording(type: String, id: String)
         case stopLive(type: String, id: String, request: StopLiveRequest)
         case stopRecording(type: String, id: String)
         case stopTranscription(type: String, id: String, request: StopTranscriptionRequest)
@@ -128,6 +133,7 @@ final class MockDefaultAPIEndpoints: DefaultAPIEndpoints, Mockable, @unchecked S
         case videoConnect
         case ringCall(request: RingCallRequest)
         case clientCallEvent(request: ReportClientEventRequest)
+        case getCallRingState(type: String, id: String, callSessionId: String)
 
         var payload: Any {
             switch self {
@@ -185,6 +191,8 @@ final class MockDefaultAPIEndpoints: DefaultAPIEndpoints, Mockable, @unchecked S
                 return (type, id)
             case let .startClosedCaptions(type, id, request):
                 return (type, id, request)
+            case let .startFrameRecording(type, id, request):
+                return (type, id, request)
             case let .startRecording(type, id, request):
                 return (type, id, request)
             case let .startTranscription(type, id, request):
@@ -193,6 +201,8 @@ final class MockDefaultAPIEndpoints: DefaultAPIEndpoints, Mockable, @unchecked S
                 return (type, id)
             case let .stopClosedCaptions(type, id, request):
                 return (type, id, request)
+            case let .stopFrameRecording(type, id):
+                return (type, id)
             case let .stopLive(type, id, request):
                 return (type, id, request)
             case let .stopRecording(type, id):
@@ -229,6 +239,8 @@ final class MockDefaultAPIEndpoints: DefaultAPIEndpoints, Mockable, @unchecked S
                 return request
             case let .clientCallEvent(request: request):
                 return request
+            case let .getCallRingState(type, id, callSessionId):
+                return (type, id, callSessionId)
             }
         }
     }
@@ -445,6 +457,17 @@ final class MockDefaultAPIEndpoints: DefaultAPIEndpoints, Mockable, @unchecked S
         return try stubbedResult(for: .startClosedCaptions)
     }
 
+    func startFrameRecording(
+        type: String,
+        id: String,
+        startFrameRecordingRequest: StartFrameRecordingRequest
+    ) async throws -> StartFrameRecordingResponse {
+        stubbedFunctionInput[.startFrameRecording]?.append(
+            .startFrameRecording(type: type, id: id, request: startFrameRecordingRequest)
+        )
+        return try stubbedResult(for: .startFrameRecording)
+    }
+
     func startRecording(
         type: String,
         id: String,
@@ -482,6 +505,11 @@ final class MockDefaultAPIEndpoints: DefaultAPIEndpoints, Mockable, @unchecked S
             .stopClosedCaptions(type: type, id: id, request: stopClosedCaptionsRequest)
         )
         return try stubbedResult(for: .stopClosedCaptions)
+    }
+
+    func stopFrameRecording(type: String, id: String) async throws -> StopFrameRecordingResponse {
+        stubbedFunctionInput[.stopFrameRecording]?.append(.stopFrameRecording(type: type, id: id))
+        return try stubbedResult(for: .stopFrameRecording)
     }
 
     func stopLive(type: String, id: String, stopLiveRequest: StopLiveRequest) async throws -> StopLiveResponse {
@@ -601,5 +629,12 @@ final class MockDefaultAPIEndpoints: DefaultAPIEndpoints, Mockable, @unchecked S
             return value
         }
         return try stubbedResult(for: .clientCallEvent)
+    }
+
+    func getCallRingState(type: String, id: String, callSessionId: String) async throws -> GetCallRingStateResponse {
+        stubbedFunctionInput[.getCallRingState]?.append(
+            .getCallRingState(type: type, id: id, callSessionId: callSessionId)
+        )
+        return try stubbedResult(for: .getCallRingState)
     }
 }

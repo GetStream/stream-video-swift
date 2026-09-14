@@ -452,39 +452,21 @@ extension WebRTCCoordinator.StateMachine.Stage {
             try Task.checkCancellation()
 
             if !isFastReconnecting {
-                try await withThrowingTaskGroup(of: Void.self) { [weak self, context] group in
-                    group.addTask { [context] in
-                        /// Configures the audio session for the current call using the provided
-                        /// join source. This ensures the session setup reflects whether the
-                        /// join was triggered in-app or via CallKit and applies the correct
-                        /// audio routing and category.
-                        try await coordinator.stateAdapter.configureAudioSession(
-                            source: context.joinSource
-                        )
-                    }
+                try await coordinator.stateAdapter.configureAudioSession(
+                    source: context.joinSource
+                )
 
-                    group.addTask { [weak self, context] in
-                        /// Before we move on configuring the PeerConnections we need to ensure
-                        /// that the audioSession has been activated and configured correctly.
-                        ///
-                        /// When the join was initiated from CallKit, activation only happens
-                        /// after the call has fully joined and the pending answer action has
-                        /// been fulfilled, so waiting here would always time out. We skip the
-                        /// wait and let CallKit's later activation start audio once it arrives.
-                        if case .callKit = context.joinSource {
-                            // No-op: CallKit activates the session post-join.
-                        } else {
-                            await self?.ensureAudioSessionIsReady()
-                        }
-
-                        /// Configures all peer connections after the audio session is ready.
-                        /// Ensures signaling, media, and routing are correctly established for
-                        /// all tracks as part of the join process.
-                        try await coordinator.stateAdapter.configurePeerConnections()
-                    }
-
-                    try await group.waitForAll()
+                /// CallKit activates the session only after the pending answer
+                /// action is fulfilled, so waiting here would always time out.
+                if case .callKit = context.joinSource {
+                    // No-op: CallKit activates the session post-join.
+                } else {
+                    await ensureAudioSessionIsReady()
                 }
+
+                try Task.checkCancellation()
+
+                try await coordinator.stateAdapter.configurePeerConnections()
 
                 try Task.checkCancellation()
 

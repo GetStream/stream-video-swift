@@ -185,7 +185,7 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
     func test_streamVideo_ringCallReject() async throws {
         let httpClient = httpClientWithGetCallResponse()
         let rejectCallResponse = RejectCallResponse(duration: "1")
-        let data = try! JSONEncoder.default.encode(rejectCallResponse)
+        let data = try! JSONEncoder.streamCore.encode(rejectCallResponse)
         let streamVideo = StreamVideo.mock(httpClient: httpClient)
         self.streamVideo = streamVideo
         let call = streamVideo.call(callType: callType, callId: callId)
@@ -224,7 +224,7 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
             members: [],
             ownCapabilities: []
         )
-        httpClient.dataResponses = [try JSONEncoder.default.encode(getCallResponse)]
+        httpClient.dataResponses = [try JSONEncoder.streamCore.encode(getCallResponse)]
 
         nonisolated(unsafe) weak var previousCall: Call?
         do {
@@ -346,6 +346,43 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
         XCTAssert(streamVideo.state.connection == .initialized)
     }
 
+    // MARK: - getEdges
+
+    func test_streamVideo_getEdges_returnsUnwrappedEdges() async throws {
+        // Given
+        let expected = makeEdgeResponse()
+        let httpClient = HTTPClient_Mock()
+        httpClient.dataResponses = [
+            try JSONEncoder.streamCore.encode(
+                GetEdgesResponse(duration: "1", edges: [expected])
+            )
+        ]
+        let streamVideo = StreamVideo.mock(httpClient: httpClient)
+        self.streamVideo = streamVideo
+
+        // When
+        let edges = try await streamVideo.getEdges()
+
+        // Then
+        XCTAssertEqual(edges, [expected])
+    }
+
+    func test_streamVideo_getEdges_propagatesFailure() async throws {
+        // Given
+        let httpClient = HTTPClient_Mock()
+        let streamVideo = StreamVideo.mock(httpClient: httpClient)
+        self.streamVideo = streamVideo
+
+        // When
+        do {
+            _ = try await streamVideo.getEdges()
+            XCTFail("getEdges should fail when no response is available")
+        } catch {
+            // Then
+            XCTAssertEqual(httpClient.requestCounter, 1)
+        }
+    }
+
     // MARK: - Event Publisher & Subscribe Tests
 
     func test_eventPublisher_filtersOnlyCoordinatorEvents() async {
@@ -367,7 +404,9 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
         // When
         let coordinatorEvent = VideoEvent.typeCallAcceptedEvent(.dummy(callCid: "cid"))
         let internalEvent = WrappedEvent.internalEvent(WSConnected())
-        streamVideo.eventNotificationCenter.process(.coordinatorEvent(coordinatorEvent))
+        streamVideo.eventNotificationCenter.process(
+            WrappedEvent.coordinatorEvent(coordinatorEvent)
+        )
         streamVideo.eventNotificationCenter.process(internalEvent)
         await fulfillment { receivedEvents.count == 1 }
 
@@ -397,7 +436,7 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
         // When
         let event = CallAcceptedEvent.dummy()
         streamVideo.eventNotificationCenter.process(
-            .coordinatorEvent(.typeCallAcceptedEvent(event))
+            WrappedEvent.coordinatorEvent(.typeCallAcceptedEvent(event))
         )
 
         await fulfillment { receivedEvents.count == 1 }
@@ -434,7 +473,9 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
                 }
                 group.addTask {
                     await self.wait(for: 0.5)
-                    streamVideo.eventNotificationCenter.process(.coordinatorEvent(event))
+                    streamVideo.eventNotificationCenter.process(
+                        WrappedEvent.coordinatorEvent(event)
+                    )
                 }
             }
         }
@@ -468,7 +509,9 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
                 }
                 group.addTask {
                     await self.wait(for: 0.5)
-                    streamVideo.eventNotificationCenter.process(.coordinatorEvent(event))
+                    streamVideo.eventNotificationCenter.process(
+                        WrappedEvent.coordinatorEvent(event)
+                    )
                 }
             }
         }
@@ -497,6 +540,21 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
         )
     }
 
+    private func makeEdgeResponse() -> EdgeResponse {
+        EdgeResponse(
+            continentCode: "EU",
+            countryIsoCode: "NL",
+            green: 1,
+            id: "amsterdam",
+            latencyTestUrl: "https://latency.stream-io-video.com/amsterdam",
+            latitude: 52.3676,
+            longitude: 4.9041,
+            red: 3,
+            subdivisionIsoCode: "NH",
+            yellow: 2
+        )
+    }
+
     private func httpClientWithGetCallResponse() -> HTTPClient_Mock {
         let httpClient = HTTPClient_Mock()
         let callResponse = makeCallResponse()
@@ -506,7 +564,7 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
             members: [],
             ownCapabilities: []
         )
-        let data = try! JSONEncoder.default.encode(getCallResponse)
+        let data = try! JSONEncoder.streamCore.encode(getCallResponse)
         httpClient.dataResponses = [data]
         return httpClient
     }

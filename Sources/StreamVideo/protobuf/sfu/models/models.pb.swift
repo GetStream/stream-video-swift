@@ -996,6 +996,11 @@ struct Stream_Video_Sfu_Models_CallState {
   /// Pins are ordered in descending order (most important first).
   var pins: [Stream_Video_Sfu_Models_Pin] = []
 
+  /// e2ee_enabled is true when the call uses end-to-end encryption. Clients
+  /// must enable their frame encryptor; the SFU forwards encrypted frames
+  /// opaquely and server-side recording/transcription/broadcasting are disabled.
+  var e2EeEnabled: Bool = false
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
@@ -1338,6 +1343,8 @@ struct Stream_Video_Sfu_Models_TrackInfo {
   mutating func clearCodec() {self._codec = nil}
 
   var publishOptionID: Int32 = 0
+
+  var selfSubAudioVideo: Bool = false
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -2077,6 +2084,7 @@ extension Stream_Video_Sfu_Models_CallState: SwiftProtobuf.Message, SwiftProtobu
     2: .standard(proto: "started_at"),
     3: .standard(proto: "participant_count"),
     4: .same(proto: "pins"),
+    5: .standard(proto: "e2ee_enabled"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -2089,6 +2097,7 @@ extension Stream_Video_Sfu_Models_CallState: SwiftProtobuf.Message, SwiftProtobu
       case 2: try { try decoder.decodeSingularMessageField(value: &self._startedAt) }()
       case 3: try { try decoder.decodeSingularMessageField(value: &self._participantCount) }()
       case 4: try { try decoder.decodeRepeatedMessageField(value: &self.pins) }()
+      case 5: try { try decoder.decodeSingularBoolField(value: &self.e2EeEnabled) }()
       default: break
       }
     }
@@ -2111,6 +2120,9 @@ extension Stream_Video_Sfu_Models_CallState: SwiftProtobuf.Message, SwiftProtobu
     if !self.pins.isEmpty {
       try visitor.visitRepeatedMessageField(value: self.pins, fieldNumber: 4)
     }
+    if self.e2EeEnabled != false {
+      try visitor.visitSingularBoolField(value: self.e2EeEnabled, fieldNumber: 5)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -2119,6 +2131,7 @@ extension Stream_Video_Sfu_Models_CallState: SwiftProtobuf.Message, SwiftProtobu
     if lhs._startedAt != rhs._startedAt {return false}
     if lhs._participantCount != rhs._participantCount {return false}
     if lhs.pins != rhs.pins {return false}
+    if lhs.e2EeEnabled != rhs.e2EeEnabled {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -2735,6 +2748,7 @@ extension Stream_Video_Sfu_Models_TrackInfo: SwiftProtobuf.Message, SwiftProtobu
     10: .same(proto: "muted"),
     11: .same(proto: "codec"),
     12: .standard(proto: "publish_option_id"),
+    13: .standard(proto: "self_sub_audio_video"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -2753,6 +2767,7 @@ extension Stream_Video_Sfu_Models_TrackInfo: SwiftProtobuf.Message, SwiftProtobu
       case 10: try { try decoder.decodeSingularBoolField(value: &self.muted) }()
       case 11: try { try decoder.decodeSingularMessageField(value: &self._codec) }()
       case 12: try { try decoder.decodeSingularInt32Field(value: &self.publishOptionID) }()
+      case 13: try { try decoder.decodeSingularBoolField(value: &self.selfSubAudioVideo) }()
       default: break
       }
     }
@@ -2793,6 +2808,9 @@ extension Stream_Video_Sfu_Models_TrackInfo: SwiftProtobuf.Message, SwiftProtobu
     if self.publishOptionID != 0 {
       try visitor.visitSingularInt32Field(value: self.publishOptionID, fieldNumber: 12)
     }
+    if self.selfSubAudioVideo != false {
+      try visitor.visitSingularBoolField(value: self.selfSubAudioVideo, fieldNumber: 13)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -2807,6 +2825,7 @@ extension Stream_Video_Sfu_Models_TrackInfo: SwiftProtobuf.Message, SwiftProtobu
     if lhs.muted != rhs.muted {return false}
     if lhs._codec != rhs._codec {return false}
     if lhs.publishOptionID != rhs.publishOptionID {return false}
+    if lhs.selfSubAudioVideo != rhs.selfSubAudioVideo {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

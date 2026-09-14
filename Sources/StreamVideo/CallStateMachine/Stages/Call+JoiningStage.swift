@@ -104,16 +104,32 @@ extension Call.StateMachine.Stage {
                     call.leave(reason: "join.interception.failed")
                     transitionErrorOrLog(error)
                 } catch {
+                    // `joinCall` can still throw TimeOutError after leave.
+                    if Task.isCancelled {
+                        return
+                    }
+
                     var input = input
                     input.currentNumberOfRetries += 1
 
                     if input.currentNumberOfRetries < input.retryPolicy.maxRetries {
-                        let delay = UInt64((input.retryPolicy.delay(input.currentNumberOfRetries)) * 1_000_000_000)
+                        let delay = UInt64(
+                            (input.retryPolicy.delay(input.currentNumberOfRetries))
+                                * 1_000_000_000
+                        )
                         log.error(
                             "Joining call id:\(call.callId) type:\(call.callType) failed. Will retry after a delay.",
                             error: error
                         )
-                        try? await Task.sleep(nanoseconds: delay)
+                        // `try? Task.sleep` swallowed CancellationError
+                        // and re-entered `.joining` after leave (CI hang).
+                        // Cancel must return.
+                        do {
+                            try await Task.sleep(nanoseconds: delay)
+                            try Task.checkCancellation()
+                        } catch is CancellationError {
+                            return
+                        }
                         transitionOrError(.joining(call, input: .join(input)))
                     } else {
                         input.deliverySubject.send(completion: .failure(error))

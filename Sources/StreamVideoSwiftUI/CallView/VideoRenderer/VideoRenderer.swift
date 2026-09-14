@@ -134,17 +134,27 @@ public class VideoRenderer: RTCVideoRenderingView, @unchecked Sendable {
 
 extension VideoRenderer {
 
-    /// Handles rendering view updates for a specified participant's video track.
+    /// Attaches a participant's current video track and propagates size updates.
+    ///
+    /// When a track exists, the renderer retains the participant, attaches the
+    /// track, and reports a changed rendered size asynchronously. Diagnostic
+    /// logging is restricted to immutable track metadata so rendering does not
+    /// wait for synchronized WebRTC state during a SwiftUI view update.
+    ///
     /// - Parameters:
-    ///   - participant: The participant whose video track is being handled.
-    ///   - onTrackSizeUpdate: A closure to be called when the track size is updated.
+    ///   - participant: The participant whose current track should be rendered.
+    ///   - onTrackSizeUpdate: Called when the rendered size differs from the
+    ///     participant's stored track size.
+    /// - Important: This method can run on the main thread during SwiftUI
+    ///   updates. Reading `RTCVideoTrack.isEnabled` here is unsafe because its
+    ///   proxy may wait for WebRTC's signaling thread and block UI updates.
     public func handleViewRendering(
         for participant: CallParticipant,
         onTrackSizeUpdate: @escaping @Sendable (CGSize, CallParticipant) -> Void
     ) {
         if let track = participant.track {
             log.info(
-                "Found \(track.kind) track:\(track.trackId) for \(participant.name) and will add on \(type(of: self)):\(identifier)) isMuted:\(!track.isEnabled)",
+                "Found \(track.kind) track:\(track.trackId) for \(participant.name) and will add on \(type(of: self)):\(identifier)",
                 subsystems: .other
             )
             self.participant = participant
