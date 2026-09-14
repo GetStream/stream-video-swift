@@ -2,6 +2,7 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import Foundation
 @testable import StreamVideo
 import XCTest
@@ -1624,17 +1625,24 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
             .assertEventuallyInMainActor {
                 $0.call.microphone.audioBitrateProfile == .musicHighQuality
             }
-            .performWithoutValueOverride { _ in
+            .performWithoutValueOverride { flow in
+                // Subscribe before posting: rejoin can return to
+                // `.connected` before a later poll observes
+                // `.reconnecting`. `relay()` matches CallController's
+                // join-response race; `dropFirst()` ignores the
+                // already-connected value.
+                let statuses = await MainActor.run {
+                    flow.call.state.$reconnectionStatus
+                        .dropFirst()
+                        .relay()
+                }
                 NotificationCenter.default.post(
                     name: .init("video.getstream.io.reconnect.rejoin"),
                     object: nil
                 )
-            }
-            .assertEventuallyInMainActor {
-                $0.call.state.reconnectionStatus == .reconnecting
-            }
-            .assertEventuallyInMainActor(timeout: 30) {
-                $0.call.state.reconnectionStatus == .connected
+                _ = try await statuses
+                    .filter { $0 == .connected }
+                    .nextValue(timeout: 40)
             }
             .assertEventuallyInMainActor {
                 $0.call.microphone.audioBitrateProfile == .musicHighQuality
