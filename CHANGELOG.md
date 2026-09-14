@@ -4,6 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### 🔄 Changed
+
+# [1.52.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.52.0)
+_September 09, 2026_
+
 ### ✅ Added
 - Added support for Xcode 27. [#1263](https://github.com/GetStream/stream-video-swift/pull/1263)
 - `StreamVideo.getEdges()` returns the list of edges (datacenters) available for hosting calls [#1247](https://github.com/GetStream/stream-video-swift/pull/1247).
