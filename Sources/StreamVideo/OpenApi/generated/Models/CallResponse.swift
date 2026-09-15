@@ -78,7 +78,7 @@ public final class CallResponse: @unchecked Sendable, Codable, JSONEncodable, Ha
         self.updatedAt = updatedAt
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case backstage
         case blockedUserIds = "blocked_user_ids"
         case captioning

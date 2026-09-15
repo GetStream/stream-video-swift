@@ -12,7 +12,7 @@ public final class EgressHLSResponse: @unchecked Sendable, Codable, JSONEncodabl
         self.playlistUrl = playlistUrl
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case playlistUrl = "playlist_url"
     }
     

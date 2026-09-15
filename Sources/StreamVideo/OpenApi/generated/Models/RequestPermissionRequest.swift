@@ -12,7 +12,7 @@ public final class RequestPermissionRequest: @unchecked Sendable, Codable, JSONE
         self.permissions = permissions
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case permissions
     }
     

@@ -18,7 +18,7 @@ public final class ConnectedEvent: @unchecked Sendable, Event, Codable, JSONEnco
         self.me = me
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case connectionId = "connection_id"
         case createdAt = "created_at"
         case me

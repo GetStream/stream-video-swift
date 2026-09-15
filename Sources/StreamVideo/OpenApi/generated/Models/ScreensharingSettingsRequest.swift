@@ -16,7 +16,7 @@ public final class ScreensharingSettingsRequest: @unchecked Sendable, Codable, J
         self.targetResolution = targetResolution
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case accessRequestEnabled = "access_request_enabled"
         case enabled
         case targetResolution = "target_resolution"

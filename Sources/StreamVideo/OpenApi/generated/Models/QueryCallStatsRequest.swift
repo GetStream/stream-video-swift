@@ -27,7 +27,7 @@ public final class QueryCallStatsRequest: @unchecked Sendable, Codable, JSONEnco
         self.sort = sort
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case filterConditions = "filter_conditions"
         case limit
         case next

@@ -14,7 +14,7 @@ public final class StartHLSBroadcastingResponse: @unchecked Sendable, Codable, J
         self.playlistUrl = playlistUrl
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case duration
         case playlistUrl = "playlist_url"
     }

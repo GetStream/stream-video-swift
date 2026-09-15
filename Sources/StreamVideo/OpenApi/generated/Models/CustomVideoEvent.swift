@@ -20,7 +20,7 @@ public final class CustomVideoEvent: @unchecked Sendable, Event, Codable, JSONEn
         self.user = user
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case callCid = "call_cid"
         case createdAt = "created_at"
         case custom

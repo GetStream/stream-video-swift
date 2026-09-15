@@ -26,7 +26,7 @@ public final class GetCallResponse: @unchecked Sendable, Codable, JSONEncodable,
         self.ownCapabilities = ownCapabilities
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case call
         case duration
         case members

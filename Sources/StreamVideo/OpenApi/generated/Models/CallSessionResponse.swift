@@ -47,7 +47,7 @@ public final class CallSessionResponse: @unchecked Sendable, Codable, JSONEncoda
         self.timerEndsAt = timerEndsAt
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case acceptedBy = "accepted_by"
         case anonymousParticipantCount = "anonymous_participant_count"
         case endedAt = "ended_at"

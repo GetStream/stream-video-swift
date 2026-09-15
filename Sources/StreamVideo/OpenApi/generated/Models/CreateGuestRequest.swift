@@ -12,7 +12,7 @@ public final class CreateGuestRequest: @unchecked Sendable, Codable, JSONEncodab
         self.user = user
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case user
     }
     

@@ -20,7 +20,7 @@ public final class CallUserMutedEvent: @unchecked Sendable, Event, Codable, JSON
         self.mutedUserIds = mutedUserIds
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case callCid = "call_cid"
         case createdAt = "created_at"
         case fromUserId = "from_user_id"

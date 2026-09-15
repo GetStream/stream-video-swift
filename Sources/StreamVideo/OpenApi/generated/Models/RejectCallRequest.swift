@@ -12,7 +12,7 @@ public final class RejectCallRequest: @unchecked Sendable, Codable, JSONEncodabl
         self.reason = reason
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case reason
     }
     

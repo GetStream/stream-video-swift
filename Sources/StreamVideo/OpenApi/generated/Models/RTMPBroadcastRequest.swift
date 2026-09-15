@@ -44,7 +44,7 @@ public final class RTMPBroadcastRequest: @unchecked Sendable, Codable, JSONEncod
         self.streamUrl = streamUrl
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case layout
         case name
         case quality

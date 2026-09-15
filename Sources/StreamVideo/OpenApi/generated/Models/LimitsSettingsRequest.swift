@@ -14,7 +14,7 @@ public final class LimitsSettingsRequest: @unchecked Sendable, Codable, JSONEnco
         self.maxParticipants = maxParticipants
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case maxDurationSeconds = "max_duration_seconds"
         case maxParticipants = "max_participants"
     }

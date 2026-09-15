@@ -12,7 +12,7 @@ public final class ThumbnailResponse: @unchecked Sendable, Codable, JSONEncodabl
         self.imageUrl = imageUrl
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case imageUrl = "image_url"
     }
     

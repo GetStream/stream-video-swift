@@ -18,7 +18,7 @@ public final class CallLiveStartedEvent: @unchecked Sendable, Event, Codable, JS
         self.createdAt = createdAt
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case call
         case callCid = "call_cid"
         case createdAt = "created_at"

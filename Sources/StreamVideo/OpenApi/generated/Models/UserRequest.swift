@@ -30,7 +30,7 @@ public final class UserRequest: @unchecked Sendable, Codable, JSONEncodable, Has
         self.name = name
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case custom
         case id
         case image

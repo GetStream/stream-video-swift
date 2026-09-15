@@ -12,7 +12,7 @@ public final class ThumbnailsSettingsRequest: @unchecked Sendable, Codable, JSON
         self.enabled = enabled
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case enabled
     }
     

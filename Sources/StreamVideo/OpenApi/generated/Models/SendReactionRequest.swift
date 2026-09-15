@@ -17,7 +17,7 @@ public final class SendReactionRequest: @unchecked Sendable, Codable, JSONEncoda
         self.type = type
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case custom
         case emojiCode = "emoji_code"
         case type

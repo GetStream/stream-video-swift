@@ -29,7 +29,7 @@ public final class EncryptionSettingsResponse: @unchecked Sendable, Codable, JSO
         self.mode = mode
     }
 
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case mode
     }
 }

@@ -12,7 +12,7 @@ public final class StopClosedCaptionsRequest: @unchecked Sendable, Codable, JSON
         self.stopTranscription = stopTranscription
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case stopTranscription = "stop_transcription"
     }
     

@@ -7,7 +7,7 @@ public final class RawRecordingResponse: @unchecked Sendable, Codable, JSONEncod
         self.status = status
     }
 
-public enum CodingKeys: String, CodingKey, CaseIterable {
+public enum CodingKeys: String, CodingKey {
     case status
 }
 

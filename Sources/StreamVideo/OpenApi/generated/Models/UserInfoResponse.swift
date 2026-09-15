@@ -21,7 +21,7 @@ public final class UserInfoResponse: @unchecked Sendable, Codable, JSONEncodable
         self.roles = roles
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case custom
         case id
         case image

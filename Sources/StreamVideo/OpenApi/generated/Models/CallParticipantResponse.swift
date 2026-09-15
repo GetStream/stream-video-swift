@@ -18,7 +18,7 @@ public final class CallParticipantResponse: @unchecked Sendable, Codable, JSONEn
         self.userSessionId = userSessionId
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case joinedAt = "joined_at"
         case role
         case user

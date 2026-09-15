@@ -19,7 +19,7 @@ public final class AppEventResponse: @unchecked Sendable, Codable, JSONEncodable
         self.name = name
     }
 
-public enum CodingKeys: String, CodingKey, CaseIterable {
+public enum CodingKeys: String, CodingKey {
     case asyncUrlEnrichEnabled = "async_url_enrich_enabled"
     case autoTranslationEnabled = "auto_translation_enabled"
     case fileUploadConfig = "file_upload_config"

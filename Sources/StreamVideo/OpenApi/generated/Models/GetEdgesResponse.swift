@@ -14,7 +14,7 @@ public final class GetEdgesResponse: @unchecked Sendable, Codable, JSONEncodable
         self.edges = edges
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case duration
         case edges
     }

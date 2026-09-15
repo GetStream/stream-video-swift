@@ -12,7 +12,7 @@ public final class SessionSettingsRequest: @unchecked Sendable, Codable, JSONEnc
         self.inactivityTimeoutSeconds = inactivityTimeoutSeconds
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case inactivityTimeoutSeconds = "inactivity_timeout_seconds"
     }
     

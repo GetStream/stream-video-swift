@@ -29,7 +29,7 @@ public final class GetOrCreateCallResponse: @unchecked Sendable, Codable, JSONEn
         self.ownCapabilities = ownCapabilities
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case call
         case created
         case duration

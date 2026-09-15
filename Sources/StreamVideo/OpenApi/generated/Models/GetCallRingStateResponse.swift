@@ -39,7 +39,7 @@ public final class GetCallRingStateResponse: @unchecked Sendable, Codable, JSONE
         self.sessionStartedAt = sessionStartedAt
     }
 
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case acceptedBy = "accepted_by"
         case callCid = "call_cid"
         case callEndedAt = "call_ended_at"

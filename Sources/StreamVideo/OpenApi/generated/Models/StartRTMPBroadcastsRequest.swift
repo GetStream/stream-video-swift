@@ -12,7 +12,7 @@ public final class StartRTMPBroadcastsRequest: @unchecked Sendable, Codable, JSO
         self.broadcasts = broadcasts
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case broadcasts
     }
     

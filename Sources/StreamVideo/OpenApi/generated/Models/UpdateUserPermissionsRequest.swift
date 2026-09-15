@@ -16,7 +16,7 @@ public final class UpdateUserPermissionsRequest: @unchecked Sendable, Codable, J
         self.userId = userId
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case grantPermissions = "grant_permissions"
         case revokePermissions = "revoke_permissions"
         case userId = "user_id"
