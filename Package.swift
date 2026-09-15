@@ -22,7 +22,7 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-protobuf.git", "1.30.0"..."1.31.0"),
+        .package(url: "https://github.com/apple/swift-protobuf.git", "1.38.0"..."1.39.0"),
         .package(url: "https://github.com/GetStream/stream-video-swift-webrtc.git", exact: "145.15.0"),
         .package(url: "https://github.com/GetStream/stream-core-swift.git", from: "0.10.1")
     ],
