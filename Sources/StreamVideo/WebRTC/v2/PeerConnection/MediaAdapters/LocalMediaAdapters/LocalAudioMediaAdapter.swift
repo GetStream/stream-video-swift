@@ -44,7 +44,10 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
 
     /// The primary audio track for this adapter.
-    let primaryTrack: RTCAudioTrack
+    ///
+    /// Replaced when the capture profile crosses music so unmute
+    /// `SetAudioSend` reads music source options (NS/HPF off).
+    private(set) var primaryTrack: RTCAudioTrack
 
     /// A publisher that emits events related to audio tracks.
     let subject: PassthroughSubject<TrackEvent, Never>
@@ -79,7 +82,9 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         self.subject = subject
 
         // Create the primary audio track for the session.
-        let source = peerConnectionFactory.makeAudioSource(.defaultConstraints)
+        let source = peerConnectionFactory.makeAudioSource(
+            .audioCaptureConstraints(for: .voiceStandard)
+        )
         let track = peerConnectionFactory.makeAudioTrack(source: source)
         primaryTrack = track
         streamIds = ["\(sessionID):audio"]
@@ -342,8 +347,10 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     func setMaxBitrate(for profile: AudioBitrateProfile) async {
         try? await processingQueue.addSynchronousTaskOperation { [weak self] in
             guard let self else { return }
+            let previous = audioBitrateProfile
             audioBitrateProfile = profile
             applyCurrentProfileBitrate()
+            rebuildAudioSourceIfNeeded(from: previous, to: profile)
             if profile == .voiceStandard {
                 restoredBitrates.removeAll()
             }
@@ -381,6 +388,50 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         }
         transceiverStorage.set(transceiver, track: track, for: options)
         applyProfileBitrate(for: options, on: transceiver)
+    }
+
+    /// `LocalAudioSource` copies goog* flags at create and has no setter.
+    /// Crossing music rebuilds the source so unmute `SetOptions` matches
+    /// the profile (same idea as JS re-gUM with music constraints).
+    private func rebuildAudioSourceIfNeeded(
+        from previous: AudioBitrateProfile,
+        to profile: AudioBitrateProfile
+    ) {
+        guard previous.isMusic != profile.isMusic else { return }
+
+        let source = peerConnectionFactory.makeAudioSource(
+            .audioCaptureConstraints(for: profile)
+        )
+        let track = peerConnectionFactory.makeAudioTrack(source: source)
+        track.isEnabled = primaryTrack.isEnabled
+        let previousTrack = primaryTrack
+        primaryTrack = track
+
+        transceiverStorage.forEach { options, value in
+            let clone = track.clone(from: peerConnectionFactory)
+            clone.isEnabled = value.track.isEnabled
+            let wasAttached = value.transceiver.sender.track != nil
+            transceiverStorage.replaceTrack(clone, for: options)
+            if wasAttached {
+                value.transceiver.sender.track = clone
+            }
+        }
+
+        guard hasRegisteredPrimaryTrack else { return }
+        subject.send(
+            .removed(
+                id: sessionID,
+                trackType: .audio,
+                track: previousTrack
+            )
+        )
+        subject.send(
+            .added(
+                id: sessionID,
+                trackType: .audio,
+                track: track
+            )
+        )
     }
 
     /// Uses live `publishOptions`, not the storage key. Equality is only

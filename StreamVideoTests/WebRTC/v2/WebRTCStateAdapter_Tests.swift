@@ -1182,6 +1182,28 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertFalse(Self.videoConfig.audioProcessingModule.config.isNoiseSuppressionEnabled)
     }
 
+    func test_enqueueCallSettings_music_reassertsSoftwareProcessing() async throws {
+        try await prepare()
+        try await subject.setAudioBitrateProfile(.musicHighQuality)
+        let module = Self.videoConfig.audioProcessingModule
+        module.config.isNoiseSuppressionEnabled = true
+        module.config.isHighpassFilterEnabled = true
+
+        await subject.enqueueCallSettings { settings in
+            CallSettings(
+                audioOn: settings.audioOn,
+                videoOn: settings.videoOn,
+                speakerOn: !settings.speakerOn,
+                cameraPosition: settings.cameraPosition
+            )
+        }
+
+        await fulfillment {
+            !module.config.isNoiseSuppressionEnabled
+                && !module.config.isHighpassFilterEnabled
+        }
+    }
+
     func test_configurePeerConnections_defaultProfile_doesNotSetAudioMaxBitrate(
     ) async throws {
         try await prepare()

@@ -99,6 +99,17 @@ final class MediaTransceiverStorage<KeyType: Hashable>: Sequence, CustomStringCo
         storageQueue.sync { storage[key] != nil }
     }
 
+    /// Replaces the stored track for `key` without creating a transceiver.
+    func replaceTrack(
+        _ track: RTCMediaStreamTrack,
+        for key: KeyType
+    ) {
+        storageQueue.sync {
+            guard let existing = storage[key] else { return }
+            storage[key] = (existing.transceiver, track)
+        }
+    }
+
     /// Removes all transceivers from the storage.
     ///
     /// Ensures that all transceivers are stopped and their associated tracks are cleared

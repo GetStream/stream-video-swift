@@ -267,22 +267,39 @@ final class AudioBitrateProfileApplicator: @unchecked Sendable {
 
         lock.sync {
             if profile.isMusic {
-                let config = audioProcessingModule.config
-                if restoredAudioProcessing == nil {
-                    restoredAudioProcessing = .init(
-                        isNoiseSuppressionEnabled: config.isNoiseSuppressionEnabled,
-                        isHighpassFilterEnabled: config.isHighpassFilterEnabled
-                    )
-                }
-                config.isNoiseSuppressionEnabled = false
-                config.isHighpassFilterEnabled = false
-                audioProcessingModule.config = config
+                applyMusicAudioProcessingLocked()
             } else {
                 restoreAudioProcessing()
+                applyLiveFilter()
             }
-            applyLiveFilter()
         }
         await publisher?.setAudioMaxBitrate(for: profile)
+    }
+
+    /// Re-applies music-mode APM after a path that may have restored
+    /// WebRTC software NS/HPF (for example `SetAudioSend` on publish).
+    /// No-op unless music is currently applied.
+    func reassertSoftwareProcessing() {
+        lock.sync {
+            guard storedProfile.isMusic else { return }
+            applyMusicAudioProcessingLocked()
+        }
+    }
+
+    /// Caller must already hold `lock`. Does not stash stomped APM values;
+    /// restore state is captured only the first time music is applied.
+    private func applyMusicAudioProcessingLocked() {
+        let config = audioProcessingModule.config
+        if restoredAudioProcessing == nil {
+            restoredAudioProcessing = .init(
+                isNoiseSuppressionEnabled: config.isNoiseSuppressionEnabled,
+                isHighpassFilterEnabled: config.isHighpassFilterEnabled
+            )
+        }
+        config.isNoiseSuppressionEnabled = false
+        config.isHighpassFilterEnabled = false
+        audioProcessingModule.config = config
+        applyLiveFilter()
     }
 
     /// Caller must already hold `lock`. Reads `storedProfile` directly so

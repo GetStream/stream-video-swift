@@ -29,4 +29,28 @@ extension RTCMediaConstraints {
         mandatoryConstraints: [kRTCMediaConstraintsIceRestart: kRTCMediaConstraintsValueTrue],
         optionalConstraints: commonOptionalConstraints
     )
+
+    /// Capture-source flags for music: software NS/HPF/AEC/AGC off.
+    /// Unmute `SetAudioSend` reapplies these via `SetOptions`.
+    private static let musicOptionalConstraints: [String: String] = [
+        "DtlsSrtpKeyAgreement": kRTCMediaConstraintsValueTrue,
+        "googAutoGainControl": kRTCMediaConstraintsValueFalse,
+        "googNoiseSuppression": kRTCMediaConstraintsValueFalse,
+        "googEchoCancellation": kRTCMediaConstraintsValueFalse,
+        "googHighpassFilter": kRTCMediaConstraintsValueFalse,
+        "googTypingNoiseDetection": kRTCMediaConstraintsValueFalse,
+        "googAudioMirroring": kRTCMediaConstraintsValueFalse
+    ]
+
+    nonisolated(unsafe) static let musicCaptureConstraints = RTCMediaConstraints(
+        mandatoryConstraints: nil,
+        optionalConstraints: musicOptionalConstraints
+    )
+
+    /// Voice keeps the default goog* processing flags; music turns them off.
+    static func audioCaptureConstraints(
+        for profile: AudioBitrateProfile
+    ) -> RTCMediaConstraints {
+        profile.isMusic ? musicCaptureConstraints : defaultConstraints
+    }
 }
