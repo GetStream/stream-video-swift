@@ -7,6 +7,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### ✅ Added
 - `MicrophoneManager.setAudioBitrateProfile(_:)` switches in-call capture between voice and music (hi-fi). Requires dashboard `hifi_audio_enabled`. Music disables Apple Voice Processing and software NS/HPF, and raises the audio bitrate to 128 kbps. [#1260](https://github.com/GetStream/stream-video-swift/pull/1260)
 
+### 🔄 Changed
+- The bundled incoming call ringtone ships as AAC (`incoming.m4a`) instead of uncompressed PCM (`incoming.wav`), matching the outgoing sound. `Sounds.incomingCallSound` now defaults to `"incoming.m4a"`, which removes ~700KB from `StreamVideoSwiftUI.framework`. Apps that replace `Sounds.incomingCallSound` are unaffected; apps that only override `Sounds.bundle` need an `incoming.m4a` in their bundle.
+
 # [1.52.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.52.0)
 _September 09, 2026_
 
