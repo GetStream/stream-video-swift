@@ -149,7 +149,6 @@ struct LobbyContentView<Factory: ViewFactory>: View {
 struct CameraCheckView<Factory: ViewFactory>: View {
 
     @Injected(\.images) var images
-    @Injected(\.permissions) var permissions
     @Injected(\.streamVideo) var streamVideo
     @Injected(\.videoAppearance) var videoAppearance
     
@@ -161,7 +160,7 @@ struct CameraCheckView<Factory: ViewFactory>: View {
     var body: some View {
         GeometryReader { proxy in
             Group {
-                if let image = viewModel.viewfinderImage, isCameraOn {
+                if let image = viewModel.viewfinderImage, callSettings.videoOn {
                     image
                         .resizable()
                         .aspectRatio(contentMode: .fill)
@@ -181,7 +180,7 @@ struct CameraCheckView<Factory: ViewFactory>: View {
                         .accessibility(identifier: "cameraCheckView")
                         .streamAccessibility(value: "0")
                     }
-                    .opacity(isCameraOn ? 0 : 1)
+                    .opacity(callSettings.videoOn ? 0 : 1)
                 }
             }
             .frame(width: proxy.size.width, height: proxy.size.height)
@@ -210,10 +209,6 @@ struct CameraCheckView<Factory: ViewFactory>: View {
     private var tokens: DesignSystemTokens { videoAppearance.tokens }
 
     private var avatarSize: CGFloat { tokens.layout.buttonVisualHeightLg }
-
-    private var isCameraOn: Bool {
-        callSettings.videoOn && permissions.hasCameraPermission
-    }
 }
 
 struct JoinCallView<Factory: ViewFactory>: View {
@@ -293,11 +288,7 @@ struct CallSettingsView: View {
                 size: tokens.layout.buttonVisualHeightMd,
                 controlStyle: .init(
                     enabled: .init(icon: images.micTurnOn, iconStyle: secondaryButtonStyle),
-                    disabled: .init(icon: images.micTurnOff, iconStyle: destructiveButtonStyle),
-                    permissionDenied: .init(
-                        icon: images.micTurnOff,
-                        iconStyle: permissionDeniedButtonStyle
-                    )
+                    disabled: .init(icon: images.micTurnOff, iconStyle: destructiveButtonStyle)
                 )
             ) {
                 callSettings = CallSettings(
@@ -313,11 +304,7 @@ struct CallSettingsView: View {
                 size: tokens.layout.buttonVisualHeightMd,
                 controlStyle: .init(
                     enabled: .init(icon: images.videoTurnOn, iconStyle: secondaryButtonStyle),
-                    disabled: .init(icon: images.videoTurnOff, iconStyle: destructiveButtonStyle),
-                    permissionDenied: .init(
-                        icon: images.videoTurnOff,
-                        iconStyle: permissionDeniedButtonStyle
-                    )
+                    disabled: .init(icon: images.videoTurnOff, iconStyle: destructiveButtonStyle)
                 )
             ) {
                 callSettings = CallSettings(
@@ -344,14 +331,6 @@ struct CallSettingsView: View {
         CallIconStyle(
             backgroundColor: Color(tokens.colors.buttonDestructiveBackground),
             foregroundColor: Color(tokens.colors.buttonDestructiveTextOnAccent),
-            opacity: 1
-        )
-    }
-
-    private var permissionDeniedButtonStyle: CallIconStyle {
-        CallIconStyle(
-            backgroundColor: Color(tokens.colors.backgroundUtilityDisabled),
-            foregroundColor: Color(tokens.colors.textDisabled),
             opacity: 1
         )
     }

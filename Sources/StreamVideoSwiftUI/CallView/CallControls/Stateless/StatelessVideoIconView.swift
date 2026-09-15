@@ -61,13 +61,7 @@ public struct StatelessVideoIconView: View {
     public var body: some View {
         Button(
             action: { actionHandler?() },
-            label: {
-                label(
-                    isEnabled: callSettings.videoOn,
-                    hasPermission: hasPermission,
-                    canRequestPermission: canRequestPermission
-                )
-            }
+            label: { label(isEnabled: callSettings.videoOn, hasPermission: hasPermission) }
         )
         .disabled(!hasPermission && !canRequestPermission)
         .accessibility(identifier: "cameraToggle")
@@ -79,20 +73,15 @@ public struct StatelessVideoIconView: View {
     // MARK: - Private Helpers
 
     @ViewBuilder
-    private func label(
-        isEnabled: Bool,
-        hasPermission: Bool,
-        canRequestPermission: Bool
-    ) -> some View {
-        let style = controlStyle(
-            isEnabled: isEnabled,
-            hasPermission: hasPermission,
-            canRequestPermission: canRequestPermission
-        )
+    private func label(isEnabled: Bool, hasPermission: Bool) -> some View {
         let content = CallIconView(
-            icon: style.icon,
+            icon: isEnabled && hasPermission
+                ? controlStyle.enabled.icon
+                : controlStyle.disabled.icon,
             size: size,
-            iconStyle: style.iconStyle
+            iconStyle: isEnabled && hasPermission
+                ? controlStyle.enabled.iconStyle
+                : controlStyle.disabled.iconStyle
         )
 
         if hasPermission || canRequestPermission {
@@ -109,20 +98,6 @@ public struct StatelessVideoIconView: View {
                             .controlCallControlErrorBadgeBackground
                     )
                 )
-        }
-    }
-
-    private func controlStyle(
-        isEnabled: Bool,
-        hasPermission: Bool,
-        canRequestPermission: Bool
-    ) -> ControlStyle {
-        if !hasPermission, !canRequestPermission {
-            return controlStyle.permissionDenied
-        } else if isEnabled, hasPermission {
-            return controlStyle.enabled
-        } else {
-            return controlStyle.disabled
         }
     }
 }
