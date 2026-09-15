@@ -276,18 +276,12 @@ final class AudioBitrateProfileApplicator: @unchecked Sendable {
         await publisher?.setAudioMaxBitrate(for: profile)
     }
 
-    /// Re-applies music-mode APM after a path that may have restored
-    /// WebRTC software NS/HPF (for example `SetAudioSend` on publish).
-    /// No-op unless music is currently applied.
-    func reassertSoftwareProcessing() {
-        lock.sync {
-            guard storedProfile.isMusic else { return }
-            applyMusicAudioProcessingLocked()
-        }
-    }
-
-    /// Caller must already hold `lock`. Does not stash stomped APM values;
-    /// restore state is captured only the first time music is applied.
+    /// Turns software NS/HPF off for music. Caller must already hold
+    /// `lock`.
+    ///
+    /// Restore state is captured only the first time music is applied,
+    /// so a later apply that is already in music does not stash stomped
+    /// APM values as the voice baseline.
     private func applyMusicAudioProcessingLocked() {
         let config = audioProcessingModule.config
         if restoredAudioProcessing == nil {

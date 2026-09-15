@@ -800,7 +800,6 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
             }
 
             try await publisher.didUpdateCallSettings(updatedCallSettings)
-            audioBitrateProfileApplicator.reassertSoftwareProcessing()
 
             if updatedCallSettings.cameraPosition != currentCallSettings.cameraPosition {
                 try await publisher.didUpdateCameraPosition(

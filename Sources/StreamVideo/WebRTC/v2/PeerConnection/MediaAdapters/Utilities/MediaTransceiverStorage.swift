@@ -79,14 +79,21 @@ final class MediaTransceiverStorage<KeyType: Hashable>: Sequence, CustomStringCo
 
     /// Associates a transceiver with a specific key, replacing any existing entry.
     ///
+    /// Logs a warning only when the stored transceiver identity changes.
+    /// Swapping the track on the same transceiver (music source rebuild)
+    /// is not an overwrite.
+    ///
     /// - Parameters:
-    ///   - value: The transceiver to store, or `nil` to remove the key from storage.
+    ///   - value: The transceiver to store.
+    ///   - track: The track associated with this transceiver.
     ///   - key: The key used to associate with the transceiver.
     func set(_ value: RTCRtpTransceiver, track: RTCMediaStreamTrack, for key: KeyType) {
-        if contains(key: key) {
-            log.warning("TransceiverStorage for trackType: \(trackType) will overwrite existing value for key: \(key).")
-        }
         storageQueue.sync {
+            if let existing = storage[key], existing.transceiver !== value {
+                log.warning(
+                    "TransceiverStorage for trackType: \(trackType) will overwrite existing value for key: \(key)."
+                )
+            }
             storage[key] = (value, track)
         }
     }
@@ -97,17 +104,6 @@ final class MediaTransceiverStorage<KeyType: Hashable>: Sequence, CustomStringCo
     /// - Returns: `true` if the key exists in the storage, `false` otherwise.
     func contains(key: KeyType) -> Bool {
         storageQueue.sync { storage[key] != nil }
-    }
-
-    /// Replaces the stored track for `key` without creating a transceiver.
-    func replaceTrack(
-        _ track: RTCMediaStreamTrack,
-        for key: KeyType
-    ) {
-        storageQueue.sync {
-            guard let existing = storage[key] else { return }
-            storage[key] = (existing.transceiver, track)
-        }
     }
 
     /// Removes all transceivers from the storage.
