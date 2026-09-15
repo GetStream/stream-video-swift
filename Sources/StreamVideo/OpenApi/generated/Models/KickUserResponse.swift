@@ -11,7 +11,7 @@ public final class KickUserResponse: @unchecked Sendable, Codable, JSONEncodable
         self.duration = duration
     }
 
-public enum CodingKeys: String, CodingKey, CaseIterable {
+public enum CodingKeys: String, CodingKey {
     case duration
 }
 

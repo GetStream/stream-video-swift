@@ -51,7 +51,7 @@ public final class FrameRecordingSettingsRequest: @unchecked Sendable, Codable, 
         self.quality = quality
     }
 
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case captureIntervalInSeconds = "capture_interval_in_seconds"
         case mode
         case quality

@@ -17,7 +17,7 @@ public final class MemberRequest: @unchecked Sendable, Codable, JSONEncodable, H
         self.userId = userId
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case custom
         case role
         case userId = "user_id"

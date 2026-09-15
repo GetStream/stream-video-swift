@@ -22,7 +22,7 @@ public final class CallSessionParticipantLeftEvent: @unchecked Sendable, Event, 
         self.sessionId = sessionId
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case callCid = "call_cid"
         case createdAt = "created_at"
         case durationSeconds = "duration_seconds"

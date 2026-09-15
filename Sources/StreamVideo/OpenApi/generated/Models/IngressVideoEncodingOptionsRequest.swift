@@ -13,7 +13,7 @@ public final class IngressVideoEncodingOptionsRequest: @unchecked Sendable, Coda
         self.source = source
     }
 
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case layers
         case source
     }

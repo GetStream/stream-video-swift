@@ -14,7 +14,7 @@ public final class BackstageSettings: @unchecked Sendable, Codable, JSONEncodabl
         self.joinAheadTimeSeconds = joinAheadTimeSeconds
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case enabled
         case joinAheadTimeSeconds = "join_ahead_time_seconds"
     }

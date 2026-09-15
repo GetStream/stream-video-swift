@@ -12,7 +12,7 @@ public final class PinResponse: @unchecked Sendable, Codable, JSONEncodable, Has
         self.duration = duration
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case duration
     }
     

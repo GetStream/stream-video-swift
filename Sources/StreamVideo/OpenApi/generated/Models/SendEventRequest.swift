@@ -13,7 +13,7 @@ public final class SendEventRequest: @unchecked Sendable, Codable, JSONEncodable
         self.custom = custom
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case custom
     }
     

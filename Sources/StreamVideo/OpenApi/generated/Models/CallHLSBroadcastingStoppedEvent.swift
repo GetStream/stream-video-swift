@@ -16,7 +16,7 @@ public final class CallHLSBroadcastingStoppedEvent: @unchecked Sendable, Event, 
         self.createdAt = createdAt
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case callCid = "call_cid"
         case createdAt = "created_at"
         case type

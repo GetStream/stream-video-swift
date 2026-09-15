@@ -12,7 +12,7 @@ public final class CallIngressResponse: @unchecked Sendable, Codable, JSONEncoda
         self.rtmp = rtmp
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case rtmp
     }
     

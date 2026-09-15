@@ -15,7 +15,7 @@ public final class IngressAudioEncodingResponse: @unchecked Sendable, Codable, J
         self.enableDtx = enableDtx
     }
 
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case bitrate
         case channels
         case enableDtx = "enable_dtx"

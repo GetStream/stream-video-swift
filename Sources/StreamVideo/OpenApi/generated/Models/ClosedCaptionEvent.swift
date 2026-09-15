@@ -18,7 +18,7 @@ public final class ClosedCaptionEvent: @unchecked Sendable, Event, Codable, JSON
         self.createdAt = createdAt
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case callCid = "call_cid"
         case closedCaption = "closed_caption"
         case createdAt = "created_at"

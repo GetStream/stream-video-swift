@@ -46,7 +46,7 @@ public final class LayoutSettings: @unchecked Sendable, Codable, JSONEncodable, 
         self.options = options
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case detectOrientation = "detect_orientation"
         case externalAppUrl = "external_app_url"
         case externalCssUrl = "external_css_url"

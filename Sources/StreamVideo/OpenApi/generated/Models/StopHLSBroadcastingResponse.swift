@@ -12,7 +12,7 @@ public final class StopHLSBroadcastingResponse: @unchecked Sendable, Codable, JS
         self.duration = duration
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case duration
     }
     

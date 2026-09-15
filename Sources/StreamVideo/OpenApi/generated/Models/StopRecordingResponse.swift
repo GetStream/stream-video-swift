@@ -12,7 +12,7 @@ public final class StopRecordingResponse: @unchecked Sendable, Codable, JSONEnco
         self.duration = duration
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case duration
     }
     

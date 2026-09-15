@@ -12,7 +12,7 @@ public final class UnblockUserResponse: @unchecked Sendable, Codable, JSONEncoda
         self.duration = duration
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case duration
     }
     
