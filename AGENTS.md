@@ -17,8 +17,8 @@ v2 introduces a **shared design-token system** so Chat and Video can reskin from
 ### Types and ownership
 
 - **`DesignSystemTokens`** (Core, class): `tokens.colors` (semantic colors plus `tokens.colors.palette` for brand/chrome ramps), `tokens.layout` (spacing, radii, strokes, elevations), and `tokens.fonts` (shared SwiftUI typography). Override color ramps **before the first read**. Colors stay on UIKit `UIColor`; fonts stay on SwiftUI `Font`. UIKit `UIFont` faces stay on product UIKit SDKs (for example StreamChatUI).
-- **`VideoAppearance`**: Video’s design-system type. Holds `tokens: DesignSystemTokens` and `colors: VideoAppearance.Colors` (Video-only colors from `tokens/video`). No images or sounds. Video owns **no** layout or font tokens; layout and shared fonts come from `tokens`. Labels and other shared semantics live on `tokens.colors`.
-- **`Appearance`** (legacy): existing SwiftUI `Colors` struct plus images, fonts, and sounds. `@Injected(\.appearance)` / `@Injected(\.fonts)` and `StreamVideoUI(..., appearance:)` still take this type. Shared typography lives on `videoAppearance.tokens.fonts`. **Do not migrate existing views** onto `VideoAppearance` or `tokens.fonts` unless the task explicitly asks.
+- **`VideoAppearance`**: Video’s design-system type. Holds `tokens: DesignSystemTokens`, `colors: VideoAppearance.Colors` (Video-only colors from `tokens/video`), and `images: Images` (Video’s own icons, mirroring Chat’s `appearance.images`). No sounds. Video owns **no** layout or font tokens; layout and shared fonts come from `tokens`. Labels and other shared semantics live on `tokens.colors`.
+- **`Appearance`** (legacy): existing SwiftUI `Colors` struct plus images, fonts, and sounds. `@Injected(\.appearance)` / `@Injected(\.fonts)` and `StreamVideoUI(..., appearance:)` still take this type. Shared typography lives on `videoAppearance.tokens.fonts`. Migrated views use `@Injected(\.videoAppearance)`; other views continue using the legacy appearance until explicitly migrated.
 
 Product prefix is **Video**, not Call. Use `VideoAppearance` / `VideoAppearance.Colors`.
 
@@ -46,7 +46,7 @@ Token ownership lives in `design-system-tokens`. Video consumes Core plus `token
 
 ### Mixed Chat + Video apps
 
-`InjectedValues` is a StreamCore type. Both SDKs must not publish the same key names (`appearance`, `colors`, `fonts`, `images`, `tokens`) or a customer file that imports both will not compile. Video views still inject `fonts` from legacy `Appearance`; Chat UIKit keeps local `UIFont` faces.
+`InjectedValues` is a StreamCore type. Both SDKs must not publish the same key names (`appearance`, `colors`, `fonts`, `images`, `tokens`) or a customer file that imports both will not compile. Migrated Video views inject `videoAppearance`; other Video views still inject `fonts` from legacy `Appearance`. Chat UIKit keeps local `UIFont` faces.
 
 Intended customer API (Chat will mirror this when it adopts):
 
@@ -69,7 +69,42 @@ struct InboxHeader: View {
 
 Pass the **same** `DesignSystemTokens` instance into both appearances so brand/layout/fonts stay in sync. If the customer constructed Chat and Video with different token instances, each surface must read `tokens` from **its own** appearance; they are no longer interchangeable.
 
-This injection split is the destination API. It is **not** wired on Video yet: views still use `@Injected(\.appearance)` → legacy `Appearance`. Do not add `videoAppearance` to `InjectedValues` or rename the existing keys unless the task asks.
+`StreamVideoUI(..., videoAppearance:)` wires `@Injected(\.videoAppearance)`. Keep non-migrated views on `@Injected(\.appearance)` and its legacy convenience keys until their migration is explicitly requested.
+
+### Design refresh (token migration)
+
+The v2 UI refresh is a **token swap**, not a Figma rebuild. Figma is the source for *which* semantic tokens a surface should use. The existing SwiftUI structure, copy, assets, and control hierarchy stay unless a follow-up explicitly asks for a layout redesign.
+
+Do:
+
+- Switch the view to `@Injected(\.videoAppearance)` and read colors, fonts, spacing, and radii from `videoAppearance.tokens` (Video-only colors from `videoAppearance.colors`).
+- Use Figma variable names as a lookup (`core/button/secondary/bg` → `tokens.colors.buttonSecondaryBackground`, `typography` styles → `tokens.fonts.*`).
+- Replace hardcoded numbers *and* implicit SwiftUI defaults: bare `.padding()` is 16pt (`tokens.layout.spacingMd`). Give `VStack` / `HStack` an explicit spacing token instead of relying on the system default.
+- Replace legacy `CallIconStyle.primary` / `.transparent` (hardcoded white/black) with a `CallIconStyle` built from the tokens Figma assigns to that control (lobby mic/camera use secondary button bg/text).
+- Read icons from `videoAppearance.images`; never inline `Image(systemName:)` in a migrated view.
+- Re-record **existing** snapshots that cover the state you restyled before adding new ones; a shared control change (badges, `CallIconStyle`) reaches every suite that renders it.
+- Keep snapshot tests for the screen; record with `-configuration Test` (the `STREAM_TESTS` flag lives only on Test). Prefer updating existing snapshot filenames so Git shows a before/after image diff.
+
+Do not:
+
+- Restyle the screen to match Figma frames (new headers, globe icons, aspect ratios, CTA copy, removed participant cards, and so on).
+- Add Figma-only assets or L10n keys that the current layout does not use.
+- Use `tokens.layout.spacingNone` for zero spacing; write `spacing: 0`.
+- Invent Core avatar/size tokens from this SDK. If no public token matches, use the nearest public layout token (`buttonVisualHeightMd` / `Lg`, `spacing*`, `radius*`) rather than a magic number. Do not reach into StreamCoreUI’s internal `size64` / `size80` primitives.
+- Use iOS 14-only a11y modifiers (`.accessibilityLabel`, `.accessibilityHidden`); deployment is still iOS 13 in this module — use `.accessibility(label:)` / `.accessibility(hidden:)`.
+
+Typical substitutions from the lobby pass:
+
+| Legacy / literal | Token |
+|---|---|
+| `colors.text` | `tokens.colors.textPrimary` |
+| `colors.textLowEmphasis` | `tokens.colors.textSecondary` |
+| `colors.lobbyBackground` | `tokens.colors.backgroundCoreApp` |
+| `colors.lobbySecondaryBackground` | `tokens.colors.backgroundCoreSurfaceDefault` |
+| `colors.primaryButtonBackground` / `.white` | `tokens.colors.buttonPrimaryBackground` / `buttonPrimaryTextOnAccent` |
+| `.font(.title)` / `.body` / `.headline` / `.caption` | `tokens.fonts.title` / `.body` / `.headline` / `.caption1` |
+| `16` padding or corner radius | `tokens.layout.spacingMd` / `radiusXl` |
+| `32` stack spacing | `tokens.layout.spacing2xl` |
 
 ### Linking
 

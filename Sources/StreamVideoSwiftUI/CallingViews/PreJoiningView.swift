@@ -2,6 +2,7 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import StreamCoreUI
 import StreamVideo
 import SwiftUI
 
@@ -62,8 +63,8 @@ public struct LobbyView<Factory: ViewFactory>: View {
 struct LobbyContentView<Factory: ViewFactory>: View {
 
     @Injected(\.images) var images
-    @Injected(\.colors) var colors
     @Injected(\.streamVideo) var streamVideo
+    @Injected(\.videoAppearance) var videoAppearance
     
     @ObservedObject var viewModel: LobbyViewModel
     @ObservedObject var microphoneChecker: MicrophoneChecker
@@ -76,33 +77,33 @@ struct LobbyContentView<Factory: ViewFactory>: View {
     var onCloseLobby: () -> Void
     
     var body: some View {
-        VStack {
+        VStack(spacing: tokens.layout.spacingXs) {
             ZStack {
-                HStack {
+                HStack(spacing: tokens.layout.spacingXs) {
                     Spacer()
                     Button {
                         onCloseLobby()
                     } label: {
                         Image(systemName: "xmark")
-                            .foregroundColor(colors.text)
+                            .foregroundColor(textPrimary)
                     }
                 }
 
-                VStack(alignment: .center) {
+                VStack(alignment: .center, spacing: tokens.layout.spacingXs) {
                     Text(L10n.WaitingRoom.title)
-                        .font(.title)
-                        .foregroundColor(colors.text)
+                        .font(tokens.fonts.title)
+                        .foregroundColor(textPrimary)
                         .bold()
 
                     Text(L10n.WaitingRoom.subtitle)
-                        .font(.body)
-                        .foregroundColor(Color(colors.textLowEmphasis))
+                        .font(tokens.fonts.body)
+                        .foregroundColor(Color(tokens.colors.textSecondary))
                 }
             }
-            .padding()
+            .padding(tokens.layout.spacingMd)
             .zIndex(1)
 
-            VStack {
+            VStack(spacing: tokens.layout.spacingXs) {
                 CameraCheckView(
                     viewModel: viewModel,
                     microphoneChecker: microphoneChecker,
@@ -112,8 +113,8 @@ struct LobbyContentView<Factory: ViewFactory>: View {
 
                 if microphoneChecker.isSilent {
                     Text(L10n.WaitingRoom.Mic.notWorking)
-                        .font(.caption)
-                        .foregroundColor(colors.text)
+                        .font(tokens.fonts.caption1)
+                        .foregroundColor(textPrimary)
                 }
 
                 CallSettingsView(callSettings: $callSettings)
@@ -126,9 +127,12 @@ struct LobbyContentView<Factory: ViewFactory>: View {
                     onJoinCallTap: onJoinCallTap
                 )
             }
-            .padding()
+            .padding(tokens.layout.spacingMd)
         }
-        .background(colors.lobbyBackground.edgesIgnoringSafeArea(.all))
+        .background(
+            Color(tokens.colors.backgroundCoreApp)
+                .edgesIgnoringSafeArea(.all)
+        )
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .onAppear { viewModel.startCamera(front: true) }
         .onDisappear {
@@ -136,13 +140,17 @@ struct LobbyContentView<Factory: ViewFactory>: View {
             viewModel.cleanUp()
         }
     }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
+
+    private var textPrimary: Color { Color(tokens.colors.textPrimary) }
 }
 
 struct CameraCheckView<Factory: ViewFactory>: View {
 
     @Injected(\.images) var images
-    @Injected(\.colors) var colors
     @Injected(\.streamVideo) var streamVideo
+    @Injected(\.videoAppearance) var videoAppearance
     
     @ObservedObject var viewModel: LobbyViewModel
     @ObservedObject var microphoneChecker: MicrophoneChecker
@@ -161,11 +169,13 @@ struct CameraCheckView<Factory: ViewFactory>: View {
                 } else {
                     ZStack {
                         Rectangle()
-                            .fill(colors.lobbySecondaryBackground)
+                            .fill(
+                                Color(tokens.colors.backgroundCoreSurfaceDefault)
+                            )
 
                         viewFactory.makeUserAvatar(
                             streamVideo.user,
-                            with: .init(size: 80)
+                            with: .init(size: avatarSize)
                         )
                         .accessibility(identifier: "cameraCheckView")
                         .streamAccessibility(value: "0")
@@ -175,9 +185,9 @@ struct CameraCheckView<Factory: ViewFactory>: View {
             }
             .frame(width: proxy.size.width, height: proxy.size.height)
             .overlay(
-                VStack {
+                VStack(spacing: 0) {
                     Spacer()
-                    HStack {
+                    HStack(spacing: 0) {
                         MicrophoneCheckView(
                             audioLevels: microphoneChecker.audioLevels,
                             microphoneOn: callSettings.audioOn,
@@ -190,14 +200,20 @@ struct CameraCheckView<Factory: ViewFactory>: View {
                 }
             )
             .clipped()
-            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .clipShape(
+                RoundedRectangle(cornerRadius: tokens.layout.radiusXl)
+            )
         }
     }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
+
+    private var avatarSize: CGFloat { tokens.layout.buttonVisualHeightLg }
 }
 
 struct JoinCallView<Factory: ViewFactory>: View {
 
-    @Injected(\.colors) var colors
+    @Injected(\.videoAppearance) var videoAppearance
 
     var viewFactory: Factory
     var callId: String
@@ -206,9 +222,9 @@ struct JoinCallView<Factory: ViewFactory>: View {
     var onJoinCallTap: () -> Void
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: tokens.layout.spacingMd) {
             Text(waitingRoomDescription)
-                .font(.headline)
+                .font(tokens.fonts.headline)
                 .multilineTextAlignment(.leading)
                 .fixedSize(horizontal: false, vertical: true)
                 .accessibility(identifier: "callParticipantsCount")
@@ -231,15 +247,17 @@ struct JoinCallView<Factory: ViewFactory>: View {
                     .frame(maxWidth: .infinity)
                     .accessibility(identifier: "joinCall")
             }
-            .frame(height: 50)
-            .background(colors.primaryButtonBackground)
-            .cornerRadius(16)
-            .foregroundColor(.white)
+            .frame(height: tokens.layout.buttonVisualHeightLg)
+            .background(Color(tokens.colors.buttonPrimaryBackground))
+            .cornerRadius(tokens.layout.radiusXl)
+            .foregroundColor(Color(tokens.colors.buttonPrimaryTextOnAccent))
         }
-        .padding()
-        .background(colors.lobbySecondaryBackground)
-        .cornerRadius(16)
+        .padding(tokens.layout.spacingMd)
+        .background(Color(tokens.colors.backgroundCoreSurfaceDefault))
+        .cornerRadius(tokens.layout.radiusXl)
     }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
     
     private var waitingRoomDescription: String {
         "\(L10n.WaitingRoom.description) \(L10n.WaitingRoom.numberOfParticipants(callParticipants.count))"
@@ -258,20 +276,19 @@ struct JoinCallView<Factory: ViewFactory>: View {
 struct CallSettingsView: View {
     
     @Injected(\.images) var images
+    @Injected(\.videoAppearance) var videoAppearance
     
     @Binding var callSettings: CallSettings
     
-    private let iconSize: CGFloat = 50
-    
     var body: some View {
-        HStack(spacing: 32) {
+        HStack(spacing: tokens.layout.spacing2xl) {
             StatelessMicrophoneIconView(
                 call: nil,
                 callSettings: callSettings,
-                size: iconSize,
+                size: tokens.layout.buttonVisualHeightMd,
                 controlStyle: .init(
-                    enabled: .init(icon: images.micTurnOn, iconStyle: .primary),
-                    disabled: .init(icon: images.micTurnOff, iconStyle: .transparent)
+                    enabled: .init(icon: images.micTurnOn, iconStyle: secondaryButtonStyle),
+                    disabled: .init(icon: images.micTurnOff, iconStyle: destructiveButtonStyle)
                 )
             ) {
                 callSettings = CallSettings(
@@ -284,10 +301,10 @@ struct CallSettingsView: View {
             StatelessVideoIconView(
                 call: nil,
                 callSettings: callSettings,
-                size: iconSize,
+                size: tokens.layout.buttonVisualHeightMd,
                 controlStyle: .init(
-                    enabled: .init(icon: images.videoTurnOn, iconStyle: .primary),
-                    disabled: .init(icon: images.videoTurnOff, iconStyle: .transparent)
+                    enabled: .init(icon: images.videoTurnOn, iconStyle: secondaryButtonStyle),
+                    disabled: .init(icon: images.videoTurnOff, iconStyle: destructiveButtonStyle)
                 )
             ) {
                 callSettings = CallSettings(
@@ -297,12 +314,32 @@ struct CallSettingsView: View {
                 )
             }
         }
-        .padding()
+        .padding(tokens.layout.spacingMd)
+    }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
+
+    private var secondaryButtonStyle: CallIconStyle {
+        CallIconStyle(
+            backgroundColor: Color(tokens.colors.buttonSecondaryBackground),
+            foregroundColor: Color(tokens.colors.buttonSecondaryText),
+            opacity: 1
+        )
+    }
+
+    private var destructiveButtonStyle: CallIconStyle {
+        CallIconStyle(
+            backgroundColor: Color(tokens.colors.buttonDestructiveBackground),
+            foregroundColor: Color(tokens.colors.buttonDestructiveTextOnAccent),
+            opacity: 1
+        )
     }
 }
 
 @available(iOS 14.0, *)
 struct ParticipantsInCallView<Factory: ViewFactory>: View {
+
+    @Injected(\.videoAppearance) var videoAppearance
 
     struct ParticipantInCall: Identifiable {
         let id: String
@@ -330,28 +367,26 @@ struct ParticipantsInCallView<Factory: ViewFactory>: View {
         return result
     }
     
-    private let viewSize: CGFloat = 64
-    
     var body: some View {
         ScrollView(.horizontal) {
-            LazyHStack {
+            LazyHStack(spacing: tokens.layout.spacingXs) {
                 ForEach(participantsInCall) { participant in
-                    VStack {
+                    VStack(spacing: tokens.layout.spacingXs) {
                         viewFactory.makeUserAvatar(
                             participant.user,
-                            with: .init(size: 40) {
+                            with: .init(size: avatarSize) {
                                 AnyView(
                                     CircledTitleView(
                                         title: participant.user.name.isEmpty ? participant.user
                                             .id : String(participant.user.name.uppercased().first!),
-                                        size: 40
+                                        size: avatarSize
                                     )
                                 )
                             }
                         )
 
                         Text(participant.user.name)
-                            .font(.caption)
+                            .font(tokens.fonts.caption1)
                     }
                     .frame(width: viewSize, height: viewSize)
                 }
@@ -359,4 +394,10 @@ struct ParticipantsInCallView<Factory: ViewFactory>: View {
         }
         .frame(height: viewSize)
     }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
+
+    private var avatarSize: CGFloat { tokens.layout.buttonVisualHeightMd }
+
+    private var viewSize: CGFloat { avatarSize + tokens.layout.spacingXl }
 }

@@ -14,6 +14,7 @@ public struct StatelessMicrophoneIconView: View {
 
     @Injected(\.images) private var images
     @Injected(\.permissions) private var permissions
+    @Injected(\.videoAppearance) private var videoAppearance
 
     /// The associated call for the microphone icon.
     public weak var call: Call?
@@ -88,7 +89,16 @@ public struct StatelessMicrophoneIconView: View {
             content
         } else {
             content
-                .badge(Image(systemName: "exclamationmark"), background: .orange)
+                .badge(
+                    videoAppearance.images.callControlErrorBadge,
+                    foreground: Color(
+                        videoAppearance.colors.controlCallControlErrorBadgeText
+                    ),
+                    background: Color(
+                        videoAppearance.colors
+                            .controlCallControlErrorBadgeBackground
+                    )
+                )
         }
     }
 }

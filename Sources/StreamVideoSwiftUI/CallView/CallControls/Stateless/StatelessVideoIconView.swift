@@ -14,6 +14,7 @@ public struct StatelessVideoIconView: View {
 
     @Injected(\.images) private var images
     @Injected(\.permissions) private var permissions
+    @Injected(\.videoAppearance) private var videoAppearance
 
     /// The associated call for the video icon.
     public weak var call: Call?
@@ -87,7 +88,16 @@ public struct StatelessVideoIconView: View {
             content
         } else {
             content
-                .badge(Image(systemName: "exclamationmark"), background: .orange)
+                .badge(
+                    videoAppearance.images.callControlErrorBadge,
+                    foreground: Color(
+                        videoAppearance.colors.controlCallControlErrorBadgeText
+                    ),
+                    background: Color(
+                        videoAppearance.colors
+                            .controlCallControlErrorBadgeBackground
+                    )
+                )
         }
     }
 }
