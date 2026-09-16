@@ -63,6 +63,27 @@ final class LocalParticipantView_Tests: StreamVideoUITestCase, @unchecked Sendab
         AssertSnapshot(view, variants: snapshotVariants)
     }
 
+    func test_localParticipantView_connectionQualityExcellent_small_snapshot() {
+        let view = makeView(
+            audioOn: true,
+            showAllInfo: true,
+            connectionQuality: .excellent
+        )
+        AssertSnapshot(view, variants: [.smallDark])
+    }
+
+    func test_localParticipantView_connectionQualityExcellent_extraExtraExtraLarge_snapshot() {
+        let view = makeView(
+            audioOn: true,
+            showAllInfo: true,
+            connectionQuality: .excellent
+        )
+        AssertSnapshot(
+            view,
+            variants: [.extraExtraExtraLargeLight]
+        )
+    }
+
     func test_localParticipantView_connectionQualityGood_snapshot() {
         let view = makeView(
             audioOn: true,
@@ -72,6 +93,27 @@ final class LocalParticipantView_Tests: StreamVideoUITestCase, @unchecked Sendab
         AssertSnapshot(view, variants: snapshotVariants)
     }
 
+    func test_localParticipantView_connectionQualityGood_small_snapshot() {
+        let view = makeView(
+            audioOn: true,
+            showAllInfo: true,
+            connectionQuality: .good
+        )
+        AssertSnapshot(view, variants: [.smallDark])
+    }
+
+    func test_localParticipantView_connectionQualityGood_extraExtraExtraLarge_snapshot() {
+        let view = makeView(
+            audioOn: true,
+            showAllInfo: true,
+            connectionQuality: .good
+        )
+        AssertSnapshot(
+            view,
+            variants: [.extraExtraExtraLargeLight]
+        )
+    }
+
     func test_localParticipantView_connectionQualityPoor_snapshot() {
         let view = makeView(
             audioOn: true,
@@ -79,6 +121,27 @@ final class LocalParticipantView_Tests: StreamVideoUITestCase, @unchecked Sendab
             connectionQuality: .poor
         )
         AssertSnapshot(view, variants: snapshotVariants)
+    }
+
+    func test_localParticipantView_connectionQualityPoor_small_snapshot() {
+        let view = makeView(
+            audioOn: true,
+            showAllInfo: true,
+            connectionQuality: .poor
+        )
+        AssertSnapshot(view, variants: [.smallDark])
+    }
+
+    func test_localParticipantView_connectionQualityPoor_extraExtraExtraLarge_snapshot() {
+        let view = makeView(
+            audioOn: true,
+            showAllInfo: true,
+            connectionQuality: .poor
+        )
+        AssertSnapshot(
+            view,
+            variants: [.extraExtraExtraLargeLight]
+        )
     }
 
     // MARK: - Helpers
