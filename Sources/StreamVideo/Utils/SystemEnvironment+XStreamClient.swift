@@ -11,8 +11,10 @@ import IOKit
 #endif
 
 extension SystemEnvironment {
+    static let sdkIdentifier: String = "stream-video-swift-v\(version)"
+    
     static let xStreamClientHeader: String = {
-        "stream-video-swift-v\(version)|app=\(appName)|app_version=\(appVersion)|os=\(os) \(osVersion)|device_model=\(model)"
+        "\(sdkIdentifier)|app=\(appName)|app_version=\(appVersion)|os=\(os) \(osVersion)|device_model=\(model)"
     }()
 
     static let clientDetails: Stream_Video_Sfu_Models_ClientDetails = {
