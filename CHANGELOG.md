@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🔄 Changed
 - The `Appearance` object has been replaced with `VideoAppearance` object [#1258](https://github.com/GetStream/stream-video-swift/pull/1258)
+- Lobby screen redesigned with the Stream Design System [#1271](https://github.com/GetStream/stream-video-swift/pull/1271)
+- Ringing screen redesigned with the Stream Design System [#1280](https://github.com/GetStream/stream-video-swift/pull/1280)
 
 # Upcoming
 
