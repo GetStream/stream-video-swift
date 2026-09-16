@@ -3,11 +3,14 @@
 //
 
 import Foundation
+import StreamCoreUI
 import StreamVideo
 import SwiftUI
 
 @available(iOS 14.0, *)
 public struct LocalParticipantViewModifier: ViewModifier {
+
+    @Injected(\.videoAppearance) var videoAppearance
 
     private let localParticipant: CallParticipant
     private var call: Call?
@@ -63,7 +66,11 @@ public struct LocalParticipantViewModifier: ViewModifier {
                 decoration: .speaking,
                 availableDecorations: decorations
             )
-            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .clipShape(
+                RoundedRectangle(
+                    cornerRadius: tokens.layout.radiusXl
+                )
+            )
             .clipped()
     }
 
@@ -71,10 +78,14 @@ public struct LocalParticipantViewModifier: ViewModifier {
     private var participantCount: Int {
         call?.state.participants.count ?? 0
     }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
 
 @available(iOS, introduced: 13, obsoleted: 14)
 public struct LocalParticipantViewModifier_iOS13: ViewModifier {
+
+    @Injected(\.videoAppearance) var videoAppearance
 
     private let localParticipant: CallParticipant
     private var call: Call?
@@ -117,9 +128,17 @@ public struct LocalParticipantViewModifier_iOS13: ViewModifier {
                             )
                         }
                     }
-                    .padding(.bottom, 2)
+                    .padding(
+                        .bottom,
+                        tokens.layout.spacingXxxs
+                    )
                 }
-                .padding(.all, showAllInfo ? 16 : 8)
+                .padding(
+                    .all,
+                    showAllInfo
+                        ? tokens.layout.spacingMd
+                        : tokens.layout.spacingXs
+                )
             )
             .applyDecorationModifierIfRequired(
                 VideoCallParticipantOptionsModifier(participant: localParticipant, call: call),
@@ -131,7 +150,11 @@ public struct LocalParticipantViewModifier_iOS13: ViewModifier {
                 decoration: .speaking,
                 availableDecorations: decorations
             )
-            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .clipShape(
+                RoundedRectangle(
+                    cornerRadius: tokens.layout.radiusXl
+                )
+            )
             .clipped()
     }
 
@@ -139,6 +162,8 @@ public struct LocalParticipantViewModifier_iOS13: ViewModifier {
     private var participantCount: Int {
         call?.state.participants.count ?? 0
     }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
 
 internal struct ParticipantMicrophoneCheckView: View {
