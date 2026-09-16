@@ -103,23 +103,56 @@ final class WebRTCCoordinatorStateMachine_CleanUpStageTests: XCTestCase, @unchec
             .sfuStack
             .setConnectionState(to: .connected(healthCheckInfo: .init()))
 
-        _ = subject.transition(from: .disconnected(subject.context))
-        await wait(for: 0.5)
+        let stack = mockCoordinatorStack!
+        try await assertTransition(
+            from: .disconnected,
+            expectedTarget: .idle,
+            subject: subject
+        ) { [publisher, subscriber] _ in
+            await self.assertNilAsync(
+                await stack.coordinator.stateAdapter.sfuAdapter
+            )
+            await self.assertNilAsync(
+                await stack.coordinator.stateAdapter.publisher
+            )
+            await self.assertNilAsync(
+                await stack.coordinator.stateAdapter.subscriber
+            )
+            await self.assertNilAsync(
+                await stack.coordinator.stateAdapter.statsAdapter
+            )
+            await self.assertEqualAsync(
+                await stack.coordinator.stateAdapter.sessionID,
+                ""
+            )
+            await self.assertEqualAsync(
+                await stack.coordinator.stateAdapter.token,
+                ""
+            )
+            await self.assertEqualAsync(
+                await stack.coordinator.stateAdapter.ownCapabilities,
+                []
+            )
+            await self.assertEqualAsync(
+                await stack.coordinator.stateAdapter.participants,
+                [:]
+            )
+            await self.assertEqualAsync(
+                await stack.coordinator.stateAdapter.participantsCount,
+                0
+            )
+            await self.assertEqualAsync(
+                await stack.coordinator.stateAdapter.participantPins,
+                []
+            )
 
-        await assertNilAsync(await mockCoordinatorStack.coordinator.stateAdapter.sfuAdapter)
-        await assertNilAsync(await mockCoordinatorStack.coordinator.stateAdapter.publisher)
-        await assertNilAsync(await mockCoordinatorStack.coordinator.stateAdapter.subscriber)
-        await assertNilAsync(await mockCoordinatorStack.coordinator.stateAdapter.statsAdapter)
-        await assertEqualAsync(await mockCoordinatorStack.coordinator.stateAdapter.sessionID, "")
-        await assertEqualAsync(await mockCoordinatorStack.coordinator.stateAdapter.token, "")
-        await assertEqualAsync(await mockCoordinatorStack.coordinator.stateAdapter.ownCapabilities, [])
-        await assertEqualAsync(await mockCoordinatorStack.coordinator.stateAdapter.participants, [:])
-        await assertEqualAsync(await mockCoordinatorStack.coordinator.stateAdapter.participantsCount, 0)
-        await assertEqualAsync(await mockCoordinatorStack.coordinator.stateAdapter.participantPins, [])
-
-        XCTAssertEqual(publisher?.timesCalled(.close), 1)
-        XCTAssertEqual(subscriber?.timesCalled(.close), 1)
-        XCTAssertEqual(mockCoordinatorStack.sfuStack.webSocket.timesCalled(.disconnectAsync), 1)
+            XCTAssertEqual(publisher?.timesCalled(.close), 1)
+            XCTAssertEqual(subscriber?.timesCalled(.close), 1)
+            XCTAssertEqual(
+                stack.sfuStack.webSocket.timesCalled(.disconnectAsync),
+                1
+            )
+        }
     }
 
     func test_transition_contextWasReset() async throws {

@@ -649,8 +649,11 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
         }
     }
 
-    func test_handlePinsChanged_givenEvent_whenPublished_thenReplacesLocalPinnedParticipants() async throws {
-        let participantA = CallParticipant.dummy(pin: .init(isLocal: true, pinnedAt: .init()))
+    func test_handlePinsChanged_givenEvent_whenPublished_thenKeepsLocalPinnedParticipants() async throws {
+        let localPinnedAt = Date(timeIntervalSince1970: 1000)
+        let participantA = CallParticipant.dummy(
+            pin: .init(isLocal: true, pinnedAt: localPinnedAt)
+        )
         let participantB = CallParticipant.dummy()
         var event = Stream_Video_Sfu_Event_PinsChanged()
         event.pins = .init()
@@ -663,7 +666,29 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
             payload: .pinsUpdated(event),
             initialState: [participantA, participantB].reduce(into: [String: CallParticipant]()) { $0[$1.sessionId] = $1 }
         ) {
-            $0[participantA.sessionId]?.pin?.isLocal == false && $0[participantB.sessionId]?.pin == nil
+            $0[participantA.sessionId]?.pin?.isLocal == true
+                && $0[participantA.sessionId]?.pin?.pinnedAt == localPinnedAt
+                && $0[participantB.sessionId]?.pin == nil
+        }
+    }
+
+    func test_handlePinsChanged_givenEmptyEvent_whenPublished_thenKeepsLocalPinnedParticipants() async throws {
+        let localPinnedAt = Date(timeIntervalSince1970: 1000)
+        let participantA = CallParticipant.dummy(
+            pin: .init(isLocal: true, pinnedAt: localPinnedAt)
+        )
+        let participantB = CallParticipant.dummy()
+        var event = Stream_Video_Sfu_Event_PinsChanged()
+        event.pins = []
+
+        try await assert(
+            event,
+            payload: .pinsUpdated(event),
+            initialState: [participantA, participantB].reduce(into: [String: CallParticipant]()) { $0[$1.sessionId] = $1 }
+        ) {
+            $0[participantA.sessionId]?.pin?.isLocal == true
+                && $0[participantA.sessionId]?.pin?.pinnedAt == localPinnedAt
+                && $0[participantB.sessionId]?.pin == nil
         }
     }
 

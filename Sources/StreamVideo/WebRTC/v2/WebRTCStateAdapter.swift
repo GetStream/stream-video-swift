@@ -560,12 +560,16 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         disposableBag.removeAll()
         // Restore VP/APM before deactivating so the next never-music
         // call does not inherit a music session.
-        await resetAudioBitrateProfile()
         // Drain leftover publish and close PCs first, then drop the
         // store ADM pointer. Deactivate used to run first and
         // `reset()` the native module while worker threads were still
         // inside the graph. Do not `setEngineAvailability(false)`
         // here: a replacement call may already own the shared engine.
+        // Hold PCs across the profile-reset await so that hop cannot
+        // skip close on the connections this session still owns.
+        let publisher = self.publisher
+        let subscriber = self.subscriber
+        await resetAudioBitrateProfile()
         await publisher?.close()
         await subscriber?.close()
         self.publisher = nil

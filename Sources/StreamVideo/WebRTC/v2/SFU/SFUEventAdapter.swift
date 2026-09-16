@@ -468,23 +468,52 @@ final class SFUEventAdapter: @unchecked Sendable {
 
     /// Handles a PinsChanged event.
     ///
+    /// Matches JS `CallState.setServerSidePins`: keep local pins, apply a
+    /// server pin only when the participant has none, and clear only
+    /// remote pins that left the SFU list.
     /// - Parameter event: The PinsChanged event to handle.
     private func handlePinsChanged(
         _ event: Stream_Video_Sfu_Event_PinsChanged
     ) async {
         await stateAdapter.enqueue { participants in
-            var updatedParticipants = participants
-            let sessionIds = event.pins.map(\.sessionID)
+            let now = Date()
+            var sessionPinnedAt: [String: Date] = [:]
+            var userPinnedAt: [String: Date] = [:]
+            var ambiguousUserIds: Set<String> = []
 
-            for (key, participant) in updatedParticipants {
-                if sessionIds.contains(key) {
-                    updatedParticipants[key] = participant.pin?.isLocal == false
-                        ? participant
-                        : participant.withUpdated(
-                            pin: .init(isLocal: false, pinnedAt: .init())
-                        )
+            for (index, pin) in event.pins.enumerated() {
+                let pinnedAt = now.addingTimeInterval(
+                    TimeInterval(event.pins.count - index) / 1000
+                )
+                if userPinnedAt[pin.userID] != nil
+                    || ambiguousUserIds.contains(pin.userID) {
+                    userPinnedAt[pin.userID] = nil
+                    ambiguousUserIds.insert(pin.userID)
                 } else {
-                    updatedParticipants[key] = participant.withUpdated(pin: nil)
+                    userPinnedAt[pin.userID] = pinnedAt
+                }
+                if sessionPinnedAt[pin.sessionID] == nil {
+                    sessionPinnedAt[pin.sessionID] = pinnedAt
+                }
+            }
+
+            var updatedParticipants = participants
+            for (key, participant) in participants {
+                let serverPinnedAt = sessionPinnedAt[participant.sessionId]
+                    ?? (ambiguousUserIds.contains(participant.userId)
+                        ? nil
+                        : userPinnedAt[participant.userId]
+                    )
+
+                if let serverPinnedAt, participant.pin == nil {
+                    updatedParticipants[key] = participant.withUpdated(
+                        pin: .init(isLocal: false, pinnedAt: serverPinnedAt)
+                    )
+                } else if serverPinnedAt == nil,
+                          participant.pin?.isLocal == false {
+                    updatedParticipants[key] = participant.withUpdated(
+                        pin: nil
+                    )
                 }
             }
 
