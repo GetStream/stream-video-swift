@@ -7,6 +7,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### ✅ Added
 - `MicrophoneManager.setAudioBitrateProfile(_:)` switches in-call capture between voice and music (hi-fi). Requires dashboard `hifi_audio_enabled`. Music disables Apple Voice Processing and software NS/HPF, and raises the audio bitrate to 128 kbps. [#1260](https://github.com/GetStream/stream-video-swift/pull/1260)
 
+### 🐞 Fixed
+- Mute/unmute while music mode is on no longer chops or delays published audio. Switching to music rebuilds the local audio source with NS/HPF off, so unmute republish no longer restores software processing while Voice Processing is still disabled. Mute still unpublishes the track.
+
 # [1.52.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.52.0)
 _September 09, 2026_
 

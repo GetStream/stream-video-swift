@@ -43,8 +43,15 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
     private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
 
-    /// The primary audio track for this adapter.
-    let primaryTrack: RTCAudioTrack
+    /// The session's local microphone track.
+    ///
+    /// Clones of this track are attached to audio senders (Opus, RED,
+    /// and any extra negotiated codec). The underlying `RTCAudioSource`
+    /// is immutable, so this property is replaced when the capture
+    /// profile crosses music: unmute `SetAudioSend` then reads the new
+    /// source options (software NS/HPF off) instead of the voice
+    /// defaults.
+    private(set) var primaryTrack: RTCAudioTrack
 
     /// A publisher that emits events related to audio tracks.
     let subject: PassthroughSubject<TrackEvent, Never>
@@ -79,7 +86,9 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         self.subject = subject
 
         // Create the primary audio track for the session.
-        let source = peerConnectionFactory.makeAudioSource(.defaultConstraints)
+        let source = peerConnectionFactory.makeAudioSource(
+            .audioCaptureConstraints(for: .voiceStandard)
+        )
         let track = peerConnectionFactory.makeAudioTrack(source: source)
         primaryTrack = track
         streamIds = ["\(sessionID):audio"]
@@ -339,11 +348,24 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         with layerSettings: [Stream_Video_Sfu_Event_AudioSender]
     ) { /* No-op */ }
 
+    /// Applies the profile's Opus bitrate and, if the profile crossed
+    /// music, rebuilds the capture source.
+    ///
+    /// Bitrate is written on existing sender encodings and does not
+    /// renegotiate. Crossing music replaces ``primaryTrack`` and every
+    /// stored sender track so later mute/unmute publish uses music APM
+    /// flags. Same-side voice profiles (standard ↔ high quality) only
+    /// change bitrate.
+    ///
+    /// - Parameter profile: The profile to stamp on senders and, when
+    ///   `isMusic` changes, on a new `RTCAudioSource`.
     func setMaxBitrate(for profile: AudioBitrateProfile) async {
         try? await processingQueue.addSynchronousTaskOperation { [weak self] in
             guard let self else { return }
+            let previous = audioBitrateProfile
             audioBitrateProfile = profile
             applyCurrentProfileBitrate()
+            rebuildAudioSourceIfNeeded(from: previous, to: profile)
             if profile == .voiceStandard {
                 restoredBitrates.removeAll()
             }
@@ -381,6 +403,79 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         }
         transceiverStorage.set(transceiver, track: track, for: options)
         applyProfileBitrate(for: options, on: transceiver)
+    }
+
+    /// Rebuilds the capture source when `previous.isMusic` differs from
+    /// `profile.isMusic`.
+    ///
+    /// WebRTC `LocalAudioSource` copies goog* flags at create and
+    /// exposes no setter. Unmute enables the track, which runs
+    /// `SetAudioSend` → `SetOptions` from those copied flags. A voice
+    /// source therefore restored software NS/HPF while Apple Voice
+    /// Processing was still off, which chopped or delayed published
+    /// audio.
+    ///
+    /// Creates one new source and track, then swaps a clone onto every
+    /// stored audio transceiver (Opus, RED, inactive codecs).
+    /// `RtpSender.SetTrack` does not mark negotiation needed, so mids
+    /// stay. Detached senders only update storage so the next attach
+    /// uses the matching source.
+    ///
+    /// Mirrors JS web re-gUM with music constraints. Mute still
+    /// unpublishes, matching JS `stopPublish` and Android disable.
+    private func rebuildAudioSourceIfNeeded(
+        from previous: AudioBitrateProfile,
+        to profile: AudioBitrateProfile
+    ) {
+        guard previous.isMusic != profile.isMusic else { return }
+
+        let source = peerConnectionFactory.makeAudioSource(
+            .audioCaptureConstraints(for: profile)
+        )
+        let track = peerConnectionFactory.makeAudioTrack(source: source)
+        track.isEnabled = primaryTrack.isEnabled
+        let previousTrack = primaryTrack
+        primaryTrack = track
+
+        transceiverStorage.forEach { options, value in
+            let clone = track.clone(from: peerConnectionFactory)
+            clone.isEnabled = value.track.isEnabled
+            let wasAttached = value.transceiver.sender.track != nil
+            transceiverStorage.set(
+                value.transceiver,
+                track: clone,
+                for: options
+            )
+            if wasAttached {
+                value.transceiver.sender.track = clone
+            }
+        }
+
+        log.debug(
+            """
+            Local audio source rebuilt for profile:\(profile)
+                previous: \(previousTrack.trackId) isEnabled:\(previousTrack.isEnabled)
+                primary: \(track.trackId) isEnabled:\(track.isEnabled)
+                clones: \(transceiverStorage.map(\.value.track.trackId).joined(separator: ","))
+            """,
+            subsystems: .webRTC
+        )
+
+        guard hasRegisteredPrimaryTrack else { return }
+        subject.send(
+            .removed(
+                id: sessionID,
+                trackType: .audio,
+                track: previousTrack
+            )
+        )
+        subject.send(
+            .added(
+                id: sessionID,
+                trackType: .audio,
+                track: track
+            )
+        )
     }
 
     /// Uses live `publishOptions`, not the storage key. Equality is only
