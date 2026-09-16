@@ -515,9 +515,9 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertFalse(mockAudioRecorder.isRecording)
     }
 
-    // MARK: - stop
+    // MARK: - stopMedia
 
-    func test_stop_thenPublish_doesNotAddTransceiver() async throws {
+    func test_stopMedia_thenPublish_doesNotAddTransceiver() async throws {
         publishOptions = [.dummy(codec: .opus)]
         try publishOptions.forEach { publishOption in
             mockPeerConnection.stub(
@@ -530,14 +530,14 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
             ownCapabilities: [.sendAudio]
         )
 
-        await subject.stop()
+        await subject.stopMedia()
         try await subject.publish()
 
         XCTAssertEqual(mockPeerConnection.timesCalled(.addTransceiver), 0)
         XCTAssertFalse(subject.primaryTrack.isEnabled)
     }
 
-    func test_stop_didUpdateCallSettingsAudioOn_doesNotAddTransceiver() async throws {
+    func test_stopMedia_didUpdateCallSettingsAudioOn_doesNotAddTransceiver() async throws {
         publishOptions = [.dummy(codec: .opus)]
         try publishOptions.forEach { publishOption in
             mockPeerConnection.stub(
@@ -550,7 +550,7 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
             ownCapabilities: [.sendAudio]
         )
 
-        await subject.stop()
+        await subject.stopMedia()
         try await subject.didUpdateCallSettings(.init(audioOn: true))
 
         XCTAssertEqual(mockPeerConnection.timesCalled(.addTransceiver), 0)

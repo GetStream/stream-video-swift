@@ -31,6 +31,7 @@ final class MockLocalMediaAdapter: LocalMediaAdapting, Mockable, @unchecked Send
         case didUpdatePublishOptions
         case changePublishQuality
         case didUpdateOwnCapabilities
+        case stopMedia
     }
 
     enum MockFunctionInputKey: Payloadable {
@@ -41,6 +42,7 @@ final class MockLocalMediaAdapter: LocalMediaAdapting, Mockable, @unchecked Send
         case trackInfo(collectionType: RTCPeerConnectionTrackInfoCollectionType)
         case didUpdatePublishOptions(publishOptions: PublishOptions)
         case didUpdateOwnCapabilities(ownCapabilities: Set<OwnCapability>)
+        case stopMedia
 
         var payload: Any {
             switch self {
@@ -58,6 +60,8 @@ final class MockLocalMediaAdapter: LocalMediaAdapting, Mockable, @unchecked Send
                 return collectionType
             case let .didUpdatePublishOptions(publishOptions):
                 return publishOptions
+            case .stopMedia:
+                return ()
             }
         }
     }
@@ -100,5 +104,9 @@ final class MockLocalMediaAdapter: LocalMediaAdapting, Mockable, @unchecked Send
     func didUpdatePublishOptions(_ publishOptions: PublishOptions) async throws {
         stubbedFunctionInput[.didUpdatePublishOptions]?
             .append(.didUpdatePublishOptions(publishOptions: publishOptions))
+    }
+
+    func stopMedia() async {
+        stubbedFunctionInput[.stopMedia]?.append(.stopMedia)
     }
 }

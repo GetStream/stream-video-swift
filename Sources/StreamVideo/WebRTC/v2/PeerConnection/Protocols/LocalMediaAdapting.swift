@@ -61,4 +61,12 @@ protocol LocalMediaAdapting {
     func didUpdateOwnCapabilities(_ ownCapabilities: Set<OwnCapability>)
 
     func didUpdatePublishOptions(_ publishOptions: PublishOptions) async throws
+
+    /// Drains leftover local publish before the peer connection closes.
+    /// Camera and screenshare ignore this; audio waits for in-flight work.
+    func stopMedia() async
+}
+
+extension LocalMediaAdapting {
+    func stopMedia() async {}
 }

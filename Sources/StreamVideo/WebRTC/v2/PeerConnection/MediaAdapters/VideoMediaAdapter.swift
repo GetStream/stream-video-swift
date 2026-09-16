@@ -140,6 +140,11 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
         try await localMediaManager.didUpdateCallSettings(settings)
     }
 
+    /// Camera ignores leftover-publish drain; audio handles it.
+    func stopMedia() async {
+        await localMediaManager.stopMedia()
+    }
+
     func didUpdateOwnCapabilities(
         _ ownCapabilities: Set<OwnCapability>
     ) {

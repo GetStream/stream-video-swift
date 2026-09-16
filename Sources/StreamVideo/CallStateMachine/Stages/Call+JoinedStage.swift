@@ -37,6 +37,9 @@ extension Call.StateMachine.Stage {
         /// after a successful `.joining -> .joined` transition and are released
         /// together with the stage.
         private let disposableBag = DisposableBag()
+        private let capabilitiesQueue = OperationQueue(
+            maxConcurrentOperationCount: 1
+        )
 
         /// Initializes a new joined stage with the provided call and response.
         ///
@@ -47,6 +50,10 @@ extension Call.StateMachine.Stage {
             _ context: Context
         ) {
             super.init(id: .joined, context: context)
+        }
+
+        deinit {
+            capabilitiesQueue.cancelAllOperations()
         }
 
         /// Handles the transition from the previous stage to this stage.
@@ -109,12 +116,11 @@ extension Call.StateMachine.Stage {
         /// updates. Every effective change is forwarded to the call controller
         /// so permission-dependent media actions stay in sync.
         ///
-        /// Each emission gets its own `DisposableBag` task identifier. Sharing
-        /// one identifier would cancel an in-flight join-time update when a
-        /// later value arrives (latest-wins), which can drop the capabilities
-        /// already applied from `JoinCallResponse`.
+        /// Updates run on a serial queue so a later emission cannot be
+        /// overwritten by an earlier in-flight task.
         ///
-        /// - Parameter call: The call whose capability stream should be observed.
+        /// - Parameter call: The call whose capability stream should
+        ///   be observed.
         private func subscribeToOwnCapabilitiesChanges(on call: Call) async {
             let publisher = await MainActor.run {
                 call.state.$ownCapabilities
@@ -122,13 +128,12 @@ extension Call.StateMachine.Stage {
                     .eraseToAnyPublisher()
             }
             publisher
-                .sink { [weak self, weak call] capabilities in
-                    guard let self else { return }
-                    Task(disposableBag: self.disposableBag) { [weak call] in
-                        await call?
-                            .callController
-                            .updateOwnCapabilities(ownCapabilities: capabilities)
-                    }
+                .sinkTask(
+                    queue: capabilitiesQueue
+                ) { [weak call] capabilities in
+                    await call?
+                        .callController
+                        .updateOwnCapabilities(ownCapabilities: capabilities)
                 }
                 .store(in: disposableBag)
         }

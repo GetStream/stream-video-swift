@@ -934,6 +934,25 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
         }
     }
 
+    func test_handleCallGrantsUpdated_allPublishGrantsRevoked_clearsPublishCapabilities() async throws {
+        await stateAdapter.enqueueOwnCapabilities {
+            [.sendAudio, .sendVideo, .screenshare]
+        }
+        var event = Stream_Video_Sfu_Event_CallGrantsUpdated()
+        event.currentGrants = .init()
+        event.currentGrants.canPublishAudio = false
+        event.currentGrants.canPublishVideo = false
+        event.currentGrants.canScreenshare = false
+
+        try await assert(
+            event,
+            payload: .callGrantsUpdated(event),
+            initialState: [:]
+        ) { _ in
+            await self.stateAdapter.ownCapabilities.isEmpty
+        }
+    }
+
     func test_handleCallGrantsUpdated_withoutGrants_doesNotUpdateOwnCapabilities() async throws {
         await stateAdapter.enqueueOwnCapabilities { [.sendAudio, .sendVideo] }
         var event = Stream_Video_Sfu_Event_CallGrantsUpdated()

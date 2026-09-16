@@ -159,6 +159,27 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         await fulfilmentInMainActor { call.state.ownCapabilities == [.sendAudio] }
     }
 
+    func test_setCall_ownCapabilitiesUpdatedOnStateAdapter_emptyAfterNonEmpty_updatesCallState() async throws {
+        let call = await MockCall(.dummy())
+        _ = subject
+        subject.call = call
+
+        await mockWebRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .enqueueOwnCapabilities { [.sendAudio] }
+        await fulfilmentInMainActor { call.state.ownCapabilities == [.sendAudio] }
+
+        await mockWebRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .enqueueOwnCapabilities { [] }
+
+        await fulfilmentInMainActor { call.state.ownCapabilities.isEmpty }
+    }
+
     func test_setAudioBitrateProfile_beforeJoin_throwsWithoutChangingProfile() async {
         subject.call = await MockCall(.dummy())
 

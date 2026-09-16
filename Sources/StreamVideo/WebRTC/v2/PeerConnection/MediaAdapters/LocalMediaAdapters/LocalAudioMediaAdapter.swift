@@ -136,7 +136,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     /// Stops further publish, then waits for work already on the queue.
     /// Close awaits this so clone/addTransceiver cannot run on a dead
     /// AudioEngine.
-    func stop() async {
+    func stopMedia() async {
         isStopped = true
         processingQueue.cancelAllOperations()
         try? await processingQueue.addSynchronousTaskOperation {}
@@ -222,7 +222,13 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         _ settings: CallSettings
     ) async throws {
         try await processingQueue.addSynchronousTaskOperation { [weak self] in
-            guard let self, !isStopped, ownCapabilities.contains(.sendAudio) else { return }
+            guard
+                let self,
+                !isStopped,
+                ownCapabilities.contains(.sendAudio)
+            else {
+                return
+            }
             registerPrimaryTrackIfPossible(settings)
 
             guard lastUpdatedCallSettings != settings.audio else { return }
@@ -238,8 +244,9 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                 )
             }
 
-            // Mute RPC can finish after close started. Stop() cancels
-            // this operation and sets the latch before we get here.
+            // Mute RPC can finish after close started. stopMedia()
+            // cancels this operation and sets the latch before we get
+            // here.
             try Task.checkCancellation()
             guard !isStopped else { return }
 

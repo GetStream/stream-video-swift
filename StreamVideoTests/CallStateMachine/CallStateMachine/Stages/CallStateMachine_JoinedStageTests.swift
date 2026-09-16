@@ -97,6 +97,27 @@ final class CallStateMachineStageJoinedStage_Tests: StreamVideoTestCase, @unchec
                 .contains([.sendAudio]) ?? false
         }
     }
+
+    func test_joiningTransition_ownCapabilitiesAThenB_controllerKeepsB() async {
+        _ = subject.transition(
+            from: .init(id: .joining, context: .init(call: call))
+        )
+
+        await fulfillment {
+            self.callController.timesCalled(.updateOwnCapabilities) > 0
+        }
+
+        await MainActor.run {
+            call.state.ownCapabilities = [.sendAudio]
+            call.state.ownCapabilities = [.sendVideo]
+        }
+
+        await fulfillment {
+            self.callController
+                .recordedInputPayload([OwnCapability].self, for: .updateOwnCapabilities)?
+                .last == [.sendVideo]
+        }
+    }
 }
 
 extension Call.StateMachine.Stage.Context.Output {

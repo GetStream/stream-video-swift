@@ -75,6 +75,11 @@ class CallController: @unchecked Sendable {
     private var webRTCClientStateObserver: AnyCancellable?
     private var webRTCParticipantsObserver: AnyCancellable?
     private var participants: CollectionDelayedUpdateObserver<[String: CallParticipant]>?
+    /// True after a non-empty adapter set has been applied. The adapter
+    /// publishes an empty seed before join; that must not wipe
+    /// `JoinCallResponse` capabilities. Later empty updates (all grants
+    /// revoked) must still apply.
+    private var hasAppliedNonEmptyAdapterOwnCapabilities = false
 
     private let disposableBag = DisposableBag()
 
@@ -899,12 +904,9 @@ class CallController: @unchecked Sendable {
     ///
     /// The adapter publishes an empty seed before join. Applying that value
     /// after `JoinCallResponse` has already populated call state would wipe
-    /// those capabilities, so an empty adapter set is ignored while call state
-    /// already has capabilities. Non-empty adapter updates still apply,
-    /// including when this observer subscribes after the adapter was
-    /// populated. Capability updates that flow the other way, from the call
-    /// state down to the WebRTC layer, are skipped because the value is
-    /// already in sync.
+    /// those capabilities, so empty adapter values are ignored until a
+    /// non-empty set has been applied. After that, empty updates (all
+    /// publishing grants revoked) still reach call state.
     private func observeOwnCapabilitiesUpdates() async {
         await webRTCCoordinator
             .stateAdapter
@@ -912,11 +914,15 @@ class CallController: @unchecked Sendable {
             .removeDuplicates()
             .log(.debug) { "OwnCapabilities updated to \($0)" }
             .sinkTask(storeIn: disposableBag) { @MainActor [weak self] value in
-                guard let state = self?.call?.state else {
+                guard let self, let state = self.call?.state else {
                     return
                 }
-                if value.isEmpty, !state.ownCapabilities.isEmpty {
-                    return
+                if value.isEmpty {
+                    guard self.hasAppliedNonEmptyAdapterOwnCapabilities else {
+                        return
+                    }
+                } else {
+                    self.hasAppliedNonEmptyAdapterOwnCapabilities = true
                 }
                 guard Set(state.ownCapabilities) != value else {
                     return

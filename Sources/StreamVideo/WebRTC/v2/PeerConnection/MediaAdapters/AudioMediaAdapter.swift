@@ -169,9 +169,9 @@ final class AudioMediaAdapter: MediaAdapting, @unchecked Sendable {
             .setMaxBitrate(for: profile)
     }
 
-    /// Waits until local audio publish has finished or been cancelled.
-    func stopLocalAudio() async {
-        await (localMediaManager as? LocalAudioMediaAdapter)?.stop()
+    /// Drains leftover local publish before the peer connection closes.
+    func stopMedia() async {
+        await localMediaManager.stopMedia()
     }
 
     // MARK: - Observers

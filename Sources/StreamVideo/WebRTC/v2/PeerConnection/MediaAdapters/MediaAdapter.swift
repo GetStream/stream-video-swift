@@ -350,9 +350,11 @@ final class MediaAdapter {
         try await videoMediaAdapter.removeCapturePhotoOutput(capturePhotoOutput)
     }
 
-    /// Waits until local audio publish has finished or been cancelled.
-    func stopLocalAudio() async {
-        await audioMediaAdapter.stopLocalAudio()
+    /// Drains leftover local publish before the peer connection closes.
+    func stopMedia() async {
+        await audioMediaAdapter.stopMedia()
+        await videoMediaAdapter.stopMedia()
+        await screenShareMediaAdapter.stopMedia()
     }
 
     // MARK: - ScreenSharing

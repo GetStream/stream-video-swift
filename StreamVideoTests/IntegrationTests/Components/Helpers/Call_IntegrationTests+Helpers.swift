@@ -108,16 +108,11 @@ extension Call_IntegrationTests {
         }
 
         // Helpers.init applies production timeouts for live API calls.
-        // Put the process-wide STREAM_TESTS defaults back so later
-        // tests on this xctest clone do not inherit production values.
+        // Restore .testing so later tests on this clone do not keep
+        // production values.
         func restoreAudioSessionReadinessWatchdog() {
-            #if STREAM_TESTS
             WebRTCConfiguration.timeout = .testing
             CallConfiguration.timeout = .testing
-            #else
-            WebRTCConfiguration.timeout = .production
-            CallConfiguration.timeout = .production
-            #endif
         }
 
         mutating func callFlow(

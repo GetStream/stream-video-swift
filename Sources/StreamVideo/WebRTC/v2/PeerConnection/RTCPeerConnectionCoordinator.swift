@@ -581,9 +581,9 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             """,
             subsystems: subsystem
         )
-        // Drain leftover audio publish (mute RPC → clone track) before
+        // Drain leftover local publish (mute RPC → clone track) before
         // the native peer connection and ADM graph go away.
-        await mediaAdapter.stopLocalAudio()
+        await mediaAdapter.stopMedia()
         disposableBag.removeAll()
         await peerConnection.close()
         peerConnection.subject.send(StreamRTCPeerConnection.CloseEvent())

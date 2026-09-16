@@ -132,6 +132,9 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
         /* No-op */
     }
 
+    /// Screenshare ignores leftover-publish drain; audio handles it.
+    func stopMedia() async {}
+
     /// Publishes the local screen sharing track to the peer connection.
     ///
     /// This method enables the primary screen sharing track and creates

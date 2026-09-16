@@ -170,6 +170,9 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         )
     }
 
+    /// Camera ignores leftover-publish drain; audio handles it.
+    func stopMedia() async {}
+
     /// Updates the local video media based on new call settings.
     ///
     /// - Parameter settings: The updated call settings.

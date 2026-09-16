@@ -610,11 +610,18 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         peerConnectionsDisposableBag.removeAll()
         pendingPeerConnectionTracesDisposableBag.removeAll()
         disposableBag.removeAll()
-        await audioSession.deactivate()
+        // Drain leftover publish via close() before dropping the
+        // coordinators. deinit only closes the native PC and would
+        // let mute-RPC clone a track after the graph is gone.
+        let publisher = self.publisher
+        let subscriber = self.subscriber
         await publisher?.prepareForClosing()
         await subscriber?.prepareForClosing()
-        publisher = nil
-        subscriber = nil
+        await publisher?.close()
+        await subscriber?.close()
+        self.publisher = nil
+        self.subscriber = nil
+        await audioSession.deactivate()
         set(sfuAdapter: nil)
         set(statsAdapter: nil)
         set(token: "")
