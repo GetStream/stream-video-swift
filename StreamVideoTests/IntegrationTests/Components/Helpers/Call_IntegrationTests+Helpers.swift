@@ -86,13 +86,14 @@ extension Call_IntegrationTests {
             }
             registeredCalls = [:]
 
-            audioStore
-                .dispatch(.setAudioDeviceModule(nil))
-
-            _ = try? await audioStore
-                .publisher(\.audioDeviceModule)
-                .filter { $0 == nil }
-                .nextValue(timeout: 2)
+            // Leave cleanup already drops the ADM. Do not nil it here:
+            // that raced a live AudioEngine worker on the shared store.
+            if audioStore.state.audioDeviceModule != nil {
+                _ = try? await audioStore
+                    .publisher(\.audioDeviceModule)
+                    .filter { $0 == nil }
+                    .nextValue(timeout: 2)
+            }
 
             permissions.dismantle()
             await client.dismantle()

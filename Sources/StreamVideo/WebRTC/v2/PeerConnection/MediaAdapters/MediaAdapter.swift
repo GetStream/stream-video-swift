@@ -349,9 +349,14 @@ final class MediaAdapter {
     ) async throws {
         try await videoMediaAdapter.removeCapturePhotoOutput(capturePhotoOutput)
     }
-    
+
+    /// Waits until local audio publish has finished or been cancelled.
+    func stopLocalAudio() async {
+        await audioMediaAdapter.stopLocalAudio()
+    }
+
     // MARK: - ScreenSharing
-    
+
     /// Begins screen sharing of the specified type.
     ///
     /// - Parameters:

@@ -60,6 +60,9 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     private var ownCapabilities: [OwnCapability] = []
     private var audioBitrateProfile: AudioBitrateProfile = .voiceStandard
     private var restoredBitrates: [PublishOptions.AudioPublishOptions: Int] = [:]
+    /// True after ``stop()``. Mute-state RPC used to resume and clone
+    /// tracks after the native peer connection was already closed.
+    @Atomic private var isStopped = false
 
     /// Initializes a new instance of `LocalAudioMediaAdapter`.
     ///
@@ -130,6 +133,15 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         registerPrimaryTrackIfPossible(settings)
     }
 
+    /// Stops further publish, then waits for work already on the queue.
+    /// Close awaits this so clone/addTransceiver cannot run on a dead
+    /// AudioEngine.
+    func stop() async {
+        isStopped = true
+        processingQueue.cancelAllOperations()
+        try? await processingQueue.addSynchronousTaskOperation {}
+    }
+
     /// Starts publishing the local audio track.
     ///
     /// This enables the primary track and creates additional transceivers based
@@ -140,6 +152,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     /// consumers.
     func publish() async throws {
         guard
+            !isStopped,
             !primaryTrack.isEnabled
         else {
             return
@@ -148,10 +161,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         primaryTrack.isEnabled = true
 
         publishOptions.forEach {
-            self.addTransceiverIfRequired(
-                for: $0,
-                with: self.primaryTrack.clone(from: self.peerConnectionFactory)
-            )
+            self.addTransceiverIfRequired(for: $0)
         }
 
         let activePublishOptions = Set(self.publishOptions)
@@ -212,7 +222,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         _ settings: CallSettings
     ) async throws {
         try await processingQueue.addSynchronousTaskOperation { [weak self] in
-            guard let self, ownCapabilities.contains(.sendAudio) else { return }
+            guard let self, !isStopped, ownCapabilities.contains(.sendAudio) else { return }
             registerPrimaryTrackIfPossible(settings)
 
             guard lastUpdatedCallSettings != settings.audio else { return }
@@ -227,6 +237,11 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                     for: sessionID
                 )
             }
+
+            // Mute RPC can finish after close started. Stop() cancels
+            // this operation and sets the latch before we get here.
+            try Task.checkCancellation()
+            guard !isStopped else { return }
 
             if isMuted, primaryTrack.isEnabled {
                 try await unpublish()
@@ -257,17 +272,14 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         _ publishOptions: PublishOptions
     ) async throws {
         processingQueue.addTaskOperation { [weak self] in
-            guard let self else { return }
+            guard let self, !isStopped else { return }
 
             self.publishOptions = publishOptions.audio
 
             guard primaryTrack.isEnabled else { return }
 
             for option in self.publishOptions {
-                addTransceiverIfRequired(
-                    for: option,
-                    with: primaryTrack.clone(from: peerConnectionFactory)
-                )
+                addTransceiverIfRequired(for: option)
             }
 
             let activePublishOptions = Set(self.publishOptions)
@@ -374,19 +386,17 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
     // MARK: - Private Helpers
 
-    /// Adds or updates a transceiver for a given audio track and publish option.
-    ///
-    /// - Parameters:
-    ///   - options: The options for publishing the audio track.
-    ///   - track: The audio track to be added or updated.
+    /// Adds a transceiver for a publish option. Clones the primary
+    /// track only after ``stop()`` has been ruled out so factory
+    /// clone cannot run on a dead AudioEngine.
     private func addTransceiverIfRequired(
-        for options: PublishOptions.AudioPublishOptions,
-        with track: RTCAudioTrack
+        for options: PublishOptions.AudioPublishOptions
     ) {
-        guard !transceiverStorage.contains(key: options) else {
+        guard !isStopped, !transceiverStorage.contains(key: options) else {
             return
         }
 
+        let track = primaryTrack.clone(from: peerConnectionFactory)
         guard
             let transceiver = peerConnection.addTransceiver(
                 trackType: .audio,

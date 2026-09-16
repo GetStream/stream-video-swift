@@ -255,9 +255,19 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         source.observer = self
     }
 
+    deinit {
+        // Native ADM keeps a raw observer pointer. If this Swift
+        // object dies first, willReleaseEngine can jump into freed
+        // memory.
+        if source.observer === self {
+            source.observer = nil
+        }
+    }
+
     // MARK: - Recording
 
-    /// Reinitializes the ADM, clearing its internal audio graph state.
+    /// Rebuilds the native AudioEngine graph. Unsafe during teardown;
+    /// close peer connections, then drop the store pointer instead.
     /// - Note: Serialized on ``engineQueue`` with other engine mutations.
     func reset() {
         engineQueue.sync { _ = source.reset() }

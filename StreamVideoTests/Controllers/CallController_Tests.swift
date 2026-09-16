@@ -857,13 +857,13 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
 
         let actual = try XCTUnwrap(
             mockPublisher.recordedInputPayload(
-                (ScreensharingType, [OwnCapability], Bool).self,
+                MockRTCPeerConnectionCoordinator.BeginScreenSharingPayload.self,
                 for: .beginScreenSharing
             )?.first
         )
-        XCTAssertEqual(actual.0, .inApp)
-        XCTAssertEqual(actual.1, ownCapabilities)
-        XCTAssertTrue(actual.2)
+        XCTAssertEqual(actual.type, .inApp)
+        XCTAssertEqual(actual.ownCapabilities, ownCapabilities)
+        XCTAssertTrue(actual.includeAudio)
     }
 
     func test_startScreensharing_typeIsInApp_includeAudioFalse_shouldBeginScreenSharing() async throws {
@@ -884,13 +884,13 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
 
         let actual = try XCTUnwrap(
             mockPublisher.recordedInputPayload(
-                (ScreensharingType, [OwnCapability], Bool).self,
+                MockRTCPeerConnectionCoordinator.BeginScreenSharingPayload.self,
                 for: .beginScreenSharing
             )?.first
         )
-        XCTAssertEqual(actual.0, .inApp)
-        XCTAssertEqual(actual.1, ownCapabilities)
-        XCTAssertFalse(actual.2)
+        XCTAssertEqual(actual.type, .inApp)
+        XCTAssertEqual(actual.ownCapabilities, ownCapabilities)
+        XCTAssertFalse(actual.includeAudio)
     }
 
     func test_startScreensharing_typeIsBroadcast_includeAudioTrue_shouldBeginScreenSharing() async throws {
@@ -911,13 +911,13 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
 
         let actual = try XCTUnwrap(
             mockPublisher.recordedInputPayload(
-                (ScreensharingType, [OwnCapability], Bool).self,
+                MockRTCPeerConnectionCoordinator.BeginScreenSharingPayload.self,
                 for: .beginScreenSharing
             )?.first
         )
-        XCTAssertEqual(actual.0, .broadcast)
-        XCTAssertEqual(actual.1, ownCapabilities)
-        XCTAssertTrue(actual.2)
+        XCTAssertEqual(actual.type, .broadcast)
+        XCTAssertEqual(actual.ownCapabilities, ownCapabilities)
+        XCTAssertTrue(actual.includeAudio)
     }
 
     func test_startScreensharing_typeIsBroadcast_includeAudioFalse_shouldBeginScreenSharing() async throws {
@@ -938,13 +938,13 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
 
         let actual = try XCTUnwrap(
             mockPublisher.recordedInputPayload(
-                (ScreensharingType, [OwnCapability], Bool).self,
+                MockRTCPeerConnectionCoordinator.BeginScreenSharingPayload.self,
                 for: .beginScreenSharing
             )?.first
         )
-        XCTAssertEqual(actual.0, .broadcast)
-        XCTAssertEqual(actual.1, ownCapabilities)
-        XCTAssertFalse(actual.2)
+        XCTAssertEqual(actual.type, .broadcast)
+        XCTAssertEqual(actual.ownCapabilities, ownCapabilities)
+        XCTAssertFalse(actual.includeAudio)
     }
 
     // MARK: - stopScreensharing
@@ -1147,7 +1147,10 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         try await subject.zoom(by: 32)
 
         XCTAssertEqual(
-            mockPublisher.recordedInputPayload(CGFloat.self, for: .zoom)?.first,
+            mockPublisher.recordedInputPayload(
+                MockRTCPeerConnectionCoordinator.ZoomPayload.self,
+                for: .zoom
+            )?.first?.factor,
             32
         )
     }

@@ -255,11 +255,26 @@ final class RTCAudioStore_AudioDeviceModuleMiddlewareTests: XCTestCase, @uncheck
             line: #line
         )
 
-        XCTAssertEqual(currentMock.timesCalled(.reset), 1)
+        XCTAssertEqual(currentMock.timesCalled(.reset), 0)
         XCTAssertEqual(replacementMock.timesCalled(.reset), 0)
         XCTAssertEqual(replacementMock.timesCalled(.setMuteMode), 1)
         XCTAssertEqual(replacementMock.timesCalled(.setRecordingAlwaysPreparedMode), 0)
         XCTAssertEqual(replacementMock.timesCalled(.setVoiceProcessingEnabled), 0)
+    }
+
+    func test_setAudioDeviceModule_nil_doesNotResetPreviousModule() throws {
+        let (currentModule, currentMock) = makeModule(isRecording: true)
+        let state = makeState(audioDeviceModule: currentModule)
+
+        subject.apply(
+            state: state,
+            action: .setAudioDeviceModule(nil),
+            file: #file,
+            function: #function,
+            line: #line
+        )
+
+        XCTAssertEqual(currentMock.timesCalled(.reset), 0)
     }
 
     // MARK: - setMutedSpeechDetectionEnabled

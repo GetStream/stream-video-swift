@@ -39,6 +39,20 @@ final class MockRTCPeerConnectionCoordinator:
         case setAudioMaxBitrate
     }
 
+    /// Boxed so `recordedInputPayload` can `as?` it. A 3-tuple through
+    /// `Any` is dropped by Swift (XCTUnwrap nil while `timesCalled` is 1).
+    struct BeginScreenSharingPayload: Equatable {
+        var type: ScreensharingType
+        var ownCapabilities: [OwnCapability]
+        var includeAudio: Bool
+    }
+
+    /// `CGFloat` through `Any` often comes back as `Double`, so
+    /// `as? CGFloat` is nil even when zoom was recorded.
+    struct ZoomPayload: Equatable {
+        var factor: CGFloat
+    }
+
     enum MockFunctionInputKey: Payloadable {
         case changePublishQuality(event: Stream_Video_Sfu_Event_ChangePublishQuality)
         case didUpdateCallSettings(callSettings: CallSettings)
@@ -85,7 +99,11 @@ final class MockRTCPeerConnectionCoordinator:
             case let .setUp(settings, ownCapabilities):
                 return (settings, ownCapabilities)
             case let .beginScreenSharing(type, ownCapabilities, includeAudio):
-                return (type, ownCapabilities, includeAudio)
+                return BeginScreenSharingPayload(
+                    type: type,
+                    ownCapabilities: ownCapabilities,
+                    includeAudio: includeAudio
+                )
             case .stopScreenSharing:
                 return ()
             case let .focus(point):
@@ -99,7 +117,7 @@ final class MockRTCPeerConnectionCoordinator:
             case let .removeVideoOutput(videoOutput):
                 return videoOutput
             case let .zoom(factor):
-                return factor
+                return ZoomPayload(factor: factor)
             case let .trackInfo(trackType):
                 return trackType
             case .statsReport:

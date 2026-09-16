@@ -401,12 +401,12 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
 
         let actual = try XCTUnwrap(
             mockPublisher.recordedInputPayload(
-                (ScreensharingType, [OwnCapability], Bool).self,
+                MockRTCPeerConnectionCoordinator.BeginScreenSharingPayload.self,
                 for: .beginScreenSharing
             )?.first
         )
-        XCTAssertEqual(actual.0, .inApp)
-        XCTAssertEqual(actual.1, ownCapabilities)
+        XCTAssertEqual(actual.type, .inApp)
+        XCTAssertEqual(actual.ownCapabilities, ownCapabilities)
     }
 
     func test_startScreensharing_typeIsBroadcast_shouldBeginScreenSharing() async throws {
@@ -424,12 +424,12 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
 
         let actual = try XCTUnwrap(
             mockPublisher.recordedInputPayload(
-                (ScreensharingType, [OwnCapability], Bool).self,
+                MockRTCPeerConnectionCoordinator.BeginScreenSharingPayload.self,
                 for: .beginScreenSharing
             )?.first
         )
-        XCTAssertEqual(actual.0, .broadcast)
-        XCTAssertEqual(actual.1, ownCapabilities)
+        XCTAssertEqual(actual.type, .broadcast)
+        XCTAssertEqual(actual.ownCapabilities, ownCapabilities)
     }
 
     // MARK: - stopScreensharing
@@ -612,10 +612,16 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
         try await subject.zoom(by: 32)
 
         await fulfillment {
-            mockPublisher.recordedInputPayload(CGFloat.self, for: .zoom)?.last == 32
+            mockPublisher.recordedInputPayload(
+                MockRTCPeerConnectionCoordinator.ZoomPayload.self,
+                for: .zoom
+            )?.last?.factor == 32
         }
         XCTAssertEqual(
-            mockPublisher.recordedInputPayload(CGFloat.self, for: .zoom)?.last,
+            mockPublisher.recordedInputPayload(
+                MockRTCPeerConnectionCoordinator.ZoomPayload.self,
+                for: .zoom
+            )?.last?.factor,
             32
         )
     }

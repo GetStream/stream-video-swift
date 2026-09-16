@@ -309,6 +309,8 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             subsystems: subsystem
         )
         disposableBag.removeAll()
+        // Supported teardown is ``close()``, which drains local audio
+        // first. deinit cannot await that drain.
         // swiftlint:disable discourage_task_init
         Task { [peerConnection] in await peerConnection.close() }
         // swiftlint:enable discourage_task_init
@@ -579,6 +581,9 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             """,
             subsystems: subsystem
         )
+        // Drain leftover audio publish (mute RPC → clone track) before
+        // the native peer connection and ADM graph go away.
+        await mediaAdapter.stopLocalAudio()
         disposableBag.removeAll()
         await peerConnection.close()
         peerConnection.subject.send(StreamRTCPeerConnection.CloseEvent())

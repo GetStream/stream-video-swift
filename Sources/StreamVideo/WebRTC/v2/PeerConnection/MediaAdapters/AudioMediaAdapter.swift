@@ -169,6 +169,11 @@ final class AudioMediaAdapter: MediaAdapting, @unchecked Sendable {
             .setMaxBitrate(for: profile)
     }
 
+    /// Waits until local audio publish has finished or been cancelled.
+    func stopLocalAudio() async {
+        await (localMediaManager as? LocalAudioMediaAdapter)?.stop()
+    }
+
     // MARK: - Observers
 
     /// Adds a new audio stream and notifies observers.

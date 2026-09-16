@@ -704,26 +704,13 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         try await subject.configurePeerConnections()
         let mockPublisher = try await XCTAsyncUnwrap(await subject!.publisher as? MockRTCPeerConnectionCoordinator)
 
-        XCTAssertEqual(
-            mockPublisher.recordedInputPayload(
-                (ScreensharingType, [OwnCapability], Bool).self,
-                for: .beginScreenSharing
-            )?.first?.0,
-            .inApp
-        )
-        XCTAssertEqual(
-            mockPublisher.recordedInputPayload(
-                (ScreensharingType, [OwnCapability], Bool).self,
-                for: .beginScreenSharing
-            )?.first?.1,
-            [.blockUsers]
-        )
-        XCTAssertTrue(
-            mockPublisher.recordedInputPayload(
-                (ScreensharingType, [OwnCapability], Bool).self,
-                for: .beginScreenSharing
-            )?.first?.2 ?? false
-        )
+        let actual = mockPublisher.recordedInputPayload(
+            MockRTCPeerConnectionCoordinator.BeginScreenSharingPayload.self,
+            for: .beginScreenSharing
+        )?.first
+        XCTAssertEqual(actual?.type, .inApp)
+        XCTAssertEqual(actual?.ownCapabilities, [.blockUsers])
+        XCTAssertEqual(actual?.includeAudio, true)
     }
 
     func test_configurePeerConnections_withoutActiveSession_shouldNotBeginScreenSharing() async throws {

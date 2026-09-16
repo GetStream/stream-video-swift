@@ -147,15 +147,16 @@ extension RTCAudioStore {
             try audioDeviceModule.setMuted(value)
         }
 
-        /// Handles ADM swapping by wiring up observers and ensuring the previous
-        /// module is stopped.
+        /// Wires publishers for the new ADM. Does not `reset()` the previous
+        /// one: that rebuilds the native graph while WebRTC may still be
+        /// releasing it. The previous owner closes peer connections in
+        /// `cleanUp`, then `deactivate()` drops the store pointer if it
+        /// still owns the session.
         private func didSetAudioDeviceModule(
             _ audioDeviceModule: AudioDeviceModule?,
             state: RTCAudioStore.StoreState
         ) throws {
             disposableBag.removeAll()
-
-            state.audioDeviceModule?.reset()
 
             guard let audioDeviceModule else {
                 return
