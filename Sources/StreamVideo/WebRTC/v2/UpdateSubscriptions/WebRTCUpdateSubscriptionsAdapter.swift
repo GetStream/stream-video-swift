@@ -74,18 +74,15 @@ final class WebRTCUpdateSubscriptionsAdapter: @unchecked Sendable {
     /// Calling this method multiple times cancels any previous observation and
     /// restarts from the latest values.
     func startObservation() {
-        processingQueue.addOperation { [weak self] in
-            guard let self else { return }
-            publisherCancellable?.cancel()
-            publisherCancellable = nil
-            publisherCancellable = publisher
-                .sinkTask(queue: processingQueue) { [weak self] in
-                    try await self?.process(
-                        participants: $0.0,
-                        incomingVideoQualitySettings: $0.1
-                    )
-                }
-        }
+        publisherCancellable?.cancel()
+        publisherCancellable = nil
+        publisherCancellable = publisher
+            .sinkTask(queue: processingQueue) { [weak self] in
+                try await self?.process(
+                    participants: $0.0,
+                    incomingVideoQualitySettings: $0.1
+                )
+            }
     }
 
     /// Stops observing participant and quality updates.

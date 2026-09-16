@@ -57,9 +57,16 @@ final class WebRTCUpdateSubscriptionsAdapter_Tests: XCTestCase, @unchecked Senda
             "3": .dummy(id: "3", isScreenSharing: true),
             "4": .dummy(id: "4", isScreenSharing: true)
         ])
-        await fulfillment { self.mockSFUStack.service.updateSubscriptionsWasCalledWithRequest != nil }
+        await fulfillment {
+            self.mockSFUStack.service.timesCalled(.updateSubscriptions) == 1
+        }
 
-        let request = try XCTUnwrap(mockSFUStack.service.updateSubscriptionsWasCalledWithRequest)
+        let request = try XCTUnwrap(
+            mockSFUStack.service.recordedInputPayload(
+                Stream_Video_Sfu_Signal_UpdateSubscriptionsRequest.self,
+                for: .updateSubscriptions
+            )?.last
+        )
         XCTAssertEqual(request.tracks.filter { $0.trackType == .video }.count, 2)
         XCTAssertEqual(request.tracks.filter { $0.trackType == .screenShare }.count, 2)
     }

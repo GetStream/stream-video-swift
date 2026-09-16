@@ -28,7 +28,9 @@ extension Call_IntegrationTests.Helpers {
 
         func dismantle() async {
             for client in registeredClients.values {
-                await client.disconnect()
+                _ = try? await Task(timeoutInSeconds: 2) {
+                    await client.disconnect()
+                }.value
             }
 
             StreamVideoProviderKey.currentValue = nil

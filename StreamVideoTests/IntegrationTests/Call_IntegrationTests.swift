@@ -19,10 +19,15 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
 
     // MARK: - Lifecycle
 
+    override func setUp() async throws {
+        try await super.setUp()
+        helpers = .init(loggingMode: .sdk)
+    }
+
     override func tearDown() async throws {
-        _ = 0
-        try await helpers.dismantle()
-        helpers = nil
+        var helpers = self.helpers
+        self.helpers = nil
+        try await helpers?.dismantle()
         try await super.tearDown()
     }
 
@@ -34,7 +39,12 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         let deviceId = String.unique
 
         try await helpers
-            .callFlow(id: .unique, type: .default, userId: .unique)
+            .callFlow(
+                id: .unique,
+                type: .default,
+                userId: .unique,
+                connectMode: .none
+            )
             .perform { try await $0.client.setDevice(id: deviceId) }
             .perform { try await $0.client.listDevices() }
             .assert { $0.value.map(\.id).contains(deviceId) }
@@ -44,7 +54,12 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         let deviceId = String.unique
 
         try await helpers
-            .callFlow(id: .unique, type: .default, userId: .unique)
+            .callFlow(
+                id: .unique,
+                type: .default,
+                userId: .unique,
+                connectMode: .none
+            )
             .perform { try await $0.client.setVoipDevice(id: deviceId) }
             .perform { try await $0.client.listDevices() }
             .assert { $0.value.map(\.id).contains(deviceId) }
@@ -56,7 +71,12 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         let deviceId = String.unique
 
         try await helpers
-            .callFlow(id: .unique, type: .default, userId: .unique)
+            .callFlow(
+                id: .unique,
+                type: .default,
+                userId: .unique,
+                connectMode: .none
+            )
             .perform { try await $0.client.setDevice(id: deviceId) }
             .perform { try await $0.client.deleteDevice(id: deviceId) }
             .assertEventually { try await $0.client.listDevices().isEmpty }
@@ -66,7 +86,12 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         let deviceId = String.unique
 
         try await helpers
-            .callFlow(id: .unique, type: .default, userId: .unique)
+            .callFlow(
+                id: .unique,
+                type: .default,
+                userId: .unique,
+                connectMode: .none
+            )
             .perform { try await $0.client.setVoipDevice(id: deviceId) }
             .perform { try await $0.client.deleteDevice(id: deviceId) }
             .assertEventually { try await $0.client.listDevices().isEmpty }
@@ -79,7 +104,12 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     /// only asserts the fields the API actually populates.
     func test_getEdges_returnsEdgesWithIdentifierAndLocation() async throws {
         try await helpers
-            .callFlow(id: .unique, type: .default, userId: .unique)
+            .callFlow(
+                id: .unique,
+                type: .default,
+                userId: .unique,
+                connectMode: .none
+            )
             .perform { try await $0.client.getEdges() }
             .assert { !$0.value.isEmpty }
             .assert { $0.value.allSatisfy { edge in !edge.id.isEmpty } }
@@ -211,7 +241,11 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         let cid = callCid(from: callId, callType: callType)
 
         try await helpers
-            .callFlow(id: callId, type: callType, userId: .unique)
+            .callFlow(
+                id: callId,
+                type: callType,
+                userId: .unique
+            )
             .performWithErrorExpectation { try await $0.call.get() }
             .tryMap { $0.value as? APIError }
             .assert { $0.value.code == 16 }
@@ -222,11 +256,17 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         let callType = String.unique
 
         try await helpers
-            .callFlow(id: .unique, type: callType, userId: .unique)
+            .callFlow(
+                id: .unique,
+                type: callType,
+                userId: .unique
+            )
             .performWithErrorExpectation { try await $0.call.get() }
             .tryMap { $0.value as? APIError }
             .assert { $0.value.code == 16 }
-            .assert { $0.value.message.localizedStandardContains("\(callType): call type does not exist") }
+            .assert {
+                $0.value.message.localizedStandardContains("\(callType): call type does not exist")
+            }
     }
 
     // MARK: - Subscribe
@@ -491,23 +531,18 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         let user2CallFlow = try await helpers
             .callFlow(id: callId, type: .default, userId: user2)
 
+        try await user1CallFlow
+            .perform { try await $0.call.create(memberIds: [user1, user2], ring: true) }
+
         try await withThrowingTaskGroup(of: Void.self) { group in
             group.addTask {
                 try await user1CallFlow
-                    .perform { try await $0.call.create(memberIds: [user1, user2], ring: true) }
                     .assertEventuallyInMainActor { $0.call.state.session?.acceptedBy[user2] != nil }
             }
 
             group.addTask {
                 try await user2CallFlow
-                    .assertEventually {
-                        do {
-                            _ = try await $0.call.get()
-                            return true
-                        } catch {
-                            return false
-                        }
-                    }
+                    .perform { try await $0.call.get() }
                     .perform { try await $0.call.accept() }
                     .assertEventuallyInMainActor { $0.call.state.session?.acceptedBy[user2] != nil }
             }
@@ -819,6 +854,9 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
             .perform { try await $0.call.create(memberIds: [host], backstage: .init(enabled: false)) }
             .perform { try await $0.call.join(callSettings: .init(audioOn: true, videoOn: false)) }
 
+        let participantCallFlow = try await helpers
+            .callFlow(id: callId, type: .audioRoom, userId: participant, environment: "demo")
+
         try await withThrowingTaskGroup(of: Void.self) { group in
             group.addTask {
                 try await hostCallFlow
@@ -828,9 +866,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
             }
 
             group.addTask {
-                try await self
-                    .helpers
-                    .callFlow(id: callId, type: .audioRoom, userId: participant, environment: "demo")
+                try await participantCallFlow
                     .perform { try await $0.call.join(callSettings: .init(audioOn: false, videoOn: false)) }
                     .assertEventuallyInMainActor { $0.call.state.participants.endIndex == 2 }
                     .assertEventuallyInMainActor { $0.call.currentUserHasCapability(.sendAudio) == false }
@@ -897,6 +933,10 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
             .perform { try await $0.call.create(memberIds: [host], backstage: .init(enabled: false)) }
             .perform { try await $0.call.join(callSettings: .init(audioOn: true, videoOn: false)) }
 
+        let participantCallFlow = try await self
+            .helpers
+            .callFlow(id: callId, type: .audioRoom, userId: participant, environment: "demo")
+
         try await withThrowingTaskGroup(of: Void.self) { group in
             group.addTask {
                 try await hostCallFlow
@@ -911,9 +951,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
             }
 
             group.addTask {
-                try await self
-                    .helpers
-                    .callFlow(id: callId, type: .audioRoom, userId: participant, environment: "demo")
+                try await participantCallFlow
                     .perform { try await $0.call.join(callSettings: .init(audioOn: false, videoOn: false)) }
                     .assertEventuallyInMainActor { $0.call.state.participants.endIndex == 2 }
                     .assertEventuallyInMainActor { $0.call.currentUserHasCapability(.sendAudio) == false }
@@ -993,6 +1031,9 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
             .perform { try await $0.call.create(memberIds: [host], backstage: .init(enabled: false)) }
             .perform { try await $0.call.join(callSettings: .init(audioOn: true, videoOn: false)) }
 
+        let participantCallFlow = try await helpers
+            .callFlow(id: callId, type: .audioRoom, userId: participant, environment: "demo")
+
         try await withThrowingTaskGroup(of: Void.self) { group in
             group.addTask {
                 try await hostCallFlow
@@ -1005,9 +1046,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
             }
 
             group.addTask {
-                try await self
-                    .helpers
-                    .callFlow(id: callId, type: .audioRoom, userId: participant, environment: "demo")
+                try await participantCallFlow
                     .perform { try await $0.call.join(callSettings: .init(audioOn: false, videoOn: false)) }
                     .assertEventuallyInMainActor { $0.call.currentUserHasCapability(.sendVideo) == false }
                     .assertEventuallyInMainActor { $0.call.state.callSettings.videoOn == false }

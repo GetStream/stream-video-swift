@@ -73,6 +73,8 @@ extension Call_IntegrationTests {
 
             if duringDismantleObservedAllCallEnded {
                 for call in registeredCalls.values {
+                    _ = try? await call.microphone.disable()
+                    _ = try? await call.camera.disable()
                     call.leave()
                     _ = try? await NotificationCenter
                         .default
@@ -87,7 +89,7 @@ extension Call_IntegrationTests {
             audioStore
                 .dispatch(.setAudioDeviceModule(nil))
 
-            _ = try await audioStore
+            _ = try? await audioStore
                 .publisher(\.audioDeviceModule)
                 .filter { $0 == nil }
                 .nextValue(timeout: 2)
@@ -104,11 +106,17 @@ extension Call_IntegrationTests {
             WebRTCConfiguration.timeout.audioSessionReadinessWatchdog = 3600
         }
 
-        // Production 10s. No-op if never stubbed.
+        // Helpers.init applies production timeouts for live API calls.
+        // Put the process-wide STREAM_TESTS defaults back so later
+        // tests on this xctest clone do not inherit production values.
         func restoreAudioSessionReadinessWatchdog() {
-            WebRTCConfiguration.timeout.audioSessionReadinessWatchdog =
-                WebRTCConfiguration.Timeout.production
-                    .audioSessionReadinessWatchdog
+            #if STREAM_TESTS
+            WebRTCConfiguration.timeout = .testing
+            CallConfiguration.timeout = .testing
+            #else
+            WebRTCConfiguration.timeout = .production
+            CallConfiguration.timeout = .production
+            #endif
         }
 
         mutating func callFlow(
@@ -116,6 +124,7 @@ extension Call_IntegrationTests {
             type: String,
             userId: String,
             environment: String = "pronto",
+            connectMode: StreamVideoHelper.ConnectMode = .afterInit,
             clientResolutionMode: StreamVideoHelper.ClientResolutionMode = .ignoreCache,
             streamVideoEnvironment: StreamVideo.Environment = .silentAudioDevice,
             overrideAPIKey: String? = nil,
@@ -127,7 +136,7 @@ extension Call_IntegrationTests {
                 apiKey: overrideAPIKey ?? authentication.apiKey,
                 token: overrideToken ?? authentication.token,
                 userId: userId,
-                connectMode: .afterInit,
+                connectMode: connectMode,
                 clientResolutionMode: clientResolutionMode,
                 clientRegisterMode: .auto,
                 streamVideoEnvironment: streamVideoEnvironment

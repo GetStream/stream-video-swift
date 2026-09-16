@@ -397,7 +397,7 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
         )
 
         try await subject.startScreensharing(type: .inApp, includeAudio: true)
-        await fulfillment { mockPublisher.timesCalled(.beginScreenSharing) == 1 }
+        XCTAssertEqual(mockPublisher.timesCalled(.beginScreenSharing), 1)
 
         let actual = try XCTUnwrap(
             mockPublisher.recordedInputPayload(
@@ -420,7 +420,7 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
         )
 
         try await subject.startScreensharing(type: .broadcast, includeAudio: true)
-        await fulfillment { mockPublisher.timesCalled(.beginScreenSharing) == 1 }
+        XCTAssertEqual(mockPublisher.timesCalled(.beginScreenSharing), 1)
 
         let actual = try XCTUnwrap(
             mockPublisher.recordedInputPayload(

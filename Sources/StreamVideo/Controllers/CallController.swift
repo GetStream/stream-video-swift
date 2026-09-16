@@ -897,8 +897,14 @@ class CallController: @unchecked Sendable {
     /// as the publishing rights the SFU grants or revokes mid-call, and applies
     /// them on the call state.
     ///
-    /// Capability updates that flow the other way, from the call state down to
-    /// the WebRTC layer, are skipped here because the value is already in sync.
+    /// The adapter publishes an empty seed before join. Applying that value
+    /// after `JoinCallResponse` has already populated call state would wipe
+    /// those capabilities, so an empty adapter set is ignored while call state
+    /// already has capabilities. Non-empty adapter updates still apply,
+    /// including when this observer subscribes after the adapter was
+    /// populated. Capability updates that flow the other way, from the call
+    /// state down to the WebRTC layer, are skipped because the value is
+    /// already in sync.
     private func observeOwnCapabilitiesUpdates() async {
         await webRTCCoordinator
             .stateAdapter
@@ -906,10 +912,13 @@ class CallController: @unchecked Sendable {
             .removeDuplicates()
             .log(.debug) { "OwnCapabilities updated to \($0)" }
             .sinkTask(storeIn: disposableBag) { @MainActor [weak self] value in
-                guard
-                    let state = self?.call?.state,
-                    Set(state.ownCapabilities) != value
-                else {
+                guard let state = self?.call?.state else {
+                    return
+                }
+                if value.isEmpty, !state.ownCapabilities.isEmpty {
+                    return
+                }
+                guard Set(state.ownCapabilities) != value else {
                     return
                 }
                 state.ownCapabilities = Array(value)

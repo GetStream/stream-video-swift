@@ -109,6 +109,11 @@ extension Call.StateMachine.Stage {
         /// updates. Every effective change is forwarded to the call controller
         /// so permission-dependent media actions stay in sync.
         ///
+        /// Each emission gets its own `DisposableBag` task identifier. Sharing
+        /// one identifier would cancel an in-flight join-time update when a
+        /// later value arrives (latest-wins), which can drop the capabilities
+        /// already applied from `JoinCallResponse`.
+        ///
         /// - Parameter call: The call whose capability stream should be observed.
         private func subscribeToOwnCapabilitiesChanges(on call: Call) async {
             let publisher = await MainActor.run {
@@ -117,10 +122,13 @@ extension Call.StateMachine.Stage {
                     .eraseToAnyPublisher()
             }
             publisher
-                .sinkTask(storeIn: disposableBag) { [weak call] in
-                    await call?
-                        .callController
-                        .updateOwnCapabilities(ownCapabilities: $0)
+                .sink { [weak self, weak call] capabilities in
+                    guard let self else { return }
+                    Task(disposableBag: self.disposableBag) { [weak call] in
+                        await call?
+                            .callController
+                            .updateOwnCapabilities(ownCapabilities: capabilities)
+                    }
                 }
                 .store(in: disposableBag)
         }

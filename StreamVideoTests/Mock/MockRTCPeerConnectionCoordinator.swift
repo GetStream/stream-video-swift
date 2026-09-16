@@ -296,13 +296,15 @@ final class MockRTCPeerConnectionCoordinator:
         ownCapabilities: [OwnCapability],
         includeAudio: Bool
     ) async throws {
-        stubbedFunctionInput[.beginScreenSharing]?.append(
-            .beginScreenSharing(
-                type: type,
-                ownCapabilities: ownCapabilities,
-                includeAudio: includeAudio
+        _stubbedFunctionInput.mutate { inputs in
+            inputs[.beginScreenSharing, default: []].append(
+                .beginScreenSharing(
+                    type: type,
+                    ownCapabilities: ownCapabilities,
+                    includeAudio: includeAudio
+                )
             )
-        )
+        }
     }
 
     override func stopScreenSharing() async throws {
