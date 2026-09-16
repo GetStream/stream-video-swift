@@ -60,10 +60,10 @@
 		84F7384E287C198500A363F4 /* StreamVideo.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 84F737ED287C13AC00A363F4 /* StreamVideo.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		C0DE0C6E00000000000000C3 /* StreamCore in Frameworks */ = {isa = PBXBuildFile; productRef = C0DE0C6E00000000000000B2 /* StreamCore */; };
 		C0DE0C6E00000000000000C5 /* StreamCore in Frameworks */ = {isa = PBXBuildFile; productRef = C0DE0C6E00000000000000B4 /* StreamCore */; };
-		C0DE0C6E00000000000000C9 /* StreamCoreUI in Frameworks */ = {isa = PBXBuildFile; productRef = C0DE0C6E00000000000000B8 /* StreamCoreUI */; };
 		C0DE0C6E00000000000000C6 /* StreamCore in Frameworks */ = {isa = PBXBuildFile; productRef = C0DE0C6E00000000000000B5 /* StreamCore */; };
 		C0DE0C6E00000000000000C7 /* StreamCore in Frameworks */ = {isa = PBXBuildFile; productRef = C0DE0C6E00000000000000B6 /* StreamCore */; };
 		C0DE0C6E00000000000000C8 /* StreamCore in Frameworks */ = {isa = PBXBuildFile; productRef = C0DE0C6E00000000000000B7 /* StreamCore */; };
+		C0DE0C6E00000000000000C9 /* StreamCoreUI in Frameworks */ = {isa = PBXBuildFile; productRef = C0DE0C6E00000000000000B8 /* StreamCoreUI */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -541,7 +541,6 @@
 				"StreamVideo/WebRTC/v2/SDP Parsing/README.md",
 				StreamVideoSwiftUI/.swiftgen.yml,
 				StreamVideoSwiftUI/Appearance.swift,
-				StreamVideoSwiftUI/VideoAppearance.swift,
 				StreamVideoSwiftUI/CallContainer.swift,
 				StreamVideoSwiftUI/CallingViews/CallBackgrounds.swift,
 				StreamVideoSwiftUI/CallingViews/CallConnectingView.swift,
@@ -695,6 +694,7 @@
 				StreamVideoSwiftUI/Utils/UserAvatar.swift,
 				StreamVideoSwiftUI/Utils/VideoRendererPool/VideoRendererPool.swift,
 				StreamVideoSwiftUI/Utils/ViewExtensions.swift,
+				StreamVideoSwiftUI/VideoAppearance.swift,
 				StreamVideoSwiftUI/ViewFactory.swift,
 				StreamVideoUIKit/CallViewController.swift,
 				StreamVideoUIKit/Info.plist,
@@ -714,7 +714,6 @@
 				"/Localized: StreamVideoSwiftUI/Resources/Localizable.strings",
 				"/Localized: StreamVideoSwiftUI/Resources/Localizable.stringsdict",
 				StreamVideoSwiftUI/Appearance.swift,
-				StreamVideoSwiftUI/VideoAppearance.swift,
 				StreamVideoSwiftUI/CallContainer.swift,
 				StreamVideoSwiftUI/CallingViews/CallBackgrounds.swift,
 				StreamVideoSwiftUI/CallingViews/CallConnectingView.swift,
@@ -867,6 +866,7 @@
 				StreamVideoSwiftUI/Utils/UserAvatar.swift,
 				StreamVideoSwiftUI/Utils/VideoRendererPool/VideoRendererPool.swift,
 				StreamVideoSwiftUI/Utils/ViewExtensions.swift,
+				StreamVideoSwiftUI/VideoAppearance.swift,
 				StreamVideoSwiftUI/ViewFactory.swift,
 			);
 			publicHeaders = (
@@ -3500,11 +3500,6 @@
 			package = C0DE0C6E00000000000000A1 /* XCRemoteSwiftPackageReference "stream-core-swift" */;
 			productName = StreamCore;
 		};
-		C0DE0C6E00000000000000B8 /* StreamCoreUI */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = C0DE0C6E00000000000000A1 /* XCRemoteSwiftPackageReference "stream-core-swift" */;
-			productName = StreamCoreUI;
-		};
 		C0DE0C6E00000000000000B5 /* StreamCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = C0DE0C6E00000000000000A1 /* XCRemoteSwiftPackageReference "stream-core-swift" */;
@@ -3519,6 +3514,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = C0DE0C6E00000000000000A1 /* XCRemoteSwiftPackageReference "stream-core-swift" */;
 			productName = StreamCore;
+		};
+		C0DE0C6E00000000000000B8 /* StreamCoreUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C0DE0C6E00000000000000A1 /* XCRemoteSwiftPackageReference "stream-core-swift" */;
+			productName = StreamCoreUI;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

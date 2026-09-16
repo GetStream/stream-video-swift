@@ -10,28 +10,26 @@ struct CallingIndicator: View {
 
     @Injected(\.videoAppearance) var videoAppearance
     
-    private let size: CGFloat = 4
-    
     @State var isTransparent = false
     
     var body: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 2) {
+        HStack(alignment: .firstTextBaseline, spacing: tokens.layout.spacingXxxs) {
             Circle()
-                .frame(width: size, height: size)
+                .frame(width: tokens.layout.spacingXxs, height: tokens.layout.spacingXxs)
                 .opacity(isTransparent ? 1 : 0)
                 .animation(
                     .easeOut(duration: 1).delay(0.2).repeatForever(autoreverses: true),
                     value: isTransparent
                 )
             Circle()
-                .frame(width: size, height: size)
+                .frame(width: tokens.layout.spacingXxs, height: tokens.layout.spacingXxs)
                 .opacity(isTransparent ? 1 : 0)
                 .animation(
                     .easeInOut(duration: 1).delay(0.2).repeatForever(autoreverses: true),
                     value: isTransparent
                 )
             Circle()
-                .frame(width: size, height: size)
+                .frame(width: tokens.layout.spacingXxs, height: tokens.layout.spacingXxs)
                 .opacity(isTransparent ? 1 : 0)
                 .animation(
                     .easeIn(duration: 1).delay(0.2).repeatForever(autoreverses: true),
@@ -46,4 +44,6 @@ struct CallingIndicator: View {
             isTransparent.toggle()
         }
     }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }

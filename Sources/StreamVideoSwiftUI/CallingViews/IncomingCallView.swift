@@ -85,9 +85,9 @@ struct IncomingCallViewContent<Factory: ViewFactory>: View {
                 participants: callParticipants,
                 caller: callInfo.caller.name
             )
-            .padding()
+            .padding(tokens.layout.spacingMd)
 
-            HStack(alignment: .firstTextBaseline, spacing: 2) {
+            HStack(alignment: .firstTextBaseline, spacing: tokens.layout.spacingXxxs) {
                 Text(L10n.Call.Incoming.title)
                     .font(tokens.fonts.title2)
                     .fontWeight(.semibold)
@@ -136,7 +136,7 @@ struct IncomingCallViewContent<Factory: ViewFactory>: View {
 
                 Spacing()
             }
-            .padding()
+            .padding(tokens.layout.spacingMd)
         }
         .background(
             CallBackground()

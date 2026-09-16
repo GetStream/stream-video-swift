@@ -27,7 +27,7 @@ struct CallingGroupView<Factory: ViewFactory>: View {
     }
 
     var body: some View {
-        VStack {
+        VStack(spacing: tokens.layout.spacingXs) {
             if participants.count >= 3 {
                 participantView(
                     for: participants[0],
@@ -163,7 +163,7 @@ struct CircledTitleView: View {
                 )
                 .font(tokens.fonts.title)
                 .minimumScaleFactor(0.4)
-                .padding()
+                .padding(tokens.layout.spacingMd)
         }
         .frame(maxWidth: size, maxHeight: size)
         .modifier(ShadowModifier())

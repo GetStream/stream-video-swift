@@ -55,9 +55,9 @@ public struct CallConnectingView<CallControls: View, CallTopView: View, Factory:
                 CallingParticipantsView(
                     participants: outgoingCallMembers
                 )
-                .padding()
+                .padding(tokens.layout.spacingMd)
                 
-                HStack(alignment: .firstTextBaseline, spacing: 2) {
+                HStack(alignment: .firstTextBaseline, spacing: tokens.layout.spacingXxxs) {
                     Text(title)
                         .font(tokens.fonts.title2)
                         .fontWeight(.semibold)
