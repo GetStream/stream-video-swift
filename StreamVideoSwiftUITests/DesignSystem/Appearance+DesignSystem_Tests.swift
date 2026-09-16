@@ -88,6 +88,15 @@ final class Appearance_DesignSystem_Tests: XCTestCase, @unchecked Sendable {
         )
     }
 
+    func test_injectedValues_whenVideoAppearanceIsSet_returnsSameInstance() {
+        let previous = InjectedValues[\.videoAppearance]
+        defer { InjectedValues[\.videoAppearance] = previous }
+
+        InjectedValues[\.videoAppearance] = subject
+
+        XCTAssertTrue(InjectedValues[\.videoAppearance] === subject)
+    }
+
     // Dynamic `UIColor(light:dark:)` instances are not `==` even when they
     // resolve to the same pair, so compare the resolved styles instead.
     private func assertEqualDynamicColor(

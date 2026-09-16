@@ -30,6 +30,7 @@ public class Images {
     public var participantsIcon = Image(systemName: "person.2.fill")
     public var layoutSelectorIcon = Image(systemName: "circle.grid.2x2.fill")
     public var screenshareIcon = Image(systemName: "square.and.arrow.up.circle.fill")
+    public var callControlErrorBadge = Image(systemName: "exclamationmark")
 
     private static var toggleCameraImageName: String {
         if #available(iOS 14, *) {

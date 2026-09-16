@@ -7,6 +7,7 @@ import StreamVideo
 public class StreamVideoUI {
     var streamVideo: StreamVideo
     var appearance: Appearance
+    var videoAppearance: VideoAppearance
     var utils: Utils
     
     /// Initializes a new instance of `StreamVideoUI` with the specified parameters.
@@ -17,6 +18,7 @@ public class StreamVideoUI {
     ///   - videoConfig: A `VideoConfig` instance representing the video config.
     ///   - tokenProvider: A closure that provides a `UserToken` for the specified `User`.
     ///   - appearance: The `Appearance` instance to use for customizing the appearance of the user interface.
+    ///   - videoAppearance: The design-system appearance used by migrated views.
     ///   - utils: The `Utils` instance to use for utility functions.
     /// - Returns: A new instance of `StreamVideoUI`.
     public convenience init(
@@ -26,6 +28,7 @@ public class StreamVideoUI {
         videoConfig: VideoConfig = VideoConfig(),
         tokenProvider: @escaping UserTokenProvider,
         appearance: Appearance = Appearance(),
+        videoAppearance: VideoAppearance = .shared,
         utils: Utils = UtilsKey.currentValue
     ) {
         let streamVideo = StreamVideo(
@@ -38,6 +41,7 @@ public class StreamVideoUI {
         self.init(
             streamVideo: streamVideo,
             appearance: appearance,
+            videoAppearance: videoAppearance,
             utils: utils
         )
     }
@@ -46,17 +50,21 @@ public class StreamVideoUI {
     /// - Parameters:
     ///   - streamVideo: The `StreamVideo` instance.
     ///   - appearance: The `Appearance` instance to use for customizing the appearance of the user interface.
+    ///   - videoAppearance: The design-system appearance used by migrated views.
     ///   - utils: The `Utils` instance to use for utility functions.
     /// - Returns: A new instance of `StreamVideoUI`.
     public init(
         streamVideo: StreamVideo,
         appearance: Appearance = Appearance(),
+        videoAppearance: VideoAppearance = .shared,
         utils: Utils = UtilsKey.currentValue
     ) {
         self.streamVideo = streamVideo
         self.appearance = appearance
+        self.videoAppearance = videoAppearance
         self.utils = utils
         AppearanceKey.currentValue = appearance
+        VideoAppearanceKey.currentValue = videoAppearance
         UtilsKey.currentValue = utils
     }
     
