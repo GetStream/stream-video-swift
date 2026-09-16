@@ -52,13 +52,47 @@ final class LocalParticipantView_Tests: StreamVideoUITestCase, @unchecked Sendab
         )
     }
 
+    // MARK: - Connection Quality
+
+    func test_localParticipantView_connectionQualityExcellent_snapshot() {
+        let view = makeView(
+            audioOn: true,
+            showAllInfo: true,
+            connectionQuality: .excellent
+        )
+        AssertSnapshot(view, variants: snapshotVariants)
+    }
+
+    func test_localParticipantView_connectionQualityGood_snapshot() {
+        let view = makeView(
+            audioOn: true,
+            showAllInfo: true,
+            connectionQuality: .good
+        )
+        AssertSnapshot(view, variants: snapshotVariants)
+    }
+
+    func test_localParticipantView_connectionQualityPoor_snapshot() {
+        let view = makeView(
+            audioOn: true,
+            showAllInfo: true,
+            connectionQuality: .poor
+        )
+        AssertSnapshot(view, variants: snapshotVariants)
+    }
+
     // MARK: - Helpers
 
-    private func makeView(audioOn: Bool) -> some View {
+    private func makeView(
+        audioOn: Bool,
+        showAllInfo: Bool = false,
+        connectionQuality: ConnectionQuality = .excellent
+    ) -> some View {
         let participant = ParticipantFactory.get(
             1,
             withVideo: true,
-            withAudio: audioOn
+            withAudio: audioOn,
+            connectionQuality: connectionQuality
         ).first!
 
         let settings = CallSettings(audioOn: audioOn)
@@ -77,7 +111,8 @@ final class LocalParticipantView_Tests: StreamVideoUITestCase, @unchecked Sendab
             LocalParticipantViewModifier(
                 localParticipant: participant,
                 call: call,
-                callSettings: .constant(settings)
+                callSettings: .constant(settings),
+                showAllInfo: showAllInfo
             )
         )
         .frame(
