@@ -53,6 +53,18 @@ final class MediaTransceiverStorage_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertTrue(subject.isEmpty)
     }
 
+    func test_set_sameTransceiver_updatesTrack() throws {
+        let transceiver = try makeTransceiver()
+        subject.set(transceiver, track: trackA, for: "transceiver1")
+
+        subject.set(transceiver, track: trackB, for: "transceiver1")
+
+        let entry = try XCTUnwrap(subject.get(for: "transceiver1"))
+        XCTAssertTrue(entry.transceiver === transceiver)
+        XCTAssertTrue(entry.track === trackB)
+        XCTAssertEqual(subject.count, 1)
+    }
+
     // MARK: - Private Helpers
 
     private func makeTransceiver() throws -> RTCRtpTransceiver {
