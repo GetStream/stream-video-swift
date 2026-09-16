@@ -3,7 +3,6 @@
 //
 
 import Combine
-import StreamCoreUI
 import StreamVideo
 import SwiftUI
 
@@ -25,8 +24,9 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
         case auto
     }
     
-    @Injected(\.videoAppearance) var videoAppearance
-
+    /// Accesses the color palette from the app's dependency injection.
+    @Injected(\.colors) var colors
+    
     @Injected(\.formatters.mediaDuration) private var formatter: MediaDurationFormatter
 
     var viewFactory: Factory
@@ -238,7 +238,7 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
     private var errorView: some View {
         Text(L10n.Call.Livestream.error)
             .multilineTextAlignment(.center)
-            .foregroundColor(Color(tokens.colors.textPrimary))
+            .foregroundColor(colors.livestreamText)
     }
     
     @ViewBuilder
@@ -248,11 +248,11 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
     
     @ViewBuilder
     private var notStartedView: some View {
-        VStack(spacing: tokens.layout.spacingMd) {
+        VStack(spacing: 16) {
             if countdown > 0 {
                 Text(L10n.Call.Livestream.countdown)
                 Text(formatter.format(countdown) ?? "")
-                    .font(tokens.fonts.title.monospacedDigit())
+                    .font(.title.monospacedDigit())
                     .bold()
             } else {
                 Text(L10n.Call.Livestream.notStarted)
@@ -262,25 +262,21 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
                 let waitingCount = session.participants.count
                 if waitingCount > 0 {
                     Text("\(waitingCount) \(L10n.Call.Livestream.earlyParticipants)")
-                        .font(tokens.fonts.subheadline)
-                        .foregroundColor(
-                            Color(tokens.colors.textSecondary)
-                        )
+                        .font(.subheadline)
+                        .foregroundColor(Color(colors.textLowEmphasis))
                 }
             }
         }
-        .foregroundColor(Color(tokens.colors.textPrimary))
-        .padding(tokens.layout.spacingMd)
+        .foregroundColor(colors.livestreamText)
+        .padding()
     }
     
     @ViewBuilder
     private var endedView: some View {
-        VStack(spacing: tokens.layout.spacing2xl) {
+        VStack(spacing: 32) {
             Text(L10n.Call.Livestream.ended)
                 .multilineTextAlignment(.center)
-                .foregroundColor(
-                    Color(tokens.colors.textPrimary)
-                )
+                .foregroundColor(colors.livestreamText)
                 .onAppear {
                     if recordings == nil {
                         Task {
@@ -295,13 +291,11 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
                 }
             
             if let recordings, !recordings.isEmpty {
-                VStack(spacing: tokens.layout.spacingXs) {
+                VStack(spacing: 8) {
                     Text(L10n.Call.Livestream.recordings)
-                        .font(tokens.fonts.subheadline)
+                        .font(.subheadline)
                         .multilineTextAlignment(.center)
-                        .foregroundColor(
-                            Color(tokens.colors.textPrimary)
-                        )
+                        .foregroundColor(colors.livestreamText)
                     
                     ForEach(recordings, id: \.self) { recording in
                         Button {
@@ -310,10 +304,8 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
                             }
                         } label: {
                             Text(recording.url)
-                                .font(tokens.fonts.subheadline)
-                                .foregroundColor(
-                                    Color(tokens.colors.textSecondary)
-                                )
+                                .font(.subheadline)
+                                .foregroundColor(Color(colors.textLowEmphasis))
                         }
                     }
                 }
@@ -350,12 +342,10 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
                 VStack(alignment: .center) {
                     Text(L10n.Call.Livestream.hostVideoUnavailable)
                         .multilineTextAlignment(.center)
-                        .foregroundColor(
-                            Color(tokens.colors.textPrimary)
-                        )
+                        .foregroundColor(colors.livestreamText)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .padding(tokens.layout.spacingMd)
+                .padding()
             }
         }
         .onChange(of: fullScreen) { onFullScreenStateChange?($0) }
@@ -366,7 +356,7 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
         if controlsShown || !fullScreen {
             VStack {
                 Spacer()
-                HStack(spacing: tokens.layout.spacingXs) {
+                HStack(spacing: 8) {
                     LiveIndicator()
                     if showParticipantCount {
                         LivestreamParticipantsView(
@@ -393,14 +383,12 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
                         }
                     }
                 }
-                .padding(tokens.layout.spacingMd)
+                .padding()
                 .background(
-                    Color(tokens.colors.backgroundCoreOverlayDark)
+                    colors.livestreamBackground
                         .edgesIgnoringSafeArea(.all)
                 )
-                .foregroundColor(
-                    Color(tokens.colors.textOnAccent)
-                )
+                .foregroundColor(colors.livestreamCallControlsColor)
                 .overlay(
                     LivestreamDurationView(
                         duration: formatter.format(state.duration)
@@ -428,34 +416,26 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
         disposableBag.removeAll()
         livestreamState = .initial
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
 
 struct LiveIndicator: View {
     
-    @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.colors) var colors
     
     var body: some View {
         Text(L10n.Call.Livestream.live)
-            .font(tokens.fonts.headline)
-            .padding(.vertical, tokens.layout.spacingXxs)
-            .padding(.horizontal, tokens.layout.spacingXs)
-            .foregroundColor(
-                Color(tokens.colors.textOnAccent)
-            )
-            .background(
-                Color(tokens.colors.buttonPrimaryBackground)
-            )
-            .cornerRadius(tokens.layout.radiusMd)
+            .font(.headline)
+            .padding(.vertical, 4)
+            .padding(.horizontal, 8)
+            .foregroundColor(colors.livestreamCallControlsColor)
+            .background(colors.primaryButtonBackground)
+            .cornerRadius(8)
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
 
 struct LivestreamPlayPauseButton: View {
     
-    @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.colors) var colors
     
     @Binding var streamPaused: Bool
     var trackUpdate: () -> Void
@@ -469,63 +449,52 @@ struct LivestreamPlayPauseButton: View {
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(width: 60)
-                .foregroundColor(
-                    Color(videoAppearance.tokens.colors.textOnAccent)
-                )
+                .foregroundColor(colors.livestreamCallControlsColor)
         }
     }
 }
 
 struct LivestreamParticipantsView: View {
     
-    @Injected(\.videoAppearance) var videoAppearance
-    
     var participantsCount: Int
     
     var body: some View {
-        HStack(spacing: tokens.layout.spacingXxs) {
+        HStack {
             Image(systemName: "eye")
             Text("\(participantsCount)")
-                .font(tokens.fonts.headline)
+                .font(.headline)
         }
-        .padding(.all, tokens.layout.spacingXs)
-        .cornerRadius(tokens.layout.radiusMd)
+        .padding(.all, 8)
+        .cornerRadius(8)
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
 
 struct LivestreamDurationView: View {
     
-    @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.colors) var colors
     
     let duration: String?
     
     var body: some View {
-        HStack(spacing: tokens.layout.spacingXxs) {
+        HStack {
             Circle()
-                .fill(Color(tokens.colors.accentError))
-                .frame(
-                    width: tokens.layout.spacingXs,
-                    height: tokens.layout.spacingXs
-                )
+                .fill(Color.red)
+                .frame(width: 8)
             
             if let duration {
                 Text(duration)
-                    .font(tokens.fonts.headline.monospacedDigit())
-                    .foregroundColor(
-                        Color(tokens.colors.textOnAccent)
-                    )
+                    .font(.headline.monospacedDigit())
+                    .foregroundColor(colors.livestreamCallControlsColor)
             }
         }
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
 
 struct LivestreamButton: View {
     
-    @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.colors) var colors
+    
+    private let buttonSize: CGFloat = 32
     
     var imageName: String
     var action: () -> Void
@@ -537,20 +506,13 @@ struct LivestreamButton: View {
             }
         } label: {
             Image(systemName: imageName)
-                .padding(.all, tokens.layout.spacingXxs)
-                .frame(
-                    width: tokens.layout.iconSizeLg,
-                    height: tokens.layout.iconSizeLg
-                )
-                .background(
-                    Color(tokens.colors.backgroundCoreOverlayDarkStrong)
-                )
-                .cornerRadius(tokens.layout.radiusMd)
+                .padding(.all, 4)
+                .frame(width: buttonSize, height: buttonSize)
+                .background(colors.participantInfoBackgroundColor)
+                .cornerRadius(8)
         }
-        .padding(.horizontal, tokens.layout.spacingXxxs)
+        .padding(.horizontal, 2)
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
 
 enum LivestreamState {
