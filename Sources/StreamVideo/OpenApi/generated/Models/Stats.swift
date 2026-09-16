@@ -14,7 +14,7 @@ public final class Stats: @unchecked Sendable, Codable, JSONEncodable, Hashable 
         self.maxSeconds = maxSeconds
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case averageSeconds = "average_seconds"
         case maxSeconds = "max_seconds"
     }

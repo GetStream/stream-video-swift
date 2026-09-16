@@ -71,18 +71,7 @@ extension SelectiveEncodable {
     /// - Parameter label: The property name to check.
     /// - Returns: `true` if the property should be ignored, `false` otherwise.
     func shouldIgnoreProperty(_ label: String) -> Bool {
-        // If there are no rules, do not ignore any property.
-        guard !ignorePropertiesRules.isEmpty else {
-            return false
-        }
-        // Check each rule; stop and return true if any rule matches.
-        return ignorePropertiesRules.reduce(false) { partialResult, rule in
-            guard !partialResult else {
-                // Already matched a rule, no need to check further.
-                return partialResult
-            }
-            return rule(label)
-        }
+        shouldIgnoreSelectiveEncodableProperty(label, rules: ignorePropertiesRules)
     }
 
     /// Encodes the properties of `self` selectively according to the ignore rules.
@@ -91,42 +80,97 @@ extension SelectiveEncodable {
     /// those not ignored. Each property is encoded by obtaining a super encoder
     /// keyed by the property name.
     ///
+    /// The work is delegated to a non-generic implementation so that the
+    /// compiler emits a single copy of the encoding logic instead of
+    /// specialising it for every conforming type.
+    ///
     /// - Parameter encoder: The encoder to write data to.
     /// - Throws: Rethrows any encoding errors from the properties.
     func encode(to encoder: Encoder) throws {
-        // Create a keyed container using a generic coding key type.
-        var container = encoder.container(keyedBy: SelectiveEncodableCodingKeys.self)
-        // Reflect on self to access all stored properties.
-        let mirror = Mirror(reflecting: encodableRepresentation)
+        try encodeSelectively(
+            encodableRepresentation,
+            ownerType: type(of: self),
+            rules: ignorePropertiesRules,
+            to: encoder
+        )
+    }
+}
 
-        // Iterate over each child property.
-        for child in mirror.children {
-            do {
-                try process(child, container: &container)
-            } catch {
-                log.warning("Unable to json encode property:\(child.label) on type:\(type(of: self)).")
-            }
+// MARK: - Non-generic implementation
+
+/// Returns whether `label` matches any of the provided ignore rules.
+///
+/// Lives outside the protocol extension so that it is emitted once instead of
+/// being specialised for each conforming type.
+private func shouldIgnoreSelectiveEncodableProperty(
+    _ label: String,
+    rules: [(String) -> Bool]
+) -> Bool {
+    // If there are no rules, do not ignore any property.
+    guard !rules.isEmpty else {
+        return false
+    }
+    // Check each rule; stop and return true if any rule matches.
+    return rules.reduce(false) { partialResult, rule in
+        guard !partialResult else {
+            // Already matched a rule, no need to check further.
+            return partialResult
+        }
+        return rule(label)
+    }
+}
+
+/// Reflects over `value` and encodes every property that no ignore rule
+/// matches.
+///
+/// - Parameters:
+///   - value: The value whose stored properties will be encoded.
+///   - ownerType: The conforming type, used for diagnostics only.
+///   - rules: The rules deciding which property names to skip.
+///   - encoder: The encoder to write data to.
+///
+/// Marked `@inline(never)` so the reflection loop is emitted once for the
+/// whole module rather than being inlined into every conformance.
+@inline(never)
+private func encodeSelectively(
+    _ value: any Encodable,
+    ownerType: Any.Type,
+    rules: [(String) -> Bool],
+    to encoder: Encoder
+) throws {
+    // Create a keyed container using a generic coding key type.
+    var container = encoder.container(keyedBy: SelectiveEncodableCodingKeys.self)
+    // Reflect on the value to access all stored properties.
+    let mirror = Mirror(reflecting: value)
+
+    // Iterate over each child property.
+    for child in mirror.children {
+        do {
+            try encodeSelectively(child, rules: rules, container: &container)
+        } catch {
+            log.warning("Unable to json encode property:\(child.label) on type:\(ownerType).")
         }
     }
+}
 
-    private func process(
-        _ child: Mirror.Child,
-        container: inout KeyedEncodingContainer<SelectiveEncodableCodingKeys>
-    ) throws {
-        guard
-            let label = child.label,
-            // Skip properties without a label or those that should be ignored.
-            !shouldIgnoreProperty(label),
-            // Construct a coding key from the property name.
-            let codingKey = SelectiveEncodableCodingKeys(stringValue: label),
-            // Attempt to encode the property value if it conforms to Encodable.
-            let value = child.value as? Encodable
-        else {
-            return
-        }
-
-        try value.encode(to: container.superEncoder(forKey: codingKey))
+private func encodeSelectively(
+    _ child: Mirror.Child,
+    rules: [(String) -> Bool],
+    container: inout KeyedEncodingContainer<SelectiveEncodableCodingKeys>
+) throws {
+    guard
+        let label = child.label,
+        // Skip properties without a label or those that should be ignored.
+        !shouldIgnoreSelectiveEncodableProperty(label, rules: rules),
+        // Construct a coding key from the property name.
+        let codingKey = SelectiveEncodableCodingKeys(stringValue: label),
+        // Attempt to encode the property value if it conforms to Encodable.
+        let value = child.value as? Encodable
+    else {
+        return
     }
+
+    try value.encode(to: container.superEncoder(forKey: codingKey))
 }
 
 /// A generic `CodingKey` implementation used for dynamic property encoding.

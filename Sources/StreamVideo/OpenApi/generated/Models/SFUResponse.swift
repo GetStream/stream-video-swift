@@ -16,7 +16,7 @@ public final class SFUResponse: @unchecked Sendable, Codable, JSONEncodable, Has
         self.wsEndpoint = wsEndpoint
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case edgeName = "edge_name"
         case url
         case wsEndpoint = "ws_endpoint"

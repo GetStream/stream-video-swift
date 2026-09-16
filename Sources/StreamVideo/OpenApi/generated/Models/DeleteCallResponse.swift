@@ -16,7 +16,7 @@ public final class DeleteCallResponse: @unchecked Sendable, Codable, JSONEncodab
         self.taskId = taskId
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case call
         case duration
         case taskId = "task_id"

@@ -14,7 +14,7 @@ public final class PushNotificationSettingsResponse: @unchecked Sendable, Codabl
         self.disabledUntil = disabledUntil
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case disabled
         case disabledUntil = "disabled_until"
     }

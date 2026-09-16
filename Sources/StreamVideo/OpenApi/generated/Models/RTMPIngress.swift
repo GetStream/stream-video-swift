@@ -12,7 +12,7 @@ public final class RTMPIngress: @unchecked Sendable, Codable, JSONEncodable, Has
         self.address = address
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case address
     }
     

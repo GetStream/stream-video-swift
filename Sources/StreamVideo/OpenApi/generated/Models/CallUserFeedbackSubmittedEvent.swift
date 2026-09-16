@@ -29,7 +29,7 @@ public final class CallUserFeedbackSubmittedEvent: @unchecked Sendable, Event, C
         self.user = user
     }
 
-public enum CodingKeys: String, CodingKey, CaseIterable {
+public enum CodingKeys: String, CodingKey {
     case callCid = "call_cid"
     case createdAt = "created_at"
     case custom

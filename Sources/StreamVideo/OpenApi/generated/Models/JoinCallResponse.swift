@@ -35,7 +35,7 @@ public final class JoinCallResponse: @unchecked Sendable, Codable, JSONEncodable
         self.statsOptions = statsOptions
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case call
         case created
         case credentials

@@ -50,7 +50,7 @@ public final class AudioSettingsRequest: @unchecked Sendable, Codable, JSONEncod
         self.speakerDefaultOn = speakerDefaultOn
     }
 
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case accessRequestEnabled = "access_request_enabled"
         case defaultDevice = "default_device"
         case hifiAudioEnabled = "hifi_audio_enabled"

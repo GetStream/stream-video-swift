@@ -20,7 +20,7 @@ public final class CallUpdatedEvent: @unchecked Sendable, Event, Codable, JSONEn
         self.createdAt = createdAt
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case call
         case callCid = "call_cid"
         case capabilitiesByRole = "capabilities_by_role"

@@ -7,7 +7,7 @@ public final class CompositeRecordingResponse: @unchecked Sendable, Codable, JSO
         self.status = status
     }
 
-public enum CodingKeys: String, CodingKey, CaseIterable {
+public enum CodingKeys: String, CodingKey {
     case status
 }
 

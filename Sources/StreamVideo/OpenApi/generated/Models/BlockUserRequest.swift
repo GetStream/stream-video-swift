@@ -12,7 +12,7 @@ public final class BlockUserRequest: @unchecked Sendable, Codable, JSONEncodable
         self.userId = userId
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case userId = "user_id"
     }
     

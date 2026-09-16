@@ -18,7 +18,7 @@ public final class CallTranscription: @unchecked Sendable, Codable, JSONEncodabl
         self.url = url
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case endTime = "end_time"
         case filename
         case startTime = "start_time"

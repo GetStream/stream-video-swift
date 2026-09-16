@@ -43,7 +43,7 @@ public final class VideoSettings: @unchecked Sendable, Codable, JSONEncodable, H
         self.targetResolution = targetResolution
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case accessRequestEnabled = "access_request_enabled"
         case cameraDefaultOn = "camera_default_on"
         case cameraFacing = "camera_facing"

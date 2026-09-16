@@ -61,7 +61,7 @@ public final class CallSettingsRequest: @unchecked Sendable, Codable, JSONEncoda
         self.video = video
     }
 
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case audio
         case backstage
         case broadcasting

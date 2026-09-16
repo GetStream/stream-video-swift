@@ -16,7 +16,7 @@ public final class PublishedTrackInfo: @unchecked Sendable, Codable, JSONEncodab
         self.trackType = trackType
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case codecMimeType = "codec_mime_type"
         case durationSeconds = "duration_seconds"
         case trackType = "track_type"

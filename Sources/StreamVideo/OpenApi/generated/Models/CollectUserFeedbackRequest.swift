@@ -30,7 +30,7 @@ public final class CollectUserFeedbackRequest: @unchecked Sendable, Codable, JSO
         self.userSessionId = userSessionId
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case custom
         case rating
         case reason

@@ -18,7 +18,7 @@ public final class UserUpdatedEvent: @unchecked Sendable, Event, Codable, JSONEn
         self.user = user
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case createdAt = "created_at"
         case receivedAt = "received_at"
         case type

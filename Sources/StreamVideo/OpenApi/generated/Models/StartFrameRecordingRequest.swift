@@ -11,7 +11,7 @@ public final class StartFrameRecordingRequest: @unchecked Sendable, Codable, JSO
         self.recordingExternalStorage = recordingExternalStorage
     }
 
-public enum CodingKeys: String, CodingKey, CaseIterable {
+public enum CodingKeys: String, CodingKey {
     case recordingExternalStorage = "recording_external_storage"
 }
 

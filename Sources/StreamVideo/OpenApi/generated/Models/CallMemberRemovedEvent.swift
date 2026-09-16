@@ -20,7 +20,7 @@ public final class CallMemberRemovedEvent: @unchecked Sendable, Event, Codable, 
         self.members = members
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case call
         case callCid = "call_cid"
         case createdAt = "created_at"

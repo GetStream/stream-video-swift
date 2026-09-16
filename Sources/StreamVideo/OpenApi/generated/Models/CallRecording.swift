@@ -18,7 +18,7 @@ public final class CallRecording: @unchecked Sendable, Codable, JSONEncodable, H
         self.url = url
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case endTime = "end_time"
         case filename
         case startTime = "start_time"

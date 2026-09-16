@@ -19,7 +19,7 @@ public final class CallFrameRecordingFailedEvent: @unchecked Sendable, Event, Co
         self.egressId = egressId
     }
 
-public enum CodingKeys: String, CodingKey, CaseIterable {
+public enum CodingKeys: String, CodingKey {
     case call
     case callCid = "call_cid"
     case createdAt = "created_at"

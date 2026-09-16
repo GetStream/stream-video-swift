@@ -18,7 +18,7 @@ public final class QueryCallStatsResponse: @unchecked Sendable, Codable, JSONEnc
         self.reports = reports
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case duration
         case next
         case prev

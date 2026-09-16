@@ -19,7 +19,7 @@ public final class KickedUserEvent: @unchecked Sendable, Event, Codable, JSONEnc
         self.user = user
     }
 
-public enum CodingKeys: String, CodingKey, CaseIterable {
+public enum CodingKeys: String, CodingKey {
     case callCid = "call_cid"
     case createdAt = "created_at"
     case kickedByUser = "kicked_by_user"

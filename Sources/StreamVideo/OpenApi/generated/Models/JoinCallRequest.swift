@@ -50,7 +50,7 @@ public final class JoinCallRequest: @unchecked Sendable, Codable, JSONEncodable 
         self.video = video
     }
 
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case create
         case data
         case e2ee

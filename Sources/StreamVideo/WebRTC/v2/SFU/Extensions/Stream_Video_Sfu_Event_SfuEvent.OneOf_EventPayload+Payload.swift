@@ -16,53 +16,61 @@ extension Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload {
     /// - Note: This method uses optional casting (`as?`) which means it will return `nil`
     ///   if the actual payload doesn't match the requested type.
     func payload<T>(_ payloadType: T.Type) -> T? {
+        boxedPayload as? T
+    }
+
+    /// The associated value of the current case, type-erased.
+    ///
+    /// Extracting the value in a non-generic property keeps the large switch
+    /// below out of every specialisation of `payload(_:)`.
+    private var boxedPayload: Any {
         switch self {
         case let .subscriberOffer(payload):
-            return payload as? T
+            return payload
         case let .publisherAnswer(payload):
-            return payload as? T
+            return payload
         case let .connectionQualityChanged(payload):
-            return payload as? T
+            return payload
         case let .audioLevelChanged(payload):
-            return payload as? T
+            return payload
         case let .iceTrickle(payload):
-            return payload as? T
+            return payload
         case let .changePublishQuality(payload):
-            return payload as? T
+            return payload
         case let .participantJoined(payload):
-            return payload as? T
+            return payload
         case let .participantLeft(payload):
-            return payload as? T
+            return payload
         case let .dominantSpeakerChanged(payload):
-            return payload as? T
+            return payload
         case let .joinResponse(payload):
-            return payload as? T
+            return payload
         case let .healthCheckResponse(payload):
-            return payload as? T
+            return payload
         case let .trackPublished(payload):
-            return payload as? T
+            return payload
         case let .trackUnpublished(payload):
-            return payload as? T
+            return payload
         case let .error(payload):
-            return payload as? T
+            return payload
         case let .callGrantsUpdated(payload):
-            return payload as? T
+            return payload
         case let .goAway(payload):
-            return payload as? T
+            return payload
         case let .iceRestart(payload):
-            return payload as? T
+            return payload
         case let .pinsUpdated(payload):
-            return payload as? T
+            return payload
         case let .callEnded(payload):
-            return payload as? T
+            return payload
         case let .participantUpdated(payload):
-            return payload as? T
+            return payload
         case let .participantMigrationComplete(payload):
-            return payload as? T
+            return payload
         case let .changePublishOptions(payload):
-            return payload as? T
+            return payload
         case let .inboundStateNotification(payload):
-            return payload as? T
+            return payload
         }
     }
 }

@@ -14,7 +14,7 @@ public final class StatsOptions: @unchecked Sendable, Codable, JSONEncodable, Ha
         self.reportingIntervalMs = reportingIntervalMs
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case enableRtcStats = "enable_rtc_stats"
         case reportingIntervalMs = "reporting_interval_ms"
     }

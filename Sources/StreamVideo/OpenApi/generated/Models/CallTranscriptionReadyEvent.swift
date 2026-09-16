@@ -18,7 +18,7 @@ public final class CallTranscriptionReadyEvent: @unchecked Sendable, Event, Coda
         self.createdAt = createdAt
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case callCid = "call_cid"
         case callTranscription = "call_transcription"
         case createdAt = "created_at"

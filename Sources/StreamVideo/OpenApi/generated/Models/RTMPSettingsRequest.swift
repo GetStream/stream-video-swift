@@ -38,7 +38,7 @@ public final class RTMPSettingsRequest: @unchecked Sendable, Codable, JSONEncoda
         self.quality = quality
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case enabled
         case quality
     }
