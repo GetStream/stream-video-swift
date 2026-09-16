@@ -122,7 +122,7 @@ public struct AudioVolumeIndicator: View {
                         Color(
                             videoAppearance
                                 .colors
-                                .indicatorConnectionQualityGreat
+                                .indicatorMicrophoneLevelBarActive
                         )
                     )
                     .frame(
