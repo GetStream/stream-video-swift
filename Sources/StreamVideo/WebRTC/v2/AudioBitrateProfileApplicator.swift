@@ -267,22 +267,33 @@ final class AudioBitrateProfileApplicator: @unchecked Sendable {
 
         lock.sync {
             if profile.isMusic {
-                let config = audioProcessingModule.config
-                if restoredAudioProcessing == nil {
-                    restoredAudioProcessing = .init(
-                        isNoiseSuppressionEnabled: config.isNoiseSuppressionEnabled,
-                        isHighpassFilterEnabled: config.isHighpassFilterEnabled
-                    )
-                }
-                config.isNoiseSuppressionEnabled = false
-                config.isHighpassFilterEnabled = false
-                audioProcessingModule.config = config
+                applyMusicAudioProcessingLocked()
             } else {
                 restoreAudioProcessing()
+                applyLiveFilter()
             }
-            applyLiveFilter()
         }
         await publisher?.setAudioMaxBitrate(for: profile)
+    }
+
+    /// Turns software NS/HPF off for music. Caller must already hold
+    /// `lock`.
+    ///
+    /// Restore state is captured only the first time music is applied,
+    /// so a later apply that is already in music does not stash stomped
+    /// APM values as the voice baseline.
+    private func applyMusicAudioProcessingLocked() {
+        let config = audioProcessingModule.config
+        if restoredAudioProcessing == nil {
+            restoredAudioProcessing = .init(
+                isNoiseSuppressionEnabled: config.isNoiseSuppressionEnabled,
+                isHighpassFilterEnabled: config.isHighpassFilterEnabled
+            )
+        }
+        config.isNoiseSuppressionEnabled = false
+        config.isHighpassFilterEnabled = false
+        audioProcessingModule.config = config
+        applyLiveFilter()
     }
 
     /// Caller must already hold `lock`. Reads `storedProfile` directly so
