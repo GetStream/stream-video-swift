@@ -2,9 +2,13 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import StreamCoreUI
+import StreamVideo
 import SwiftUI
 
 struct CallingIndicator: View {
+
+    @Injected(\.videoAppearance) var videoAppearance
     
     private let size: CGFloat = 4
     
@@ -35,7 +39,9 @@ struct CallingIndicator: View {
                 )
         }
         .accessibility(identifier: "callingIndicator")
-        .foregroundColor(.white)
+        .foregroundColor(
+            Color(videoAppearance.tokens.colors.textSecondary)
+        )
         .onAppear {
             isTransparent.toggle()
         }
