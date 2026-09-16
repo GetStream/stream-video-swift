@@ -15,74 +15,74 @@ final class LocalParticipantView_Tests: StreamVideoUITestCase, @unchecked Sendab
     private lazy var call = streamVideoUI?.streamVideo
         .call(callType: callType, callId: callId)
 
+    private let viewSize = CGSize(width: 120, height: 160)
+
     override func tearDown() async throws {
         call = nil
         try await super.tearDown()
     }
 
+    // MARK: - Mic On
+
     func test_localParticipantView_snapshot() {
-        let participant = ParticipantFactory.get(
-            1,
-            withVideo: true,
-            withAudio: true
-        ).first!
+        let view = makeView(audioOn: true)
+        AssertSnapshot(view, variants: snapshotVariants)
+    }
 
-        let view = LocalVideoView(
-            viewFactory: TestViewFactory(),
-            participant: participant,
-            callSettings: CallSettings(),
-            call: call,
-            availableFrame: .init(
-                origin: .zero,
-                size: .init(width: 120, height: 120)
-            )
-        )
-        .modifier(
-            LocalParticipantViewModifier(
-                localParticipant: participant,
-                call: call,
-                callSettings: .constant(CallSettings())
-            )
-        )
-        .frame(width: 120, height: 120)
-
+    func test_localParticipantView_extraExtraExtraLarge_snapshot() {
+        let view = makeView(audioOn: true)
         AssertSnapshot(
             view,
-            variants: snapshotVariants
+            variants: [.extraExtraExtraLargeLight]
         )
     }
 
+    // MARK: - Mic Off
+
     func test_localParticipantView_micOff_snapshot() {
+        let view = makeView(audioOn: false)
+        AssertSnapshot(view, variants: snapshotVariants)
+    }
+
+    func test_localParticipantView_micOff_extraExtraExtraLarge_snapshot() {
+        let view = makeView(audioOn: false)
+        AssertSnapshot(
+            view,
+            variants: [.extraExtraExtraLargeLight]
+        )
+    }
+
+    // MARK: - Helpers
+
+    private func makeView(audioOn: Bool) -> some View {
         let participant = ParticipantFactory.get(
             1,
             withVideo: true,
-            withAudio: false
+            withAudio: audioOn
         ).first!
 
-        let view = LocalVideoView(
+        let settings = CallSettings(audioOn: audioOn)
+
+        return LocalVideoView(
             viewFactory: TestViewFactory(),
             participant: participant,
-            callSettings: CallSettings(audioOn: false),
+            callSettings: settings,
             call: call,
             availableFrame: .init(
                 origin: .zero,
-                size: .init(width: 120, height: 120)
+                size: viewSize
             )
         )
         .modifier(
             LocalParticipantViewModifier(
                 localParticipant: participant,
                 call: call,
-                callSettings: .constant(
-                    CallSettings(audioOn: false)
-                )
+                callSettings: .constant(settings)
             )
         )
-        .frame(width: 120, height: 120)
-
-        AssertSnapshot(
-            view,
-            variants: snapshotVariants
+        .frame(
+            width: viewSize.width,
+            height: viewSize.height
         )
     }
 }
