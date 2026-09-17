@@ -230,7 +230,7 @@ struct ParticipantsButton: View {
                 .background(
                     primaryStyle
                         ? Color(colors.buttonPrimaryBackground)
-                        : Color.clear
+                        : Color(colors.buttonSecondaryBackground)
                 )
                 .overlay(
                     RoundedRectangle(
