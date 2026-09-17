@@ -202,18 +202,18 @@ final class StreamRTCPeerConnection: StreamRTCPeerConnectionProtocol, @unchecked
         source.restartIce()
     }
 
-    /// Closes the native peer connection on the main actor and waits.
+    /// Closes the native peer connection and waits for it to finish.
     ///
-    /// A fire-and-forget Task used to return before ICE-closed
-    /// callbacks finished, so leftover publish still ran after Call
-    /// deinit.
+    /// Native `close()` can block the calling thread. A detached task
+    /// runs that work off the caller's actor so it cannot block
+    /// `MainActor` / `CallState`. Teardown still waits for the result.
     func close() async {
-        await MainActor.run {
-            // Stop transceivers first. Accessing RTCVideoTrack after
-            // close blocks the main thread.
+        _ = await Task.detached { [source] in
+            // Stop transceivers first, then native close, off the
+            // caller's actor so this cannot block MainActor/`CallState`.
             source.transceivers.forEach { $0.stopInternal() }
             source.close()
-        }
+        }.result
     }
 
     // MARK: - Private

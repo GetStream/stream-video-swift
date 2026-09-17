@@ -530,6 +530,8 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
             .callFlow(id: callId, type: .default, userId: user1)
         let user2CallFlow = try await helpers
             .callFlow(id: callId, type: .default, userId: user2)
+        let user2RingEvents = user2CallFlow
+            .subscribe(for: CallRingEvent.self)
 
         try await user1CallFlow
             .perform { try await $0.call.create(memberIds: [user1, user2], ring: true) }
@@ -541,7 +543,8 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
             }
 
             group.addTask {
-                try await user2CallFlow
+                try await user2RingEvents
+                    .assertEventually { (event: CallRingEvent) in event.call.id == callId }
                     .perform { try await $0.call.get() }
                     .perform { try await $0.call.accept() }
                     .assertEventuallyInMainActor { $0.call.state.session?.acceptedBy[user2] != nil }

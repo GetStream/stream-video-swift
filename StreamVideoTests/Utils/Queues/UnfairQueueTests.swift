@@ -7,11 +7,20 @@ import XCTest
 
 final class UnfairQueueTests: XCTestCase, @unchecked Sendable {
 
-    private lazy var taskWaitIntervalRange: ClosedRange<TimeInterval>! = 0.2...0.5
-    private lazy var subject: UnfairQueue! = .init()
+    private var taskWaitIntervalRange: ClosedRange<TimeInterval>! = 0.2...0.5
+    private var subject: UnfairQueue!
     private var sharedResource: Int! = 0
 
     // MARK: - Lifecycle
+
+    override func setUp() {
+        super.setUp()
+        // Create the lock before concurrent tasks. `lazy` init is not
+        // thread-safe, so racing first access can mint two queues and
+        // lose increments.
+        subject = .init()
+        sharedResource = 0
+    }
 
     override func tearDown() {
         subject = nil
