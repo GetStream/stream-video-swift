@@ -1290,8 +1290,15 @@ final class WebRTCStateAdapter_Tests: LogTestCase, @unchecked Sendable {
         )
 
         try await subject.setAudioBitrateProfile(.voiceHighQuality)
-        try await subject.setAudioBitrateProfile(.voiceStandard)
+        XCTAssertEqual(
+            mockPublisher.recordedInputPayload(
+                AudioBitrateProfile.self,
+                for: .setAudioMaxBitrate
+            ),
+            [.voiceHighQuality]
+        )
 
+        try await subject.setAudioBitrateProfile(.voiceStandard)
         XCTAssertEqual(
             mockPublisher.recordedInputPayload(
                 AudioBitrateProfile.self,
@@ -1360,7 +1367,7 @@ final class WebRTCStateAdapter_Tests: LogTestCase, @unchecked Sendable {
                 category: .playAndRecord,
                 mode: .voiceChat,
                 options: [],
-                overrideOutputAudioPort: .none
+                overrideOutputAudioPort: AVAudioSession.PortOverride.none
             )
         )
         await subject.audioSession.didUpdatePolicy(
