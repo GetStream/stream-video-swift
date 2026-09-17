@@ -193,14 +193,14 @@ struct VideoUserView<Factory: ViewFactory>: View {
     @ViewBuilder
     private var selectedCheckmark: some View {
         if #available(iOS 15.0, *) {
-            Image(systemName: "checkmark.circle.fill")
+            videoAppearance.images.checkmarkCircleFill
                 .symbolRenderingMode(.palette)
                 .foregroundStyle(
                     Color(colors.textOnAccent),
                     Color(colors.accentPrimary)
                 )
         } else {
-            Image(systemName: "checkmark.circle.fill")
+            videoAppearance.images.checkmarkCircleFill
                 .foregroundColor(
                     Color(colors.accentPrimary)
                 )
