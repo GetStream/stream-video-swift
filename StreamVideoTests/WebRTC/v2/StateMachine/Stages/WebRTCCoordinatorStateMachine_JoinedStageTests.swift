@@ -134,7 +134,10 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: LogTestCase, @unchec
     func test_transition_withMigrationStatusObserverThatTimesOut_updatesReconnectionStrategyAndThrowsError() async throws {
         subject.context.coordinator = mockCoordinatorStack.coordinator
         subject.context.previousSFUAdapter = mockCoordinatorStack.sfuStack.adapter
-        subject.context.migrationStatusObserver = .init(migratingFrom: mockCoordinatorStack.sfuStack.adapter)
+        subject.context.migrationStatusObserver = .init(
+            migratingFrom: mockCoordinatorStack.sfuStack.adapter,
+            deadline: 2
+        )
 
         await assertTransitions(
             from: .joining,
