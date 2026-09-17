@@ -182,18 +182,42 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
     /// - Parameter sfuAdapter: The SFU adapter to authenticate with.
     /// - Throws: An error if connection fails.
     func waitForAuthentication(on sfuAdapter: SFUAdapter) async throws {
+        switch sfuAdapter.connectionState {
+        case .disconnected, .disconnecting:
+            throw ClientError("Not connected.")
+        default:
+            break
+        }
+
         sfuAdapter.connect()
-        _ = try await sfuAdapter
+
+        switch sfuAdapter.connectionState {
+        case .disconnected, .disconnecting:
+            throw ClientError("Not connected.")
+        default:
+            break
+        }
+
+        let state = try await sfuAdapter
             .$connectionState
             .filter {
                 switch $0 {
-                case .authenticating:
+                case .authenticating, .disconnected, .disconnecting:
                     return true
                 default:
                     return false
                 }
             }
             .nextValue(timeout: WebRTCConfiguration.timeout.authenticate)
+
+        switch state {
+        case .authenticating:
+            return
+        case .disconnected, .disconnecting:
+            throw ClientError("Not connected.")
+        default:
+            throw ClientError("Not connected.")
+        }
     }
 
     /// Awaits for the connectionState to the SFU to change to `.connected`.

@@ -747,6 +747,37 @@ final class WebRTCAuthenticator_Tests: LogTestCase, @unchecked Sendable {
         }
     }
 
+    func test_waitForAuthentication_shouldThrowWhenAlreadyDisconnected() async throws {
+        mockCoordinatorStack
+            .sfuStack
+            .setConnectionState(to: .disconnected(source: .noPongReceived))
+
+        _ = await XCTAssertThrowsErrorAsync {
+            try await subject
+                .waitForAuthentication(on: mockCoordinatorStack.sfuStack.adapter)
+        }
+    }
+
+    func test_waitForAuthentication_shouldThrowWhenDisconnectedWhileWaiting() async throws {
+        try await withThrowingTaskGroup(of: Void.self) { group in
+            group.addTask {
+                _ = await XCTAssertThrowsErrorAsync {
+                    try await self.subject
+                        .waitForAuthentication(on: self.mockCoordinatorStack.sfuStack.adapter)
+                }
+            }
+
+            group.addTask {
+                await self.wait(for: 0.5)
+                self.mockCoordinatorStack
+                    .sfuStack
+                    .setConnectionState(to: .disconnected(source: .noPongReceived))
+            }
+
+            try await group.waitForAll()
+        }
+    }
+
     // MARK: - waitForConnect
 
     func test_waitForConnect_shouldThrowErrorIfTimeout() async throws {

@@ -80,10 +80,13 @@ extension Call.StateMachine.Stage {
         /// without waiting on a nested executor hop under parallel test load.
         private func execute() {
             guard let call = context.call else { return }
-            Task(disposableBag: disposableBag) { @MainActor [weak self] in
+            Task(disposableBag: disposableBag, priority: .userInitiated) { @MainActor [weak self] in
                 guard let self else { return }
+                await call.callController.updateOwnCapabilities(
+                    ownCapabilities: call.state.ownCapabilities
+                )
                 subscribeToCallSettingsUpdates(on: call)
-                await subscribeToOwnCapabilitiesChanges(on: call)
+                subscribeToOwnCapabilitiesChanges(on: call)
             }
         }
 
@@ -110,7 +113,7 @@ extension Call.StateMachine.Stage {
         ///
         /// - Parameter call: The call whose capability stream should be observed.
         @MainActor
-        private func subscribeToOwnCapabilitiesChanges(on call: Call) async {
+        private func subscribeToOwnCapabilitiesChanges(on call: Call) {
             call.state.$ownCapabilities
                 .removeDuplicates()
                 .dropFirst()
@@ -120,10 +123,6 @@ extension Call.StateMachine.Stage {
                         .updateOwnCapabilities(ownCapabilities: $0)
                 }
                 .store(in: disposableBag)
-
-            await call.callController.updateOwnCapabilities(
-                ownCapabilities: call.state.ownCapabilities
-            )
         }
     }
 }

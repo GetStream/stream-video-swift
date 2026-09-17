@@ -226,11 +226,18 @@ extension WebRTCCoordinator.StateMachine.Stage {
         /// available.
         private func observeInternetConnection() {
             internetObservationCancellable?.cancel()
-            internetObservationCancellable = internetConnectionObserver
+            let statusPublisher = internetConnectionObserver
                 .statusPublisher
                 .filter { $0 != .unknown }
                 .log(.debug, subsystems: .webRTC) { "Internet connection status updated to \($0)" }
-                .debounce(for: 1, scheduler: processingQueue)
+
+            internetObservationCancellable = statusPublisher
+                .prefix(1)
+                .merge(
+                    with: statusPublisher
+                        .dropFirst()
+                        .debounce(for: 1, scheduler: processingQueue)
+                )
                 .removeDuplicates()
                 .receive(on: processingQueue)
                 .sinkTask(storeIn: disposableBag) { [weak self] in
