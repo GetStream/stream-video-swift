@@ -2,12 +2,13 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import StreamCoreUI
 import StreamVideo
 import SwiftUI
 
 struct CallingParticipantsView: View {
     
-    @Injected(\.fonts) var fonts
+    @Injected(\.videoAppearance) var videoAppearance
     
     var participants: [Member]
     var caller: String = ""
@@ -15,9 +16,13 @@ struct CallingParticipantsView: View {
     var body: some View {
         Text(text)
             .multilineTextAlignment(.center)
-            .font(participants.count > 1 ? fonts.title2 : fonts.title)
-            .foregroundColor(.white)
-            .padding(.horizontal, 32)
+            .font(
+                participants.count > 1
+                    ? tokens.fonts.title2
+                    : tokens.fonts.title
+            )
+            .foregroundColor(Color(tokens.colors.textOnAccent))
+            .padding(.horizontal, tokens.layout.spacing2xl)
     }
     
     private var text: String {
@@ -40,4 +45,6 @@ struct CallingParticipantsView: View {
             return "\(participants[0].user.name), \(participants[1].user.name) and +\(remaining) more"
         }
     }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }

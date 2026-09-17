@@ -2,10 +2,13 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import StreamCoreUI
 import StreamVideo
 import SwiftUI
 
 struct CallingGroupView<Factory: ViewFactory>: View {
+
+    @Injected(\.videoAppearance) var videoAppearance
 
     let easeGently = Animation.easeOut(duration: 1).repeatForever(autoreverses: true)
 
@@ -24,7 +27,7 @@ struct CallingGroupView<Factory: ViewFactory>: View {
     }
 
     var body: some View {
-        VStack {
+        VStack(spacing: tokens.layout.spacingXs) {
             if participants.count >= 3 {
                 participantView(
                     for: participants[0],
@@ -32,7 +35,7 @@ struct CallingGroupView<Factory: ViewFactory>: View {
                     animation: easeGently.delay(0.2)
                 )
 
-                HStack(spacing: 16) {
+                HStack(spacing: tokens.layout.spacingMd) {
                     participantView(
                         for: participants[1],
                         scaleEffect: isCalling ? 1.2 : 0.7,
@@ -65,7 +68,7 @@ struct CallingGroupView<Factory: ViewFactory>: View {
                     )
                 }
             } else {
-                HStack(spacing: 16) {
+                HStack(spacing: tokens.layout.spacingMd) {
                     ForEach(0..<participants.count, id: \.self) { index in
                         participantView(
                             for: participants[index],
@@ -102,6 +105,8 @@ struct CallingGroupView<Factory: ViewFactory>: View {
             )
         )
     }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
 
 struct IncomingCallParticipantView<Factory: ViewFactory>: View {
@@ -141,8 +146,7 @@ struct IncomingCallParticipantView<Factory: ViewFactory>: View {
 
 struct CircledTitleView: View {
     
-    @Injected(\.colors) var colors
-    @Injected(\.fonts) var fonts
+    @Injected(\.videoAppearance) var videoAppearance
     
     var title: String
     var size: CGFloat = .expandedAvatarSize
@@ -150,14 +154,20 @@ struct CircledTitleView: View {
     var body: some View {
         ZStack {
             Circle()
-                .foregroundColor(colors.tintColor)
+                .foregroundColor(
+                    Color(tokens.colors.accentPrimary)
+                )
             Text(title)
-                .foregroundColor(.white)
-                .font(fonts.title)
+                .foregroundColor(
+                    Color(tokens.colors.textOnAccent)
+                )
+                .font(tokens.fonts.title)
                 .minimumScaleFactor(0.4)
-                .padding()
+                .padding(tokens.layout.spacingMd)
         }
         .frame(maxWidth: size, maxHeight: size)
         .modifier(ShadowModifier())
     }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }

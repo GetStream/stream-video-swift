@@ -2,10 +2,13 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import StreamCoreUI
 import StreamVideo
 import SwiftUI
 
 public struct CallBackground: View {
+    
+    @Injected(\.videoAppearance) var videoAppearance
     
     var imageURL: URL?
     
@@ -21,9 +24,11 @@ public struct CallBackground: View {
 }
 
 struct FallbackBackground: View {
-        
+
+    @Injected(\.videoAppearance) var videoAppearance
+
     var body: some View {
-        DefaultBackgroundGradient()
+        Color(videoAppearance.tokens.colors.backgroundCoreScrim)
             .aspectRatio(contentMode: .fill)
             .edgesIgnoringSafeArea(.all)
     }

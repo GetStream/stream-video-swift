@@ -2,16 +2,13 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import StreamCoreUI
 import StreamVideo
 import SwiftUI
 
 public struct CallConnectingView<CallControls: View, CallTopView: View, Factory: ViewFactory>: View {
     @Injected(\.streamVideo) var streamVideo
-    
-    @Injected(\.colors) var colors
-    @Injected(\.fonts) var fonts
-    @Injected(\.images) var images
-    @Injected(\.utils) var utils
+    @Injected(\.videoAppearance) var videoAppearance
 
     var viewFactory: Factory
     @State public var outgoingCallMembers: [Member]
@@ -35,7 +32,7 @@ public struct CallConnectingView<CallControls: View, CallTopView: View, Factory:
 
     public var body: some View {
         ZStack {
-            VStack(spacing: 16) {
+            VStack(spacing: tokens.layout.spacingMd) {
                 callTopView
                 
                 Spacer()
@@ -58,11 +55,15 @@ public struct CallConnectingView<CallControls: View, CallTopView: View, Factory:
                 CallingParticipantsView(
                     participants: outgoingCallMembers
                 )
-                .padding()
+                .padding(tokens.layout.spacingMd)
                 
-                HStack(alignment: .firstTextBaseline, spacing: 2) {
+                HStack(alignment: .firstTextBaseline, spacing: tokens.layout.spacingXxxs) {
                     Text(title)
-                        .applyCallingStyle()
+                        .font(tokens.fonts.title2)
+                        .fontWeight(.semibold)
+                        .foregroundColor(
+                            Color(tokens.colors.textSecondary)
+                        )
                         .accessibility(identifier: "callConnectingView")
                     CallingIndicator()
                 }
@@ -79,4 +80,6 @@ public struct CallConnectingView<CallControls: View, CallTopView: View, Factory:
             outgoingCallMembers = members.filter { $0.id != streamVideo.user.id }
         }
     }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
