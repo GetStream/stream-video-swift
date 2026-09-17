@@ -9,6 +9,8 @@ import SwiftUI
 @available(iOS 14.0, *)
 public struct InviteParticipantsView<Factory: ViewFactory>: View {
 
+    @Injected(\.videoAppearance) var videoAppearance
+
     var viewFactory: Factory
     @StateObject var viewModel: InviteParticipantsViewModel
     
@@ -45,11 +47,15 @@ public struct InviteParticipantsView<Factory: ViewFactory>: View {
             SearchBar(text: $viewModel.searchText)
                 .padding(
                     .vertical,
-                    !viewModel.selectedUsers.isEmpty ? 0 : 16
+                    !viewModel.selectedUsers.isEmpty
+                        ? 0
+                        : videoAppearance.tokens.layout.spacingMd
                 )
 
             ScrollView(.horizontal) {
-                HStack(spacing: 16) {
+                HStack(
+                    spacing: videoAppearance.tokens.layout.spacingMd
+                ) {
                     ForEach(viewModel.selectedUsers) { user in
                         SelectedParticipantView(
                             viewFactory: viewFactory,
@@ -61,7 +67,9 @@ public struct InviteParticipantsView<Factory: ViewFactory>: View {
                 }
                 .padding(
                     .all,
-                    !viewModel.selectedUsers.isEmpty ? 16 : 0
+                    !viewModel.selectedUsers.isEmpty
+                        ? videoAppearance.tokens.layout.spacingMd
+                        : 0
                 )
             }
 
