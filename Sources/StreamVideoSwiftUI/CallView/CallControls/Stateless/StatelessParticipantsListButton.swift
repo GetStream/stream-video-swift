@@ -13,8 +13,6 @@ public struct StatelessParticipantsListButton: View {
     public typealias ActionHandler = () -> Void
 
     @Injected(\.images) private var images
-    @Injected(\.fonts) var fonts
-    @Injected(\.colors) var colors
 
     /// The associated call for the participants list button.
     public weak var call: Call?

@@ -2,6 +2,7 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import StreamCoreUI
 import StreamVideo
 import SwiftUI
 
@@ -9,7 +10,7 @@ import SwiftUI
 public struct CallControlsView: View {
 
     @Injected(\.streamVideo) var streamVideo
-    @Injected(\.colors) var colors
+    @Injected(\.videoAppearance) var videoAppearance
 
     @ObservedObject var viewModel: CallViewModel
     @State var ownCapabilities: [OwnCapability]
@@ -36,8 +37,8 @@ public struct CallControlsView: View {
                 ParticipantsListButton(viewModel: viewModel)
             }
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical)
+        .padding(.horizontal, tokens.layout.spacingMd)
+        .padding(.vertical, tokens.layout.spacingMd)
         .frame(maxWidth: .infinity)
         .onReceive(call?.state.$ownCapabilities.receive(on: DispatchQueue.main)) { ownCapabilities = $0 }
     }
@@ -50,6 +51,8 @@ public struct CallControlsView: View {
             return viewModel.call
         }
     }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
 
 /// A view displaying the video toggle button for a call.
@@ -132,9 +135,6 @@ public struct ToggleCameraIconView: View {
 
 /// A view displaying the hang-up button for a call.
 public struct HangUpIconView: View {
-
-    @Injected(\.images) var images
-    @Injected(\.colors) var colors
 
     @ObservedObject var viewModel: CallViewModel
     let size: CGFloat

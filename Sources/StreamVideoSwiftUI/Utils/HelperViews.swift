@@ -2,13 +2,14 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import StreamCoreUI
 import StreamVideo
 import SwiftUI
 
 struct Spacing: View {
-    
+
     var size = 1
-    
+
     var body: some View {
         ForEach(0..<size, id: \.self) { _ in
             Spacer()
@@ -17,16 +18,23 @@ struct Spacing: View {
 }
 
 public struct CallIconView: View {
+
+    @Injected(\.videoAppearance) var videoAppearance
+
     var icon: Image
     var size: CGFloat = 64
     var iconStyle: CallIconStyle = .primary
-    
-    public init(icon: Image, size: CGFloat = 64, iconStyle: CallIconStyle = .primary) {
+
+    public init(
+        icon: Image,
+        size: CGFloat = 64,
+        iconStyle: CallIconStyle = .primary
+    ) {
         self.icon = icon
         self.size = size
         self.iconStyle = iconStyle
     }
-    
+
     public var body: some View {
         ZStack {
             Circle().fill(
@@ -50,37 +58,76 @@ public struct CallIconStyle {
 }
 
 extension CallIconStyle {
+
     public nonisolated(unsafe) static let primary = CallIconStyle(
-        backgroundColor: .white,
-        foregroundColor: .black,
+        backgroundColor: Color(
+            InjectedValues[\.videoAppearance]
+                .tokens.colors.buttonSecondaryBackground
+        ),
+        foregroundColor: Color(
+            InjectedValues[\.videoAppearance]
+                .tokens.colors.buttonSecondaryText
+        ),
         opacity: 1
     )
 
     public nonisolated(unsafe) static let secondary = CallIconStyle(
-        backgroundColor: Color(InjectedValues[\.colors].participantBackground),
-        foregroundColor: .white,
+        backgroundColor: Color(
+            InjectedValues[\.videoAppearance]
+                .tokens.colors.buttonSecondaryBackground
+        ),
+        foregroundColor: Color(
+            InjectedValues[\.videoAppearance]
+                .tokens.colors.buttonSecondaryText
+        ),
         opacity: 1
     )
 
     public nonisolated(unsafe) static let secondaryActive = CallIconStyle(
-        backgroundColor: InjectedValues[\.colors].activeSecondaryCallControl,
-        foregroundColor: .white,
+        backgroundColor: Color(
+            InjectedValues[\.videoAppearance]
+                .tokens.colors.accentPrimary
+        ),
+        foregroundColor: Color(
+            InjectedValues[\.videoAppearance]
+                .tokens.colors.textOnAccent
+        ),
         opacity: 1
     )
 
     public nonisolated(unsafe) static let transparent = CallIconStyle(
-        backgroundColor: Color(InjectedValues[\.colors].participantBackground),
-        foregroundColor: .white,
+        backgroundColor: Color(
+            InjectedValues[\.videoAppearance]
+                .tokens.colors.buttonSecondaryBackground
+        ),
+        foregroundColor: Color(
+            InjectedValues[\.videoAppearance]
+                .tokens.colors.buttonSecondaryText
+        ),
         opacity: 1
     )
+
     public nonisolated(unsafe) static let disabled = CallIconStyle(
-        backgroundColor: InjectedValues[\.colors].inactiveCallControl,
-        foregroundColor: .white,
+        backgroundColor: Color(
+            InjectedValues[\.videoAppearance]
+                .tokens.colors.accentError
+        ),
+        foregroundColor: Color(
+            InjectedValues[\.videoAppearance]
+                .tokens.colors.textOnAccent
+        ),
         opacity: 1
     )
+
     public nonisolated(unsafe) static let destructive = CallIconStyle(
-        backgroundColor: InjectedValues[\.colors].inactiveCallControl,
-        foregroundColor: .white,
+        backgroundColor: Color(
+            InjectedValues[\.videoAppearance]
+                .colors.controlDeclineCallButtonBackground
+        ),
+        foregroundColor: Color(
+            InjectedValues[\.videoAppearance]
+                .colors.controlDeclineCallButtonText
+        ),
         opacity: 1
     )
 }
