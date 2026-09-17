@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class GetOrCreateCallRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class GetOrCreateCallRequest: @unchecked Sendable, Encodable, JSONEncodable, Hashable {
     
     public var data: CallRequest?
     public var membersLimit: Int?

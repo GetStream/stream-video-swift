@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class UpdateCallResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class UpdateCallResponse: @unchecked Sendable, Decodable, Hashable {
     
     public var call: CallResponse
     public var duration: String

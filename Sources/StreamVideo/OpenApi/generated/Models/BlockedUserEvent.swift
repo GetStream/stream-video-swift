@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class BlockedUserEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
+public final class BlockedUserEvent: @unchecked Sendable, Event, Decodable, Hashable, WSCallEvent {
     
     public var blockedByUser: UserResponse?
     public var callCid: String

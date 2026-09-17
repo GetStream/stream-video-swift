@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class RequestPermissionResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class RequestPermissionResponse: @unchecked Sendable, Decodable, Hashable {
     
     public var duration: String
 

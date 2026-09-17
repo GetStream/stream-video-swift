@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class StopRecordingResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class StopRecordingResponse: @unchecked Sendable, Decodable, Hashable {
     
     public var duration: String
 

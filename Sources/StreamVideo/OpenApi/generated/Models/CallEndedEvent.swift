@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class CallEndedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
+public final class CallEndedEvent: @unchecked Sendable, Event, Decodable, Hashable, WSCallEvent {
     
     public var call: CallResponse
     public var callCid: String

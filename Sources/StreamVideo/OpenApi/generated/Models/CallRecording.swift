@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class CallRecording: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class CallRecording: @unchecked Sendable, Decodable, Hashable {
     
     public var endTime: Date
     public var filename: String

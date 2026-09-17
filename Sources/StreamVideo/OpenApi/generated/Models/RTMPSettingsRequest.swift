@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class RTMPSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class RTMPSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable, Hashable {
     
     public enum Quality: String, Sendable, Codable, CaseIterable {
         case _1080p = "1080p"

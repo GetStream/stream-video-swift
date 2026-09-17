@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class IngressAudioEncodingOptionsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class IngressAudioEncodingOptionsRequest: @unchecked Sendable, Encodable, JSONEncodable, Hashable {
     
     public enum IngressAudioEncodingOptionsRequestChannels: String, Sendable, Codable, CaseIterable {
         case _1 = "1"

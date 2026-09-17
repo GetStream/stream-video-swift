@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class RingCallRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class RingCallRequest: @unchecked Sendable, Encodable, JSONEncodable, Hashable {
     public var membersIds: [String]?
     public var video: Bool?
 

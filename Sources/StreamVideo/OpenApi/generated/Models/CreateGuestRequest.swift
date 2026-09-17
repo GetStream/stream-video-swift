@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class CreateGuestRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class CreateGuestRequest: @unchecked Sendable, Encodable, JSONEncodable, Hashable {
     
     public var user: UserRequest
 

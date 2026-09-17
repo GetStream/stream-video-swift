@@ -5,7 +5,7 @@
 import StreamCore
 import Foundation
 
-public final class AppUpdatedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public final class AppUpdatedEvent: @unchecked Sendable, Event, Decodable, Hashable {
     public var app: AppEventResponse
     public var createdAt: Date
     public var custom: [String: RawJSON]

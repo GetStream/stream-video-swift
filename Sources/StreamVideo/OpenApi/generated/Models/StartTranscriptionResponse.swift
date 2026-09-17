@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class StartTranscriptionResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class StartTranscriptionResponse: @unchecked Sendable, Decodable, Hashable {
     
     public var duration: String
 

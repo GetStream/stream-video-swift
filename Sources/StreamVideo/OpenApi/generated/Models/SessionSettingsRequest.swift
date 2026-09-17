@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class SessionSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class SessionSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable, Hashable {
     
     public var inactivityTimeoutSeconds: Int
 

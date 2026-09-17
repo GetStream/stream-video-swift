@@ -5,7 +5,7 @@
 import StreamCore
 import Foundation
 
-public final class UserEventPayload: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class UserEventPayload: @unchecked Sendable, Decodable, Hashable {
     
     public var blockedUserIds: [String]
     public var createdAt: Date

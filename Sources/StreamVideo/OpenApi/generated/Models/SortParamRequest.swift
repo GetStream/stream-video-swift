@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class SortParamRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class SortParamRequest: @unchecked Sendable, Encodable, JSONEncodable, Hashable {
     
     public var direction: Int?
     public var field: String?

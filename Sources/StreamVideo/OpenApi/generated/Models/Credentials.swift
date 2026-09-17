@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class Credentials: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class Credentials: @unchecked Sendable, Decodable, Hashable {
     
     public var iceServers: [ICEServer]
     public var server: SFUResponse

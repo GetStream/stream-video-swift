@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class StopLiveRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class StopLiveRequest: @unchecked Sendable, Encodable, JSONEncodable, Hashable {
     
     public var continueClosedCaption: Bool?
     public var continueHls: Bool?

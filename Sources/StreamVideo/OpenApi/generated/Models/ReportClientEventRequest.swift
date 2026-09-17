@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class ReportClientEventRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class ReportClientEventRequest: @unchecked Sendable, Encodable, JSONEncodable, Hashable {
     /// Client-side events to report (1-100 per request)
     public var events: [ClientEvent]
 

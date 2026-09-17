@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class FileUploadConfig: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class FileUploadConfig: @unchecked Sendable, Decodable, Hashable {
     public var allowedFileExtensions: [String]
     public var allowedMimeTypes: [String]
     public var blockedFileExtensions: [String]

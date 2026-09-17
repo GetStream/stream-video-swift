@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class StartClosedCaptionsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class StartClosedCaptionsRequest: @unchecked Sendable, Encodable, JSONEncodable, Hashable {
     
     public var enableTranscription: Bool?
     public var externalStorage: String?

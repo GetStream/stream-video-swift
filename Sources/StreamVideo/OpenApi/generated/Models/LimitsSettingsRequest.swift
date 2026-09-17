@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class LimitsSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class LimitsSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable, Hashable {
     
     public var maxDurationSeconds: Int?
     public var maxParticipants: Int?

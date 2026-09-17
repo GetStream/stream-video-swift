@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class ICEServer: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class ICEServer: @unchecked Sendable, Decodable, Hashable {
     
     public var password: String
     public var urls: [String]

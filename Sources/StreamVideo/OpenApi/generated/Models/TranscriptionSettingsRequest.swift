@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class TranscriptionSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class TranscriptionSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable, Hashable {
     
     public enum ClosedCaptionMode: String, Sendable, Codable, CaseIterable {
         case autoOn = "auto-on"

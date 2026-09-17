@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class CallFrameRecordingFailedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
+public final class CallFrameRecordingFailedEvent: @unchecked Sendable, Event, Decodable, Hashable, WSCallEvent {
     public var call: CallResponse
     public var callCid: String
     public var createdAt: Date

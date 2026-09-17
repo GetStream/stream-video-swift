@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class CallStatsReportSummaryResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class CallStatsReportSummaryResponse: @unchecked Sendable, Decodable, Hashable {
     
     public var callCid: String
     public var callDurationSeconds: Int

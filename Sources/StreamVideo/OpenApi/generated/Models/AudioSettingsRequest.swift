@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class AudioSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class AudioSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable, Hashable {
     
     public enum DefaultDevice: String, Sendable, Codable, CaseIterable {
         case earpiece

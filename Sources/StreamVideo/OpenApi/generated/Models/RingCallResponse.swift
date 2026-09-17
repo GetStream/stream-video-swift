@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class RingCallResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class RingCallResponse: @unchecked Sendable, Decodable, Hashable {
     public var duration: String
     public var membersIds: [String]
 

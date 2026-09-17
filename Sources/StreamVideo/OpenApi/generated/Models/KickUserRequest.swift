@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class KickUserRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class KickUserRequest: @unchecked Sendable, Encodable, JSONEncodable, Hashable {
     public var block: Bool?
     public var userId: String
 

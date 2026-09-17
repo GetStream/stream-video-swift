@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class UnpinResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class UnpinResponse: @unchecked Sendable, Decodable, Hashable {
     
     public var duration: String
 
