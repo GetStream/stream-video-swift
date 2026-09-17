@@ -30,69 +30,85 @@ final class InviteParticipantsView_Tests: StreamVideoUITestCase,
         try await super.tearDown()
     }
 
-    // MARK: - UsersHeaderView
+    // MARK: - Full layout
 
-    func test_usersHeaderView_snapshot() {
-        let view = UsersHeaderView()
-            .frame(width: 390)
+    func test_inviteParticipants_withUsersAndSelection_snapshot() {
+        let alice = makeUser(id: "user-1", name: "Alice", image: 1)
+        let bob = makeUser(id: "user-2", name: "Bob", image: 2)
+        let view = makeView(
+            allUsers: [
+                alice,
+                bob,
+                makeUser(id: "user-3", name: "Charlie", image: 3),
+                makeUser(id: "user-4", name: "Diana", image: 4),
+                makeUser(id: "user-5", name: "Eve", image: 5)
+            ],
+            selectedUsers: [alice, bob]
+        )
 
         AssertSnapshot(view, variants: allVariants)
     }
 
-    // MARK: - VideoUserView
-
-    func test_videoUserView_unselected_snapshot() {
-        let user = User.dummy(
-            id: "test-user",
-            name: "John Doe"
+    func test_inviteParticipants_noSelection_snapshot() {
+        let view = makeView(
+            allUsers: [
+                makeUser(id: "user-1", name: "Alice", image: 1),
+                makeUser(id: "user-2", name: "Bob", image: 2),
+                makeUser(id: "user-3", name: "Charlie", image: 3),
+                makeUser(id: "user-4", name: "Diana", image: 4)
+            ]
         )
-        let view = VideoUserView(
-            viewFactory: DefaultViewFactory.shared,
-            user: user,
-            isSelected: false
-        )
-        .frame(width: 390)
 
         AssertSnapshot(view, variants: allVariants)
     }
 
-    func test_videoUserView_selected_snapshot() {
-        let user = User.dummy(
-            id: "test-user",
-            name: "John Doe"
-        )
-        let view = VideoUserView(
-            viewFactory: DefaultViewFactory.shared,
-            user: user,
-            isSelected: true
-        )
-        .frame(width: 390)
+    func test_inviteParticipants_noUsers_snapshot() {
+        let view = makeView(allUsers: [])
 
         AssertSnapshot(view, variants: allVariants)
     }
 
-    // MARK: - SelectedParticipantView (in horizontal scroll context)
+    // MARK: - Private Helpers
 
-    func test_selectedParticipants_multipleUsers_snapshot() {
-        let users = [
-            User.dummy(id: "user-1", name: "Alice"),
-            User.dummy(id: "user-2", name: "Bob"),
-            User.dummy(id: "user-3", name: "Charlie")
-        ]
-        let view = ScrollView(.horizontal) {
-            HStack(spacing: 16) {
-                ForEach(users) { user in
-                    SelectedParticipantView(
-                        viewFactory: DefaultViewFactory.shared,
-                        user: user,
-                        onUserTapped: { _ in }
-                    )
-                }
-            }
-            .padding(.all, 16)
+    private func makeUser(
+        id: String,
+        name: String,
+        image: Int
+    ) -> User {
+        .dummy(
+            id: id,
+            name: name,
+            imageURL: ImageFactory.get(image)
+        )
+    }
+
+    private func makeView(
+        allUsers: [User],
+        selectedUsers: [User] = []
+    ) -> some View {
+        NavigationView {
+            InviteParticipantsView(
+                viewFactory: DefaultViewFactory.shared,
+                viewModel: InviteParticipantsViewModel(
+                    call: call,
+                    allUsers: allUsers,
+                    selectedUsers: selectedUsers
+                ),
+                inviteParticipantsShown: .constant(true)
+            )
         }
-        .frame(width: 390, height: 100)
+        .navigationViewStyle(.stack)
+    }
+}
 
-        AssertSnapshot(view, variants: allVariants)
+extension InviteParticipantsViewModel {
+    convenience init(
+        call: Call? = nil,
+        allUsers: [User],
+        selectedUsers: [User] = []
+    ) {
+        self.init(currentParticipants: [], call: call)
+        self.allUsers = allUsers
+        self.selectedUsers = selectedUsers
     }
 }

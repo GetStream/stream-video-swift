@@ -29,6 +29,16 @@ public struct InviteParticipantsView<Factory: ViewFactory>: View {
         )
         _inviteParticipantsShown = inviteParticipantsShown
     }
+
+    init(
+        viewFactory: Factory = DefaultViewFactory.shared,
+        viewModel: InviteParticipantsViewModel,
+        inviteParticipantsShown: Binding<Bool>
+    ) {
+        self.viewFactory = viewFactory
+        _viewModel = StateObject(wrappedValue: viewModel)
+        _inviteParticipantsShown = inviteParticipantsShown
+    }
     
     public var body: some View {
         VStack(spacing: 0) {
@@ -165,15 +175,32 @@ struct VideoUserView<Factory: ViewFactory>: View {
             Spacer()
 
             if isSelected {
-                Image(systemName: "checkmark.circle.fill")
-                    .renderingMode(.template)
-                    .foregroundColor(
-                        Color(
-                            videoAppearance.tokens.colors
-                                .accentPrimary
-                        )
-                    )
+                selectedCheckmark
+                    .accessibility(hidden: true)
             }
+        }
+    }
+
+    @ViewBuilder
+    private var selectedCheckmark: some View {
+        if #available(iOS 15.0, *) {
+            Image(systemName: "checkmark.circle.fill")
+                .symbolRenderingMode(.palette)
+                .foregroundStyle(
+                    Color(
+                        videoAppearance.tokens.colors.textOnAccent
+                    ),
+                    Color(
+                        videoAppearance.tokens.colors.accentPrimary
+                    )
+                )
+        } else {
+            Image(systemName: "checkmark.circle.fill")
+                .foregroundColor(
+                    Color(
+                        videoAppearance.tokens.colors.accentPrimary
+                    )
+                )
         }
     }
 }

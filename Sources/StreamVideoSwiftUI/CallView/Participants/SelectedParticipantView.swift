@@ -9,6 +9,7 @@ import SwiftUI
 struct SelectedParticipantView<Factory: ViewFactory>: View {
 
     @Injected(\.videoAppearance) var videoAppearance
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private let avatarSize: CGFloat = 50
 
@@ -27,7 +28,7 @@ struct SelectedParticipantView<Factory: ViewFactory>: View {
     }
 
     var body: some View {
-        VStack {
+        VStack(spacing: tokens.layout.spacingXs) {
             viewFactory.makeUserAvatar(
                 user,
                 with: .init(size: avatarSize)
@@ -35,33 +36,48 @@ struct SelectedParticipantView<Factory: ViewFactory>: View {
 
             Text(user.name)
                 .lineLimit(1)
-                .font(videoAppearance.tokens.fonts.footnote)
+                .font(tokens.fonts.footnote)
+                .foregroundColor(Color(tokens.colors.textPrimary))
         }
         .overlay(
             TopRightView {
-                Button(action: {
-                    withAnimation {
-                        onUserTapped(user)
-                    }
-                }, label: {
+                Button(action: removeUser) {
                     ZStack {
                         Circle()
-                            .fill(Color.white)
-                            .frame(width: 16, height: 16)
+                            .fill(Color(tokens.colors.textOnInverse))
+                            .frame(
+                                width: tokens.layout.iconSizeSm,
+                                height: tokens.layout.iconSizeSm
+                            )
 
-                        Image(systemName: "xmark.circle.fill")
+                        videoAppearance.images.xmarkCircleFill
                             .foregroundColor(
-                                Color.black.opacity(0.8)
+                                Color(
+                                    tokens.colors.backgroundCoreInverse
+                                )
                             )
                     }
-                    .padding(
-                        .all,
-                        videoAppearance.tokens.layout.spacingXxs
-                    )
-                })
+                    .padding(.all, tokens.layout.spacingXxs)
+                }
+                .accessibility(label: Text(user.name))
             }
-            .offset(x: 6, y: -4)
+            .offset(
+                x: tokens.layout.buttonPaddingXIconOnlySm,
+                y: -tokens.layout.spacingXxs
+            )
         )
         .frame(width: avatarSize)
     }
+
+    private func removeUser() {
+        if reduceMotion {
+            onUserTapped(user)
+        } else {
+            withAnimation {
+                onUserTapped(user)
+            }
+        }
+    }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
