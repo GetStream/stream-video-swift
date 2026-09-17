@@ -18,6 +18,13 @@ final class CallParticipantsInfoView_Tests: StreamVideoUITestCase,
         callId: callId
     )
 
+    private let allVariants: [SnapshotVariant] = [
+        .defaultLight,
+        .defaultDark,
+        .smallDark,
+        .extraExtraExtraLargeLight
+    ]
+
     override func tearDown() async throws {
         call = nil
         try await super.tearDown()
@@ -29,7 +36,7 @@ final class CallParticipantsInfoView_Tests: StreamVideoUITestCase,
         let participants = ParticipantFactory.get(3, withAudio: true)
         let view = makeSheet(participants: participants)
 
-        AssertSnapshot(view, variants: snapshotVariants)
+        AssertSnapshot(view, variants: allVariants)
     }
 
     func test_participantsSheet_withMutedParticipants_snapshot() {
@@ -39,13 +46,13 @@ final class CallParticipantsInfoView_Tests: StreamVideoUITestCase,
         )
         let view = makeSheet(participants: participants)
 
-        AssertSnapshot(view, variants: snapshotVariants)
+        AssertSnapshot(view, variants: allVariants)
     }
 
     func test_participantsSheet_noParticipants_snapshot() {
         let view = makeSheet(participants: [])
 
-        AssertSnapshot(view, variants: snapshotVariants)
+        AssertSnapshot(view, variants: allVariants)
     }
 
     // MARK: - Private Helpers
