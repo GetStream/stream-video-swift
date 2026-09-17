@@ -22,28 +22,16 @@ final class RecursiveQueueTests: LogTestCase, @unchecked Sendable {
 
     // MARK: - sync(_:)
 
-    func test_sync_exclusiveAccess() async {
+    func test_sync_exclusiveAccess() {
         let iterations = 10
-        let expectation = XCTestExpectation(description: "Concurrent access")
-        expectation.expectedFulfillmentCount = iterations
-
-        await withTaskGroup(of: Void.self) { group in
-            for _ in 0..<iterations {
-                group.addTask {
-                    await self.wait(for: Double.random(in: self.taskWaitIntervalRange))
-                    self.subject.sync {
-                        let currentValue = self.sharedResource!
-                        self.sharedResource = currentValue + 1
-                    }
-                    expectation.fulfill()
-                }
+        // NSRecursiveLock is thread-based. Swift tasks can share a
+        // thread and re-enter, which is not the exclusion this tests.
+        DispatchQueue.concurrentPerform(iterations: iterations) { _ in
+            subject.sync {
+                let currentValue = sharedResource!
+                sharedResource = currentValue + 1
             }
         }
-
-        await fulfillment(
-            of: [expectation],
-            timeout: TimeInterval(iterations) * taskWaitIntervalRange.upperBound
-        )
         XCTAssertEqual(sharedResource, iterations)
     }
 

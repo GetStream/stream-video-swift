@@ -7,8 +7,7 @@ import XCTest
 
 final class ApplicationLifecycleVideoMuteAdapterTests: LogTestCase, @unchecked Sendable {
 
-    private lazy var notificationCenter: NotificationCenter! = .init()
-    private lazy var applicationStateAdapter: StreamAppStateAdapter! = .init(notificationCenter: notificationCenter)
+    private lazy var mockAppStateAdapter: MockAppStateAdapter! = .init()
     private lazy var sessionId: String! = .unique
     private lazy var mockSFUStack: MockSFUStack! = .init()
     private lazy var mockCapturer: MockStreamVideoCapturer! = .init()
@@ -16,7 +15,7 @@ final class ApplicationLifecycleVideoMuteAdapterTests: LogTestCase, @unchecked S
 
     override func setUp() {
         super.setUp()
-        InjectedValues[\.applicationStateAdapter] = applicationStateAdapter
+        mockAppStateAdapter.makeShared()
         // We set this one to allow us to control the value of ``CallSettings.videoOn``.
         InjectedValues[\.simulatorStreamFile] = URL(string: "getstream.io")!
         subject = .init(
@@ -26,8 +25,8 @@ final class ApplicationLifecycleVideoMuteAdapterTests: LogTestCase, @unchecked S
     }
 
     override func tearDown() {
-        notificationCenter = nil
-        applicationStateAdapter = nil
+        mockAppStateAdapter?.dismante()
+        mockAppStateAdapter = nil
         sessionId = nil
         mockSFUStack = nil
         mockCapturer = nil
@@ -121,10 +120,10 @@ final class ApplicationLifecycleVideoMuteAdapterTests: LogTestCase, @unchecked S
     // MARK: - Private Helpers
 
     private func mockMoveToForeground() {
-        notificationCenter.post(name: UIApplication.willEnterForegroundNotification, object: nil)
+        mockAppStateAdapter.stubbedState = .foreground
     }
 
     private func mockMoveToBackground() {
-        notificationCenter.post(name: UIApplication.didEnterBackgroundNotification, object: nil)
+        mockAppStateAdapter.stubbedState = .background
     }
 }
