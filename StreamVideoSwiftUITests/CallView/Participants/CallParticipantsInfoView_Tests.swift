@@ -55,11 +55,23 @@ final class CallParticipantsInfoView_Tests: StreamVideoUITestCase,
         AssertSnapshot(view, variants: allVariants)
     }
 
+    func test_participantsSheet_withInviteAndMuteButtons_snapshot() {
+        call.state.ownCapabilities = [.updateCallMember]
+        let participants = ParticipantFactory.get(3, withAudio: true)
+        let view = makeSheet(
+            participants: participants,
+            callSettings: CallSettings(audioOn: true)
+        )
+
+        AssertSnapshot(view, variants: allVariants)
+    }
+
     // MARK: - Private Helpers
 
     @ViewBuilder
     private func makeSheet(
-        participants: [CallParticipant]
+        participants: [CallParticipant],
+        callSettings: CallSettings = CallSettings()
     ) -> some View {
         CallParticipantsViewContainer(
             viewFactory: DefaultViewFactory.shared,
@@ -67,7 +79,7 @@ final class CallParticipantsInfoView_Tests: StreamVideoUITestCase,
             participants: participants,
             call: call,
             blockedUsers: [],
-            callSettings: CallSettings(),
+            callSettings: callSettings,
             inviteParticipantsShown: .constant(false),
             inviteTapped: {},
             muteTapped: {},
