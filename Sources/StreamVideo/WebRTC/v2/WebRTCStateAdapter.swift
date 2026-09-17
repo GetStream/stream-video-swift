@@ -561,12 +561,12 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         // Restore VP/APM before deactivating so the next never-music
         // call does not inherit a music session.
         await resetAudioBitrateProfile()
-        await audioSession.deactivate()
         await publisher?.close()
         await subscriber?.close()
         self.publisher = nil
         self.subscriber = nil
         self.statsAdapter = nil
+        await audioSession.deactivate()
         await sfuAdapter?.disconnect()
         enqueue { _ in [:] }
         set(sfuAdapter: nil)

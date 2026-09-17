@@ -43,6 +43,8 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
     private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
 
+    @Atomic private var isStopped = false
+
     /// The session's local microphone track.
     ///
     /// Clones of this track are attached to audio senders (Opus, RED,
@@ -99,6 +101,8 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
     /// Cleans up resources when the instance is deallocated.
     deinit {
+        isStopped = true
+        processingQueue.cancelAllOperations()
         transceiverStorage.removeAll()
         log.debug(
             """
@@ -111,6 +115,21 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     }
 
     // MARK: - LocalMediaManaging
+
+    /// Stops local audio processing and rejects further publish/update work.
+    func stop() async {
+        isStopped = true
+        processingQueue.cancelAllOperations()
+        _ = try? await processingQueue.addSynchronousTaskOperation { [weak self] in
+            guard let self else { return }
+            if primaryTrack.isEnabled {
+                primaryTrack.isEnabled = false
+                transceiverStorage
+                    .forEach { $0.value.track.isEnabled = false }
+                audioRecorder.stopRecording()
+            }
+        }
+    }
 
     /// Configures the local audio media with the given settings and capabilities.
     ///
@@ -139,6 +158,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     /// through call settings updates) and not called directly by external
     /// consumers.
     func publish() async throws {
+        guard !isStopped else { return }
         guard
             !primaryTrack.isEnabled
         else {
@@ -212,7 +232,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         _ settings: CallSettings
     ) async throws {
         try await processingQueue.addSynchronousTaskOperation { [weak self] in
-            guard let self, ownCapabilities.contains(.sendAudio) else { return }
+            guard let self, !isStopped, ownCapabilities.contains(.sendAudio) else { return }
             registerPrimaryTrackIfPossible(settings)
 
             guard lastUpdatedCallSettings != settings.audio else { return }
@@ -227,6 +247,8 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                     for: sessionID
                 )
             }
+
+            guard !isStopped else { return }
 
             if isMuted, primaryTrack.isEnabled {
                 try await unpublish()
@@ -257,7 +279,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         _ publishOptions: PublishOptions
     ) async throws {
         processingQueue.addTaskOperation { [weak self] in
-            guard let self else { return }
+            guard let self, !isStopped else { return }
 
             self.publishOptions = publishOptions.audio
 
@@ -361,7 +383,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     ///   `isMusic` changes, on a new `RTCAudioSource`.
     func setMaxBitrate(for profile: AudioBitrateProfile) async {
         try? await processingQueue.addSynchronousTaskOperation { [weak self] in
-            guard let self else { return }
+            guard let self, !isStopped else { return }
             let previous = audioBitrateProfile
             audioBitrateProfile = profile
             applyCurrentProfileBitrate()
@@ -383,6 +405,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         for options: PublishOptions.AudioPublishOptions,
         with track: RTCAudioTrack
     ) {
+        guard !isStopped else { return }
         guard !transceiverStorage.contains(key: options) else {
             return
         }

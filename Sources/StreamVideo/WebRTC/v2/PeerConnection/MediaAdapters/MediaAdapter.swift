@@ -375,4 +375,9 @@ final class MediaAdapter {
     func stopScreenSharing() async throws {
         try await screenShareMediaAdapter.stopScreenSharing()
     }
+
+    /// Stops local media adapters so teardown cannot publish after close.
+    func stop() async {
+        await audioMediaAdapter.stop()
+    }
 }

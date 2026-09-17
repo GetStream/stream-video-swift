@@ -316,6 +316,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
 
     func prepareForClosing() async {
         await iceAdapter.stopObserving()
+        await mediaAdapter.stop()
     }
 
     /// SetUp and negotiation are running concurrently. However, in order to be able to negotiate
@@ -580,6 +581,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             subsystems: subsystem
         )
         disposableBag.removeAll()
+        await mediaAdapter.stop()
         await peerConnection.close()
         peerConnection.subject.send(StreamRTCPeerConnection.CloseEvent())
     }
