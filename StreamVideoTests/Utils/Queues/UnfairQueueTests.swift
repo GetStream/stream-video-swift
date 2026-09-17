@@ -7,39 +7,50 @@ import XCTest
 
 final class UnfairQueueTests: LogTestCase, @unchecked Sendable {
 
-    private lazy var subject: UnfairQueue! = .init()
+    private lazy var taskWaitIntervalRange: ClosedRange<TimeInterval>! = 0.2...0.5
+    private var subject: UnfairQueue!
     private var sharedResource: Int! = 0
 
     // MARK: - Lifecycle
 
+    override func setUp() {
+        super.setUp()
+        // Swift lazy init is not thread-safe. Create the queue on the
+        // test thread so TaskGroup children cannot first-touch it.
+        subject = UnfairQueue()
+    }
+
     override func tearDown() {
         subject = nil
+        taskWaitIntervalRange = nil
         sharedResource = nil
         super.tearDown()
     }
 
     // MARK: - sync(_:)
 
-    func test_sync_exclusiveAccess() {
+    func test_sync_exclusiveAccess() async {
         let iterations = 10
-        let group = DispatchGroup()
-        let queue = DispatchQueue(
-            label: "io.getstream.UnfairQueueTests",
-            attributes: .concurrent
-        )
-        // Swift tasks can share a thread, which is not the exclusion
-        // this tests. Drive increments from a concurrent queue.
-        for _ in 0..<iterations {
-            group.enter()
-            queue.async {
-                self.subject.sync {
-                    let currentValue = self.sharedResource!
-                    self.sharedResource = currentValue + 1
+        let expectation = XCTestExpectation(description: "Concurrent access")
+        expectation.expectedFulfillmentCount = iterations
+
+        await withTaskGroup(of: Void.self) { group in
+            for _ in 0..<iterations {
+                group.addTask {
+                    await self.wait(for: Double.random(in: self.taskWaitIntervalRange))
+                    self.subject.sync {
+                        let currentValue = self.sharedResource!
+                        self.sharedResource = currentValue + 1
+                    }
+                    expectation.fulfill()
                 }
-                group.leave()
             }
         }
-        group.wait()
+
+        await fulfillment(
+            of: [expectation],
+            timeout: TimeInterval(iterations) * taskWaitIntervalRange.upperBound
+        )
         XCTAssertEqual(sharedResource, iterations)
     }
 }
