@@ -14,7 +14,7 @@ public final class PinRequest: @unchecked Sendable, Codable, JSONEncodable, Hash
         self.userId = userId
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case sessionId = "session_id"
         case userId = "user_id"
     }

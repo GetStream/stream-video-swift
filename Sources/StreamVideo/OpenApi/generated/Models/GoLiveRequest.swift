@@ -32,7 +32,7 @@ public final class GoLiveRequest: @unchecked Sendable, Codable, JSONEncodable, H
         self.transcriptionStorageName = transcriptionStorageName
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case recordingStorageName = "recording_storage_name"
         case startClosedCaption = "start_closed_caption"
         case startHls = "start_hls"

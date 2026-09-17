@@ -18,7 +18,7 @@ public final class EgressRTMPResponse: @unchecked Sendable, Codable, JSONEncodab
         self.streamUrl = streamUrl
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case name
         case startedAt = "started_at"
         case streamKey = "stream_key"

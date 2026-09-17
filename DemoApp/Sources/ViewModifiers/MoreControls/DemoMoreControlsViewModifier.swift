@@ -79,6 +79,8 @@ struct DemoMoreControlsViewModifier: ViewModifier {
 
                                 DemoAudioTrackButtonView()
 
+                                DemoMusicModeButtonView(viewModel: viewModel)
+
                                 DemoMoreLogsAndGleapButtonView()
 
                                 DemoBroadcastMoreControlsListButtonView(

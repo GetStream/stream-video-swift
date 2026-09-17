@@ -16,7 +16,7 @@ public final class ICEServer: @unchecked Sendable, Codable, JSONEncodable, Hasha
         self.username = username
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case password
         case urls
         case username

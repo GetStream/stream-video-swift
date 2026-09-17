@@ -8,7 +8,7 @@ import StreamVideo
 public class Sounds {
     public var bundle: Bundle = .streamVideoUI
     public var outgoingCallSound: Resource = "outgoing.m4a"
-    public var incomingCallSound: Resource = "incoming.wav"
+    public var incomingCallSound: Resource = "incoming.m4a"
 
     public init() { /* Public init. */ }
 }

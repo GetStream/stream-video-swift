@@ -14,7 +14,7 @@ public final class VideoResolution: @unchecked Sendable, Codable, JSONEncodable,
         self.width = width
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case height
         case width
     }

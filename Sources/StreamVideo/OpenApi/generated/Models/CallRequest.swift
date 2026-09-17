@@ -30,7 +30,7 @@ public final class CallRequest: @unchecked Sendable, Codable, JSONEncodable, Has
         self.video = video
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case custom
         case members
         case settingsOverride = "settings_override"

@@ -206,7 +206,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
         mockPeerConnection.stub(for: .offer, with: offer)
 
         let expectation = self.expectation(description: "CreateOfferEvent was not received.")
-        let cancellable: AnyCancellable? = mockPeerConnection
+        let cancellable: AnyCancellable? = mockPeerConnection!
             .publisher
             .compactMap { $0 as? StreamRTCPeerConnection.CreateOfferEvent }
             .filter { $0.sessionDescription.sdp == offer.sdp }
@@ -233,7 +233,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
         mockPeerConnection.stub(for: .answer, with: answer)
 
         let expectation = self.expectation(description: "CreateAnswerEvent was not received.")
-        let cancellable: AnyCancellable? = mockPeerConnection
+        let cancellable: AnyCancellable? = mockPeerConnection!
             .publisher
             .compactMap { $0 as? StreamRTCPeerConnection.CreateAnswerEvent }
             .filter { $0.sessionDescription.sdp == answer.sdp }
@@ -260,7 +260,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
         mockPeerConnection.stub(for: .setLocalDescription, with: value)
 
         let expectation = self.expectation(description: "setLocalDescription was not received.")
-        let cancellable: AnyCancellable? = mockPeerConnection
+        let cancellable: AnyCancellable? = mockPeerConnection!
             .publisher
             .compactMap { $0 as? StreamRTCPeerConnection.SetLocalDescriptionEvent }
             .filter { $0.sessionDescription.sdp == value.sdp }
@@ -287,7 +287,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
         mockPeerConnection.stub(for: .setRemoteDescription, with: value)
 
         let expectation = self.expectation(description: "setRemoteDescription was not received.")
-        let cancellable: AnyCancellable? = mockPeerConnection
+        let cancellable: AnyCancellable? = mockPeerConnection!
             .publisher
             .compactMap { $0 as? StreamRTCPeerConnection.SetRemoteDescriptionEvent }
             .filter { $0.sessionDescription.sdp == value.sdp }
@@ -309,7 +309,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
 
     func test_close_eventWasPublished() async throws {
         let expectation = self.expectation(description: "CloseEvent was not received.")
-        let cancellable: AnyCancellable? = mockPeerConnection
+        let cancellable: AnyCancellable? = mockPeerConnection!
             .publisher
             .compactMap { $0 as? StreamRTCPeerConnection.CloseEvent }
             .sink { _ in expectation.fulfill() }
@@ -775,7 +775,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
     func test_restartICE_subjectIsPublisher_eventWasPublished() async throws {
         _ = subject
         let expectation = self.expectation(description: "RestartICEEvent was not received.")
-        let cancellable: AnyCancellable? = mockPeerConnection
+        let cancellable: AnyCancellable? = mockPeerConnection!
             .publisher
             .compactMap { $0 as? StreamRTCPeerConnection.RestartICEEvent }
             .sink { _ in expectation.fulfill() }
@@ -805,7 +805,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
         peerType = .subscriber
         _ = subject
         let expectation = self.expectation(description: "RestartICEEvent was not received.")
-        let cancellable: AnyCancellable? = mockPeerConnection
+        let cancellable: AnyCancellable? = mockPeerConnection!
             .publisher
             .compactMap { $0 as? StreamRTCPeerConnection.RestartICEEvent }
             .sink { _ in expectation.fulfill() }

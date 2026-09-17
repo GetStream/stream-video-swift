@@ -52,6 +52,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
 
     override func tearDown() async throws {
         await subject.cleanUp()
+        Self.videoConfig.audioProcessingModule.setAudioFilter(nil)
         mockAudioStore.dismantle()
         mockPermissions.dismantle()
         subject = nil
@@ -107,6 +108,26 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         await subject.set(sessionID: expected)
 
         await assertEqualAsync(await subject.sessionID, expected)
+    }
+
+    func test_setSessionID_shouldUpdateLastSessionID() async throws {
+        let expected = String.unique
+
+        await subject.set(sessionID: expected)
+
+        let lastSessionID = await subject.lastSessionID
+        XCTAssertEqual(lastSessionID, expected)
+    }
+
+    func test_setSessionID_withEmptyValue_shouldNotUpdateLastSessionID() async throws {
+        let expected = String.unique
+        await subject.set(sessionID: expected)
+
+        await subject.set(sessionID: "")
+
+        await assertEqualAsync(await subject.sessionID, "")
+        let lastSessionID = await subject.lastSessionID
+        XCTAssertEqual(lastSessionID, expected)
     }
 
     // MARK: - setIsTracingEnabled
@@ -239,6 +260,25 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         }
     }
 
+    func test_enqueueOwnCapabilities_derivedFromCurrentSet_revokesSendAudioCapability_turnsAudioOff() async throws {
+        await subject.enqueueOwnCapabilities { [.sendAudio, .sendVideo] }
+        await subject.enqueueCallSettings { _ in CallSettings(audioOn: true, videoOn: true) }
+
+        await fulfillment {
+            let currentSettings = await self.subject.callSettings
+            return currentSettings.audioOn && currentSettings.videoOn
+        }
+
+        await subject.enqueueOwnCapabilities { $0.subtracting([.sendAudio]) }
+
+        await fulfillment {
+            let currentSettings = await self.subject.callSettings
+            return currentSettings.audioOn == false && currentSettings.videoOn
+        }
+        let ownCapabilities = await subject.ownCapabilities
+        XCTAssertEqual(ownCapabilities, [.sendVideo])
+    }
+
     func test_enqueueOwnCapabilities_revokesSendAudioCapability_turnsAudioOff() async throws {
         await subject.enqueueOwnCapabilities { [.sendAudio, .sendVideo] }
         await subject.enqueueCallSettings { _ in CallSettings(audioOn: true, videoOn: true) }
@@ -311,7 +351,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         await subject.set(sfuAdapter: sfuStack.adapter)
         await subject.enqueueOwnCapabilities { [.sendAudio, .sendVideo, .screenshare] }
         try await subject.configurePeerConnections()
-        let mockPublisher = try await XCTAsyncUnwrap(await subject.publisher as? MockRTCPeerConnectionCoordinator)
+        let mockPublisher = try await XCTAsyncUnwrap(await subject!.publisher as? MockRTCPeerConnectionCoordinator)
 
         let screenShareSessionProvider = await subject.screenShareSessionProvider
         screenShareSessionProvider.activeSession = .init(
@@ -347,7 +387,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         let sfuStack = MockSFUStack()
         await subject.set(sfuAdapter: sfuStack.adapter)
         try await subject.configurePeerConnections()
-        let publisher = try await XCTAsyncUnwrap(await subject.publisher as? MockRTCPeerConnectionCoordinator)
+        let publisher = try await XCTAsyncUnwrap(await subject!.publisher as? MockRTCPeerConnectionCoordinator)
         publisher.stubEventSubject.send(
             StreamRTCPeerConnection.CreateOfferEvent(
                 sessionDescription: .init(type: .offer, sdp: "")
@@ -457,7 +497,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
 
         await subject.set(videoFilter: expected)
 
-        let mockPublisher = try await XCTAsyncUnwrap(await subject.publisher as? MockRTCPeerConnectionCoordinator)
+        let mockPublisher = try await XCTAsyncUnwrap(await subject!.publisher as? MockRTCPeerConnectionCoordinator)
         XCTAssertEqual(
             mockPublisher.recordedInputPayload(VideoFilter.self, for: .setVideoFilter)?.first?.id,
             expected.id
@@ -530,7 +570,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
 
         try await subject.configurePeerConnections()
 
-        let mockPublisher = try await XCTAsyncUnwrap(await subject.publisher as? MockRTCPeerConnectionCoordinator)
+        let mockPublisher = try await XCTAsyncUnwrap(await subject!.publisher as? MockRTCPeerConnectionCoordinator)
         let mockSubscriber = try await XCTAsyncUnwrap(await subject.subscriber as? MockRTCPeerConnectionCoordinator)
 
         await fulfillment {
@@ -609,7 +649,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
 
         try await subject.configurePeerConnections()
 
-        let publisher = try await XCTAsyncUnwrap(await subject.publisher)
+        let publisher = try await XCTAsyncUnwrap(await subject!.publisher)
         let subscriber = try await XCTAsyncUnwrap(await subject.subscriber)
         XCTAssertTrue(mockStatsAdapter.publisher === publisher)
         XCTAssertTrue(mockStatsAdapter.subscriber === subscriber)
@@ -631,9 +671,9 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
 
         try await subject.configurePeerConnections()
 
-        await fulfillment { await self.subject.publisher != nil }
+        await fulfillment { await self.subject!.publisher != nil }
 
-        let _publisher = await subject.publisher
+        let _publisher = await subject!.publisher
         let publisher = try XCTUnwrap(_publisher)
         let _subscriber = await subject.subscriber
         let subscriber = try XCTUnwrap(_subscriber)
@@ -662,7 +702,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         await subject.enqueueOwnCapabilities { ownCapabilities }
 
         try await subject.configurePeerConnections()
-        let mockPublisher = try await XCTAsyncUnwrap(await subject.publisher as? MockRTCPeerConnectionCoordinator)
+        let mockPublisher = try await XCTAsyncUnwrap(await subject!.publisher as? MockRTCPeerConnectionCoordinator)
 
         XCTAssertEqual(
             mockPublisher.recordedInputPayload(
@@ -694,7 +734,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         await subject.enqueueOwnCapabilities { ownCapabilities }
 
         try await subject.configurePeerConnections()
-        let mockPublisher = try await XCTAsyncUnwrap(await subject.publisher as? MockRTCPeerConnectionCoordinator)
+        let mockPublisher = try await XCTAsyncUnwrap(await subject!.publisher as? MockRTCPeerConnectionCoordinator)
 
         XCTAssertEqual(mockPublisher.timesCalled(.beginScreenSharing), 0)
     }
@@ -796,7 +836,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
     func test_cleanUp_shouldResetProperties() async throws {
         let sfuStack = MockSFUStack()
         try await prepare(sfuStack: sfuStack)
-        let mockPublisher = try await XCTAsyncUnwrap(await subject.publisher as? MockRTCPeerConnectionCoordinator)
+        let mockPublisher = try await XCTAsyncUnwrap(await subject!.publisher as? MockRTCPeerConnectionCoordinator)
         let mockSubscriber = try await XCTAsyncUnwrap(await subject.subscriber as? MockRTCPeerConnectionCoordinator)
 
         await subject.cleanUp()
@@ -805,13 +845,16 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(mockSubscriber.timesCalled(.close), 1)
         XCTAssertEqual(sfuStack.webSocket.timesCalled(.disconnectAsync), 1)
 
-        await fulfillment { await self.subject.publisher == nil }
-        await assertNilAsync(await subject.publisher)
+        await fulfillment { await self.subject!.publisher == nil }
+        await assertNilAsync(await subject!.publisher)
         await assertNilAsync(await subject.subscriber)
         await assertNilAsync(await subject.statsAdapter)
         await assertNilAsync(await subject.sfuAdapter)
         await assertEqualAsync(await subject.token, "")
         await assertEqualAsync(await subject.sessionID, "")
+        /// The session that just ended remains available for consumers that
+        /// run after cleanUp (e.g. user feedback collection).
+        await assertFalseAsync(await subject.lastSessionID.isEmpty)
         await assertEqualAsync(await subject.ownCapabilities, [])
         await assertEqualAsync(await subject.participants, [:])
         await assertEqualAsync(await subject.participantsCount, 0)
@@ -866,7 +909,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
             participants: participants,
             participantPins: pins
         )
-        let mockPublisher = try await XCTAsyncUnwrap(await subject.publisher as? MockRTCPeerConnectionCoordinator)
+        let mockPublisher = try await XCTAsyncUnwrap(await subject!.publisher as? MockRTCPeerConnectionCoordinator)
         let mockSubscriber = try await XCTAsyncUnwrap(await subject.subscriber as? MockRTCPeerConnectionCoordinator)
         let sessionId = await subject.sessionID
         await subject.didAddTrack(
@@ -891,7 +934,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(mockPublisher.timesCalled(.close), 0)
         XCTAssertEqual(mockSubscriber.timesCalled(.close), 0)
         XCTAssertEqual(sfuStack.webSocket.timesCalled(.disconnectAsync), 0)
-        await assertNilAsync(await subject.publisher)
+        await assertNilAsync(await subject!.publisher)
         await assertNilAsync(await subject.subscriber)
         await assertNilAsync(await subject.statsAdapter)
         await assertNilAsync(await subject.sfuAdapter)
@@ -927,6 +970,539 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         await subject.cleanUpForReconnection()
 
         await assertEqualAsync(await subject.callSettings.cameraPosition, .back)
+    }
+
+    // MARK: - setAudioBitrateProfile
+
+    func test_setAudioBitrateProfile_music_disablesSoftwareProcessingAndVPAGC() async throws {
+        try await subject.setAudioBitrateProfile(.musicHighQuality)
+
+        await assertEqualAsync(await subject.audioBitrateProfile, .musicHighQuality)
+        XCTAssertFalse(Self.videoConfig.audioProcessingModule.config.isNoiseSuppressionEnabled)
+        XCTAssertFalse(Self.videoConfig.audioProcessingModule.config.isHighpassFilterEnabled)
+        XCTAssertFalse(mockAudioDeviceModuleSource.isVoiceProcessingAGCEnabled)
+        XCTAssertTrue(mockAudioDeviceModuleSource.isVoiceProcessingBypassed)
+        XCTAssertEqual(
+            mockAudioDeviceModuleSource.recordedInputPayload(
+                Bool.self,
+                for: .setVoiceProcessingEnabled
+            ),
+            [false]
+        )
+    }
+
+    func test_setAudioBitrateProfile_voice_restoresPreviousSoftwareProcessing() async throws {
+        let module = Self.videoConfig.audioProcessingModule
+        let originalNoiseSuppression = module.config.isNoiseSuppressionEnabled
+        let originalHighpassFilter = module.config.isHighpassFilterEnabled
+        defer {
+            module.config.isNoiseSuppressionEnabled = originalNoiseSuppression
+            module.config.isHighpassFilterEnabled = originalHighpassFilter
+        }
+        let config = module.config
+        config.isNoiseSuppressionEnabled = false
+        config.isHighpassFilterEnabled = true
+        module.config = config
+
+        try await subject.setAudioBitrateProfile(.musicHighQuality)
+        try await subject.setAudioBitrateProfile(.voiceStandard)
+
+        XCTAssertFalse(module.config.isNoiseSuppressionEnabled)
+        XCTAssertTrue(module.config.isHighpassFilterEnabled)
+    }
+
+    func test_setAudioBitrateProfile_music_restoresActivePlayout() async throws {
+        try await prepare()
+        mockAudioDeviceModuleSource.stub(for: \.isPlaying, with: true)
+        let recordingBefore = mockAudioDeviceModuleSource
+            .timesCalled(.initAndStartRecording)
+        let playoutBefore = mockAudioDeviceModuleSource
+            .timesCalled(.initAndStartPlayout)
+
+        try await subject.setAudioBitrateProfile(.musicHighQuality)
+
+        XCTAssertEqual(
+            mockAudioDeviceModuleSource.timesCalled(.initAndStartRecording),
+            recordingBefore
+        )
+        XCTAssertEqual(
+            mockAudioDeviceModuleSource.timesCalled(.initAndStartPlayout),
+            playoutBefore + 1
+        )
+    }
+
+    func test_setAudioBitrateProfile_music_doesNotRestartStoppedPlayout(
+    ) async throws {
+        try await prepare()
+        mockAudioDeviceModuleSource.stub(
+            for: \.isPlayoutInitialized,
+            with: true
+        )
+        let playoutBefore = mockAudioDeviceModuleSource
+            .timesCalled(.startPlayout)
+
+        try await subject.setAudioBitrateProfile(.musicHighQuality)
+
+        XCTAssertEqual(
+            mockAudioDeviceModuleSource.timesCalled(.startPlayout),
+            playoutBefore
+        )
+    }
+
+    func test_setAudioBitrateProfile_music_clearsAndRestoresAudioFilter() async throws {
+        let filter = MockAudioFilter(id: "nc")
+        subject.setAudioFilter(filter)
+
+        try await subject.setAudioBitrateProfile(.musicHighQuality)
+        XCTAssertNil(Self.videoConfig.audioProcessingModule.activeAudioFilter)
+
+        try await subject.setAudioBitrateProfile(.voiceStandard)
+        XCTAssertEqual(Self.videoConfig.audioProcessingModule.activeAudioFilter?.id, "nc")
+    }
+
+    func test_setAudioFilter_whileMusic_stashesUntilVoice() async throws {
+        try await subject.setAudioBitrateProfile(.musicHighQuality)
+
+        let filter = MockAudioFilter(id: "nc")
+        subject.setAudioFilter(filter)
+        XCTAssertNil(Self.videoConfig.audioProcessingModule.activeAudioFilter)
+        XCTAssertEqual(subject.requestedAudioFilter?.id, "nc")
+
+        try await subject.setAudioBitrateProfile(.voiceStandard)
+        XCTAssertEqual(Self.videoConfig.audioProcessingModule.activeAudioFilter?.id, "nc")
+    }
+
+    func test_setAudioFilter_nil_whileMusic_doesNotRestoreOnVoice() async throws {
+        let filter = MockAudioFilter(id: "nc")
+        subject.setAudioFilter(filter)
+        try await subject.setAudioBitrateProfile(.musicHighQuality)
+
+        subject.setAudioFilter(nil)
+
+        try await subject.setAudioBitrateProfile(.voiceStandard)
+        XCTAssertNil(Self.videoConfig.audioProcessingModule.activeAudioFilter)
+    }
+
+    func test_setAudioFilter_nil_whileScreenShare_doesNotRestoreOnStop(
+    ) async throws {
+        let filter = MockAudioFilter(id: "nc")
+        subject.setAudioFilter(filter)
+        let provider = await subject.screenShareSessionProvider
+        let gate = try XCTUnwrap(provider.audioFilterGate)
+        gate(true)
+
+        subject.setAudioFilter(nil)
+        gate(false)
+
+        XCTAssertNil(Self.videoConfig.audioProcessingModule.activeAudioFilter)
+    }
+
+    func test_setScreenShareActive_voice_clearsAndRestoresAudioFilter() async throws {
+        let filter = MockAudioFilter(id: "nc")
+        subject.setAudioFilter(filter)
+
+        let provider = await subject.screenShareSessionProvider
+        let gate = try XCTUnwrap(provider.audioFilterGate)
+        gate(true)
+        XCTAssertNil(Self.videoConfig.audioProcessingModule.activeAudioFilter)
+
+        gate(false)
+        XCTAssertEqual(Self.videoConfig.audioProcessingModule.activeAudioFilter?.id, "nc")
+    }
+
+    func test_setScreenShareActive_whileMusic_doesNotClobberStashedFilter(
+    ) async throws {
+        let filter = MockAudioFilter(id: "nc")
+        subject.setAudioFilter(filter)
+        try await subject.setAudioBitrateProfile(.musicHighQuality)
+
+        let provider = await subject.screenShareSessionProvider
+        let gate = try XCTUnwrap(provider.audioFilterGate)
+        gate(true)
+        gate(false)
+
+        try await subject.setAudioBitrateProfile(.voiceStandard)
+        XCTAssertEqual(Self.videoConfig.audioProcessingModule.activeAudioFilter?.id, "nc")
+    }
+
+    func test_setAudioBitrateProfile_music_whileScreenShareActive_restoresFilterAfterVoice(
+    ) async throws {
+        let filter = MockAudioFilter(id: "nc")
+        subject.setAudioFilter(filter)
+        let provider = await subject.screenShareSessionProvider
+        let gate = try XCTUnwrap(provider.audioFilterGate)
+        gate(true)
+        XCTAssertNil(Self.videoConfig.audioProcessingModule.activeAudioFilter)
+
+        try await subject.setAudioBitrateProfile(.musicHighQuality)
+        gate(false)
+        XCTAssertNil(Self.videoConfig.audioProcessingModule.activeAudioFilter)
+
+        try await subject.setAudioBitrateProfile(.voiceStandard)
+        XCTAssertEqual(Self.videoConfig.audioProcessingModule.activeAudioFilter?.id, "nc")
+    }
+
+    func test_cleanUp_resetsAudioBitrateProfileAndSoftwareProcessing() async throws {
+        let module = Self.videoConfig.audioProcessingModule
+        let originalNoiseSuppression = module.config.isNoiseSuppressionEnabled
+        let originalHighpassFilter = module.config.isHighpassFilterEnabled
+        module.config.isNoiseSuppressionEnabled = true
+        module.config.isHighpassFilterEnabled = true
+        defer {
+            module.config.isNoiseSuppressionEnabled = originalNoiseSuppression
+            module.config.isHighpassFilterEnabled = originalHighpassFilter
+        }
+        try await subject.setAudioBitrateProfile(.musicHighQuality)
+
+        await subject.cleanUp()
+
+        await assertEqualAsync(await subject.audioBitrateProfile, .voiceStandard)
+        XCTAssertTrue(Self.videoConfig.audioProcessingModule.config.isNoiseSuppressionEnabled)
+        XCTAssertTrue(Self.videoConfig.audioProcessingModule.config.isHighpassFilterEnabled)
+        XCTAssertTrue(mockAudioDeviceModuleSource.isVoiceProcessingAGCEnabled)
+        XCTAssertFalse(mockAudioDeviceModuleSource.isVoiceProcessingBypassed)
+    }
+
+    func test_cleanUp_dropsStashedAudioFilter() async throws {
+        let filter = MockAudioFilter(id: "nc")
+        subject.setAudioFilter(filter)
+        try await subject.setAudioBitrateProfile(.musicHighQuality)
+
+        await subject.cleanUp()
+
+        XCTAssertNil(Self.videoConfig.audioProcessingModule.activeAudioFilter)
+    }
+
+    func test_cleanUpForReconnection_keepsAudioBitrateProfile() async throws {
+        try await subject.setAudioBitrateProfile(.musicHighQuality)
+
+        await subject.cleanUpForReconnection()
+
+        await assertEqualAsync(await subject.audioBitrateProfile, .musicHighQuality)
+        XCTAssertFalse(Self.videoConfig.audioProcessingModule.config.isNoiseSuppressionEnabled)
+    }
+
+    func test_configurePeerConnections_defaultProfile_doesNotSetAudioMaxBitrate(
+    ) async throws {
+        try await prepare()
+
+        let mockPublisher = try await XCTAsyncUnwrap(
+            await subject!.publisher as? MockRTCPeerConnectionCoordinator
+        )
+        XCTAssertEqual(mockPublisher.timesCalled(.setAudioMaxBitrate), 0)
+    }
+
+    func test_setAudioBitrateProfile_music_setsBitrateAndVoiceRestoresPrevious(
+    ) async throws {
+        try await prepare()
+        await subject.set(
+            publishOptions: .dummy(
+                audio: [.dummy(codec: .opus, bitrate: 64000)]
+            )
+        )
+        let mockPublisher = try await XCTAsyncUnwrap(
+            await subject!.publisher as? MockRTCPeerConnectionCoordinator
+        )
+
+        try await subject.setAudioBitrateProfile(.musicHighQuality)
+        try await subject.setAudioBitrateProfile(.voiceStandard)
+
+        XCTAssertEqual(
+            mockPublisher.recordedInputPayload(
+                AudioBitrateProfile.self,
+                for: .setAudioMaxBitrate
+            ),
+            [.musicHighQuality, .voiceStandard]
+        )
+    }
+
+    func test_setAudioBitrateProfile_voiceHighQuality_setsBitrateWithoutDisablingVP(
+    ) async throws {
+        try await prepare()
+        await subject.set(
+            publishOptions: .dummy(
+                audio: [.dummy(codec: .opus, bitrate: 64000)]
+            )
+        )
+        let mockPublisher = try await XCTAsyncUnwrap(
+            await subject!.publisher as? MockRTCPeerConnectionCoordinator
+        )
+        let vpCalls = mockAudioDeviceModuleSource
+            .timesCalled(.setVoiceProcessingEnabled)
+        let agcEnabled = mockAudioDeviceModuleSource
+            .isVoiceProcessingAGCEnabled
+        let vpBypassed = mockAudioDeviceModuleSource
+            .isVoiceProcessingBypassed
+        let nsEnabled = Self.videoConfig.audioProcessingModule.config
+            .isNoiseSuppressionEnabled
+        let hpfEnabled = Self.videoConfig.audioProcessingModule.config
+            .isHighpassFilterEnabled
+
+        try await subject.setAudioBitrateProfile(.voiceHighQuality)
+
+        await assertEqualAsync(
+            await subject.audioBitrateProfile,
+            .voiceHighQuality
+        )
+        XCTAssertEqual(
+            mockPublisher.recordedInputPayload(
+                AudioBitrateProfile.self,
+                for: .setAudioMaxBitrate
+            ),
+            [.voiceHighQuality]
+        )
+        XCTAssertEqual(
+            mockAudioDeviceModuleSource.timesCalled(
+                .setVoiceProcessingEnabled
+            ),
+            vpCalls
+        )
+        XCTAssertEqual(
+            mockAudioDeviceModuleSource.isVoiceProcessingAGCEnabled,
+            agcEnabled
+        )
+        XCTAssertEqual(
+            mockAudioDeviceModuleSource.isVoiceProcessingBypassed,
+            vpBypassed
+        )
+        XCTAssertEqual(
+            Self.videoConfig.audioProcessingModule.config
+                .isNoiseSuppressionEnabled,
+            nsEnabled
+        )
+        XCTAssertEqual(
+            Self.videoConfig.audioProcessingModule.config
+                .isHighpassFilterEnabled,
+            hpfEnabled
+        )
+    }
+
+    func test_setAudioBitrateProfile_voiceHighQuality_restoresPreviousBitrate(
+    ) async throws {
+        try await prepare()
+        await subject.set(
+            publishOptions: .dummy(
+                audio: [.dummy(codec: .opus, bitrate: 64000)]
+            )
+        )
+        let mockPublisher = try await XCTAsyncUnwrap(
+            await subject!.publisher as? MockRTCPeerConnectionCoordinator
+        )
+
+        try await subject.setAudioBitrateProfile(.voiceHighQuality)
+        try await subject.setAudioBitrateProfile(.voiceStandard)
+
+        XCTAssertEqual(
+            mockPublisher.recordedInputPayload(
+                AudioBitrateProfile.self,
+                for: .setAudioMaxBitrate
+            ),
+            [.voiceHighQuality, .voiceStandard]
+        )
+    }
+
+    func test_configurePeerConnections_afterMusicReconnect_setsAudioMaxBitrate(
+    ) async throws {
+        try await prepare()
+        await subject.set(
+            publishOptions: .dummy(
+                audio: [.dummy(codec: .opus, bitrate: 64000)]
+            )
+        )
+        try await subject.setAudioBitrateProfile(.musicHighQuality)
+        await subject.cleanUpForReconnection()
+
+        let sfuStack = MockSFUStack()
+        await subject.set(sfuAdapter: sfuStack.adapter)
+        try await subject.configurePeerConnections()
+
+        let mockPublisher = try await XCTAsyncUnwrap(
+            await subject!.publisher as? MockRTCPeerConnectionCoordinator
+        )
+        XCTAssertEqual(mockPublisher.timesCalled(.setAudioMaxBitrate), 1)
+        XCTAssertEqual(
+            mockPublisher.recordedInputPayload(
+                AudioBitrateProfile.self,
+                for: .setAudioMaxBitrate
+            ),
+            [.musicHighQuality]
+        )
+    }
+
+    func test_setAudioBitrateProfile_sameMusicProfile_doesNotReapplyVP(
+    ) async throws {
+        try await subject.setAudioBitrateProfile(.musicHighQuality)
+        let vpCount = mockAudioDeviceModuleSource.timesCalled(
+            .setVoiceProcessingEnabled
+        )
+
+        try await subject.setAudioBitrateProfile(.musicHighQuality)
+
+        XCTAssertEqual(
+            mockAudioDeviceModuleSource.timesCalled(
+                .setVoiceProcessingEnabled
+            ),
+            vpCount
+        )
+        await assertEqualAsync(
+            await subject.audioBitrateProfile,
+            .musicHighQuality
+        )
+    }
+
+    func test_setAudioBitrateProfile_music_whenSessionInactive_skipsVPRebuild(
+    ) async throws {
+        let policy = MockAudioSessionPolicy()
+        policy.stub(
+            for: .configuration,
+            with: AudioSessionConfiguration(
+                isActive: false,
+                category: .playAndRecord,
+                mode: .voiceChat,
+                options: [],
+                overrideOutputAudioPort: .none
+            )
+        )
+        await subject.audioSession.didUpdatePolicy(
+            policy,
+            callSettings: callSettings,
+            ownCapabilities: [.sendAudio]
+        )
+        let vpCount = mockAudioDeviceModuleSource.timesCalled(
+            .setVoiceProcessingEnabled
+        )
+
+        try await subject.setAudioBitrateProfile(.musicHighQuality)
+
+        await assertEqualAsync(
+            await subject.audioBitrateProfile,
+            .musicHighQuality
+        )
+        XCTAssertFalse(
+            Self.videoConfig.audioProcessingModule.config
+                .isNoiseSuppressionEnabled
+        )
+        XCTAssertEqual(
+            mockAudioDeviceModuleSource.timesCalled(
+                .setVoiceProcessingEnabled
+            ),
+            vpCount
+        )
+    }
+
+    func test_setAudioBitrateProfile_music_whenVPDisableFails_keepsVoiceProfile(
+    ) async throws {
+        mockAudioDeviceModuleSource.stub(
+            for: .setVoiceProcessingEnabled,
+            with: 1
+        )
+
+        do {
+            try await subject.setAudioBitrateProfile(.musicHighQuality)
+            XCTFail("VP disable must throw so music is not half-applied.")
+        } catch {
+            await assertEqualAsync(
+                await subject.audioBitrateProfile,
+                .voiceStandard
+            )
+        }
+    }
+
+    func test_cleanUp_withoutMusic_doesNotMutateSoftwareProcessingOrFilter(
+    ) async throws {
+        let module = Self.videoConfig.audioProcessingModule
+        module.config.isNoiseSuppressionEnabled = false
+        module.config.isHighpassFilterEnabled = false
+        let filter = MockAudioFilter(id: "nc")
+        module.setAudioFilter(filter)
+        let vpCalls = mockAudioDeviceModuleSource
+            .timesCalled(.setVoiceProcessingEnabled)
+
+        await subject.cleanUp()
+
+        XCTAssertFalse(module.config.isNoiseSuppressionEnabled)
+        XCTAssertFalse(module.config.isHighpassFilterEnabled)
+        XCTAssertEqual(module.activeAudioFilter?.id, "nc")
+        XCTAssertEqual(
+            mockAudioDeviceModuleSource.timesCalled(.setVoiceProcessingEnabled),
+            vpCalls
+        )
+        module.config.isNoiseSuppressionEnabled = true
+        module.config.isHighpassFilterEnabled = true
+    }
+
+    func test_cleanUp_whenMusicRestoreThrows_restoresSoftwareProcessing(
+    ) async throws {
+        let module = Self.videoConfig.audioProcessingModule
+        let originalNoiseSuppression = module.config.isNoiseSuppressionEnabled
+        let originalHighpassFilter = module.config.isHighpassFilterEnabled
+        module.config.isNoiseSuppressionEnabled = true
+        module.config.isHighpassFilterEnabled = true
+        defer {
+            module.config.isNoiseSuppressionEnabled = originalNoiseSuppression
+            module.config.isHighpassFilterEnabled = originalHighpassFilter
+        }
+        try await subject.setAudioBitrateProfile(.musicHighQuality)
+        mockAudioDeviceModuleSource.stub(
+            for: .setVoiceProcessingEnabled,
+            with: 1
+        )
+
+        await subject.cleanUp()
+
+        await assertEqualAsync(
+            await subject.audioBitrateProfile,
+            .voiceStandard
+        )
+        XCTAssertTrue(
+            Self.videoConfig.audioProcessingModule.config
+                .isNoiseSuppressionEnabled
+        )
+        XCTAssertTrue(
+            Self.videoConfig.audioProcessingModule.config
+                .isHighpassFilterEnabled
+        )
+    }
+
+    func test_cleanUp_whenMusicRestoreThrows_nextJoinRetriesVoiceProcessingEnable_(
+    ) async throws {
+        let module = Self.videoConfig.audioProcessingModule
+        let originalNoiseSuppression = module.config.isNoiseSuppressionEnabled
+        let originalHighpassFilter = module.config.isHighpassFilterEnabled
+        module.config.isNoiseSuppressionEnabled = true
+        module.config.isHighpassFilterEnabled = true
+        defer {
+            module.config.isNoiseSuppressionEnabled = originalNoiseSuppression
+            module.config.isHighpassFilterEnabled = originalHighpassFilter
+        }
+        try await subject.setAudioBitrateProfile(.musicHighQuality)
+        mockAudioDeviceModuleSource.stub(
+            for: .setVoiceProcessingEnabled,
+            with: 1
+        )
+
+        await subject.cleanUp()
+
+        mockAudioDeviceModuleSource.stub(
+            for: .setVoiceProcessingEnabled,
+            with: 0
+        )
+        await subject.set(sessionID: .unique)
+        try await prepare()
+
+        XCTAssertEqual(
+            mockAudioDeviceModuleSource.recordedInputPayload(
+                Bool.self,
+                for: .setVoiceProcessingEnabled
+            )?.last,
+            true
+        )
+        await assertEqualAsync(
+            await subject.audioBitrateProfile,
+            .voiceStandard
+        )
+        XCTAssertTrue(module.config.isNoiseSuppressionEnabled)
+        XCTAssertTrue(module.config.isHighpassFilterEnabled)
     }
 
     // MARK: - didAddTrack
@@ -1176,7 +1752,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         sfuStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
         await subject.set(sfuAdapter: sfuStack.adapter)
         try await subject.configurePeerConnections()
-        let mockPublisher = try await XCTAsyncUnwrap(await subject.publisher as? MockRTCPeerConnectionCoordinator)
+        let mockPublisher = try await XCTAsyncUnwrap(await subject!.publisher as? MockRTCPeerConnectionCoordinator)
         let mockSubscriber = try await XCTAsyncUnwrap(await subject.subscriber as? MockRTCPeerConnectionCoordinator)
         let newVideoOptions = VideoOptions(
             preferredCameraPosition: .back
@@ -1358,7 +1934,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         )
 
         await subject.enqueueCallSettings { _ in newCallSettings }
-        let mockPublisher = try await XCTAsyncUnwrap(await subject.publisher as? MockRTCPeerConnectionCoordinator)
+        let mockPublisher = try await XCTAsyncUnwrap(await subject!.publisher as? MockRTCPeerConnectionCoordinator)
 
         await fulfillment {
             mockPublisher.timesCalled(.didUpdateCallSettings) == 1
@@ -1386,7 +1962,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         await subject.enqueueCallSettings { _ in .init(videoOn: true) }
 
         let mockPublisher = try await XCTAsyncUnwrap(
-            await subject.publisher as? MockRTCPeerConnectionCoordinator
+            await subject!.publisher as? MockRTCPeerConnectionCoordinator
         )
         await fulfillment {
             mockPublisher.timesCalled(.didUpdateCallSettings) == 1
@@ -1417,7 +1993,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         await subject.enqueueCallSettings { _ in .init(audioOn: true) }
 
         let mockPublisher = try await XCTAsyncUnwrap(
-            await subject.publisher as? MockRTCPeerConnectionCoordinator
+            await subject!.publisher as? MockRTCPeerConnectionCoordinator
         )
         await fulfillment {
             mockPublisher.timesCalled(.didUpdateCallSettings) == 1
@@ -1451,7 +2027,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
             audioOn: true
         )
 
-        let mockPublisher = try await XCTAsyncUnwrap(await subject.publisher as? MockRTCPeerConnectionCoordinator)
+        let mockPublisher = try await XCTAsyncUnwrap(await subject!.publisher as? MockRTCPeerConnectionCoordinator)
         await fulfillment {
             mockPublisher.timesCalled(.didUpdateCallSettings) == 2
         }
@@ -1481,7 +2057,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
             videoOn: true
         )
 
-        let mockPublisher = try await XCTAsyncUnwrap(await subject.publisher as? MockRTCPeerConnectionCoordinator)
+        let mockPublisher = try await XCTAsyncUnwrap(await subject!.publisher as? MockRTCPeerConnectionCoordinator)
         await fulfillment {
             mockPublisher.timesCalled(.didUpdateCallSettings) == 2
         }

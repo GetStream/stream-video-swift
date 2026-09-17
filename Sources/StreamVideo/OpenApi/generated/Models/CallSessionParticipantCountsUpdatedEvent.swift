@@ -29,7 +29,7 @@ public final class CallSessionParticipantCountsUpdatedEvent: @unchecked Sendable
         self.sessionId = sessionId
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case anonymousParticipantCount = "anonymous_participant_count"
         case callCid = "call_cid"
         case createdAt = "created_at"

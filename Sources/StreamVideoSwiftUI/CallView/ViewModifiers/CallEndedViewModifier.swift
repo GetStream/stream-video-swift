@@ -131,7 +131,7 @@ private struct CallEndedViewModifier<Subview: View>: ViewModifier {
     }
 }
 
-@available(iOS, introduced: 13, obsoleted: 14)
+@available(iOS, introduced: 13, deprecated: 14)
 private struct CallEndedViewModifier_iOS13<Subview: View>: ViewModifier {
 
     private var presentationValidator: (Call?) -> Bool

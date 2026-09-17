@@ -6,7 +6,7 @@ import AVFoundation
 import Foundation
 import StreamVideo
 
-final class AudioTrackPlayer: NSObject, AVAudioPlayerDelegate, @unchecked Sendable {
+final class AudioTrackPlayer: NSObject, @unchecked Sendable {
     enum Track: String, Equatable, CaseIterable {
         case track1 = "track_1"
         case track2 = "track_2"
@@ -60,8 +60,11 @@ final class AudioTrackPlayer: NSObject, AVAudioPlayerDelegate, @unchecked Sendab
             track = nil
         }
     }
+}
 
-    // MARK: - AVAudioPlayerDelegate
+// MARK: - AVAudioPlayerDelegate
+
+extension AudioTrackPlayer: AVAudioPlayerDelegate {
 
     func audioPlayerDidFinishPlaying(
         _ player: AVAudioPlayer,

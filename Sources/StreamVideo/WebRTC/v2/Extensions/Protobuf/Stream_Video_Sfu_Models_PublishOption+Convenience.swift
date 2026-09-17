@@ -38,6 +38,12 @@ extension Stream_Video_Sfu_Models_PublishOption {
         codec = .init()
         codec.name = source.codec.rawValue
         bitrate = Int32(source.bitrate)
+        audioBitrateProfiles = source.bitrateProfiles.map { profile, value in
+            var item = Stream_Video_Sfu_Models_AudioBitrate()
+            item.profile = profile.sfuProfile
+            item.bitrate = Int32(value)
+            return item
+        }
     }
 
     /// Initializes a `Stream_Video_Sfu_Models_PublishOption` from a video model.

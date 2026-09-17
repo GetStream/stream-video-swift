@@ -14,7 +14,7 @@ public final class ListRecordingsResponse: @unchecked Sendable, Codable, JSONEnc
         self.recordings = recordings
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case duration
         case recordings
     }

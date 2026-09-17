@@ -41,7 +41,7 @@ public final class CallEvent: @unchecked Sendable, Codable, JSONEncodable, Hasha
         self.type = type
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case _internal = "internal"
         case category
         case component

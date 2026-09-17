@@ -20,7 +20,7 @@ public final class HealthCheckEvent: @unchecked Sendable, Event, Codable, JSONEn
         self.receivedAt = receivedAt
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case cid
         case connectionId = "connection_id"
         case createdAt = "created_at"

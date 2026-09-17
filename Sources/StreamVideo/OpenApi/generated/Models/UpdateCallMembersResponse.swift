@@ -14,7 +14,7 @@ public final class UpdateCallMembersResponse: @unchecked Sendable, Codable, JSON
         self.members = members
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case duration
         case members
     }

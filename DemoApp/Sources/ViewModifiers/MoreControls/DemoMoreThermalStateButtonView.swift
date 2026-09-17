@@ -3,6 +3,7 @@
 //
 
 import StreamVideo
+import StreamVideoSwiftUI
 import SwiftUI
 
 struct DemoMoreThermalStateButtonView: View {

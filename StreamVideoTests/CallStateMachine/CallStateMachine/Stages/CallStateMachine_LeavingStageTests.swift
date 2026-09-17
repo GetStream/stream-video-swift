@@ -68,4 +68,23 @@ final class CallStateMachineStageLeavingStage_Tests:
         XCTAssertTrue(streamVideo.state.activeCall === previousActiveCall)
         XCTAssertEqual(previousActiveCall.timesCalled(.leave), 0)
     }
+
+    func test_transition_resetsMicrophoneAudioBitrateProfile() async throws {
+        try await call.microphone.setAudioBitrateProfile(.musicHighQuality)
+        XCTAssertEqual(
+            call.microphone.audioBitrateProfile,
+            .musicHighQuality
+        )
+        subject.transition = { self.transitionedToStage = $0 }
+
+        _ = subject.transition(
+            from: .init(id: .joined, context: .init(call: call))
+        )
+
+        await fulfilmentInMainActor {
+            self.transitionedToStage?.id == .idle
+                && self.call.microphone.audioBitrateProfile
+                == .voiceStandard
+        }
+    }
 }

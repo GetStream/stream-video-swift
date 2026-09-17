@@ -232,6 +232,7 @@ final class RTCAudioStore_AudioDeviceModuleMiddlewareTests: XCTestCase, @uncheck
         XCTAssertEqual(currentMock.timesCalled(.reset), 0)
         XCTAssertEqual(currentMock.timesCalled(.setMuteMode), 1)
         XCTAssertEqual(currentMock.timesCalled(.setRecordingAlwaysPreparedMode), 0)
+        XCTAssertEqual(currentMock.timesCalled(.setVoiceProcessingEnabled), 0)
 
         wait(for: [setRecordingExpectation, setMicrophoneMutedExpectation], timeout: 1)
     }
@@ -258,6 +259,7 @@ final class RTCAudioStore_AudioDeviceModuleMiddlewareTests: XCTestCase, @uncheck
         XCTAssertEqual(replacementMock.timesCalled(.reset), 0)
         XCTAssertEqual(replacementMock.timesCalled(.setMuteMode), 1)
         XCTAssertEqual(replacementMock.timesCalled(.setRecordingAlwaysPreparedMode), 0)
+        XCTAssertEqual(replacementMock.timesCalled(.setVoiceProcessingEnabled), 0)
     }
 
     // MARK: - setMutedSpeechDetectionEnabled

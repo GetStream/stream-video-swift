@@ -18,7 +18,7 @@ public final class UserStats: @unchecked Sendable, Codable, JSONEncodable, Hasha
         self.sessionStats = sessionStats
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case info
         case minEventTs = "min_event_ts"
         case rating
