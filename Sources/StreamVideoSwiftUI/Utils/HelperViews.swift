@@ -94,14 +94,14 @@ public struct OnlineIndicatorView: View {
     public var body: some View {
         ZStack {
             Circle()
-                .fill(Color(tokens.colors.backgroundCoreApp))
+                .fill(Color(colors.backgroundCoreApp))
                 .frame(
                     width: indicatorSize,
                     height: indicatorSize
                 )
 
             Circle()
-                .fill(Color(tokens.colors.accentSuccess))
+                .fill(Color(colors.accentSuccess))
                 .frame(
                     width: innerCircleSize,
                     height: innerCircleSize
@@ -113,7 +113,7 @@ public struct OnlineIndicatorView: View {
         2 * indicatorSize / 3
     }
 
-    private var tokens: DesignSystemTokens {
-        videoAppearance.tokens
+    private var colors: DesignSystemTokens.Colors {
+        videoAppearance.tokens.colors
     }
 }

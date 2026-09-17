@@ -116,6 +116,8 @@ public struct InviteParticipantsView<Factory: ViewFactory>: View {
     }
 }
 
+// MARK: - UsersHeaderView
+
 struct UsersHeaderView: View {
 
     @Injected(\.videoAppearance) var videoAppearance
@@ -125,22 +127,26 @@ struct UsersHeaderView: View {
     var body: some View {
         HStack {
             Text(title)
-                .padding(.horizontal, tokens.layout.spacingMd)
-                .padding(.vertical, tokens.layout.spacingXxxs)
-                .font(tokens.fonts.body)
-                .foregroundColor(
-                    Color(tokens.colors.textSecondary)
-                )
+                .padding(.horizontal, layout.spacingMd)
+                .padding(.vertical, layout.spacingXxxs)
+                .font(fonts.body)
+                .foregroundColor(Color(colors.textSecondary))
 
             Spacer()
         }
-        .background(
-            Color(tokens.colors.backgroundCoreSurfaceDefault)
-        )
+        .background(Color(colors.backgroundCoreSurfaceDefault))
     }
 
-    private var tokens: DesignSystemTokens {
-        videoAppearance.tokens
+    private var colors: DesignSystemTokens.Colors {
+        videoAppearance.tokens.colors
+    }
+
+    private var fonts: DesignSystemTokens.Fonts {
+        videoAppearance.tokens.fonts
+    }
+
+    private var layout: DesignSystemTokens.Layout {
+        videoAppearance.tokens.layout
     }
 }
 
@@ -173,7 +179,7 @@ struct VideoUserView<Factory: ViewFactory>: View {
 
             Text(user.name)
                 .lineLimit(1)
-                .font(tokens.fonts.bodyBold)
+                .font(fonts.bodyBold)
 
             Spacer()
 
@@ -190,18 +196,22 @@ struct VideoUserView<Factory: ViewFactory>: View {
             Image(systemName: "checkmark.circle.fill")
                 .symbolRenderingMode(.palette)
                 .foregroundStyle(
-                    Color(tokens.colors.textOnAccent),
-                    Color(tokens.colors.accentPrimary)
+                    Color(colors.textOnAccent),
+                    Color(colors.accentPrimary)
                 )
         } else {
             Image(systemName: "checkmark.circle.fill")
                 .foregroundColor(
-                    Color(tokens.colors.accentPrimary)
+                    Color(colors.accentPrimary)
                 )
         }
     }
 
-    private var tokens: DesignSystemTokens {
-        videoAppearance.tokens
+    private var colors: DesignSystemTokens.Colors {
+        videoAppearance.tokens.colors
+    }
+
+    private var fonts: DesignSystemTokens.Fonts {
+        videoAppearance.tokens.fonts
     }
 }

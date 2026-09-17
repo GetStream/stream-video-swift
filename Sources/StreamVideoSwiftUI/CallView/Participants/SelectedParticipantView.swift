@@ -28,7 +28,7 @@ struct SelectedParticipantView<Factory: ViewFactory>: View {
     }
 
     var body: some View {
-        VStack(spacing: tokens.layout.spacingXs) {
+        VStack(spacing: layout.spacingXs) {
             viewFactory.makeUserAvatar(
                 user,
                 with: .init(size: avatarSize)
@@ -36,34 +36,32 @@ struct SelectedParticipantView<Factory: ViewFactory>: View {
 
             Text(user.name)
                 .lineLimit(1)
-                .font(tokens.fonts.footnote)
-                .foregroundColor(Color(tokens.colors.textPrimary))
+                .font(fonts.footnote)
+                .foregroundColor(Color(colors.textPrimary))
         }
         .overlay(
             TopRightView {
                 Button(action: removeUser) {
                     ZStack {
                         Circle()
-                            .fill(Color(tokens.colors.textOnInverse))
+                            .fill(Color(colors.textOnInverse))
                             .frame(
-                                width: tokens.layout.iconSizeSm,
-                                height: tokens.layout.iconSizeSm
+                                width: layout.iconSizeSm,
+                                height: layout.iconSizeSm
                             )
 
                         videoAppearance.images.xmarkCircleFill
                             .foregroundColor(
-                                Color(
-                                    tokens.colors.backgroundCoreInverse
-                                )
+                                Color(colors.backgroundCoreInverse)
                             )
                     }
-                    .padding(.all, tokens.layout.spacingXxs)
+                    .padding(.all, layout.spacingXxs)
                 }
                 .accessibility(label: Text(user.name))
             }
             .offset(
-                x: tokens.layout.buttonPaddingXIconOnlySm,
-                y: -tokens.layout.spacingXxs
+                x: layout.buttonPaddingXIconOnlySm,
+                y: -layout.spacingXxs
             )
         )
         .frame(width: avatarSize)
@@ -79,5 +77,15 @@ struct SelectedParticipantView<Factory: ViewFactory>: View {
         }
     }
 
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
+    private var colors: DesignSystemTokens.Colors {
+        videoAppearance.tokens.colors
+    }
+
+    private var fonts: DesignSystemTokens.Fonts {
+        videoAppearance.tokens.fonts
+    }
+
+    private var layout: DesignSystemTokens.Layout {
+        videoAppearance.tokens.layout
+    }
 }

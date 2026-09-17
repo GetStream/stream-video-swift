@@ -145,10 +145,10 @@ struct CallParticipantsViewContainer<Factory: ViewFactory>: View {
                             )
                         }
                     }
-                    .padding(.horizontal, tokens.layout.spacingMd)
+                    .padding(.horizontal, layout.spacingMd)
                 }
 
-                HStack(spacing: tokens.layout.spacingMd) {
+                HStack(spacing: layout.spacingMd) {
                     if viewModel.inviteParticipantsButtonShown {
                         ParticipantsButton(title: L10n.Call.Participants.invite, onTapped: inviteTapped)
                     }
@@ -159,7 +159,7 @@ struct CallParticipantsViewContainer<Factory: ViewFactory>: View {
                         onTapped: muteTapped
                     )
                 }
-                .padding(tokens.layout.spacingMd)
+                .padding(layout.spacingMd)
 
                 NavigationLink(isActive: $inviteParticipantsShown) {
                     InviteParticipantsView(
@@ -198,8 +198,12 @@ struct CallParticipantsViewContainer<Factory: ViewFactory>: View {
         }
     }
 
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
+    private var layout: DesignSystemTokens.Layout {
+        videoAppearance.tokens.layout
+    }
 }
+
+// MARK: - ParticipantsButton
 
 struct ParticipantsButton: View {
 
@@ -214,36 +218,46 @@ struct ParticipantsButton: View {
             onTapped()
         } label: {
             Text(title)
-                .font(tokens.fonts.headline)
+                .font(fonts.headline)
                 .bold()
-                .padding(.vertical, tokens.layout.spacingSm)
+                .padding(.vertical, layout.spacingSm)
                 .frame(maxWidth: .infinity)
                 .foregroundColor(
                     primaryStyle
-                        ? Color(tokens.colors.buttonPrimaryTextOnAccent)
-                        : Color(tokens.colors.buttonSecondaryText)
+                        ? Color(colors.buttonPrimaryTextOnAccent)
+                        : Color(colors.buttonSecondaryText)
                 )
                 .background(
                     primaryStyle
-                        ? Color(tokens.colors.buttonPrimaryBackground)
+                        ? Color(colors.buttonPrimaryBackground)
                         : Color.clear
                 )
                 .overlay(
                     RoundedRectangle(
-                        cornerRadius: tokens.layout.radius3xl
+                        cornerRadius: layout.radius3xl
                     )
                     .stroke(
                         primaryStyle
-                            ? Color(tokens.colors.buttonPrimaryBackground)
-                            : Color(tokens.colors.buttonSecondaryBorder),
+                            ? Color(colors.buttonPrimaryBackground)
+                            : Color(colors.buttonSecondaryBorder),
                         lineWidth: 1
                     )
                 )
-                .cornerRadius(tokens.layout.radius3xl)
+                .cornerRadius(layout.radius3xl)
         }
     }
 
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
+    private var colors: DesignSystemTokens.Colors {
+        videoAppearance.tokens.colors
+    }
+
+    private var fonts: DesignSystemTokens.Fonts {
+        videoAppearance.tokens.fonts
+    }
+
+    private var layout: DesignSystemTokens.Layout {
+        videoAppearance.tokens.layout
+    }
 }
 
 struct BlockedUsersView: View {
@@ -257,12 +271,9 @@ struct BlockedUsersView: View {
         HStack {
             VStack(alignment: .leading) {
                 Text(L10n.Call.Participants.blocked)
-                    .font(tokens.fonts.headline)
+                    .font(fonts.headline)
                     .multilineTextAlignment(.leading)
-                    .padding(
-                        .vertical,
-                        tokens.layout.spacingXs
-                    )
+                    .padding(.vertical, layout.spacingXs)
                 ForEach(blockedUsers) { blockedUser in
                     Text(blockedUser.id)
                         .contextMenu {
@@ -284,10 +295,16 @@ struct BlockedUsersView: View {
         }
     }
 
-    private var tokens: DesignSystemTokens {
-        videoAppearance.tokens
+    private var fonts: DesignSystemTokens.Fonts {
+        videoAppearance.tokens.fonts
+    }
+
+    private var layout: DesignSystemTokens.Layout {
+        videoAppearance.tokens.layout
     }
 }
+
+// MARK: - CallParticipantView
 
 struct CallParticipantView<Factory: ViewFactory>: View {
 
@@ -310,7 +327,7 @@ struct CallParticipantView<Factory: ViewFactory>: View {
     }
 
     var body: some View {
-        VStack(spacing: tokens.layout.spacingXxs) {
+        VStack(spacing: layout.spacingXxs) {
             HStack {
                 viewFactory.makeUserAvatar(
                     participant.user,
@@ -337,7 +354,7 @@ struct CallParticipantView<Factory: ViewFactory>: View {
                 )
 
                 Text(participant.name)
-                    .font(tokens.fonts.bodyBold)
+                    .font(fonts.bodyBold)
                 Spacer()
                 (
                     participant.hasAudio
@@ -346,8 +363,8 @@ struct CallParticipantView<Factory: ViewFactory>: View {
                 )
                 .foregroundColor(
                     participant.hasAudio
-                        ? Color(tokens.colors.textPrimary)
-                        : Color(tokens.colors.accentError)
+                        ? Color(colors.textPrimary)
+                        : Color(colors.accentError)
                 )
 
                 (
@@ -357,11 +374,11 @@ struct CallParticipantView<Factory: ViewFactory>: View {
                 )
                 .foregroundColor(
                     participant.hasVideo
-                        ? Color(tokens.colors.textPrimary)
-                        : Color(tokens.colors.accentError)
+                        ? Color(colors.textPrimary)
+                        : Color(colors.accentError)
                 )
             }
-            .padding(.all, tokens.layout.spacingXxs)
+            .padding(.all, layout.spacingXxs)
 
             Divider()
         }
@@ -380,7 +397,17 @@ struct CallParticipantView<Factory: ViewFactory>: View {
         }
     }
 
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
+    private var colors: DesignSystemTokens.Colors {
+        videoAppearance.tokens.colors
+    }
+
+    private var fonts: DesignSystemTokens.Fonts {
+        videoAppearance.tokens.fonts
+    }
+
+    private var layout: DesignSystemTokens.Layout {
+        videoAppearance.tokens.layout
+    }
 }
 
 extension CallParticipant {

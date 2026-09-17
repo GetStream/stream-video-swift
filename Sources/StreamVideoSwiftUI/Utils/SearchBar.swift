@@ -17,15 +17,15 @@ struct SearchBar: View, KeyboardReadable {
     var body: some View {
         HStack {
             TextField(L10n.Call.Participants.search, text: $text)
-                .padding(tokens.layout.spacingXs)
-                .padding(.leading, tokens.layout.spacingXs)
-                .padding(.horizontal, tokens.layout.spacing2xl)
+                .padding(layout.spacingXs)
+                .padding(.leading, layout.spacingXs)
+                .padding(.horizontal, layout.spacing2xl)
                 .background(
-                    Color(tokens.colors.backgroundCoreSurfaceDefault)
+                    Color(colors.backgroundCoreSurfaceDefault)
                 )
                 .clipShape(
                     RoundedRectangle(
-                        cornerRadius: tokens.layout.radiusXl,
+                        cornerRadius: layout.radiusXl,
                         style: .continuous
                     )
                 )
@@ -34,12 +34,12 @@ struct SearchBar: View, KeyboardReadable {
                         videoAppearance.images.searchIcon
                             .customizable()
                             .foregroundColor(
-                                Color(tokens.colors.textSecondary)
+                                Color(colors.textSecondary)
                             )
                             .frame(maxHeight: 18)
                             .padding(
                                 .leading,
-                                tokens.layout.spacingSm
+                                layout.spacingSm
                             )
 
                         Spacer()
@@ -53,20 +53,17 @@ struct SearchBar: View, KeyboardReadable {
                                     .customizable()
                                     .frame(width: 18, height: 18)
                                     .foregroundColor(
-                                        Color(
-                                            tokens.colors
-                                                .textSecondary
-                                        )
+                                        Color(colors.textSecondary)
                                     )
                                     .padding(
                                         .trailing,
-                                        tokens.layout.spacingXs
+                                        layout.spacingXs
                                     )
                             }
                         }
                     }
                 )
-                .padding(.horizontal, tokens.layout.spacingXs)
+                .padding(.horizontal, layout.spacingXs)
                 .transition(.identity)
                 .animation(.easeInOut, value: isEditing)
 
@@ -78,16 +75,16 @@ struct SearchBar: View, KeyboardReadable {
                 }) {
                     Text(L10n.Call.Participants.cancelSearch)
                         .foregroundColor(
-                            Color(tokens.colors.accentPrimary)
+                            Color(colors.accentPrimary)
                         )
                 }
                 .frame(height: 20)
-                .padding(.trailing, tokens.layout.spacingXs)
+                .padding(.trailing, layout.spacingXs)
                 .transition(.move(edge: .trailing))
                 .animation(.easeInOut)
             }
         }
-        .padding(.vertical, tokens.layout.spacingXs)
+        .padding(.vertical, layout.spacingXs)
         .onReceive(keyboardWillChangePublisher) { shown in
             if shown {
                 self.isEditing = true
@@ -98,5 +95,11 @@ struct SearchBar: View, KeyboardReadable {
         }
     }
 
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
+    private var colors: DesignSystemTokens.Colors {
+        videoAppearance.tokens.colors
+    }
+
+    private var layout: DesignSystemTokens.Layout {
+        videoAppearance.tokens.layout
+    }
 }

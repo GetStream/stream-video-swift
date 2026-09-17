@@ -25,17 +25,19 @@ public struct ModalButton: View {
         } label: {
             image
                 .resizable()
-                .foregroundColor(
-                    Color(tokens.colors.textPrimary)
-                )
+                .foregroundColor(Color(colors.textPrimary))
                 .aspectRatio(contentMode: .fit)
-                .padding(tokens.layout.spacingXs)
+                .padding(layout.spacingXs)
         }
         .buttonStyle(.modal)
     }
 
-    private var tokens: DesignSystemTokens {
-        videoAppearance.tokens
+    private var colors: DesignSystemTokens.Colors {
+        videoAppearance.tokens.colors
+    }
+
+    private var layout: DesignSystemTokens.Layout {
+        videoAppearance.tokens.layout
     }
 }
 
@@ -51,16 +53,15 @@ struct ModalButtonStyle: ButtonStyle {
                 Circle()
                     .fill(
                         Color(
-                            tokens.colors
-                                .backgroundCoreSurfaceDefault
+                            colors.backgroundCoreSurfaceDefault
                         )
                     )
             )
             .frame(width: 30, height: 30)
     }
 
-    private var tokens: DesignSystemTokens {
-        videoAppearance.tokens
+    private var colors: DesignSystemTokens.Colors {
+        videoAppearance.tokens.colors
     }
 }
 
