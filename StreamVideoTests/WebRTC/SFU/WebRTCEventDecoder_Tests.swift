@@ -6,7 +6,7 @@ import StreamCore
 @testable import StreamVideo
 import XCTest
 
-final class WebRTCEventDecoder_Tests: XCTestCase, @unchecked Sendable {
+final class WebRTCEventDecoder_Tests: LogTestCase, @unchecked Sendable {
 
     private var subject: WebRTCEventDecoder!
 

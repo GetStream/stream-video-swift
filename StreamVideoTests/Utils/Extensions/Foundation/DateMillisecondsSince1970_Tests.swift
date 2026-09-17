@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class DateMillisecondsSince1970_Tests: XCTestCase, @unchecked Sendable {
+final class DateMillisecondsSince1970_Tests: LogTestCase, @unchecked Sendable {
 
     func test_millisecondsSince1970_matchesExpectedMilliseconds() {
         let referenceDate = Date(timeIntervalSince1970: 0) // 1970-01-01T00:00:00Z

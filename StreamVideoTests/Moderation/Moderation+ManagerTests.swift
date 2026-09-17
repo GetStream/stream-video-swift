@@ -7,7 +7,7 @@ import Foundation
 import XCTest
 
 @MainActor
-final class Moderation_ManagerTests: XCTestCase, @unchecked Sendable {
+final class Moderation_ManagerTests: LogTestCase, @unchecked Sendable {
     private var mockedStreamVideo: MockStreamVideo! = MockStreamVideo()
     private lazy var subject: Moderation.Manager! = .init(MockCall())
 

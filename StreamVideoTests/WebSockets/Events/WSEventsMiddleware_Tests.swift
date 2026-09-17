@@ -8,7 +8,7 @@ import StreamCore
 @testable import StreamVideo
 import XCTest
 
-final class WSEventsMiddleware_Tests: XCTestCase, @unchecked Sendable {
+final class WSEventsMiddleware_Tests: LogTestCase, @unchecked Sendable {
 
     private var subject: WSEventsMiddleware!
 

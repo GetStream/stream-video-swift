@@ -6,7 +6,7 @@ import AVFoundation
 @testable import StreamVideo
 import XCTest
 
-final class LivestreamAudioSessionPolicyTests: XCTestCase, @unchecked Sendable {
+final class LivestreamAudioSessionPolicyTests: LogTestCase, @unchecked Sendable {
 
     private var subject: LivestreamAudioSessionPolicy!
 

@@ -7,7 +7,7 @@ import AVFoundation
 import StreamWebRTC
 import XCTest
 
-final class RTCAudioStore_RouteChangeEffectTests: XCTestCase, @unchecked Sendable {
+final class RTCAudioStore_RouteChangeEffectTests: LogTestCase, @unchecked Sendable {
 
     private var session: RTCAudioSession!
     private var publisher: RTCAudioSessionPublisher!

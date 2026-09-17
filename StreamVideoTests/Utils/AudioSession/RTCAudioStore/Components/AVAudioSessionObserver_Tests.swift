@@ -8,7 +8,7 @@ import StreamSwiftTestHelpers
 @testable import StreamVideo
 import XCTest
 
-final class AVAudioSessionObserver_Tests: XCTestCase, @unchecked Sendable {
+final class AVAudioSessionObserver_Tests: LogTestCase, @unchecked Sendable {
 
     private var cancellables: Set<AnyCancellable>!
 

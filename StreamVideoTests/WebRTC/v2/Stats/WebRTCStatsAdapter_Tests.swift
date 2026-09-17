@@ -7,7 +7,7 @@ import Combine
 import StreamWebRTC
 import XCTest
 
-final class WebRTCStatsAdapter_Tests: XCTestCase, @unchecked Sendable {
+final class WebRTCStatsAdapter_Tests: LogTestCase, @unchecked Sendable {
 
     private lazy var trackStorage: WebRTCTrackStorage! = .init()
     private lazy var mockCollector: MockWebRTCStatsCollector! = .init()

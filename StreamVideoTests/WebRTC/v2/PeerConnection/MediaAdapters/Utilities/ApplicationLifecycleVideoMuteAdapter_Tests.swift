@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class ApplicationLifecycleVideoMuteAdapterTests: XCTestCase, @unchecked Sendable {
+final class ApplicationLifecycleVideoMuteAdapterTests: LogTestCase, @unchecked Sendable {
 
     private lazy var notificationCenter: NotificationCenter! = .init()
     private lazy var applicationStateAdapter: StreamAppStateAdapter! = .init(notificationCenter: notificationCenter)

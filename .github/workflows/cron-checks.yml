@@ -12,6 +12,11 @@ on:
         type: boolean
         required: false
         default: false
+      retry_tests:
+        description: 'Retry failed LLC/E2E tests?'
+        type: boolean
+        required: false
+        default: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -24,6 +29,7 @@ env:
   HOMEBREW_NO_INSTALL_CLEANUP: 1 # Disable cleanup for homebrew, we don't need it on CI
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   VERBOSE: ${{ github.event.inputs.verbose == 'true' && '--verbose' || '' }}
+  RETRY_TESTS: ${{ github.event.inputs.retry_tests || 'false' }}
 
 jobs:
   build-test-app-and-frameworks:
@@ -89,7 +95,7 @@ jobs:
     - name: Launch Allure TestOps
       run: bundle exec fastlane allure_launch cron:true
     - name: Run UI Tests (Debug)
-      run: bundle exec fastlane test_e2e device:"${{ env.IOS_SIMULATOR_DEVICE }}" cron:true test_without_building:true ${{ env.VERBOSE }}
+      run: bundle exec fastlane test_e2e device:"${{ env.IOS_SIMULATOR_DEVICE }}" cron:true test_without_building:true retry_tests:"${{ env.RETRY_TESTS }}" ${{ env.VERBOSE }}
       timeout-minutes: 90
       env:
         STREAM_SDK_TEST_APP: ${{ secrets.STREAM_SDK_TEST_APP }}
@@ -153,13 +159,14 @@ jobs:
         version: ${{ matrix.ios }}
         device: ${{ matrix.device }}
     - name: Run LLC Tests (Debug)
-      run: bundle exec fastlane test device:"${{ env.IOS_SIMULATOR_DEVICE }}" cron:true ${{ env.VERBOSE }}
+      run: bundle exec fastlane test device:"${{ env.IOS_SIMULATOR_DEVICE }}" cron:true retry_tests:"${{ env.RETRY_TESTS }}" ${{ env.VERBOSE }}
       timeout-minutes: 60
     - name: Parse xcresult
       if: failure()
       run: |
         brew install chargepoint/xcparse/xcparse
         xcparse logs fastlane/test_output/StreamVideo.xcresult fastlane/test_output/logs/
+        xcparse attachments --test fastlane/test_output/StreamVideo.xcresult fastlane/test_output/logs/attachments
     - uses: actions/upload-artifact@v4
       if: failure()
       with:
@@ -167,6 +174,7 @@ jobs:
         path: |
           fastlane/test_output/logs/*/Diagnostics/**/*.txt
           fastlane/test_output/logs/*/Diagnostics/simctl_diagnostics/DiagnosticReports/*
+          fastlane/test_output/logs/attachments/**
 
   build-apps:
     name: Build Demo Apps

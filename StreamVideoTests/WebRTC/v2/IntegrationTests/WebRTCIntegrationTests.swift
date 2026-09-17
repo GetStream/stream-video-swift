@@ -6,7 +6,7 @@ import Combine
 @testable import StreamVideo
 @preconcurrency import XCTest
 
-final class WebRTCIntegrationTests: XCTestCase, @unchecked Sendable {
+final class WebRTCIntegrationTests: LogTestCase, @unchecked Sendable {
 
     struct Operation {
         var delay: TimeInterval = 0

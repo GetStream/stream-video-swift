@@ -7,7 +7,7 @@ import Combine
 import StreamWebRTC
 @preconcurrency import XCTest
 
-final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable {
+final class RTCPeerConnectionCoordinator_Tests: LogTestCase, @unchecked Sendable {
 
     private lazy var sessionId: String! = .unique
     private lazy var peerType: PeerConnectionType! = .publisher

@@ -6,7 +6,7 @@ import Foundation
 @testable import StreamVideo
 import XCTest
 
-final class JsonEventDecoder_Tests: XCTestCase, @unchecked Sendable {
+final class JsonEventDecoder_Tests: LogTestCase, @unchecked Sendable {
 
     private var subject: JsonEventDecoder!
 

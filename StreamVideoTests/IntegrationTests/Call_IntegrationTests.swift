@@ -7,7 +7,7 @@ import Foundation
 @testable import StreamVideo
 import XCTest
 
-final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
+final class Call_IntegrationTests: LogTestCase, @unchecked Sendable {
 
     // MARK: - Nested Types
 
@@ -15,13 +15,13 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
 
     // MARK: - Properties
 
-    private var helpers: Call_IntegrationTests.Helpers! = .init(loggingMode: .sdk)
+    private var helpers: Call_IntegrationTests.Helpers! = .init()
 
     // MARK: - Lifecycle
 
     override func setUp() async throws {
         try await super.setUp()
-        helpers = .init(loggingMode: .sdk)
+        helpers = .init()
     }
 
     override func tearDown() async throws {

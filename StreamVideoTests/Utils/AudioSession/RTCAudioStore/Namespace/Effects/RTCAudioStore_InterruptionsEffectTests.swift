@@ -6,7 +6,7 @@
 import StreamWebRTC
 import XCTest
 
-final class RTCAudioStore_InterruptionsEffectTests: XCTestCase, @unchecked Sendable {
+final class RTCAudioStore_InterruptionsEffectTests: LogTestCase, @unchecked Sendable {
 
     private enum TestError: Error { case stub }
 

@@ -8,7 +8,7 @@ import StreamCore
 @testable import StreamVideo
 import XCTest
 
-final class SFUWebSocket_Tests: XCTestCase, @unchecked Sendable {
+final class SFUWebSocket_Tests: LogTestCase, @unchecked Sendable {
 
     func test_closeCodeProvider_noPongReceived_returns4001() {
         let subject = SFUWebSocketCloseCodeProvider()

@@ -6,7 +6,7 @@ import Foundation
 @testable import StreamVideo
 import XCTest
 
-final class PermissionStore_MicrophoneMiddlewareTests: XCTestCase, @unchecked Sendable {
+final class PermissionStore_MicrophoneMiddlewareTests: LogTestCase, @unchecked Sendable {
 
     private lazy var mockPermissionProvider: MockMicrophonePermissionProvider! = .init()
     private lazy var subject: PermissionStore.MicrophoneMiddleware! = .init(

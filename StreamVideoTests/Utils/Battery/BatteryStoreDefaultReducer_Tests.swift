@@ -6,7 +6,7 @@
 import UIKit
 import XCTest
 
-final class BatteryStoreDefaultReducer_Tests: XCTestCase, @unchecked Sendable {
+final class BatteryStoreDefaultReducer_Tests: LogTestCase, @unchecked Sendable {
 
     private var reducer: BatteryStore.Namespace.DefaultReducer!
     private var state: BatteryStore.Namespace.StoreState!

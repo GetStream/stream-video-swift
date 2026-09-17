@@ -7,7 +7,7 @@ import Combine
 import StreamWebRTC
 @preconcurrency import XCTest
 
-final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
+final class WebRTCCoordinator_Tests: LogTestCase, @unchecked Sendable {
     /// Class variable that will be used by all test cases in the file. This ensure that only one
     /// PeerConnectionFactory will be created during tests, ensuring that WebRTC deallocation will
     /// only happen once all tests cases in the file ran.

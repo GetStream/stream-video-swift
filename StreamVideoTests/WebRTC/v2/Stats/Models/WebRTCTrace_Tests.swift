@@ -7,7 +7,7 @@ import StreamWebRTC
 import SwiftProtobuf
 import XCTest
 
-final class WebRTCTrace_Tests: XCTestCase, @unchecked Sendable {
+final class WebRTCTrace_Tests: LogTestCase, @unchecked Sendable {
 
     // MARK: - Tests
 

@@ -7,7 +7,7 @@ import AVFoundation
 @testable import StreamVideo
 import XCTest
 
-final class AVAudioPCMBuffer_FromCMSampleBuffer_Tests: XCTestCase,
+final class AVAudioPCMBuffer_FromCMSampleBuffer_Tests: LogTestCase,
     @unchecked Sendable {
 
     private var subject: AVAudioPCMBuffer!

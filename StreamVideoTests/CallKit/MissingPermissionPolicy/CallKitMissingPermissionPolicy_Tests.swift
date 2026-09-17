@@ -6,7 +6,7 @@ import Foundation
 @testable import StreamVideo
 import XCTest
 
-final class CallKitMissingPermissionPolicy_Tests: XCTestCase, @unchecked Sendable {
+final class CallKitMissingPermissionPolicy_Tests: LogTestCase, @unchecked Sendable {
 
     func test_returnsExpectedPolicies() {
         XCTAssertNotNil(CallKitMissingPermissionPolicy.none.policy as? CallKitMissingPermissionPolicy.NoOp)

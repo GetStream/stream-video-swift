@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class WebRTCAuthenticator_Tests: XCTestCase, @unchecked Sendable {
+final class WebRTCAuthenticator_Tests: LogTestCase, @unchecked Sendable {
 
     private nonisolated(unsafe) static var videoConfig: VideoConfig! = .dummy()
 

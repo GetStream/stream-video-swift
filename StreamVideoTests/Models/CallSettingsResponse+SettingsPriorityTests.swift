@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class CallSettingsResponse_SettingsPriorityTests: XCTestCase, @unchecked Sendable {
+final class CallSettingsResponse_SettingsPriorityTests: LogTestCase, @unchecked Sendable {
     
     func test_speakerOnWithSettingsPriority_whenVideoCameraDefaultOn_returnsTrue() {
         // Given

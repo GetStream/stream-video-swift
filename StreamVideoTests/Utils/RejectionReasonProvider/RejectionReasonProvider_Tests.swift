@@ -6,7 +6,7 @@ import Foundation
 @testable import StreamVideo
 import XCTest
 
-final class StreamRejectionReasonProviderTests: XCTestCase, @unchecked Sendable {
+final class StreamRejectionReasonProviderTests: LogTestCase, @unchecked Sendable {
 
     private lazy var mockStreamVideo: MockStreamVideo! = MockStreamVideo()
     private lazy var subject: StreamRejectionReasonProvider! = StreamRejectionReasonProvider(mockStreamVideo)

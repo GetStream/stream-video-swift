@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class UnfairQueueTests: XCTestCase, @unchecked Sendable {
+final class UnfairQueueTests: LogTestCase, @unchecked Sendable {
 
     private var taskWaitIntervalRange: ClosedRange<TimeInterval>! = 0.2...0.5
     private var subject: UnfairQueue!

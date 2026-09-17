@@ -7,7 +7,7 @@ import Combine
 import StreamWebRTC
 import XCTest
 
-final class RTCAudioStore_Tests: XCTestCase, @unchecked Sendable {
+final class RTCAudioStore_Tests: LogTestCase, @unchecked Sendable {
 
     private var session: RTCAudioSession!
     private var subject: RTCAudioStore!

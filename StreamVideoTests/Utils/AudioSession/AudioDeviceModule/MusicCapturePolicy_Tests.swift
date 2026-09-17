@@ -6,7 +6,7 @@
 import StreamWebRTC
 import XCTest
 
-final class MusicCapturePolicy_Tests: XCTestCase, @unchecked Sendable {
+final class MusicCapturePolicy_Tests: LogTestCase, @unchecked Sendable {
 
     private var subject: MusicCapturePolicy!
 

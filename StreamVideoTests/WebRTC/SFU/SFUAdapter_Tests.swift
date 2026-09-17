@@ -6,7 +6,7 @@ import StreamCore
 @testable import StreamVideo
 import XCTest
 
-final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
+final class SFUAdapterTests: LogTestCase, @unchecked Sendable {
     private let connectedState = WebSocketConnectionState
         .connected(healthCheckInfo: .init())
     private lazy var mockService: MockSignalServer! = .init()

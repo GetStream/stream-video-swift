@@ -6,7 +6,7 @@ import AVFoundation
 @testable import StreamVideo
 import XCTest
 
-final class AVAudioFormat_Equality_Tests: XCTestCase, @unchecked Sendable {
+final class AVAudioFormat_Equality_Tests: LogTestCase, @unchecked Sendable {
 
     private var subject: AVAudioFormat!
 

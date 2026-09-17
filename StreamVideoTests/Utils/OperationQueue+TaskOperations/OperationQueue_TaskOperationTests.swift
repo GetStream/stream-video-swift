@@ -6,7 +6,7 @@ import Foundation
 import StreamVideo
 import XCTest
 
-final class OperationQueue_Tests: XCTestCase, @unchecked Sendable {
+final class OperationQueue_Tests: LogTestCase, @unchecked Sendable {
 
     private var subject: OperationQueue! = .init()
     private var counter = 0

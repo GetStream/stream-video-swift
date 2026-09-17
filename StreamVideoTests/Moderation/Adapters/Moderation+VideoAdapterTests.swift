@@ -8,7 +8,7 @@ import Foundation
 import XCTest
 
 @MainActor
-final class Moderation_VideoAdapterTests: XCTestCase, @unchecked Sendable {
+final class Moderation_VideoAdapterTests: LogTestCase, @unchecked Sendable {
     private var mockedStreamVideo: MockStreamVideo! = MockStreamVideo()
     private lazy var call: MockCall! = .init()
     private lazy var subject: Moderation.VideoAdapter! = .init(call)

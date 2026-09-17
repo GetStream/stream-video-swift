@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class WebRTCCoordinatorStateMachine_BlockedStageTests: XCTestCase, @unchecked Sendable {
+final class WebRTCCoordinatorStateMachine_BlockedStageTests: LogTestCase, @unchecked Sendable {
 
     private nonisolated(unsafe) static var videoConfig: VideoConfig! = .dummy()
 

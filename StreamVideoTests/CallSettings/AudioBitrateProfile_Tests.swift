@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class AudioBitrateProfile_Tests: XCTestCase, @unchecked Sendable {
+final class AudioBitrateProfile_Tests: LogTestCase, @unchecked Sendable {
 
     func test_defaultBitrate_matchesVoiceAndMusicRates() {
         XCTAssertEqual(AudioBitrateProfile.voiceStandard.defaultBitrate, 64000)

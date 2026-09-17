@@ -6,7 +6,7 @@ import AVFoundation
 @testable import StreamVideo
 import XCTest
 
-final class AVAudioConverter_Convert_Tests: XCTestCase, @unchecked Sendable {
+final class AVAudioConverter_Convert_Tests: LogTestCase, @unchecked Sendable {
 
     private var subject: AVAudioConverter!
 

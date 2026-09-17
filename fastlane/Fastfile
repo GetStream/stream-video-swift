@@ -211,7 +211,7 @@ lane :test do |options|
 
   update_testplan_on_ci(path: "StreamVideoTests/StreamVideo.xctestplan")
 
-  scan_options = {
+  scan(
     project: xcode_project,
     scheme: 'StreamVideo',
     testplan: 'StreamVideo',
@@ -219,19 +219,11 @@ lane :test do |options|
     derived_data_path: derived_data_path,
     cloned_source_packages_path: source_packages_path,
     devices: options[:device],
-    number_of_retries: 3,
+    number_of_retries: scan_number_of_retries(options),
     skip_build: options[:skip_build],
     build_for_testing: options[:build_for_testing],
     xcodebuild_formatter: xcodebuild_formatter
-  }
-
-  begin
-    scan(scan_options)
-  rescue StandardError => _e
-    failed_tests = retreive_failed_tests
-    UI.important("Re-running #{failed_tests.size} failed tests ⌛️")
-    scan(scan_options.merge(only_testing: failed_tests))
-  end
+  )
 
   slather if is_ci && !options[:build_for_testing]
 end
@@ -354,7 +346,7 @@ lane :test_e2e do |options|
     build_for_testing: options[:build_for_testing],
     devices: options[:device],
     prelaunch_simulator: is_ci,
-    number_of_retries: 3,
+    number_of_retries: scan_number_of_retries(options),
     xcodebuild_formatter: xcodebuild_formatter
   }
 
@@ -377,6 +369,12 @@ lane :test_e2e do |options|
     UI.important("Re-running #{failed_tests.size} failed tests ⌛️")
     scan(scan_options.merge(only_testing: failed_tests))
   end
+end
+
+def scan_number_of_retries(options)
+  value = options[:retry_tests]
+  value = ENV['RETRY_TESTS'] if value.nil?
+  value.to_s.downcase == 'true' ? 3 : 0
 end
 
 private_lane :retreive_failed_tests do

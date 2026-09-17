@@ -51,21 +51,21 @@ extension Call_IntegrationTests {
             self.client = client
             self.users = user
             self.permissions = permissions
-
-            switch loggingMode {
-            case .none:
-                LogConfig.webRTCLogsEnabled = false
-                LogConfig.level = .error
-            case .sdk:
-                LogConfig.webRTCLogsEnabled = false
-                LogConfig.level = .debug
-            case .webrtc:
-                LogConfig.webRTCLogsEnabled = true
-                LogConfig.level = .error
-            case .all:
-                LogConfig.webRTCLogsEnabled = true
-                LogConfig.level = .debug
-            }
+//
+//            switch loggingMode {
+//            case .none:
+//                LogConfig.webRTCLogsEnabled = false
+//                LogConfig.level = .error
+//            case .sdk:
+//                LogConfig.webRTCLogsEnabled = false
+//                LogConfig.level = .debug
+//            case .webrtc:
+//                LogConfig.webRTCLogsEnabled = true
+//                LogConfig.level = .error
+//            case .all:
+//                LogConfig.webRTCLogsEnabled = true
+//                LogConfig.level = .debug
+//            }
         }
 
         mutating func dismantle() async throws {
@@ -111,8 +111,10 @@ extension Call_IntegrationTests {
         // Restore .testing so later tests on this clone do not keep
         // production values.
         func restoreAudioSessionReadinessWatchdog() {
+            #if STREAM_TESTS
             WebRTCConfiguration.timeout = .testing
             CallConfiguration.timeout = .testing
+            #endif
         }
 
         mutating func callFlow(

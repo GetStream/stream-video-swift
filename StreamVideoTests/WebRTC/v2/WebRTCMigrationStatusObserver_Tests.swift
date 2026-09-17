@@ -6,7 +6,7 @@ import Foundation
 @testable import StreamVideo
 import XCTest
 
-final class WebRTCMigrationStatusObserver_Tests: XCTestCase, @unchecked Sendable {
+final class WebRTCMigrationStatusObserver_Tests: LogTestCase, @unchecked Sendable {
     private lazy var sfuStack: MockSFUStack! = .init()
     private lazy var subject: WebRTCMigrationStatusObserver! = .init(
         migratingFrom: sfuStack.adapter

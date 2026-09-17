@@ -7,7 +7,7 @@ import StreamCore
 @testable import StreamVideo
 import XCTest
 
-final class ClientError_Tests: XCTestCase, @unchecked Sendable {
+final class ClientError_Tests: LogTestCase, @unchecked Sendable {
     func test_init_videoAPIError_preservesPublicAPIError() throws {
         let apiError = makeAPIError(code: 1)
 

@@ -8,7 +8,7 @@ import StreamCore
 @testable import StreamVideo
 import XCTest
 
-final class CoordinatorWebSocket_Tests: XCTestCase, @unchecked Sendable {
+final class CoordinatorWebSocket_Tests: LogTestCase, @unchecked Sendable {
 
     func test_connectionFailure_reconnectsAutomatically() async {
         let eventNotificationCenter = DefaultEventNotificationCenter()

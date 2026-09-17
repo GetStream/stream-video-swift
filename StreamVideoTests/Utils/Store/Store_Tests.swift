@@ -7,7 +7,7 @@ import Foundation
 @testable import StreamVideo
 import XCTest
 
-final class Store_Tests: XCTestCase, @unchecked Sendable {
+final class Store_Tests: LogTestCase, @unchecked Sendable {
 
     private lazy var middlewareA: MockMiddleware<TestStoreNamespace>! = .init()
     private lazy var middlewareB: MockMiddleware<TestStoreNamespace>! = .init()

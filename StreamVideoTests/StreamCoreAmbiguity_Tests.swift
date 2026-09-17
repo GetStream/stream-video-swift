@@ -6,7 +6,7 @@ import StreamCore
 import StreamVideo
 import XCTest
 
-final class StreamCoreAmbiguity_Tests: XCTestCase, @unchecked Sendable {
+final class StreamCoreAmbiguity_Tests: LogTestCase, @unchecked Sendable {
     func test_importingBothModules_resolvesSharedSymbols() {
         let types: [Any.Type] = [
             APIError.self,

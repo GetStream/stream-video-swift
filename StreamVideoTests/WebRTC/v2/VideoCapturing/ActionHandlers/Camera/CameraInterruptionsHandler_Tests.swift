@@ -7,7 +7,7 @@ import AVFoundation
 import StreamWebRTC
 import XCTest
 
-final class CameraInterruptionsHandler_Tests: XCTestCase, @unchecked Sendable {
+final class CameraInterruptionsHandler_Tests: LogTestCase, @unchecked Sendable {
 
     private var subject: CameraInterruptionsHandler!
     private var videoSource: RTCVideoSource!

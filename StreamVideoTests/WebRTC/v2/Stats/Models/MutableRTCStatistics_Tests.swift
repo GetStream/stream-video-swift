@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class MutableRTCStatistics_Tests: XCTestCase, @unchecked Sendable {
+final class MutableRTCStatistics_Tests: LogTestCase, @unchecked Sendable {
     // MARK: - Tests
 
     func test_init_fromRTCStatistics() {

@@ -6,7 +6,7 @@ import Foundation
 @testable import StreamVideo
 import XCTest
 
-final class PermissionStore_DefaultReducerTests: XCTestCase, @unchecked Sendable {
+final class PermissionStore_DefaultReducerTests: LogTestCase, @unchecked Sendable {
 
     private lazy var subject: PermissionStore.DefaultReducer! = .init()
 

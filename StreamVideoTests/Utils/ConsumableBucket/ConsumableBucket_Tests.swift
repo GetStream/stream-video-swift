@@ -6,7 +6,7 @@ import Combine
 @testable import StreamVideo
 import XCTest
 
-final class ConsumableBucket_Tests: XCTestCase, @unchecked Sendable {
+final class ConsumableBucket_Tests: LogTestCase, @unchecked Sendable {
 
     func test_append_and_consume_returnsAppendedElements() {
         let subject = ConsumableBucket<Int>()

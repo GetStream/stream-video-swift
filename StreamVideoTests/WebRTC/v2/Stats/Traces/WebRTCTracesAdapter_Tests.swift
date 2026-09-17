@@ -6,7 +6,7 @@ import Combine
 @testable import StreamVideo
 import XCTest
 
-final class WebRTCTracesAdapter_Tests: XCTestCase, @unchecked Sendable {
+final class WebRTCTracesAdapter_Tests: LogTestCase, @unchecked Sendable {
 
     private lazy var reportSubject: PassthroughSubject<CallStatsReport, Never>! = .init()
     private lazy var disposableBag: DisposableBag! = .init()

@@ -6,7 +6,7 @@ import Combine
 @testable import StreamVideo
 @preconcurrency import XCTest
 
-final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @unchecked Sendable {
+final class WebRTCCoordinatorStateMachine_JoinedStageTests: LogTestCase, @unchecked Sendable {
 
     private nonisolated(unsafe) static var videoConfig: VideoConfig! = .dummy()
 

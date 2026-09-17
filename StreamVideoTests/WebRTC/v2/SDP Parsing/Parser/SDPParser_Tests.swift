@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class SDPParser_Tests: XCTestCase, @unchecked Sendable {
+final class SDPParser_Tests: LogTestCase, @unchecked Sendable {
 
     private var visitor: RTPMapVisitor! = .init()
     private var subject: SDPParser! = .init()

@@ -7,7 +7,7 @@ import Foundation
 @testable import StreamVideo
 import XCTest
 
-final class IdleTimerAdapter_Tests: XCTestCase, @unchecked Sendable {
+final class IdleTimerAdapter_Tests: LogTestCase, @unchecked Sendable {
 
     private var activeCallSubject: CurrentValueSubject<Call?, Never>! = .init(nil)
     private var mockStreamVideo: MockStreamVideo! = .init()

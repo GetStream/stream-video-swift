@@ -6,7 +6,7 @@ import Foundation
 @testable import StreamVideo
 import XCTest
 
-final class StreamCallAudioRecorder_CategoryMiddlewareTests: XCTestCase, @unchecked Sendable {
+final class StreamCallAudioRecorder_CategoryMiddlewareTests: LogTestCase, @unchecked Sendable {
 
     @Injected(\.audioStore) private var audioStore
 

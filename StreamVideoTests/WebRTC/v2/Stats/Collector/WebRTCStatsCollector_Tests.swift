@@ -7,7 +7,7 @@ import Combine
 @testable import StreamWebRTC
 import XCTest
 
-final class WebRTCStatsCollector_Tests: XCTestCase, @unchecked Sendable {
+final class WebRTCStatsCollector_Tests: LogTestCase, @unchecked Sendable {
 
     private lazy var mockSFUStack: MockSFUStack! = .init()
     private lazy var mockPublisher: MockRTCPeerConnectionCoordinator! = try! .init(

@@ -6,7 +6,7 @@ import Foundation
 @testable import StreamVideo
 @preconcurrency import XCTest
 
-final class WebRTCStatsReporter_Tests: XCTestCase, @unchecked Sendable {
+final class WebRTCStatsReporter_Tests: LogTestCase, @unchecked Sendable {
 
     private lazy var mockPublisher: MockRTCPeerConnectionCoordinator! = try! MockRTCPeerConnectionCoordinator(
         peerType: .publisher,

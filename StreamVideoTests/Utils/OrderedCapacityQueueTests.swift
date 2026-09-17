@@ -6,7 +6,7 @@ import Combine
 @testable import StreamVideo
 import XCTest
 
-final class OrderedCapacityQueueTests: XCTestCase, @unchecked Sendable {
+final class OrderedCapacityQueueTests: LogTestCase, @unchecked Sendable {
     private lazy var queue: OrderedCapacityQueue<Int>! = .init(capacity: 5, removalTime: 1)
     private var cancellables: Set<AnyCancellable>! = .init()
 

@@ -7,7 +7,7 @@ import Combine
 @preconcurrency import StreamWebRTC
 @preconcurrency import XCTest
 
-final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
+final class LocalAudioMediaAdapter_Tests: LogTestCase, @unchecked Sendable {
 
     private var mockStreamVideo: MockStreamVideo! = .init()
     private var mockAudioRecorder: MockStreamCallAudioRecorder! = .init()

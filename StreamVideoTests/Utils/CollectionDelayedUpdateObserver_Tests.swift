@@ -6,7 +6,7 @@ import Combine
 @testable import StreamVideo
 import XCTest
 
-final class CollectionDelayedUpdateObserver_Tests: XCTestCase, @unchecked Sendable {
+final class CollectionDelayedUpdateObserver_Tests: LogTestCase, @unchecked Sendable {
 
     func test_init_givenSmallCollection_whenInitializing_thenIntervalIsScreenRefreshRate() {
         // Given

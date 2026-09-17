@@ -14,7 +14,7 @@ import XCTest
 /// - State consistency under high load
 /// - Order preservation for serial processing
 /// - Publisher behavior under concurrent access
-final class Store_ConcurrencyTests: XCTestCase, @unchecked Sendable {
+final class Store_ConcurrencyTests: LogTestCase, @unchecked Sendable {
     
     // MARK: - Properties
     

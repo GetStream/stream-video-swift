@@ -6,7 +6,12 @@
 import StreamWebRTC
 import XCTest
 
-final class LoggerConcurrency_Tests: XCTestCase, @unchecked Sendable {
+final class LoggerConcurrency_Tests: LogTestCase, @unchecked Sendable {
+
+    override func tearDown() {
+        super.tearDown()
+        LogConfig.level = .debug
+    }
 
     func test_webRTCLogsEnabled_updatesWebRTCMode() {
         let originalMode = Logger.WebRTC.mode

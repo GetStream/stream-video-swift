@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class Stream_Video_Sfu_Models_CallGrants_OwnCapability_Tests: XCTestCase, @unchecked Sendable {
+final class Stream_Video_Sfu_Models_CallGrants_OwnCapability_Tests: LogTestCase, @unchecked Sendable {
 
     // MARK: - applied(to:)
 

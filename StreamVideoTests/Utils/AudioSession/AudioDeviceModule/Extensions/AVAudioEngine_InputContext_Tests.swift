@@ -6,7 +6,7 @@ import AVFoundation
 @testable import StreamVideo
 import XCTest
 
-final class AVAudioEngine_InputContext_Tests: XCTestCase, @unchecked Sendable {
+final class AVAudioEngine_InputContext_Tests: LogTestCase, @unchecked Sendable {
 
     private var subject: AVAudioEngine.InputContext!
 

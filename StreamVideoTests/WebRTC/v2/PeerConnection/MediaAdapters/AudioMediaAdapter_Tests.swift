@@ -7,7 +7,7 @@ import Combine
 import StreamWebRTC
 import XCTest
 
-final class AudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
+final class AudioMediaAdapter_Tests: LogTestCase, @unchecked Sendable {
 
     private lazy var sessionId: String! = .unique
     private lazy var peerConnectionFactory: PeerConnectionFactory! = .mock()

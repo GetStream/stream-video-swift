@@ -7,7 +7,7 @@ import Foundation
 import UserNotifications
 import XCTest
 
-final class PermissionStore_PushNotificationsMiddlewareTests: XCTestCase, @unchecked Sendable {
+final class PermissionStore_PushNotificationsMiddlewareTests: LogTestCase, @unchecked Sendable {
 
     private lazy var mockPermissionProvider: MockPushNotificationsPermissionProvider! = .init()
     private lazy var subject: PermissionStore.PushNotificationsMiddleware! = .init(

@@ -8,7 +8,7 @@ import UIKit
 @testable import StreamVideo
 import XCTest
 
-final class BatteryStoreObservationMiddleware_Tests: XCTestCase, @unchecked Sendable {
+final class BatteryStoreObservationMiddleware_Tests: LogTestCase, @unchecked Sendable {
 
     func test_batteryStateNotification_dispatchesSetState() async {
         let expectation = expectation(description: "Dispatch setState")

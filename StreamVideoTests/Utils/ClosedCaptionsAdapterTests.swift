@@ -7,7 +7,7 @@ import Combine
 import XCTest
 
 @MainActor
-final class ClosedCaptionsAdapterTests: XCTestCase, @unchecked Sendable {
+final class ClosedCaptionsAdapterTests: LogTestCase, @unchecked Sendable {
     private static var videoConfig: VideoConfig! = .dummy()
 
     private var mockedStreamVideo: MockStreamVideo! = MockStreamVideo(

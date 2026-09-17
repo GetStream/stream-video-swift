@@ -6,7 +6,7 @@ import Foundation
 @testable import StreamVideo
 import XCTest
 
-final class PermissionStore_Tests: XCTestCase, @unchecked Sendable {
+final class PermissionStore_Tests: LogTestCase, @unchecked Sendable {
 
     private lazy var mockAudioStore: MockRTCAudioStore! = .init()
     private lazy var mockReducer: MockReducer<PermissionStore.Namespace>! = .init()

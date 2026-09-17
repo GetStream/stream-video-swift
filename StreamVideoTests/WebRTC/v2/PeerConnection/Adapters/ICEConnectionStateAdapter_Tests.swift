@@ -7,7 +7,7 @@ import Foundation
 @testable import StreamVideo
 import XCTest
 
-final class ICEConnectionStateAdapter_Tests: XCTestCase, @unchecked Sendable {
+final class ICEConnectionStateAdapter_Tests: LogTestCase, @unchecked Sendable {
 
     private lazy var mockSFUStack: MockSFUStack! = .init()
     private lazy var mockRTCPeerConnectionCoordinator: MockRTCPeerConnectionCoordinator! = try! .init(

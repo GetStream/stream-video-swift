@@ -6,7 +6,7 @@
 import StreamWebRTC
 import XCTest
 
-final class RTCVideoTrack_CloneTests: XCTestCase, @unchecked Sendable {
+final class RTCVideoTrack_CloneTests: LogTestCase, @unchecked Sendable {
 
     func test_clone_preservesEnabledState() {
         let factory = PeerConnectionFactory.mock()

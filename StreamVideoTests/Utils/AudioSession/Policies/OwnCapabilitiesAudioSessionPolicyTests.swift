@@ -6,7 +6,7 @@ import AVFoundation
 @testable import StreamVideo
 import XCTest
 
-final class OwnCapabilitiesAudioSessionPolicyTests: XCTestCase, @unchecked Sendable {
+final class OwnCapabilitiesAudioSessionPolicyTests: LogTestCase, @unchecked Sendable {
 
     private lazy var stubbedAppStateAdapter: MockAppStateAdapter! = .init()
     private lazy var subject: OwnCapabilitiesAudioSessionPolicy! = .init()

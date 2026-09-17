@@ -8,7 +8,7 @@ import Foundation
 import XCTest
 
 @MainActor
-final class ProximityManager_Tests: XCTestCase, @unchecked Sendable {
+final class ProximityManager_Tests: LogTestCase, @unchecked Sendable {
 
     private var mockedStreamVideo: MockStreamVideo! = .init()
     private lazy var mockProximityMonitor: MockProximityMonitor! = .init()

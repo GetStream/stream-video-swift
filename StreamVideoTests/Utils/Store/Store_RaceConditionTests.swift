@@ -14,7 +14,7 @@ import XCTest
 /// - Middleware state access during updates
 /// - Publisher timing issues
 /// - Cleanup during active operations
-final class Store_RaceConditionTests: XCTestCase, @unchecked Sendable {
+final class Store_RaceConditionTests: LogTestCase, @unchecked Sendable {
     
     private var store: Store<RaceTestNamespace>!
     private var cancellables: Set<AnyCancellable>!

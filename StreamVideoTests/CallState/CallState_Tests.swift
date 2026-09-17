@@ -7,7 +7,7 @@ import Foundation
 import XCTest
 
 @MainActor
-final class CallState_Tests: XCTestCase, @unchecked Sendable {
+final class CallState_Tests: LogTestCase, @unchecked Sendable {
 
     /// Test the `didUpdate(_:)` function by combining existing and newly added participants.
     func test_didUpdate_combinesExistingAndNewParticipants() {

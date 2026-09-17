@@ -8,7 +8,7 @@ import Combine
 import StreamWebRTC
 @preconcurrency import XCTest
 
-final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
+final class WebRTCStateAdapter_Tests: LogTestCase, @unchecked Sendable {
 
     private nonisolated(unsafe) static var videoConfig: VideoConfig! = .dummy()
 

@@ -6,7 +6,7 @@
 import StreamWebRTC
 import XCTest
 
-final class StreamVideoCapturer_AudioFilterGate_Tests: XCTestCase,
+final class StreamVideoCapturer_AudioFilterGate_Tests: LogTestCase,
     @unchecked Sendable {
 
     func test_setAudioFilterGate_inAppCapturer_attachesToHandler() {

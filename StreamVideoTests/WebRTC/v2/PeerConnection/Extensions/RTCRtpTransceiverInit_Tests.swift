@@ -6,7 +6,7 @@
 import StreamWebRTC
 import XCTest
 
-final class RTCRtpTransceiverInit_Tests: XCTestCase, @unchecked Sendable {
+final class RTCRtpTransceiverInit_Tests: LogTestCase, @unchecked Sendable {
 
     // MARK: - temporary
 

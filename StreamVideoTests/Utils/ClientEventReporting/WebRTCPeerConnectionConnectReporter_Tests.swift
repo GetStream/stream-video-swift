@@ -8,7 +8,7 @@ import Foundation
 import StreamWebRTC
 @preconcurrency import XCTest
 
-final class WebRTCPeerConnectionConnectReporter_Tests: XCTestCase, @unchecked Sendable {
+final class WebRTCPeerConnectionConnectReporter_Tests: LogTestCase, @unchecked Sendable {
 
     private lazy var stateSubject: CurrentValueSubject<RTCPeerConnectionState, Never>! = .init(.new)
     private lazy var iceStateSubject: CurrentValueSubject<RTCIceConnectionState, Never>! = .init(.new)

@@ -5,7 +5,7 @@
 import StreamVideo
 import XCTest
 
-final class StreamCoreReexport_Tests: XCTestCase, @unchecked Sendable {
+final class StreamCoreReexport_Tests: LogTestCase, @unchecked Sendable {
     func test_streamVideo_reexportsStreamCore() {
         _ = DefaultEventNotificationCenter()
     }

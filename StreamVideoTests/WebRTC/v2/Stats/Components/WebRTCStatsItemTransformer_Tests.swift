@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class WebRTCStatsItemTransformer_Tests: XCTestCase, @unchecked Sendable {
+final class WebRTCStatsItemTransformer_Tests: LogTestCase, @unchecked Sendable {
 
     // MARK: - Tests
 

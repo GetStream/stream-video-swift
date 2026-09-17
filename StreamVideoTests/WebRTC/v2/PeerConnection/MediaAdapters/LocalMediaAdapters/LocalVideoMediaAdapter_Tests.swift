@@ -7,7 +7,7 @@ import Combine
 @preconcurrency import StreamWebRTC
 @preconcurrency import XCTest
 
-final class LocalVideoMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
+final class LocalVideoMediaAdapter_Tests: LogTestCase, @unchecked Sendable {
     private lazy var sessionId: String! = .unique
     private lazy var publishOptions: [PublishOptions.VideoPublishOptions]! = [.dummy(codec: .h264)]
     private lazy var peerConnectionFactory: PeerConnectionFactory! = .mock()
