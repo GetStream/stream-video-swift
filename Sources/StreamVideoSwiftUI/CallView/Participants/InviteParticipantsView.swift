@@ -48,14 +48,11 @@ public struct InviteParticipantsView<Factory: ViewFactory>: View {
                 .padding(
                     .vertical,
                     !viewModel.selectedUsers.isEmpty
-                        ? 0
-                        : videoAppearance.tokens.layout.spacingMd
+                        ? 0 : layout.spacingMd
                 )
 
             ScrollView(.horizontal) {
-                HStack(
-                    spacing: videoAppearance.tokens.layout.spacingMd
-                ) {
+                HStack(spacing: layout.spacingMd) {
                     ForEach(viewModel.selectedUsers) { user in
                         SelectedParticipantView(
                             viewFactory: viewFactory,
@@ -68,8 +65,7 @@ public struct InviteParticipantsView<Factory: ViewFactory>: View {
                 .padding(
                     .all,
                     !viewModel.selectedUsers.isEmpty
-                        ? videoAppearance.tokens.layout.spacingMd
-                        : 0
+                        ? layout.spacingMd : 0
                 )
             }
 
@@ -114,6 +110,10 @@ public struct InviteParticipantsView<Factory: ViewFactory>: View {
         })
         .navigationBarBackButtonHidden(true)
     }
+
+    private var layout: DesignSystemTokens.Layout {
+        videoAppearance.tokens.layout
+    }
 }
 
 struct UsersHeaderView: View {
@@ -125,27 +125,22 @@ struct UsersHeaderView: View {
     var body: some View {
         HStack {
             Text(title)
-                .padding(
-                    .horizontal,
-                    videoAppearance.tokens.layout.spacingMd
-                )
-                .padding(
-                    .vertical,
-                    videoAppearance.tokens.layout.spacingXxxs
-                )
-                .font(videoAppearance.tokens.fonts.body)
+                .padding(.horizontal, tokens.layout.spacingMd)
+                .padding(.vertical, tokens.layout.spacingXxxs)
+                .font(tokens.fonts.body)
                 .foregroundColor(
-                    Color(videoAppearance.tokens.colors.textSecondary)
+                    Color(tokens.colors.textSecondary)
                 )
 
             Spacer()
         }
         .background(
-            Color(
-                videoAppearance.tokens.colors
-                    .backgroundCoreSurfaceDefault
-            )
+            Color(tokens.colors.backgroundCoreSurfaceDefault)
         )
+    }
+
+    private var tokens: DesignSystemTokens {
+        videoAppearance.tokens
     }
 }
 
@@ -178,7 +173,7 @@ struct VideoUserView<Factory: ViewFactory>: View {
 
             Text(user.name)
                 .lineLimit(1)
-                .font(videoAppearance.tokens.fonts.bodyBold)
+                .font(tokens.fonts.bodyBold)
 
             Spacer()
 
@@ -195,20 +190,18 @@ struct VideoUserView<Factory: ViewFactory>: View {
             Image(systemName: "checkmark.circle.fill")
                 .symbolRenderingMode(.palette)
                 .foregroundStyle(
-                    Color(
-                        videoAppearance.tokens.colors.textOnAccent
-                    ),
-                    Color(
-                        videoAppearance.tokens.colors.accentPrimary
-                    )
+                    Color(tokens.colors.textOnAccent),
+                    Color(tokens.colors.accentPrimary)
                 )
         } else {
             Image(systemName: "checkmark.circle.fill")
                 .foregroundColor(
-                    Color(
-                        videoAppearance.tokens.colors.accentPrimary
-                    )
+                    Color(tokens.colors.accentPrimary)
                 )
         }
+    }
+
+    private var tokens: DesignSystemTokens {
+        videoAppearance.tokens
     }
 }

@@ -257,9 +257,12 @@ struct BlockedUsersView: View {
         HStack {
             VStack(alignment: .leading) {
                 Text(L10n.Call.Participants.blocked)
-                    .font(videoAppearance.tokens.fonts.headline)
+                    .font(tokens.fonts.headline)
                     .multilineTextAlignment(.leading)
-                    .padding(.vertical, videoAppearance.tokens.layout.spacingXs)
+                    .padding(
+                        .vertical,
+                        tokens.layout.spacingXs
+                    )
                 ForEach(blockedUsers) { blockedUser in
                     Text(blockedUser.id)
                         .contextMenu {
@@ -279,6 +282,10 @@ struct BlockedUsersView: View {
             }
             Spacer()
         }
+    }
+
+    private var tokens: DesignSystemTokens {
+        videoAppearance.tokens
     }
 }
 
