@@ -7,8 +7,8 @@ import SwiftUI
 
 @available(iOS 14.0, *)
 public struct LayoutMenuView: View {
-    
-    @Injected(\.images) var images
+
+    @Injected(\.videoAppearance) var videoAppearance
 
     @ObservedObject var viewModel: CallViewModel
     var size: CGFloat
@@ -17,7 +17,7 @@ public struct LayoutMenuView: View {
         _viewModel = ObservedObject(initialValue: viewModel)
         self.size = size
     }
-    
+
     public var body: some View {
         Menu {
             LayoutMenuItem(
@@ -43,7 +43,7 @@ public struct LayoutMenuView: View {
             }
         } label: {
             CallIconView(
-                icon: images.layoutSelectorIcon,
+                icon: videoAppearance.images.layoutSelectorIcon,
                 size: size,
                 iconStyle: .secondary
             )

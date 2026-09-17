@@ -87,22 +87,38 @@ extension CallIconStyle {
 
 /// View used for the online indicator.
 public struct OnlineIndicatorView: View {
-    @Injected(\.colors) private var colors
-    
+    @Injected(\.videoAppearance) private var videoAppearance
+
     var indicatorSize: CGFloat
-    
+
     public var body: some View {
         ZStack {
             Circle()
-                .fill(colors.textInverted)
-                .frame(width: indicatorSize, height: indicatorSize)
-            
+                .fill(
+                    Color(
+                        videoAppearance.tokens.colors
+                            .backgroundCoreApp
+                    )
+                )
+                .frame(
+                    width: indicatorSize,
+                    height: indicatorSize
+                )
+
             Circle()
-                .fill(colors.onlineIndicatorColor)
-                .frame(width: innerCircleSize, height: innerCircleSize)
+                .fill(
+                    Color(
+                        videoAppearance.tokens.colors
+                            .accentSuccess
+                    )
+                )
+                .frame(
+                    width: innerCircleSize,
+                    height: innerCircleSize
+                )
         }
     }
-    
+
     private var innerCircleSize: CGFloat {
         2 * indicatorSize / 3
     }

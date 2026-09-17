@@ -2,13 +2,14 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import StreamCoreUI
 import StreamVideo
 import SwiftUI
 
 struct SelectedParticipantView<Factory: ViewFactory>: View {
 
-    @Injected(\.fonts) var fonts
-    
+    @Injected(\.videoAppearance) var videoAppearance
+
     private let avatarSize: CGFloat = 50
 
     var viewFactory: Factory
@@ -27,11 +28,14 @@ struct SelectedParticipantView<Factory: ViewFactory>: View {
 
     var body: some View {
         VStack {
-            viewFactory.makeUserAvatar(user, with: .init(size: avatarSize))
+            viewFactory.makeUserAvatar(
+                user,
+                with: .init(size: avatarSize)
+            )
 
             Text(user.name)
                 .lineLimit(1)
-                .font(fonts.footnote)
+                .font(videoAppearance.tokens.fonts.footnote)
         }
         .overlay(
             TopRightView {
@@ -44,11 +48,16 @@ struct SelectedParticipantView<Factory: ViewFactory>: View {
                         Circle()
                             .fill(Color.white)
                             .frame(width: 16, height: 16)
-                        
+
                         Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(Color.black.opacity(0.8))
+                            .foregroundColor(
+                                Color.black.opacity(0.8)
+                            )
                     }
-                    .padding(.all, 4)
+                    .padding(
+                        .all,
+                        videoAppearance.tokens.layout.spacingXxs
+                    )
                 })
             }
             .offset(x: 6, y: -4)
