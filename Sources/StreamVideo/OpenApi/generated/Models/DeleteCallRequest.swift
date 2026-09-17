@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class DeleteCallRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class DeleteCallRequest: @unchecked Sendable, Encodable, JSONEncodable, Hashable {
     
     public var hard: Bool?
 

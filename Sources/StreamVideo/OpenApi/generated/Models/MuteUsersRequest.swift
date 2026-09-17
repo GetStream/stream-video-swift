@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class MuteUsersRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class MuteUsersRequest: @unchecked Sendable, Encodable, JSONEncodable, Hashable {
     
     public var audio: Bool?
     public var muteAllUsers: Bool?

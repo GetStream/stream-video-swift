@@ -5,7 +5,7 @@
 import StreamCore
 import Foundation
 
-public final class QueryCallParticipantsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class QueryCallParticipantsRequest: @unchecked Sendable, Encodable, JSONEncodable, Hashable {
     public var filterConditions: [String: RawJSON]?
 
     public init(filterConditions: [String: RawJSON]? = nil) {

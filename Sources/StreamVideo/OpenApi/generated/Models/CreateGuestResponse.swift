@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class CreateGuestResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class CreateGuestResponse: @unchecked Sendable, Decodable, Hashable {
     
     public var accessToken: String
     public var duration: String

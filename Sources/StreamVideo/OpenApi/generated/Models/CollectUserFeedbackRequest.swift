@@ -5,7 +5,7 @@
 import StreamCore
 import Foundation
 
-public final class CollectUserFeedbackRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class CollectUserFeedbackRequest: @unchecked Sendable, Encodable, JSONEncodable, Hashable {
     
     public var custom: [String: RawJSON]?
     public var rating: Int

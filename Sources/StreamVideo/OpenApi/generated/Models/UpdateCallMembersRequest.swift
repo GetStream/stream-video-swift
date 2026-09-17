@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class UpdateCallMembersRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class UpdateCallMembersRequest: @unchecked Sendable, Encodable, JSONEncodable, Hashable {
     
     public var removeMembers: [String]?
     public var updateMembers: [MemberRequest]?

@@ -116,7 +116,9 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         }
     }
 
-    func send<Response: Codable>(
+    // `Decodable` rather than `Codable`: response models no longer carry the
+    // encoding half. See "Conformance split" in Scripts/optimizeGeneratedCodeSize.py.
+    func send<Response: Decodable>(
         request: Request,
         deserializer: (Data) throws -> Response
     ) async throws -> Response {

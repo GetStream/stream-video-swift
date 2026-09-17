@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class StartRTMPBroadcastsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class StartRTMPBroadcastsRequest: @unchecked Sendable, Encodable, JSONEncodable, Hashable {
     
     public var broadcasts: [RTMPBroadcastRequest]
 

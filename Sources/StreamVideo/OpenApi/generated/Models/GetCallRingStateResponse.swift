@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class GetCallRingStateResponse: @unchecked Sendable, Codable, JSONEncodable {
+public final class GetCallRingStateResponse: @unchecked Sendable, Decodable {
     /// Users that accepted the call, mapped to when they accepted
     public var acceptedBy: [String: Date]
     /// The CID of the call

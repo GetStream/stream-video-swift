@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class EncryptionSettingsRequest: @unchecked Sendable, Codable, JSONEncodable {
+public final class EncryptionSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable {
     
     public enum EncryptionSettingsRequestMode: String, Sendable, Codable, CaseIterable {
         case autoOn = "auto-on"

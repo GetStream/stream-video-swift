@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class IngressSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class IngressSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable, Hashable {
     public var audioEncodingOptions: IngressAudioEncodingOptionsRequest?
     public var enabled: Bool?
     public var videoEncodingOptions: [String: IngressVideoEncodingOptionsRequest]?

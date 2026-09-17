@@ -5,7 +5,7 @@
 import StreamCore
 import Foundation
 
-public final class CallRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class CallRequest: @unchecked Sendable, Encodable, JSONEncodable, Hashable {
     
     public var custom: [String: RawJSON]?
     public var members: [MemberRequest]?

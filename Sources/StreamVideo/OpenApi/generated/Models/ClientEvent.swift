@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class ClientEvent: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class ClientEvent: @unchecked Sendable, Encodable, JSONEncodable, Hashable {
     /// Call session ID associated with the attempt. Required on every event except CoordinatorJoin initiation and CoordinatorJoin failure (where the call session is not yet established); optional on MediaDevicePermission.
     public var callSessionId: String?
     /// Camera permission status: INITIATED, FAILED, GRANTED, or NOT_INITIATED. Required on every MediaDevicePermission event.

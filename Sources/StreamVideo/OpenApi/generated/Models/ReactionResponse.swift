@@ -5,7 +5,7 @@
 import StreamCore
 import Foundation
 
-public final class ReactionResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class ReactionResponse: @unchecked Sendable, Decodable, Hashable {
     
     public var custom: [String: RawJSON]?
     public var emojiCode: String?

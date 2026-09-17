@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class StartFrameRecordingResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class StartFrameRecordingResponse: @unchecked Sendable, Decodable, Hashable {
     public var duration: String
 
     public init(duration: String) {

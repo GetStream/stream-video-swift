@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class SFUResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class SFUResponse: @unchecked Sendable, Decodable, Hashable {
     
     public var edgeName: String
     public var url: String

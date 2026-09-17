@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class AppEventResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class AppEventResponse: @unchecked Sendable, Decodable, Hashable {
     public var asyncUrlEnrichEnabled: Bool?
     public var autoTranslationEnabled: Bool
     public var fileUploadConfig: FileUploadConfig?

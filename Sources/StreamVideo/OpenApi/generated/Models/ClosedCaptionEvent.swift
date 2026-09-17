@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class ClosedCaptionEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
+public final class ClosedCaptionEvent: @unchecked Sendable, Event, Decodable, Hashable, WSCallEvent {
     
     public var callCid: String
     public var closedCaption: CallClosedCaption

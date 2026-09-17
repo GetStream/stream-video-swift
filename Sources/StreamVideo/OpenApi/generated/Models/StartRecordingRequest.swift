@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class StartRecordingRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class StartRecordingRequest: @unchecked Sendable, Encodable, JSONEncodable, Hashable {
     
     public var recordingExternalStorage: String?
 

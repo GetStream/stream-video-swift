@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class UpdateUserPermissionsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class UpdateUserPermissionsRequest: @unchecked Sendable, Encodable, JSONEncodable, Hashable {
     
     public var grantPermissions: [String]?
     public var revokePermissions: [String]?

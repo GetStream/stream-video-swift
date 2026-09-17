@@ -5,7 +5,7 @@
 import StreamCore
 import Foundation
 
-public final class CallUserFeedbackSubmittedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
+public final class CallUserFeedbackSubmittedEvent: @unchecked Sendable, Event, Decodable, Hashable, WSCallEvent {
     public var callCid: String
     public var createdAt: Date
     public var custom: [String: RawJSON]?

@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class StatsOptions: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class StatsOptions: @unchecked Sendable, Decodable, Hashable {
     
     public var enableRtcStats: Bool
     public var reportingIntervalMs: Int

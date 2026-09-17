@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class CallTranscriptionReadyEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
+public final class CallTranscriptionReadyEvent: @unchecked Sendable, Event, Decodable, Hashable, WSCallEvent {
     
     public var callCid: String
     public var callTranscription: CallTranscription

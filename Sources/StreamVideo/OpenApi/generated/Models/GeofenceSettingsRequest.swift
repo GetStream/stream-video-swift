@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class GeofenceSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class GeofenceSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable, Hashable {
     
     public var names: [String]?
 

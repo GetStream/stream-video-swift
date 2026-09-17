@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class StopClosedCaptionsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class StopClosedCaptionsRequest: @unchecked Sendable, Encodable, JSONEncodable, Hashable {
     
     public var stopTranscription: Bool?
 

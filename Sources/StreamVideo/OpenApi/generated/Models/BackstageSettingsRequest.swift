@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class BackstageSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class BackstageSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable, Hashable {
     
     public var enabled: Bool?
     public var joinAheadTimeSeconds: Int?

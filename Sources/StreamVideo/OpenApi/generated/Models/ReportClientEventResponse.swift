@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class ReportClientEventResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class ReportClientEventResponse: @unchecked Sendable, Decodable, Hashable {
     /// Duration of the request in milliseconds
     public var duration: String
 

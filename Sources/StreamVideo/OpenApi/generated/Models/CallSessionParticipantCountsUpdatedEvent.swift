@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class CallSessionParticipantCountsUpdatedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable,
+public final class CallSessionParticipantCountsUpdatedEvent: @unchecked Sendable, Event, Decodable, Hashable,
     WSCallEvent {
     
     public var anonymousParticipantCount: Int

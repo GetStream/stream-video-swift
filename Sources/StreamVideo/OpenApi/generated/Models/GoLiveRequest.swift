@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class GoLiveRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class GoLiveRequest: @unchecked Sendable, Encodable, JSONEncodable, Hashable {
     
     public var recordingStorageName: String?
     public var startClosedCaption: Bool?

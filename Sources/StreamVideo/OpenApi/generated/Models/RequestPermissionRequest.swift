@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class RequestPermissionRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class RequestPermissionRequest: @unchecked Sendable, Encodable, JSONEncodable, Hashable {
     
     public var permissions: [String]
 

@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class HLSSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class HLSSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable, Hashable {
     
     public var autoOn: Bool?
     public var enabled: Bool?

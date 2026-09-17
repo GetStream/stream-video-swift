@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class BroadcastSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class BroadcastSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable, Hashable {
     
     public var enabled: Bool?
     public var hls: HLSSettingsRequest?

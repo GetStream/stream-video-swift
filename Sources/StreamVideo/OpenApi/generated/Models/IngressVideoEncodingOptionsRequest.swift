@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class IngressVideoEncodingOptionsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class IngressVideoEncodingOptionsRequest: @unchecked Sendable, Encodable, JSONEncodable, Hashable {
     public var layers: [IngressVideoLayerRequest]
     public var source: IngressSourceRequest
 
