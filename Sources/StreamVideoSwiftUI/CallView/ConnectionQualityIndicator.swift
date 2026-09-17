@@ -2,12 +2,14 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import StreamCoreUI
 import StreamVideo
 import SwiftUI
+
 /// A view representing a connection quality indicator.
 public struct ConnectionQualityIndicator: View {
 
-    @Injected(\.colors) var colors
+    @Injected(\.videoAppearance) var videoAppearance
 
     private var size: CGFloat = 28
     private var width: CGFloat = 3
@@ -34,7 +36,7 @@ public struct ConnectionQualityIndicator: View {
     }
 
     public var body: some View {
-        HStack(alignment: .bottom, spacing: 2) {
+        HStack(alignment: .bottom, spacing: tokens.layout.spacingXxxs) {
             ForEach(1..<4) { index in
                 IndicatorPart(
                     width: width,
@@ -46,9 +48,11 @@ public struct ConnectionQualityIndicator: View {
         .frame(width: size, height: size)
         .padding(paddingsConfig)
         .cornerRadius(
-            8,
+            tokens.layout.radiusMd,
             corners: [.topLeft],
-            backgroundColor: connectionQuality == .unknown ? .clear : colors.participantInfoBackgroundColor
+            backgroundColor: connectionQuality == .unknown
+                ? .clear
+                : Color(tokens.colors.backgroundCoreOverlayDarkStrong)
         )
         .accessibility(identifier: "connectionQualityIndicator")
     }
@@ -58,11 +62,15 @@ public struct ConnectionQualityIndicator: View {
     /// - Returns: The color for the specified indicator part.
     private func color(for index: Int) -> Color {
         if connectionQuality == .excellent {
-            return colors.goodConnectionQualityIndicatorColor
+            return Color(videoAppearance.colors.indicatorConnectionQualityGreat)
         } else if connectionQuality == .good {
-            return index == 3 ? colors.white : colors.goodConnectionQualityIndicatorColor
+            return index == 3
+                ? Color(tokens.colors.textOnInverse)
+                : Color(videoAppearance.colors.indicatorConnectionQualityGreat)
         } else if connectionQuality == .poor {
-            return index == 1 ? colors.badConnectionQualityIndicatorColor : colors.white
+            return index == 1
+                ? Color(videoAppearance.colors.indicatorConnectionQualityPoor)
+                : Color(tokens.colors.textOnInverse)
         } else {
             return .clear
         }
@@ -80,14 +88,16 @@ public struct ConnectionQualityIndicator: View {
             return width * 4
         }
     }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
 
 struct IndicatorPart: View {
-    
+
     var width: CGFloat
     var height: CGFloat
     var color: Color
-    
+
     var body: some View {
         RoundedRectangle(cornerSize: .init(width: 2, height: 2))
             .fill(color)

@@ -2,11 +2,14 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import StreamCoreUI
 import StreamVideo
 import SwiftUI
 
 /// A view that allows dragging a content view to specific corners based on user gestures.
 public struct CornerDraggableView<Content: View>: View {
+    @Injected(\.videoAppearance) var videoAppearance
+
     @State var callViewPlacement = CallViewPlacement.topTrailing
     @State private var dragAmount = CGSize.zero
 
@@ -92,9 +95,11 @@ public struct CornerDraggableView<Content: View>: View {
                     padding: padding
                 ) + dragAmount.height
             )
-            .padding()
+            .padding(tokens.layout.spacingMd)
             .background(Color.clear)
     }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 
     private func checkCallPlacement(for location: CGPoint, in rect: CGRect) -> CallViewPlacement {
         let availablePlacements: [CallViewPlacement] = [
