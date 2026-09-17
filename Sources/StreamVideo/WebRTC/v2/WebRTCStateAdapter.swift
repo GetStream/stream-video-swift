@@ -49,8 +49,16 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     let audioSession: CallAudioSession
     let trackStorage: WebRTCTrackStorage = .init()
 
+    /// The latest non-empty session id observed during the call's lifetime.
+    ///
+    /// ``cleanUp()`` resets ``sessionID`` while the call is torn down, but
+    /// consumers may need to refer to the session that just ended (e.g. user
+    /// feedback is usually collected *after* the call has ended). This
+    /// property retains the id for them.
+    private(set) var lastSessionID: String
+
     /// Published properties that represent different parts of the WebRTC state.
-    @Published private(set) var sessionID: String = UUID().uuidString
+    @Published private(set) var sessionID: String
     @Published private(set) var token: String = ""
     @Published private(set) var callSettings: CallSettings
     @Published private(set) var audioSettings: AudioSettings = .init()
@@ -89,6 +97,14 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     private(set) var initialCallSettings: CallSettings?
 
     private var videoFilter: VideoFilter?
+    /// Requested capture/publish profile. The applicator is the source of
+    /// truth so a failed apply cannot briefly publish the new value.
+    /// Kept across reconnects; leave resets it through the applicator.
+    var audioBitrateProfile: AudioBitrateProfile {
+        audioBitrateProfileApplicator.profile
+    }
+
+    private nonisolated let audioBitrateProfileApplicator: AudioBitrateProfileApplicator
 
     private let rtcPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinatorProviding
     private let disposableBag = DisposableBag()
@@ -196,6 +212,9 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         self.apiKey = apiKey
         self.callCid = callCid
         self.videoConfig = videoConfig
+        let sessionID = UUID().uuidString
+        self._sessionID = .init(initialValue: sessionID)
+        self.lastSessionID = sessionID
         self._callSettings = .init(initialValue: callSettings)
         let peerConnectionFactory = peerConnectionFactory
         self.peerConnectionFactory = peerConnectionFactory
@@ -205,6 +224,19 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         self.screenShareSessionProvider = screenShareSessionProvider
         self.audioSession = .init()
         self.stagePublisher = stagePublisher
+        self.audioBitrateProfileApplicator = AudioBitrateProfileApplicator(
+            audioSession: audioSession,
+            audioProcessingModule: videoConfig.audioProcessingModule,
+            audioDeviceModule: { [peerConnectionFactory] in
+                peerConnectionFactory.audioDeviceModule
+            }
+        )
+        // In-app screenshare audio suspends the live filter; music still
+        // wins if both are active.
+        screenShareSessionProvider.audioFilterGate = {
+            [audioBitrateProfileApplicator] isActive in
+            audioBitrateProfileApplicator.setScreenShareActive(isActive)
+        }
 
         peerConnectionFactory
             .setFrameBufferPolicy(
@@ -225,6 +257,11 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     /// Sets the session ID.
     func set(sessionID value: String) {
         self.sessionID = value
+        /// The empty value set during ``cleanUp()`` is skipped on purpose, so
+        /// that ``lastSessionID`` keeps pointing to the session that ended.
+        if !value.isEmpty {
+            lastSessionID = value
+        }
     }
 
     /// Sets the call settings.
@@ -325,6 +362,27 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
             callSettings: callSettings,
             ownCapabilities: ownCapabilities
         )
+    }
+
+    /// Applies an in-call audio bitrate/processing profile.
+    ///
+    /// The applicator stores the profile. On throw, session + ADM + stored
+    /// profile have already been rolled back there; this method does not
+    /// keep a second copy to rewind.
+    func setAudioBitrateProfile(_ profile: AudioBitrateProfile) async throws {
+        try await applyAudioBitrateProfile(profile, context: .setProfile)
+    }
+
+    /// Applies an audio filter, or stashes it while music or screenshare
+    /// is suppressing live processing.
+    nonisolated func setAudioFilter(_ audioFilter: AudioFilter?) {
+        audioBitrateProfileApplicator.setAudioFilter(audioFilter)
+    }
+
+    /// Filter last requested by `Call.setAudioFilter`, including while
+    /// music or screenshare stash live output.
+    nonisolated var requestedAudioFilter: AudioFilter? {
+        audioBitrateProfileApplicator.requestedAudioFilter
     }
 
     // MARK: - Client Capabilities
@@ -469,6 +527,18 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         try await restoreScreenSharing()
         publisher.setVideoFilter(videoFilter)
         publisher.completeSetUp()
+        // Rebind: new senders need the live bitrate even if music is
+        // already on. Session is re-asserted; VP no-ops if unchanged.
+        // Do not skip subscriber setup if session/ADM rebind throws;
+        // the applicator rolls the profile back.
+        do {
+            try await applyAudioBitrateProfile(
+                audioBitrateProfile,
+                context: .rebind
+            )
+        } catch {
+            log.error(error, subsystems: .webRTC)
+        }
 
         try await subscriber.setUp(
             with: callSettings,
@@ -488,6 +558,9 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         pendingPeerConnectionTracesDisposableBag.removeAll()
         peerConnectionsDisposableBag.removeAll()
         disposableBag.removeAll()
+        // Restore VP/APM before deactivating so the next never-music
+        // call does not inherit a music session.
+        await resetAudioBitrateProfile()
         await audioSession.deactivate()
         await publisher?.close()
         await subscriber?.close()
@@ -756,7 +829,48 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         lineNumber: UInt = #line,
         _ operation: @Sendable @escaping () -> Set<OwnCapability>
     ) async {
-        let newValue = operation()
+        await apply(
+            ownCapabilities: operation(),
+            functionName: functionName,
+            fileName: fileName,
+            lineNumber: lineNumber
+        )
+    }
+
+    /// Enqueues an own capabilities update derived from the current set.
+    ///
+    /// Use this variant when the new capabilities depend on the existing ones,
+    /// such as when the SFU grants or revokes individual publishing rights. The
+    /// current set is read and replaced without suspension, so concurrent
+    /// updates cannot interleave.
+    ///
+    /// - Parameter operation: Receives the current capabilities and returns the
+    ///   new ones.
+    func enqueueOwnCapabilities(
+        functionName: StaticString = #function,
+        fileName: StaticString = #fileID,
+        lineNumber: UInt = #line,
+        _ operation: @Sendable @escaping (Set<OwnCapability>) -> Set<OwnCapability>
+    ) async {
+        await apply(
+            ownCapabilities: operation(ownCapabilities),
+            functionName: functionName,
+            fileName: fileName,
+            lineNumber: lineNumber
+        )
+    }
+
+    /// Applies a new own capabilities set and propagates the side effects.
+    ///
+    /// The set is stored, forwarded to the publisher, used to turn off audio or
+    /// video when the matching capability is missing and stops an active
+    /// screen sharing session when the screenshare capability is removed.
+    private func apply(
+        ownCapabilities newValue: Set<OwnCapability>,
+        functionName: StaticString,
+        fileName: StaticString,
+        lineNumber: UInt
+    ) async {
         set(ownCapabilities: newValue)
 
         publisher?.didUpdateOwnCapabilities(newValue)
@@ -920,6 +1034,30 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     /// Updates the publish options and notifies the publisher.
     private func didUpdate(publishOptions: PublishOptions) {
         publisher?.publishOptions = publishOptions
+    }
+
+    /// Restores voice processing and software NS/HPF after music. No-op
+    /// when this session never left ``.voiceStandard``. Cannot restick
+    /// music if ADM restore throws.
+    private func resetAudioBitrateProfile() async {
+        audioBitrateProfileApplicator.discardStashedAudioFilter()
+        await audioBitrateProfileApplicator.resetToVoice(
+            callSettings: callSettings,
+            ownCapabilities: ownCapabilities
+        )
+    }
+
+    private func applyAudioBitrateProfile(
+        _ profile: AudioBitrateProfile,
+        context: AudioBitrateApplyContext
+    ) async throws {
+        try await audioBitrateProfileApplicator.apply(
+            profile: profile,
+            callSettings: callSettings,
+            ownCapabilities: ownCapabilities,
+            publisher: publisher,
+            context: context
+        )
     }
 
     // MARK: Participant Operations

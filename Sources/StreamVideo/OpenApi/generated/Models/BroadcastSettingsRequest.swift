@@ -16,7 +16,7 @@ public final class BroadcastSettingsRequest: @unchecked Sendable, Codable, JSONE
         self.rtmp = rtmp
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case enabled
         case hls
         case rtmp

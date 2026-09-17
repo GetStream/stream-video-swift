@@ -30,7 +30,7 @@ public final class QueryCallsRequest: @unchecked Sendable, Codable, JSONEncodabl
         self.watch = watch
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case filterConditions = "filter_conditions"
         case limit
         case next

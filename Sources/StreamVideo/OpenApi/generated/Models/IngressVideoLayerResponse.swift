@@ -19,7 +19,7 @@ public final class IngressVideoLayerResponse: @unchecked Sendable, Codable, JSON
         self.minDimension = minDimension
     }
 
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case bitrate
         case codec
         case frameRateLimit = "frame_rate_limit"

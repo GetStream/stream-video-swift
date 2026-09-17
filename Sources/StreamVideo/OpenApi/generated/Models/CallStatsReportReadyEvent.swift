@@ -17,7 +17,7 @@ public final class CallStatsReportReadyEvent: @unchecked Sendable, Event, Codabl
         self.sessionId = sessionId
     }
 
-public enum CodingKeys: String, CodingKey, CaseIterable {
+public enum CodingKeys: String, CodingKey {
     case callCid = "call_cid"
     case createdAt = "created_at"
     case sessionId = "session_id"

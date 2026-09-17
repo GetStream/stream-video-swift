@@ -19,7 +19,7 @@ public final class FileUploadConfig: @unchecked Sendable, Codable, JSONEncodable
         self.sizeLimit = sizeLimit
     }
 
-public enum CodingKeys: String, CodingKey, CaseIterable {
+public enum CodingKeys: String, CodingKey {
     case allowedFileExtensions = "allowed_file_extensions"
     case allowedMimeTypes = "allowed_mime_types"
     case blockedFileExtensions = "blocked_file_extensions"

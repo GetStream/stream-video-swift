@@ -34,7 +34,7 @@ public final class CallMissedEvent: @unchecked Sendable, Event, Codable, JSONEnc
         self.user = user
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case call
         case callCid = "call_cid"
         case createdAt = "created_at"

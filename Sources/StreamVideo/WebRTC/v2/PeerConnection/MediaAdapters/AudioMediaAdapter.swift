@@ -161,6 +161,14 @@ final class AudioMediaAdapter: MediaAdapting, @unchecked Sendable {
             .changePublishQuality(with: layerSettings)
     }
 
+    /// Updates local audio sender bitrate and, when the profile
+    /// crosses music, rebuilds the capture source. Does not
+    /// renegotiate.
+    func setMaxBitrate(for profile: AudioBitrateProfile) async {
+        await (localMediaManager as? LocalAudioMediaAdapter)?
+            .setMaxBitrate(for: profile)
+    }
+
     // MARK: - Observers
 
     /// Adds a new audio stream and notifies observers.

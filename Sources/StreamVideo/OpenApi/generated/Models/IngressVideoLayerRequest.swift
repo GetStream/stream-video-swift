@@ -35,7 +35,7 @@ public final class IngressVideoLayerRequest: @unchecked Sendable, Codable, JSONE
         self.minDimension = minDimension
     }
 
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case bitrate
         case codec
         case frameRateLimit = "frame_rate_limit"

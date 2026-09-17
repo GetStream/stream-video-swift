@@ -665,6 +665,47 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
         cancellable.cancel()
     }
 
+    func test_execute_whenCancelledDuringRetryDelay_doesNotReenterJoining() async throws {
+        let unexpectedReentry = expectation(
+            description: "Join should not retry after cancellation."
+        )
+        unexpectedReentry.isInverted = true
+        let context = Call.StateMachine.Stage.Context(
+            call: call,
+            input: .join(
+                .init(
+                    create: true,
+                    callSettings: .init(audioOn: false),
+                    options: .init(memberIds: [.unique]),
+                    ring: true,
+                    notify: false,
+                    source: .inApp,
+                    deliverySubject: .init(nil),
+                    retryPolicy: .init(maxRetries: 3, delay: { _ in 5 })
+                )
+            )
+        )
+
+        callController.stub(for: .join, with: ClientError())
+        subject.transition = {
+            if $0.id == .joining {
+                unexpectedReentry.fulfill()
+            }
+        }
+        subject.context = context
+
+        _ = subject.transition(from: .idle(.init()))
+
+        await fulfilmentInMainActor {
+            self.callController.timesCalled(.join) == 1
+        }
+
+        subject.willTransitionAway()
+
+        await fulfillment(of: [unexpectedReentry], timeout: 0.5)
+        XCTAssertEqual(callController.timesCalled(.join), 1)
+    }
+
     func test_execute_withRetries_whenJoinFailsAndThereAreAvailableRetries_transitionsToJoining() async throws {
         let context = Call.StateMachine.Stage.Context(
             call: call,

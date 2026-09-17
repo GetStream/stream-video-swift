@@ -189,10 +189,10 @@ jobs:
 
   build-old-xcode:
     name: Build SDKs (Old Xcode)
-    runs-on: macos-14
+    runs-on: macos-15
     if: ${{ github.event_name != 'push' && github.event.inputs.snapshots != 'true' }}
     env:
-      XCODE_VERSION: "16.1"
+      XCODE_VERSION: "16.4"
     steps:
     - name: Connect Bot
       uses: webfactory/ssh-agent@v0.7.0
@@ -214,9 +214,9 @@ jobs:
 
   automated-code-review:
     name: Automated Code Review
-    runs-on: macos-14
+    runs-on: macos-15
     env:
-      XCODE_VERSION: "16.1"
+      XCODE_VERSION: "16.4"
     steps:
     - uses: actions/checkout@v4.1.1
     - uses: ./.github/actions/bootstrap

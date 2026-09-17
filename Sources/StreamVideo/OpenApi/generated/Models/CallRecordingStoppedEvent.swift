@@ -36,7 +36,7 @@ public final class CallRecordingStoppedEvent: @unchecked Sendable, Event, Codabl
         self.recordingType = recordingType
     }
 
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case callCid = "call_cid"
         case createdAt = "created_at"
         case egressId = "egress_id"

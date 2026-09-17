@@ -22,7 +22,7 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-protobuf.git", exact: "1.30.0"),
+        .package(url: "https://github.com/apple/swift-protobuf.git", "1.38.0"..."1.39.0"),
         .package(url: "https://github.com/GetStream/stream-video-swift-webrtc.git", exact: "145.15.0"),
         // Temporary pin to the develop commit that split Core tokens
         // by namespace. Restore `from:` once they ship in a tag.

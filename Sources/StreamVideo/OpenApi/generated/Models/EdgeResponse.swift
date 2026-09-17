@@ -41,7 +41,7 @@ public final class EdgeResponse: @unchecked Sendable, Codable, JSONEncodable, Ha
         self.yellow = yellow
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case continentCode = "continent_code"
         case countryIsoCode = "country_iso_code"
         case green

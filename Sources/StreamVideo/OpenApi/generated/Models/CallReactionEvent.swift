@@ -18,7 +18,7 @@ public final class CallReactionEvent: @unchecked Sendable, Event, Codable, JSONE
         self.reaction = reaction
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case callCid = "call_cid"
         case createdAt = "created_at"
         case reaction

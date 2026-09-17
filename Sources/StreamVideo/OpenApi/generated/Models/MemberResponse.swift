@@ -33,7 +33,7 @@ public final class MemberResponse: @unchecked Sendable, Codable, JSONEncodable, 
         self.userId = userId
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case createdAt = "created_at"
         case custom
         case deletedAt = "deleted_at"

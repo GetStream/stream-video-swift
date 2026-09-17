@@ -57,7 +57,7 @@ public final class RecordSettingsRequest: @unchecked Sendable, Codable, JSONEnco
         self.quality = quality
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case audioOnly = "audio_only"
         case mode
         case quality

@@ -20,7 +20,7 @@ public final class CallSessionStartedEvent: @unchecked Sendable, Event, Codable,
         self.sessionId = sessionId
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case call
         case callCid = "call_cid"
         case createdAt = "created_at"

@@ -12,7 +12,7 @@ public final class AcceptCallResponse: @unchecked Sendable, Codable, JSONEncodab
         self.duration = duration
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case duration
     }
     

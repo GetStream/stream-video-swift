@@ -31,7 +31,7 @@ public final class IngressSourceRequest: @unchecked Sendable, Codable, JSONEncod
         self.width = width
     }
 
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case fps
         case height
         case width

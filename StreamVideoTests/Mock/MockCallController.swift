@@ -19,6 +19,7 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
         case updateOwnCapabilities
         case enableClientCapabilities
         case disableClientCapabilities
+        case setAudioBitrateProfile
     }
 
     enum MockFunctionInputKey: Payloadable {
@@ -53,6 +54,8 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
 
         case disableClientCapabilities(Set<ClientCapability>)
 
+        case setAudioBitrateProfile(AudioBitrateProfile)
+
         var payload: Any {
             switch self {
             case let .setDisconnectionTimeout(timeout):
@@ -86,6 +89,8 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
                 return value
             case let .disableClientCapabilities(value):
                 return value
+            case let .setAudioBitrateProfile(value):
+                return value
             }
         }
     }
@@ -95,6 +100,7 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
     @Atomic var stubbedFunctionInput: [FunctionKey: [MockFunctionInputKey]] = FunctionKey
         .allCases
         .reduce(into: [FunctionKey: [MockFunctionInputKey]]()) { $0[$1] = [] }
+    var setAudioBitrateProfileHandler: (@Sendable (AudioBitrateProfile) async throws -> Void)?
 
     convenience init(initialCallSettings: CallSettings = .default) {
         self.init(
@@ -219,5 +225,14 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
     ) async {
         stubbedFunctionInput[.disableClientCapabilities]?
             .append(.disableClientCapabilities(capabilities))
+    }
+
+    override func setAudioBitrateProfile(_ profile: AudioBitrateProfile) async throws {
+        stubbedFunctionInput[.setAudioBitrateProfile]?
+            .append(.setAudioBitrateProfile(profile))
+        try await setAudioBitrateProfileHandler?(profile)
+        if let error = stubbedFunction[.setAudioBitrateProfile] as? Error {
+            throw error
+        }
     }
 }

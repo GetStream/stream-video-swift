@@ -18,7 +18,7 @@ public final class QueryCallsResponse: @unchecked Sendable, Codable, JSONEncodab
         self.prev = prev
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case calls
         case duration
         case next

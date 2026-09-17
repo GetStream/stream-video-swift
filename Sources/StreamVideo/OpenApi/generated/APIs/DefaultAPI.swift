@@ -1214,6 +1214,29 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
             try self.jsonDecoder.decode(ReportClientEventResponse.self, from: $0)
         }
     }
+    
+    open func getCallRingState(type: String, id: String, callSessionId: String) async throws -> GetCallRingStateResponse {
+        var path = "/api/v2/video/call/{type}/{id}/ring_state"
+
+        let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
+        let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        path = path.replacingOccurrences(of: String(format: "{%@}", "type"), with: typePostEscape, options: .literal, range: nil)
+        let idPreEscape = "\(APIHelper.mapValueToPathItem(id))"
+        let idPostEscape = idPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        path = path.replacingOccurrences(of: String(format: "{%@}", "id"), with: idPostEscape, options: .literal, range: nil)
+        let queryParams = APIHelper.mapValuesToQueryItems([
+            "call_session_id": (wrappedValue: callSessionId.encodeToJSON(), isExplode: true)
+        ])
+
+        let urlRequest = try makeRequest(
+            uriPath: path,
+            queryParams: queryParams ?? [],
+            httpMethod: "GET"
+        )
+        return try await send(request: urlRequest) {
+            try self.jsonDecoder.decode(GetCallRingStateResponse.self, from: $0)
+        }
+    }
 }
 
 protocol DefaultAPIEndpoints {
@@ -1343,4 +1366,6 @@ protocol DefaultAPIEndpoints {
     func ringCall(type: String, id: String, ringCallRequest: RingCallRequest) async throws -> RingCallResponse
     
     func reportClientCallEvent(reportClientEventRequest: ReportClientEventRequest) async throws -> ReportClientEventResponse
+    
+    func getCallRingState(type: String, id: String, callSessionId: String) async throws -> GetCallRingStateResponse
 }

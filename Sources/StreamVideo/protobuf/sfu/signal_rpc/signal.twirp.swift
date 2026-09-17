@@ -11,7 +11,7 @@ class Stream_Video_Sfu_Signal_SignalServer: @unchecked Sendable {
     let syncQueue = DispatchQueue(label: "Stream_Video_Sfu_Signal_SignalServer", qos: .userInitiated)
     let pathPrefix: String = "/stream.video.sfu.signal.SignalServer/"
     var httpConfig = HTTPConfig.default //TODO: move this
-    
+
     init(httpClient: HTTPClient, apiKey: String, hostname: String, token: String) {
         self.httpClient = httpClient
         self.hostname = hostname
@@ -39,18 +39,16 @@ class Stream_Video_Sfu_Signal_SignalServer: @unchecked Sendable {
         return try await execute(request: updateMuteStatesRequest, path: "UpdateMuteStates")
     }
     
-    func update(userToken: String) {
-        syncQueue.async { [weak self] in
-            self?.token = userToken
-        }
-    }
-    
     func iceRestart(iCERestartRequest: Stream_Video_Sfu_Signal_ICERestartRequest) async throws -> Stream_Video_Sfu_Signal_ICERestartResponse {
         return try await execute(request: iCERestartRequest, path: "IceRestart")
     }
     
     func sendStats(sendStatsRequest: Stream_Video_Sfu_Signal_SendStatsRequest) async throws -> Stream_Video_Sfu_Signal_SendStatsResponse {
         return try await execute(request: sendStatsRequest, path: "SendStats")
+    }
+    
+    func sendMetrics(sendMetricsRequest: Stream_Video_Sfu_Signal_SendMetricsRequest) async throws -> Stream_Video_Sfu_Signal_SendMetricsResponse {
+        return try await execute(request: sendMetricsRequest, path: "SendMetrics")
     }
     
     func startNoiseCancellation(startNoiseCancellationRequest: Stream_Video_Sfu_Signal_StartNoiseCancellationRequest) async throws -> Stream_Video_Sfu_Signal_StartNoiseCancellationResponse {
@@ -60,7 +58,12 @@ class Stream_Video_Sfu_Signal_SignalServer: @unchecked Sendable {
     func stopNoiseCancellation(stopNoiseCancellationRequest: Stream_Video_Sfu_Signal_StopNoiseCancellationRequest) async throws -> Stream_Video_Sfu_Signal_StopNoiseCancellationResponse {
         return try await execute(request: stopNoiseCancellationRequest, path: "StopNoiseCancellation")
     }
-
+    
+    func update(userToken: String) {
+        syncQueue.async { [weak self] in
+            self?.token = userToken
+        }
+    }
 
     private func execute<Request: ProtoModel, Response: ProtoModelResponse>(request: Request, path: String, retries: Int = 0) async throws -> Response {
         let requestData = try request.serializedData()
@@ -97,6 +100,7 @@ class Stream_Video_Sfu_Signal_SignalServer: @unchecked Sendable {
         var request = URLRequest(url: url)
         request.setValue("application/protobuf", forHTTPHeaderField: "Content-Type")
         request.setValue("Bearer \(token)", forHTTPHeaderField: "authorization")
+        request.setValue(SystemEnvironment.sdkIdentifier, forHTTPHeaderField: "X-Stream-Client")
         request.httpMethod = "POST"
         return request
     }

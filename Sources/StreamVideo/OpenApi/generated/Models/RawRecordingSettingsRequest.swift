@@ -28,7 +28,7 @@ public final class RawRecordingSettingsRequest: @unchecked Sendable, Codable, JS
         self.mode = mode
     }
 
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case mode
     }
 

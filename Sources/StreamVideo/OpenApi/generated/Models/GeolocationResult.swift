@@ -41,7 +41,7 @@ public final class GeolocationResult: @unchecked Sendable, Codable, JSONEncodabl
         self.subdivisionIsoCode = subdivisionIsoCode
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case accuracyRadius = "accuracy_radius"
         case city
         case continent

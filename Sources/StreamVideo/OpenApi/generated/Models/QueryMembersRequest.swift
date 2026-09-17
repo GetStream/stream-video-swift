@@ -33,7 +33,7 @@ public final class QueryMembersRequest: @unchecked Sendable, Codable, JSONEncoda
         self.type = type
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case filterConditions = "filter_conditions"
         case id
         case limit

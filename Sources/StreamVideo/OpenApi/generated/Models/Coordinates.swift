@@ -14,7 +14,7 @@ public final class Coordinates: @unchecked Sendable, Codable, JSONEncodable, Has
         self.longitude = longitude
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case latitude
         case longitude
     }

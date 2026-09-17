@@ -14,7 +14,7 @@ public final class SortParamRequest: @unchecked Sendable, Codable, JSONEncodable
         self.field = field
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case direction
         case field
     }

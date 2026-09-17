@@ -14,7 +14,7 @@ public final class VideoQuality: @unchecked Sendable, Codable, JSONEncodable, Ha
         self.usageType = usageType
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case resolution
         case usageType = "usage_type"
     }

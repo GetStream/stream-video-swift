@@ -60,7 +60,7 @@ public final class OwnUserResponse: @unchecked Sendable, Codable, JSONEncodable,
         self.updatedAt = updatedAt
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case blockedUserIds = "blocked_user_ids"
         case createdAt = "created_at"
         case custom
