@@ -27,6 +27,8 @@ final class WebRTCUpdateSubscriptionsAdapter: @unchecked Sendable {
     private let publisher: AnyPublisher<(WebRTCStateAdapter.ParticipantsStorage, IncomingVideoQualitySettings), Never>
     /// The active subscription observing ``publisher``.
     private var publisherCancellable: AnyCancellable?
+    /// Whether publisher events should be processed and forwarded to the SFU.
+    @Atomic private var isObserving = false
 
     /// Stores the last set of track subscription details sent to the SFU.
     private var lastTrackSubscriptionDetails:
@@ -74,22 +76,21 @@ final class WebRTCUpdateSubscriptionsAdapter: @unchecked Sendable {
     /// Calling this method multiple times cancels any previous observation and
     /// restarts from the latest values.
     func startObservation() {
-        processingQueue.addOperation { [weak self] in
-            guard let self else { return }
-            publisherCancellable?.cancel()
-            publisherCancellable = nil
-            publisherCancellable = publisher
-                .sinkTask(queue: processingQueue) { [weak self] in
-                    try await self?.process(
-                        participants: $0.0,
-                        incomingVideoQualitySettings: $0.1
-                    )
-                }
-        }
+        publisherCancellable?.cancel()
+        publisherCancellable = nil
+        isObserving = true
+        publisherCancellable = publisher
+            .sinkTask(queue: processingQueue) { [weak self] in
+                try await self?.process(
+                    participants: $0.0,
+                    incomingVideoQualitySettings: $0.1
+                )
+            }
     }
 
     /// Stops observing participant and quality updates.
     func stopObservation() {
+        isObserving = false
         publisherCancellable?.cancel()
         publisherCancellable = nil
     }
@@ -130,6 +131,10 @@ final class WebRTCUpdateSubscriptionsAdapter: @unchecked Sendable {
         incomingVideoQualitySettings: IncomingVideoQualitySettings,
         trackTypes: Set<Stream_Video_Sfu_Models_TrackType> = [.video, .screenShare, .screenShareAudio]
     ) async throws {
+        guard isObserving else {
+            return
+        }
+
         let tracks = tracksFactory.buildSubscriptionDetails(
             nil,
             sessionID: sessionID,
@@ -149,6 +154,10 @@ final class WebRTCUpdateSubscriptionsAdapter: @unchecked Sendable {
             Set(lastTrackSubscriptionDetails)
 
         guard setTracks != setLastTrackSubscriptionDetails else {
+            return
+        }
+
+        guard isObserving else {
             return
         }
 

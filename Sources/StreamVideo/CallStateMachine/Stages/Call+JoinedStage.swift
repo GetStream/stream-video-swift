@@ -75,29 +75,28 @@ extension Call.StateMachine.Stage {
 
         /// Starts joined-stage side effects after a valid stage transition.
         ///
-        /// The method subscribes to call settings and capability updates so the
-        /// call controller and media managers stay aligned with live call state.
+        /// Subscriptions are registered on the main actor in one task so
+        /// capability state present before `.joined` is synced immediately,
+        /// without waiting on a nested executor hop under parallel test load.
         private func execute() {
-            Task(disposableBag: disposableBag) { [weak self] in
-                guard let self, let call = context.call else { return }
-                await subscribeToCallSettingsUpdates(on: call)
+            guard let call = context.call else { return }
+            Task(disposableBag: disposableBag) { @MainActor [weak self] in
+                guard let self else { return }
+                subscribeToCallSettingsUpdates(on: call)
                 await subscribeToOwnCapabilitiesChanges(on: call)
             }
         }
 
         /// Subscribes to call-settings changes while in the joined stage.
         ///
-        /// The publisher is created on the main actor because `CallState` is
-        /// main-actor isolated. Each emitted value updates the local managers
-        /// that coordinate camera/microphone behavior.
+        /// Must run on the main actor because `CallState` is main-actor isolated.
+        /// Each emitted value updates the local managers that coordinate
+        /// camera/microphone behavior.
         ///
         /// - Parameter call: The call whose settings stream should be observed.
-        private func subscribeToCallSettingsUpdates(on call: Call) async {
-            let publisher = await MainActor.run {
-                call.state.$callSettings.eraseToAnyPublisher()
-            }
-            publisher
-                // Dispatching on main thread as the updateCallSettingsManagers updates @Published properties
+        @MainActor
+        private func subscribeToCallSettingsUpdates(on call: Call) {
+            call.state.$callSettings
                 .receive(on: DispatchQueue.main)
                 .sink { [weak call] in call?.updateCallSettingsManagers(with: $0) }
                 .store(in: disposableBag)
@@ -106,23 +105,25 @@ extension Call.StateMachine.Stage {
         /// Subscribes to own-capability changes while in the joined stage.
         ///
         /// Duplicated capability sets are filtered to avoid unnecessary backend
-        /// updates. Every effective change is forwarded to the call controller
-        /// so permission-dependent media actions stay in sync.
+        /// updates. The current value is synced once when observation starts,
+        /// then every subsequent change is forwarded to the call controller.
         ///
         /// - Parameter call: The call whose capability stream should be observed.
+        @MainActor
         private func subscribeToOwnCapabilitiesChanges(on call: Call) async {
-            let publisher = await MainActor.run {
-                call.state.$ownCapabilities
-                    .removeDuplicates()
-                    .eraseToAnyPublisher()
-            }
-            publisher
+            call.state.$ownCapabilities
+                .removeDuplicates()
+                .dropFirst()
                 .sinkTask(storeIn: disposableBag) { [weak call] in
                     await call?
                         .callController
                         .updateOwnCapabilities(ownCapabilities: $0)
                 }
                 .store(in: disposableBag)
+
+            await call.callController.updateOwnCapabilities(
+                ownCapabilities: call.state.ownCapabilities
+            )
         }
     }
 }
