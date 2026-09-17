@@ -76,14 +76,6 @@ class CallController: @unchecked Sendable {
     private var webRTCParticipantsObserver: AnyCancellable?
     private var participants: CollectionDelayedUpdateObserver<[String: CallParticipant]>?
 
-    /// The latest non-empty session id observed for this call.
-    ///
-    /// `WebRTCStateAdapter.cleanUp()` resets the session id while the call is
-    /// torn down, but user feedback is usually collected *after* the call has
-    /// ended. Retaining the id here keeps it available to
-    /// ``collectUserFeedback(custom:rating:reason:)``.
-    @Atomic private var lastSessionId: String?
-
     private let disposableBag = DisposableBag()
 
     init(
@@ -123,6 +115,7 @@ class CallController: @unchecked Sendable {
             await observeStatsReporterUpdates()
             await observeCallSettingsUpdates()
             await observeSpeakingWhileMutedUpdates()
+            await observeOwnCapabilitiesUpdates()
         }
     }
 
@@ -220,6 +213,24 @@ class CallController: @unchecked Sendable {
         )
     }
 
+    /// Applies an in-call audio bitrate/processing profile.
+    ///
+    /// Hi-fi profiles require dashboard `hifi_audio_enabled`.
+    /// ``AudioBitrateProfile/voiceStandard`` does not, so a mid-call
+    /// dashboard disable can still restore voice. Fetches call settings
+    /// when they have not been loaded yet. The coordinator/applicator owns
+    /// session, ADM, and stored profile; a throw means those were rolled
+    /// back.
+    func setAudioBitrateProfile(_ profile: AudioBitrateProfile) async throws {
+        guard let call, await call.state.session != nil else {
+            throw ClientError("Audio bitrate profiles require a joined call.")
+        }
+        if profile != .voiceStandard {
+            try await ensureHiFiAudioEnabled()
+        }
+        try await webRTCCoordinator.setAudioBitrateProfile(profile)
+    }
+
     /// Changes the video state for the current user.
     /// - Parameter isEnabled: whether video should be enabled.
     func changeVideoState(isEnabled: Bool) async throws {
@@ -263,6 +274,22 @@ class CallController: @unchecked Sendable {
             guard let self else { return }
             await webRTCCoordinator.setVideoFilter(videoFilter)
         }
+    }
+
+    /// Sets an `audioFilter` for the current call.
+    ///
+    /// Forwards to the applicator so music and screenshare can suppress
+    /// live output without `Call` knowing about either.
+    /// - Parameter audioFilter: An `AudioFilter` instance to apply, or
+    ///   `nil` to clear it.
+    func setAudioFilter(_ audioFilter: AudioFilter?) {
+        webRTCCoordinator.setAudioFilter(audioFilter)
+    }
+
+    /// Filter last requested by `Call.setAudioFilter`, including while
+    /// music or screenshare stash live output.
+    var requestedAudioFilter: AudioFilter? {
+        webRTCCoordinator.requestedAudioFilter
     }
 
     /// Starts screensharing for the current call.
@@ -512,7 +539,7 @@ class CallController: @unchecked Sendable {
                 reason: reason,
                 sdk: SystemEnvironment.sdkName,
                 sdkVersion: SystemEnvironment.version,
-                userSessionId: lastSessionId
+                userSessionId: await webRTCCoordinator.stateAdapter.lastSessionID
             )
         )
     }
@@ -697,6 +724,24 @@ class CallController: @unchecked Sendable {
         )
     }
 
+    /// Dashboard gate for music / hi-fi profiles. Fetches call settings
+    /// once if they have not been loaded yet.
+    private func ensureHiFiAudioEnabled() async throws {
+        guard let call else {
+            throw ClientError("Call is not available.")
+        }
+        if let settings = await call.state.settings {
+            guard settings.audio.hifiAudioEnabled == true else {
+                throw ClientError("Hi-fi audio is not enabled on dashboard settings.")
+            }
+            return
+        }
+        _ = try await call.get()
+        guard await call.state.settings?.audio.hifiAudioEnabled == true else {
+            throw ClientError("Hi-fi audio is not enabled on dashboard settings.")
+        }
+    }
+
     private func prefetchLocation() {
         Task(disposableBag: disposableBag) { [weak self] in
             guard let self else { return }
@@ -795,6 +840,10 @@ class CallController: @unchecked Sendable {
                         .webRTCCoordinator
                         .stateMachine
                         .transition(.blocked(self.webRTCCoordinator.stateMachine.currentStage.context))
+                    // Blocked cleans the coordinator without Call.leave(),
+                    // so reset the published profile or a later music set
+                    // on this Call is a no-op.
+                    await self.call?.microphone.resetAudioBitrateProfile()
                 }
                 .store(in: disposableBag, key: DisposableKey.currentUserBlocked.rawValue)
         }
@@ -804,16 +853,7 @@ class CallController: @unchecked Sendable {
         webRTCClientSessionIDObserver = await webRTCCoordinator
             .stateAdapter
             .$sessionID
-            .sinkTask(storeIn: disposableBag) { @MainActor [weak self] sessionId in
-                guard let self else { return }
-                call?.state.sessionId = sessionId
-                /// The empty value emitted during cleanUp is skipped on
-                /// purpose, so that feedback collected after the call ended
-                /// still reports the session it refers to.
-                if !sessionId.isEmpty {
-                    lastSessionId = sessionId
-                }
-            }
+            .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in self?.call?.state.sessionId = $0 }
     }
 
     private func observeStatsReporterUpdates() async {
@@ -849,6 +889,30 @@ class CallController: @unchecked Sendable {
             .log(.debug) { "Speaking while muted updated to \($0)" }
             .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in
                 self?.call?.state.isSpeakingWhileMuted = $0
+            }
+            .store(in: disposableBag)
+    }
+
+    /// Observes own capability changes that originate below the call state, such
+    /// as the publishing rights the SFU grants or revokes mid-call, and applies
+    /// them on the call state.
+    ///
+    /// Capability updates that flow the other way, from the call state down to
+    /// the WebRTC layer, are skipped here because the value is already in sync.
+    private func observeOwnCapabilitiesUpdates() async {
+        await webRTCCoordinator
+            .stateAdapter
+            .$ownCapabilities
+            .removeDuplicates()
+            .log(.debug) { "OwnCapabilities updated to \($0)" }
+            .sinkTask(storeIn: disposableBag) { @MainActor [weak self] value in
+                guard
+                    let state = self?.call?.state,
+                    Set(state.ownCapabilities) != value
+                else {
+                    return
+                }
+                state.ownCapabilities = Array(value)
             }
             .store(in: disposableBag)
     }

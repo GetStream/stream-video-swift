@@ -12,7 +12,7 @@ public final class QueryCallParticipantsRequest: @unchecked Sendable, Codable, J
         self.filterConditions = filterConditions
     }
 
-public enum CodingKeys: String, CodingKey, CaseIterable {
+public enum CodingKeys: String, CodingKey {
     case filterConditions = "filter_conditions"
 }
 

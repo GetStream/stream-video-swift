@@ -10,10 +10,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### 🔄 Changed
 - The `Appearance` object has been replaced with `VideoAppearance` object [#1258](https://github.com/GetStream/stream-video-swift/pull/1258)
 - Floating self view redesigned with Stream Design System [#1284](https://github.com/GetStream/stream-video-swift/pull/1284)
+- Lobby screen redesigned with the Stream Design System [#1271](https://github.com/GetStream/stream-video-swift/pull/1271)
+- Ringing screen redesigned with the Stream Design System [#1280](https://github.com/GetStream/stream-video-swift/pull/1280)
+- Livestream screen redesigned with the Stream Design System [#1282](https://github.com/GetStream/stream-video-swift/pull/1282)
 
 # Upcoming
 
 ### ✅ Added
+- `MicrophoneManager.setAudioBitrateProfile(_:)` switches in-call capture between voice and music (hi-fi). Requires dashboard `hifi_audio_enabled`. Music disables Apple Voice Processing and software NS/HPF, and raises the audio bitrate to 128 kbps. [#1260](https://github.com/GetStream/stream-video-swift/pull/1260)
+
+### 🔄 Changed
+- The bundled incoming call ringtone ships as AAC (`incoming.m4a`) instead of uncompressed PCM (`incoming.wav`), matching the outgoing sound. `Sounds.incomingCallSound` now defaults to `"incoming.m4a"`. Apps that replace `Sounds.incomingCallSound` are unaffected; apps that only override `Sounds.bundle` need an `incoming.m4a` in their bundle.
+
+### 🐞 Fixed
+- Mute/unmute while music mode is on no longer chops or delays published audio. Switching to music rebuilds the local audio source with NS/HPF off, so unmute republish no longer restores software processing while Voice Processing is still disabled. Mute still unpublishes the track.
+
+# [1.52.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.52.0)
+_September 09, 2026_
+
+### ✅ Added
+- Added support for Xcode 27. [#1263](https://github.com/GetStream/stream-video-swift/pull/1263)
 - `StreamVideo.getEdges()` returns the list of edges (datacenters) available for hosting calls [#1247](https://github.com/GetStream/stream-video-swift/pull/1247).
 - `Call.deleteRecording(callSessionId:filename:)` for deleting a recording of a call session [#1244](https://github.com/GetStream/stream-video-swift/pull/1244).
 - Added `Call.delete(hard:)` for deleting a call. [#1243](https://github.com/GetStream/stream-video-swift/pull/1243)
@@ -22,6 +38,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Call.stopAllRTMPBroadcasts()` to stop every RTMP-out broadcast of a call in one call [#1245](https://github.com/GetStream/stream-video-swift/pull/1245).
 
 ### 🐞 Fixed
+- Mid-call permission changes from the SFU are now applied on `Call.state.ownCapabilities`, instead of the `callGrantsUpdated` event being ignored. [#1250](https://github.com/GetStream/stream-video-swift/pull/1250)
 - After a WebSocket reconnect during ringing, the SDK reloads the ringing call and applies accept, reject, or end from the refreshed session so the caller is not stuck on stale local state. [#1253](https://github.com/GetStream/stream-video-swift/pull/1253)
 - Transient peer-connection disconnections no longer trigger an immediate full rejoin, allowing the existing ICE restart flow to recover the session. [#1231](https://github.com/GetStream/stream-video-swift/pull/1231)
 - `CallParticipant.withUpdated(...)` no longer resets `source` to `.webRTCUnspecified`, which previously broke the `videoIngressSource` and `participantSource` sort comparators after any participant update. `source` is now also part of `CallParticipant` equality. [#1251](https://github.com/GetStream/stream-video-swift/pull/1251)

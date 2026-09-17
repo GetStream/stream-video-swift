@@ -2,16 +2,13 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import StreamCoreUI
 import StreamVideo
 import SwiftUI
 
 public struct OutgoingCallView<CallControls: View, CallTopView: View, Factory: ViewFactory>: View {
 
     @Injected(\.streamVideo) var streamVideo
-    
-    @Injected(\.colors) var colors
-    @Injected(\.fonts) var fonts
-    @Injected(\.images) var images
     @Injected(\.utils) var utils
     
     var viewFactory: Factory

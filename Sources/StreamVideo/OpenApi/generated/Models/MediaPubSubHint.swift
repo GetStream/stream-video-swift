@@ -18,7 +18,7 @@ public final class MediaPubSubHint: @unchecked Sendable, Codable, JSONEncodable,
         self.videoSubscribed = videoSubscribed
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case audioPublished = "audio_published"
         case audioSubscribed = "audio_subscribed"
         case videoPublished = "video_published"

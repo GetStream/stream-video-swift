@@ -14,7 +14,7 @@ public final class LimitsSettingsResponse: @unchecked Sendable, Codable, JSONEnc
         self.maxParticipants = maxParticipants
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case maxDurationSeconds = "max_duration_seconds"
         case maxParticipants = "max_participants"
     }

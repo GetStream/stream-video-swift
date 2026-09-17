@@ -121,7 +121,7 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
 
     func test_handleChangePublishQuality_givenEvent_whenPublished_thenUpdatesPublisherQuality() async throws {
         try await stateAdapter.configurePeerConnections()
-        let publisher = await stateAdapter.publisher
+        let publisher = await stateAdapter!.publisher
 
         let participantA = CallParticipant.dummy()
         let participantB = CallParticipant.dummy()
@@ -885,6 +885,41 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
             $0[participantA.sessionId]?.pausedTracks == [.screenshare]
                 && $0[participantB.sessionId]?.pausedTracks == [.video]
                 && $0[participantC.sessionId]?.pausedTracks.isEmpty == true
+        }
+    }
+
+    // MARK: callGrantsUpdated
+
+    func test_handleCallGrantsUpdated_revokedGrant_updatesOwnCapabilities() async throws {
+        await stateAdapter.enqueueOwnCapabilities {
+            [.sendAudio, .sendVideo, .screenshare, .endCall]
+        }
+        var event = Stream_Video_Sfu_Event_CallGrantsUpdated()
+        event.currentGrants = .init()
+        event.currentGrants.canPublishAudio = true
+        event.currentGrants.canPublishVideo = false
+        event.currentGrants.canScreenshare = false
+
+        try await assert(
+            event,
+            payload: .callGrantsUpdated(event),
+            initialState: [:]
+        ) { _ in
+            await self.stateAdapter.ownCapabilities == [.sendAudio, .endCall]
+        }
+    }
+
+    func test_handleCallGrantsUpdated_withoutGrants_doesNotUpdateOwnCapabilities() async throws {
+        await stateAdapter.enqueueOwnCapabilities { [.sendAudio, .sendVideo] }
+        var event = Stream_Video_Sfu_Event_CallGrantsUpdated()
+        event.message = .unique
+
+        try await assert(
+            event,
+            payload: .callGrantsUpdated(event),
+            initialState: [:]
+        ) { _ in
+            await self.stateAdapter.ownCapabilities == [.sendAudio, .sendVideo]
         }
     }
 

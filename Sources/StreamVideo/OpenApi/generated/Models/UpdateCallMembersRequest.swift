@@ -14,7 +14,7 @@ public final class UpdateCallMembersRequest: @unchecked Sendable, Codable, JSONE
         self.updateMembers = updateMembers
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case removeMembers = "remove_members"
         case updateMembers = "update_members"
     }

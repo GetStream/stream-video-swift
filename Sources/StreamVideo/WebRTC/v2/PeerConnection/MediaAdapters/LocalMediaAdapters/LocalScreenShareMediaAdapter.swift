@@ -503,6 +503,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
                 audioDeviceModule: audioDeviceModule,
                 includeAudio: includeAudio
             )
+            attachAudioFilterGate(to: videoCapturer)
             capturer = videoCapturer
 
             screenShareSessionProvider.activeSession = .init(
@@ -522,6 +523,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
                 audioDeviceModule: audioDeviceModule,
                 includeAudio: includeAudio
             )
+            attachAudioFilterGate(to: videoCapturer)
             capturer = videoCapturer
 
             screenShareSessionProvider.activeSession = .init(
@@ -531,6 +533,17 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
                 includeAudio: includeAudio
             )
         }
+    }
+
+    /// Wires the session provider's gate onto in-app capture only.
+    /// Broadcast capturers have no ``ScreenShareCaptureHandler``.
+    private func attachAudioFilterGate(
+        to videoCapturer: StreamVideoCapturing
+    ) {
+        (videoCapturer as? StreamVideoCapturer)?
+            .setAudioFilterGate(
+                screenShareSessionProvider.audioFilterGate
+            )
     }
 
     /// Starts the screen sharing capturing session.

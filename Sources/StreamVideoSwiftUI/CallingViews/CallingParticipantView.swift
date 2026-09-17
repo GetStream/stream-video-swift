@@ -2,6 +2,7 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import StreamCoreUI
 import StreamVideo
 import SwiftUI
 
@@ -27,7 +28,7 @@ struct CallingParticipantView<Factory: ViewFactory>: View {
 
 struct AnimatingParticipantView<Factory: ViewFactory>: View {
 
-    @Injected(\.colors) var colors
+    @Injected(\.videoAppearance) var videoAppearance
     
     @State var isCalling = false
 
@@ -48,21 +49,18 @@ struct AnimatingParticipantView<Factory: ViewFactory>: View {
         )
         .background(
             ZStack {
-                // Outer circle
                 PulsatingCircle(
                     scaleEffect: isCalling ? 0.8 : 1.2,
                     opacity: 0.2,
                     isCalling: isCalling
                 )
                     
-                // Middle circle
                 PulsatingCircle(
                     scaleEffect: isCalling ? 0.7 : 1.1,
                     opacity: 0.5,
                     isCalling: isCalling
                 )
                     
-                // Inner circle
                 PulsatingCircle(
                     scaleEffect: isCalling ? 0.5 : 1.2,
                     opacity: 0.3,
@@ -78,7 +76,7 @@ struct AnimatingParticipantView<Factory: ViewFactory>: View {
 
 struct PulsatingCircle: View {
     
-    @Injected(\.colors) var colors
+    @Injected(\.videoAppearance) var videoAppearance
     var scaleEffect: CGFloat
     var opacity: CGFloat
     var isCalling: Bool
@@ -87,7 +85,7 @@ struct PulsatingCircle: View {
     
     var body: some View {
         Circle()
-            .fill(colors.callPulsingColor)
+            .fill(Color(videoAppearance.tokens.colors.accentPrimary))
             .frame(width: size, height: size)
             .opacity(opacity)
             .scaleEffect(scaleEffect)

@@ -27,7 +27,7 @@ public final class CallFrameRecordingFrameReadyEvent: @unchecked Sendable, Event
         self.users = users
     }
 
-public enum CodingKeys: String, CodingKey, CaseIterable {
+public enum CodingKeys: String, CodingKey {
     case callCid = "call_cid"
     case capturedAt = "captured_at"
     case createdAt = "created_at"

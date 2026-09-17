@@ -12,7 +12,7 @@ public final class CallTimeline: @unchecked Sendable, Codable, JSONEncodable, Ha
         self.events = events
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case events
     }
     

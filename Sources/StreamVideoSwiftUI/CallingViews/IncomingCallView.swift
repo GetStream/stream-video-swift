@@ -2,6 +2,7 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import StreamCoreUI
 import StreamVideo
 import SwiftUI
 
@@ -9,9 +10,7 @@ import SwiftUI
 @available(iOS 14.0, *)
 public struct IncomingCallView<Factory: ViewFactory>: View {
 
-    @Injected(\.fonts) var fonts
-    @Injected(\.colors) var colors
-    @Injected(\.images) var images
+    @Injected(\.videoAppearance) var videoAppearance
     @Injected(\.utils) var utils
 
     var viewFactory: Factory
@@ -20,11 +19,14 @@ public struct IncomingCallView<Factory: ViewFactory>: View {
     var onCallAccepted: (String) -> Void
     var onCallRejected: (String) -> Void
 
-    /// Initializes the incoming call view with call information and callbacks for call acceptance and rejection.
+    /// Initializes the incoming call view with call information
+    /// and callbacks for call acceptance and rejection.
     /// - Parameters:
     ///   - callInfo: Information about the incoming call.
-    ///   - onCallAccepted: Callback when the incoming call is accepted.
-    ///   - onCallRejected: Callback when the incoming call is rejected.
+    ///   - onCallAccepted: Callback when the incoming call is
+    ///     accepted.
+    ///   - onCallRejected: Callback when the incoming call is
+    ///     rejected.
     public init(
         viewFactory: Factory = DefaultViewFactory.shared,
         callInfo: IncomingCall,
@@ -53,9 +55,7 @@ public struct IncomingCallView<Factory: ViewFactory>: View {
 /// The content view of the incoming call screen.
 struct IncomingCallViewContent<Factory: ViewFactory>: View {
 
-    @Injected(\.fonts) var fonts
-    @Injected(\.colors) var colors
-    @Injected(\.images) var images
+    @Injected(\.videoAppearance) var videoAppearance
     @Injected(\.utils) var utils
 
     var viewFactory: Factory
@@ -65,7 +65,7 @@ struct IncomingCallViewContent<Factory: ViewFactory>: View {
     var onCallRejected: (String) -> Void
 
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: tokens.layout.spacingMd) {
             Spacer()
 
             if callParticipants.count > 1 {
@@ -85,11 +85,15 @@ struct IncomingCallViewContent<Factory: ViewFactory>: View {
                 participants: callParticipants,
                 caller: callInfo.caller.name
             )
-            .padding()
+            .padding(tokens.layout.spacingMd)
 
-            HStack(alignment: .firstTextBaseline, spacing: 2) {
+            HStack(alignment: .firstTextBaseline, spacing: tokens.layout.spacingXxxs) {
                 Text(L10n.Call.Incoming.title)
-                    .applyCallingStyle()
+                    .font(tokens.fonts.title2)
+                    .fontWeight(.semibold)
+                    .foregroundColor(
+                        Color(tokens.colors.textSecondary)
+                    )
                 CallingIndicator()
             }
 
@@ -103,30 +107,36 @@ struct IncomingCallViewContent<Factory: ViewFactory>: View {
                 } label: {
                     Image(systemName: "phone.down.circle.fill")
                         .applyCallButtonStyle(
-                            color: Color.red,
+                            color: Color(
+                                videoAppearance.colors
+                                    .controlDeclineCallButtonBackground
+                            ),
                             backgroundType: .circle,
                             size: 80
                         )
                 }
-                .padding(.all, 8)
+                .padding(.all, tokens.layout.spacingXs)
 
                 Spacing(size: 3)
 
                 Button {
                     onCallAccepted(callInfo.id)
                 } label: {
-                    images.acceptCall
+                    videoAppearance.images.acceptCall
                         .applyCallButtonStyle(
-                            color: Color.green,
+                            color: Color(
+                                videoAppearance.colors
+                                    .controlAcceptCallButtonBackground
+                            ),
                             backgroundType: .circle,
                             size: 80
                         )
                 }
-                .padding(.all, 8)
+                .padding(.all, tokens.layout.spacingXs)
 
                 Spacing()
             }
-            .padding()
+            .padding(tokens.layout.spacingMd)
         }
         .background(
             CallBackground()
@@ -138,4 +148,6 @@ struct IncomingCallViewContent<Factory: ViewFactory>: View {
             utils.callSoundsPlayer.stopOngoingSound()
         }
     }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }

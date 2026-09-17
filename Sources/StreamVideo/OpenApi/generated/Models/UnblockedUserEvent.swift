@@ -18,7 +18,7 @@ public final class UnblockedUserEvent: @unchecked Sendable, Event, Codable, JSON
         self.user = user
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case callCid = "call_cid"
         case createdAt = "created_at"
         case type

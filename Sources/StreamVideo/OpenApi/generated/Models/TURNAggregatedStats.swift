@@ -14,7 +14,7 @@ public final class TURNAggregatedStats: @unchecked Sendable, Codable, JSONEncoda
         self.total = total
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case tcp
         case total
     }

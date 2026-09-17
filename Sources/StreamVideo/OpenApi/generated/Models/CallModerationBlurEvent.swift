@@ -19,7 +19,7 @@ public final class CallModerationBlurEvent: @unchecked Sendable, Event, Codable,
         self.userId = userId
     }
 
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case callCid = "call_cid"
         case createdAt = "created_at"
         case custom

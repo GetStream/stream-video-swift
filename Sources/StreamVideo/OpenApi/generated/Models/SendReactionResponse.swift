@@ -14,7 +14,7 @@ public final class SendReactionResponse: @unchecked Sendable, Codable, JSONEncod
         self.reaction = reaction
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case duration
         case reaction
     }

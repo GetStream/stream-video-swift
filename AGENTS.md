@@ -388,7 +388,7 @@ Accessibility & UI quality
 - Keep the subject line concise (ideally under 72 characters); put additional context in the body separated by a blank line.
 - Do **not** include ticket IDs or Linear issue keys in commit subjects. Link tickets from the PR instead.
 - Before opening a PR: build all affected schemes, run tests, `bundle exec fastlane run_swift_format strict:true`.
-- PRs must include: clear description, linked issues, CHANGELOG updates for user-visible changes, and screenshots/screencasts for UI changes. No new warnings.
+- PRs must follow the template in `.github/PULL_REQUEST_TEMPLATE.md`. Fill in every section: 🔗 Issue Links (Linear/GitHub), 🎯 Goal, 📝 Summary, 🛠 Implementation, 🎨 Showcase (before/after screenshots for UI changes), 🧪 Manual Testing Notes, and ☑️ Contributor Checklist. No new warnings.
 - Use the GitHub CLI to create a PR and use the Linear MCP to link the relevant issue.
 - When creating a PR for v2 work, the base branch should be `v2`.
 - Do not use `gh pr edit` (GraphQL `projectCards` deprecation). Patch the body with `gh api repos/.../pulls/N -X PATCH`.

@@ -12,7 +12,7 @@ public final class StartRecordingRequest: @unchecked Sendable, Codable, JSONEnco
         self.recordingExternalStorage = recordingExternalStorage
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case recordingExternalStorage = "recording_external_storage"
     }
     

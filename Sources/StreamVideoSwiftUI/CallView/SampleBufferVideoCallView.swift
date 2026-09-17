@@ -37,6 +37,7 @@ final class SampleBufferVideoCallView: UIView {
     }
 }
 
+@MainActor
 protocol SampleBufferVideoRendering {
     @available(iOS 14.0, *)
     var requiresFlushToResumeDecoding: Bool { get }

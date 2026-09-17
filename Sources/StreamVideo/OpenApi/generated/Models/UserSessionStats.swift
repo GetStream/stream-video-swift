@@ -167,7 +167,7 @@ public final class UserSessionStats: @unchecked Sendable, Codable, JSONEncodable
         self.webrtcVersion = webrtcVersion
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case averageConnectionTime = "average_connection_time"
         case browser
         case browserVersion = "browser_version"

@@ -26,7 +26,7 @@ public final class CountrywiseAggregateStats: @unchecked Sendable, Codable, JSON
         self.subscriberLatency = subscriberLatency
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case participantCount = "participant_count"
         case publisherJitter = "publisher_jitter"
         case publisherLatency = "publisher_latency"

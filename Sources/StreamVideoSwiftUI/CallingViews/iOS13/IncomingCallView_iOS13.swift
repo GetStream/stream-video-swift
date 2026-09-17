@@ -2,15 +2,14 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import StreamCoreUI
 import StreamVideo
 import SwiftUI
 
-@available(iOS, introduced: 13, obsoleted: 14)
+@available(iOS, introduced: 13, deprecated: 14)
 public struct IncomingCallView_iOS13<Factory: ViewFactory>: View {
     @Injected(\.streamVideo) var streamVideo
-    @Injected(\.fonts) var fonts
-    @Injected(\.colors) var colors
-    @Injected(\.images) var images
+    @Injected(\.videoAppearance) var videoAppearance
     @Injected(\.utils) var utils
 
     var viewFactory: Factory
