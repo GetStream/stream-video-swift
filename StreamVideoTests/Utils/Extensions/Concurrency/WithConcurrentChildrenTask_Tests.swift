@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class WithConcurrentChildrenTask_Tests: XCTestCase, @unchecked Sendable {
+final class WithConcurrentChildrenTask_Tests: LogTestCase, @unchecked Sendable {
 
     private enum TestError: Error, Equatable {
         case expected

@@ -6,7 +6,7 @@ import Combine
 @testable import StreamVideo
 import XCTest
 
-final class CapturedChannelsMiddleware_Tests: XCTestCase, @unchecked Sendable {
+final class CapturedChannelsMiddleware_Tests: LogTestCase, @unchecked Sendable {
 
     private lazy var delegate: AudioCustomProcessingModule! = .init()
     private lazy var store: Store<AudioProcessingStore.Namespace>! = AudioProcessingStore.Namespace.store(initialState: .initial)

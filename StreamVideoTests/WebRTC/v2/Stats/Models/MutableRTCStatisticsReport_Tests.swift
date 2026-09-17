@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class MutableRTCStatisticsReport_Tests: XCTestCase, @unchecked Sendable {
+final class MutableRTCStatisticsReport_Tests: LogTestCase, @unchecked Sendable {
 
     private lazy var dummyStats: [String: MutableRTCStatistics]! = [
         "stat1": MutableRTCStatistics(

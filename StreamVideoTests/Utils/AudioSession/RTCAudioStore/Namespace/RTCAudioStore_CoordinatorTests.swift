@@ -6,7 +6,7 @@ import AVFoundation
 @testable import StreamVideo
 import XCTest
 
-final class RTCAudioStore_CoordinatorTests: XCTestCase, @unchecked Sendable {
+final class RTCAudioStore_CoordinatorTests: LogTestCase, @unchecked Sendable {
 
     private var subject: RTCAudioStore.Coordinator! = .init()
 

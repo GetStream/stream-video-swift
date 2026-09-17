@@ -8,7 +8,7 @@ import Foundation
 import XCTest
 
 @MainActor
-final class SpeakerProximityPolicy_Tests: XCTestCase, @unchecked Sendable {
+final class SpeakerProximityPolicy_Tests: LogTestCase, @unchecked Sendable {
 
     private var mockStreamVideo: MockStreamVideo! = .init()
     private lazy var mockCall: MockCall! = .init(.dummy())

@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class CallConfigurationTests: XCTestCase, @unchecked Sendable {
+final class CallConfigurationTests: LogTestCase, @unchecked Sendable {
 
     func test_timeout_shouldReturnProductionTimeouts() {
         let timeout = CallConfiguration.Timeout.production

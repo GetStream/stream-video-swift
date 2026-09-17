@@ -6,7 +6,7 @@
 import StreamWebRTC
 import XCTest
 
-final class RTCPeerConnectionEvent_AllEvents_Tests: XCTestCase, @unchecked Sendable {
+final class RTCPeerConnectionEvent_AllEvents_Tests: LogTestCase, @unchecked Sendable {
 
     func test_HasRemoteDescription_traceValues() {
         let sdp = RTCSessionDescription(type: .offer, sdp: "v=0")

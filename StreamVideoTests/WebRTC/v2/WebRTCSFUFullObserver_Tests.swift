@@ -6,7 +6,7 @@ import Combine
 @testable import StreamVideo
 import XCTest
 
-final class WebRTCSFUFullObserver_Tests: XCTestCase, @unchecked Sendable {
+final class WebRTCSFUFullObserver_Tests: LogTestCase, @unchecked Sendable {
     private var cancellables: Set<AnyCancellable> = []
     private lazy var sfuStack: MockSFUStack! = .init()
     private lazy var subject: WebRTCSFUFullObserver! = .init(sfuStack.adapter)

@@ -7,7 +7,7 @@ import StreamCore
 @testable import StreamVideo
 import XCTest
 
-final class JSONDecoder_Tests: XCTestCase, @unchecked Sendable {
+final class JSONDecoder_Tests: LogTestCase, @unchecked Sendable {
     private var decoder: JSONDecoder = .streamCore
 
     func test_throwsException_whenDecodingDateFromEmptyString() {

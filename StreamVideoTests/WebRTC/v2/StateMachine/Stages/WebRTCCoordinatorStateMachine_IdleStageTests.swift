@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class WebRTCCoordinatorStateMachine_IdleStageTests: XCTestCase, @unchecked Sendable {
+final class WebRTCCoordinatorStateMachine_IdleStageTests: LogTestCase, @unchecked Sendable {
 
     private lazy var allOtherStages: [WebRTCCoordinator.StateMachine.Stage]! = WebRTCCoordinator
         .StateMachine

@@ -6,7 +6,7 @@ import AVFoundation
 @testable import StreamVideo
 import XCTest
 
-final class RTCAudioStore_AudioDeviceModuleMiddlewareTests: XCTestCase, @unchecked Sendable {
+final class RTCAudioStore_AudioDeviceModuleMiddlewareTests: LogTestCase, @unchecked Sendable {
 
     private var recordedSetRecording = false
     private var recordedSetMicrophoneMuted = false

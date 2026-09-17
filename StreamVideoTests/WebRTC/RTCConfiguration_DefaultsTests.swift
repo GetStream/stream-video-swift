@@ -7,7 +7,7 @@ import Foundation
 import StreamWebRTC
 import XCTest
 
-final class RTCConfiguration_DefaultsTests: XCTestCase, @unchecked Sendable {
+final class RTCConfiguration_DefaultsTests: LogTestCase, @unchecked Sendable {
 
     func test_makeConfiguration_returnsCorrectlyConfiguredResult() {
         let iceServer = ICEServer(password: .unique, urls: [], username: .unique)

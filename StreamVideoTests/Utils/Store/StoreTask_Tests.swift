@@ -8,7 +8,7 @@ import Foundation
 import XCTest
 
 /// Tests focused on StoreTask behavior and integration with Store.
-final class StoreTask_Tests: XCTestCase, @unchecked Sendable {
+final class StoreTask_Tests: LogTestCase, @unchecked Sendable {
 
     // MARK: - Subject
 

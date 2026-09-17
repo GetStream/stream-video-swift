@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class Task_DisposableBag_Tests: XCTestCase, @unchecked Sendable {
+final class Task_DisposableBag_Tests: LogTestCase, @unchecked Sendable {
 
     func test_init_taskCompletes_removesTaskFromBag() async {
         let subject = DisposableBag()

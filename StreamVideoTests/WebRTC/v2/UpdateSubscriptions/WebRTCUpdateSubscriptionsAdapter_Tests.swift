@@ -7,7 +7,7 @@ import Foundation
 @testable import StreamVideo
 import XCTest
 
-final class WebRTCUpdateSubscriptionsAdapter_Tests: XCTestCase, @unchecked Sendable {
+final class WebRTCUpdateSubscriptionsAdapter_Tests: LogTestCase, @unchecked Sendable {
 
     private lazy var participantsSubject: CurrentValueSubject<WebRTCStateAdapter.ParticipantsStorage, Never>! = .init([:])
     private lazy var incomingVideoQualitySettingsSubject: CurrentValueSubject<IncomingVideoQualitySettings, Never>! = .init(.none)

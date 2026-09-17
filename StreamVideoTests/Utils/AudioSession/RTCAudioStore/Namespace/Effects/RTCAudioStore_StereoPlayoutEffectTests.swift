@@ -8,7 +8,7 @@ import Combine
 import StreamWebRTC
 import XCTest
 
-final class RTCAudioStore_StereoPlayoutEffectTests: XCTestCase, @unchecked Sendable {
+final class RTCAudioStore_StereoPlayoutEffectTests: LogTestCase, @unchecked Sendable {
 
     func test_stereoPlayoutChanges_dispatchesStereoAction() async throws {
         let expectation = self.expectation(description: "Expected action dispatched.")

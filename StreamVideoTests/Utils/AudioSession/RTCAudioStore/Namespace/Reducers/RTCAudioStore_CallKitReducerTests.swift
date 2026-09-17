@@ -6,7 +6,7 @@ import AVFoundation
 @testable import StreamVideo
 import XCTest
 
-final class RTCAudioStore_CallKitReducerTests: XCTestCase, @unchecked Sendable {
+final class RTCAudioStore_CallKitReducerTests: LogTestCase, @unchecked Sendable {
 
     private var session: MockAudioSession!
     private var subject: RTCAudioStore.Namespace.CallKitReducer!

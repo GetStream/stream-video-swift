@@ -7,7 +7,7 @@ import Foundation
 import XCTest
 
 // TODO: Reenable them
-// final class StreamCallAudioRecorder_InterruptionMiddlewareTests: XCTestCase, @unchecked Sendable {
+// final class StreamCallAudioRecorder_InterruptionMiddlewareTests: LogTestCase, @unchecked Sendable {
 //
 //    @Injected(\.audioStore) private var audioStore
 //

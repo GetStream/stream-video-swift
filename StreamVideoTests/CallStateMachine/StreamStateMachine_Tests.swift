@@ -6,7 +6,7 @@ import Combine
 @testable import StreamVideo
 import XCTest
 
-final class StreamStateMachineTests: XCTestCase, @unchecked Sendable {
+final class StreamStateMachineTests: LogTestCase, @unchecked Sendable {
 
     // MARK: - Test Initial State
 

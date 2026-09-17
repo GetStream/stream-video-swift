@@ -8,7 +8,7 @@ import Combine
 import StreamWebRTC
 import XCTest
 
-final class RTCAudioStore_AVAudioSessionEffectTests: XCTestCase, @unchecked Sendable {
+final class RTCAudioStore_AVAudioSessionEffectTests: LogTestCase, @unchecked Sendable {
 
     private var effect: RTCAudioStore.AVAudioSessionEffect!
     private var stateSubject: PassthroughSubject<RTCAudioStore.StoreState, Never>!

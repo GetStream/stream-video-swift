@@ -9,7 +9,7 @@ import StreamCore
 @testable import StreamVideo
 @preconcurrency import XCTest
 
-final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
+final class CallKitServiceTests: LogTestCase, @unchecked Sendable {
 
     private var completionError: Error?
     private lazy var subject: CallKitService! = .init()

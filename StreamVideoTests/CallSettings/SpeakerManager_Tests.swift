@@ -5,7 +5,7 @@
 @testable import StreamVideo
 @preconcurrency import XCTest
 
-final class SpeakerManager_Tests: XCTestCase, @unchecked Sendable {
+final class SpeakerManager_Tests: LogTestCase, @unchecked Sendable {
 
     // MARK: - disable
 

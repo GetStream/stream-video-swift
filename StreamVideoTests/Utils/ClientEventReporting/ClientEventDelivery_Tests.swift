@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class ClientEventDelivery_Tests: XCTestCase, @unchecked Sendable {
+final class ClientEventDelivery_Tests: LogTestCase, @unchecked Sendable {
 
     private lazy var mockAPI: MockDefaultAPIEndpoints! = .init()
     private lazy var subject: ClientEventDelivery! = .init(

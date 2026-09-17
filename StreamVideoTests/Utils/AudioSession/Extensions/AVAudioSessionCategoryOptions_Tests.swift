@@ -6,7 +6,7 @@ import AVFoundation
 @testable import StreamVideo
 import XCTest
 
-final class AVAudioSessionCategoryOptionsTests: XCTestCase, @unchecked Sendable {
+final class AVAudioSessionCategoryOptionsTests: LogTestCase, @unchecked Sendable {
 
     // MARK: - playAndRecord
 

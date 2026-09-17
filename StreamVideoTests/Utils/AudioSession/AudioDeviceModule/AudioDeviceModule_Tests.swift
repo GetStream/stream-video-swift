@@ -9,7 +9,7 @@ import Foundation
 import StreamWebRTC
 import XCTest
 
-final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
+final class AudioDeviceModule_Tests: LogTestCase, @unchecked Sendable {
 
     private var source: MockRTCAudioDeviceModule!
     private var audioEngineNodeAdapter: MockAudioEngineNodeAdapter!

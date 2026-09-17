@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class InternetConnection_Tests: XCTestCase, @unchecked Sendable {
+final class InternetConnection_Tests: LogTestCase, @unchecked Sendable {
     private var monitor: InternetConnectionMonitor_Mock! = .init()
     private lazy var subject: VideoInternetConnection! = .init(monitor: monitor)
 

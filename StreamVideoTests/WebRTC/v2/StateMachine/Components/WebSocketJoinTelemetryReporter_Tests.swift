@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class WebSocketJoinTelemetryReporter_Tests: XCTestCase, @unchecked Sendable {
+final class WebSocketJoinTelemetryReporter_Tests: LogTestCase, @unchecked Sendable {
 
     func test_begin_reportsWSJoinWithDetails() async {
         var (subject, stack) = makeSubject()

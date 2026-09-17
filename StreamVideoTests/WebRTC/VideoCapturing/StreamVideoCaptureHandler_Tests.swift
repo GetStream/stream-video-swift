@@ -7,7 +7,7 @@ import Foundation
 import StreamWebRTC
 @preconcurrency import XCTest
 
-final class StreamVideoCaptureHandler_Tests: XCTestCase, @unchecked Sendable {
+final class StreamVideoCaptureHandler_Tests: LogTestCase, @unchecked Sendable {
 
     private lazy var source: MockRTCVideoCapturerDelegate! = .init()
     private lazy var subject: StreamVideoCaptureHandler! = .init(

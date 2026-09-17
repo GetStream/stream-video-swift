@@ -7,7 +7,7 @@ import StreamCore
 @testable @preconcurrency import StreamVideo
 import XCTest
 
-final class TimerPublisher_Tests: XCTestCase, @unchecked Sendable {
+final class TimerPublisher_Tests: LogTestCase, @unchecked Sendable {
 
     private var disposableBag: DisposableBag! = .init()
     private var receivedDates: [Date]! = []

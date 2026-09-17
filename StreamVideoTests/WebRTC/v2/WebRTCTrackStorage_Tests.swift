@@ -6,7 +6,7 @@
 import StreamWebRTC
 import XCTest
 
-final class WebRTCTrackStorage_Tests: XCTestCase, @unchecked Sendable {
+final class WebRTCTrackStorage_Tests: LogTestCase, @unchecked Sendable {
 
     private lazy var peerConnectionFactory: PeerConnectionFactory! = .mock()
     private lazy var subject: WebRTCTrackStorage! = .init()

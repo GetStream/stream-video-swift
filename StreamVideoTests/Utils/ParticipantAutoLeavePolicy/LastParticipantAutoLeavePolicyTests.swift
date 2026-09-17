@@ -6,7 +6,7 @@ import Combine
 @testable import StreamVideo
 @preconcurrency import XCTest
 
-final class LastParticipantAutoLeavePolicyTests: XCTestCase, @unchecked Sendable {
+final class LastParticipantAutoLeavePolicyTests: LogTestCase, @unchecked Sendable {
 
     private lazy var user: User! = .dummy()
     private lazy var mockStreamVideo: MockStreamVideo! = MockStreamVideo(

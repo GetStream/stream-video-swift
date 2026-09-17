@@ -6,7 +6,7 @@ import Foundation
 @testable import StreamVideo
 import XCTest
 
-final class RawJSON_Tests: XCTestCase, @unchecked Sendable {
+final class RawJSON_Tests: LogTestCase, @unchecked Sendable {
     func test_valueEncoding() throws {
         struct test {
             var value: RawJSON

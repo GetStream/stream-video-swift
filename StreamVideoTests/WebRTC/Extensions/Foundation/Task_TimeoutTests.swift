@@ -12,7 +12,7 @@ import XCTest
 /// - Timeout scenarios
 /// - Concurrent task handling
 /// - Edge cases and error handling
-final class TaskTimeoutTests: XCTestCase, @unchecked Sendable {
+final class TaskTimeoutTests: LogTestCase, @unchecked Sendable {
     
     // MARK: - Basic Functionality Tests
     

@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class DefaultRetryStrategyTests: XCTestCase, @unchecked Sendable {
+final class DefaultRetryStrategyTests: LogTestCase, @unchecked Sendable {
     private let expectedStreamVideoMaximumReconnectionDelay: TimeInterval = 25
     private var subject: DefaultRetryStrategy! = .init()
 

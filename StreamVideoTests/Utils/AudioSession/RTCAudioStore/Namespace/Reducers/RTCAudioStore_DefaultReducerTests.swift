@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class RTCAudioStore_DefaultReducerTests: XCTestCase, @unchecked Sendable {
+final class RTCAudioStore_DefaultReducerTests: LogTestCase, @unchecked Sendable {
 
     private enum TestError: Error { case stub }
 

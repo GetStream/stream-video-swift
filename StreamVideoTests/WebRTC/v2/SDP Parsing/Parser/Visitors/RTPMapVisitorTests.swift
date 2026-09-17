@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class RTPMapVisitor_Tests: XCTestCase, @unchecked Sendable {
+final class RTPMapVisitor_Tests: LogTestCase, @unchecked Sendable {
 
     private var subject: RTPMapVisitor! = .init()
 

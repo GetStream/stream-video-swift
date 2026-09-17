@@ -6,7 +6,7 @@ import Foundation
 @testable import StreamVideo
 import XCTest
 
-final class ClientEventFailure_Tests: XCTestCase, @unchecked Sendable {
+final class ClientEventFailure_Tests: LogTestCase, @unchecked Sendable {
 
     func test_init_withFailureCode_usesDefaultReason() {
         let failure = ClientEventFailure(code: .requestTimeout)

@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class SFUAdapterEvent_Tests: XCTestCase, @unchecked Sendable {
+final class SFUAdapterEvent_Tests: LogTestCase, @unchecked Sendable {
 
     func test_CreateEvent() {
         let event = SFUAdapter.CreateEvent(hostname: "example.com")

@@ -6,7 +6,7 @@ import AVFoundation
 @testable import StreamVideo
 import XCTest
 
-final class RTCAudioStore_AVAudioSessionConfigurationValidatorTests: XCTestCase,
+final class RTCAudioStore_AVAudioSessionConfigurationValidatorTests: LogTestCase,
     @unchecked Sendable {
 
     private var subject: RTCAudioStore.StoreState.AVAudioSessionConfiguration!

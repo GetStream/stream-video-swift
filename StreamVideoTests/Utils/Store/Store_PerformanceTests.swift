@@ -14,7 +14,7 @@ import XCTest
 /// - State update latency
 /// - Memory usage under load
 /// - Publisher performance
-final class Store_PerformanceTests: XCTestCase, @unchecked Sendable {
+final class Store_PerformanceTests: LogTestCase, @unchecked Sendable {
     
     private var store: Store<PerformanceTestNamespace>!
     private var cancellables: Set<AnyCancellable>!

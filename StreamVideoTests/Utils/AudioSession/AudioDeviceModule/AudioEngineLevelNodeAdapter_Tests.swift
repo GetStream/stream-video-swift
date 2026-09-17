@@ -7,7 +7,7 @@ import Combine
 @testable import StreamVideo
 import XCTest
 
-final class AudioEngineLevelNodeAdapter_Tests: XCTestCase, @unchecked Sendable {
+final class AudioEngineLevelNodeAdapter_Tests: LogTestCase, @unchecked Sendable {
 
     private var subject: CurrentValueSubject<Float, Never>!
     private var sut: AudioEngineLevelNodeAdapter!

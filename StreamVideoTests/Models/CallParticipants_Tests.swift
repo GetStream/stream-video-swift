@@ -6,7 +6,7 @@ import Foundation
 @testable import StreamVideo
 import XCTest
 
-final class CallParticipants_Tests: XCTestCase, @unchecked Sendable {
+final class CallParticipants_Tests: LogTestCase, @unchecked Sendable {
 
     func test_callParticipant_audioLevels() {
         // Given

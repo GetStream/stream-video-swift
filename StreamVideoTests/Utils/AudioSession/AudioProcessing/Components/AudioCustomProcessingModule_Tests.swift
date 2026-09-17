@@ -6,7 +6,7 @@ import Combine
 @testable import StreamVideo
 import XCTest
 
-final class AudioCustomProcessingModule_Tests: XCTestCase, @unchecked Sendable {
+final class AudioCustomProcessingModule_Tests: LogTestCase, @unchecked Sendable {
 
     private var cancellables: Set<AnyCancellable> = []
 

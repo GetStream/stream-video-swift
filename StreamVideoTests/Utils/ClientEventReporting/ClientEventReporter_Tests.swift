@@ -6,7 +6,7 @@ import Foundation
 @testable import StreamVideo
 @preconcurrency import XCTest
 
-final class ClientEventReporter_Tests: XCTestCase, @unchecked Sendable {
+final class ClientEventReporter_Tests: LogTestCase, @unchecked Sendable {
 
     /// Mutable clock shared with the reporter so tests can drive `elapsed_time`.
     private final class DateHolder: @unchecked Sendable {

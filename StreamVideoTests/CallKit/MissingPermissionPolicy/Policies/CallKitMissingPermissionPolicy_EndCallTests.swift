@@ -6,7 +6,7 @@ import Foundation
 @testable import StreamVideo
 import XCTest
 
-final class CallKitMissingPermissionPolicy_EndCallTests: XCTestCase, @unchecked Sendable {
+final class CallKitMissingPermissionPolicy_EndCallTests: LogTestCase, @unchecked Sendable {
 
     private lazy var mockApplicationStateAdapter: MockAppStateAdapter! = .init()
     private lazy var mockPermissions: MockPermissionsStore! = .init()

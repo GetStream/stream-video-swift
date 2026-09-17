@@ -6,7 +6,7 @@ import Combine
 @testable import StreamVideo
 import XCTest
 
-final class ProximityMonitor_Tests: XCTestCase, @unchecked Sendable {
+final class ProximityMonitor_Tests: LogTestCase, @unchecked Sendable {
     private lazy var subject: ProximityMonitor! = ProximityMonitor()
 
     override func tearDown() async throws {

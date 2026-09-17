@@ -8,7 +8,7 @@ import Foundation
 import StreamWebRTC
 import XCTest
 
-final class RTCAudioSessionPublisher_Tests: XCTestCase, @unchecked Sendable {
+final class RTCAudioSessionPublisher_Tests: LogTestCase, @unchecked Sendable {
 
     private lazy var subject: RTCAudioSessionPublisher! = .init(.sharedInstance())
 

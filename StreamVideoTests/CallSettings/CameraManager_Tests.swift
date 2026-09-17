@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class CameraManager_Tests: XCTestCase, @unchecked Sendable {
+final class CameraManager_Tests: LogTestCase, @unchecked Sendable {
 
     // MARK: - toggle
 

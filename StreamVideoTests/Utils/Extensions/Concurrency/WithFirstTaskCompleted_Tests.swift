@@ -6,7 +6,7 @@ import Foundation
 @testable import StreamVideo
 import XCTest
 
-final class WithFirstTaskCompleted_Tests: XCTestCase, @unchecked Sendable {
+final class WithFirstTaskCompleted_Tests: LogTestCase, @unchecked Sendable {
 
     private enum TestError: Error, Equatable {
         case expected

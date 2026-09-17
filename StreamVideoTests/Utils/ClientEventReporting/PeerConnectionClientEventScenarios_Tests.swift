@@ -7,7 +7,7 @@ import Combine
 import StreamWebRTC
 import XCTest
 
-final class PeerConnectionClientEventScenarios_Tests: XCTestCase, @unchecked Sendable {
+final class PeerConnectionClientEventScenarios_Tests: LogTestCase, @unchecked Sendable {
 
     func test_subscribeICEFailure_reportsPeerConnectionConnectFailure() async {
         let reporter = MockClientEventReporter()

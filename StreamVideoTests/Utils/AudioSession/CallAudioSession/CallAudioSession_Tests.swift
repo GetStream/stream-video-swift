@@ -8,7 +8,7 @@ import Combine
 import StreamWebRTC
 import XCTest
 
-final class CallAudioSession_Tests: XCTestCase, @unchecked Sendable {
+final class CallAudioSession_Tests: LogTestCase, @unchecked Sendable {
 
     private var mockAudioStore: MockRTCAudioStore!
     private var subject: CallAudioSession!

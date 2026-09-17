@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class BatteryStore_Tests: XCTestCase, @unchecked Sendable {
+final class BatteryStore_Tests: LogTestCase, @unchecked Sendable {
 
     private var store: Store<BatteryStore.Namespace>!
     private var subject: BatteryStore!

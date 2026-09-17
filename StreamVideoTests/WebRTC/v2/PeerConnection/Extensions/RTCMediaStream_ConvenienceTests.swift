@@ -6,7 +6,7 @@
 import StreamWebRTC
 import XCTest
 
-final class RTCMediaStream_ConvenienceTests: XCTestCase, @unchecked Sendable {
+final class RTCMediaStream_ConvenienceTests: LogTestCase, @unchecked Sendable {
 
     func test_trackType_withScreenShareTrack() {
         let factory = PeerConnectionFactory.mock()

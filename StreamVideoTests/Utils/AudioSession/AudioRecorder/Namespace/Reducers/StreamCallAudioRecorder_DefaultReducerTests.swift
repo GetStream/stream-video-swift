@@ -6,7 +6,7 @@ import Foundation
 @testable import StreamVideo
 import XCTest
 
-final class StreamCallAudioRecorder_DefaultReducerTests: XCTestCase, @unchecked Sendable {
+final class StreamCallAudioRecorder_DefaultReducerTests: LogTestCase, @unchecked Sendable {
 
     private lazy var subject: StreamCallAudioRecorder.Namespace.DefaultReducer! = .init()
 

@@ -9,7 +9,7 @@ import CoreMedia
 import StreamWebRTC
 import XCTest
 
-final class CameraSystemPressureHandler_Tests: XCTestCase, @unchecked Sendable {
+final class CameraSystemPressureHandler_Tests: LogTestCase, @unchecked Sendable {
 
     private var subject: CameraSystemPressureHandler!
     private var mockDevice: MockSystemPressureCaptureDevice!

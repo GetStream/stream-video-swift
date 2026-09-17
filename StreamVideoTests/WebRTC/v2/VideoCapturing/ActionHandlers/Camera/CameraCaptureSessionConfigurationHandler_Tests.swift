@@ -7,7 +7,7 @@ import AVFoundation
 import StreamWebRTC
 import XCTest
 
-final class CameraCaptureSessionConfigurationHandler_Tests: XCTestCase, @unchecked Sendable {
+final class CameraCaptureSessionConfigurationHandler_Tests: LogTestCase, @unchecked Sendable {
 
     private lazy var subject: CameraCaptureSessionConfigurationHandler! = .init()
 

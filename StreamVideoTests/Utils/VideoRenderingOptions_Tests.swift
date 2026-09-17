@@ -6,7 +6,7 @@
 import StreamWebRTC
 @preconcurrency import XCTest
 
-final class VideoRenderingOptions_Tests: XCTestCase, @unchecked Sendable {
+final class VideoRenderingOptions_Tests: LogTestCase, @unchecked Sendable {
 
     private var subject: VideoRenderingOptions!
 

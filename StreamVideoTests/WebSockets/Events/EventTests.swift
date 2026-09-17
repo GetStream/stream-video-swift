@@ -7,7 +7,7 @@ import StreamCore
 @testable import StreamVideo
 import XCTest
 
-final class EventTests: XCTestCase, @unchecked Sendable {
+final class EventTests: LogTestCase, @unchecked Sendable {
 
     private lazy var customVideoEvent: CustomVideoEvent! = CustomVideoEvent(
         callCid: "123",

@@ -7,7 +7,7 @@ import AVFoundation
 @testable import StreamVideo
 import XCTest
 
-final class CMSampleBuffer_Info_Tests: XCTestCase, @unchecked Sendable {
+final class CMSampleBuffer_Info_Tests: LogTestCase, @unchecked Sendable {
 
     private var subject: CMSampleBuffer!
 

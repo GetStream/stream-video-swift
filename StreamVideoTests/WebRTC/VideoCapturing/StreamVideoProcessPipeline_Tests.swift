@@ -7,7 +7,7 @@ import CoreVideo
 import StreamWebRTC
 @preconcurrency import XCTest
 
-final class StreamVideoProcessPipeline_Tests: XCTestCase, @unchecked Sendable {
+final class StreamVideoProcessPipeline_Tests: LogTestCase, @unchecked Sendable {
 
     private var source: MockRTCVideoCapturerDelegate!
     private var subject: StreamVideoProcessPipeline!

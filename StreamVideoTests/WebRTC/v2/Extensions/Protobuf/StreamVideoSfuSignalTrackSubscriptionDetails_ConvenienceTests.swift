@@ -6,7 +6,7 @@ import CoreGraphics
 @testable import StreamVideo
 import XCTest
 
-final class StreamVideoSfuSignalTrackSubscriptionDetails_ConvenienceTests: XCTestCase, @unchecked Sendable {
+final class StreamVideoSfuSignalTrackSubscriptionDetails_ConvenienceTests: LogTestCase, @unchecked Sendable {
 
     func test_initWithVideoTrack() {
         let userId = "user123"

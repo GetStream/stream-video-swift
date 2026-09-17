@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class RecursiveQueueTests: XCTestCase, @unchecked Sendable {
+final class RecursiveQueueTests: LogTestCase, @unchecked Sendable {
 
     private lazy var taskWaitIntervalRange: ClosedRange<TimeInterval>! = 0.2...0.5
     private lazy var subject: RecursiveQueue! = .init()

@@ -7,7 +7,7 @@ import Foundation
 import XCTest
 
 @MainActor
-final class RingingCallRecoveryAdapter_Tests: XCTestCase, @unchecked Sendable {
+final class RingingCallRecoveryAdapter_Tests: LogTestCase, @unchecked Sendable {
 
     private var mockStreamVideo: MockStreamVideo! = .init()
     private var mockCall: MockCall!

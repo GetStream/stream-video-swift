@@ -6,7 +6,7 @@
 import StreamWebRTC
 import XCTest
 
-final class Sorting_Tests: XCTestCase, @unchecked Sendable {
+final class Sorting_Tests: LogTestCase, @unchecked Sendable {
 
     // MARK: - pinned
 

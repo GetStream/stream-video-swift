@@ -7,7 +7,7 @@ import CoreMedia
 @testable import StreamVideo
 import XCTest
 
-final class CGSizeDefaultValuesTests: XCTestCase, @unchecked Sendable {
+final class CGSizeDefaultValuesTests: LogTestCase, @unchecked Sendable {
 
     func test_defaultFullSize() {
         XCTAssertEqual(CGSize.full, CGSize(width: 1280, height: 720))

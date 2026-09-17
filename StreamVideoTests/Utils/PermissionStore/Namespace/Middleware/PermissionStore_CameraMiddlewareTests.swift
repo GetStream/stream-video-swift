@@ -6,7 +6,7 @@ import Foundation
 @testable import StreamVideo
 import XCTest
 
-final class PermissionStore_CameraMiddlewareTests: XCTestCase, @unchecked Sendable {
+final class PermissionStore_CameraMiddlewareTests: LogTestCase, @unchecked Sendable {
 
     private lazy var mockPermissionProvider: MockCameraPermissionProvider! = .init()
     private lazy var subject: PermissionStore.CameraMiddleware! = .init(

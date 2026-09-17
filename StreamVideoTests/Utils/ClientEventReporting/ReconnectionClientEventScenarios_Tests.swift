@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class ReconnectionClientEventScenarios_Tests: XCTestCase, @unchecked Sendable {
+final class ReconnectionClientEventScenarios_Tests: LogTestCase, @unchecked Sendable {
 
     func test_sfuErrorFast_transitionsToDisconnectedWithFastStrategy() async throws {
         let harness = ClientEventScenarioHarness()

@@ -7,7 +7,7 @@ import Combine
 import StreamWebRTC
 @preconcurrency import XCTest
 
-final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
+final class LocalScreenShareMediaAdapter_Tests: LogTestCase, @unchecked Sendable {
 
     private var disposableBag: DisposableBag! = .init()
     private lazy var sessionId: String! = .unique

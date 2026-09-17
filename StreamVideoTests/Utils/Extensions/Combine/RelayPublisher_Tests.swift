@@ -6,7 +6,7 @@ import Combine
 @testable import StreamVideo
 import XCTest
 
-final class RelayPublisher_Tests: XCTestCase, @unchecked Sendable {
+final class RelayPublisher_Tests: LogTestCase, @unchecked Sendable {
 
     // MARK: - Replay
 

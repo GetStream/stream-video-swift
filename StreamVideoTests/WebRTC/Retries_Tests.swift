@@ -6,7 +6,7 @@
 import StreamWebRTC
 import XCTest
 
-final class Retries_Tests: XCTestCase, @unchecked Sendable {
+final class Retries_Tests: LogTestCase, @unchecked Sendable {
     
     private var dummyRequest: URLRequest! = URLRequest(url: URL(string: "https://test.com")!)
     private var dummyData: Data! = Data()

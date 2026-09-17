@@ -15,7 +15,7 @@ import XCTest
 /// - Timeout behavior
 /// - Error handling
 /// - Concurrency scenarios
-final class PublisherAsyncStreamTests: XCTestCase, @unchecked Sendable {
+final class PublisherAsyncStreamTests: LogTestCase, @unchecked Sendable {
 
     private final class ReceivedValuesStorage<Element>: @unchecked Sendable {
         @Atomic private var values: [Element] = []

@@ -7,7 +7,7 @@ import Foundation
 @testable import StreamVideo
 import XCTest
 
-final class ThermalStateObserverTests: XCTestCase, @unchecked Sendable {
+final class ThermalStateObserverTests: LogTestCase, @unchecked Sendable {
 
     private var stubThermalState: ProcessInfo.ThermalState = .nominal
     private lazy var subject: ThermalStateObserver! = .init { self.stubThermalState }

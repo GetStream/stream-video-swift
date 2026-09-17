@@ -7,7 +7,7 @@ import Foundation
 @testable import StreamVideo
 import XCTest
 
-final class WebRTCAudioSessionWatchdog_Tests: XCTestCase, @unchecked Sendable {
+final class WebRTCAudioSessionWatchdog_Tests: LogTestCase, @unchecked Sendable {
 
     private var mockAudioStore: MockRTCAudioStore!
     private var disposableBag: DisposableBag! = .init()

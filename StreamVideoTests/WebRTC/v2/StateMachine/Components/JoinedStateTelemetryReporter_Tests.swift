@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class JoinedStateTelemetryReporter_Tests: XCTestCase, @unchecked Sendable {
+final class JoinedStateTelemetryReporter_Tests: LogTestCase, @unchecked Sendable {
 
     private let sessionId: String = .unique
     private let unifiedSessionId: String = .unique

@@ -6,7 +6,7 @@
 import StreamWebRTC
 import XCTest
 
-final class MicrophoneManager_Tests: XCTestCase, @unchecked Sendable {
+final class MicrophoneManager_Tests: LogTestCase, @unchecked Sendable {
 
     // MARK: - toggle
 

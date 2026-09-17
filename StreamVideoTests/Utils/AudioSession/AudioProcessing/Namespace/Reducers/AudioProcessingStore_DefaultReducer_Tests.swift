@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class AudioProcessingStore_DefaultReducer_Tests: XCTestCase, @unchecked Sendable {
+final class AudioProcessingStore_DefaultReducer_Tests: LogTestCase, @unchecked Sendable {
 
     // MARK: - Subject
 
