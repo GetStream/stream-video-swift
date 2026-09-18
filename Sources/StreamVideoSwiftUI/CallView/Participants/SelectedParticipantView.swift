@@ -9,7 +9,6 @@ import SwiftUI
 struct SelectedParticipantView<Factory: ViewFactory>: View {
 
     @Injected(\.videoAppearance) var videoAppearance
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private let avatarSize: CGFloat = 50
 
@@ -41,7 +40,11 @@ struct SelectedParticipantView<Factory: ViewFactory>: View {
         }
         .overlay(
             TopRightView {
-                Button(action: removeUser) {
+                Button(action: {
+                    withAnimation {
+                        onUserTapped(user)
+                    }
+                }, label: {
                     ZStack {
                         Circle()
                             .fill(Color(colors.textOnInverse))
@@ -56,8 +59,7 @@ struct SelectedParticipantView<Factory: ViewFactory>: View {
                             )
                     }
                     .padding(.all, layout.spacingXxs)
-                }
-                .accessibility(label: Text(user.name))
+                })
             }
             .offset(
                 x: layout.buttonPaddingXIconOnlySm,
@@ -65,16 +67,6 @@ struct SelectedParticipantView<Factory: ViewFactory>: View {
             )
         )
         .frame(width: avatarSize)
-    }
-
-    private func removeUser() {
-        if reduceMotion {
-            onUserTapped(user)
-        } else {
-            withAnimation {
-                onUserTapped(user)
-            }
-        }
     }
 
     private var colors: DesignSystemTokens.Colors {

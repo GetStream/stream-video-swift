@@ -185,7 +185,6 @@ struct VideoUserView<Factory: ViewFactory>: View {
 
             if isSelected {
                 selectedCheckmark
-                    .accessibility(hidden: true)
             }
         }
     }
