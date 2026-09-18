@@ -18,7 +18,7 @@ public final class CallHLSBroadcastingStartedEvent: @unchecked Sendable, Event, 
         self.hlsPlaylistUrl = hlsPlaylistUrl
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case callCid = "call_cid"
         case createdAt = "created_at"
         case hlsPlaylistUrl = "hls_playlist_url"

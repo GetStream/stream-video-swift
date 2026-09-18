@@ -64,7 +64,7 @@ public final class CallSettingsResponse: @unchecked Sendable, Codable, JSONEncod
         self.video = video
     }
 
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case audio
         case backstage
         case broadcasting

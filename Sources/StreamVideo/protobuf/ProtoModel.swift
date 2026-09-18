@@ -23,3 +23,12 @@ extension Stream_Video_Sfu_Signal_ICERestartResponse: ErrorProviding {}
 extension Stream_Video_Sfu_Signal_SendStatsResponse: ErrorProviding {}
 extension Stream_Video_Sfu_Signal_StartNoiseCancellationResponse: ErrorProviding {}
 extension Stream_Video_Sfu_Signal_StopNoiseCancellationResponse: ErrorProviding {}
+extension Stream_Video_Sfu_Signal_SendMetricsResponse: ErrorProviding {
+    var hasError: Bool {
+        false
+    }
+    
+    var error: Stream_Video_Sfu_Models_Error {
+        Stream_Video_Sfu_Models_Error()
+    }
+}

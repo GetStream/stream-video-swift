@@ -12,7 +12,7 @@ public final class ReportClientEventRequest: @unchecked Sendable, Codable, JSONE
         self.events = events
     }
 
-public enum CodingKeys: String, CodingKey, CaseIterable {
+public enum CodingKeys: String, CodingKey {
     case events
 }
 

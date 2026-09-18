@@ -29,7 +29,7 @@ public final class MuteUsersRequest: @unchecked Sendable, Codable, JSONEncodable
         self.video = video
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case audio
         case muteAllUsers = "mute_all_users"
         case screenshare

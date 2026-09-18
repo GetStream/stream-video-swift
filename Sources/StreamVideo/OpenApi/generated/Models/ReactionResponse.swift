@@ -19,7 +19,7 @@ public final class ReactionResponse: @unchecked Sendable, Codable, JSONEncodable
         self.user = user
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case custom
         case emojiCode = "emoji_code"
         case type

@@ -26,6 +26,7 @@ final class MockRTCAudioDeviceModule: RTCAudioDeviceModuleControlling, Mockable,
         case stopRecording
         case refreshStereoPlayoutState
         case setMuteMode
+        case setVoiceProcessingEnabled
         case setRecordingAlwaysPreparedMode
         case setEngineAvailability
     }
@@ -42,6 +43,7 @@ final class MockRTCAudioDeviceModule: RTCAudioDeviceModuleControlling, Mockable,
         case stopRecording
         case refreshStereoPlayoutState
         case setMuteMode(RTCAudioEngineMuteMode)
+        case setVoiceProcessingEnabled(Bool)
         case setRecordingAlwaysPreparedMode(Bool)
         case setEngineAvailability(Bool, Bool)
 
@@ -79,6 +81,9 @@ final class MockRTCAudioDeviceModule: RTCAudioDeviceModuleControlling, Mockable,
                 return ()
 
             case let .setMuteMode(value):
+                return value
+
+            case let .setVoiceProcessingEnabled(value):
                 return value
 
             case let .setRecordingAlwaysPreparedMode(value):
@@ -167,6 +172,7 @@ final class MockRTCAudioDeviceModule: RTCAudioDeviceModuleControlling, Mockable,
         stub(for: .startRecording, with: 0)
         stub(for: .refreshStereoPlayoutState, with: 0)
         stub(for: .setMuteMode, with: 0)
+        stub(for: .setVoiceProcessingEnabled, with: 0)
         stub(for: .setRecordingAlwaysPreparedMode, with: 0)
         stub(for: .setEngineAvailability, with: 0)
     }
@@ -222,7 +228,8 @@ final class MockRTCAudioDeviceModule: RTCAudioDeviceModuleControlling, Mockable,
     }
 
     var isVoiceProcessingAGCEnabled: Bool {
-        self[dynamicMember: \.isVoiceProcessingAGCEnabled]
+        get { self[dynamicMember: \.isVoiceProcessingAGCEnabled] }
+        set { stub(for: \.isVoiceProcessingAGCEnabled, with: newValue) }
     }
 
     var isRecordingAlwaysPreparedMode: Bool {
@@ -307,6 +314,23 @@ final class MockRTCAudioDeviceModule: RTCAudioDeviceModuleControlling, Mockable,
         stubbedFunctionInput[.setMuteMode]?
             .append(.setMuteMode(mode))
         return stubbedFunction[.setMuteMode] as! Int
+    }
+
+    func setVoiceProcessingEnabled(_ enabled: Bool) -> Int {
+        onInvoke?(.setVoiceProcessingEnabled)
+        stubbedFunctionInput[.setVoiceProcessingEnabled]?
+            .append(.setVoiceProcessingEnabled(enabled))
+        stub(for: \.isVoiceProcessingEnabled, with: enabled)
+        observer?.audioDeviceModule(
+            .init(),
+            didUpdateAudioProcessingState: .init(
+                voiceProcessingEnabled: enabled,
+                voiceProcessingBypassed: isVoiceProcessingBypassed,
+                voiceProcessingAGCEnabled: isVoiceProcessingAGCEnabled,
+                stereoPlayoutEnabled: isStereoPlayoutEnabled
+            )
+        )
+        return stubbedFunction[.setVoiceProcessingEnabled] as! Int
     }
 
     func setRecordingAlwaysPreparedMode(_ alwaysPreparedRecording: Bool) -> Int {

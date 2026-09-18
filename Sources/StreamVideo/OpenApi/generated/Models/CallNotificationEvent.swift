@@ -31,7 +31,7 @@ public final class CallNotificationEvent: @unchecked Sendable, Event, Codable, J
         self.user = user
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case call
         case callCid = "call_cid"
         case createdAt = "created_at"

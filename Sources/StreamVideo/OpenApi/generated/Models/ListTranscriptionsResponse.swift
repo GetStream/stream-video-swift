@@ -14,7 +14,7 @@ public final class ListTranscriptionsResponse: @unchecked Sendable, Codable, JSO
         self.transcriptions = transcriptions
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case duration
         case transcriptions
     }

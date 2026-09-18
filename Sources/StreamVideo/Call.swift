@@ -584,9 +584,12 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     }
 
     /// Sets an `AudioFilter` for the current call.
+    ///
+    /// Music and in-app screenshare audio stash the filter instead of
+    /// writing it live; it is restored when those suppressions end.
     /// - Parameter audioFilter: Desired filter; pass `nil` to clear it.
     public func setAudioFilter(_ audioFilter: AudioFilter?) {
-        streamVideo.videoConfig.audioProcessingModule.setAudioFilter(audioFilter)
+        callController.setAudioFilter(audioFilter)
     }
 
     /// Starts screensharing from the device.
@@ -1805,22 +1808,27 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         }
 
         let audioProcessingModule = streamVideo.videoConfig.audioProcessingModule
+        let noiseCancellationFilterId = noiseCancellationFilter.id
+        let isNoiseCancellationFilterInUse =
+            audioProcessingModule.activeAudioFilter?.id
+                == noiseCancellationFilterId
+                || callController.requestedAudioFilter?.id
+                == noiseCancellationFilterId
 
         if let value {
             switch value.mode {
             case .available:
                 log.debug("NoiseCancellationSettings updated with mode:\(value.mode).")
-            case .disabled where audioProcessingModule.activeAudioFilter?.id == noiseCancellationFilter.id:
-                /// Deactivate noiseCancellationFilter if mode is disabled and the noiseCancellation
-                /// audioFilter is currently active.
+            case .disabled where isNoiseCancellationFilterInUse:
+                /// Clear NC even if music or screenshare stashed it live.
                 log
                     .debug(
                         "NoiseCancellationSettings updated with mode:\(value.mode). Will deactivate noiseCancellationFilter:\(noiseCancellationFilter.id)"
                     )
                 setAudioFilter(nil)
             case .autoOn
-                where audioProcessingModule.activeAudioFilter?.id != noiseCancellationFilter.id && streamVideo
-                .isHardwareAccelerationAvailable:
+                where audioProcessingModule.activeAudioFilter?.id != noiseCancellationFilter.id
+                && streamVideo.isHardwareAccelerationAvailable:
                 /// Activate noiseCancellationFilter if mode is autoOn,  hardwareAcceleration is
                 /// available and the noiseCancellation audioFilter isn't already enabled.
                 log

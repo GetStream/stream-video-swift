@@ -23,7 +23,7 @@ public final class QueryCallParticipantsResponse: @unchecked Sendable, Codable, 
         self.totalParticipants = totalParticipants
     }
 
-public enum CodingKeys: String, CodingKey, CaseIterable {
+public enum CodingKeys: String, CodingKey {
     case call
     case duration
     case members

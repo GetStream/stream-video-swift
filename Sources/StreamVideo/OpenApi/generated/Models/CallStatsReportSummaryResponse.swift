@@ -35,7 +35,7 @@ public final class CallStatsReportSummaryResponse: @unchecked Sendable, Codable,
         self.qualityScore = qualityScore
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case callCid = "call_cid"
         case callDurationSeconds = "call_duration_seconds"
         case callSessionId = "call_session_id"

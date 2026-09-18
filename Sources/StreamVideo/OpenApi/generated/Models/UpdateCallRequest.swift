@@ -17,7 +17,7 @@ public final class UpdateCallRequest: @unchecked Sendable, Codable, JSONEncodabl
         self.startsAt = startsAt
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case custom
         case settingsOverride = "settings_override"
         case startsAt = "starts_at"

@@ -16,7 +16,7 @@ public final class TargetResolution: @unchecked Sendable, Codable, JSONEncodable
         self.width = width
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case bitrate
         case height
         case width

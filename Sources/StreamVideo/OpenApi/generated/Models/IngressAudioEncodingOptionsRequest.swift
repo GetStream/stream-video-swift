@@ -31,7 +31,7 @@ public final class IngressAudioEncodingOptionsRequest: @unchecked Sendable, Coda
         self.enableDtx = enableDtx
     }
 
-public enum CodingKeys: String, CodingKey, CaseIterable {
+public enum CodingKeys: String, CodingKey {
     case bitrate
     case channels
     case enableDtx = "enable_dtx"

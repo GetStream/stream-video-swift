@@ -20,7 +20,7 @@ public final class CallClosedCaption: @unchecked Sendable, Codable, JSONEncodabl
         self.user = user
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case endTime = "end_time"
         case speakerId = "speaker_id"
         case startTime = "start_time"

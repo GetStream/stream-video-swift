@@ -13,7 +13,7 @@ public final class RingCallResponse: @unchecked Sendable, Codable, JSONEncodable
         self.membersIds = membersIds
     }
 
-public enum CodingKeys: String, CodingKey, CaseIterable {
+public enum CodingKeys: String, CodingKey {
     case duration
     case membersIds = "members_ids"
 }

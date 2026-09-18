@@ -26,7 +26,7 @@ public final class StopLiveRequest: @unchecked Sendable, Codable, JSONEncodable,
         self.continueTranscription = continueTranscription
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case continueClosedCaption = "continue_closed_caption"
         case continueHls = "continue_hls"
         case continueRecording = "continue_recording"

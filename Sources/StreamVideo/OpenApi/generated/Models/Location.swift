@@ -16,7 +16,7 @@ public final class Location: @unchecked Sendable, Codable, JSONEncodable, Hashab
         self.subdivisionIsoCode = subdivisionIsoCode
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case continentCode = "continent_code"
         case countryIsoCode = "country_iso_code"
         case subdivisionIsoCode = "subdivision_iso_code"

@@ -20,7 +20,7 @@ public final class CallSessionParticipantJoinedEvent: @unchecked Sendable, Event
         self.sessionId = sessionId
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case callCid = "call_cid"
         case createdAt = "created_at"
         case participant

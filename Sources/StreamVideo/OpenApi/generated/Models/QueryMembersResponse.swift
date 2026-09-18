@@ -18,7 +18,7 @@ public final class QueryMembersResponse: @unchecked Sendable, Codable, JSONEncod
         self.prev = prev
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case duration
         case members
         case next

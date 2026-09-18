@@ -14,7 +14,7 @@ public final class Count: @unchecked Sendable, Codable, JSONEncodable, Hashable 
         self.value = value
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case approximate
         case value
     }

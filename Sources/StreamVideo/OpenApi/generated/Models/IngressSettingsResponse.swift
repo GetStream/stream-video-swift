@@ -15,7 +15,7 @@ public final class IngressSettingsResponse: @unchecked Sendable, Codable, JSONEn
         self.videoEncodingOptions = videoEncodingOptions
     }
 
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case audioEncodingOptions = "audio_encoding_options"
         case enabled
         case videoEncodingOptions = "video_encoding_options"

@@ -14,7 +14,7 @@ public final class PublisherAggregateStats: @unchecked Sendable, Codable, JSONEn
         self.total = total
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case byTrackType = "by_track_type"
         case total
     }

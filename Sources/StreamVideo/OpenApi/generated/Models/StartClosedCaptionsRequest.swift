@@ -16,7 +16,7 @@ public final class StartClosedCaptionsRequest: @unchecked Sendable, Codable, JSO
         self.language = language
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case enableTranscription = "enable_transcription"
         case externalStorage = "external_storage"
         case language

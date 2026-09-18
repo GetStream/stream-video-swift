@@ -20,7 +20,7 @@ public final class GetOrCreateCallRequest: @unchecked Sendable, Codable, JSONEnc
         self.video = video
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case data
         case membersLimit = "members_limit"
         case notify

@@ -16,7 +16,7 @@ public final class RingSettings: @unchecked Sendable, Codable, JSONEncodable, Ha
         self.missedCallTimeoutMs = missedCallTimeoutMs
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case autoCancelTimeoutMs = "auto_cancel_timeout_ms"
         case incomingCallTimeoutMs = "incoming_call_timeout_ms"
         case missedCallTimeoutMs = "missed_call_timeout_ms"
