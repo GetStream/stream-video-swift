@@ -220,7 +220,6 @@ lane :test do |options|
     cloned_source_packages_path: source_packages_path,
     devices: options[:device],
     concurrent_workers: 2,
-    number_of_retries: 3,
     skip_build: options[:skip_build],
     build_for_testing: options[:build_for_testing],
     xcodebuild_formatter: xcodebuild_formatter
@@ -355,7 +354,6 @@ lane :test_e2e do |options|
     build_for_testing: options[:build_for_testing],
     devices: options[:device],
     prelaunch_simulator: is_ci,
-    number_of_retries: 3,
     xcodebuild_formatter: xcodebuild_formatter
   }
 
