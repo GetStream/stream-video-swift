@@ -172,17 +172,42 @@ struct CallParticipantsViewContainer<Factory: ViewFactory>: View {
                     EmptyView()
                 }
             }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    ModalButton(
-                        image: videoAppearance.images.xmark,
-                        action: closeTapped
-                    )
+            .toolbar(content: {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button {
+                        closeTapped()
+                    } label: {
+                        videoAppearance.images.xmark
+                            .resizable()
+                            .renderingMode(.template)
+                            .aspectRatio(contentMode: .fit)
+                            .padding(layout.spacingXxs)
+                            .frame(
+                                width: layout.iconSizeMd,
+                                height: layout.iconSizeMd
+                            )
+                            .foregroundColor(Color(colors.textPrimary))
+                    }
                     .accessibility(identifier: "Close")
                 }
-            }
+
+                ToolbarItem(placement: .principal) {
+                    Text(navigationTitle)
+                        .font(fonts.headline)
+                        .foregroundColor(Color(colors.textPrimary))
+                }
+            })
             .navigationTitle(navigationTitle)
             .navigationBarTitleDisplayMode(.inline)
+            .background(
+                Color(colors.backgroundCoreElevation1)
+                    .edgesIgnoringSafeArea(.all)
+            )
+            .modifier(
+                ParticipantsSheetBackgroundModifier(
+                    color: colors.backgroundCoreElevation1
+                )
+            )
             .accessibility(identifier: "participantsScrollView")
             .streamAccessibility(value: "\(participants.count)")
         }
@@ -198,8 +223,36 @@ struct CallParticipantsViewContainer<Factory: ViewFactory>: View {
         }
     }
 
+    private var colors: DesignSystemTokens.Colors {
+        videoAppearance.tokens.colors
+    }
+
+    private var fonts: DesignSystemTokens.Fonts {
+        videoAppearance.tokens.fonts
+    }
+
     private var layout: DesignSystemTokens.Layout {
         videoAppearance.tokens.layout
+    }
+}
+
+private struct ParticipantsSheetBackgroundModifier: ViewModifier {
+
+    var color: UIColor
+
+    func body(content: Content) -> some View {
+        if #available(iOS 16.4, *) {
+            content
+                .toolbarBackground(Color(color), for: .navigationBar)
+                .toolbarBackground(.visible, for: .navigationBar)
+                .presentationBackground(Color(color))
+        } else if #available(iOS 16.0, *) {
+            content
+                .toolbarBackground(Color(color), for: .navigationBar)
+                .toolbarBackground(.visible, for: .navigationBar)
+        } else {
+            content
+        }
     }
 }
 
