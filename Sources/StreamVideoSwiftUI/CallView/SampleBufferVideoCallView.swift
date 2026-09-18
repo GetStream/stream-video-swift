@@ -46,7 +46,7 @@ protocol SampleBufferVideoRendering {
     func enqueue(_ sampleBuffer: CMSampleBuffer)
 }
 
-extension AVSampleBufferDisplayLayer: @preconcurrency SampleBufferVideoRendering {}
+extension AVSampleBufferDisplayLayer: SampleBufferVideoRendering {}
 #if swift(>=5.9)
 @available(iOS 17.0, *)
 extension AVSampleBufferVideoRenderer: SampleBufferVideoRendering {}

@@ -829,7 +829,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
 
     /// Start the ringing timeout timer for the call.
     open func setUpRingingTimer(for callState: GetCallResponse) {
-        let timeout = TimeInterval(callState.call.settings.ring.autoCancelTimeoutMs / 1000)
+        let timeout = TimeInterval(callState.call.settings.ring.autoCancelTimeoutMs) / 1000
         ringingTimerCancellable = DefaultTimer
             .publish(every: timeout)
             .sink { [weak self] _ in

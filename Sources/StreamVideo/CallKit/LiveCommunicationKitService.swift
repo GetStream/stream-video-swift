@@ -110,10 +110,8 @@ open class LiveCommunicationKitService: NSObject, ConversationManagerDelegate, S
     open var iconTemplateImageData: Data?
     /// The ringtone sound to use for ringing calls.
     open var ringtoneSound: String?
-    /// Whether the call can be held on its own or swapped with another call.
-    /// - Important: Holding a call isn't supported yet!
-    open var supportsHolding: Bool = false
-    /// Whether video is supported.
+    /// Whether video is supported. If true, push titles add "Video";
+    /// otherwise "Audio". Default is `false`.
     open var supportsVideo: Bool = false
     /// Whether calls received will be showing in Recents app.
     open var includesCallsInRecents: Bool = true
@@ -124,6 +122,10 @@ open class LiveCommunicationKitService: NSObject, ConversationManagerDelegate, S
 
     /// The policy that decides whether managed calls should leave automatically
     /// when participant state changes.
+    ///
+    /// - Important: Assign a **dedicated** policy instance.
+    ///   Do not share the same instance with ``CallViewModel``
+    ///   because each consumer overwrites `onPolicyTriggered`.
     open var participantAutoLeavePolicy: ParticipantAutoLeavePolicy = LastParticipantAutoLeavePolicy() {
         didSet {
             var oldValue = oldValue
@@ -494,7 +496,7 @@ open class LiveCommunicationKitService: NSObject, ConversationManagerDelegate, S
 
     /// Start the ringing timeout timer for the call.
     open func setUpRingingTimer(for callState: GetCallResponse) {
-        let timeout = TimeInterval(callState.call.settings.ring.autoCancelTimeoutMs / 1000)
+        let timeout = TimeInterval(callState.call.settings.ring.autoCancelTimeoutMs) / 1000
         ringingTimerCancellable = DefaultTimer
             .publish(every: timeout)
             .sink { [weak self] _ in
@@ -525,7 +527,24 @@ open class LiveCommunicationKitService: NSObject, ConversationManagerDelegate, S
         callerId: String,
         hasVideo: Bool
     ) async {
-        guard let streamVideo, let callEntry = callEntry(for: callUUID) else {
+        guard let callEntry = callEntry(for: callUUID) else {
+            // The conversation was reported to the system but no call could be
+            // built for it (no client, or a cid that doesn't parse), so
+            // `callEnded(cid:)` has nothing to look up. End the reported
+            // conversation by its UUID instead, otherwise it stays on screen.
+            log.warning(
+                """
+                LiveCommunicationKit operation:reportIncomingCall cannot be fulfilled because
+                no call could be resolved for cid:\(cid).
+                """,
+                subsystems: .callKit
+            )
+            reportConversationEnded(for: callUUID, reason: .failed)
+            sendEvent(.idle)
+            return
+        }
+
+        guard let streamVideo else {
             log.warning(
                 """
                 LiveCommunicationKit operation:reportIncomingCall cannot be fulfilled because
@@ -652,8 +671,18 @@ open class LiveCommunicationKitService: NSObject, ConversationManagerDelegate, S
                 reportConversationStartedConnecting(for: callToJoinEntry)
                 try await callToJoinEntry.call.accept()
             } catch {
+                // The system call is torn down here, so the join flow must not
+                // continue: joining afterwards would enter a call that
+                // LiveCommunicationKit already considers dead.
                 log.error(error, subsystems: .callKit)
-                completeActionOnce { action.fail() }
+                let didFail = completeActionOnce { action.fail() }
+                if !didFail {
+                    reportConversationEnded(for: callToJoinEntry, reason: .failed)
+                }
+                callToJoinEntry.call.leave()
+                set(nil, for: conversationUUID)
+                sendEvent(.idle)
+                return
             }
 
             do {
@@ -930,13 +959,6 @@ open class LiveCommunicationKitService: NSObject, ConversationManagerDelegate, S
     private func buildConversationManager(
         supportedHandleTypes: Set<Handle.Kind> = [.generic]
     ) -> ConversationManager {
-        if supportsHolding {
-            log.warning(
-                "LiveCommunicationKit hold isn't supported.",
-                subsystems: .callKit
-            )
-        }
-
         let configuration = ConversationManager.Configuration(
             ringtoneName: ringtoneSound,
             iconTemplateImageData: iconTemplateImageData,
@@ -1116,7 +1138,14 @@ open class LiveCommunicationKitService: NSObject, ConversationManagerDelegate, S
         for entry: CallEntry,
         reason: Conversation.EndedReason
     ) {
-        guard let conversation = conversation(for: entry.callUUID) else { return }
+        reportConversationEnded(for: entry.callUUID, reason: reason)
+    }
+
+    private func reportConversationEnded(
+        for callUUID: UUID,
+        reason: Conversation.EndedReason
+    ) {
+        guard let conversation = conversation(for: callUUID) else { return }
         conversationManager.reportConversationEvent(
             .conversationEnded(Date(), reason),
             for: conversation

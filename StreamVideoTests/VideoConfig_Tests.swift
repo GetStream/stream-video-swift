@@ -7,15 +7,15 @@ import XCTest
 
 final class VideoConfig_Tests: XCTestCase, @unchecked Sendable {
 
-    func test_init_whenUseLiveCommunicationKitIsNotProvided_defaultsToTrue() {
+    func test_init_whenUseLiveCommunicationKitIsNotProvided_defaultsToFalse() {
         let subject = VideoConfig()
 
-        XCTAssertTrue(subject.useLiveCommunicationKit)
+        XCTAssertFalse(subject.useLiveCommunicationKit)
     }
 
-    func test_init_whenUseLiveCommunicationKitIsFalse_setsValue() {
-        let subject = VideoConfig(useLiveCommunicationKit: false)
+    func test_init_whenUseLiveCommunicationKitIsTrue_setsValue() {
+        let subject = VideoConfig(useLiveCommunicationKit: true)
 
-        XCTAssertFalse(subject.useLiveCommunicationKit)
+        XCTAssertTrue(subject.useLiveCommunicationKit)
     }
 }

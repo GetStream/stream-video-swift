@@ -147,8 +147,7 @@ final class CallKitPushNotificationAdapterTests: XCTestCase, @unchecked Sendable
                 localizedCallerName: "TestUser",
                 callerId: "test_user",
                 hasVideo: false
-            ),
-            useLiveCommunicationKit: false
+            )
         )
 
         #if canImport(LiveCommunicationKit)
@@ -156,6 +155,29 @@ final class CallKitPushNotificationAdapterTests: XCTestCase, @unchecked Sendable
             #available(iOS 27.0, *),
             let liveCommunicationKitService = liveCommunicationKitService as? MockLiveCommunicationKitService {
             XCTAssertNil(liveCommunicationKitService.reportIncomingCallWasCalled)
+        }
+        #endif
+    }
+
+    @MainActor
+    func test_pushRegistryDidReceiveIncomingPush_useLiveCommunicationKitTrue_reportsToLiveCommunicationKit() async {
+        callKitService.streamVideo = MockStreamVideo(
+            videoConfig: .dummy(useLiveCommunicationKit: true)
+        )
+
+        await assertDidReceivePushNotification(
+            .init(
+                cid: "123",
+                localizedCallerName: "TestUser",
+                callerId: "test_user",
+                hasVideo: false
+            ),
+            useLiveCommunicationKit: true
+        )
+
+        #if canImport(LiveCommunicationKit)
+        if #available(iOS 27.0, *) {
+            XCTAssertNil(callKitService.reportIncomingCallWasCalled)
         }
         #endif
     }
@@ -172,7 +194,7 @@ final class CallKitPushNotificationAdapterTests: XCTestCase, @unchecked Sendable
         _ content: CallKitPushNotificationAdapter.Content? = nil,
         contentType: PKPushType = .voIP,
         displayName: String = "",
-        useLiveCommunicationKit: Bool = true,
+        useLiveCommunicationKit: Bool = false,
         file: StaticString = #filePath,
         line: UInt = #line
     ) async {

@@ -70,6 +70,27 @@ final class CallKitAdapterTests: XCTestCase, @unchecked Sendable {
         subject.streamVideo = streamVideo
 
         // Then
+        // LiveCommunicationKit is opt-in, so the default configuration keeps
+        // CallKit in charge on every OS version.
+        XCTAssertTrue(callKitService.streamVideo === streamVideo)
+        #if canImport(LiveCommunicationKit)
+        if
+            #available(iOS 27.0, *),
+            let liveCommunicationKitService = liveCommunicationKitService as? MockLiveCommunicationKitService {
+            XCTAssertNil(liveCommunicationKitService.streamVideo)
+        }
+        #endif
+        XCTAssertTrue(callKitPushNotificationAdapter.registerWasCalled)
+    }
+
+    func test_didUpdate_streamVideoUseLiveCommunicationKitTrue_liveCommunicationKitServiceWasUpdatedOnly() {
+        // Given
+        let streamVideo = MockStreamVideo(videoConfig: .dummy(useLiveCommunicationKit: true))
+
+        // When
+        subject.streamVideo = streamVideo
+
+        // Then
         #if canImport(LiveCommunicationKit)
         if
             #available(iOS 27.0, *),
@@ -80,6 +101,8 @@ final class CallKitAdapterTests: XCTestCase, @unchecked Sendable {
             return
         }
         #endif
+        // Without LiveCommunicationKit available, CallKit stays in charge even
+        // though the configuration opted in.
         XCTAssertTrue(callKitService.streamVideo === streamVideo)
         XCTAssertTrue(callKitPushNotificationAdapter.registerWasCalled)
     }

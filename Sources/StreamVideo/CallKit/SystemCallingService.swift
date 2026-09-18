@@ -9,7 +9,6 @@ protocol SystemCallingService: AnyObject {
     var streamVideo: StreamVideo? { get set }
     var iconTemplateImageData: Data? { get set }
     var ringtoneSound: String? { get set }
-    var supportsHolding: Bool { get set }
     var supportsVideo: Bool { get set }
     var includesCallsInRecents: Bool { get set }
     var missingPermissionPolicy: CallKitMissingPermissionPolicy { get set }
@@ -37,10 +36,10 @@ extension CallKitService: SystemCallingService {}
 
 /// Resolves which system calling framework owns VoIP calls.
 ///
-/// LiveCommunicationKit is only picked when the SDK was compiled against an OS
-/// SDK that ships the framework **and** the device runs a version that supports
-/// it. Everything older keeps using CallKit, no matter what
-/// ``VideoConfig/useLiveCommunicationKit`` says.
+/// LiveCommunicationKit is only picked when an app opts in through
+/// ``VideoConfig/useLiveCommunicationKit`` **and** the SDK was compiled against
+/// an OS SDK that ships the framework **and** the device runs a version that
+/// supports it. Anything else keeps using CallKit.
 enum SystemCallingServiceProvider {
 
     /// Whether LiveCommunicationKit can be used on the running OS version.
@@ -55,13 +54,13 @@ enum SystemCallingServiceProvider {
 
     /// Whether calls for `streamVideo` are handled by LiveCommunicationKit.
     ///
-    /// When no client has been configured yet we assume the default
-    /// configuration, which opts into LiveCommunicationKit when it's available.
+    /// With no client configured yet there is nothing to opt in, so CallKit
+    /// stays in charge.
     static func usesLiveCommunicationKit(for streamVideo: StreamVideo?) -> Bool {
         guard isLiveCommunicationKitAvailable else {
             return false
         }
-        return streamVideo?.videoConfig.useLiveCommunicationKit ?? true
+        return streamVideo?.videoConfig.useLiveCommunicationKit ?? false
     }
 
     /// The service that manages calls for `streamVideo`.

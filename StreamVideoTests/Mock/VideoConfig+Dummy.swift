@@ -10,7 +10,7 @@ extension VideoConfig {
     static func dummy(
         audioProcessingModule: AudioProcessingModule = MockAudioProcessingModule.shared,
         noiseCancellationFilter: NoiseCancellationFilter? = nil,
-        useLiveCommunicationKit: Bool = true
+        useLiveCommunicationKit: Bool = false
     ) -> VideoConfig {
         .init(
             noiseCancellationFilter: noiseCancellationFilter,
