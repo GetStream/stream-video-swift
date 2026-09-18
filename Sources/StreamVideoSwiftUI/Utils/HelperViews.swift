@@ -95,17 +95,11 @@ public struct OnlineIndicatorView: View {
         ZStack {
             Circle()
                 .fill(Color(colors.backgroundCoreApp))
-                .frame(
-                    width: indicatorSize,
-                    height: indicatorSize
-                )
+                .frame(width: indicatorSize, height: indicatorSize)
 
             Circle()
                 .fill(Color(colors.accentSuccess))
-                .frame(
-                    width: innerCircleSize,
-                    height: innerCircleSize
-                )
+                .frame(width: innerCircleSize, height: innerCircleSize)
         }
     }
 

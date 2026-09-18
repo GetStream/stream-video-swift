@@ -45,28 +45,17 @@ public struct InviteParticipantsView<Factory: ViewFactory>: View {
     public var body: some View {
         VStack(spacing: 0) {
             SearchBar(text: $viewModel.searchText)
-                .padding(
-                    .vertical,
-                    !viewModel.selectedUsers.isEmpty
-                        ? 0 : layout.spacingMd
-                )
+                .padding(.vertical, !viewModel.selectedUsers.isEmpty ? 0 : layout.spacingMd)
 
             ScrollView(.horizontal) {
                 HStack(spacing: layout.spacingMd) {
                     ForEach(viewModel.selectedUsers) { user in
-                        SelectedParticipantView(
-                            viewFactory: viewFactory,
-                            user: user
-                        ) { user in
+                        SelectedParticipantView(viewFactory: viewFactory, user: user) { user in
                             viewModel.userTapped(user)
                         }
                     }
                 }
-                .padding(
-                    .all,
-                    !viewModel.selectedUsers.isEmpty
-                        ? layout.spacingMd : 0
-                )
+                .padding(.all, !viewModel.selectedUsers.isEmpty ? layout.spacingMd : 0)
             }
 
             UsersHeaderView()
@@ -115,8 +104,6 @@ public struct InviteParticipantsView<Factory: ViewFactory>: View {
         videoAppearance.tokens.layout
     }
 }
-
-// MARK: - UsersHeaderView
 
 struct UsersHeaderView: View {
 
@@ -172,10 +159,7 @@ struct VideoUserView<Factory: ViewFactory>: View {
 
     var body: some View {
         HStack {
-            viewFactory.makeUserAvatar(
-                user,
-                with: .init(size: avatarSize)
-            )
+            viewFactory.makeUserAvatar(user, with: .init(size: avatarSize))
 
             Text(user.name)
                 .lineLimit(1)
@@ -194,15 +178,10 @@ struct VideoUserView<Factory: ViewFactory>: View {
         if #available(iOS 15.0, *) {
             videoAppearance.images.checkmarkCircleFill
                 .symbolRenderingMode(.palette)
-                .foregroundStyle(
-                    Color(colors.textOnAccent),
-                    Color(colors.accentPrimary)
-                )
+                .foregroundStyle(Color(colors.textOnAccent), Color(colors.accentPrimary))
         } else {
             videoAppearance.images.checkmarkCircleFill
-                .foregroundColor(
-                    Color(colors.accentPrimary)
-                )
+                .foregroundColor(Color(colors.accentPrimary))
         }
     }
 

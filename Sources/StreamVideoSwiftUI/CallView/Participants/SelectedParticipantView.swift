@@ -28,10 +28,7 @@ struct SelectedParticipantView<Factory: ViewFactory>: View {
 
     var body: some View {
         VStack(spacing: layout.spacingXs) {
-            viewFactory.makeUserAvatar(
-                user,
-                with: .init(size: avatarSize)
-            )
+            viewFactory.makeUserAvatar(user, with: .init(size: avatarSize))
 
             Text(user.name)
                 .lineLimit(1)
@@ -48,23 +45,15 @@ struct SelectedParticipantView<Factory: ViewFactory>: View {
                     ZStack {
                         Circle()
                             .fill(Color(colors.textOnInverse))
-                            .frame(
-                                width: layout.iconSizeSm,
-                                height: layout.iconSizeSm
-                            )
+                            .frame(width: layout.iconSizeSm, height: layout.iconSizeSm)
 
                         videoAppearance.images.xmarkCircleFill
-                            .foregroundColor(
-                                Color(colors.backgroundCoreInverse)
-                            )
+                            .foregroundColor(Color(colors.backgroundCoreInverse))
                     }
                     .padding(.all, layout.spacingXxs)
                 })
             }
-            .offset(
-                x: layout.buttonPaddingXIconOnlySm,
-                y: -layout.spacingXxs
-            )
+            .offset(x: layout.buttonPaddingXIconOnlySm, y: -layout.spacingXxs)
         )
         .frame(width: avatarSize)
     }

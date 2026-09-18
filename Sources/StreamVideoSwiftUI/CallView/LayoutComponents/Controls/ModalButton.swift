@@ -49,14 +49,7 @@ struct ModalButtonStyle: ButtonStyle {
         configuration
             .label
             .opacity(configuration.isPressed ? 0.5 : 1)
-            .background(
-                Circle()
-                    .fill(
-                        Color(
-                            colors.backgroundCoreSurfaceDefault
-                        )
-                    )
-            )
+            .background(Circle().fill(Color(colors.backgroundCoreSurfaceDefault)))
             .frame(width: 30, height: 30)
     }
 

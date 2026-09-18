@@ -172,7 +172,7 @@ struct CallParticipantsViewContainer<Factory: ViewFactory>: View {
                     EmptyView()
                 }
             }
-            .toolbar(content: {
+            .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button {
                         closeTapped()
@@ -182,10 +182,7 @@ struct CallParticipantsViewContainer<Factory: ViewFactory>: View {
                             .renderingMode(.template)
                             .aspectRatio(contentMode: .fit)
                             .padding(layout.spacingXxs)
-                            .frame(
-                                width: layout.iconSizeMd,
-                                height: layout.iconSizeMd
-                            )
+                            .frame(width: layout.iconSizeMd, height: layout.iconSizeMd)
                             .foregroundColor(Color(colors.textPrimary))
                     }
                     .accessibility(identifier: "Close")
@@ -196,18 +193,11 @@ struct CallParticipantsViewContainer<Factory: ViewFactory>: View {
                         .font(fonts.headline)
                         .foregroundColor(Color(colors.textPrimary))
                 }
-            })
+            }
             .navigationTitle(navigationTitle)
             .navigationBarTitleDisplayMode(.inline)
-            .background(
-                Color(colors.backgroundCoreElevation1)
-                    .edgesIgnoringSafeArea(.all)
-            )
-            .modifier(
-                ParticipantsSheetBackgroundModifier(
-                    color: colors.backgroundCoreElevation1
-                )
-            )
+            .background(Color(colors.backgroundCoreElevation1).edgesIgnoringSafeArea(.all))
+            .modifier(ParticipantsSheetBackgroundModifier(color: colors.backgroundCoreElevation1))
             .accessibility(identifier: "participantsScrollView")
             .streamAccessibility(value: "\(participants.count)")
         }
@@ -256,8 +246,6 @@ private struct ParticipantsSheetBackgroundModifier: ViewModifier {
     }
 }
 
-// MARK: - ParticipantsButton
-
 struct ParticipantsButton: View {
 
     @Injected(\.videoAppearance) private var videoAppearance
@@ -286,15 +274,13 @@ struct ParticipantsButton: View {
                         : Color(colors.buttonSecondaryBackground)
                 )
                 .overlay(
-                    RoundedRectangle(
-                        cornerRadius: layout.radius3xl
-                    )
-                    .stroke(
-                        primaryStyle
-                            ? Color(colors.buttonPrimaryBackground)
-                            : Color(colors.buttonSecondaryBorder),
-                        lineWidth: 1
-                    )
+                    RoundedRectangle(cornerRadius: layout.radius3xl)
+                        .stroke(
+                            primaryStyle
+                                ? Color(colors.buttonPrimaryBackground)
+                                : Color(colors.buttonSecondaryBorder),
+                            lineWidth: 1
+                        )
                 )
                 .cornerRadius(layout.radius3xl)
         }
@@ -357,8 +343,6 @@ struct BlockedUsersView: View {
     }
 }
 
-// MARK: - CallParticipantView
-
 struct CallParticipantView<Factory: ViewFactory>: View {
 
     @Injected(\.videoAppearance) var videoAppearance
@@ -389,22 +373,13 @@ struct CallParticipantView<Factory: ViewFactory>: View {
                             CircledTitleView(
                                 title: participant.name.isEmpty
                                     ? participant.id
-                                    : String(
-                                        participant.name
-                                            .uppercased().first!
-                                    ),
+                                    : String(participant.name.uppercased().first!),
                                 size: imageSize
                             )
                         )
                     }
                 )
-                .overlay(
-                    TopRightView {
-                        OnlineIndicatorView(
-                            indicatorSize: imageSize * 0.3
-                        )
-                    }
-                )
+                .overlay(TopRightView { OnlineIndicatorView(indicatorSize: imageSize * 0.3) })
 
                 Text(participant.name)
                     .font(fonts.bodyBold)

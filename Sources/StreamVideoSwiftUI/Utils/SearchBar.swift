@@ -20,27 +20,15 @@ struct SearchBar: View, KeyboardReadable {
                 .padding(layout.spacingXs)
                 .padding(.leading, layout.spacingXs)
                 .padding(.horizontal, layout.spacing2xl)
-                .background(
-                    Color(colors.backgroundCoreSurfaceDefault)
-                )
-                .clipShape(
-                    RoundedRectangle(
-                        cornerRadius: layout.radiusXl,
-                        style: .continuous
-                    )
-                )
+                .background(Color(colors.backgroundCoreSurfaceDefault))
+                .clipShape(RoundedRectangle(cornerRadius: layout.radiusXl, style: .continuous))
                 .overlay(
                     HStack {
                         videoAppearance.images.searchIcon
                             .customizable()
-                            .foregroundColor(
-                                Color(colors.textSecondary)
-                            )
+                            .foregroundColor(Color(colors.textSecondary))
                             .frame(maxHeight: 18)
-                            .padding(
-                                .leading,
-                                layout.spacingSm
-                            )
+                            .padding(.leading, layout.spacingSm)
 
                         Spacer()
 
@@ -48,17 +36,11 @@ struct SearchBar: View, KeyboardReadable {
                             Button(action: {
                                 self.text = ""
                             }) {
-                                videoAppearance.images
-                                    .searchCloseIcon
+                                videoAppearance.images.searchCloseIcon
                                     .customizable()
                                     .frame(width: 18, height: 18)
-                                    .foregroundColor(
-                                        Color(colors.textSecondary)
-                                    )
-                                    .padding(
-                                        .trailing,
-                                        layout.spacingXs
-                                    )
+                                    .foregroundColor(Color(colors.textSecondary))
+                                    .padding(.trailing, layout.spacingXs)
                             }
                         }
                     }
@@ -74,9 +56,7 @@ struct SearchBar: View, KeyboardReadable {
                     resignFirstResponder()
                 }) {
                     Text(L10n.Call.Participants.cancelSearch)
-                        .foregroundColor(
-                            Color(colors.accentPrimary)
-                        )
+                        .foregroundColor(Color(colors.accentPrimary))
                 }
                 .frame(height: 20)
                 .padding(.trailing, layout.spacingXs)
