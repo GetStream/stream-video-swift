@@ -2,6 +2,7 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import StreamCoreUI
 import StreamVideo
 import SwiftUI
 
@@ -83,9 +84,8 @@ struct CallParticipantsView<Factory: ViewFactory>: View {
 struct CallParticipantsViewContainer<Factory: ViewFactory>: View {
 
     @ObservedObject var viewModel: CallParticipantsInfoViewModel
-    
-    @Injected(\.colors) var colors
-    @Injected(\.images) var images
+
+    @Injected(\.videoAppearance) var videoAppearance
 
     var viewFactory: Factory
     var participants: [CallParticipant]
@@ -145,10 +145,10 @@ struct CallParticipantsViewContainer<Factory: ViewFactory>: View {
                             )
                         }
                     }
-                    .padding(.horizontal)
+                    .padding(.horizontal, layout.spacingMd)
                 }
 
-                HStack(spacing: 16) {
+                HStack(spacing: layout.spacingMd) {
                     if viewModel.inviteParticipantsButtonShown {
                         ParticipantsButton(title: L10n.Call.Participants.invite, onTapped: inviteTapped)
                     }
@@ -159,7 +159,7 @@ struct CallParticipantsViewContainer<Factory: ViewFactory>: View {
                         onTapped: muteTapped
                     )
                 }
-                .padding()
+                .padding(layout.spacingMd)
 
                 NavigationLink(isActive: $inviteParticipantsShown) {
                     InviteParticipantsView(
@@ -173,13 +173,31 @@ struct CallParticipantsViewContainer<Factory: ViewFactory>: View {
                 }
             }
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    ModalButton(image: images.xmark, action: closeTapped)
-                        .accessibility(identifier: "Close")
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button {
+                        closeTapped()
+                    } label: {
+                        videoAppearance.images.xmark
+                            .resizable()
+                            .renderingMode(.template)
+                            .aspectRatio(contentMode: .fit)
+                            .padding(layout.spacingXxs)
+                            .frame(width: layout.iconSizeMd, height: layout.iconSizeMd)
+                            .foregroundColor(Color(colors.textPrimary))
+                    }
+                    .accessibility(identifier: "Close")
+                }
+
+                ToolbarItem(placement: .principal) {
+                    Text(navigationTitle)
+                        .font(fonts.headline)
+                        .foregroundColor(Color(colors.textPrimary))
                 }
             }
             .navigationTitle(navigationTitle)
             .navigationBarTitleDisplayMode(.inline)
+            .background(Color(colors.backgroundCoreElevation1).edgesIgnoringSafeArea(.all))
+            .modifier(ParticipantsSheetBackgroundModifier(color: colors.backgroundCoreElevation1))
             .accessibility(identifier: "participantsScrollView")
             .streamAccessibility(value: "\(participants.count)")
         }
@@ -194,19 +212,48 @@ struct CallParticipantsViewContainer<Factory: ViewFactory>: View {
             return L10n.Call.Participants.title
         }
     }
+
+    private var colors: DesignSystemTokens.Colors {
+        videoAppearance.tokens.colors
+    }
+
+    private var fonts: DesignSystemTokens.Fonts {
+        videoAppearance.tokens.fonts
+    }
+
+    private var layout: DesignSystemTokens.Layout {
+        videoAppearance.tokens.layout
+    }
+}
+
+private struct ParticipantsSheetBackgroundModifier: ViewModifier {
+
+    var color: UIColor
+
+    func body(content: Content) -> some View {
+        if #available(iOS 16.4, *) {
+            content
+                .toolbarBackground(Color(color), for: .navigationBar)
+                .toolbarBackground(.visible, for: .navigationBar)
+                .presentationBackground(Color(color))
+        } else if #available(iOS 16.0, *) {
+            content
+                .toolbarBackground(Color(color), for: .navigationBar)
+                .toolbarBackground(.visible, for: .navigationBar)
+        } else {
+            content
+        }
+    }
 }
 
 struct ParticipantsButton: View {
-    
-    @Injected(\.colors) private var colors
-    @Injected(\.fonts) private var fonts
-    
-    private let cornerRadius: CGFloat = 24
-    
+
+    @Injected(\.videoAppearance) private var videoAppearance
+
     var title: String
     var primaryStyle: Bool = true
     var onTapped: () -> Void
-    
+
     var body: some View {
         Button {
             onTapped()
@@ -214,33 +261,58 @@ struct ParticipantsButton: View {
             Text(title)
                 .font(fonts.headline)
                 .bold()
-                .padding(.vertical, 12)
+                .padding(.vertical, layout.spacingSm)
                 .frame(maxWidth: .infinity)
                 .foregroundColor(
-                    primaryStyle ? colors.textInverted : colors.secondaryButton
+                    primaryStyle
+                        ? Color(colors.buttonPrimaryTextOnAccent)
+                        : Color(colors.buttonSecondaryText)
                 )
-                .background(primaryStyle ? colors.tintColor : Color.clear)
+                .background(
+                    primaryStyle
+                        ? Color(colors.buttonPrimaryBackground)
+                        : Color(colors.buttonSecondaryBackground)
+                )
                 .overlay(
-                    RoundedRectangle(cornerRadius: cornerRadius)
-                        .stroke(primaryStyle ? colors.tintColor : colors.secondaryButton, lineWidth: 1)
+                    RoundedRectangle(cornerRadius: layout.radius3xl)
+                        .stroke(
+                            primaryStyle
+                                ? Color(colors.buttonPrimaryBackground)
+                                : Color(colors.buttonSecondaryBorder),
+                            lineWidth: 1
+                        )
                 )
-                .cornerRadius(cornerRadius)
+                .cornerRadius(layout.radius3xl)
         }
+    }
+
+    private var colors: DesignSystemTokens.Colors {
+        videoAppearance.tokens.colors
+    }
+
+    private var fonts: DesignSystemTokens.Fonts {
+        videoAppearance.tokens.fonts
+    }
+
+    private var layout: DesignSystemTokens.Layout {
+        videoAppearance.tokens.layout
     }
 }
 
 struct BlockedUsersView: View {
-    
+
+    @Injected(\.videoAppearance) var videoAppearance
+
     var blockedUsers: [User]
     var unblockActions: @MainActor (User) -> [CallParticipantMenuAction]
-    
+
     var body: some View {
         HStack {
             VStack(alignment: .leading) {
                 Text(L10n.Call.Participants.blocked)
-                    .font(.headline)
+                    .font(fonts.headline)
                     .multilineTextAlignment(.leading)
-                    .padding(.vertical, 8)
+                    .padding(.vertical, layout.spacingXs)
                 ForEach(blockedUsers) { blockedUser in
                     Text(blockedUser.id)
                         .contextMenu {
@@ -261,14 +333,20 @@ struct BlockedUsersView: View {
             Spacer()
         }
     }
+
+    private var fonts: DesignSystemTokens.Fonts {
+        videoAppearance.tokens.fonts
+    }
+
+    private var layout: DesignSystemTokens.Layout {
+        videoAppearance.tokens.layout
+    }
 }
 
 struct CallParticipantView<Factory: ViewFactory>: View {
 
-    @Injected(\.colors) var colors
-    @Injected(\.fonts) var fonts
-    @Injected(\.images) var images
-    
+    @Injected(\.videoAppearance) var videoAppearance
+
     private let imageSize: CGFloat = 48
 
     var viewFactory: Factory
@@ -286,7 +364,7 @@ struct CallParticipantView<Factory: ViewFactory>: View {
     }
 
     var body: some View {
-        VStack(spacing: 4) {
+        VStack(spacing: layout.spacingXxs) {
             HStack {
                 viewFactory.makeUserAvatar(
                     participant.user,
@@ -306,13 +384,29 @@ struct CallParticipantView<Factory: ViewFactory>: View {
                 Text(participant.name)
                     .font(fonts.bodyBold)
                 Spacer()
-                (participant.hasAudio ? images.micTurnOn : images.micTurnOff)
-                    .foregroundColor(participant.hasAudio ? colors.text : colors.inactiveCallControl)
+                (
+                    participant.hasAudio
+                        ? videoAppearance.images.micTurnOn
+                        : videoAppearance.images.micTurnOff
+                )
+                .foregroundColor(
+                    participant.hasAudio
+                        ? Color(colors.textPrimary)
+                        : Color(colors.accentError)
+                )
 
-                (participant.hasVideo ? images.videoTurnOn : images.videoTurnOff)
-                    .foregroundColor(participant.hasVideo ? colors.text : colors.inactiveCallControl)
+                (
+                    participant.hasVideo
+                        ? videoAppearance.images.videoTurnOn
+                        : videoAppearance.images.videoTurnOff
+                )
+                .foregroundColor(
+                    participant.hasVideo
+                        ? Color(colors.textPrimary)
+                        : Color(colors.accentError)
+                )
             }
-            .padding(.all, 4)
+            .padding(.all, layout.spacingXxs)
 
             Divider()
         }
@@ -329,6 +423,18 @@ struct CallParticipantView<Factory: ViewFactory>: View {
                 }
             }
         }
+    }
+
+    private var colors: DesignSystemTokens.Colors {
+        videoAppearance.tokens.colors
+    }
+
+    private var fonts: DesignSystemTokens.Fonts {
+        videoAppearance.tokens.fonts
+    }
+
+    private var layout: DesignSystemTokens.Layout {
+        videoAppearance.tokens.layout
     }
 }
 

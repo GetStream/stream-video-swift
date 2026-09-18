@@ -2,11 +2,14 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import StreamCoreUI
 import StreamVideo
 import SwiftUI
 
 @available(iOS 14.0, *)
 public struct InviteParticipantsView<Factory: ViewFactory>: View {
+
+    @Injected(\.videoAppearance) var videoAppearance
 
     var viewFactory: Factory
     @StateObject var viewModel: InviteParticipantsViewModel
@@ -28,21 +31,31 @@ public struct InviteParticipantsView<Factory: ViewFactory>: View {
         )
         _inviteParticipantsShown = inviteParticipantsShown
     }
+
+    init(
+        viewFactory: Factory = DefaultViewFactory.shared,
+        viewModel: InviteParticipantsViewModel,
+        inviteParticipantsShown: Binding<Bool>
+    ) {
+        self.viewFactory = viewFactory
+        _viewModel = StateObject(wrappedValue: viewModel)
+        _inviteParticipantsShown = inviteParticipantsShown
+    }
     
     public var body: some View {
         VStack(spacing: 0) {
             SearchBar(text: $viewModel.searchText)
-                .padding(.vertical, !viewModel.selectedUsers.isEmpty ? 0 : 16)
-            
+                .padding(.vertical, !viewModel.selectedUsers.isEmpty ? 0 : layout.spacingMd)
+
             ScrollView(.horizontal) {
-                HStack(spacing: 16) {
+                HStack(spacing: layout.spacingMd) {
                     ForEach(viewModel.selectedUsers) { user in
                         SelectedParticipantView(viewFactory: viewFactory, user: user) { user in
                             viewModel.userTapped(user)
                         }
                     }
                 }
-                .padding(.all, !viewModel.selectedUsers.isEmpty ? 16 : 0)
+                .padding(.all, !viewModel.selectedUsers.isEmpty ? layout.spacingMd : 0)
             }
 
             UsersHeaderView()
@@ -86,34 +99,48 @@ public struct InviteParticipantsView<Factory: ViewFactory>: View {
         })
         .navigationBarBackButtonHidden(true)
     }
+
+    private var layout: DesignSystemTokens.Layout {
+        videoAppearance.tokens.layout
+    }
 }
 
 struct UsersHeaderView: View {
-    
-    @Injected(\.colors) var colors
-    @Injected(\.fonts) var fonts
-    
+
+    @Injected(\.videoAppearance) var videoAppearance
+
     var title = L10n.Call.Participants.onPlatform
-    
+
     var body: some View {
         HStack {
             Text(title)
-                .padding(.horizontal)
-                .padding(.vertical, 2)
+                .padding(.horizontal, layout.spacingMd)
+                .padding(.vertical, layout.spacingXxxs)
                 .font(fonts.body)
-                .foregroundColor(Color(colors.textLowEmphasis))
-            
+                .foregroundColor(Color(colors.textSecondary))
+
             Spacer()
         }
-        .background(Color(colors.background1))
+        .background(Color(colors.backgroundCoreSurfaceDefault))
+    }
+
+    private var colors: DesignSystemTokens.Colors {
+        videoAppearance.tokens.colors
+    }
+
+    private var fonts: DesignSystemTokens.Fonts {
+        videoAppearance.tokens.fonts
+    }
+
+    private var layout: DesignSystemTokens.Layout {
+        videoAppearance.tokens.layout
     }
 }
 
 struct VideoUserView<Factory: ViewFactory>: View {
 
-    @Injected(\.colors) var colors
-    @Injected(\.fonts) var fonts
-    
+    @Injected(\.videoAppearance) var videoAppearance
+
     private let avatarSize: CGFloat = 56
 
     var viewFactory: Factory
@@ -139,12 +166,30 @@ struct VideoUserView<Factory: ViewFactory>: View {
                 .font(fonts.bodyBold)
 
             Spacer()
-            
+
             if isSelected {
-                Image(systemName: "checkmark.circle.fill")
-                    .renderingMode(.template)
-                    .foregroundColor(colors.tintColor)
+                selectedCheckmark
             }
         }
+    }
+
+    @ViewBuilder
+    private var selectedCheckmark: some View {
+        if #available(iOS 15.0, *) {
+            videoAppearance.images.checkmarkCircleFill
+                .symbolRenderingMode(.palette)
+                .foregroundStyle(Color(colors.textOnAccent), Color(colors.accentPrimary))
+        } else {
+            videoAppearance.images.checkmarkCircleFill
+                .foregroundColor(Color(colors.accentPrimary))
+        }
+    }
+
+    private var colors: DesignSystemTokens.Colors {
+        videoAppearance.tokens.colors
+    }
+
+    private var fonts: DesignSystemTokens.Fonts {
+        videoAppearance.tokens.fonts
     }
 }

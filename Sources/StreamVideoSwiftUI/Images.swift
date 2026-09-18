@@ -23,6 +23,8 @@ public class Images {
     public var acceptCall = Image(systemName: "phone.circle.fill")
     public var participants = Image(systemName: "person.2.fill")
     public var xmark = Image(systemName: "xmark")
+    public var xmarkCircleFill = Image(systemName: "xmark.circle.fill")
+    public var checkmarkCircleFill = Image(systemName: "checkmark.circle.fill")
     public var searchIcon = Image(systemName: "magnifyingglass")
     public var searchCloseIcon = Image(systemName: "multiply.circle")
     public var recordIcon = Image(systemName: "record.circle")
