@@ -18,7 +18,7 @@ public final class CallRecordingReadyEvent: @unchecked Sendable, Event, Codable,
         self.createdAt = createdAt
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case callCid = "call_cid"
         case callRecording = "call_recording"
         case createdAt = "created_at"

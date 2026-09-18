@@ -2,6 +2,7 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import Foundation
 @testable import StreamVideo
 import XCTest
@@ -375,11 +376,10 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     // MARK: - End
 
     func test_end_whenCreatorEndsCall_thenParticipantAutomaticallyLeaves() async throws {
-        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
+        helpers.configuration.stubAudioSessionReadinessWatchdogForJoinMiss()
         let callId = String.unique
         let creatorUserId = String.unique
         let participantUserId = String.unique
-        helpers.duringDismantleObservedAllCallEnded = false
 
         let creatorUserFlow = try await helpers
             .callFlow(id: callId, type: .default, userId: creatorUserId)
@@ -398,7 +398,8 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
 
         try await participantFlow
             .assertEventuallyInMainActor(timeout: 30) {
-                $0.call.streamVideo.state.activeCall == nil
+                $0.client.state.activeCall == nil
+                    && creatorFlow.client.state.activeCall == nil
             }
     }
 
@@ -480,7 +481,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     // MARK: - Accept
 
     func test_accept_whenUserAcceptsTheCall_thenCallStateUpdatesForAllParticipantsAsExpected() async throws {
-        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
+        helpers.configuration.stubAudioSessionReadinessWatchdogForJoinMiss()
         let callId = String.unique
         let user1 = String.unique
         let user2 = String.unique
@@ -518,7 +519,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     // MARK: - Notify
 
     func test_notify_whenNotifyEventIsBeingSent_thenOtherParticipantsReceiveTheEventAsExpected() async throws {
-        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
+        helpers.configuration.stubAudioSessionReadinessWatchdogForJoinMiss()
         let callId = String.unique
         let user1 = String.unique
         let user2 = String.unique
@@ -557,7 +558,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     // MARK: Ringing
 
     func test_join_ringingFlow_whenAcceptingACallWhilePermissionsAreNotGranted_thenWeJoinTheCallCorrectly() async throws {
-        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
+        helpers.configuration.stubAudioSessionReadinessWatchdogForJoinMiss()
         let callId = String.unique
         let user1 = String.unique
         let user2 = String.unique
@@ -599,7 +600,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     // MARK: Livestream
 
     func test_join_livestream_whenCallIsInBackstageOnlyHostCanJoin_thenAnyOtherParticipantShouldFailToJoin() async throws {
-        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
+        helpers.configuration.stubAudioSessionReadinessWatchdogForJoinMiss()
         let callId = String.unique
         let participant = String.unique
 
@@ -629,7 +630,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     }
 
     func test_join_livestream_whenCallIsInBackstage_thenOnlyCreatorAndOtherHostsCanJoin() async throws {
-        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
+        helpers.configuration.stubAudioSessionReadinessWatchdogForJoinMiss()
         let callId = String.unique
         let creator = String.unique
         let otherHost = String.unique
@@ -667,7 +668,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     }
 
     func test_join_livestream_whenCallIsInBackstageOnlyHostCanJoin_thenAfterCallGoesLiveAnyOtherParticipantCanJoin() async throws {
-        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
+        helpers.configuration.stubAudioSessionReadinessWatchdogForJoinMiss()
         let callId = String.unique
         let participant = String.unique
         let joinAheadTimeSeconds: Double = 10
@@ -699,7 +700,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
 
     func test_join_audioRoom_whenAParticipantIsGrantedPermissionsToSpeak_thenTheirCallStateUpdatesWithExpectedCapabilities(
     ) async throws {
-        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
+        helpers.configuration.stubAudioSessionReadinessWatchdogForJoinMiss()
         let callId = String.unique
         let host = String.unique
 
@@ -733,7 +734,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     }
 
     func test_join_audioRoom_whenAParticipanRequestsPermissionToSpeakAndGetsRejected_thenTheirCallStateDoesNotUpdate() async throws {
-        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
+        helpers.configuration.stubAudioSessionReadinessWatchdogForJoinMiss()
         let callId = String.unique
         let host = String.unique
 
@@ -768,7 +769,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     }
 
     func test_join_audioRoom_whenAParticipantPermissionGetsRevoked_thenTheirCallStateUpdatesWithExpectedCapabilities() async throws {
-        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
+        helpers.configuration.stubAudioSessionReadinessWatchdogForJoinMiss()
         let callId = String.unique
         let host = "host"
         let participant = "participant"
@@ -807,7 +808,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     }
 
     func test_audioRoom_participantWithoutSpeakPermission_toggleMicrophone_audioRemainsDisabled() async throws {
-        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
+        helpers.configuration.stubAudioSessionReadinessWatchdogForJoinMiss()
         helpers.permissions.setMicrophonePermission(isGranted: true)
         let callId = String.unique
         let host = String.unique
@@ -844,7 +845,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     }
 
     func test_audioRoom_participantRequestsSpeakPermission_hostAccepts_participantCanToggleMicrophone() async throws {
-        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
+        helpers.configuration.stubAudioSessionReadinessWatchdogForJoinMiss()
         helpers.permissions.setMicrophonePermission(isGranted: true)
         let callId = String.unique
         let host = String.unique
@@ -885,7 +886,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
 
     func test_audioRoom_participantRequestsSpeakPermission_hostRejects_participantCannotToggleMicrophone(
     ) async throws {
-        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
+        helpers.configuration.stubAudioSessionReadinessWatchdogForJoinMiss()
         helpers.permissions.setMicrophonePermission(isGranted: true)
         let callId = String.unique
         let host = String.unique
@@ -929,7 +930,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     }
 
     func test_audioRoom_hostRevokesSpeakPermission_participantGetsMutedAndCannotToggleMicrophone() async throws {
-        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
+        helpers.configuration.stubAudioSessionReadinessWatchdogForJoinMiss()
         helpers.permissions.setMicrophonePermission(isGranted: true)
         let callId = String.unique
         let host = String.unique
@@ -981,7 +982,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     }
 
     func test_audioRoom_participantWithoutVideoPermission_toggleCamera_videoRemainsDisabled() async throws {
-        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
+        helpers.configuration.stubAudioSessionReadinessWatchdogForJoinMiss()
         helpers.permissions.setCameraPermission(isGranted: true)
         let callId = String.unique
         let host = String.unique
@@ -1064,7 +1065,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     }
 
     func test_join_whenParticipantCancelsJoinAttemptAndRetries_thenSecondJoinSucceedsWithoutTimeoutErrors() async throws {
-        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
+        helpers.configuration.stubAudioSessionReadinessWatchdogForJoinMiss()
         let callId = String.unique
         let creator = String.unique
         let participant = String.unique
@@ -1154,7 +1155,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     // MARK: - Pin
 
     func test_pin_whenUserGetsPinnedForEveryone_thenCallStateOfAllParticipantsUpdatesAsExpected() async throws {
-        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
+        helpers.configuration.stubAudioSessionReadinessWatchdogForJoinMiss()
         let callId = String.unique
         let user1 = String.unique
         let user2 = String.unique
@@ -1195,7 +1196,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     }
 
     func test_pin_whenUserGetsPinnedLocally_thenCallStateOfLocalParticipantOnlyUpdatesAsExpected() async throws {
-        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
+        helpers.configuration.stubAudioSessionReadinessWatchdogForJoinMiss()
         let callId = String.unique
         let user1 = String.unique
         let user2 = String.unique
@@ -1233,7 +1234,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     // MARK: - Unpin
 
     func test_pin_whenUserGetsUnpinnedForEveryone_thenCallStateOfAllParticipantsUpdatesAsExpected() async throws {
-        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
+        helpers.configuration.stubAudioSessionReadinessWatchdogForJoinMiss()
         let callId = String.unique
         let user1 = String.unique
         let user2 = String.unique
@@ -1290,7 +1291,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     }
 
     func test_pin_whenUserGetsUnpinnedLocally_thenCallStateOfLocalParticipantOnlyUpdatesAsExpected() async throws {
-        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
+        helpers.configuration.stubAudioSessionReadinessWatchdogForJoinMiss()
         let callId = String.unique
         let user1 = String.unique
         let user2 = String.unique
@@ -1468,6 +1469,228 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
             }
 
             try await group.waitForAll()
+        }
+    }
+
+    // MARK: - Audio bitrate profile
+
+    func test_joinedCall_setMusicHighQuality_disablesSoftwareProcessingAndPublishesProfile(
+    ) async throws {
+        helpers.permissions.setMicrophonePermission(isGranted: true)
+        let processing = resetSharedAudioProcessingModule()
+        defer { resetSharedAudioProcessingModule() }
+
+        try await helpers
+            .callFlow(id: .unique, type: .default, userId: .unique)
+            .perform { try await $0.call.create() }
+            .perform { try await self.enableHiFiAudio(on: $0.call) }
+            .perform {
+                try await $0.call.join(
+                    callSettings: .init(audioOn: true, videoOn: false)
+                )
+            }
+            .assertEventuallyInMainActor { $0.call.state.session != nil }
+            .perform {
+                try await $0.call.microphone
+                    .setAudioBitrateProfile(.musicHighQuality)
+            }
+            .assertEventuallyInMainActor {
+                $0.call.microphone.audioBitrateProfile == .musicHighQuality
+            }
+            .assert { _ in
+                processing.config.isNoiseSuppressionEnabled == false
+                    && processing.config.isHighpassFilterEnabled == false
+            }
+    }
+
+    func test_joinedCall_setAudioFilterDuringMusic_stashesUntilVoice(
+    ) async throws {
+        helpers.permissions.setMicrophonePermission(isGranted: true)
+        let processing = resetSharedAudioProcessingModule()
+        defer { resetSharedAudioProcessingModule() }
+        let filter = MockAudioFilter(id: "nc")
+
+        try await helpers
+            .callFlow(id: .unique, type: .default, userId: .unique)
+            .perform { try await $0.call.create() }
+            .perform { try await self.enableHiFiAudio(on: $0.call) }
+            .perform {
+                try await $0.call.join(
+                    callSettings: .init(audioOn: true, videoOn: false)
+                )
+            }
+            .assertEventuallyInMainActor { $0.call.state.session != nil }
+            .perform { $0.call.setAudioFilter(filter) }
+            .assert { _ in processing.activeAudioFilter?.id == "nc" }
+            .perform {
+                try await $0.call.microphone
+                    .setAudioBitrateProfile(.musicHighQuality)
+            }
+            .assert { _ in processing.activeAudioFilter == nil }
+            .perform {
+                try await $0.call.microphone
+                    .setAudioBitrateProfile(.voiceStandard)
+            }
+            .assert { _ in processing.activeAudioFilter?.id == "nc" }
+    }
+
+    func test_joinedCall_musicThenLeave_resetsPublishedProfileAndSoftwareProcessing(
+    ) async throws {
+        helpers.permissions.setMicrophonePermission(isGranted: true)
+        let processing = resetSharedAudioProcessingModule()
+        defer { resetSharedAudioProcessingModule() }
+
+        try await helpers
+            .callFlow(id: .unique, type: .default, userId: .unique)
+            .perform { try await $0.call.create() }
+            .perform { try await self.enableHiFiAudio(on: $0.call) }
+            .perform {
+                try await $0.call.join(
+                    callSettings: .init(audioOn: true, videoOn: false)
+                )
+            }
+            .assertEventuallyInMainActor { $0.call.state.session != nil }
+            .perform {
+                try await $0.call.microphone
+                    .setAudioBitrateProfile(.musicHighQuality)
+            }
+            .performWithoutValueOverride { $0.call.leave() }
+            .assertEventuallyInMainActor {
+                $0.call.microphone.audioBitrateProfile == .voiceStandard
+            }
+            .assertEventually { _ in
+                processing.config.isNoiseSuppressionEnabled
+                    && processing.config.isHighpassFilterEnabled
+            }
+    }
+
+    func test_joinedCall_musicSurvivesMuteAndUnmute(
+    ) async throws {
+        helpers.permissions.setMicrophonePermission(isGranted: true)
+        let processing = resetSharedAudioProcessingModule()
+        defer { resetSharedAudioProcessingModule() }
+
+        try await helpers
+            .callFlow(id: .unique, type: .default, userId: .unique)
+            .perform { try await $0.call.create() }
+            .perform { try await self.enableHiFiAudio(on: $0.call) }
+            .perform {
+                try await $0.call.join(
+                    callSettings: .init(audioOn: true, videoOn: false)
+                )
+            }
+            .assertEventuallyInMainActor { $0.call.state.session != nil }
+            .perform {
+                try await $0.call.microphone
+                    .setAudioBitrateProfile(.musicHighQuality)
+            }
+            .perform { try await $0.call.microphone.disable() }
+            .assertEventuallyInMainActor {
+                $0.call.state.callSettings.audioOn == false
+            }
+            .assertEventuallyInMainActor {
+                $0.call.microphone.audioBitrateProfile == .musicHighQuality
+            }
+            .perform { try await $0.call.microphone.enable() }
+            .assertEventuallyInMainActor { $0.call.state.callSettings.audioOn }
+            .assertEventuallyInMainActor {
+                $0.call.microphone.audioBitrateProfile == .musicHighQuality
+            }
+            .assert { _ in
+                processing.config.isNoiseSuppressionEnabled == false
+                    && processing.config.isHighpassFilterEnabled == false
+            }
+    }
+
+    func test_joinedCall_musicThenRejoin_keepsMusicProcessingAndPublishedProfile(
+    ) async throws {
+        helpers.permissions.setMicrophonePermission(isGranted: true)
+        let processing = resetSharedAudioProcessingModule()
+        defer { resetSharedAudioProcessingModule() }
+
+        try await helpers
+            .callFlow(id: .unique, type: .default, userId: .unique)
+            .perform { try await $0.call.create() }
+            .perform { try await self.enableHiFiAudio(on: $0.call) }
+            .perform {
+                try await $0.call.join(
+                    callSettings: .init(audioOn: true, videoOn: false)
+                )
+            }
+            .assertEventuallyInMainActor { $0.call.state.session != nil }
+            .perform {
+                try await $0.call.microphone
+                    .setAudioBitrateProfile(.musicHighQuality)
+            }
+            .assertEventuallyInMainActor {
+                $0.call.microphone.audioBitrateProfile == .musicHighQuality
+            }
+            .performWithoutValueOverride { flow in
+                // Subscribe before posting: rejoin can return to
+                // `.connected` before a later poll observes
+                // `.reconnecting`. `relay()` matches CallController's
+                // join-response race; `dropFirst()` ignores the
+                // already-connected value.
+                let statuses = await MainActor.run {
+                    flow.call.state.$reconnectionStatus
+                        .dropFirst()
+                        .relay()
+                }
+                NotificationCenter.default.post(
+                    name: .init("video.getstream.io.reconnect.rejoin"),
+                    object: nil
+                )
+                _ = try await statuses
+                    .filter { $0 == .connected }
+                    .nextValue(timeout: 40)
+            }
+            .assertEventuallyInMainActor {
+                $0.call.microphone.audioBitrateProfile == .musicHighQuality
+            }
+            .assert { _ in
+                processing.config.isNoiseSuppressionEnabled == false
+                    && processing.config.isHighpassFilterEnabled == false
+            }
+    }
+}
+
+private extension Call_IntegrationTests {
+    @discardableResult
+    func resetSharedAudioProcessingModule() -> AudioProcessingModule {
+        let module = Helpers.StreamVideoHelper.videoConfig
+            .audioProcessingModule
+        let config = module.config
+        config.isNoiseSuppressionEnabled = true
+        config.isHighpassFilterEnabled = true
+        module.config = config
+        module.setAudioFilter(nil)
+        return module
+    }
+
+    func enableHiFiAudio(on call: Call) async throws {
+        let alreadyEnabled = await MainActor.run {
+            call.state.settings?.audio.hifiAudioEnabled == true
+        }
+        if alreadyEnabled {
+            return
+        }
+
+        _ = try await call.update(
+            settingsOverride: .init(
+                audio: .init(
+                    defaultDevice: .speaker,
+                    hifiAudioEnabled: true
+                )
+            )
+        )
+
+        let enabled = await MainActor.run {
+            call.state.settings?.audio.hifiAudioEnabled == true
+        }
+        guard enabled else {
+            throw ClientError(
+                "Hi-fi audio was not enabled after settings override."
+            )
         }
     }
 }

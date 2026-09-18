@@ -43,14 +43,23 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
     private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
 
-    /// The primary audio track for this adapter.
-    let primaryTrack: RTCAudioTrack
+    /// The session's local microphone track.
+    ///
+    /// Clones of this track are attached to audio senders (Opus, RED,
+    /// and any extra negotiated codec). The underlying `RTCAudioSource`
+    /// is immutable, so this property is replaced when the capture
+    /// profile crosses music: unmute `SetAudioSend` then reads the new
+    /// source options (software NS/HPF off) instead of the voice
+    /// defaults.
+    private(set) var primaryTrack: RTCAudioTrack
 
     /// A publisher that emits events related to audio tracks.
     let subject: PassthroughSubject<TrackEvent, Never>
 
     private var hasRegisteredPrimaryTrack: Bool = false
     private var ownCapabilities: [OwnCapability] = []
+    private var audioBitrateProfile: AudioBitrateProfile = .voiceStandard
+    private var restoredBitrates: [PublishOptions.AudioPublishOptions: Int] = [:]
 
     /// Initializes a new instance of `LocalAudioMediaAdapter`.
     ///
@@ -77,7 +86,9 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         self.subject = subject
 
         // Create the primary audio track for the session.
-        let source = peerConnectionFactory.makeAudioSource(.defaultConstraints)
+        let source = peerConnectionFactory.makeAudioSource(
+            .audioCaptureConstraints(for: .voiceStandard)
+        )
         let track = peerConnectionFactory.makeAudioTrack(source: source)
         primaryTrack = track
         streamIds = ["\(sessionID):audio"]
@@ -205,10 +216,10 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             registerPrimaryTrackIfPossible(settings)
 
             guard lastUpdatedCallSettings != settings.audio else { return }
-            
+
             let isMuted = !settings.audioOn
             let isLocalMuted = !primaryTrack.isEnabled
-            
+
             if isMuted != isLocalMuted {
                 try await sfuAdapter.updateTrackMuteState(
                     .audio,
@@ -216,13 +227,13 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                     for: sessionID
                 )
             }
-            
+
             if isMuted, primaryTrack.isEnabled {
                 try await unpublish()
             } else if !isMuted {
                 try await publish()
             }
-            
+
             lastUpdatedCallSettings = settings.audio
         }
     }
@@ -271,6 +282,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                         $0.value.transceiver.sender.track = nil
                     }
                 }
+            applyCurrentProfileBitrate()
 
             log.debug(
                 """
@@ -336,6 +348,30 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         with layerSettings: [Stream_Video_Sfu_Event_AudioSender]
     ) { /* No-op */ }
 
+    /// Applies the profile's Opus bitrate and, if the profile crossed
+    /// music, rebuilds the capture source.
+    ///
+    /// Bitrate is written on existing sender encodings and does not
+    /// renegotiate. Crossing music replaces ``primaryTrack`` and every
+    /// stored sender track so later mute/unmute publish uses music APM
+    /// flags. Same-side voice profiles (standard ↔ high quality) only
+    /// change bitrate.
+    ///
+    /// - Parameter profile: The profile to stamp on senders and, when
+    ///   `isMusic` changes, on a new `RTCAudioSource`.
+    func setMaxBitrate(for profile: AudioBitrateProfile) async {
+        try? await processingQueue.addSynchronousTaskOperation { [weak self] in
+            guard let self else { return }
+            let previous = audioBitrateProfile
+            audioBitrateProfile = profile
+            applyCurrentProfileBitrate()
+            rebuildAudioSourceIfNeeded(from: previous, to: profile)
+            if profile == .voiceStandard {
+                restoredBitrates.removeAll()
+            }
+        }
+    }
+
     // MARK: - Private Helpers
 
     /// Adds or updates a transceiver for a given audio track and publish option.
@@ -366,6 +402,134 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             return
         }
         transceiverStorage.set(transceiver, track: track, for: options)
+        applyProfileBitrate(for: options, on: transceiver)
+    }
+
+    /// Rebuilds the capture source when `previous.isMusic` differs from
+    /// `profile.isMusic`.
+    ///
+    /// WebRTC `LocalAudioSource` copies goog* flags at create and
+    /// exposes no setter. Unmute enables the track, which runs
+    /// `SetAudioSend` → `SetOptions` from those copied flags. A voice
+    /// source therefore restored software NS/HPF while Apple Voice
+    /// Processing was still off, which chopped or delayed published
+    /// audio.
+    ///
+    /// Creates one new source and track, then swaps a clone onto every
+    /// stored audio transceiver (Opus, RED, inactive codecs).
+    /// `RtpSender.SetTrack` does not mark negotiation needed, so mids
+    /// stay. Detached senders only update storage so the next attach
+    /// uses the matching source.
+    ///
+    /// Mirrors JS web re-gUM with music constraints. Mute still
+    /// unpublishes, matching JS `stopPublish` and Android disable.
+    private func rebuildAudioSourceIfNeeded(
+        from previous: AudioBitrateProfile,
+        to profile: AudioBitrateProfile
+    ) {
+        guard previous.isMusic != profile.isMusic else { return }
+
+        let source = peerConnectionFactory.makeAudioSource(
+            .audioCaptureConstraints(for: profile)
+        )
+        let track = peerConnectionFactory.makeAudioTrack(source: source)
+        track.isEnabled = primaryTrack.isEnabled
+        let previousTrack = primaryTrack
+        primaryTrack = track
+
+        transceiverStorage.forEach { options, value in
+            let clone = track.clone(from: peerConnectionFactory)
+            clone.isEnabled = value.track.isEnabled
+            let wasAttached = value.transceiver.sender.track != nil
+            transceiverStorage.set(
+                value.transceiver,
+                track: clone,
+                for: options
+            )
+            if wasAttached {
+                value.transceiver.sender.track = clone
+            }
+        }
+
+        log.debug(
+            """
+            Local audio source rebuilt for profile:\(profile)
+                previous: \(previousTrack.trackId) isEnabled:\(previousTrack.isEnabled)
+                primary: \(track.trackId) isEnabled:\(track.isEnabled)
+                clones: \(transceiverStorage.map(\.value.track.trackId).joined(separator: ","))
+            """,
+            subsystems: .webRTC
+        )
+
+        guard hasRegisteredPrimaryTrack else { return }
+        subject.send(
+            .removed(
+                id: sessionID,
+                trackType: .audio,
+                track: previousTrack
+            )
+        )
+        subject.send(
+            .added(
+                id: sessionID,
+                trackType: .audio,
+                track: track
+            )
+        )
+    }
+
+    /// Uses live `publishOptions`, not the storage key. Equality is only
+    /// id+codec, so an SFU profile-map refresh would otherwise keep the
+    /// stale bitrate.
+    private func applyCurrentProfileBitrate() {
+        transceiverStorage.forEach { options, value in
+            applyProfileBitrate(for: options, on: value.transceiver)
+        }
+    }
+
+    private func applyProfileBitrate(
+        for options: PublishOptions.AudioPublishOptions,
+        on transceiver: RTCRtpTransceiver
+    ) {
+        let current = publishOptions.first { $0 == options } ?? options
+        if let bitrate = bitrate(for: current, profile: audioBitrateProfile) {
+            applyMaxBitrate(bitrate, on: transceiver)
+        }
+    }
+
+    private func bitrate(
+        for options: PublishOptions.AudioPublishOptions,
+        profile: AudioBitrateProfile
+    ) -> Int? {
+        if profile == .voiceStandard {
+            if let mapped = options.bitrateProfiles[profile], mapped > 0 {
+                return mapped
+            }
+            return restoredBitrates[options]
+        }
+        if restoredBitrates[options] == nil {
+            restoredBitrates[options] = options.bitrate
+        }
+        return options.bitrate(for: profile)
+    }
+
+    /// Writes `maxBitrateBps` on the sender's existing encodings.
+    /// `bitrate <= 0` clears the cap. An empty encodings list is left
+    /// unchanged: synthesizing one encoding would change the send-encoding
+    /// count and libwebrtc rejects that assignment. New transceivers are
+    /// stamped again from ``addTransceiverIfRequired``.
+    private func applyMaxBitrate(
+        _ bitrate: Int,
+        on transceiver: RTCRtpTransceiver
+    ) {
+        let params = transceiver.sender.parameters
+        guard !params.encodings.isEmpty else { return }
+        if bitrate <= 0 {
+            params.encodings.forEach { $0.maxBitrateBps = nil }
+        } else {
+            params.encodings.forEach { $0.maxBitrateBps = bitrate as NSNumber }
+        }
+        transceiver.sender.parameters = params
     }
 
     private func registerPrimaryTrackIfPossible(_ callSettings: CallSettings) {

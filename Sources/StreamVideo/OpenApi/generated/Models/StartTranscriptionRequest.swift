@@ -16,7 +16,7 @@ public final class StartTranscriptionRequest: @unchecked Sendable, Codable, JSON
         self.transcriptionExternalStorage = transcriptionExternalStorage
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case enableClosedCaptions = "enable_closed_captions"
         case language
         case transcriptionExternalStorage = "transcription_external_storage"

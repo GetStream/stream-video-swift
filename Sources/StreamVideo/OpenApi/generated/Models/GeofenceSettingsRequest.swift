@@ -12,7 +12,7 @@ public final class GeofenceSettingsRequest: @unchecked Sendable, Codable, JSONEn
         self.names = names
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case names
     }
     

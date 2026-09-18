@@ -97,7 +97,7 @@ public final class TranscriptionSettingsRequest: @unchecked Sendable, Codable, J
         self.mode = mode
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case closedCaptionMode = "closed_caption_mode"
         case language
         case mode

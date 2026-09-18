@@ -7,7 +7,7 @@ public final class FrameRecordingResponse: @unchecked Sendable, Codable, JSONEnc
         self.status = status
     }
 
-public enum CodingKeys: String, CodingKey, CaseIterable {
+public enum CodingKeys: String, CodingKey {
     case status
 }
 

@@ -11,18 +11,17 @@ import StreamWebRTC
 /// Handles ReplayKit screen capture and forwards frames to WebRTC.
 final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandler, RPScreenRecorderDelegate, @unchecked Sendable {
 
-    @Injected(\.audioFilterProcessingModule) private var audioFilterProcessingModule
-
     @Atomic private var isRecording: Bool = false
     private var activeSession: Session?
     private let recorder: RPScreenRecorder
     private let includeAudio: Bool
-    private let disposableBag = DisposableBag()
+    /// Nil until ``setAudioFilterGate(_:)`` after capturer build, and for
+    /// broadcast (no in-app audio).
+    private var audioFilterGate: ScreenShareAudioFilterGate?
     private let audioProcessingQueue = DispatchQueue(
         label: "io.getstream.screenshare.audio.processing",
         qos: .userInitiated
     )
-    private var audioFilterBeforeScreensharingAudio: AudioFilter?
 
     private struct Session {
         var videoCapturer: RTCVideoCapturer
@@ -35,11 +34,22 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
     ///   - recorder: The ReplayKit recorder to use. Defaults to `.shared()`.
     ///   - includeAudio: Whether to capture app audio during screen sharing.
     ///     Only valid for `.inApp`; ignored otherwise.
-    init(recorder: RPScreenRecorder = .shared(), includeAudio: Bool) {
+    init(
+        recorder: RPScreenRecorder = .shared(),
+        includeAudio: Bool
+    ) {
         self.recorder = recorder
         self.includeAudio = includeAudio
         super.init()
         recorder.delegate = self
+    }
+
+    /// Attaches the session provider's filter gate after capturer build.
+    /// Not part of ``init`` because the factory must not depend on audio
+    /// filter types; ``LocalScreenShareMediaAdapter`` wires it on the
+    /// built capturer.
+    func setAudioFilterGate(_ audioFilterGate: ScreenShareAudioFilterGate?) {
+        self.audioFilterGate = includeAudio ? audioFilterGate : nil
     }
 
     // MARK: - RPScreenRecorderDelegate
@@ -52,7 +62,9 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
         )
     }
 
-    /// Handles ReplayKit stop events and tears down capture on error.
+    /// Handles ReplayKit stop events. Capture has already stopped; do not
+    /// call `stopCapture` again. Lift the filter gate even when `error`
+    /// is nil.
     func screenRecorder(
         _ screenRecorder: RPScreenRecorder,
         didStopRecordingWith previewViewController: RPPreviewViewController?,
@@ -60,14 +72,8 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
     ) {
         if let error {
             log.error(error, subsystems: .videoCapturer)
-            Task(disposableBag: disposableBag) { [weak self] in
-                do {
-                    try await self?.stop()
-                } catch {
-                    log.error(error, subsystems: .videoCapturer)
-                }
-            }
         }
+        finishCapture()
     }
 
     // MARK: - StreamVideoCapturerActionHandler
@@ -117,23 +123,27 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
         recorder.isMicrophoneEnabled = false
         recorder.isCameraEnabled = false
 
-        audioFilterBeforeScreensharingAudio = audioFilterProcessingModule.activeAudioFilter
-        audioFilterProcessingModule.setAudioFilter(nil)
+        audioFilterGate?(true)
 
-        try await Task { @MainActor [weak self] in
-            try await self?.startCapture { [weak self] sampleBuffer,
-                sampleBufferType,
-                error in
-                if let error {
-                    log.error(error, subsystems: .videoCapturer)
-                } else {
-                    self?.didReceive(
-                        sampleBuffer: sampleBuffer,
-                        sampleBufferType: sampleBufferType
-                    )
+        do {
+            try await Task { @MainActor [weak self] in
+                try await self?.startCapture { [weak self] sampleBuffer,
+                    sampleBufferType,
+                    error in
+                    if let error {
+                        log.error(error, subsystems: .videoCapturer)
+                    } else {
+                        self?.didReceive(
+                            sampleBuffer: sampleBuffer,
+                            sampleBufferType: sampleBufferType
+                        )
+                    }
                 }
-            }
-        }.value
+            }.value
+        } catch {
+            audioFilterGate?(false)
+            throw error
+        }
 
         activeSession = .init(
             videoCapturer: videoCapturer,
@@ -249,19 +259,27 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
         audioDeviceModule.enqueue(sampleBuffer)
     }
 
-    /// Stops ReplayKit capture and restores audio filters.
+    /// Stops ReplayKit capture and lifts the screenshare filter suspend.
+    ///
+    /// `stopCapture` completion means capture has stopped, including when
+    /// it supplies an error. Do not use `recorder.isRecording` as a second
+    /// source of truth; that flag can lag and leave live filters suppressed.
     private func stop() async throws {
-        guard
-            isRecording == true
-        else {
+        guard isRecording else {
             return
         }
 
-        // Restore the previously disabled filter
-        audioFilterProcessingModule.setAudioFilter(audioFilterBeforeScreensharingAudio)
-        audioFilterBeforeScreensharingAudio = nil
-
+        defer { finishCapture() }
         try await recorder.stopCapture()
+    }
+
+    /// Terminal cleanup after capture has stopped. Idempotent. Does not
+    /// call `stopCapture`.
+    private func finishCapture() {
+        guard isRecording else {
+            return
+        }
+        audioFilterGate?(false)
         activeSession = nil
         isRecording = false
     }

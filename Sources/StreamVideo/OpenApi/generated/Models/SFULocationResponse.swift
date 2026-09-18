@@ -18,7 +18,7 @@ public final class SFULocationResponse: @unchecked Sendable, Codable, JSONEncoda
         self.location = location
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case coordinates
         case datacenter
         case id

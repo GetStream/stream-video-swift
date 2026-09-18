@@ -20,7 +20,7 @@ public final class AggregatedStats: @unchecked Sendable, Codable, JSONEncodable,
         self.turn = turn
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case countrywiseAggregateStats = "countrywise_aggregate_stats"
         case publisherAggregateStats = "publisher_aggregate_stats"
         case turn

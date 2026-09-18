@@ -18,7 +18,7 @@ public final class Subsession: @unchecked Sendable, Codable, JSONEncodable, Hash
         self.sfuId = sfuId
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case endedAt = "ended_at"
         case joinedAt = "joined_at"
         case pubSubHint = "pub_sub_hint"

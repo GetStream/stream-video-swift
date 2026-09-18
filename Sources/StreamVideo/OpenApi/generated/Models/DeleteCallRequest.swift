@@ -12,7 +12,7 @@ public final class DeleteCallRequest: @unchecked Sendable, Codable, JSONEncodabl
         self.hard = hard
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case hard
     }
     

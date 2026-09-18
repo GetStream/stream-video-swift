@@ -16,7 +16,7 @@ public final class HLSSettingsResponse: @unchecked Sendable, Codable, JSONEncoda
         self.qualityTracks = qualityTracks
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case autoOn = "auto_on"
         case enabled
         case qualityTracks = "quality_tracks"

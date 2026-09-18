@@ -16,7 +16,7 @@ public final class Credentials: @unchecked Sendable, Codable, JSONEncodable, Has
         self.token = token
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case iceServers = "ice_servers"
         case server
         case token

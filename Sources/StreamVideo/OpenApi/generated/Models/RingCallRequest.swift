@@ -13,7 +13,7 @@ public final class RingCallRequest: @unchecked Sendable, Codable, JSONEncodable,
         self.video = video
     }
 
-public enum CodingKeys: String, CodingKey, CaseIterable {
+public enum CodingKeys: String, CodingKey {
     case membersIds = "members_ids"
     case video
 }

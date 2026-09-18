@@ -16,7 +16,7 @@ public final class CreateGuestResponse: @unchecked Sendable, Codable, JSONEncoda
         self.user = user
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case accessToken = "access_token"
         case duration
         case user

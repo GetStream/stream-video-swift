@@ -18,7 +18,7 @@ public final class ConnectionErrorEvent: @unchecked Sendable, Event, Codable, JS
         self.error = error
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case connectionId = "connection_id"
         case createdAt = "created_at"
         case error

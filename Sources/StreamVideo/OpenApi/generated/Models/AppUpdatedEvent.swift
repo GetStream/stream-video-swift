@@ -19,7 +19,7 @@ public final class AppUpdatedEvent: @unchecked Sendable, Event, Codable, JSONEnc
         self.receivedAt = receivedAt
     }
 
-public enum CodingKeys: String, CodingKey, CaseIterable {
+public enum CodingKeys: String, CodingKey {
     case app
     case createdAt = "created_at"
     case custom

@@ -12,7 +12,7 @@ public final class StopRTMPBroadcastsResponse: @unchecked Sendable, Codable, JSO
         self.duration = duration
     }
     
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case duration
     }
     

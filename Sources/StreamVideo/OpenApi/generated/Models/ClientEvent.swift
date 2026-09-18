@@ -89,7 +89,7 @@ public final class ClientEvent: @unchecked Sendable, Codable, JSONEncodable, Has
         self.wasPreviouslyConnected = wasPreviouslyConnected
     }
 
-    public enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey {
         case callSessionId = "call_session_id"
         case cameraPermissionStatus = "camera_permission_status"
         case coordinatorConnectId = "coordinator_connect_id"

@@ -23,7 +23,7 @@ public final class EgressResponse: @unchecked Sendable, Codable, JSONEncodable, 
         self.rtmps = rtmps
     }
 
-public enum CodingKeys: String, CodingKey, CaseIterable {
+public enum CodingKeys: String, CodingKey {
     case broadcasting
     case compositeRecording = "composite_recording"
     case frameRecording = "frame_recording"
