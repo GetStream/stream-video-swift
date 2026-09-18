@@ -69,6 +69,9 @@ extension Call_IntegrationTests {
         }
 
         mutating func dismantle() async throws {
+            // Runs even when the teardown below throws, so the shared
+            // timeouts never outlive the scenario.
+            defer { configuration.dismantle() }
             restoreAudioSessionReadinessWatchdog()
 
             if duringDismantleObservedAllCallEnded {
@@ -121,6 +124,7 @@ extension Call_IntegrationTests {
             overrideAPIKey: String? = nil,
             overrideToken: String? = nil
         ) async throws -> CallFlow<Void> {
+            configuration.activate()
             let authentication = try await authentication
                 .authenticate(userId: userId, environment: environment)
             let client = try await client.buildClient(
@@ -149,6 +153,7 @@ extension Call_IntegrationTests {
             userId: String,
             clientResolutionMode: StreamVideoHelper.ClientResolutionMode = .ignoreCache
         ) async throws -> Call {
+            configuration.activate()
             let authentication = try await authentication
                 .authenticate(userId: userId)
             let client = try await client.buildClient(
