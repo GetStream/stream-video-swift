@@ -376,12 +376,10 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     // MARK: - End
 
     func test_end_whenCreatorEndsCall_thenParticipantAutomaticallyLeaves() async throws {
-        throw XCTSkip()
         helpers.configuration.stubAudioSessionReadinessWatchdogForJoinMiss()
         let callId = String.unique
         let creatorUserId = String.unique
         let participantUserId = String.unique
-        helpers.duringDismantleObservedAllCallEnded = false
 
         let creatorUserFlow = try await helpers
             .callFlow(id: callId, type: .default, userId: creatorUserId)
@@ -400,7 +398,8 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
 
         try await participantFlow
             .assertEventuallyInMainActor(timeout: 30) {
-                $0.call.streamVideo.state.activeCall == nil
+                $0.client.state.activeCall == nil
+                    && creatorFlow.client.state.activeCall == nil
             }
     }
 

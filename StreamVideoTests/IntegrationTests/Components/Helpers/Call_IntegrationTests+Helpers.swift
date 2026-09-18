@@ -28,8 +28,6 @@ extension Call_IntegrationTests {
 
         enum LoggingMode { case none, sdk, webrtc, all }
 
-        var duringDismantleObservedAllCallEnded = true
-
         var authentication: AuthenticationHelper
         var configuration: ConfigurationHelper
         var client: StreamVideoHelper
@@ -73,16 +71,14 @@ extension Call_IntegrationTests {
             // timeouts never outlive the scenario.
             defer { configuration.dismantle() }
 
-            if duringDismantleObservedAllCallEnded {
-                for call in registeredCalls.values {
-                    call.leave()
-                    _ = try? await NotificationCenter
-                        .default
-                        .publisher(for: .init(CallNotification.callEnded))
-                        .compactMap { ($0.object as? Call)?.cId }
-                        .filter { $0 == call.cId }
-                        .nextValue(timeout: 2)
-                }
+            for call in registeredCalls.values {
+                call.leave()
+                _ = try? await NotificationCenter
+                    .default
+                    .publisher(for: .init(CallNotification.callEnded))
+                    .compactMap { ($0.object as? Call)?.cId }
+                    .filter { $0 == call.cId }
+                    .nextValue(timeout: 2)
             }
             registeredCalls = [:]
 
