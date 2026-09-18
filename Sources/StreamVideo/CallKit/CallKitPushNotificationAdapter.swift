@@ -42,14 +42,13 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
     @Injected(\.callKitService) private var callKitService
 
     private var activeSystemCallingService: SystemCallingService {
-        #if canImport(LiveCommunicationKit)
-        if #available(iOS 27.0, *), shouldUseLiveCommunicationKit {
-            return InjectedValues[\.liveCommunicationKitService]
-        }
-        #endif
-        return callKitService
+        SystemCallingServiceProvider.service(for: configuredStreamVideo)
     }
 
+    /// The client configured on whichever system calling service is in charge.
+    ///
+    /// `CallKitAdapter` hands the client to a single service, so the first
+    /// non-`nil` value is the configured one.
     private var configuredStreamVideo: StreamVideo? {
         if let streamVideo = callKitService.streamVideo {
             return streamVideo
@@ -60,10 +59,6 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
         }
         #endif
         return nil
-    }
-
-    private var shouldUseLiveCommunicationKit: Bool {
-        configuredStreamVideo?.videoConfig.useLiveCommunicationKit ?? true
     }
 
     /// The push registry used for VoIP push notifications.

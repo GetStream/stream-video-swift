@@ -1157,7 +1157,7 @@ final class AudioDeviceModule_Tests: XCTestCase, @unchecked Sendable {
             interleaved: false
         )!
     }
-        
+
     @discardableResult
     private func configureInput(
         engine: AVAudioEngine = AVAudioEngine(),

@@ -12,11 +12,16 @@ import LiveCommunicationKit
 @available(iOS 27.0, *)
 final class LiveCommunicationKitServiceTests: XCTestCase, @unchecked Sendable {
 
+    private var mockedStreamVideo: MockStreamVideo!
     private var subject: LiveCommunicationKitService!
     private var cancellables: Set<AnyCancellable>!
 
     override func setUp() {
         super.setUp()
+        // The service builds a `LastParticipantAutoLeavePolicy` during `init`,
+        // which reads `InjectedValues[\.streamVideo]`. That accessor traps when
+        // no client exists, so one has to be set up before the subject.
+        mockedStreamVideo = .init()
         subject = .init()
         cancellables = []
     }
@@ -24,6 +29,7 @@ final class LiveCommunicationKitServiceTests: XCTestCase, @unchecked Sendable {
     override func tearDown() {
         cancellables = nil
         subject = nil
+        mockedStreamVideo = nil
         super.tearDown()
     }
 

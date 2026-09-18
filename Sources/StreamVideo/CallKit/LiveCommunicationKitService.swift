@@ -220,6 +220,13 @@ open class LiveCommunicationKitService: NSObject, ConversationManagerDelegate, S
 
         Task(disposableBag: disposableBag) { [weak self] in
             guard let self else {
+                // PushKit terminates the app if the completion of a VoIP push
+                // is never called, so it must be invoked on every path.
+                completion(
+                    ClientError(
+                        "LiveCommunicationKitService was deallocated before reporting the incoming call with cid:\(cid)."
+                    )
+                )
                 return
             }
 
@@ -882,6 +889,11 @@ open class LiveCommunicationKitService: NSObject, ConversationManagerDelegate, S
             return
         }
 
+        // Unlike CallKit, ending doesn't round-trip through the system, so the
+        // ringing timeout has to be torn down here.
+        ringingTimerCancellable?.cancel()
+        ringingTimerCancellable = nil
+
         Task(disposableBag: disposableBag) { [weak self] in
             guard let self else { return }
             reportConversationEnded(
@@ -968,7 +980,10 @@ open class LiveCommunicationKitService: NSObject, ConversationManagerDelegate, S
                 displayName: $0.user.name
             )
         }
-        let capabilities: Conversation.Capabilities? = hasVideo ? .video : nil
+        // Declared explicitly rather than left to the framework defaults:
+        // holding, merging and tones aren't supported, and their actions would
+        // only be failed if the system offered them.
+        let capabilities: Conversation.Capabilities = hasVideo ? .video : []
         let update = Conversation.Update(
             localMember: localHandle,
             members: [remoteHandle],

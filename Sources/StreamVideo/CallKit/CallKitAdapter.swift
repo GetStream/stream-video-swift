@@ -10,7 +10,6 @@ import Foundation
 open class CallKitAdapter {
 
     @Injected(\.callKitPushNotificationAdapter) private var callKitPushNotificationAdapter
-    @Injected(\.callKitService) private var callKitService
     @Injected(\.currentDevice) private var currentDevice
 
     private var loggedInStateCancellable: AnyCancellable?
@@ -41,10 +40,21 @@ open class CallKitAdapter {
 
     /// The policy that decides if a system-managed call should leave
     /// automatically when participant state changes.
+    ///
+    /// - Important: Assign a **dedicated** policy instance. A policy exposes a
+    ///   single `onPolicyTriggered` slot, so sharing one instance with another
+    ///   consumer (e.g. `CallViewModel`) silently disconnects the earlier one.
     open var participantAutoLeavePolicy: ParticipantAutoLeavePolicy {
         get { activeSystemCallingService.participantAutoLeavePolicy }
-        set { updateSystemCallingServices { $0.participantAutoLeavePolicy = newValue } }
+        set {
+            _participantAutoLeavePolicy = newValue
+            applyParticipantAutoLeavePolicy(newValue)
+        }
     }
+
+    /// The last policy assigned through ``participantAutoLeavePolicy``. Kept so
+    /// it can be re-applied whenever the active service changes.
+    private var _participantAutoLeavePolicy: ParticipantAutoLeavePolicy?
 
     /// The policy defining the availability of system calling services.
     ///
@@ -88,27 +98,13 @@ open class CallKitAdapter {
     }
 
     private var activeSystemCallingService: SystemCallingService {
-        #if canImport(LiveCommunicationKit)
-        if #available(iOS 27.0, *), shouldUseLiveCommunicationKit {
-            return InjectedValues[\.liveCommunicationKitService]
-        }
-        #endif
-        return callKitService
-    }
-
-    private var shouldUseLiveCommunicationKit: Bool {
-        streamVideo?.videoConfig.useLiveCommunicationKit ?? true
+        SystemCallingServiceProvider.service(for: streamVideo)
     }
 
     private func updateSystemCallingServices(
         _ update: (SystemCallingService) -> Void
     ) {
-        update(callKitService)
-        #if canImport(LiveCommunicationKit)
-        if #available(iOS 27.0, *) {
-            update(InjectedValues[\.liveCommunicationKitService])
-        }
-        #endif
+        SystemCallingServiceProvider.updateAll(update)
     }
 
     private func updateSystemCallingServices(with streamVideo: StreamVideo?) {
@@ -117,15 +113,28 @@ open class CallKitAdapter {
             return
         }
 
-        let useLiveCommunicationKit = streamVideo.videoConfig.useLiveCommunicationKit
-        callKitService.streamVideo = useLiveCommunicationKit ? nil : streamVideo
-        #if canImport(LiveCommunicationKit)
-        if #available(iOS 27.0, *) {
-            InjectedValues[\.liveCommunicationKitService].streamVideo = useLiveCommunicationKit
-                ? streamVideo
-                : nil
+        // Only the service that will manage the calls receives the client. The
+        // availability check matters: on OS versions without
+        // LiveCommunicationKit, CallKit stays in charge even when the config
+        // opts into LiveCommunicationKit.
+        let activeService = SystemCallingServiceProvider.service(for: streamVideo)
+        updateSystemCallingServices { $0.streamVideo = $0 === activeService ? streamVideo : nil }
+    }
+
+    /// Hands the policy to every available service, letting the active one
+    /// assign it **last**.
+    ///
+    /// Each service claims the policy's single `onPolicyTriggered` slot in its
+    /// `didSet`, so the last assignment is the one that stays connected.
+    private func applyParticipantAutoLeavePolicy(
+        _ policy: ParticipantAutoLeavePolicy
+    ) {
+        let activeService = activeSystemCallingService
+        updateSystemCallingServices {
+            guard $0 !== activeService else { return }
+            $0.participantAutoLeavePolicy = policy
         }
-        #endif
+        activeService.participantAutoLeavePolicy = policy
     }
 
     private func didUpdate(_ streamVideo: StreamVideo?) {
@@ -138,6 +147,12 @@ open class CallKitAdapter {
         }
 
         updateSystemCallingServices(with: streamVideo)
+
+        // The active service may have changed, so the policy's callback slot
+        // needs to be re-claimed by whichever service is now in charge.
+        if let _participantAutoLeavePolicy {
+            applyParticipantAutoLeavePolicy(_participantAutoLeavePolicy)
+        }
 
         guard streamVideo != nil else {
             unregisterForIncomingCalls()

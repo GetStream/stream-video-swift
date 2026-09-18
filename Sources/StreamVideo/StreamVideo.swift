@@ -582,16 +582,11 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     /// Reports whether a system-level (VoIP) call is currently active.
     ///
     /// Used by `CallKitReconnectionPolicy` to keep the coordinator socket
-    /// recovering while the app is backgrounded during a call. When
-    /// LiveCommunicationKit is available it owns the call, so its call count is
-    /// the authoritative one; otherwise we fall back to CallKit.
+    /// recovering while the app is backgrounded during a call. Either CallKit
+    /// or LiveCommunicationKit owns the call depending on the OS version and
+    /// `VideoConfig.useLiveCommunicationKit`, so both are consulted.
     private static func hasActiveSystemCall() -> Bool {
-        #if canImport(LiveCommunicationKit)
-        if #available(iOS 27.0, *) {
-            return InjectedValues[\.liveCommunicationKitService].callCount > 0
-        }
-        #endif
-        return InjectedValues[\.callKitService].callCount > 0
+        SystemCallingServiceProvider.hasActiveCall
     }
 
     /// Builds the coordinator connect payload (auth) sent once the socket opens.
