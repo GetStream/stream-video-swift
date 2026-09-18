@@ -376,7 +376,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     // MARK: - End
 
     func test_end_whenCreatorEndsCall_thenParticipantAutomaticallyLeaves() async throws {
-        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
+        helpers.configuration.stubAudioSessionReadinessWatchdogForJoinMiss()
         let callId = String.unique
         let creatorUserId = String.unique
         let participantUserId = String.unique
@@ -481,7 +481,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     // MARK: - Accept
 
     func test_accept_whenUserAcceptsTheCall_thenCallStateUpdatesForAllParticipantsAsExpected() async throws {
-        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
+        helpers.configuration.stubAudioSessionReadinessWatchdogForJoinMiss()
         let callId = String.unique
         let user1 = String.unique
         let user2 = String.unique
@@ -519,7 +519,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     // MARK: - Notify
 
     func test_notify_whenNotifyEventIsBeingSent_thenOtherParticipantsReceiveTheEventAsExpected() async throws {
-        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
+        helpers.configuration.stubAudioSessionReadinessWatchdogForJoinMiss()
         let callId = String.unique
         let user1 = String.unique
         let user2 = String.unique
@@ -558,7 +558,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     // MARK: Ringing
 
     func test_join_ringingFlow_whenAcceptingACallWhilePermissionsAreNotGranted_thenWeJoinTheCallCorrectly() async throws {
-        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
+        helpers.configuration.stubAudioSessionReadinessWatchdogForJoinMiss()
         let callId = String.unique
         let user1 = String.unique
         let user2 = String.unique
@@ -600,7 +600,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     // MARK: Livestream
 
     func test_join_livestream_whenCallIsInBackstageOnlyHostCanJoin_thenAnyOtherParticipantShouldFailToJoin() async throws {
-        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
+        helpers.configuration.stubAudioSessionReadinessWatchdogForJoinMiss()
         let callId = String.unique
         let participant = String.unique
 
@@ -630,7 +630,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     }
 
     func test_join_livestream_whenCallIsInBackstage_thenOnlyCreatorAndOtherHostsCanJoin() async throws {
-        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
+        helpers.configuration.stubAudioSessionReadinessWatchdogForJoinMiss()
         let callId = String.unique
         let creator = String.unique
         let otherHost = String.unique
@@ -668,7 +668,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     }
 
     func test_join_livestream_whenCallIsInBackstageOnlyHostCanJoin_thenAfterCallGoesLiveAnyOtherParticipantCanJoin() async throws {
-        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
+        helpers.configuration.stubAudioSessionReadinessWatchdogForJoinMiss()
         let callId = String.unique
         let participant = String.unique
         let joinAheadTimeSeconds: Double = 10
@@ -700,7 +700,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
 
     func test_join_audioRoom_whenAParticipantIsGrantedPermissionsToSpeak_thenTheirCallStateUpdatesWithExpectedCapabilities(
     ) async throws {
-        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
+        helpers.configuration.stubAudioSessionReadinessWatchdogForJoinMiss()
         let callId = String.unique
         let host = String.unique
 
@@ -734,7 +734,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     }
 
     func test_join_audioRoom_whenAParticipanRequestsPermissionToSpeakAndGetsRejected_thenTheirCallStateDoesNotUpdate() async throws {
-        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
+        helpers.configuration.stubAudioSessionReadinessWatchdogForJoinMiss()
         let callId = String.unique
         let host = String.unique
 
@@ -769,7 +769,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     }
 
     func test_join_audioRoom_whenAParticipantPermissionGetsRevoked_thenTheirCallStateUpdatesWithExpectedCapabilities() async throws {
-        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
+        helpers.configuration.stubAudioSessionReadinessWatchdogForJoinMiss()
         let callId = String.unique
         let host = "host"
         let participant = "participant"
@@ -808,7 +808,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     }
 
     func test_audioRoom_participantWithoutSpeakPermission_toggleMicrophone_audioRemainsDisabled() async throws {
-        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
+        helpers.configuration.stubAudioSessionReadinessWatchdogForJoinMiss()
         helpers.permissions.setMicrophonePermission(isGranted: true)
         let callId = String.unique
         let host = String.unique
@@ -845,7 +845,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     }
 
     func test_audioRoom_participantRequestsSpeakPermission_hostAccepts_participantCanToggleMicrophone() async throws {
-        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
+        helpers.configuration.stubAudioSessionReadinessWatchdogForJoinMiss()
         helpers.permissions.setMicrophonePermission(isGranted: true)
         let callId = String.unique
         let host = String.unique
@@ -886,7 +886,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
 
     func test_audioRoom_participantRequestsSpeakPermission_hostRejects_participantCannotToggleMicrophone(
     ) async throws {
-        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
+        helpers.configuration.stubAudioSessionReadinessWatchdogForJoinMiss()
         helpers.permissions.setMicrophonePermission(isGranted: true)
         let callId = String.unique
         let host = String.unique
@@ -930,7 +930,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     }
 
     func test_audioRoom_hostRevokesSpeakPermission_participantGetsMutedAndCannotToggleMicrophone() async throws {
-        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
+        helpers.configuration.stubAudioSessionReadinessWatchdogForJoinMiss()
         helpers.permissions.setMicrophonePermission(isGranted: true)
         let callId = String.unique
         let host = String.unique
@@ -982,7 +982,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     }
 
     func test_audioRoom_participantWithoutVideoPermission_toggleCamera_videoRemainsDisabled() async throws {
-        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
+        helpers.configuration.stubAudioSessionReadinessWatchdogForJoinMiss()
         helpers.permissions.setCameraPermission(isGranted: true)
         let callId = String.unique
         let host = String.unique
@@ -1065,7 +1065,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     }
 
     func test_join_whenParticipantCancelsJoinAttemptAndRetries_thenSecondJoinSucceedsWithoutTimeoutErrors() async throws {
-        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
+        helpers.configuration.stubAudioSessionReadinessWatchdogForJoinMiss()
         let callId = String.unique
         let creator = String.unique
         let participant = String.unique
@@ -1155,7 +1155,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     // MARK: - Pin
 
     func test_pin_whenUserGetsPinnedForEveryone_thenCallStateOfAllParticipantsUpdatesAsExpected() async throws {
-        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
+        helpers.configuration.stubAudioSessionReadinessWatchdogForJoinMiss()
         let callId = String.unique
         let user1 = String.unique
         let user2 = String.unique
@@ -1196,7 +1196,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     }
 
     func test_pin_whenUserGetsPinnedLocally_thenCallStateOfLocalParticipantOnlyUpdatesAsExpected() async throws {
-        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
+        helpers.configuration.stubAudioSessionReadinessWatchdogForJoinMiss()
         let callId = String.unique
         let user1 = String.unique
         let user2 = String.unique
@@ -1234,7 +1234,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     // MARK: - Unpin
 
     func test_pin_whenUserGetsUnpinnedForEveryone_thenCallStateOfAllParticipantsUpdatesAsExpected() async throws {
-        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
+        helpers.configuration.stubAudioSessionReadinessWatchdogForJoinMiss()
         let callId = String.unique
         let user1 = String.unique
         let user2 = String.unique
@@ -1291,7 +1291,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
     }
 
     func test_pin_whenUserGetsUnpinnedLocally_thenCallStateOfLocalParticipantOnlyUpdatesAsExpected() async throws {
-        helpers.stubAudioSessionReadinessWatchdogForJoinMiss()
+        helpers.configuration.stubAudioSessionReadinessWatchdogForJoinMiss()
         let callId = String.unique
         let user1 = String.unique
         let user2 = String.unique

@@ -62,5 +62,12 @@ extension Call_IntegrationTests.Helpers {
             Self.previousWebRTCTimeout = nil
             Self.previousCallTimeout = nil
         }
+
+        // Inactive never becomes ready; Joined watchdog
+        // rejoin is the join-miss. Stub interval only.
+        func stubAudioSessionReadinessWatchdogForJoinMiss() {
+            guard Self.previousWebRTCTimeout == nil else { return }
+            WebRTCConfiguration.timeout.audioSessionReadinessWatchdog = 3600
+        }
     }
 }
