@@ -39,6 +39,19 @@ final class AudioBufferRenderer_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertTrue(storedContext?.destination === destination)
     }
 
+    func test_configure_whenContextFormatIsInvalid_clearsStoredContext() {
+        let context = AVAudioEngine.InputContext(
+            engine: AVAudioEngine(),
+            source: nil,
+            destination: AVAudioMixerNode(),
+            format: makeInvalidFormat()
+        )
+
+        subject.configure(with: context)
+
+        XCTAssertNil(rendererContext(subject))
+    }
+
     func test_reset_clearsStoredContext() {
         let engine = AVAudioEngine()
         let destination = AVAudioMixerNode()
@@ -62,6 +75,15 @@ final class AudioBufferRenderer_Tests: XCTestCase, @unchecked Sendable {
             commonFormat: .pcmFormatFloat32,
             sampleRate: 48000,
             channels: 1,
+            interleaved: false
+        )!
+    }
+
+    private func makeInvalidFormat() -> AVAudioFormat {
+        AVAudioFormat(
+            commonFormat: .pcmFormatFloat32,
+            sampleRate: 0,
+            channels: 0,
             interleaved: false
         )!
     }
