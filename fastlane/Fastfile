@@ -261,6 +261,7 @@ private_lane :test_ui do |options|
   remove_snapshots(scheme: options[:scheme]) if record_mode
 
   update_testplan_on_ci(path: "#{options[:scheme]}Tests/#{options[:scheme]}.xctestplan")
+  allow_xcode26_parallel_test_results
 
   scan(
     project: xcode_project,
@@ -292,6 +293,30 @@ private_lane :test_ui do |options|
       base_branch: current_branch,
       head_branch: "#{current_branch}-#{options[:scheme]}-snapshots-#{Time.now.to_i}"
     )
+  end
+end
+
+# fastlane 2.228 raises a build failure for Xcode 26 parallel results
+# ("** TEST FAILED **") before fail_build is applied, so snapshot
+# recording aborts before the snapshots PR. fastlane 2.231 handles
+# this; drop the shim once the lockfile is at least that version.
+private_lane :allow_xcode26_parallel_test_results do
+  require 'scan'
+
+  error_handler = Scan::ErrorHandler.singleton_class
+  return if error_handler.method_defined?(:handle_build_error_without_xcode26)
+
+  error_handler.alias_method(
+    :handle_build_error_without_xcode26,
+    :handle_build_error
+  )
+
+  Scan::ErrorHandler.define_singleton_method(:handle_build_error) do |output, log_path|
+    xcode26_test_failure = /Testing started.*\*\* TEST FAILED \*\*/m
+    xcode26_execute_failure = /Testing started.*\*\* TEST EXECUTE FAILED \*\*/m
+    return if output.match?(xcode26_test_failure) || output.match?(xcode26_execute_failure)
+
+    handle_build_error_without_xcode26(output, log_path)
   end
 end
 
