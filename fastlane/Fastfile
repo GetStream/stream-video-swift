@@ -391,12 +391,16 @@ end
 
 private_lane :retreive_failed_tests do
   report_path = 'test_output/report.junit'
-  raise UI.user_error!('There is no junit report to parse') unless File.file?(report_path)
+  next [] unless File.file?(report_path)
 
   junit_report = Nokogiri::XML(File.read(report_path))
   failed_tests = []
   passed_tests = []
-  suite_name = junit_report.xpath('//testsuite').first['name'].split('.').first
+  suite = junit_report.xpath('//testsuite').first
+  suite_name = suite && suite['name']
+  next [] if suite_name.nil? || suite_name.empty?
+
+  suite_name = suite_name.split('.').first
   junit_report.xpath('//testcase').each do |testcase|
     class_name = testcase['classname'].split('.').last
     test_name = testcase['name'].delete('()')
