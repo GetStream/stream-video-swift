@@ -63,6 +63,7 @@ final class MockWebRTCCoordinatorStack: @unchecked Sendable {
             videoConfig: videoConfig,
             callSettings: callSettings,
             clientEventReporter: clientEventReporter,
+            peerConnectionFactory: peerConenctionFactory,
             rtcPeerConnectionCoordinatorFactory: rtcPeerConnectionCoordinatorFactory,
             webRTCAuthenticator: webRTCAuthenticator,
             callAuthentication: callAuthenticator.authenticate
