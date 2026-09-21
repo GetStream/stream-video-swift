@@ -11,8 +11,7 @@ import XCTest
 
 @MainActor
 final class InviteParticipantsView_Tests: StreamVideoUITestCase,
-    @unchecked Sendable
-{
+    @unchecked Sendable {
     private lazy var call: Call! = streamVideoUI?.streamVideo.call(
         callType: callType,
         callId: callId
