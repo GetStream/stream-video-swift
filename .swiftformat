@@ -66,7 +66,7 @@
 --commas inline
 --trimwhitespace nonblank-lines
 --stripunusedargs closure-only
---maxwidth 132
+--maxwidth 140
 
 --binarygrouping 4,7
 --octalgrouping none
