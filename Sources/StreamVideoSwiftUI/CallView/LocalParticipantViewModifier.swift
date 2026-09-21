@@ -66,11 +66,7 @@ public struct LocalParticipantViewModifier: ViewModifier {
                 decoration: .speaking,
                 availableDecorations: decorations
             )
-            .clipShape(
-                RoundedRectangle(
-                    cornerRadius: tokens.layout.radiusXl
-                )
-            )
+            .clipShape(RoundedRectangle(cornerRadius: tokens.layout.radiusXl))
             .clipped()
     }
 
@@ -128,10 +124,7 @@ public struct LocalParticipantViewModifier_iOS13: ViewModifier {
                             )
                         }
                     }
-                    .padding(
-                        .bottom,
-                        tokens.layout.spacingXxxs
-                    )
+                    .padding(.bottom, tokens.layout.spacingXxxs)
                 }
                 .padding(
                     .all,
@@ -150,11 +143,7 @@ public struct LocalParticipantViewModifier_iOS13: ViewModifier {
                 decoration: .speaking,
                 availableDecorations: decorations
             )
-            .clipShape(
-                RoundedRectangle(
-                    cornerRadius: tokens.layout.radiusXl
-                )
-            )
+            .clipShape(RoundedRectangle(cornerRadius: tokens.layout.radiusXl))
             .clipped()
     }
 

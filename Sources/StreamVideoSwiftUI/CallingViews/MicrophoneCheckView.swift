@@ -41,16 +41,12 @@ public struct MicrophoneCheckView: View {
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(maxHeight: CGFloat(maxHeight))
-                    .foregroundColor(
-                        Color(tokens.colors.textOnAccent)
-                    )
+                    .foregroundColor(Color(tokens.colors.textOnAccent))
                     .padding(.trailing, tokens.layout.spacingXxs)
             }
 
             Text(streamVideo.user.name)
-                .foregroundColor(
-                    Color(tokens.colors.textOnAccent)
-                )
+                .foregroundColor(Color(tokens.colors.textOnAccent))
                 .multilineTextAlignment(.leading)
                 .lineLimit(1)
                 .font(tokens.fonts.caption1)
@@ -69,9 +65,7 @@ public struct MicrophoneCheckView: View {
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(height: CGFloat(maxHeight))
-                    .foregroundColor(
-                        Color(tokens.colors.accentError)
-                    )
+                    .foregroundColor(Color(tokens.colors.accentError))
             }
         }
         .padding(.all, tokens.layout.spacingXxxs)
@@ -80,9 +74,7 @@ public struct MicrophoneCheckView: View {
         .cornerRadius(
             tokens.layout.radiusMd,
             corners: [.topRight],
-            backgroundColor: Color(
-                tokens.colors.backgroundCoreOverlayDarkStrong
-            )
+            backgroundColor: Color(tokens.colors.backgroundCoreOverlayDarkStrong)
         )
         .onReceive(permissions.$hasMicrophonePermission) { hasMicrophoneAccess = $0 }
     }
@@ -115,20 +107,9 @@ public struct AudioVolumeIndicator: View {
         HStack(spacing: tokens.layout.spacingXxxs) {
             ForEach(levels) { level in
                 VStack {
-                    RoundedRectangle(
-                        cornerRadius: tokens.layout.radiusXs
-                    )
-                    .fill(
-                        Color(
-                            videoAppearance
-                                .colors
-                                .indicatorMicrophoneLevelBarActive
-                        )
-                    )
-                    .frame(
-                        width: tokens.layout.spacingXxxs,
-                        height: height(for: level.value)
-                    )
+                    RoundedRectangle(cornerRadius: tokens.layout.radiusXs)
+                        .fill(Color(videoAppearance.colors.indicatorMicrophoneLevelBarActive))
+                        .frame(width: tokens.layout.spacingXxxs, height: height(for: level.value))
                 }
                 .frame(height: CGFloat(maxHeight))
             }

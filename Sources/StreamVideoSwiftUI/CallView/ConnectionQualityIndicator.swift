@@ -5,7 +5,6 @@
 import StreamCoreUI
 import StreamVideo
 import SwiftUI
-
 /// A view representing a connection quality indicator.
 public struct ConnectionQualityIndicator: View {
 
