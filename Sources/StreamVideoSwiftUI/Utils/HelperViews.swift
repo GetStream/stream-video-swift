@@ -87,7 +87,6 @@ extension CallIconStyle {
 
 /// View used for the online indicator.
 public struct OnlineIndicatorView: View {
-    @Injected(\.videoAppearance) private var videoAppearance
 
     var indicatorSize: CGFloat
 
@@ -105,9 +104,5 @@ public struct OnlineIndicatorView: View {
 
     private var innerCircleSize: CGFloat {
         2 * indicatorSize / 3
-    }
-
-    private var colors: DesignSystemTokens.Colors {
-        videoAppearance.tokens.colors
     }
 }

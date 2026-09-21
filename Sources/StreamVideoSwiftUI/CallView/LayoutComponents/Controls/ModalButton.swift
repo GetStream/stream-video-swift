@@ -3,13 +3,10 @@
 //
 
 import Foundation
-import StreamCoreUI
 import StreamVideo
 import SwiftUI
 
 public struct ModalButton: View {
-
-    @Injected(\.videoAppearance) var videoAppearance
 
     var image: Image
     var action: () -> Void
@@ -31,19 +28,9 @@ public struct ModalButton: View {
         }
         .buttonStyle(.modal)
     }
-
-    private var colors: DesignSystemTokens.Colors {
-        videoAppearance.tokens.colors
-    }
-
-    private var layout: DesignSystemTokens.Layout {
-        videoAppearance.tokens.layout
-    }
 }
 
 struct ModalButtonStyle: ButtonStyle {
-
-    @Injected(\.videoAppearance) var videoAppearance
 
     func makeBody(configuration: Configuration) -> some View {
         configuration
@@ -51,10 +38,6 @@ struct ModalButtonStyle: ButtonStyle {
             .opacity(configuration.isPressed ? 0.5 : 1)
             .background(Circle().fill(Color(colors.backgroundCoreSurfaceDefault)))
             .frame(width: 30, height: 30)
-    }
-
-    private var colors: DesignSystemTokens.Colors {
-        videoAppearance.tokens.colors
     }
 }
 

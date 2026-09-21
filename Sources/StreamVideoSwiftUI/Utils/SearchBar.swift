@@ -2,7 +2,6 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
-import StreamCoreUI
 import StreamVideo
 import SwiftUI
 
@@ -73,13 +72,5 @@ struct SearchBar: View, KeyboardReadable {
                 self.isEditing = false
             }
         }
-    }
-
-    private var colors: DesignSystemTokens.Colors {
-        videoAppearance.tokens.colors
-    }
-
-    private var layout: DesignSystemTokens.Layout {
-        videoAppearance.tokens.layout
     }
 }

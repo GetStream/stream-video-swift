@@ -2,7 +2,6 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
-import StreamCoreUI
 import StreamVideo
 import SwiftUI
 
@@ -212,18 +211,6 @@ struct CallParticipantsViewContainer<Factory: ViewFactory>: View {
             return L10n.Call.Participants.title
         }
     }
-
-    private var colors: DesignSystemTokens.Colors {
-        videoAppearance.tokens.colors
-    }
-
-    private var fonts: DesignSystemTokens.Fonts {
-        videoAppearance.tokens.fonts
-    }
-
-    private var layout: DesignSystemTokens.Layout {
-        videoAppearance.tokens.layout
-    }
 }
 
 private struct ParticipantsSheetBackgroundModifier: ViewModifier {
@@ -247,8 +234,6 @@ private struct ParticipantsSheetBackgroundModifier: ViewModifier {
 }
 
 struct ParticipantsButton: View {
-
-    @Injected(\.videoAppearance) private var videoAppearance
 
     var title: String
     var primaryStyle: Bool = true
@@ -285,23 +270,9 @@ struct ParticipantsButton: View {
                 .cornerRadius(layout.radius3xl)
         }
     }
-
-    private var colors: DesignSystemTokens.Colors {
-        videoAppearance.tokens.colors
-    }
-
-    private var fonts: DesignSystemTokens.Fonts {
-        videoAppearance.tokens.fonts
-    }
-
-    private var layout: DesignSystemTokens.Layout {
-        videoAppearance.tokens.layout
-    }
 }
 
 struct BlockedUsersView: View {
-
-    @Injected(\.videoAppearance) var videoAppearance
 
     var blockedUsers: [User]
     var unblockActions: @MainActor (User) -> [CallParticipantMenuAction]
@@ -332,14 +303,6 @@ struct BlockedUsersView: View {
             }
             Spacer()
         }
-    }
-
-    private var fonts: DesignSystemTokens.Fonts {
-        videoAppearance.tokens.fonts
-    }
-
-    private var layout: DesignSystemTokens.Layout {
-        videoAppearance.tokens.layout
     }
 }
 
@@ -423,18 +386,6 @@ struct CallParticipantView<Factory: ViewFactory>: View {
                 }
             }
         }
-    }
-
-    private var colors: DesignSystemTokens.Colors {
-        videoAppearance.tokens.colors
-    }
-
-    private var fonts: DesignSystemTokens.Fonts {
-        videoAppearance.tokens.fonts
-    }
-
-    private var layout: DesignSystemTokens.Layout {
-        videoAppearance.tokens.layout
     }
 }
 

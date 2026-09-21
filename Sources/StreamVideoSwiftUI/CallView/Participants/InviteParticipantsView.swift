@@ -2,14 +2,11 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
-import StreamCoreUI
 import StreamVideo
 import SwiftUI
 
 @available(iOS 14.0, *)
 public struct InviteParticipantsView<Factory: ViewFactory>: View {
-
-    @Injected(\.videoAppearance) var videoAppearance
 
     var viewFactory: Factory
     @StateObject var viewModel: InviteParticipantsViewModel
@@ -99,15 +96,9 @@ public struct InviteParticipantsView<Factory: ViewFactory>: View {
         })
         .navigationBarBackButtonHidden(true)
     }
-
-    private var layout: DesignSystemTokens.Layout {
-        videoAppearance.tokens.layout
-    }
 }
 
 struct UsersHeaderView: View {
-
-    @Injected(\.videoAppearance) var videoAppearance
 
     var title = L10n.Call.Participants.onPlatform
 
@@ -122,18 +113,6 @@ struct UsersHeaderView: View {
             Spacer()
         }
         .background(Color(colors.backgroundCoreSurfaceDefault))
-    }
-
-    private var colors: DesignSystemTokens.Colors {
-        videoAppearance.tokens.colors
-    }
-
-    private var fonts: DesignSystemTokens.Fonts {
-        videoAppearance.tokens.fonts
-    }
-
-    private var layout: DesignSystemTokens.Layout {
-        videoAppearance.tokens.layout
     }
 }
 
@@ -183,13 +162,5 @@ struct VideoUserView<Factory: ViewFactory>: View {
             videoAppearance.images.checkmarkCircleFill
                 .foregroundColor(Color(colors.accentPrimary))
         }
-    }
-
-    private var colors: DesignSystemTokens.Colors {
-        videoAppearance.tokens.colors
-    }
-
-    private var fonts: DesignSystemTokens.Fonts {
-        videoAppearance.tokens.fonts
     }
 }

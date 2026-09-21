@@ -2,7 +2,6 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
-import StreamCoreUI
 import StreamVideo
 import SwiftUI
 
@@ -56,17 +55,5 @@ struct SelectedParticipantView<Factory: ViewFactory>: View {
             .offset(x: layout.buttonPaddingXIconOnlySm, y: -layout.spacingXxs)
         )
         .frame(width: avatarSize)
-    }
-
-    private var colors: DesignSystemTokens.Colors {
-        videoAppearance.tokens.colors
-    }
-
-    private var fonts: DesignSystemTokens.Fonts {
-        videoAppearance.tokens.fonts
-    }
-
-    private var layout: DesignSystemTokens.Layout {
-        videoAppearance.tokens.layout
     }
 }
