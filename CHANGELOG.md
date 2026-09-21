@@ -15,6 +15,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### 🔄 Changed
+
+# [1.53.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.53.0)
+_September 18, 2026_
+
 ### ✅ Added
 - `MicrophoneManager.setAudioBitrateProfile(_:)` switches in-call capture between voice and music (hi-fi). Requires dashboard `hifi_audio_enabled`. Music disables Apple Voice Processing and software NS/HPF, and raises the audio bitrate to 128 kbps. [#1260](https://github.com/GetStream/stream-video-swift/pull/1260)
 
