@@ -12,7 +12,7 @@ struct SimpleCallingView: View {
     private enum CallAction { case lobby, join, start(callId: String) }
 
     @Injected(\.streamVideo) var streamVideo
-    @Injected(\.appearance) var appearance
+    @Injected(\.videoAppearance) var videoAppearance
 
     @State var text = ""
     @State private var callType: String
@@ -38,7 +38,7 @@ struct SimpleCallingView: View {
     }
 
     var body: some View {
-        VStack {
+        VStack(spacing: tokens.layout.spacingXs) {
             DemoCallingTopView(callViewModel: viewModel)
 
             Spacer()
@@ -49,27 +49,28 @@ struct SimpleCallingView: View {
                 .frame(width: 114)
 
             Text("Stream Video Calling")
-                .font(.title)
+                .font(tokens.fonts.title)
                 .bold()
-                .padding()
+                .padding(tokens.layout.spacingMd)
 
             Text("Build reliable video calling, audio rooms, and live streaming with our easy-to-use SDKs and global edge network")
+                .font(tokens.fonts.body)
                 .multilineTextAlignment(.center)
-                .foregroundColor(.init(appearance.colors.textLowEmphasis))
-                .padding()
+                .foregroundColor(Color(tokens.colors.textSecondary))
+                .padding(tokens.layout.spacingMd)
 
-            HStack {
+            HStack(spacing: tokens.layout.spacingXs) {
                 Text("\(callTypeTitle) ID number")
-                    .font(.caption)
-                    .foregroundColor(.init(appearance.colors.textLowEmphasis))
+                    .font(tokens.fonts.caption1)
+                    .foregroundColor(Color(tokens.colors.textSecondary))
                 Spacer()
             }
 
-            HStack {
-                HStack {
+            HStack(spacing: tokens.layout.spacingXs) {
+                HStack(spacing: tokens.layout.spacingXs) {
                     TextField("\(callTypeTitle) ID", text: $text)
-                        .foregroundColor(appearance.colors.text)
-                        .padding(.all, 12)
+                        .foregroundColor(Color(tokens.colors.inputTextDefault))
+                        .padding(.all, tokens.layout.spacingSm)
                         .disabled(isAnonymous)
 
                     if !isAnonymous {
@@ -78,11 +79,11 @@ struct SimpleCallingView: View {
                         ) { handleDeeplink($0) }
                     }
                 }
-                .background(Color(appearance.colors.background))
-                .clipShape(RoundedRectangle(cornerRadius: 8))
+                .background(Color(tokens.colors.backgroundCoreSurfaceDefault))
+                .clipShape(RoundedRectangle(cornerRadius: tokens.layout.radiusMd))
                 .overlay(
-                    RoundedRectangle(cornerRadius: 8).stroke(
-                        Color(appearance.colors.textLowEmphasis),
+                    RoundedRectangle(cornerRadius: tokens.layout.radiusMd).stroke(
+                        Color(tokens.colors.borderCoreDefault),
                         lineWidth: 1
                     )
                 )
@@ -112,13 +113,13 @@ struct SimpleCallingView: View {
             }
 
             if canStartCall {
-                HStack {
+                HStack(spacing: tokens.layout.spacingXs) {
                     Text("Don't have a \(callTypeTitle) ID?")
-                        .font(.caption)
-                        .foregroundColor(.init(appearance.colors.textLowEmphasis))
+                        .font(tokens.fonts.caption1)
+                        .foregroundColor(Color(tokens.colors.textSecondary))
                     Spacer()
                 }
-                .padding(.top)
+                .padding(.top, tokens.layout.spacingMd)
 
                 Button {
                     resignFirstResponder()
@@ -130,7 +131,7 @@ struct SimpleCallingView: View {
                     )
                     .disabled(appState.loading)
                 }
-                .padding(.bottom)
+                .padding(.bottom, tokens.layout.spacingMd)
                 .disabled(appState.loading)
             }
 
@@ -144,6 +145,8 @@ struct SimpleCallingView: View {
         )
         .onChange(of: text) { parseURLIfRequired($0) }
     }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 
     private var isAnonymous: Bool { appState.currentUser == .anonymous }
     private var canStartCall: Bool {
