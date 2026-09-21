@@ -7,16 +7,17 @@ import XCTest
 
 final class ApplicationLifecycleVideoMuteAdapterTests: XCTestCase, @unchecked Sendable {
 
-    private lazy var notificationCenter: NotificationCenter! = .init()
-    private lazy var applicationStateAdapter: StreamAppStateAdapter! = .init(notificationCenter: notificationCenter)
+    private lazy var applicationStateAdapter: MockAppStateAdapter! = .init()
     private lazy var sessionId: String! = .unique
     private lazy var mockSFUStack: MockSFUStack! = .init()
     private lazy var mockCapturer: MockStreamVideoCapturer! = .init()
     private var subject: ApplicationLifecycleVideoMuteAdapter!
+    private var previousSimulatorStreamFile: URL?
 
     override func setUp() {
         super.setUp()
-        InjectedValues[\.applicationStateAdapter] = applicationStateAdapter
+        previousSimulatorStreamFile = InjectedValues[\.simulatorStreamFile]
+        applicationStateAdapter.makeShared()
         // We set this one to allow us to control the value of ``CallSettings.videoOn``.
         InjectedValues[\.simulatorStreamFile] = URL(string: "getstream.io")!
         subject = .init(
@@ -26,12 +27,14 @@ final class ApplicationLifecycleVideoMuteAdapterTests: XCTestCase, @unchecked Se
     }
 
     override func tearDown() {
-        notificationCenter = nil
+        subject = nil
+        applicationStateAdapter.dismante()
         applicationStateAdapter = nil
         sessionId = nil
         mockSFUStack = nil
         mockCapturer = nil
-        subject = nil
+        InjectedValues[\.simulatorStreamFile] = previousSimulatorStreamFile
+        previousSimulatorStreamFile = nil
         super.tearDown()
     }
 
@@ -121,10 +124,10 @@ final class ApplicationLifecycleVideoMuteAdapterTests: XCTestCase, @unchecked Se
     // MARK: - Private Helpers
 
     private func mockMoveToForeground() {
-        notificationCenter.post(name: UIApplication.willEnterForegroundNotification, object: nil)
+        applicationStateAdapter.stubbedState = .foreground
     }
 
     private func mockMoveToBackground() {
-        notificationCenter.post(name: UIApplication.didEnterBackgroundNotification, object: nil)
+        applicationStateAdapter.stubbedState = .background
     }
 }

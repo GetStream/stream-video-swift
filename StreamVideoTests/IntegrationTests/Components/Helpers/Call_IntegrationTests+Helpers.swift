@@ -28,8 +28,6 @@ extension Call_IntegrationTests {
 
         enum LoggingMode { case none, sdk, webrtc, all }
 
-        var duringDismantleObservedAllCallEnded = true
-
         var authentication: AuthenticationHelper
         var configuration: ConfigurationHelper
         var client: StreamVideoHelper
@@ -69,18 +67,18 @@ extension Call_IntegrationTests {
         }
 
         mutating func dismantle() async throws {
-            restoreAudioSessionReadinessWatchdog()
+            // Runs even when the teardown below throws, so the shared
+            // timeouts never outlive the scenario.
+            defer { configuration.dismantle() }
 
-            if duringDismantleObservedAllCallEnded {
-                for call in registeredCalls.values {
-                    call.leave()
-                    _ = try? await NotificationCenter
-                        .default
-                        .publisher(for: .init(CallNotification.callEnded))
-                        .compactMap { ($0.object as? Call)?.cId }
-                        .filter { $0 == call.cId }
-                        .nextValue(timeout: 2)
-                }
+            for call in registeredCalls.values {
+                call.leave()
+                _ = try? await NotificationCenter
+                    .default
+                    .publisher(for: .init(CallNotification.callEnded))
+                    .compactMap { ($0.object as? Call)?.cId }
+                    .filter { $0 == call.cId }
+                    .nextValue(timeout: 2)
             }
             registeredCalls = [:]
 
@@ -98,19 +96,6 @@ extension Call_IntegrationTests {
 
         // MARK: - CallFlow
 
-        // Inactive never becomes ready; Joined watchdog
-        // rejoin is the join-miss. Stub interval only.
-        func stubAudioSessionReadinessWatchdogForJoinMiss() {
-            WebRTCConfiguration.timeout.audioSessionReadinessWatchdog = 3600
-        }
-
-        // Production 10s. No-op if never stubbed.
-        func restoreAudioSessionReadinessWatchdog() {
-            WebRTCConfiguration.timeout.audioSessionReadinessWatchdog =
-                WebRTCConfiguration.Timeout.production
-                    .audioSessionReadinessWatchdog
-        }
-
         mutating func callFlow(
             id: String,
             type: String,
@@ -121,6 +106,7 @@ extension Call_IntegrationTests {
             overrideAPIKey: String? = nil,
             overrideToken: String? = nil
         ) async throws -> CallFlow<Void> {
+            configuration.activate()
             let authentication = try await authentication
                 .authenticate(userId: userId, environment: environment)
             let client = try await client.buildClient(
@@ -149,6 +135,7 @@ extension Call_IntegrationTests {
             userId: String,
             clientResolutionMode: StreamVideoHelper.ClientResolutionMode = .ignoreCache
         ) async throws -> Call {
+            configuration.activate()
             let authentication = try await authentication
                 .authenticate(userId: userId)
             let client = try await client.buildClient(
