@@ -183,7 +183,9 @@ final class MockRTCPeerConnectionCoordinator:
         audioDeviceModule: AudioDeviceModule = .init(MockRTCAudioDeviceModule())
     ) throws {
         let peerConnectionFactory = PeerConnectionFactory.build(
-            audioProcessingModule: MockAudioProcessingModule.shared
+            audioProcessingModule: MockAudioProcessingModule.shared,
+            audioDeviceModuleSource: MockRTCAudioDeviceModule(),
+            audioEngineAvailabilityOverride: false
         )
 
         let sessionId = String.unique

@@ -47,7 +47,8 @@ final class MockWebRTCCoordinatorStack: @unchecked Sendable {
         self.mockAudioDeviceModule = mockAudioDeviceModule
         self.peerConenctionFactory = .build(
             audioProcessingModule: videoConfig.audioProcessingModule,
-            audioDeviceModuleSource: mockAudioDeviceModule
+            audioDeviceModuleSource: mockAudioDeviceModule,
+            audioEngineAvailabilityOverride: false
         )
         let rtcPeerConnectionCoordinatorFactory: MockRTCPeerConnectionCoordinatorFactory = rtcPeerConnectionCoordinatorFactory ??
             .init(peerConnectionFactory: peerConenctionFactory)

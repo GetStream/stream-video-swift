@@ -672,11 +672,29 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         let callId = String.unique
         let participant = String.unique
         let joinAheadTimeSeconds: Double = 10
-        let startingDate = Date(timeIntervalSinceNow: joinAheadTimeSeconds * 2)
-        let joiningDate = Date(timeIntervalSinceNow: joinAheadTimeSeconds + 2)
 
-        try await helpers
-            .callFlow(id: callId, type: .livestream, userId: .unique, environment: "demo")
+        // Authenticate both clients before `startsAt` is chosen so token
+        // fetch is not charged against the join-ahead denial window.
+        let hostCallFlow = try await helpers
+            .callFlow(
+                id: callId,
+                type: .livestream,
+                userId: .unique,
+                environment: "demo"
+            )
+        let participantCallFlow = try await helpers
+            .callFlow(
+                id: callId,
+                type: .livestream,
+                userId: participant,
+                environment: "demo"
+            )
+
+        // Auth + host join can exceed the original `now + 20` window.
+        // Keep `startsAt` far enough ahead that the first participant
+        // join is still denied.
+        let startingDate = Date(timeIntervalSinceNow: 45)
+        try await hostCallFlow
             .perform {
                 try await $0.call.create(
                     startsAt: startingDate,
@@ -688,11 +706,22 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
             }
             .perform { try await $0.call.join() }
 
-        try await self
-            .helpers
-            .callFlow(id: callId, type: .livestream, userId: participant, environment: "demo")
+        let startsAt = await MainActor.run {
+            hostCallFlow.call.state.startsAt
+        } ?? startingDate
+        let joinAheadOpensAt = startsAt.addingTimeInterval(
+            -joinAheadTimeSeconds
+        )
+        let joiningDate = joinAheadOpensAt.addingTimeInterval(2)
+        XCTAssertLessThan(
+            Date(),
+            joinAheadOpensAt,
+            "Join-ahead window already open; denial cannot be asserted."
+        )
+
+        try await participantCallFlow
             .performWithErrorExpectation { try await $0.call.join() }
-            .assertEventually { _ in Date() >= joiningDate }
+            .assertEventually(timeout: 40) { _ in Date() >= joiningDate }
             .perform { try await $0.call.join() }
     }
 

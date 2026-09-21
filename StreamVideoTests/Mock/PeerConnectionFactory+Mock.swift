@@ -12,7 +12,9 @@ extension PeerConnectionFactory {
         _ audioProcessingModule: AudioProcessingModule = MockAudioProcessingModule.shared
     ) -> PeerConnectionFactory {
         .build(
-            audioProcessingModule: audioProcessingModule
+            audioProcessingModule: audioProcessingModule,
+            audioDeviceModuleSource: MockRTCAudioDeviceModule(),
+            audioEngineAvailabilityOverride: false
         )
     }
 

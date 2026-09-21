@@ -36,13 +36,24 @@ final class PeerConnectionFactory: @unchecked Sendable {
             primary: Self.defaultEncoder,
             fallback: Self.defaultEncoder
         )
-        return RTCPeerConnectionFactory(
+        let factory = RTCPeerConnectionFactory(
             audioDeviceModuleType: .audioEngine,
             bypassVoiceProcessing: false,
             encoderFactory: encoderFactory,
             decoderFactory: Self.defaultDecoder,
             audioProcessingModule: audioProcessingModule
         )
+        // When availability is forced off, disable the real ADM before
+        // its worker thread reaches `AVAudioEngine.inputNode`.
+        if audioEngineAvailabilityOverride == false {
+            _ = factory.audioDeviceModule.setEngineAvailability(
+                .init(
+                    isInputAvailable: false,
+                    isOutputAvailable: false
+                )
+            )
+        }
+        return factory
     }()
 
     /// Lazy-loaded default video encoder factory.
@@ -86,11 +97,15 @@ final class PeerConnectionFactory: @unchecked Sendable {
     ) {
         self.audioProcessingModule = audioProcessingModule
         self.audioEngineAvailabilityOverride = audioEngineAvailabilityOverride
-        _ = factory
 
         if let audioDeviceModuleSource {
+            // Skip eager factory construction. `_ = factory` would still
+            // allocate WebRTC's AudioEngine ADM even when the mock is
+            // the module we actually use, and that ADM aborts in
+            // parallel XCTest workers (`AURemoteIO::Initialize`).
             audioDeviceModuleStorage = .init(audioDeviceModuleSource)
         } else {
+            _ = factory
             audioDeviceModuleStorage = .init(factory.audioDeviceModule)
         }
     }
