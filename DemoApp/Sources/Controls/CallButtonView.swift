@@ -16,7 +16,13 @@ struct CallButtonView: View {
     var body: some View {
         Text(title)
             .bold()
-            .foregroundColor(Color(tokens.colors.buttonPrimaryTextOnAccent))
+            .foregroundColor(
+                Color(
+                    isDisabled
+                        ? tokens.colors.textDisabled
+                        : tokens.colors.buttonPrimaryTextOnAccent
+                )
+            )
             .padding(.all, tokens.layout.spacingSm)
             .frame(maxWidth: maxWidth ?? .infinity)
             .background(

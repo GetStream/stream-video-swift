@@ -10,7 +10,7 @@ struct LoginView: View {
 
     @StateObject var viewModel: LoginViewModel
     var completion: (UserCredentials) -> Void
-    @Injected(\.appearance) var appearance
+    @Injected(\.videoAppearance) var videoAppearance
 
     @State var addUserShown = false
     @ObservedObject private var appState: AppState = .shared
@@ -29,7 +29,7 @@ struct LoginView: View {
     }
 
     var body: some View {
-        VStack {
+        VStack(spacing: tokens.layout.spacingXs) {
             List {
                 Section {
                     ForEach(appState.users) { user in
@@ -38,7 +38,6 @@ struct LoginView: View {
                             viewModel: viewModel,
                             completion: completion
                         )
-                        .listRowBackground(Color.clear)
                         .deleteDisabled(User.builtIn.first { $0.id == user.id } != nil)
                     }
                     .onDelete(perform: delete)
@@ -99,10 +98,9 @@ struct LoginView: View {
                 }
             }
             .listStyle(.plain)
-            .background(Color.clear)
         }
         .alignedToReadableContentGuide()
-        .foregroundColor(appearance.colors.text)
+        .foregroundColor(Color(tokens.colors.textPrimary))
         .overlay(
             appState.loading ? ProgressView() : nil
         )
@@ -125,7 +123,7 @@ struct LoginView: View {
                 dismissButton: .cancel { error = nil }
             )
         })
-        .background(appearance.colors.lobbyBackground.edgesIgnoringSafeArea(.all))
+        .background(Color(tokens.colors.backgroundCoreApp).edgesIgnoringSafeArea(.all))
         .onReceive(appState.$deeplinkInfo) { [weak viewModel] deeplinkInfo in
             guard appState.userState == .notLoggedIn, deeplinkInfo != .empty else { return }
             viewModel?.login(
@@ -147,9 +145,13 @@ struct LoginView: View {
 
         return true
     }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
 
 struct LoginItemView<Title: View, Icon: View>: View {
+
+    @Injected(\.videoAppearance) var videoAppearance
 
     var selected: Binding<Bool>
     var action: () -> Void
@@ -169,7 +171,7 @@ struct LoginItemView<Title: View, Icon: View>: View {
     }
 
     var body: some View {
-        HStack {
+        HStack(spacing: tokens.layout.spacingXs) {
             Button {
                 action()
             } label: {
@@ -185,14 +187,13 @@ struct LoginItemView<Title: View, Icon: View>: View {
                 Image(systemName: "checkmark")
             }
         }
-        .padding(8)
-        .listRowBackground(Color.clear)
+        .padding(tokens.layout.spacingXs)
     }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
 
 struct BuiltInUserView: View {
-
-    @Injected(\.colors) var colors
 
     var user: User
     var viewModel: LoginViewModel
@@ -212,7 +213,7 @@ struct BuiltInUserView: View {
 
 struct AppUserView: View {
 
-    @Injected(\.colors) var colors
+    @Injected(\.videoAppearance) var videoAppearance
     var user: User
     var size: CGFloat = 32
     var overrideUserName: String?
@@ -226,11 +227,13 @@ struct AppUserView: View {
         } else if let firstCharacter = (overrideUserName ?? user.name).first {
             Text(String(firstCharacter))
                 .fontWeight(.medium)
-                .foregroundColor(colors.text)
+                .foregroundColor(Color(tokens.colors.textPrimary))
                 .frame(width: size, height: size)
-                .background(Color(.secondarySystemBackground))
+                .background(Color(tokens.colors.backgroundCoreSurfaceDefault))
                 .clipShape(Circle())
                 .accessibilityIdentifier("userAvatar")
         }
     }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
