@@ -361,7 +361,6 @@ Accessibility & UI quality
 - Use `///` for doc comments.
 - Use `// MARK:` to group code.
 - Use `// MARK: - <Group Name>` to group code.
-- Use 140 characters as the maximum line length.
 - Keep comments as simple as possible.
 - Avoid stating the obvious e.g. `var isActive: Bool // A variable that indicates if the view is active`.
 - Read around the APIs you are documenting and add context to make the comments more useful.
