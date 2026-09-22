@@ -3,11 +3,12 @@
 //
 
 import StreamVideo
+import StreamVideoSwiftUI
 import SwiftUI
 
 struct DemoAddUserView: View {
 
-    @Injected(\.appearance) var appearance
+    @Injected(\.videoAppearance) var videoAppearance
     @Environment(\.presentationMode) var presentationMode
 
     @State var name = ""
@@ -16,7 +17,7 @@ struct DemoAddUserView: View {
     var body: some View {
         NavigationView {
             ScrollView {
-                VStack {
+                VStack(spacing: tokens.layout.spacingXs) {
                     Group {
                         TextField("User id", text: $id)
 
@@ -42,10 +43,12 @@ struct DemoAddUserView: View {
                 }
                 .textFieldStyle(DemoTextfieldStyle())
             }
-            .padding()
+            .padding(tokens.layout.spacingMd)
             .navigationTitle("Add a new User")
         }
     }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 
     private var buttonDisabled: Bool {
         name.isEmpty || id.isEmpty
@@ -165,21 +168,23 @@ struct DemoCheckboxView<Label: View, CheckIcon: View>: View {
 
 struct DemoTextfieldStyle: TextFieldStyle {
 
-    @Injected(\.appearance) var appearance
-
-    @State var cornerRadius: CGFloat = 8
+    @Injected(\.videoAppearance) var videoAppearance
 
     @ViewBuilder
-    private var clipShape: some Shape { RoundedRectangle(cornerRadius: cornerRadius) }
+    private var clipShape: some Shape {
+        RoundedRectangle(cornerRadius: tokens.layout.radiusMd)
+    }
 
     func _body(configuration: TextField<Self._Label>) -> some View {
         configuration
-            .padding()
-            .foregroundColor(appearance.colors.text)
-            .background(Color(appearance.colors.background))
-            .overlay(clipShape.stroke(Color(appearance.colors.textLowEmphasis), lineWidth: 1))
+            .padding(tokens.layout.spacingMd)
+            .foregroundColor(Color(tokens.colors.inputTextDefault))
+            .background(Color(tokens.colors.backgroundCoreSurfaceDefault))
+            .overlay(clipShape.stroke(Color(tokens.colors.borderCoreDefault), lineWidth: 1))
             .clipShape(clipShape)
     }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
 
 struct DemoTextEditor: View {

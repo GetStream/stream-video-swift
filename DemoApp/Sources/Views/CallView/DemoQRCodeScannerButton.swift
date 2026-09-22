@@ -9,7 +9,7 @@ import SwiftUI
 
 struct DemoQRCodeScannerButton: View {
 
-    @Injected(\.appearance) var appearance
+    @Injected(\.videoAppearance) var videoAppearance
 
     @State private var isQRScannerPresented = false
     @ObservedObject var viewModel: CallViewModel
@@ -31,9 +31,9 @@ struct DemoQRCodeScannerButton: View {
             isQRScannerPresented = true
         } label: {
             Image(systemName: "qrcode.viewfinder")
-                .foregroundColor(.init(appearance.colors.textLowEmphasis))
+                .foregroundColor(Color(tokens.colors.textSecondary))
         }
-        .padding(.trailing)
+        .padding(.trailing, tokens.layout.spacingMd)
         .sheet(isPresented: $isQRScannerPresented) {
             CodeScannerView(codeTypes: [.qr]) { result in
                 switch result {
@@ -66,4 +66,6 @@ struct DemoQRCodeScannerButton: View {
         EmptyView()
         #endif
     }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
