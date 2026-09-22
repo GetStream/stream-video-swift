@@ -2,13 +2,12 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import StreamCoreUI
 import StreamVideo
 import SwiftUI
 
 public struct MicrophoneCheckView: View {
-    @Injected(\.colors) var colors
-    @Injected(\.fonts) var fonts
-    @Injected(\.images) var images
+    @Injected(\.videoAppearance) var videoAppearance
     @Injected(\.streamVideo) var streamVideo
     @Injected(\.permissions) var permissions
 
@@ -36,21 +35,21 @@ public struct MicrophoneCheckView: View {
     }
     
     public var body: some View {
-        HStack(spacing: 4) {
+        HStack(spacing: tokens.layout.spacingXxs) {
             if isPinned {
                 Image(systemName: "pin.fill")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(maxHeight: CGFloat(maxHeight))
-                    .foregroundColor(.white)
-                    .padding(.trailing, 4)
+                    .foregroundColor(Color(tokens.colors.textOnAccent))
+                    .padding(.trailing, tokens.layout.spacingXxs)
             }
 
             Text(streamVideo.user.name)
-                .foregroundColor(.white)
+                .foregroundColor(Color(tokens.colors.textOnAccent))
                 .multilineTextAlignment(.leading)
                 .lineLimit(1)
-                .font(fonts.caption1)
+                .font(tokens.fonts.caption1)
                 .minimumScaleFactor(0.7)
                 .accessibility(identifier: "participantName")
 
@@ -62,28 +61,30 @@ public struct MicrophoneCheckView: View {
                     maxValue: 1
                 )
             } else {
-                images.micTurnOff
+                videoAppearance.images.micTurnOff
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(height: CGFloat(maxHeight))
-                    .foregroundColor(colors.inactiveCallControl)
+                    .foregroundColor(Color(tokens.colors.accentError))
             }
         }
-        .padding(.all, 2)
-        .padding(.horizontal, 4)
+        .padding(.all, tokens.layout.spacingXxxs)
+        .padding(.horizontal, tokens.layout.spacingXxs)
         .frame(height: 28)
         .cornerRadius(
-            8,
+            tokens.layout.radiusMd,
             corners: [.topRight],
-            backgroundColor: colors.participantInfoBackgroundColor
+            backgroundColor: Color(tokens.colors.backgroundCoreOverlayDarkStrong)
         )
         .onReceive(permissions.$hasMicrophonePermission) { hasMicrophoneAccess = $0 }
     }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
 
 public struct AudioVolumeIndicator: View {
     
-    @Injected(\.colors) var colors
+    @Injected(\.videoAppearance) var videoAppearance
     
     var audioLevels: [Float]
     var maxHeight: Float
@@ -103,18 +104,20 @@ public struct AudioVolumeIndicator: View {
     }
     
     public var body: some View {
-        HStack(spacing: 2) {
+        HStack(spacing: tokens.layout.spacingXxxs) {
             ForEach(levels) { level in
                 VStack {
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(colors.goodConnectionQualityIndicatorColor)
-                        .frame(width: 2, height: height(for: level.value))
+                    RoundedRectangle(cornerRadius: tokens.layout.radiusXs)
+                        .fill(Color(videoAppearance.colors.indicatorMicrophoneLevelBarActive))
+                        .frame(width: tokens.layout.spacingXxxs, height: height(for: level.value))
                 }
                 .frame(height: CGFloat(maxHeight))
             }
         }
     }
-    
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
+
     var levels: [AudioLevel] {
         var levels = [AudioLevel]()
         for (index, level) in audioLevels.enumerated() {
