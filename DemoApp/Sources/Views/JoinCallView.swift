@@ -3,11 +3,13 @@
 //
 
 import StreamVideo
+import StreamVideoSwiftUI
 import SwiftUI
 
 struct JoinCallView: View {
 
     @Environment(\.presentationMode) var presentationMode
+    @Injected(\.videoAppearance) var videoAppearance
     @StateObject var viewModel: LoginViewModel
     var completion: (UserCredentials) -> Void
 
@@ -16,7 +18,7 @@ struct JoinCallView: View {
     var body: some View {
         NavigationView {
             ScrollView {
-                VStack {
+                VStack(spacing: tokens.layout.spacingXs) {
                     TextField("Call Id", text: $callId)
                         .textFieldStyle(DemoTextfieldStyle())
 
@@ -29,9 +31,11 @@ struct JoinCallView: View {
                     }
                 }
             }
-            .padding()
+            .padding(tokens.layout.spacingMd)
             .navigationTitle("Join Call")
             .overlay(AppState.shared.loading ? ProgressView() : nil)
         }
     }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }

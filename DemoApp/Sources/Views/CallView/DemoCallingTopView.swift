@@ -10,7 +10,7 @@ import SwiftUI
 
 struct DemoCallingTopView: View {
 
-    @Injected(\.colors) var colors
+    @Injected(\.videoAppearance) var videoAppearance
 
     @ObservedObject var streamVideo = InjectedValues[\.streamVideo]
     @ObservedObject var callViewModel: CallViewModel
@@ -26,12 +26,12 @@ struct DemoCallingTopView: View {
     }
 
     var body: some View {
-        HStack {
+        HStack(spacing: tokens.layout.spacingXs) {
             if AppEnvironment.configuration.isRelease {
                 Label {
                     Text(username)
-                        .bold()
-                        .foregroundColor(.primary)
+                        .font(tokens.fonts.bodyBold)
+                        .foregroundColor(Color(tokens.colors.textPrimary))
                 } icon: {
                     AppUserView(user: currentUser, overrideUserName: username)
                 }
@@ -41,8 +41,8 @@ struct DemoCallingTopView: View {
                 } label: {
                     Label {
                         Text(username)
-                            .bold()
-                            .foregroundColor(.primary)
+                            .font(tokens.fonts.bodyBold)
+                            .foregroundColor(Color(tokens.colors.textPrimary))
                     } icon: {
                         AppUserView(user: currentUser, overrideUserName: username)
                     }
@@ -57,7 +57,8 @@ struct DemoCallingTopView: View {
                     DemoCallsView(callViewModel: callViewModel)
                 } label: {
                     Text("Calls")
-                        .foregroundColor(.primary)
+                        .font(tokens.fonts.body)
+                        .foregroundColor(Color(tokens.colors.textPrimary))
                 }
             }
 
@@ -78,4 +79,6 @@ struct DemoCallingTopView: View {
             )
         }
     }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
