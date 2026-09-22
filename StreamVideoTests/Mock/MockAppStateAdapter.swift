@@ -26,6 +26,7 @@ final class MockAppStateAdapter: AppStateProviding, @unchecked Sendable {
 
     /// We call this just before the object that needs to use the mock is about to be created.
     func makeShared() {
+        previousValue = InjectedValues[\.applicationStateAdapter]
         AppStateProviderKey.currentValue = self
         InjectedValues[\.applicationStateAdapter] = self
     }

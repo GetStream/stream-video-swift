@@ -406,6 +406,7 @@
 				CallView/LayoutComponents/HorizontalParticipantsListView_Tests.swift,
 				"CallView/LayoutComponents/mock-profile-image.jpg",
 				CallView/LayoutComponents/SpotlightSpeakerView_Tests.swift,
+				CallView/LocalParticipantView_Tests.swift,
 				CallView/ParticipantListButton_Tests.swift,
 				CallView/Participants/CallParticipantsInfoView_Tests.swift,
 				CallView/Participants/InviteParticipantsView_Tests.swift,
