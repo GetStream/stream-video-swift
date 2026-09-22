@@ -213,7 +213,7 @@ struct CallParticipantsViewContainer<Factory: ViewFactory>: View {
     }
 }
 
-private struct ParticipantsSheetBackgroundModifier: ViewModifier {
+struct ParticipantsSheetBackgroundModifier: ViewModifier {
 
     var color: UIColor
 

@@ -71,29 +71,42 @@ public struct InviteParticipantsView<Factory: ViewFactory>: View {
                 .onAppear {
                     viewModel.onUserAppear(user: user)
                 }
+                .listRowBackground(Color(colors.backgroundCoreElevation1))
             }
             .listStyle(.plain)
+            .modifier(InviteParticipantsListBackgroundModifier())
         }
-        .navigationTitle(L10n.Call.Participants.add)
         .toolbar(content: {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button {
                     inviteParticipantsShown = false
                 } label: {
                     Image(systemName: "chevron.left")
+                        .foregroundColor(Color(colors.textPrimary))
                 }
             }
-            
+
+            ToolbarItem(placement: .principal) {
+                Text(L10n.Call.Participants.add)
+                    .font(fonts.headline)
+                    .foregroundColor(Color(colors.textPrimary))
+            }
+
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
                     viewModel.inviteUsersTapped()
                 } label: {
                     Text(L10n.Call.Participants.invite)
                         .bold()
+                        .foregroundColor(Color(colors.textPrimary))
                 }
                 .disabled(viewModel.selectedUsers.isEmpty)
             }
         })
+        .navigationTitle(L10n.Call.Participants.add)
+        .navigationBarTitleDisplayMode(.inline)
+        .background(Color(colors.backgroundCoreElevation1).edgesIgnoringSafeArea(.all))
+        .modifier(ParticipantsSheetBackgroundModifier(color: colors.backgroundCoreElevation1))
         .navigationBarBackButtonHidden(true)
     }
 }
@@ -161,6 +174,16 @@ struct VideoUserView<Factory: ViewFactory>: View {
         } else {
             videoAppearance.images.checkmarkCircleFill
                 .foregroundColor(Color(colors.accentPrimary))
+        }
+    }
+}
+
+private struct InviteParticipantsListBackgroundModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 16.0, *) {
+            content.scrollContentBackground(.hidden)
+        } else {
+            content
         }
     }
 }
