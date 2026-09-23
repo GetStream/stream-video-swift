@@ -20,7 +20,7 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
         call: Call?,
         participants: [CallParticipant],
         frame: CGRect,
-        innerItemSpace: CGFloat = 8,
+        innerItemSpace: CGFloat = InjectedValues[\.videoAppearance].tokens.layout.spacingXs,
         onChangeTrackVisibility: @escaping @MainActor (CallParticipant, Bool) -> Void
     ) {
         self.viewFactory = viewFactory

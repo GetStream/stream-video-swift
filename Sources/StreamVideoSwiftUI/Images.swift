@@ -25,6 +25,7 @@ public class Images {
     public var xmark = Image(systemName: "xmark")
     public var xmarkCircleFill = Image(systemName: "xmark.circle.fill")
     public var checkmarkCircleFill = Image(systemName: "checkmark.circle.fill")
+    public var checkmark = Image(systemName: "checkmark")
     public var searchIcon = Image(systemName: "magnifyingglass")
     public var searchCloseIcon = Image(systemName: "multiply.circle")
     public var recordIcon = Image(systemName: "record.circle")
@@ -33,6 +34,9 @@ public class Images {
     public var layoutSelectorIcon = Image(systemName: "circle.grid.2x2.fill")
     public var screenshareIcon = Image(systemName: "square.and.arrow.up.circle.fill")
     public var callControlErrorBadge = Image(systemName: "exclamationmark")
+    public var participantOptions = Image(systemName: "ellipsis")
+    public var participantPinned = Image(systemName: "pin.fill")
+    public var participantVideoPaused = Image(systemName: "wifi.slash")
 
     private static var toggleCameraImageName: String {
         if #available(iOS 14, *) {

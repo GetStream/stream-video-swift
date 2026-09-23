@@ -94,7 +94,7 @@ public struct VideoCallParticipantModifier: ViewModifier {
             .overlay(
                 ZStack {
                     BottomView(content: {
-                        HStack {
+                        HStack(spacing: layout.spacingXs) {
                             ParticipantInfoView(
                                 participant: participant,
                                 isPinned: participant.isPinned
@@ -121,7 +121,7 @@ public struct VideoCallParticipantModifier: ViewModifier {
                 decoration: .speaking,
                 availableDecorations: decorations
             )
-            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .clipShape(RoundedRectangle(cornerRadius: layout.radius2xl))
             .clipped()
     }
 
@@ -150,7 +150,7 @@ extension View {
 @MainActor
 public struct VideoCallParticipantOptionsModifier: ViewModifier {
 
-    @Injected(\.appearance) var appearance
+    @Injected(\.videoAppearance) var videoAppearance
 
     @State private var presentActionSheet: Bool = false
 
@@ -195,16 +195,16 @@ public struct VideoCallParticipantOptionsModifier: ViewModifier {
                 TopLeftView {
                     contentView
                 }
-                .padding(4)
+                .padding(layout.spacingXxs)
             )
     }
 
     @ViewBuilder
     private var optionsButtonView: some View {
-        Image(systemName: "ellipsis")
-            .foregroundColor(.white)
-            .padding(8)
-            .background(appearance.colors.participantInfoBackgroundColor)
+        videoAppearance.images.participantOptions
+            .foregroundColor(Color(colors.textOnAccent))
+            .padding(layout.spacingXs)
+            .background(Color(colors.backgroundCoreOverlayDarkStrong))
             .clipShape(Circle())
     }
 
@@ -298,8 +298,6 @@ public struct VideoCallParticipantOptionsModifier: ViewModifier {
 
 public struct VideoCallParticipantSpeakingModifier: ViewModifier {
 
-    @Injected(\.colors) var colors
-
     public var participant: CallParticipant
     public var participantCount: Int
     public var cornerRadius: CGFloat
@@ -307,7 +305,7 @@ public struct VideoCallParticipantSpeakingModifier: ViewModifier {
     public init(
         participant: CallParticipant,
         participantCount: Int,
-        cornerRadius: CGFloat = 16
+        cornerRadius: CGFloat = InjectedValues[\.videoAppearance].tokens.layout.radius2xl
     ) {
         self.participant = participant
         self.participantCount = participantCount
@@ -319,8 +317,8 @@ public struct VideoCallParticipantSpeakingModifier: ViewModifier {
             .overlay(
                 participant.isSpeaking && participantCount > 1 ?
                     RoundedRectangle(cornerRadius: cornerRadius).strokeBorder(
-                        colors.participantSpeakingHighlightColor,
-                        lineWidth: 2
+                        Color(colors.accentPrimary),
+                        lineWidth: layout.iconStrokeEmphasis
                     ) : nil
             )
     }
@@ -329,7 +327,6 @@ public struct VideoCallParticipantSpeakingModifier: ViewModifier {
 @MainActor
 public struct VideoCallParticipantView<Factory: ViewFactory>: View {
 
-    @Injected(\.images) var images
     @Injected(\.streamVideo) var streamVideo
 
     var viewFactory: Factory
@@ -435,9 +432,7 @@ public struct VideoCallParticipantView<Factory: ViewFactory>: View {
 }
 
 public struct ParticipantInfoView: View {
-    @Injected(\.images) var images
-    @Injected(\.fonts) var fonts
-    @Injected(\.colors) var colors
+    @Injected(\.videoAppearance) var videoAppearance
     
     var participant: CallParticipant
     var isPinned: Bool
@@ -457,17 +452,17 @@ public struct ParticipantInfoView: View {
     }
     
     public var body: some View {
-        HStack(spacing: 4) {
+        HStack(spacing: layout.spacingXxs) {
             if isPinned {
-                Image(systemName: "pin.fill")
+                videoAppearance.images.participantPinned
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(maxHeight: maxHeight)
-                    .foregroundColor(.white)
-                    .padding(.trailing, 4)
+                    .foregroundColor(Color(colors.textOnAccent))
+                    .padding(.trailing, layout.spacingXxs)
             }
             Text(participant.name.isEmpty ? participant.id : participant.name)
-                .foregroundColor(.white)
+                .foregroundColor(Color(colors.textOnAccent))
                 .multilineTextAlignment(.leading)
                 .lineLimit(1)
                 .font(fonts.caption1)
@@ -475,12 +470,12 @@ public struct ParticipantInfoView: View {
                 .accessibility(identifier: "participantName")
 
             if participant.pausedTracks.contains(.video) {
-                Image(systemName: "wifi.slash")
+                videoAppearance.images.participantVideoPaused
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(maxHeight: maxHeight)
-                    .foregroundColor(.white)
-                    .padding(.trailing, 4)
+                    .foregroundColor(Color(colors.textOnAccent))
+                    .padding(.trailing, layout.spacingXxs)
             }
 
             SoundIndicator(participant: participant)
@@ -489,17 +484,15 @@ public struct ParticipantInfoView: View {
         .padding(paddingsConfig)
         .frame(height: 28)
         .cornerRadius(
-            8,
+            layout.radiusLg,
             corners: [.topRight],
-            backgroundColor: colors.participantInfoBackgroundColor
+            backgroundColor: Color(colors.backgroundCoreOverlayDarkStrong)
         )
     }
 }
 
 public struct SoundIndicator: View {
-            
-    @Injected(\.images) var images
-    @Injected(\.colors) var colors
+    @Injected(\.videoAppearance) var videoAppearance
     
     let participant: CallParticipant
     
@@ -508,10 +501,10 @@ public struct SoundIndicator: View {
     }
     
     public var body: some View {
-        (participant.hasAudio ? images.micTurnOn : images.micTurnOff)
+        (participant.hasAudio ? videoAppearance.images.micTurnOn : videoAppearance.images.micTurnOff)
             .resizable()
             .aspectRatio(contentMode: .fit)
-            .foregroundColor(participant.hasAudio ? .white : colors.inactiveCallControl)
+            .foregroundColor(Color(colors.textOnAccent))
             .accessibility(identifier: "participantMic")
             .streamAccessibility(value: participant.hasAudio ? "1" : "0")
     }
@@ -535,8 +528,8 @@ public struct PopoverButton: View {
             popoverShown = false
         } label: {
             Text(title)
-                .padding(.horizontal)
-                .foregroundColor(.primary)
+                .padding(.horizontal, layout.spacingMd)
+                .foregroundColor(Color(colors.textPrimary))
         }
     }
 }
