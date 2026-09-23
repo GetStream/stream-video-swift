@@ -97,11 +97,13 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
 
         await subject.trace(expected)
 
+        // Battery/network observers can trace first after the adapter is
+        // installed, so match the forwarded event by tag instead of order.
         XCTAssertEqual(
             statsAdapter.recordedInputPayload(
                 WebRTCTrace.self,
                 for: .trace
-            )?.first,
+            )?.first { $0.tag == expected.tag },
             expected
         )
     }
@@ -149,6 +151,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         let call = await MockCall(.dummy())
         _ = subject
         subject.call = call
+        await fulfilmentInMainActor { call.state.sessionId.isEmpty == false }
 
         await mockWebRTCCoordinatorFactory
             .mockCoordinatorStack
@@ -281,6 +284,9 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
     }
 
     func test_joinCall_withHighScaleHint_setsJoinRequestHint() async throws {
+        let mockAudioStore = makeAudioStoreReady()
+        defer { mockAudioStore.dismantle() }
+
         let defaultAPI = MockDefaultAPIEndpoints()
         let webRTCCoordinatorFactory = MockWebRTCCoordinatorFactory(
             videoConfig: Self.videoConfig
@@ -313,6 +319,10 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
                     .sfuStack
                     .adapter
             )
+        let joinResponseCancellable = respondToJoinRequests(
+            on: webRTCCoordinatorFactory
+        )
+        defer { joinResponseCancellable.cancel() }
 
         let joinTask = Task {
             try await subject.joinCall(
@@ -329,20 +339,6 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
             defaultAPI.timesCalled(.joinCall) == 1
         }
 
-        await fulfillment {
-            webRTCCoordinatorFactory
-                .mockCoordinatorStack
-                .coordinator
-                .stateMachine
-                .currentStage
-                .id == .joining
-        }
-        webRTCCoordinatorFactory
-            .mockCoordinatorStack
-            .sfuStack
-            .setConnectionState(to: .connected(healthCheckInfo: .init()))
-        webRTCCoordinatorFactory.mockCoordinatorStack.joinResponse([])
-
         _ = try await joinTask.value
 
         let request = try XCTUnwrap(
@@ -356,6 +352,9 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
     }
 
     func test_joinCall_withoutHighScaleHint_clearsRequestHint() async throws {
+        let mockAudioStore = makeAudioStoreReady()
+        defer { mockAudioStore.dismantle() }
+
         let defaultAPI = MockDefaultAPIEndpoints()
         let webRTCCoordinatorFactory = MockWebRTCCoordinatorFactory(
             videoConfig: Self.videoConfig
@@ -385,6 +384,10 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
                     .sfuStack
                     .adapter
             )
+        let joinResponseCancellable = respondToJoinRequests(
+            on: webRTCCoordinatorFactory
+        )
+        defer { joinResponseCancellable.cancel() }
 
         let joinTask = Task {
             try await subject.joinCall(
@@ -400,20 +403,6 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         await fulfillment {
             defaultAPI.timesCalled(.joinCall) == 1
         }
-
-        await fulfillment {
-            webRTCCoordinatorFactory
-                .mockCoordinatorStack
-                .coordinator
-                .stateMachine
-                .currentStage
-                .id == .joining
-        }
-        webRTCCoordinatorFactory
-            .mockCoordinatorStack
-            .sfuStack
-            .setConnectionState(to: .connected(healthCheckInfo: .init()))
-        webRTCCoordinatorFactory.mockCoordinatorStack.joinResponse([])
 
         _ = try await joinTask.value
 
@@ -1576,6 +1565,31 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
                 .stateAdapter
                 .participants.count == 1
         }
+    }
+
+    private func makeAudioStoreReady() -> MockRTCAudioStore {
+        let mockAudioStore = MockRTCAudioStore()
+        mockAudioStore.makeShared()
+        mockAudioStore.audioStore.dispatch(.setActive(true))
+        mockAudioStore.audioStore.dispatch(
+            .setCurrentRoute(
+                .dummy(outputs: [.dummy(isReceiver: true)])
+            )
+        )
+        return mockAudioStore
+    }
+
+    private func respondToJoinRequests(
+        on factory: MockWebRTCCoordinatorFactory
+    ) -> AnyCancellable {
+        let stack = factory.mockCoordinatorStack
+        let cancellable = stack.sfuStack.adapter.publisherSendEvent
+            .compactMap { $0 as? SFUAdapter.JoinEvent }
+            .sink { _ in stack.joinResponse([]) }
+        stack.sfuStack.setConnectionState(
+            to: .connected(healthCheckInfo: .init())
+        )
+        return cancellable
     }
 }
 

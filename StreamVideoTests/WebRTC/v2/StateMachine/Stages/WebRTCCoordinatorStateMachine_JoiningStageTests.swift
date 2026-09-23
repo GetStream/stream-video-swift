@@ -160,6 +160,108 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
         XCTAssertNil(subscriber)
     }
 
+    func test_willTransitionAway_whenJoinResponseIsPending_ignoresLateSubscriberEvents(
+    ) async throws {
+        let mockAudioStore = MockRTCAudioStore()
+        mockAudioStore.makeShared()
+        defer { mockAudioStore.dismantle() }
+        mockAudioStore.audioStore.dispatch(.setActive(true))
+        mockAudioStore.audioStore.dispatch(
+            .setCurrentRoute(.dummy(outputs: [.dummy(isReceiver: true)]))
+        )
+        subject.context.audioSessionWatchdog = .init()
+        subject.context.joinSource = .inApp
+        await fulfillment("Audio session was not ready before joining.") {
+            self.subject.context.audioSessionWatchdog.isReady
+        }
+
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.reconnectAttempts = 11
+        await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
+        mockCoordinatorStack.webRTCAuthenticator.stubbedFunction[.waitForConnect] =
+            Result<Void, Error>.success(())
+
+        let unexpectedTransition = expectation(
+            description: "Joining stage should not transition after cancellation."
+        )
+        unexpectedTransition.isInverted = true
+        subject.transition = { _ in unexpectedTransition.fulfill() }
+
+        let offerMarker = String.unique
+        var receivedOffers: [String] = []
+        let offerExpectation = expectation(
+            description: "Late subscriber offer was delivered live."
+        )
+        let offerCancellable = mockCoordinatorStack.sfuStack.adapter
+            .publisher(eventType: Stream_Video_Sfu_Event_SubscriberOffer.self)
+            .sink {
+                receivedOffers.append($0.sdp)
+                offerExpectation.fulfill()
+            }
+        let icePayload = """
+        {"candidate":"\(String.unique)"}
+        """
+        var receivedCandidates: [String] = []
+        let iceExpectation = expectation(
+            description: "Late subscriber ICE was delivered live."
+        )
+        let iceCancellable = mockCoordinatorStack.sfuStack.adapter
+            .publisher(eventType: Stream_Video_Sfu_Models_ICETrickle.self)
+            .sink {
+                receivedCandidates.append($0.iceCandidate)
+                iceExpectation.fulfill()
+            }
+        defer {
+            offerCancellable.cancel()
+            iceCancellable.cancel()
+        }
+
+        _ = subject.transition(from: .connected(subject.context))
+
+        await fulfillment("Join request was not sent before cancellation.") {
+            let webSocketEngine = self.mockCoordinatorStack.sfuStack.webSocket
+            guard
+                let requests = webSocketEngine.recordedInputPayload(
+                    Stream_Video_Sfu_Event_SfuRequest.self,
+                    for: .send
+                )
+            else {
+                return false
+            }
+            return !requests.isEmpty
+        }
+
+        subject.willTransitionAway()
+
+        var offer = Stream_Video_Sfu_Event_SubscriberOffer()
+        offer.sdp = offerMarker
+        var trickle = Stream_Video_Sfu_Models_ICETrickle()
+        trickle.iceCandidate = icePayload
+        trickle.peerType = .subscriber
+        trickle.sessionID = .unique
+        mockCoordinatorStack.sfuStack.receiveEvent(.joinResponse(.init()))
+        mockCoordinatorStack.sfuStack.receiveEvent(.subscriberOffer(offer))
+        mockCoordinatorStack.sfuStack.receiveEvent(.iceTrickle(trickle))
+
+        await fulfillment(of: [offerExpectation, iceExpectation], timeout: defaultTimeout)
+        await fulfillment(of: [unexpectedTransition], timeout: 0.2)
+        XCTAssertEqual(receivedOffers, [offerMarker])
+        XCTAssertEqual(receivedCandidates, [icePayload])
+        let publisher = await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .publisher
+        let subscriber = await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .subscriber
+        XCTAssertNil(publisher)
+        XCTAssertNil(subscriber)
+    }
+
     // MARK: - transition from connected with isRejoiningFromSessionID == nil
 
     func test_transition_fromConnectedWithoutCoordinator_updatesReconnectionStrategy() async throws {
@@ -405,6 +507,12 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             XCTAssertNotNil(subscriber)
         }
         cancellable.cancel()
+    }
+
+    func test_transition_fromConnected_buffersSubscriberEventsBeforePeerConnections() async throws {
+        try await assertBuffersSubscriberEventsBeforePeerConnections(
+            from: .connected
+        )
     }
 
     func test_transition_fromConnected_configuresAudioSession() async throws {
@@ -997,6 +1105,14 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             XCTAssertNotNil(subscriber)
         }
         cancellable.cancel()
+    }
+
+    func test_transition_fromConnectedWithRejoin_buffersSubscriberEventsBeforePeerConnections() async throws {
+        subject.context.isRejoiningFromSessionID = .unique
+
+        try await assertBuffersSubscriberEventsBeforePeerConnections(
+            from: .connected
+        )
     }
 
     func test_transition_fromConnectedWithRejoin_configuresAudioSession() async throws {
@@ -1649,6 +1765,14 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
         cancellable.cancel()
     }
 
+    func test_transition_fromMigrated_buffersSubscriberEventsBeforePeerConnections() async throws {
+        subject.context.migratingFromSFU = "test-sfu"
+
+        try await assertBuffersSubscriberEventsBeforePeerConnections(
+            from: .migrated
+        )
+    }
+
     func test_transition_fromMigrated_configuresAudioSession() async throws {
         subject.context.coordinator = mockCoordinatorStack.coordinator
         subject.context.reconnectAttempts = 11
@@ -1789,6 +1913,94 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
     }
 
     // MARK: - Private helpers
+
+    private func assertBuffersSubscriberEventsBeforePeerConnections(
+        from: WebRTCCoordinator.StateMachine.Stage.ID,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) async throws {
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.reconnectAttempts = 11
+        await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
+        mockCoordinatorStack.webRTCAuthenticator.stubbedFunction[.waitForConnect] = Result<Void, Error>.success(())
+
+        let offerMarker = String.unique
+        let iceMarker = String.unique
+        let icePayload = """
+        {"candidate":"\(iceMarker)"}
+        """
+        var receivedOffers: [String] = []
+        var receivedCandidates: [String] = []
+
+        let offerExpectation = expectation(description: "Subscriber offer was delivered twice.")
+        offerExpectation.expectedFulfillmentCount = 2
+        let offerCancellable = mockCoordinatorStack.sfuStack.adapter
+            .publisher(eventType: Stream_Video_Sfu_Event_SubscriberOffer.self)
+            .sink {
+                receivedOffers.append($0.sdp)
+                offerExpectation.fulfill()
+            }
+
+        let iceExpectation = expectation(description: "Subscriber ICE was delivered twice.")
+        iceExpectation.expectedFulfillmentCount = 2
+        let iceCancellable = mockCoordinatorStack.sfuStack.adapter
+            .publisher(eventType: Stream_Video_Sfu_Models_ICETrickle.self)
+            .sink {
+                receivedCandidates.append($0.iceCandidate)
+                iceExpectation.fulfill()
+            }
+
+        let joinCancellable = mockCoordinatorStack.sfuStack.adapter
+            .publisherSendEvent
+            .compactMap { $0 as? SFUAdapter.JoinEvent }
+            .prefix(1)
+            .sink { [mockCoordinatorStack] _ in
+                var offer = Stream_Video_Sfu_Event_SubscriberOffer()
+                offer.sdp = offerMarker
+
+                var trickle = Stream_Video_Sfu_Models_ICETrickle()
+                trickle.iceCandidate = icePayload
+                trickle.peerType = .subscriber
+                trickle.sessionID = .unique
+
+                mockCoordinatorStack?.sfuStack.receiveEvent(
+                    .joinResponse(.init())
+                )
+                mockCoordinatorStack?.sfuStack.receiveEvent(
+                    .subscriberOffer(offer)
+                )
+                mockCoordinatorStack?.sfuStack.receiveEvent(
+                    .iceTrickle(trickle)
+                )
+            }
+
+        defer {
+            joinCancellable.cancel()
+            offerCancellable.cancel()
+            iceCancellable.cancel()
+        }
+
+        try await assertTransition(
+            from: from,
+            expectedTarget: .joined,
+            subject: subject,
+            validator: {
+                let publisher = await $0.context.coordinator?.stateAdapter.publisher
+                let subscriber = await $0.context.coordinator?.stateAdapter.subscriber
+                XCTAssertNotNil(publisher, file: file, line: line)
+                XCTAssertNotNil(subscriber, file: file, line: line)
+            },
+            file: file,
+            line: line
+        )
+
+        await fulfillment(of: [offerExpectation, iceExpectation], timeout: defaultTimeout)
+        XCTAssertEqual(receivedOffers, [offerMarker, offerMarker], file: file, line: line)
+        XCTAssertEqual(receivedCandidates, [icePayload, icePayload], file: file, line: line)
+    }
 
     private func assertTransition(
         from: WebRTCCoordinator.StateMachine.Stage.ID,

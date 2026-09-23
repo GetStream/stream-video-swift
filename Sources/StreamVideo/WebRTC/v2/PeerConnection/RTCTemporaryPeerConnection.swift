@@ -5,7 +5,11 @@
 import Foundation
 import StreamWebRTC
 
-/// A temporary peer connection used for creating offers with specific tracks.
+/// Creates an offer without retaining a peer connection for the call.
+///
+/// `createOffer()` disables its tracks and awaits native closure on both
+/// success and error. Deinitialization also requests closure as a fallback,
+/// but cannot wait for it.
 final class RTCTemporaryPeerConnection {
 
     private let peerConnection: StreamRTCPeerConnectionProtocol
@@ -72,16 +76,21 @@ final class RTCTemporaryPeerConnection {
 
     /// Cleans up resources when the instance is being deallocated.
     deinit {
-        peerConnection.transceivers.forEach { $0.stopInternal() }
+        // `createOffer` closes the connection on both success and error.
+        // Cancellation can still skip that path, so keep a close as a
+        // safety net. Do not inspect transceivers here; a closed PC can
+        // block the deinit thread.
+        let peerConnection = peerConnection
         // swiftlint:disable discourage_task_init
-        Task { [peerConnection] in await peerConnection.close() }
+        Task { await peerConnection.close() }
         // swiftlint:enable discourage_task_init
     }
 
     /// Creates an offer for the temporary peer connection.
     ///
-    /// This method adds the local audio and video tracks (if available) to the peer connection
-    /// as receive-only transceivers before creating the offer.
+    /// Adds temporary send-only audio and video transceivers, then creates
+    /// the offer. Both tracks are disabled and the connection is closed
+    /// before this method returns or throws.
     ///
     /// - Returns: An `RTCSessionDescription` representing the created offer.
     /// - Throws: An error if the offer creation fails.
@@ -97,7 +106,26 @@ final class RTCTemporaryPeerConnection {
             with: localVideoTrack,
             init: .temporary(trackType: .video)
         )
-        
-        return try await peerConnection.offer(for: .defaultConstraints)
+
+        do {
+            let offer = try await peerConnection.offer(
+                for: .defaultConstraints
+            )
+            await tearDownMedia()
+            return offer
+        } catch {
+            await tearDownMedia()
+            throw error
+        }
+    }
+
+    /// Disables both tracks and waits for native closure before returning.
+    ///
+    /// Leaving the audio track enabled after the offer can keep AURemoteIO
+    /// delivering into a VoiceEngine while its factory is being released.
+    private func tearDownMedia() async {
+        localAudioTrack.isEnabled = false
+        localVideoTrack.isEnabled = false
+        await peerConnection.close()
     }
 }

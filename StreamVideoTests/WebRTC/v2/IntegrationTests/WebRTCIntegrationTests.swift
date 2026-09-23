@@ -129,6 +129,66 @@ final class WebRTCIntegrationTests: XCTestCase, @unchecked Sendable {
         }
     }
 
+    func test_addTransceiver_afterClose_returnsNil() async throws {
+        let factory = PeerConnectionFactory.mock()
+        let audioTrack = factory.mockAudioTrack()
+        audioTrack.isEnabled = false
+        let subject = try StreamRTCPeerConnection(factory, configuration: .init())
+
+        XCTAssertNotNil(
+            subject.addTransceiver(
+                trackType: .audio,
+                with: audioTrack,
+                init: .temporary(trackType: .audio)
+            )
+        )
+
+        await subject.close()
+
+        XCTAssertNil(
+            subject.addTransceiver(
+                trackType: .audio,
+                with: audioTrack,
+                init: .temporary(trackType: .audio)
+            )
+        )
+
+        await subject.close()
+    }
+
+    func test_addTransceiver_concurrentWithClose_completesAndClosesPeerConnection() async throws {
+        let factory = PeerConnectionFactory.mock()
+        let audioTracks = (0..<4).map { _ in
+            let track = factory.mockAudioTrack()
+            track.isEnabled = false
+            return track
+        }
+        let subject = try StreamRTCPeerConnection(factory, configuration: .init())
+
+        await withTaskGroup(of: Void.self) { group in
+            for audioTrack in audioTracks {
+                group.addTask {
+                    _ = subject.addTransceiver(
+                        trackType: .audio,
+                        with: audioTrack,
+                        init: .temporary(trackType: .audio)
+                    )
+                }
+            }
+            group.addTask { await subject.close() }
+            group.addTask { await subject.close() }
+        }
+
+        XCTAssertEqual(subject.connectionState, .closed)
+        XCTAssertNil(
+            subject.addTransceiver(
+                trackType: .audio,
+                with: audioTracks[0],
+                init: .temporary(trackType: .audio)
+            )
+        )
+    }
+
     // MARK: - Flow Helpers
 
     private func stubCallAuthentication(
