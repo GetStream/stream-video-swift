@@ -35,7 +35,13 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             // Keep the previous call alive until after the PublishedSubject lock is
             // released: deallocating it inside the setter cancels its
             // OutgoingRingingController subscription to $ringingCall and aborts.
-            didSet { _ = oldValue }
+            didSet {
+                if oldValue !== ringingCall {
+                    oldValue?.ringingRecovery.stop()
+                    ringingCall?.ringingRecovery.activate()
+                }
+                _ = oldValue
+            }
         }
 
         private nonisolated let disposableBag = DisposableBag()
@@ -120,10 +126,6 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     private let disposableBag = DisposableBag()
 
     private lazy var idleTimerAdapter = IdleTimerAdapter(self)
-    /// Reloads `state.ringingCall` from the coordinator whenever the
-    /// WebSocket reconnects, so a missed accept/reject/end is not stuck
-    /// on a stale local copy.
-    private lazy var ringingCallRecoveryAdapter = RingingCallRecoveryAdapter(self)
 
     /// Initializes a new instance of `StreamVideo` with the specified parameters.
     /// - Parameters:
@@ -217,7 +219,6 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         _ = eventNotificationCenter
         _ = idleTimerAdapter
         _ = battery
-        _ = ringingCallRecoveryAdapter
 
         if user.type != .anonymous {
             let userAuth = UserAuth { [weak self] in
@@ -286,6 +287,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
                 callController: callController,
                 callSettings: callSettings
             )
+            call.ringingRecovery.configure(on: self)
             eventsMiddleware.add(subscriber: call)
             return call
         }
@@ -452,6 +454,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
                     coordinatorClient: self.coordinatorClient,
                     callController: callController
                 )
+                call.ringingRecovery.configure(on: self)
                 eventsMiddleware.add(subscriber: call)
                 return call
             },

@@ -413,6 +413,39 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         await assertCallingState(.idle)
     }
 
+    func test_outgoingCall_historicalNonmemberAcceptance_allInviteesReject_cancels() async {
+        await prepare()
+        let invitees: [Member] = participants + [thirdUser]
+        subject.startCall(
+            callType: .default,
+            callId: callId,
+            members: invitees,
+            ring: true
+        )
+        await assertCallingState(.outgoing)
+
+        let session = CallSessionResponse.dummy(
+            acceptedBy: ["previous-callee": Date()],
+            rejectedBy: [
+                secondUser.userId: Date(),
+                thirdUser.userId: Date()
+            ]
+        )
+        mockCall.state.session = session
+        streamVideo.process(
+            .coordinatorEvent(
+                .typeCallRejectedEvent(.dummy(
+                    call: .dummy(cid: cId, session: session),
+                    callCid: cId,
+                    createdAt: Date(),
+                    user: thirdUser.user.toUserResponse()
+                ))
+            )
+        )
+
+        await assertCallingState(.idle)
+    }
+
     func test_outgoingCall_callCreatedPriorToStarting_rejectedEventFromOneParticipantCallRemainsOngoing() async throws {
         // Given
         let memberResponses = (participants + [thirdUser]).map {
@@ -633,10 +666,8 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         )
     }
 
-    func test_outgoingCall_ringTimeout() async throws {
-        // Given
-        let ringTimeoutSeconds = 3
-        await prepare(ringTimeOut: ringTimeoutSeconds * 1000)
+    func test_outgoingCall_callEndedNotification_cleansUpWithoutLeavingAgain() async throws {
+        await prepare()
         subject.startCall(
             callType: .default,
             callId: callId,
@@ -645,8 +676,149 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         )
         await assertCallingState(.outgoing)
 
-        // Then
-        await assertCallingState(.idle, timeout: TimeInterval(ringTimeoutSeconds + 1 * 1000))
+        NotificationCenter.default.post(
+            name: Notification.Name(CallNotification.callEnded),
+            object: mockCall
+        )
+
+        await assertCallingState(.idle)
+        XCTAssertEqual(mockCall.timesCalled(.leave), 0)
+    }
+
+    func test_outgoingCall_finalReadFindsAcceptance_joinsWithoutRejecting() async throws {
+        let api = await prepareFinalReadScenario(
+            .success(GetCallRingStateResponse(
+                acceptedBy: [secondUser.userId: Date()],
+                callCid: cId,
+                createdByUserId: firstUser.userId,
+                duration: "0",
+                missedBy: [:],
+                rejectedBy: [:],
+                sessionId: "final-read-session"
+            ))
+        )
+
+        await assertCallingState(.inCall)
+        XCTAssertEqual(api.timesCalled(.getCallRingState), 1)
+        XCTAssertEqual(api.timesCalled(.rejectCall), 0)
+    }
+
+    func test_outgoingCall_finalReadFindsEndedSession_doesNotJoin() async {
+        let api = await prepareFinalReadScenario(
+            .success(GetCallRingStateResponse(
+                acceptedBy: [secondUser.userId: Date()],
+                callCid: cId,
+                createdByUserId: firstUser.userId,
+                duration: "0",
+                missedBy: [:],
+                rejectedBy: [:],
+                sessionEndedAt: Date(),
+                sessionId: "final-read-session"
+            ))
+        )
+
+        await assertCallingState(.idle)
+        XCTAssertEqual(api.timesCalled(.getCallRingState), 1)
+        XCTAssertEqual(api.timesCalled(.rejectCall), 0)
+    }
+
+    func test_outgoingCall_finalReadFails_timesOutAndRejects() async {
+        let api = await prepareFinalReadScenario(
+            .failure(APIError(
+                code: 12345,
+                details: [],
+                duration: "0",
+                message: "temporarily unavailable",
+                moreInfo: "",
+                statusCode: 503
+            ))
+        )
+
+        await assertCallingState(.idle)
+        XCTAssertEqual(api.timesCalled(.getCallRingState), 1)
+        XCTAssertEqual(api.timesCalled(.rejectCall), 1)
+    }
+
+    func test_outgoingCall_finalReadStalls_rejectsAfterBoundedGrace() async {
+        let gate = FinalReadTestGate()
+        let response = GetCallRingStateResponse(
+            acceptedBy: [secondUser.userId: Date()],
+            callCid: cId,
+            createdByUserId: firstUser.userId,
+            duration: "0",
+            missedBy: [:],
+            rejectedBy: [:],
+            sessionId: "final-read-session"
+        )
+        let api = await prepareFinalReadScenario(
+            .success(response),
+            handler: {
+                await gate.wait()
+                return response
+            }
+        )
+
+        await assertCallingState(.idle, timeout: 10)
+        await fulfilmentInMainActor(timeout: 10) {
+            api.timesCalled(.rejectCall) == 1
+        }
+        await gate.release()
+        XCTAssertEqual(api.timesCalled(.getCallRingState), 1)
+    }
+
+    private func prepareFinalReadScenario(
+        _ outcome: Result<GetCallRingStateResponse, Error>,
+        handler: (@Sendable () async throws -> GetCallRingStateResponse)? = nil
+    ) async -> MockDefaultAPIEndpoints {
+        await streamVideo.disconnect()
+        streamVideo = nil
+        let client = MockStreamVideo(user: firstUser.user)
+        streamVideo = client
+        let api = MockDefaultAPIEndpoints()
+        let call = Call(
+            callType: callType,
+            callId: callId,
+            coordinatorClient: api,
+            callController: CallController_Mock.make()
+        )
+        call.ringingRecovery.configure(on: client)
+        let sessionId = "final-read-session"
+        let response = CallResponse.dummy(
+            cid: cId,
+            createdBy: firstUser.user.toUserResponse(),
+            id: callId,
+            session: .dummy(id: sessionId),
+            settings: .dummy(ring: .dummy(autoCancelTimeoutMs: 200)),
+            type: callType
+        )
+        api.stub(
+            for: .getOrCreateCall,
+            with: GetOrCreateCallResponse(
+                call: response,
+                created: true,
+                duration: "0",
+                members: [],
+                ownCapabilities: []
+            )
+        )
+        switch outcome {
+        case let .success(response):
+            api.stub(for: .getCallRingState, with: response)
+        case let .failure(error):
+            api.stub(for: .getCallRingState, with: error)
+        }
+        api.getCallRingStateHandler = handler
+        api.stub(for: .rejectCall, with: RejectCallResponse(duration: "0"))
+        client.stub(for: .call, with: call)
+        subject = .init()
+        subject.startCall(
+            callType: callType,
+            callId: callId,
+            members: participants,
+            ring: true
+        )
+
+        return api
     }
 
     // MARK: - Incoming
@@ -1866,4 +2038,22 @@ extension User {
 
 extension Member {
     var userId: String { id }
+}
+
+private actor FinalReadTestGate {
+    private var continuation: CheckedContinuation<Void, Never>?
+    private var released = false
+
+    func wait() async {
+        if released { return }
+        await withCheckedContinuation { continuation in
+            self.continuation = continuation
+        }
+    }
+
+    func release() {
+        released = true
+        continuation?.resume()
+        continuation = nil
+    }
 }

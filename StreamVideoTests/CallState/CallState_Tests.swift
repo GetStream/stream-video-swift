@@ -9,6 +9,61 @@ import XCTest
 @MainActor
 final class CallState_Tests: XCTestCase, @unchecked Sendable {
 
+    func test_ringState_olderSnapshot_preservesWebSocketOutcomeAndRoster() {
+        let subject = CallState(.dummy())
+        let newer = Date(timeIntervalSince1970: 200)
+        let older = Date(timeIntervalSince1970: 100)
+        let participant = CallParticipantResponse.dummy()
+        subject.session = .dummy(
+            acceptedBy: ["ws": newer],
+            id: "ring-session",
+            participants: [participant],
+            rejectedBy: ["rejected": newer]
+        )
+        let response = GetCallRingStateResponse(
+            acceptedBy: ["ws": older, "polled": older],
+            callCid: "default:call",
+            callEndedAt: newer,
+            createdByUserId: "caller",
+            duration: "0",
+            missedBy: ["missed": older],
+            rejectedBy: ["rejected": older],
+            sessionId: "ring-session"
+        )
+
+        XCTAssertTrue(subject.update(from: response))
+        XCTAssertEqual(subject.session?.acceptedBy["ws"], newer)
+        XCTAssertEqual(subject.session?.acceptedBy["polled"], older)
+        XCTAssertEqual(subject.session?.rejectedBy["rejected"], newer)
+        XCTAssertEqual(subject.session?.missedBy["missed"], older)
+        XCTAssertEqual(subject.session?.participants, [participant])
+
+        subject.update(from: .dummy(
+            cid: "default:call",
+            session: .dummy(id: "ring-session")
+        ))
+        XCTAssertEqual(subject.endedAt, newer)
+        XCTAssertEqual(subject.session?.acceptedBy["ws"], newer)
+        XCTAssertEqual(subject.session?.acceptedBy["polled"], older)
+    }
+
+    func test_ringState_wrongSession_doesNotChangeCurrentSession() {
+        let subject = CallState(.dummy())
+        subject.session = .dummy(id: "current")
+        let response = GetCallRingStateResponse(
+            acceptedBy: ["callee": Date()],
+            callCid: "default:call",
+            createdByUserId: "caller",
+            duration: "0",
+            missedBy: [:],
+            rejectedBy: [:],
+            sessionId: "old"
+        )
+
+        XCTAssertFalse(subject.update(from: response))
+        XCTAssertTrue(subject.session?.acceptedBy.isEmpty == true)
+    }
+
     /// Test the `didUpdate(_:)` function by combining existing and newly added participants.
     func test_didUpdate_combinesExistingAndNewParticipants() {
         assertParticipantsUpdate(

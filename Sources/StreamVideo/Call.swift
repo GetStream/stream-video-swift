@@ -61,6 +61,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     internal let callController: CallController
     internal let coordinatorClient: DefaultAPIEndpoints
     private var outgoingRingingController: OutgoingRingingController?
+    internal lazy var ringingRecovery = RingingCallRecoveryAdapter(self)
 
     /// This adapter is used to manage closed captions for the
     /// call.
@@ -402,7 +403,11 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         await state.update(from: response)
         if ring {
             configureOutgoingRingingController()
-            await MainActor.run { streamVideo.state.ringingCall = self }
+            let ringingMemberIds = aggregatedMembers?.map(\.userId)
+            await MainActor.run {
+                streamVideo.state.ringingCall = self
+                ringingRecovery.activate(membersIds: ringingMemberIds)
+            }
         }
 
         return response.call
@@ -421,6 +426,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             id: callId,
             ringCallRequest: request
         )
+        ringingRecovery.activate(mode: .activeCall, membersIds: request.membersIds)
         return response
     }
 
@@ -650,6 +656,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     ///   Pass a custom value when you want the backend to distinguish between
     ///   different leave flows (for example, user action vs timeout).
     public func leave(reason: String? = nil) {
+        ringingRecovery.stop()
         stateMachine.transition(
             .leaving(
                 .init(

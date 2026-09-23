@@ -491,7 +491,7 @@ open class CallViewModel: ObservableObject {
             Task(disposableBag: disposableBag, priority: .userInitiated) { [weak self] in
                 guard let self else { return }
                 do {
-                    let callData = try await call.create(
+                    _ = try await call.create(
                         members: membersRequest,
                         custom: customData,
                         team: team,
@@ -508,10 +508,6 @@ open class CallViewModel: ObservableObject {
                     try ringCreationCoordinator?.updateStateCreated()
                     ringCreationCoordinator = nil
 
-                    let timeoutSeconds = TimeInterval(
-                        callData.settings.ring.autoCancelTimeoutMs / 1000
-                    )
-                    startTimer(timeout: timeoutSeconds)
                 } catch is OutgoingRingCreationCoordinator.CallAlreadyRejected {
                     // Hang-up raced create and could not reject a call that did
                     // not exist yet. The call exists now, so cancel it here to
@@ -606,7 +602,7 @@ open class CallViewModel: ObservableObject {
 
                 call.updateParticipantsSorting(with: participantsSortComparators)
 
-                let joinResponse = try await call.join(
+                _ = try await call.join(
                     create: true,
                     options: options,
                     ring: false,
@@ -621,10 +617,6 @@ open class CallViewModel: ObservableObject {
                     request: .init(membersIds: members.map(\.id).filter { $0 != self.streamVideo.user.id }, video: video)
                 )
                 
-                let autoCancelTimeoutMs = call.state.settings?.ring.autoCancelTimeoutMs
-                    ?? joinResponse.call.settings.ring.autoCancelTimeoutMs
-                let timeoutSeconds = TimeInterval(autoCancelTimeoutMs) / 1000
-                startTimer(timeout: timeoutSeconds)
                 save(call: call)
                 enteringCallTask = nil
                 hasAcceptedCall = false
@@ -1042,6 +1034,10 @@ open class CallViewModel: ObservableObject {
             return
         }
 
+        if ringTimeout {
+            setCallingState(.idle)
+        }
+
         Task(disposableBag: disposableBag, priority: .userInitiated) { [weak self] in
             guard let self else { return }
 
@@ -1081,6 +1077,18 @@ open class CallViewModel: ObservableObject {
     }
 
     private func subscribeToCallEvents() {
+        NotificationCenter.default
+            .publisher(for: Notification.Name(CallNotification.callEnded))
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] notification in
+                guard let self, let endedCall = notification.object as? Call,
+                      (pendingCall ?? call) === endedCall else { return }
+                pendingCall = nil
+                call = nil
+                leaveCall(reason: nil)
+            }
+            .store(in: disposableBag)
+
         streamVideo
             .eventPublisher()
             .receive(on: DispatchQueue.main) // Required because CallViewModel is isolated on MainActor
@@ -1163,6 +1171,13 @@ open class CallViewModel: ObservableObject {
                 setActiveCall(call)
             }
         case .outgoing where call?.cId == event.callCid:
+            guard let call,
+                  let userId = event.user?.id,
+                  userId != streamVideo.user.id else { return }
+            let recipientIds = outgoingRecipientIds(for: call)
+            if !recipientIds.isEmpty && !recipientIds.contains(userId) {
+                return
+            }
             // Mirror `joinCall` so the incoming UI is dismissed before
             // `enterCall` finishes the async join flow, which may now be
             // delayed by a `callJoinInterceptor`.
@@ -1202,23 +1217,23 @@ open class CallViewModel: ObservableObject {
             guard let outgoingCall = call else {
                 return
             }
-            let outgoingMembersCount = outgoingCallMembers.filter { $0.id != streamVideo.user.id }.count
-            let rejections = {
-                if outgoingMembersCount == 1, event.user?.id != streamVideo.user.id {
-                    return 1
-                } else {
-                    return outgoingCall.state.session?.rejectedBy.count ?? 0
+            let outgoingMemberIds = outgoingRecipientIds(for: outgoingCall)
+            let rejectedBy = outgoingCall.state.session?.rejectedBy ?? [:]
+            let acceptedBy = outgoingCall.state.session?.acceptedBy ?? [:]
+            let allRejected = !outgoingMemberIds.isEmpty
+                && outgoingMemberIds.allSatisfy {
+                    rejectedBy[$0] != nil
+                        || (outgoingMemberIds.count == 1 && event.user?.id == $0)
                 }
-            }()
-            let accepted = outgoingCall.state.session?.acceptedBy.count ?? 0
-            if accepted == 0, rejections >= outgoingMembersCount {
+            if outgoingMemberIds.allSatisfy({ acceptedBy[$0] == nil }),
+               allRejected {
                 if skipCallStateUpdates {
                     skipCallStateUpdates = false
-                    setCallingState(.idle)
                 }
+                setCallingState(.idle)
                 Task(disposableBag: disposableBag, priority: .userInitiated) { [weak self] in
                     _ = try? await outgoingCall.reject(
-                        reason: "Call rejected by all \(outgoingMembersCount) outgoing call members."
+                        reason: "Call rejected by all \(outgoingMemberIds.count) outgoing call members."
                     )
                     self?.leaveCall(reason: "unanswered")
                 }
@@ -1226,6 +1241,13 @@ open class CallViewModel: ObservableObject {
         default:
             break
         }
+    }
+
+    private func outgoingRecipientIds(for call: Call) -> Set<String> {
+        let members = outgoingCallMembers.isEmpty
+            ? call.state.members.map(\.id)
+            : outgoingCallMembers.map(\.id)
+        return Set(members.filter { $0 != streamVideo.user.id })
     }
 
     /// Handles a call end event and updates the VM state.

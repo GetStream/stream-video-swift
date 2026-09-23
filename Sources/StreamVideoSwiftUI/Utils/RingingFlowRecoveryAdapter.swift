@@ -6,18 +6,6 @@ import Combine
 import Foundation
 import StreamVideo
 
-/// Turns a refreshed ringing-call session into the accept / reject / end
-/// events `CallViewModel` already handles from the WebSocket.
-///
-/// After a reconnect, the StreamVideo client reloads `Call.state` with
-/// `get()`. That does not join the call. This adapter watches
-/// `StreamVideo.state.ringingCall` and, for an outgoing ring (the local
-/// user created it), synthesizes those events from `session`.
-///
-/// `createdBy` is checked when the session updates, not when
-/// `ringingCall` is first assigned. CallKit and similar paths set
-/// `ringingCall` before `get()` fills `createdBy`; a later `GET` updates
-/// session and does not re-emit `ringingCall`.
 final class RingingFlowRecoveryAdapter: @unchecked Sendable {
 
     private enum DisposableKey: String { case sessionObserver }
@@ -41,30 +29,36 @@ final class RingingFlowRecoveryAdapter: @unchecked Sendable {
         self.onRejected = onRejected
         self.onEnded = onEnded
 
-        observeRingingCall()
+        observeCurrentCall()
     }
 
     // MARK: - Private Helpers
 
     @MainActor
-    private func observeRingingCall() {
+    private func observeCurrentCall() {
         streamVideo
             .state
             .$ringingCall
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] in self?.didUpdateRingingCall($0) }
+            .sink { [weak self] _ in self?.didUpdateCall() }
+            .store(in: disposableBag)
+        streamVideo
+            .state
+            .$activeCall
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.didUpdateCall() }
             .store(in: disposableBag)
     }
 
     @MainActor
-    private func didUpdateRingingCall(_ ringingCall: Call?) {
+    private func didUpdateCall() {
         disposableBag.remove(DisposableKey.sessionObserver.rawValue)
 
-        guard let ringingCall else {
+        guard let call = streamVideo.state.ringingCall ?? streamVideo.state.activeCall else {
             return
         }
 
-        observeCallStateSessionWhileRinging(ringingCall)
+        observeCallStateSessionWhileRinging(call)
     }
 
     @MainActor
@@ -72,10 +66,11 @@ final class RingingFlowRecoveryAdapter: @unchecked Sendable {
         ringingCall
             .state
             .$session
-            .compactMap { $0 }
+            .combineLatest(ringingCall.state.$endedAt)
             .receive(on: DispatchQueue.main)
-            .sink { [weak self, callCId = ringingCall.cId] session in
-                self?.ringingCallSessionUpdated(session, callCId: callCId)
+            .sink { [weak self, weak ringingCall] _ in
+                guard let ringingCall else { return }
+                self?.ringingCallStateUpdated(ringingCall)
             }
             .store(
                 in: disposableBag,
@@ -83,25 +78,49 @@ final class RingingFlowRecoveryAdapter: @unchecked Sendable {
             )
     }
 
-    private func ringingCallSessionUpdated(
-        _ session: CallSessionResponse,
-        callCId: String
-    ) {
-        Task { @MainActor [weak self] in
-            guard
-                let self,
-                let ringingCall = streamVideo.state.ringingCall,
-                ringingCall.cId == callCId,
-                ringingCall.state.createdBy?.id == streamVideo.user.id
-            else {
-                return
+    @MainActor
+    private func ringingCallStateUpdated(_ call: Call) {
+        guard (streamVideo.state.ringingCall ?? streamVideo.state.activeCall) === call else {
+            return
+        }
+        let callCId = call.cId
+        let currentUserId = streamVideo.user.id
+        let session = call.state.session
+        if session?.endedAt != nil || call.state.endedAt != nil {
+            onEnded(
+                .ended(
+                    .init(
+                        callCid: callCId,
+                        user: nil,
+                        action: .end
+                    )
+                )
+            )
+            return
+        }
+        guard let session, let creatorId = call.state.createdBy?.id else { return }
+        if creatorId != currentUserId {
+            if session.acceptedBy[currentUserId] != nil {
+                onAccepted(.accepted(.init(
+                    callCid: callCId,
+                    user: .init(id: currentUserId),
+                    action: .accept
+                )))
+            } else if let userId = [currentUserId, creatorId].first(where: { userId in
+                session.rejectedBy[userId] != nil
+                    && (userId == currentUserId || session.acceptedBy.keys.allSatisfy { $0 == creatorId })
+            }) {
+                onRejected(.rejected(.init(
+                    callCid: callCId,
+                    user: .init(id: userId),
+                    action: .reject
+                )))
+            } else if session.missedBy[currentUserId] != nil {
+                onEnded(.ended(.init(callCid: callCId, user: nil, action: .end)))
             }
-
-            let currentUserId = streamVideo.user.id
-            if
-                let userId = session.acceptedBy.keys.first(where: {
-                    $0 != currentUserId
-                }) {
+        } else {
+            for userId in session.acceptedBy.keys
+                where userId != currentUserId {
                 onAccepted(
                     .accepted(
                         .init(
@@ -111,26 +130,15 @@ final class RingingFlowRecoveryAdapter: @unchecked Sendable {
                         )
                     )
                 )
-            } else if
-                let userId = session.rejectedBy.keys.first(where: {
-                    $0 != currentUserId
-                }) {
+            }
+            for userId in session.rejectedBy.keys
+                where userId != currentUserId {
                 onRejected(
                     .rejected(
                         .init(
                             callCid: callCId,
                             user: .init(id: userId),
                             action: .reject
-                        )
-                    )
-                )
-            } else if session.endedAt != nil {
-                onEnded(
-                    .ended(
-                        .init(
-                            callCid: callCId,
-                            user: nil,
-                            action: .end
                         )
                     )
                 )
