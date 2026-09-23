@@ -31,8 +31,12 @@ struct DemoMoreControlsViewModifier: ViewModifier {
                         else { return tokens.layout.spacing2xl }
                     }()) {
                         VStack(spacing: tokens.layout.spacingXs) {
-                            DemoReactionSelectorView { viewModel.moreControlsShown = false }
-                            DemoRaiseHandToggleButtonView(viewModel: viewModel)
+                            VStack(spacing: tokens.layout.spacingXs) {
+                                DemoReactionSelectorView { viewModel.moreControlsShown = false }
+                                DemoRaiseHandToggleButtonView(viewModel: viewModel)
+                            }
+                            .padding(.horizontal, tokens.layout.spacingMd)
+
                             if #available(iOS 15.0, *) {
                                 DemoBackgroundEffectSelector()
                                     .padding(.top, tokens.layout.spacingMd)
@@ -73,6 +77,7 @@ struct DemoMoreControlsViewModifier: ViewModifier {
                                 label: "Stats"
                             ) { Image(systemName: "chart.xyaxis.line") }
                         }
+                        .padding(.horizontal, tokens.layout.spacingMd)
 
                         if AppEnvironment.configuration != .release {
                             VStack(spacing: tokens.layout.spacingXs) {
@@ -143,10 +148,10 @@ struct DemoMoreControlsViewModifier: ViewModifier {
                                     viewModel: viewModel
                                 ) { viewModel.moreControlsShown = false }
                             }
+                            .padding(.horizontal, tokens.layout.spacingMd)
                         }
                     }
                 }
-                .padding(.horizontal, tokens.layout.spacingMd)
                 .background(Color(tokens.colors.backgroundCoreElevation1))
                 .sheet(isPresented: $isStatsPresented) {
                     DemoStatsView(

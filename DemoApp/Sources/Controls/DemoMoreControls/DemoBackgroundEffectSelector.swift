@@ -15,12 +15,13 @@ struct DemoBackgroundEffectSelector: View {
     var effects: [BackgroundEffect] = BackgroundEffect.allCases
 
     var body: some View {
-        ScrollView(.horizontal) {
+        ScrollView(.horizontal, showsIndicators: false) {
             HStack(alignment: .center, spacing: tokens.layout.spacingXxs) {
                 ForEach(effects) { effect in
                     DemoEffectButton(effect: effect)
                 }
             }
+            .padding(.horizontal, tokens.layout.spacingMd)
         }
     }
 
