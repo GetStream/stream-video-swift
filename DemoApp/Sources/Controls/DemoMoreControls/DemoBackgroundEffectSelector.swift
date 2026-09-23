@@ -10,25 +10,29 @@ import SwiftUI
 @available(iOS 15.0, *)
 struct DemoBackgroundEffectSelector: View {
 
+    @Injected(\.videoAppearance) private var videoAppearance
+
     var effects: [BackgroundEffect] = BackgroundEffect.allCases
 
     var body: some View {
         ScrollView(.horizontal) {
-            HStack(alignment: .center) {
+            HStack(alignment: .center, spacing: tokens.layout.spacingXs) {
                 ForEach(effects) { effect in
                     DemoEffectButton(effect: effect)
                 }
             }
-            .padding(8)
+            .padding(tokens.layout.spacingXs)
         }
     }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
 
 @available(iOS 15.0, *)
 @MainActor
 struct DemoEffectButton: View {
 
-    @Injected(\.colors) var colors
+    @Injected(\.videoAppearance) private var videoAppearance
 
     var effect: BackgroundEffect
     @ObservedObject var appState = AppState.shared
@@ -53,7 +57,7 @@ struct DemoEffectButton: View {
             appState.videoFilter = isSelected ? nil : effect.filter
         } label: {
             Circle()
-                .fill(Color(colors.participantBackground))
+                .fill(Color(tokens.colors.backgroundCoreOnElevation))
                 .overlay(
                     effect
                         .image
@@ -63,11 +67,22 @@ struct DemoEffectButton: View {
                         .clipShape(Circle())
                 )
                 .clipped()
-                .frame(width: 44, height: 44)
-                .overlay(Circle().stroke(isSelected ? colors.text : .clear))
+                .frame(
+                    width: tokens.layout.buttonVisualHeightMd,
+                    height: tokens.layout.buttonVisualHeightMd
+                )
+                .overlay(
+                    Circle().stroke(
+                        Color(tokens.colors.borderUtilityActive),
+                        lineWidth: isSelected ? 2 : 0
+                    )
+                    .padding(2)
+                )
         }
         .buttonStyle(.plain)
     }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
 
 @available(iOS 15.0, *)

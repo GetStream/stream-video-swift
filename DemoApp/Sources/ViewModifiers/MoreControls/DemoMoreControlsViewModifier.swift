@@ -12,7 +12,7 @@ struct DemoMoreControlsViewModifier: ViewModifier {
     @ObservedObject var appState: AppState = .shared
     @ObservedObject var viewModel: CallViewModel
     @Injected(\.snapshotTrigger) var snapshotTrigger
-    @Injected(\.appearance) var appearance
+    @Injected(\.videoAppearance) private var videoAppearance
     @Injected(\.localParticipantSnapshotViewModel) var localParticipantSnapshotViewModel
 
     @State private var isStatsPresented = false
@@ -27,10 +27,10 @@ struct DemoMoreControlsViewModifier: ViewModifier {
             .halfSheet(isPresented: $viewModel.moreControlsShown) {
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: {
-                        if #available(iOS 15.0, *) { return 8 }
-                        else { return 32 }
+                        if #available(iOS 15.0, *) { return tokens.layout.spacingXs }
+                        else { return tokens.layout.spacing2xl }
                     }()) {
-                        VStack(spacing: 8) {
+                        VStack(spacing: tokens.layout.spacingXs) {
                             DemoReactionSelectorView { viewModel.moreControlsShown = false }
                             DemoRaiseHandToggleButtonView(viewModel: viewModel)
                             if #available(iOS 15.0, *) {
@@ -38,7 +38,7 @@ struct DemoMoreControlsViewModifier: ViewModifier {
                             }
                         }
 
-                        VStack {
+                        VStack(spacing: tokens.layout.spacingXs) {
                             DemoNoiseCancellationButtonView(viewModel: viewModel)
 
                             DemoMoreControlListButtonView(
@@ -74,7 +74,7 @@ struct DemoMoreControlsViewModifier: ViewModifier {
                         }
 
                         if AppEnvironment.configuration != .release {
-                            VStack {
+                            VStack(spacing: tokens.layout.spacingXs) {
                                 Divider()
 
                                 DemoAudioTrackButtonView()
@@ -145,7 +145,8 @@ struct DemoMoreControlsViewModifier: ViewModifier {
                         }
                     }
                 }
-                .padding(.horizontal)
+                .padding(.horizontal, tokens.layout.spacingMd)
+                .background(Color(tokens.colors.backgroundCoreElevation1))
                 .sheet(isPresented: $isStatsPresented) {
                     DemoStatsView(
                         viewModel: viewModel,
@@ -154,12 +155,13 @@ struct DemoMoreControlsViewModifier: ViewModifier {
                 }
             }
     }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
 
 private struct DemoMoreLogsAndGleapButtonView: View {
 
     @Injected(\.gleap) private var gleap
-    @Injected(\.appearance) private var appearance
 
     @State private var areLogsPresented = false
     @State private var activeLogsTask: Task<Void, Error>?

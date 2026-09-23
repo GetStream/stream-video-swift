@@ -7,8 +7,6 @@ import StreamVideo
 import SwiftUI
 
 struct HalfSheetView<Content: View>: View {
-    @Injected(\.colors) var colors
-
     @Binding var isPresented: Bool
     let content: () -> Content
 
@@ -32,8 +30,6 @@ struct HalfSheetView<Content: View>: View {
 
 struct DraggableSheetView<Content: View>: View {
 
-    @Injected(\.colors) var colors
-
     var isPresented: Binding<Bool>
     var content: () -> Content
     var dismissalFraction: CGFloat = 0.33 // we need to swipe just 1/3 of the total height.
@@ -44,12 +40,11 @@ struct DraggableSheetView<Content: View>: View {
         GeometryReader { proxy in
             VStack(spacing: 0) {
                 DragHandleView()
-                    .background(Color(
-                        colors
-                            .callBackground
+                    .background(Color(colors
+                            .backgroundCoreElevation1
                     )) // Give the view "volume" so the DragGesture is effective from it's whole width.
                     .padding(.vertical, 5)
-                    .padding(.horizontal, 24) // Avoid collision with rounded corners.
+                    .padding(.horizontal, layout.spacingXl) // Avoid collision with rounded corners.
                     .gesture(
                         DragGesture()
                             .onChanged { value in
@@ -72,9 +67,9 @@ struct DraggableSheetView<Content: View>: View {
             }
             .frame(maxHeight: .infinity)
             .cornerRadius(
-                24,
+                layout.radius4xl,
                 corners: [.topLeft, .topRight],
-                backgroundColor: Color(colors.callBackground)
+                backgroundColor: Color(colors.backgroundCoreElevation1)
             )
             .offset(y: isPresented.wrappedValue ? dragOffset : proxy.size.height / 2)
         }
@@ -86,7 +81,7 @@ public struct DragHandleView: View {
     
     public var body: some View {
         VStack(alignment: .center) {
-            Color.white.opacity(0.3)
+            Color(colors.accentNeutral)
                 .frame(width: 44, height: 5)
                 .clipShape(Capsule())
         }
@@ -104,10 +99,18 @@ extension View {
         onDismiss: (() -> Void)? = nil,
         @ViewBuilder content: @escaping () -> Content
     ) -> some View where Content: View {
-        if #available(iOS 16.0, *) {
+        if #available(iOS 16.4, *) {
             sheet(isPresented: isPresented, onDismiss: onDismiss) {
                 content()
-                    .padding(.vertical)
+                    .padding(.top, layout.spacingMd)
+                    .presentationDetents([.medium])
+                    .presentationDragIndicator(.visible)
+                    .presentationBackground(Color(colors.backgroundCoreElevation1))
+            }
+        } else if #available(iOS 16.0, *) {
+            sheet(isPresented: isPresented, onDismiss: onDismiss) {
+                content()
+                    .padding(.top, layout.spacingMd)
                     .presentationDetents([.medium])
                     .presentationDragIndicator(.visible)
             }
