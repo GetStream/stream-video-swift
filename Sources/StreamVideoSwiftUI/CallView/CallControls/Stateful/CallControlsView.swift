@@ -2,7 +2,6 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
-import StreamCoreUI
 import StreamVideo
 import SwiftUI
 
@@ -10,7 +9,6 @@ import SwiftUI
 public struct CallControlsView: View {
 
     @Injected(\.streamVideo) var streamVideo
-    @Injected(\.videoAppearance) var videoAppearance
 
     @ObservedObject var viewModel: CallViewModel
     @State var ownCapabilities: [OwnCapability]
@@ -23,12 +21,14 @@ public struct CallControlsView: View {
     }
 
     public var body: some View {
-        HStack {
-            if ownCapabilities.contains(.sendVideo) == true {
-                VideoIconView(viewModel: viewModel)
-            }
-            if ownCapabilities.contains(.sendAudio) == true {
-                MicrophoneIconView(viewModel: viewModel)
+        HStack(spacing: 0) {
+            HStack(spacing: layout.spacingXs) {
+                if ownCapabilities.contains(.sendVideo) == true {
+                    VideoIconView(viewModel: viewModel)
+                }
+                if ownCapabilities.contains(.sendAudio) == true {
+                    MicrophoneIconView(viewModel: viewModel)
+                }
             }
 
             Spacer()
@@ -37,8 +37,8 @@ public struct CallControlsView: View {
                 ParticipantsListButton(viewModel: viewModel)
             }
         }
-        .padding(.horizontal, tokens.layout.spacingMd)
-        .padding(.vertical, tokens.layout.spacingMd)
+        .padding(.horizontal, layout.spacingMd)
+        .padding(.vertical, layout.spacingMd)
         .frame(maxWidth: .infinity)
         .onReceive(call?.state.$ownCapabilities.receive(on: DispatchQueue.main)) { ownCapabilities = $0 }
     }
@@ -51,14 +51,10 @@ public struct CallControlsView: View {
             return viewModel.call
         }
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
 
 /// A view displaying the video toggle button for a call.
 public struct VideoIconView: View {
-
-    @Injected(\.images) var images
 
     @ObservedObject var viewModel: CallViewModel
     let size: CGFloat
@@ -85,8 +81,6 @@ public struct VideoIconView: View {
 /// A view displaying the microphone toggle button for a call.
 public struct MicrophoneIconView: View {
 
-    @Injected(\.images) var images
-
     @ObservedObject var viewModel: CallViewModel
     let size: CGFloat
 
@@ -111,8 +105,6 @@ public struct MicrophoneIconView: View {
 
 /// A view displaying the toggle camera position button for a call.
 public struct ToggleCameraIconView: View {
-
-    @Injected(\.images) var images
 
     @ObservedObject var viewModel: CallViewModel
     let size: CGFloat
@@ -158,8 +150,6 @@ public struct HangUpIconView: View {
 /// A view displaying the audio output toggle button for a call.
 public struct AudioOutputIconView: View {
 
-    @Injected(\.images) var images
-
     @ObservedObject var viewModel: CallViewModel
     let size: CGFloat
 
@@ -183,8 +173,6 @@ public struct AudioOutputIconView: View {
 
 /// A view displaying the speaker toggle button for a call.
 public struct SpeakerIconView: View {
-
-    @Injected(\.images) var images
 
     @ObservedObject var viewModel: CallViewModel
     let size: CGFloat

@@ -2,7 +2,6 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
-import StreamCoreUI
 import StreamVideo
 import SwiftUI
 
@@ -43,7 +42,10 @@ public struct CallIconView: View {
             icon
                 .resizable()
                 .aspectRatio(contentMode: .fit)
-                .frame(maxWidth: 22, maxHeight: 20)
+                .frame(
+                    maxWidth: videoAppearance.tokens.layout.iconSizeMd,
+                    maxHeight: videoAppearance.tokens.layout.iconSizeMd
+                )
                 .foregroundColor(iconStyle.foregroundColor)
         }
         .frame(width: size, height: size)

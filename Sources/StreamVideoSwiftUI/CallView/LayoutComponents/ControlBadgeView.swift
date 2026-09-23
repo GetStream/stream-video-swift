@@ -22,8 +22,8 @@ public struct ControlBadgeView: View {
     /// - Parameter value: The value to display within the badge.
     public init(
         _ value: String,
-        foreground: Color = InjectedValues[\.colors].textInverted,
-        background: Color = InjectedValues[\.colors].onlineIndicatorColor
+        foreground: Color = Color(InjectedValues[\.videoAppearance].tokens.colors.badgeTextOnAccent),
+        background: Color = Color(InjectedValues[\.videoAppearance].tokens.colors.badgeBackgroundPrimary)
     ) {
         content = .text(
             value,
@@ -34,8 +34,8 @@ public struct ControlBadgeView: View {
 
     public init(
         _ image: Image,
-        foreground: Color = InjectedValues[\.colors].textInverted,
-        background: Color = InjectedValues[\.colors].onlineIndicatorColor
+        foreground: Color = Color(InjectedValues[\.videoAppearance].tokens.colors.badgeTextOnAccent),
+        background: Color = Color(InjectedValues[\.videoAppearance].tokens.colors.badgeBackgroundPrimary)
     ) {
         content = .image(
             image,
@@ -93,8 +93,8 @@ extension View {
     @ViewBuilder
     public func badge(
         _ value: String,
-        foreground: Color = InjectedValues[\.colors].textInverted,
-        background: Color = InjectedValues[\.colors].onlineIndicatorColor
+        foreground: Color = Color(InjectedValues[\.videoAppearance].tokens.colors.badgeTextOnAccent),
+        background: Color = Color(InjectedValues[\.videoAppearance].tokens.colors.badgeBackgroundPrimary)
     ) -> some View {
         overlay(
             ControlBadgeView(
@@ -108,8 +108,8 @@ extension View {
     @ViewBuilder
     public func badge(
         _ value: Image,
-        foreground: Color = InjectedValues[\.colors].textInverted,
-        background: Color = InjectedValues[\.colors].onlineIndicatorColor
+        foreground: Color = Color(InjectedValues[\.videoAppearance].tokens.colors.badgeTextOnAccent),
+        background: Color = Color(InjectedValues[\.videoAppearance].tokens.colors.badgeBackgroundPrimary)
     ) -> some View {
         overlay(
             ControlBadgeView(

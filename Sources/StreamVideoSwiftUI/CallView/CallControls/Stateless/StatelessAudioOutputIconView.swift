@@ -12,7 +12,7 @@ public struct StatelessAudioOutputIconView: View {
     /// Defines a closure type for action handling.
     public typealias ActionHandler = () -> Void
 
-    @Injected(\.images) private var images
+    @Injected(\.videoAppearance) private var videoAppearance
 
     /// The associated call for the audio output icon.
     public weak var call: Call?
@@ -50,8 +50,8 @@ public struct StatelessAudioOutputIconView: View {
             label: {
                 CallIconView(
                     icon: callSettings.audioOutputOn
-                        ? images.speakerOn
-                        : images.speakerOff,
+                        ? videoAppearance.images.speakerOn
+                        : videoAppearance.images.speakerOff,
                     size: size,
                     iconStyle: callSettings.audioOutputOn
                         ? .primary
