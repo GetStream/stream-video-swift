@@ -16,12 +16,11 @@ struct DemoBackgroundEffectSelector: View {
 
     var body: some View {
         ScrollView(.horizontal) {
-            HStack(alignment: .center, spacing: tokens.layout.spacingXs) {
+            HStack(alignment: .center, spacing: tokens.layout.spacingXxs) {
                 ForEach(effects) { effect in
                     DemoEffectButton(effect: effect)
                 }
             }
-            .padding(tokens.layout.spacingXs)
         }
     }
 
@@ -56,30 +55,45 @@ struct DemoEffectButton: View {
         Button {
             appState.videoFilter = isSelected ? nil : effect.filter
         } label: {
-            Circle()
-                .fill(Color(tokens.colors.backgroundCoreOnElevation))
-                .overlay(
-                    effect
-                        .image
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .padding(effect.padding)
-                        .clipShape(Circle())
-                )
-                .clipped()
-                .frame(
-                    width: tokens.layout.buttonVisualHeightMd,
-                    height: tokens.layout.buttonVisualHeightMd
-                )
-                .overlay(
-                    Circle().stroke(
-                        Color(tokens.colors.borderUtilityActive),
-                        lineWidth: isSelected ? 2 : 0
+            ZStack {
+                Circle()
+                    .fill(Color(tokens.colors.backgroundCoreOnElevation))
+                    .overlay(
+                        effect
+                            .image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .padding(effect.padding)
+                            .clipShape(Circle())
                     )
-                    .padding(2)
-                )
+                    .clipped()
+                    .frame(
+                        width: tokens.layout.buttonVisualHeightMd,
+                        height: tokens.layout.buttonVisualHeightMd
+                    )
+
+                if isSelected {
+                    Circle()
+                        .stroke(
+                            Color(tokens.colors.borderUtilityActive),
+                            lineWidth: 2
+                        )
+                        .frame(
+                            width: selectionRingSize,
+                            height: selectionRingSize
+                        )
+                }
+            }
+            .frame(
+                width: tokens.layout.buttonVisualHeightLg,
+                height: tokens.layout.buttonVisualHeightLg
+            )
         }
         .buttonStyle(.plain)
+    }
+
+    private var selectionRingSize: CGFloat {
+        tokens.layout.buttonVisualHeightLg - tokens.layout.spacingXxs
     }
 
     private var tokens: DesignSystemTokens { videoAppearance.tokens }

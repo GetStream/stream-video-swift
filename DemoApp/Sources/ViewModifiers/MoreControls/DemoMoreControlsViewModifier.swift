@@ -35,6 +35,7 @@ struct DemoMoreControlsViewModifier: ViewModifier {
                             DemoRaiseHandToggleButtonView(viewModel: viewModel)
                             if #available(iOS 15.0, *) {
                                 DemoBackgroundEffectSelector()
+                                    .padding(.top, tokens.layout.spacingMd)
                             }
                         }
 
