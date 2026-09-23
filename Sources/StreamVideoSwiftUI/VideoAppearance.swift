@@ -61,3 +61,36 @@ extension InjectedValues {
         }
     }
 }
+
+// This will be changed once all views have been migrated.
+enum VideoTokens {
+    static var colors: DesignSystemTokens.Colors {
+        InjectedValues[\.videoAppearance].tokens.colors
+    }
+
+    static var fonts: DesignSystemTokens.Fonts {
+        InjectedValues[\.videoAppearance].tokens.fonts
+    }
+
+    static var layout: DesignSystemTokens.Layout {
+        InjectedValues[\.videoAppearance].tokens.layout
+    }
+}
+
+extension View {
+    var colors: DesignSystemTokens.Colors { VideoTokens.colors }
+    var fonts: DesignSystemTokens.Fonts { VideoTokens.fonts }
+    var layout: DesignSystemTokens.Layout { VideoTokens.layout }
+}
+
+extension ButtonStyle {
+    var colors: DesignSystemTokens.Colors { VideoTokens.colors }
+    var fonts: DesignSystemTokens.Fonts { VideoTokens.fonts }
+    var layout: DesignSystemTokens.Layout { VideoTokens.layout }
+}
+
+extension ViewModifier {
+    var colors: DesignSystemTokens.Colors { VideoTokens.colors }
+    var fonts: DesignSystemTokens.Fonts { VideoTokens.fonts }
+    var layout: DesignSystemTokens.Layout { VideoTokens.layout }
+}

@@ -28,21 +28,31 @@ public struct InviteParticipantsView<Factory: ViewFactory>: View {
         )
         _inviteParticipantsShown = inviteParticipantsShown
     }
+
+    init(
+        viewFactory: Factory = DefaultViewFactory.shared,
+        viewModel: InviteParticipantsViewModel,
+        inviteParticipantsShown: Binding<Bool>
+    ) {
+        self.viewFactory = viewFactory
+        _viewModel = StateObject(wrappedValue: viewModel)
+        _inviteParticipantsShown = inviteParticipantsShown
+    }
     
     public var body: some View {
         VStack(spacing: 0) {
             SearchBar(text: $viewModel.searchText)
-                .padding(.vertical, !viewModel.selectedUsers.isEmpty ? 0 : 16)
-            
+                .padding(.vertical, !viewModel.selectedUsers.isEmpty ? 0 : layout.spacingMd)
+
             ScrollView(.horizontal) {
-                HStack(spacing: 16) {
+                HStack(spacing: layout.spacingMd) {
                     ForEach(viewModel.selectedUsers) { user in
                         SelectedParticipantView(viewFactory: viewFactory, user: user) { user in
                             viewModel.userTapped(user)
                         }
                     }
                 }
-                .padding(.all, !viewModel.selectedUsers.isEmpty ? 16 : 0)
+                .padding(.all, !viewModel.selectedUsers.isEmpty ? layout.spacingMd : 0)
             }
 
             UsersHeaderView()
@@ -61,59 +71,68 @@ public struct InviteParticipantsView<Factory: ViewFactory>: View {
                 .onAppear {
                     viewModel.onUserAppear(user: user)
                 }
+                .listRowBackground(Color(colors.backgroundCoreElevation1))
             }
             .listStyle(.plain)
+            .modifier(InviteParticipantsListBackgroundModifier())
         }
-        .navigationTitle(L10n.Call.Participants.add)
         .toolbar(content: {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button {
                     inviteParticipantsShown = false
                 } label: {
                     Image(systemName: "chevron.left")
+                        .foregroundColor(Color(colors.textPrimary))
                 }
             }
-            
+
+            ToolbarItem(placement: .principal) {
+                Text(L10n.Call.Participants.add)
+                    .font(fonts.headline)
+                    .foregroundColor(Color(colors.textPrimary))
+            }
+
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
                     viewModel.inviteUsersTapped()
                 } label: {
                     Text(L10n.Call.Participants.invite)
                         .bold()
+                        .foregroundColor(Color(colors.textPrimary))
                 }
                 .disabled(viewModel.selectedUsers.isEmpty)
             }
         })
+        .navigationTitle(L10n.Call.Participants.add)
+        .navigationBarTitleDisplayMode(.inline)
+        .background(Color(colors.backgroundCoreElevation1).edgesIgnoringSafeArea(.all))
+        .modifier(ParticipantsSheetBackgroundModifier(color: colors.backgroundCoreElevation1))
         .navigationBarBackButtonHidden(true)
     }
 }
 
 struct UsersHeaderView: View {
-    
-    @Injected(\.colors) var colors
-    @Injected(\.fonts) var fonts
-    
+
     var title = L10n.Call.Participants.onPlatform
-    
+
     var body: some View {
         HStack {
             Text(title)
-                .padding(.horizontal)
-                .padding(.vertical, 2)
+                .padding(.horizontal, layout.spacingMd)
+                .padding(.vertical, layout.spacingXxxs)
                 .font(fonts.body)
-                .foregroundColor(Color(colors.textLowEmphasis))
-            
+                .foregroundColor(Color(colors.textSecondary))
+
             Spacer()
         }
-        .background(Color(colors.background1))
+        .background(Color(colors.backgroundCoreSurfaceDefault))
     }
 }
 
 struct VideoUserView<Factory: ViewFactory>: View {
 
-    @Injected(\.colors) var colors
-    @Injected(\.fonts) var fonts
-    
+    @Injected(\.videoAppearance) var videoAppearance
+
     private let avatarSize: CGFloat = 56
 
     var viewFactory: Factory
@@ -139,12 +158,32 @@ struct VideoUserView<Factory: ViewFactory>: View {
                 .font(fonts.bodyBold)
 
             Spacer()
-            
+
             if isSelected {
-                Image(systemName: "checkmark.circle.fill")
-                    .renderingMode(.template)
-                    .foregroundColor(colors.tintColor)
+                selectedCheckmark
             }
+        }
+    }
+
+    @ViewBuilder
+    private var selectedCheckmark: some View {
+        if #available(iOS 15.0, *) {
+            videoAppearance.images.checkmarkCircleFill
+                .symbolRenderingMode(.palette)
+                .foregroundStyle(Color(colors.textOnAccent), Color(colors.accentPrimary))
+        } else {
+            videoAppearance.images.checkmarkCircleFill
+                .foregroundColor(Color(colors.accentPrimary))
+        }
+    }
+}
+
+private struct InviteParticipantsListBackgroundModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 16.0, *) {
+            content.scrollContentBackground(.hidden)
+        } else {
+            content
         }
     }
 }

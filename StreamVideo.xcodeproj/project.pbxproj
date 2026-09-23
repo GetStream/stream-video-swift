@@ -408,6 +408,8 @@
 				CallView/LayoutComponents/SpotlightSpeakerView_Tests.swift,
 				CallView/LocalParticipantView_Tests.swift,
 				CallView/ParticipantListButton_Tests.swift,
+				CallView/Participants/CallParticipantsInfoView_Tests.swift,
+				CallView/Participants/InviteParticipantsView_Tests.swift,
 				CallView/ParticipantsFullScreenLayout_Tests.swift,
 				CallView/ParticipantsGridLayout_Tests.swift,
 				CallView/ParticipantsSpotlightLayout_Tests.swift,

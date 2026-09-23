@@ -7,8 +7,8 @@ import SwiftUI
 
 struct SelectedParticipantView<Factory: ViewFactory>: View {
 
-    @Injected(\.fonts) var fonts
-    
+    @Injected(\.videoAppearance) var videoAppearance
+
     private let avatarSize: CGFloat = 50
 
     var viewFactory: Factory
@@ -26,12 +26,13 @@ struct SelectedParticipantView<Factory: ViewFactory>: View {
     }
 
     var body: some View {
-        VStack {
+        VStack(spacing: layout.spacingXs) {
             viewFactory.makeUserAvatar(user, with: .init(size: avatarSize))
 
             Text(user.name)
                 .lineLimit(1)
                 .font(fonts.footnote)
+                .foregroundColor(Color(colors.textPrimary))
         }
         .overlay(
             TopRightView {
@@ -42,16 +43,16 @@ struct SelectedParticipantView<Factory: ViewFactory>: View {
                 }, label: {
                     ZStack {
                         Circle()
-                            .fill(Color.white)
-                            .frame(width: 16, height: 16)
-                        
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(Color.black.opacity(0.8))
+                            .fill(Color(colors.textOnInverse))
+                            .frame(width: layout.iconSizeSm, height: layout.iconSizeSm)
+
+                        videoAppearance.images.xmarkCircleFill
+                            .foregroundColor(Color(colors.backgroundCoreInverse))
                     }
-                    .padding(.all, 4)
+                    .padding(.all, layout.spacingXxs)
                 })
             }
-            .offset(x: 6, y: -4)
+            .offset(x: layout.buttonPaddingXIconOnlySm, y: -layout.spacingXxs)
         )
         .frame(width: avatarSize)
     }

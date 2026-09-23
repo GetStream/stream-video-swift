@@ -10,10 +10,6 @@ import SwiftUI
 /// display a badge with the number of the total participants in the call.
 public struct ParticipantsListButton: View {
 
-    @Injected(\.images) var images
-    @Injected(\.fonts) var fonts
-    @Injected(\.colors) var colors
-
     @ObservedObject var viewModel: CallViewModel
     @State private var count: Int = 0
     let size: CGFloat

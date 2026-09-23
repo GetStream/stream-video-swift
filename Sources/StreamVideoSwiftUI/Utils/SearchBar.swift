@@ -7,66 +7,63 @@ import SwiftUI
 
 /// Search bar used in the message search.
 struct SearchBar: View, KeyboardReadable {
-    
-    @Injected(\.colors) private var colors
-    @Injected(\.fonts) private var fonts
-    @Injected(\.images) private var images
-    
+
+    @Injected(\.videoAppearance) private var videoAppearance
+
     @Binding var text: String
     @State private var isEditing = false
-        
+
     var body: some View {
         HStack {
             TextField(L10n.Call.Participants.search, text: $text)
-                .padding(8)
-                .padding(.leading, 8)
-                .padding(.horizontal, 24)
-                .background(Color(colors.background1))
-                .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                .padding(layout.spacingXs)
+                .padding(.leading, layout.spacingXs)
+                .padding(.horizontal, layout.spacing2xl)
+                .background(Color(colors.backgroundCoreSurfaceDefault))
+                .clipShape(RoundedRectangle(cornerRadius: layout.radiusXl, style: .continuous))
                 .overlay(
                     HStack {
-                        images.searchIcon
+                        videoAppearance.images.searchIcon
                             .customizable()
-                            .foregroundColor(Color(colors.textLowEmphasis))
+                            .foregroundColor(Color(colors.textSecondary))
                             .frame(maxHeight: 18)
-                            .padding(.leading, 12)
-                        
+                            .padding(.leading, layout.spacingSm)
+
                         Spacer()
-                        
+
                         if !self.text.isEmpty {
                             Button(action: {
                                 self.text = ""
                             }) {
-                                images.searchCloseIcon
+                                videoAppearance.images.searchCloseIcon
                                     .customizable()
                                     .frame(width: 18, height: 18)
-                                    .foregroundColor(Color(colors.textLowEmphasis))
-                                    .padding(.trailing, 8)
+                                    .foregroundColor(Color(colors.textSecondary))
+                                    .padding(.trailing, layout.spacingXs)
                             }
                         }
                     }
                 )
-                .padding(.horizontal, 8)
+                .padding(.horizontal, layout.spacingXs)
                 .transition(.identity)
                 .animation(.easeInOut, value: isEditing)
-            
+
             if isEditing {
                 Button(action: {
                     self.isEditing = false
                     self.text = ""
-                    // Dismiss the keyboard
                     resignFirstResponder()
                 }) {
                     Text(L10n.Call.Participants.cancelSearch)
-                        .foregroundColor(colors.tintColor)
+                        .foregroundColor(Color(colors.accentPrimary))
                 }
                 .frame(height: 20)
-                .padding(.trailing, 8)
+                .padding(.trailing, layout.spacingXs)
                 .transition(.move(edge: .trailing))
                 .animation(.easeInOut)
             }
         }
-        .padding(.vertical, 8)
+        .padding(.vertical, layout.spacingXs)
         .onReceive(keyboardWillChangePublisher) { shown in
             if shown {
                 self.isEditing = true

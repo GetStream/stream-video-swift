@@ -8,8 +8,6 @@ import SwiftUI
 
 public struct ModalButton: View {
 
-    @Injected(\.colors) var colors
-
     var image: Image
     var action: () -> Void
 
@@ -24,9 +22,9 @@ public struct ModalButton: View {
         } label: {
             image
                 .resizable()
-                .foregroundColor(colors.text)
+                .foregroundColor(Color(colors.textPrimary))
                 .aspectRatio(contentMode: .fit)
-                .padding(8)
+                .padding(layout.spacingXs)
         }
         .buttonStyle(.modal)
     }
@@ -34,13 +32,11 @@ public struct ModalButton: View {
 
 struct ModalButtonStyle: ButtonStyle {
 
-    @Injected(\.colors) var colors
-
     func makeBody(configuration: Configuration) -> some View {
         configuration
             .label
             .opacity(configuration.isPressed ? 0.5 : 1)
-            .background(Circle().fill(Color(colors.participantBackground)))
+            .background(Circle().fill(Color(colors.backgroundCoreSurfaceDefault)))
             .frame(width: 30, height: 30)
     }
 }
