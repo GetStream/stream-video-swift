@@ -287,8 +287,8 @@ struct CallSettingsView: View {
                 callSettings: callSettings,
                 size: tokens.layout.buttonVisualHeightMd,
                 controlStyle: .init(
-                    enabled: .init(icon: images.micTurnOn, iconStyle: secondaryButtonStyle),
-                    disabled: .init(icon: images.micTurnOff, iconStyle: destructiveButtonStyle)
+                    enabled: .init(icon: images.micTurnOn, iconStyle: .secondary),
+                    disabled: .init(icon: images.micTurnOff, iconStyle: .disabled)
                 )
             ) {
                 callSettings = CallSettings(
@@ -303,8 +303,8 @@ struct CallSettingsView: View {
                 callSettings: callSettings,
                 size: tokens.layout.buttonVisualHeightMd,
                 controlStyle: .init(
-                    enabled: .init(icon: images.videoTurnOn, iconStyle: secondaryButtonStyle),
-                    disabled: .init(icon: images.videoTurnOff, iconStyle: destructiveButtonStyle)
+                    enabled: .init(icon: images.videoTurnOn, iconStyle: .secondary),
+                    disabled: .init(icon: images.videoTurnOff, iconStyle: .disabled)
                 )
             ) {
                 callSettings = CallSettings(
@@ -318,22 +318,6 @@ struct CallSettingsView: View {
     }
 
     private var tokens: DesignSystemTokens { videoAppearance.tokens }
-
-    private var secondaryButtonStyle: CallIconStyle {
-        CallIconStyle(
-            backgroundColor: Color(tokens.colors.buttonSecondaryBackground),
-            foregroundColor: Color(tokens.colors.buttonSecondaryText),
-            opacity: 1
-        )
-    }
-
-    private var destructiveButtonStyle: CallIconStyle {
-        CallIconStyle(
-            backgroundColor: Color(tokens.colors.buttonDestructiveBackground),
-            foregroundColor: Color(tokens.colors.buttonDestructiveTextOnAccent),
-            opacity: 1
-        )
-    }
 }
 
 @available(iOS 14.0, *)
