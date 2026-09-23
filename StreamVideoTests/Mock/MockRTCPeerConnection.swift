@@ -22,6 +22,13 @@ final class MockRTCPeerConnection: StreamRTCPeerConnectionProtocol, Mockable, @u
 
     func stub<T>(for function: FunctionKey, with value: T) { stubbedFunction[function] = value }
 
+    private func record(
+        _ key: FunctionKey,
+        _ input: MockFunctionInputKey
+    ) {
+        _stubbedFunctionInput.mutate { $0[key, default: []].append(input) }
+    }
+
     enum MockFunctionKey: Hashable, CaseIterable {
         case setLocalDescription
         case setRemoteDescription
@@ -112,23 +119,20 @@ final class MockRTCPeerConnection: StreamRTCPeerConnectionProtocol, Mockable, @u
     func setLocalDescription(
         _ sessionDescription: RTCSessionDescription
     ) async throws {
-        stubbedFunctionInput[.setLocalDescription]?
-            .append(.setLocalDescription(sessionDescription: sessionDescription))
+        record(.setLocalDescription, .setLocalDescription(sessionDescription: sessionDescription))
     }
 
     func setRemoteDescription(
         _ sessionDescription: RTCSessionDescription
     ) async throws {
-        stubbedFunctionInput[.setRemoteDescription]?
-            .append(.setRemoteDescription(sessionDescription: sessionDescription))
+        record(.setRemoteDescription, .setRemoteDescription(sessionDescription: sessionDescription))
     }
 
     func offer(
         for constraints: RTCMediaConstraints
     ) async throws -> RTCSessionDescription {
         defer {
-            stubbedFunctionInput[.offer]?
-                .append(.offer(constraints: constraints))
+            record(.offer, .offer(constraints: constraints))
         }
         return try await operationQueue.addSynchronousTaskOperation {
             if let result = self.stubbedFunction[.offer] as? RTCSessionDescription {
@@ -144,14 +148,12 @@ final class MockRTCPeerConnection: StreamRTCPeerConnectionProtocol, Mockable, @u
     func answer(
         for constraints: RTCMediaConstraints
     ) async throws -> RTCSessionDescription {
-        stubbedFunctionInput[.answer]?
-            .append(.answer(constraints: constraints))
+        record(.answer, .answer(constraints: constraints))
         return stubbedFunction[.answer] as! RTCSessionDescription
     }
 
     func statistics() async throws -> RTCStatisticsReport? {
-        stubbedFunctionInput[.statistics]?
-            .append(.statistics)
+        record(.statistics, .statistics)
         return stubbedFunction[.statistics] as? RTCStatisticsReport
     }
 
@@ -160,8 +162,10 @@ final class MockRTCPeerConnection: StreamRTCPeerConnectionProtocol, Mockable, @u
         with track: RTCMediaStreamTrack,
         init transceiverInit: RTCRtpTransceiverInit
     ) -> RTCRtpTransceiver? {
-        stubbedFunctionInput[.addTransceiver]?
-            .append(.addTransceiver(trackType: trackType, track: track, transceiverInit: transceiverInit))
+        record(
+            .addTransceiver,
+            .addTransceiver(trackType: trackType, track: track, transceiverInit: transceiverInit)
+        )
         if let result = stubbedFunction[.addTransceiver] as? RTCRtpTransceiver {
             result.sender.track = track
             return result
@@ -178,14 +182,12 @@ final class MockRTCPeerConnection: StreamRTCPeerConnectionProtocol, Mockable, @u
     func transceivers(
         for trackType: TrackType
     ) -> [RTCRtpTransceiver] {
-        stubbedFunctionInput[.transceivers]?
-            .append(.transceivers(trackType: trackType))
+        record(.transceivers, .transceivers(trackType: trackType))
         return stubbedFunction[.transceivers] as? [RTCRtpTransceiver] ?? []
     }
 
     func add(_ candidate: RTCIceCandidate) async throws {
-        stubbedFunctionInput[.addCandidate]?
-            .append(.addCandidate(candidate: candidate))
+        record(.addCandidate, .addCandidate(candidate: candidate))
     }
 
     func publisher<T>(
@@ -194,7 +196,7 @@ final class MockRTCPeerConnection: StreamRTCPeerConnectionProtocol, Mockable, @u
         publisher.compactMap { $0 as? T }.eraseToAnyPublisher()
     }
 
-    func restartIce() { stubbedFunctionInput[.restartICE]?.append(.restartICE) }
+    func restartIce() { record(.restartICE, .restartICE) }
 
-    func close() { stubbedFunctionInput[.close]?.append(.close) }
+    func close() { record(.close, .close) }
 }

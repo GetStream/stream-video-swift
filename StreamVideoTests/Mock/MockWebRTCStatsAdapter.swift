@@ -49,6 +49,13 @@ final class MockWebRTCStatsAdapter: Mockable, WebRTCStatsAdapting, @unchecked Se
         stubbedFunction[function] = value
     }
 
+    private func record(
+        _ key: FunctionKey,
+        _ input: MockFunctionInputKey
+    ) {
+        _stubbedFunctionInput.mutate { $0[key, default: []].append(input) }
+    }
+
     init() {
         stub(for: \.deliveryInterval, with: 1)
         stub(for: \.isTracingEnabled, with: true)
@@ -109,15 +116,15 @@ final class MockWebRTCStatsAdapter: Mockable, WebRTCStatsAdapting, @unchecked Se
     }
 
     func scheduleStatsReporting() {
-        stubbedFunctionInput[.scheduleStatsReporting]?.append(.scheduleStatsReporting)
+        record(.scheduleStatsReporting, .scheduleStatsReporting)
     }
 
     func trace(_ trace: WebRTCTrace) {
-        stubbedFunctionInput[.trace]?.append(.trace(trace))
+        record(.trace, .trace(trace))
     }
 
     func consume(_ bucket: ConsumableBucket<WebRTCTrace>) {
-        stubbedFunctionInput[.consume]?.append(.consume(bucket))
+        record(.consume, .consume(bucket))
         consumedTraces.append(contentsOf: bucket.consume(flush: true))
     }
 }

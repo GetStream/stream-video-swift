@@ -343,7 +343,11 @@ final class MockDefaultAPIEndpoints: DefaultAPIEndpoints, Mockable, @unchecked S
     }
 
     func joinCall(type: String, id: String, joinCallRequest: JoinCallRequest) async throws -> JoinCallResponse {
-        stubbedFunctionInput[.joinCall]?.append(.joinCall(type: type, id: id, request: joinCallRequest))
+        _stubbedFunctionInput.mutate {
+            $0[.joinCall, default: []].append(
+                .joinCall(type: type, id: id, request: joinCallRequest)
+            )
+        }
         return try stubbedResult(for: .joinCall)
     }
 

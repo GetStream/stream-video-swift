@@ -356,7 +356,7 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable 
         mockPeerConnection.stub(
             for: .addTransceiver,
             with: StubVariantResultProvider {
-                try! self.makeTransceiver(of: .video, videoOptions: .dummy(codec: $0 == 0 ? .h264 : .av1))
+                try! self.makeTransceiver(of: .video, videoOptions: .dummy(codec: $0 == 1 ? .h264 : .av1))
             }
         )
         publishOptions = [

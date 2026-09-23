@@ -123,6 +123,13 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
         stubbedFunction[function] = value
     }
 
+    private func record(
+        _ key: FunctionKey,
+        _ input: MockFunctionInputKey
+    ) {
+        _stubbedFunctionInput.mutate { $0[key, default: []].append(input) }
+    }
+
     override func joinCall(
         create: Bool = true,
         callSettings: CallSettings?,
@@ -133,7 +140,8 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
         policy: WebRTCJoinPolicy = .default,
         coordinatorJoinAttemptCount: Int = 0
     ) async throws -> JoinCallResponse {
-        stubbedFunctionInput[.join]?.append(
+        record(
+            .join,
             .join(
                 create: create,
                 callSettings: callSettings,
@@ -169,28 +177,26 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
     }
 
     override func setDisconnectionTimeout(_ timeout: TimeInterval) {
-        stubbedFunctionInput[.setDisconnectionTimeout]?
-            .append(.setDisconnectionTimeout(timeout: timeout))
+        record(
+            .setDisconnectionTimeout,
+            .setDisconnectionTimeout(timeout: timeout)
+        )
     }
 
     override func leave(reason: String?) {
-        stubbedFunctionInput[.leave]?
-            .append(.leave(reason: reason))
+        record(.leave, .leave(reason: reason))
     }
 
     override func observeWebRTCStateUpdated() {
-        stubbedFunctionInput[.observeWebRTCStateUpdated]?
-            .append(.observeWebRTCStateUpdated)
+        record(.observeWebRTCStateUpdated, .observeWebRTCStateUpdated)
     }
 
     override func trace(_ trace: WebRTCTrace) async {
-        stubbedFunctionInput[.trace]?
-            .append(.trace(trace))
+        record(.trace, .trace(trace))
     }
 
     override func changeVideoState(isEnabled: Bool) async throws {
-        stubbedFunctionInput[.changeVideoState]?
-            .append(.changeVideoState(isEnabled))
+        record(.changeVideoState, .changeVideoState(isEnabled))
     }
 
     override func changeAudioState(
@@ -199,37 +205,34 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
         function: StaticString,
         line: UInt
     ) async throws {
-        stubbedFunctionInput[.changeAudioState]?
-            .append(.changeAudioState(isEnabled))
+        record(.changeAudioState, .changeAudioState(isEnabled))
     }
 
     override func changeCameraMode(position: CameraPosition) async throws {
-        stubbedFunctionInput[.changeCameraMode]?
-            .append(.changeCameraMode(position))
+        record(.changeCameraMode, .changeCameraMode(position))
     }
 
     override func updateOwnCapabilities(ownCapabilities: [OwnCapability]) async {
-        stubbedFunctionInput[.updateOwnCapabilities]?
-            .append(.updateOwnCapabilities(ownCapabilities))
+        record(.updateOwnCapabilities, .updateOwnCapabilities(ownCapabilities))
     }
 
     override func enableClientCapabilities(
         _ capabilities: Set<ClientCapability>
     ) async {
-        stubbedFunctionInput[.enableClientCapabilities]?
-            .append(.enableClientCapabilities(capabilities))
+        record(.enableClientCapabilities, .enableClientCapabilities(capabilities))
     }
 
     override func disableClientCapabilities(
         _ capabilities: Set<ClientCapability>
     ) async {
-        stubbedFunctionInput[.disableClientCapabilities]?
-            .append(.disableClientCapabilities(capabilities))
+        record(
+            .disableClientCapabilities,
+            .disableClientCapabilities(capabilities)
+        )
     }
 
     override func setAudioBitrateProfile(_ profile: AudioBitrateProfile) async throws {
-        stubbedFunctionInput[.setAudioBitrateProfile]?
-            .append(.setAudioBitrateProfile(profile))
+        record(.setAudioBitrateProfile, .setAudioBitrateProfile(profile))
         try await setAudioBitrateProfileHandler?(profile)
         if let error = stubbedFunction[.setAudioBitrateProfile] as? Error {
             throw error
