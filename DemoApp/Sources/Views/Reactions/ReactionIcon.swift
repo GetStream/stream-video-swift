@@ -12,14 +12,14 @@ struct ReactionIcon: View {
 
     var iconName: String
     var width: CGFloat?
-    var foregroundColor: Color?
 
     var body: some View {
         Image(systemName: iconName)
             .resizable()
             .aspectRatio(contentMode: .fit)
             .frame(width: width ?? tokens.layout.buttonVisualHeightMd)
-            .foregroundColor(foregroundColor ?? Color(tokens.colors.accentWarning))
+            .symbolRenderingMode(.multicolor)
+            .foregroundColor(Color(red: 1, green: 0.8, blue: 0.2))
     }
 
     private var tokens: DesignSystemTokens { videoAppearance.tokens }
@@ -27,23 +27,13 @@ struct ReactionIcon: View {
 
 struct ReactionIcon_Previews: PreviewProvider {
     static var previews: some View {
-        let sizes: [CGFloat] = [20, 40, 60]
-        let colors: [Color] = [.yellow, .red, .blue]
-        let reactions: [Reaction] = [.like, .raiseHand]
+        let reactions: [Reaction] = [.like, .dislike, .heart, .smile, .fireworks, .raiseHand]
 
-        ForEach(colors, id: \.self) { color in
-            ForEach(sizes, id: \.self) { size in
-                HStack {
-                    ForEach(reactions) { reaction in
-                        ReactionIcon(
-                            iconName: reaction.iconName,
-                            width: size,
-                            foregroundColor: color
-                        )
-                    }
-                }
-                .previewLayout(.sizeThatFits)
+        HStack {
+            ForEach(reactions) { reaction in
+                ReactionIcon(iconName: reaction.iconName)
             }
         }
+        .previewLayout(.sizeThatFits)
     }
 }
