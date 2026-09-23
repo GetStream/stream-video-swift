@@ -48,7 +48,7 @@ struct DemoMoreControlListButtonView<Icon: View>: View {
         .background(
             primaryStyle
                 ? Color(tokens.colors.buttonPrimaryBackground)
-                : Color.clear
+                : Color(tokens.colors.backgroundCoreElevation1)
         )
         .clipShape(Capsule())
         .frame(maxWidth: .infinity)
