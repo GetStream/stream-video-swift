@@ -667,6 +667,27 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
         }
     }
 
+    func test_handlePinsChanged_givenLocalPinAbsentFromEvent_whenPublished_thenKeepsLocalPin() async throws {
+        let localParticipant = CallParticipant.dummy(pin: .init(isLocal: true, pinnedAt: .init()))
+        let remoteParticipant = CallParticipant.dummy()
+        var event = Stream_Video_Sfu_Event_PinsChanged()
+        var pin = Stream_Video_Sfu_Models_Pin()
+        pin.sessionID = remoteParticipant.sessionId
+        event.pins = [pin]
+
+        try await assert(
+            event,
+            payload: .pinsUpdated(event),
+            initialState: [
+                localParticipant.sessionId: localParticipant,
+                remoteParticipant.sessionId: remoteParticipant
+            ]
+        ) {
+            $0[localParticipant.sessionId]?.pin?.isLocal == true
+                && $0[remoteParticipant.sessionId]?.pin?.isLocal == false
+        }
+    }
+
     func test_handlePinsChanged_givenEvent_whenPublished_thenRemovesNonLocalPinnedParticipantsThatHaveBeenRemoved() async throws {
         let participantA = CallParticipant.dummy()
         let participantB = CallParticipant.dummy(pin: .init(isLocal: false, pinnedAt: .init()))

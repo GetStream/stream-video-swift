@@ -437,7 +437,8 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             request: QueryCallsRequest(
                 filterConditions: filters,
                 limit: limit,
-                sort: sort
+                sort: sort,
+                watch: watch
             )
         )
         return (

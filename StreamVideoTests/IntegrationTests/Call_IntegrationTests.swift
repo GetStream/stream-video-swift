@@ -310,14 +310,12 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         try await helpers
             .callFlow(id: .unique, type: .default, userId: .unique)
             .perform { try await $0.call.create() }
-            .perform {
-                try await $0.client.queryCalls(
-                    filters: [CallSortField.cid.rawValue: .string($0.call.cId)],
-                    watch: true
+            .assertEventually {
+                try await self.queryContainsCreatedCall(
+                    client: $0.client,
+                    call: $0.call
                 )
             }
-            .assert { $0.value.calls.endIndex == 1 }
-            .assert { $0.value.calls.first?.cId == $0.call.cId }
     }
 
     func test_queryCalls_whenQueryForCreatedCallAndThatCallUpdate_thenLocalInstanceGetsUpdatedAsExpected() async throws {
@@ -327,14 +325,12 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         try await helpers
             .callFlow(id: .unique, type: .default, userId: .unique)
             .perform { try await $0.call.create() }
-            .perform {
-                try await $0.client.queryCalls(
-                    filters: [CallSortField.cid.rawValue: .string($0.call.cId)],
-                    watch: true
+            .assertEventually {
+                try await self.queryContainsCreatedCall(
+                    client: $0.client,
+                    call: $0.call
                 )
             }
-            .assert { $0.value.calls.endIndex == 1 }
-            .assert { $0.value.calls.first?.cId == $0.call.cId }
             .perform { try await $0.call.update(custom: [colorKey: .string(colorValue)]) }
             .assertEventuallyInMainActor { $0.call.state.custom[colorKey]?.stringValue == colorValue }
     }
@@ -343,17 +339,13 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         try await helpers
             .callFlow(id: .unique, type: .default, userId: .unique)
             .perform { try await $0.call.create() }
-            .perform {
-                try await $0.client.queryCalls(
-                    filters: [
-                        CallSortField.endedAt.rawValue: .nil,
-                        CallSortField.cid.rawValue: .string($0.call.cId)
-                    ],
-                    watch: true
+            .assertEventually {
+                try await self.queryContainsCreatedCall(
+                    client: $0.client,
+                    call: $0.call,
+                    extraFilters: [CallSortField.endedAt.rawValue: .nil]
                 )
             }
-            .assert { $0.value.calls.endIndex == 1 }
-            .assert { $0.value.calls.first?.cId == $0.call.cId }
     }
 
     func test_queryCalls_whenQueryForNotEndedCallAndCallNotEnded_thenReturnsExpectedResult() async throws {
@@ -1666,6 +1658,23 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
 }
 
 private extension Call_IntegrationTests {
+    func queryContainsCreatedCall(
+        client: StreamVideo,
+        call: Call,
+        extraFilters: [String: RawJSON] = [:]
+    ) async throws -> Bool {
+        var filters: [String: RawJSON] = [
+            CallSortField.cid.rawValue: .string(call.cId)
+        ]
+        extraFilters.forEach { filters[$0.key] = $0.value }
+        let response = try await client.queryCalls(
+            filters: filters,
+            watch: true
+        )
+        return response.calls.endIndex == 1
+            && response.calls.first?.cId == call.cId
+    }
+
     @discardableResult
     func resetSharedAudioProcessingModule() -> AudioProcessingModule {
         let module = Helpers.StreamVideoHelper.videoConfig
