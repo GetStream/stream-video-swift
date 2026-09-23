@@ -13,9 +13,6 @@ public struct VideoRendererView: UIViewRepresentable {
     /// The type of the `UIView` being represented.
     public typealias UIViewType = VideoRenderer
 
-    /// Injected dependency for accessing color configurations.
-    @Injected(\.colors) var colors
-
     /// The identifier for the video renderer.
     var id: String
 
@@ -72,7 +69,7 @@ public struct VideoRendererView: UIViewRepresentable {
             size: size
         )
         context.coordinator.renderer.videoContentMode = contentMode
-        context.coordinator.renderer.backgroundColor = colors.participantBackground
+        context.coordinator.renderer.backgroundColor = colors.backgroundCoreSurfaceSubtle
 
         if showVideo {
             handleRendering(context.coordinator.renderer)
