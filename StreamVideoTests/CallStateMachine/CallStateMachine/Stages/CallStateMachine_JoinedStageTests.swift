@@ -21,14 +21,15 @@ final class CallStateMachineStageJoinedStage_Tests: StreamVideoTestCase, @unchec
     private lazy var response: JoinCallResponse! = .dummy()
     private lazy var subject: Call.StateMachine.Stage! = .joined(.init(call: call), response: response)
 
-    override func tearDown() {
-        callController = nil
-        call = nil
+    override func tearDown() async throws {
+        subject = nil
         allOtherStages = nil
         validOtherStages = nil
         response = nil
-        subject = nil
-        super.tearDown()
+        call = nil
+        callController = nil
+        await MainActor.run {}
+        try await super.tearDown()
     }
 
     // MARK: - Test Initialization
@@ -56,14 +57,12 @@ final class CallStateMachineStageJoinedStage_Tests: StreamVideoTestCase, @unchec
     func test_joiningTransition_callSettingsChange_managersSynchronize() async {
         _ = subject.transition(from: .init(id: .joining, context: .init(call: call)))
 
-        await MainActor.run {
-            call.state.ownCapabilities = [.sendAudio]
-        }
         await fulfillment {
             self.callController.timesCalled(.updateOwnCapabilities) > 0
         }
 
         await MainActor.run {
+            call.state.ownCapabilities = [.sendAudio]
             call.state.update(
                 callSettings: .init(
                     audioOn: false,
@@ -85,6 +84,21 @@ final class CallStateMachineStageJoinedStage_Tests: StreamVideoTestCase, @unchec
     // MARK: - OwnCapabilities observation
 
     func test_joiningTransition_ownCapabilitiesChanged_controllerReceivesUpdate() async {
+        let coordinatorFactory = MockWebRTCCoordinatorFactory(videoConfig: .dummy())
+        await coordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter
+            .enqueueOwnCapabilities { [.sendAudio] }
+        callController = .init(
+            defaultAPI: MockDefaultAPIEndpoints(),
+            user: .dummy(),
+            callId: .unique,
+            callType: .unique,
+            apiKey: .unique,
+            videoConfig: .dummy(),
+            initialCallSettings: .default,
+            cachedLocation: nil,
+            webRTCCoordinatorFactory: coordinatorFactory
+        )
+
         await MainActor.run {
             call.state.ownCapabilities = [.sendAudio]
         }

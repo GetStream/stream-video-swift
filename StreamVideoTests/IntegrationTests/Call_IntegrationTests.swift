@@ -672,8 +672,13 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         let callId = String.unique
         let participant = String.unique
         let joinAheadTimeSeconds: Double = 10
-        let startingDate = Date(timeIntervalSinceNow: joinAheadTimeSeconds * 2)
-        let joiningDate = Date(timeIntervalSinceNow: joinAheadTimeSeconds + 2)
+        // Join-ahead opens at `startsAt - joinAheadTimeSeconds`.
+        // `Call.join()` retries `JoinBackstage` errors, so the window
+        // must stay closed until that first join has finished failing.
+        let startingDate = Date(timeIntervalSinceNow: 30)
+        let joiningDate = startingDate.addingTimeInterval(
+            -joinAheadTimeSeconds + 2
+        )
 
         try await helpers
             .callFlow(id: callId, type: .livestream, userId: .unique, environment: "demo")
@@ -692,7 +697,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
             .helpers
             .callFlow(id: callId, type: .livestream, userId: participant, environment: "demo")
             .performWithErrorExpectation { try await $0.call.join() }
-            .assertEventually { _ in Date() >= joiningDate }
+            .delay(max(0, joiningDate.timeIntervalSinceNow))
             .perform { try await $0.call.join() }
     }
 
@@ -819,6 +824,10 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
             .perform { try await $0.call.create(memberIds: [host], backstage: .init(enabled: false)) }
             .perform { try await $0.call.join(callSettings: .init(audioOn: true, videoOn: false)) }
 
+        let participantCallFlow = try await self
+            .helpers
+            .callFlow(id: callId, type: .audioRoom, userId: participant, environment: "demo")
+
         try await withThrowingTaskGroup(of: Void.self) { group in
             group.addTask {
                 try await hostCallFlow
@@ -828,9 +837,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
             }
 
             group.addTask {
-                try await self
-                    .helpers
-                    .callFlow(id: callId, type: .audioRoom, userId: participant, environment: "demo")
+                try await participantCallFlow
                     .perform { try await $0.call.join(callSettings: .init(audioOn: false, videoOn: false)) }
                     .assertEventuallyInMainActor { $0.call.state.participants.endIndex == 2 }
                     .assertEventuallyInMainActor { $0.call.currentUserHasCapability(.sendAudio) == false }
@@ -859,6 +866,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         let participantCallFlow = try await self
             .helpers
             .callFlow(id: callId, type: .audioRoom, userId: participant, environment: "demo")
+            .perform { try await $0.call.join(callSettings: .init(audioOn: false, videoOn: false)) }
 
         try await withThrowingTaskGroup(of: Void.self) { group in
             group.addTask {
@@ -870,7 +878,6 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
 
             group.addTask {
                 try await participantCallFlow
-                    .perform { try await $0.call.join(callSettings: .init(audioOn: false, videoOn: false)) }
                     .assertEventuallyInMainActor { $0.call.state.participants.endIndex == 2 }
                     .assertEventuallyInMainActor { $0.call.currentUserHasCapability(.sendAudio) == false }
                     .assertEventuallyInMainActor { $0.call.state.callSettings.audioOn == false }
@@ -897,6 +904,10 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
             .perform { try await $0.call.create(memberIds: [host], backstage: .init(enabled: false)) }
             .perform { try await $0.call.join(callSettings: .init(audioOn: true, videoOn: false)) }
 
+        let participantCallFlow = try await self
+            .helpers
+            .callFlow(id: callId, type: .audioRoom, userId: participant, environment: "demo")
+
         try await withThrowingTaskGroup(of: Void.self) { group in
             group.addTask {
                 try await hostCallFlow
@@ -911,9 +922,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
             }
 
             group.addTask {
-                try await self
-                    .helpers
-                    .callFlow(id: callId, type: .audioRoom, userId: participant, environment: "demo")
+                try await participantCallFlow
                     .perform { try await $0.call.join(callSettings: .init(audioOn: false, videoOn: false)) }
                     .assertEventuallyInMainActor { $0.call.state.participants.endIndex == 2 }
                     .assertEventuallyInMainActor { $0.call.currentUserHasCapability(.sendAudio) == false }
@@ -993,6 +1002,10 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
             .perform { try await $0.call.create(memberIds: [host], backstage: .init(enabled: false)) }
             .perform { try await $0.call.join(callSettings: .init(audioOn: true, videoOn: false)) }
 
+        let participantCallFlow = try await self
+            .helpers
+            .callFlow(id: callId, type: .audioRoom, userId: participant, environment: "demo")
+
         try await withThrowingTaskGroup(of: Void.self) { group in
             group.addTask {
                 try await hostCallFlow
@@ -1005,9 +1018,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
             }
 
             group.addTask {
-                try await self
-                    .helpers
-                    .callFlow(id: callId, type: .audioRoom, userId: participant, environment: "demo")
+                try await participantCallFlow
                     .perform { try await $0.call.join(callSettings: .init(audioOn: false, videoOn: false)) }
                     .assertEventuallyInMainActor { $0.call.currentUserHasCapability(.sendVideo) == false }
                     .assertEventuallyInMainActor { $0.call.state.callSettings.videoOn == false }

@@ -412,7 +412,7 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         mockPeerConnection.stub(
             for: .addTransceiver,
             with: StubVariantResultProvider {
-                try! self.makeTransceiver(of: .audio, audioOptions: .dummy(codec: $0 == 0 ? .opus : .red))
+                try! self.makeTransceiver(of: .audio, audioOptions: .dummy(codec: $0 == 1 ? .opus : .red))
             }
         )
         publishOptions = [

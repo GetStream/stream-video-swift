@@ -42,9 +42,6 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         InjectedValues[\.simulatorStreamFile] = .init(fileURLWithPath: .unique)
         InjectedValues[\.captureDeviceProvider] = mockCaptureDeviceProvider
         mockCapturerFactory.stub(for: .buildCameraCapturer, with: mockVideoCapturer)
-
-        RTCSetMinDebugLogLevel(.verbose)
-        RTCEnableMetrics()
     }
 
     override func tearDown() {
@@ -425,7 +422,7 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         mockPeerConnection.stub(
             for: .addTransceiver,
             with: StubVariantResultProvider {
-                try! self.makeTransceiver(of: .video, videoOptions: .dummy(codec: $0 == 0 ? .h264 : .av1))
+                try! self.makeTransceiver(of: .video, videoOptions: .dummy(codec: $0 == 1 ? .h264 : .av1))
             }
         )
         publishOptions = [
@@ -510,11 +507,15 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
             with: .init(videoOn: false),
             ownCapabilities: [.sendVideo]
         )
+        subject.primaryTrack.isEnabled = false
 
         try await subject.publish()
 
-        await fulfillment { self.subject.primaryTrack.isEnabled == true }
-        XCTAssertEqual(mockPeerConnection.stubbedFunctionInput[.addTransceiver]?.count, 1)
+        await fulfillment {
+            self.subject.primaryTrack.isEnabled
+                && self.mockPeerConnection.timesCalled(.addTransceiver) == 1
+        }
+        XCTAssertEqual(mockPeerConnection.timesCalled(.addTransceiver), 1)
     }
 
     func test_publish_disabledLocalTrack_transceiverHasBeenCreated_enablesAndAddsTrack() async throws {

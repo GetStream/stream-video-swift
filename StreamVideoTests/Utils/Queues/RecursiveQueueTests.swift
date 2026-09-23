@@ -7,11 +7,18 @@ import XCTest
 
 final class RecursiveQueueTests: XCTestCase, @unchecked Sendable {
 
-    private lazy var taskWaitIntervalRange: ClosedRange<TimeInterval>! = 0.2...0.5
-    private lazy var subject: RecursiveQueue! = .init()
-    private var sharedResource: Int! = 0
+    private var taskWaitIntervalRange: ClosedRange<TimeInterval>!
+    private var subject: RecursiveQueue!
+    private var sharedResource: Int!
 
     // MARK: - Lifecycle
+
+    override func setUp() {
+        super.setUp()
+        taskWaitIntervalRange = 0.2...0.5
+        subject = .init()
+        sharedResource = 0
+    }
 
     override func tearDown() {
         subject = nil
