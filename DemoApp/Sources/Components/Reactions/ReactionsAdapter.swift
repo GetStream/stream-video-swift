@@ -18,6 +18,7 @@ final class ReactionsAdapter: ObservableObject, @unchecked Sendable {
 
     private var callEndedNotificationObserver: Any?
     private var activeCallUpdated: AnyCancellable?
+    private var fireworksTask: Task<Void, Never>?
     private let disposableBag = DisposableBag()
     private var call: Call? { didSet { subscribeToReactionEvents() } }
 
@@ -151,9 +152,19 @@ final class ReactionsAdapter: ObservableObject, @unchecked Sendable {
 
     private func handleFireworksReaction(_ reaction: Reaction, from user: User) {
         guard reaction.id == .fireworks else { return }
+        Task { @MainActor [weak self] in
+            self?.presentFireworks(for: 2.5)
+        }
+    }
+
+    @MainActor
+    private func presentFireworks(for duration: TimeInterval) {
+        fireworksTask?.cancel()
         showFireworks = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
-            self.showFireworks = false
+        fireworksTask = Task { @MainActor [weak self] in
+            try? await Task.sleep(nanoseconds: UInt64(duration * 1_000_000_000))
+            guard !Task.isCancelled else { return }
+            self?.showFireworks = false
         }
     }
 
