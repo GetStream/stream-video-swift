@@ -14,6 +14,8 @@ final class MockRTCPeerConnection: StreamRTCPeerConnectionProtocol, Mockable, @u
     typealias FunctionKey = MockFunctionKey
     var stubbedProperty: [String: Any] = [:]
     var stubbedFunction: [FunctionKey: Any] = [:]
+    var offerHandler: ((RTCMediaConstraints) async throws -> RTCSessionDescription)?
+    var closeHandler: (() async -> Void)?
     @Atomic var stubbedFunctionInput: [FunctionKey: [MockFunctionInputKey]] = FunctionKey.allCases
         .reduce(into: [FunctionKey: [MockFunctionInputKey]]()) { $0[$1] = [] }
     func stub<T>(for keyPath: KeyPath<MockRTCPeerConnection, T>, with value: T) {
@@ -134,6 +136,9 @@ final class MockRTCPeerConnection: StreamRTCPeerConnectionProtocol, Mockable, @u
         defer {
             record(.offer, .offer(constraints: constraints))
         }
+        if let offerHandler {
+            return try await offerHandler(constraints)
+        }
         return try await operationQueue.addSynchronousTaskOperation {
             if let result = self.stubbedFunction[.offer] as? RTCSessionDescription {
                 return result
@@ -198,5 +203,8 @@ final class MockRTCPeerConnection: StreamRTCPeerConnectionProtocol, Mockable, @u
 
     func restartIce() { record(.restartICE, .restartICE) }
 
-    func close() { record(.close, .close) }
+    func close() async {
+        record(.close, .close)
+        await closeHandler?()
+    }
 }

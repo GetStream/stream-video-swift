@@ -30,44 +30,30 @@ final class RTCTemporaryPeerConnection {
         let videoSource = peerConnectionFactory.makeVideoSource(forScreenShare: false)
         let videoTrack = peerConnectionFactory.makeVideoTrack(source: videoSource)
 
-        try await self.init(
+        let peerConnection = try StreamRTCPeerConnection(
+            peerConnectionFactory,
+            configuration: await coordinator.stateAdapter.connectOptions.rtcConfiguration
+        )
+
+        self.init(
+            peerConnection: peerConnection,
             direction: peerConnectionType == .subscriber ? .recvOnly : .sendOnly,
-            sessionID: coordinator.stateAdapter.sessionID,
-            peerConnectionFactory: coordinator.stateAdapter.peerConnectionFactory,
-            configuration: coordinator.stateAdapter.connectOptions.rtcConfiguration,
-            sfuAdapter: sfuAdapter,
-            videoOptions: coordinator.stateAdapter.videoOptions,
+            videoOptions: await coordinator.stateAdapter.videoOptions,
             localAudioTrack: audioTrack,
             localVideoTrack: videoTrack
         )
     }
 
-    /// Initializes a new RTCTemporaryPeerConnection.
-    ///
-    /// - Parameters:
-    ///   - sessionID: The unique identifier for the session.
-    ///   - peerConnectionFactory: The factory for creating WebRTC objects.
-    ///   - configuration: The configuration for the peer connection.
-    ///   - sfuAdapter: The adapter for communicating with the SFU.
-    ///   - videoOptions: The options for video configuration.
-    ///   - localAudioTrack: The local audio track to add to the connection.
-    ///   - localVideoTrack: The local video track to add to the connection.
-    ///
-    /// - Throws: An error if the peer connection creation fails.
-    private init(
+    /// Uses an existing connection and tracks for a single offer.
+    /// `createOffer()` disables both tracks and awaits connection closure.
+    init(
+        peerConnection: StreamRTCPeerConnectionProtocol,
         direction: RTCRtpTransceiverDirection,
-        sessionID: String,
-        peerConnectionFactory: PeerConnectionFactory,
-        configuration: RTCConfiguration,
-        sfuAdapter: SFUAdapter,
         videoOptions: VideoOptions,
         localAudioTrack: RTCAudioTrack,
         localVideoTrack: RTCVideoTrack
-    ) throws {
-        peerConnection = try StreamRTCPeerConnection(
-            peerConnectionFactory,
-            configuration: configuration
-        )
+    ) {
+        self.peerConnection = peerConnection
         self.direction = direction
         self.localAudioTrack = localAudioTrack
         self.localVideoTrack = localVideoTrack
