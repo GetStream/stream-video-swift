@@ -23,6 +23,9 @@ is_localhost = !is_ci
 @force_check = false
 swift_environment_path = File.absolute_path('../Sources/StreamVideo/Generated/SystemEnvironment+Version.swift')
 xcodebuild_formatter = FastlaneCore::Globals.verbose? ? '' : nil
+retry_report_id = ENV['GITHUB_RUN_ID'] || 'local'
+retry_report_attempt = ENV['GITHUB_RUN_ATTEMPT'] || '1'
+retry_report_name = "report.retry-source-#{retry_report_id}-#{retry_report_attempt}.junit"
 
 before_all do |lane|
   if is_ci
@@ -228,12 +231,16 @@ lane :test do |options|
   }
 
   if options[:retry_failed]
-    failed_tests = retreive_failed_tests
+    failed_tests = retreive_failed_tests(scheme: 'StreamVideo')
     UI.user_error!('No failed tests available to retry') if failed_tests.empty?
     scan_options[:only_testing] = failed_tests
   end
 
-  scan_with_retries(scan_options: scan_options, retries: options[:retries])
+  scan_with_retries(
+    scan_options: scan_options,
+    retries: options[:retries],
+    retry_failed: options[:retry_failed]
+  )
 
   slather if is_ci && !options[:build_for_testing]
 end
@@ -390,7 +397,15 @@ private_lane :scan_with_retries do |options|
   begin
     attempt += 1
     attempt_started_at = Time.now
-    FileUtils.rm_f(File.join(output_directory, 'report.junit'))
+    report_path = File.join(output_directory, 'report.junit')
+    retry_report_path = File.join(output_directory, "#{scan_options[:scheme]}.#{retry_report_name}")
+    retrying = options[:retry_failed] || attempt > 1
+    if retrying && File.file?(report_path)
+      FileUtils.cp(report_path, retry_report_path)
+    elsif !retrying
+      FileUtils.rm_f(retry_report_path)
+    end
+    FileUtils.rm_f(report_path)
     begin
       scan(scan_options)
     ensure
@@ -404,11 +419,12 @@ private_lane :scan_with_retries do |options|
         FileUtils.mkdir_p(attempt_directory)
         FileUtils.cp_r(path, attempt_directory)
       end
+      FileUtils.rm_f(retry_report_path) if File.file?(report_path)
     end
   rescue StandardError
     raise if retries_left.zero?
 
-    failed_tests = retreive_failed_tests
+    failed_tests = retreive_failed_tests(scheme: scan_options[:scheme])
     raise if failed_tests.empty?
 
     retries_left -= 1
@@ -418,14 +434,18 @@ private_lane :scan_with_retries do |options|
   end
 end
 
-private_lane :retreive_failed_tests do
+private_lane :retreive_failed_tests do |options|
   report_path = 'test_output/report.junit'
+  report_path = File.join('test_output', "#{options[:scheme]}.#{retry_report_name}") unless File.file?(report_path)
   raise UI.user_error!('There is no junit report to parse') unless File.file?(report_path)
 
   junit_report = Nokogiri::XML(File.read(report_path))
   failed_tests = []
   passed_tests = []
   suite_name = junit_report.xpath('//testsuite').first['name'].split('.').first
+  if options[:scheme] == 'StreamVideo' && suite_name != 'StreamVideoTests'
+    UI.user_error!('JUnit report belongs to another test suite')
+  end
   junit_report.xpath('//testcase').each do |testcase|
     class_name = testcase['classname'].split('.').last
     test_name = testcase['name'].delete('()')
