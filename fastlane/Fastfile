@@ -5,6 +5,7 @@ skip_docs
 require 'json'
 require 'net/http'
 require 'fileutils'
+require 'open3'
 require 'tmpdir'
 import 'Sonarfile'
 import 'Allurefile'
@@ -214,7 +215,8 @@ desc 'Runs LLC tests'
 lane :test do |options|
   next unless is_check_required(sources: sources_matrix[:llc], force_check: @force_check)
 
-  update_testplan_on_ci(path: "StreamVideoTests/StreamVideo.xctestplan")
+  testplan_path = File.expand_path('../StreamVideoTests/StreamVideo.xctestplan')
+  update_testplan_on_ci(path: testplan_path)
 
   scan_options = {
     project: xcode_project,
@@ -236,11 +238,24 @@ lane :test do |options|
     scan_options[:only_testing] = failed_tests
   end
 
-  scan_with_retries(
-    scan_options: scan_options,
-    retries: options[:retries],
-    retry_failed: options[:retry_failed]
-  )
+  original_testplan = File.read(testplan_path)
+  begin
+    update_testplan(
+      path: testplan_path,
+      env_vars: {
+        key: 'STREAM_TEST_VERBOSE',
+        value: FastlaneCore::Globals.verbose?.to_s
+      }
+    )
+
+    scan_with_retries(
+      scan_options: scan_options,
+      retries: options[:retries],
+      retry_failed: options[:retry_failed]
+    )
+  ensure
+    File.write(testplan_path, original_testplan)
+  end
 
   slather if is_ci && !options[:build_for_testing]
 end
@@ -382,9 +397,7 @@ lane :test_e2e do |options|
 end
 
 # Runs scan once, then retries failed tests up to three times by default.
-# Every attempt recalculates the failing set from the previous run's junit
-# report, so a shrinking set of flaky tests converges instead of dragging
-# the whole suite along.
+# Every attempt keeps tests without a confirmed pass eligible for retry.
 private_lane :scan_with_retries do |options|
   scan_options = options[:scan_options]
   max_retries = (options[:retries] || 3).to_i
@@ -399,8 +412,10 @@ private_lane :scan_with_retries do |options|
     attempt_started_at = Time.now
     report_path = File.join(output_directory, 'report.junit')
     retry_report_path = File.join(output_directory, "#{scan_options[:scheme]}.#{retry_report_name}")
+    result_path = File.join(output_directory, "#{scan_options[:scheme]}.xcresult")
+    prior_result_mtime = File.mtime(result_path) if File.exist?(result_path)
     retrying = options[:retry_failed] || attempt > 1
-    if retrying && File.file?(report_path)
+    if retrying && File.file?(report_path) && !File.file?(retry_report_path)
       FileUtils.cp(report_path, retry_report_path)
     elsif !retrying
       FileUtils.rm_f(retry_report_path)
@@ -411,21 +426,41 @@ private_lane :scan_with_retries do |options|
     ensure
       # Keep each completed attempt before the next scan replaces its output.
       attempt_directory = File.join(attempts_directory, "attempt-#{attempt}")
-      result_paths = [File.join(output_directory, "#{scan_options[:scheme]}.xcresult"),
-                      File.join(output_directory, 'report.junit')]
+      result_paths = [result_path, report_path]
       result_paths.each do |path|
         next unless File.exist?(path) && File.mtime(path) >= attempt_started_at
 
         FileUtils.mkdir_p(attempt_directory)
         FileUtils.cp_r(path, attempt_directory)
       end
-      FileUtils.rm_f(retry_report_path) if File.file?(report_path)
+      if retrying && File.file?(retry_report_path)
+        begin
+          reconcile_retry_report(
+            report_path: report_path,
+            retry_report_path: retry_report_path,
+            result_path: result_paths.first,
+            attempt_started_at: attempt_started_at,
+            prior_result_mtime: prior_result_mtime,
+            scheme: scan_options[:scheme]
+          )
+        rescue StandardError => e
+          UI.important("Could not reconcile retry results: #{e.message}")
+        end
+      end
     end
-  rescue StandardError
+    if retrying && File.file?(retry_report_path)
+      remaining = retreive_failed_tests(scheme: scan_options[:scheme])
+      UI.user_error!("#{remaining.size} retry tests have no confirmed pass") unless remaining.empty?
+    end
+  rescue StandardError => e
     raise if retries_left.zero?
 
-    failed_tests = retreive_failed_tests(scheme: scan_options[:scheme])
-    raise if failed_tests.empty?
+    begin
+      failed_tests = retreive_failed_tests(scheme: scan_options[:scheme])
+    rescue StandardError
+      raise e
+    end
+    raise e if failed_tests.empty?
 
     retries_left -= 1
     UI.important("Retry #{max_retries - retries_left}/#{max_retries}: re-running #{failed_tests.size} failed tests ⌛️")
@@ -434,30 +469,81 @@ private_lane :scan_with_retries do |options|
   end
 end
 
+private_lane :reconcile_retry_report do |options|
+  retry_report = Nokogiri::XML(File.read(options[:retry_report_path]))
+  suite_name = retry_report.at_xpath('//testsuite')['name'].split('.').first
+  outcomes = Hash.new { |tests, name| tests[name] = [] }
+
+  if File.file?(options[:report_path])
+    current_report = Nokogiri::XML(File.read(options[:report_path]))
+    current_suite = current_report.at_xpath('//testsuite')&.[]('name')&.split('.')&.first
+    current_report.xpath('//testcase').each do |testcase|
+      next unless current_suite && testcase['classname'] && testcase['name']
+
+      name = "#{current_suite}/#{testcase['classname'].split('.').last}/#{testcase['name'].delete_suffix('()')}"
+      result = if testcase.at_xpath('failure | error')
+                 'Failed'
+               elsif testcase.at_xpath('skipped')
+                 'Skipped'
+               else
+                 'Passed'
+               end
+      outcomes[name] << result
+    end
+  end
+
+  result_path = options[:result_path]
+  result_mtime = File.mtime(result_path) if File.directory?(result_path)
+  if result_mtime && result_mtime >= options[:attempt_started_at] &&
+     (!options[:prior_result_mtime] || result_mtime > options[:prior_result_mtime])
+    begin
+      output, status = Open3.capture2('xcrun', 'xcresulttool', 'get',
+                                      'test-results', 'tests', '--path', result_path,
+                                      err: File::NULL)
+      if status.success?
+        prefix = "test://com.apple.xcode/#{options[:scheme]}/"
+        visit = lambda do |node|
+          if node['nodeType'] == 'Test Case' && node['nodeIdentifierURL']&.start_with?(prefix)
+            outcomes[node['nodeIdentifierURL'].delete_prefix(prefix)] << node['result']
+          end
+          node.fetch('children', []).each { |child| visit.call(child) }
+        end
+        JSON.parse(output).fetch('testNodes', []).each { |node| visit.call(node) }
+      end
+    rescue Errno::ENOENT, JSON::ParserError => e
+      UI.important("Could not inspect current xcresult: #{e.message}")
+    end
+  end
+
+  confirmed_passes = outcomes.select { |_, results| results.all? { |result| result == 'Passed' } }.keys
+  retry_report.xpath('//testcase').each do |testcase|
+    name = "#{suite_name}/#{testcase['classname'].split('.').last}/#{testcase['name'].delete_suffix('()')}"
+    testcase.remove if confirmed_passes.include?(name)
+  end
+  File.write(options[:retry_report_path], retry_report.to_xml)
+end
+
 private_lane :retreive_failed_tests do |options|
-  report_path = 'test_output/report.junit'
-  report_path = File.join('test_output', "#{options[:scheme]}.#{retry_report_name}") unless File.file?(report_path)
+  report_path = File.join('test_output', "#{options[:scheme]}.#{retry_report_name}")
+  report_path = 'test_output/report.junit' unless File.file?(report_path)
   raise UI.user_error!('There is no junit report to parse') unless File.file?(report_path)
 
   junit_report = Nokogiri::XML(File.read(report_path))
   failed_tests = []
-  passed_tests = []
   suite_name = junit_report.xpath('//testsuite').first['name'].split('.').first
   if options[:scheme] == 'StreamVideo' && suite_name != 'StreamVideoTests'
     UI.user_error!('JUnit report belongs to another test suite')
   end
   junit_report.xpath('//testcase').each do |testcase|
     class_name = testcase['classname'].split('.').last
-    test_name = testcase['name'].delete('()')
+    test_name = testcase['name'].delete_suffix('()')
 
-    if testcase.at_xpath('failure')
+    if testcase.at_xpath('failure | error')
       failed_tests << "#{suite_name}/#{class_name}/#{test_name}"
-    else
-      passed_tests << "#{suite_name}/#{class_name}/#{test_name}"
     end
   end
 
-  (failed_tests - passed_tests).uniq
+  failed_tests.uniq
 end
 
 lane :stop_e2e_helpers do

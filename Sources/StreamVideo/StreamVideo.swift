@@ -125,6 +125,15 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     /// on a stale local copy.
     private lazy var ringingCallRecoveryAdapter = RingingCallRecoveryAdapter(self)
 
+    /// Timeout values for various WebRTC operations.
+    internal var connectionTimeout: TimeInterval = {
+        #if STREAM_TESTS
+        return 5
+        #else
+        return 30
+        #endif
+    }()
+
     /// Initializes a new instance of `StreamVideo` with the specified parameters.
     /// - Parameters:
     ///   - apiKey: The API key.
@@ -547,12 +556,16 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         
         log.debug("Listening for WS connection")
 
+        guard let webSocketClient else {
+            throw ClientError.Unknown()
+        }
+
         do {
             log.debug("Listening for WS connection")
-            _ = try await DefaultTimer
-                .publish(every: 0.1)
-                .filter { [weak webSocketClient] _ in webSocketClient?.connectionState.isConnected == true }
-                .nextValue(timeout: 30)
+            _ = try await webSocketClient
+                .connectionStatePublisher
+                .filter { $0.isConnected }
+                .nextValue(timeout: connectionTimeout)
         } catch {
             log.debug("Timeout while waiting for WS connection opening")
             throw ClientError.NetworkError()
