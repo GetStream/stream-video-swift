@@ -156,6 +156,8 @@ final class Call_JoinRecovery_Tests: StreamVideoTestCase, @unchecked Sendable {
     }
 
     func test_join_afterInitialJoinAndSubscriberDisconnects_capsBackendJoinRequestsAfterTenRejoins() async throws {
+        makeAudioStoreReady()
+
         let mockPermissions = MockPermissionsStore()
         defer { mockPermissions.dismantle() }
 
@@ -227,6 +229,14 @@ final class Call_JoinRecovery_Tests: StreamVideoTestCase, @unchecked Sendable {
                     .adapter
             )
 
+        let joinRequests = webRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .sfuStack
+            .adapter
+            .publisherSendEvent
+            .compactMap { @Sendable event in event as? SFUAdapter.JoinEvent }
+            .relay()
+
         let joinTask = Task {
             try await subject.join(
                 create: false,
@@ -246,12 +256,16 @@ final class Call_JoinRecovery_Tests: StreamVideoTestCase, @unchecked Sendable {
                 .id == .joining
         }
 
-        await wait(for: 0.5)
+        let joinResponseCancellable = joinRequests.sink {
+            @Sendable [stack = webRTCCoordinatorFactory.mockCoordinatorStack] _ in
+            stack.joinResponse([])
+        }
+        defer { joinResponseCancellable.cancel() }
+
         webRTCCoordinatorFactory
             .mockCoordinatorStack
             .sfuStack
             .setConnectionState(to: .connected(healthCheckInfo: .init()))
-        webRTCCoordinatorFactory.mockCoordinatorStack.joinResponse([])
 
         _ = try await joinTask.value
 
@@ -286,12 +300,10 @@ final class Call_JoinRecovery_Tests: StreamVideoTestCase, @unchecked Sendable {
             defaultAPI.timesCalled(.joinCall) == joinCallCountBeforeAllowedRejoin + 1
         }
 
-        await wait(for: 0.5)
         webRTCCoordinatorFactory
             .mockCoordinatorStack
             .sfuStack
             .setConnectionState(to: .connected(healthCheckInfo: .init()))
-        webRTCCoordinatorFactory.mockCoordinatorStack.joinResponse([])
 
         await fulfilmentInMainActor(timeout: defaultTimeout) {
             webRTCCoordinatorFactory
@@ -342,6 +354,8 @@ final class Call_JoinRecovery_Tests: StreamVideoTestCase, @unchecked Sendable {
     }
 
     func test_join_afterAbnormalWebSocketClosure_issuesAdditionalBackendJoinRequest() async throws {
+        makeAudioStoreReady()
+
         let mockPermissions = MockPermissionsStore()
         defer { mockPermissions.dismantle() }
 
@@ -399,6 +413,10 @@ final class Call_JoinRecovery_Tests: StreamVideoTestCase, @unchecked Sendable {
                     .adapter
             )
         )
+        // Fast reconnect skips the backend joinCall. This test asserts the
+        // rejoin path, so the stubbed peers must not look healthy.
+        publisher.stub(for: \.isHealthy, with: false)
+        subscriber.stub(for: \.isHealthy, with: false)
         defaultAPI.stub(for: .joinCall, with: joinResponse)
         webRTCCoordinatorFactory
             .mockCoordinatorStack
@@ -420,6 +438,14 @@ final class Call_JoinRecovery_Tests: StreamVideoTestCase, @unchecked Sendable {
                     .sfuStack
                     .adapter
             )
+
+        let joinRequests = webRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .sfuStack
+            .adapter
+            .publisherSendEvent
+            .compactMap { @Sendable event in event as? SFUAdapter.JoinEvent }
+            .relay()
 
         let joinTask = Task {
             try await subject.join(
@@ -451,6 +477,17 @@ final class Call_JoinRecovery_Tests: StreamVideoTestCase, @unchecked Sendable {
                 .id == .joining
         }
 
+        let joinResponseCancellable = joinRequests.sink {
+            @Sendable [stack = webRTCCoordinatorFactory.mockCoordinatorStack] _ in
+            stack.joinResponse([])
+        }
+        defer { joinResponseCancellable.cancel() }
+
+        webRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .sfuStack
+            .setConnectionState(to: .connected(healthCheckInfo: .init()))
+
         await fulfilmentInMainActor(timeout: defaultTimeout) {
             webRTCCoordinatorFactory
                 .mockCoordinatorStack
@@ -467,14 +504,6 @@ final class Call_JoinRecovery_Tests: StreamVideoTestCase, @unchecked Sendable {
                     return false
                 } == true
         }
-        webRTCCoordinatorFactory
-            .mockCoordinatorStack
-            .sfuStack
-            .receiveEvent(.joinResponse(.init()))
-        webRTCCoordinatorFactory
-            .mockCoordinatorStack
-            .sfuStack
-            .setConnectionState(to: .connected(healthCheckInfo: .init()))
 
         _ = try await joinTask.value
 
@@ -515,10 +544,6 @@ final class Call_JoinRecovery_Tests: StreamVideoTestCase, @unchecked Sendable {
         webRTCCoordinatorFactory
             .mockCoordinatorStack
             .sfuStack
-            .receiveEvent(.joinResponse(.init()))
-        webRTCCoordinatorFactory
-            .mockCoordinatorStack
-            .sfuStack
             .setConnectionState(to: .connected(healthCheckInfo: .init()))
 
         let joinCallRequests = try XCTUnwrap(
@@ -536,6 +561,16 @@ final class Call_JoinRecovery_Tests: StreamVideoTestCase, @unchecked Sendable {
             joinCallRequests.allSatisfy {
                 $0.2.hintHighScaleLivestreamPublisher == true
             }
+        )
+    }
+
+    private func makeAudioStoreReady() {
+        let audioStore = InjectedValues[\.audioStore]
+        audioStore.dispatch(.setActive(true))
+        audioStore.dispatch(
+            .setCurrentRoute(
+                .dummy(outputs: [.dummy(isReceiver: true)])
+            )
         )
     }
 }

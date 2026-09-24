@@ -30,8 +30,6 @@ final class StreamRTCPeerConnection: StreamRTCPeerConnectionProtocol, @unchecked
     /// A dispatch queue for handling peer connection operations.
     let dispatchQueue = DispatchQueue(label: "io.getstream.peerconnection")
 
-    private let disposableBag = DisposableBag()
-
     /// A publisher for RTCPeerConnectionEvents.
     lazy var publisher: AnyPublisher<RTCPeerConnectionEvent, Never> = delegatePublisher
         .publisher
@@ -44,6 +42,10 @@ final class StreamRTCPeerConnection: StreamRTCPeerConnectionProtocol, @unchecked
 
     private let delegatePublisher = DelegatePublisher()
     private let source: RTCPeerConnection
+    // Orders close claims with add checks and map insertion. Native calls
+    // and awaited teardown must run outside this lock.
+    private let lifecycleQueue = UnfairQueue()
+    private var isClosed = false
 
     /// Initializes a new StreamRTCPeerConnection.
     ///
@@ -157,19 +159,45 @@ final class StreamRTCPeerConnection: StreamRTCPeerConnectionProtocol, @unchecked
 
     // MARK: - Forwarding API
 
-    /// Adds a transceiver to the peer connection.
+    /// Adds a transceiver while the peer connection is open.
+    ///
+    /// The native add runs outside the lifecycle lock. If closure wins
+    /// before the result is stored, this stops the new transceiver and
+    /// returns `nil`. A result stored first is stopped by `close()`.
     ///
     /// - Parameters:
     ///   - track: The media track to add.
     ///   - transceiverInit: The initialization parameters for the transceiver.
-    /// - Returns: The created RTCRtpTransceiver, or nil if creation fails.
+    /// - Returns: The created transceiver, or `nil` if creation fails or
+    ///   closure begins before it can be stored.
     func addTransceiver(
         trackType: TrackType,
         with track: RTCMediaStreamTrack,
         init transceiverInit: RTCRtpTransceiverInit
     ) -> RTCRtpTransceiver? {
-        let result = source.addTransceiver(with: track, init: transceiverInit)
-        storeTransceiver(result, trackType: trackType)
+        guard lifecycleQueue.sync({ isClosed }) == false else {
+            // PeerConnection is closing. Do not add new transceivers.
+            return nil
+        }
+
+        // libwebrtc does not reject an add after close, so check again once
+        // the native add returns. The native call stays outside the lock.
+        guard let result = source.addTransceiver(
+            with: track,
+            init: transceiverInit
+        ) else {
+            return nil
+        }
+
+        let isClosedAfterAdd: Bool = lifecycleQueue.sync {
+            guard !isClosed else { return true }
+            storeTransceiver(result, trackType: trackType)
+            return false
+        }
+        guard !isClosedAfterAdd else {
+            result.stopInternal()
+            return nil
+        }
         return result
     }
 
@@ -204,15 +232,25 @@ final class StreamRTCPeerConnection: StreamRTCPeerConnectionProtocol, @unchecked
         source.restartIce()
     }
 
-    /// Closes the peer connection.
+    /// Stops transceivers and closes the peer connection on the main actor.
+    ///
+    /// The first caller awaits native teardown. A concurrent caller that
+    /// finds closure already claimed returns before teardown finishes.
+    /// An in-flight native add may stop its result after this returns.
     func close() async {
-        Task(disposableBag: disposableBag) { @MainActor [weak self] in
-            /// It's very important to close any transceivers **before** we close the connection, to make
-            /// sure that access to `RTCVideoTrack` properties, will be handled correctly. Otherwise
-            /// if we try to access any property/method on a `RTCVideoTrack` instance whose
-            /// peerConnection has closed, we will get blocked on the Main Thread.
-            self?.source.transceivers.forEach { $0.stopInternal() }
-            self?.source.close()
+        let shouldClose: Bool = lifecycleQueue.sync {
+            guard !isClosed else { return false }
+            isClosed = true
+            return true
+        }
+        guard shouldClose else { return }
+
+        let source = self.source
+        await MainActor.run {
+            // Stop before close: later track-property access can block the
+            // main thread if its peer connection is already closed.
+            source.transceivers.forEach { $0.stopInternal() }
+            source.close()
         }
     }
 

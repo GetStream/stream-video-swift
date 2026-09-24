@@ -6,7 +6,7 @@ runs:
     - run: echo "IMAGE=${ImageOS}-${ImageVersion}" >> $GITHUB_ENV
       shell: bash
     - name: Cache SPM
-      uses: actions/cache@v4
+      uses: actions/cache@v6.1.0
       id: spm-cache
       with:
         path: spm_cache

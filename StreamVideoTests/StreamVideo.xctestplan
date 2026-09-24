@@ -18,11 +18,11 @@
         }
       ]
     },
-    "defaultTestExecutionTimeAllowance" : 100,
+    "defaultTestExecutionTimeAllowance" : 60,
     "environmentVariableEntries" : [
 
     ],
-    "maximumTestExecutionTimeAllowance" : 100,
+    "maximumTestExecutionTimeAllowance" : 60,
     "maximumTestRepetitions" : 1,
     "targetForVariableExpansion" : {
       "containerPath" : "container:StreamVideo.xcodeproj",

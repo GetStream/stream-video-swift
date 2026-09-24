@@ -1653,7 +1653,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
                 )
                 _ = try await statuses
                     .filter { $0 == .connected }
-                    .nextValue(timeout: 40)
+                    .nextValue(timeout: 20)
             }
             .assertEventuallyInMainActor {
                 $0.call.microphone.audioBitrateProfile == .musicHighQuality
