@@ -73,7 +73,14 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
                     context.sfuEventObserver = nil
 
+                    let cleanupStartedAt = Date()
+                    log.debug("Stage cleanup started.", subsystems: .webRTC)
                     await coordinator.stateAdapter.cleanUp()
+                    log.debug(
+                        "WebRTC stage cleanup completed after "
+                            + "\(Date().timeIntervalSince(cleanupStartedAt))s.",
+                        subsystems: .webRTC
+                    )
                     context = .init(coordinator: context.coordinator)
 
                     try transition?(.idle(context))

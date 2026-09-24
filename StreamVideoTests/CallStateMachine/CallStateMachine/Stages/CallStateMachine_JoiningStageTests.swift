@@ -731,6 +731,96 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
         }
     }
 
+    func test_execute_withRetries_unrecoverableAPIError_deliversErrorWithoutRetry() async throws {
+        let error = APIError(
+            code: 17,
+            details: [],
+            duration: "",
+            message: "Join backstage denied",
+            moreInfo: "",
+            statusCode: 403,
+            unrecoverable: true
+        )
+        let deliverySubject = CurrentValueSubject<JoinCallResponse?, Error>(nil)
+        let deliveryExpectation = expectation(description: "Original API error delivered.")
+        let cancellable = deliverySubject
+            .receive(on: DispatchQueue.main)
+            .compactMap { $0 }
+            .sink {
+                guard case let .failure(deliveredError) = $0 else {
+                    XCTFail()
+                    return
+                }
+                guard let deliveredAPIError = deliveredError as? APIError else {
+                    XCTFail("Expected the original APIError.")
+                    return
+                }
+                XCTAssertEqual(deliveredAPIError.code, error.code)
+                XCTAssertEqual(deliveredAPIError.statusCode, error.statusCode)
+                XCTAssertEqual(deliveredAPIError.message, error.message)
+                XCTAssertEqual(deliveredAPIError.unrecoverable, error.unrecoverable)
+                deliveryExpectation.fulfill()
+            } receiveValue: { _ in XCTFail() }
+
+        let context = Call.StateMachine.Stage.Context(
+            call: call,
+            input: .join(
+                .init(
+                    create: true,
+                    ring: true,
+                    notify: true,
+                    source: .inApp,
+                    deliverySubject: deliverySubject,
+                    retryPolicy: .init(maxRetries: 2, delay: { _ in 0 })
+                )
+            )
+        )
+
+        try await assertJoining(
+            context,
+            joinResponse: error,
+            expectedTransition: .error
+        ) {
+            XCTAssertEqual(self.callController.timesCalled(.join), 1)
+        }
+
+        await fulfillment(of: [deliveryExpectation], timeout: defaultTimeout)
+        cancellable.cancel()
+    }
+
+    func test_execute_withRetries_recoverableAPIError_retries() async throws {
+        let error = APIError(
+            code: 17,
+            details: [],
+            duration: "",
+            message: "Join backstage denied",
+            moreInfo: "",
+            statusCode: 403,
+            unrecoverable: false
+        )
+        let context = Call.StateMachine.Stage.Context(
+            call: call,
+            input: .join(
+                .init(
+                    create: true,
+                    ring: true,
+                    notify: true,
+                    source: .inApp,
+                    deliverySubject: .init(nil),
+                    retryPolicy: .init(maxRetries: 2, delay: { _ in 0 })
+                )
+            )
+        )
+
+        try await assertJoining(
+            context,
+            joinResponse: error,
+            expectedTransition: .error
+        ) {
+            XCTAssertEqual(self.callController.timesCalled(.join), 2)
+        }
+    }
+
     func test_execute_withRetries_whenJoinFailsAndThereAreAvailableRetries_afterRetriesFailItDeliversErrorToDeliverySubject(
     ) async throws {
         let deliverySubject = CurrentValueSubject<JoinCallResponse?, Error>(nil)

@@ -553,6 +553,8 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     /// Cleans up the WebRTC session by closing connections and resetting
     /// states.
     func cleanUp() async {
+        let cleanupID = UUID().uuidString.prefix(8)
+        log.debug("Cleanup \(cleanupID): started.", subsystems: .webRTC)
         screenShareSessionProvider.activeSession = nil
         videoCaptureSessionProvider.activeSession = nil
         pendingPeerConnectionTracesDisposableBag.removeAll()
@@ -560,14 +562,36 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         disposableBag.removeAll()
         // Restore VP/APM before deactivating so the next never-music
         // call does not inherit a music session.
+        log.debug("Cleanup \(cleanupID): resetting audio.", subsystems: .webRTC)
         await resetAudioBitrateProfile()
+        log.debug("Cleanup \(cleanupID): audio reset.", subsystems: .webRTC)
         await audioSession.deactivate()
+        log.debug(
+            "Cleanup \(cleanupID): audio deactivated.",
+            subsystems: .webRTC
+        )
         await publisher?.close()
+        log.debug(
+            "Cleanup \(cleanupID): publisher closed.",
+            subsystems: .webRTC
+        )
         await subscriber?.close()
+        log.debug(
+            "Cleanup \(cleanupID): subscriber closed.",
+            subsystems: .webRTC
+        )
         self.publisher = nil
         self.subscriber = nil
         self.statsAdapter = nil
+        log.debug(
+            "Cleanup \(cleanupID): disconnecting SFU.",
+            subsystems: .webRTC
+        )
         await sfuAdapter?.disconnect()
+        log.debug(
+            "Cleanup \(cleanupID): SFU disconnected.",
+            subsystems: .webRTC
+        )
         enqueue { _ in [:] }
         set(sfuAdapter: nil)
         set(token: "")
@@ -577,9 +601,18 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         set(anonymousCount: 0)
         set(participantPins: [])
         set(isSpeakingWhileMuted: false)
+        log.debug(
+            "Cleanup \(cleanupID): resetting details.",
+            subsystems: .webRTC
+        )
         await set(clientEventDetails: .init())
+        log.debug(
+            "Cleanup \(cleanupID): event details reset.",
+            subsystems: .webRTC
+        )
         trackStorage.removeAll()
         permissionsAdapter.cleanUp()
+        log.debug("Cleanup \(cleanupID): completed.", subsystems: .webRTC)
     }
 
     /// Cleans up the session for reconnection, clearing adapters and tracks.

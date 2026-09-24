@@ -192,7 +192,24 @@ class CallController: @unchecked Sendable {
             return try await relay
                 .nextValue(timeout: WebRTCConfiguration.timeout.join)
         } catch {
+            if let apiError = error as? APIError {
+                log.debug(
+                    "Join failed with API error code:\(apiError.code) "
+                        + "status:\(apiError.statusCode) "
+                        + "unrecoverable:\(apiError.unrecoverable == true). "
+                        + "Awaiting cleanup.",
+                    subsystems: .webRTC
+                )
+            } else {
+                log.debug("Join failed. Awaiting cleanup.", subsystems: .webRTC)
+            }
+            let cleanupStartedAt = Date()
             await webRTCCoordinator.cleanUp()
+            log.debug(
+                "Join cleanup completed after "
+                    + "\(Date().timeIntervalSince(cleanupStartedAt))s.",
+                subsystems: .webRTC
+            )
             throw error
         }
     }

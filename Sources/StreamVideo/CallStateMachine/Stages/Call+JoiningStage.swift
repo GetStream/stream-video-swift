@@ -109,6 +109,12 @@ extension Call.StateMachine.Stage {
                         return
                     }
 
+                    if let apiError = error as? APIError, apiError.unrecoverable == true {
+                        input.deliverySubject.send(completion: .failure(error))
+                        transitionErrorOrLog(error)
+                        return
+                    }
+
                     var input = input
                     input.currentNumberOfRetries += 1
 
