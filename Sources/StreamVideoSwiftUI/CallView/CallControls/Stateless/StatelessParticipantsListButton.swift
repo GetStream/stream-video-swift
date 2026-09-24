@@ -62,8 +62,11 @@ public struct StatelessParticipantsListButton: View {
             }
         )
         .overlay(
-            ControlBadgeView("\(count)")
-                .opacity(count > 1 ? 1 : 0)
+            ControlBadgeView(
+                "\(count)",
+                border: Color(videoAppearance.tokens.colors.badgeBorder)
+            )
+            .opacity(count > 1 ? 1 : 0)
         )
         .accessibility(identifier: "participantMenu")
         .onReceive(call?.state.$participants) {
