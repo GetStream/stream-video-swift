@@ -69,13 +69,22 @@ extension Call_IntegrationTests {
             audioStore
                 .dispatch(.setAudioDeviceModule(nil))
 
-            _ = try await audioStore
-                .publisher(\.audioDeviceModule)
-                .filter { $0 == nil }
-                .nextValue(timeout: 2)
+            var audioCleanupError: Error?
+            do {
+                _ = try await audioStore
+                    .publisher(\.audioDeviceModule)
+                    .filter { $0 == nil }
+                    .nextValue(timeout: 2)
+            } catch {
+                audioCleanupError = error
+            }
 
             permissions.dismantle()
             await client.dismantle()
+
+            if let audioCleanupError {
+                throw audioCleanupError
+            }
         }
 
         // MARK: - CallFlow

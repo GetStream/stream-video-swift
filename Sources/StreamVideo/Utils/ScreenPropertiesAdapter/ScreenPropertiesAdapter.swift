@@ -18,7 +18,7 @@ public final class ScreenPropertiesAdapter: @unchecked Sendable {
     init() {
         Task { @MainActor in
             let maximumFramesPerSecond: Int
-            #if canImport(UIKit)
+            #if canImport(UIKit) && !STREAM_TESTS
             maximumFramesPerSecond = max(30, UIScreen.main.maximumFramesPerSecond)
             #else
             maximumFramesPerSecond = 30
