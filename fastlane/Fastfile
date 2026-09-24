@@ -4,6 +4,8 @@ skip_docs
 
 require 'json'
 require 'net/http'
+require 'fileutils'
+require 'tmpdir'
 import 'Sonarfile'
 import 'Allurefile'
 
@@ -373,9 +375,28 @@ end
 private_lane :scan_with_retries do |options|
   scan_options = options[:scan_options]
   attempts_left = options[:retries] || 3
+  output_directory = File.expand_path('test_output')
+  FileUtils.mkdir_p(output_directory)
+  attempts_directory = Dir.mktmpdir("#{scan_options[:scheme]}-attempts-", output_directory)
+  attempt = 0
 
   begin
-    scan(scan_options)
+    attempt += 1
+    attempt_started_at = Time.now
+    begin
+      scan(scan_options)
+    ensure
+      # Keep each completed attempt before the next scan replaces its output.
+      attempt_directory = File.join(attempts_directory, "attempt-#{attempt}")
+      result_paths = [File.join(output_directory, "#{scan_options[:scheme]}.xcresult"),
+                      File.join(output_directory, 'report.junit')]
+      result_paths.each do |path|
+        next unless File.exist?(path) && File.mtime(path) >= attempt_started_at
+
+        FileUtils.mkdir_p(attempt_directory)
+        FileUtils.cp_r(path, attempt_directory)
+      end
+    end
   rescue StandardError
     raise if attempts_left.zero?
 

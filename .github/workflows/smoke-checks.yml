@@ -80,6 +80,15 @@ jobs:
       env:
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
       if: ${{ github.event_name == 'push' && failure() }}
+    - name: Upload xcresults for every attempt
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: Test Results LLC
+        include-hidden-files: true
+        path: |
+          fastlane/test_output/StreamVideo-attempts-*/
+          fastlane/test_output/StreamVideo.xcresult/
     - name: Parse xcresult
       if: failure()
       run: |

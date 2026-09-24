@@ -102,6 +102,15 @@ jobs:
     - name: Allure TestOps Launch Removal
       if: cancelled()
       run: bundle exec fastlane allure_launch_removal launch_id:$LAUNCH_ID
+    - name: Upload xcresults for every attempt
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: Test Results E2E (iOS ${{ matrix.ios }})
+        include-hidden-files: true
+        path: |
+          fastlane/test_output/DemoApp-attempts-*/
+          fastlane/test_output/DemoApp.xcresult/
     - name: Parse xcresult
       if: failure()
       run: |
@@ -155,6 +164,15 @@ jobs:
     - name: Run LLC Tests (Debug)
       run: bundle exec fastlane test device:"${{ env.IOS_SIMULATOR_DEVICE }}" cron:true ${{ env.VERBOSE }}
       timeout-minutes: 60
+    - name: Upload xcresults for every attempt
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: Test Results LLC (iOS ${{ matrix.ios }})
+        include-hidden-files: true
+        path: |
+          fastlane/test_output/StreamVideo-attempts-*/
+          fastlane/test_output/StreamVideo.xcresult/
     - name: Parse xcresult
       if: failure()
       run: |
