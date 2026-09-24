@@ -733,7 +733,11 @@ extension WebRTCCoordinator.StateMachine.Stage {
         }
     }
 
-    private func prepareForJoiningRequest(sfuAdapter: SFUAdapter) -> (RelayPublisher<Stream_Video_Sfu_Event_JoinResponse, Never>, ConsumableBucket<Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload>) {
+    private func prepareForJoiningRequest(sfuAdapter: SFUAdapter)
+        -> (
+            RelayPublisher<Stream_Video_Sfu_Event_JoinResponse, Never>,
+            ConsumableBucket<Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload>
+        ) {
         // Send can deliver a response before join() subscribes.
         let joinResponsePublisher = sfuAdapter
             .publisher(
@@ -745,6 +749,5 @@ extension WebRTCCoordinator.StateMachine.Stage {
         )
 
         return (joinResponsePublisher, subscriberEventBucket)
-
     }
 }
