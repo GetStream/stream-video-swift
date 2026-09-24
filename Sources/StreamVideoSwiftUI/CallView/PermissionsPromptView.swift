@@ -11,6 +11,7 @@ import SwiftUI
 public struct PermissionsPromptView: View {
 
     @Injected(\.urlNavigator) private var urlNavigator
+    @Injected(\.videoAppearance) private var videoAppearance
 
     private let ownCapabilitiesPublisher: AnyPublisher<Set<OwnCapability>, Never>?
 
@@ -36,13 +37,13 @@ public struct PermissionsPromptView: View {
     public var body: some View {
         Group {
             if (isMissingCameraPermission || isMissingMicrophonePermission), !isHidden {
-                HStack {
+                HStack(spacing: layout.spacingXs) {
                     title
                     Spacer()
                     actionsContainerView
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(8)
+                .padding(layout.spacingXs)
                 .modifier(ShadowViewModifier())
                 .alert(isPresented: $presentNavigationPopup) { alertContentView }
             }
@@ -73,7 +74,8 @@ public struct PermissionsPromptView: View {
     @ViewBuilder
     private func text(for string: String) -> some View {
         Text(string)
-            .font(.headline)
+            .font(fonts.headline)
+            .foregroundColor(Color(colors.textPrimary))
             .minimumScaleFactor(0.5)
             .multilineTextAlignment(.leading)
             .lineLimit(3)
@@ -81,7 +83,7 @@ public struct PermissionsPromptView: View {
 
     @ViewBuilder
     private var actionsContainerView: some View {
-        HStack {
+        HStack(spacing: layout.spacingXs) {
             goToSettingsButton
         }
     }
@@ -93,11 +95,11 @@ public struct PermissionsPromptView: View {
         } label: {
             settingsButtonLabel
         }
-        .padding(.vertical, 4)
-        .padding(.horizontal, 8)
-        .foregroundColor(.white)
-        .background(Color.blue)
-        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .padding(.vertical, layout.spacingXxs)
+        .padding(.horizontal, layout.spacingXs)
+        .foregroundColor(Color(colors.buttonPrimaryTextOnAccent))
+        .background(Color(colors.buttonPrimaryBackground))
+        .clipShape(RoundedRectangle(cornerRadius: layout.radiusMd))
     }
 
     @ViewBuilder
@@ -106,12 +108,12 @@ public struct PermissionsPromptView: View {
             Label {
                 Text(L10n.Call.Permissions.Missing.Cta.title)
             } icon: {
-                Image(systemName: "gear")
+                videoAppearance.images.settings
             }
             .minimumScaleFactor(0.7)
         } else {
-            HStack(alignment: .center, spacing: 4) {
-                Image(systemName: "gear")
+            HStack(alignment: .center, spacing: layout.spacingXxs) {
+                videoAppearance.images.settings
                 Text(L10n.Call.Permissions.Missing.Cta.title)
             }
             .minimumScaleFactor(0.7)
