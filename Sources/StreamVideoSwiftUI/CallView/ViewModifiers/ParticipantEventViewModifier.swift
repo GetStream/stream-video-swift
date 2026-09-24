@@ -8,8 +8,6 @@ import SwiftUI
 
 struct ParticipantEventsNotificationViewModifier: ViewModifier {
 
-    @Injected(\.colors) private var colors
-
     @ObservedObject var viewModel: CallViewModel
 
     func body(content: Content) -> some View {
@@ -20,11 +18,11 @@ struct ParticipantEventsNotificationViewModifier: ViewModifier {
     private var overlayContent: some View {
         if let event = viewModel.participantEvent {
             Text("\(event.user) \(event.action.display) the call.")
-                .padding(8)
-                .background(Color(UIColor.systemBackground))
-                .foregroundColor(colors.text)
+                .font(fonts.body)
+                .padding(layout.spacingXs)
+                .foregroundColor(Color(colors.textPrimary))
                 .modifier(ShadowViewModifier())
-                .padding()
+                .padding(layout.spacingMd)
                 .accessibility(identifier: "participantEventLabel")
         } else {
             EmptyView()

@@ -106,8 +106,6 @@ public struct CallContainer<Factory: ViewFactory>: View {
 
 public struct WaitingLocalUserView<Factory: ViewFactory>: View {
 
-    @Injected(\.appearance) var appearance
-
     @ObservedObject var viewModel: CallViewModel
     var viewFactory: Factory
     
@@ -118,10 +116,10 @@ public struct WaitingLocalUserView<Factory: ViewFactory>: View {
     
     public var body: some View {
         ZStack {
-            DefaultBackgroundGradient()
+            Color(colors.backgroundCoreApp)
                 .edgesIgnoringSafeArea(.all)
 
-            VStack {
+            VStack(spacing: layout.spacingXs) {
                 viewFactory.makeCallTopView(viewModel: viewModel)
                     .opacity(viewModel.callingState == .reconnecting ? 0 : 1)
 
@@ -146,7 +144,7 @@ public struct WaitingLocalUserView<Factory: ViewFactory>: View {
                         Spacer()
                     }
                 }
-                .padding(.horizontal, 8)
+                .padding(.horizontal, layout.spacingXs)
                 .opacity(viewModel.callingState == .reconnecting ? 0 : 1)
 
                 viewFactory.makeCallControlsView(viewModel: viewModel)

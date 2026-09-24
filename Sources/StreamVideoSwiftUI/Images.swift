@@ -37,6 +37,7 @@ public class Images {
     public var participantOptions = Image(systemName: "ellipsis")
     public var participantPinned = Image(systemName: "pin.fill")
     public var participantVideoPaused = Image(systemName: "wifi.slash")
+    public var settings = Image(systemName: "gear")
 
     private static var toggleCameraImageName: String {
         if #available(iOS 14, *) {
