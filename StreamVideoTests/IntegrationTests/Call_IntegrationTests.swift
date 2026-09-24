@@ -15,7 +15,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
 
     // MARK: - Properties
 
-    private var helpers: Call_IntegrationTests.Helpers! = .init(loggingMode: .sdk)
+    private var helpers: Call_IntegrationTests.Helpers! = .init()
 
     // MARK: - Lifecycle
 

@@ -26,8 +26,6 @@ extension Call_IntegrationTests {
     struct Helpers: Sendable {
         @Injected(\.audioStore) private var audioStore
 
-        enum LoggingMode { case none, sdk, webrtc, all }
-
         var authentication: AuthenticationHelper
         var configuration: ConfigurationHelper
         var client: StreamVideoHelper
@@ -37,7 +35,6 @@ extension Call_IntegrationTests {
         private var registeredCalls: [String: Call] = [:]
 
         init(
-            loggingMode: LoggingMode = .none,
             configuration: ConfigurationHelper = .init(),
             authentication: AuthenticationHelper = .init(),
             client: StreamVideoHelper = .init(),
@@ -50,20 +47,7 @@ extension Call_IntegrationTests {
             self.users = user
             self.permissions = permissions
 
-            switch loggingMode {
-            case .none:
-                LogConfig.webRTCLogsEnabled = false
-                LogConfig.level = .error
-            case .sdk:
-                LogConfig.webRTCLogsEnabled = false
-                LogConfig.level = .debug
-            case .webrtc:
-                LogConfig.webRTCLogsEnabled = true
-                LogConfig.level = .error
-            case .all:
-                LogConfig.webRTCLogsEnabled = true
-                LogConfig.level = .debug
-            }
+            LogConfig.webRTCLogsEnabled = false
         }
 
         mutating func dismantle() async throws {
