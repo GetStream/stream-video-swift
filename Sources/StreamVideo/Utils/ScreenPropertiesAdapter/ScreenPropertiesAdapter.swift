@@ -25,7 +25,9 @@ public final class ScreenPropertiesAdapter: @unchecked Sendable {
             #endif
             preferredFramesPerSecond = maximumFramesPerSecond
             refreshRate = 1.0 / Double(maximumFramesPerSecond)
+            #if !STREAM_TESTS
             scale = UIScreen.main.scale
+            #endif
         }
     }
 }
