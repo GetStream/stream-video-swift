@@ -215,6 +215,8 @@ desc 'Runs LLC tests'
 lane :test do |options|
   next unless is_check_required(sources: sources_matrix[:llc], force_check: @force_check)
 
+  FastlaneCore::Globals.verbose = true
+
   testplan_path = File.expand_path('../StreamVideoTests/StreamVideo.xctestplan')
   update_testplan_on_ci(path: testplan_path)
 
@@ -229,7 +231,7 @@ lane :test do |options|
     concurrent_workers: 2,
     skip_build: options[:skip_build],
     build_for_testing: options[:build_for_testing],
-    xcodebuild_formatter: xcodebuild_formatter
+    xcodebuild_formatter: ''
   }
 
   if options[:retry_failed]
