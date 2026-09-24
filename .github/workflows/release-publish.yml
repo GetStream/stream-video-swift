@@ -17,7 +17,7 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
 
-      - uses: actions/checkout@v4.1.1
+      - uses: actions/checkout@v7.0.1
         with:
           token: ${{ secrets.ADMIN_API_TOKEN }}
           fetch-depth: 0
@@ -43,7 +43,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: release
     steps:
-      - uses: actions/checkout@v4.1.1
+      - uses: actions/checkout@v7.0.1
         with:
           token: ${{ secrets.ADMIN_API_TOKEN }}
           fetch-depth: 0

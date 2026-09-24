@@ -227,7 +227,13 @@ lane :test do |options|
     xcodebuild_formatter: xcodebuild_formatter
   }
 
-  scan_with_retries(scan_options: scan_options)
+  if options[:retry_failed]
+    failed_tests = retreive_failed_tests
+    UI.user_error!('No failed tests available to retry') if failed_tests.empty?
+    scan_options[:only_testing] = failed_tests
+  end
+
+  scan_with_retries(scan_options: scan_options, retries: options[:retries])
 
   slather if is_ci && !options[:build_for_testing]
 end
@@ -368,13 +374,14 @@ lane :test_e2e do |options|
   scan_with_retries(scan_options: scan_options)
 end
 
-# Runs scan and re-runs only the tests that failed, up to `retries` times.
+# Runs scan once, then retries failed tests up to three times by default.
 # Every attempt recalculates the failing set from the previous run's junit
 # report, so a shrinking set of flaky tests converges instead of dragging
 # the whole suite along.
 private_lane :scan_with_retries do |options|
   scan_options = options[:scan_options]
-  attempts_left = options[:retries] || 3
+  max_retries = (options[:retries] || 3).to_i
+  retries_left = max_retries
   output_directory = File.expand_path('test_output')
   FileUtils.mkdir_p(output_directory)
   attempts_directory = Dir.mktmpdir("#{scan_options[:scheme]}-attempts-", output_directory)
@@ -383,6 +390,7 @@ private_lane :scan_with_retries do |options|
   begin
     attempt += 1
     attempt_started_at = Time.now
+    FileUtils.rm_f(File.join(output_directory, 'report.junit'))
     begin
       scan(scan_options)
     ensure
@@ -398,13 +406,13 @@ private_lane :scan_with_retries do |options|
       end
     end
   rescue StandardError
-    raise if attempts_left.zero?
+    raise if retries_left.zero?
 
     failed_tests = retreive_failed_tests
     raise if failed_tests.empty?
 
-    attempts_left -= 1
-    UI.important("Re-running #{failed_tests.size} failed tests ⌛️ (#{attempts_left} retries left)")
+    retries_left -= 1
+    UI.important("Retry #{max_retries - retries_left}/#{max_retries}: re-running #{failed_tests.size} failed tests ⌛️")
     scan_options = scan_options.merge(only_testing: failed_tests)
     retry
   end

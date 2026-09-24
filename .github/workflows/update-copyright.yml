@@ -19,7 +19,7 @@ jobs:
     name: Copyright
     runs-on: macos-15
     steps:
-    - uses: actions/checkout@v4.1.1
+    - uses: actions/checkout@v7.0.1
     - uses: ./.github/actions/ruby-cache
     - run: bundle exec fastlane copyright
       timeout-minutes: 5
