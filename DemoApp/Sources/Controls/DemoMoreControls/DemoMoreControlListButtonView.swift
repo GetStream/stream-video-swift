@@ -9,9 +9,10 @@ import SwiftUI
 
 struct DemoMoreControlListButtonView<Icon: View>: View {
 
-    @Injected(\.colors) var colors
+    @Injected(\.videoAppearance) private var videoAppearance
 
     var centered: Bool = false
+    var primaryStyle: Bool = false
     var action: () -> Void
     var label: String
     var disabled: Bool = false
@@ -21,9 +22,12 @@ struct DemoMoreControlListButtonView<Icon: View>: View {
         Button {
             action()
         } label: {
-            HStack {
+            HStack(spacing: tokens.layout.spacingSm) {
                 Label(
-                    title: { Text(label) },
+                    title: {
+                        Text(label)
+                            .font(primaryStyle ? tokens.fonts.bodyBold : tokens.fonts.body)
+                    },
                     icon: { icon() }
                 )
 
@@ -32,16 +36,26 @@ struct DemoMoreControlListButtonView<Icon: View>: View {
                 }
             }
             .frame(maxWidth: .infinity)
-            .padding(.horizontal)
+            .padding(.horizontal, tokens.layout.spacingSm)
         }
-        .frame(height: 40)
+        .frame(minHeight: tokens.layout.buttonVisualHeightLg)
         .buttonStyle(.borderless)
-        .foregroundColor(colors.white)
-        .background(Color(colors.participantBackground))
+        .foregroundColor(
+            primaryStyle
+                ? Color(tokens.colors.buttonPrimaryTextOnAccent)
+                : Color(tokens.colors.textPrimary)
+        )
+        .background(
+            primaryStyle
+                ? Color(tokens.colors.buttonPrimaryBackground)
+                : Color(tokens.colors.backgroundCoreElevation1)
+        )
         .clipShape(Capsule())
         .frame(maxWidth: .infinity)
         .disabled(disabled)
     }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
 
 @MainActor
@@ -57,6 +71,7 @@ struct DemoRaiseHandToggleButtonView: View {
     var body: some View {
         DemoMoreControlListButtonView(
             centered: true,
+            primaryStyle: true,
             action: { reactionsAdapter.send(reaction: .raiseHand) },
             label: currentUserHasRaisedHand ? "Lower Hand" : "Raise Hand"
         ) {

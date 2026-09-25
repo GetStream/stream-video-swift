@@ -7,7 +7,7 @@ import StreamVideoSwiftUI
 import SwiftUI
 
 struct DemoBroadcastMoreControlsListButtonView: View {
-    @Injected(\.appearance) private var appearance
+    @Injected(\.videoAppearance) private var videoAppearance
 
     @State private var selection: ScreensharingType = .inApp
 
@@ -23,11 +23,11 @@ struct DemoBroadcastMoreControlsListButtonView: View {
                     label: selection == .inApp ? "Stop Screensharing" : "Stop Broadcasting"
                 ) {
                     Image(systemName: "record.circle")
-                        .foregroundColor(appearance.colors.accentRed)
+                        .foregroundColor(Color(tokens.colors.accentError))
                 }
                 .transition(.opacity.combined(with: .scale))
             } else {
-                HStack(spacing: 12) {
+                HStack(spacing: tokens.layout.spacingSm) {
                     inAppScreenshareButtonView
 
                     broadcastButtonView
@@ -61,7 +61,7 @@ struct DemoBroadcastMoreControlsListButtonView: View {
                 label: "Screenshare"
             ) {
                 Image(systemName: "record.circle")
-                    .foregroundColor(appearance.colors.text)
+                    .foregroundColor(Color(tokens.colors.textPrimary))
             }
         }
     }
@@ -79,7 +79,7 @@ struct DemoBroadcastMoreControlsListButtonView: View {
                 label: "Broadcast"
             ) {
                 Image(systemName: "record.circle")
-                    .foregroundColor(appearance.colors.text)
+                    .foregroundColor(Color(tokens.colors.textPrimary))
             }
             .allowsHitTesting(false)
         }
@@ -116,4 +116,6 @@ struct DemoBroadcastMoreControlsListButtonView: View {
     private var isBroadcastDisabled: Bool {
         isDisabled || (isCurrentUserScreenSharing && selection != .broadcast)
     }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }

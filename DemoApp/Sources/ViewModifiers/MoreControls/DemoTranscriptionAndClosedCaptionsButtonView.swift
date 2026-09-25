@@ -9,7 +9,7 @@ import SwiftUI
 
 struct DemoTranscriptionAndClosedCaptionsButtonView: View {
 
-    @Injected(\.colors) private var colors
+    @Injected(\.videoAppearance) private var videoAppearance
     @ObservedObject var viewModel: CallViewModel
 
     @State private var isTranscriptionAvailable = false
@@ -60,10 +60,10 @@ struct DemoTranscriptionAndClosedCaptionsButtonView: View {
                         Image(systemName: "captions.bubble")
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal)
-                    .frame(height: 40)
-                    .foregroundColor(colors.white)
-                    .background(Color(colors.participantBackground))
+                    .padding(.horizontal, tokens.layout.spacingMd)
+                    .frame(height: tokens.layout.buttonVisualHeightMd)
+                    .foregroundColor(Color(tokens.colors.buttonSecondaryText))
+                    .background(Color(tokens.colors.buttonSecondaryBackground))
                     .clipShape(Capsule())
                 }
                 .onReceive(viewModel.call?.state.$transcribing) { isTranscribing = $0 }
@@ -230,4 +230,6 @@ struct DemoTranscriptionAndClosedCaptionsButtonView: View {
             }
         }
     }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }

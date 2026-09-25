@@ -9,7 +9,7 @@ import SwiftUI
 struct DemoMoreThermalStateButtonView: View {
 
     @Injected(\.thermalStateObserver) private var thermalStateObserver
-    @Injected(\.colors) private var colors
+    @Injected(\.videoAppearance) private var videoAppearance
     @State private var thermalState = ProcessInfo.ThermalState.nominal
 
     var body: some View {
@@ -19,11 +19,11 @@ struct DemoMoreThermalStateButtonView: View {
                 icon: { icon(for: thermalState) }
             )
             .frame(maxWidth: .infinity)
-            .padding(.horizontal)
+            .padding(.horizontal, tokens.layout.spacingMd)
         }
-        .frame(height: 40)
+        .frame(height: tokens.layout.buttonVisualHeightMd)
         .buttonStyle(.borderless)
-        .foregroundColor(colors.white)
+        .foregroundColor(Color(tokens.colors.textOnAccent))
         .background(background(for: thermalState))
         .clipShape(Capsule())
         .frame(maxWidth: .infinity)
@@ -66,15 +66,17 @@ struct DemoMoreThermalStateButtonView: View {
     private func background(for thermalState: ProcessInfo.ThermalState) -> some View {
         switch thermalState {
         case .nominal:
-            Color.blue
+            Color(tokens.colors.accentPrimary)
         case .fair:
-            Color.green
+            Color(tokens.colors.accentSuccess)
         case .serious:
-            Color.orange
+            Color(tokens.colors.accentWarning)
         case .critical:
-            Color.red
+            Color(tokens.colors.accentError)
         @unknown default:
-            Color.clear
+            Color(tokens.colors.accentNeutral)
         }
     }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }

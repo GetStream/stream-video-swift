@@ -8,7 +8,7 @@ import SwiftUI
 
 struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
 
-    @Injected(\.appearance) var appearance
+    @Injected(\.videoAppearance) private var videoAppearance
     @Injected(\.chatViewModel) var chatViewModel
 
     @ObservedObject var viewModel: CallViewModel
@@ -54,13 +54,13 @@ struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
                     Spacer()
                 }
             }
-            .padding(.horizontal)
+            .padding(.horizontal, tokens.layout.spacingMd)
 
             viewFactory.makeCallControlsView(viewModel: viewModel)
         }
         .presentParticipantListView(viewModel: viewModel, viewFactory: viewFactory)
         .chat(viewModel: viewModel, chatViewModel: chatViewModel)
-        .background(Color(appearance.colors.callBackground).edgesIgnoringSafeArea(.all))
+        .background(Color(tokens.colors.backgroundCoreApp).edgesIgnoringSafeArea(.all))
     }
 
     @ViewBuilder
@@ -69,7 +69,7 @@ struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
             Spacer()
 
             Group {
-                VStack(spacing: 16) {
+                VStack(spacing: tokens.layout.spacingMd) {
                     Button {
                         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
                             isSharePromptVisible.toggle()
@@ -86,8 +86,8 @@ struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
                                 )
                             )
                         }
-                        .foregroundColor(appearance.colors.text)
-                        .font(appearance.fonts.title3.bold())
+                        .foregroundColor(Color(tokens.colors.textPrimary))
+                        .font(tokens.fonts.title3.bold())
                     }
 
                     if isSharePromptVisible {
@@ -102,10 +102,10 @@ struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding()
+                .padding(tokens.layout.spacingMd)
             }
-            .background(Color(appearance.colors.participantBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .background(Color(tokens.colors.backgroundCoreElevation1))
+            .clipShape(RoundedRectangle(cornerRadius: tokens.layout.radiusXl))
             .sheet(isPresented: $isInviteViewVisible) {
                 NavigationView {
                     InviteParticipantsView(
@@ -119,7 +119,8 @@ struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
         }
         .presentsMoreControls(viewModel: viewModel)
         .alignedToReadableContentGuide()
-        .padding(.bottom)
+        .padding(.horizontal, tokens.layout.spacingXs)
+        .padding(.bottom, tokens.layout.spacing3xl)
     }
 
     private var callLink: String {
@@ -145,17 +146,17 @@ struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
             } label: {
                 HStack {
                     Label(
-                        title: { Text("Add Others") },
+                        title: { Text("Add Others").font(tokens.fonts.bodyBold) },
                         icon: { Image(systemName: "person.fill.badge.plus") }
                     )
                 }
                 .frame(maxWidth: .infinity)
-                .padding(.horizontal)
+                .padding(.horizontal, tokens.layout.spacingMd)
             }
-            .frame(height: 40)
+            .frame(height: tokens.layout.buttonVisualHeightLg)
             .buttonStyle(.plain)
-            .foregroundColor(appearance.colors.text)
-            .background(appearance.colors.accentBlue)
+            .foregroundColor(Color(tokens.colors.buttonPrimaryTextOnAccent))
+            .background(Color(tokens.colors.buttonPrimaryBackground))
             .clipShape(Capsule())
             .frame(maxWidth: .infinity)
         }
@@ -170,20 +171,21 @@ struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
                 HStack {
                     Label(
                         title: {
-                            Text("Call id: \(Text(callId).font(appearance.fonts.caption1).fontWeight(.medium))").lineLimit(1)
+                            Text("Call id: \(Text(callId).font(tokens.fonts.caption1).fontWeight(.medium))").lineLimit(1)
                                 .minimumScaleFactor(0.7)
                         },
                         icon: { Image(systemName: "doc.on.clipboard") }
                     )
                 }
                 .frame(maxWidth: .infinity)
-                .padding(.horizontal)
+                .padding(.horizontal, tokens.layout.spacingMd)
             }
-            .frame(height: 40)
+            .frame(height: tokens.layout.buttonVisualHeightLg)
             .buttonStyle(.plain)
-            .foregroundColor(appearance.colors.text)
+            .foregroundColor(Color(tokens.colors.buttonSecondaryText))
+            .background(Color(tokens.colors.buttonSecondaryBackground))
             .clipShape(Capsule())
-            .overlay(Capsule().stroke(Color(appearance.colors.textLowEmphasis), lineWidth: 1))
+            .overlay(Capsule().stroke(Color(tokens.colors.buttonSecondaryBorder), lineWidth: 1))
             .frame(maxWidth: .infinity)
         }
     }
@@ -194,18 +196,20 @@ struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
             Group {
                 QRCodeView(text: callLink)
                     .frame(width: 100, height: 100, alignment: .center)
-                    .padding()
+                    .padding(tokens.layout.spacingMd)
             }
             .frame(maxWidth: .infinity)
-            .background(Color.black)
-            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .background(Color(tokens.colors.backgroundCoreOnElevation))
+            .clipShape(RoundedRectangle(cornerRadius: tokens.layout.radiusXl))
 
             Text("Scan the QR code to join from another device.")
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .font(appearance.fonts.body)
-                .foregroundColor(appearance.colors.text)
+                .font(tokens.fonts.body)
+                .foregroundColor(Color(tokens.colors.textPrimary))
                 .minimumScaleFactor(0.7)
                 .lineLimit(1)
         }
     }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }

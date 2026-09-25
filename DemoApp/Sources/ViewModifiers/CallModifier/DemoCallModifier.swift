@@ -29,6 +29,7 @@ struct DemoCallModifier<Factory: ViewFactory>: ViewModifier {
 
     func body(content: Content) -> some View {
         contentView(content)
+            .fireworks()
             .modifier(ThermalStateViewModifier())
     }
 

@@ -10,25 +10,29 @@ import SwiftUI
 @available(iOS 15.0, *)
 struct DemoBackgroundEffectSelector: View {
 
+    @Injected(\.videoAppearance) private var videoAppearance
+
     var effects: [BackgroundEffect] = BackgroundEffect.allCases
 
     var body: some View {
-        ScrollView(.horizontal) {
-            HStack(alignment: .center) {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(alignment: .center, spacing: tokens.layout.spacingXxs) {
                 ForEach(effects) { effect in
                     DemoEffectButton(effect: effect)
                 }
             }
-            .padding(8)
+            .padding(.horizontal, tokens.layout.spacingMd)
         }
     }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
 
 @available(iOS 15.0, *)
 @MainActor
 struct DemoEffectButton: View {
 
-    @Injected(\.colors) var colors
+    @Injected(\.videoAppearance) private var videoAppearance
 
     var effect: BackgroundEffect
     @ObservedObject var appState = AppState.shared
@@ -52,22 +56,48 @@ struct DemoEffectButton: View {
         Button {
             appState.videoFilter = isSelected ? nil : effect.filter
         } label: {
-            Circle()
-                .fill(Color(colors.participantBackground))
-                .overlay(
-                    effect
-                        .image
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .padding(effect.padding)
-                        .clipShape(Circle())
-                )
-                .clipped()
-                .frame(width: 44, height: 44)
-                .overlay(Circle().stroke(isSelected ? colors.text : .clear))
+            ZStack {
+                Circle()
+                    .fill(Color(tokens.colors.backgroundCoreOnElevation))
+                    .overlay(
+                        effect
+                            .image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .padding(effect.padding)
+                            .clipShape(Circle())
+                    )
+                    .clipped()
+                    .frame(
+                        width: tokens.layout.buttonVisualHeightMd,
+                        height: tokens.layout.buttonVisualHeightMd
+                    )
+
+                if isSelected {
+                    Circle()
+                        .stroke(
+                            Color(tokens.colors.borderUtilityActive),
+                            lineWidth: 2
+                        )
+                        .frame(
+                            width: selectionRingSize,
+                            height: selectionRingSize
+                        )
+                }
+            }
+            .frame(
+                width: tokens.layout.buttonVisualHeightLg,
+                height: tokens.layout.buttonVisualHeightLg
+            )
         }
         .buttonStyle(.plain)
     }
+
+    private var selectionRingSize: CGFloat {
+        tokens.layout.buttonVisualHeightLg - tokens.layout.spacingXxs
+    }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
 
 @available(iOS 15.0, *)
