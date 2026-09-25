@@ -597,12 +597,24 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         let participant = String.unique
 
         try await helpers
-            .callFlow(id: callId, type: .livestream, userId: .unique, environment: "demo")
+            .callFlow(
+                id: callId,
+                type: .livestream,
+                userId: .unique,
+                environment: "demo",
+                streamVideoEnvironment: .mockedAudioDevice
+            )
             .perform { try await $0.call.create(backstage: .init(enabled: true)) }
             .perform { try await $0.call.join() }
 
         try await helpers
-            .callFlow(id: callId, type: .livestream, userId: participant, environment: "demo")
+            .callFlow(
+                id: callId,
+                type: .livestream,
+                userId: participant,
+                environment: "demo",
+                streamVideoEnvironment: .mockedAudioDevice
+            )
             .performWithErrorExpectation { try await $0.call.join() }
             .tryMap { $0.value as? APIError }
             .assert { $0.value.code == 17 }
@@ -691,7 +703,13 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         )
 
         try await helpers
-            .callFlow(id: callId, type: .livestream, userId: .unique, environment: "demo")
+            .callFlow(
+                id: callId,
+                type: .livestream,
+                userId: .unique,
+                environment: "demo",
+                streamVideoEnvironment: .mockedAudioDevice
+            )
             .perform {
                 try await $0.call.create(
                     startsAt: startingDate,
@@ -705,7 +723,13 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
 
         try await self
             .helpers
-            .callFlow(id: callId, type: .livestream, userId: participant, environment: "demo")
+            .callFlow(
+                id: callId,
+                type: .livestream,
+                userId: participant,
+                environment: "demo",
+                streamVideoEnvironment: .mockedAudioDevice
+            )
             .performWithErrorExpectation { try await $0.call.join() }
             .delay(max(0, joiningDate.timeIntervalSinceNow))
             .perform { try await $0.call.join() }
@@ -720,12 +744,24 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         let host = String.unique
 
         let hostCallFlow = try await helpers
-            .callFlow(id: callId, type: .audioRoom, userId: host, environment: "demo")
+            .callFlow(
+                id: callId,
+                type: .audioRoom,
+                userId: host,
+                environment: "demo",
+                streamVideoEnvironment: .mockedAudioDevice
+            )
             .perform { try await $0.call.create(memberIds: [host], backstage: .init(enabled: false)) }
             .perform { try await $0.call.join() }
 
         let participantCallFlow = try await helpers
-            .callFlow(id: callId, type: .audioRoom, userId: .unique, environment: "demo")
+            .callFlow(
+                id: callId,
+                type: .audioRoom,
+                userId: .unique,
+                environment: "demo",
+                streamVideoEnvironment: .mockedAudioDevice
+            )
 
         try await withThrowingTaskGroup(of: Void.self) { group in
             group.addTask {
@@ -754,12 +790,24 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         let host = String.unique
 
         let hostCallFlow = try await helpers
-            .callFlow(id: callId, type: .audioRoom, userId: host, environment: "demo")
+            .callFlow(
+                id: callId,
+                type: .audioRoom,
+                userId: host,
+                environment: "demo",
+                streamVideoEnvironment: .mockedAudioDevice
+            )
             .perform { try await $0.call.create(memberIds: [host], backstage: .init(enabled: false)) }
             .perform { try await $0.call.join() }
 
         let participantCallFlow = try await helpers
-            .callFlow(id: callId, type: .audioRoom, userId: .unique, environment: "demo")
+            .callFlow(
+                id: callId,
+                type: .audioRoom,
+                userId: .unique,
+                environment: "demo",
+                streamVideoEnvironment: .mockedAudioDevice
+            )
 
         try await withThrowingTaskGroup(of: Void.self) { group in
             group.addTask {
@@ -790,13 +838,13 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         let participant = "participant"
 
         let hostCallFlow = try await helpers
-            .callFlow(id: callId, type: .audioRoom, userId: host)
+            .callFlow(id: callId, type: .audioRoom, userId: host, streamVideoEnvironment: .mockedAudioDevice)
             .perform { try await $0.call.create(members: [.init(role: "host", userId: host)], backstage: .init(enabled: false)) }
             .perform { try await $0.call.join() }
             .assertEventuallyInMainActor { $0.call.state.ownCapabilities.contains(.updateCallPermissions) }
 
         let participantCallFlow = try await helpers
-            .callFlow(id: callId, type: .audioRoom, userId: participant)
+            .callFlow(id: callId, type: .audioRoom, userId: participant, streamVideoEnvironment: .mockedAudioDevice)
 
         try await withThrowingTaskGroup(of: Void.self) { group in
             group.addTask {
@@ -1182,10 +1230,10 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         let user2 = String.unique
 
         let user1CallFlow = try await helpers
-            .callFlow(id: callId, type: .default, userId: user1)
+            .callFlow(id: callId, type: .default, userId: user1, streamVideoEnvironment: .mockedAudioDevice)
 
         let user2CallFlow = try await helpers
-            .callFlow(id: callId, type: .default, userId: user2)
+            .callFlow(id: callId, type: .default, userId: user2, streamVideoEnvironment: .mockedAudioDevice)
 
         let user1JoinedFlow = try await user1CallFlow
             .perform { try await $0.call.create(memberIds: [user1, user2]) }
@@ -1223,10 +1271,10 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         let user2 = String.unique
 
         let user1CallFlow = try await helpers
-            .callFlow(id: callId, type: .default, userId: user1)
+            .callFlow(id: callId, type: .default, userId: user1, streamVideoEnvironment: .mockedAudioDevice)
 
         let user2CallFlow = try await helpers
-            .callFlow(id: callId, type: .default, userId: user2)
+            .callFlow(id: callId, type: .default, userId: user2, streamVideoEnvironment: .mockedAudioDevice)
 
         let user1JoinedFlow = try await user1CallFlow
             .perform { try await $0.call.create(memberIds: [user1, user2]) }
@@ -1261,10 +1309,10 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         let user2 = String.unique
 
         let user1CallFlow = try await helpers
-            .callFlow(id: callId, type: .default, userId: user1)
+            .callFlow(id: callId, type: .default, userId: user1, streamVideoEnvironment: .mockedAudioDevice)
 
         let user2CallFlow = try await helpers
-            .callFlow(id: callId, type: .default, userId: user2)
+            .callFlow(id: callId, type: .default, userId: user2, streamVideoEnvironment: .mockedAudioDevice)
 
         let user1JoinedFlow = try await user1CallFlow
             .perform { try await $0.call.create(memberIds: [user1, user2]) }
@@ -1318,10 +1366,10 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         let user2 = String.unique
 
         let user1CallFlow = try await helpers
-            .callFlow(id: callId, type: .default, userId: user1)
+            .callFlow(id: callId, type: .default, userId: user1, streamVideoEnvironment: .mockedAudioDevice)
 
         let user2CallFlow = try await helpers
-            .callFlow(id: callId, type: .default, userId: user2)
+            .callFlow(id: callId, type: .default, userId: user2, streamVideoEnvironment: .mockedAudioDevice)
 
         let user1JoinedFlow = try await user1CallFlow
             .perform { try await $0.call.create(memberIds: [user1, user2]) }
