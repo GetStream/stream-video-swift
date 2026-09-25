@@ -8,10 +8,6 @@ import SwiftUI
 
 public struct CallView<Factory: ViewFactory>: View {
 
-    @Injected(\.streamVideo) var streamVideo
-    @Injected(\.images) var images
-    @Injected(\.colors) var colors
-
     var viewFactory: Factory
     @ObservedObject var viewModel: CallViewModel
 
@@ -24,7 +20,7 @@ public struct CallView<Factory: ViewFactory>: View {
     }
 
     public var body: some View {
-        VStack {
+        VStack(spacing: layout.spacingXs) {
             viewFactory
                 .makeCallTopView(viewModel: viewModel)
                 .presentParticipantEventsNotification(viewModel: viewModel)
@@ -36,12 +32,12 @@ public struct CallView<Factory: ViewFactory>: View {
                     cornerDraggableView(videoFeedProxy)
                 }
             }
-            .padding([.leading, .trailing], 8)
+            .padding(.horizontal, layout.spacingXs)
 
             viewFactory.makeCallControlsView(viewModel: viewModel)
                 .opacity(viewModel.hideUIElements ? 0 : 1)
         }
-        .background(Color(colors.callBackground).edgesIgnoringSafeArea(.all))
+        .background(Color(colors.backgroundCoreApp).edgesIgnoringSafeArea(.all))
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .enablePictureInPicture(viewModel.isPictureInPictureEnabled)
         .presentParticipantListView(viewModel: viewModel, viewFactory: viewFactory)
@@ -87,7 +83,7 @@ public struct CallView<Factory: ViewFactory>: View {
             )
             .accessibility(identifier: "cornerDraggableView")
             .opacity(viewModel.hideUIElements ? 0 : 1)
-            .padding()
+            .padding(layout.spacingMd)
         } else {
             EmptyView()
         }

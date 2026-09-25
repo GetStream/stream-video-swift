@@ -8,8 +8,6 @@ import SwiftUI
 public struct CallTopView<Factory: ViewFactory>: View {
 
     @Injected(\.streamVideo) var streamVideo
-    @Injected(\.colors) var colors
-    @Injected(\.images) var images
 
     private var viewFactory: Factory
 
@@ -27,7 +25,7 @@ public struct CallTopView<Factory: ViewFactory>: View {
     public var body: some View {
         Group {
             HStack(spacing: 0) {
-                HStack {
+                HStack(spacing: layout.spacingXs) {
                     if
                         #available(iOS 14.0, *),
                         viewModel.callParticipants.count > 1 {
@@ -44,21 +42,21 @@ public struct CallTopView<Factory: ViewFactory>: View {
                 }
                 .frame(maxWidth: .infinity)
 
-                HStack(alignment: .center) {
+                HStack(alignment: .center, spacing: layout.spacingXs) {
                     CallDurationView(viewModel)
                 }
                 .frame(height: 44)
                 .frame(maxWidth: .infinity)
 
-                HStack {
+                HStack(spacing: layout.spacingXs) {
                     Spacer()
                     HangUpIconView(viewModel: viewModel)
                 }
                 .frame(maxWidth: .infinity)
             }
             .overlay(overlayView)
-            .padding(.horizontal, 16)
-            .padding(.vertical)
+            .padding(.horizontal, layout.spacingMd)
+            .padding(.vertical, layout.spacingMd)
             .frame(maxWidth: .infinity)
         }
     }
@@ -91,7 +89,8 @@ public struct CallTopView<Factory: ViewFactory>: View {
 }
 
 public struct SharingIndicator: View {
-            
+    @Injected(\.videoAppearance) var videoAppearance
+
     @ObservedObject var viewModel: CallViewModel
     @Binding var sharingPopupDismissed: Bool
     
@@ -101,27 +100,27 @@ public struct SharingIndicator: View {
     }
     
     public var body: some View {
-        HStack {
+        HStack(spacing: layout.spacingXs) {
             Text(L10n.Call.Current.sharing)
-                .font(.headline)
+                .font(fonts.headline)
             Divider()
             Button {
                 viewModel.stopScreensharing()
             } label: {
                 Text(L10n.Call.Current.stopSharing)
-                    .font(.headline)
+                    .font(fonts.headline)
             }
             Button {
                 sharingPopupDismissed = true
             } label: {
-                Image(systemName: "xmark")
+                videoAppearance.images.xmark
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(height: 14)
             }
-            .padding(.leading, 4)
+            .padding(.leading, layout.spacingXxs)
         }
-        .padding(.all, 8)
+        .padding(layout.spacingXs)
         .modifier(ShadowViewModifier())
     }
 }

@@ -55,8 +55,7 @@ public struct CallDurationView: View {
 }
 
 private struct InCallDurationView: View {
-    @Injected(\.colors) private var colors: Colors
-    @Injected(\.images) private var images: Images
+    @Injected(\.videoAppearance) private var videoAppearance
 
     let viewModel: CallViewModel
     @State private var duration: TimeInterval
@@ -69,11 +68,11 @@ private struct InCallDurationView: View {
     var body: some View {
         DurationView(duration: duration) {
             if viewModel.recordingState == .recording {
-                images.recordIcon
+                videoAppearance.images.recordIcon
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 12)
-                    .foregroundColor(colors.inactiveCallControl)
+                    .foregroundColor(Color(colors.accentError))
             }
         }
         .onReceive(viewModel.call?.state.$duration) { self.duration = $0 }
@@ -97,7 +96,6 @@ private struct RingingCallDurationView: View {
 
 private struct DurationView<IconView: View>: View {
 
-    @Injected(\.colors) private var colors: Colors
     @Injected(\.formatters.mediaDuration) private var formatter: MediaDurationFormatter
 
     let duration: TimeInterval
@@ -110,15 +108,15 @@ private struct DurationView<IconView: View>: View {
 
     var body: some View {
         if duration > 0, let formattedDuration = formatter.format(duration) {
-            HStack(spacing: 4) {
+            HStack(spacing: layout.spacingXxs) {
                 iconView
 
                 TimeView(formattedDuration)
                     .layoutPriority(2)
             }
-            .padding(.horizontal)
-            .padding(.vertical, 4)
-            .background(Color(colors.participantBackground))
+            .padding(.horizontal, layout.spacingMd)
+            .padding(.vertical, layout.spacingXxs)
+            .background(Color(colors.backgroundCoreSurfaceDefault))
             .clipShape(Capsule())
         } else {
             EmptyView()
@@ -128,9 +126,6 @@ private struct DurationView<IconView: View>: View {
 
 private struct TimeView: View {
 
-    @Injected(\.fonts) private var fonts: Fonts
-    @Injected(\.colors) private var colors: Colors
-
     var value: NSMutableAttributedString
 
     fileprivate init(_ value: String) {
@@ -138,12 +133,12 @@ private struct TimeView: View {
         self.value = attributed
         self.value.addAttribute(
             .foregroundColor,
-            value: colors.callDurationColor.withAlphaComponent(0.6),
+            value: colors.textTertiary,
             range: .init(location: 0, length: attributed.length - 3)
         )
         self.value.addAttribute(
             .foregroundColor,
-            value: colors.callDurationColor,
+            value: colors.textPrimary,
             range: .init(location: attributed.length - 3, length: 3)
         )
     }
@@ -154,7 +149,7 @@ private struct TimeView: View {
                 Text(AttributedString(value))
             } else {
                 Text(value.string)
-                    .foregroundColor(Color.white.opacity(0.6))
+                    .foregroundColor(Color(colors.textTertiary))
             }
         }
         .font(fonts.bodyBold.monospacedDigit())
