@@ -10,12 +10,14 @@ struct DeeplinkInfo: Equatable {
     var callId: String
     var callType: String
     var baseURL: AppEnvironment.BaseURL
+    var encryptionKey: String?
 
     nonisolated(unsafe) static let empty = DeeplinkInfo(
         url: nil,
         callId: "",
         callType: "",
-        baseURL: AppEnvironment.baseURL
+        baseURL: AppEnvironment.baseURL,
+        encryptionKey: nil
     )
 }
 
@@ -46,7 +48,8 @@ struct DeeplinkAdapter {
                     url: url,
                     callId: callId,
                     callType: .livestream,
-                    baseURL: AppEnvironment.BaseURL.livestream
+                    baseURL: AppEnvironment.BaseURL.livestream,
+                    encryptionKey: Self.encryptionKey(from: url)
                 ),
                 nil
             )
@@ -92,10 +95,53 @@ struct DeeplinkAdapter {
                     url: url,
                     callId: callId,
                     callType: callType,
-                    baseURL: baseURL
+                    baseURL: baseURL,
+                    encryptionKey: Self.encryptionKey(from: url)
                 ),
                 nil
             )
         }
+    }
+
+    static func encryptionKey(from url: URL) -> String? {
+        encryptionKey(fromQueryItems: url.queryParameters)
+            ?? encryptionKey(fromRaw: url.query)
+            ?? encryptionKey(fromRaw: url.fragment)
+            ?? encryptionKey(fromRaw: url.absoluteString)
+    }
+
+    static func encryptionKey(fromRaw text: String?) -> String? {
+        guard let text, !text.isEmpty else { return nil }
+        let haystack = text.replacingOccurrences(of: "&amp;", with: "&")
+        for marker in ["encryption_key=", "encryption_keys=", "encryptionKey="] {
+            guard let range = haystack.range(of: marker, options: .caseInsensitive)
+            else { continue }
+            let rest = haystack[range.upperBound...]
+            let end = rest.firstIndex {
+                $0 == "&" || $0 == "#" || $0.isNewline || $0 == " "
+            } ?? rest.endIndex
+            let trimmed = formDecoded(String(rest[..<end]))
+            if !trimmed.isEmpty { return trimmed }
+        }
+        return nil
+    }
+
+    private static func encryptionKey(
+        fromQueryItems params: [String: String]
+    ) -> String? {
+        for name in ["encryption_key", "encryption_keys", "encryptionKey"] {
+            if let value = params[name] {
+                let decoded = formDecoded(value)
+                if !decoded.isEmpty { return decoded }
+            }
+        }
+        return nil
+    }
+
+    /// `+` is a space in form-urlencoded query values (`able+acid+anger`).
+    private static func formDecoded(_ value: String) -> String {
+        let plusAsSpace = value.replacingOccurrences(of: "+", with: " ")
+        return (plusAsSpace.removingPercentEncoding ?? plusAsSpace)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }

@@ -51,6 +51,9 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
     /// A publisher that emits events related to the screen sharing track.
     let subject: PassthroughSubject<TrackEvent, Never>
 
+    /// Shared box used to attach an encryptor after `addTransceiver`.
+    private let e2ee: E2EEAttachmentContext
+
     /// We only want to register (send our primary track to the subject) only when we are about to publish
     /// for the first time. The property help us keep track of that.
     private var hasRegisteredPrimaryTrack: Bool = false
@@ -68,6 +71,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
     ///   - capturerFactory: Factory for creating video capturers. Defaults to
     ///     `StreamVideoCapturerFactory`.
     ///   - audioDeviceModule: The audio device module used for screen share audio.
+    ///   - e2ee: Shared box used to encrypt the local screenshare sender.
     init(
         sessionID: String,
         peerConnection: StreamRTCPeerConnectionProtocol,
@@ -77,7 +81,8 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
         subject: PassthroughSubject<TrackEvent, Never>,
         screenShareSessionProvider: ScreenShareSessionProvider,
         capturerFactory: VideoCapturerProviding = StreamVideoCapturerFactory(),
-        audioDeviceModule: AudioDeviceModule
+        audioDeviceModule: AudioDeviceModule,
+        e2ee: E2EEAttachmentContext = .init()
     ) {
         self.sessionID = sessionID
         self.peerConnection = peerConnection
@@ -88,6 +93,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
         self.screenShareSessionProvider = screenShareSessionProvider
         self.capturerFactory = capturerFactory
         self.audioDeviceModule = audioDeviceModule
+        self.e2ee = e2ee
 
         // Initialize the primary track, using the existing session's local track if available.
         primaryTrack = {
@@ -151,36 +157,40 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
             }
 
             primaryTrack.isEnabled = true
-
-            publishOptions.forEach {
-                self.addTransceiverIfRequired(
-                    for: $0,
-                    with: self.primaryTrack.clone(from: self.peerConnectionFactory),
-                    screenSharingType: activeSession.screenSharingType
-                )
-            }
-
-            let activePublishOptions = Set(self.publishOptions)
-
-            transceiverStorage
-                .forEach {
-                    if activePublishOptions.contains($0.key) {
-                        $0.value.track.isEnabled = true
-                        $0.value.transceiver.sender.track = $0.value.track
-                    } else {
-                        $0.value.track.isEnabled = false
-                        $0.value.transceiver.sender.track = nil
-                    }
+            do {
+                for options in publishOptions {
+                    try addTransceiverIfRequired(
+                        for: options,
+                        with: primaryTrack.clone(from: peerConnectionFactory),
+                        screenSharingType: activeSession.screenSharingType
+                    )
                 }
 
-            log.debug(
-                """
-                Local screenShareTracks are now published
-                    primary: \(primaryTrack.trackId) isEnabled:\(primaryTrack.isEnabled)
-                    clones: \(transceiverStorage.map(\.value.track.trackId).joined(separator: ","))
-                """,
-                subsystems: .webRTC
-            )
+                let activePublishOptions = Set(self.publishOptions)
+
+                transceiverStorage
+                    .forEach {
+                        if activePublishOptions.contains($0.key) {
+                            $0.value.track.isEnabled = true
+                            $0.value.transceiver.sender.track = $0.value.track
+                        } else {
+                            $0.value.track.isEnabled = false
+                            $0.value.transceiver.sender.track = nil
+                        }
+                    }
+
+                log.debug(
+                    """
+                    Local screenShareTracks are now published
+                        primary: \(primaryTrack.trackId) isEnabled:\(primaryTrack.isEnabled)
+                        clones: \(transceiverStorage.map(\.value.track.trackId).joined(separator: ","))
+                    """,
+                    subsystems: .webRTC
+                )
+            } catch {
+                primaryTrack.isEnabled = false
+                throw error
+            }
         }
     }
 
@@ -244,7 +254,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
     func didUpdatePublishOptions(
         _ publishOptions: PublishOptions
     ) async throws {
-        processingQueue.addTaskOperation { [weak self] in
+        try await processingQueue.addSynchronousTaskOperation { [weak self] in
             guard let self else { return }
 
             self.publishOptions = publishOptions.screenShare
@@ -255,7 +265,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
             else { return }
 
             for publishOption in self.publishOptions {
-                addTransceiverIfRequired(
+                try addTransceiverIfRequired(
                     for: publishOption,
                     with: primaryTrack.clone(from: peerConnectionFactory),
                     screenSharingType: activeSession.screenSharingType
@@ -448,6 +458,10 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
 
     /// Adds or updates a transceiver for a given track and publishing option.
     ///
+    /// When E2EE is enabled, the encryptor is attached before the transceiver
+    /// is stored. Attach failure clears the sender track and throws so
+    /// the track is not announced.
+    ///
     /// - Parameters:
     ///   - options: The publishing options for the track.
     ///   - track: The video track to add or update.
@@ -456,7 +470,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
         for options: PublishOptions.VideoPublishOptions,
         with track: RTCVideoTrack,
         screenSharingType: ScreensharingType
-    ) {
+    ) throws {
         guard !transceiverStorage.contains(key: options) else {
             return
         }
@@ -481,6 +495,11 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
         if params.setDegradationPreference(options.degradationPreference) {
             transceiver.sender.parameters = params
         }
+        try e2ee.encryptIfNeeded(
+            sender: transceiver.sender,
+            codec: options.codec.e2eeCodecPin,
+            trackType: .screenshare
+        )
         transceiverStorage.set(transceiver, track: track, for: options)
     }
 

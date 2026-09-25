@@ -148,6 +148,11 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     ///
     /// If the final handoff times out, the SDK leaves the call with reason
     /// `join.timeout` before rethrowing the timeout error.
+    ///
+    /// - Note: Attach E2EE with ``setE2EEManager(_:)`` **before** joining.
+    ///   The join request reports `e2ee: true` when a manager is set, and
+    ///   peer connections created during join attach encrypt/decrypt from
+    ///   that manager. Calling ``setE2EEManager(_:)`` after join throws.
     /// - Parameters:
     ///  - create: whether the call should be created if it doesn't exist.
     ///  - options: configuration options for the call.
@@ -339,6 +344,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     ///   - video: A boolean indicating if the call will be video or only audio. Still requires appropriate
     ///   - transcription: An object to override the transcription Call settings from the dashboard.
     ///   setting of ``CallSettings`.`
+    ///   - encryption: Optional encryption settings applied on get-or-create
+    ///    (`auto-on` to require framed AES-GCM E2EE).
     /// - Returns: A `CallResponse` object representing the created call.
     /// - Throws: An error if the call creation fails.
     @discardableResult
@@ -354,7 +361,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         maxParticipants: Int? = nil,
         backstage: BackstageSettingsRequest? = nil,
         video: Bool? = nil,
-        transcription: TranscriptionSettingsRequest? = nil
+        transcription: TranscriptionSettingsRequest? = nil,
+        encryption: EncryptionSettingsRequest? = nil
     ) async throws -> CallResponse {
         let membersFromMemberIds = memberIds?
             .map { MemberRequest(userId: $0) } ?? []
@@ -375,6 +383,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
         settingsOverride = CallSettingsRequest(
             backstage: backstage,
+            encryption: encryption,
             limits: limits,
             transcription: transcription
         )
@@ -581,6 +590,17 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     public func setVideoFilter(_ videoFilter: VideoFilter?) {
         moderation.setVideoFilter(videoFilter)
         callController.setVideoFilter(videoFilter)
+    }
+
+    /// Attaches or clears end-to-end encryption. Must run before ``join``.
+    ///
+    /// Pass ``EncryptionManager`` (or any ``E2EEManager``) before joining,
+    /// or `nil` to detach. Throws if peer connections already exist.
+    /// - Parameter manager: The encryption manager to attach, or `nil`
+    ///   to clear it.
+    /// - Throws: If called after join.
+    public func setE2EEManager(_ manager: E2EEManager?) async throws {
+        try await callController.setE2EEManager(manager)
     }
 
     /// Sets an `AudioFilter` for the current call.

@@ -88,13 +88,21 @@ struct DemoCallingViewModifier: ViewModifier {
                 await call.updatePublishOptions(
                     preferredVideoCodec: AppEnvironment.preferredVideoCodec.videoCodec
                 )
+                await AppEnvironment.EncryptionKeys.shared.attachIfNeeded(
+                    to: call,
+                    userId: streamVideo.user.id
+                )
                 _ = await Task { @MainActor in
                     viewModel.update(
                         participantsSortComparators: callType == .livestream
                             ? livestreamOrAudioRoomSortPreset
                             : defaultSortPreset
                     )
-                    viewModel.joinCall(callType: callType, callId: callId)
+                    viewModel.joinCall(
+                        callType: callType,
+                        callId: callId,
+                        encryption: AppEnvironment.EncryptionKeys.shared.encryptionRequest
+                    )
                 }.result
             } catch {
                 log.error(error)
@@ -113,6 +121,7 @@ struct DemoCallingViewModifier: ViewModifier {
 
         callType = resolvedCallType
         text.wrappedValue = deeplinkInfo.callId
+        AppEnvironment.EncryptionKeys.shared.applyDeeplink(deeplinkInfo)
         appState.deeplinkInfo = .empty
         joinCallIfNeeded(with: deeplinkInfo.callId, callType: resolvedCallType)
     }

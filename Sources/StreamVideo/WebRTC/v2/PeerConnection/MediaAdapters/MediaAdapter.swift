@@ -45,6 +45,8 @@ final class MediaAdapter {
     ///   - screenShareSessionProvider: Provides access to the active screen
     ///     sharing session.
     ///   - audioDeviceModule: The audio device module shared with capturers.
+    ///   - e2ee: Shared box used by local adapters to encrypt at
+    ///     `addTransceiver` time. Empty when encryption is off.
     convenience init(
         sessionID: String,
         peerConnectionType: PeerConnectionType,
@@ -56,7 +58,8 @@ final class MediaAdapter {
         publishOptions: PublishOptions,
         videoCaptureSessionProvider: VideoCaptureSessionProvider,
         screenShareSessionProvider: ScreenShareSessionProvider,
-        audioDeviceModule: AudioDeviceModule
+        audioDeviceModule: AudioDeviceModule,
+        e2ee: E2EEAttachmentContext = .init()
     ) {
         let subject = PassthroughSubject<TrackEvent, Never>()
         
@@ -96,7 +99,8 @@ final class MediaAdapter {
                     peerConnectionFactory: peerConnectionFactory,
                     sfuAdapter: sfuAdapter,
                     publishOptions: publishOptions.audio,
-                    subject: subject
+                    subject: subject,
+                    e2ee: e2ee
                 ),
                 videoMediaAdapter: .init(
                     sessionID: sessionID,
@@ -108,7 +112,8 @@ final class MediaAdapter {
                     publishOptions: publishOptions.video,
                     subject: subject,
                     videoCaptureSessionProvider: videoCaptureSessionProvider,
-                    audioDeviceModule: audioDeviceModule
+                    audioDeviceModule: audioDeviceModule,
+                    e2ee: e2ee
                 ),
                 screenShareMediaAdapter: .init(
                     sessionID: sessionID,
@@ -118,7 +123,8 @@ final class MediaAdapter {
                     publishOptions: publishOptions.screenShare,
                     subject: subject,
                     screenShareSessionProvider: screenShareSessionProvider,
-                    audioDeviceModule: audioDeviceModule
+                    audioDeviceModule: audioDeviceModule,
+                    e2ee: e2ee
                 )
             )
         }

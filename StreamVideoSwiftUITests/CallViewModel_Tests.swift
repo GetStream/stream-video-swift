@@ -873,6 +873,38 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(joinPayload.1?.highScaleLivestreamPublisherHint, true)
     }
 
+    func test_startCall_forwardsEncryptionSettings() async throws {
+        await prepare()
+        mockCall.resetRecords(for: .join)
+
+        subject.startCall(
+            callType: callType,
+            callId: callId,
+            members: participants,
+            encryption: EncryptionSettingsRequest(mode: .autoOn)
+        )
+
+        await fulfilmentInMainActor { self.mockCall.timesCalled(.join) == 1 }
+
+        let joinPayload = try XCTUnwrap(
+            mockCall
+                .recordedInputPayload(
+                    (
+                        Bool,
+                        CreateCallOptions?,
+                        Bool,
+                        Bool,
+                        CallSettings?,
+                        WebRTCJoinPolicy
+                    ).self,
+                    for: .join
+                )?
+                .last
+        )
+
+        XCTAssertEqual(joinPayload.1?.settings?.encryption?.mode, .autoOn)
+    }
+
     func test_joinCall_whenHangingUpWhileJoinIsInProgress_thenCallingStateDoesNotBecomeInCall() async throws {
         let joinStartedExpectation = expectation(
             description: "Join flow should start before hang up."

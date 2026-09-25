@@ -58,13 +58,22 @@ internal struct DemoCallContainerView: View {
             let highScaleHint = AppEnvironment
                 .highScaleLivestreamPublisherHint
                 .value
-            viewModel.startCall(
-                callType: callType,
-                callId: .unique,
-                members: [.init(user: .init(id: name))],
-                ring: true,
-                highScaleLivestreamPublisherHint: highScaleHint
-            )
+            let callId = String.unique
+            Task {
+                let call = streamVideo.call(callType: callType, callId: callId)
+                await AppEnvironment.EncryptionKeys.shared.attachIfNeeded(
+                    to: call,
+                    userId: streamVideo.user.id
+                )
+                viewModel.startCall(
+                    callType: callType,
+                    callId: callId,
+                    members: [.init(user: .init(id: name))],
+                    ring: true,
+                    highScaleLivestreamPublisherHint: highScaleHint,
+                    encryption: AppEnvironment.EncryptionKeys.shared.encryptionRequest
+                )
+            }
         }
     }
 }
