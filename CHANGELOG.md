@@ -18,6 +18,7 @@ _September 18, 2026_
 
 ### 🔄 Changed
 - The bundled incoming call ringtone ships as AAC (`incoming.m4a`) instead of uncompressed PCM (`incoming.wav`), matching the outgoing sound. `Sounds.incomingCallSound` now defaults to `"incoming.m4a"`. Apps that replace `Sounds.incomingCallSound` are unaffected; apps that only override `Sounds.bundle` need an `incoming.m4a` in their bundle.
+- The generated API client no longer inlines the middleware chain and the path parameter escaping into each of its 52 endpoints, shrinking `StreamVideo` by ~80 KB. No public API or behaviour change.
 
 ### 🐞 Fixed
 - Mute/unmute while music mode is on no longer chops or delays published audio. Switching to music rebuilds the local audio source with NS/HPF off, so unmute republish no longer restores software processing while Voice Processing is still disabled. Mute still unpublishes the track.
