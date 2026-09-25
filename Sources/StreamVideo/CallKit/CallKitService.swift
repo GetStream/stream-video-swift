@@ -34,6 +34,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         var ringingTimedOut: Bool = false
         var isEndedElsewhere: Bool = false
         var leaveReason: String?
+        var ringingStateCancellable: AnyCancellable?
 
         init(
             call: Call,
@@ -305,6 +306,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                     )
                 } else {
                     callEntry.createdBy = callState.call.createdBy.toUser
+                    await observeRingingState(callEntry)
                     setUpRingingTimer(for: callState)
                 }
             } catch {
@@ -353,15 +355,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             subsystems: .callKit
         )
 
-        callProvider.reportCall(
-            with: newCallEntry.callUUID,
-            endedAt: nil,
-            reason: .answeredElsewhere
-        )
-        ringingTimerCancellable?.cancel()
-        ringingTimerCancellable = nil
-        set(nil, for: newCallEntry.callUUID)
-        callCache.remove(for: newCallEntry.call.cId)
+        finishRingingCall(newCallEntry, reason: .answeredElsewhere)
     }
 
     /// Handle a rejection from the same user or the call creator elsewhere.
@@ -395,15 +389,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             subsystems: .callKit
         )
 
-        callProvider.reportCall(
-            with: newCallEntry.callUUID,
-            endedAt: nil,
-            reason: .declinedElsewhere
-        )
-        ringingTimerCancellable?.cancel()
-        ringingTimerCancellable = nil
-        set(nil, for: newCallEntry.callUUID)
-        callCache.remove(for: newCallEntry.call.cId)
+        finishRingingCall(newCallEntry, reason: .declinedElsewhere)
     }
 
     /// Handles a ringing or active CallKit call ending.
@@ -853,6 +839,59 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     }
 
     // MARK: - Private helpers
+
+    @MainActor
+    private func observeRingingState(_ entry: CallEntry) {
+        entry.ringingStateCancellable = entry.call.state.$session
+            .combineLatest(entry.call.state.$endedAt)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self, weak entry] _ in
+                guard let self, let entry,
+                      callEntry(for: entry.callUUID) === entry,
+                      entry.callUUID != active,
+                      let userId = streamVideo?.user.id else { return }
+                let state = entry.call.state
+                let session = state.session
+                let creatorRejected = entry.createdBy.map { creator in
+                    session?.rejectedBy[creator.id] != nil
+                        && session?.acceptedBy.keys.contains { $0 != creator.id } != true
+                } ?? false
+                if state.endedAt != nil || session?.endedAt != nil {
+                    finishRingingCall(entry, reason: .remoteEnded)
+                } else if session?.acceptedBy[userId] != nil {
+                    finishRingingCall(entry, reason: .answeredElsewhere)
+                } else if session?.rejectedBy[userId] != nil || creatorRejected {
+                    finishRingingCall(entry, reason: .declinedElsewhere)
+                } else if session?.missedBy[userId] != nil {
+                    finishRingingCall(entry, reason: .unanswered)
+                }
+            }
+    }
+
+    private func finishRingingCall(
+        _ entry: CallEntry,
+        reason: CXCallEndedReason
+    ) {
+        let removed = storageAccessQueue.sync {
+            guard _storage[entry.callUUID] === entry else { return false }
+            _storage[entry.callUUID] = nil
+            return true
+        }
+        guard removed else { return }
+        callProvider.reportCall(
+            with: entry.callUUID,
+            endedAt: nil,
+            reason: reason
+        )
+        ringingTimerCancellable?.cancel()
+        ringingTimerCancellable = nil
+        callCache.remove(for: entry.call.cId)
+        Task { @MainActor [weak streamVideo, call = entry.call] in
+            if streamVideo?.state.ringingCall === call {
+                streamVideo?.state.ringingCall = nil
+            }
+        }
+    }
 
     /// Do not auto-accept or join in subscriptions. Mirror remote accept/
     /// reject/end to keep state in sync.

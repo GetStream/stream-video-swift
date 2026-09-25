@@ -466,7 +466,12 @@ public class CallState: ObservableObject {
         createdAt = response.createdAt
         updatedAt = response.updatedAt
         startsAt = response.startsAt
-        endedAt = response.endedAt
+        if let currentSessionId = session?.id,
+           currentSessionId == response.session?.id {
+            endedAt = [endedAt, response.endedAt].compactMap { $0 }.max()
+        } else {
+            endedAt = response.endedAt
+        }
         createdBy = response.createdBy.toUser
         backstage = response.backstage
         recordingState = response.recording ? .recording : .noRecording
@@ -474,8 +479,21 @@ public class CallState: ObservableObject {
         captioning = response.captioning
         blockedUserIds = Set(response.blockedUserIds.map { $0 })
         team = response.team
-        configureDuration(for: response.session, file: file, function: function, line: line)
-        session = response.session
+        let updatedSession = response.session
+        if let current = session,
+           let updatedSession,
+           current.id == updatedSession.id {
+            mergeRingOutcomes(
+                into: updatedSession,
+                acceptedBy: current.acceptedBy,
+                rejectedBy: current.rejectedBy,
+                missedBy: current.missedBy
+            )
+            updatedSession.endedAt = [updatedSession.endedAt, current.endedAt]
+                .compactMap { $0 }.max()
+        }
+        configureDuration(for: updatedSession, file: file, function: function, line: line)
+        session = updatedSession
         settings = response.settings
         egress = response.egress
         
@@ -484,6 +502,40 @@ public class CallState: ObservableObject {
             streamKey: streamVideoSession.token.rawValue
         )
         ingress = Ingress(rtmp: rtmp)
+    }
+
+    /// Applies only ring outcome fields to the current session. A WebSocket
+    /// event can arrive while the HTTP read is in flight, so entries already
+    /// known locally must survive an older response.
+    internal func update(from response: GetCallRingStateResponse) -> Bool {
+        guard let current = session,
+              current.id == response.sessionId else {
+            return false
+        }
+
+        mergeRingOutcomes(
+            into: current,
+            acceptedBy: response.acceptedBy,
+            rejectedBy: response.rejectedBy,
+            missedBy: response.missedBy
+        )
+        current.startedAt = current.startedAt ?? response.sessionStartedAt
+        current.endedAt = [current.endedAt, response.sessionEndedAt]
+            .compactMap { $0 }.max()
+        endedAt = [endedAt, response.callEndedAt].compactMap { $0 }.max()
+        session = current
+        return true
+    }
+
+    private func mergeRingOutcomes(
+        into session: CallSessionResponse,
+        acceptedBy: [String: Date],
+        rejectedBy: [String: Date],
+        missedBy: [String: Date]
+    ) {
+        session.acceptedBy.merge(acceptedBy) { max($0, $1) }
+        session.rejectedBy.merge(rejectedBy) { max($0, $1) }
+        session.missedBy.merge(missedBy) { max($0, $1) }
     }
     
     /// Updates the current `CallSettings` if they differ from the stored value.

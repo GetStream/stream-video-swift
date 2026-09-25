@@ -17,6 +17,8 @@ final class MockDefaultAPIEndpoints: DefaultAPIEndpoints, Mockable, @unchecked S
     @Atomic var stubbedFunctionInput: [FunctionKey: [FunctionInputKey]] = FunctionKey
         .allCases
         .reduce(into: [FunctionKey: [FunctionInputKey]]()) { $0[$1] = [] }
+    var rejectCallHandler: (@Sendable () async throws -> RejectCallResponse)?
+    var getCallRingStateHandler: (@Sendable () async throws -> GetCallRingStateResponse)?
 
     func stub<T>(for keyPath: KeyPath<MockDefaultAPIEndpoints, T>, with value: T) {
         stubbedProperty[propertyKey(for: keyPath)] = value
@@ -406,6 +408,7 @@ final class MockDefaultAPIEndpoints: DefaultAPIEndpoints, Mockable, @unchecked S
 
     func rejectCall(type: String, id: String, rejectCallRequest: RejectCallRequest) async throws -> RejectCallResponse {
         stubbedFunctionInput[.rejectCall]?.append(.rejectCall(type: type, id: id, request: rejectCallRequest))
+        if let rejectCallHandler { return try await rejectCallHandler() }
         return try stubbedResult(for: .rejectCall)
     }
 
@@ -635,6 +638,9 @@ final class MockDefaultAPIEndpoints: DefaultAPIEndpoints, Mockable, @unchecked S
         stubbedFunctionInput[.getCallRingState]?.append(
             .getCallRingState(type: type, id: id, callSessionId: callSessionId)
         )
+        if let getCallRingStateHandler {
+            return try await getCallRingStateHandler()
+        }
         return try stubbedResult(for: .getCallRingState)
     }
 }

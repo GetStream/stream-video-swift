@@ -1007,6 +1007,49 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
     // MARK: - callRejected
 
     @MainActor
+    func test_ringingCall_refreshedAcceptance_reportsAnsweredElsewhere() async {
+        await assertRecoveredRingingState(
+            .dummy(acceptedBy: [user.id: Date()]),
+            reason: .answeredElsewhere
+        )
+    }
+
+    @MainActor
+    func test_ringingCall_refreshedCreatorRejection_reportsDeclinedElsewhere() async {
+        await assertRecoveredRingingState(
+            .dummy(rejectedBy: [defaultGetCallResponse.call.createdBy.id: Date()]),
+            reason: .declinedElsewhere
+        )
+    }
+
+    @MainActor
+    func test_ringingCall_refreshedMissedOutcome_reportsUnanswered() async {
+        await assertRecoveredRingingState(
+            .dummy(missedBy: [user.id: Date()]),
+            reason: .unanswered
+        )
+    }
+
+    @MainActor
+    func test_ringingCall_refreshedEndWithAcceptance_reportsRemoteEnded() async {
+        await assertRecoveredRingingState(
+            .dummy(acceptedBy: [user.id: Date()], endedAt: Date()),
+            reason: .remoteEnded
+        )
+    }
+
+    @MainActor
+    func test_activeCall_refreshedAcceptance_doesNotEndCallKitCall() async throws {
+        let call = try await acceptIncomingCall()
+
+        await assertNoAction {
+            call.state.session = .dummy(acceptedBy: [user.id: Date()])
+        }
+
+        XCTAssertEqual(subject.callCount, 1)
+    }
+
+    @MainActor
     func test_callRejected_expectedTransactionWasRequested() async throws {
         stubCall(response: defaultGetCallResponse)
         subject.streamVideo = mockedStreamVideo
@@ -1783,6 +1826,39 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
 
         await fulfillment(file: file, line: line) { action.fulfillWasCalled }
         XCTAssertFalse(action.failWasCalled, file: file, line: line)
+    }
+
+    @MainActor
+    private func assertRecoveredRingingState(
+        _ session: CallSessionResponse,
+        reason: CXCallEndedReason,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) async {
+        let call = stubCall(response: defaultGetCallResponse)
+        subject.streamVideo = mockedStreamVideo
+        subject.reportIncomingCall(
+            cid,
+            localizedCallerName: localizedCallerName,
+            callerId: callerId
+        ) { _ in }
+        await fulfillment {
+            call.timesCalled(.get) == 1
+                && self.mockedStreamVideo.state.ringingCall === call
+        }
+
+        await assertReportCallEnded(
+            reason,
+            actionBlock: { call.state.session = session },
+            file: file,
+            filePath: file,
+            line: line
+        )
+
+        await fulfillment {
+            self.subject.callCount == 0
+                && self.mockedStreamVideo.state.ringingCall == nil
+        }
     }
 
     /// Reports an incoming call and answers it, returning the stubbed call so
