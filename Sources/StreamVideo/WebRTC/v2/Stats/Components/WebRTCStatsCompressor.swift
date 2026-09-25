@@ -9,21 +9,36 @@ import StreamWebRTC
 ///
 /// This struct helps reduce payload size by only retaining updated
 /// statistics since the last report. Timestamps are normalized for consistency.
-struct WebRTCStatsCompressor {
+final class WebRTCStatsCompressor: @unchecked Sendable {
 
+    private let processingQueue = UnfairQueue()
     private var lastReport: CallStatsReport?
 
     /// Compresses the provided call stats report against the previous one.
     ///
     /// - Parameter report: The current call statistics report.
     /// - Returns: A tuple containing compressed publisher and subscriber stats.
-    mutating func compress(_ report: CallStatsReport) -> (
+    func compress(_ report: CallStatsReport) -> (
+        publisher: MutableRTCStatisticsReport?,
+        subscriber: MutableRTCStatisticsReport?
+    ) {
+        processingQueue.sync {
+            let result = execute(lastReport: lastReport, report: report)
+            lastReport = report
+            return result
+        }
+    }
+
+    private func execute(
+        lastReport: CallStatsReport?,
+        report: CallStatsReport
+    ) -> (
         publisher: MutableRTCStatisticsReport?,
         subscriber: MutableRTCStatisticsReport?
     ) {
         let publisherRawStats: MutableRTCStatisticsReport? = {
             if let value = report.publisherRawStats {
-                return execute(
+                return buildNewStatsReport(
                     oldStats: lastReport?.publisherRawStats,
                     newStats: value
                 )
@@ -34,7 +49,7 @@ struct WebRTCStatsCompressor {
 
         let subscriberRawStats: MutableRTCStatisticsReport? = {
             if let value = report.subscriberRawStats {
-                return execute(
+                return buildNewStatsReport(
                     oldStats: lastReport?.subscriberRawStats,
                     newStats: value
                 )
@@ -43,7 +58,6 @@ struct WebRTCStatsCompressor {
             }
         }()
 
-        lastReport = report
         return (publisherRawStats, subscriberRawStats)
     }
 
@@ -56,7 +70,7 @@ struct WebRTCStatsCompressor {
     ///   - newStats: The current statistics report to compress.
     /// - Returns: A mutable statistics report with only changed entries,
     ///   or nil if no changes are found.
-    private func execute(
+    private func buildNewStatsReport(
         oldStats: RTCStatisticsReport?,
         newStats: RTCStatisticsReport
     ) -> MutableRTCStatisticsReport? {
