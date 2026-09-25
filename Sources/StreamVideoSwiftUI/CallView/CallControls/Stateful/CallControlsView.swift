@@ -21,14 +21,12 @@ public struct CallControlsView: View {
     }
 
     public var body: some View {
-        HStack(spacing: 0) {
-            HStack(spacing: layout.spacingXs) {
-                if ownCapabilities.contains(.sendVideo) == true {
-                    VideoIconView(viewModel: viewModel)
-                }
-                if ownCapabilities.contains(.sendAudio) == true {
-                    MicrophoneIconView(viewModel: viewModel)
-                }
+        HStack(spacing: layout.spacingXs) {
+            if ownCapabilities.contains(.sendVideo) == true {
+                VideoIconView(viewModel: viewModel)
+            }
+            if ownCapabilities.contains(.sendAudio) == true {
+                MicrophoneIconView(viewModel: viewModel)
             }
 
             Spacer()
