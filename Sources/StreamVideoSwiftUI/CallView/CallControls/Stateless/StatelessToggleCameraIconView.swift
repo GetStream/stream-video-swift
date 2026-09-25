@@ -12,7 +12,7 @@ public struct StatelessToggleCameraIconView: View {
     /// Defines a closure type for action handling.
     public typealias ActionHandler = () -> Void
 
-    @Injected(\.images) private var images
+    @Injected(\.videoAppearance) private var videoAppearance
 
     /// The associated call for the toggle camera icon.
     public weak var call: Call?
@@ -48,7 +48,7 @@ public struct StatelessToggleCameraIconView: View {
             action: { actionHandler?() },
             label: {
                 CallIconView(
-                    icon: images.toggleCamera,
+                    icon: videoAppearance.images.toggleCamera,
                     size: size,
                     iconStyle: .secondary
                 )
