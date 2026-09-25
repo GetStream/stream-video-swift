@@ -629,10 +629,22 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
         let participant = String.unique
 
         let creatorCallFlow = try await helpers
-            .callFlow(id: callId, type: .livestream, userId: creator, environment: "demo")
+            .callFlow(
+                id: callId,
+                type: .livestream,
+                userId: creator,
+                environment: "demo",
+                streamVideoEnvironment: .mockedAudioDevice
+            )
 
         let otherHostCallFlow = try await helpers
-            .callFlow(id: callId, type: .livestream, userId: otherHost, environment: "demo")
+            .callFlow(
+                id: callId,
+                type: .livestream,
+                userId: otherHost,
+                environment: "demo",
+                streamVideoEnvironment: .mockedAudioDevice
+            )
 
         _ = try await creatorCallFlow
             .perform { try await $0.call.create(
@@ -648,7 +660,13 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
             .assertEventuallyInMainActor { $0.call.state.sessionId.isEmpty == false }
 
         try await helpers
-            .callFlow(id: callId, type: .livestream, userId: participant, environment: "demo")
+            .callFlow(
+                id: callId,
+                type: .livestream,
+                userId: participant,
+                environment: "demo",
+                streamVideoEnvironment: .mockedAudioDevice
+            )
             .performWithErrorExpectation { try await $0.call.join() }
             .tryMap { $0.value as? APIError }
             .assert { $0.value.code == 17 }

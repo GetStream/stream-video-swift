@@ -123,6 +123,14 @@ extension Call_IntegrationTests.Helpers {
 
 extension StreamVideo.Environment {
     static var silentAudioDevice: Self {
+        makeSilentAudioDevice(mockDevice: false)
+    }
+
+    static var mockedAudioDevice: Self {
+        makeSilentAudioDevice(mockDevice: true)
+    }
+
+    private static func makeSilentAudioDevice(mockDevice: Bool) -> Self {
         var environment = Self()
         environment.callControllerBuilder = {
             defaultAPI,
@@ -135,6 +143,7 @@ extension StreamVideo.Environment {
                 cachedLocation in
             let peerConnectionFactory = PeerConnectionFactory.build(
                 audioProcessingModule: videoConfig.audioProcessingModule,
+                audioDeviceModuleSource: mockDevice ? MockRTCAudioDeviceModule() : nil,
                 audioEngineAvailabilityOverride: false
             )
             return CallController(
