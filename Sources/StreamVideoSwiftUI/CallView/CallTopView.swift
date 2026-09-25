@@ -103,12 +103,14 @@ public struct SharingIndicator: View {
         HStack(spacing: layout.spacingXs) {
             Text(L10n.Call.Current.sharing)
                 .font(fonts.headline)
+                .foregroundColor(Color(colors.textPrimary))
             Divider()
             Button {
                 viewModel.stopScreensharing()
             } label: {
                 Text(L10n.Call.Current.stopSharing)
                     .font(fonts.headline)
+                    .foregroundColor(Color(colors.accentPrimary))
             }
             Button {
                 sharingPopupDismissed = true
@@ -117,6 +119,7 @@ public struct SharingIndicator: View {
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(height: 14)
+                    .foregroundColor(Color(colors.accentPrimary))
             }
             .padding(.leading, layout.spacingXxs)
         }
