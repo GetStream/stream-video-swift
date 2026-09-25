@@ -327,6 +327,7 @@
 				"Utilities/Dummy/RingSettings+Dummy.swift",
 				"Utilities/Dummy/RTCAudioStoreState+Dummy.swift",
 				"Utilities/Dummy/RTCMediaStreamTrack+dummy.swift",
+				"Utilities/Dummy/RTCStatisticsReport+Dummy.swift",
 				"Utilities/Dummy/RTMPIngress+Dummy.swift",
 				"Utilities/Dummy/ScreensharingSettings+Dummy.swift",
 				"Utilities/Dummy/SessionSettingsResponse+Dummy.swift",
