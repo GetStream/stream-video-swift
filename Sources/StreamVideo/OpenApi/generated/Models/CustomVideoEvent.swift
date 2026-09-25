@@ -5,7 +5,7 @@
 import StreamCore
 import Foundation
 
-public final class CustomVideoEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
+public final class CustomVideoEvent: @unchecked Sendable, Event, Decodable, Hashable, WSCallEvent {
     
     public var callCid: String
     public var createdAt: Date

@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class UserUpdatedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public final class UserUpdatedEvent: @unchecked Sendable, Event, Decodable, Hashable {
     
     public var createdAt: Date
     public var receivedAt: Date?

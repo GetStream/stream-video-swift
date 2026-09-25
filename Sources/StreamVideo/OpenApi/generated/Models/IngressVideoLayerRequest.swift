@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class IngressVideoLayerRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class IngressVideoLayerRequest: @unchecked Sendable, Encodable, JSONEncodable, Hashable {
     
     public enum IngressVideoLayerRequestCodec: String, Sendable, Codable, CaseIterable {
         case h264 = "h264"

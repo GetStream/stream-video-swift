@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class UnpinRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class UnpinRequest: @unchecked Sendable, Encodable, JSONEncodable, Hashable {
     
     public var sessionId: String
     public var userId: String

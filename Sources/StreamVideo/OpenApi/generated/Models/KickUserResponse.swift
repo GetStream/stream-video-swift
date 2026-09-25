@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class KickUserResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class KickUserResponse: @unchecked Sendable, Decodable, Hashable {
     public var duration: String
 
     public init(duration: String) {

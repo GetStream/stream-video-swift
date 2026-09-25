@@ -5,7 +5,7 @@
 import StreamCore
 import Foundation
 
-public final class SendEventRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class SendEventRequest: @unchecked Sendable, Encodable, JSONEncodable, Hashable {
     
     public var custom: [String: RawJSON]?
 

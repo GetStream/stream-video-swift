@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class JoinCallRequest: @unchecked Sendable, Codable, JSONEncodable {
+public final class JoinCallRequest: @unchecked Sendable, Encodable, JSONEncodable {
     /// if true the call will be created if it doesn't exist
     public var create: Bool?
     /// CallRequest is the payload for creating a call.

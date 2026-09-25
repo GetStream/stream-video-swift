@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class CallSettingsRequest: @unchecked Sendable, Codable, JSONEncodable {
+public final class CallSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable {
     public var audio: AudioSettingsRequest?
     public var backstage: BackstageSettingsRequest?
     public var broadcasting: BroadcastSettingsRequest?

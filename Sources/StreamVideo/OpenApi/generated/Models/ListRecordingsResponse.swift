@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class ListRecordingsResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class ListRecordingsResponse: @unchecked Sendable, Decodable, Hashable {
     
     public var duration: String
     public var recordings: [CallRecording]

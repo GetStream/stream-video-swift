@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class JoinCallResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class JoinCallResponse: @unchecked Sendable, Decodable, Hashable {
     
     public var call: CallResponse
     public var created: Bool

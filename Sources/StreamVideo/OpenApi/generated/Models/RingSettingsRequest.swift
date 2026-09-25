@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class RingSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class RingSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable, Hashable {
     
     public var autoCancelTimeoutMs: Int
     public var incomingCallTimeoutMs: Int

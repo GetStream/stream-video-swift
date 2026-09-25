@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class UnblockUserRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class UnblockUserRequest: @unchecked Sendable, Encodable, JSONEncodable, Hashable {
     
     public var userId: String
 

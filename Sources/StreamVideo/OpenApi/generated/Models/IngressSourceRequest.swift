@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class IngressSourceRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class IngressSourceRequest: @unchecked Sendable, Encodable, JSONEncodable, Hashable {
     
     public enum IngressSourceRequestFps: String, Sendable, Codable, CaseIterable {
         case _30 = "30"

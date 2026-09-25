@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class RejectCallRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class RejectCallRequest: @unchecked Sendable, Encodable, JSONEncodable, Hashable {
     
     public var reason: String?
 

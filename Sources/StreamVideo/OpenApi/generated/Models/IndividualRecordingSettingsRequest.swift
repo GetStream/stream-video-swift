@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class IndividualRecordingSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class IndividualRecordingSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable, Hashable {
     
     public enum IndividualRecordingSettingsRequestMode: String, Sendable, Codable, CaseIterable {
         case autoOn = "auto-on"

@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class CollectUserFeedbackResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class CollectUserFeedbackResponse: @unchecked Sendable, Decodable, Hashable {
     
     public var duration: String
 

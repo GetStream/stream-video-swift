@@ -13,7 +13,7 @@ private class WSEventMapping: Decodable {
     let type: String
 }
 
-public enum VideoEvent: Codable, Hashable {
+public enum VideoEvent: Decodable, Hashable {
     case typeAppUpdatedEvent(AppUpdatedEvent)
     case typeCallAcceptedEvent(CallAcceptedEvent)
     case typeBlockedUserEvent(BlockedUserEvent)
@@ -315,127 +315,6 @@ public enum VideoEvent: Codable, Hashable {
         }
     }
 
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.singleValueContainer()
-        switch self {
-        case let .typeAppUpdatedEvent(value):
-            try container.encode(value)
-        case let .typeCallAcceptedEvent(value):
-            try container.encode(value)
-        case let .typeBlockedUserEvent(value):
-            try container.encode(value)
-        case let .typeClosedCaptionEvent(value):
-            try container.encode(value)
-        case let .typeCallClosedCaptionsFailedEvent(value):
-            try container.encode(value)
-        case let .typeCallClosedCaptionsStartedEvent(value):
-            try container.encode(value)
-        case let .typeCallClosedCaptionsStoppedEvent(value):
-            try container.encode(value)
-        case let .typeCallCreatedEvent(value):
-            try container.encode(value)
-        case let .typeCallDeletedEvent(value):
-            try container.encode(value)
-        case let .typeCallEndedEvent(value):
-            try container.encode(value)
-        case let .typeCallFrameRecordingFailedEvent(value):
-            try container.encode(value)
-        case let .typeCallFrameRecordingFrameReadyEvent(value):
-            try container.encode(value)
-        case let .typeCallFrameRecordingStartedEvent(value):
-            try container.encode(value)
-        case let .typeCallFrameRecordingStoppedEvent(value):
-            try container.encode(value)
-        case let .typeCallHLSBroadcastingFailedEvent(value):
-            try container.encode(value)
-        case let .typeCallHLSBroadcastingStartedEvent(value):
-            try container.encode(value)
-        case let .typeCallHLSBroadcastingStoppedEvent(value):
-            try container.encode(value)
-        case let .typeKickedUserEvent(value):
-            try container.encode(value)
-        case let .typeCallLiveStartedEvent(value):
-            try container.encode(value)
-        case let .typeCallMemberAddedEvent(value):
-            try container.encode(value)
-        case let .typeCallMemberRemovedEvent(value):
-            try container.encode(value)
-        case let .typeCallMemberUpdatedEvent(value):
-            try container.encode(value)
-        case let .typeCallMemberUpdatedPermissionEvent(value):
-            try container.encode(value)
-        case let .typeCallMissedEvent(value):
-            try container.encode(value)
-        case let .typeCallModerationBlurEvent(value):
-            try container.encode(value)
-        case let .typeCallModerationWarningEvent(value):
-            try container.encode(value)
-        case let .typeCallNotificationEvent(value):
-            try container.encode(value)
-        case let .typePermissionRequestEvent(value):
-            try container.encode(value)
-        case let .typeUpdatedCallPermissionsEvent(value):
-            try container.encode(value)
-        case let .typeCallReactionEvent(value):
-            try container.encode(value)
-        case let .typeCallRecordingFailedEvent(value):
-            try container.encode(value)
-        case let .typeCallRecordingReadyEvent(value):
-            try container.encode(value)
-        case let .typeCallRecordingStartedEvent(value):
-            try container.encode(value)
-        case let .typeCallRecordingStoppedEvent(value):
-            try container.encode(value)
-        case let .typeCallRejectedEvent(value):
-            try container.encode(value)
-        case let .typeCallRingEvent(value):
-            try container.encode(value)
-        case let .typeCallRtmpBroadcastFailedEvent(value):
-            try container.encode(value)
-        case let .typeCallRtmpBroadcastStartedEvent(value):
-            try container.encode(value)
-        case let .typeCallRtmpBroadcastStoppedEvent(value):
-            try container.encode(value)
-        case let .typeCallSessionEndedEvent(value):
-            try container.encode(value)
-        case let .typeCallSessionParticipantCountsUpdatedEvent(value):
-            try container.encode(value)
-        case let .typeCallSessionParticipantJoinedEvent(value):
-            try container.encode(value)
-        case let .typeCallSessionParticipantLeftEvent(value):
-            try container.encode(value)
-        case let .typeCallSessionStartedEvent(value):
-            try container.encode(value)
-        case let .typeCallStatsReportReadyEvent(value):
-            try container.encode(value)
-        case let .typeCallTranscriptionFailedEvent(value):
-            try container.encode(value)
-        case let .typeCallTranscriptionReadyEvent(value):
-            try container.encode(value)
-        case let .typeCallTranscriptionStartedEvent(value):
-            try container.encode(value)
-        case let .typeCallTranscriptionStoppedEvent(value):
-            try container.encode(value)
-        case let .typeUnblockedUserEvent(value):
-            try container.encode(value)
-        case let .typeCallUpdatedEvent(value):
-            try container.encode(value)
-        case let .typeCallUserFeedbackSubmittedEvent(value):
-            try container.encode(value)
-        case let .typeCallUserMutedEvent(value):
-            try container.encode(value)
-        case let .typeConnectionErrorEvent(value):
-            try container.encode(value)
-        case let .typeConnectedEvent(value):
-            try container.encode(value)
-        case let .typeCustomVideoEvent(value):
-            try container.encode(value)
-        case let .typeHealthCheckEvent(value):
-            try container.encode(value)
-        case let .typeUserUpdatedEvent(value):
-            try container.encode(value)
-        }
-    }
 
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()

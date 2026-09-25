@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class CallRecordingStoppedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
+public final class CallRecordingStoppedEvent: @unchecked Sendable, Event, Decodable, Hashable, WSCallEvent {
     
     public enum CallRecordingStoppedEventRecordingType: String, Sendable, Codable, CaseIterable {
         case composite = "composite"
