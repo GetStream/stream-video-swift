@@ -6,6 +6,7 @@ import SnapshotTesting
 import StreamSwiftTestHelpers
 @testable import StreamVideo
 @testable import StreamVideoSwiftUI
+import SwiftUI
 import XCTest
 
 @MainActor
@@ -78,6 +79,26 @@ final class MicrophoneCheckView_Tests: StreamVideoUITestCase, @unchecked Sendabl
             view,
             variants: [.defaultLight],
             size: sizeThatFits
+        )
+    }
+
+    func test_localParticipantModifier_withoutAllInfo_leftAlignsMic_snapshot() {
+        let view = Color.red
+            .frame(width: 250, height: 100)
+            .modifier(
+                LocalParticipantViewModifier(
+                    localParticipant: .dummy(name: "Get Stream"),
+                    call: nil,
+                    callSettings: .constant(.default),
+                    showAllInfo: false,
+                    decorations: []
+                )
+            )
+
+        AssertSnapshot(
+            view,
+            variants: [.defaultLight],
+            size: .init(width: 250, height: 100)
         )
     }
 }
