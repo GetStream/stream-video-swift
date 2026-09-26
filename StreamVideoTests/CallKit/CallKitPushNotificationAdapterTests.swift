@@ -10,6 +10,9 @@ final class CallKitPushNotificationAdapterTests: XCTestCase, @unchecked Sendable
 
     private lazy var streamVideo: MockStreamVideo! = .init()
     private lazy var callKitService: MockCallKitService! = .init()
+    #if canImport(LiveCommunicationKit)
+    private var liveCommunicationKitService: AnyObject?
+    #endif
     private lazy var subject: CallKitPushNotificationAdapter! = .init()
 
     // MARK: - Lifecycle
@@ -18,11 +21,21 @@ final class CallKitPushNotificationAdapterTests: XCTestCase, @unchecked Sendable
         super.setUp()
         _ = streamVideo
         InjectedValues[\.callKitService] = callKitService
+        #if canImport(LiveCommunicationKit)
+        if #available(iOS 27.0, *) {
+            let liveCommunicationKitService = MockLiveCommunicationKitService()
+            self.liveCommunicationKitService = liveCommunicationKitService
+            InjectedValues[\.liveCommunicationKitService] = liveCommunicationKitService
+        }
+        #endif
     }
 
     override func tearDown() {
         streamVideo = nil
         callKitService = nil
+        #if canImport(LiveCommunicationKit)
+        liveCommunicationKitService = nil
+        #endif
         subject = nil
         super.tearDown()
     }
@@ -123,6 +136,53 @@ final class CallKitPushNotificationAdapterTests: XCTestCase, @unchecked Sendable
     }
 
     @MainActor
+    func test_pushRegistryDidReceiveIncomingPush_useLiveCommunicationKitFalse_reportsToCallKit() async {
+        callKitService.streamVideo = MockStreamVideo(
+            videoConfig: .dummy(useLiveCommunicationKit: false)
+        )
+
+        await assertDidReceivePushNotification(
+            .init(
+                cid: "123",
+                localizedCallerName: "TestUser",
+                callerId: "test_user",
+                hasVideo: false
+            )
+        )
+
+        #if canImport(LiveCommunicationKit)
+        if
+            #available(iOS 27.0, *),
+            let liveCommunicationKitService = liveCommunicationKitService as? MockLiveCommunicationKitService {
+            XCTAssertNil(liveCommunicationKitService.reportIncomingCallWasCalled)
+        }
+        #endif
+    }
+
+    @MainActor
+    func test_pushRegistryDidReceiveIncomingPush_useLiveCommunicationKitTrue_reportsToLiveCommunicationKit() async {
+        callKitService.streamVideo = MockStreamVideo(
+            videoConfig: .dummy(useLiveCommunicationKit: true)
+        )
+
+        await assertDidReceivePushNotification(
+            .init(
+                cid: "123",
+                localizedCallerName: "TestUser",
+                callerId: "test_user",
+                hasVideo: false
+            ),
+            useLiveCommunicationKit: true
+        )
+
+        #if canImport(LiveCommunicationKit)
+        if #available(iOS 27.0, *) {
+            XCTAssertNil(callKitService.reportIncomingCallWasCalled)
+        }
+        #endif
+    }
+
+    @MainActor
     func test_pushRegistryDidReceiveIncomingPush_typeIsNotVoIP_reportIncomingCallWasNotCalled() async {
         await assertDidReceivePushNotification(contentType: .fileProvider)
     }
@@ -134,6 +194,7 @@ final class CallKitPushNotificationAdapterTests: XCTestCase, @unchecked Sendable
         _ content: CallKitPushNotificationAdapter.Content? = nil,
         contentType: PKPushType = .voIP,
         displayName: String = "",
+        useLiveCommunicationKit: Bool = false,
         file: StaticString = #filePath,
         line: UInt = #line
     ) async {
@@ -172,6 +233,53 @@ final class CallKitPushNotificationAdapterTests: XCTestCase, @unchecked Sendable
             XCTAssertEqual(completionCallCount, 1, file: file, line: line)
             return
         }
+
+        #if canImport(LiveCommunicationKit)
+        if
+            useLiveCommunicationKit,
+            #available(iOS 27.0, *),
+            let liveCommunicationKitService = liveCommunicationKitService as? MockLiveCommunicationKitService {
+            await fulfillment { liveCommunicationKitService.reportIncomingCallWasCalled != nil }
+            XCTAssertEqual(completionCallCount, 0, file: file, line: line)
+
+            if let content {
+                XCTAssertEqual(
+                    liveCommunicationKitService.reportIncomingCallWasCalled?.cid,
+                    content.cid,
+                    file: file,
+                    line: line
+                )
+                XCTAssertEqual(
+                    liveCommunicationKitService.reportIncomingCallWasCalled?.callerName,
+                    displayName.isEmpty ? content.localizedCallerName : displayName,
+                    file: file,
+                    line: line
+                )
+                XCTAssertEqual(
+                    liveCommunicationKitService.reportIncomingCallWasCalled?.callerId,
+                    content.callerId,
+                    file: file,
+                    line: line
+                )
+                XCTAssertEqual(
+                    liveCommunicationKitService.reportIncomingCallWasCalled?.hasVideo,
+                    content.hasVideo,
+                    file: file,
+                    line: line
+                )
+                liveCommunicationKitService.reportIncomingCallWasCalled?.completion(nil)
+                await fulfillment(of: [completionWasCalledExpectation])
+                XCTAssertEqual(completionCallCount, 1, file: file, line: line)
+            } else {
+                XCTAssertNil(
+                    liveCommunicationKitService.reportIncomingCallWasCalled,
+                    file: file,
+                    line: line
+                )
+            }
+            return
+        }
+        #endif
 
         await fulfillment { self.callKitService.reportIncomingCallWasCalled != nil }
         XCTAssertEqual(completionCallCount, 0, file: file, line: line)
@@ -216,6 +324,29 @@ final class CallKitPushNotificationAdapterTests: XCTestCase, @unchecked Sendable
 }
 
 // MARK: - Mocks
+
+#if canImport(LiveCommunicationKit)
+@available(iOS 27.0, *)
+private final class MockLiveCommunicationKitService: LiveCommunicationKitService, @unchecked Sendable {
+    private(set) var reportIncomingCallWasCalled: (
+        cid: String,
+        callerName: String,
+        callerId: String,
+        hasVideo: Bool,
+        completion: (Error?) -> Void
+    )?
+
+    override func reportIncomingCall(
+        _ cid: String,
+        localizedCallerName: String,
+        callerId: String,
+        hasVideo: Bool = false,
+        completion: @Sendable @escaping (Error?) -> Void
+    ) {
+        reportIncomingCallWasCalled = (cid, localizedCallerName, callerId, hasVideo, completion)
+    }
+}
+#endif
 
 private final class MockPKPushPayload: PKPushPayload {
 
