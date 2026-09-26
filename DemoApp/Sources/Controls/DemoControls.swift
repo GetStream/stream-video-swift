@@ -108,6 +108,7 @@ struct ChatIconView: View {
 
     @Injected(\.images) var images
     @Injected(\.colors) var colors
+    @Injected(\.videoAppearance) var videoAppearance
 
     @ObservedObject var viewModel: DemoChatViewModel
     let size: CGFloat
@@ -128,8 +129,11 @@ struct ChatIconView: View {
                     size: size,
                     iconStyle: viewModel.isChatVisible ? .secondaryActive : .secondary
                 ).overlay(
-                    ControlBadgeView("\(viewModel.unreadCount)")
-                        .opacity(viewModel.unreadCount > 0 ? 1 : 0)
+                    ControlBadgeView(
+                        "\(viewModel.unreadCount)",
+                        border: Color(videoAppearance.tokens.colors.badgeBorder)
+                    )
+                    .opacity(viewModel.unreadCount > 0 ? 1 : 0)
                 )
             }
         )

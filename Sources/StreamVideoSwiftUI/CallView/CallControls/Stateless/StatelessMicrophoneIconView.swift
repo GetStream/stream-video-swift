@@ -12,7 +12,6 @@ public struct StatelessMicrophoneIconView: View {
     /// Defines a closure type for action handling.
     public typealias ActionHandler = () -> Void
 
-    @Injected(\.images) private var images
     @Injected(\.permissions) private var permissions
     @Injected(\.videoAppearance) private var videoAppearance
 
@@ -44,8 +43,14 @@ public struct StatelessMicrophoneIconView: View {
         callSettings: CallSettings = .default,
         size: CGFloat = 44,
         controlStyle: ToggleControlStyle = .init(
-            enabled: .init(icon: Appearance.default.images.micTurnOn, iconStyle: .transparent),
-            disabled: .init(icon: Appearance.default.images.micTurnOff, iconStyle: .disabled)
+            enabled: .init(
+                icon: InjectedValues[\.videoAppearance].images.micTurnOn,
+                iconStyle: .transparent
+            ),
+            disabled: .init(
+                icon: InjectedValues[\.videoAppearance].images.micTurnOff,
+                iconStyle: .disabled
+            )
         ),
         actionHandler: ActionHandler? = nil
     ) {

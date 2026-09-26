@@ -12,7 +12,6 @@ public struct StatelessVideoIconView: View {
     /// Defines a closure type for action handling.
     public typealias ActionHandler = () -> Void
 
-    @Injected(\.images) private var images
     @Injected(\.permissions) private var permissions
     @Injected(\.videoAppearance) private var videoAppearance
 
@@ -43,8 +42,14 @@ public struct StatelessVideoIconView: View {
         callSettings: CallSettings = .default,
         size: CGFloat = 44,
         controlStyle: ToggleControlStyle = .init(
-            enabled: .init(icon: Appearance.default.images.videoTurnOn, iconStyle: .transparent),
-            disabled: .init(icon: Appearance.default.images.videoTurnOff, iconStyle: .disabled)
+            enabled: .init(
+                icon: InjectedValues[\.videoAppearance].images.videoTurnOn,
+                iconStyle: .transparent
+            ),
+            disabled: .init(
+                icon: InjectedValues[\.videoAppearance].images.videoTurnOff,
+                iconStyle: .disabled
+            )
         ),
         actionHandler: ActionHandler? = nil
     ) {

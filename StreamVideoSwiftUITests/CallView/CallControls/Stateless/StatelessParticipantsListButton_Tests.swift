@@ -6,6 +6,7 @@ import SnapshotTesting
 import StreamSwiftTestHelpers
 @testable import StreamVideo
 @testable import StreamVideoSwiftUI
+import SwiftUI
 import XCTest
 
 final class StatelessParticipantsListButton_Tests: StreamVideoUITestCase, @unchecked Sendable {
@@ -92,7 +93,7 @@ final class StatelessParticipantsListButton_Tests: StreamVideoUITestCase, @unche
         isActive: Bool = false,
         file: StaticString = #filePath,
         line: UInt = #line
-    ) throws -> StatelessParticipantsListButton {
+    ) throws -> some View {
         let call = try XCTUnwrap(
             streamVideoUI?.streamVideo.call(
                 callType: .default,
@@ -106,6 +107,8 @@ final class StatelessParticipantsListButton_Tests: StreamVideoUITestCase, @unche
             partialResult[userId] = .dummy(id: userId)
         }
 
-        return .init(call: call, isActive: .constant(isActive))
+        return StatelessParticipantsListButton(call: call, isActive: .constant(isActive))
+            .padding(8)
+            .background(Color(InjectedValues[\.videoAppearance].tokens.colors.palette.chrome400))
     }
 }

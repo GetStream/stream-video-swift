@@ -9,7 +9,6 @@ import SwiftUI
 public struct CallControlsView: View {
 
     @Injected(\.streamVideo) var streamVideo
-    @Injected(\.colors) var colors
 
     @ObservedObject var viewModel: CallViewModel
     @State var ownCapabilities: [OwnCapability]
@@ -22,7 +21,7 @@ public struct CallControlsView: View {
     }
 
     public var body: some View {
-        HStack {
+        HStack(spacing: layout.spacingXs) {
             if ownCapabilities.contains(.sendVideo) == true {
                 VideoIconView(viewModel: viewModel)
             }
@@ -36,8 +35,8 @@ public struct CallControlsView: View {
                 ParticipantsListButton(viewModel: viewModel)
             }
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical)
+        .padding(.horizontal, layout.spacingMd)
+        .padding(.vertical, layout.spacingMd)
         .frame(maxWidth: .infinity)
         .onReceive(call?.state.$ownCapabilities.receive(on: DispatchQueue.main)) { ownCapabilities = $0 }
     }
@@ -54,8 +53,6 @@ public struct CallControlsView: View {
 
 /// A view displaying the video toggle button for a call.
 public struct VideoIconView: View {
-
-    @Injected(\.images) var images
 
     @ObservedObject var viewModel: CallViewModel
     let size: CGFloat
@@ -82,8 +79,6 @@ public struct VideoIconView: View {
 /// A view displaying the microphone toggle button for a call.
 public struct MicrophoneIconView: View {
 
-    @Injected(\.images) var images
-
     @ObservedObject var viewModel: CallViewModel
     let size: CGFloat
 
@@ -109,8 +104,6 @@ public struct MicrophoneIconView: View {
 /// A view displaying the toggle camera position button for a call.
 public struct ToggleCameraIconView: View {
 
-    @Injected(\.images) var images
-
     @ObservedObject var viewModel: CallViewModel
     let size: CGFloat
 
@@ -133,9 +126,6 @@ public struct ToggleCameraIconView: View {
 /// A view displaying the hang-up button for a call.
 public struct HangUpIconView: View {
 
-    @Injected(\.images) var images
-    @Injected(\.colors) var colors
-
     @ObservedObject var viewModel: CallViewModel
     let size: CGFloat
 
@@ -157,8 +147,6 @@ public struct HangUpIconView: View {
 
 /// A view displaying the audio output toggle button for a call.
 public struct AudioOutputIconView: View {
-
-    @Injected(\.images) var images
 
     @ObservedObject var viewModel: CallViewModel
     let size: CGFloat
@@ -183,8 +171,6 @@ public struct AudioOutputIconView: View {
 
 /// A view displaying the speaker toggle button for a call.
 public struct SpeakerIconView: View {
-
-    @Injected(\.images) var images
 
     @ObservedObject var viewModel: CallViewModel
     let size: CGFloat

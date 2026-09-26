@@ -12,7 +12,7 @@ public struct StatelessHangUpIconView: View {
     /// Defines a closure type for action handling.
     public typealias ActionHandler = () -> Void
 
-    @Injected(\.images) private var images
+    @Injected(\.videoAppearance) private var videoAppearance
 
     /// The associated call for the hang-up icon.
     public weak var call: Call?
@@ -47,7 +47,7 @@ public struct StatelessHangUpIconView: View {
     public var body: some View {
         Button { actionHandler?() } label: {
             CallIconView(
-                icon: images.hangup,
+                icon: videoAppearance.images.hangup,
                 size: size,
                 iconStyle: .destructive
             )

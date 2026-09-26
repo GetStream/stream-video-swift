@@ -18,30 +18,39 @@ public struct ControlBadgeView: View {
     /// The value to be displayed within the badge.
     var content: Content
 
+    /// The optional ring drawn around the badge.
+    var border: Color?
+
     /// Initializes a control badge view with the specified value.
-    /// - Parameter value: The value to display within the badge.
+    /// - Parameters:
+    ///   - value: The value to display within the badge.
+    ///   - border: An optional ring that separates the badge from the control it overlaps.
     public init(
         _ value: String,
-        foreground: Color = InjectedValues[\.colors].textInverted,
-        background: Color = InjectedValues[\.colors].onlineIndicatorColor
+        foreground: Color = Color(InjectedValues[\.videoAppearance].tokens.colors.badgeTextOnAccent),
+        background: Color = Color(InjectedValues[\.videoAppearance].tokens.colors.badgeBackgroundPrimary),
+        border: Color? = nil
     ) {
         content = .text(
             value,
             foreground: foreground,
             background: background
         )
+        self.border = border
     }
 
     public init(
         _ image: Image,
-        foreground: Color = InjectedValues[\.colors].textInverted,
-        background: Color = InjectedValues[\.colors].onlineIndicatorColor
+        foreground: Color = Color(InjectedValues[\.videoAppearance].tokens.colors.badgeTextOnAccent),
+        background: Color = Color(InjectedValues[\.videoAppearance].tokens.colors.badgeBackgroundPrimary),
+        border: Color? = nil
     ) {
         content = .image(
             image,
             foreground: foreground,
             background: background
         )
+        self.border = border
     }
 
     public var body: some View {
@@ -54,7 +63,22 @@ public struct ControlBadgeView: View {
                 .padding(videoAppearance.tokens.layout.spacingXxxs)
                 .font(videoAppearance.tokens.fonts.caption1)
                 .foregroundColor(foregroundColor)
-                .background(Circle().fill(backgroundColor))
+                .background(badgeBackground)
+        }
+    }
+
+    @ViewBuilder
+    private var badgeBackground: some View {
+        if let border {
+            Circle()
+                .fill(backgroundColor)
+                .overlay(
+                    Circle()
+                        .strokeBorder(border, lineWidth: videoAppearance.tokens.layout.iconStrokeDefault)
+                        .padding(-videoAppearance.tokens.layout.iconStrokeDefault)
+                )
+        } else {
+            Circle().fill(backgroundColor)
         }
     }
 
@@ -93,8 +117,8 @@ extension View {
     @ViewBuilder
     public func badge(
         _ value: String,
-        foreground: Color = InjectedValues[\.colors].textInverted,
-        background: Color = InjectedValues[\.colors].onlineIndicatorColor
+        foreground: Color = Color(InjectedValues[\.videoAppearance].tokens.colors.badgeTextOnAccent),
+        background: Color = Color(InjectedValues[\.videoAppearance].tokens.colors.badgeBackgroundPrimary)
     ) -> some View {
         overlay(
             ControlBadgeView(
@@ -108,8 +132,8 @@ extension View {
     @ViewBuilder
     public func badge(
         _ value: Image,
-        foreground: Color = InjectedValues[\.colors].textInverted,
-        background: Color = InjectedValues[\.colors].onlineIndicatorColor
+        foreground: Color = Color(InjectedValues[\.videoAppearance].tokens.colors.badgeTextOnAccent),
+        background: Color = Color(InjectedValues[\.videoAppearance].tokens.colors.badgeBackgroundPrimary)
     ) -> some View {
         overlay(
             ControlBadgeView(
