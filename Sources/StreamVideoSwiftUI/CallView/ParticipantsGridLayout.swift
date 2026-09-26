@@ -167,7 +167,7 @@ struct TwoColumnParticipantsView<Factory: ViewFactory>: View {
     var leftColumnParticipants: [CallParticipant]
     var rightColumnParticipants: [CallParticipant]
     var availableFrame: CGRect
-    var innerItemSpace: CGFloat = 8
+    var innerItemSpace: CGFloat = InjectedValues[\.videoAppearance].tokens.layout.spacingXs
     var onChangeTrackVisibility: @MainActor (CallParticipant, Bool) -> Void
     
     var body: some View {
@@ -215,11 +215,11 @@ struct TwoRowParticipantsView<Factory: ViewFactory>: View {
     var firstRowParticipants: [CallParticipant]
     var secondRowParticipants: [CallParticipant]
     var availableFrame: CGRect
-    var innerItemSpacing: CGFloat = 8
+    var innerItemSpacing: CGFloat = InjectedValues[\.videoAppearance].tokens.layout.spacingXs
     var onChangeTrackVisibility: @MainActor (CallParticipant, Bool) -> Void
     
     var body: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: innerItemSpacing) {
             HorizontalParticipantsView(
                 viewFactory: viewFactory,
                 call: call,
@@ -254,7 +254,7 @@ struct VerticalParticipantsView<Factory: ViewFactory>: View {
     var call: Call?
     var participants: [CallParticipant]
     var availableFrame: CGRect
-    var innerItemSpace: CGFloat = 8
+    var innerItemSpace: CGFloat = InjectedValues[\.videoAppearance].tokens.layout.spacingXs
     var includeSpacer: Bool = false
     var onChangeTrackVisibility: @MainActor (CallParticipant, Bool) -> Void
 
@@ -312,7 +312,7 @@ struct HorizontalParticipantsView<Factory: ViewFactory>: View {
     var call: Call?
     var participants: [CallParticipant]
     var availableFrame: CGRect
-    var innerItemSpacing: CGFloat = 8
+    var innerItemSpacing: CGFloat = InjectedValues[\.videoAppearance].tokens.layout.spacingXs
     var onChangeTrackVisibility: @MainActor (CallParticipant, Bool) -> Void
 
     var body: some View {

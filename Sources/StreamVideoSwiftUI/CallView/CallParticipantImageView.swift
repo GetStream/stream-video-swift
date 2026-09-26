@@ -7,8 +7,6 @@ import SwiftUI
 
 public struct CallParticipantImageView<Factory: ViewFactory>: View {
 
-    @Injected(\.colors) var colors
-    
     private let size: CGFloat = 138
 
     var viewFactory: Factory
@@ -30,7 +28,7 @@ public struct CallParticipantImageView<Factory: ViewFactory>: View {
 
     public var body: some View {
         StreamLazyImage(imageURL: imageURL) {
-            Color(colors.participantBackground)
+            Color(colors.backgroundCoreSurfaceSubtle)
         }
         .blur(radius: 8)
         .overlay(

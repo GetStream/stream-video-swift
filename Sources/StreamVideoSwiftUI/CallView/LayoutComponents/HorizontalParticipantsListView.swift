@@ -42,7 +42,7 @@ public struct HorizontalParticipantsListView<Factory: ViewFactory>: View {
         participants: [CallParticipant],
         frame: CGRect,
         call: Call?,
-        innerItemSpace: CGFloat = 8,
+        innerItemSpace: CGFloat = InjectedValues[\.videoAppearance].tokens.layout.spacingXs,
         showAllInfo: Bool = false
     ) {
         self.viewFactory = viewFactory
@@ -107,12 +107,12 @@ public struct HorizontalParticipantsListView<Factory: ViewFactory>: View {
                             )
                         }
                     }
-                    .cornerRadius(8)
+                    .cornerRadius(layout.radius2xl)
                     .accessibility(identifier: "horizontalParticipantsListParticipant")
                 }
             }
             .frame(height: barFrame.height)
-            .cornerRadius(8)
+            .cornerRadius(layout.radius2xl)
         }
         .accessibility(identifier: "horizontalParticipantsList")
     }
