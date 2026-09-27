@@ -16,7 +16,6 @@ public struct CornerDraggableView<Content: View>: View {
     private var scaleFactorX: CGFloat
     private var scaleFactorY: CGFloat
     private var availableFrame: CGRect
-    private var padding: UIEdgeInsets = .init(top: 8, left: 8, bottom: 8, right: 8)
 
     var content: (CGRect) -> Content
     var proxy: GeometryProxy
@@ -100,6 +99,11 @@ public struct CornerDraggableView<Content: View>: View {
     }
 
     private var tokens: DesignSystemTokens { videoAppearance.tokens }
+
+    private var padding: UIEdgeInsets {
+        let spacing = tokens.layout.spacingXs
+        return .init(top: spacing, left: spacing, bottom: spacing, right: spacing)
+    }
 
     private func checkCallPlacement(for location: CGPoint, in rect: CGRect) -> CallViewPlacement {
         let availablePlacements: [CallViewPlacement] = [

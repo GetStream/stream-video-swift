@@ -60,12 +60,12 @@ extension View {
 /// Modifier for adding shadow and corner radius to a view.
 struct ShadowViewModifier: ViewModifier {
     
-    var cornerRadius: CGFloat = 16
-    var borderColor: Color = Color.gray
+    var cornerRadius: CGFloat = InjectedValues[\.videoAppearance].tokens.layout.radiusXl
+    var borderColor: Color = Color(InjectedValues[\.videoAppearance].tokens.colors.borderCoreDefault)
 
     func body(content: Content) -> some View {
         content
-            .background(Color(UIColor.systemBackground))
+            .background(Color(colors.backgroundCoreElevation1))
             .cornerRadius(cornerRadius)
             .modifier(ShadowModifier())
             .overlay(
