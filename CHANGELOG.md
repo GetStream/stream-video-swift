@@ -4,7 +4,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
-### 🔄 Changed
+### 🐞 Fixed
+- The microphone indicator in the floating local-participant view is now left-aligned when connection quality is unavailable. [#1287](https://github.com/GetStream/stream-video-swift/pull/1287)
 
 ### 🐞 Fixed
 
