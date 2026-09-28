@@ -69,6 +69,15 @@ final class AudioBufferRenderer {
             return
         }
 
+        guard context.format.sampleRate > 0, context.format.channelCount > 0 else {
+            log.warning(
+                "Skipping renderer configuration because the format is invalid: \(context.format).",
+                subsystems: .audioRecording
+            )
+            self.context = nil
+            return
+        }
+
         #if STREAM_TESTS
         // Avoid making changes to AVAudioEngine instances during tests as they
         // cause crashes.
