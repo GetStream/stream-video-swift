@@ -7,8 +7,6 @@ import SwiftUI
 
 public struct ReconnectionView<Factory: ViewFactory>: View {
     
-    @Injected(\.colors) var colors
-    
     @ObservedObject var viewModel: CallViewModel
     var viewFactory: Factory
     
@@ -23,18 +21,20 @@ public struct ReconnectionView<Factory: ViewFactory>: View {
     public var body: some View {
         WaitingLocalUserView(viewModel: viewModel, viewFactory: viewFactory)
             .overlay(
-                VStack {
+                VStack(spacing: layout.spacingXs) {
                     Text(L10n.Call.Current.reconnecting)
-                        .applyCallingStyle()
-                        .padding()
+                        .font(fonts.title2)
+                        .fontWeight(.semibold)
+                        .foregroundColor(Color(colors.textPrimary))
+                        .padding(layout.spacingMd)
                         .accessibility(identifier: "reconnectingMessage")
                     CallingIndicator()
                 }
-                .padding()
+                .padding(layout.spacingMd)
                 .background(
-                    Color(colors.callBackground).opacity(0.7).edgesIgnoringSafeArea(.all)
+                    Color(colors.backgroundCoreSurfaceCard).edgesIgnoringSafeArea(.all)
                 )
-                .cornerRadius(16)
+                .cornerRadius(layout.radiusXl)
             )
     }
 }
