@@ -2,6 +2,7 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import StreamVideo
 import SwiftUI
 
 public struct Toast: Equatable {
@@ -71,22 +72,24 @@ public indirect enum ToastStyle: Equatable {
 
 extension ToastStyle {
     var themeColor: Color {
+        let colors = InjectedValues[\.videoAppearance].tokens.colors
         switch self {
-        case .error: return Color.red
-        case .warning: return Color.orange
-        case .info: return Color.blue
-        case .success: return Color.green
+        case .error: return Color(colors.accentError)
+        case .warning: return Color(colors.accentWarning)
+        case .info: return Color(colors.accentPrimary)
+        case .success: return Color(colors.accentSuccess)
         case let .custom(baseStyle, _): return baseStyle.themeColor
         }
     }
     
-    var iconFileName: String {
+    var icon: Image {
+        let images = InjectedValues[\.videoAppearance].images
         switch self {
-        case .info: return "info.circle.fill"
-        case .warning: return "exclamationmark.triangle.fill"
-        case .success: return "checkmark.circle.fill"
-        case .error: return "exclamationmark.circle.fill"
-        case let .custom(baseStyle, _): return baseStyle.iconFileName
+        case .info: return images.infoCircleFill
+        case .warning: return images.exclamationmarkTriangleFill
+        case .success: return images.checkmarkCircleFill
+        case .error: return images.exclamationmarkCircleFill
+        case let .custom(baseStyle, _): return baseStyle.icon
         }
     }
 }

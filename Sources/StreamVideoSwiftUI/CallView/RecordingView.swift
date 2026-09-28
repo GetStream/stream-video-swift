@@ -9,15 +9,15 @@ public struct RecordingView: View {
     public init() { /* Public init. */ }
     
     public var body: some View {
-        HStack {
+        HStack(spacing: layout.spacingXs) {
             Circle()
-                .fill(Color.red)
-                .frame(height: 12)
+                .fill(Color(colors.accentError))
+                .frame(height: layout.iconSizeXs)
             Text(L10n.Call.Current.recording)
-                .bold()
-                .foregroundColor(.white)
+                .font(fonts.bodyBold)
+                .foregroundColor(Color(colors.textOnAccent))
             Spacer()
         }
-        .padding(.horizontal, 8)
+        .padding(.horizontal, layout.spacingXs)
     }
 }

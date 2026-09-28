@@ -2,10 +2,14 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import StreamVideo
 import SwiftUI
 
 /// View that displays different types of toasts.
 public struct ToastView: View {
+
+    @Injected(\.videoAppearance) var videoAppearance
+
     var style: ToastStyle
     var message: String
     var onCancelTapped: (() -> Void)
@@ -26,33 +30,33 @@ public struct ToastView: View {
         case let .custom(_, icon):
             icon
         default:
-            Image(systemName: style.iconFileName)
+            style.icon
                 .foregroundColor(style.themeColor)
         }
     }
 
     public var body: some View {
-        HStack(alignment: .center, spacing: 12) {
+        HStack(alignment: .center, spacing: layout.spacingSm) {
 
             iconView
 
             Text(message)
-                .font(Font.caption)
-                .foregroundColor(Color.primary)
+                .font(fonts.caption1)
+                .foregroundColor(Color(colors.textPrimary))
             
             Spacer(minLength: 10)
             
             Button {
                 onCancelTapped()
             } label: {
-                Image(systemName: "xmark")
+                videoAppearance.images.xmark
                     .foregroundColor(style.themeColor)
             }
         }
-        .padding()
+        .padding(layout.spacingMd)
         .frame(maxWidth: .infinity)
         .modifier(ShadowViewModifier(borderColor: style.themeColor))
-        .padding(.horizontal, 16)
+        .padding(.horizontal, layout.spacingMd)
     }
 }
 
@@ -71,7 +75,7 @@ public struct ToastModifier: ViewModifier {
             .overlay(
                 ZStack {
                     toastView()
-                        .offset(y: toast?.placement == .bottom ? -16 : 16)
+                        .offset(y: toast?.placement == .bottom ? -layout.spacingMd : layout.spacingMd)
                 }
                 .animation(.spring(), value: toast)
             )
@@ -82,7 +86,7 @@ public struct ToastModifier: ViewModifier {
     
     @ViewBuilder func toastView() -> some View {
         if let toast = toast {
-            VStack {
+            VStack(spacing: layout.spacingXs) {
                 if toast.placement == .bottom {
                     Spacer()
                 }
