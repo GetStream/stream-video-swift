@@ -342,6 +342,14 @@ final class Call_JoinRecovery_Tests: StreamVideoTestCase, @unchecked Sendable {
     }
 
     func test_join_afterAbnormalWebSocketClosure_issuesAdditionalBackendJoinRequest() async throws {
+        let audioStore = MockRTCAudioStore()
+        audioStore.makeShared()
+        defer { audioStore.dismantle() }
+        audioStore.audioStore.dispatch(.setActive(true))
+        audioStore.audioStore.dispatch(
+            .setCurrentRoute(.dummy(outputs: [.dummy(isReceiver: true)]))
+        )
+
         let mockPermissions = MockPermissionsStore()
         defer { mockPermissions.dismantle() }
 
@@ -399,6 +407,8 @@ final class Call_JoinRecovery_Tests: StreamVideoTestCase, @unchecked Sendable {
                     .adapter
             )
         )
+        publisher.stub(for: \.isHealthy, with: false)
+        subscriber.stub(for: \.isHealthy, with: false)
         defaultAPI.stub(for: .joinCall, with: joinResponse)
         webRTCCoordinatorFactory
             .mockCoordinatorStack
