@@ -13,7 +13,6 @@ import SwiftUI
 /// Shows either the participant's video feed or their profile image if video is not available.
 struct PictureInPictureVideoParticipantView: View {
 
-    @Injected(\.images) var images
     @Injected(\.streamVideo) var streamVideo
 
     var store: PictureInPictureStore
