@@ -7,8 +7,7 @@ import SwiftUI
 
 public struct ScreenshareIconView: View {
     
-    @Injected(\.images) var images
-    @Injected(\.colors) var colors
+    @Injected(\.videoAppearance) var videoAppearance
     
     @ObservedObject var viewModel: CallViewModel
     let size: CGFloat
@@ -23,9 +22,9 @@ public struct ScreenshareIconView: View {
             viewModel.startScreensharing(type: .inApp)
         } label: {
             CallIconView(
-                icon: images.screenshareIcon,
+                icon: videoAppearance.images.screenshareIcon,
                 size: size,
-                iconStyle: (viewModel.call?.state.isCurrentUserScreensharing == false ? .transparent : .primary)
+                iconStyle: (viewModel.call?.state.isCurrentUserScreensharing == false ? .secondary : .secondaryActive)
             )
         }
     }
@@ -34,13 +33,10 @@ public struct ScreenshareIconView: View {
 @available(iOS 14.0, *)
 public struct BroadcastIconView: View {
     
-    @Injected(\.images) var images
-    @Injected(\.colors) var colors
-    
     @ObservedObject var viewModel: CallViewModel
     @StateObject var broadcastObserver = BroadcastObserver()
     let size: CGFloat
-    let iconStyle = CallIconStyle.transparent
+    let iconStyle = CallIconStyle.secondary
     let preferredExtension: String
     let iconSize: CGFloat = 44
     let offset: CGPoint
