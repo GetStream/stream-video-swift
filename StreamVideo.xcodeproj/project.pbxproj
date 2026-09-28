@@ -418,6 +418,7 @@
 				CallView/PermissionsPromptView_Tests.swift,
 				CallView/ReconnectionView_Tests.swift,
 				CallView/RecordingView_Tests.swift,
+				CallView/ScreensharingControls_Tests.swift,
 				CallView/ScreenSharingView_Tests.swift,
 				CallView/VideoRenderer_Tests.swift,
 				CallView/VisibilityThresholdModifier_Tests.swift,
