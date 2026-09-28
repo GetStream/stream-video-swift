@@ -162,6 +162,37 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
 
     // MARK: - transition from connected with isRejoiningFromSessionID == nil
 
+    func test_transition_immediateJoinResponse_completesFastReconnect() async throws {
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        await mockCoordinatorStack.coordinator.stateAdapter.set(
+            sfuAdapter: mockCoordinatorStack.sfuStack.adapter
+        )
+        mockCoordinatorStack.sfuStack.setConnectionState(
+            to: .connected(healthCheckInfo: .init())
+        )
+        mockCoordinatorStack.webRTCAuthenticator.stubbedFunction[.waitForConnect] =
+            Result<Void, Error>.success(())
+
+        let response = mockCoordinatorStack.sfuStack.adapter
+            .publisherSendEvent
+            .compactMap { $0 as? SFUAdapter.JoinEvent }
+            .prefix(1)
+            .sink { [mockCoordinatorStack] _ in
+                mockCoordinatorStack?.sfuStack.receiveEvent(
+                    .joinResponse(.init())
+                )
+            }
+        defer { response.cancel() }
+
+        try await assertTransition(
+            from: .fastReconnected,
+            expectedTarget: .joined,
+            subject: subject
+        ) { target in
+            XCTAssertNil(target.context.flowError)
+        }
+    }
+
     func test_transition_fromConnectedWithoutCoordinator_updatesReconnectionStrategy() async throws {
         try await assertTransition(
             from: .connected,
