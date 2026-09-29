@@ -32,11 +32,20 @@ final class RingingCallRecoveryAdapter: @unchecked Sendable {
                 PollingRingingRecoveryPolicy(streamVideo, options: options)
             )
         }
-        self.init(policies: policies)
+        self.init(streamVideo, policies: policies)
     }
 
-    init(policies: [RingingRecoveryPolicy]) {
+    init(_ streamVideo: StreamVideo, policies: [RingingRecoveryPolicy]) {
         self.policies = policies
+        streamVideo.state.$ringingCall
+            .dropFirst()
+            .filter { $0 == nil }
+            // Cancel synchronously: delaying this until the main queue could
+            // cancel work for a new ring that has already started.
+            .sink { [weak processingQueue] _ in
+                processingQueue?.cancelAllOperations()
+            }
+            .store(in: disposableBag)
         Publishers
             .MergeMany(policies.map(\.actionPublisher))
             // Each action becomes an operation on the serial queue, so the

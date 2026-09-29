@@ -57,7 +57,7 @@ final class RingingCallRecoveryAdapter_Tests: XCTestCase, @unchecked Sendable {
         let policy = StubPolicy()
         let recorder = Recorder()
         let (release, releaseContinuation) = AsyncStream<Void>.makeStream()
-        subject = .init(policies: [policy])
+        subject = .init(mockStreamVideo, policies: [policy])
 
         policy.subject.send {
             await recorder.append("first-started")
@@ -79,6 +79,29 @@ final class RingingCallRecoveryAdapter_Tests: XCTestCase, @unchecked Sendable {
                 "second-started"
             ]
         }
+    }
+
+    func test_ringingCallCleared_cancelsRunningAndQueuedActions() async {
+        let policy = StubPolicy()
+        let recorder = Recorder()
+        let (release, continuation) = AsyncStream<Void>.makeStream()
+        defer { continuation.finish() }
+        mockStreamVideo.state.ringingCall = mockCall
+        subject = .init(mockStreamVideo, policies: [policy])
+        policy.subject.send {
+            await recorder.append("first-started")
+            for await _ in release { break }
+            await recorder.append(Task.isCancelled ? "first-cancelled" : "first-completed")
+        }
+        await fulfilmentInMainActor { recorder.entries == ["first-started"] }
+        policy.subject.send { await recorder.append("queued-request") }
+
+        mockStreamVideo.state.ringingCall = nil
+        // A final action proves the queue has moved past the cancelled work.
+        policy.subject.send { await recorder.append("queue-drained") }
+
+        await fulfilmentInMainActor { recorder.entries.contains("queue-drained") }
+        XCTAssertEqual(recorder.entries, ["first-started", "first-cancelled", "queue-drained"])
     }
 }
 

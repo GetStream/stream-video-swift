@@ -31,6 +31,9 @@ final class PollingRingingRecoveryPolicy: RingingRecoveryPolicy, @unchecked Send
     private var ringingCallCancellable: AnyCancellable?
     /// The polling of the current ring. Accessed only on the main actor.
     private var pollingCancellable: AnyCancellable?
+    /// Invalidates queued work even when the same call starts ringing again.
+    /// Accessed only on the main actor.
+    private var pollingId: UUID?
 
     init(
         _ streamVideo: StreamVideo,
@@ -59,6 +62,7 @@ final class PollingRingingRecoveryPolicy: RingingRecoveryPolicy, @unchecked Send
     @MainActor
     private func didUpdateRingingCall(_ ringingCall: Call?) {
         // Only one call rings at a time, so any change ends the old polling.
+        pollingId = nil
         pollingCancellable = nil
 
         // Callees are out of scope: they act on the ring themselves.
@@ -84,7 +88,14 @@ final class PollingRingingRecoveryPolicy: RingingRecoveryPolicy, @unchecked Send
             .compactMap { $0 }
             .first { $0 > 0 } ?? 30000
         let ringTimeout = TimeInterval(ringTimeoutMs) / 1000
-        let action = makeAction(for: call, callSessionId: callSessionId)
+        let pollingId = UUID()
+        self.pollingId = pollingId
+        let action = makeAction(
+            for: call,
+            callSessionId: callSessionId,
+            pollingId: pollingId,
+            deadline: Date().addingTimeInterval(ringTimeout)
+        )
 
         pollingCancellable = polls(of: call, until: ringTimeout)
             .sink { [weak self] in self?.actionSubject.send(action) }
@@ -138,15 +149,21 @@ final class PollingRingingRecoveryPolicy: RingingRecoveryPolicy, @unchecked Send
     /// likely transient, so the next tick tries again.
     private func makeAction(
         for call: Call,
-        callSessionId: String
+        callSessionId: String,
+        pollingId: UUID,
+        deadline: Date
     ) -> RingingRecoveryAction {
-        { [weak self, weak call] in
-            // The action may be queued behind others and run after the ring
-            // settled. Skip it then.
+        { @MainActor [weak self, weak call] in
+            try Task.checkCancellation()
+            // Cancelling a timer cannot remove actions already in the queue.
+            // Recheck the run and deadline when each action actually starts.
             guard
                 let self,
                 let call,
-                await isRinging(call)
+                self.pollingId == pollingId,
+                streamVideo?.state.ringingCall === call,
+                call.state.session?.id == callSessionId,
+                Date() < deadline
             else {
                 return
             }
@@ -155,7 +172,7 @@ final class PollingRingingRecoveryPolicy: RingingRecoveryPolicy, @unchecked Send
                 try await call.updateRingState(callSessionId: callSessionId)
             } catch let error as APIError where error.isTerminalForRingState {
                 // The session is gone or belongs to another call.
-                await stopPolling(call)
+                stopPolling(call, pollingId: pollingId)
                 // Rethrown so the adapter logs it.
                 throw error
             }
@@ -163,14 +180,10 @@ final class PollingRingingRecoveryPolicy: RingingRecoveryPolicy, @unchecked Send
     }
 
     @MainActor
-    private func isRinging(_ call: Call) -> Bool {
-        streamVideo?.state.ringingCall === call
-    }
-
-    @MainActor
-    private func stopPolling(_ call: Call) {
-        // A late failure from an earlier ring must not stop the current one.
-        guard isRinging(call) else { return }
+    private func stopPolling(_ call: Call, pollingId: UUID) {
+        // A late failure must not cancel a replacement run on the same call.
+        guard self.pollingId == pollingId else { return }
+        self.pollingId = nil
         pollingCancellable = nil
         log.debug("Ring state polling stopped for cid:\(call.cId).")
     }
