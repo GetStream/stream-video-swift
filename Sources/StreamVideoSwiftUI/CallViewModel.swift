@@ -212,6 +212,17 @@ open class CallViewModel: ObservableObject {
     private var applicationLifecycleUpdates: AnyCancellable?
 
     private var ringingCancellable: AnyCancellable?
+    /// When the outgoing ring times out. Kept so a failed join can resume
+    /// the ring without extending it.
+    private var ringingTimeoutDate: Date?
+    /// The rejection sent once every callee of the outgoing ring declined.
+    ///
+    /// The call keeps ringing until this request finishes, and ring state
+    /// polling republishes the session every few seconds while it rings.
+    /// On a slow network a poll could land while the request is still
+    /// running and send a second rejection. Holding the task lets
+    /// `handleRejectedEvent` skip it.
+    private var outgoingRejectionTask: Task<Void, Never>?
     private var lastScreenSharingParticipant: CallParticipant?
 
     private var lastLayoutChange = Date()
@@ -948,7 +959,8 @@ open class CallViewModel: ObservableObject {
         highScaleLivestreamPublisherHint: Bool? = nil,
         customData: [String: RawJSON]? = nil,
         policy: WebRTCJoinPolicy = .default,
-        encryption: EncryptionSettingsRequest? = nil
+        encryption: EncryptionSettingsRequest? = nil,
+        resumesRingingOnFailure: Bool = false
     ) {
         if enteringCallTask != nil || callingState == .inCall {
             return
@@ -1004,6 +1016,12 @@ open class CallViewModel: ObservableObject {
                     pendingCall = nil
                     return
                 }
+                if resumesRingingOnFailure, resumeRinging(resolvedCall) {
+                    log.error("Failed to join an accepted call", error: error)
+                    enteringCallTask = nil
+                    pendingCall = nil
+                    return
+                }
                 log.error("Error starting a call", error: error)
                 self.error = error
                 setCallingState(.idle)
@@ -1033,6 +1051,7 @@ open class CallViewModel: ObservableObject {
     }
 
     private func startTimer(timeout: TimeInterval) {
+        ringingTimeoutDate = Date().addingTimeInterval(timeout)
         ringingCancellable = Foundation
             .Timer
             .publish(every: timeout, on: .main, in: .default)
@@ -1043,6 +1062,25 @@ open class CallViewModel: ObservableObject {
                 log.debug("Detected ringing timeout, hanging up...")
                 handleCallHangUp(ringTimeout: true)
             }
+    }
+
+    /// Goes back to ringing after the join of an accepted outgoing call
+    /// failed, like the JS SDK. The next ring state poll sees the accept
+    /// again and retries the join.
+    ///
+    /// - Returns: `false` when the ring is already over.
+    private func resumeRinging(_ call: Call) -> Bool {
+        guard
+            streamVideo.state.ringingCall === call,
+            let ringingTimeoutDate
+        else {
+            return false
+        }
+        setCallingState(.outgoing)
+        // The ring timer stopped when the join started. It resumes with the
+        // time left, as the Timer needs an interval above zero.
+        startTimer(timeout: max(ringingTimeoutDate.timeIntervalSinceNow, 0.1))
+        return true
     }
 
     private func handleCallHangUp(
@@ -1192,7 +1230,8 @@ open class CallViewModel: ObservableObject {
                 callType: event.type,
                 callId: event.callId,
                 members: [],
-                policy: .peerConnectionReadinessAware
+                policy: .peerConnectionReadinessAware,
+                resumesRingingOnFailure: true
             )
         default:
             break
@@ -1230,15 +1269,26 @@ open class CallViewModel: ObservableObject {
             }()
             let accepted = outgoingCall.state.session?.acceptedBy.count ?? 0
             if accepted == 0, rejections >= outgoingMembersCount {
+                // A rejection is already on its way; see
+                // `outgoingRejectionTask`.
+                guard outgoingRejectionTask == nil else {
+                    return
+                }
                 if skipCallStateUpdates {
                     skipCallStateUpdates = false
                     setCallingState(.idle)
                 }
-                Task(disposableBag: disposableBag, priority: .userInitiated) { [weak self] in
+                outgoingRejectionTask = Task(
+                    disposableBag: disposableBag,
+                    priority: .userInitiated
+                ) { [weak self] in
                     _ = try? await outgoingCall.reject(
                         reason: "Call rejected by all \(outgoingMembersCount) outgoing call members."
                     )
                     self?.leaveCall(reason: "unanswered")
+                    // Cleared only after leaving: by then the call no longer
+                    // rings, so no later poll can reach this branch for it.
+                    self?.outgoingRejectionTask = nil
                 }
             }
         default:

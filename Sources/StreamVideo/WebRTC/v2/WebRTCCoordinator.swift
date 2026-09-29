@@ -121,6 +121,8 @@ final class WebRTCCoordinator: @unchecked Sendable {
     ///   - ring: Whether a ring tone should be played.
     ///   - notify: Whether users should be notified about call join.
     ///   - source: Source that initiated the join.
+    ///   - ringJoinSource: What made the caller join after its ring, if the
+    ///     join follows a ring.
     ///   - joinResponseHandler: A subject that receives the join completion
     ///     result once the flow finishes.
     ///   - coordinatorJoinAttemptCount: Zero-based retry index of the
@@ -132,6 +134,7 @@ final class WebRTCCoordinator: @unchecked Sendable {
         ring: Bool,
         notify: Bool,
         source: JoinSource,
+        ringJoinSource: ClientEventJoinSource? = nil,
         joinResponseHandler: PassthroughSubject<JoinCallResponse, Error>,
         policy: WebRTCJoinPolicy = .default,
         coordinatorJoinAttemptCount: Int = 0
@@ -142,6 +145,7 @@ final class WebRTCCoordinator: @unchecked Sendable {
         await stateAdapter.set(initialCallSettings: callSettings)
 
         stateMachine.currentStage.context.joinSource = source
+        stateMachine.currentStage.context.ringJoinSource = ringJoinSource
         stateMachine.currentStage.context.joinResponseHandler = joinResponseHandler
         stateMachine.currentStage.context.joinPolicy = policy
         stateMachine.currentStage.context.coordinatorJoinAttemptCount = coordinatorJoinAttemptCount

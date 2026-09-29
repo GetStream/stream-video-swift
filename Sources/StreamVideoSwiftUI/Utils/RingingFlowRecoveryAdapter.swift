@@ -98,7 +98,20 @@ final class RingingFlowRecoveryAdapter: @unchecked Sendable {
             }
 
             let currentUserId = streamVideo.user.id
-            if
+            // Checked first: a poll can report an accept and the end
+            // together, for example when the callee accepted and then hung
+            // up. Joining an ended session would fail.
+            if session.endedAt != nil {
+                onEnded(
+                    .ended(
+                        .init(
+                            callCid: callCId,
+                            user: nil,
+                            action: .end
+                        )
+                    )
+                )
+            } else if
                 let userId = session.acceptedBy.keys.first(where: {
                     $0 != currentUserId
                 }) {
@@ -121,16 +134,6 @@ final class RingingFlowRecoveryAdapter: @unchecked Sendable {
                             callCid: callCId,
                             user: .init(id: userId),
                             action: .reject
-                        )
-                    )
-                )
-            } else if session.endedAt != nil {
-                onEnded(
-                    .ended(
-                        .init(
-                            callCid: callCId,
-                            user: nil,
-                            action: .end
                         )
                     )
                 )

@@ -363,6 +363,64 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         await assertCallingState(.inCall)
     }
 
+    func test_outgoingCall_acceptedJoinFails_resumesRingingAndRetriesOnNextAccept(
+    ) async throws {
+        // Given
+        await prepare()
+        subject.startCall(
+            callType: .default,
+            callId: callId,
+            members: participants,
+            ring: true
+        )
+        await assertCallingState(.outgoing)
+        streamVideo.state.ringingCall = mockCall
+        mockCall.stubbedJoinError = ClientError("join failed")
+
+        // When
+        processAcceptedEvent()
+
+        // Then
+        await fulfilmentInMainActor {
+            self.mockCall.timesCalled(.join) == 1
+        }
+        await assertCallingState(.outgoing)
+        XCTAssertNil(subject.error)
+
+        // When
+        mockCall.stubbedJoinError = nil
+        processAcceptedEvent()
+
+        // Then
+        await assertCallingState(.inCall)
+    }
+
+    func test_outgoingCall_rejectedAgainWhileRejecting_rejectsOnce() async throws {
+        // Given
+        await prepare()
+        subject.startCall(
+            callType: .default,
+            callId: callId,
+            members: participants,
+            ring: true
+        )
+        await assertCallingState(.outgoing)
+        mockCall.waitForRejectToResume = true
+
+        // When
+        processRejectedEvent()
+        await fulfilmentInMainActor { self.mockCall.timesCalled(.reject) == 1 }
+        processRejectedEvent()
+        // Lets the second event reach the view model while the first
+        // rejection is still in flight.
+        await wait(for: 0.5)
+        mockCall.resumeReject()
+
+        // Then
+        await assertCallingState(.idle)
+        XCTAssertEqual(mockCall.timesCalled(.reject), 1)
+    }
+
     func test_outgoingCall_rejectedEventThreeParticipants() async throws {
         // Given
         await prepare()
@@ -1655,6 +1713,37 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
     }
 
     // MARK: - Private helpers
+
+    private func processAcceptedEvent() {
+        streamVideo.process(
+            .coordinatorEvent(
+                .typeCallAcceptedEvent(
+                    .dummy(
+                        callCid: cId,
+                        user: secondUser.user.toUserResponse()
+                    )
+                )
+            )
+        )
+    }
+
+    private func processRejectedEvent() {
+        streamVideo.process(
+            .coordinatorEvent(
+                .typeCallRejectedEvent(.dummy(
+                    call: .dummy(
+                        cid: cId,
+                        session: .dummy(
+                            rejectedBy: [secondUser.userId: Date()]
+                        )
+                    ),
+                    callCid: cId,
+                    createdAt: Date(),
+                    user: secondUser.user.toUserResponse()
+                ))
+            )
+        )
+    }
 
     private func prepare(
         call: MockCall? = nil,

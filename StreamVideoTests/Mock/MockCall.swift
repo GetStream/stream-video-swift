@@ -22,6 +22,7 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
         case callKitActivated
         case ring
         case setVideoFilter
+        case updateRingState
     }
 
     enum MockCallFunctionInputKey: Payloadable {
@@ -48,6 +49,8 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
 
         case get
 
+        case updateRingState(callSessionId: String)
+
         var payload: Any {
             switch self {
             case let .join(create, options, ring, notify, callSettings, policy):
@@ -73,6 +76,9 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
 
             case .get:
                 return NSNull()
+
+            case let .updateRingState(callSessionId):
+                return callSessionId
             }
         }
     }
@@ -88,6 +94,9 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
     var waitForJoinToResume = false
     var onJoinStarted: (@Sendable () -> Void)?
     var onJoinResumed: (@Sendable (MockCall) async -> Void)?
+    /// When true, `reject` suspends until ``resumeReject()`` is called.
+    var waitForRejectToResume = false
+    private var rejectContinuation: CheckedContinuation<Void, Never>?
     /// When true, `create` suspends until ``resumeCreate()`` is called.
     var waitForCreateToResume = false
     var onCreateStarted: (@Sendable () -> Void)?
@@ -224,6 +233,15 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
         return stubbedFunction[.get] as! GetCallResponse
     }
 
+    override func updateRingState(callSessionId: String) async throws {
+        stubbedFunctionInput[.updateRingState]?.append(
+            .updateRingState(callSessionId: callSessionId)
+        )
+        if let error = stubbedFunction[.updateRingState] as? Error {
+            throw error
+        }
+    }
+
     override func accept() async throws -> AcceptCallResponse {
         stubbedFunction[.accept] as! AcceptCallResponse
     }
@@ -236,6 +254,9 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
             throw ClientError("Call has not been created yet.")
         }
         stubbedFunctionInput[.reject]?.append(.reject(reason: reason))
+        if waitForRejectToResume {
+            await withCheckedContinuation { rejectContinuation = $0 }
+        }
         successfulRejectCount += 1
         return stubbedFunction[.reject] as! RejectCallResponse
     }
@@ -298,6 +319,11 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
     func resumeJoin() {
         joinContinuation?.resume()
         joinContinuation = nil
+    }
+
+    func resumeReject() {
+        rejectContinuation?.resume()
+        rejectContinuation = nil
     }
 
     override func leave(reason: String? = nil) {

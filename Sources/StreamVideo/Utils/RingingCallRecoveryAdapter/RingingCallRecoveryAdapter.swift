@@ -5,59 +5,43 @@
 import Combine
 import Foundation
 
-/// Reloads the ringing call from the coordinator after the WebSocket
-/// reconnects.
+/// Keeps the ringing call's state current when ring events are lost.
 ///
-/// Accept, reject, and end for an outgoing ring arrive as coordinator
-/// events. If the socket drops while we are still ringing, those events
-/// never reach this device and `Call.state` stays stale — the caller
-/// never joins.
-///
-/// On every `WSConnected` this adapter calls `get()` on
-/// `state.ringingCall` without `ring: true`, so session fields such as
-/// `acceptedBy` are current again without paging callees a second time.
-/// SwiftUI then turns that session into the same events it already
+/// Accept, reject, and end for a ring arrive as coordinator events. If one
+/// is lost, `Call.state` stays stale and the caller never joins. Each
+/// ``RingingRecoveryPolicy`` decides when to refresh the call; the adapter
+/// runs their actions on one serial queue, so refreshes never overlap.
+/// SwiftUI turns the refreshed session into the same events it already
 /// handles from the socket.
 final class RingingCallRecoveryAdapter: @unchecked Sendable {
 
-    private let disposableBag = DisposableBag()
+    /// Runs one action at a time. Two refreshes that overlap can finish out
+    /// of order, and the older one would then overwrite the newer state.
     private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
-    private weak var streamVideo: StreamVideo?
+    /// Held here because subscribing to a policy's publisher does not keep
+    /// the policy alive.
+    private let policies: [RingingRecoveryPolicy]
+    private let disposableBag = DisposableBag()
 
-    init(_ streamVideo: StreamVideo) {
-        self.streamVideo = streamVideo
-
-        streamVideo
-            .rawEventPublisher
-            .compactMap {
-                switch $0 {
-                case let .internalEvent(event):
-                    return event
-                default:
-                    return nil
-                }
-            }
-            .filter { $0 is WSConnected }
-            .receive(on: processingQueue)
-            .sinkTask(storeIn: disposableBag) { [weak self] _ in
-                await self?.didConnect()
-            }
-            .store(in: disposableBag)
+    convenience init(_ streamVideo: StreamVideo) {
+        var policies: [RingingRecoveryPolicy] = [
+            ReconnectRingingRecoveryPolicy(streamVideo)
+        ]
+        if let options = streamVideo.videoConfig.ringStatePolling {
+            policies.append(
+                PollingRingingRecoveryPolicy(streamVideo, options: options)
+            )
+        }
+        self.init(policies: policies)
     }
 
-    private func didConnect() async {
-        guard
-            let ringingCall = await MainActor.run(body: {
-                streamVideo?.state.ringingCall
-            })
-        else {
-            return
-        }
-
-        do {
-            _ = try await ringingCall.get()
-        } catch {
-            log.error(error)
-        }
+    init(policies: [RingingRecoveryPolicy]) {
+        self.policies = policies
+        Publishers
+            .MergeMany(policies.map(\.actionPublisher))
+            // Each action becomes an operation on the serial queue, so the
+            // next one starts only after the previous one finishes.
+            .sinkTask(queue: processingQueue) { try await $0() }
+            .store(in: disposableBag)
     }
 }

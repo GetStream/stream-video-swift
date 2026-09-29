@@ -152,6 +152,13 @@ public class CallState: ObservableObject {
     /// help customize logic, analytics, and UI based on how the call was started.
     var joinSource: JoinSource?
 
+    /// The ring session whose first accept came from polling the ring state
+    /// instead of a WebSocket event. Reported on the caller's join.
+    ///
+    /// Never reset: it is compared with the current session, and every ring
+    /// gets a new one, so a value from an earlier ring never matches.
+    private(set) var sessionIdWithPolledAccept: String?
+
     private var durationCancellable: AnyCancellable?
     private nonisolated let disposableBag = DisposableBag()
 
@@ -484,6 +491,56 @@ public class CallState: ObservableObject {
             streamKey: streamVideoSession.token.rawValue
         )
         ingress = Ingress(rtmp: rtmp)
+    }
+
+    /// Merges a polled ring state into ``session``.
+    ///
+    /// Only adds: an outcome the WebSocket already delivered is never
+    /// removed. A response for another session is ignored.
+    internal func update(from ringState: GetCallRingStateResponse) {
+        // The poll can answer for an earlier ring of the same call, which
+        // had another session.
+        guard let session, session.id == ringState.sessionId else {
+            return
+        }
+
+        // Keeps the WebSocket's timestamp when both sides know the user.
+        let keepCurrent: (Date, Date) -> Date = { current, _ in current }
+        let updated = CallSessionResponse(
+            acceptedBy: session.acceptedBy.merging(
+                ringState.acceptedBy,
+                uniquingKeysWith: keepCurrent
+            ),
+            anonymousParticipantCount: session.anonymousParticipantCount,
+            // A session ends with its call.
+            endedAt: session.endedAt
+                ?? ringState.sessionEndedAt
+                ?? ringState.callEndedAt,
+            id: session.id,
+            liveEndedAt: session.liveEndedAt,
+            liveStartedAt: session.liveStartedAt,
+            missedBy: session.missedBy.merging(
+                ringState.missedBy,
+                uniquingKeysWith: keepCurrent
+            ),
+            participants: session.participants,
+            participantsCountByRole: session.participantsCountByRole,
+            rejectedBy: session.rejectedBy.merging(
+                ringState.rejectedBy,
+                uniquingKeysWith: keepCurrent
+            ),
+            startedAt: session.startedAt,
+            timerEndsAt: session.timerEndsAt
+        )
+
+        // The first accept came from the poll, so the caller joins because
+        // of it. Stored per session, so a later ring starts clean.
+        if session.acceptedBy.isEmpty, !updated.acceptedBy.isEmpty {
+            sessionIdWithPolledAccept = session.id
+        }
+        // Published even when nothing changed: each poll lets the ringing
+        // flow act again, so a join that failed is retried, like in JS.
+        self.session = updated
     }
     
     /// Updates the current `CallSettings` if they differ from the stored value.

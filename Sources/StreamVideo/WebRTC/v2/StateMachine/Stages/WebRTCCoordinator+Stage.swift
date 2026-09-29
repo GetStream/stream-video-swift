@@ -29,6 +29,9 @@ extension WebRTCCoordinator.StateMachine {
             var disconnectionSource: WebSocketConnectionState.DisconnectionSource?
             var flowError: Error?
             var joinSource: JoinSource?
+            /// Sent as `source` on the first `CoordinatorJoin` of a caller
+            /// joining after its ring.
+            var ringJoinSource: ClientEventJoinSource?
             var joinPolicy: WebRTCJoinPolicy = .default
             /// Preserves explicit join routing hints for recovery requests that
             /// no longer carry the original `CreateCallOptions`.

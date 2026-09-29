@@ -164,7 +164,9 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     /// coordinator `JoinCall` REST request.
                     let coordinatorJoinDetails = ClientEventStageDetails(
                         coordinatorConnectId: context.coordinatorConnectId,
-                        joinReason: updateSession ? .fullRejoin : .firstAttempt
+                        joinReason: updateSession ? .fullRejoin : .firstAttempt,
+                        // A rejoin is a recovery, not a reaction to the ring.
+                        source: updateSession ? nil : context.ringJoinSource
                     )
                     let coordinatorJoinAttempt = await coordinator
                         .clientEventReporter
