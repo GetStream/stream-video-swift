@@ -27,37 +27,33 @@ struct DemoFeedbackView: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            closeButtonBar
+        NavigationView {
             contentView
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        closeButton
+                    }
+                }
+                .navigationBarTitleDisplayMode(.inline)
+                .background(Color(tokens.colors.backgroundCoreElevation1).edgesIgnoringSafeArea(.all))
+                .modifier(DemoSheetBackgroundModifier(color: tokens.colors.backgroundCoreElevation1))
         }
-        .background(Color(tokens.colors.backgroundCoreElevation1).edgesIgnoringSafeArea(.all))
-        .modifier(DemoSheetBackgroundModifier(color: tokens.colors.backgroundCoreElevation1))
+        .navigationViewStyle(.stack)
         .toastView(toast: $toast)
         .onAppear { checkIfDisconnectionErrorIsAvailable() }
     }
 
-    private var closeButtonBar: some View {
-        HStack(spacing: 0) {
-            Button(action: dismiss) {
-                videoAppearance.images.xmark
-                    .resizable()
-                    .renderingMode(.template)
-                    .aspectRatio(contentMode: .fit)
-                    .padding(tokens.layout.spacingXxs)
-                    .frame(width: tokens.layout.iconSizeMd, height: tokens.layout.iconSizeMd)
-                    .foregroundColor(Color(tokens.colors.textPrimary))
-                    .frame(
-                        width: tokens.layout.buttonHitTargetMinWidth,
-                        height: tokens.layout.buttonHitTargetMinHeight
-                    )
-                    .contentShape(Rectangle())
-            }
-            .accessibility(identifier: "Close")
-
-            Spacer()
+    private var closeButton: some View {
+        Button(action: dismiss) {
+            videoAppearance.images.xmark
+                .resizable()
+                .renderingMode(.template)
+                .aspectRatio(contentMode: .fit)
+                .padding(tokens.layout.spacingXxs)
+                .frame(width: tokens.layout.iconSizeMd, height: tokens.layout.iconSizeMd)
+                .foregroundColor(Color(tokens.colors.textPrimary))
         }
-        .padding(.horizontal, tokens.layout.spacingXs)
+        .accessibility(identifier: "Close")
     }
 
     private var contentView: some View {
@@ -234,7 +230,14 @@ private struct DemoSheetBackgroundModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         if #available(iOS 16.4, *) {
-            content.presentationBackground(Color(color))
+            content
+                .toolbarBackground(Color(color), for: .navigationBar)
+                .toolbarBackground(.visible, for: .navigationBar)
+                .presentationBackground(Color(color))
+        } else if #available(iOS 16.0, *) {
+            content
+                .toolbarBackground(Color(color), for: .navigationBar)
+                .toolbarBackground(.visible, for: .navigationBar)
         } else {
             content
         }
