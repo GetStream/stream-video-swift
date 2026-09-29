@@ -49,8 +49,9 @@ final class PollingRingingRecoveryPolicy: RingingRecoveryPolicy, @unchecked Send
             // The call state we read below is main actor isolated.
             .receive(on: DispatchQueue.main)
             .sink { [weak self] ringingCall in
+                guard let self else { return }
                 MainActor.assumeIsolated {
-                    self?.didUpdateRingingCall(ringingCall)
+                    self.didUpdateRingingCall(ringingCall)
                 }
             }
     }
