@@ -27,6 +27,40 @@ struct DemoFeedbackView: View {
     }
 
     var body: some View {
+        VStack(spacing: 0) {
+            closeButtonBar
+            contentView
+        }
+        .background(Color(tokens.colors.backgroundCoreElevation1).edgesIgnoringSafeArea(.all))
+        .modifier(DemoSheetBackgroundModifier(color: tokens.colors.backgroundCoreElevation1))
+        .toastView(toast: $toast)
+        .onAppear { checkIfDisconnectionErrorIsAvailable() }
+    }
+
+    private var closeButtonBar: some View {
+        HStack(spacing: 0) {
+            Button(action: dismiss) {
+                videoAppearance.images.xmark
+                    .resizable()
+                    .renderingMode(.template)
+                    .aspectRatio(contentMode: .fit)
+                    .padding(tokens.layout.spacingXxs)
+                    .frame(width: tokens.layout.iconSizeMd, height: tokens.layout.iconSizeMd)
+                    .foregroundColor(Color(tokens.colors.textPrimary))
+                    .frame(
+                        width: tokens.layout.buttonHitTargetMinWidth,
+                        height: tokens.layout.buttonHitTargetMinHeight
+                    )
+                    .contentShape(Rectangle())
+            }
+            .accessibility(identifier: "Close")
+
+            Spacer()
+        }
+        .padding(.horizontal, tokens.layout.spacingXs)
+    }
+
+    private var contentView: some View {
         ScrollView {
             VStack(spacing: tokens.layout.spacingXl) {
                 Image("feedbackLogo")
@@ -81,11 +115,6 @@ struct DemoFeedbackView: View {
             }
             .padding(tokens.layout.spacingMd)
         }
-        .withModalNavigationBar(title: "", closeAction: dismiss)
-        .background(Color(tokens.colors.backgroundCoreElevation1).edgesIgnoringSafeArea(.all))
-        .modifier(DemoSheetBackgroundModifier(color: tokens.colors.backgroundCoreElevation1))
-        .toastView(toast: $toast)
-        .onAppear { checkIfDisconnectionErrorIsAvailable() }
     }
 
     // MARK: - Private helpers
