@@ -8,14 +8,16 @@ import SwiftUI
 
 struct FBCallControlsView: View {
     
+    @Injected(\.videoAppearance) var videoAppearance
+
     @ObservedObject var viewModel: CallViewModel
     
     var body: some View {
-        HStack(spacing: 24) {
+        HStack(spacing: tokens.layout.spacingXl) {
             Button {
                 viewModel.toggleCameraEnabled()
             } label: {
-                Image(systemName: "video.fill")
+                videoAppearance.images.videoTurnOn
             }
             
             Spacer()
@@ -23,7 +25,7 @@ struct FBCallControlsView: View {
             Button {
                 viewModel.toggleMicrophoneEnabled()
             } label: {
-                Image(systemName: "mic.fill")
+                videoAppearance.images.micTurnOn
             }
             
             Spacer()
@@ -31,41 +33,47 @@ struct FBCallControlsView: View {
             Button {
                 viewModel.toggleCameraPosition()
             } label: {
-                Image(systemName: "arrow.triangle.2.circlepath.camera.fill")
+                videoAppearance.images.toggleCamera
             }
             
             Spacer()
             
             HangUpIconView(viewModel: viewModel)
         }
-        .foregroundColor(.white)
-        .padding(.vertical, 8)
-        .padding(.horizontal)
+        .foregroundColor(Color(tokens.colors.textOnAccent))
+        .padding(.vertical, tokens.layout.spacingXs)
+        .padding(.horizontal, tokens.layout.spacingMd)
         .modifier(BackgroundModifier())
-        .padding(.horizontal, 32)
+        .padding(.horizontal, tokens.layout.spacing2xl)
     }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
 
 struct BackgroundModifier: ViewModifier {
     
+    @Injected(\.videoAppearance) var videoAppearance
+
     func body(content: Content) -> some View {
         if #available(iOS 15, *) {
             content
                 .background(
                     .ultraThinMaterial,
-                    in: RoundedRectangle(cornerRadius: 24)
+                    in: RoundedRectangle(cornerRadius: tokens.layout.radius3xl)
                 )
         } else {
             content
-                .background(Color.black.opacity(0.8))
-                .cornerRadius(24)
+                .background(Color(tokens.colors.backgroundCoreOverlayDarkStrong))
+                .cornerRadius(tokens.layout.radius3xl)
         }
     }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
 
 struct CustomVideoCallParticipantView: View {
     
-    @Injected(\.images) var images
+    @Injected(\.videoAppearance) var videoAppearance
     @Injected(\.streamVideo) var streamVideo
         
     let participant: CallParticipant
@@ -106,7 +114,11 @@ struct CustomVideoCallParticipantView: View {
         .overlay(
             ZStack {
                 LinearGradient(
-                    colors: [Color.green, Color.black, Color.green],
+                    colors: [
+                        Color(tokens.colors.accentSuccess),
+                        Color(tokens.colors.backgroundCoreOverlayDarkStrong),
+                        Color(tokens.colors.accentSuccess)
+                    ],
                     startPoint: .top,
                     endPoint: .bottom
                 )
@@ -115,13 +127,15 @@ struct CustomVideoCallParticipantView: View {
 
                 ZStack {
                     Circle()
-                        .fill(Color.black)
+                        .fill(Color(tokens.colors.backgroundCoreOverlayDarkStrong))
                         .frame(width: 50, height: 50)
-                    Image(systemName: "mic.fill")
-                        .foregroundColor(.white)
+                    videoAppearance.images.micTurnOn
+                        .foregroundColor(Color(tokens.colors.textOnAccent))
                 }
                 .overlay(
-                    participant.isSpeaking ? Circle().stroke(Color.green, lineWidth: 2) : nil
+                    participant.isSpeaking
+                        ? Circle().stroke(Color(videoAppearance.colors.indicatorSoundIndicatorSpeaking), lineWidth: 2)
+                        : nil
                 )
                 .opacity(showVideo ? 0 : 1)
             }
@@ -131,10 +145,14 @@ struct CustomVideoCallParticipantView: View {
     private var showVideo: Bool {
         participant.shouldDisplayTrack
     }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
 
 struct CustomParticipantModifier: ViewModifier {
             
+    @Injected(\.videoAppearance) var videoAppearance
+
     var participant: CallParticipant
     @Binding var pinnedParticipant: CallParticipant?
     var participantCount: Int
@@ -160,33 +178,35 @@ struct CustomParticipantModifier: ViewModifier {
             .adjustVideoFrame(to: availableFrame.width, ratio: ratio)
             .overlay(
                 ZStack {
-                    VStack {
+                    VStack(spacing: 0) {
                         Spacer()
-                        HStack {
+                        HStack(spacing: tokens.layout.spacingXs) {
                             Text(participant.name)
-                                .foregroundColor(.white)
-                                .bold()
+                                .font(tokens.fonts.bodyBold)
+                                .foregroundColor(Color(tokens.colors.textOnAccent))
                             Spacer()
                             ConnectionQualityIndicator(
                                 connectionQuality: participant.connectionQuality
                             )
                         }
-                        .padding(.bottom, 2)
+                        .padding(.bottom, tokens.layout.spacingXxxs)
                     }
-                    .padding()
+                    .padding(tokens.layout.spacingMd)
                     
                     if participant.isSpeaking && participantCount > 1 {
                         Rectangle()
-                            .strokeBorder(Color.blue.opacity(0.7), lineWidth: 2)
+                            .strokeBorder(Color(tokens.colors.accentPrimary), lineWidth: 2)
                     }
                 }
             )
     }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
 
 struct CustomIncomingCallView: View {
     
-    @Injected(\.colors) var colors
+    @Injected(\.videoAppearance) var videoAppearance
     
     @ObservedObject var callViewModel: CallViewModel
     @StateObject var viewModel: IncomingViewModel
@@ -202,63 +222,65 @@ struct CustomIncomingCallView: View {
     }
     
     var body: some View {
-        VStack {
+        VStack(spacing: tokens.layout.spacingXs) {
             Spacer()
             Text("Incoming call")
-                .foregroundColor(Color(colors.textLowEmphasis))
-                .padding()
+                .foregroundColor(Color(tokens.colors.textSecondary))
+                .padding(tokens.layout.spacingMd)
             
             StreamLazyImage(imageURL: callInfo.caller.imageURL)
                 .frame(width: 80, height: 80)
-                .clipShape(RoundedRectangle(cornerRadius: 8))
-                .padding()
+                .clipShape(RoundedRectangle(cornerRadius: tokens.layout.radiusMd))
+                .padding(tokens.layout.spacingMd)
             
             Text(callInfo.caller.name)
-                .font(.title)
-                .foregroundColor(Color(colors.textLowEmphasis))
-                .padding()
+                .font(tokens.fonts.title)
+                .foregroundColor(Color(tokens.colors.textSecondary))
+                .padding(tokens.layout.spacingMd)
             
             Spacer()
             
-            HStack(spacing: 16) {
+            HStack(spacing: tokens.layout.spacingMd) {
                 Spacer()
                 
                 Button {
                     callViewModel.rejectCall(callType: callInfo.type, callId: callInfo.id)
                 } label: {
-                    Image(systemName: "phone.down.fill")
-                        .foregroundColor(.white)
-                        .padding()
+                    videoAppearance.images.hangup
+                        .foregroundColor(Color(videoAppearance.colors.controlDeclineCallButtonText))
+                        .padding(tokens.layout.spacingMd)
                         .background(
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(Color.red)
+                            RoundedRectangle(cornerRadius: tokens.layout.radiusMd)
+                                .fill(Color(videoAppearance.colors.controlDeclineCallButtonBackground))
                                 .frame(width: 60, height: 60)
                         )
                 }
-                .padding(.all, 8)
+                .padding(.all, tokens.layout.spacingXs)
                                 
                 Button {
                     callViewModel.acceptCall(callType: callInfo.type, callId: callInfo.id)
                 } label: {
                     Image(systemName: "phone.fill")
-                        .foregroundColor(.white)
-                        .padding()
+                        .foregroundColor(Color(videoAppearance.colors.controlAcceptCallButtonText))
+                        .padding(tokens.layout.spacingMd)
                         .background(
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(Color.green)
+                            RoundedRectangle(cornerRadius: tokens.layout.radiusMd)
+                                .fill(Color(videoAppearance.colors.controlAcceptCallButtonBackground))
                                 .frame(width: 60, height: 60)
                         )
                 }
-                .padding(.all, 8)
+                .padding(.all, tokens.layout.spacingXs)
                 
                 Spacer()
             }
-            .padding()
+            .padding(tokens.layout.spacingMd)
         }
-        .background(Color.white.edgesIgnoringSafeArea(.all))
+        .background(Color(tokens.colors.backgroundCoreApp).edgesIgnoringSafeArea(.all))
     }
     
     var callInfo: IncomingCall {
         viewModel.callInfo
     }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }

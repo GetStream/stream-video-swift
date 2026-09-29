@@ -10,7 +10,7 @@ import SwiftUI
 struct DemoFeedbackView: View {
 
     @Environment(\.openURL) private var openURL
-    @Injected(\.appearance) private var appearance
+    @Injected(\.videoAppearance) private var videoAppearance
 
     @State private var email: String = ""
     @State private var comment: String = ""
@@ -29,25 +29,25 @@ struct DemoFeedbackView: View {
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 32) {
+            VStack(spacing: tokens.layout.spacing2xl) {
                 Image("feedbackLogo")
 
-                VStack(spacing: 8) {
+                VStack(spacing: tokens.layout.spacingXs) {
                     Text("How is your call going?")
-                        .font(appearance.fonts.headline)
-                        .foregroundColor(appearance.colors.text)
+                        .font(tokens.fonts.headline)
+                        .foregroundColor(Color(tokens.colors.textPrimary))
                         .lineLimit(1)
 
                     Text("All feedback is celebrated!")
-                        .font(appearance.fonts.subheadline)
-                        .foregroundColor(.init(appearance.colors.textLowEmphasis))
+                        .font(tokens.fonts.subheadline)
+                        .foregroundColor(Color(tokens.colors.textSecondary))
                         .lineLimit(2)
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
                 .multilineTextAlignment(.center)
 
-                VStack(spacing: 27) {
-                    VStack(spacing: 16) {
+                VStack(spacing: tokens.layout.spacingXl) {
+                    VStack(spacing: tokens.layout.spacingMd) {
                         TextField(
                             "Email Address *",
                             text: $email
@@ -57,17 +57,17 @@ struct DemoFeedbackView: View {
                         DemoTextEditor(text: $comment, placeholder: "Message")
                     }
 
-                    HStack {
+                    HStack(spacing: tokens.layout.spacingXs) {
                         Text("Rate Quality")
-                            .font(appearance.fonts.body)
-                            .foregroundColor(.init(appearance.colors.textLowEmphasis))
+                            .font(tokens.fonts.body)
+                            .foregroundColor(Color(tokens.colors.textSecondary))
                             .frame(maxWidth: .infinity, alignment: .leading)
 
                         DemoStarRatingView(rating: $rating)
                     }
                 }
 
-                HStack {
+                HStack(spacing: tokens.layout.spacingXs) {
                     Button {
                         resignFirstResponder()
                         openURL(.init(string: "https://getstream.io/video/#contact")!)
@@ -75,10 +75,10 @@ struct DemoFeedbackView: View {
                         Text("Contact Us")
                     }
                     .frame(maxWidth: .infinity)
-                    .foregroundColor(appearance.colors.text)
-                    .padding(.vertical, 4)
+                    .foregroundColor(Color(tokens.colors.buttonSecondaryText))
+                    .padding(.vertical, tokens.layout.spacingXxs)
                     .clipShape(Capsule())
-                    .overlay(Capsule().stroke(Color(appearance.colors.textLowEmphasis), lineWidth: 1))
+                    .overlay(Capsule().stroke(Color(tokens.colors.buttonSecondaryBorder), lineWidth: 1))
 
                     Button {
                         resignFirstResponder()
@@ -110,16 +110,20 @@ struct DemoFeedbackView: View {
                         }
                     }
                     .frame(maxWidth: .infinity)
-                    .foregroundColor(appearance.colors.text)
-                    .padding(.vertical, 4)
-                    .background(isSubmitEnabled ? appearance.colors.accentBlue : appearance.colors.lightGray)
+                    .foregroundColor(
+                        Color(isSubmitEnabled ? tokens.colors.buttonPrimaryTextOnAccent : tokens.colors.textDisabled)
+                    )
+                    .padding(.vertical, tokens.layout.spacingXxs)
+                    .background(
+                        Color(isSubmitEnabled ? tokens.colors.buttonPrimaryBackground : tokens.colors.backgroundUtilityDisabled)
+                    )
                     .disabled(!isSubmitEnabled)
                     .clipShape(Capsule())
                 }
 
                 Spacer()
             }
-            .padding(.horizontal)
+            .padding(.horizontal, tokens.layout.spacingMd)
         }
         .withModalNavigationBar(title: "", closeAction: dismiss)
         .toastView(toast: $toast)
@@ -127,6 +131,8 @@ struct DemoFeedbackView: View {
     }
 
     // MARK: - Private helpers
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 
     @MainActor
     func checkIfDisconnectionErrorIsAvailable() {
@@ -140,6 +146,8 @@ struct DemoFeedbackView: View {
 }
 
 struct DemoStarRatingView: View {
+    @Injected(\.videoAppearance) private var videoAppearance
+
     var rating: Binding<Int>
 
     private var range: ClosedRange<Int>
@@ -154,16 +162,18 @@ struct DemoStarRatingView: View {
     }
 
     var body: some View {
-        HStack {
+        HStack(spacing: tokens.layout.spacingXs) {
             ForEach(range, id: \.self) { index in
                 Image(systemName: index <= rating.wrappedValue ? "star.fill" : "star")
                     .resizable()
-                    .frame(width: 30, height: 30)
-                    .foregroundColor(.yellow)
+                    .frame(width: tokens.layout.iconSizeLg, height: tokens.layout.iconSizeLg)
+                    .foregroundColor(Color(tokens.colors.accentWarning))
                     .onTapGesture {
                         rating.wrappedValue = index
                     }
             }
         }
     }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }

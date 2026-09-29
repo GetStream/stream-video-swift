@@ -4,11 +4,12 @@
 
 import Foundation
 import StreamVideo
+import StreamVideoSwiftUI
 import SwiftUI
 
 struct MemoryLogViewer: View {
     
-    @Injected(\.appearance) var appearance
+    @Injected(\.videoAppearance) var videoAppearance
     
     @State private var logs = LogQueue.queue.elements
     @State private var isSharePresented = false
@@ -112,25 +113,27 @@ struct MemoryLogViewer: View {
         }
     }
 
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
+
     @ViewBuilder
     func makeEntryView(for entry: LogDetails) -> some View {
         let (iconName, iconColor): (String, Color) = {
             switch entry.level {
             case .debug:
-                return ("ladybug", appearance.colors.text)
+                return ("ladybug", Color(tokens.colors.textPrimary))
             case .info:
-                return ("info.circle", Color.blue)
+                return ("info.circle", Color(tokens.colors.accentPrimary))
             case .warning:
-                return ("exclamationmark.circle", Color.yellow)
+                return ("exclamationmark.circle", Color(tokens.colors.accentWarning))
             case .error:
-                return ("x.circle", appearance.colors.accentRed)
+                return ("x.circle", Color(tokens.colors.accentError))
             }
         }()
         
         Label {
             Text(entry.message)
-                .font(appearance.fonts.body)
-                .foregroundColor(appearance.colors.text)
+                .font(tokens.fonts.body)
+                .foregroundColor(Color(tokens.colors.textPrimary))
                 .lineLimit(3)
         } icon: {
             Image(systemName: iconName)
@@ -157,7 +160,7 @@ struct SearchableModifier: ViewModifier {
 
 struct MemoryLogEntryViewer: View {
     
-    @Injected(\.appearance) var appearance
+    @Injected(\.videoAppearance) var videoAppearance
     
     var entry: LogDetails
     
@@ -165,31 +168,31 @@ struct MemoryLogEntryViewer: View {
         Label {
             ScrollView {
                 Text(entry.message)
-                    .font(appearance.fonts.body)
-                    .foregroundColor(appearance.colors.text)
+                    .font(tokens.fonts.body)
+                    .foregroundColor(Color(tokens.colors.textPrimary))
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
         } icon: {
             iconView
         }
-        .padding(.horizontal)
+        .padding(.horizontal, tokens.layout.spacingMd)
     }
     
     private var iconView: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: tokens.layout.spacingMd) {
             switch entry.level {
             case .debug:
                 Image(systemName: "ladybug")
-                    .foregroundColor(appearance.colors.text)
+                    .foregroundColor(Color(tokens.colors.textPrimary))
             case .info:
                 Image(systemName: "info.circle")
-                    .foregroundColor(Color.blue)
+                    .foregroundColor(Color(tokens.colors.accentPrimary))
             case .warning:
                 Image(systemName: "exclamationmark.circle")
-                    .foregroundColor(Color.yellow)
+                    .foregroundColor(Color(tokens.colors.accentWarning))
             case .error:
                 Image(systemName: "x.circle")
-                    .foregroundColor(appearance.colors.accentRed)
+                    .foregroundColor(Color(tokens.colors.accentError))
             }
             
             copyMessageView
@@ -201,7 +204,9 @@ struct MemoryLogEntryViewer: View {
             UIPasteboard.general.string = entry.message
         } label: {
             Image(systemName: "doc.on.doc")
-                .foregroundColor(Color.blue)
+                .foregroundColor(Color(tokens.colors.accentPrimary))
         }
     }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
