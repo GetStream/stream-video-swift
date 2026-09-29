@@ -213,7 +213,7 @@ struct DemoTranscriptionAndClosedCaptionsButtonView: View {
                 Label {
                     Text(value.description)
                 } icon: {
-                    Image(systemName: "checkmark")
+                    videoAppearance.images.checkmark
                 }
             } else {
                 Text(value.description)

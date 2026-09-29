@@ -9,10 +9,6 @@ import SwiftUI
 
 struct ChatModifier: ViewModifier {
 
-    @Injected(\.images) var images
-    @Injected(\.fonts) var fonts
-    @Injected(\.colors) var colors
-
     @ObservedObject var viewModel: CallViewModel
     @ObservedObject var chatViewModel: DemoChatViewModel
 

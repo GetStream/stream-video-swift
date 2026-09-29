@@ -173,7 +173,7 @@ private struct DemoMoreLogsAndGleapButtonView: View {
     @State private var activeLogsTask: Task<Void, Error>?
 
     var body: some View {
-        HStack {
+        HStack(spacing: InjectedValues[\.videoAppearance].tokens.layout.spacingXs) {
             gleapButtonView
             logsViewButtonView
         }
