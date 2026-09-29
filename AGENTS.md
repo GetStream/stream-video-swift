@@ -142,7 +142,7 @@ Typical substitutions from the lobby pass:
 
 - **StreamCore** / **StreamCoreUI** from [`stream-core-swift`](https://github.com/GetStream/stream-core-swift.git) (revision pin until tokens ship in a tag)
 - **swift-protobuf** (exact 1.30.0)
-- **stream-video-swift-webrtc** (exact 145.15.0)
+- **stream-video-swift-webrtc** (exact 145.17.0)
 
 Do not add new third-party deps without discussion.
 
