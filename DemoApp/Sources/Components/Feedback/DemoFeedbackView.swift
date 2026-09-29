@@ -20,7 +20,6 @@ struct DemoFeedbackView: View {
 
     private weak var call: Call?
     private var dismiss: () -> Void
-    private var isSubmitEnabled: Bool { !email.isEmpty && !isSubmitting }
 
     init(_ call: Call, dismiss: @escaping () -> Void) {
         self.call = call
@@ -29,103 +28,62 @@ struct DemoFeedbackView: View {
 
     var body: some View {
         ScrollView {
-            VStack(spacing: tokens.layout.spacing2xl) {
+            VStack(spacing: tokens.layout.spacingXl) {
                 Image("feedbackLogo")
 
                 VStack(spacing: tokens.layout.spacingXs) {
                     Text("How is your call going?")
-                        .font(tokens.fonts.headline)
+                        .font(tokens.fonts.title3.bold())
                         .foregroundColor(Color(tokens.colors.textPrimary))
                         .lineLimit(1)
 
                     Text("All feedback is celebrated!")
-                        .font(tokens.fonts.subheadline)
+                        .font(tokens.fonts.body)
                         .foregroundColor(Color(tokens.colors.textSecondary))
                         .lineLimit(2)
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
                 .multilineTextAlignment(.center)
 
-                VStack(spacing: tokens.layout.spacingXl) {
-                    VStack(spacing: tokens.layout.spacingMd) {
-                        TextField(
-                            "Email Address *",
-                            text: $email
-                        )
-                        .textFieldStyle(DemoTextfieldStyle())
+                VStack(spacing: tokens.layout.spacingMd) {
+                    TextField(
+                        "Email Address *",
+                        text: $email
+                    )
+                    .textFieldStyle(DemoTextfieldStyle())
 
-                        DemoTextEditor(text: $comment, placeholder: "Message")
-                    }
+                    DemoTextEditor(text: $comment, placeholder: "Message")
 
                     HStack(spacing: tokens.layout.spacingXs) {
                         Text("Rate Quality")
-                            .font(tokens.fonts.body)
-                            .foregroundColor(Color(tokens.colors.textSecondary))
+                            .font(tokens.fonts.bodyBold)
+                            .foregroundColor(Color(tokens.colors.textPrimary))
                             .frame(maxWidth: .infinity, alignment: .leading)
 
                         DemoStarRatingView(rating: $rating)
                     }
                 }
 
-                HStack(spacing: tokens.layout.spacingXs) {
-                    Button {
+                HStack(spacing: tokens.layout.spacingMd) {
+                    DemoFeedbackButton(title: "Contact Us", style: .secondary) {
                         resignFirstResponder()
                         openURL(.init(string: "https://getstream.io/video/#contact")!)
-                    } label: {
-                        Text("Contact Us")
                     }
-                    .frame(maxWidth: .infinity)
-                    .foregroundColor(Color(tokens.colors.buttonSecondaryText))
-                    .padding(.vertical, tokens.layout.spacingXxs)
-                    .clipShape(Capsule())
-                    .overlay(Capsule().stroke(Color(tokens.colors.buttonSecondaryBorder), lineWidth: 1))
 
-                    Button {
-                        resignFirstResponder()
-                        isSubmitting = true
-                        Task {
-                            do {
-                                try await call?.collectUserFeedback(
-                                    rating: rating,
-                                    reason: """
-                                    \(email)
-                                    \(comment)
-                                    """
-                                )
-                                Task { @MainActor in
-                                    dismiss()
-                                }
-                                isSubmitting = false
-                            } catch {
-                                log.error(error)
-                                dismiss()
-                                isSubmitting = false
-                            }
-                        }
-                    } label: {
-                        if isSubmitting {
-                            ProgressView()
-                        } else {
-                            Text("Submit")
-                        }
-                    }
-                    .frame(maxWidth: .infinity)
-                    .foregroundColor(
-                        Color(isSubmitEnabled ? tokens.colors.buttonPrimaryTextOnAccent : tokens.colors.textDisabled)
+                    DemoFeedbackButton(
+                        title: "Submit",
+                        style: .primary,
+                        isEnabled: !email.isEmpty,
+                        isLoading: isSubmitting,
+                        action: submit
                     )
-                    .padding(.vertical, tokens.layout.spacingXxs)
-                    .background(
-                        Color(isSubmitEnabled ? tokens.colors.buttonPrimaryBackground : tokens.colors.backgroundUtilityDisabled)
-                    )
-                    .disabled(!isSubmitEnabled)
-                    .clipShape(Capsule())
                 }
-
-                Spacer()
             }
-            .padding(.horizontal, tokens.layout.spacingMd)
+            .padding(tokens.layout.spacingMd)
         }
         .withModalNavigationBar(title: "", closeAction: dismiss)
+        .background(Color(tokens.colors.backgroundCoreElevation1).edgesIgnoringSafeArea(.all))
+        .modifier(DemoSheetBackgroundModifier(color: tokens.colors.backgroundCoreElevation1))
         .toastView(toast: $toast)
         .onAppear { checkIfDisconnectionErrorIsAvailable() }
     }
@@ -134,6 +92,30 @@ struct DemoFeedbackView: View {
 
     private var tokens: DesignSystemTokens { videoAppearance.tokens }
 
+    private func submit() {
+        resignFirstResponder()
+        isSubmitting = true
+        Task {
+            do {
+                try await call?.collectUserFeedback(
+                    rating: rating,
+                    reason: """
+                    \(email)
+                    \(comment)
+                    """
+                )
+                Task { @MainActor in
+                    dismiss()
+                }
+                isSubmitting = false
+            } catch {
+                log.error(error)
+                dismiss()
+                isSubmitting = false
+            }
+        }
+    }
+
     @MainActor
     func checkIfDisconnectionErrorIsAvailable() {
         if call?.state.disconnectionError is ClientError.NetworkNotAvailable {
@@ -141,6 +123,91 @@ struct DemoFeedbackView: View {
                 style: .error,
                 message: "Your call was ended because it seems your internet connection is down."
             )
+        }
+    }
+}
+
+private struct DemoFeedbackButton: View {
+
+    enum Style { case primary, secondary }
+
+    @Injected(\.videoAppearance) private var videoAppearance
+
+    var title: String
+    var style: Style
+    var isEnabled = true
+    var isLoading = false
+    var action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Group {
+                if isLoading {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: foregroundColor))
+                } else {
+                    Text(title)
+                        .font(tokens.fonts.bodyBold)
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: tokens.layout.buttonVisualHeightLg)
+            .foregroundColor(foregroundColor)
+            .background(Capsule().fill(backgroundColor))
+            .overlay(Capsule().stroke(borderColor, lineWidth: 1))
+            .contentShape(Capsule())
+        }
+        .buttonStyle(DemoFeedbackButtonStyle())
+        .disabled(!isEnabled || isLoading)
+    }
+
+    private var foregroundColor: Color {
+        switch style {
+        case .primary:
+            return Color(isEnabled ? tokens.colors.textOnAccent : tokens.colors.textDisabled)
+        case .secondary:
+            return Color(tokens.colors.buttonSecondaryText)
+        }
+    }
+
+    private var backgroundColor: Color {
+        switch style {
+        case .primary:
+            return Color(isEnabled ? tokens.colors.accentPrimary : tokens.colors.backgroundUtilityDisabled)
+        case .secondary:
+            return Color(tokens.colors.buttonSecondaryBackground)
+        }
+    }
+
+    private var borderColor: Color {
+        switch style {
+        case .primary:
+            return backgroundColor
+        case .secondary:
+            return Color(tokens.colors.buttonSecondaryBorder)
+        }
+    }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
+}
+
+private struct DemoFeedbackButtonStyle: ButtonStyle {
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .opacity(configuration.isPressed ? 0.7 : 1)
+    }
+}
+
+private struct DemoSheetBackgroundModifier: ViewModifier {
+
+    var color: UIColor
+
+    func body(content: Content) -> some View {
+        if #available(iOS 16.4, *) {
+            content.presentationBackground(Color(color))
+        } else {
+            content
         }
     }
 }
