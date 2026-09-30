@@ -660,11 +660,8 @@ class CallController: @unchecked Sendable {
 
     // MARK: - private
 
-    /// What made the caller join after its ring, or `nil` for any other
-    /// join.
-    ///
-    /// The ringing call is still set when the join starts: it clears once
-    /// the call becomes active.
+    /// Source of an outgoing ring's acceptance, or nil for other joins.
+    /// Ringing clears only after the call becomes active.
     @MainActor
     private func ringJoinSource() -> ClientEventJoinSource? {
         guard

@@ -152,11 +152,8 @@ public class CallState: ObservableObject {
     /// help customize logic, analytics, and UI based on how the call was started.
     var joinSource: JoinSource?
 
-    /// The ring session whose first accept came from polling the ring state
-    /// instead of a WebSocket event. Reported on the caller's join.
-    ///
-    /// Never reset: it is compared with the current session, and every ring
-    /// gets a new one, so a value from an earlier ring never matches.
+    /// Identifies a polled acceptance for the caller's join telemetry.
+    /// Compared with the current session ID, so it need not be reset.
     private(set) var sessionIdWithPolledAccept: String?
 
     private var durationCancellable: AnyCancellable?
@@ -185,8 +182,7 @@ public class CallState: ObservableObject {
         case .typeCallHLSBroadcastingStoppedEvent:
             egress?.broadcasting = false
         case let .typeCallCreatedEvent(event):
-            // The creation snapshot can arrive after create() has hydrated
-            // the ring session. Keep that newer state for the same creation.
+            // A delayed creation snapshot must not clear the hydrated session.
             if session != nil,
                event.call.session == nil,
                event.call.createdAt == createdAt {
@@ -501,13 +497,8 @@ public class CallState: ObservableObject {
         ingress = Ingress(rtmp: rtmp)
     }
 
-    /// Merges a polled ring state into ``session``.
-    ///
-    /// Only adds: an outcome the WebSocket already delivered is never
-    /// removed. A response for another session is ignored.
+    /// Adds ring outcomes without removing updates received over WebSocket.
     internal func update(from ringState: GetCallRingStateResponse) {
-        // The poll can answer for an earlier ring of the same call, which
-        // had another session.
         guard let session, session.id == ringState.sessionId else {
             return
         }
@@ -520,7 +511,6 @@ public class CallState: ObservableObject {
                 uniquingKeysWith: keepCurrent
             ),
             anonymousParticipantCount: session.anonymousParticipantCount,
-            // A session ends with its call.
             endedAt: session.endedAt
                 ?? ringState.sessionEndedAt
                 ?? ringState.callEndedAt,
@@ -541,13 +531,10 @@ public class CallState: ObservableObject {
             timerEndsAt: session.timerEndsAt
         )
 
-        // The first accept came from the poll, so the caller joins because
-        // of it. Stored per session, so a later ring starts clean.
         if session.acceptedBy.isEmpty, !updated.acceptedBy.isEmpty {
             sessionIdWithPolledAccept = session.id
         }
-        // Published even when nothing changed: each poll lets the ringing
-        // flow act again, so a join that failed is retried, like in JS.
+        // Republish unchanged outcomes so a failed join can retry.
         self.session = updated
     }
     

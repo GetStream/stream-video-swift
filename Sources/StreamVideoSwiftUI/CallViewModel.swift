@@ -212,16 +212,9 @@ open class CallViewModel: ObservableObject {
     private var applicationLifecycleUpdates: AnyCancellable?
 
     private var ringingCancellable: AnyCancellable?
-    /// When the outgoing ring times out. Kept so a failed join can resume
-    /// the ring without extending it.
+    /// Preserves the original ring deadline when a failed join retries.
     private var ringingTimeoutDate: Date?
-    /// The rejection sent once every callee of the outgoing ring declined.
-    ///
-    /// The call keeps ringing until this request finishes, and ring state
-    /// polling republishes the session every few seconds while it rings.
-    /// On a slow network a poll could land while the request is still
-    /// running and send a second rejection. Holding the task lets
-    /// `handleRejectedEvent` skip it.
+    /// Prevents repeated polls from sending overlapping rejections.
     private var outgoingRejectionTask: Task<Void, Never>?
     private var lastScreenSharingParticipant: CallParticipant?
 
@@ -1064,11 +1057,7 @@ open class CallViewModel: ObservableObject {
             }
     }
 
-    /// Goes back to ringing after the join of an accepted outgoing call
-    /// failed, like the JS SDK. The next ring state poll sees the accept
-    /// again and retries the join.
-    ///
-    /// - Returns: `false` when the ring is already over.
+    /// Resumes ringing after a failed join, keeping the original deadline.
     private func resumeRinging(_ call: Call) -> Bool {
         guard
             streamVideo.state.ringingCall === call,
@@ -1077,8 +1066,7 @@ open class CallViewModel: ObservableObject {
             return false
         }
         setCallingState(.outgoing)
-        // The ring timer stopped when the join started. It resumes with the
-        // time left, as the Timer needs an interval above zero.
+        // Resume with remaining time; the timer requires a positive interval.
         startTimer(timeout: max(ringingTimeoutDate.timeIntervalSinceNow, 0.1))
         return true
     }
@@ -1269,8 +1257,6 @@ open class CallViewModel: ObservableObject {
             }()
             let accepted = outgoingCall.state.session?.acceptedBy.count ?? 0
             if accepted == 0, rejections >= outgoingMembersCount {
-                // A rejection is already on its way; see
-                // `outgoingRejectionTask`.
                 guard outgoingRejectionTask == nil else {
                     return
                 }
@@ -1286,8 +1272,7 @@ open class CallViewModel: ObservableObject {
                         reason: "Call rejected by all \(outgoingMembersCount) outgoing call members."
                     )
                     self?.leaveCall(reason: "unanswered")
-                    // Cleared only after leaving: by then the call no longer
-                    // rings, so no later poll can reach this branch for it.
+                    // Clear after leaving so another poll cannot reject again.
                     self?.outgoingRejectionTask = nil
                 }
             }

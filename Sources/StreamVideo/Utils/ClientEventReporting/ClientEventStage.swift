@@ -42,9 +42,7 @@ enum ClientEventJoinReason: String, Sendable, Equatable {
     case fullRejoin = "full-rejoin"
 }
 
-/// What made the caller join after its ring, sent as `source` on
-/// `CoordinatorJoin` events. It shows how often polling rescued a ring
-/// whose WebSocket event was lost.
+/// Ring acceptance source reported on the caller's `CoordinatorJoin` events.
 enum ClientEventJoinSource: String, Sendable, Equatable {
     /// The accept arrived as a WebSocket event.
     case ringWS = "ring-ws"

@@ -5,21 +5,12 @@
 import Combine
 import Foundation
 
-/// Keeps the ringing call's state current when ring events are lost.
-///
-/// Accept, reject, and end for a ring arrive as coordinator events. If one
-/// is lost, `Call.state` stays stale and the caller never joins. Each
-/// ``RingingRecoveryPolicy`` decides when to refresh the call; the adapter
-/// runs their actions on one serial queue, so refreshes never overlap.
-/// SwiftUI turns the refreshed session into the same events it already
-/// handles from the socket.
+/// Runs ringing recovery actions serially when ring events are lost.
 final class RingingCallRecoveryAdapter: @unchecked Sendable {
 
-    /// Runs one action at a time. Two refreshes that overlap can finish out
-    /// of order, and the older one would then overwrite the newer state.
+    /// Serializes fetches so responses cannot arrive out of order.
     private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
-    /// Held here because subscribing to a policy's publisher does not keep
-    /// the policy alive.
+    /// Subscriptions alone do not keep policies alive.
     private let policies: [RingingRecoveryPolicy]
     private let disposableBag = DisposableBag()
 
@@ -40,17 +31,14 @@ final class RingingCallRecoveryAdapter: @unchecked Sendable {
         streamVideo.state.$ringingCall
             .dropFirst()
             .filter { $0 == nil }
-            // Cancel synchronously: delaying this until the main queue could
-            // cancel work for a new ring that has already started.
+            // Cancel now so an old ring cannot cancel a new ring's work.
             .sink { [weak processingQueue] _ in
                 processingQueue?.cancelAllOperations()
             }
             .store(in: disposableBag)
         Publishers
             .MergeMany(policies.map(\.actionPublisher))
-            // A reconnect and a poll can both refresh an outgoing ring.
-            // Each action runs on the serial queue: fetches cannot overlap,
-            // but requests from the two policies are not deduplicated.
+            // Serialize reconnect and polling fetches without deduplicating.
             .sinkTask(queue: processingQueue) { try await $0() }
             .store(in: disposableBag)
     }

@@ -21,9 +21,8 @@ public final class VideoConfig: Sendable {
     public let usesProcessingPipeline: Bool
     public let usesNewCapturingPipeline: Bool
 
-    /// Caller-side polling for the ring outcome, used when the
-    /// `call.accepted`, `call.rejected` or `call.missed` event never
-    /// arrives. On by default; `nil` turns it off.
+    /// Polls outgoing ring outcomes when events are lost.
+    /// Enabled by default; `nil` disables polling.
     public let ringStatePolling: RingStatePollingOptions?
 
     /// Initializes a new instance of `VideoConfig` with the specified parameters.
@@ -35,8 +34,7 @@ public final class VideoConfig: Sendable {
     ///   - audioProcessingModule: Provide your own audio processing or fallback to the
     ///     default one.
     ///   - usesProcessingPipeline: Enables capture-time processing for camera frames.
-    ///   - ringStatePolling: Timings for polling the outcome of a ring the
-    ///     current user started. Pass `nil` to turn polling off.
+    ///   - ringStatePolling: Outgoing ring polling options; `nil` disables it.
     /// - Returns: A new instance of `VideoConfig`.
     public init(
         videoFilters: [VideoFilter] = [],
@@ -55,12 +53,11 @@ public final class VideoConfig: Sendable {
     }
 }
 
-/// Timings for polling the outcome of a ring the current user started.
+/// Timings for polling outgoing ring outcomes.
 public struct RingStatePollingOptions: Sendable, Equatable {
-    /// Quiet time after the ring starts, or after the last ring event,
-    /// before the first poll.
+    /// Seconds of silence after ringing or the last outcome before polling.
     public var startAfter: TimeInterval
-    /// The time between polls.
+    /// Seconds between polls.
     public var interval: TimeInterval
 
     /// The defaults match the JS and Android SDKs.

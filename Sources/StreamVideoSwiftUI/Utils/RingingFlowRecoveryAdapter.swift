@@ -98,9 +98,7 @@ final class RingingFlowRecoveryAdapter: @unchecked Sendable {
             }
 
             let currentUserId = streamVideo.user.id
-            // Checked first: a poll can report an accept and the end
-            // together, for example when the callee accepted and then hung
-            // up. Joining an ended session would fail.
+            // Handle end before acceptance to avoid joining an ended session.
             if session.endedAt != nil {
                 onEnded(
                     .ended(

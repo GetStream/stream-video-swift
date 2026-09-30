@@ -121,8 +121,7 @@ final class WebRTCCoordinator: @unchecked Sendable {
     ///   - ring: Whether a ring tone should be played.
     ///   - notify: Whether users should be notified about call join.
     ///   - source: Source that initiated the join.
-    ///   - ringJoinSource: What made the caller join after its ring, if the
-    ///     join follows a ring.
+    ///   - ringJoinSource: Acceptance source for the caller's outgoing ring.
     ///   - joinResponseHandler: A subject that receives the join completion
     ///     result once the flow finishes.
     ///   - coordinatorJoinAttemptCount: Zero-based retry index of the

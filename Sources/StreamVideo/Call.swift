@@ -303,12 +303,9 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         return response
     }
 
-    /// Returns who accepted, rejected or missed the ring of a call session.
-    /// Safe to poll: it performs no writes and emits no events.
-    ///
-    /// - Parameter callSessionId: The session to read. Defaults to the
-    ///   current one. Pass it to read a session that has already ended, as
-    ///   ending a call clears its current session.
+    /// Reads ring outcomes without changing local state or emitting events.
+    /// - Parameter callSessionId: Session to read; defaults to the current one.
+    ///   Pass an explicit ID after the current session has been cleared.
     public func getRingState(
         callSessionId: String? = nil
     ) async throws -> GetCallRingStateResponse {
@@ -325,10 +322,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         )
     }
 
-    /// Reads the ring outcome of a call session and merges it into ``state``.
-    ///
-    /// - Parameter callSessionId: The session that was rung. Pass the one
-    ///   captured when the ring started: ending the call clears the session.
+    /// Fetches and merges ring outcomes for the captured ring session.
     func updateRingState(callSessionId: String) async throws {
         let response = try await getRingState(callSessionId: callSessionId)
         await state.update(from: response)

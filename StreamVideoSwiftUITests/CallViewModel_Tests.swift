@@ -365,7 +365,6 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
 
     func test_outgoingCall_acceptedJoinFails_resumesRingingAndRetriesOnNextAccept(
     ) async throws {
-        // Given
         await prepare()
         subject.startCall(
             callType: .default,
@@ -377,26 +376,21 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         streamVideo.state.ringingCall = mockCall
         mockCall.stubbedJoinError = ClientError("join failed")
 
-        // When
         processAcceptedEvent()
 
-        // Then
         await fulfilmentInMainActor {
             self.mockCall.timesCalled(.join) == 1
         }
         await assertCallingState(.outgoing)
         XCTAssertNil(subject.error)
 
-        // When
         mockCall.stubbedJoinError = nil
         processAcceptedEvent()
 
-        // Then
         await assertCallingState(.inCall)
     }
 
     func test_outgoingCall_rejectedAgainWhileRejecting_rejectsOnce() async throws {
-        // Given
         await prepare()
         subject.startCall(
             callType: .default,
@@ -407,16 +401,13 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         await assertCallingState(.outgoing)
         mockCall.waitForRejectToResume = true
 
-        // When
         processRejectedEvent()
         await fulfilmentInMainActor { self.mockCall.timesCalled(.reject) == 1 }
         processRejectedEvent()
-        // Lets the second event reach the view model while the first
-        // rejection is still in flight.
+        // Let the second event arrive while the first rejection is pending.
         await wait(for: 0.5)
         mockCall.resumeReject()
 
-        // Then
         await assertCallingState(.idle)
         XCTAssertEqual(mockCall.timesCalled(.reject), 1)
     }
