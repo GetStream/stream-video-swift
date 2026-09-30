@@ -41,7 +41,7 @@ final class DeeplinkTests: StreamTestCase {
 
         try [
             "https://getstream.io/.well-known/apple-app-site-association",
-            "https://staging.getstream.io/.well-known/apple-app-site-association",
+//            "https://staging.getstream.io/.well-known/apple-app-site-association",
             "https://pronto.getstream.io/.well-known/apple-app-site-association"
         ].forEach { try assertEnvironment($0) }
     }

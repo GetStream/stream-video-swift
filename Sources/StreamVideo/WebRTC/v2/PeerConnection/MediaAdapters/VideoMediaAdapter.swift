@@ -49,6 +49,7 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
     ///   - videoCaptureSessionProvider: The provider for video capture
     ///     sessions.
     ///   - audioDeviceModule: The audio device module used by video capture.
+    ///   - e2ee: Shared box used to encrypt the local video sender.
     convenience init(
         sessionID: String,
         peerConnection: StreamRTCPeerConnectionProtocol,
@@ -59,7 +60,8 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
         publishOptions: [PublishOptions.VideoPublishOptions],
         subject: PassthroughSubject<TrackEvent, Never>,
         videoCaptureSessionProvider: VideoCaptureSessionProvider,
-        audioDeviceModule: AudioDeviceModule
+        audioDeviceModule: AudioDeviceModule,
+        e2ee: E2EEAttachmentContext = .init()
     ) {
         self.init(
             sessionID: sessionID,
@@ -75,7 +77,8 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
                 publishOptions: publishOptions,
                 subject: subject,
                 videoCaptureSessionProvider: videoCaptureSessionProvider,
-                audioDeviceModule: audioDeviceModule
+                audioDeviceModule: audioDeviceModule,
+                e2ee: e2ee
             ),
             subject: subject
         )

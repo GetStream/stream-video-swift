@@ -124,6 +124,12 @@ final class MockRTCPeerConnectionCoordinator:
         stubbedFunction[function] = value
     }
 
+    private func record(_ input: MockFunctionInputKey, for function: FunctionKey) {
+        _stubbedFunctionInput.mutate {
+            $0[function]?.append(input)
+        }
+    }
+
     // MARK: - Overrides
 
     var stubbedMid: [TrackType: String] = [:]
@@ -226,13 +232,11 @@ final class MockRTCPeerConnectionCoordinator:
     override func changePublishQuality(
         with event: Stream_Video_Sfu_Event_ChangePublishQuality
     ) {
-        stubbedFunctionInput[.changePublishQuality]?
-            .append(.changePublishQuality(event: event))
+        record(.changePublishQuality(event: event), for: .changePublishQuality)
     }
 
     override func didUpdateCallSettings(_ settings: CallSettings) async throws {
-        stubbedFunctionInput[.didUpdateCallSettings]?
-            .append(.didUpdateCallSettings(callSettings: settings))
+        record(.didUpdateCallSettings(callSettings: settings), for: .didUpdateCallSettings)
 
         if let result = stubbedFunction[.didUpdateCallSettings] as? Result<Void, Error> {
             switch result {
@@ -247,35 +251,27 @@ final class MockRTCPeerConnectionCoordinator:
     override func didUpdateCameraPosition(
         _ position: AVCaptureDevice.Position
     ) async throws {
-        stubbedFunctionInput[.didUpdateCameraPosition]?
-            .append(.didUpdateCameraPosition(position: position))
+        record(.didUpdateCameraPosition(position: position), for: .didUpdateCameraPosition)
     }
 
     override func restartICE() {
-        stubbedFunctionInput[.restartICE]?.append(.restartICE)
+        record(.restartICE, for: .restartICE)
     }
 
     override func close() async {
-        stubbedFunctionInput[.close]?.append(.close)
+        record(.close, for: .close)
     }
 
     override func setVideoFilter(_ videoFilter: VideoFilter?) {
-        stubbedFunctionInput[.setVideoFilter]?.append(
-            .setVideoFilter(
-                videoFilter: videoFilter
-            )
-        )
+        record(.setVideoFilter(videoFilter: videoFilter), for: .setVideoFilter)
     }
 
     override func setAudioMaxBitrate(for profile: AudioBitrateProfile) async {
-        stubbedFunctionInput[.setAudioMaxBitrate]?.append(
-            .setAudioMaxBitrate(profile)
-        )
+        record(.setAudioMaxBitrate(profile), for: .setAudioMaxBitrate)
     }
 
     override func ensureSetUpHasBeenCompleted() async throws {
-        stubbedFunctionInput[.ensureSetUpHasBeenCompleted]?
-            .append(.ensureSetUpHasBeenCompleted)
+        record(.ensureSetUpHasBeenCompleted, for: .ensureSetUpHasBeenCompleted)
 
         if let result = stubbedFunction[.ensureSetUpHasBeenCompleted] as? Error {
             throw result
@@ -286,8 +282,9 @@ final class MockRTCPeerConnectionCoordinator:
         with settings: CallSettings,
         ownCapabilities: [OwnCapability]
     ) async throws {
-        stubbedFunctionInput[.setUp]?.append(
-            .setUp(settings: settings, ownCapabilities: ownCapabilities)
+        record(
+            .setUp(settings: settings, ownCapabilities: ownCapabilities),
+            for: .setUp
         )
     }
 
@@ -296,75 +293,74 @@ final class MockRTCPeerConnectionCoordinator:
         ownCapabilities: [OwnCapability],
         includeAudio: Bool
     ) async throws {
-        stubbedFunctionInput[.beginScreenSharing]?.append(
+        record(
             .beginScreenSharing(
                 type: type,
                 ownCapabilities: ownCapabilities,
                 includeAudio: includeAudio
-            )
+            ),
+            for: .beginScreenSharing
         )
     }
 
     override func stopScreenSharing() async throws {
-        stubbedFunctionInput[.stopScreenSharing]?.append(.stopScreenSharing)
+        record(.stopScreenSharing, for: .stopScreenSharing)
     }
 
     override func focus(at point: CGPoint) async throws {
-        stubbedFunctionInput[.focus]?.append(
-            .focus(point: point)
-        )
+        record(.focus(point: point), for: .focus)
     }
 
     override func addCapturePhotoOutput(
         _ capturePhotoOutput: AVCapturePhotoOutput
     ) async throws {
-        stubbedFunctionInput[.addCapturePhotoOutput]?.append(
-            .addCapturePhotoOutput(capturePhotoOutput: capturePhotoOutput)
+        record(
+            .addCapturePhotoOutput(capturePhotoOutput: capturePhotoOutput),
+            for: .addCapturePhotoOutput
         )
     }
 
     override func removeCapturePhotoOutput(
         _ capturePhotoOutput: AVCapturePhotoOutput
     ) async throws {
-        stubbedFunctionInput[.removeCapturePhotoOutput]?.append(
-            .removeCapturePhotoOutput(capturePhotoOutput: capturePhotoOutput)
+        record(
+            .removeCapturePhotoOutput(capturePhotoOutput: capturePhotoOutput),
+            for: .removeCapturePhotoOutput
         )
     }
 
     override func addVideoOutput(
         _ videoOutput: AVCaptureVideoDataOutput
     ) async throws {
-        stubbedFunctionInput[.addVideoOutput]?.append(
-            .addVideoOutput(videoOutput: videoOutput)
+        record(
+            .addVideoOutput(videoOutput: videoOutput),
+            for: .addVideoOutput
         )
     }
 
     override func removeVideoOutput(
         _ videoOutput: AVCaptureVideoDataOutput
     ) async throws {
-        stubbedFunctionInput[.removeVideoOutput]?.append(
-            .removeVideoOutput(videoOutput: videoOutput)
+        record(
+            .removeVideoOutput(videoOutput: videoOutput),
+            for: .removeVideoOutput
         )
     }
 
     override func zoom(by factor: CGFloat) async throws {
-        stubbedFunctionInput[.zoom]?.append(
-            .zoom(factor: factor)
-        )
+        record(.zoom(factor: factor), for: .zoom)
     }
 
     override func trackInfo(
         for type: TrackType,
         collectionType: RTCPeerConnectionTrackInfoCollectionType
     ) -> [Stream_Video_Sfu_Models_TrackInfo] {
-        stubbedFunctionInput[.trackInfo]?.append(
-            .trackInfo(trackType: type)
-        )
+        record(.trackInfo(trackType: type), for: .trackInfo)
         return stubbedTrackInfo[type] ?? []
     }
 
     override func statsReport() async throws -> StreamRTCStatisticsReport {
-        stubbedFunctionInput[.statsReport]?.append(.statsReport)
+        record(.statsReport, for: .statsReport)
         return (stubbedFunction[.statsReport] as? StreamRTCStatisticsReport) ?? .init(nil)
     }
 }

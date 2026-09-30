@@ -86,6 +86,7 @@ final class CallStateMachineStageJoinedStage_Tests: StreamVideoTestCase, @unchec
 
     func test_joiningTransition_ownCapabilitiesChanged_controllerReceivesUpdate() async {
         await MainActor.run {
+            call.callController.call = nil
             call.state.ownCapabilities = [.sendAudio]
         }
 
