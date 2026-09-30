@@ -15,14 +15,14 @@ set -ex
 # remove old generated code
 rm -rf "$PROJECT_ROOT/Sources/StreamVideo/OpenApi/generated/Models/"*
 
-# cd into chat-manager module dir so go run can find go.mod, use absolute paths for outputs
+# cd into the openapi module dir so go run can find go.mod, use absolute paths for outputs
 (
-  cd "$SOURCE_PATH/projects/chat-manager" &&
-  go run . openapi generate-spec -products video -version v2 -clientside -output "$SOURCE_PATH/releases/v2/video-openapi-clientside" -renamed-models "$SCRIPT_DIR/renamed-models.json" &&
+  cd "$SOURCE_PATH/tools/openapi" &&
+  go run . generate-spec -products video -version v2 -clientside -output "$SOURCE_PATH/releases/v2/video-openapi-clientside" -renamed-models "$SCRIPT_DIR/renamed-models.json" &&
   # number_as_float keeps JSON numbers as Float. The generator defaults to Double
   # since Float truncates float64s, but our generated models are public, so
   # widening them would be a source and binary break.
-  go run . openapi generate-client --language swift --spec "$SOURCE_PATH/releases/v2/video-openapi-clientside.yaml" --opt number_as_float=true --output "$PROJECT_ROOT/Sources/StreamVideo/OpenApi/generated/"
+  go run . generate-client --language swift --spec "$SOURCE_PATH/releases/v2/video-openapi-clientside.yaml" --opt number_as_float=true --output "$PROJECT_ROOT/Sources/StreamVideo/OpenApi/generated/"
 )
 
 # Shared OpenAPI types are provided by StreamCore.

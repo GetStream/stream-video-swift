@@ -104,6 +104,9 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
                     try Task.checkCancellation()
 
+                    let (joinResponsePublisher, subscriberEventBucket) =
+                        prepareForJoiningRequest(sfuAdapter: sfuAdapter)
+
                     await sfuAdapter.sendJoinRequest(
                         WebRTCJoinRequestFactory(
                             capabilities: coordinator.stateAdapter.clientCapabilities.map(\.rawValue)
@@ -155,6 +158,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         coordinator: coordinator,
                         sfuAdapter: sfuAdapter,
                         isFastReconnecting: isFastReconnecting,
+                        joinResponsePublisher: joinResponsePublisher,
+                        subscriberEventBucket: subscriberEventBucket,
                         shouldReportWebSocketJoin: shouldReportWebSocketJoin
                     )
 
@@ -195,6 +200,9 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
                     try Task.checkCancellation()
 
+                    let (joinResponsePublisher, subscriberEventBucket) =
+                        prepareForJoiningRequest(sfuAdapter: sfuAdapter)
+
                     await sfuAdapter.sendJoinRequest(
                         WebRTCJoinRequestFactory(
                             capabilities: coordinator.stateAdapter.clientCapabilities.map(\.rawValue)
@@ -231,6 +239,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         coordinator: coordinator,
                         sfuAdapter: sfuAdapter,
                         isFastReconnecting: false,
+                        joinResponsePublisher: joinResponsePublisher,
+                        subscriberEventBucket: subscriberEventBucket,
                         shouldReportWebSocketJoin: true
                     )
 
@@ -263,6 +273,9 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     }
 
                     try Task.checkCancellation()
+
+                    let (joinResponsePublisher, subscriberEventBucket) =
+                        prepareForJoiningRequest(sfuAdapter: sfuAdapter)
 
                     await sfuAdapter.sendJoinRequest(
                         WebRTCJoinRequestFactory(
@@ -299,6 +312,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         coordinator: coordinator,
                         sfuAdapter: sfuAdapter,
                         isFastReconnecting: false,
+                        joinResponsePublisher: joinResponsePublisher,
+                        subscriberEventBucket: subscriberEventBucket,
                         shouldReportWebSocketJoin: true
                     )
 
@@ -350,6 +365,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
             coordinator: WebRTCCoordinator,
             sfuAdapter: SFUAdapter,
             isFastReconnecting: Bool,
+            joinResponsePublisher: RelayPublisher<Stream_Video_Sfu_Event_JoinResponse, Never>,
+            subscriberEventBucket: ConsumableBucket<Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload>,
             shouldReportWebSocketJoin: Bool
         ) async throws {
             // Fast reconnects usually refresh the WebSocket transparently and
@@ -361,6 +378,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     coordinator: coordinator,
                     sfuAdapter: sfuAdapter,
                     isFastReconnecting: true,
+                    joinResponsePublisher: joinResponsePublisher,
+                    subscriberEventBucket: subscriberEventBucket,
                     shouldReportWebSocketJoin: shouldReportWebSocketJoin
                 )
                 return
@@ -370,6 +389,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 coordinator: coordinator,
                 sfuAdapter: sfuAdapter,
                 isFastReconnecting: false,
+                joinResponsePublisher: joinResponsePublisher,
+                subscriberEventBucket: subscriberEventBucket,
                 shouldReportWebSocketJoin: shouldReportWebSocketJoin
             )
         }
@@ -387,6 +408,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
             coordinator: WebRTCCoordinator,
             sfuAdapter: SFUAdapter,
             isFastReconnecting: Bool,
+            joinResponsePublisher: RelayPublisher<Stream_Video_Sfu_Event_JoinResponse, Never>,
+            subscriberEventBucket: ConsumableBucket<Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload>,
             shouldReportWebSocketJoin: Bool
         ) async throws {
             if let eventObserver = context.sfuEventObserver {
@@ -411,16 +434,10 @@ extension WebRTCCoordinator.StateMachine.Stage {
             // We create an event bucket in which we collect all SFU events
             // that will be received until the moment our PeerConnections have
             // been setup.
-            let subscriberEventBucket = ConsumableBucket(
-                sfuAdapter
-                    .publisher
-                    .eraseToAnyPublisher()
-            )
-
             try Task.checkCancellation()
 
             let joinResponse = try await observeSFUResponse(
-                sfuAdapter: sfuAdapter,
+                joinResponsePublisher: joinResponsePublisher,
                 shouldReportWebSocketJoin: shouldReportWebSocketJoin
             )
 
@@ -739,12 +756,11 @@ extension WebRTCCoordinator.StateMachine.Stage {
         ///     started for this join response.
         /// - Returns: The SFU join response.
         private func observeSFUResponse(
-            sfuAdapter: SFUAdapter,
+            joinResponsePublisher: RelayPublisher<Stream_Video_Sfu_Event_JoinResponse, Never>,
             shouldReportWebSocketJoin: Bool
         ) async throws -> Stream_Video_Sfu_Event_JoinResponse {
             do {
-                let joinResponse = try await sfuAdapter
-                    .publisher(eventType: Stream_Video_Sfu_Event_JoinResponse.self)
+                let joinResponse = try await joinResponsePublisher
                     .nextValue(timeout: WebRTCConfiguration.timeout.join)
 
                 if shouldReportWebSocketJoin {
@@ -760,5 +776,20 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 throw error
             }
         }
+    }
+
+    private func prepareForJoiningRequest(
+        sfuAdapter: SFUAdapter
+    ) -> (
+        RelayPublisher<Stream_Video_Sfu_Event_JoinResponse, Never>,
+        ConsumableBucket<Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload>
+    ) {
+        let joinResponsePublisher = sfuAdapter
+            .publisher(eventType: Stream_Video_Sfu_Event_JoinResponse.self)
+            .relay()
+        let subscriberEventBucket = ConsumableBucket(
+            sfuAdapter.publisher.eraseToAnyPublisher()
+        )
+        return (joinResponsePublisher, subscriberEventBucket)
     }
 }

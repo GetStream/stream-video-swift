@@ -107,7 +107,7 @@ final class WebRTCStatsAdapter: @unchecked Sendable, WebRTCStatsAdapting {
     /// Adapter responsible for buffering and restoring WebRTC trace events.
     private lazy var traces: WebRTCTracing = WebRTCTracesAdapter(latestReportPublisher: latestReportPublisher)
     /// Compresses raw stats reports for efficient reporting.
-    private lazy var statsCompressor = WebRTCStatsCompressor()
+    private let statsCompressor = WebRTCStatsCompressor()
 
     convenience init(
         collectionInterval: TimeInterval = 2,

@@ -46,9 +46,9 @@ public struct LocalParticipantViewModifier: ViewModifier {
                             isSilent: microphoneChecker.isSilent,
                             isPinned: localParticipant.isPinned
                         )
+                        Spacer()
 
                         if showAllInfo {
-                            Spacer()
                             ConnectionQualityIndicator(
                                 connectionQuality: localParticipant.connectionQuality
                             )
@@ -116,9 +116,9 @@ public struct LocalParticipantViewModifier_iOS13: ViewModifier {
                             isSilent: microphoneChecker.isSilent,
                             isPinned: localParticipant.isPinned
                         )
+                        Spacer()
 
                         if showAllInfo {
-                            Spacer()
                             ConnectionQualityIndicator(
                                 connectionQuality: localParticipant.connectionQuality
                             )

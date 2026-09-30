@@ -327,6 +327,7 @@
 				"Utilities/Dummy/RingSettings+Dummy.swift",
 				"Utilities/Dummy/RTCAudioStoreState+Dummy.swift",
 				"Utilities/Dummy/RTCMediaStreamTrack+dummy.swift",
+				"Utilities/Dummy/RTCStatisticsReport+Dummy.swift",
 				"Utilities/Dummy/RTMPIngress+Dummy.swift",
 				"Utilities/Dummy/ScreensharingSettings+Dummy.swift",
 				"Utilities/Dummy/SessionSettingsResponse+Dummy.swift",
@@ -3347,7 +3348,7 @@
 			repositoryURL = "https://github.com/GetStream/stream-video-swift-webrtc.git";
 			requirement = {
 				kind = exactVersion;
-				version = 145.15.0;
+				version = 145.17.0;
 			};
 		};
 		40F445C32A9E1D91004BE3DA /* XCRemoteSwiftPackageReference "stream-chat-swift-test-helpers" */ = {
