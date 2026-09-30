@@ -30,6 +30,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
         @unchecked Sendable {
         private let reason: String?
         private let disposableBag = DisposableBag()
+        private var coordinator: WebRTCCoordinator?
 
         /// Initializes a new instance of `LeavingStage`.
         /// - Parameter context: The context for the leaving stage.
@@ -38,6 +39,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
             reason: String?
         ) {
             self.reason = reason
+            coordinator = context.coordinator
             super.init(id: .leaving, context: context)
         }
 
@@ -61,11 +63,13 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
         /// Executes the leaving process.
         private func execute() {
-            Task(disposableBag: disposableBag) { [weak self] in
+            let coordinator = coordinator ?? context.coordinator
+            self.coordinator = nil
+            Task(disposableBag: disposableBag) { [weak self, coordinator] in
                 guard let self else { return }
                 do {
                     guard
-                        let coordinator = context.coordinator
+                        let coordinator
                     else {
                         throw ClientError("WebRCTAdapter instance not available.")
                     }

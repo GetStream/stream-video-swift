@@ -129,6 +129,8 @@ final class CallAudioSession: @unchecked Sendable {
     }
 
     func deactivate() async {
+        let statsAdapter = statsAdapter
+        self.statsAdapter = nil
         guard delegate != nil else {
             return
         }

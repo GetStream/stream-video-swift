@@ -614,11 +614,11 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         await subscriber?.close()
         self.publisher = nil
         self.subscriber = nil
-        self.statsAdapter = nil
         pendingDecryptors.removeAll()
         await sfuAdapter?.disconnect()
         enqueue { _ in [:] }
         set(sfuAdapter: nil)
+        self.statsAdapter = nil
         set(token: "")
         set(sessionID: "")
         set(ownCapabilities: [])
