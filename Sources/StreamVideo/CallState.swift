@@ -152,6 +152,10 @@ public class CallState: ObservableObject {
     /// help customize logic, analytics, and UI based on how the call was started.
     var joinSource: JoinSource?
 
+    /// Identifies a polled acceptance for the caller's join telemetry.
+    /// Compared with the current session ID, so it need not be reset.
+    private(set) var sessionIdWithPolledAccept: String?
+
     private var durationCancellable: AnyCancellable?
     private nonisolated let disposableBag = DisposableBag()
 
@@ -178,6 +182,13 @@ public class CallState: ObservableObject {
         case .typeCallHLSBroadcastingStoppedEvent:
             egress?.broadcasting = false
         case let .typeCallCreatedEvent(event):
+            // A delayed creation snapshot must not clear the hydrated session.
+            if session != nil,
+               event.call.session == nil,
+               event.call.createdAt == createdAt {
+                mergeMembers(event.members)
+                return
+            }
             update(from: event.call)
             mergeMembers(event.members)
         case let .typeCallDeletedEvent(event):
@@ -484,6 +495,47 @@ public class CallState: ObservableObject {
             streamKey: streamVideoSession.token.rawValue
         )
         ingress = Ingress(rtmp: rtmp)
+    }
+
+    /// Adds ring outcomes without removing updates received over WebSocket.
+    internal func update(from ringState: GetCallRingStateResponse) {
+        guard let session, session.id == ringState.sessionId else {
+            return
+        }
+
+        // Keeps the WebSocket's timestamp when both sides know the user.
+        let keepCurrent: (Date, Date) -> Date = { current, _ in current }
+        let updated = CallSessionResponse(
+            acceptedBy: session.acceptedBy.merging(
+                ringState.acceptedBy,
+                uniquingKeysWith: keepCurrent
+            ),
+            anonymousParticipantCount: session.anonymousParticipantCount,
+            endedAt: session.endedAt
+                ?? ringState.sessionEndedAt
+                ?? ringState.callEndedAt,
+            id: session.id,
+            liveEndedAt: session.liveEndedAt,
+            liveStartedAt: session.liveStartedAt,
+            missedBy: session.missedBy.merging(
+                ringState.missedBy,
+                uniquingKeysWith: keepCurrent
+            ),
+            participants: session.participants,
+            participantsCountByRole: session.participantsCountByRole,
+            rejectedBy: session.rejectedBy.merging(
+                ringState.rejectedBy,
+                uniquingKeysWith: keepCurrent
+            ),
+            startedAt: session.startedAt,
+            timerEndsAt: session.timerEndsAt
+        )
+
+        if session.acceptedBy.isEmpty, !updated.acceptedBy.isEmpty {
+            sessionIdWithPolledAccept = session.id
+        }
+        // Republish unchanged outcomes so a failed join can retry.
+        self.session = updated
     }
     
     /// Updates the current `CallSettings` if they differ from the stored value.

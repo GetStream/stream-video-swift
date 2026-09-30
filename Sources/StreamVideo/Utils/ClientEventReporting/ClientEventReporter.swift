@@ -244,6 +244,7 @@ actor ClientEventReporter: ClientEventReporting {
             screenShareStatus: details.screenShareStatus?.rawValue,
             sdkVersion: context.sdkVersion,
             sfuId: details.sfuId,
+            source: details.source?.rawValue,
             stage: stage.rawValue,
             stageId: stageId,
             timestamp: currentDate(),

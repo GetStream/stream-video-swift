@@ -303,6 +303,31 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         return response
     }
 
+    /// Reads ring outcomes without changing local state or emitting events.
+    /// - Parameter callSessionId: Session to read; defaults to the current one.
+    ///   Pass an explicit ID after the current session has been cleared.
+    public func getRingState(
+        callSessionId: String? = nil
+    ) async throws -> GetCallRingStateResponse {
+        let currentSessionId = await state.session?.id
+        guard let sessionId = callSessionId ?? currentSessionId else {
+            throw ClientError(
+                "Cannot read the ring state: the call has no session."
+            )
+        }
+        return try await coordinatorClient.getCallRingState(
+            type: callType,
+            id: callId,
+            callSessionId: sessionId
+        )
+    }
+
+    /// Fetches and merges ring outcomes for the captured ring session.
+    func updateRingState(callSessionId: String) async throws {
+        let response = try await getRingState(callSessionId: callSessionId)
+        await state.update(from: response)
+    }
+
     /// Rings the call and marks it as `StreamVideo.State.ringingCall`.
     ///
     /// The call stays in the ringing state until it is accepted,
