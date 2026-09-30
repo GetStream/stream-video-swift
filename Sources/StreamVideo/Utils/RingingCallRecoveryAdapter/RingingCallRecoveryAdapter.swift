@@ -48,8 +48,9 @@ final class RingingCallRecoveryAdapter: @unchecked Sendable {
             .store(in: disposableBag)
         Publishers
             .MergeMany(policies.map(\.actionPublisher))
-            // Each action becomes an operation on the serial queue, so the
-            // next one starts only after the previous one finishes.
+            // A reconnect and a poll can both refresh an outgoing ring.
+            // Each action runs on the serial queue: fetches cannot overlap,
+            // but requests from the two policies are not deduplicated.
             .sinkTask(queue: processingQueue) { try await $0() }
             .store(in: disposableBag)
     }

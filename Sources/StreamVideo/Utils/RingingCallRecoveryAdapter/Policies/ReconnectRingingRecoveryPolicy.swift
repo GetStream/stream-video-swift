@@ -5,11 +5,18 @@
 import Combine
 import Foundation
 
-/// Refreshes the ringing call every time the WebSocket reconnects.
+/// Refreshes an incoming or outgoing ring when the WebSocket reconnects.
 ///
-/// Events sent while the socket was down are lost, so the action reloads
-/// the call with `get()`. It does not pass `ring: true`, so callees are
-/// not paged a second time.
+/// Flow coverage:
+/// - Caller: refreshes the outgoing ring after reconnecting.
+/// - Callee: refreshes the incoming ring after reconnecting.
+///
+/// Reloads the full call with `get()` to recover events lost while offline.
+/// It works when polling is disabled or the local session is unavailable.
+/// It does not pass `ring: true`, so callees are not paged a second time.
+///
+/// Unlike polling, this policy needs a connection event. It cannot recover
+/// a dropped ring outcome while the socket still appears connected.
 final class ReconnectRingingRecoveryPolicy: RingingRecoveryPolicy {
 
     let actionPublisher: AnyPublisher<RingingRecoveryAction, Never>

@@ -7,11 +7,18 @@ import Foundation
 
 /// Polls the ring state of a ring the current user started.
 ///
-/// The WebSocket pings every 25s while a ring lasts about 30s, so a dead
-/// socket can go unnoticed for the whole ring and the caller never learns
-/// that a callee accepted. Polling fills that gap. The result is merged
-/// into `call.state.session`, where the SwiftUI ringing flow handles it the
-/// same way as a WebSocket event.
+/// Flow coverage:
+/// - Caller: polls the outgoing ring when ring events stop arriving.
+/// - Callee: does not poll incoming rings. Reconnect recovery covers them.
+///
+/// A lost ring outcome may not trigger a reconnect before the ring ends.
+/// After a quiet period, this policy reads the lightweight ring-state API
+/// until the backend's ring timeout. It requires a known session and can
+/// be disabled through `VideoConfig`.
+///
+/// Unlike reconnect recovery, polling does not need a connection event.
+/// The result is merged into `call.state.session`, where the SwiftUI
+/// ringing flow handles it the same way as a WebSocket event.
 ///
 /// `@unchecked Sendable`: the mutable state is only touched on the main
 /// actor.
