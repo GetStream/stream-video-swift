@@ -185,6 +185,14 @@ public class CallState: ObservableObject {
         case .typeCallHLSBroadcastingStoppedEvent:
             egress?.broadcasting = false
         case let .typeCallCreatedEvent(event):
+            // The creation snapshot can arrive after create() has hydrated
+            // the ring session. Keep that newer state for the same creation.
+            if session != nil,
+               event.call.session == nil,
+               event.call.createdAt == createdAt {
+                mergeMembers(event.members)
+                return
+            }
             update(from: event.call)
             mergeMembers(event.members)
         case let .typeCallDeletedEvent(event):

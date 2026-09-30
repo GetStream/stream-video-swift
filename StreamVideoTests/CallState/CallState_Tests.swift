@@ -222,6 +222,66 @@ final class CallState_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(subject.callSettings, initialCallSettings)
     }
 
+    func test_createResponse_delayedCreationEvent_keepsHydratedSession() {
+        let subject = CallState(.dummy())
+        let session = CallSessionResponse.dummy(id: "ring-session")
+        let response = CallResponse.dummy(
+            currentSessionId: session.id,
+            session: session
+        )
+        subject.update(from: GetOrCreateCallResponse(
+            call: response,
+            created: true,
+            duration: "",
+            members: [],
+            ownCapabilities: []
+        ))
+
+        subject.updateState(from: .typeCallCreatedEvent(.init(
+            call: .dummy(createdAt: response.createdAt),
+            callCid: response.cid,
+            createdAt: response.createdAt,
+            members: []
+        )))
+
+        XCTAssertEqual(subject.session, session)
+    }
+
+    func test_callCreatedEvent_withoutHydratedSession_updatesCall() {
+        let subject = CallState(.dummy())
+        let createdAt = Date(timeIntervalSince1970: 100)
+
+        subject.updateState(from: .typeCallCreatedEvent(.init(
+            call: .dummy(createdAt: createdAt),
+            callCid: "",
+            createdAt: createdAt,
+            members: []
+        )))
+
+        XCTAssertEqual(subject.createdAt, createdAt)
+        XCTAssertNil(subject.session)
+    }
+
+    func test_callCreatedEvent_newCallCreation_replacesPreviousSession() {
+        let subject = CallState(.dummy())
+        let createdAt = Date(timeIntervalSince1970: 100)
+        subject.update(from: CallResponse.dummy(
+            createdAt: createdAt,
+            session: .dummy(id: "previous-session")
+        ))
+        let newCreatedAt = createdAt.addingTimeInterval(1)
+
+        subject.updateState(from: .typeCallCreatedEvent(.init(
+            call: .dummy(createdAt: newCreatedAt),
+            callCid: "",
+            createdAt: newCreatedAt,
+            members: []
+        )))
+
+        XCTAssertEqual(subject.createdAt, newCreatedAt)
+        XCTAssertNil(subject.session)
+    }
+
     func test_update_fromCallResponse_withoutStartedSession_keepsDurationReset() {
         let subject = CallState(.dummy())
 
