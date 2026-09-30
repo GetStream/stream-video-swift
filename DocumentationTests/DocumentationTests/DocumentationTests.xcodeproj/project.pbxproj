@@ -38,6 +38,8 @@
 		40E23B9B2B67BA4100D11FC1 /* 02-push-notifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E23B9A2B67BA4100D11FC1 /* 02-push-notifications.swift */; };
 		40F18B902BEBC97F00ADF76E /* 18-call-quality-rating.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F18B8F2BEBC97F00ADF76E /* 18-call-quality-rating.swift */; };
 		40F290AB2BDFB37000DCF136 /* 16-noise-cancellation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F290AA2BDFB37000DCF136 /* 16-noise-cancellation.swift */; };
+		C92099012FD2000000000001 /* 14-high-fidelity-audio.swift in Sources */ = {isa = PBXBuildFile; fileRef = C92099012FD2000000000002 /* 14-high-fidelity-audio.swift */; };
+		C92099012FD2000000000003 /* 15-end-to-end-encryption.swift in Sources */ = {isa = PBXBuildFile; fileRef = C92099012FD2000000000004 /* 15-end-to-end-encryption.swift */; };
 		40F290AD2BDFB3CA00DCF136 /* 20-noise-cancellation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F290AC2BDFB3CA00DCF136 /* 20-noise-cancellation.swift */; };
 		40FFDC372B63E400004DA7A2 /* 08-permissions-and-moderation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC362B63E400004DA7A2 /* 08-permissions-and-moderation.swift */; };
 		40FFDC392B63E459004DA7A2 /* 09-reactions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC382B63E459004DA7A2 /* 09-reactions.swift */; };
@@ -123,6 +125,8 @@
 		40E23B9A2B67BA4100D11FC1 /* 02-push-notifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "02-push-notifications.swift"; sourceTree = "<group>"; };
 		40F18B8F2BEBC97F00ADF76E /* 18-call-quality-rating.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "18-call-quality-rating.swift"; sourceTree = "<group>"; };
 		40F290AA2BDFB37000DCF136 /* 16-noise-cancellation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "16-noise-cancellation.swift"; sourceTree = "<group>"; };
+		C92099012FD2000000000002 /* 14-high-fidelity-audio.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "14-high-fidelity-audio.swift"; sourceTree = "<group>"; };
+		C92099012FD2000000000004 /* 15-end-to-end-encryption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "15-end-to-end-encryption.swift"; sourceTree = "<group>"; };
 		40F290AC2BDFB3CA00DCF136 /* 20-noise-cancellation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "20-noise-cancellation.swift"; sourceTree = "<group>"; };
 		40FFDC362B63E400004DA7A2 /* 08-permissions-and-moderation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "08-permissions-and-moderation.swift"; sourceTree = "<group>"; };
 		40FFDC382B63E459004DA7A2 /* 09-reactions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "09-reactions.swift"; sourceTree = "<group>"; };
@@ -248,7 +252,9 @@
 				40FFDC3E2B63E734004DA7A2 /* 12-call-state.swift */,
 				845494D62DB9038900211413 /* 13-livestreaming.swift */,
 				40FFDC432B63E95D004DA7A2 /* 14-swiftui-vs-uikit.swift */,
+				C92099012FD2000000000002 /* 14-high-fidelity-audio.swift */,
 				40FFDC452B63EA54004DA7A2 /* 15-migration-from-dolby.swift */,
+				C92099012FD2000000000004 /* 15-end-to-end-encryption.swift */,
 				40F290AA2BDFB37000DCF136 /* 16-noise-cancellation.swift */,
 			);
 			path = "03-guides";
@@ -529,6 +535,8 @@
 				40AB356B2B73965D00E465CC /* 16-snapshot.swift in Sources */,
 				40FFDCA22B640741004DA7A2 /* 14-livestream-player.swift in Sources */,
 				40FFDCA42B640772004DA7A2 /* 15-long-press-to-focus.swift in Sources */,
+				C92099012FD2000000000001 /* 14-high-fidelity-audio.swift in Sources */,
+				C92099012FD2000000000003 /* 15-end-to-end-encryption.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
