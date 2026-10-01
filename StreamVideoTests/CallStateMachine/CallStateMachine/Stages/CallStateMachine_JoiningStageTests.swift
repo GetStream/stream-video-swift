@@ -774,7 +774,55 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
         cancellable.cancel()
     }
 
+    func test_execute_withRetries_joinFailsWithUnrecoverableError_doesNotRetry() async throws {
+        let context = makeJoinContext(maxRetries: 3)
+
+        try await assertJoining(
+            context,
+            joinResponse: APIError(
+                code: 109,
+                message: "the join must request e2ee",
+                statusCode: 400,
+                unrecoverable: true
+            ),
+            expectedTransition: .error
+        )
+
+        XCTAssertEqual(callController.timesCalled(.join), 1)
+    }
+
+    func test_execute_withRetries_joinFailsAfterAllRetries_removesCallFromCacheWithoutLeaving() async throws {
+        let callCache = InjectedValues[\.callCache]
+        _ = callCache.call(for: call.cId) { call }
+        defer { callCache.remove(for: call.cId) }
+
+        try await assertJoining(
+            makeJoinContext(maxRetries: 2),
+            expectedTransition: .error
+        )
+
+        let cachedCall = callCache.call(for: call.cId) { MockCall(.dummy()) }
+        XCTAssertFalse(cachedCall === call)
+        XCTAssertEqual(call.timesCalled(.leave), 0)
+    }
+
     // MARK: - Private helpers
+
+    private func makeJoinContext(maxRetries: Int) -> Call.StateMachine.Stage.Context {
+        .init(
+            call: call,
+            input: .join(
+                .init(
+                    create: true,
+                    ring: false,
+                    notify: false,
+                    source: .inApp,
+                    deliverySubject: .init(nil),
+                    retryPolicy: .init(maxRetries: maxRetries, delay: { _ in 0 })
+                )
+            )
+        )
+    }
 
     private func assertJoining(
         _ context: Call.StateMachine.Stage.Context,
