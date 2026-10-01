@@ -9,7 +9,7 @@ import SwiftUI
 
 struct DemoClosedCaptionsView: View {
 
-    @Injected(\.colors) private var colors
+    @Injected(\.videoAppearance) private var videoAppearance
 
     @ObservedObject var viewModel: CallViewModel
     @State private var items: [CallClosedCaption] = []
@@ -24,27 +24,29 @@ struct DemoClosedCaptionsView: View {
                 if items.isEmpty {
                     EmptyView()
                 } else {
-                    VStack {
+                    VStack(spacing: tokens.layout.spacingXs) {
                         ForEach(items, id: \.hashValue) { item in
-                            HStack(alignment: .top) {
+                            HStack(alignment: .top, spacing: tokens.layout.spacingXs) {
                                 Text(item.speakerId)
-                                    .foregroundColor(.init(colors.textLowEmphasis))
+                                    .foregroundColor(Color(tokens.colors.textOnAccent))
 
                                 Text(item.text)
                                     .lineLimit(3)
-                                    .foregroundColor(colors.text)
+                                    .foregroundColor(Color(tokens.colors.textOnAccent))
                                     .frame(maxWidth: .infinity)
                             }
                             .transition(.asymmetric(insertion: .move(edge: .bottom), removal: .move(edge: .top)))
                         }
                     }
-                    .padding(.horizontal)
-                    .padding(.vertical, 8)
-                    .background(Color.black.opacity(0.75))
+                    .padding(.horizontal, tokens.layout.spacingMd)
+                    .padding(.vertical, tokens.layout.spacingXs)
+                    .background(Color(tokens.colors.backgroundCoreOverlayDarkStrong))
                     .animation(.default, value: items)
                 }
             }
             .onReceive(viewModel.call?.state.$closedCaptions) { items = $0 }
         }
     }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }

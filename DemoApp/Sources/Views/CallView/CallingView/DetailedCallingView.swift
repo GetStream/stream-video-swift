@@ -21,7 +21,7 @@ struct DetailedCallingView<Factory: ViewFactory>: View {
     }
 
     @Injected(\.streamVideo) var streamVideo
-    @Injected(\.appearance) var appearance
+    @Injected(\.videoAppearance) var videoAppearance
 
     @ObservedObject var viewModel: CallViewModel
     @ObservedObject private var appState = AppState.shared
@@ -89,15 +89,17 @@ struct DetailedCallingView<Factory: ViewFactory>: View {
         self.viewModel = viewModel
     }
 
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
+
     var body: some View {
-        VStack {
+        VStack(spacing: tokens.layout.spacingXs) {
             DemoCallingTopView(callViewModel: viewModel)
 
             VStack(spacing: 0) {
-                HStack {
+                HStack(spacing: tokens.layout.spacingXs) {
                     TextField("Call ID", text: $text)
-                        .foregroundColor(appearance.colors.text)
-                        .padding(.all, 12)
+                        .foregroundColor(Color(tokens.colors.inputTextDefault))
+                        .padding(.all, tokens.layout.spacingSm)
                         .accessibilityIdentifier("callId")
                         .disabled(isAnonymous)
 
@@ -111,9 +113,9 @@ struct DetailedCallingView<Factory: ViewFactory>: View {
                             )
                         } label: {
                             Image(systemName: "arrow.triangle.2.circlepath")
-                                .foregroundColor(.init(appearance.colors.textLowEmphasis))
+                                .foregroundColor(Color(tokens.colors.inputTextIcon))
                         }
-                        .padding(.trailing)
+                        .padding(.trailing, tokens.layout.spacingMd)
                     }
                 }
 
@@ -124,12 +126,15 @@ struct DetailedCallingView<Factory: ViewFactory>: View {
                         }
                     }
                     .pickerStyle(.segmented)
-                    .padding(8)
+                    .padding(tokens.layout.spacingXs)
                 }
             }
-            .background(Color(appearance.colors.background))
-            .clipShape(RoundedRectangle(cornerRadius: 8))
-            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(appearance.colors.textLowEmphasis), lineWidth: 1))
+            .background(Color(tokens.colors.backgroundCoreSurfaceDefault))
+            .clipShape(RoundedRectangle(cornerRadius: tokens.layout.radiusMd))
+            .overlay(
+                RoundedRectangle(cornerRadius: tokens.layout.radiusMd)
+                    .stroke(Color(tokens.colors.borderCoreDefault), lineWidth: 1)
+            )
 
             if callAction == .startCall {
                 participantsListView
@@ -242,14 +247,14 @@ struct DetailedCallingView<Factory: ViewFactory>: View {
                     } icon: {
                         AppUserView(user: participant)
                     }
-                    .foregroundColor(appearance.colors.text)
+                    .foregroundColor(Color(tokens.colors.textPrimary))
                     .accessibilityIdentifier("participantItem")
                 }
             } header: {
-                HStack {
+                HStack(spacing: tokens.layout.spacingXs) {
                     Text("Built-In")
                     Spacer()
-                    HStack {
+                    HStack(spacing: tokens.layout.spacingXs) {
                         callSettingsView
                         Button {
                             addUserShown = true
@@ -257,12 +262,12 @@ struct DetailedCallingView<Factory: ViewFactory>: View {
                             Image(systemName: "plus")
                         }
                     }
-                    .foregroundColor(appearance.colors.text)
+                    .foregroundColor(Color(tokens.colors.textPrimary))
                 }
             }
         }
         .listStyle(.plain)
-        .background(Color.clear)
+        .background(Color(tokens.colors.backgroundCoreApp))
         .frame(maxWidth: .infinity, alignment: .leading)
         .sheet(isPresented: $addUserShown, onDismiss: {}) {
             DemoAddUserView()

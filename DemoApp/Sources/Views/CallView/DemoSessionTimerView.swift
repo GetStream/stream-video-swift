@@ -8,18 +8,17 @@ import SwiftUI
 
 struct DemoSessionTimerView: View {
     
-    @Injected(\.colors) var colors
-    @Injected(\.fonts) var fonts
+    @Injected(\.videoAppearance) var videoAppearance
     @Injected(\.formatters.mediaDuration) private var formatter: MediaDurationFormatter
 
     @ObservedObject var sessionTimer: SessionTimer
     
     var body: some View {
-        VStack {
-            HStack {
+        VStack(spacing: 0) {
+            HStack(spacing: tokens.layout.spacingXs) {
                 if let duration = formatter.format(sessionTimer.secondsUntilEnd) {
                     Text("Call will end in \(duration)")
-                        .font(fonts.body.monospacedDigit())
+                        .font(tokens.fonts.body.monospacedDigit())
                         .minimumScaleFactor(0.2)
                         .lineLimit(1)
                 } else {
@@ -31,14 +30,14 @@ struct DemoSessionTimerView: View {
                         sessionTimer.extendCallDuration()
                     }, label: {
                         Text("Extend for \(Int(sessionTimer.extensionTime / 60)) min")
-                            .bold()
+                            .font(tokens.fonts.bodyBold)
                     })
                 }
             }
-            .foregroundColor(Color(colors.callDurationColor))
-            .padding(.horizontal)
-            .padding(.vertical, 4)
-            .background(Color(colors.participantBackground))
+            .foregroundColor(Color(tokens.colors.textPrimary))
+            .padding(.horizontal, tokens.layout.spacingMd)
+            .padding(.vertical, tokens.layout.spacingXxs)
+            .background(Color(tokens.colors.backgroundCoreSurfaceDefault))
             .clipShape(Capsule())
             .frame(height: 60)
             .padding(.top, 80)
@@ -46,4 +45,6 @@ struct DemoSessionTimerView: View {
             Spacer()
         }
     }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }

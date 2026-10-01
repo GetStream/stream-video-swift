@@ -29,7 +29,7 @@ struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
     }
 
     var body: some View {
-        VStack {
+        VStack(spacing: tokens.layout.spacingXs) {
             viewFactory.makeCallTopView(viewModel: viewModel)
 
             Group {
@@ -65,7 +65,7 @@ struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
 
     @ViewBuilder
     private var sharePromptView: some View {
-        VStack {
+        VStack(spacing: 0) {
             Spacer()
 
             Group {
@@ -75,7 +75,7 @@ struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
                             isSharePromptVisible.toggle()
                         }
                     } label: {
-                        HStack {
+                        HStack(spacing: tokens.layout.spacingXs) {
                             Text("Your Meeting is live!")
 
                             Spacer()
@@ -139,11 +139,11 @@ struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
 
     @ViewBuilder
     private var inviteOthersView: some View {
-        VStack {
+        VStack(spacing: tokens.layout.spacingXs) {
             Button {
                 isInviteViewVisible = true
             } label: {
-                HStack {
+                HStack(spacing: tokens.layout.spacingXs) {
                     Label(
                         title: { Text("Add Others").font(tokens.fonts.bodyBold) },
                         icon: { Image(systemName: "person.fill.badge.plus") }
@@ -163,11 +163,11 @@ struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
 
     @ViewBuilder
     private var copyLinkView: some View {
-        VStack {
+        VStack(spacing: tokens.layout.spacingXs) {
             Button {
                 UIPasteboard.general.string = callLink
             } label: {
-                HStack {
+                HStack(spacing: tokens.layout.spacingXs) {
                     Label(
                         title: {
                             Text("Call id: \(Text(callId).font(tokens.fonts.caption1).fontWeight(.medium))").lineLimit(1)
@@ -191,7 +191,7 @@ struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
 
     @ViewBuilder
     private var qrCodeView: some View {
-        VStack {
+        VStack(spacing: tokens.layout.spacingXs) {
             Group {
                 QRCodeView(text: callLink)
                     .frame(width: 100, height: 100, alignment: .center)

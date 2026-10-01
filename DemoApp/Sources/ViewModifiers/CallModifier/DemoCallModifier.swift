@@ -9,8 +9,6 @@ import SwiftUI
 
 struct DemoCallModifier<Factory: ViewFactory>: ViewModifier {
 
-    @Injected(\.appearance) private var appearance
-
     var viewFactory: Factory
     var viewModel: CallViewModel
     var chatViewModel: DemoChatViewModel
