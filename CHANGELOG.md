@@ -4,6 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### 🔄 Changed
+
+# [1.54.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.54.0)
+_October 01, 2026_
+
 ### ✅ Added
 - Added framed AES-GCM end-to-end encryption via `Call.setE2EEManager(_:)` and `EncryptionManager`. Attach the manager before `join()`, or pass `nil` to detach it. [#1249](https://github.com/GetStream/stream-video-swift/pull/1249)
 - `Call.create`, `CallViewModel.startCall`, `joinCall`, and `joinAndRingCall` accept optional `encryption` settings so get-or-create can set mode `auto-on`. [#1249](https://github.com/GetStream/stream-video-swift/pull/1249)
