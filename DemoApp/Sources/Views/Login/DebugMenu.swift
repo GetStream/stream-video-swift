@@ -11,7 +11,7 @@ import SwiftUI
 @MainActor
 struct DebugMenu: View {
 
-    @Injected(\.colors) var colors
+    @Injected(\.videoAppearance) var videoAppearance
 
     private var appState = AppState.shared
     @ObservedObject private var encryptionKeys = AppEnvironment.EncryptionKeys.shared
@@ -291,7 +291,7 @@ struct DebugMenu: View {
                             Label {
                                 Text("Clear")
                             } icon: {
-                                Image(systemName: "xmark")
+                                videoAppearance.images.xmark
                             }
                         }
                     }
@@ -338,7 +338,7 @@ struct DebugMenu: View {
 
         } label: {
             Image(systemName: "gearshape.fill")
-                .foregroundColor(colors.text)
+                .foregroundColor(Color(videoAppearance.tokens.colors.textPrimary))
         }
         .sheet(isPresented: $isLogsViewerVisible) {
             NavigationView {
@@ -434,7 +434,7 @@ struct DebugMenu: View {
                 Label {
                     Text("Custom (\(apiKey))")
                 } icon: {
-                    Image(systemName: "checkmark")
+                    videoAppearance.images.checkmark
                 }
             }
         } else {
@@ -455,7 +455,7 @@ struct DebugMenu: View {
                 Label {
                     Text("Custom (\(value)\")")
                 } icon: {
-                    Image(systemName: "checkmark")
+                    videoAppearance.images.checkmark
                 }
             }
         } else {
@@ -476,7 +476,7 @@ struct DebugMenu: View {
                 Label {
                     Text("Custom (\(value)\")")
                 } icon: {
-                    Image(systemName: "checkmark")
+                    videoAppearance.images.checkmark
                 }
             }
         } else {
@@ -497,7 +497,7 @@ struct DebugMenu: View {
                 Label {
                     Text("Custom (\(value)\")")
                 } icon: {
-                    Image(systemName: "checkmark")
+                    videoAppearance.images.checkmark
                 }
             }
         } else {
@@ -552,7 +552,7 @@ struct DebugMenu: View {
                             Text(item.title)
                         } icon: {
                             currentValue == item
-                                ? AnyView(Image(systemName: "checkmark"))
+                                ? AnyView(videoAppearance.images.checkmark)
                                 : AnyView(EmptyView())
                         }
                     }
@@ -586,7 +586,7 @@ struct DebugMenu: View {
                             Text(item.title)
                         } icon: {
                             currentValues.contains(item)
-                                ? AnyView(Image(systemName: "checkmark"))
+                                ? AnyView(videoAppearance.images.checkmark)
                                 : AnyView(EmptyView())
                         }
                     }
