@@ -178,16 +178,18 @@ private struct DemoCallDurationView: View {
         .onReceive(viewModel.call?.state.$duration) { duration = $0 }
     }
 
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
+
     @ViewBuilder
     private var inCallChip: some View {
         if duration > 0, let formatted = formatter.format(duration) {
-            HStack(spacing: layout.spacingXxs) {
+            HStack(spacing: tokens.layout.spacingXxs) {
                 if isEncrypted {
                     Image(systemName: lockSymbol)
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .frame(width: 12)
-                        .foregroundColor(Color(colors.accentSuccess))
+                        .foregroundColor(Color(tokens.colors.accentSuccess))
                         .accessibility(identifier: "e2eeEncryptedBadge")
                 }
                 if viewModel.recordingState == .recording {
@@ -195,18 +197,18 @@ private struct DemoCallDurationView: View {
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .frame(width: 12)
-                        .foregroundColor(Color(colors.accentError))
+                        .foregroundColor(Color(tokens.colors.accentError))
                 }
                 Text(formatted)
-                    .font(fonts.bodyBold.monospacedDigit())
-                    .foregroundColor(Color(colors.textPrimary))
+                    .font(tokens.fonts.bodyBold.monospacedDigit())
+                    .foregroundColor(Color(tokens.colors.textPrimary))
                     .minimumScaleFactor(0.2)
                     .lineLimit(1)
                     .layoutPriority(2)
             }
-            .padding(.horizontal, layout.spacingMd)
-            .padding(.vertical, layout.spacingXxs)
-            .background(Color(colors.backgroundCoreSurfaceDefault))
+            .padding(.horizontal, tokens.layout.spacingMd)
+            .padding(.vertical, tokens.layout.spacingXxs)
+            .background(Color(tokens.colors.backgroundCoreSurfaceDefault))
             .clipShape(Capsule())
             .accessibility(
                 identifier: viewModel.recordingState == .recording
