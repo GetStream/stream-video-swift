@@ -252,6 +252,23 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         await fulfilmentInMainActor { self.subject.call?.cId == self.mockCall.cId }
     }
 
+    func test_callKitJoin_idleAfterActiveCallWasCleared_resetsCallingStateAndCall() async {
+        let callKitService = MockCallKitService()
+        InjectedValues[\.callKitService] = callKitService
+        callKitService.send(.joining(mockCall))
+        subject = .init()
+        await assertCallingState(.joining)
+
+        subject.setActiveCall(nil)
+        XCTAssertEqual(subject.callingState, .joining)
+        XCTAssertNil(streamVideo.state.activeCall)
+
+        callKitService.send(.idle)
+
+        await assertCallingState(.idle)
+        await fulfilmentInMainActor { self.subject.call == nil }
+    }
+
     func test_reconnectionStatusMigratingThenConnected_keepsCallingStateJoining() async {
         // Given
         await prepareMediaScenario()
