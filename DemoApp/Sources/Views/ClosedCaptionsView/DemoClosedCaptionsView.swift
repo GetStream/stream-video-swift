@@ -28,7 +28,7 @@ struct DemoClosedCaptionsView: View {
                         ForEach(items, id: \.hashValue) { item in
                             HStack(alignment: .top, spacing: tokens.layout.spacingXs) {
                                 Text(item.speakerId)
-                                    .foregroundColor(Color(tokens.colors.textTertiary))
+                                    .foregroundColor(Color(tokens.colors.textOnAccent))
 
                                 Text(item.text)
                                     .lineLimit(3)
