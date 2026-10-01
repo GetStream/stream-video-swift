@@ -39,15 +39,6 @@ extension Image {
     }
 }
 
-extension Text {
-    
-    func applyCallingStyle() -> some View {
-        font(InjectedValues[\.fonts].title2)
-            .fontWeight(.semibold)
-            .foregroundColor(InjectedValues[\.colors].lightGray)
-    }
-}
-
 extension View {
     
     public func adjustVideoFrame(to width: CGFloat, ratio: CGFloat = 0.5) -> some View {

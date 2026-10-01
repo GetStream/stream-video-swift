@@ -13,8 +13,6 @@ import SwiftUI
 /// including participant video, screen sharing, and reconnection states.
 struct PictureInPictureContentView: View {
 
-    @Injected(\.appearance) private var appearance
-
     private let store: PictureInPictureStore
 
     @State private var state: PictureInPictureContent
@@ -33,7 +31,7 @@ struct PictureInPictureContentView: View {
 
     var body: some View {
         ZStack {
-            Color(appearance.colors.participantBackground)
+            Color(colors.backgroundCoreSurfaceSubtle)
                 .edgesIgnoringSafeArea(.all)
 
             contentView

@@ -46,8 +46,6 @@ private struct ZoomableScrollViewImpl<Content: View>: UIViewControllerRepresenta
     // MARK: - ZoomableScrollViewController
 
     class ZoomableScrollViewController: UIViewController, UIScrollViewDelegate {
-        @Injected(\.colors) var colors
-        
         let coordinator: Coordinator
         let scrollView = UIScrollView()
         

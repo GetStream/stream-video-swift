@@ -38,7 +38,7 @@ private struct PictureInPictureParticipantModifier: ViewModifier {
         content
             .overlay(
                 BottomView(content: {
-                    HStack {
+                    HStack(spacing: layout.spacingXs) {
                         ParticipantInfoView(
                             participant: participant,
                             isPinned: participant.isPinned,
