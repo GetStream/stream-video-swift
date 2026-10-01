@@ -38,6 +38,10 @@ internal enum L10n {
       internal static var pinForEveryone: String { L10n.tr("Localizable", "call.current.pin-for-everyone") }
       /// Pin user
       internal static var pinUser: String { L10n.tr("Localizable", "call.current.pin-user") }
+      /// %@ presenting
+      internal static func presenting(_ p1: Any) -> String {
+        return L10n.tr("Localizable", "call.current.presenting", String(describing: p1))
+      }
       /// Trying to reconnect to the call
       internal static var reconnecting: String { L10n.tr("Localizable", "call.current.reconnecting") }
       /// Recording

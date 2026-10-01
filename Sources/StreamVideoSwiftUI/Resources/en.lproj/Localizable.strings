@@ -23,6 +23,7 @@
 "call.current.layout-full-screen" = "Full Screen";
 "call.current.layout-view" = "View";
 "call.current.pin-user" = "Pin user";
+"call.current.presenting" = "%@ presenting";
 "call.current.unpin-user" = "Unpin user";
 "call.current.pin-for-everyone" = "Pin for everyone";
 "call.current.unpin-for-everyone" = "Unpin for everyone";

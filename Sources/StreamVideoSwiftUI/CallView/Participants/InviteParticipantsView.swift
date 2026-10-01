@@ -8,6 +8,8 @@ import SwiftUI
 @available(iOS 14.0, *)
 public struct InviteParticipantsView<Factory: ViewFactory>: View {
 
+    @Injected(\.videoAppearance) private var videoAppearance
+
     var viewFactory: Factory
     @StateObject var viewModel: InviteParticipantsViewModel
     
@@ -81,7 +83,7 @@ public struct InviteParticipantsView<Factory: ViewFactory>: View {
                 Button {
                     inviteParticipantsShown = false
                 } label: {
-                    Image(systemName: "chevron.left")
+                    videoAppearance.images.chevronLeft
                         .foregroundColor(Color(colors.textPrimary))
                 }
             }
@@ -116,7 +118,7 @@ struct UsersHeaderView: View {
     var title = L10n.Call.Participants.onPlatform
 
     var body: some View {
-        HStack {
+        HStack(spacing: layout.spacingXs) {
             Text(title)
                 .padding(.horizontal, layout.spacingMd)
                 .padding(.vertical, layout.spacingXxxs)
@@ -150,7 +152,7 @@ struct VideoUserView<Factory: ViewFactory>: View {
     }
 
     var body: some View {
-        HStack {
+        HStack(spacing: layout.spacingXs) {
             viewFactory.makeUserAvatar(user, with: .init(size: avatarSize))
 
             Text(user.name)

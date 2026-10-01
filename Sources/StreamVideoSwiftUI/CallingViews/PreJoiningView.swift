@@ -66,7 +66,6 @@ public struct LobbyView<Factory: ViewFactory, SettingsView: View>: View {
 
 struct LobbyContentView<Factory: ViewFactory, SettingsView: View>: View {
 
-    @Injected(\.images) var images
     @Injected(\.streamVideo) var streamVideo
     @Injected(\.videoAppearance) var videoAppearance
     
@@ -89,7 +88,7 @@ struct LobbyContentView<Factory: ViewFactory, SettingsView: View>: View {
                     Button {
                         onCloseLobby()
                     } label: {
-                        Image(systemName: "xmark")
+                        videoAppearance.images.xmark
                             .foregroundColor(textPrimary)
                     }
                 }
@@ -177,7 +176,6 @@ extension LobbyView where SettingsView == CallSettingsView {
 
 struct CameraCheckView<Factory: ViewFactory>: View {
 
-    @Injected(\.images) var images
     @Injected(\.streamVideo) var streamVideo
     @Injected(\.videoAppearance) var videoAppearance
     
@@ -304,7 +302,6 @@ struct JoinCallView<Factory: ViewFactory>: View {
 
 struct CallSettingsView: View {
     
-    @Injected(\.images) var images
     @Injected(\.videoAppearance) var videoAppearance
     
     @Binding var callSettings: CallSettings
@@ -316,8 +313,8 @@ struct CallSettingsView: View {
                 callSettings: callSettings,
                 size: tokens.layout.buttonVisualHeightMd,
                 controlStyle: .init(
-                    enabled: .init(icon: images.micTurnOn, iconStyle: .secondary),
-                    disabled: .init(icon: images.micTurnOff, iconStyle: .disabled)
+                    enabled: .init(icon: videoAppearance.images.micTurnOn, iconStyle: .secondary),
+                    disabled: .init(icon: videoAppearance.images.micTurnOff, iconStyle: .disabled)
                 )
             ) {
                 callSettings = CallSettings(
@@ -332,8 +329,8 @@ struct CallSettingsView: View {
                 callSettings: callSettings,
                 size: tokens.layout.buttonVisualHeightMd,
                 controlStyle: .init(
-                    enabled: .init(icon: images.videoTurnOn, iconStyle: .secondary),
-                    disabled: .init(icon: images.videoTurnOff, iconStyle: .disabled)
+                    enabled: .init(icon: videoAppearance.images.videoTurnOn, iconStyle: .secondary),
+                    disabled: .init(icon: videoAppearance.images.videoTurnOff, iconStyle: .disabled)
                 )
             ) {
                 callSettings = CallSettings(

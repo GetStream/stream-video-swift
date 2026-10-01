@@ -99,13 +99,13 @@ struct IncomingCallViewContent<Factory: ViewFactory>: View {
 
             Spacer()
 
-            HStack {
+            HStack(spacing: tokens.layout.spacingXs) {
                 Spacing()
 
                 Button {
                     onCallRejected(callInfo.id)
                 } label: {
-                    Image(systemName: "phone.down.circle.fill")
+                    videoAppearance.images.declineCall
                         .applyCallButtonStyle(
                             color: Color(
                                 videoAppearance.colors
