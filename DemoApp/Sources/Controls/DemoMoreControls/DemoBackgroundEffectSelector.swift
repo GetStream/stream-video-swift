@@ -153,11 +153,12 @@ enum BackgroundEffect: String, CaseIterable, Identifiable {
     }
 
     var padding: Double {
+        let iconPadding = InjectedValues[\.videoAppearance].tokens.layout.buttonPaddingXIconOnlyMd
         switch self {
         case .none:
-            return 10
+            return iconPadding
         case .pixelate, .blur, .blurBackground:
-            return 10
+            return iconPadding
         default:
             return 0
         }

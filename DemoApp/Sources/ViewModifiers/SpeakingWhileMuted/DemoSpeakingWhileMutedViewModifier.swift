@@ -9,7 +9,7 @@ import SwiftUI
 
 struct DemoSpeakingWhileMutedViewModifier: ViewModifier {
 
-    @Injected(\.appearance) private var appearance
+    @Injected(\.videoAppearance) private var videoAppearance
     @ObservedObject var viewModel: CallViewModel
 
     @State private var mutedIndicatorShown = false
@@ -27,17 +27,19 @@ struct DemoSpeakingWhileMutedViewModifier: ViewModifier {
     @ViewBuilder
     private var overlayView: some View {
         if mutedIndicatorShown {
-            VStack {
+            VStack(spacing: 0) {
                 Spacer()
                 Text("You are muted. Unmute to speak.")
-                    .padding(8)
-                    .background(Color(UIColor.systemBackground))
-                    .foregroundColor(appearance.colors.text)
-                    .cornerRadius(16)
-                    .padding()
+                    .padding(tokens.layout.spacingXs)
+                    .background(Color(tokens.colors.backgroundCoreElevation1))
+                    .foregroundColor(Color(tokens.colors.textPrimary))
+                    .cornerRadius(tokens.layout.radiusXl)
+                    .padding(tokens.layout.spacingMd)
             }
         }
     }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 
     private var speakingWhileMutedPublisher: AnyPublisher<Bool, Never> {
         guard let call = viewModel.call else {

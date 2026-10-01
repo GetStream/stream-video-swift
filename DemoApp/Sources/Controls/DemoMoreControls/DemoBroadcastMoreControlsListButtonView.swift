@@ -22,7 +22,7 @@ struct DemoBroadcastMoreControlsListButtonView: View {
                     action: { viewModel.stopScreensharing() },
                     label: selection == .inApp ? "Stop Screensharing" : "Stop Broadcasting"
                 ) {
-                    Image(systemName: "record.circle")
+                    videoAppearance.images.recordIcon
                         .foregroundColor(Color(tokens.colors.accentError))
                 }
                 .transition(.opacity.combined(with: .scale))
@@ -60,7 +60,7 @@ struct DemoBroadcastMoreControlsListButtonView: View {
                 action: {},
                 label: "Screenshare"
             ) {
-                Image(systemName: "record.circle")
+                videoAppearance.images.recordIcon
                     .foregroundColor(Color(tokens.colors.textPrimary))
             }
         }
@@ -78,7 +78,7 @@ struct DemoBroadcastMoreControlsListButtonView: View {
                 action: { /* No-op */ },
                 label: "Broadcast"
             ) {
-                Image(systemName: "record.circle")
+                videoAppearance.images.recordIcon
                     .foregroundColor(Color(tokens.colors.textPrimary))
             }
             .allowsHitTesting(false)

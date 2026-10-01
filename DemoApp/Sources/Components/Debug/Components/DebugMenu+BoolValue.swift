@@ -3,12 +3,16 @@
 //
 
 import Foundation
+import StreamVideo
+import StreamVideoSwiftUI
 import SwiftUI
 
 extension DebugMenu {
 
     /// Generic debug menu item that selects a single value and can append extra actions.
     struct ItemMenuView<Item: Debuggable, AdditionalItems: View>: View {
+        @Injected(\.videoAppearance) var videoAppearance
+
         var appState: AppState = .shared
 
         var items: [Item]
@@ -47,7 +51,7 @@ extension DebugMenu {
                                 Text(item.title)
                             } icon: {
                                 currentValue == item
-                                    ? AnyView(Image(systemName: "checkmark"))
+                                    ? AnyView(videoAppearance.images.checkmark)
                                     : AnyView(EmptyView())
                             }
                         }

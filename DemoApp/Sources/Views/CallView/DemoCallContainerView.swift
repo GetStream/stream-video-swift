@@ -12,7 +12,6 @@ internal struct DemoCallContainerView: View {
     private var callId: String
     private var callType: String
     @Injected(\.streamVideo) var streamVideo
-    @Injected(\.appearance) var appearance
     @StateObject var viewModel: CallViewModel
     @StateObject var chatViewModel: DemoChatViewModel
     @ObservedObject var appState = AppState.shared

@@ -9,38 +9,38 @@ import SwiftUI
 
 struct DemoModalNavigationBarViewModifier: ViewModifier {
 
-    @Injected(\.fonts) private var fonts
-    @Injected(\.images) private var images
-    @Injected(\.colors) private var colors
+    @Injected(\.videoAppearance) private var videoAppearance
 
     var title: String
     var closeAction: (() -> Void)?
 
     func body(content: Content) -> some View {
         VStack(spacing: 0) {
-            HStack {
+            HStack(spacing: tokens.layout.spacingXs) {
                 if !title.isEmpty {
                     Text(title)
-                        .font(fonts.title3)
+                        .font(tokens.fonts.title3)
                         .fontWeight(.medium)
                 }
 
                 Spacer()
 
                 if let closeAction {
-                    ModalButton(image: images.xmark) {
+                    ModalButton(image: videoAppearance.images.xmark) {
                         closeAction()
                     }
                 }
             }
-            .foregroundColor(.white)
-            .padding(.bottom, 24)
-            .padding(.top)
-            .padding(.horizontal)
+            .foregroundColor(Color(tokens.colors.textPrimary))
+            .padding(.bottom, tokens.layout.spacingXl)
+            .padding(.top, tokens.layout.spacingMd)
+            .padding(.horizontal, tokens.layout.spacingMd)
 
             content
         }
     }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
 
 extension View {

@@ -17,13 +17,13 @@ struct DemoReactionSelectorView: View {
 
     var body: some View {
 
-        HStack {
+        HStack(spacing: tokens.layout.spacingXs) {
             if orientationAdapter.orientation.isLandscape {
-                HStack {}
+                HStack(spacing: 0) {}
                     .frame(maxWidth: .infinity)
                 contentView
                     .frame(maxWidth: .infinity)
-                HStack {
+                HStack(spacing: 0) {
                     Spacer()
                     ModalButton(image: videoAppearance.images.xmark, action: closeTapped)
                         .accessibility(identifier: "Close")

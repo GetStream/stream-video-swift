@@ -11,8 +11,7 @@ import SwiftUI
 struct AppControlsWithChat: View {
 
     @Injected(\.streamVideo) var streamVideo
-    @Injected(\.images) var images
-    @Injected(\.colors) var colors
+    @Injected(\.videoAppearance) var videoAppearance
     @Injected(\.chatViewModel) var chatViewModel
     @Injected(\.currentDevice) var currentDevice
 
@@ -29,7 +28,7 @@ struct AppControlsWithChat: View {
     }
 
     var body: some View {
-        HStack {
+        HStack(spacing: videoAppearance.tokens.layout.spacingXs) {
             MoreControlsIconView(viewModel: viewModel)
 
             #if !targetEnvironment(simulator)
@@ -51,12 +50,14 @@ struct AppControlsWithChat: View {
                 ChatIconView(viewModel: chatViewModel)
             }
         }
-        .padding(.horizontal, 16)
-        .padding(.bottom)
+        .padding(.horizontal, videoAppearance.tokens.layout.spacingMd)
+        .padding(.bottom, videoAppearance.tokens.layout.spacingMd)
     }
 }
 
 struct MoreControlsIconView: View {
+
+    @Injected(\.videoAppearance) var videoAppearance
 
     @ObservedObject var viewModel: CallViewModel
     let size: CGFloat
@@ -73,7 +74,7 @@ struct MoreControlsIconView: View {
             },
             label: {
                 CallIconView(
-                    icon: Image(systemName: "ellipsis"),
+                    icon: videoAppearance.images.participantOptions,
                     size: size,
                     iconStyle: viewModel.moreControlsShown ? .secondaryActive : .secondary
                 )
@@ -87,8 +88,6 @@ struct MoreControlsIconView: View {
 struct ChatControlsHeader: View {
 
     @Injected(\.streamVideo) var streamVideo
-    @Injected(\.images) var images
-    @Injected(\.colors) var colors
     @Injected(\.chatViewModel) var chatViewModel
 
     private let size: CGFloat = 50
@@ -106,8 +105,6 @@ struct ChatControlsHeader: View {
 
 struct ChatIconView: View {
 
-    @Injected(\.images) var images
-    @Injected(\.colors) var colors
     @Injected(\.videoAppearance) var videoAppearance
 
     @ObservedObject var viewModel: DemoChatViewModel

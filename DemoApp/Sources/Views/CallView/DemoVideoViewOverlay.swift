@@ -32,7 +32,7 @@ struct DemoVideoViewOverlay<RootView: View, Factory: ViewFactory>: View {
 
 struct DemoCallContainer<Factory: ViewFactory>: View {
     
-    @Injected(\.appearance) private var appearance
+    @Injected(\.videoAppearance) private var videoAppearance
     
     var viewFactory: Factory
     @StateObject var viewModel: CallViewModel
@@ -52,7 +52,7 @@ struct DemoCallContainer<Factory: ViewFactory>: View {
                 call.callType == .livestream {
                 ZStack {
                     if call.state.backstage == true {
-                        VStack {
+                        VStack(spacing: 0) {
                             viewFactory.makeCallTopView(viewModel: viewModel)
                             Spacer()
                         }
@@ -68,7 +68,7 @@ struct DemoCallContainer<Factory: ViewFactory>: View {
                     )
                 }
                 .toastView(toast: $viewModel.toast)
-                .background(appearance.colors.lobbyBackground)
+                .background(Color(videoAppearance.tokens.colors.backgroundCoreApp))
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 CallContainer(viewFactory: viewFactory, viewModel: viewModel)
