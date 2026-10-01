@@ -11,7 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🐞 Fixed
 
-- The joining screen now closes when answering a CallKit call fails.
+- The joining screen now closes when answering a CallKit call fails. [#1334](https://github.com/GetStream/stream-video-swift/pull/1334)
 - A caller no longer stays stuck ringing when an accept, reject, or end event is lost. [#1302](https://github.com/GetStream/stream-video-swift/pull/1302)
 - Fixed a race condition when compressing WebRTC statistics concurrently. [#1311](https://github.com/GetStream/stream-video-swift/pull/1311)
 - The microphone indicator in the floating local-participant view is now left-aligned when connection quality is unavailable. [#1287](https://github.com/GetStream/stream-video-swift/pull/1287)
