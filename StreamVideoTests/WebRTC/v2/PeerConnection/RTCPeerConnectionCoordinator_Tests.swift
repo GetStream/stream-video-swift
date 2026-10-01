@@ -329,6 +329,34 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
         await safeFulfillment(of: [expectation])
     }
 
+    // MARK: - prepareForClosing
+
+    func test_prepareForClosing_pendingNegotiation_doesNotPublishOldSession() async throws {
+        mockSFUStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
+        _ = subject
+        mockPeerConnection.subject.send(StreamRTCPeerConnection.ShouldNegotiateEvent())
+
+        await fulfillment { [mockPeerConnection] in
+            mockPeerConnection?.timesCalled(.setLocalDescription) == 1
+        }
+
+        await subject.prepareForClosing()
+        subject.completeSetUp()
+        mockPeerConnection.subject.send(StreamRTCPeerConnection.ShouldNegotiateEvent())
+
+        let published = XCTNSPredicateExpectation(
+            predicate: NSPredicate { [mockSFUStack] _, _ in
+                mockSFUStack?.service.setPublisherWasCalledWithRequest != nil
+            },
+            object: nil
+        )
+        published.isInverted = true
+        await safeFulfillment(of: [published], timeout: 1)
+
+        XCTAssertNil(mockSFUStack.service.setPublisherWasCalledWithRequest)
+        XCTAssertEqual(mockPeerConnection.timesCalled(.close), 0)
+    }
+
     // MARK: - negotiate
 
     // MARK: publisher
