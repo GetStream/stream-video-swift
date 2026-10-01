@@ -111,6 +111,10 @@ struct IncomingCallViewContent<Factory: ViewFactory>: View {
                                 videoAppearance.colors
                                     .controlDeclineCallButtonBackground
                             ),
+                            glyphColor: Color(
+                                videoAppearance.colors
+                                    .controlDeclineCallButtonText
+                            ),
                             backgroundType: .circle,
                             size: 80
                         )
@@ -127,6 +131,10 @@ struct IncomingCallViewContent<Factory: ViewFactory>: View {
                             color: Color(
                                 videoAppearance.colors
                                     .controlAcceptCallButtonBackground
+                            ),
+                            glyphColor: Color(
+                                videoAppearance.colors
+                                    .controlAcceptCallButtonText
                             ),
                             backgroundType: .circle,
                             size: 80

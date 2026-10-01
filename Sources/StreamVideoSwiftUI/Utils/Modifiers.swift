@@ -16,6 +16,9 @@ extension Image {
     
     public func applyCallButtonStyle(
         color: Color,
+        glyphColor: Color = Color(
+            InjectedValues[\.videoAppearance].colors.controlAcceptCallButtonText
+        ),
         backgroundType: BackgroundType = .circle,
         size: CGFloat = 64
     ) -> some View {
@@ -24,20 +27,21 @@ extension Image {
             .aspectRatio(contentMode: .fit)
             .frame(width: size)
             .frame(maxHeight: size)
-            .background(background(for: backgroundType))
+            .background(background(for: backgroundType, glyphColor: glyphColor))
             .modifier(ShadowModifier())
     }
     
     @ViewBuilder
-    func background(for type: BackgroundType) -> some View {
-        let tokens = InjectedValues[\.videoAppearance].tokens
+    func background(for type: BackgroundType, glyphColor: Color) -> some View {
         if type == .none {
             EmptyView()
         } else if type == .circle {
-            Color(tokens.colors.backgroundCoreElevation0).mask(Circle())
+            glyphColor.mask(Circle())
         } else {
-            Color(tokens.colors.backgroundCoreElevation0).mask(
-                Rectangle().padding(tokens.layout.spacingSm)
+            glyphColor.mask(
+                Rectangle().padding(
+                    InjectedValues[\.videoAppearance].tokens.layout.spacingSm
+                )
             )
         }
     }
