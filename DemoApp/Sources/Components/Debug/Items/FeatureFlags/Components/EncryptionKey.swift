@@ -5,6 +5,7 @@
 import CommonCrypto
 import Foundation
 import StreamVideo
+import StreamVideoSwiftUI
 import SwiftUI
 
 extension AppEnvironment {
@@ -174,6 +175,7 @@ extension DebugMenu {
     /// Feature-flag entry for pasting one shared key or many (comma / newline separated).
     struct EncryptionKeyMenuView: View {
 
+        @Injected(\.videoAppearance) private var videoAppearance
         @ObservedObject private var keys = AppEnvironment.EncryptionKeys.shared
 
         var body: some View {
@@ -206,7 +208,7 @@ extension DebugMenu {
                 Text(title)
             } icon: {
                 if selected {
-                    Image(systemName: "checkmark")
+                    videoAppearance.images.checkmark
                 }
             }
         }
@@ -217,30 +219,31 @@ extension DebugMenu {
 
         let prompt: AppEnvironment.EncryptionKeys.Prompt
 
+        @Injected(\.videoAppearance) private var videoAppearance
         @ObservedObject private var keys = AppEnvironment.EncryptionKeys.shared
         @Environment(\.presentationMode) private var presentationMode
         @State private var text = ""
         @State private var errorMessage: String?
 
         var body: some View {
-            VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: tokens.layout.spacingMd) {
                 Text(subtitle)
-                    .font(.footnote)
-                    .foregroundColor(.secondary)
+                    .font(tokens.fonts.footnote)
+                    .foregroundColor(Color(tokens.colors.textSecondary))
 
                 TextEditor(text: $text)
-                    .font(.system(.body, design: .monospaced))
+                    .font(keyFont)
                     .frame(minHeight: 120)
-                    .padding(8)
+                    .padding(tokens.layout.spacingXs)
                     .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(Color.secondary.opacity(0.4), lineWidth: 1)
+                        RoundedRectangle(cornerRadius: tokens.layout.radiusMd)
+                            .stroke(Color(tokens.colors.borderCoreDefault), lineWidth: 1)
                     )
 
                 if let errorMessage {
                     Text(errorMessage)
-                        .font(.footnote)
-                        .foregroundColor(.red)
+                        .font(tokens.fonts.footnote)
+                        .foregroundColor(Color(tokens.colors.accentError))
                 }
 
                 Button {
@@ -252,7 +255,7 @@ extension DebugMenu {
 
                 Spacer()
             }
-            .padding()
+            .padding(tokens.layout.spacingMd)
             .navigationTitle(prompt == .oneKey ? "Encryption Key" : "Encryption Keys")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -270,6 +273,15 @@ extension DebugMenu {
                     text = keys.values.map(DemoHex.string(from:)).joined(separator: ",")
                 }
             }
+        }
+
+        private var tokens: DesignSystemTokens { videoAppearance.tokens }
+
+        private var keyFont: Font {
+            if #available(iOS 16.0, *) {
+                return tokens.fonts.body.monospaced()
+            }
+            return .system(.body, design: .monospaced)
         }
 
         private var subtitle: String {
