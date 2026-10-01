@@ -65,19 +65,33 @@ final class CallParticipantsInfoView_Tests: StreamVideoUITestCase,
         AssertSnapshot(view, variants: allVariants)
     }
 
+    func test_participantsSheet_withBlockedUsers_snapshot() {
+        let participants = ParticipantFactory.get(2, withAudio: true)
+        let view = makeSheet(
+            participants: participants,
+            blockedUsers: [
+                User(id: "blocked-1"),
+                User(id: "blocked-2")
+            ]
+        )
+
+        AssertSnapshot(view, variants: allVariants)
+    }
+
     // MARK: - Private Helpers
 
     @ViewBuilder
     private func makeSheet(
         participants: [CallParticipant],
-        callSettings: CallSettings = CallSettings()
+        callSettings: CallSettings = CallSettings(),
+        blockedUsers: [User] = []
     ) -> some View {
         CallParticipantsViewContainer(
             viewFactory: DefaultViewFactory.shared,
             viewModel: CallParticipantsInfoViewModel(call: call),
             participants: participants,
             call: call,
-            blockedUsers: [],
+            blockedUsers: blockedUsers,
             callSettings: callSettings,
             inviteParticipantsShown: .constant(false),
             inviteTapped: {},
