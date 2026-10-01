@@ -16,10 +16,28 @@ final class LocalParticipantView_Tests: StreamVideoUITestCase, @unchecked Sendab
         .call(callType: callType, callId: callId)
 
     private let viewSize = CGSize(width: 120, height: 160)
+    private nonisolated(unsafe) var mockPermissions: MockPermissionsStore?
+    private nonisolated(unsafe) var mockAudioRecorder: MockStreamCallAudioRecorder?
+
+    override func setUp() async throws {
+        try await super.setUp()
+        let audioRecorder = MockStreamCallAudioRecorder()
+        let permissions = MockPermissionsStore()
+        permissions.stubMicrophonePermission(.denied)
+        await fulfillment {
+            !permissions.permissionsStore.hasMicrophonePermission
+        }
+        mockAudioRecorder = audioRecorder
+        mockPermissions = permissions
+    }
 
     override func tearDown() async throws {
         call = nil
         try await super.tearDown()
+        mockPermissions?.dismantle()
+        mockPermissions = nil
+        InjectedValues[\.callAudioRecorder] = StreamCallAudioRecorder()
+        mockAudioRecorder = nil
     }
 
     // MARK: - Mic On

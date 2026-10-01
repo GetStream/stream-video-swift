@@ -7,8 +7,6 @@ import SwiftUI
 
 public struct ScreenSharingView<Factory: ViewFactory>: View {
 
-    @Injected(\.colors) var colors
-
     @ObservedObject var viewModel: CallViewModel
     var screenSharing: ScreenSharingSession
     var frame: CGRect
@@ -23,7 +21,7 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
         viewModel: CallViewModel,
         screenSharing: ScreenSharingSession,
         availableFrame: CGRect,
-        innerItemSpace: CGFloat = 8,
+        innerItemSpace: CGFloat = InjectedValues[\.videoAppearance].tokens.layout.spacingXs,
         isZoomEnabled: Bool = true
     ) where Factory == DefaultViewFactory {
         self.init(
@@ -40,7 +38,7 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
         viewModel: CallViewModel,
         screenSharing: ScreenSharingSession,
         availableFrame: CGRect,
-        innerItemSpace: CGFloat = 8,
+        innerItemSpace: CGFloat = InjectedValues[\.videoAppearance].tokens.layout.spacingXs,
         viewFactory: Factory,
         isZoomEnabled: Bool = true
     ) {
@@ -56,8 +54,9 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
         VStack(spacing: innerItemSpace) {
             if !viewModel.hideUIElements, orientationAdapter.orientation.isPortrait || UIDevice.current.isIpad {
                 Text("\(screenSharing.participant.name) presenting")
-                    .foregroundColor(colors.white)
-                    .padding()
+                    .font(fonts.body)
+                    .foregroundColor(Color(colors.textPrimary))
+                    .padding(layout.spacingMd)
                     .accessibility(identifier: "participantPresentingLabel")
             }
 
@@ -93,7 +92,7 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
                 view.add(track: track)
             }
         }
-        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .clipShape(RoundedRectangle(cornerRadius: layout.radiusXl))
         .accessibility(identifier: "screenSharingView")
     }
 
@@ -131,9 +130,9 @@ struct HorizontalContainer<Content: View>: View {
     
     var body: some View {
         if #available(iOS 14.0, *) {
-            LazyHStack(content: content)
+            LazyHStack(spacing: layout.spacingXs, content: content)
         } else {
-            HStack(content: content)
+            HStack(spacing: layout.spacingXs, content: content)
         }
     }
 }

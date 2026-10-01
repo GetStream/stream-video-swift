@@ -27,7 +27,7 @@ final class ScreenSharingView_Tests: StreamVideoUITestCase, @unchecked Sendable 
             participant: viewModel.participants[1]
         )
         let view = ZStack {
-            Color.black.ignoresSafeArea(.all)
+            Color(InjectedValues[\.videoAppearance].tokens.colors.backgroundCoreApp).ignoresSafeArea(.all)
             ScreenSharingView(
                 viewModel: viewModel,
                 screenSharing: session,

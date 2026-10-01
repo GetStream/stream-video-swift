@@ -25,7 +25,7 @@ public struct ParticipantPopoverView<CustomView: View>: View {
     }
     
     public var body: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: layout.spacingMd) {
             if !participant.isPinnedRemotely {
                 PopoverButton(
                     title: pinTitle,
@@ -90,7 +90,7 @@ public struct ParticipantPopoverView<CustomView: View>: View {
                 customView()
             }
         }
-        .padding()
+        .padding(layout.spacingMd)
         .modifier(ShadowViewModifier())
     }
     

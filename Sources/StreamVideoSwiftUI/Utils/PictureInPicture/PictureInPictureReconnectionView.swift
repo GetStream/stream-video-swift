@@ -11,20 +11,20 @@ import SwiftUI
 /// the connection to the video call.
 struct PictureInPictureReconnectionView: View {
 
-    @Injected(\.colors) private var colors
-
     var body: some View {
-        VStack {
+        VStack(spacing: layout.spacingXs) {
             Text(L10n.Call.Current.reconnecting)
-                .applyCallingStyle()
-                .padding()
+                .font(fonts.title2)
+                .fontWeight(.semibold)
+                .foregroundColor(Color(colors.textOnAccent))
+                .padding(layout.spacingMd)
                 .accessibility(identifier: "reconnectingMessage")
             CallingIndicator()
         }
-        .padding()
+        .padding(layout.spacingMd)
         .background(
-            Color(colors.callBackground).opacity(0.7).edgesIgnoringSafeArea(.all)
+            Color(colors.backgroundCoreOverlayDarkStrong).edgesIgnoringSafeArea(.all)
         )
-        .cornerRadius(16)
+        .cornerRadius(layout.radiusXl)
     }
 }

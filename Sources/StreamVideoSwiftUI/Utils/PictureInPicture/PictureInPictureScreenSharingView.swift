@@ -13,7 +13,6 @@ import SwiftUI
 /// Renders the screen sharing content with participant information overlay.
 struct PictureInPictureScreenSharingView: View {
     
-    @Injected(\.images) var images
     @Injected(\.streamVideo) var streamVideo
 
     var store: PictureInPictureStore
