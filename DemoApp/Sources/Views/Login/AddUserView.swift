@@ -58,7 +58,7 @@ struct DemoAddUserView: View {
 @MainActor
 struct DemoCustomEnvironmentView: View {
 
-    @Injected(\.appearance) var appearance
+    @Injected(\.videoAppearance) var videoAppearance
     @Environment(\.presentationMode) var presentationMode
 
     @State var baseURL: AppEnvironment.BaseURL
@@ -84,7 +84,7 @@ struct DemoCustomEnvironmentView: View {
 
     var body: some View {
         ScrollView {
-            VStack {
+            VStack(spacing: tokens.layout.spacingXs) {
                 Picker("Base on which environment?", selection: $baseURL) {
                     Text(AppEnvironment.BaseURL.demo.title).tag(AppEnvironment.BaseURL.demo)
                     Text(AppEnvironment.BaseURL.pronto.title).tag(AppEnvironment.BaseURL.pronto)
@@ -116,9 +116,11 @@ struct DemoCustomEnvironmentView: View {
                 Spacer()
             }
         }
-        .padding()
+        .padding(tokens.layout.spacingMd)
         .navigationTitle("Custom Environment")
     }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 
     private var buttonDisabled: Bool {
         apiKey.isEmpty || token.isEmpty
@@ -126,7 +128,7 @@ struct DemoCustomEnvironmentView: View {
 
     @ViewBuilder
     private var pushNotificationConfiguration: some View {
-        VStack {
+        VStack(spacing: tokens.layout.spacingXs) {
             DemoCheckboxView(isChecked: $usesDefaultPushNotificationConfig) {
                 Text("Use `.default` push notification configuration")
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -134,21 +136,25 @@ struct DemoCustomEnvironmentView: View {
             } icon: {
                 Image(systemName: usesDefaultPushNotificationConfig ? "checkmark.square" : "square")
             }
-            .foregroundColor(usesDefaultPushNotificationConfig ? appearance.colors.text : .init(appearance.colors.textLowEmphasis))
+            .foregroundColor(
+                Color(usesDefaultPushNotificationConfig ? tokens.colors.textPrimary : tokens.colors.textSecondary)
+            )
 
             if !usesDefaultPushNotificationConfig {
-                VStack {
+                VStack(spacing: tokens.layout.spacingXs) {
                     TextField("Push Notification", text: $pushNotificationName)
                     TextField("VoIP Push Notification", text: $voIPPushNotificationName)
                 }
                 .textFieldStyle(DemoTextfieldStyle())
             }
         }
-        .padding(.vertical, 16)
+        .padding(.vertical, tokens.layout.spacingMd)
     }
 }
 
 struct DemoCheckboxView<Label: View, CheckIcon: View>: View {
+    @Injected(\.videoAppearance) var videoAppearance
+
     @Binding var isChecked: Bool
     var label: () -> Label
     var icon: () -> CheckIcon
@@ -157,13 +163,15 @@ struct DemoCheckboxView<Label: View, CheckIcon: View>: View {
         Button {
             isChecked.toggle()
         } label: {
-            HStack(spacing: 8) {
+            HStack(spacing: tokens.layout.spacingXs) {
                 label()
                     .frame(maxWidth: .infinity)
                 icon()
             }
         }
     }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
 
 struct DemoTextfieldStyle: TextFieldStyle {
@@ -189,34 +197,39 @@ struct DemoTextfieldStyle: TextFieldStyle {
 
 struct DemoTextEditor: View {
 
-    @Injected(\.appearance) var appearance
+    @Injected(\.videoAppearance) var videoAppearance
 
     var text: Binding<String>
-    @State var cornerRadius: CGFloat = 8
 
     var placeholder: String
 
     private let notificationCenter: NotificationCenter = .default
 
     @ViewBuilder
-    private var clipShape: some Shape { RoundedRectangle(cornerRadius: cornerRadius) }
+    private var clipShape: some Shape {
+        RoundedRectangle(cornerRadius: tokens.layout.radiusMd)
+    }
 
     var body: some View {
         withPlaceholder {
             withClearBackgroundContent
                 .lineLimit(4)
-                .padding()
+                .padding(tokens.layout.spacingMd)
                 .foregroundColor(
-                    text.wrappedValue == placeholder
-                        ? .init(appearance.colors.textLowEmphasis)
-                        : appearance.colors.text
+                    Color(
+                        text.wrappedValue == placeholder
+                            ? tokens.colors.inputTextPlaceholder
+                            : tokens.colors.inputTextDefault
+                    )
                 )
-                .background(Color(appearance.colors.background))
-                .overlay(clipShape.stroke(Color(appearance.colors.textLowEmphasis), lineWidth: 1))
+                .background(Color(tokens.colors.backgroundCoreSurfaceDefault))
+                .overlay(clipShape.stroke(Color(tokens.colors.borderCoreDefault), lineWidth: 1))
                 .clipShape(clipShape)
                 .frame(height: 100)
         }
     }
+
+    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 
     @ViewBuilder
     private var withClearBackgroundContent: some View {
