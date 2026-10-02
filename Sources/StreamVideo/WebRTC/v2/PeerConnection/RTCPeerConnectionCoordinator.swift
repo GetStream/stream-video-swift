@@ -351,12 +351,10 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
                 .sinkTask(queue: setPublisherProcessingQueue) { [weak self] in await self?.negotiate() }
                 .store(in: disposableBag)
         } else {
+            // SFUAdapter relays events across webSocket refreshes, so a single
+            // observer is enough. Re-subscribing on refresh would handle every
+            // offer once per refresh.
             configureSubscriberOfferObserver()
-
-            sfuAdapter
-                .refreshPublisher
-                .sink { [weak self] in self?.configureSubscriberOfferObserver() }
-                .store(in: disposableBag)
         }
     }
 
@@ -973,6 +971,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             try await sfuAdapter.sendAnswer(
                 sessionDescription: answer.sdp,
                 peerType: .subscriber,
+                negotiationID: event.negotiationID,
                 for: sessionId
             )
             log.debug("Subscriber offer was handled.", subsystems: subsystem)
