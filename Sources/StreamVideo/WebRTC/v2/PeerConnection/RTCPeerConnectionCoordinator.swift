@@ -378,6 +378,9 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     }
 
     func prepareForClosing() async {
+        disposableBag.removeAll()
+        setPublisherProcessingQueue.cancelAllOperations()
+        subscriberOfferProcessingQueue.cancelAllOperations()
         await iceAdapter.stopObserving()
     }
 
@@ -642,7 +645,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             """,
             subsystems: subsystem
         )
-        disposableBag.removeAll()
+        await prepareForClosing()
         await peerConnection.close()
         peerConnection.subject.send(StreamRTCPeerConnection.CloseEvent())
     }
@@ -867,9 +870,13 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
 
             let offer = try await createOffer(constraints: constraints)
 
+            try Task.checkCancellation()
             try await setLocalDescription(offer)
 
+            try Task.checkCancellation()
             try await ensureSetUpHasBeenCompleted()
+
+            try Task.checkCancellation()
 
             /// - Note: Capabilities aren't required at this point and thus it's ok to leave it empty.
             let tracksInfo = WebRTCJoinRequestFactory(
@@ -904,12 +911,15 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
                 for: sessionId
             )
 
+            try Task.checkCancellation()
             try await setRemoteDescription(
                 .init(
                     type: .answer,
                     sdp: sessionDescription.sdp
                 )
             )
+        } catch is CancellationError {
+            return
         } catch {
             log.error(error, subsystems: subsystem)
         }
@@ -941,7 +951,9 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
                 )
             )
 
+            try Task.checkCancellation()
             var answer = try await createAnswer()
+            try Task.checkCancellation()
             if mungeSubscriberStereo {
                 let munger = SDPParser()
                 let visitor = StereoEnableVisitor()
@@ -957,12 +969,15 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
                 try await setLocalDescription(answer)
             }
 
+            try Task.checkCancellation()
             try await sfuAdapter.sendAnswer(
                 sessionDescription: answer.sdp,
                 peerType: .subscriber,
                 for: sessionId
             )
             log.debug("Subscriber offer was handled.", subsystems: subsystem)
+        } catch is CancellationError {
+            return
         } catch {
             log.error(
                 "Error handling offer event",
