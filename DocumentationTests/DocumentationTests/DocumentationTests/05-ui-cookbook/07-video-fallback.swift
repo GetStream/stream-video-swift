@@ -32,7 +32,7 @@ private func content() {
 
         struct CustomVideoCallParticipantView: View {
 
-            @Injected(\.images) var images
+            @Injected(\.videoAppearance) var videoAppearance
             @Injected(\.streamVideo) var streamVideo
 
             let participant: CallParticipant

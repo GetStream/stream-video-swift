@@ -65,7 +65,7 @@ struct LayoutMenuItem: View {
                 selectLayout(layout)
             }
         } label: {
-            HStack(spacing: layout.spacingXs) {
+            HStack(spacing: videoAppearance.tokens.layout.spacingXs) {
                 Text(title)
                 Spacer()
                 if selectedLayout == layout {

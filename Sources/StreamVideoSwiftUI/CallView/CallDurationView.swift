@@ -56,6 +56,7 @@ public struct CallDurationView: View {
 
 private struct InCallDurationView: View {
     @Injected(\.videoAppearance) private var videoAppearance
+    @Injected(\.videoAppearance.tokens.colors) var colors
 
     let viewModel: CallViewModel
     @State private var duration: TimeInterval
@@ -97,6 +98,8 @@ private struct RingingCallDurationView: View {
 private struct DurationView<IconView: View>: View {
 
     @Injected(\.formatters.mediaDuration) private var formatter: MediaDurationFormatter
+    @Injected(\.videoAppearance.tokens.colors) var colors
+    @Injected(\.videoAppearance.tokens.layout) var layout
 
     let duration: TimeInterval
     private let iconView: IconView
@@ -125,6 +128,8 @@ private struct DurationView<IconView: View>: View {
 }
 
 private struct TimeView: View {
+    @Injected(\.videoAppearance.tokens.colors) var colors
+    @Injected(\.videoAppearance.tokens.fonts) var fonts
 
     var value: NSMutableAttributedString
 

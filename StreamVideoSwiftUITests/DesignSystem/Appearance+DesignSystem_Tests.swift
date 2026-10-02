@@ -88,6 +88,22 @@ final class Appearance_DesignSystem_Tests: XCTestCase, @unchecked Sendable {
         )
     }
 
+    // MARK: - Sounds
+
+    func test_init_withoutSounds_usesDefaultSounds() {
+        XCTAssertEqual(subject.sounds.bundle, .streamVideoUI)
+        XCTAssertEqual(subject.sounds.incomingCallSound.fileName, "incoming.m4a")
+        XCTAssertEqual(subject.sounds.outgoingCallSound.fileName, "outgoing.m4a")
+    }
+
+    func test_init_withSounds_storesSameInstance() {
+        let sounds = Sounds()
+
+        subject = VideoAppearance(sounds: sounds)
+
+        XCTAssertTrue(subject.sounds === sounds)
+    }
+
     func test_injectedValues_whenVideoAppearanceIsSet_returnsSameInstance() {
         let previous = InjectedValues[\.videoAppearance]
         defer { InjectedValues[\.videoAppearance] = previous }

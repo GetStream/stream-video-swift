@@ -64,6 +64,7 @@ public enum VideoCallParticipantDecoration: Hashable, CaseIterable {
 }
 
 public struct VideoCallParticipantModifier: ViewModifier {
+    @Injected(\.videoAppearance.tokens.layout) var layout
 
     var participant: CallParticipant
     var call: Call?
@@ -151,6 +152,8 @@ extension View {
 public struct VideoCallParticipantOptionsModifier: ViewModifier {
 
     @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.videoAppearance.tokens.colors) var colors
+    @Injected(\.videoAppearance.tokens.layout) var layout
 
     @State private var presentActionSheet: Bool = false
 
@@ -297,6 +300,8 @@ public struct VideoCallParticipantOptionsModifier: ViewModifier {
 }
 
 public struct VideoCallParticipantSpeakingModifier: ViewModifier {
+    @Injected(\.videoAppearance.tokens.colors) var colors
+    @Injected(\.videoAppearance.tokens.layout) var layout
 
     public var participant: CallParticipant
     public var participantCount: Int
@@ -433,6 +438,9 @@ public struct VideoCallParticipantView<Factory: ViewFactory>: View {
 
 public struct ParticipantInfoView: View {
     @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.videoAppearance.tokens.colors) var colors
+    @Injected(\.videoAppearance.tokens.fonts) var fonts
+    @Injected(\.videoAppearance.tokens.layout) var layout
     
     var participant: CallParticipant
     var isPinned: Bool
@@ -493,6 +501,7 @@ public struct ParticipantInfoView: View {
 
 public struct SoundIndicator: View {
     @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.videoAppearance.tokens.colors) var colors
     
     let participant: CallParticipant
     
@@ -511,6 +520,8 @@ public struct SoundIndicator: View {
 }
 
 public struct PopoverButton: View {
+    @Injected(\.videoAppearance.tokens.colors) var colors
+    @Injected(\.videoAppearance.tokens.layout) var layout
         
     var title: String
     @Binding var popoverShown: Bool

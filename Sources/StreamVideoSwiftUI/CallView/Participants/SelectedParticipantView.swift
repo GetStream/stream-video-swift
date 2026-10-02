@@ -8,6 +8,9 @@ import SwiftUI
 struct SelectedParticipantView<Factory: ViewFactory>: View {
 
     @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.videoAppearance.tokens.colors) var colors
+    @Injected(\.videoAppearance.tokens.fonts) var fonts
+    @Injected(\.videoAppearance.tokens.layout) var layout
 
     private let avatarSize: CGFloat = 50
 

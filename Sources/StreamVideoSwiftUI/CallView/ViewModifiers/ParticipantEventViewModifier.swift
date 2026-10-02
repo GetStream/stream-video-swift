@@ -7,6 +7,9 @@ import StreamVideo
 import SwiftUI
 
 struct ParticipantEventsNotificationViewModifier: ViewModifier {
+    @Injected(\.videoAppearance.tokens.colors) var colors
+    @Injected(\.videoAppearance.tokens.fonts) var fonts
+    @Injected(\.videoAppearance.tokens.layout) var layout
 
     @ObservedObject var viewModel: CallViewModel
 

@@ -20,7 +20,7 @@ private func content() {
     container {
         struct DemoClosedCaptionsView: View {
 
-            @Injected(\.colors) private var colors
+            @Injected(\.videoAppearance) private var videoAppearance
 
             var call: Call
             @State private var items: [CallClosedCaption] = []
@@ -38,11 +38,11 @@ private func content() {
                             ForEach(items, id: \.hashValue) { item in
                                 HStack(alignment: .top) {
                                     Text(item.speakerId)
-                                        .foregroundColor(.init(colors.textLowEmphasis))
+                                        .foregroundColor(Color(videoAppearance.tokens.colors.textSecondary))
 
                                     Text(item.text)
                                         .lineLimit(3)
-                                        .foregroundColor(colors.text)
+                                        .foregroundColor(Color(videoAppearance.tokens.colors.textPrimary))
                                         .frame(maxWidth: .infinity)
                                 }
                                 .transition(.asymmetric(insertion: .move(edge: .bottom), removal: .move(edge: .top)))

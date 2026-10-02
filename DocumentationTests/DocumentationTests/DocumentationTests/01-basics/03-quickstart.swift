@@ -82,7 +82,7 @@ private func content() {
             ) {
                 let images = Images()
                 images.hangup = Image(systemName: "phone.down")
-                let appearance = Appearance(images: images)
+                let videoAppearance = VideoAppearance(images: images)
                 streamVideo = StreamVideoUI(
                     apiKey: apiKey,
                     user: userCredentials.user,
@@ -92,7 +92,7 @@ private func content() {
                         // When finished, call the result handler with either .success or .failure.
                         result(.success(userCredentials.token))
                     },
-                    appearance: appearance
+                    videoAppearance: videoAppearance
                 )
             }
 
