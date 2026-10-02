@@ -126,9 +126,9 @@ struct CallParticipantsViewContainer<Factory: ViewFactory>: View {
 
     var body: some View {
         NavigationView {
-            VStack {
+            VStack(spacing: layout.spacingXs) {
                 ScrollView {
-                    LazyVStack {
+                    LazyVStack(spacing: layout.spacingXs) {
                         ForEach(participants) { participant in
                             CallParticipantView(
                                 viewFactory: viewFactory,
@@ -278,8 +278,8 @@ struct BlockedUsersView: View {
     var unblockActions: @MainActor (User) -> [CallParticipantMenuAction]
 
     var body: some View {
-        HStack {
-            VStack(alignment: .leading) {
+        HStack(spacing: layout.spacingXs) {
+            VStack(alignment: .leading, spacing: layout.spacingXs) {
                 Text(L10n.Call.Participants.blocked)
                     .font(fonts.headline)
                     .multilineTextAlignment(.leading)
@@ -291,7 +291,7 @@ struct BlockedUsersView: View {
                                 Button {
                                     menuAction.action(blockedUser.id)
                                 } label: {
-                                    HStack {
+                                    HStack(spacing: layout.spacingXs) {
                                         Image(systemName: menuAction.iconName)
                                         Text(menuAction.title)
                                         Spacer()
@@ -328,7 +328,7 @@ struct CallParticipantView<Factory: ViewFactory>: View {
 
     var body: some View {
         VStack(spacing: layout.spacingXxs) {
-            HStack {
+            HStack(spacing: layout.spacingXs) {
                 viewFactory.makeUserAvatar(
                     participant.user,
                     with: .init(size: imageSize) {
@@ -378,7 +378,7 @@ struct CallParticipantView<Factory: ViewFactory>: View {
                 Button {
                     menuAction.action(participant.userId)
                 } label: {
-                    HStack {
+                    HStack(spacing: layout.spacingXs) {
                         Image(systemName: menuAction.iconName)
                         Text(menuAction.title)
                         Spacer()

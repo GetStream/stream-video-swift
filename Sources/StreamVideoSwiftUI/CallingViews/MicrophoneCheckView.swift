@@ -37,7 +37,7 @@ public struct MicrophoneCheckView: View {
     public var body: some View {
         HStack(spacing: tokens.layout.spacingXxs) {
             if isPinned {
-                Image(systemName: "pin.fill")
+                videoAppearance.images.participantPinned
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(maxHeight: CGFloat(maxHeight))
@@ -106,7 +106,7 @@ public struct AudioVolumeIndicator: View {
     public var body: some View {
         HStack(spacing: tokens.layout.spacingXxxs) {
             ForEach(levels) { level in
-                VStack {
+                VStack(spacing: tokens.layout.spacingXs) {
                     RoundedRectangle(cornerRadius: tokens.layout.radiusXs)
                         .fill(Color(videoAppearance.colors.indicatorMicrophoneLevelBarActive))
                         .frame(width: tokens.layout.spacingXxxs, height: height(for: level.value))

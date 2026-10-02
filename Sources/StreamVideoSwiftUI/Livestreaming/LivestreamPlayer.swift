@@ -347,7 +347,7 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
                     } : nil
                 )
             } else {
-                VStack(alignment: .center) {
+                VStack(alignment: .center, spacing: tokens.layout.spacingXs) {
                     Text(L10n.Call.Livestream.hostVideoUnavailable)
                         .multilineTextAlignment(.center)
                         .foregroundColor(
@@ -364,7 +364,7 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
     @ViewBuilder
     private var livestreamControls: some View {
         if controlsShown || !fullScreen {
-            VStack {
+            VStack(spacing: tokens.layout.spacingXs) {
                 Spacer()
                 HStack(spacing: tokens.layout.spacingXs) {
                     LiveIndicator()
@@ -376,18 +376,18 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
                     }
                     Spacer()
                     LivestreamButton(
-                        imageName: !muted
-                            ? "speaker.wave.2.fill"
-                            : "speaker.slash.fill"
+                        image: muted
+                            ? videoAppearance.images.speakerOff
+                            : videoAppearance.images.speakerWave
                     ) {
                         toggleAudioOutput()
                     }
-                    LivestreamButton(imageName: "viewfinder") {
+                    LivestreamButton(image: videoAppearance.images.viewfinder) {
                         fullScreen.toggle()
                     }
                     if showsLeaveCallButton {
                         LivestreamButton(
-                            imageName: "phone.down.fill"
+                            image: videoAppearance.images.hangup
                         ) {
                             leaveLivestream()
                         }
@@ -465,7 +465,7 @@ struct LivestreamPlayPauseButton: View {
             streamPaused = !streamPaused
             trackUpdate()
         } label: {
-            Image(systemName: streamPaused ? "play.fill" : "pause.fill")
+            (streamPaused ? videoAppearance.images.play : videoAppearance.images.pause)
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(width: 60)
@@ -484,7 +484,7 @@ struct LivestreamParticipantsView: View {
     
     var body: some View {
         HStack(spacing: tokens.layout.spacingXxs) {
-            Image(systemName: "eye")
+            videoAppearance.images.eye
             Text("\(participantsCount)")
                 .font(tokens.fonts.headline)
         }
@@ -527,7 +527,7 @@ struct LivestreamButton: View {
     
     @Injected(\.videoAppearance) var videoAppearance
     
-    var imageName: String
+    var image: Image
     var action: () -> Void
     
     var body: some View {
@@ -536,7 +536,7 @@ struct LivestreamButton: View {
                 action()
             }
         } label: {
-            Image(systemName: imageName)
+            image
                 .padding(.all, tokens.layout.spacingXxs)
                 .frame(
                     width: tokens.layout.iconSizeLg,

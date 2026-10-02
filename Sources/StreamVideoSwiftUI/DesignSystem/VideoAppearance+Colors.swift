@@ -16,20 +16,14 @@ extension VideoAppearance {
 
         public lazy var controlAcceptCallButtonBackground: UIColor =
             colors.accentSuccess
-        public lazy var controlAcceptCallButtonText: UIColor =
-            colors.textOnAccent
+        public lazy var callControlButtonText: UIColor = .white
+        public lazy var controlAcceptCallButtonText: UIColor = callControlButtonText
         public lazy var controlCallControlErrorBadgeBackground: UIColor =
             colors.accentWarning
-        public lazy var controlCallControlErrorBadgeText: UIColor = UIColor(
-            red: 0,
-            green: 0,
-            blue: 0,
-            alpha: 1
-        )
+        public lazy var controlCallControlErrorBadgeText: UIColor = .black
         public lazy var controlDeclineCallButtonBackground: UIColor =
             colors.accentError
-        public lazy var controlDeclineCallButtonText: UIColor =
-            colors.textOnAccent
+        public lazy var controlDeclineCallButtonText: UIColor = callControlButtonText
 
         // MARK: - Indicator
 

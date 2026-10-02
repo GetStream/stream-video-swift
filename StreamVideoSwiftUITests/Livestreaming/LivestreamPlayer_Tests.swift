@@ -30,6 +30,21 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
         // Then
         AssertSnapshot(player, variants: [.defaultLight, .defaultDark])
     }
+
+    @MainActor
+    func test_livestreamPlayer_mutedWithLeaveButton_snapshot() async throws {
+        let call = streamVideo.call(callType: callType, callId: callId)
+        call.state.backstage = false
+        let player = LivestreamPlayer(
+            call: call,
+            muted: true,
+            joinPolicy: .none,
+            showsLeaveCallButton: true
+        )
+        .frame(width: defaultScreenSize.width, height: defaultScreenSize.height)
+
+        AssertSnapshot(player, variants: [.defaultLight, .defaultDark])
+    }
     
     @MainActor
     func test_livestreamPlayer_snapshotHideParticipantCount() async throws {

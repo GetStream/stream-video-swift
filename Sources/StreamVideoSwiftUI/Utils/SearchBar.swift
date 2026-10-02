@@ -14,7 +14,7 @@ struct SearchBar: View, KeyboardReadable {
     @State private var isEditing = false
 
     var body: some View {
-        HStack {
+        HStack(spacing: layout.spacingXs) {
             TextField(L10n.Call.Participants.search, text: $text)
                 .padding(layout.spacingXs)
                 .padding(.leading, layout.spacingXs)
@@ -22,7 +22,7 @@ struct SearchBar: View, KeyboardReadable {
                 .background(Color(colors.backgroundCoreSurfaceDefault))
                 .clipShape(RoundedRectangle(cornerRadius: layout.radiusXl, style: .continuous))
                 .overlay(
-                    HStack {
+                    HStack(spacing: layout.spacingXs) {
                         videoAppearance.images.searchIcon
                             .customizable()
                             .foregroundColor(Color(colors.textSecondary))

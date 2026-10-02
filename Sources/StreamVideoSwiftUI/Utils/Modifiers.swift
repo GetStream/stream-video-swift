@@ -2,6 +2,7 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import StreamCoreUI
 import StreamVideo
 import SwiftUI
 
@@ -29,12 +30,16 @@ extension Image {
     
     @ViewBuilder
     func background(for type: BackgroundType) -> some View {
+        let videoAppearance = InjectedValues[\.videoAppearance]
+        let glyphColor = Color(videoAppearance.colors.callControlButtonText)
         if type == .none {
             EmptyView()
         } else if type == .circle {
-            Color.white.mask(Circle())
+            glyphColor.mask(Circle())
         } else {
-            Color.white.mask(Rectangle().padding(12))
+            glyphColor.mask(
+                Rectangle().padding(videoAppearance.tokens.layout.spacingSm)
+            )
         }
     }
 }
@@ -71,9 +76,13 @@ struct ShadowViewModifier: ViewModifier {
 
 /// Modifier for adding shadow to a view.
 struct ShadowModifier: ViewModifier {
+    @Environment(\.colorScheme) private var colorScheme
+
     func body(content: Content) -> some View {
+        let primary = colorScheme == .dark ? layout.darkElevation3 : layout.lightElevation3
+        let contact = colorScheme == .dark ? layout.darkElevation1 : layout.lightElevation1
         content
-            .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 12)
-            .shadow(color: Color.black.opacity(0.1), radius: 1, x: 0, y: 1)
+            .shadow(color: Color(primary.color), radius: primary.blur, x: primary.x, y: primary.y)
+            .shadow(color: Color(contact.color), radius: contact.blur, x: contact.x, y: contact.y)
     }
 }

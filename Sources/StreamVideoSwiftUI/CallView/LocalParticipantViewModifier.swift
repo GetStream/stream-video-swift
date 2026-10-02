@@ -39,7 +39,7 @@ public struct LocalParticipantViewModifier: ViewModifier {
         content
             .overlay(
                 BottomView {
-                    HStack {
+                    HStack(spacing: layout.spacingXs) {
                         ParticipantMicrophoneCheckView(
                             audioLevels: microphoneChecker.audioLevels,
                             microphoneOn: callSettings.audioOn,
@@ -109,7 +109,7 @@ public struct LocalParticipantViewModifier_iOS13: ViewModifier {
         content
             .overlay(
                 BottomView {
-                    HStack {
+                    HStack(spacing: layout.spacingXs) {
                         ParticipantMicrophoneCheckView(
                             audioLevels: microphoneChecker.audioLevels,
                             microphoneOn: callSettings.audioOn,
