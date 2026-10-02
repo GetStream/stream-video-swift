@@ -910,6 +910,8 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
                     sdp: sessionDescription.sdp
                 )
             )
+        } catch is CancellationError {
+            return
         } catch {
             log.error(error, subsystems: subsystem)
         }
@@ -963,6 +965,8 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
                 for: sessionId
             )
             log.debug("Subscriber offer was handled.", subsystems: subsystem)
+        } catch is CancellationError {
+            return
         } catch {
             log.error(
                 "Error handling offer event",
