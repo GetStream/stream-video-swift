@@ -4,6 +4,7 @@
 
 import Foundation
 import StreamVideo
+import SwiftUI
 
 /// Represents an action available in the menu for a call participant.
 public struct CallParticipantMenuAction: Identifiable {
@@ -13,8 +14,8 @@ public struct CallParticipantMenuAction: Identifiable {
     public var title: String
     /// The required capability to execute this action.
     public var requiredCapability: OwnCapability
-    /// The name of the icon associated with the action.
-    public var iconName: String
+    /// The icon associated with the action.
+    public var icon: Image
     /// The closure to execute when the action is triggered, passing the participant's ID.
     public var action: @MainActor @Sendable (String) -> Void
     /// Optional confirmation popup data that may be presented before executing the action.

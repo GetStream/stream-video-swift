@@ -292,7 +292,7 @@ struct BlockedUsersView: View {
                                     menuAction.action(blockedUser.id)
                                 } label: {
                                     HStack(spacing: layout.spacingXs) {
-                                        Image(systemName: menuAction.iconName)
+                                        menuAction.icon
                                         Text(menuAction.title)
                                         Spacer()
                                     }
@@ -379,7 +379,7 @@ struct CallParticipantView<Factory: ViewFactory>: View {
                     menuAction.action(participant.userId)
                 } label: {
                     HStack(spacing: layout.spacingXs) {
-                        Image(systemName: menuAction.iconName)
+                        menuAction.icon
                         Text(menuAction.title)
                         Spacer()
                     }
