@@ -41,7 +41,15 @@ Access paths on `VideoAppearance`:
 - Video-only: `videoAppearance.colors.controlAcceptCallButtonBackground`
 - Assets: `videoAppearance.images.hangup`, `videoAppearance.sounds.incomingCallSound`
 
-Inside the SDK, `View`, `ButtonStyle`, and `ViewModifier` expose internal `colors` / `fonts` / `layout` helpers that read `tokens` from the injected `VideoAppearance`. Do not add public injected keys for them; `\.videoAppearance` is the only public appearance key.
+Inside the SDK, each view, button style, or modifier injects only the token groups it reads, using the same nested key paths customers use:
+
+```swift
+@Injected(\.videoAppearance.tokens.colors) var colors
+@Injected(\.videoAppearance.tokens.fonts) var fonts
+@Injected(\.videoAppearance.tokens.layout) var layout
+```
+
+Add `@Injected(\.videoAppearance) var videoAppearance` only when the type also reads images, sounds, or Video-only colors. Do not add `View` / `ButtonStyle` / `ViewModifier` extensions that expose tokens, and do not add public injected keys for them; `\.videoAppearance` is the only public appearance key.
 
 `VideoAppearance.Colors.init` defaults to `DesignSystemTokens()`, so `Colors()` works without supplying tokens.
 

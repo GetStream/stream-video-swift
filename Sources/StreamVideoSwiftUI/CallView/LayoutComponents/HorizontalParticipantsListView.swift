@@ -8,6 +8,7 @@ import SwiftUI
 /// `HorizontalParticipantsListView` represents a horizontally scrollable view of participant thumbnails.
 /// This component lays out participant thumbnails in a bar at the bottom of the associated view.
 public struct HorizontalParticipantsListView<Factory: ViewFactory>: View {
+    @Injected(\.videoAppearance.tokens.layout) var layout
 
     // MARK: - Properties
 

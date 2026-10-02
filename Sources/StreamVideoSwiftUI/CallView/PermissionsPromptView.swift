@@ -12,6 +12,9 @@ public struct PermissionsPromptView: View {
 
     @Injected(\.urlNavigator) private var urlNavigator
     @Injected(\.videoAppearance) private var videoAppearance
+    @Injected(\.videoAppearance.tokens.colors) var colors
+    @Injected(\.videoAppearance.tokens.fonts) var fonts
+    @Injected(\.videoAppearance.tokens.layout) var layout
 
     private let ownCapabilitiesPublisher: AnyPublisher<Set<OwnCapability>, Never>?
 

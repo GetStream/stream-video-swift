@@ -9,6 +9,9 @@ import SwiftUI
 public struct InviteParticipantsView<Factory: ViewFactory>: View {
 
     @Injected(\.videoAppearance) private var videoAppearance
+    @Injected(\.videoAppearance.tokens.colors) var colors
+    @Injected(\.videoAppearance.tokens.fonts) var fonts
+    @Injected(\.videoAppearance.tokens.layout) var layout
 
     var viewFactory: Factory
     @StateObject var viewModel: InviteParticipantsViewModel
@@ -114,6 +117,9 @@ public struct InviteParticipantsView<Factory: ViewFactory>: View {
 }
 
 struct UsersHeaderView: View {
+    @Injected(\.videoAppearance.tokens.colors) var colors
+    @Injected(\.videoAppearance.tokens.fonts) var fonts
+    @Injected(\.videoAppearance.tokens.layout) var layout
 
     var title = L10n.Call.Participants.onPlatform
 
@@ -134,6 +140,9 @@ struct UsersHeaderView: View {
 struct VideoUserView<Factory: ViewFactory>: View {
 
     @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.videoAppearance.tokens.colors) var colors
+    @Injected(\.videoAppearance.tokens.fonts) var fonts
+    @Injected(\.videoAppearance.tokens.layout) var layout
 
     private let avatarSize: CGFloat = 56
 

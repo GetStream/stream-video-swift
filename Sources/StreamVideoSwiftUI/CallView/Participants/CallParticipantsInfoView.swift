@@ -81,6 +81,9 @@ struct CallParticipantsView<Factory: ViewFactory>: View {
 
 @available(iOS 14.0, *)
 struct CallParticipantsViewContainer<Factory: ViewFactory>: View {
+    @Injected(\.videoAppearance.tokens.colors) var colors
+    @Injected(\.videoAppearance.tokens.fonts) var fonts
+    @Injected(\.videoAppearance.tokens.layout) var layout
 
     @ObservedObject var viewModel: CallParticipantsInfoViewModel
 
@@ -234,6 +237,9 @@ struct ParticipantsSheetBackgroundModifier: ViewModifier {
 }
 
 struct ParticipantsButton: View {
+    @Injected(\.videoAppearance.tokens.colors) var colors
+    @Injected(\.videoAppearance.tokens.fonts) var fonts
+    @Injected(\.videoAppearance.tokens.layout) var layout
 
     var title: String
     var primaryStyle: Bool = true
@@ -273,6 +279,8 @@ struct ParticipantsButton: View {
 }
 
 struct BlockedUsersView: View {
+    @Injected(\.videoAppearance.tokens.fonts) var fonts
+    @Injected(\.videoAppearance.tokens.layout) var layout
 
     var blockedUsers: [User]
     var unblockActions: @MainActor (User) -> [CallParticipantMenuAction]
@@ -309,6 +317,9 @@ struct BlockedUsersView: View {
 struct CallParticipantView<Factory: ViewFactory>: View {
 
     @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.videoAppearance.tokens.colors) var colors
+    @Injected(\.videoAppearance.tokens.fonts) var fonts
+    @Injected(\.videoAppearance.tokens.layout) var layout
 
     private let imageSize: CGFloat = 48
 

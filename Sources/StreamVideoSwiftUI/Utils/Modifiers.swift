@@ -55,6 +55,7 @@ extension View {
 
 /// Modifier for adding shadow and corner radius to a view.
 struct ShadowViewModifier: ViewModifier {
+    @Injected(\.videoAppearance.tokens.colors) var colors
     
     var cornerRadius: CGFloat = InjectedValues[\.videoAppearance].tokens.layout.radiusXl
     var borderColor: Color = Color(InjectedValues[\.videoAppearance].tokens.colors.borderCoreDefault)
@@ -76,6 +77,8 @@ struct ShadowViewModifier: ViewModifier {
 
 /// Modifier for adding shadow to a view.
 struct ShadowModifier: ViewModifier {
+    @Injected(\.videoAppearance.tokens.layout) var layout
+
     @Environment(\.colorScheme) private var colorScheme
 
     func body(content: Content) -> some View {

@@ -12,6 +12,7 @@ import SwiftUI
 /// This view handles rendering different types of content based on the current state,
 /// including participant video, screen sharing, and reconnection states.
 struct PictureInPictureContentView: View {
+    @Injected(\.videoAppearance.tokens.colors) var colors
 
     private let store: PictureInPictureStore
 

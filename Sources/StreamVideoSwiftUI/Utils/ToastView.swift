@@ -9,6 +9,9 @@ import SwiftUI
 public struct ToastView: View {
 
     @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.videoAppearance.tokens.colors) var colors
+    @Injected(\.videoAppearance.tokens.fonts) var fonts
+    @Injected(\.videoAppearance.tokens.layout) var layout
 
     var style: ToastStyle
     var message: String
@@ -61,6 +64,7 @@ public struct ToastView: View {
 }
 
 public struct ToastModifier: ViewModifier {
+    @Injected(\.videoAppearance.tokens.layout) var layout
     
     @Binding var toast: Toast?
     @State private var workItem: Task<Void, Never>?

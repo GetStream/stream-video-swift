@@ -136,6 +136,7 @@ extension CallIconStyle {
 
 /// View used for the online indicator.
 public struct OnlineIndicatorView: View {
+    @Injected(\.videoAppearance.tokens.colors) var colors
 
     var indicatorSize: CGFloat
 

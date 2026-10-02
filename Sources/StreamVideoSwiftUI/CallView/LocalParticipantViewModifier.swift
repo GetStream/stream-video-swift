@@ -11,6 +11,7 @@ import SwiftUI
 public struct LocalParticipantViewModifier: ViewModifier {
 
     @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.videoAppearance.tokens.layout) var layout
 
     private let localParticipant: CallParticipant
     private var call: Call?
@@ -82,6 +83,7 @@ public struct LocalParticipantViewModifier: ViewModifier {
 public struct LocalParticipantViewModifier_iOS13: ViewModifier {
 
     @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.videoAppearance.tokens.layout) var layout
 
     private let localParticipant: CallParticipant
     private var call: Call?

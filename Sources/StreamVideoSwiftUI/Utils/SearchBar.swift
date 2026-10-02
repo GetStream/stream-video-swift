@@ -9,6 +9,8 @@ import SwiftUI
 struct SearchBar: View, KeyboardReadable {
 
     @Injected(\.videoAppearance) private var videoAppearance
+    @Injected(\.videoAppearance.tokens.colors) var colors
+    @Injected(\.videoAppearance.tokens.layout) var layout
 
     @Binding var text: String
     @State private var isEditing = false

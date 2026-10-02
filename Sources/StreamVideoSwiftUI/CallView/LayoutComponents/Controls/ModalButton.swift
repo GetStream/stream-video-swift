@@ -7,6 +7,8 @@ import StreamVideo
 import SwiftUI
 
 public struct ModalButton: View {
+    @Injected(\.videoAppearance.tokens.colors) var colors
+    @Injected(\.videoAppearance.tokens.layout) var layout
 
     var image: Image
     var action: () -> Void
@@ -31,6 +33,7 @@ public struct ModalButton: View {
 }
 
 struct ModalButtonStyle: ButtonStyle {
+    @Injected(\.videoAppearance.tokens.colors) var colors
 
     func makeBody(configuration: Configuration) -> some View {
         configuration

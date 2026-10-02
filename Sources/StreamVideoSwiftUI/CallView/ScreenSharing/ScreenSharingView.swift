@@ -6,6 +6,9 @@ import StreamVideo
 import SwiftUI
 
 public struct ScreenSharingView<Factory: ViewFactory>: View {
+    @Injected(\.videoAppearance.tokens.colors) var colors
+    @Injected(\.videoAppearance.tokens.fonts) var fonts
+    @Injected(\.videoAppearance.tokens.layout) var layout
 
     @ObservedObject var viewModel: CallViewModel
     var screenSharing: ScreenSharingSession
@@ -125,6 +128,7 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
 }
 
 struct HorizontalContainer<Content: View>: View {
+    @Injected(\.videoAppearance.tokens.layout) var layout
     
     @ViewBuilder var content: () -> Content
     
