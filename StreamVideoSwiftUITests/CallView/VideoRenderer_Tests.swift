@@ -91,6 +91,56 @@ final class VideoRenderer_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertFalse(wasRead)
     }
 
+    func test_add_sameTrack_attachesOnceOffMainThread() async throws {
+        let factory = PeerConnectionFactory.build(
+            audioProcessingModule: MockAudioProcessingModule.shared
+        )
+        let track = factory.makeVideoTrack(
+            source: factory.makeVideoSource(forScreenShare: false)
+        )
+        let selector = #selector(RTCVideoTrack.add(_:))
+        let method = try XCTUnwrap(
+            class_getInstanceMethod(RTCVideoTrack.self, selector)
+        )
+        let originalImplementation = method_getImplementation(method)
+        let original = unsafeBitCast(
+            originalImplementation,
+            to: (@convention(c) (AnyObject, Selector, AnyObject) -> Void).self
+        )
+        let callsOnMainThread = Atomic(wrappedValue: [Bool]())
+        let queueKey = DispatchSpecificKey<Bool>()
+        subject.queue.setSpecific(key: queueKey, value: true)
+        let replacement: @convention(block) (RTCVideoTrack, AnyObject) -> Void = { currentTrack, renderer in
+            if currentTrack === track,
+               Thread.isMainThread || DispatchQueue.getSpecific(key: queueKey) == true {
+                callsOnMainThread.mutate { $0.append(Thread.isMainThread) }
+            }
+            original(currentTrack, selector, renderer)
+        }
+        let replacementImplementation = imp_implementationWithBlock(replacement)
+        method_setImplementation(method, replacementImplementation)
+        defer {
+            method_setImplementation(method, originalImplementation)
+            imp_removeBlock(replacementImplementation)
+            subject.queue.setSpecific(key: queueKey, value: nil)
+        }
+
+        subject.add(track: track)
+        subject.add(track: track)
+        await withCheckedContinuation { continuation in
+            subject.queue.async { continuation.resume() }
+        }
+
+        XCTAssertEqual(callsOnMainThread.wrappedValue, [false])
+
+        await withCheckedContinuation { [subject] continuation in
+            subject!.queue.async {
+                track.remove(subject!)
+                continuation.resume()
+            }
+        }
+    }
+
     // MARK: - Private helpers
 
     private func assertPreferredFramesPerSecond(
