@@ -9,7 +9,9 @@ import StreamVideo
 /// Deals with sounds that are played during calls.
 open class CallSoundsPlayer {
     
-    @Injected(\.sounds) private var sounds
+    @Injected(\.videoAppearance) private var videoAppearance
+
+    private var sounds: Sounds { videoAppearance.sounds }
     
     private var audioPlayer: AVAudioPlayer?
     

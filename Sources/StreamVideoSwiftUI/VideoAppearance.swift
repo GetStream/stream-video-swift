@@ -36,13 +36,18 @@ public final class VideoAppearance {
     /// The images the Video SDK renders. Icons stay on the product SDK.
     public var images: Images
 
+    /// The sounds played for incoming and outgoing calls.
+    public var sounds: Sounds
+
     public init(
         tokens: DesignSystemTokens = DesignSystemTokens(),
-        images: Images = Images()
+        images: Images = Images(),
+        sounds: Sounds = Sounds()
     ) {
         self.tokens = tokens
         self.colors = Colors(tokens: tokens)
         self.images = images
+        self.sounds = sounds
     }
 }
 
