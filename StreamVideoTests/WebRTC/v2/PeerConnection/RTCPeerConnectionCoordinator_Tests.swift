@@ -710,6 +710,26 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
         )
     }
 
+    func test_handleSubscriberOffer_subjectIsSubscriber_afterSFURefresh_handlesOfferOnce() async throws {
+        peerType = .subscriber
+        _ = subject
+        let refreshedWebSocket = MockSFUWebSocket()
+        mockSFUStack.nextWebSocket = refreshedWebSocket
+        mockSFUStack.adapter.refresh(
+            webSocketConfiguration: .init(url: .init(string: "https://getstream.io")!)
+        )
+
+        var offer = Stream_Video_Sfu_Event_SubscriberOffer()
+        offer.sdp = .unique
+        refreshedWebSocket.inject(.subscriberOffer(offer))
+
+        await fulfillment { [mockPeerConnection] in
+            (mockPeerConnection?.timesCalled(.setRemoteDescription) ?? 0) >= 1
+        }
+        await wait(for: 1)
+        XCTAssertEqual(mockPeerConnection?.timesCalled(.setRemoteDescription), 1)
+    }
+
     func test_negotiate_subjectIsPublisher_callsSendAnswerOnSFU() async throws {
         mockSFUStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
         peerType = .subscriber
@@ -720,7 +740,9 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
             with: RTCSessionDescription(type: .offer, sdp: sdp)
         )
 
-        mockSFUStack.receiveEvent(.subscriberOffer(Stream_Video_Sfu_Event_SubscriberOffer()))
+        var offer = Stream_Video_Sfu_Event_SubscriberOffer()
+        offer.negotiationID = 7
+        mockSFUStack.receiveEvent(.subscriberOffer(offer))
 
         await fulfillment { [mockSFUStack] in
             mockSFUStack?.service.sendAnswerWasCalledWithRequest != nil
@@ -737,6 +759,10 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
         XCTAssertEqual(
             mockSFUStack.service.sendAnswerWasCalledWithRequest?.sdp,
             sdp
+        )
+        XCTAssertEqual(
+            mockSFUStack.service.sendAnswerWasCalledWithRequest?.negotiationID,
+            7
         )
     }
 
