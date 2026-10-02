@@ -16,6 +16,7 @@ _October 01, 2026_
 
 ### 🐞 Fixed
 
+- Old call connections now stop negotiating when reconnection cleanup begins.
 - The joining screen now closes when answering a CallKit call fails. [#1334](https://github.com/GetStream/stream-video-swift/pull/1334)
 - A caller no longer stays stuck ringing when an accept, reject, or end event is lost. [#1302](https://github.com/GetStream/stream-video-swift/pull/1302)
 - Fixed a race condition when compressing WebRTC statistics concurrently. [#1311](https://github.com/GetStream/stream-video-swift/pull/1311)
