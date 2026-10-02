@@ -12,8 +12,6 @@ final class StreamRTCPeerConnection: StreamRTCPeerConnectionProtocol, @unchecked
     /// A dictionary groups transceivers based on the type of their carrying track.
     @Atomic private var transceiversMap: [TrackType: [RTCRtpTransceiver]] = [:]
 
-    @Atomic private var isClosed = false
-
     /// The configuration used to initialize the peer connection.
     ///
     /// Contains settings such as ICE servers, SDP semantics, bundle policy,
@@ -34,7 +32,35 @@ final class StreamRTCPeerConnection: StreamRTCPeerConnectionProtocol, @unchecked
     /// A dispatch queue for handling peer connection operations.
     let dispatchQueue = DispatchQueue(label: "io.getstream.peerconnection")
 
-    private let disposableBag = DisposableBag()
+    /// Serial queue for the async SDP, ICE candidate and statistics APIs,
+    /// plus native teardown.
+    ///
+    /// The Objective-C peer connection methods are synchronous proxies: the
+    /// calling thread blocks until the signaling thread runs the call, even
+    /// for methods that report their result through a completion handler.
+    /// When the signaling thread stalls, for example behind a worker thread
+    /// that waits on a decoder, every caller stalls with it. From Swift
+    /// concurrency, each blocked call parks a thread of the cooperative
+    /// pool, which has about one thread per CPU core, and a few of them are
+    /// enough to starve unrelated async work across the SDK. From the main
+    /// thread, the UI freezes. This queue keeps the wait on one thread per
+    /// peer connection.
+    ///
+    /// Being serial, it hands calls to WebRTC in queue submission order.
+    /// Completion callbacks can arrive later; this queue serializes API
+    /// entry, not the entire asynchronous negotiation. ``close()`` runs
+    /// after earlier queue entries, which skip WebRTC if already closed.
+    private let operationQueue = DispatchQueue(label: "io.getstream.peerconnection.operations")
+
+    /// Set as soon as ``close()`` is called, before the close itself runs.
+    ///
+    /// ``perform(_:)`` checks it before each queued call, so calls that were
+    /// waiting on ``operationQueue`` fail with `CancellationError` without
+    /// reaching WebRTC. Without it they would still wait for the signaling
+    /// thread, only to be rejected there because the connection is closed.
+    /// It is `@Atomic` because ``close()`` writes it on the caller's thread
+    /// while ``operationQueue`` reads it.
+    @Atomic private var isClosed = false
 
     /// A publisher for RTCPeerConnectionEvents.
     lazy var publisher: AnyPublisher<RTCPeerConnectionEvent, Never> = delegatePublisher
@@ -85,22 +111,9 @@ final class StreamRTCPeerConnection: StreamRTCPeerConnectionProtocol, @unchecked
     func setLocalDescription(
         _ sessionDescription: RTCSessionDescription
     ) async throws {
-        try await withCheckedThrowingContinuation { [weak self] continuation in
-            guard let self else {
-                continuation.resume(
-                    throwing: ClientError.Unknown("RTCPeerConnection instance is unavailable.")
-                )
-                return
-            }
-
-            source.setLocalDescription(sessionDescription) { error in
-                if let error = error {
-                    continuation.resume(throwing: error)
-                } else {
-                    continuation.resume(returning: ())
-                }
-            }
-        } as ()
+        try await perform { source, completion in
+            source.setLocalDescription(sessionDescription) { completion(Self.result($0)) }
+        }
     }
 
     /// Sets the remote description asynchronously.
@@ -110,23 +123,11 @@ final class StreamRTCPeerConnection: StreamRTCPeerConnectionProtocol, @unchecked
     func setRemoteDescription(
         _ sessionDescription: RTCSessionDescription
     ) async throws {
-        guard !isClosed else { throw CancellationError() }
-        try await withCheckedThrowingContinuation { [weak self] continuation in
-            guard let self else {
-                continuation.resume(
-                    throwing: ClientError.Unknown("RTCPeerConnection instance is unavailable.")
-                )
-                return
+        try await perform { source, completion in
+            source.setRemoteDescription(sessionDescription) {
+                completion(Self.result($0))
             }
-
-            source.setRemoteDescription(sessionDescription) { error in
-                if let error = error {
-                    continuation.resume(throwing: error)
-                } else {
-                    continuation.resume(returning: ())
-                }
-            }
-        } as ()
+        }
 
         // Native success may arrive after close. Serialize acceptance with the
         // close flag so teardown cannot occur between the check and publication.
@@ -148,7 +149,12 @@ final class StreamRTCPeerConnection: StreamRTCPeerConnectionProtocol, @unchecked
     func offer(
         for constraints: RTCMediaConstraints
     ) async throws -> RTCSessionDescription {
-        try await source.offer(for: constraints)
+        // `RTCMediaConstraints` isn't marked `Sendable`, but it can't change
+        // after it's created, so handing it to the operation queue is safe.
+        nonisolated(unsafe) let constraints = constraints
+        return try await perform { source, completion in
+            source.offer(for: constraints) { completion(Self.result($0, $1)) }
+        }
     }
 
     /// Creates an answer asynchronously.
@@ -159,7 +165,11 @@ final class StreamRTCPeerConnection: StreamRTCPeerConnectionProtocol, @unchecked
     func answer(
         for constraints: RTCMediaConstraints
     ) async throws -> RTCSessionDescription {
-        try await source.answer(for: constraints)
+        // See `offer(for:)`.
+        nonisolated(unsafe) let constraints = constraints
+        return try await perform { source, completion in
+            source.answer(for: constraints) { completion(Self.result($0, $1)) }
+        }
     }
 
     /// Retrieves the statistics of the peer connection.
@@ -167,7 +177,9 @@ final class StreamRTCPeerConnection: StreamRTCPeerConnectionProtocol, @unchecked
     /// - Returns: An RTCStatisticsReport containing the connection statistics.
     /// - Throws: An error if retrieving statistics fails.
     func statistics() async throws -> RTCStatisticsReport? {
-        await source.statistics()
+        try await perform { source, completion in
+            source.statistics { completion(.success($0)) }
+        }
     }
 
     // MARK: - Forwarding API
@@ -197,7 +209,9 @@ final class StreamRTCPeerConnection: StreamRTCPeerConnectionProtocol, @unchecked
     /// - Parameter candidate: The ICE candidate to add.
     /// - Throws: An error if adding the candidate fails.
     func add(_ candidate: RTCIceCandidate) async throws {
-        try await source.add(candidate)
+        try await perform { source, completion in
+            source.add(candidate) { completion(Self.result($0)) }
+        }
     }
 
     // MARK: - Publishing API
@@ -220,24 +234,93 @@ final class StreamRTCPeerConnection: StreamRTCPeerConnectionProtocol, @unchecked
     }
 
     /// Closes the peer connection.
+    ///
+    /// The closed flag is set right away, so calls still waiting on
+    /// ``operationQueue`` fail with `CancellationError` without reaching
+    /// WebRTC. The coordinator's negotiation handlers already ignore that
+    /// error, which matches how the JS SDK drops work that fails after
+    /// `dispose()`.
+    ///
+    /// The close itself is queued behind the call WebRTC may be running, and
+    /// this method returns without waiting for it. WebRTC runs its calls one
+    /// at a time on the signaling thread, so a close can't overtake a
+    /// running call whichever thread sends it. Waiting here would let a
+    /// stalled WebRTC block `WebRTCStateAdapter.cleanUp()`, which closes the
+    /// peer connections before it disconnects from the SFU.
+    ///
+    /// This used to run on the main actor. WebRTC doesn't require that:
+    /// `stopInternal()` and `close()` are both proxied to the signaling
+    /// thread from any caller. On the main thread, a stalled signaling
+    /// thread froze the UI while the user left the call.
+    ///
+    /// Calling it again is a no-op.
     func close() async {
-        var shouldClose = false
-        _isClosed.mutate {
-            shouldClose = !$0
-            $0 = true
+        // Read and set in one locked step, so concurrent calls close once.
+        var wasClosed = false
+        _isClosed.mutate { (value: inout Bool) in
+            wasClosed = value
+            value = true
         }
-        guard shouldClose else { return }
-        Task(disposableBag: disposableBag) { @MainActor [weak self] in
-            /// It's very important to close any transceivers **before** we close the connection, to make
-            /// sure that access to `RTCVideoTrack` properties, will be handled correctly. Otherwise
-            /// if we try to access any property/method on a `RTCVideoTrack` instance whose
-            /// peerConnection has closed, we will get blocked on the Main Thread.
-            self?.source.transceivers.forEach { $0.stopInternal() }
-            self?.source.close()
+        guard !wasClosed else { return }
+
+        operationQueue.async { [self] in
+            // Stop the transceivers before closing the connection. Otherwise
+            // reading a property of an `RTCVideoTrack` whose peer connection
+            // has closed can block the reading thread, and renderers may
+            // still be reading their tracks at this point.
+            source.transceivers.forEach { $0.stopInternal() }
+            source.close()
         }
     }
 
     // MARK: - Private
+
+    /// Runs a WebRTC call on ``operationQueue`` and awaits its completion
+    /// handler.
+    ///
+    /// The calling task suspends without holding a thread, so a stalled
+    /// signaling thread blocks only ``operationQueue``. The closed check
+    /// runs when the call reaches the front of the queue. Checking when the
+    /// call is queued would miss a close that arrives while it waits.
+    ///
+    /// - Note: If WebRTC never calls the completion handler, the caller stays
+    ///   suspended. This matches the previous continuation-based calls.
+    private func perform<T: Sendable>(
+        _ operation: @escaping @Sendable (
+            RTCPeerConnection,
+            @escaping @Sendable (Result<T, Error>) -> Void
+        ) -> Void
+    ) async throws -> T {
+        try await withCheckedThrowingContinuation { continuation in
+            operationQueue.async { [self] in
+                guard !isClosed else {
+                    continuation.resume(throwing: CancellationError())
+                    return
+                }
+                operation(source) { continuation.resume(with: $0) }
+            }
+        }
+    }
+
+    /// Maps a WebRTC completion that reports only an optional error.
+    private static func result(_ error: Error?) -> Result<Void, Error> {
+        error.map { .failure($0) } ?? .success(())
+    }
+
+    /// Maps a WebRTC completion that reports a description or an error.
+    ///
+    /// WebRTC should always provide one of the two. The fallback error
+    /// covers the case where it provides neither, so the continuation still
+    /// resumes instead of leaking.
+    private static func result(
+        _ sessionDescription: RTCSessionDescription?,
+        _ error: Error?
+    ) -> Result<RTCSessionDescription, Error> {
+        if let sessionDescription {
+            return .success(sessionDescription)
+        }
+        return .failure(error ?? ClientError.Unknown("WebRTC returned no session description."))
+    }
 
     private func storeTransceiver(
         _ transceiver: RTCRtpTransceiver?,
