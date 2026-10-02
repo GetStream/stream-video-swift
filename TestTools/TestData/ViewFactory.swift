@@ -37,7 +37,7 @@ class TestViewFactory: ViewFactory {
                         .clipped()
                 }
                 .edgesIgnoringSafeArea(.all)
-                .background(Color(Colors().callBackground))
+                .background(Color(red: 16 / 255, green: 18 / 255, blue: 19 / 255))
 
                 ZStack {
                     image

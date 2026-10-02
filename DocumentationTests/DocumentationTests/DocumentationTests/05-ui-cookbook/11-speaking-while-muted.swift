@@ -12,7 +12,7 @@ private func content() {
     container {
         struct SpeakingWhileMutedViewModifier: ViewModifier {
 
-            @Injected(\.colors) var colors
+            @Injected(\.videoAppearance) var videoAppearance
             @ObservedObject var viewModel: CallViewModel
 
             @State private var mutedIndicatorShown = false
@@ -35,7 +35,7 @@ private func content() {
                         Text("You are muted. Unmute to speak.")
                             .padding(8)
                             .background(Color(UIColor.systemBackground))
-                            .foregroundColor(colors.text)
+                            .foregroundColor(Color(videoAppearance.tokens.colors.textPrimary))
                             .cornerRadius(16)
                             .padding()
                     }

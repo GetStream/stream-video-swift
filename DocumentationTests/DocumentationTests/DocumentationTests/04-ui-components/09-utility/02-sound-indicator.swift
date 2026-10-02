@@ -17,7 +17,7 @@ private func content() {
         let images = Images()
         images.micTurnOn = Image("custom_mic_turn_on_icon")
         images.micTurnOff = Image("custom_mic_turn_off_icon")
-        let appearance = Appearance(images: images)
-        streamVideoUI = StreamVideoUI(streamVideo: streamVideo, appearance: appearance)
+        let videoAppearance = VideoAppearance(images: images)
+        streamVideoUI = StreamVideoUI(streamVideo: streamVideo, videoAppearance: videoAppearance)
     }
 }

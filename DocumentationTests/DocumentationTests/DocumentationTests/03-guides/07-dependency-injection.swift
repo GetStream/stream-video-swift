@@ -11,10 +11,10 @@ import SwiftUI
 private func content() {
     container {
         @Injected(\.streamVideo) var streamVideo
-        @Injected(\.fonts) var fonts
-        @Injected(\.colors) var colors
-        @Injected(\.images) var images
-        @Injected(\.sounds) var sounds
+        @Injected(\.videoAppearance) var videoAppearance
+        @Injected(\.videoAppearance.colors) var colors
+        @Injected(\.videoAppearance.images) var images
+        @Injected(\.videoAppearance.sounds) var sounds
         @Injected(\.utils) var utils
     }
 

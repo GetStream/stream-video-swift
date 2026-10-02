@@ -17,8 +17,8 @@ v2 introduces a **shared design-token system** so Chat and Video can reskin from
 ### Types and ownership
 
 - **`DesignSystemTokens`** (Core, class): `tokens.colors` (semantic colors plus `tokens.colors.palette` for brand/chrome ramps), `tokens.layout` (spacing, radii, strokes, elevations), and `tokens.fonts` (shared SwiftUI typography). Override color ramps **before the first read**. Colors stay on UIKit `UIColor`; fonts stay on SwiftUI `Font`. UIKit `UIFont` faces stay on product UIKit SDKs (for example StreamChatUI).
-- **`VideoAppearance`**: Video’s design-system type. Holds `tokens: DesignSystemTokens`, `colors: VideoAppearance.Colors` (Video-only colors from `tokens/video`), and `images: Images` (Video’s own icons, mirroring Chat’s `appearance.images`). No sounds. Video owns **no** layout or font tokens; layout and shared fonts come from `tokens`. Labels and other shared semantics live on `tokens.colors`.
-- **`Appearance`** (legacy): existing SwiftUI `Colors` struct plus images, fonts, and sounds. `@Injected(\.appearance)` / `@Injected(\.fonts)` and `StreamVideoUI(..., appearance:)` still take this type. Shared typography lives on `videoAppearance.tokens.fonts`. Migrated views use `@Injected(\.videoAppearance)`; other views continue using the legacy appearance until explicitly migrated.
+- **`VideoAppearance`**: Video’s only appearance type. Holds `tokens: DesignSystemTokens`, `colors: VideoAppearance.Colors` (Video-only colors from `tokens/video`), `images: Images` (Video’s own icons, mirroring Chat’s `appearance.images`), and `sounds: Sounds` (incoming/outgoing call sounds). `VideoAppearance.localizationProvider` overrides SDK string lookup. Video owns **no** layout or font tokens; layout and shared fonts come from `tokens`. Labels and other shared semantics live on `tokens.colors`.
+- The legacy `Appearance`, `Colors`, and `Fonts` types and their `\.appearance` / `\.colors` / `\.fonts` / `\.images` / `\.sounds` keys were removed in v2. Do not reintroduce them.
 
 Product prefix is **Video**, not Call. Use `VideoAppearance` / `VideoAppearance.Colors`.
 
@@ -29,16 +29,19 @@ tokens.layout.spacingMd = 16
 
 let videoAppearance = VideoAppearance(tokens: tokens)
 videoAppearance.colors.indicatorSoundIndicatorSpeaking = .green
+videoAppearance.images.hangup = Image("custom_hangup")
+videoAppearance.sounds.incomingCallSound = "custom_ringtone.m4a"
 
-// Existing views, until they migrate:
-let appearance = Appearance(colors: colors, images: images, fonts: fonts, sounds: sounds)
-StreamVideoUI(streamVideo: streamVideo, appearance: appearance)
+StreamVideoUI(streamVideo: streamVideo, videoAppearance: videoAppearance)
 ```
 
 Access paths on `VideoAppearance`:
 
 - Shared: `videoAppearance.tokens.colors.accentPrimary`, `videoAppearance.tokens.layout.spacingMd`, `videoAppearance.tokens.fonts.body`
 - Video-only: `videoAppearance.colors.controlAcceptCallButtonBackground`
+- Assets: `videoAppearance.images.hangup`, `videoAppearance.sounds.incomingCallSound`
+
+Inside the SDK, `View`, `ButtonStyle`, and `ViewModifier` expose internal `colors` / `fonts` / `layout` helpers that read `tokens` from the injected `VideoAppearance`. Do not add public injected keys for them; `\.videoAppearance` is the only public appearance key.
 
 `VideoAppearance.Colors.init` defaults to `DesignSystemTokens()`, so `Colors()` works without supplying tokens.
 
@@ -46,7 +49,7 @@ Token ownership lives in `design-system-tokens`. Video consumes Core plus `token
 
 ### Mixed Chat + Video apps
 
-`InjectedValues` is a StreamCore type. Both SDKs must not publish the same key names (`appearance`, `colors`, `fonts`, `images`, `tokens`) or a customer file that imports both will not compile. Migrated Video views inject `videoAppearance`; other Video views still inject `fonts` from legacy `Appearance`. Chat UIKit keeps local `UIFont` faces.
+`InjectedValues` is a StreamCore type. Both SDKs must not publish the same key names (`appearance`, `colors`, `fonts`, `images`, `tokens`) or a customer file that imports both will not compile. Video publishes only `videoAppearance`. Chat UIKit keeps local `UIFont` faces.
 
 Intended customer API (Chat will mirror this when it adopts):
 
@@ -67,9 +70,11 @@ struct InboxHeader: View {
 }
 ```
 
+For a single value, inject a nested key path instead of adding a short key: `@Injected(\.videoAppearance.colors)`, `@Injected(\.videoAppearance.images)`, `@Injected(\.videoAppearance.tokens.fonts)`. `VideoAppearance` is a class, so these paths stay writable and never clash with Chat.
+
 Pass the **same** `DesignSystemTokens` instance into both appearances so brand/layout/fonts stay in sync. If the customer constructed Chat and Video with different token instances, each surface must read `tokens` from **its own** appearance; they are no longer interchangeable.
 
-`StreamVideoUI(..., videoAppearance:)` wires `@Injected(\.videoAppearance)`. Keep non-migrated views on `@Injected(\.appearance)` and its legacy convenience keys until their migration is explicitly requested.
+`StreamVideoUI(..., videoAppearance:)` wires `@Injected(\.videoAppearance)`.
 
 ### Design refresh (token migration)
 
@@ -282,7 +287,7 @@ Accessibility & UI quality
 
 - Ensure SwiftUI and UIKit components have accessibility labels, traits, and dynamic type support.
 - Support both light/dark mode.
-- Use the Appearance system for theming and configuration.
+- Use `VideoAppearance` for theming and configuration.
 
 ## Testing Guidelines
 

@@ -11,8 +11,7 @@ import SwiftUI
 /// Shared color and layout tokens come from ``DesignSystemTokens``. Pass
 /// the same instance into Chat's appearance so both SDKs reskin together.
 /// Video-only colors live on ``colors``. Shared typography is
-/// ``tokens/fonts``. Existing views still use ``Appearance/fonts``
-/// until they migrate.
+/// ``tokens/fonts``.
 ///
 /// ```swift
 /// let tokens = DesignSystemTokens()
@@ -49,6 +48,18 @@ public final class VideoAppearance {
         self.images = images
         self.sounds = sounds
     }
+
+    /// Provider for custom localization which is dependent on App Bundle.
+    public nonisolated(unsafe) static var localizationProvider: (
+        _ key: String,
+        _ table: String
+    ) -> String = { key, table in
+        Bundle.streamVideoUI.localizedString(
+            forKey: key,
+            value: nil,
+            table: table
+        )
+    }
 }
 
 enum VideoAppearanceKey: InjectionKey {
@@ -67,7 +78,6 @@ extension InjectedValues {
     }
 }
 
-// This will be changed once all views have been migrated.
 enum VideoTokens {
     static var colors: DesignSystemTokens.Colors {
         InjectedValues[\.videoAppearance].tokens.colors
