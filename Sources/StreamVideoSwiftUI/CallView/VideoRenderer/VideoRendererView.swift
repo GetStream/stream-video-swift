@@ -129,7 +129,10 @@ extension VideoRendererView {
 
         /// Dismantles the video renderer and releases resources.
         func dismantle() {
-            renderer.track?.remove(renderer)
+            // Detach on the renderer's queue. Calling `remove(_:)` on the
+            // track from here would block the main thread on WebRTC's
+            // worker thread.
+            renderer.removeTrack()
             disposableBag.removeAll()
             videoRendererPool.releaseRenderer(renderer)
         }
