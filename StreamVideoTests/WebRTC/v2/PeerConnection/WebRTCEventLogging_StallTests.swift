@@ -25,6 +25,8 @@ final class WebRTCEventLogging_StallTests: XCTestCase, @unchecked Sendable {
         try await assertDescriptionsAvoidNativeGetters(events: .track)
     }
 
+    // Keep non-Sendable WebRTC fixtures on the actor that formats the events.
+    @MainActor
     private func assertDescriptionsAvoidNativeGetters(
         events: Events,
         file: StaticString = #filePath,
@@ -140,10 +142,10 @@ final class WebRTCEventLogging_StallTests: XCTestCase, @unchecked Sendable {
         let returnedWithoutReadingBlockedState = await withCheckedContinuation { continuation in
             DispatchQueue.global(qos: .userInitiated).async {
                 let result = XCTWaiter.wait(for: [finishedFormatting], timeout: 1)
+                releaseGate.signal()
                 continuation.resume(returning: result == .completed)
             }
         }
-        releaseGate.signal()
         await MainActor.run {}
 
         XCTAssertTrue(returnedWithoutReadingBlockedState, "Formatting waited for gated WebRTC state.", file: file, line: line)
