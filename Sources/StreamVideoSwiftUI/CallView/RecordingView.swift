@@ -6,9 +6,9 @@ import StreamVideo
 import SwiftUI
 
 public struct RecordingView: View {
-    @Injected(\.videoAppearance.tokens.colors) var colors
-    @Injected(\.videoAppearance.tokens.fonts) var fonts
-    @Injected(\.videoAppearance.tokens.layout) var layout
+    @Injected(\.colors) var colors
+    @Injected(\.fonts) var fonts
+    @Injected(\.layout) var layout
     
     public init() { /* Public init. */ }
     

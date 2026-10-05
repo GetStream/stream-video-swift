@@ -7,7 +7,8 @@ import StreamVideoSwiftUI
 import SwiftUI
 
 struct CallButtonView: View {
-    @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.colors) private var colors
+    @Injected(\.layout) private var layout
 
     var title: String
     var maxWidth: CGFloat?
@@ -19,19 +20,17 @@ struct CallButtonView: View {
             .foregroundColor(
                 Color(
                     isDisabled
-                        ? tokens.colors.textDisabled
-                        : tokens.colors.buttonPrimaryTextOnAccent
+                        ? colors.textDisabled
+                        : colors.buttonPrimaryTextOnAccent
                 )
             )
-            .padding(.all, tokens.layout.spacingSm)
+            .padding(.all, layout.spacingSm)
             .frame(maxWidth: maxWidth ?? .infinity)
             .background(
                 isDisabled
-                    ? Color(tokens.colors.backgroundUtilityDisabled)
-                    : Color(tokens.colors.buttonPrimaryBackground)
+                    ? Color(colors.backgroundUtilityDisabled)
+                    : Color(colors.buttonPrimaryBackground)
             )
-            .cornerRadius(tokens.layout.radiusMd)
+            .cornerRadius(layout.radiusMd)
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }

@@ -8,8 +8,10 @@ import SwiftUI
 
 struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
 
-    @Injected(\.videoAppearance) private var videoAppearance
     @Injected(\.chatViewModel) var chatViewModel
+    @Injected(\.colors) private var colors
+    @Injected(\.fonts) private var fonts
+    @Injected(\.layout) private var layout
 
     @ObservedObject var viewModel: CallViewModel
 
@@ -29,7 +31,7 @@ struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
     }
 
     var body: some View {
-        VStack(spacing: tokens.layout.spacingXs) {
+        VStack(spacing: layout.spacingXs) {
             viewFactory.makeCallTopView(viewModel: viewModel)
 
             Group {
@@ -54,13 +56,13 @@ struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
                     Spacer()
                 }
             }
-            .padding(.horizontal, tokens.layout.spacingMd)
+            .padding(.horizontal, layout.spacingMd)
 
             viewFactory.makeCallControlsView(viewModel: viewModel)
         }
         .presentParticipantListView(viewModel: viewModel, viewFactory: viewFactory)
         .chat(viewModel: viewModel, chatViewModel: chatViewModel)
-        .background(Color(tokens.colors.backgroundCoreApp).edgesIgnoringSafeArea(.all))
+        .background(Color(colors.backgroundCoreApp).edgesIgnoringSafeArea(.all))
     }
 
     @ViewBuilder
@@ -69,13 +71,13 @@ struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
             Spacer()
 
             Group {
-                VStack(spacing: tokens.layout.spacingMd) {
+                VStack(spacing: layout.spacingMd) {
                     Button {
                         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
                             isSharePromptVisible.toggle()
                         }
                     } label: {
-                        HStack(spacing: tokens.layout.spacingXs) {
+                        HStack(spacing: layout.spacingXs) {
                             Text("Your Meeting is live!")
 
                             Spacer()
@@ -86,8 +88,8 @@ struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
                                 )
                             )
                         }
-                        .foregroundColor(Color(tokens.colors.textPrimary))
-                        .font(tokens.fonts.title3.bold())
+                        .foregroundColor(Color(colors.textPrimary))
+                        .font(fonts.title3.bold())
                     }
 
                     if isSharePromptVisible {
@@ -102,10 +104,10 @@ struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(tokens.layout.spacingMd)
+                .padding(layout.spacingMd)
             }
-            .background(Color(tokens.colors.backgroundCoreElevation1))
-            .clipShape(RoundedRectangle(cornerRadius: tokens.layout.radiusXl))
+            .background(Color(colors.backgroundCoreElevation1))
+            .clipShape(RoundedRectangle(cornerRadius: layout.radiusXl))
             .sheet(isPresented: $isInviteViewVisible) {
                 NavigationView {
                     InviteParticipantsView(
@@ -119,8 +121,8 @@ struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
         }
         .presentsMoreControls(viewModel: viewModel)
         .alignedToReadableContentGuide()
-        .padding(.horizontal, tokens.layout.spacingXs)
-        .padding(.bottom, tokens.layout.spacing3xl)
+        .padding(.horizontal, layout.spacingXs)
+        .padding(.bottom, layout.spacing3xl)
     }
 
     private var callLink: String {
@@ -139,23 +141,23 @@ struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
 
     @ViewBuilder
     private var inviteOthersView: some View {
-        VStack(spacing: tokens.layout.spacingXs) {
+        VStack(spacing: layout.spacingXs) {
             Button {
                 isInviteViewVisible = true
             } label: {
-                HStack(spacing: tokens.layout.spacingXs) {
+                HStack(spacing: layout.spacingXs) {
                     Label(
-                        title: { Text("Add Others").font(tokens.fonts.bodyBold) },
+                        title: { Text("Add Others").font(fonts.bodyBold) },
                         icon: { Image(systemName: "person.fill.badge.plus") }
                     )
                 }
                 .frame(maxWidth: .infinity)
-                .padding(.horizontal, tokens.layout.spacingMd)
+                .padding(.horizontal, layout.spacingMd)
             }
-            .frame(height: tokens.layout.buttonVisualHeightLg)
+            .frame(height: layout.buttonVisualHeightLg)
             .buttonStyle(.plain)
-            .foregroundColor(Color(tokens.colors.buttonPrimaryTextOnAccent))
-            .background(Color(tokens.colors.buttonPrimaryBackground))
+            .foregroundColor(Color(colors.buttonPrimaryTextOnAccent))
+            .background(Color(colors.buttonPrimaryBackground))
             .clipShape(Capsule())
             .frame(maxWidth: .infinity)
         }
@@ -163,52 +165,50 @@ struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
 
     @ViewBuilder
     private var copyLinkView: some View {
-        VStack(spacing: tokens.layout.spacingXs) {
+        VStack(spacing: layout.spacingXs) {
             Button {
                 UIPasteboard.general.string = callLink
             } label: {
-                HStack(spacing: tokens.layout.spacingXs) {
+                HStack(spacing: layout.spacingXs) {
                     Label(
                         title: {
-                            Text("Call id: \(Text(callId).font(tokens.fonts.caption1).fontWeight(.medium))").lineLimit(1)
+                            Text("Call id: \(Text(callId).font(fonts.caption1).fontWeight(.medium))").lineLimit(1)
                                 .minimumScaleFactor(0.7)
                         },
                         icon: { Image(systemName: "doc.on.clipboard") }
                     )
                 }
                 .frame(maxWidth: .infinity)
-                .padding(.horizontal, tokens.layout.spacingMd)
+                .padding(.horizontal, layout.spacingMd)
             }
-            .frame(height: tokens.layout.buttonVisualHeightLg)
+            .frame(height: layout.buttonVisualHeightLg)
             .buttonStyle(.plain)
-            .foregroundColor(Color(tokens.colors.buttonSecondaryText))
-            .background(Color(tokens.colors.buttonSecondaryBackground))
+            .foregroundColor(Color(colors.buttonSecondaryText))
+            .background(Color(colors.buttonSecondaryBackground))
             .clipShape(Capsule())
-            .overlay(Capsule().stroke(Color(tokens.colors.buttonSecondaryBorder), lineWidth: 1))
+            .overlay(Capsule().stroke(Color(colors.buttonSecondaryBorder), lineWidth: 1))
             .frame(maxWidth: .infinity)
         }
     }
 
     @ViewBuilder
     private var qrCodeView: some View {
-        VStack(spacing: tokens.layout.spacingXs) {
+        VStack(spacing: layout.spacingXs) {
             Group {
                 QRCodeView(text: callLink)
                     .frame(width: 100, height: 100, alignment: .center)
-                    .padding(tokens.layout.spacingMd)
+                    .padding(layout.spacingMd)
             }
             .frame(maxWidth: .infinity)
-            .background(Color(tokens.colors.backgroundCoreOnElevation))
-            .clipShape(RoundedRectangle(cornerRadius: tokens.layout.radiusXl))
+            .background(Color(colors.backgroundCoreOnElevation))
+            .clipShape(RoundedRectangle(cornerRadius: layout.radiusXl))
 
             Text("Scan the QR code to join from another device.")
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .font(tokens.fonts.body)
-                .foregroundColor(Color(tokens.colors.textPrimary))
+                .font(fonts.body)
+                .foregroundColor(Color(colors.textPrimary))
                 .minimumScaleFactor(0.7)
                 .lineLimit(1)
         }
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }

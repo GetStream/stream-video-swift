@@ -10,8 +10,7 @@ import SwiftUI
 @available(iOS 14.0, *)
 public struct LocalParticipantViewModifier: ViewModifier {
 
-    @Injected(\.videoAppearance) var videoAppearance
-    @Injected(\.videoAppearance.tokens.layout) var layout
+    @Injected(\.layout) var layout
 
     private let localParticipant: CallParticipant
     private var call: Call?
@@ -67,7 +66,7 @@ public struct LocalParticipantViewModifier: ViewModifier {
                 decoration: .speaking,
                 availableDecorations: decorations
             )
-            .clipShape(RoundedRectangle(cornerRadius: tokens.layout.radiusXl))
+            .clipShape(RoundedRectangle(cornerRadius: layout.radiusXl))
             .clipped()
     }
 
@@ -75,15 +74,12 @@ public struct LocalParticipantViewModifier: ViewModifier {
     private var participantCount: Int {
         call?.state.participants.count ?? 0
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
 
 @available(iOS, introduced: 13, deprecated: 14)
 public struct LocalParticipantViewModifier_iOS13: ViewModifier {
 
-    @Injected(\.videoAppearance) var videoAppearance
-    @Injected(\.videoAppearance.tokens.layout) var layout
+    @Injected(\.layout) var layout
 
     private let localParticipant: CallParticipant
     private var call: Call?
@@ -126,13 +122,13 @@ public struct LocalParticipantViewModifier_iOS13: ViewModifier {
                             )
                         }
                     }
-                    .padding(.bottom, tokens.layout.spacingXxxs)
+                    .padding(.bottom, layout.spacingXxxs)
                 }
                 .padding(
                     .all,
                     showAllInfo
-                        ? tokens.layout.spacingMd
-                        : tokens.layout.spacingXs
+                        ? layout.spacingMd
+                        : layout.spacingXs
                 )
             )
             .applyDecorationModifierIfRequired(
@@ -145,7 +141,7 @@ public struct LocalParticipantViewModifier_iOS13: ViewModifier {
                 decoration: .speaking,
                 availableDecorations: decorations
             )
-            .clipShape(RoundedRectangle(cornerRadius: tokens.layout.radiusXl))
+            .clipShape(RoundedRectangle(cornerRadius: layout.radiusXl))
             .clipped()
     }
 
@@ -153,8 +149,6 @@ public struct LocalParticipantViewModifier_iOS13: ViewModifier {
     private var participantCount: Int {
         call?.state.participants.count ?? 0
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
 
 internal struct ParticipantMicrophoneCheckView: View {

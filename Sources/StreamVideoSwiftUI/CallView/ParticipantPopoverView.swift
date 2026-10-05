@@ -6,7 +6,7 @@ import StreamVideo
 import SwiftUI
 
 public struct ParticipantPopoverView<CustomView: View>: View {
-    @Injected(\.videoAppearance.tokens.layout) var layout
+    @Injected(\.layout) var layout
     
     var participant: CallParticipant
     var call: Call?

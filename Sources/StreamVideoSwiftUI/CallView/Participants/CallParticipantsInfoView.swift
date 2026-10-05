@@ -81,13 +81,13 @@ struct CallParticipantsView<Factory: ViewFactory>: View {
 
 @available(iOS 14.0, *)
 struct CallParticipantsViewContainer<Factory: ViewFactory>: View {
-    @Injected(\.videoAppearance.tokens.colors) var colors
-    @Injected(\.videoAppearance.tokens.fonts) var fonts
-    @Injected(\.videoAppearance.tokens.layout) var layout
+    @Injected(\.colors) var colors
+    @Injected(\.fonts) var fonts
+    @Injected(\.layout) var layout
 
     @ObservedObject var viewModel: CallParticipantsInfoViewModel
 
-    @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.images) var images
 
     var viewFactory: Factory
     var participants: [CallParticipant]
@@ -179,7 +179,7 @@ struct CallParticipantsViewContainer<Factory: ViewFactory>: View {
                     Button {
                         closeTapped()
                     } label: {
-                        videoAppearance.images.xmark
+                        images.xmark
                             .resizable()
                             .renderingMode(.template)
                             .aspectRatio(contentMode: .fit)
@@ -237,9 +237,9 @@ struct ParticipantsSheetBackgroundModifier: ViewModifier {
 }
 
 struct ParticipantsButton: View {
-    @Injected(\.videoAppearance.tokens.colors) var colors
-    @Injected(\.videoAppearance.tokens.fonts) var fonts
-    @Injected(\.videoAppearance.tokens.layout) var layout
+    @Injected(\.colors) var colors
+    @Injected(\.fonts) var fonts
+    @Injected(\.layout) var layout
 
     var title: String
     var primaryStyle: Bool = true
@@ -279,8 +279,8 @@ struct ParticipantsButton: View {
 }
 
 struct BlockedUsersView: View {
-    @Injected(\.videoAppearance.tokens.fonts) var fonts
-    @Injected(\.videoAppearance.tokens.layout) var layout
+    @Injected(\.fonts) var fonts
+    @Injected(\.layout) var layout
 
     var blockedUsers: [User]
     var unblockActions: @MainActor (User) -> [CallParticipantMenuAction]
@@ -316,10 +316,10 @@ struct BlockedUsersView: View {
 
 struct CallParticipantView<Factory: ViewFactory>: View {
 
-    @Injected(\.videoAppearance) var videoAppearance
-    @Injected(\.videoAppearance.tokens.colors) var colors
-    @Injected(\.videoAppearance.tokens.fonts) var fonts
-    @Injected(\.videoAppearance.tokens.layout) var layout
+    @Injected(\.colors) var colors
+    @Injected(\.fonts) var fonts
+    @Injected(\.layout) var layout
+    @Injected(\.images) var images
 
     private let imageSize: CGFloat = 48
 
@@ -360,8 +360,8 @@ struct CallParticipantView<Factory: ViewFactory>: View {
                 Spacer()
                 (
                     participant.hasAudio
-                        ? videoAppearance.images.micTurnOn
-                        : videoAppearance.images.micTurnOff
+                        ? images.micTurnOn
+                        : images.micTurnOff
                 )
                 .foregroundColor(
                     participant.hasAudio
@@ -371,8 +371,8 @@ struct CallParticipantView<Factory: ViewFactory>: View {
 
                 (
                     participant.hasVideo
-                        ? videoAppearance.images.videoTurnOn
-                        : videoAppearance.images.videoTurnOff
+                        ? images.videoTurnOn
+                        : images.videoTurnOff
                 )
                 .foregroundColor(
                     participant.hasVideo

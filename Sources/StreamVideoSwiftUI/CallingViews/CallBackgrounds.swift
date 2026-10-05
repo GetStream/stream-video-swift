@@ -8,8 +8,6 @@ import SwiftUI
 
 public struct CallBackground: View {
     
-    @Injected(\.videoAppearance) var videoAppearance
-    
     var imageURL: URL?
     
     public init(imageURL: URL? = nil) {
@@ -25,10 +23,10 @@ public struct CallBackground: View {
 
 struct FallbackBackground: View {
 
-    @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.colors) var colors
 
     var body: some View {
-        Color(videoAppearance.tokens.colors.backgroundCoreScrim)
+        Color(colors.backgroundCoreScrim)
             .aspectRatio(contentMode: .fill)
             .edgesIgnoringSafeArea(.all)
     }

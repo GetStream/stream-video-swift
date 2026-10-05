@@ -11,10 +11,10 @@ import SwiftUI
 public struct PermissionsPromptView: View {
 
     @Injected(\.urlNavigator) private var urlNavigator
-    @Injected(\.videoAppearance) private var videoAppearance
-    @Injected(\.videoAppearance.tokens.colors) var colors
-    @Injected(\.videoAppearance.tokens.fonts) var fonts
-    @Injected(\.videoAppearance.tokens.layout) var layout
+    @Injected(\.colors) var colors
+    @Injected(\.fonts) var fonts
+    @Injected(\.layout) var layout
+    @Injected(\.images) private var images
 
     private let ownCapabilitiesPublisher: AnyPublisher<Set<OwnCapability>, Never>?
 
@@ -111,12 +111,12 @@ public struct PermissionsPromptView: View {
             Label {
                 Text(L10n.Call.Permissions.Missing.Cta.title)
             } icon: {
-                videoAppearance.images.settings
+                images.settings
             }
             .minimumScaleFactor(0.7)
         } else {
             HStack(alignment: .center, spacing: layout.spacingXxs) {
-                videoAppearance.images.settings
+                images.settings
                 Text(L10n.Call.Permissions.Missing.Cta.title)
             }
             .minimumScaleFactor(0.7)

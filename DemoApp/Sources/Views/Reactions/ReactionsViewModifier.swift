@@ -8,7 +8,7 @@ import SwiftUI
 
 struct ReactionsViewModifier: ViewModifier {
 
-    @Injected(\.videoAppearance) private var videoAppearance
+    @Injected(\.layout) private var layout
     @ObservedObject var reactionsAdapter = InjectedValues[\.reactionsAdapter]
     
     var participant: CallParticipant
@@ -19,7 +19,7 @@ struct ReactionsViewModifier: ViewModifier {
                 ReactionOverlayView(
                     participant: participant
                 )
-                .padding(.top, tokens.layout.spacingMd)
+                .padding(.top, layout.spacingMd)
             )
             .onChange(of: participant.isSpeaking) { newValue in
                 if newValue {
@@ -27,8 +27,6 @@ struct ReactionsViewModifier: ViewModifier {
                 }
             }
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
 
 struct ReactionsViewModifier_Previews: PreviewProvider {

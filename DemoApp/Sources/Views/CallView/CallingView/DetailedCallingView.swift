@@ -21,7 +21,8 @@ struct DetailedCallingView<Factory: ViewFactory>: View {
     }
 
     @Injected(\.streamVideo) var streamVideo
-    @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.colors) private var colors
+    @Injected(\.layout) private var layout
 
     @ObservedObject var viewModel: CallViewModel
     @ObservedObject private var appState = AppState.shared
@@ -89,17 +90,15 @@ struct DetailedCallingView<Factory: ViewFactory>: View {
         self.viewModel = viewModel
     }
 
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
-
     var body: some View {
-        VStack(spacing: tokens.layout.spacingXs) {
+        VStack(spacing: layout.spacingXs) {
             DemoCallingTopView(callViewModel: viewModel)
 
             VStack(spacing: 0) {
-                HStack(spacing: tokens.layout.spacingXs) {
+                HStack(spacing: layout.spacingXs) {
                     TextField("Call ID", text: $text)
-                        .foregroundColor(Color(tokens.colors.inputTextDefault))
-                        .padding(.all, tokens.layout.spacingSm)
+                        .foregroundColor(Color(colors.inputTextDefault))
+                        .padding(.all, layout.spacingSm)
                         .accessibilityIdentifier("callId")
                         .disabled(isAnonymous)
 
@@ -113,9 +112,9 @@ struct DetailedCallingView<Factory: ViewFactory>: View {
                             )
                         } label: {
                             Image(systemName: "arrow.triangle.2.circlepath")
-                                .foregroundColor(Color(tokens.colors.inputTextIcon))
+                                .foregroundColor(Color(colors.inputTextIcon))
                         }
-                        .padding(.trailing, tokens.layout.spacingMd)
+                        .padding(.trailing, layout.spacingMd)
                     }
                 }
 
@@ -126,14 +125,14 @@ struct DetailedCallingView<Factory: ViewFactory>: View {
                         }
                     }
                     .pickerStyle(.segmented)
-                    .padding(tokens.layout.spacingXs)
+                    .padding(layout.spacingXs)
                 }
             }
-            .background(Color(tokens.colors.backgroundCoreSurfaceDefault))
-            .clipShape(RoundedRectangle(cornerRadius: tokens.layout.radiusMd))
+            .background(Color(colors.backgroundCoreSurfaceDefault))
+            .clipShape(RoundedRectangle(cornerRadius: layout.radiusMd))
             .overlay(
-                RoundedRectangle(cornerRadius: tokens.layout.radiusMd)
-                    .stroke(Color(tokens.colors.borderCoreDefault), lineWidth: 1)
+                RoundedRectangle(cornerRadius: layout.radiusMd)
+                    .stroke(Color(colors.borderCoreDefault), lineWidth: 1)
             )
 
             if callAction == .startCall {
@@ -247,14 +246,14 @@ struct DetailedCallingView<Factory: ViewFactory>: View {
                     } icon: {
                         AppUserView(user: participant)
                     }
-                    .foregroundColor(Color(tokens.colors.textPrimary))
+                    .foregroundColor(Color(colors.textPrimary))
                     .accessibilityIdentifier("participantItem")
                 }
             } header: {
-                HStack(spacing: tokens.layout.spacingXs) {
+                HStack(spacing: layout.spacingXs) {
                     Text("Built-In")
                     Spacer()
-                    HStack(spacing: tokens.layout.spacingXs) {
+                    HStack(spacing: layout.spacingXs) {
                         callSettingsView
                         Button {
                             addUserShown = true
@@ -262,12 +261,12 @@ struct DetailedCallingView<Factory: ViewFactory>: View {
                             Image(systemName: "plus")
                         }
                     }
-                    .foregroundColor(Color(tokens.colors.textPrimary))
+                    .foregroundColor(Color(colors.textPrimary))
                 }
             }
         }
         .listStyle(.plain)
-        .background(Color(tokens.colors.backgroundCoreApp))
+        .background(Color(colors.backgroundCoreApp))
         .frame(maxWidth: .infinity, alignment: .leading)
         .sheet(isPresented: $addUserShown, onDismiss: {}) {
             DemoAddUserView()

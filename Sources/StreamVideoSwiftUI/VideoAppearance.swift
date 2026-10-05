@@ -76,4 +76,40 @@ extension InjectedValues {
             Self[VideoAppearanceKey.self] = newValue
         }
     }
+
+    /// Video-only colors plus every shared color token.
+    ///
+    /// In a file that also imports the Chat SDK, use
+    /// `\.videoAppearance.colors` or `\.videoAppearance.tokens.colors`.
+    public var colors: VideoAppearance.Colors {
+        get { videoAppearance.colors }
+        set { videoAppearance.colors = newValue }
+    }
+
+    /// The images the Video SDK renders.
+    ///
+    /// In a file that also imports the Chat SDK, use
+    /// `\.videoAppearance.images`.
+    public var images: Images {
+        get { videoAppearance.images }
+        set { videoAppearance.images = newValue }
+    }
+
+    /// Shared typography tokens.
+    ///
+    /// In a file that also imports the Chat SDK, use
+    /// `\.videoAppearance.tokens.fonts`.
+    public var fonts: DesignSystemTokens.Fonts {
+        get { videoAppearance.tokens.fonts }
+        set { videoAppearance.tokens.fonts = newValue }
+    }
+
+    /// Shared spacing, radius, stroke, and elevation tokens.
+    ///
+    /// In a file that also imports the Chat SDK, use
+    /// `\.videoAppearance.tokens.layout`.
+    public var layout: DesignSystemTokens.Layout {
+        get { videoAppearance.tokens.layout }
+        set { videoAppearance.tokens.layout = newValue }
+    }
 }

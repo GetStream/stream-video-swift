@@ -57,8 +57,8 @@ private func content() {
 
         struct CustomLobbyContentView: View {
 
-            @Injected(\.videoAppearance) var videoAppearance
             @Injected(\.streamVideo) var streamVideo
+            @Injected(\.colors) var colors
 
             @ObservedObject var viewModel: LobbyViewModel
             @ObservedObject var microphoneChecker: MicrophoneChecker
@@ -76,12 +76,12 @@ private func content() {
                             Spacer()
                             Text("Before Joining")
                                 .font(.title)
-                                .foregroundColor(Color(videoAppearance.tokens.colors.textPrimary))
+                                .foregroundColor(Color(colors.textPrimary))
                                 .bold()
 
                             Text("Setup your audio and video")
                                 .font(.body)
-                                .foregroundColor(Color(videoAppearance.tokens.colors.textSecondary))
+                                .foregroundColor(Color(colors.textSecondary))
 
                             CameraCheckView(
                                 viewModel: viewModel,
@@ -93,7 +93,7 @@ private func content() {
                             if microphoneChecker.isSilent {
                                 Text("Your microphone doesn't seem to be working. Make sure you have all permissions accepted.")
                                     .font(.caption)
-                                    .foregroundColor(Color(videoAppearance.tokens.colors.textPrimary))
+                                    .foregroundColor(Color(colors.textPrimary))
                             }
 
                             CallSettingsView(callSettings: $callSettings)
@@ -112,13 +112,13 @@ private func content() {
                                 onCloseLobby()
                             } label: {
                                 Image(systemName: "xmark")
-                                    .foregroundColor(Color(videoAppearance.tokens.colors.textPrimary))
+                                    .foregroundColor(Color(colors.textPrimary))
                             }
                             .padding()
                         }
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(Color(videoAppearance.tokens.colors.backgroundCoreApp).edgesIgnoringSafeArea(.all))
+                    .background(Color(colors.backgroundCoreApp).edgesIgnoringSafeArea(.all))
                 }
                 .onAppear {
                     viewModel.startCamera(front: true)
@@ -131,8 +131,8 @@ private func content() {
 
         struct CameraCheckView: View {
 
-            @Injected(\.videoAppearance) var videoAppearance
             @Injected(\.streamVideo) var streamVideo
+            @Injected(\.colors) var colors
 
             @ObservedObject var viewModel: LobbyViewModel
             @ObservedObject var microphoneChecker: MicrophoneChecker
@@ -152,7 +152,7 @@ private func content() {
                     } else {
                         ZStack {
                             Rectangle()
-                                .fill(Color(videoAppearance.tokens.colors.backgroundCoreSurfaceDefault))
+                                .fill(Color(colors.backgroundCoreSurfaceDefault))
                                 .frame(width: availableSize.width - 32, height: cameraSize)
                                 .cornerRadius(16)
 
@@ -195,7 +195,7 @@ private func content() {
 
         struct CallSettingsView: View {
 
-            @Injected(\.videoAppearance) var videoAppearance
+            @Injected(\.images) var images
 
             @Binding var callSettings: CallSettings
 
@@ -211,7 +211,7 @@ private func content() {
                         )
                     } label: {
                         CallIconView(
-                            icon: (callSettings.audioOn ? videoAppearance.images.micTurnOn : videoAppearance.images.micTurnOff),
+                            icon: (callSettings.audioOn ? images.micTurnOn : images.micTurnOff),
                             size: iconSize,
                             iconStyle: (callSettings.audioOn ? .primary : .transparent)
                         )
@@ -227,7 +227,7 @@ private func content() {
                         )
                     } label: {
                         CallIconView(
-                            icon: (callSettings.videoOn ? videoAppearance.images.videoTurnOn : videoAppearance.images.videoTurnOff),
+                            icon: (callSettings.videoOn ? images.videoTurnOn : images.videoTurnOff),
                             size: iconSize,
                             iconStyle: (callSettings.videoOn ? .primary : .transparent)
                         )
@@ -241,7 +241,7 @@ private func content() {
         
         struct JoinCallView: View {
 
-            @Injected(\.videoAppearance) var videoAppearance
+            @Injected(\.colors) var colors
 
             var callId: String
             var callType: String
@@ -272,12 +272,12 @@ private func content() {
                             .accessibility(identifier: "joinCall")
                     }
                     .frame(height: 50)
-                    .background(Color(videoAppearance.tokens.colors.buttonPrimaryBackground))
+                    .background(Color(colors.buttonPrimaryBackground))
                     .cornerRadius(16)
                     .foregroundColor(.white)
                 }
                 .padding()
-                .background(Color(videoAppearance.tokens.colors.backgroundCoreSurfaceDefault))
+                .background(Color(colors.backgroundCoreSurfaceDefault))
                 .cornerRadius(16)
             }
 

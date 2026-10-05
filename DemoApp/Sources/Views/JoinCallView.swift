@@ -9,7 +9,7 @@ import SwiftUI
 struct JoinCallView: View {
 
     @Environment(\.presentationMode) var presentationMode
-    @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.layout) private var layout
     @StateObject var viewModel: LoginViewModel
     var completion: (UserCredentials) -> Void
 
@@ -18,7 +18,7 @@ struct JoinCallView: View {
     var body: some View {
         NavigationView {
             ScrollView {
-                VStack(spacing: tokens.layout.spacingXs) {
+                VStack(spacing: layout.spacingXs) {
                     TextField("Call Id", text: $callId)
                         .textFieldStyle(DemoTextfieldStyle())
 
@@ -31,11 +31,9 @@ struct JoinCallView: View {
                     }
                 }
             }
-            .padding(tokens.layout.spacingMd)
+            .padding(layout.spacingMd)
             .navigationTitle("Join Call")
             .overlay(AppState.shared.loading ? ProgressView() : nil)
         }
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }

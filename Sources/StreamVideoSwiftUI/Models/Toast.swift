@@ -72,7 +72,7 @@ public indirect enum ToastStyle: Equatable {
 
 extension ToastStyle {
     var themeColor: Color {
-        let colors = InjectedValues[\.videoAppearance].tokens.colors
+        let colors = InjectedValues[\.colors]
         switch self {
         case .error: return Color(colors.accentError)
         case .warning: return Color(colors.accentWarning)
@@ -83,7 +83,7 @@ extension ToastStyle {
     }
     
     var icon: Image {
-        let images = InjectedValues[\.videoAppearance].images
+        let images = InjectedValues[\.images]
         switch self {
         case .info: return images.infoCircleFill
         case .warning: return images.exclamationmarkTriangleFill

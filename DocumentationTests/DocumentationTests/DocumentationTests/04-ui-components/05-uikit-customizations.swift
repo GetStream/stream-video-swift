@@ -104,7 +104,8 @@ private func content() {
 
             @StateObject private var chatHelper = ChatHelper()
 
-            @Injected(\.videoAppearance) var videoAppearance
+            @Injected(\.colors) var colors
+            @Injected(\.images) var images
 
             public init(viewModel: CallViewModel) {
                 self.viewModel = viewModel
@@ -143,8 +144,8 @@ private func content() {
                             label: {
                                 CallIconView(
                                     icon: viewModel.callSettings.videoOn
-                                        ? videoAppearance.images.videoTurnOn
-                                        : videoAppearance.images.videoTurnOff,
+                                        ? images.videoTurnOn
+                                        : images.videoTurnOff,
                                     size: size,
                                     iconStyle: (viewModel.callSettings.videoOn ? .primary : .transparent)
                                 )
@@ -159,8 +160,8 @@ private func content() {
                             label: {
                                 CallIconView(
                                     icon: viewModel.callSettings.audioOn
-                                        ? videoAppearance.images.micTurnOn
-                                        : videoAppearance.images.micTurnOff,
+                                        ? images.micTurnOn
+                                        : images.micTurnOff,
                                     size: size,
                                     iconStyle: (viewModel.callSettings.audioOn ? .primary : .transparent)
                                 )
@@ -174,7 +175,7 @@ private func content() {
                             },
                             label: {
                                 CallIconView(
-                                    icon: videoAppearance.images.toggleCamera,
+                                    icon: images.toggleCamera,
                                     size: size,
                                     iconStyle: .primary
                                 )
@@ -185,9 +186,9 @@ private func content() {
                         Button {
                             viewModel.hangUp()
                         } label: {
-                            videoAppearance.images.hangup
+                            images.hangup
                                 .applyCallButtonStyle(
-                                    color: Color(videoAppearance.colors.controlDeclineCallButtonBackground),
+                                    color: Color(colors.controlDeclineCallButtonBackground),
                                     size: size
                                 )
                         }
@@ -215,7 +216,7 @@ private func content() {
                 .frame(maxWidth: .infinity)
                 .frame(height: chatHelper.chatShown ? chatHeight + 100 : 100)
                 .background(
-                    Color(videoAppearance.tokens.colors.backgroundCoreSurfaceDefault)
+                    Color(colors.backgroundCoreSurfaceDefault)
                         .cornerRadius(16)
                         .edgesIgnoringSafeArea(.all)
                 )

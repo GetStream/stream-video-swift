@@ -105,8 +105,8 @@ public struct CallContainer<Factory: ViewFactory>: View {
 }
 
 public struct WaitingLocalUserView<Factory: ViewFactory>: View {
-    @Injected(\.videoAppearance.tokens.colors) var colors
-    @Injected(\.videoAppearance.tokens.layout) var layout
+    @Injected(\.colors) var colors
+    @Injected(\.layout) var layout
 
     @ObservedObject var viewModel: CallViewModel
     var viewFactory: Factory

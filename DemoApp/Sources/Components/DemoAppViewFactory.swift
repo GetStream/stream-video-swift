@@ -10,9 +10,10 @@ final class DemoAppViewFactory: ViewFactory {
 
     static let shared = DemoAppViewFactory()
 
-    @Injected(\.videoAppearance) var videoAppearance
     @Injected(\.snapshotTrigger) var snapshotTrigger
     @Injected(\.streamVideo) var streamVideo
+    @Injected(\.colors) var colors
+    @Injected(\.layout) var layout
 
     func makeWaitingLocalUserView(viewModel: CallViewModel) -> some View {
         DemoWaitingLocalUserView(viewFactory: self, viewModel: viewModel)
@@ -55,7 +56,7 @@ final class DemoAppViewFactory: ViewFactory {
             onCloseLobby: handleCloseLobby
         )
         .alignedToReadableContentGuide()
-        .background(Color(videoAppearance.tokens.colors.backgroundCoreApp).edgesIgnoringSafeArea(.all))
+        .background(Color(colors.backgroundCoreApp).edgesIgnoringSafeArea(.all))
     }
 
     func makeInnerWaitingLocalUserView(viewModel: CallViewModel) -> AnyView {
@@ -129,7 +130,7 @@ final class DemoAppViewFactory: ViewFactory {
             VStack(spacing: 0) {
                 Spacer()
                 DemoClosedCaptionsView(viewModel)
-                    .padding(.bottom, videoAppearance.tokens.layout.spacing2xl)
+                    .padding(.bottom, layout.spacing2xl)
             }
         )
     }

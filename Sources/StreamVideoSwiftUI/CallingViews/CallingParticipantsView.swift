@@ -8,7 +8,9 @@ import SwiftUI
 
 struct CallingParticipantsView: View {
     
-    @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.colors) private var colors
+    @Injected(\.fonts) private var fonts
+    @Injected(\.layout) private var layout
     
     var participants: [Member]
     var caller: String = ""
@@ -18,11 +20,11 @@ struct CallingParticipantsView: View {
             .multilineTextAlignment(.center)
             .font(
                 participants.count > 1
-                    ? tokens.fonts.title2
-                    : tokens.fonts.title
+                    ? fonts.title2
+                    : fonts.title
             )
-            .foregroundColor(Color(tokens.colors.textOnAccent))
-            .padding(.horizontal, tokens.layout.spacing2xl)
+            .foregroundColor(Color(colors.textOnAccent))
+            .padding(.horizontal, layout.spacing2xl)
     }
     
     private var text: String {
@@ -45,6 +47,4 @@ struct CallingParticipantsView: View {
             return "\(participants[0].user.name), \(participants[1].user.name) and +\(remaining) more"
         }
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }

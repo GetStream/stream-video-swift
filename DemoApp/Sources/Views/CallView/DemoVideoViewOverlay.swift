@@ -32,7 +32,7 @@ struct DemoVideoViewOverlay<RootView: View, Factory: ViewFactory>: View {
 
 struct DemoCallContainer<Factory: ViewFactory>: View {
     
-    @Injected(\.videoAppearance) private var videoAppearance
+    @Injected(\.colors) private var colors
     
     var viewFactory: Factory
     @StateObject var viewModel: CallViewModel
@@ -68,7 +68,7 @@ struct DemoCallContainer<Factory: ViewFactory>: View {
                     )
                 }
                 .toastView(toast: $viewModel.toast)
-                .background(Color(videoAppearance.tokens.colors.backgroundCoreApp))
+                .background(Color(colors.backgroundCoreApp))
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 CallContainer(viewFactory: viewFactory, viewModel: viewModel)

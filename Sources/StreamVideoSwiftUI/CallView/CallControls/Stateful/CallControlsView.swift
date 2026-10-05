@@ -9,7 +9,7 @@ import SwiftUI
 public struct CallControlsView: View {
 
     @Injected(\.streamVideo) var streamVideo
-    @Injected(\.videoAppearance.tokens.layout) var layout
+    @Injected(\.layout) var layout
 
     @ObservedObject var viewModel: CallViewModel
     @State var ownCapabilities: [OwnCapability]

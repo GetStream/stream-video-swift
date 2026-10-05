@@ -9,17 +9,19 @@ import SwiftUI
 
 struct DemoParticipantOptionsButton: View {
 
-    @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.colors) var colors
+    @Injected(\.images) var images
+    @Injected(\.layout) var layout
     var action: () -> Void = {}
 
     var body: some View {
         Button {
             action()
         } label: {
-            videoAppearance.images.participantOptions
-                .foregroundColor(Color(videoAppearance.tokens.colors.textOnAccent))
-                .padding(videoAppearance.tokens.layout.spacingXs)
-                .background(Color(videoAppearance.tokens.colors.backgroundCoreOverlayDarkStrong))
+            images.participantOptions
+                .foregroundColor(Color(colors.textOnAccent))
+                .padding(layout.spacingXs)
+                .background(Color(colors.backgroundCoreOverlayDarkStrong))
                 .clipShape(Circle())
         }
     }

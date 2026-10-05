@@ -11,7 +11,8 @@ struct DemoCallingViewModifier: ViewModifier {
 
     @Injected(\.streamVideo) private var streamVideo
     @Injected(\.callKitAdapter) private var callKitAdapter
-    @Injected(\.videoAppearance) private var videoAppearance
+    @Injected(\.colors) private var colors
+    @Injected(\.layout) private var layout
 
     @ObservedObject var viewModel: CallViewModel
     @ObservedObject private var appState = AppState.shared
@@ -35,9 +36,9 @@ struct DemoCallingViewModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .padding(tokens.layout.spacingMd)
+            .padding(layout.spacingMd)
             .alignedToReadableContentGuide()
-            .background(Color(tokens.colors.backgroundCoreApp).edgesIgnoringSafeArea(.all))
+            .background(Color(colors.backgroundCoreApp).edgesIgnoringSafeArea(.all))
             .onReceive(appState.$deeplinkInfo) { deeplinkInfo in
                 autoJoinIfNeeded(from: deeplinkInfo)
             }
@@ -75,8 +76,6 @@ struct DemoCallingViewModifier: ViewModifier {
             }
             .toastView(toast: $viewModel.toast)
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 
     private func joinCallIfNeeded(with callId: String, callType: String) {
         guard !callId.isEmpty, viewModel.callingState == .idle else {

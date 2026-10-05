@@ -8,20 +8,22 @@ import SwiftUI
 
 struct LoadingView: View {
 
-    @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.colors) private var colors
+    @Injected(\.fonts) private var fonts
+    @Injected(\.layout) private var layout
 
     init() {}
 
     var body: some View {
         ZStack {
-            VStack(spacing: tokens.layout.spacingMd) {
+            VStack(spacing: layout.spacingMd) {
                 Spacer()
 
-                HStack(alignment: .firstTextBaseline, spacing: tokens.layout.spacingXxxs) {
+                HStack(alignment: .firstTextBaseline, spacing: layout.spacingXxxs) {
                     Text("Loading...")
-                        .font(tokens.fonts.title2)
+                        .font(fonts.title2)
                         .fontWeight(.semibold)
-                        .foregroundColor(Color(tokens.colors.textSecondary))
+                        .foregroundColor(Color(colors.textSecondary))
                         .accessibility(identifier: "loadingView")
                 }
 
@@ -29,12 +31,10 @@ struct LoadingView: View {
             }
         }
         .background(
-            Color(tokens.colors.backgroundCoreApp)
+            Color(colors.backgroundCoreApp)
                 .edgesIgnoringSafeArea(.all)
         )
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
 
 struct LoadingView_Previews: PreviewProvider {

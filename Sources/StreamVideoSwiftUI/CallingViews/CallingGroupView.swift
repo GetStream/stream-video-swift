@@ -8,7 +8,7 @@ import SwiftUI
 
 struct CallingGroupView<Factory: ViewFactory>: View {
 
-    @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.layout) private var layout
 
     let easeGently = Animation.easeOut(duration: 1).repeatForever(autoreverses: true)
 
@@ -27,7 +27,7 @@ struct CallingGroupView<Factory: ViewFactory>: View {
     }
 
     var body: some View {
-        VStack(spacing: tokens.layout.spacingXs) {
+        VStack(spacing: layout.spacingXs) {
             if participants.count >= 3 {
                 participantView(
                     for: participants[0],
@@ -35,7 +35,7 @@ struct CallingGroupView<Factory: ViewFactory>: View {
                     animation: easeGently.delay(0.2)
                 )
 
-                HStack(spacing: tokens.layout.spacingMd) {
+                HStack(spacing: layout.spacingMd) {
                     participantView(
                         for: participants[1],
                         scaleEffect: isCalling ? 1.2 : 0.7,
@@ -68,7 +68,7 @@ struct CallingGroupView<Factory: ViewFactory>: View {
                     )
                 }
             } else {
-                HStack(spacing: tokens.layout.spacingMd) {
+                HStack(spacing: layout.spacingMd) {
                     ForEach(0..<participants.count, id: \.self) { index in
                         participantView(
                             for: participants[index],
@@ -105,8 +105,6 @@ struct CallingGroupView<Factory: ViewFactory>: View {
             )
         )
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
 
 struct IncomingCallParticipantView<Factory: ViewFactory>: View {
@@ -146,7 +144,9 @@ struct IncomingCallParticipantView<Factory: ViewFactory>: View {
 
 struct CircledTitleView: View {
     
-    @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.colors) private var colors
+    @Injected(\.fonts) private var fonts
+    @Injected(\.layout) private var layout
     
     var title: String
     var size: CGFloat = .expandedAvatarSize
@@ -155,19 +155,17 @@ struct CircledTitleView: View {
         ZStack {
             Circle()
                 .foregroundColor(
-                    Color(tokens.colors.accentPrimary)
+                    Color(colors.accentPrimary)
                 )
             Text(title)
                 .foregroundColor(
-                    Color(tokens.colors.textOnAccent)
+                    Color(colors.textOnAccent)
                 )
-                .font(tokens.fonts.title)
+                .font(fonts.title)
                 .minimumScaleFactor(0.4)
-                .padding(tokens.layout.spacingMd)
+                .padding(layout.spacingMd)
         }
         .frame(maxWidth: size, maxHeight: size)
         .modifier(ShadowModifier())
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }

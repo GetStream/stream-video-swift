@@ -7,10 +7,10 @@ import SwiftUI
 
 struct SelectedParticipantView<Factory: ViewFactory>: View {
 
-    @Injected(\.videoAppearance) var videoAppearance
-    @Injected(\.videoAppearance.tokens.colors) var colors
-    @Injected(\.videoAppearance.tokens.fonts) var fonts
-    @Injected(\.videoAppearance.tokens.layout) var layout
+    @Injected(\.colors) var colors
+    @Injected(\.fonts) var fonts
+    @Injected(\.layout) var layout
+    @Injected(\.images) var images
 
     private let avatarSize: CGFloat = 50
 
@@ -49,7 +49,7 @@ struct SelectedParticipantView<Factory: ViewFactory>: View {
                             .fill(Color(colors.textOnInverse))
                             .frame(width: layout.iconSizeSm, height: layout.iconSizeSm)
 
-                        videoAppearance.images.xmarkCircleFill
+                        images.xmarkCircleFill
                             .foregroundColor(Color(colors.backgroundCoreInverse))
                     }
                     .padding(.all, layout.spacingXxs)

@@ -8,7 +8,7 @@ import SwiftUI
 
 struct ReactionOverlayView: View {
 
-    @Injected(\.videoAppearance) private var videoAppearance
+    @Injected(\.layout) private var layout
     @ObservedObject var reactionsAdapter = InjectedValues[\.reactionsAdapter]
 
     var participant: CallParticipant
@@ -30,10 +30,8 @@ struct ReactionOverlayView: View {
                 ReactionIcon(iconName: reaction.iconName)
             }
         }
-        .padding(.horizontal, tokens.layout.spacingMd)
+        .padding(.horizontal, layout.spacingMd)
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
 
 struct ReactionOverlayView_Previews: PreviewProvider {

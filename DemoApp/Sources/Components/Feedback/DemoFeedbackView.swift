@@ -10,7 +10,10 @@ import SwiftUI
 struct DemoFeedbackView: View {
 
     @Environment(\.openURL) private var openURL
-    @Injected(\.videoAppearance) private var videoAppearance
+    @Injected(\.colors) private var colors
+    @Injected(\.images) private var images
+    @Injected(\.fonts) private var fonts
+    @Injected(\.layout) private var layout
 
     @State private var email: String = ""
     @State private var comment: String = ""
@@ -35,8 +38,8 @@ struct DemoFeedbackView: View {
                     }
                 }
                 .navigationBarTitleDisplayMode(.inline)
-                .background(Color(tokens.colors.backgroundCoreElevation1).edgesIgnoringSafeArea(.all))
-                .modifier(DemoSheetBackgroundModifier(color: tokens.colors.backgroundCoreElevation1))
+                .background(Color(colors.backgroundCoreElevation1).edgesIgnoringSafeArea(.all))
+                .modifier(DemoSheetBackgroundModifier(color: colors.backgroundCoreElevation1))
         }
         .navigationViewStyle(.stack)
         .toastView(toast: $toast)
@@ -45,37 +48,37 @@ struct DemoFeedbackView: View {
 
     private var closeButton: some View {
         Button(action: dismiss) {
-            videoAppearance.images.xmark
+            images.xmark
                 .resizable()
                 .renderingMode(.template)
                 .aspectRatio(contentMode: .fit)
-                .padding(tokens.layout.spacingXxs)
-                .frame(width: tokens.layout.iconSizeMd, height: tokens.layout.iconSizeMd)
-                .foregroundColor(Color(tokens.colors.textPrimary))
+                .padding(layout.spacingXxs)
+                .frame(width: layout.iconSizeMd, height: layout.iconSizeMd)
+                .foregroundColor(Color(colors.textPrimary))
         }
         .accessibility(identifier: "Close")
     }
 
     private var contentView: some View {
         ScrollView {
-            VStack(spacing: tokens.layout.spacingXl) {
+            VStack(spacing: layout.spacingXl) {
                 Image("feedbackLogo")
 
-                VStack(spacing: tokens.layout.spacingXs) {
+                VStack(spacing: layout.spacingXs) {
                     Text("How is your call going?")
-                        .font(tokens.fonts.title3.bold())
-                        .foregroundColor(Color(tokens.colors.textPrimary))
+                        .font(fonts.title3.bold())
+                        .foregroundColor(Color(colors.textPrimary))
                         .lineLimit(1)
 
                     Text("All feedback is celebrated!")
-                        .font(tokens.fonts.body)
-                        .foregroundColor(Color(tokens.colors.textSecondary))
+                        .font(fonts.body)
+                        .foregroundColor(Color(colors.textSecondary))
                         .lineLimit(2)
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
                 .multilineTextAlignment(.center)
 
-                VStack(spacing: tokens.layout.spacingMd) {
+                VStack(spacing: layout.spacingMd) {
                     TextField(
                         "Email Address *",
                         text: $email
@@ -84,17 +87,17 @@ struct DemoFeedbackView: View {
 
                     DemoTextEditor(text: $comment, placeholder: "Message")
 
-                    HStack(spacing: tokens.layout.spacingXs) {
+                    HStack(spacing: layout.spacingXs) {
                         Text("Rate Quality")
-                            .font(tokens.fonts.bodyBold)
-                            .foregroundColor(Color(tokens.colors.textPrimary))
+                            .font(fonts.bodyBold)
+                            .foregroundColor(Color(colors.textPrimary))
                             .frame(maxWidth: .infinity, alignment: .leading)
 
                         DemoStarRatingView(rating: $rating)
                     }
                 }
 
-                HStack(spacing: tokens.layout.spacingMd) {
+                HStack(spacing: layout.spacingMd) {
                     DemoFeedbackButton(title: "Contact Us", style: .secondary) {
                         resignFirstResponder()
                         openURL(.init(string: "https://getstream.io/video/#contact")!)
@@ -109,13 +112,11 @@ struct DemoFeedbackView: View {
                     )
                 }
             }
-            .padding(tokens.layout.spacingMd)
+            .padding(layout.spacingMd)
         }
     }
 
     // MARK: - Private helpers
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 
     private func submit() {
         resignFirstResponder()
@@ -156,7 +157,9 @@ private struct DemoFeedbackButton: View {
 
     enum Style { case primary, secondary }
 
-    @Injected(\.videoAppearance) private var videoAppearance
+    @Injected(\.colors) private var colors
+    @Injected(\.fonts) private var fonts
+    @Injected(\.layout) private var layout
 
     var title: String
     var style: Style
@@ -172,11 +175,11 @@ private struct DemoFeedbackButton: View {
                         .progressViewStyle(CircularProgressViewStyle(tint: foregroundColor))
                 } else {
                     Text(title)
-                        .font(tokens.fonts.bodyBold)
+                        .font(fonts.bodyBold)
                 }
             }
             .frame(maxWidth: .infinity)
-            .frame(height: tokens.layout.buttonVisualHeightLg)
+            .frame(height: layout.buttonVisualHeightLg)
             .foregroundColor(foregroundColor)
             .background(Capsule().fill(backgroundColor))
             .overlay(Capsule().stroke(borderColor, lineWidth: 1))
@@ -189,18 +192,18 @@ private struct DemoFeedbackButton: View {
     private var foregroundColor: Color {
         switch style {
         case .primary:
-            return Color(isEnabled ? tokens.colors.textOnAccent : tokens.colors.textDisabled)
+            return Color(isEnabled ? colors.textOnAccent : colors.textDisabled)
         case .secondary:
-            return Color(tokens.colors.buttonSecondaryText)
+            return Color(colors.buttonSecondaryText)
         }
     }
 
     private var backgroundColor: Color {
         switch style {
         case .primary:
-            return Color(isEnabled ? tokens.colors.accentPrimary : tokens.colors.backgroundUtilityDisabled)
+            return Color(isEnabled ? colors.accentPrimary : colors.backgroundUtilityDisabled)
         case .secondary:
-            return Color(tokens.colors.buttonSecondaryBackground)
+            return Color(colors.buttonSecondaryBackground)
         }
     }
 
@@ -209,11 +212,9 @@ private struct DemoFeedbackButton: View {
         case .primary:
             return backgroundColor
         case .secondary:
-            return Color(tokens.colors.buttonSecondaryBorder)
+            return Color(colors.buttonSecondaryBorder)
         }
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
 
 private struct DemoFeedbackButtonStyle: ButtonStyle {
@@ -245,7 +246,8 @@ private struct DemoSheetBackgroundModifier: ViewModifier {
 }
 
 struct DemoStarRatingView: View {
-    @Injected(\.videoAppearance) private var videoAppearance
+    @Injected(\.colors) private var colors
+    @Injected(\.layout) private var layout
 
     var rating: Binding<Int>
 
@@ -261,18 +263,16 @@ struct DemoStarRatingView: View {
     }
 
     var body: some View {
-        HStack(spacing: tokens.layout.spacingXs) {
+        HStack(spacing: layout.spacingXs) {
             ForEach(range, id: \.self) { index in
                 Image(systemName: index <= rating.wrappedValue ? "star.fill" : "star")
                     .resizable()
-                    .frame(width: tokens.layout.iconSizeLg, height: tokens.layout.iconSizeLg)
-                    .foregroundColor(Color(tokens.colors.accentWarning))
+                    .frame(width: layout.iconSizeLg, height: layout.iconSizeLg)
+                    .foregroundColor(Color(colors.accentWarning))
                     .onTapGesture {
                         rating.wrappedValue = index
                     }
             }
         }
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }

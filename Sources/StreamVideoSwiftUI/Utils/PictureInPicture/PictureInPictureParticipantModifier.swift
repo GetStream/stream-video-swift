@@ -9,7 +9,7 @@ import SwiftUI
 ///
 /// Adds participant details, connection quality, and speaking indicators to the view.
 private struct PictureInPictureParticipantModifier: ViewModifier {
-    @Injected(\.videoAppearance.tokens.layout) var layout
+    @Injected(\.layout) var layout
 
     var participant: CallParticipant
     var call: Call?

@@ -29,8 +29,8 @@ struct HalfSheetView<Content: View>: View {
 }
 
 struct DraggableSheetView<Content: View>: View {
-    @Injected(\.videoAppearance.tokens.colors) var colors
-    @Injected(\.videoAppearance.tokens.layout) var layout
+    @Injected(\.colors) var colors
+    @Injected(\.layout) var layout
 
     var isPresented: Binding<Bool>
     var content: () -> Content
@@ -79,7 +79,7 @@ struct DraggableSheetView<Content: View>: View {
 }
 
 public struct DragHandleView: View {
-    @Injected(\.videoAppearance.tokens.colors) var colors
+    @Injected(\.colors) var colors
 
     public init() {}
     
@@ -103,19 +103,20 @@ extension View {
         onDismiss: (() -> Void)? = nil,
         @ViewBuilder content: @escaping () -> Content
     ) -> some View where Content: View {
-        let tokens = InjectedValues[\.videoAppearance].tokens
+        let colors = InjectedValues[\.colors]
+        let layout = InjectedValues[\.layout]
         if #available(iOS 16.4, *) {
             sheet(isPresented: isPresented, onDismiss: onDismiss) {
                 content()
-                    .padding(.top, tokens.layout.spacingMd)
+                    .padding(.top, layout.spacingMd)
                     .presentationDetents([.medium])
                     .presentationDragIndicator(.visible)
-                    .presentationBackground(Color(tokens.colors.backgroundCoreElevation1))
+                    .presentationBackground(Color(colors.backgroundCoreElevation1))
             }
         } else if #available(iOS 16.0, *) {
             sheet(isPresented: isPresented, onDismiss: onDismiss) {
                 content()
-                    .padding(.top, tokens.layout.spacingMd)
+                    .padding(.top, layout.spacingMd)
                     .presentationDetents([.medium])
                     .presentationDragIndicator(.visible)
             }

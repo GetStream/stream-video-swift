@@ -6,9 +6,9 @@ import StreamVideo
 import SwiftUI
 
 public struct ScreenSharingView<Factory: ViewFactory>: View {
-    @Injected(\.videoAppearance.tokens.colors) var colors
-    @Injected(\.videoAppearance.tokens.fonts) var fonts
-    @Injected(\.videoAppearance.tokens.layout) var layout
+    @Injected(\.colors) var colors
+    @Injected(\.fonts) var fonts
+    @Injected(\.layout) var layout
 
     @ObservedObject var viewModel: CallViewModel
     var screenSharing: ScreenSharingSession
@@ -24,7 +24,7 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
         viewModel: CallViewModel,
         screenSharing: ScreenSharingSession,
         availableFrame: CGRect,
-        innerItemSpace: CGFloat = InjectedValues[\.videoAppearance].tokens.layout.spacingXs,
+        innerItemSpace: CGFloat = InjectedValues[\.layout].spacingXs,
         isZoomEnabled: Bool = true
     ) where Factory == DefaultViewFactory {
         self.init(
@@ -41,7 +41,7 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
         viewModel: CallViewModel,
         screenSharing: ScreenSharingSession,
         availableFrame: CGRect,
-        innerItemSpace: CGFloat = InjectedValues[\.videoAppearance].tokens.layout.spacingXs,
+        innerItemSpace: CGFloat = InjectedValues[\.layout].spacingXs,
         viewFactory: Factory,
         isZoomEnabled: Bool = true
     ) {
@@ -128,7 +128,7 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
 }
 
 struct HorizontalContainer<Content: View>: View {
-    @Injected(\.videoAppearance.tokens.layout) var layout
+    @Injected(\.layout) var layout
     
     @ViewBuilder var content: () -> Content
     

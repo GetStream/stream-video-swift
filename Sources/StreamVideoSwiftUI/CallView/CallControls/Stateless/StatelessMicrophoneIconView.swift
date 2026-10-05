@@ -13,7 +13,8 @@ public struct StatelessMicrophoneIconView: View {
     public typealias ActionHandler = () -> Void
 
     @Injected(\.permissions) private var permissions
-    @Injected(\.videoAppearance) private var videoAppearance
+    @Injected(\.colors) private var colors
+    @Injected(\.images) private var images
 
     /// The associated call for the microphone icon.
     public weak var call: Call?
@@ -44,11 +45,11 @@ public struct StatelessMicrophoneIconView: View {
         size: CGFloat = 44,
         controlStyle: ToggleControlStyle = .init(
             enabled: .init(
-                icon: InjectedValues[\.videoAppearance].images.micTurnOn,
+                icon: InjectedValues[\.images].micTurnOn,
                 iconStyle: .transparent
             ),
             disabled: .init(
-                icon: InjectedValues[\.videoAppearance].images.micTurnOff,
+                icon: InjectedValues[\.images].micTurnOff,
                 iconStyle: .disabled
             )
         ),
@@ -95,12 +96,12 @@ public struct StatelessMicrophoneIconView: View {
         } else {
             content
                 .badge(
-                    videoAppearance.images.callControlErrorBadge,
+                    images.callControlErrorBadge,
                     foreground: Color(
-                        videoAppearance.colors.controlCallControlErrorBadgeText
+                        colors.controlCallControlErrorBadgeText
                     ),
                     background: Color(
-                        videoAppearance.colors
+                        colors
                             .controlCallControlErrorBadgeBackground
                     )
                 )

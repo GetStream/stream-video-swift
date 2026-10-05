@@ -40,7 +40,8 @@ private func content() {
 
     container {
         struct ParticipantInfoView: View {
-            @Injected(\.videoAppearance) var videoAppearance
+            @Injected(\.colors) var colors
+            @Injected(\.fonts) var fonts
 
             var participant: CallParticipant
             var isPinned: Bool
@@ -70,7 +71,7 @@ private func content() {
                         .foregroundColor(.white)
                         .multilineTextAlignment(.leading)
                         .lineLimit(1)
-                        .font(videoAppearance.tokens.fonts.caption1)
+                        .font(fonts.caption1)
                         .minimumScaleFactor(0.7)
                         .accessibility(identifier: "participantName")
 
@@ -92,7 +93,7 @@ private func content() {
                 .cornerRadius(
                     8,
                     corners: [.topRight],
-                    backgroundColor: Color(videoAppearance.tokens.colors.backgroundCoreOverlayDarkStrong)
+                    backgroundColor: Color(colors.backgroundCoreOverlayDarkStrong)
                 )
             }
         }

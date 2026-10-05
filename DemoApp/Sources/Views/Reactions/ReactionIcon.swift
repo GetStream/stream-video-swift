@@ -8,7 +8,7 @@ import SwiftUI
 
 struct ReactionIcon: View {
 
-    @Injected(\.videoAppearance) private var videoAppearance
+    @Injected(\.layout) private var layout
 
     var iconName: String
     var width: CGFloat?
@@ -17,12 +17,10 @@ struct ReactionIcon: View {
         Image(systemName: iconName)
             .resizable()
             .aspectRatio(contentMode: .fit)
-            .frame(width: width ?? tokens.layout.buttonVisualHeightMd)
+            .frame(width: width ?? layout.buttonVisualHeightMd)
             .symbolRenderingMode(.multicolor)
             .foregroundColor(Color(red: 1, green: 0.8, blue: 0.2))
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
 
 struct ReactionIcon_Previews: PreviewProvider {

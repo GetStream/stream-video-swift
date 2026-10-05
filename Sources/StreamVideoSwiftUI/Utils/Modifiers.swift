@@ -30,15 +30,14 @@ extension Image {
     
     @ViewBuilder
     func background(for type: BackgroundType) -> some View {
-        let videoAppearance = InjectedValues[\.videoAppearance]
-        let glyphColor = Color(videoAppearance.colors.callControlButtonText)
+        let glyphColor = Color(InjectedValues[\.colors].callControlButtonText)
         if type == .none {
             EmptyView()
         } else if type == .circle {
             glyphColor.mask(Circle())
         } else {
             glyphColor.mask(
-                Rectangle().padding(videoAppearance.tokens.layout.spacingSm)
+                Rectangle().padding(InjectedValues[\.layout].spacingSm)
             )
         }
     }
@@ -55,10 +54,10 @@ extension View {
 
 /// Modifier for adding shadow and corner radius to a view.
 struct ShadowViewModifier: ViewModifier {
-    @Injected(\.videoAppearance.tokens.colors) var colors
+    @Injected(\.colors) var colors
     
-    var cornerRadius: CGFloat = InjectedValues[\.videoAppearance].tokens.layout.radiusXl
-    var borderColor: Color = Color(InjectedValues[\.videoAppearance].tokens.colors.borderCoreDefault)
+    var cornerRadius: CGFloat = InjectedValues[\.layout].radiusXl
+    var borderColor: Color = Color(InjectedValues[\.colors].borderCoreDefault)
 
     func body(content: Content) -> some View {
         content
@@ -77,7 +76,7 @@ struct ShadowViewModifier: ViewModifier {
 
 /// Modifier for adding shadow to a view.
 struct ShadowModifier: ViewModifier {
-    @Injected(\.videoAppearance.tokens.layout) var layout
+    @Injected(\.layout) var layout
 
     @Environment(\.colorScheme) private var colorScheme
 

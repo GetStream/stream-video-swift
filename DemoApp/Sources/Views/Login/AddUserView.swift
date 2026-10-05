@@ -8,7 +8,7 @@ import SwiftUI
 
 struct DemoAddUserView: View {
 
-    @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.layout) private var layout
     @Environment(\.presentationMode) var presentationMode
 
     @State var name = ""
@@ -17,7 +17,7 @@ struct DemoAddUserView: View {
     var body: some View {
         NavigationView {
             ScrollView {
-                VStack(spacing: tokens.layout.spacingXs) {
+                VStack(spacing: layout.spacingXs) {
                     Group {
                         TextField("User id", text: $id)
 
@@ -43,12 +43,10 @@ struct DemoAddUserView: View {
                 }
                 .textFieldStyle(DemoTextfieldStyle())
             }
-            .padding(tokens.layout.spacingMd)
+            .padding(layout.spacingMd)
             .navigationTitle("Add a new User")
         }
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 
     private var buttonDisabled: Bool {
         name.isEmpty || id.isEmpty
@@ -58,7 +56,8 @@ struct DemoAddUserView: View {
 @MainActor
 struct DemoCustomEnvironmentView: View {
 
-    @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.colors) private var colors
+    @Injected(\.layout) private var layout
     @Environment(\.presentationMode) var presentationMode
 
     @State var baseURL: AppEnvironment.BaseURL
@@ -84,7 +83,7 @@ struct DemoCustomEnvironmentView: View {
 
     var body: some View {
         ScrollView {
-            VStack(spacing: tokens.layout.spacingXs) {
+            VStack(spacing: layout.spacingXs) {
                 Picker("Base on which environment?", selection: $baseURL) {
                     Text(AppEnvironment.BaseURL.demo.title).tag(AppEnvironment.BaseURL.demo)
                     Text(AppEnvironment.BaseURL.pronto.title).tag(AppEnvironment.BaseURL.pronto)
@@ -116,11 +115,9 @@ struct DemoCustomEnvironmentView: View {
                 Spacer()
             }
         }
-        .padding(tokens.layout.spacingMd)
+        .padding(layout.spacingMd)
         .navigationTitle("Custom Environment")
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 
     private var buttonDisabled: Bool {
         apiKey.isEmpty || token.isEmpty
@@ -128,7 +125,7 @@ struct DemoCustomEnvironmentView: View {
 
     @ViewBuilder
     private var pushNotificationConfiguration: some View {
-        VStack(spacing: tokens.layout.spacingXs) {
+        VStack(spacing: layout.spacingXs) {
             DemoCheckboxView(isChecked: $usesDefaultPushNotificationConfig) {
                 Text("Use `.default` push notification configuration")
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -137,23 +134,23 @@ struct DemoCustomEnvironmentView: View {
                 Image(systemName: usesDefaultPushNotificationConfig ? "checkmark.square" : "square")
             }
             .foregroundColor(
-                Color(usesDefaultPushNotificationConfig ? tokens.colors.textPrimary : tokens.colors.textSecondary)
+                Color(usesDefaultPushNotificationConfig ? colors.textPrimary : colors.textSecondary)
             )
 
             if !usesDefaultPushNotificationConfig {
-                VStack(spacing: tokens.layout.spacingXs) {
+                VStack(spacing: layout.spacingXs) {
                     TextField("Push Notification", text: $pushNotificationName)
                     TextField("VoIP Push Notification", text: $voIPPushNotificationName)
                 }
                 .textFieldStyle(DemoTextfieldStyle())
             }
         }
-        .padding(.vertical, tokens.layout.spacingMd)
+        .padding(.vertical, layout.spacingMd)
     }
 }
 
 struct DemoCheckboxView<Label: View, CheckIcon: View>: View {
-    @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.layout) private var layout
 
     @Binding var isChecked: Bool
     var label: () -> Label
@@ -163,41 +160,39 @@ struct DemoCheckboxView<Label: View, CheckIcon: View>: View {
         Button {
             isChecked.toggle()
         } label: {
-            HStack(spacing: tokens.layout.spacingXs) {
+            HStack(spacing: layout.spacingXs) {
                 label()
                     .frame(maxWidth: .infinity)
                 icon()
             }
         }
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
 
 struct DemoTextfieldStyle: TextFieldStyle {
 
-    @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.colors) private var colors
+    @Injected(\.layout) private var layout
 
     @ViewBuilder
     private var clipShape: some Shape {
-        RoundedRectangle(cornerRadius: tokens.layout.radiusMd)
+        RoundedRectangle(cornerRadius: layout.radiusMd)
     }
 
     func _body(configuration: TextField<Self._Label>) -> some View {
         configuration
-            .padding(tokens.layout.spacingMd)
-            .foregroundColor(Color(tokens.colors.inputTextDefault))
-            .background(Color(tokens.colors.backgroundCoreSurfaceDefault))
-            .overlay(clipShape.stroke(Color(tokens.colors.borderCoreDefault), lineWidth: 1))
+            .padding(layout.spacingMd)
+            .foregroundColor(Color(colors.inputTextDefault))
+            .background(Color(colors.backgroundCoreSurfaceDefault))
+            .overlay(clipShape.stroke(Color(colors.borderCoreDefault), lineWidth: 1))
             .clipShape(clipShape)
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
 
 struct DemoTextEditor: View {
 
-    @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.colors) private var colors
+    @Injected(\.layout) private var layout
 
     var text: Binding<String>
 
@@ -207,29 +202,27 @@ struct DemoTextEditor: View {
 
     @ViewBuilder
     private var clipShape: some Shape {
-        RoundedRectangle(cornerRadius: tokens.layout.radiusMd)
+        RoundedRectangle(cornerRadius: layout.radiusMd)
     }
 
     var body: some View {
         withPlaceholder {
             withClearBackgroundContent
                 .lineLimit(4)
-                .padding(tokens.layout.spacingMd)
+                .padding(layout.spacingMd)
                 .foregroundColor(
                     Color(
                         text.wrappedValue == placeholder
-                            ? tokens.colors.inputTextPlaceholder
-                            : tokens.colors.inputTextDefault
+                            ? colors.inputTextPlaceholder
+                            : colors.inputTextDefault
                     )
                 )
-                .background(Color(tokens.colors.backgroundCoreSurfaceDefault))
-                .overlay(clipShape.stroke(Color(tokens.colors.borderCoreDefault), lineWidth: 1))
+                .background(Color(colors.backgroundCoreSurfaceDefault))
+                .overlay(clipShape.stroke(Color(colors.borderCoreDefault), lineWidth: 1))
                 .clipShape(clipShape)
                 .frame(height: 100)
         }
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 
     @ViewBuilder
     private var withClearBackgroundContent: some View {

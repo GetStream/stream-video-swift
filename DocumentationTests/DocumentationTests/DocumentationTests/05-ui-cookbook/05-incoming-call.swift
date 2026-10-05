@@ -13,7 +13,7 @@ private func content() {
     container {
         struct CustomIncomingCallView: View {
 
-            @Injected(\.videoAppearance) var videoAppearance
+            @Injected(\.colors) var colors
 
             @ObservedObject var callViewModel: CallViewModel
             @StateObject var viewModel: IncomingViewModel
@@ -32,7 +32,7 @@ private func content() {
                 VStack {
                     Spacer()
                     Text("Incoming call")
-                        .foregroundColor(Color(videoAppearance.tokens.colors.textSecondary))
+                        .foregroundColor(Color(colors.textSecondary))
                         .padding()
 
                     StreamLazyImage(imageURL: callInfo.caller.imageURL)
@@ -42,7 +42,7 @@ private func content() {
 
                     Text(callInfo.caller.name)
                         .font(.title)
-                        .foregroundColor(Color(videoAppearance.tokens.colors.textSecondary))
+                        .foregroundColor(Color(colors.textSecondary))
                         .padding()
 
                     Spacer()

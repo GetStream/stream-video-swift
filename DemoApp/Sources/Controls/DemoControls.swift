@@ -11,9 +11,9 @@ import SwiftUI
 struct AppControlsWithChat: View {
 
     @Injected(\.streamVideo) var streamVideo
-    @Injected(\.videoAppearance) var videoAppearance
     @Injected(\.chatViewModel) var chatViewModel
     @Injected(\.currentDevice) var currentDevice
+    @Injected(\.layout) var layout
 
     private var canOpenChat: Bool
 
@@ -28,7 +28,7 @@ struct AppControlsWithChat: View {
     }
 
     var body: some View {
-        HStack(spacing: videoAppearance.tokens.layout.spacingXs) {
+        HStack(spacing: layout.spacingXs) {
             MoreControlsIconView(viewModel: viewModel)
 
             #if !targetEnvironment(simulator)
@@ -50,14 +50,14 @@ struct AppControlsWithChat: View {
                 ChatIconView(viewModel: chatViewModel)
             }
         }
-        .padding(.horizontal, videoAppearance.tokens.layout.spacingMd)
-        .padding(.bottom, videoAppearance.tokens.layout.spacingMd)
+        .padding(.horizontal, layout.spacingMd)
+        .padding(.bottom, layout.spacingMd)
     }
 }
 
 struct MoreControlsIconView: View {
 
-    @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.images) var images
 
     @ObservedObject var viewModel: CallViewModel
     let size: CGFloat
@@ -74,7 +74,7 @@ struct MoreControlsIconView: View {
             },
             label: {
                 CallIconView(
-                    icon: videoAppearance.images.participantOptions,
+                    icon: images.participantOptions,
                     size: size,
                     iconStyle: viewModel.moreControlsShown ? .secondaryActive : .secondary
                 )
@@ -105,7 +105,7 @@ struct ChatControlsHeader: View {
 
 struct ChatIconView: View {
 
-    @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.colors) var colors
 
     @ObservedObject var viewModel: DemoChatViewModel
     let size: CGFloat
@@ -128,7 +128,7 @@ struct ChatIconView: View {
                 ).overlay(
                     ControlBadgeView(
                         "\(viewModel.unreadCount)",
-                        border: Color(videoAppearance.tokens.colors.badgeBorder)
+                        border: Color(colors.badgeBorder)
                     )
                     .opacity(viewModel.unreadCount > 0 ? 1 : 0)
                 )

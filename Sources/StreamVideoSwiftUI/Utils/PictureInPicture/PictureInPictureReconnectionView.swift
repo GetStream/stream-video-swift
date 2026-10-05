@@ -10,9 +10,9 @@ import SwiftUI
 /// Shows a reconnection message and loading indicator while attempting to restore
 /// the connection to the video call.
 struct PictureInPictureReconnectionView: View {
-    @Injected(\.videoAppearance.tokens.colors) var colors
-    @Injected(\.videoAppearance.tokens.fonts) var fonts
-    @Injected(\.videoAppearance.tokens.layout) var layout
+    @Injected(\.colors) var colors
+    @Injected(\.fonts) var fonts
+    @Injected(\.layout) var layout
 
     var body: some View {
         VStack(spacing: layout.spacingXs) {

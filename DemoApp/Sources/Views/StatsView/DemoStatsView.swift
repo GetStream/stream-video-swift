@@ -11,7 +11,7 @@ import SwiftUI
 
 struct DemoStatsView: View {
 
-    @Injected(\.videoAppearance) private var videoAppearance
+    @Injected(\.layout) private var layout
 
     @ObservedObject var viewModel: CallViewModel
     var presentationBinding: Binding<Bool>
@@ -38,7 +38,7 @@ struct DemoStatsView: View {
                 title: "Call Performance",
                 description: "Review the key data points below to assess call performance"
             ) {
-                VStack(spacing: tokens.layout.spacingMd) {
+                VStack(spacing: layout.spacingMd) {
                     row {
                         DemoStatView(
                             viewModel,
@@ -130,7 +130,7 @@ struct DemoStatsView: View {
                         )
                     }
                 }
-                .padding(.vertical, tokens.layout.spacingMd)
+                .padding(.vertical, layout.spacingMd)
             }
             .withoutListSeparator()
         }
@@ -139,14 +139,12 @@ struct DemoStatsView: View {
         .withDragIndicator()
     }
 
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
-
     @ViewBuilder
     private func row(
         @ViewBuilder _ lhs: () -> some View,
         @ViewBuilder _ rhs: () -> some View = { EmptyView() }
     ) -> some View {
-        HStack(alignment: .top, spacing: tokens.layout.spacingXs) {
+        HStack(alignment: .top, spacing: layout.spacingXs) {
             lhs()
                 .frame(maxWidth: .infinity)
 
@@ -250,7 +248,9 @@ extension View {
 
 private struct DemoStatsSection<Content: View>: View {
 
-    @Injected(\.videoAppearance) private var videoAppearance
+    @Injected(\.colors) private var colors
+    @Injected(\.fonts) private var fonts
+    @Injected(\.layout) private var layout
 
     @ObservedObject var viewModel: CallViewModel
 
@@ -260,28 +260,26 @@ private struct DemoStatsSection<Content: View>: View {
     var content: () -> Content
 
     var body: some View {
-        VStack(spacing: tokens.layout.spacingXs) {
-            VStack(spacing: tokens.layout.spacingXs) {
-                HStack(spacing: tokens.layout.spacingXs) {
+        VStack(spacing: layout.spacingXs) {
+            VStack(spacing: layout.spacingXs) {
+                HStack(spacing: layout.spacingXs) {
                     Text(Image(systemName: iconName))
 
                     Text(title)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .foregroundColor(Color(tokens.colors.textPrimary))
-                .font(tokens.fonts.bodyBold)
+                .foregroundColor(Color(colors.textPrimary))
+                .font(fonts.bodyBold)
 
                 Text(description)
-                    .foregroundColor(Color(tokens.colors.textSecondary))
+                    .foregroundColor(Color(colors.textSecondary))
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .font(tokens.fonts.subheadline)
+                    .font(fonts.subheadline)
             }
 
             content()
         }
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
 
 private struct DemoStatView<Value: Comparable>: View {
@@ -339,7 +337,9 @@ private struct DemoStatView<Value: Comparable>: View {
 
     struct DemoStatQualityBadge: View {
 
-        @Injected(\.videoAppearance) private var videoAppearance
+        @Injected(\.colors) private var colors
+        @Injected(\.fonts) private var fonts
+        @Injected(\.layout) private var layout
 
         var quality: DemoStatQuality
 
@@ -348,11 +348,11 @@ private struct DemoStatView<Value: Comparable>: View {
             case .unknown:
                 EmptyView()
             case .bad:
-                view("Bad", with: Color(tokens.colors.accentError))
+                view("Bad", with: Color(colors.accentError))
             case .ok:
-                view("Ok", with: Color(tokens.colors.accentWarning))
+                view("Ok", with: Color(colors.accentWarning))
             case .good:
-                view("Good", with: Color(tokens.colors.accentSuccess))
+                view("Good", with: Color(colors.accentSuccess))
             }
         }
 
@@ -360,18 +360,18 @@ private struct DemoStatView<Value: Comparable>: View {
         private func view(_ text: String, with color: Color) -> some View {
             Text(text)
                 .foregroundColor(color)
-                .padding(.horizontal, tokens.layout.spacingXs)
-                .padding(.vertical, tokens.layout.spacingXxs)
-                .font(tokens.fonts.caption1)
+                .padding(.horizontal, layout.spacingXs)
+                .padding(.vertical, layout.spacingXxs)
+                .font(fonts.caption1)
                 .minimumScaleFactor(0.5)
                 .background(color.opacity(0.4))
-                .clipShape(RoundedRectangle(cornerRadius: tokens.layout.radiusMd))
+                .clipShape(RoundedRectangle(cornerRadius: layout.radiusMd))
         }
-
-        private var tokens: DesignSystemTokens { videoAppearance.tokens }
     }
 
-    @Injected(\.videoAppearance) private var videoAppearance
+    @Injected(\.colors) private var colors
+    @Injected(\.fonts) private var fonts
+    @Injected(\.layout) private var layout
 
     @StateObject private var viewModel: DemoStatViewModel
     private var presentationTransformer: (Value, Value) -> String
@@ -399,17 +399,17 @@ private struct DemoStatView<Value: Comparable>: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: tokens.layout.spacingXs) {
+        VStack(alignment: .leading, spacing: layout.spacingXs) {
             Text(viewModel.title)
-                .font(tokens.fonts.subheadline)
-                .foregroundColor(Color(tokens.colors.textSecondary))
+                .font(fonts.subheadline)
+                .foregroundColor(Color(colors.textSecondary))
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .lineLimit(2)
 
-            HStack(spacing: tokens.layout.spacingXs) {
+            HStack(spacing: layout.spacingXs) {
                 Text(presentationTransformer(viewModel.value, viewModel.previousValue))
-                    .font(tokens.fonts.bodyBold)
-                    .foregroundColor(Color(tokens.colors.textPrimary))
+                    .font(fonts.bodyBold)
+                    .foregroundColor(Color(colors.textPrimary))
                     .minimumScaleFactor(0.7)
                     .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -418,8 +418,6 @@ private struct DemoStatView<Value: Comparable>: View {
         }
         .multilineTextAlignment(.leading)
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
 
 @available(iOS 16.0, *)
@@ -453,7 +451,8 @@ private struct DemoLatencyChartView: View {
         }
     }
 
-    @Injected(\.videoAppearance) private var videoAppearance
+    @Injected(\.colors) private var colors
+    @Injected(\.layout) private var layout
 
     @StateObject private var viewModel: DemoLatencyChartViewModel
 
@@ -468,22 +467,20 @@ private struct DemoLatencyChartView: View {
                     x: .value("Index", value.offset),
                     y: .value("Latency", value.element)
                 )
-                .foregroundStyle(Color(tokens.colors.accentSuccess))
+                .foregroundStyle(Color(colors.accentSuccess))
                 .interpolationMethod(.cardinal)
 
                 PointMark(
                     x: .value("Index", value.offset),
                     y: .value("Latency", value.element)
                 )
-                .foregroundStyle(Color(tokens.colors.accentSuccess))
+                .foregroundStyle(Color(colors.accentSuccess))
             }
         }
         .chartXScale(domain: viewModel.visibleRange)
         .chartXAxis(.hidden)
-        .padding(.vertical, tokens.layout.spacingMd)
-        .padding(.horizontal, tokens.layout.spacingXxs)
-        .clipShape(RoundedRectangle(cornerRadius: tokens.layout.radiusMd))
+        .padding(.vertical, layout.spacingMd)
+        .padding(.horizontal, layout.spacingXxs)
+        .clipShape(RoundedRectangle(cornerRadius: layout.radiusMd))
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }

@@ -11,7 +11,7 @@ extension DebugMenu {
 
     /// Generic debug menu item that selects a single value and can append extra actions.
     struct ItemMenuView<Item: Debuggable, AdditionalItems: View>: View {
-        @Injected(\.videoAppearance) var videoAppearance
+        @Injected(\.images) var images
 
         var appState: AppState = .shared
 
@@ -51,7 +51,7 @@ extension DebugMenu {
                                 Text(item.title)
                             } icon: {
                                 currentValue == item
-                                    ? AnyView(videoAppearance.images.checkmark)
+                                    ? AnyView(images.checkmark)
                                     : AnyView(EmptyView())
                             }
                         }

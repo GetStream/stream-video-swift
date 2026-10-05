@@ -8,7 +8,7 @@ import SwiftUI
 
 /// A view that allows dragging a content view to specific corners based on user gestures.
 public struct CornerDraggableView<Content: View>: View {
-    @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.layout) private var layout
 
     @State var callViewPlacement = CallViewPlacement.topTrailing
     @State private var dragAmount = CGSize.zero
@@ -94,14 +94,12 @@ public struct CornerDraggableView<Content: View>: View {
                     padding: padding
                 ) + dragAmount.height
             )
-            .padding(tokens.layout.spacingMd)
+            .padding(layout.spacingMd)
             .background(Color.clear)
     }
 
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
-
     private var padding: UIEdgeInsets {
-        let spacing = tokens.layout.spacingXs
+        let spacing = layout.spacingXs
         return .init(top: spacing, left: spacing, bottom: spacing, right: spacing)
     }
 

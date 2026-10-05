@@ -8,9 +8,9 @@ import SwiftUI
 /// Search bar used in the message search.
 struct SearchBar: View, KeyboardReadable {
 
-    @Injected(\.videoAppearance) private var videoAppearance
-    @Injected(\.videoAppearance.tokens.colors) var colors
-    @Injected(\.videoAppearance.tokens.layout) var layout
+    @Injected(\.colors) var colors
+    @Injected(\.layout) var layout
+    @Injected(\.images) private var images
 
     @Binding var text: String
     @State private var isEditing = false
@@ -25,7 +25,7 @@ struct SearchBar: View, KeyboardReadable {
                 .clipShape(RoundedRectangle(cornerRadius: layout.radiusXl, style: .continuous))
                 .overlay(
                     HStack(spacing: layout.spacingXs) {
-                        videoAppearance.images.searchIcon
+                        images.searchIcon
                             .customizable()
                             .foregroundColor(Color(colors.textSecondary))
                             .frame(maxHeight: 18)
@@ -37,7 +37,7 @@ struct SearchBar: View, KeyboardReadable {
                             Button(action: {
                                 self.text = ""
                             }) {
-                                videoAppearance.images.searchCloseIcon
+                                images.searchCloseIcon
                                     .customizable()
                                     .frame(width: 18, height: 18)
                                     .foregroundColor(Color(colors.textSecondary))
