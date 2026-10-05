@@ -109,6 +109,18 @@ final class MediaFrameTrackRenderer:
 
 /// Actor-isolated state for ``MediaFrameReporter``.
 private actor MediaFrameReporterStorage {
+    /// Runs the actor on its own serial queue.
+    ///
+    /// The actor attaches and detaches renderers on remote tracks, and those
+    /// calls block until WebRTC runs them: on the worker thread for video,
+    /// on the signaling thread for audio. On the default executor, each
+    /// blocked call parks a thread of Swift concurrency's cooperative pool,
+    /// which has about one thread per CPU core, so a stalled WebRTC thread
+    /// can starve unrelated async work. A dedicated queue keeps the wait on
+    /// one thread that nothing else depends on.
+    private let executor = DispatchQueueExecutor()
+    nonisolated var unownedExecutor: UnownedSerialExecutor { .init(ordinary: executor) }
+
     /// Delivers first-frame events to the backend.
     private let clientEventReporter: ClientEventReporting
 
