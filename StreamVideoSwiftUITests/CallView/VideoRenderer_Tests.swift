@@ -91,7 +91,78 @@ final class VideoRenderer_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertFalse(wasRead)
     }
 
+    func test_dismantle_reusedRenderer_doesNotDetachReplacement() throws {
+        try assertRetiredCoordinatorDoesNotDetachReplacement(deallocate: false)
+    }
+
+    func test_deinit_reusedRenderer_doesNotDetachReplacement() throws {
+        try assertRetiredCoordinatorDoesNotDetachReplacement(deallocate: true)
+    }
+
     // MARK: - Private helpers
+
+    private func assertRetiredCoordinatorDoesNotDetachReplacement(
+        deallocate: Bool,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) throws {
+        let originalPool = VideoRendererPool.currentValue
+        let pool = VideoRendererPool(initialCapacity: 1)
+        subject = pool.acquireRenderer(size: .zero)
+        pool.releaseRenderer(subject)
+        VideoRendererPool.currentValue = pool
+        var coordinator: VideoRendererView.Coordinator? = .init(handleRendering: nil)
+        let factory = PeerConnectionFactory.build(
+            audioProcessingModule: MockAudioProcessingModule.shared
+        )
+        let track = factory.makeVideoTrack(source: factory.makeVideoSource(forScreenShare: false))
+        let replacement = factory.makeVideoTrack(source: factory.makeVideoSource(forScreenShare: false))
+        subject.add(track: track)
+        try XCTUnwrap(coordinator).dismantle()
+        let reusedRenderer = pool.acquireRenderer(size: .zero)
+        XCTAssertTrue(reusedRenderer === subject, file: file, line: line)
+        reusedRenderer.add(track: replacement)
+
+        let selector = #selector(RTCVideoTrack.remove(_:))
+        let method = try XCTUnwrap(class_getInstanceMethod(RTCVideoTrack.self, selector))
+        let originalIMP = method_getImplementation(method)
+        let original = unsafeBitCast(
+            originalIMP,
+            to: (@convention(c) (AnyObject, Selector, AnyObject) -> Void).self
+        )
+        let removals = Atomic(wrappedValue: 0)
+        let intercept: @convention(block) (RTCVideoTrack, AnyObject) -> Void = { track, renderer in
+            if track === replacement, renderer === reusedRenderer {
+                removals.mutate { $0 += 1 }
+            }
+            original(track, selector, renderer)
+        }
+        let interceptIMP = imp_implementationWithBlock(intercept)
+        method_setImplementation(method, interceptIMP)
+        defer {
+            method_setImplementation(method, originalIMP)
+            imp_removeBlock(interceptIMP)
+            coordinator = nil
+            replacement.remove(reusedRenderer)
+            VideoRendererPool.currentValue = originalPool
+        }
+
+        if deallocate {
+            let coordinatorIsAlive = { [weak coordinator] in coordinator != nil }
+            coordinator = nil
+            XCTAssertFalse(coordinatorIsAlive(), file: file, line: line)
+        } else {
+            try XCTUnwrap(coordinator).dismantle()
+        }
+
+        XCTAssertEqual(removals.wrappedValue, 0, "Old cleanup detached the replacement.", file: file, line: line)
+        XCTAssertFalse(
+            pool.acquireRenderer(size: .zero) === reusedRenderer,
+            "An active renderer returned to the pool.",
+            file: file,
+            line: line
+        )
+    }
 
     private func assertPreferredFramesPerSecond(
         thermalState: ProcessInfo.ThermalState,
