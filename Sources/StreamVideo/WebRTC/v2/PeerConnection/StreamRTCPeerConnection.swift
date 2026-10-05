@@ -127,7 +127,16 @@ final class StreamRTCPeerConnection: StreamRTCPeerConnectionProtocol, @unchecked
         // Sent here, after WebRTC reports success, rather than from the
         // completion handler, which WebRTC calls on its signaling thread.
         // Subscribers that don't switch queues then never run there.
-        subject.send(HasRemoteDescription(sessionDescription: sessionDescription))
+        // Native success may arrive after close. Serialize acceptance with the
+        // close flag so teardown cannot occur between the check and publication.
+        var wasClosed = false
+        _isClosed.mutate { (isClosed: inout Bool) in
+            wasClosed = isClosed
+            if !isClosed {
+                subject.send(HasRemoteDescription(sessionDescription: sessionDescription))
+            }
+        }
+        guard !wasClosed else { throw CancellationError() }
     }
 
     /// Creates an offer asynchronously.

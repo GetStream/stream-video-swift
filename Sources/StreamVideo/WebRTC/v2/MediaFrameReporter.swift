@@ -53,8 +53,9 @@ final class MediaFrameReporter: @unchecked Sendable {
     /// - Parameters:
     ///   - type: Media kind that produced the frame.
     ///   - trackId: Track id attached to the rendered frame event.
-    func reportFrame(type: TrackType, trackId: String) async {
-        await storage.report(type, trackId: trackId)
+    ///   - renderer: Registration that produced the callback.
+    func reportFrame(type: TrackType, trackId: String, renderer: MediaFrameTrackRenderer) async {
+        await storage.report(type, trackId: trackId, renderer: renderer)
     }
 }
 
@@ -91,9 +92,7 @@ final class MediaFrameTrackRenderer:
     /// - Parameter frame: Rendered frame supplied by WebRTC.
     func renderFrame(_ frame: RTCVideoFrame?) {
         guard frame != nil else { return }
-        Task { [reporter, type, trackId] in
-            await reporter?.reportFrame(type: type, trackId: trackId)
-        }
+        Task { await reportFrame() }
     }
 
     /// Forwards non-silent rendered remote audio frames to ``MediaFrameReporter``.
@@ -101,9 +100,12 @@ final class MediaFrameTrackRenderer:
     /// - Parameter pcmBuffer: Rendered audio buffer supplied by WebRTC.
     func render(pcmBuffer: AVAudioPCMBuffer) {
         guard !pcmBuffer.rmsAndPeak.isSilent else { return }
-        Task { [reporter, type, trackId] in
-            await reporter?.reportFrame(type: type, trackId: trackId)
-        }
+        Task { await reportFrame() }
+    }
+
+    /// Forwards a frame with this registration's identity.
+    func reportFrame() async {
+        await reporter?.reportFrame(type: type, trackId: trackId, renderer: self)
     }
 }
 
@@ -235,9 +237,11 @@ private actor MediaFrameReporterStorage {
     /// - Parameters:
     ///   - type: Media kind that produced the frame.
     ///   - trackId: Track id attached to the frame event.
+    ///   - renderer: Registration that produced the callback.
     func report(
         _ type: TrackType,
-        trackId: String
+        trackId: String,
+        renderer: MediaFrameTrackRenderer
     ) async {
         let stage: ClientEventStage
         let tracksToDetach: (
@@ -252,13 +256,19 @@ private actor MediaFrameReporterStorage {
         )
         switch type {
         case .video, .screenshare:
-            guard !didReportVideoFrame else { return }
+            // A reset or re-add can reuse the track id and even the track object.
+            // Only the currently attached renderer can consume the first frame.
+            guard !didReportVideoFrame,
+                  videoTracks.values.contains(where: { $0.renderer === renderer })
+            else { return }
             didReportVideoFrame = true
             stage = .firstVideoFrame
             tracksToDetach = (Array(videoTracks.values), [])
             videoTracks.removeAll()
         case .audio:
-            guard !didReportAudioFrame else { return }
+            guard !didReportAudioFrame,
+                  audioTracks.values.contains(where: { $0.renderer === renderer })
+            else { return }
             didReportAudioFrame = true
             stage = .firstAudioFrame
             tracksToDetach = ([], Array(audioTracks.values))
