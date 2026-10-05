@@ -175,7 +175,7 @@ Typical substitutions from the lobby pass:
 
 ### Dependencies
 
-- **StreamCore** / **StreamCoreUI** from [`stream-core-swift`](https://github.com/GetStream/stream-core-swift.git) (revision pin until tokens ship in a tag)
+- **StreamCore** / **StreamCoreUI** from [`stream-core-swift`](https://github.com/GetStream/stream-core-swift.git) (from 0.11.0, the first tag with the design tokens)
 - **swift-protobuf** (exact 1.30.0)
 - **stream-video-swift-webrtc** (exact 145.17.0)
 
