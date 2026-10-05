@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🔄 Changed
 
+### 🐞 Fixed
+
+- Late WebRTC callbacks no longer accept remote SDP after close or report first frames from retired track registrations.
+
 # [1.54.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.54.0)
 _October 01, 2026_
 
