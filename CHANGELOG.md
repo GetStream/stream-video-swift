@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Keep call cleanup responsive when WebRTC operations stall.
 - Repeated video-view cleanup no longer detaches a track from a reused renderer.
 - Late WebRTC callbacks no longer accept remote SDP after close or report first frames from retired track registrations.
+- Stale migration callbacks no longer interrupt call recovery, and rejected state transitions preserve reconnection timers and subscriptions.
 
 ### 🔄 Changed
 

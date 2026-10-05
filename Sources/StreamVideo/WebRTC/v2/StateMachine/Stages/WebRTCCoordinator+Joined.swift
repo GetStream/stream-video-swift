@@ -46,6 +46,14 @@ extension WebRTCCoordinator.StateMachine.Stage {
             disposableBag.removeAll()
         }
 
+        /// Cancels observations as soon as this stage loses ownership.
+        override func willTransitionAway() {
+            // Awaiting migration completion retains this stage, so deinit
+            // cannot cancel it before an old deadline interrupts a new flow.
+            disposableBag.removeAll()
+            super.willTransitionAway()
+        }
+
         /// Performs the transition from a previous stage to this joined stage.
         /// - Parameter previousStage: The stage from which the transition is
         ///   occurring.
@@ -66,6 +74,13 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
         /// Executes the joined stage logic.
         private func execute() {
+            let migrationStatusObserver = context.migrationStatusObserver
+            if let migrationStatusObserver {
+                // The observer owns a separate timeout task. Cancelling only
+                // its awaiting caller would leave that task alive until expiry.
+                AnyCancellable { migrationStatusObserver.cancel() }
+                    .store(in: disposableBag)
+            }
             Task(disposableBag: disposableBag) { [weak self] in
                 guard let self else { return }
                 do {
@@ -84,7 +99,6 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
                     try Task.checkCancellation()
 
-                    let migrationStatusObserver = context.migrationStatusObserver
                     let previousSFUAdapter = context.previousSFUAdapter
                     await cleanUpPreviousSessionIfRequired()
 
@@ -94,6 +108,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         migrationStatusObserver,
                         previousSFUAdapter: previousSFUAdapter
                     )
+
+                    try Task.checkCancellation()
 
                     observeInternetConnection()
 
@@ -144,8 +160,13 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     try Task.checkCancellation()
 
                     observeAudioSessionReadiness()
+                } catch is CancellationError {
+                    // Stage exit is normal lifecycle cancellation, not a new
+                    // failure that should disconnect the replacement session.
                 } catch {
+                    guard !Task.isCancelled else { return }
                     await cleanUpPreviousSessionIfRequired()
+                    guard !Task.isCancelled else { return }
                     transitionDisconnectOrError(error)
                 }
             }
@@ -178,24 +199,22 @@ extension WebRTCCoordinator.StateMachine.Stage {
             _ migrationStatusObserver: WebRTCMigrationStatusObserver?,
             previousSFUAdapter: SFUAdapter?
         ) async throws {
-            if let migrationStatusObserver = migrationStatusObserver {
-                let task = Task(disposableBag: disposableBag) { [weak self] in
-                    guard let self else { return }
-                    do {
-                        try Task.checkCancellation()
-                        try await migrationStatusObserver
-                            .observeMigrationStatus()
-                        await previousSFUAdapter?.disconnect()
-                    } catch is CancellationError {
-                        /* No-op */
-                    } catch {
-                        context.reconnectionStrategy = .rejoin
-                        log.warning("Will disconnect because migrationStatus failed.", subsystems: .webRTC)
-                        throw error
-                    }
+            if let migrationStatusObserver {
+                do {
+                    try Task.checkCancellation()
+                    try await migrationStatusObserver.observeMigrationStatus()
+                    try Task.checkCancellation()
+                    await previousSFUAdapter?.disconnect()
+                } catch is CancellationError {
+                    throw CancellationError()
+                } catch {
+                    try Task.checkCancellation()
+                    context.reconnectionStrategy = .rejoin
+                    log.warning("Will disconnect because migrationStatus failed.", subsystems: .webRTC)
+                    throw error
                 }
-                _ = try await task.value
             } else {
+                try Task.checkCancellation()
                 await previousSFUAdapter?.disconnect()
             }
         }
