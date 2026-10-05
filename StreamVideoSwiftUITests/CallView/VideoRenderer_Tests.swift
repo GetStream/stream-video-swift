@@ -153,7 +153,88 @@ final class VideoRenderer_Tests: XCTestCase, @unchecked Sendable {
         try await assertDismantleDuringBlockedRemoval()
     }
 
+    func test_dismantle_reusedRenderer_doesNotDetachReplacement() async throws {
+        try await assertRetiredCoordinatorDoesNotDetachReplacement(deallocate: false)
+    }
+
+    func test_deinit_reusedRenderer_doesNotDetachReplacement() async throws {
+        try await assertRetiredCoordinatorDoesNotDetachReplacement(deallocate: true)
+    }
+
     // MARK: - Private helpers
+
+    private func assertRetiredCoordinatorDoesNotDetachReplacement(
+        deallocate: Bool,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) async throws {
+        let originalPool = VideoRendererPool.currentValue
+        let pool = VideoRendererPool(initialCapacity: 1)
+        subject = pool.acquireRenderer(size: .zero)
+        pool.releaseRenderer(subject)
+        VideoRendererPool.currentValue = pool
+        var coordinator: VideoRendererView.Coordinator? = .init(handleRendering: nil)
+        let factory = PeerConnectionFactory.build(
+            audioProcessingModule: MockAudioProcessingModule.shared
+        )
+        let track = factory.makeVideoTrack(source: factory.makeVideoSource(forScreenShare: false))
+        let replacement = factory.makeVideoTrack(source: factory.makeVideoSource(forScreenShare: false))
+        subject.add(track: track)
+        try XCTUnwrap(coordinator).dismantle()
+        let reusedRenderer = pool.acquireRenderer(size: .zero)
+        XCTAssertTrue(reusedRenderer === subject, file: file, line: line)
+        reusedRenderer.add(track: replacement)
+        // Attachment and cleanup share a serial queue. Wait until the reused
+        // renderer actually holds the replacement before retiring its owner.
+        await withCheckedContinuation { continuation in
+            reusedRenderer.queue.async { continuation.resume() }
+        }
+
+        let selector = #selector(RTCVideoTrack.remove(_:))
+        let method = try XCTUnwrap(class_getInstanceMethod(RTCVideoTrack.self, selector))
+        let originalIMP = method_getImplementation(method)
+        let original = unsafeBitCast(
+            originalIMP,
+            to: (@convention(c) (AnyObject, Selector, AnyObject) -> Void).self
+        )
+        let removals = Atomic(wrappedValue: 0)
+        let intercept: @convention(block) (RTCVideoTrack, AnyObject) -> Void = { track, renderer in
+            if track === replacement, renderer === reusedRenderer {
+                removals.mutate { $0 += 1 }
+            }
+            original(track, selector, renderer)
+        }
+        let interceptIMP = imp_implementationWithBlock(intercept)
+        method_setImplementation(method, interceptIMP)
+        defer {
+            method_setImplementation(method, originalIMP)
+            imp_removeBlock(interceptIMP)
+            coordinator = nil
+            reusedRenderer.removeTrack()
+            VideoRendererPool.currentValue = originalPool
+        }
+
+        if deallocate {
+            let coordinatorIsAlive = { [weak coordinator] in coordinator != nil }
+            coordinator = nil
+            XCTAssertFalse(coordinatorIsAlive(), file: file, line: line)
+        } else {
+            try XCTUnwrap(coordinator).dismantle()
+        }
+        // A stale cleanup could enqueue removal and return immediately. Drain
+        // it before asserting so the test also covers queued detachment.
+        await withCheckedContinuation { continuation in
+            reusedRenderer.queue.async { continuation.resume() }
+        }
+
+        XCTAssertEqual(removals.wrappedValue, 0, "Old cleanup detached the replacement.", file: file, line: line)
+        XCTAssertFalse(
+            pool.acquireRenderer(size: .zero) === reusedRenderer,
+            "An active renderer returned to the pool.",
+            file: file,
+            line: line
+        )
+    }
 
     private nonisolated func assertDismantleDuringBlockedRemoval(
         file: StaticString = #filePath,
