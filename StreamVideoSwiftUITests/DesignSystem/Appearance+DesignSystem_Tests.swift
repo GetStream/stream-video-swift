@@ -151,6 +151,12 @@ final class Appearance_DesignSystem_Tests: XCTestCase, @unchecked Sendable {
         }
     }
 
+    func test_injectedSounds_returnsVideoAppearanceSounds() {
+        withInjectedSubject {
+            XCTAssertTrue(InjectedValues[\.sounds] === subject.sounds)
+        }
+    }
+
     func test_injectedFonts_returnsTokenFonts() {
         withInjectedSubject {
             XCTAssertTrue(InjectedValues[\.fonts] === subject.tokens.fonts)

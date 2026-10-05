@@ -95,6 +95,15 @@ extension InjectedValues {
         set { videoAppearance.images = newValue }
     }
 
+    /// The sounds played for incoming and outgoing calls.
+    ///
+    /// In a file that also imports the Chat SDK, use
+    /// `\.videoAppearance.sounds`.
+    public var sounds: Sounds {
+        get { videoAppearance.sounds }
+        set { videoAppearance.sounds = newValue }
+    }
+
     /// Shared typography tokens.
     ///
     /// In a file that also imports the Chat SDK, use

@@ -55,14 +55,14 @@ private func content() {
     container {
         struct MyCustomView: View {
             @Injected(\.callKitAdapter) var callKitAdapter
-            @Injected(\.videoAppearance) var videoAppearance
+            @Injected(\.sounds) var sounds
             var body: some View {
                 EmptyView() // Your content goes here.
                     .onAppear {
                         // Here we register for incomingCalls and provide
                         // a logo as we did on the previous example
                         // Provide the ringtone to use when a CallKit call is ringing
-                        callKitAdapter.ringtoneSound = videoAppearance.sounds.incomingCallSound.fileName
+                        callKitAdapter.ringtoneSound = sounds.incomingCallSound.fileName
                     }
             }
         }

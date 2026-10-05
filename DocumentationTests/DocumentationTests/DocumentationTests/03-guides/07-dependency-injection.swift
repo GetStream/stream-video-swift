@@ -16,7 +16,7 @@ private func content() {
         @Injected(\.images) var images
         @Injected(\.fonts) var fonts
         @Injected(\.layout) var layout
-        @Injected(\.videoAppearance.sounds) var sounds
+        @Injected(\.sounds) var sounds
         @Injected(\.utils) var utils
     }
 
