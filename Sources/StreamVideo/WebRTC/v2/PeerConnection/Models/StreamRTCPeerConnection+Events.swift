@@ -348,3 +348,31 @@ extension StreamRTCPeerConnection {
         var traceTag: String { "restartICE" }
     }
 }
+
+// The coordinator logs every peer connection event with its description.
+// The default description prints each stored property, and describing an
+// `RTCMediaStream` lists its tracks, which waits on WebRTC's signaling
+// thread. Describing an `RTCRtpReceiver` used to be worse: an SDK-wide
+// `description` override read its parameters on the worker thread, and it
+// was removed for that reason. These descriptions use stream and receiver
+// ids only, which WebRTC returns without switching threads.
+
+extension StreamRTCPeerConnection.AddedStreamEvent: CustomStringConvertible {
+    var description: String { "\(traceTag)(stream: \(stream.streamId))" }
+}
+
+extension StreamRTCPeerConnection.RemovedStreamEvent: CustomStringConvertible {
+    var description: String { "\(traceTag)(stream: \(stream.streamId))" }
+}
+
+extension StreamRTCPeerConnection.AddedReceiverEvent: CustomStringConvertible {
+    var description: String {
+        "\(traceTag)(receiver: \(receiver.receiverId), streams: \(streams.map(\.streamId)))"
+    }
+}
+
+extension StreamRTCPeerConnection.DidAddReceiverEvent: CustomStringConvertible {
+    var description: String {
+        "\(traceTag)(receiver: \(receiver.receiverId), streams: \(streams.map(\.streamId)))"
+    }
+}
