@@ -469,6 +469,9 @@ extension WebRTCCoordinator.StateMachine.Stage {
             try Task.checkCancellation()
 
             if !isFastReconnecting {
+                // The first native connection registers the audio transport.
+                // Registration during capture rebuilds the engine, so prepare
+                // the final connections before configuring the audio session.
                 let peerConnections = try await coordinator.stateAdapter
                     .makePeerConnections()
 

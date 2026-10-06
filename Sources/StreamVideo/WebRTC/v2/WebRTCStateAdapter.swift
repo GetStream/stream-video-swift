@@ -443,6 +443,9 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     }
 
     /// Creates the session's transports before audio capture starts.
+    ///
+    /// Transport creation is separate from media setup so joins can register
+    /// audio callbacks before activation while media still waits for readiness.
     func makePeerConnections() throws -> (
         publisher: StreamRTCPeerConnection,
         subscriber: StreamRTCPeerConnection
@@ -460,6 +463,9 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     }
 
     /// Configures media on prepared transports, creating them if needed.
+    ///
+    /// Joins reuse the prepared connections to avoid registering a replacement
+    /// audio transport after capture starts.
     ///
     /// - Throws: An error if the SFU adapter or connection setup is unavailable.
     func configurePeerConnections(

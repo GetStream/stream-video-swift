@@ -567,6 +567,9 @@ final class CallAudioSession: @unchecked Sendable {
             )
         )
         if configuration.isActive {
+            // Unmuting or enabling WebRTC audio can start native capture.
+            // Apply the category and activation first so voice processing
+            // initializes with the configured, active session.
             actions.append(categoryAction)
             actions.append(
                 .normal(.conditioned(
@@ -608,6 +611,8 @@ final class CallAudioSession: @unchecked Sendable {
             ))
         ])
         if !configuration.isActive {
+            // Disable WebRTC audio before deactivation so new tracks cannot
+            // restart playout while the session is shutting down.
             actions.append(
                 .normal(.conditioned(
                     .activeSessionIdentifier(identifier),
