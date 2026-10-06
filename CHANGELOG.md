@@ -4,11 +4,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### 🐞 Fixed
+
+- Reduced UI freezes when updating video views or logging media events. [#1346](https://github.com/GetStream/stream-video-swift/pull/1346)
+- Calls no longer enter a repeated subscriber renegotiation loop after a fast reconnect, and subscriber answers identify the offer they answer. [#1343](https://github.com/GetStream/stream-video-swift/pull/1343)
+- OBS video remains identified as RTMP when its track is paused and resumed, so viewers can return to the correct video source. [#1331](https://github.com/GetStream/stream-video-swift/pull/1331)
+- Muting now stops outgoing audio even if the server rejects the request or speaking permission has been revoked. [#1327](https://github.com/GetStream/stream-video-swift/pull/1327)
+
 ### 🔄 Changed
 
 ### 🐞 Fixed
 
 - Repeated video-view cleanup no longer detaches a track from a reused renderer. [#1348](https://github.com/GetStream/stream-video-swift/pull/1348)
+- Late WebRTC callbacks no longer accept remote SDP after close or report first frames from retired track registrations. [#1349](https://github.com/GetStream/stream-video-swift/pull/1349)
 
 # [1.54.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.54.0)
 _October 01, 2026_

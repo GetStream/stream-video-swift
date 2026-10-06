@@ -139,7 +139,10 @@ extension VideoRendererView {
                 $0 = true
             }
             guard shouldDismantle else { return }
-            renderer.track?.remove(renderer)
+            // Detach on the renderer's queue. Calling `remove(_:)` on the
+            // track from here would block the main thread on WebRTC's
+            // worker thread.
+            renderer.removeTrack()
             disposableBag.removeAll()
             videoRendererPool.releaseRenderer(renderer)
         }

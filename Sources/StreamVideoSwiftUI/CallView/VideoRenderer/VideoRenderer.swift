@@ -88,24 +88,57 @@ public class VideoRenderer: RTCVideoRenderingView, @unchecked Sendable {
     }
 
     /// Cleans up resources when the VideoRenderer instance is deallocated.
+    ///
+    /// It doesn't detach from the track. An attached `RTCVideoTrack` keeps
+    /// its renderers alive: it holds an adapter per renderer, and each
+    /// adapter references its renderer strongly. So deinit only runs after
+    /// ``removeTrack()`` or after the track itself is gone, and there is
+    /// nothing left to remove. A removal here would also run on whichever
+    /// thread drops the last reference, usually main, and wait on WebRTC's
+    /// worker thread.
     deinit {
         cancellable?.cancel()
         log.debug("\(type(of: self)):\(identifier) deallocating", subsystems: .other)
-        track?.remove(self)
     }
 
     /// Overrides the hash value to return the identifier's hash value.
     override public var hash: Int { identifier.hashValue }
 
     /// Adds the specified RTCVideoTrack to the renderer.
+    ///
+    /// `RTCVideoTrack.add(_:)` and `remove(_:)` block until WebRTC's worker
+    /// thread runs them. This method is called from
+    /// ``handleViewRendering(for:onTrackSizeUpdate:)`` during SwiftUI
+    /// updates on the main thread, so a busy or stalled worker thread used
+    /// to freeze the UI. The work now runs asynchronously on ``queue``.
+    /// The queue is serial, so attaches and detaches still apply in the
+    /// order they were requested.
+    ///
+    /// SwiftUI updates the view far more often than the track changes. When
+    /// the track is already attached, the call returns without touching
+    /// WebRTC. Before, every update removed and re-added the renderer, which
+    /// cost two worker thread round trips and briefly detached the video.
     /// - Parameter track: The RTCVideoTrack to render.
     public func add(track: RTCVideoTrack) {
-        queue.sync {
+        queue.async { [self] in
+            guard self.track !== track else { return }
             self.track?.remove(self)
-            self.track = nil
             self.track = track
             track.add(self)
             log.info("\(type(of: self)):\(identifier) was added on track:\(track.trackId)", subsystems: .other)
+        }
+    }
+
+    /// Detaches the renderer from its current track.
+    ///
+    /// Runs asynchronously on ``queue`` for the same reason as
+    /// ``add(track:)``. Because the queue is serial, it also runs after any
+    /// attach that is still pending, so a renderer returned to the reuse
+    /// pool ends up detached.
+    nonisolated func removeTrack() {
+        queue.async { [self] in
+            track?.remove(self)
+            track = nil
         }
     }
 
