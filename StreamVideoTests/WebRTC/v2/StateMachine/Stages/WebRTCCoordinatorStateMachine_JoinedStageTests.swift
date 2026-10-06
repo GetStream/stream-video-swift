@@ -123,6 +123,79 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
 
     // MARK: observeMigrationStatusIfRequired
 
+    func test_transition_oldMigrationTimesOut_keepsNewMigrationActive() async throws {
+        let migrationObserver = WebRTCMigrationStatusObserver(
+            migratingFrom: mockCoordinatorStack.sfuStack.adapter, deadline: 3
+        )
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.migrationStatusObserver = migrationObserver
+        let stateMachine = StreamStateMachine(
+            initialStage: WebRTCCoordinator.StateMachine.Stage(
+                id: .joining, context: subject.context
+            )
+        )
+        stateMachine.transition(to: subject)
+        await fulfillment { self.subject.context.migrationStatusObserver == nil }
+        XCTAssertTrue(stateMachine.currentStage === subject)
+        let replacement = MigrationStage(subject.context)
+        stateMachine.transition(to: replacement)
+        let oldStageIsReleased: @Sendable () -> Bool = { [weak stage = subject] in stage == nil }
+        subject = nil
+
+        let error = await XCTAssertThrowsErrorAsync {
+            try await migrationObserver.observeMigrationStatus()
+        }
+        XCTAssertTrue(error is CancellationError)
+        await fulfillment(block: oldStageIsReleased)
+        XCTAssertTrue(stateMachine.currentStage === replacement)
+        XCTAssertNil(replacement.context.flowError)
+    }
+
+    func test_transition_oldMigrationCompletes_doesNotDisconnectPreviousSFU() async throws {
+        mockCoordinatorStack.sfuStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
+        let migrationObserver = WebRTCMigrationStatusObserver(
+            migratingFrom: mockCoordinatorStack.sfuStack.adapter, deadline: 5
+        )
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.migrationStatusObserver = migrationObserver
+        subject.context.previousSFUAdapter = mockCoordinatorStack.sfuStack.adapter
+        let stateMachine = StreamStateMachine(
+            initialStage: WebRTCCoordinator.StateMachine.Stage(
+                id: .joining, context: subject.context
+            )
+        )
+        stateMachine.transition(to: subject)
+        await fulfillment { self.subject.context.migrationStatusObserver == nil }
+        XCTAssertTrue(stateMachine.currentStage === subject)
+        let replacement = MigrationStage(subject.context)
+        stateMachine.transition(to: replacement)
+        let oldStageIsReleased: @Sendable () -> Bool = { [weak stage = subject] in stage == nil }
+        subject = nil
+        mockCoordinatorStack.sfuStack.receiveEvent(.participantMigrationComplete(.init()))
+
+        do {
+            try await migrationObserver.observeMigrationStatus()
+        } catch {
+            XCTAssertTrue(error is CancellationError)
+        }
+
+        // Stage release proves its asynchronous work has finished; merely
+        // checking immediately after sending the event could miss a late close.
+        await fulfillment(block: oldStageIsReleased)
+        XCTAssertTrue(stateMachine.currentStage === replacement)
+        XCTAssertEqual(mockCoordinatorStack.sfuStack.webSocket.timesCalled(.disconnectAsync), 0)
+    }
+
+    private final class MigrationStage: WebRTCCoordinator.StateMachine.Stage, @unchecked Sendable {
+        init(_ context: Context) {
+            super.init(id: .migrated, context: context)
+        }
+
+        override func transition(from previousStage: WebRTCCoordinator.StateMachine.Stage) -> Self? {
+            previousStage.id == .joined ? self : nil
+        }
+    }
+
     func test_transition_withoutMigrationStatusObserver_disconnectWasNotCalledOnPreviousSFUWebSocket() async throws {
         subject.context.previousSFUAdapter = mockCoordinatorStack.sfuStack.adapter
 

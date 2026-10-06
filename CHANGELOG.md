@@ -10,11 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Calls no longer enter a repeated subscriber renegotiation loop after a fast reconnect, and subscriber answers identify the offer they answer. [#1343](https://github.com/GetStream/stream-video-swift/pull/1343)
 - OBS video remains identified as RTMP when its track is paused and resumed, so viewers can return to the correct video source. [#1331](https://github.com/GetStream/stream-video-swift/pull/1331)
 - Muting now stops outgoing audio even if the server rejects the request or speaking permission has been revoked. [#1327](https://github.com/GetStream/stream-video-swift/pull/1327)
-
-### 🔄 Changed
-
-### 🐞 Fixed
-
+- Stale migration callbacks no longer interrupt call recovery, and rejected state transitions preserve reconnection timers and subscriptions. [#1350](https://github.com/GetStream/stream-video-swift/pull/1350)
 - Repeated video-view cleanup no longer detaches a track from a reused renderer. [#1348](https://github.com/GetStream/stream-video-swift/pull/1348)
 - Failed SDP negotiations now roll back pending offers so later negotiations can succeed. A failed rollback requests call recovery. [#1352](https://github.com/GetStream/stream-video-swift/pull/1352)
 - Late WebRTC callbacks no longer accept remote SDP after close or report first frames from retired track registrations. [#1349](https://github.com/GetStream/stream-video-swift/pull/1349)

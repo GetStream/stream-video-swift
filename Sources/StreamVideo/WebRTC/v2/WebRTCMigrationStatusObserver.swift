@@ -18,7 +18,7 @@ final class WebRTCMigrationStatusObserver: @unchecked Sendable {
     private var task: Task<Void, Never>?
     private let disposableBag = DisposableBag()
 
-    @Published private var state: State = .running
+    private let state = CurrentValueSubject<State, Never>(.running)
 
     init(
         migratingFrom sfuAdapter: SFUAdapter,
@@ -33,9 +33,12 @@ final class WebRTCMigrationStatusObserver: @unchecked Sendable {
                 _ = try await sfuAdapter
                     .publisher(eventType: Stream_Video_Sfu_Event_ParticipantMigrationComplete.self)
                     .nextValue(timeout: deadline)
-                state = .completed
+                try Task.checkCancellation()
+                state.send(.completed)
+            } catch is CancellationError {
+                state.send(.failed(CancellationError()))
             } catch {
-                state = .failed(
+                state.send(.failed(
                     ClientError(
                         """
                         Migration from hostname:\(connectURL) failed after \(deadline)
@@ -43,7 +46,7 @@ final class WebRTCMigrationStatusObserver: @unchecked Sendable {
                         event.
                         """
                     )
-                )
+                ))
             }
         }
     }
@@ -52,28 +55,32 @@ final class WebRTCMigrationStatusObserver: @unchecked Sendable {
         task?.cancel()
     }
 
+    /// Stops waiting when the owning migration stage has ended.
+    func cancel() {
+        task?.cancel()
+    }
+
     func observeMigrationStatus() async throws {
-        switch state {
-        case .idle:
-            return
-        case .running:
-            let migrationStatus = try await $state.nextValue(dropFirst: 1)
-            switch migrationStatus {
-            case let .failed(error):
-                throw error
-            case .completed:
-                log.debug(
-                    """
-                    Migration from connectURL:\(connectURL) completed successfully!
-                    """,
-                    subsystems: .webRTC
-                )
-            default:
-                return
+        try Task.checkCancellation()
+        // Subscribe to terminal states directly. Reading state and then
+        // dropping the first value can miss completion between those steps.
+        let migrationStatus = try await state
+            .filter {
+                if case .running = $0 { return false }
+                return true
             }
+            .nextValue()
+        try Task.checkCancellation()
+
+        switch migrationStatus {
         case let .failed(error):
             throw error
         case .completed:
+            log.debug(
+                "Migration from connectURL:\(connectURL) completed successfully!",
+                subsystems: .webRTC
+            )
+        default:
             return
         }
     }
