@@ -912,19 +912,20 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
         }
         peerConnection.stub(for: .answer, with: answer)
         let rollbackStarted = expectation(description: "Rollback started")
-        let queueDrained = expectation(description: "Next offer reached queue")
-        let gate = AsyncStream<Void>.makeStream()
-        defer { gate.continuation.finish() }
+        let rollbackCompleted = expectation(description: "Rollback completed")
+        let rejoinRequested = expectation(description: "Rejoin requested")
+        rejoinRequested.isInverted = true
+        let gate = Atomic(wrappedValue: [CheckedContinuation<Void, Never>]())
+        defer { gate.mutate { $0.popLast()?.resume() } }
         let setRemote: @Sendable (RTCSessionDescription) async throws -> Void = {
-            [weak peerConnection] description in
-            if description.type == .offer,
-               peerConnection?.timesCalled(.setRemoteDescription) == 3 {
-                queueDrained.fulfill()
-                throw ClientError("Queue drained")
-            }
+            description in
             if description.type == .rollback {
-                rollbackStarted.fulfill()
-                for await _ in gate.stream { break }
+                // Hold the native completion even when its task is canceled.
+                await withCheckedContinuation { continuation in
+                    gate.mutate { $0.append(continuation) }
+                    rollbackStarted.fulfill()
+                }
+                rollbackCompleted.fulfill()
                 throw ClientError("Rollback completed after close preparation")
             }
             try await subscriber.setRemoteDescription(description)
@@ -933,6 +934,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
         let rejoinRequests = CurrentValueSubject<Int, Never>(0)
         let cancellable = subject.disconnectedPublisher.sink {
             rejoinRequests.send(rejoinRequests.value + 1)
+            rejoinRequested.fulfill()
         }
         defer { cancellable.cancel() }
         var offer = Stream_Video_Sfu_Event_SubscriberOffer()
@@ -942,10 +944,13 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
 
         await subject.prepareForClosing()
         mockSFUStack.receiveEvent(.subscriberOffer(offer))
-        gate.continuation.yield(())
-        await safeFulfillment(of: [queueDrained])
+        gate.mutate { $0.popLast()?.resume() }
+        await safeFulfillment(
+            of: [rollbackCompleted, rejoinRequested], timeout: 1
+        )
 
         XCTAssertEqual(rejoinRequests.value, 0)
+        XCTAssertEqual(peerConnection.timesCalled(.setRemoteDescription), 2)
         XCTAssertEqual(subscriber.signalingState, .haveRemoteOffer)
     }
 
