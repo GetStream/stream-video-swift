@@ -4,15 +4,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
-### ✅ Added
-- Added framed AES-GCM end-to-end encryption via `Call.setE2EEManager(_:)` and `EncryptionManager`. Attach the manager before `join()`, or pass `nil` to detach it. [#1249](https://github.com/GetStream/stream-video-swift/pull/1249)
-- `Call.create`, `CallViewModel.startCall`, `joinCall`, and `joinAndRingCall` accept optional `encryption` settings so get-or-create can set mode `auto-on`. [#1249](https://github.com/GetStream/stream-video-swift/pull/1249)
-
 ### 🐞 Fixed
 
 - Muting now stops outgoing audio even if the server rejects the request or speaking permission has been revoked. [#1327](https://github.com/GetStream/stream-video-swift/pull/1327)
+
+### 🔄 Changed
+
+# [1.54.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.54.0)
+_October 01, 2026_
+
+### ✅ Added
+- Added framed AES-GCM end-to-end encryption via `Call.setE2EEManager(_:)` and `EncryptionManager`. Attach the manager before `join()`, or pass `nil` to detach it. [#1249](https://github.com/GetStream/stream-video-swift/pull/1249)
+- `Call.create`, `CallViewModel.startCall`, `joinCall`, and `joinAndRingCall` accept optional `encryption` settings so get-or-create can set mode `auto-on`. [#1249](https://github.com/GetStream/stream-video-swift/pull/1249)
+- `Call.getRingState(callSessionId:)` and `VideoConfig.ringStatePolling`, to tune or turn off ring state polling. [#1302](https://github.com/GetStream/stream-video-swift/pull/1302)
+
+### 🐞 Fixed
+
+- The joining screen now closes when answering a CallKit call fails. [#1334](https://github.com/GetStream/stream-video-swift/pull/1334)
+- A caller no longer stays stuck ringing when an accept, reject, or end event is lost. [#1302](https://github.com/GetStream/stream-video-swift/pull/1302)
 - Fixed a race condition when compressing WebRTC statistics concurrently. [#1311](https://github.com/GetStream/stream-video-swift/pull/1311)
 - The microphone indicator in the floating local-participant view is now left-aligned when connection quality is unavailable. [#1287](https://github.com/GetStream/stream-video-swift/pull/1287)
+- A join that fails with an unrecoverable error is no longer retried, and a call that failed to join is no longer reused by the next join. [#1335](https://github.com/GetStream/stream-video-swift/pull/1335)
 
 # [1.53.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.53.0)
 _September 18, 2026_
