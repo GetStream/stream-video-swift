@@ -162,12 +162,26 @@ private struct DemoMoreLogsAndGleapButtonView: View {
     @Injected(\.appearance) private var appearance
 
     @State private var areLogsPresented = false
-    @State private var activeLogsTask: Task<Void, Error>?
+    @State private var activeLogsTask: Task<Void, Never>?
+    @State private var exportError: String?
 
     var body: some View {
         HStack {
             gleapButtonView
             logsViewButtonView
+        }
+        .onDisappear {
+            activeLogsTask?.cancel()
+        }
+        .alert(isPresented: Binding(
+            get: { exportError != nil },
+            set: { if !$0 { exportError = nil } }
+        )) {
+            Alert(
+                title: Text("Unable to export logs"),
+                message: Text(exportError ?? ""),
+                dismissButton: .default(Text("OK"))
+            )
         }
     }
 
@@ -176,14 +190,26 @@ private struct DemoMoreLogsAndGleapButtonView: View {
             action: {
                 activeLogsTask?.cancel()
                 activeLogsTask = Task { @MainActor in
-                    let logURL = try LogQueue.createLogFile()
-                    gleap.showBugReport(with: logURL)
+                    defer { activeLogsTask = nil }
+                    do {
+                        let logURL = try await LogQueue.createLogFile()
+                        guard !Task.isCancelled else {
+                            LogQueue.deleteTemporaryLogFile(at: logURL)
+                            return
+                        }
+                        gleap.showBugReport(with: logURL)
+                    } catch {
+                        if !Task.isCancelled {
+                            exportError = error.localizedDescription
+                        }
+                    }
                 }
             },
             label: "Report a bug"
         ) {
             Image(systemName: "ladybug.fill")
         }
+        .disabled(activeLogsTask != nil)
     }
 
     private var logsViewButtonView: some View {
@@ -194,7 +220,7 @@ private struct DemoMoreLogsAndGleapButtonView: View {
             Image(systemName: "text.page")
         }.sheet(isPresented: $areLogsPresented) {
             NavigationView {
-                MemoryLogViewer()
+                MemoryLogViewer(isPresented: $areLogsPresented)
             }
         }
     }
