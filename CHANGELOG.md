@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### 🐞 Fixed
+
+- Calls no longer enter a repeated subscriber renegotiation loop after a fast reconnect, and subscriber answers identify the offer they answer. [#1343](https://github.com/GetStream/stream-video-swift/pull/1343)
+
 ### 🔄 Changed
 
 # [1.54.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.54.0)
