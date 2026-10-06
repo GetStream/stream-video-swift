@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🐞 Fixed
 
+- Old call connections now stop negotiating when reconnection cleanup begins. [#1342](https://github.com/GetStream/stream-video-swift/pull/1342)
 - Reduced UI freezes when updating video views or logging media events. [#1346](https://github.com/GetStream/stream-video-swift/pull/1346)
 - Calls no longer enter a repeated subscriber renegotiation loop after a fast reconnect, and subscriber answers identify the offer they answer. [#1343](https://github.com/GetStream/stream-video-swift/pull/1343)
 - OBS video remains identified as RTMP when its track is paused and resumed, so viewers can return to the correct video source. [#1331](https://github.com/GetStream/stream-video-swift/pull/1331)
@@ -26,7 +27,6 @@ _October 01, 2026_
 
 ### 🐞 Fixed
 
-- Old call connections now stop negotiating when reconnection cleanup begins.
 - The joining screen now closes when answering a CallKit call fails. [#1334](https://github.com/GetStream/stream-video-swift/pull/1334)
 - A caller no longer stays stuck ringing when an accept, reject, or end event is lost. [#1302](https://github.com/GetStream/stream-video-swift/pull/1302)
 - Fixed a race condition when compressing WebRTC statistics concurrently. [#1311](https://github.com/GetStream/stream-video-swift/pull/1311)
