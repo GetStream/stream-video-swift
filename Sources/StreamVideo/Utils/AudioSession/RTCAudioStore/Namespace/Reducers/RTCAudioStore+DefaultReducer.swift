@@ -38,7 +38,9 @@ extension RTCAudioStore.Namespace {
                     }
                 }
                 updatedState.isActive = value
-                try updatedState.audioDeviceModule?.setPlayout(value)
+                try updatedState.audioDeviceModule?.setPlayout(
+                    value && state.webRTCAudioSessionConfiguration.isAudioEnabled
+                )
 
             case let .setInterrupted(value):
                 updatedState.isInterrupted = value

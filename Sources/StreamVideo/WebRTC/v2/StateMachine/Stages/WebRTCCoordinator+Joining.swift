@@ -469,6 +469,11 @@ extension WebRTCCoordinator.StateMachine.Stage {
             try Task.checkCancellation()
 
             if !isFastReconnecting {
+                let peerConnections = try await coordinator.stateAdapter
+                    .makePeerConnections()
+
+                try Task.checkCancellation()
+
                 try await coordinator.stateAdapter.configureAudioSession(
                     source: context.joinSource
                 )
@@ -483,7 +488,9 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
                 try Task.checkCancellation()
 
-                try await coordinator.stateAdapter.configurePeerConnections()
+                try await coordinator.stateAdapter.configurePeerConnections(
+                    peerConnections: peerConnections
+                )
 
                 try Task.checkCancellation()
 
@@ -540,16 +547,11 @@ extension WebRTCCoordinator.StateMachine.Stage {
             try Task.checkCancellation()
         }
 
-        /// Waits for early audio-session readiness before peer-connection setup.
+        /// Waits for audio-session readiness before configuring peer media.
         ///
-        /// This method runs in `JoiningStage` right after audio-session
-        /// configuration and just before `configurePeerConnections()`.
-        ///
-        /// Why this exists:
-        /// - The join flow can race with audio-session activation/route
-        ///   propagation (especially when control is handed back from CallKit).
-        /// - Creating peer connections before audio is active and routed can
-        ///   increase the chance of stale/no-audio media setup.
+        /// The final transports already exist so capture does not race their
+        /// audio callback registration. Media setup still waits for activation
+        /// and route propagation.
         ///
         /// How it behaves:
         /// - It waits for `context.audioSessionWatchdog.publisher` to emit

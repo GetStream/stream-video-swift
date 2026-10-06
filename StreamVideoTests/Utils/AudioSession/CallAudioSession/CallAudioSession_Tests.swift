@@ -1369,3 +1369,413 @@ private func makeRoute(
         reason: reason
     )
 }
+
+final class CallAudioSession_InitializationOrder_Tests: XCTestCase,
+    @unchecked Sendable {
+
+    private var mockAudioStore: MockRTCAudioStore!
+    private var subject: CallAudioSession!
+    private var peerConnectionFactory: PeerConnectionFactory!
+    private var observer: InitializationOrderAudioObserver!
+    private var callSettings: CurrentValueSubject<CallSettings, Never>!
+    private var capabilities: CurrentValueSubject<Set<OwnCapability>, Never>!
+    private var delegate: SpyAudioSessionAdapterDelegate!
+    private var peerConnections: [RTCPeerConnection]!
+
+    override func setUp() async throws {
+        try await super.setUp()
+        mockAudioStore = .init()
+        mockAudioStore.makeShared()
+        peerConnections = []
+        callSettings = .init(CallSettings(audioOn: true, videoOn: false))
+        capabilities = .init([.sendAudio])
+        delegate = .init()
+        subject = .init()
+        try await mockAudioStore.audioStore.dispatch([
+            .setActive(false),
+            .setActiveSessionIdentifier(subject.identifier)
+        ]).result()
+
+        peerConnectionFactory = .build(
+            audioProcessingModule: MockAudioProcessingModule.shared,
+            audioEngineAvailabilityOverride: false
+        )
+        let module = peerConnectionFactory.audioDeviceModule
+        try module.setEngineAvailability(true)
+        try module.setMuted(true)
+        try await mockAudioStore.audioStore.dispatch(
+            .setAudioDeviceModule(module)
+        ).result()
+        observer = .init(
+            forwardingTo: module,
+            audioSession: mockAudioStore.audioSession
+        )
+        peerConnectionFactory.factory.audioDeviceModule.observer = observer
+    }
+
+    override func tearDown() async throws {
+        await subject?.deactivate()
+        try await mockAudioStore?.audioStore.dispatch(
+            .setAudioDeviceModule(nil)
+        ).result()
+        peerConnections?.forEach { $0.close() }
+        peerConnections = nil
+        peerConnectionFactory?.factory.audioDeviceModule.observer = nil
+        observer = nil
+        peerConnectionFactory = nil
+        subject = nil
+        delegate = nil
+        callSettings = nil
+        capabilities = nil
+        mockAudioStore?.dismantle()
+        mockAudioStore = nil
+        try await super.tearDown()
+    }
+
+    func test_activate_inactiveSession_activatesBeforeNativeConfiguration_()
+        async throws {
+        XCTAssertFalse(mockAudioStore.audioSession.isActive)
+        XCTAssertFalse(peerConnectionFactory.factory.audioDeviceModule.isRecording)
+
+        activate(shouldSetActive: true)
+        await waitForNativeConfiguration()
+
+        XCTAssertEqual(
+            observer.recordingSessionActivity.first,
+            true,
+            "Session must be active when native willEnableEngine returns."
+        )
+    }
+
+    func test_activate_callKit_defersNativeConfigurationUntilSystemActivation_()
+        async throws {
+        try peerConnectionFactory.audioDeviceModule.setEngineAvailability(false)
+        activate(shouldSetActive: false)
+        try await mockAudioStore.audioStore.dispatch(.setActive(false)).result()
+
+        XCTAssertFalse(mockAudioStore.audioSession.isActive)
+        XCTAssertTrue(observer.recordingSessionActivity.isEmpty)
+        XCTAssertFalse(peerConnectionFactory.factory.audioDeviceModule.isRecording)
+        XCTAssertFalse(peerConnectionFactory.factory.audioDeviceModule.isEngineRunning)
+
+        try await mockAudioStore.audioStore.dispatch(
+            .callKit(.activate(.sharedInstance()))
+        ).result()
+        await waitForNativeConfiguration()
+
+        XCTAssertEqual(observer.recordingSessionActivity.first, true)
+        try await mockAudioStore.audioStore.dispatch(
+            .callKit(.deactivate(.sharedInstance()))
+        ).result()
+    }
+
+    func test_makePeerConnection_captureBeforeTransport_rebuildsNativeEngine_()
+        async throws {
+        try await prepareManualCapture()
+        try await startManualCapture()
+        let stops = observer.stopCount
+        let releases = observer.releaseCount
+
+        try makePeerConnection()
+
+        XCTAssertEqual(observer.stopCount, stops + 1)
+        XCTAssertEqual(observer.releaseCount, releases + 1)
+        XCTAssertTrue(peerConnectionFactory.factory.audioDeviceModule.isRecording)
+        XCTAssertEqual(observer.engine?.isRunning, true)
+    }
+
+    func test_join_audioReadinessPending_preparesTransportBeforeCapture_()
+        async throws {
+        let previousTimeout = WebRTCConfiguration.timeout
+        WebRTCConfiguration.timeout.audioSessionConfigurationCompletion = 60
+        defer { WebRTCConfiguration.timeout = previousTimeout }
+        let permissions = MockPermissionsStore()
+        defer { permissions.dismantle() }
+        try await mockAudioStore.audioStore.dispatch(.setAudioDeviceModule(nil)).result()
+        try await prepareManualCapture()
+        try peerConnectionFactory.audioDeviceModule.setMuted(true)
+        try await mockAudioStore.audioStore.dispatch(.setCurrentRoute(.empty)).result()
+
+        let sfuStack = MockSFUStack()
+        let coordinator = WebRTCCoordinator(
+            user: .dummy(),
+            apiKey: .unique,
+            callCid: "default:\(String.unique)",
+            videoConfig: .dummy(),
+            callSettings: callSettings.value,
+            clientEventReporter: MockClientEventReporter(),
+            peerConnectionFactory: peerConnectionFactory,
+            rtcPeerConnectionCoordinatorFactory: MockRTCPeerConnectionCoordinatorFactory(),
+            callAuthentication: MockCallAuthenticator().authenticate
+        )
+        await coordinator.stateAdapter.set(sfuAdapter: sfuStack.adapter)
+        await coordinator.stateAdapter.enqueueOwnCapabilities { [.sendAudio] }
+        let context = WebRTCCoordinator.StateMachine.Stage.Context(
+            coordinator: coordinator
+        )
+        let stage = WebRTCCoordinator.StateMachine.Stage.joining(context)
+        stage.context.joinSource = .inApp
+        stage.context.audioSessionWatchdog = .init()
+        let response = sfuStack.adapter.publisherSendEvent
+            .compactMap { $0 as? SFUAdapter.JoinEvent }
+            .prefix(1)
+            .sink { _ in sfuStack.receiveEvent(.joinResponse(.init())) }
+        defer {
+            response.cancel()
+            stage.willTransitionAway()
+        }
+
+        _ = stage.transition(from: .connected(context))
+        await fulfillment {
+            !self.peerConnectionFactory.audioDeviceModule.isMicrophoneMuted
+                && self.mockAudioStore.audioStore.state
+                .webRTCAudioSessionConfiguration.isAudioEnabled
+        }
+        try peerConnectionFactory.audioDeviceModule.setEngineAvailability(true)
+        await waitForRecording()
+        let stops = observer.stopCount
+        let releases = observer.releaseCount
+
+        try makePeerConnection()
+
+        XCTAssertEqual(observer.stopCount, stops)
+        XCTAssertEqual(observer.releaseCount, releases)
+        XCTAssertEqual(observer.engine?.isRunning, true)
+        stage.willTransitionAway()
+        await coordinator.stateAdapter.cleanUp()
+    }
+
+    func test_makePeerConnection_transportPreparedBeforeManualCapture_keepsNativeEngine_()
+        async throws {
+        try await prepareManualCapture()
+        try makePeerConnection()
+        try await startManualCapture()
+        let stops = observer.stopCount
+        let releases = observer.releaseCount
+
+        try makePeerConnection()
+
+        XCTAssertEqual(observer.stopCount, stops)
+        XCTAssertEqual(observer.releaseCount, releases)
+        XCTAssertTrue(peerConnectionFactory.factory.audioDeviceModule.isRecording)
+        XCTAssertEqual(observer.engine?.isRunning, true)
+    }
+
+    private func activate(shouldSetActive: Bool) {
+        subject.activate(
+            callSettingsPublisher: callSettings.eraseToAnyPublisher(),
+            ownCapabilitiesPublisher: capabilities.eraseToAnyPublisher(),
+            delegate: delegate,
+            statsAdapter: nil,
+            shouldSetActive: shouldSetActive
+        )
+    }
+
+    private func waitForNativeConfiguration() async {
+        await fulfillment {
+            !self.observer.recordingSessionActivity.isEmpty
+                && self.mockAudioStore.audioStore.state.isActive
+        }
+    }
+
+    private func prepareManualCapture() async throws {
+        try peerConnectionFactory.audioDeviceModule.setEngineAvailability(false)
+        XCTAssertEqual(
+            peerConnectionFactory.factory.audioDeviceModule.setManualRenderingMode(true),
+            0
+        )
+        try await mockAudioStore.audioStore.dispatch(.setActive(true)).result()
+    }
+
+    private func startManualCapture() async throws {
+        activate(shouldSetActive: true)
+        await fulfillment {
+            !self.peerConnectionFactory.audioDeviceModule.isMicrophoneMuted
+                && self.mockAudioStore.audioStore.state
+                .webRTCAudioSessionConfiguration.isAudioEnabled
+        }
+        try peerConnectionFactory.audioDeviceModule.setEngineAvailability(true)
+        await waitForRecording()
+    }
+
+    private func waitForRecording() async {
+        await fulfillment {
+            !self.observer.recordingSessionActivity.isEmpty
+                && self.mockAudioStore.audioStore.state.isActive
+                && self.peerConnectionFactory.factory.audioDeviceModule.isRecording
+                && self.observer.engine?.isRunning == true
+        }
+        XCTAssertEqual(observer.engine?.isRunning, true)
+        XCTAssertTrue(peerConnectionFactory.factory.audioDeviceModule.isRecording)
+        XCTAssertFalse(observer.recordingSessionActivity.isEmpty)
+    }
+
+    private func makePeerConnection() throws {
+        let configuration = RTCConfiguration()
+        configuration.sdpSemantics = .unifiedPlan
+        peerConnections.append(try peerConnectionFactory.makePeerConnection(
+            configuration: configuration,
+            constraints: .defaultConstraints,
+            delegate: nil
+        ))
+    }
+}
+
+private final class InitializationOrderAudioObserver: NSObject,
+    RTCAudioDeviceModuleDelegate, @unchecked Sendable {
+
+    private let delegate: AudioDeviceModule
+    private let audioSession: RTCAudioSession
+    @Atomic private(set) var recordingSessionActivity: [Bool] = []
+    @Atomic private(set) var engine: AVAudioEngine?
+    @Atomic private(set) var stopCount = 0
+    @Atomic private(set) var releaseCount = 0
+
+    init(forwardingTo delegate: AudioDeviceModule, audioSession: RTCAudioSession) {
+        self.delegate = delegate
+        self.audioSession = audioSession
+        super.init()
+    }
+
+    func audioDeviceModule(
+        _ module: RTCAudioDeviceModule,
+        didReceiveSpeechActivityEvent event: RTCSpeechActivityEvent
+    ) {
+        delegate.audioDeviceModule(module, didReceiveSpeechActivityEvent: event)
+    }
+
+    func audioDeviceModule(
+        _ module: RTCAudioDeviceModule, didCreateEngine engine: AVAudioEngine
+    ) -> Int {
+        self.engine = engine
+        return delegate.audioDeviceModule(module, didCreateEngine: engine)
+    }
+
+    func audioDeviceModule(
+        _ module: RTCAudioDeviceModule,
+        willEnableEngine engine: AVAudioEngine,
+        isPlayoutEnabled: Bool,
+        isRecordingEnabled: Bool
+    ) -> Int {
+        let result = delegate.audioDeviceModule(
+            module, willEnableEngine: engine,
+            isPlayoutEnabled: isPlayoutEnabled,
+            isRecordingEnabled: isRecordingEnabled
+        )
+        // Sample synchronously after the owner can prepare the session, before
+        // WebRTC continues into native node and Voice Processing configuration.
+        if isRecordingEnabled {
+            _recordingSessionActivity.mutate { $0.append(audioSession.isActive) }
+        }
+        return result
+    }
+
+    func audioDeviceModule(
+        _ module: RTCAudioDeviceModule,
+        willStartEngine engine: AVAudioEngine,
+        isPlayoutEnabled: Bool,
+        isRecordingEnabled: Bool
+    ) -> Int {
+        delegate.audioDeviceModule(
+            module, willStartEngine: engine,
+            isPlayoutEnabled: isPlayoutEnabled,
+            isRecordingEnabled: isRecordingEnabled
+        )
+    }
+
+    func audioDeviceModule(
+        _ module: RTCAudioDeviceModule,
+        didStopEngine engine: AVAudioEngine,
+        isPlayoutEnabled: Bool,
+        isRecordingEnabled: Bool
+    ) -> Int {
+        _stopCount.mutate { $0 += 1 }
+        return delegate.audioDeviceModule(
+            module, didStopEngine: engine,
+            isPlayoutEnabled: isPlayoutEnabled,
+            isRecordingEnabled: isRecordingEnabled
+        )
+    }
+
+    func audioDeviceModule(
+        _ module: RTCAudioDeviceModule,
+        didDisableEngine engine: AVAudioEngine,
+        isPlayoutEnabled: Bool,
+        isRecordingEnabled: Bool
+    ) -> Int {
+        delegate.audioDeviceModule(
+            module, didDisableEngine: engine,
+            isPlayoutEnabled: isPlayoutEnabled,
+            isRecordingEnabled: isRecordingEnabled
+        )
+    }
+
+    func audioDeviceModule(
+        _ module: RTCAudioDeviceModule, willReleaseEngine engine: AVAudioEngine
+    ) -> Int {
+        _releaseCount.mutate { $0 += 1 }
+        if self.engine === engine {
+            self.engine = nil
+        }
+        return delegate.audioDeviceModule(module, willReleaseEngine: engine)
+    }
+
+    func audioDeviceModule(
+        _ module: RTCAudioDeviceModule,
+        engine: AVAudioEngine,
+        configureInputFromSource source: AVAudioNode?,
+        toDestination destination: AVAudioNode,
+        format: AVAudioFormat,
+        context: [AnyHashable: Any]
+    ) -> Int {
+        var input = source
+        if engine.isInManualRenderingMode, input == nil {
+            let silence = AVAudioSourceNode { _, _, _, audioBufferList in
+                for buffer in UnsafeMutableAudioBufferListPointer(audioBufferList) {
+                    if let data = buffer.mData {
+                        memset(data, 0, Int(buffer.mDataByteSize))
+                    }
+                }
+                return noErr
+            }
+            engine.attach(silence)
+            engine.connect(
+                silence, to: destination,
+                format: AVAudioFormat(
+                    standardFormatWithSampleRate: format.sampleRate,
+                    channels: 1
+                )
+            )
+            input = silence
+        }
+        return delegate.audioDeviceModule(
+            module, engine: engine, configureInputFromSource: input,
+            toDestination: destination, format: format, context: context
+        )
+    }
+
+    func audioDeviceModule(
+        _ module: RTCAudioDeviceModule,
+        engine: AVAudioEngine,
+        configureOutputFromSource source: AVAudioNode,
+        toDestination destination: AVAudioNode?,
+        format: AVAudioFormat,
+        context: [AnyHashable: Any]
+    ) -> Int {
+        delegate.audioDeviceModule(
+            module, engine: engine, configureOutputFromSource: source,
+            toDestination: destination, format: format, context: context
+        )
+    }
+
+    func audioDeviceModuleDidUpdateDevices(_ module: RTCAudioDeviceModule) {
+        delegate.audioDeviceModuleDidUpdateDevices(module)
+    }
+
+    func audioDeviceModule(
+        _ module: RTCAudioDeviceModule,
+        didUpdateAudioProcessingState state: RTCAudioProcessingState
+    ) {
+        delegate.audioDeviceModule(module, didUpdateAudioProcessingState: state)
+    }
+}

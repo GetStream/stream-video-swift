@@ -95,13 +95,18 @@ final class RTCAudioStore_DefaultReducerTests: XCTestCase, @unchecked Sendable {
         }
     }
 
-    func test_reduce_setActive_updatesAudioDeviceModulePlayout() async throws {
+    func test_reduce_setActive_audioEnabled_updatesAudioDeviceModulePlayout() async throws {
         session.isActive = false
         let (audioDeviceModule, mockModule) = makeAudioDeviceModule()
         mockModule.stub(for: \.isPlayoutInitialized, with: false)
         let state = makeState(
             isActive: false,
-            audioDeviceModule: audioDeviceModule
+            audioDeviceModule: audioDeviceModule,
+            webRTCAudioSessionConfiguration: .init(
+                isAudioEnabled: true,
+                useManualAudio: false,
+                prefersNoInterruptionsFromSystemAlerts: false
+            )
         )
 
         _ = try await subject.reduce(
@@ -113,6 +118,27 @@ final class RTCAudioStore_DefaultReducerTests: XCTestCase, @unchecked Sendable {
         )
 
         XCTAssertEqual(mockModule.timesCalled(.initAndStartPlayout), 1)
+    }
+
+    func test_reduce_setActive_audioDisabled_doesNotStartPlayout_() async throws {
+        session.isActive = false
+        let (audioDeviceModule, mockModule) = makeAudioDeviceModule()
+        mockModule.stub(for: \.isPlayoutInitialized, with: false)
+        let state = makeState(
+            isActive: false,
+            audioDeviceModule: audioDeviceModule
+        )
+
+        let result = try await subject.reduce(
+            state: state,
+            action: .setActive(true),
+            file: #file,
+            function: #function,
+            line: #line
+        )
+
+        XCTAssertTrue(result.isActive)
+        XCTAssertEqual(mockModule.timesCalled(.initAndStartPlayout), 0)
     }
 
     // MARK: - setAudioDeviceModule
