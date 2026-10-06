@@ -23,6 +23,8 @@ final class StreamRTCPeerConnection: StreamRTCPeerConnectionProtocol, @unchecked
     /// The remote session description of the peer connection.
     var remoteDescription: RTCSessionDescription? { source.remoteDescription }
 
+    var signalingState: RTCSignalingState { source.signalingState }
+
     /// The list of RTP transceivers associated with this peer connection.
     var transceivers: [RTCRtpTransceiver] { source.transceivers }
 
@@ -131,7 +133,7 @@ final class StreamRTCPeerConnection: StreamRTCPeerConnectionProtocol, @unchecked
         var wasClosed = false
         _isClosed.mutate { (isClosed: inout Bool) in
             wasClosed = isClosed
-            if !isClosed {
+            if !isClosed, sessionDescription.type != .rollback {
                 subject.send(HasRemoteDescription(sessionDescription: sessionDescription))
             }
         }

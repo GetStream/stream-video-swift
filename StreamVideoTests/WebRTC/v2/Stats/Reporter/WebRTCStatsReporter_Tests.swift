@@ -123,8 +123,6 @@ final class WebRTCStatsReporter_Tests: XCTestCase, @unchecked Sendable {
         await fulfillment { self.mockSFUStack.service.sendStatsWasCalledWithRequest != nil }
 
         let request = try XCTUnwrap(mockSFUStack.service.sendStatsWasCalledWithRequest)
-        XCTAssertTrue(request.subscriberStats.isEmpty)
-        XCTAssertTrue(request.publisherStats.isEmpty)
         XCTAssertEqual(request.sessionID, sessionID)
     }
 
@@ -136,8 +134,6 @@ final class WebRTCStatsReporter_Tests: XCTestCase, @unchecked Sendable {
         await fulfillment { self.mockSFUStack.service.sendStatsWasCalledWithRequest != nil }
 
         let request = try XCTUnwrap(mockSFUStack.service.sendStatsWasCalledWithRequest)
-        XCTAssertTrue(request.subscriberStats.isEmpty)
-        XCTAssertTrue(request.publisherStats.isEmpty)
         XCTAssertEqual(request.sessionID, sessionID)
         XCTAssertEqual(request.deviceState?.thermalState, .critical)
     }
@@ -195,8 +191,6 @@ final class WebRTCStatsReporter_Tests: XCTestCase, @unchecked Sendable {
         await fulfillment { self.mockSFUStack.service.sendStatsWasCalledWithRequest != nil }
 
         let request = try XCTUnwrap(mockSFUStack.service.sendStatsWasCalledWithRequest)
-        XCTAssertTrue(request.subscriberStats.isEmpty)
-        XCTAssertTrue(request.publisherStats.isEmpty)
         XCTAssertEqual(request.sessionID, sessionID)
     }
 

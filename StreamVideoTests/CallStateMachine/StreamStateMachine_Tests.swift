@@ -54,6 +54,62 @@ final class StreamStateMachineTests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(stateMachine.currentStage.id, initialState.id)
     }
 
+    func test_transition_rejected_keepsActiveStageLifecycle() throws {
+        let initialStage = MockStage(id: "Initial", description: "Initial")
+        let activeStage = MockStage(
+            id: "Active", description: "Active", allowedTransitions: [initialStage]
+        )
+        let subject = StreamStateMachine(initialStage: initialStage)
+        subject.transition(to: activeStage)
+
+        subject.transition(to: MockStage(id: "Rejected", description: "Rejected"))
+
+        XCTAssertTrue(subject.currentStage === activeStage)
+        XCTAssertFalse(activeStage.willTransitionAwayWasCalled)
+        XCTAssertFalse(activeStage.didTransitionAwayWasCalled)
+        let recoveryStage = MockStage(
+            id: "Recovery", description: "Recovery", allowedTransitions: [activeStage]
+        )
+        try activeStage.transition?(recoveryStage)
+        XCTAssertTrue(subject.currentStage === recoveryStage)
+        XCTAssertTrue(activeStage.willTransitionAwayWasCalled)
+        XCTAssertTrue(activeStage.didTransitionAwayWasCalled)
+    }
+
+    func test_transition_oldCallbackWithSameStageID_keepsReplacementActive() throws {
+        let initialStage = MockStage(id: "Initial", description: "Initial")
+        let oldStage = MockStage(
+            id: "Joined", description: "Old joined", allowedTransitions: [initialStage]
+        )
+        let subject = StreamStateMachine(initialStage: initialStage)
+        subject.transition(to: oldStage)
+        let callback = try XCTUnwrap(oldStage.transition)
+        let replacement = MockStage(
+            id: "Joined", description: "New joined", allowedTransitions: [oldStage]
+        )
+        subject.transition(to: replacement)
+
+        try callback(MockStage(
+            id: "Disconnected", description: "Disconnected", allowedTransitions: [replacement]
+        ))
+
+        XCTAssertTrue(subject.currentStage === replacement)
+        XCTAssertFalse(replacement.willTransitionAwayWasCalled)
+    }
+
+    func test_transition_rejectedStageCallback_cannotAdvanceActiveStage() throws {
+        let activeStage = MockStage(id: "Active", description: "Active")
+        let subject = StreamStateMachine(initialStage: activeStage)
+        let rejectedStage = MockStage(id: "Rejected", description: "Rejected")
+        subject.transition(to: rejectedStage)
+
+        try rejectedStage.transition?(MockStage(
+            id: "Recovery", description: "Recovery", allowedTransitions: [activeStage]
+        ))
+
+        XCTAssertTrue(subject.currentStage === activeStage)
+    }
+
     // MARK: - Mocks
 
     private final class MockStage: StreamStateMachineStage {

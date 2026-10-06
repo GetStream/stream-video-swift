@@ -1002,6 +1002,106 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         await assertEqualAsync(await subject.callSettings.cameraPosition, .back)
     }
 
+    func test_cleanUpForReconnection_activeCallKitSession_repeatedRecoveryKeepsAudioEnabled_() async throws {
+        try await configureActiveCallKitAudio()
+        let audioSession = await subject.audioSession
+        let module = mockAudioStore.audioStore.state.audioDeviceModule
+        let resets = mockAudioDeviceModuleSource.timesCalled(.reset)
+        let recordingStops = mockAudioDeviceModuleSource.timesCalled(.stopRecording)
+        let playoutStops = mockAudioDeviceModuleSource.timesCalled(.stopPlayout)
+
+        // Rejoin and migration share this cleanup/setup boundary. CallKit
+        // activates once; none of these recoveries supplies another callback.
+        for _ in 0..<3 {
+            await subject.cleanUpForReconnection()
+
+            let state = mockAudioStore.audioStore.state
+            XCTAssertTrue(state.isActive)
+            XCTAssertTrue(state.webRTCAudioSessionConfiguration.isAudioEnabled)
+            XCTAssertEqual(state.activeSessionIdentifier, audioSession.identifier)
+            XCTAssertTrue(state.audioDeviceModule === module)
+
+            try await subject.configureAudioSession(source: .callKit(.init {}))
+
+            XCTAssertEqual(mockAudioDeviceModuleSource.timesCalled(.reset), resets)
+            XCTAssertEqual(mockAudioDeviceModuleSource.timesCalled(.stopRecording), recordingStops)
+            XCTAssertEqual(mockAudioDeviceModuleSource.timesCalled(.stopPlayout), playoutStops)
+            XCTAssertFalse(mockAudioStore.audioStore.state.isMicrophoneMuted)
+            let availability = mockAudioDeviceModuleSource.recordedInputPayload(
+                (Bool, Bool).self,
+                for: .setEngineAvailability
+            )?.last
+            XCTAssertEqual(availability?.0, true)
+            XCTAssertEqual(availability?.1, true)
+        }
+    }
+
+    func test_cleanUpForReconnection_mutedCallKitSession_keepsMicrophoneMuted_() async throws {
+        try await configureActiveCallKitAudio(audioOn: false)
+        let audioSession = await subject.audioSession
+
+        await subject.cleanUpForReconnection()
+
+        XCTAssertEqual(mockAudioStore.audioStore.state.activeSessionIdentifier, audioSession.identifier)
+        XCTAssertTrue(mockAudioStore.audioStore.state.webRTCAudioSessionConfiguration.isAudioEnabled)
+        try await subject.configureAudioSession(source: .callKit(.init {}))
+
+        await fulfillment {
+            let state = self.mockAudioStore.audioStore.state
+            return state.isActive
+                && state.webRTCAudioSessionConfiguration.isAudioEnabled
+                && state.isMicrophoneMuted
+        }
+        await assertFalseAsync(await subject.callSettings.audioOn)
+    }
+
+    func test_cleanUpForReconnection_callKitDeactivates_waitsForNewActivation_() async throws {
+        try await configureActiveCallKitAudio()
+
+        await subject.cleanUpForReconnection()
+        try await mockAudioStore.audioStore.dispatch(.callKit(.deactivate(.sharedInstance()))).result()
+        try await subject.configureAudioSession(source: .callKit(.init {}))
+
+        XCTAssertFalse(mockAudioStore.audioStore.state.isActive)
+        let availability = mockAudioDeviceModuleSource.recordedInputPayload(
+            (Bool, Bool).self,
+            for: .setEngineAvailability
+        )?.last
+        XCTAssertEqual(availability?.0, false)
+        XCTAssertEqual(availability?.1, false)
+
+        try await mockAudioStore.audioStore.dispatch(.callKit(.activate(.sharedInstance()))).result()
+
+        await fulfillment {
+            let state = self.mockAudioStore.audioStore.state
+            let availability = self.mockAudioDeviceModuleSource.recordedInputPayload(
+                (Bool, Bool).self,
+                for: .setEngineAvailability
+            )?.last
+            return state.isActive
+                && state.webRTCAudioSessionConfiguration.isAudioEnabled
+                && availability?.0 == true
+                && availability?.1 == true
+        }
+    }
+
+    func test_cleanUp_afterCallKitRecovery_releasesAudioOwnership_() async throws {
+        try await configureActiveCallKitAudio()
+        await subject.cleanUpForReconnection()
+        try await subject.configureAudioSession(source: .callKit(.init {}))
+        await fulfillment {
+            self.mockAudioStore.audioStore.state.webRTCAudioSessionConfiguration.isAudioEnabled
+        }
+
+        await subject.cleanUp()
+
+        let state = mockAudioStore.audioStore.state
+        XCTAssertFalse(state.isActive)
+        XCTAssertFalse(state.webRTCAudioSessionConfiguration.isAudioEnabled)
+        XCTAssertEqual(state.activeSessionIdentifier, "")
+        XCTAssertNil(state.audioDeviceModule)
+    }
+
     // MARK: - setAudioBitrateProfile
 
     func test_setAudioBitrateProfile_music_disablesSoftwareProcessingAndVPAGC() async throws {
@@ -2159,6 +2259,27 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
             }
         }
         return buffer
+    }
+
+    private func configureActiveCallKitAudio(audioOn: Bool = true) async throws {
+        mockAudioDeviceModuleSource.stub(for: \.isMicrophoneMuted, with: true)
+        await subject.enqueueOwnCapabilities { [.sendAudio] }
+        await fulfillment { await self.subject.ownCapabilities == [.sendAudio] }
+        await subject.enqueueCallSettings { _ in CallSettings(audioOn: audioOn, videoOn: false) }
+        await fulfillment {
+            let capabilities = await self.subject.ownCapabilities
+            let settings = await self.subject.callSettings
+            return capabilities == [.sendAudio] && settings.audioOn == audioOn
+        }
+        try await subject.configureAudioSession(source: .callKit(.init {}))
+        try await mockAudioStore.audioStore.dispatch(.callKit(.activate(.sharedInstance()))).result()
+        await fulfillment {
+            let state = self.mockAudioStore.audioStore.state
+            return state.isActive
+                && state.webRTCAudioSessionConfiguration.isAudioEnabled
+                && state.isMicrophoneMuted == !audioOn
+                && self.mockAudioDeviceModuleSource.timesCalled(.initAndStartPlayout) > 0
+        }
     }
 
     private func prepare(
