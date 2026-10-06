@@ -48,10 +48,12 @@ enum LogQueue {
     }
 
     static func deleteTemporaryLogFile(at path: URL) {
-        do {
-            try FileManager.default.removeItem(at: path)
-        } catch {
-            print("Error deleting temporary log file: \(error)")
+        DispatchQueue.global(qos: .utility).async {
+            do {
+                try FileManager.default.removeItem(at: path)
+            } catch {
+                print("Error deleting temporary log file: \(error)")
+            }
         }
     }
 }

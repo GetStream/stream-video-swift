@@ -14,6 +14,7 @@ struct MemoryLogViewer: View {
     @Binding var isPresented: Bool
     
     @State private var logs: [LogDetails] = []
+    @State private var query = ""
     @State private var isSharePresented = false
     @State private var logFileURL: URL?
     @State private var exportTask: Task<Void, Never>?
@@ -30,25 +31,25 @@ struct MemoryLogViewer: View {
             }
         }
         .navigationTitle("Logs Viewer")
-        .task {
-            logs = LogQueue.queue.elements
+        .task(id: query) {
+            while !Task.isCancelled {
+                let entries = LogQueue.queue.elements
+                logs = query.isEmpty
+                    ? entries
+                    : entries.filter { $0.message.contains(query) }
+                do {
+                    try await Task.sleep(nanoseconds: 1_000_000_000)
+                } catch {
+                    return
+                }
+            }
         }
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 shareButtonView
             }
         }
-        .modifier(
-            SearchableModifier { query in
-                if query.isEmpty {
-                    logs = LogQueue.queue.elements
-                } else {
-                    logs = LogQueue.queue
-                        .elements
-                        .filter { $0.message.contains(query) }
-                }
-            }
-        )
+        .modifier(SearchableModifier(query: $query))
         .sheet(isPresented: $isSharePresented) {
             if let logFileURL = logFileURL {
                 ShareActivityView(activityItems: [logFileURL])
@@ -111,13 +112,8 @@ struct MemoryLogViewer: View {
     
     private func deleteTemporaryLogFile() {
         if let fileURL = logFileURL {
-            do {
-                try FileManager.default.removeItem(at: fileURL)
-                logFileURL = nil
-                print("Temporary log file deleted successfully")
-            } catch {
-                print("Error deleting temporary log file: \(error)")
-            }
+            logFileURL = nil
+            LogQueue.deleteTemporaryLogFile(at: fileURL)
         }
     }
 
@@ -150,14 +146,12 @@ struct MemoryLogViewer: View {
 
 struct SearchableModifier: ViewModifier {
     
-    @State var query: String = ""
-    var searchCompletionHandler: (String) -> Void
+    @Binding var query: String
     
     func body(content: Content) -> some View {
         if #available(iOS 15, *) {
             content
                 .searchable(text: $query)
-                .onChange(of: query) { searchCompletionHandler($0) }
         } else {
             content
         }
