@@ -262,6 +262,8 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Sources/Components/MemoryLogDestination/LogQueue.swift,
+				Sources/Components/MemoryLogDestination/Queue.swift,
+				Sources/Components/MemoryLogDestination/SessionLogFile.swift,
 			);
 			target = 84F737F3287C13AD00A363F4 /* StreamVideoTests */;
 		};
