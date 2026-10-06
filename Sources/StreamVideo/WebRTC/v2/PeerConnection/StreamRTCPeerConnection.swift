@@ -12,6 +12,8 @@ final class StreamRTCPeerConnection: StreamRTCPeerConnectionProtocol, @unchecked
     /// A dictionary groups transceivers based on the type of their carrying track.
     @Atomic private var transceiversMap: [TrackType: [RTCRtpTransceiver]] = [:]
 
+    @Atomic private var isClosed = false
+
     /// The configuration used to initialize the peer connection.
     ///
     /// Contains settings such as ICE servers, SDP semantics, bundle policy,
@@ -106,6 +108,7 @@ final class StreamRTCPeerConnection: StreamRTCPeerConnectionProtocol, @unchecked
     func setRemoteDescription(
         _ sessionDescription: RTCSessionDescription
     ) async throws {
+        guard !isClosed else { throw CancellationError() }
         try await withCheckedThrowingContinuation { [weak self] continuation in
             guard let self else {
                 continuation.resume(
@@ -118,11 +121,21 @@ final class StreamRTCPeerConnection: StreamRTCPeerConnectionProtocol, @unchecked
                 if let error = error {
                     continuation.resume(throwing: error)
                 } else {
-                    self.subject.send(HasRemoteDescription(sessionDescription: sessionDescription))
                     continuation.resume(returning: ())
                 }
             }
         } as ()
+
+        // Native success may arrive after close. Serialize acceptance with the
+        // close flag so teardown cannot occur between the check and publication.
+        var wasClosed = false
+        _isClosed.mutate { (isClosed: inout Bool) in
+            wasClosed = isClosed
+            if !isClosed {
+                subject.send(HasRemoteDescription(sessionDescription: sessionDescription))
+            }
+        }
+        guard !wasClosed else { throw CancellationError() }
     }
 
     /// Creates an offer asynchronously.
@@ -206,6 +219,12 @@ final class StreamRTCPeerConnection: StreamRTCPeerConnectionProtocol, @unchecked
 
     /// Closes the peer connection.
     func close() async {
+        var shouldClose = false
+        _isClosed.mutate {
+            shouldClose = !$0
+            $0 = true
+        }
+        guard shouldClose else { return }
         Task(disposableBag: disposableBag) { @MainActor [weak self] in
             /// It's very important to close any transceivers **before** we close the connection, to make
             /// sure that access to `RTCVideoTrack` properties, will be handled correctly. Otherwise
