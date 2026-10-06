@@ -46,6 +46,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
         screenShareMediaAdapter: screenShareMediaAdapter
     )
     private lazy var iceConnectionStateAdapter: ICEConnectionStateAdapter! = .init()
+    private var nativePeerConnections: [StreamRTCPeerConnection] = []
     private lazy var subject: RTCPeerConnectionCoordinator! = .init(
         sessionId: sessionId,
         peerType: peerType,
@@ -65,6 +66,14 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
         iceConnectionStateAdapter: iceConnectionStateAdapter,
         clientCapabilities: []
     )
+
+    override func tearDown() async throws {
+        for peerConnection in nativePeerConnections {
+            await peerConnection.close()
+        }
+        nativePeerConnections.removeAll()
+        try await super.tearDown()
+    }
 
     override func tearDown() {
         subject = nil
@@ -653,6 +662,265 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
 
     // MARK: subscriber
 
+    func test_negotiate_setPublisherRejected_restoresStableAndRenegotiates()
+        async throws {
+        mockSFUStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
+        let publisher = try makeNativePeerConnection(trackTypes: [.audio])
+        let sfu = try makeNativePeerConnection()
+        let peerConnection = mockPeerConnection!
+        peerConnection.wrappedPeerConnection = publisher
+        let firstRejected = expectation(description: "First offer rejected")
+        let secondAccepted = expectation(description: "Second offer accepted")
+        let offer: @Sendable () async throws -> RTCSessionDescription = {
+            XCTAssertEqual(publisher.signalingState, .stable)
+            return try await publisher.offer(for: .defaultConstraints)
+        }
+        peerConnection.stub(for: .offer, with: offer)
+        let setPublisher: @Sendable (Stream_Video_Sfu_Signal_SetPublisherRequest)
+            async throws -> Stream_Video_Sfu_Signal_SetPublisherResponse = {
+                request in
+                var response = Stream_Video_Sfu_Signal_SetPublisherResponse()
+                if peerConnection.timesCalled(.offer) == 1 {
+                    response.error.code = .requestValidationFailed
+                    response.error.message = "Injected SetPublisher rejection"
+                    firstRejected.fulfill()
+                } else {
+                    try await sfu.setRemoteDescription(
+                        .init(type: .offer, sdp: request.sdp)
+                    )
+                    let answer = try await sfu.answer(for: .defaultConstraints)
+                    try await sfu.setLocalDescription(answer)
+                    response.sdp = answer.sdp
+                    secondAccepted.fulfill()
+                }
+                return response
+            }
+        mockSFUStack.service.stub(for: .setPublisher, with: setPublisher)
+        subject.completeSetUp()
+        peerConnection.subject.send(StreamRTCPeerConnection.ShouldNegotiateEvent())
+        await safeFulfillment(of: [firstRejected])
+        peerConnection.subject.send(StreamRTCPeerConnection.ShouldNegotiateEvent())
+        await safeFulfillment(of: [secondAccepted])
+        await fulfillment { publisher.signalingState == .stable }
+        XCTAssertNotNil(publisher.remoteDescription)
+    }
+
+    func test_handleSubscriberOffer_answerFails_nextValidOfferSucceeds()
+        async throws {
+        peerType = .subscriber
+        mockSFUStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
+        let subscriber = try makeNativePeerConnection()
+        let failedOfferPeer = try makeNativePeerConnection(
+            trackTypes: [.audio, .video]
+        )
+        let validOfferPeer = try makeNativePeerConnection(trackTypes: [.audio])
+        mockPeerConnection.wrappedPeerConnection = subscriber
+        let peerConnection = mockPeerConnection!
+        let answer: @Sendable () async throws -> RTCSessionDescription = {
+            [weak peerConnection] in
+            if peerConnection?.timesCalled(.answer) == 1 {
+                throw ClientError("Injected answer creation failure")
+            }
+            return try await subscriber.answer(for: .defaultConstraints)
+        }
+        mockPeerConnection.stub(for: .answer, with: answer)
+        _ = subject
+
+        var failedOffer = Stream_Video_Sfu_Event_SubscriberOffer()
+        failedOffer.sdp = try await failedOfferPeer.offer(
+            for: .defaultConstraints
+        ).sdp
+        var validOffer = Stream_Video_Sfu_Event_SubscriberOffer()
+        validOffer.sdp = try await validOfferPeer.offer(
+            for: .defaultConstraints
+        ).sdp
+        mockSFUStack.receiveEvent(.subscriberOffer(failedOffer))
+        mockSFUStack.receiveEvent(.subscriberOffer(validOffer))
+
+        await fulfillment { [mockSFUStack] in
+            mockSFUStack?.service.sendAnswerWasCalledWithRequest != nil
+        }
+        XCTAssertEqual(mockPeerConnection.timesCalled(.answer), 2)
+        XCTAssertEqual(subscriber.remoteDescription?.sdp, validOffer.sdp)
+        XCTAssertEqual(subscriber.signalingState, .stable)
+    }
+
+    func test_handleSubscriberOffer_rollbackFails_requestsRejoin() async throws {
+        peerType = .subscriber
+        let subscriber = try makeNativePeerConnection()
+        let sfu = try makeNativePeerConnection(trackTypes: [.audio])
+        mockPeerConnection.wrappedPeerConnection = subscriber
+        let answer: @Sendable () async throws -> RTCSessionDescription = {
+            throw ClientError("Injected answer failure")
+        }
+        mockPeerConnection.stub(for: .answer, with: answer)
+        let setRemote: @Sendable (RTCSessionDescription) async throws -> Void = {
+            description in
+            if description.type == .rollback {
+                throw ClientError("Injected native rollback failure")
+            }
+            try await subscriber.setRemoteDescription(description)
+        }
+        mockPeerConnection.stub(for: .setRemoteDescription, with: setRemote)
+        let rejoinRequested = expectation(description: "Rejoin requested")
+        let cancellable = subject.disconnectedPublisher.sink {
+            rejoinRequested.fulfill()
+        }
+        defer { cancellable.cancel() }
+        var offer = Stream_Video_Sfu_Event_SubscriberOffer()
+        offer.sdp = try await sfu.offer(for: .defaultConstraints).sdp
+
+        mockSFUStack.receiveEvent(.subscriberOffer(offer))
+
+        await safeFulfillment(of: [rejoinRequested])
+        XCTAssertEqual(subscriber.signalingState, .haveRemoteOffer)
+        XCTAssertNil(mockSFUStack.service.sendAnswerWasCalledWithRequest)
+    }
+
+    func test_handleSubscriberOffer_renegotiationFails_restoresCommittedSDP()
+        async throws {
+        peerType = .subscriber
+        let subscriber = try makeNativePeerConnection()
+        let sfu = try makeNativePeerConnection(trackTypes: [.audio])
+        let failedOfferPeer = try makeNativePeerConnection(
+            trackTypes: [.audio, .video]
+        )
+        let peerConnection = mockPeerConnection!
+        peerConnection.wrappedPeerConnection = subscriber
+        let committedOffer = try await sfu.offer(for: .defaultConstraints)
+        let answer: @Sendable () async throws -> RTCSessionDescription = {
+            [weak peerConnection] in
+            if peerConnection?.timesCalled(.answer) == 2 {
+                throw ClientError("Injected renegotiation failure")
+            }
+            return try await subscriber.answer(for: .defaultConstraints)
+        }
+        peerConnection.stub(for: .answer, with: answer)
+        let setRemote: @Sendable (RTCSessionDescription) async throws -> Void = {
+            [weak peerConnection] description in
+            if description.type == .offer,
+               peerConnection?.timesCalled(.answer) == 2 {
+                XCTAssertEqual(subscriber.signalingState, .stable)
+                XCTAssertEqual(
+                    subscriber.remoteDescription?.sdp, committedOffer.sdp
+                )
+            }
+            try await subscriber.setRemoteDescription(description)
+        }
+        peerConnection.stub(for: .setRemoteDescription, with: setRemote)
+        let recovered = expectation(description: "Renegotiation recovered")
+        let sendAnswer: @Sendable (Stream_Video_Sfu_Signal_SendAnswerRequest)
+            async throws -> Stream_Video_Sfu_Signal_SendAnswerResponse = { _ in
+                if peerConnection.timesCalled(.answer) == 3 {
+                    recovered.fulfill()
+                }
+                return .init()
+            }
+        mockSFUStack.service.stub(for: .sendAnswer, with: sendAnswer)
+        _ = subject
+        var offer = Stream_Video_Sfu_Event_SubscriberOffer()
+        offer.sdp = committedOffer.sdp
+        var failedOffer = Stream_Video_Sfu_Event_SubscriberOffer()
+        failedOffer.sdp = try await failedOfferPeer.offer(
+            for: .defaultConstraints
+        ).sdp
+
+        mockSFUStack.receiveEvent(.subscriberOffer(offer))
+        mockSFUStack.receiveEvent(.subscriberOffer(failedOffer))
+        mockSFUStack.receiveEvent(.subscriberOffer(offer))
+
+        await safeFulfillment(of: [recovered])
+        XCTAssertEqual(subscriber.signalingState, .stable)
+    }
+
+    func test_handleSubscriberOffer_sendAnswerRejected_keepsCommittedSDP()
+        async throws {
+        peerType = .subscriber
+        let subscriber = try makeNativePeerConnection()
+        let sfu = try makeNativePeerConnection(trackTypes: [.audio])
+        mockPeerConnection.wrappedPeerConnection = subscriber
+        let answer: @Sendable () async throws -> RTCSessionDescription = {
+            try await subscriber.answer(for: .defaultConstraints)
+        }
+        mockPeerConnection.stub(for: .answer, with: answer)
+        let secondAnswerSent = expectation(description: "Second answer sent")
+        let peerConnection = mockPeerConnection!
+        let sendAnswer: @Sendable (Stream_Video_Sfu_Signal_SendAnswerRequest)
+            async throws -> Stream_Video_Sfu_Signal_SendAnswerResponse = { _ in
+                var response = Stream_Video_Sfu_Signal_SendAnswerResponse()
+                if peerConnection.timesCalled(.answer) == 1 {
+                    response.error.code = .requestValidationFailed
+                    response.error.message = "Injected SendAnswer rejection"
+                } else {
+                    secondAnswerSent.fulfill()
+                }
+                return response
+            }
+        mockSFUStack.service.stub(for: .sendAnswer, with: sendAnswer)
+        _ = subject
+        var offer = Stream_Video_Sfu_Event_SubscriberOffer()
+        offer.sdp = try await sfu.offer(for: .defaultConstraints).sdp
+        mockSFUStack.receiveEvent(.subscriberOffer(offer))
+        mockSFUStack.receiveEvent(.subscriberOffer(offer))
+        await safeFulfillment(of: [secondAnswerSent])
+        XCTAssertEqual(subscriber.remoteDescription?.sdp, offer.sdp)
+        XCTAssertEqual(subscriber.signalingState, .stable)
+        XCTAssertFalse(
+            mockPeerConnection.recordedInputPayload(
+                RTCSessionDescription.self, for: .setRemoteDescription
+            )?.contains { $0.type == .rollback } ?? false
+        )
+    }
+
+    func test_handleSubscriberOffer_prepareForClosingDuringRollback_doesNotRequestRejoin()
+        async throws {
+        peerType = .subscriber
+        let subscriber = try makeNativePeerConnection()
+        let sfu = try makeNativePeerConnection(trackTypes: [.audio])
+        let peerConnection = mockPeerConnection!
+        peerConnection.wrappedPeerConnection = subscriber
+        let answer: @Sendable () async throws -> RTCSessionDescription = {
+            throw ClientError("Injected answer failure")
+        }
+        peerConnection.stub(for: .answer, with: answer)
+        let rollbackStarted = expectation(description: "Rollback started")
+        let queueDrained = expectation(description: "Next offer reached queue")
+        let gate = AsyncStream<Void>.makeStream()
+        defer { gate.continuation.finish() }
+        let setRemote: @Sendable (RTCSessionDescription) async throws -> Void = {
+            [weak peerConnection] description in
+            if description.type == .offer,
+               peerConnection?.timesCalled(.setRemoteDescription) == 3 {
+                queueDrained.fulfill()
+                throw ClientError("Queue drained")
+            }
+            if description.type == .rollback {
+                rollbackStarted.fulfill()
+                for await _ in gate.stream { break }
+                throw ClientError("Rollback completed after close preparation")
+            }
+            try await subscriber.setRemoteDescription(description)
+        }
+        peerConnection.stub(for: .setRemoteDescription, with: setRemote)
+        let rejoinRequests = CurrentValueSubject<Int, Never>(0)
+        let cancellable = subject.disconnectedPublisher.sink {
+            rejoinRequests.send(rejoinRequests.value + 1)
+        }
+        defer { cancellable.cancel() }
+        var offer = Stream_Video_Sfu_Event_SubscriberOffer()
+        offer.sdp = try await sfu.offer(for: .defaultConstraints).sdp
+        mockSFUStack.receiveEvent(.subscriberOffer(offer))
+        await safeFulfillment(of: [rollbackStarted])
+
+        await subject.prepareForClosing()
+        mockSFUStack.receiveEvent(.subscriberOffer(offer))
+        gate.continuation.yield(())
+        await safeFulfillment(of: [queueDrained])
+
+        XCTAssertEqual(rejoinRequests.value, 0)
+        XCTAssertEqual(subscriber.signalingState, .haveRemoteOffer)
+    }
+
     func test_handleSubscriberOffer_subjectIsSubscriber_callsSetRemoteDescription() async throws {
         peerType = .subscriber
         _ = subject
@@ -710,6 +978,26 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
         )
     }
 
+    func test_handleSubscriberOffer_subjectIsSubscriber_afterSFURefresh_handlesOfferOnce() async throws {
+        peerType = .subscriber
+        _ = subject
+        let refreshedWebSocket = MockSFUWebSocket()
+        mockSFUStack.nextWebSocket = refreshedWebSocket
+        mockSFUStack.adapter.refresh(
+            webSocketConfiguration: .init(url: .init(string: "https://getstream.io")!)
+        )
+
+        var offer = Stream_Video_Sfu_Event_SubscriberOffer()
+        offer.sdp = .unique
+        refreshedWebSocket.inject(.subscriberOffer(offer))
+
+        await fulfillment { [mockPeerConnection] in
+            (mockPeerConnection?.timesCalled(.setRemoteDescription) ?? 0) >= 1
+        }
+        await wait(for: 1)
+        XCTAssertEqual(mockPeerConnection?.timesCalled(.setRemoteDescription), 1)
+    }
+
     func test_negotiate_subjectIsPublisher_callsSendAnswerOnSFU() async throws {
         mockSFUStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
         peerType = .subscriber
@@ -720,7 +1008,9 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
             with: RTCSessionDescription(type: .offer, sdp: sdp)
         )
 
-        mockSFUStack.receiveEvent(.subscriberOffer(Stream_Video_Sfu_Event_SubscriberOffer()))
+        var offer = Stream_Video_Sfu_Event_SubscriberOffer()
+        offer.negotiationID = 7
+        mockSFUStack.receiveEvent(.subscriberOffer(offer))
 
         await fulfillment { [mockSFUStack] in
             mockSFUStack?.service.sendAnswerWasCalledWithRequest != nil
@@ -737,6 +1027,10 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
         XCTAssertEqual(
             mockSFUStack.service.sendAnswerWasCalledWithRequest?.sdp,
             sdp
+        )
+        XCTAssertEqual(
+            mockSFUStack.service.sendAnswerWasCalledWithRequest?.negotiationID,
+            7
         )
     }
 
@@ -894,6 +1188,27 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
     }
 
     // MARK: - Private helpers
+
+    private func makeNativePeerConnection(
+        trackTypes: [TrackType] = []
+    ) throws -> StreamRTCPeerConnection {
+        let configuration = RTCConfiguration()
+        configuration.sdpSemantics = .unifiedPlan
+        let result = try StreamRTCPeerConnection(
+            peerConnectionFactory,
+            configuration: configuration
+        )
+        nativePeerConnections.append(result)
+        for trackType in trackTypes {
+            let track: RTCMediaStreamTrack = trackType == .audio
+                ? peerConnectionFactory.mockAudioTrack()
+                : peerConnectionFactory.mockVideoTrack(forScreenShare: false)
+            _ = result.addTransceiver(
+                trackType: trackType, with: track, init: .init()
+            )
+        }
+        return result
+    }
 
     private func simulateConcurrentPeerConnectionSetUp(
         callSettings: CallSettings = .init(),
