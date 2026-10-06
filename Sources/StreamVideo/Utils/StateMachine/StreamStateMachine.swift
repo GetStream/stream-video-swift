@@ -75,8 +75,8 @@ public final class StreamStateMachine<StageType: StreamStateMachineStage> {
                 // Check the origin while holding the transition lock. A late
                 // callback may belong to an earlier instance with the same ID,
                 // or to a candidate whose transition was rejected.
-                guard currentStageToken == nextStageToken else { return }
-                performTransition(
+                guard self.currentStageToken == nextStageToken else { return }
+                self.performTransition(
                     to: stage,
                     file: file,
                     function: function,
