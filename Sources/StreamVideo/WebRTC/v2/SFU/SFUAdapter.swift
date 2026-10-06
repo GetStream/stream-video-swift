@@ -359,8 +359,6 @@ final class SFUAdapter: CustomStringConvertible, @unchecked Sendable {
         statsRequest.sdk = "stream-ios"
         statsRequest.sdkVersion = SystemEnvironment.version
         statsRequest.webrtcVersion = SystemEnvironment.webRTCVersion
-        statsRequest.publisherStats = report?.publisherRawStats?.jsonString ?? ""
-        statsRequest.subscriberStats = report?.subscriberRawStats?.jsonString ?? ""
         statsRequest.deviceState = .init(thermalState)
         statsRequest.encodeStats = encodeStats ?? []
         statsRequest.decodeStats = decodeStats ?? []
