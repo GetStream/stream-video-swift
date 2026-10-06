@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🐞 Fixed
 
+- OBS video remains identified as RTMP when its track is paused and resumed, so viewers can return to the correct video source. [#1331](https://github.com/GetStream/stream-video-swift/pull/1331)
 - Muting now stops outgoing audio even if the server rejects the request or speaking permission has been revoked. [#1327](https://github.com/GetStream/stream-video-swift/pull/1327)
 
 ### 🔄 Changed
