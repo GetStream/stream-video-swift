@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🔄 Changed
 
+### 🐞 Fixed
+- Preserved CallKit audio activation during rejoin and migration so microphone capture and playback can recover without another system activation callback.
+
 # [1.54.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.54.0)
 _October 01, 2026_
 
