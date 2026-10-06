@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Repeated video-view cleanup no longer detaches a track from a reused renderer. [#1348](https://github.com/GetStream/stream-video-swift/pull/1348)
 - Failed SDP negotiations now roll back pending offers so later negotiations can succeed. A failed rollback requests call recovery. [#1352](https://github.com/GetStream/stream-video-swift/pull/1352)
 - Late WebRTC callbacks no longer accept remote SDP after close or report first frames from retired track registrations. [#1349](https://github.com/GetStream/stream-video-swift/pull/1349)
+- Preserved CallKit audio activation during rejoin and migration so microphone capture and playback can recover without another system activation callback. [#1351](https://github.com/GetStream/stream-video-swift/pull/1351)
 
 # [1.54.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.54.0)
 _October 01, 2026_
