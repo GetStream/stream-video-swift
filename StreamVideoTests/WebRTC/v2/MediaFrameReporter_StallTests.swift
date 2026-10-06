@@ -56,7 +56,7 @@ final class MediaFrameReporter_StallTests: XCTestCase, @unchecked Sendable {
         let track = makeTrack(factory: factory, type: type)
         let eventReporter = MockClientEventReporter()
         let subject = MediaFrameReporter(clientEventReporter: eventReporter)
-        await subject.add(track, type: type)
+        let renderer = try await captureFrameRenderer(track: track, type: type, reporter: subject)
         let enteredRemoval = expectation(description: "Entered first-frame renderer removal")
         let mainHeartbeat = expectation(description: "Main responded during first-frame removal")
         let releaseGate = DispatchSemaphore(value: 0)
@@ -96,7 +96,7 @@ final class MediaFrameReporter_StallTests: XCTestCase, @unchecked Sendable {
             case .remove: await subject.remove(track, type: type)
             case .removeAll: await subject.removeAllTracks()
             case .reset: await subject.reset(details: .init(callSessionId: "new-session"))
-            case .firstFrame: await subject.reportFrame(type: type, trackId: track.trackId)
+            case .firstFrame: await renderer.reportFrame()
             }
         }
         await fulfillment(of: [enteredRemoval], timeout: 5)
