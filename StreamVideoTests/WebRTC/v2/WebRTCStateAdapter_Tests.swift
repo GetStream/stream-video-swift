@@ -1586,11 +1586,9 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
                 callSessionId: "call-session-1"
             )
         )
-        await reporter.add(track, type: .video)
-
-        let renderer = MediaFrameTrackRenderer(
+        let renderer = try await captureFrameRenderer(
+            track: track,
             type: .video,
-            trackId: track.trackId,
             reporter: reporter
         )
         renderer.renderFrame(try makeVideoFrame())
@@ -1607,17 +1605,15 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(event?.details.trackId, track.trackId)
     }
 
-    func test_mediaFrameReporter_renderAudio_withNonSilentBuffer_shouldReportFirstAudioFrameOnce() async {
+    func test_mediaFrameReporter_renderAudio_withNonSilentBuffer_shouldReportFirstAudioFrameOnce() async throws {
         let reporter = MediaFrameReporter(clientEventReporter: mockClientEventReporter)
         let track = await subject
             .peerConnectionFactory
             .mockAudioTrack()
         await reporter.reset(details: .init(sfuId: "sfu-1"))
-        await reporter.add(track, type: .audio)
-
-        let renderer = MediaFrameTrackRenderer(
+        let renderer = try await captureFrameRenderer(
+            track: track,
             type: .audio,
-            trackId: track.trackId,
             reporter: reporter
         )
         renderer.render(pcmBuffer: makeAudioBuffer(samples: [0.1]))
@@ -1634,17 +1630,15 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(events.first?.details.trackId, track.trackId)
     }
 
-    func test_mediaFrameReporter_renderAudio_withSilentBuffer_doesNotReportFirstAudioFrame() async {
+    func test_mediaFrameReporter_renderAudio_withSilentBuffer_doesNotReportFirstAudioFrame() async throws {
         let reporter = MediaFrameReporter(clientEventReporter: mockClientEventReporter)
         let track = await subject
             .peerConnectionFactory
             .mockAudioTrack()
         await reporter.reset(details: .init(sfuId: "sfu-1"))
-        await reporter.add(track, type: .audio)
-
-        let renderer = MediaFrameTrackRenderer(
+        let renderer = try await captureFrameRenderer(
+            track: track,
             type: .audio,
-            trackId: track.trackId,
             reporter: reporter
         )
         renderer.render(pcmBuffer: makeAudioBuffer(samples: [0, 0]))

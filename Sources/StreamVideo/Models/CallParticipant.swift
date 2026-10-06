@@ -585,7 +585,8 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
             audioLevel: audioLevel,
             audioLevels: audioLevels,
             pin: pin,
-            pausedTracks: updatedPausedTracks
+            pausedTracks: updatedPausedTracks,
+            source: source
         )
     }
 
@@ -616,7 +617,8 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
             audioLevel: audioLevel,
             audioLevels: audioLevels,
             pin: pin,
-            pausedTracks: updatedPausedTracks
+            pausedTracks: updatedPausedTracks,
+            source: source
         )
     }
 }
