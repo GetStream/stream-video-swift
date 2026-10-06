@@ -499,6 +499,8 @@ final class SFUAdapter: CustomStringConvertible, @unchecked Sendable {
     /// - Parameters:
     ///   - sessionDescription: The SDP (Session Description Protocol) answer string.
     ///   - peerType: The type of peer sending the answer (e.g., publisher or subscriber).
+    ///   - negotiationID: The id of the offer being answered. The SFU uses it
+    ///     to drop duplicate or stale answers.
     ///   - sessionId: The ID of the current session.
     /// - Throws: An error if sending the answer fails after retry attempts.
     /// - Note: This method uses a retry policy named ".fastCheckValue", which  will quickly retry a few
@@ -506,12 +508,14 @@ final class SFUAdapter: CustomStringConvertible, @unchecked Sendable {
     func sendAnswer(
         sessionDescription: String,
         peerType: Stream_Video_Sfu_Models_PeerType,
+        negotiationID: UInt32,
         for sessionId: String
     ) async throws {
         var request = Stream_Video_Sfu_Signal_SendAnswerRequest()
         request.sessionID = sessionId
         request.peerType = peerType
         request.sdp = sessionDescription
+        request.negotiationID = negotiationID
 
         log.debug(request, subsystems: .sfu)
         subjectSendEvent.send(SendAnswerEvent(hostname: host, payload: request))

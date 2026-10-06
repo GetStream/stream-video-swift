@@ -232,6 +232,25 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
 
     // MARK: - joinCall
 
+    func test_joinCall_callerOfRingingCall_passesRingWSSource() async throws {
+        try await assertRingJoinSource(.ringWS)
+    }
+
+    func test_joinCall_pollFoundTheAccept_passesRingPollAPISource() async throws {
+        try await assertRingJoinSource(.ringPollAPI) {
+            $0.state.update(
+                from: GetCallRingStateResponse.dummy(
+                    acceptedBy: ["callee": Date()],
+                    sessionId: "session-id"
+                )
+            )
+        }
+    }
+
+    func test_joinCall_callIsNotRinging_passesNoRingSource() async throws {
+        try await assertRingJoinSource(nil, isRinging: false)
+    }
+
     func test_joinCall_coordinatorTransitionsToConnecting() async throws {
         let callSettings = CallSettings(cameraPosition: .back)
         let options = CreateCallOptions(team: .unique)
@@ -1521,6 +1540,47 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
             file: file,
             line: line
         )
+    }
+
+    private func assertRingJoinSource(
+        _ expected: ClientEventJoinSource?,
+        isRinging: Bool = true,
+        configure: @MainActor (Call) -> Void = { _ in },
+        file: StaticString = #file,
+        line: UInt = #line
+    ) async throws {
+        let call = Call.dummy(
+            callType: callType,
+            callId: callId,
+            callController: subject
+        )
+        await MainActor.run {
+            call.state.createdBy = user
+            call.state.session = .dummy(id: "session-id")
+            configure(call)
+            if isRinging {
+                call.streamVideo.state.ringingCall = call
+            }
+        }
+
+        try await assertTransitionToStage(
+            .connecting,
+            operation: {
+                Task {
+                    try? await self.subject.joinCall(
+                        callSettings: nil,
+                        source: .inApp
+                    )
+                }
+            }
+        ) { stage in
+            XCTAssertEqual(
+                stage.context.ringJoinSource,
+                expected,
+                file: file,
+                line: line
+            )
+        }
     }
 
     private func assertTransitionToStage(

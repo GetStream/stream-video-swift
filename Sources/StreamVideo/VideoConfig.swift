@@ -21,6 +21,10 @@ public final class VideoConfig: Sendable {
     public let usesProcessingPipeline: Bool
     public let usesNewCapturingPipeline: Bool
 
+    /// Polls outgoing ring outcomes when events are lost.
+    /// Enabled by default; `nil` disables polling.
+    public let ringStatePolling: RingStatePollingOptions?
+
     /// Initializes a new instance of `VideoConfig` with the specified parameters.
     /// - Parameters:
     ///   - videoFilters: An array of `VideoFilter` objects representing the filters to apply to the video.
@@ -30,18 +34,35 @@ public final class VideoConfig: Sendable {
     ///   - audioProcessingModule: Provide your own audio processing or fallback to the
     ///     default one.
     ///   - usesProcessingPipeline: Enables capture-time processing for camera frames.
+    ///   - ringStatePolling: Outgoing ring polling options; `nil` disables it.
     /// - Returns: A new instance of `VideoConfig`.
     public init(
         videoFilters: [VideoFilter] = [],
         noiseCancellationFilter: NoiseCancellationFilter? = nil,
         audioProcessingModule: AudioProcessingModule? = nil,
         usesProcessingPipeline: Bool = true,
-        usesNewCapturingPipeline: Bool = true
+        usesNewCapturingPipeline: Bool = true,
+        ringStatePolling: RingStatePollingOptions? = .init()
     ) {
         self.videoFilters = videoFilters
         self.noiseCancellationFilter = noiseCancellationFilter
         self.audioProcessingModule = audioProcessingModule ?? InjectedValues[\.audioFilterProcessingModule]
         self.usesProcessingPipeline = usesProcessingPipeline
         self.usesNewCapturingPipeline = usesNewCapturingPipeline
+        self.ringStatePolling = ringStatePolling
+    }
+}
+
+/// Timings for polling outgoing ring outcomes.
+public struct RingStatePollingOptions: Sendable, Equatable {
+    /// Seconds of silence after ringing or the last outcome before polling.
+    public var startAfter: TimeInterval
+    /// Seconds between polls.
+    public var interval: TimeInterval
+
+    /// The defaults match the JS and Android SDKs.
+    public init(startAfter: TimeInterval = 15, interval: TimeInterval = 5) {
+        self.startAfter = startAfter
+        self.interval = interval
     }
 }

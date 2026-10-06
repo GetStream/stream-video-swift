@@ -162,6 +162,20 @@ final class ClientEventReporter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(initiated?.joinReason, "full-rejoin")
     }
 
+    func test_beginStage_withSource_includesSource() async {
+        await subject.reportJoinInitiated()
+
+        _ = await subject.beginStage(
+            .coordinatorJoin,
+            peerConnection: nil,
+            details: .init(source: .ringPollAPI)
+        )
+
+        await waitForEventCount(2)
+        let initiated = event(stage: "CoordinatorJoin", type: "initiated")
+        XCTAssertEqual(initiated?.source, "ring-poll-api")
+    }
+
     func test_eventsOfSameAttempt_shareJoinAttemptId() async {
         await subject.reportJoinInitiated()
         let attemptId = await subject.joinAttemptId
@@ -368,6 +382,16 @@ final class ClientEventReporter_Tests: XCTestCase, @unchecked Sendable {
             .flatMap { try? JSONSerialization.jsonObject(with: $0) as? [String: Any] }
 
         XCTAssertEqual(json?["join_reason"] as? String, "first-attempt")
+    }
+
+    func test_clientEvent_encodeToJSON_includesSource() {
+        let subject = ClientEvent(source: "ring-ws", stage: "CoordinatorJoin")
+
+        let data = try? CodableHelper.jsonEncoder.encode(subject)
+        let json = data
+            .flatMap { try? JSONSerialization.jsonObject(with: $0) as? [String: Any] }
+
+        XCTAssertEqual(json?["source"] as? String, "ring-ws")
     }
 
     // MARK: - Helpers

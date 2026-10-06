@@ -183,6 +183,7 @@ class CallController: @unchecked Sendable {
             ring: ring,
             notify: notify,
             source: source,
+            ringJoinSource: await ringJoinSource(),
             joinResponseHandler: joinCallResponseSubject,
             policy: policy,
             coordinatorJoinAttemptCount: coordinatorJoinAttemptCount
@@ -658,6 +659,26 @@ class CallController: @unchecked Sendable {
     }
 
     // MARK: - private
+
+    /// Source of an outgoing ring's acceptance, or nil for other joins.
+    /// Ringing clears only after the call becomes active.
+    @MainActor
+    private func ringJoinSource() -> ClientEventJoinSource? {
+        guard
+            let call,
+            call.streamVideo.state.ringingCall === call,
+            call.state.createdBy?.id == user.id
+        else {
+            return nil
+        }
+
+        if
+            let sessionId = call.state.session?.id,
+            sessionId == call.state.sessionIdWithPolledAccept {
+            return .ringPollAPI
+        }
+        return .ringWS
+    }
 
     private func handleParticipantsUpdated() {
         webRTCParticipantsObserver = participants?
