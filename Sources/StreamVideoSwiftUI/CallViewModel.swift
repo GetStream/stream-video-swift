@@ -312,6 +312,7 @@ open class CallViewModel: ObservableObject {
         // Hop to the main queue before running operators defined inside this
         // @MainActor type. This keeps the pipeline actor-safe and allows the
         // joining screen to appear as soon as CallKit hands us the call.
+        var isJoiningFromCallKit = false
         callKitServiceObserver
             .publisher
             .receive(on: DispatchQueue.main)
@@ -320,14 +321,20 @@ open class CallViewModel: ObservableObject {
 
                 switch event {
                 case let .joining(call):
+                    isJoiningFromCallKit = true
                     setCallingState(.joining)
                     self.call = call
                 case .joined:
+                    isJoiningFromCallKit = false
                     guard let call else { return }
                     // CallKit can report the active call while it still marks
                     // the bridge as `.joining`. Once `.joined` arrives we need
                     // an explicit handoff to let the regular in-call UI take over.
                     setActiveCall(call)
+                case .idle where isJoiningFromCallKit:
+                    isJoiningFromCallKit = false
+                    guard callingState == .joining else { return }
+                    setActiveCall(streamVideo.state.activeCall)
                 default:
                     break
                 }
