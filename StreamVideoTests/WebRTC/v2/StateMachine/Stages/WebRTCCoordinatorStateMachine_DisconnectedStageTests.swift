@@ -70,6 +70,40 @@ final class WebRTCCoordinatorStateMachine_DisconnectedStageTests: XCTestCase, @u
 
     // MARK: - transition
 
+    func test_transition_rejectedJoining_internetRecoveryStillWorks() async throws {
+        let subscribed = expectation(description: "Disconnected observes internet recovery")
+        let internetConnection = MockInternetConnection(onSubscribe: { subscribed.fulfill() })
+        internetConnection.subject.send(.unknown)
+        mockCoordinatorStack = .init(
+            videoConfig: Self.videoConfig,
+            internetConnection: internetConnection
+        )
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.reconnectionStrategy = .rejoin
+        let stateMachine = StreamStateMachine(
+            initialStage: WebRTCCoordinator.StateMachine.Stage(
+                id: .migrated, context: subject.context
+            )
+        )
+        stateMachine.transition(to: subject)
+        await fulfillment(of: [subscribed], timeout: defaultTimeout)
+        let recovered = expectation(description: "Recovery reaches rejoining")
+        let cancellable = stateMachine.publisher
+            .filter { $0.id == .rejoining }
+            .prefix(1)
+            .sink { _ in recovered.fulfill() }
+        defer {
+            cancellable.cancel()
+            stateMachine.currentStage.willTransitionAway()
+        }
+
+        stateMachine.transition(to: .joining(subject.context))
+        XCTAssertTrue(stateMachine.currentStage === subject)
+        internetConnection.subject.send(.available(.great))
+
+        await fulfillment(of: [recovered], timeout: 3)
+    }
+
     func test_transition() {
         for nextStage in allOtherStages {
             if validStages.contains(nextStage.id) {

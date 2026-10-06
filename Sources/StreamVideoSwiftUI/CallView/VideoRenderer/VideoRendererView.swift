@@ -109,6 +109,8 @@ extension VideoRendererView {
         /// A disposable bag to manage cancellable subscriptions.
         private let disposableBag = DisposableBag()
 
+        @Atomic private var isDismantled = false
+
         /// The video renderer managed by this coordinator.
         fileprivate let renderer: VideoRenderer
 
@@ -129,7 +131,18 @@ extension VideoRendererView {
 
         /// Dismantles the video renderer and releases resources.
         func dismantle() {
-            renderer.track?.remove(renderer)
+            // SwiftUI dismantling and deinit may both run after pool reuse.
+            // Claim cleanup once before touching the renderer or releasing it.
+            var shouldDismantle = false
+            _isDismantled.mutate {
+                shouldDismantle = !$0
+                $0 = true
+            }
+            guard shouldDismantle else { return }
+            // Detach on the renderer's queue. Calling `remove(_:)` on the
+            // track from here would block the main thread on WebRTC's
+            // worker thread.
+            renderer.removeTrack()
             disposableBag.removeAll()
             videoRendererPool.releaseRenderer(renderer)
         }
