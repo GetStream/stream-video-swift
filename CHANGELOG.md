@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🐞 Fixed
 
-- Failed SDP negotiations now roll back pending offers so later negotiations can succeed. A failed rollback requests call recovery.
+- Failed SDP negotiations now roll back pending offers so later negotiations can succeed. A failed rollback requests call recovery. [#1352](https://github.com/GetStream/stream-video-swift/pull/1352)
 
 # [1.54.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.54.0)
 _October 01, 2026_
