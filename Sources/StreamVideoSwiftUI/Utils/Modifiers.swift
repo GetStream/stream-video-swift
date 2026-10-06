@@ -76,11 +76,12 @@ struct ShadowViewModifier: ViewModifier {
 
 /// Modifier for adding shadow to a view.
 struct ShadowModifier: ViewModifier {
-    @Injected(\.layout) var layout
-
     @Environment(\.colorScheme) private var colorScheme
 
     func body(content: Content) -> some View {
+        // A stored `@Injected` makes `init()` main-actor isolated on Swift 6.0,
+        // which breaks the nonisolated `Image.applyCallButtonStyle`.
+        let layout = InjectedValues[\.layout]
         let primary = colorScheme == .dark ? layout.darkElevation3 : layout.lightElevation3
         let contact = colorScheme == .dark ? layout.darkElevation1 : layout.lightElevation1
         content
