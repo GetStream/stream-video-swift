@@ -50,6 +50,8 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     /// serially.
     private let setPublisherProcessingQueue = OperationQueue(maxConcurrentOperationCount: 1)
     private let subscriberOfferProcessingQueue = OperationQueue(maxConcurrentOperationCount: 1)
+    @Atomic private var isClosing = false
+    private let negotiationFailureSubject = PassthroughSubject<Void, Never>()
 
     // MARK: Adapters
 
@@ -124,6 +126,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             .publisher(eventType: StreamRTCPeerConnection.DidChangeConnectionStateEvent.self)
             .filter { $0.state == .failed }
             .map { _ in () }
+            .merge(with: negotiationFailureSubject)
             .eraseToAnyPublisher()
     }
 
@@ -378,6 +381,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     }
 
     func prepareForClosing() async {
+        isClosing = true
         await iceAdapter.stopObserving()
     }
 
@@ -632,6 +636,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
 
     /// Closes the peer connection.
     func close() async {
+        isClosing = true
         log.debug(
             """
             Closing PeerConnection
@@ -912,6 +917,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             )
         } catch {
             log.error(error, subsystems: subsystem)
+            await rollbackPendingNegotiation()
         }
     }
 
@@ -969,6 +975,30 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
                 subsystems: subsystem,
                 error: error
             )
+            await rollbackPendingNegotiation()
+        }
+    }
+
+    /// Recovers a pending offer on its serialized negotiation queue.
+    private func rollbackPendingNegotiation() async {
+        guard !isClosing else { return }
+        let expectedState: RTCSignalingState = peerType == .publisher
+            ? .haveLocalOffer : .haveRemoteOffer
+        guard peerConnection.signalingState == expectedState else { return }
+
+        do {
+            let rollback = RTCSessionDescription(type: .rollback, sdp: "")
+            if peerType == .publisher {
+                try await peerConnection.setLocalDescription(rollback)
+            } else {
+                try await peerConnection.setRemoteDescription(rollback)
+            }
+        } catch {
+            log.error(error, subsystems: subsystem)
+            guard !isClosing, peerConnection.signalingState != .closed else {
+                return
+            }
+            negotiationFailureSubject.send(())
         }
     }
 

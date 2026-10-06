@@ -21,6 +21,8 @@ final class StreamRTCPeerConnection: StreamRTCPeerConnectionProtocol, @unchecked
     /// The remote session description of the peer connection.
     var remoteDescription: RTCSessionDescription? { source.remoteDescription }
 
+    var signalingState: RTCSignalingState { source.signalingState }
+
     /// The list of RTP transceivers associated with this peer connection.
     var transceivers: [RTCRtpTransceiver] { source.transceivers }
 
@@ -118,7 +120,11 @@ final class StreamRTCPeerConnection: StreamRTCPeerConnectionProtocol, @unchecked
                 if let error = error {
                     continuation.resume(throwing: error)
                 } else {
-                    self.subject.send(HasRemoteDescription(sessionDescription: sessionDescription))
+                    if sessionDescription.type != .rollback {
+                        self.subject.send(HasRemoteDescription(
+                            sessionDescription: sessionDescription
+                        ))
+                    }
                     continuation.resume(returning: ())
                 }
             }

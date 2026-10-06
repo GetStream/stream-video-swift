@@ -83,8 +83,21 @@ final class MockRTCPeerConnection: StreamRTCPeerConnectionProtocol, Mockable, @u
 
     var configuration: RTCConfiguration = .init()
 
+    var wrappedPeerConnection: StreamRTCPeerConnection?
+
+    var signalingState: RTCSignalingState {
+        get {
+            wrappedPeerConnection?.signalingState
+                ?? self[dynamicMember: \.signalingState]
+        }
+        set { stub(for: \.signalingState, with: newValue) }
+    }
+
     var remoteDescription: RTCSessionDescription? {
-        get { self[dynamicMember: \.remoteDescription] }
+        get {
+            wrappedPeerConnection?.remoteDescription
+                ?? self[dynamicMember: \.remoteDescription]
+        }
         set { _ = newValue }
     }
 
@@ -107,6 +120,7 @@ final class MockRTCPeerConnection: StreamRTCPeerConnectionProtocol, Mockable, @u
         stub(for: .answer, with: RTCSessionDescription(type: .answer, sdp: .unique))
         stub(for: \.iceConnectionState, with: .connected)
         stub(for: \.connectionState, with: .connected)
+        stub(for: \.signalingState, with: .stable)
     }
 
     func setLocalDescription(
@@ -114,6 +128,12 @@ final class MockRTCPeerConnection: StreamRTCPeerConnectionProtocol, Mockable, @u
     ) async throws {
         stubbedFunctionInput[.setLocalDescription]?
             .append(.setLocalDescription(sessionDescription: sessionDescription))
+        if let operation = stubbedFunction[.setLocalDescription]
+            as? @Sendable (RTCSessionDescription) async throws -> Void {
+            try await operation(sessionDescription)
+        } else {
+            try await wrappedPeerConnection?.setLocalDescription(sessionDescription)
+        }
     }
 
     func setRemoteDescription(
@@ -121,6 +141,12 @@ final class MockRTCPeerConnection: StreamRTCPeerConnectionProtocol, Mockable, @u
     ) async throws {
         stubbedFunctionInput[.setRemoteDescription]?
             .append(.setRemoteDescription(sessionDescription: sessionDescription))
+        if let operation = stubbedFunction[.setRemoteDescription]
+            as? @Sendable (RTCSessionDescription) async throws -> Void {
+            try await operation(sessionDescription)
+        } else {
+            try await wrappedPeerConnection?.setRemoteDescription(sessionDescription)
+        }
     }
 
     func offer(
@@ -129,6 +155,10 @@ final class MockRTCPeerConnection: StreamRTCPeerConnectionProtocol, Mockable, @u
         defer {
             stubbedFunctionInput[.offer]?
                 .append(.offer(constraints: constraints))
+        }
+        if let operation = stubbedFunction[.offer]
+            as? @Sendable () async throws -> RTCSessionDescription {
+            return try await operation()
         }
         return try await operationQueue.addSynchronousTaskOperation {
             if let result = self.stubbedFunction[.offer] as? RTCSessionDescription {
@@ -146,6 +176,10 @@ final class MockRTCPeerConnection: StreamRTCPeerConnectionProtocol, Mockable, @u
     ) async throws -> RTCSessionDescription {
         stubbedFunctionInput[.answer]?
             .append(.answer(constraints: constraints))
+        if let result = stubbedFunction[.answer]
+            as? @Sendable () async throws -> RTCSessionDescription {
+            return try await result()
+        }
         return stubbedFunction[.answer] as! RTCSessionDescription
     }
 
