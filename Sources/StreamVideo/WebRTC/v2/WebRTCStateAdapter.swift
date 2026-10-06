@@ -653,7 +653,11 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         peerConnectionsDisposableBag.removeAll()
         pendingPeerConnectionTracesDisposableBag.removeAll()
         disposableBag.removeAll()
-        await audioSession.deactivate()
+        // Rejoin and migration replace peers within the same call. Keep its
+        // audio ownership and activation: CallKit may not activate again.
+        // configureAudioSession rebinds audio to the replacement peers and
+        // respects actual CallKit deactivation. Only cleanUp releases audio
+        // when the call ends.
         await publisher?.prepareForClosing()
         await subscriber?.prepareForClosing()
         publisher = nil
