@@ -640,6 +640,8 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
             XCTFail()
         case .get:
             XCTFail()
+        case .updateRingState:
+            XCTFail()
         }
     }
 
@@ -898,6 +900,8 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         case .setVideoFilter:
             XCTFail()
         case .get:
+            XCTFail()
+        case .updateRingState:
             XCTFail()
         }
         XCTAssertEqual(call.microphone.status, .enabled)
