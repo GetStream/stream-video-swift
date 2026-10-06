@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🐞 Fixed
 
-- Reduced UI freezes when updating video views or logging media events.
+- Reduced UI freezes when updating video views or logging media events. [#1346](https://github.com/GetStream/stream-video-swift/pull/1346)
 
 ### 🔄 Changed
 
