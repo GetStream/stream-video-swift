@@ -10,6 +10,38 @@ import XCTest
 
 final class StreamRTCPeerConnection_Tests: XCTestCase, @unchecked Sendable {
 
+    func test_setRemoteDescription_rollback_doesNotPublishAcceptedDescription()
+        async throws {
+        let factory = PeerConnectionFactory.mock()
+        let offerSource = try factory.makePeerConnection(
+            configuration: .init(),
+            constraints: .defaultConstraints,
+            delegate: nil
+        )
+        defer { offerSource.close() }
+        _ = offerSource.addTransceiver(of: .video)
+        let offer = try await offerSource.offer(for: .defaultConstraints)
+        let subject = try StreamRTCPeerConnection(factory, configuration: .init())
+        let acceptedDescriptions = Atomic(wrappedValue: 0)
+        let cancellable = subject.subject.sink {
+            if $0 is StreamRTCPeerConnection.HasRemoteDescription {
+                acceptedDescriptions.mutate { $0 += 1 }
+            }
+        }
+        defer { cancellable.cancel() }
+        do {
+            try await subject.setRemoteDescription(offer)
+            XCTAssertEqual(acceptedDescriptions.wrappedValue, 1)
+            try await subject.setRemoteDescription(.init(type: .rollback, sdp: ""))
+            XCTAssertEqual(subject.signalingState, .stable)
+            XCTAssertEqual(acceptedDescriptions.wrappedValue, 1)
+        } catch {
+            await subject.close()
+            throw error
+        }
+        await subject.close()
+    }
+
     func test_setRemoteDescription_completionAfterClose_doesNotPublishAcceptedDescription() async throws {
         try await assertRemoteDescriptionCompletion(closeBeforeDelivery: true)
     }

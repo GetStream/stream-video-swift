@@ -111,6 +111,11 @@ final class MockSignalServer: SFUSignalService, Mockable, @unchecked Sendable {
         setPublisherRequest: Stream_Video_Sfu_Signal_SetPublisherRequest
     ) async throws -> Stream_Video_Sfu_Signal_SetPublisherResponse {
         setPublisherWasCalledWithRequest = setPublisherRequest
+        if let operation = stubbedFunction[.setPublisher]
+            as? @Sendable (Stream_Video_Sfu_Signal_SetPublisherRequest)
+            async throws -> Stream_Video_Sfu_Signal_SetPublisherResponse {
+            return try await operation(setPublisherRequest)
+        }
         return stubbedFunction[.setPublisher] as! Stream_Video_Sfu_Signal_SetPublisherResponse
     }
 
@@ -128,6 +133,11 @@ final class MockSignalServer: SFUSignalService, Mockable, @unchecked Sendable {
         sendAnswerRequest: Stream_Video_Sfu_Signal_SendAnswerRequest
     ) async throws -> Stream_Video_Sfu_Signal_SendAnswerResponse {
         sendAnswerWasCalledWithRequest = sendAnswerRequest
+        if let operation = stubbedFunction[.sendAnswer]
+            as? @Sendable (Stream_Video_Sfu_Signal_SendAnswerRequest)
+            async throws -> Stream_Video_Sfu_Signal_SendAnswerResponse {
+            return try await operation(sendAnswerRequest)
+        }
         return stubbedFunction[.sendAnswer] as! Stream_Video_Sfu_Signal_SendAnswerResponse
     }
 
