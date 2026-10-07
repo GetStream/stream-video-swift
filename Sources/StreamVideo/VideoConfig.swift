@@ -60,8 +60,8 @@ public struct RingStatePollingOptions: Sendable, Equatable {
     /// Seconds between polls.
     public var interval: TimeInterval
 
-    /// The defaults match the JS and Android SDKs.
-    public init(startAfter: TimeInterval = 15, interval: TimeInterval = 5) {
+    /// Defaults to polling after 9 seconds of silence, every 5 seconds.
+    public init(startAfter: TimeInterval = 9, interval: TimeInterval = 5) {
         self.startAfter = startAfter
         self.interval = interval
     }
