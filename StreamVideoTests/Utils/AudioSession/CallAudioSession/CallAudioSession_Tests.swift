@@ -373,6 +373,42 @@ final class CallAudioSession_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertNil(subject.delegate)
     }
 
+    func test_deactivate_releasesStatsAdapterAndPreservesFinalTrace() async {
+        let delegate = SpyAudioSessionAdapterDelegate()
+        let statsAdapter = MockWebRTCStatsAdapter()
+        subject = .init(policy: MockAudioSessionPolicy())
+        subject.activate(
+            callSettingsPublisher: Empty().eraseToAnyPublisher(),
+            ownCapabilitiesPublisher: Empty().eraseToAnyPublisher(),
+            delegate: delegate,
+            statsAdapter: statsAdapter,
+            shouldSetActive: false
+        )
+        let tracesBeforeDeactivation = statsAdapter.timesCalled(.trace)
+
+        await subject.deactivate()
+
+        XCTAssertNil(subject.statsAdapter)
+        XCTAssertEqual(statsAdapter.timesCalled(.trace), tracesBeforeDeactivation + 1)
+    }
+
+    func test_deactivate_delegateReleased_releasesStatsAdapter() async {
+        var delegate: SpyAudioSessionAdapterDelegate? = .init()
+        subject = .init(policy: MockAudioSessionPolicy())
+        subject.activate(
+            callSettingsPublisher: Empty().eraseToAnyPublisher(),
+            ownCapabilitiesPublisher: Empty().eraseToAnyPublisher(),
+            delegate: delegate!,
+            statsAdapter: MockWebRTCStatsAdapter(),
+            shouldSetActive: false
+        )
+        delegate = nil
+
+        await subject.deactivate()
+
+        XCTAssertNil(subject.statsAdapter)
+    }
+
     func test_deactivate_whenOwnershipMovedAway_keepsSharedAudioConfigured() async {
         let callSettingsSubject = PassthroughSubject<CallSettings, Never>()
         let capabilitiesSubject = PassthroughSubject<Set<OwnCapability>, Never>()

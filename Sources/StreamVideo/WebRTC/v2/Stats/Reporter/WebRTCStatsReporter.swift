@@ -34,7 +34,7 @@ final class WebRTCStatsReporter: WebRTCStatsReporting, @unchecked Sendable {
     /// The SFU adapter used to send collected statistics.
     ///
     /// Setting this property triggers a reset of the collection and delivery processes.
-    var sfuAdapter: SFUAdapter? { willSet { didUpdate(newValue) } }
+    var sfuAdapter: SFUAdapter? { didSet { didUpdate(sfuAdapter) } }
 
     private let provider: () -> Input?
 
@@ -96,12 +96,12 @@ final class WebRTCStatsReporter: WebRTCStatsReporting, @unchecked Sendable {
     private func didUpdate(_ sfuAdapter: SFUAdapter?) {
         activeDeliveryTask?.cancel()
         activeDeliveryTask = nil
+        scheduleDelivery(with: interval)
 
         guard sfuAdapter != nil else {
             return
         }
 
-        scheduleDelivery(with: interval)
         log.debug("Delivery scheduled on hostname:\(sfuAdapter?.hostname) with interval:\(interval) seconds.")
     }
 
@@ -112,6 +112,8 @@ final class WebRTCStatsReporter: WebRTCStatsReporting, @unchecked Sendable {
     private func scheduleDelivery(with interval: TimeInterval) {
         deliveryCancellable?.cancel()
         deliveryCancellable = nil
+
+        guard sfuAdapter != nil else { return }
 
         guard interval > 0 else {
             log.warning("Delivery interval should be greater than 0.", subsystems: .webRTC)
@@ -174,5 +176,5 @@ final class WebRTCStatsReporter: WebRTCStatsReporting, @unchecked Sendable {
     }
 
     /// Indicates whether collecting and sending a new delivery payload is safe.
-    private var canDeliverStats: Bool { activeDeliveryTask == nil }
+    private var canDeliverStats: Bool { sfuAdapter != nil && activeDeliveryTask == nil }
 }
