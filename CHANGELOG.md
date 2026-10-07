@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🐞 Fixed
 
+- Kept blocking WebRTC operations and peer connection teardown off UI and Swift concurrency threads. [#1345](https://github.com/GetStream/stream-video-swift/pull/1345)
 - Old call connections now stop negotiating when reconnection cleanup begins. [#1342](https://github.com/GetStream/stream-video-swift/pull/1342)
 - Calls now finish cleanup and stop reporting stats when released during hang-up. [#1328](https://github.com/GetStream/stream-video-swift/pull/1328)
 - Reduced UI freezes when updating video views or logging media events. [#1346](https://github.com/GetStream/stream-video-swift/pull/1346)
