@@ -1322,6 +1322,45 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(mockPublisher.timesCalled(.setAudioMaxBitrate), 0)
     }
 
+    func test_configurePeerConnections_mainRunLoopBusy_completes() async throws {
+        let subject = try XCTUnwrap(self.subject)
+        let mainQueueBlocked = expectation(description: "Main queue is blocked")
+        let mainQueueReleased = expectation(description: "Main queue is released")
+        let peerConnectionsConfigured = expectation(
+            description: "Peer connections are configured"
+        )
+        let releaseMainQueue = DispatchSemaphore(value: 0)
+        defer { releaseMainQueue.signal() }
+
+        // Hold the main run loop while the fixture builds native peer
+        // connections. Setup must not need a timer to read its initial ID.
+        DispatchQueue.main.async {
+            mainQueueBlocked.fulfill()
+            XCTAssertEqual(
+                releaseMainQueue.wait(timeout: .now() + 2 * defaultTimeout),
+                .success
+            )
+            mainQueueReleased.fulfill()
+        }
+        await safeFulfillment(of: [mainQueueBlocked], timeout: defaultTimeout)
+
+        let preparation = Task {
+            try await self.prepare()
+            peerConnectionsConfigured.fulfill()
+        }
+        await safeFulfillment(
+            of: [peerConnectionsConfigured], timeout: defaultTimeout
+        )
+        releaseMainQueue.signal()
+        await safeFulfillment(of: [mainQueueReleased], timeout: defaultTimeout)
+        try await preparation.value
+
+        let publisher = await subject.publisher
+        let subscriber = await subject.subscriber
+        XCTAssertNotNil(publisher)
+        XCTAssertNotNil(subscriber)
+    }
+
     func test_setAudioBitrateProfile_music_setsBitrateAndVoiceRestoresPrevious(
     ) async throws {
         try await prepare()
@@ -2295,7 +2334,8 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
             name: .unique,
             filter: { _ in fatalError() }
         )
-        await fulfillment { await self.subject.sessionID.isEmpty == false }
+        let sessionID = await subject.sessionID
+        XCTAssertFalse(sessionID.isEmpty)
         await subject.set(sfuAdapter: sfuStack.adapter)
         await subject.set(videoFilter: videoFilter)
         await subject.enqueueOwnCapabilities { ownCapabilities }
