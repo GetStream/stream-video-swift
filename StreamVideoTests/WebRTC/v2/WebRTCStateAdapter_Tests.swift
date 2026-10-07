@@ -835,6 +835,34 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
 
     // MARK: - cleanUp
 
+    func test_cleanUp_retainedStatsAdapter_stopsReporting() async {
+        let sfuStack = MockSFUStack()
+        var providerCallsCount = 0
+        let reporter = WebRTCStatsReporter(interval: 100) {
+            providerCallsCount += 1
+            return nil
+        }
+        let statsAdapter = await WebRTCStatsAdapter(
+            deliveryInterval: 100,
+            sessionID: .unique,
+            unifiedSessionID: .unique,
+            isTracingEnabled: true,
+            trackStorage: subject.trackStorage,
+            collector: MockWebRTCStatsCollector(),
+            reporter: reporter,
+            traces: MockWebRTCTracesAdapter()
+        )
+        await subject.set(statsAdapter: statsAdapter)
+        await subject.set(sfuAdapter: sfuStack.adapter)
+
+        await subject.cleanUp()
+        statsAdapter.scheduleStatsReporting()
+
+        XCTAssertNil(statsAdapter.sfuAdapter)
+        XCTAssertNil(reporter.sfuAdapter)
+        XCTAssertEqual(providerCallsCount, 0)
+    }
+
     func test_cleanUp_shouldResetProperties() async throws {
         let sfuStack = MockSFUStack()
         try await prepare(sfuStack: sfuStack)
