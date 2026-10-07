@@ -49,7 +49,7 @@ extension AVAudioSession {
 
         /// Builds a new snapshot by pulling the latest values from the shared
         /// AVAudioSession instance.
-        init(_ source: AVAudioSession = .sharedInstance()) {
+        init(_ source: any AVAudioSessionProtocol = AVAudioSession.sharedInstance()) {
             self.category = source.category
             self.mode = source.mode
             self.categoryOptions = source.categoryOptions
@@ -64,9 +64,10 @@ extension AVAudioSession {
             #endif
 
             #if compiler(>=6.1)
+            let currentDevice = CurrentDevice.currentValue
             if #available(iOS 18.2, *),
-               !ProcessInfo.processInfo.isiOSAppOnMac,
-               !ProcessInfo.processInfo.isMacCatalystApp {
+               !currentDevice.isIOSAppOnMac,
+               !currentDevice.isMacCatalystApp {
                 self.prefersEchoCancelledInput = source.prefersEchoCancelledInput
                 self.isEchoCancelledInputEnabled = source.isEchoCancelledInputEnabled
                 self.isEchoCancelledInputAvailable = source.isEchoCancelledInputAvailable

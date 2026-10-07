@@ -4,7 +4,6 @@
 
 import AVFoundation
 import Combine
-import ObjectiveC
 import StreamSwiftTestHelpers
 @testable import StreamVideo
 import XCTest
@@ -112,50 +111,25 @@ final class AVAudioSessionObserver_Tests: XCTestCase, @unchecked Sendable {
             throw XCTSkip("Requires iOS 18.2 or later.")
         }
 
-        let processInfoClass = try XCTUnwrap(object_getClass(ProcessInfo.processInfo))
-        let audioSessionClass = try XCTUnwrap(object_getClass(AVAudioSession.sharedInstance()))
-        let getters: [(AnyClass, String, Bool)] = [
-            (processInfoClass, "isiOSAppOnMac", isIOSAppOnMac),
-            (processInfoClass, "isMacCatalystApp", isMacCatalystApp),
-            (audioSessionClass, "prefersEchoCancelledInput", true),
-            (audioSessionClass, "isEchoCancelledInputEnabled", true),
-            (audioSessionClass, "isEchoCancelledInputAvailable", true)
-        ]
-        let reads = Atomic(wrappedValue: 0)
-        var replacements: [(Method, IMP, IMP)] = []
-        defer {
-            for (method, original, replacement) in replacements.reversed() {
-                method_setImplementation(method, original)
-                imp_removeBlock(replacement)
-            }
-        }
+        let originalDevice = CurrentDevice.currentValue
+        let currentDevice = CurrentDevice(currentDeviceProvider: { .phone })
+        currentDevice.isIOSAppOnMac = isIOSAppOnMac
+        currentDevice.isMacCatalystApp = isMacCatalystApp
+        CurrentDevice.currentValue = currentDevice
+        defer { CurrentDevice.currentValue = originalDevice }
 
-        for (type, name, value) in getters {
-            let method = try XCTUnwrap(
-                class_getInstanceMethod(type, NSSelectorFromString(name))
-            )
-            let original = method_getImplementation(method)
-            let getter: @convention(block) (AnyObject) -> Bool = { _ in
-                if type == audioSessionClass {
-                    reads.mutate { $0 += 1 }
-                }
-                return value
-            }
-            let replacement = imp_implementationWithBlock(getter)
-            replacements.append((method, original, replacement))
-            method_setImplementation(method, replacement)
-        }
-
-        XCTAssertEqual(ProcessInfo.processInfo.isiOSAppOnMac, isIOSAppOnMac, file: file, line: line)
-        XCTAssertEqual(ProcessInfo.processInfo.isMacCatalystApp, isMacCatalystApp, file: file, line: line)
-        let subject = AVAudioSession.Snapshot()
+        let source = MockAVAudioSession()
+        source.stub(for: \.prefersEchoCancelledInput, with: true)
+        source.stub(for: \.isEchoCancelledInputEnabled, with: true)
+        source.stub(for: \.isEchoCancelledInputAvailable, with: true)
+        let subject = AVAudioSession.Snapshot(source)
         let expected = !isIOSAppOnMac && !isMacCatalystApp
 
         XCTAssertEqual(subject.prefersEchoCancelledInput, expected, file: file, line: line)
         XCTAssertEqual(subject.isEchoCancelledInputEnabled, expected, file: file, line: line)
         XCTAssertEqual(subject.isEchoCancelledInputAvailable, expected, file: file, line: line)
-        XCTAssertEqual(reads.wrappedValue, expected ? 3 : 0, file: file, line: line)
-        XCTAssertEqual(subject.category, AVAudioSession.sharedInstance().category, file: file, line: line)
+        XCTAssertEqual(source.echoCancellationReadCount, expected ? 3 : 0, file: file, line: line)
+        XCTAssertEqual(subject.category, source.category, file: file, line: line)
     }
     #endif
 }

@@ -65,6 +65,43 @@ final class MockAVAudioSession: AVAudioSessionProtocol, Mockable, @unchecked Sen
 
     // MARK: - AVAudioSessionProtocol
 
+    var category: AVAudioSession.Category = .playAndRecord
+    var mode: AVAudioSession.Mode = .voiceChat
+    var categoryOptions: AVAudioSession.CategoryOptions = []
+    var routeSharingPolicy: AVAudioSession.RouteSharingPolicy = .default
+    var availableModes: [AVAudioSession.Mode] = []
+    var preferredInput: AVAudioSessionPortDescription?
+    var maximumOutputNumberOfChannels: Int = 0
+    var outputNumberOfChannels: Int = 0
+    var preferredOutputNumberOfChannels: Int = 0
+
+    #if compiler(>=6.0)
+    @available(iOS 17.2, *)
+    var renderingMode: AVAudioSession.RenderingMode { .notApplicable }
+    #endif
+
+    @Atomic var echoCancellationReadCount: Int = 0
+
+    #if compiler(>=6.1)
+    @available(iOS 18.2, *)
+    var prefersEchoCancelledInput: Bool {
+        _echoCancellationReadCount.mutate { $0 += 1 }
+        return stubbedProperty[propertyKey(for: \.prefersEchoCancelledInput)] as? Bool ?? false
+    }
+
+    @available(iOS 18.2, *)
+    var isEchoCancelledInputEnabled: Bool {
+        _echoCancellationReadCount.mutate { $0 += 1 }
+        return stubbedProperty[propertyKey(for: \.isEchoCancelledInputEnabled)] as? Bool ?? false
+    }
+
+    @available(iOS 18.2, *)
+    var isEchoCancelledInputAvailable: Bool {
+        _echoCancellationReadCount.mutate { $0 += 1 }
+        return stubbedProperty[propertyKey(for: \.isEchoCancelledInputAvailable)] as? Bool ?? false
+    }
+    #endif
+
     /// Sets the audio category, mode, and options.
     func setCategory(
         _ category: AVAudioSession.Category,
