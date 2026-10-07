@@ -702,7 +702,9 @@
 				StreamVideoSwiftUI/Utils/VideoRendererPool/VideoRendererPool.swift,
 				StreamVideoSwiftUI/Utils/ViewExtensions.swift,
 				StreamVideoSwiftUI/VideoAppearance.swift,
-				StreamVideoSwiftUI/ViewFactory.swift,
+				StreamVideoSwiftUI/ViewFactory/Options/CallViewFactoryOptions.swift,
+				StreamVideoSwiftUI/ViewFactory/Options/ParticipantViewFactoryOptions.swift,
+				StreamVideoSwiftUI/ViewFactory/ViewFactory.swift,
 				StreamVideoUIKit/CallViewController.swift,
 				StreamVideoUIKit/Info.plist,
 				StreamVideoUIKit/StreamVideoUIKit.h,
@@ -871,7 +873,9 @@
 				StreamVideoSwiftUI/Utils/VideoRendererPool/VideoRendererPool.swift,
 				StreamVideoSwiftUI/Utils/ViewExtensions.swift,
 				StreamVideoSwiftUI/VideoAppearance.swift,
-				StreamVideoSwiftUI/ViewFactory.swift,
+				StreamVideoSwiftUI/ViewFactory/Options/CallViewFactoryOptions.swift,
+				StreamVideoSwiftUI/ViewFactory/Options/ParticipantViewFactoryOptions.swift,
+				StreamVideoSwiftUI/ViewFactory/ViewFactory.swift,
 			);
 			publicHeaders = (
 				StreamVideoSwiftUI/StreamVideoSwiftUI.h,

@@ -34,8 +34,7 @@ public struct CallParticipantImageView<Factory: ViewFactory>: View {
         .blur(radius: 8)
         .overlay(
             viewFactory.makeUserAvatar(
-                .init(id: id, name: name, imageURL: imageURL),
-                with: .init(size: size) {
+                options: .init(user: .init(id: id, name: name, imageURL: imageURL), size: size) {
                     AnyView(
                         CircledTitleView(
                             title: name.isEmpty ? id : String(name.uppercased().first!),

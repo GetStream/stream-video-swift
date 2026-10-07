@@ -165,7 +165,6 @@ struct CustomVideoParticipantsView<Factory: ViewFactory>: View {
 
 struct CustomCallParticipantsInfoView: View {
     var callViewModel: CallViewModel
-    var availableFrame: CGRect
     var body: some View { EmptyView() }
 }
 

@@ -29,8 +29,8 @@ private func content() {
     container {
         class CustomViewFactory: ViewFactory {
 
-            public func makeIncomingCallView(viewModel: CallViewModel, callInfo: IncomingCall) -> some View {
-                CustomIncomingCallView(viewModel: viewModel, callInfo: callInfo)
+            public func makeIncomingCallView(options: IncomingCallViewOptions) -> some View {
+                CustomIncomingCallView(viewModel: options.viewModel, callInfo: options.callInfo)
             }
         }
     }

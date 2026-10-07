@@ -35,12 +35,14 @@ public struct LocalVideoView<Factory: ViewFactory>: View {
 
     public var body: some View {
         viewFactory.makeVideoParticipantView(
-            participant: participant,
-            id: "\(streamVideo.user.id)-\(idSuffix)",
-            availableFrame: availableFrame,
-            contentMode: .scaleAspectFill,
-            customData: [:],
-            call: call
+            options: .init(
+                participant: participant,
+                id: "\(streamVideo.user.id)-\(idSuffix)",
+                availableFrame: availableFrame,
+                contentMode: .scaleAspectFill,
+                customData: [:],
+                call: call
+            )
         )
         .adjustVideoFrame(to: availableFrame.width, ratio: availableFrame.width / availableFrame.height)
     }

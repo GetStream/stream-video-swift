@@ -30,20 +30,24 @@ public struct ParticipantsFullScreenLayout<Factory: ViewFactory>: View {
     
     public var body: some View {
         viewFactory.makeVideoParticipantView(
-            participant: participant,
-            id: participant.id,
-            availableFrame: frame,
-            contentMode: .scaleAspectFit,
-            customData: [:],
-            call: call
+            options: .init(
+                participant: participant,
+                id: participant.id,
+                availableFrame: frame,
+                contentMode: .scaleAspectFit,
+                customData: [:],
+                call: call
+            )
         )
         .modifier(
             viewFactory.makeVideoCallParticipantModifier(
-                participant: participant,
-                call: call,
-                availableFrame: frame,
-                ratio: ratio,
-                showAllInfo: true
+                options: .init(
+                    participant: participant,
+                    call: call,
+                    availableFrame: frame,
+                    ratio: ratio,
+                    showAllInfo: true
+                )
             )
         )
         .onAppear {

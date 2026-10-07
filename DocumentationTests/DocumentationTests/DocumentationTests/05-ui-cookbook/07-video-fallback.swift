@@ -12,20 +12,13 @@ private func content() {
     container {
         class CustomViewFactory: ViewFactory {
 
-            func makeVideoParticipantView(
-                participant: CallParticipant,
-                id: String,
-                availableFrame: CGRect,
-                contentMode: UIView.ContentMode,
-                customData: [String: RawJSON],
-                call: Call?
-            ) -> some View {
+            func makeVideoParticipantView(options: VideoParticipantViewOptions) -> some View {
                 CustomVideoCallParticipantView(
-                    participant: participant,
-                    id: id,
-                    availableFrame: availableFrame,
-                    contentMode: contentMode,
-                    call: call
+                    participant: options.participant,
+                    id: options.id,
+                    availableFrame: options.availableFrame,
+                    contentMode: options.contentMode,
+                    call: options.call
                 )
             }
         }

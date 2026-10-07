@@ -14,14 +14,8 @@ private func content() {
     }
 
     container {
-        func makeParticipantsListView(
-            viewModel: CallViewModel,
-            availableFrame: CGRect
-        ) -> some View {
-            CustomCallParticipantsInfoView(
-                callViewModel: viewModel,
-                availableFrame: availableFrame
-            )
+        func makeParticipantsListView(options: ParticipantsListViewOptions) -> some View {
+            CustomCallParticipantsInfoView(callViewModel: options.viewModel)
         }
     }
 

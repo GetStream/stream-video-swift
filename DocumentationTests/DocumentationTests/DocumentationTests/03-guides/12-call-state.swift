@@ -13,19 +13,19 @@ private func content() {
     viewContainer {
         ZStack {
             if viewModel.callingState == .outgoing {
-                viewFactory.makeOutgoingCallView(viewModel: viewModel)
+                viewFactory.makeOutgoingCallView(options: .init(viewModel: viewModel))
             } else if viewModel.callingState == .inCall {
                 if !viewModel.participants.isEmpty {
                     if viewModel.isMinimized {
                         MinimizedCallView(viewModel: viewModel)
                     } else {
-                        viewFactory.makeCallView(viewModel: viewModel)
+                        viewFactory.makeCallView(options: .init(viewModel: viewModel))
                     }
                 } else {
                     WaitingLocalUserView(viewModel: viewModel, viewFactory: viewFactory)
                 }
             } else if case let .incoming(callInfo) = viewModel.callingState {
-                viewFactory.makeIncomingCallView(viewModel: viewModel, callInfo: callInfo)
+                viewFactory.makeIncomingCallView(options: .init(viewModel: viewModel, callInfo: callInfo))
             }
         }
         .onReceive(viewModel.$callingState) { _ in

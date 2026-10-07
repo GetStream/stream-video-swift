@@ -24,8 +24,8 @@ final class JoiningCallView_Tests: StreamVideoUITestCase, @unchecked Sendable {
 
     func test_joiningCallView_snapshot() throws {
         let view = JoiningCallView(
-            callTopView: factory.makeCallTopView(viewModel: viewModel),
-            callControls: factory.makeCallControlsView(viewModel: viewModel)
+            callTopView: factory.makeCallTopView(options: .init(viewModel: viewModel)),
+            callControls: factory.makeCallControlsView(options: .init(viewModel: viewModel))
         )
         AssertSnapshot(view, variants: snapshotVariants)
     }

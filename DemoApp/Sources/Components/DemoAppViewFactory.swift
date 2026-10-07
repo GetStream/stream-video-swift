@@ -15,16 +15,14 @@ final class DemoAppViewFactory: ViewFactory {
     @Injected(\.colors) var colors
     @Injected(\.layout) var layout
 
-    func makeWaitingLocalUserView(viewModel: CallViewModel) -> some View {
-        DemoWaitingLocalUserView(viewFactory: self, viewModel: viewModel)
+    func makeWaitingLocalUserView(options: WaitingLocalUserViewOptions) -> some View {
+        DemoWaitingLocalUserView(viewFactory: self, viewModel: options.viewModel)
     }
 
     @ViewBuilder
-    func makeLobbyView(
-        viewModel: CallViewModel,
-        lobbyInfo: LobbyInfo,
-        callSettings: Binding<CallSettings>
-    ) -> some View {
+    func makeLobbyView(options: LobbyViewOptions) -> some View {
+        let viewModel = options.viewModel
+        let lobbyInfo = options.lobbyInfo
         let handleJoinCall = { [streamVideo] in
             guard case .lobby = viewModel.callingState else { return }
             Task { @MainActor [streamVideo] in
@@ -50,7 +48,7 @@ final class DemoAppViewFactory: ViewFactory {
             viewFactory: self,
             callId: lobbyInfo.callId,
             callType: lobbyInfo.callType,
-            callSettings: callSettings,
+            callSettings: options.callSettings,
             callSettingsView: { DemoCallSettingsView(callSettings: $0) },
             onJoinCallTap: handleJoinCall,
             onCloseLobby: handleCloseLobby
@@ -63,10 +61,10 @@ final class DemoAppViewFactory: ViewFactory {
         .init(WaitingLocalUserView(viewModel: viewModel, viewFactory: self))
     }
 
-    func makeCallView(viewModel: CallViewModel) -> DemoCallView<DemoAppViewFactory> {
+    func makeCallView(options: CallViewOptions) -> DemoCallView<DemoAppViewFactory> {
         DemoCallView(
             viewFactory: self,
-            viewModel: viewModel
+            viewModel: options.viewModel
         )
     }
 
@@ -74,52 +72,39 @@ final class DemoAppViewFactory: ViewFactory {
         .init(StreamVideoSwiftUI.CallView(viewFactory: self, viewModel: viewModel))
     }
 
-    func makeCallControlsView(viewModel: CallViewModel) -> some View {
-        AppControlsWithChat(viewModel: viewModel)
+    func makeCallControlsView(options: CallControlsViewOptions) -> some View {
+        AppControlsWithChat(viewModel: options.viewModel)
     }
 
-    func makeCallTopView(viewModel: CallViewModel) -> some View {
-        DemoCallTopView(viewFactory: self, viewModel: viewModel)
+    func makeCallTopView(options: CallTopViewOptions) -> some View {
+        DemoCallTopView(viewFactory: self, viewModel: options.viewModel)
     }
 
-    func makeVideoCallParticipantModifier(
-        participant: CallParticipant,
-        call: Call?,
-        availableFrame: CGRect,
-        ratio: CGFloat,
-        showAllInfo: Bool
-    ) -> some ViewModifier {
+    func makeVideoCallParticipantModifier(options: VideoCallParticipantModifierOptions) -> some ViewModifier {
         DemoVideoCallParticipantModifier(
-            participant: participant,
-            call: call,
-            availableFrame: availableFrame,
-            ratio: ratio,
-            showAllInfo: showAllInfo
+            participant: options.participant,
+            call: options.call,
+            availableFrame: options.availableFrame,
+            ratio: options.ratio,
+            showAllInfo: options.showAllInfo
         )
     }
 
-    func makeLocalParticipantViewModifier(
-        localParticipant: CallParticipant,
-        callSettings: Binding<CallSettings>,
-        call: Call?
-    ) -> some ViewModifier {
+    func makeLocalParticipantViewModifier(options: LocalParticipantViewModifierOptions) -> some ViewModifier {
         DemoLocalViewModifier(
-            localParticipant: localParticipant,
-            callSettings: callSettings,
-            call: call
+            localParticipant: options.localParticipant,
+            callSettings: options.callSettings,
+            call: options.call
         )
     }
 
-    func makeVideoParticipantsView(
-        viewModel: CallViewModel,
-        availableFrame: CGRect,
-        onChangeTrackVisibility: @escaping @MainActor (CallParticipant, Bool) -> Void
-    ) -> some View {
-        VideoParticipantsView(
+    func makeVideoParticipantsView(options: VideoParticipantsViewOptions) -> some View {
+        let viewModel = options.viewModel
+        return VideoParticipantsView(
             viewFactory: self,
             viewModel: viewModel,
-            availableFrame: availableFrame,
-            onChangeTrackVisibility: onChangeTrackVisibility
+            availableFrame: options.availableFrame,
+            onChangeTrackVisibility: options.onChangeTrackVisibility
         )
         .snapshot(trigger: snapshotTrigger) { [weak viewModel] snapshot in
             Task { @MainActor [weak viewModel] in

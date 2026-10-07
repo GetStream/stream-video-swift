@@ -21,8 +21,8 @@ private func content() {
                 }
             }
 
-            func makeOutgoingCallView(viewModel: CallViewModel) -> some View {
-                CustomOutgoingCallView(viewModel: viewModel)
+            func makeOutgoingCallView(options: OutgoingCallViewOptions) -> some View {
+                CustomOutgoingCallView(viewModel: options.viewModel)
             }
         }
     }
@@ -40,8 +40,8 @@ private func content() {
                 }
             }
 
-            public func makeIncomingCallView(viewModel: CallViewModel, callInfo: IncomingCall) -> some View {
-                CustomIncomingCallView(callInfo: callInfo, viewModel: viewModel)
+            public func makeIncomingCallView(options: IncomingCallViewOptions) -> some View {
+                CustomIncomingCallView(callInfo: options.callInfo, viewModel: options.viewModel)
             }
         }
     }
@@ -58,8 +58,8 @@ private func content() {
                 }
             }
 
-            public func makeCallView(viewModel: CallViewModel) -> some View {
-                CustomCallView(viewModel: viewModel)
+            public func makeCallView(options: CallViewOptions) -> some View {
+                CustomCallView(viewModel: options.viewModel)
             }
         }
     }
@@ -76,8 +76,8 @@ private func content() {
                 }
             }
 
-            func makeCallControlsView(viewModel: CallViewModel) -> some View {
-                CustomCallControlsView(viewModel: viewModel)
+            func makeCallControlsView(options: CallControlsViewOptions) -> some View {
+                CustomCallControlsView(viewModel: options.viewModel)
             }
         }
     }
@@ -85,16 +85,12 @@ private func content() {
     container {
         class CustomViewFactory: ViewFactory {
 
-            public func makeVideoParticipantsView(
-                viewModel: CallViewModel,
-                availableFrame: CGRect,
-                onChangeTrackVisibility: @escaping @MainActor (CallParticipant, Bool) -> Void
-            ) -> some View {
+            public func makeVideoParticipantsView(options: VideoParticipantsViewOptions) -> some View {
                 VideoParticipantsView(
                     viewFactory: self,
-                    viewModel: viewModel,
-                    availableFrame: availableFrame,
-                    onChangeTrackVisibility: onChangeTrackVisibility
+                    viewModel: options.viewModel,
+                    availableFrame: options.availableFrame,
+                    onChangeTrackVisibility: options.onChangeTrackVisibility
                 )
             }
         }
@@ -103,21 +99,14 @@ private func content() {
     container {
         class CustomViewFactory: ViewFactory {
 
-            func makeVideoParticipantView(
-                participant: CallParticipant,
-                id: String,
-                availableFrame: CGRect,
-                contentMode: UIView.ContentMode,
-                customData: [String: RawJSON],
-                call: Call?
-            ) -> some View {
+            func makeVideoParticipantView(options: VideoParticipantViewOptions) -> some View {
                 VideoCallParticipantView(
-                    participant: participant,
-                    id: id,
-                    availableFrame: availableFrame,
-                    contentMode: contentMode,
-                    customData: customData,
-                    call: call
+                    participant: options.participant,
+                    id: options.id,
+                    availableFrame: options.availableFrame,
+                    contentMode: options.contentMode,
+                    customData: options.customData,
+                    call: options.call
                 )
             }
         }
@@ -126,19 +115,13 @@ private func content() {
     container {
         class CustomViewFactory: ViewFactory {
 
-            public func makeVideoCallParticipantModifier(
-                participant: CallParticipant,
-                call: Call?,
-                availableFrame: CGRect,
-                ratio: CGFloat,
-                showAllInfo: Bool
-            ) -> some ViewModifier {
+            public func makeVideoCallParticipantModifier(options: VideoCallParticipantModifierOptions) -> some ViewModifier {
                 VideoCallParticipantModifier(
-                    participant: participant,
-                    call: call,
-                    availableFrame: availableFrame,
-                    ratio: ratio,
-                    showAllInfo: showAllInfo
+                    participant: options.participant,
+                    call: options.call,
+                    availableFrame: options.availableFrame,
+                    ratio: options.ratio,
+                    showAllInfo: options.showAllInfo
                 )
             }
         }
@@ -156,8 +139,8 @@ private func content() {
                 }
             }
 
-            public func makeCallTopView(viewModel: CallViewModel) -> some View {
-                CallTopView(viewModel: viewModel)
+            public func makeCallTopView(options: CallTopViewOptions) -> some View {
+                CallTopView(viewModel: options.viewModel)
             }
         }
     }

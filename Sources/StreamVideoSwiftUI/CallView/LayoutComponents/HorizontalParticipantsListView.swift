@@ -81,20 +81,24 @@ public struct HorizontalParticipantsListView<Factory: ViewFactory>: View {
                 // Loop through each participant and display their thumbnail.
                 ForEach(participants) { participant in
                     viewFactory.makeVideoParticipantView(
-                        participant: participant,
-                        id: participant.id,
-                        availableFrame: itemFrame,
-                        contentMode: .scaleAspectFill,
-                        customData: [:],
-                        call: call
+                        options: .init(
+                            participant: participant,
+                            id: participant.id,
+                            availableFrame: itemFrame,
+                            contentMode: .scaleAspectFill,
+                            customData: [:],
+                            call: call
+                        )
                     )
                     .modifier(
                         viewFactory.makeVideoCallParticipantModifier(
-                            participant: participant,
-                            call: call,
-                            availableFrame: itemFrame,
-                            ratio: itemFrame.width / itemFrame.height,
-                            showAllInfo: showAllInfo
+                            options: .init(
+                                participant: participant,
+                                call: call,
+                                availableFrame: itemFrame,
+                                ratio: itemFrame.width / itemFrame.height,
+                                showAllInfo: showAllInfo
+                            )
                         )
                     )
                     // Observe visibility changes.

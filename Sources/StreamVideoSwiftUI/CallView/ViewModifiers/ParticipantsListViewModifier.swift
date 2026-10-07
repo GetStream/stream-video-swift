@@ -16,7 +16,7 @@ extension View {
         viewFactory: Factory = DefaultViewFactory.shared
     ) -> some View {
         halfSheet(isPresented: $viewModel.participantsShown) {
-            viewFactory.makeParticipantsListView(viewModel: viewModel)
+            viewFactory.makeParticipantsListView(options: .init(viewModel: viewModel))
                 .opacity(viewModel.hideUIElements ? 0 : 1)
                 .accessibility(identifier: "trailingTopView")
         }

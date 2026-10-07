@@ -70,7 +70,7 @@ public struct CallTopView<Factory: ViewFactory>: View {
                 sharingPopupDismissed: $sharingPopupDismissed
             )
         } else {
-            viewFactory.makePermissionsPromptView(call: viewModel.call)
+            viewFactory.makePermissionsPromptView(options: .init(call: viewModel.call))
         }
     }
 

@@ -21,8 +21,8 @@ private func content() {
 
             private init() {}
 
-            func makeCallControlsView(viewModel: CallViewModel) -> some View {
-                ChatCallControls(viewModel: viewModel)
+            func makeCallControlsView(options: CallControlsViewOptions) -> some View {
+                ChatCallControls(viewModel: options.viewModel)
             }
         }
     }

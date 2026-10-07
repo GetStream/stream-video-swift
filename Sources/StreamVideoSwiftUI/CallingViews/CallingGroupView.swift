@@ -125,8 +125,7 @@ struct IncomingCallParticipantView<Factory: ViewFactory>: View {
 
     var body: some View {
         viewFactory.makeUserAvatar(
-            participant.user,
-            with: .init(size: size) {
+            options: .init(user: participant.user, size: size) {
                 AnyView(CircledTitleView(title: title, size: size))
             }
         )

@@ -51,21 +51,25 @@ public struct SpotlightSpeakerView<Factory: ViewFactory>: View {
     public var body: some View {
         // Creates the video view for the dominant speaker.
         viewFactory.makeVideoParticipantView(
-            participant: participant,
-            id: viewId,
-            availableFrame: availableFrame,
-            contentMode: .scaleAspectFill,
-            customData: [:],
-            call: call
+            options: .init(
+                participant: participant,
+                id: viewId,
+                availableFrame: availableFrame,
+                contentMode: .scaleAspectFill,
+                customData: [:],
+                call: call
+            )
         )
         // Modifies the video view based on the participant's details and the call's state.
         .modifier(
             viewFactory.makeVideoCallParticipantModifier(
-                participant: participant,
-                call: call,
-                availableFrame: availableFrame,
-                ratio: availableFrame.width / availableFrame.height,
-                showAllInfo: true
+                options: .init(
+                    participant: participant,
+                    call: call,
+                    availableFrame: availableFrame,
+                    ratio: availableFrame.width / availableFrame.height,
+                    showAllInfo: true
+                )
             )
         )
         // Applies changes to the participant's video track.

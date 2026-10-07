@@ -53,19 +53,13 @@ private func content() {
             }
         }
 
-        func makeVideoCallParticipantModifier(
-            participant: CallParticipant,
-            call: Call?,
-            availableFrame: CGRect,
-            ratio: CGFloat,
-            showAllInfo: Bool
-        ) -> some ViewModifier {
+        func makeVideoCallParticipantModifier(options: VideoCallParticipantModifierOptions) -> some ViewModifier {
             CustomVideoCallParticipantModifier(
-                participant: participant,
-                call: call,
-                availableFrame: availableFrame,
-                ratio: ratio,
-                showAllInfo: showAllInfo
+                participant: options.participant,
+                call: options.call,
+                availableFrame: options.availableFrame,
+                ratio: options.ratio,
+                showAllInfo: options.showAllInfo
             )
         }
     }

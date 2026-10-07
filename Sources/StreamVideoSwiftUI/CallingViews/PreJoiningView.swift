@@ -203,8 +203,7 @@ struct CameraCheckView<Factory: ViewFactory>: View {
                             )
 
                         viewFactory.makeUserAvatar(
-                            streamVideo.user,
-                            with: .init(size: avatarSize)
+                            options: .init(user: streamVideo.user, size: avatarSize)
                         )
                         .accessibility(identifier: "cameraCheckView")
                         .streamAccessibility(value: "0")
@@ -383,8 +382,7 @@ struct ParticipantsInCallView<Factory: ViewFactory>: View {
                 ForEach(participantsInCall) { participant in
                     VStack(spacing: layout.spacingXs) {
                         viewFactory.makeUserAvatar(
-                            participant.user,
-                            with: .init(size: avatarSize) {
+                            options: .init(user: participant.user, size: avatarSize) {
                                 AnyView(
                                     CircledTitleView(
                                         title: participant.user.name.isEmpty ? participant.user
