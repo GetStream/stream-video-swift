@@ -24,6 +24,13 @@ final class PollingRingingRecoveryPolicy_Tests: XCTestCase, @unchecked Sendable 
 
     // MARK: - Polling
 
+    func test_defaultConfiguration_pollsAfterNineSeconds_everyFiveSeconds() {
+        let options = VideoConfig().ringStatePolling
+
+        XCTAssertEqual(options?.startAfter, 9)
+        XCTAssertEqual(options?.interval, 5)
+    }
+
     func test_callerRing_quietPeriodElapses_pollsCapturedSession() async {
         makeSubject()
         startRing(sessionId: "session-1")
