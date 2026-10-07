@@ -27,12 +27,14 @@ extension WebRTCCoordinator.StateMachine.Stage {
         WebRTCCoordinator.StateMachine.Stage,
         @unchecked Sendable {
         private let disposableBag = DisposableBag()
+        private var coordinator: WebRTCCoordinator?
 
         /// Initializes a new instance of `CleanUpStage`.
         /// - Parameter context: The context for the clean-up stage.
         init(
             _ context: Context
         ) {
+            coordinator = context.coordinator
             super.init(id: .cleanUp, context: context)
         }
 
@@ -60,11 +62,13 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
         /// Executes the clean-up process.
         private func execute() {
-            Task(disposableBag: disposableBag) { [weak self] in
+            let coordinator = coordinator ?? context.coordinator
+            self.coordinator = nil
+            Task(disposableBag: disposableBag) { [weak self, coordinator] in
                 do {
                     guard
                         let self,
-                        let coordinator = context.coordinator
+                        let coordinator
                     else {
                         throw ClientError("WebRCTCoordinator instance not available.")
                     }
