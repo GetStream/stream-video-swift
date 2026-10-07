@@ -2,6 +2,7 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import Foundation
 @testable import StreamVideo
 @preconcurrency import XCTest
@@ -48,6 +49,67 @@ final class WebRTCStatsReporter_Tests: XCTestCase, @unchecked Sendable {
     }
 
     // MARK: - delivery
+
+    func test_triggerDelivery_withoutSFU_doesNotRequestInput() {
+        var providerCallsCount = 0
+        subject = .init(interval: 100) {
+            providerCallsCount += 1
+            return nil
+        }
+
+        subject.triggerDelivery()
+        subject.sfuAdapter = mockSFUStack.adapter
+        subject.sfuAdapter = nil
+        subject.triggerDelivery()
+
+        XCTAssertEqual(providerCallsCount, 0)
+    }
+
+    func test_sfuAdapter_detached_doesNotRequestInputOnTimer() async {
+        await assertDetachedTimerDoesNotRequestInput(changeInterval: false)
+    }
+
+    func test_interval_changedWhileDetached_doesNotRequestInputOnTimer() async {
+        await assertDetachedTimerDoesNotRequestInput(changeInterval: true)
+    }
+
+    private func assertDetachedTimerDoesNotRequestInput(changeInterval: Bool) async {
+        let timerStarted = expectation(description: "Attached reporter requested input")
+        let inputRequested = expectation(description: "Detached reporter requested input")
+        inputRequested.isInverted = true
+        let inputRequests = PassthroughSubject<Void, Never>()
+        let initialSubscription = inputRequests.prefix(1).sink { timerStarted.fulfill() }
+        defer { initialSubscription.cancel() }
+        subject = .init(interval: 0.01) {
+            inputRequests.send(())
+            return nil
+        }
+        subject.sfuAdapter = mockSFUStack.adapter
+
+        await fulfillment(of: [timerStarted], timeout: 2)
+
+        subject.sfuAdapter = nil
+        if changeInterval {
+            subject.interval = 0.02
+        }
+        let subscription = inputRequests.prefix(1).sink { inputRequested.fulfill() }
+        defer { subscription.cancel() }
+
+        // DefaultTimer allows one second of timer leeway.
+        await fulfillment(of: [inputRequested], timeout: 2)
+        subject.interval = 0
+    }
+
+    func test_sfuAdapter_reattached_resumesReporting() async {
+        subject.sfuAdapter = mockSFUStack.adapter
+        subject.sfuAdapter = nil
+        subject.sfuAdapter = mockSFUStack.adapter
+        subject.interval = 0.01
+
+        await fulfillment {
+            self.mockSFUStack.service.sendStatsWasCalledWithRequest != nil
+        }
+    }
 
     func test_sfuAdapterNil_reportWasNotSentCorrectly() async throws {
         await wait(for: subject.interval + 1)
