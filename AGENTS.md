@@ -143,7 +143,7 @@ Typical substitutions from the lobby pass:
 
 ### ViewFactory options
 
-Every `ViewFactory` method takes a single `options:` argument, following Chat SwiftUI v5:
+Every `ViewFactory` method takes a single `options:` argument:
 
 ```swift
 func makeCallView(options: CallViewOptions) -> some View {
@@ -157,7 +157,6 @@ viewFactory.makeCallView(options: .init(viewModel: viewModel))
 - Conform to `Sendable` only when every stored property is `Sendable` (no `Binding`, closures, or non-Sendable models such as `ScreenSharingSession`).
 - New inputs for a slot go on its options type, not as new method parameters.
 - When an override forwards to `DefaultViewFactory`, pass `options` through instead of rebuilding it.
-- No deprecated old-signature shims; the change is covered by the v1 → v2 migration guide.
 
 ### Linking
 
