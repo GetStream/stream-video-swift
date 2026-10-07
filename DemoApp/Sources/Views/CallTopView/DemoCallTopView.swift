@@ -8,7 +8,9 @@ import SwiftUI
 
 struct DemoCallTopView<Factory: ViewFactory>: View {
 
-    @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.colors) private var colors
+    @Injected(\.images) private var images
+    @Injected(\.layout) private var layout
 
     private var viewFactory: Factory
 
@@ -27,7 +29,7 @@ struct DemoCallTopView<Factory: ViewFactory>: View {
     var body: some View {
         HStack(spacing: 0) {
             if !isCallLivestream {
-                HStack(spacing: tokens.layout.spacingXs) {
+                HStack(spacing: layout.spacingXs) {
                     if viewModel.callParticipants.count > 1, !hideLayoutMenu {
                         LayoutMenuView(viewModel: viewModel)
                             .accessibility(identifier: "viewMenu")
@@ -41,7 +43,7 @@ struct DemoCallTopView<Factory: ViewFactory>: View {
             }
 
             if !isCallLivestream {
-                HStack(alignment: .center, spacing: tokens.layout.spacingXs) {
+                HStack(alignment: .center, spacing: layout.spacingXs) {
                     DemoCallDurationView(
                         viewModel: viewModel,
                         isEncrypted: isEncrypted
@@ -51,7 +53,7 @@ struct DemoCallTopView<Factory: ViewFactory>: View {
                 .frame(maxWidth: .infinity)
             }
 
-            HStack(spacing: tokens.layout.spacingXs) {
+            HStack(spacing: layout.spacingXs) {
                 Spacer()
                 livestreamControlsView
                 HangUpIconView(viewModel: viewModel)
@@ -59,12 +61,10 @@ struct DemoCallTopView<Factory: ViewFactory>: View {
             .frame(maxWidth: .infinity)
         }
         .overlay(overlayView)
-        .padding(.horizontal, tokens.layout.spacingMd)
-        .padding(.top, tokens.layout.spacingMd)
+        .padding(.horizontal, layout.spacingMd)
+        .padding(.top, layout.spacingMd)
         .frame(maxWidth: .infinity)
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 
     private var isCallLivestream: Bool {
         guard let call = viewModel.call else { return false }
@@ -122,21 +122,21 @@ struct DemoCallTopView<Factory: ViewFactory>: View {
                             Text("Start Live")
                         } icon: {
                             Image(systemName: "play.fill")
-                                .foregroundColor(Color(tokens.colors.accentSuccess))
+                                .foregroundColor(Color(colors.accentSuccess))
                         }
                     } else {
                         Label {
                             Text("Stop Live")
                         } icon: {
                             Image(systemName: "stop.fill")
-                                .foregroundColor(Color(tokens.colors.accentError))
+                                .foregroundColor(Color(colors.accentError))
                         }
                     }
                 }
 
             } label: {
                 CallIconView(
-                    icon: videoAppearance.images.settings,
+                    icon: images.settings,
                     size: 44,
                     iconStyle: .secondary
                 )
@@ -148,8 +148,11 @@ struct DemoCallTopView<Factory: ViewFactory>: View {
 }
 
 private struct DemoCallDurationView: View {
-    @Injected(\.videoAppearance) private var videoAppearance
     @Injected(\.formatters.mediaDuration) private var formatter
+    @Injected(\.colors) private var colors
+    @Injected(\.images) private var images
+    @Injected(\.fonts) private var fonts
+    @Injected(\.layout) private var layout
 
     @ObservedObject var viewModel: CallViewModel
     var isEncrypted: Bool
@@ -178,37 +181,35 @@ private struct DemoCallDurationView: View {
         .onReceive(viewModel.call?.state.$duration) { duration = $0 }
     }
 
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
-
     @ViewBuilder
     private var inCallChip: some View {
         if duration > 0, let formatted = formatter.format(duration) {
-            HStack(spacing: tokens.layout.spacingXxs) {
+            HStack(spacing: layout.spacingXxs) {
                 if isEncrypted {
                     Image(systemName: lockSymbol)
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .frame(width: 12)
-                        .foregroundColor(Color(tokens.colors.accentSuccess))
+                        .foregroundColor(Color(colors.accentSuccess))
                         .accessibility(identifier: "e2eeEncryptedBadge")
                 }
                 if viewModel.recordingState == .recording {
-                    videoAppearance.images.recordIcon
+                    images.recordIcon
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .frame(width: 12)
-                        .foregroundColor(Color(tokens.colors.accentError))
+                        .foregroundColor(Color(colors.accentError))
                 }
                 Text(formatted)
-                    .font(tokens.fonts.bodyBold.monospacedDigit())
-                    .foregroundColor(Color(tokens.colors.textPrimary))
+                    .font(fonts.bodyBold.monospacedDigit())
+                    .foregroundColor(Color(colors.textPrimary))
                     .minimumScaleFactor(0.2)
                     .lineLimit(1)
                     .layoutPriority(2)
             }
-            .padding(.horizontal, tokens.layout.spacingMd)
-            .padding(.vertical, tokens.layout.spacingXxs)
-            .background(Color(tokens.colors.backgroundCoreSurfaceDefault))
+            .padding(.horizontal, layout.spacingMd)
+            .padding(.vertical, layout.spacingXxs)
+            .background(Color(colors.backgroundCoreSurfaceDefault))
             .clipShape(Capsule())
             .accessibility(
                 identifier: viewModel.recordingState == .recording
@@ -228,7 +229,10 @@ private struct DemoCallDurationView: View {
 
 struct SharingIndicator: View {
 
-    @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.colors) private var colors
+    @Injected(\.images) private var images
+    @Injected(\.fonts) private var fonts
+    @Injected(\.layout) private var layout
 
     @ObservedObject var viewModel: CallViewModel
     @Binding var sharingPopupDismissed: Bool
@@ -239,56 +243,53 @@ struct SharingIndicator: View {
     }
 
     var body: some View {
-        HStack(spacing: tokens.layout.spacingXs) {
+        HStack(spacing: layout.spacingXs) {
             Text("You are sharing your screen")
-                .font(tokens.fonts.headline)
-                .foregroundColor(Color(tokens.colors.textPrimary))
+                .font(fonts.headline)
+                .foregroundColor(Color(colors.textPrimary))
             Divider()
             Button {
                 viewModel.stopScreensharing()
             } label: {
                 Text("Stop sharing")
-                    .font(tokens.fonts.headline)
-                    .foregroundColor(Color(tokens.colors.accentPrimary))
+                    .font(fonts.headline)
+                    .foregroundColor(Color(colors.accentPrimary))
             }
             Button {
                 sharingPopupDismissed = true
             } label: {
-                videoAppearance.images.xmark
+                images.xmark
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(height: 14)
-                    .foregroundColor(Color(tokens.colors.accentPrimary))
+                    .foregroundColor(Color(colors.accentPrimary))
             }
-            .padding(.leading, tokens.layout.spacingXxs)
+            .padding(.leading, layout.spacingXxs)
         }
-        .padding(.all, tokens.layout.spacingXs)
+        .padding(.all, layout.spacingXs)
         .modifier(ShadowViewModifier())
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
 
 /// Modifier for adding shadow and corner radius to a view.
 private struct ShadowViewModifier: ViewModifier {
 
-    @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.colors) private var colors
+    @Injected(\.layout) private var layout
 
     func body(content: Content) -> some View {
         content
-            .background(Color(tokens.colors.backgroundCoreElevation1))
-            .cornerRadius(tokens.layout.radiusXl)
+            .background(Color(colors.backgroundCoreElevation1))
+            .cornerRadius(layout.radiusXl)
             .modifier(ShadowModifier())
             .overlay(
-                RoundedRectangle(cornerRadius: tokens.layout.radiusXl)
+                RoundedRectangle(cornerRadius: layout.radiusXl)
                     .stroke(
-                        Color(tokens.colors.borderCoreDefault),
+                        Color(colors.borderCoreDefault),
                         lineWidth: 0.5
                     )
             )
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
 
 /// Modifier for adding shadow to a view.

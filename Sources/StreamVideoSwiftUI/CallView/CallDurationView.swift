@@ -55,7 +55,8 @@ public struct CallDurationView: View {
 }
 
 private struct InCallDurationView: View {
-    @Injected(\.videoAppearance) private var videoAppearance
+    @Injected(\.colors) var colors
+    @Injected(\.images) private var images
 
     let viewModel: CallViewModel
     @State private var duration: TimeInterval
@@ -68,7 +69,7 @@ private struct InCallDurationView: View {
     var body: some View {
         DurationView(duration: duration) {
             if viewModel.recordingState == .recording {
-                videoAppearance.images.recordIcon
+                images.recordIcon
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 12)
@@ -97,6 +98,8 @@ private struct RingingCallDurationView: View {
 private struct DurationView<IconView: View>: View {
 
     @Injected(\.formatters.mediaDuration) private var formatter: MediaDurationFormatter
+    @Injected(\.colors) var colors
+    @Injected(\.layout) var layout
 
     let duration: TimeInterval
     private let iconView: IconView
@@ -125,6 +128,8 @@ private struct DurationView<IconView: View>: View {
 }
 
 private struct TimeView: View {
+    @Injected(\.colors) var colors
+    @Injected(\.fonts) var fonts
 
     var value: NSMutableAttributedString
 

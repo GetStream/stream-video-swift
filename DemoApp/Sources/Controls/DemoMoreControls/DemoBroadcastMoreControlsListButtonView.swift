@@ -7,7 +7,9 @@ import StreamVideoSwiftUI
 import SwiftUI
 
 struct DemoBroadcastMoreControlsListButtonView: View {
-    @Injected(\.videoAppearance) private var videoAppearance
+    @Injected(\.colors) private var colors
+    @Injected(\.images) private var images
+    @Injected(\.layout) private var layout
 
     @State private var selection: ScreensharingType = .inApp
 
@@ -22,12 +24,12 @@ struct DemoBroadcastMoreControlsListButtonView: View {
                     action: { viewModel.stopScreensharing() },
                     label: selection == .inApp ? "Stop Screensharing" : "Stop Broadcasting"
                 ) {
-                    videoAppearance.images.recordIcon
-                        .foregroundColor(Color(tokens.colors.accentError))
+                    images.recordIcon
+                        .foregroundColor(Color(colors.accentError))
                 }
                 .transition(.opacity.combined(with: .scale))
             } else {
-                HStack(spacing: tokens.layout.spacingSm) {
+                HStack(spacing: layout.spacingSm) {
                     inAppScreenshareButtonView
 
                     broadcastButtonView
@@ -60,8 +62,8 @@ struct DemoBroadcastMoreControlsListButtonView: View {
                 action: {},
                 label: "Screenshare"
             ) {
-                videoAppearance.images.recordIcon
-                    .foregroundColor(Color(tokens.colors.textPrimary))
+                images.recordIcon
+                    .foregroundColor(Color(colors.textPrimary))
             }
         }
     }
@@ -78,8 +80,8 @@ struct DemoBroadcastMoreControlsListButtonView: View {
                 action: { /* No-op */ },
                 label: "Broadcast"
             ) {
-                videoAppearance.images.recordIcon
-                    .foregroundColor(Color(tokens.colors.textPrimary))
+                images.recordIcon
+                    .foregroundColor(Color(colors.textPrimary))
             }
             .allowsHitTesting(false)
         }
@@ -116,6 +118,4 @@ struct DemoBroadcastMoreControlsListButtonView: View {
     private var isBroadcastDisabled: Bool {
         isDisabled || (isCurrentUserScreenSharing && selection != .broadcast)
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }

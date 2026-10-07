@@ -35,7 +35,7 @@ private func content() {
                         Text("You are muted. Unmute to speak.")
                             .padding(8)
                             .background(Color(UIColor.systemBackground))
-                            .foregroundColor(colors.text)
+                            .foregroundColor(Color(colors.textPrimary))
                             .cornerRadius(16)
                             .padding()
                     }

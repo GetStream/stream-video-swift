@@ -88,6 +88,22 @@ final class Appearance_DesignSystem_Tests: XCTestCase, @unchecked Sendable {
         )
     }
 
+    // MARK: - Sounds
+
+    func test_init_withoutSounds_usesDefaultSounds() {
+        XCTAssertEqual(subject.sounds.bundle, .streamVideoUI)
+        XCTAssertEqual(subject.sounds.incomingCallSound.fileName, "incoming.m4a")
+        XCTAssertEqual(subject.sounds.outgoingCallSound.fileName, "outgoing.m4a")
+    }
+
+    func test_init_withSounds_storesSameInstance() {
+        let sounds = Sounds()
+
+        subject = VideoAppearance(sounds: sounds)
+
+        XCTAssertTrue(subject.sounds === sounds)
+    }
+
     func test_injectedValues_whenVideoAppearanceIsSet_returnsSameInstance() {
         let previous = InjectedValues[\.videoAppearance]
         defer { InjectedValues[\.videoAppearance] = previous }
@@ -95,6 +111,69 @@ final class Appearance_DesignSystem_Tests: XCTestCase, @unchecked Sendable {
         InjectedValues[\.videoAppearance] = subject
 
         XCTAssertTrue(InjectedValues[\.videoAppearance] === subject)
+    }
+
+    // MARK: - Shared color lookup
+
+    func test_colors_sharedToken_readsFromTokens() {
+        subject.tokens.colors.textPrimary = .magenta
+
+        XCTAssertEqual(subject.colors.textPrimary, .magenta)
+    }
+
+    func test_colors_sharedPalette_readsFromTokens() {
+        subject.tokens.colors.palette.brand500 = .magenta
+
+        XCTAssertEqual(subject.colors.palette.brand500, .magenta)
+    }
+
+    // MARK: - Injected keys
+
+    func test_injectedColors_returnsVideoAppearanceColors() {
+        withInjectedSubject {
+            XCTAssertTrue(InjectedValues[\.colors] === subject.colors)
+        }
+    }
+
+    func test_injectedColors_whenSet_updatesVideoAppearance() {
+        let colors = VideoAppearance.Colors()
+
+        withInjectedSubject {
+            InjectedValues[\.colors] = colors
+
+            XCTAssertTrue(subject.colors === colors)
+        }
+    }
+
+    func test_injectedImages_returnsVideoAppearanceImages() {
+        withInjectedSubject {
+            XCTAssertTrue(InjectedValues[\.images] === subject.images)
+        }
+    }
+
+    func test_injectedSounds_returnsVideoAppearanceSounds() {
+        withInjectedSubject {
+            XCTAssertTrue(InjectedValues[\.sounds] === subject.sounds)
+        }
+    }
+
+    func test_injectedFonts_returnsTokenFonts() {
+        withInjectedSubject {
+            XCTAssertTrue(InjectedValues[\.fonts] === subject.tokens.fonts)
+        }
+    }
+
+    func test_injectedLayout_returnsTokenLayout() {
+        withInjectedSubject {
+            XCTAssertTrue(InjectedValues[\.layout] === subject.tokens.layout)
+        }
+    }
+
+    private func withInjectedSubject(_ body: () -> Void) {
+        let previous = InjectedValues[\.videoAppearance]
+        defer { InjectedValues[\.videoAppearance] = previous }
+        InjectedValues[\.videoAppearance] = subject
+        body()
     }
 
     // Dynamic `UIColor(light:dark:)` instances are not `==` even when they

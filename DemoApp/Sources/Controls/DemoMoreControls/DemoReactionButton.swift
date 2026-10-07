@@ -10,14 +10,15 @@ import SwiftUI
 struct DemoReactionSelectorView: View {
 
     @Injected(\.reactionsAdapter) var reactionsAdapter
-    @Injected(\.videoAppearance) private var videoAppearance
+    @Injected(\.images) private var images
+    @Injected(\.layout) private var layout
 
     @ObservedObject private var orientationAdapter = InjectedValues[\.orientationAdapter]
     var closeTapped: () -> Void
 
     var body: some View {
 
-        HStack(spacing: tokens.layout.spacingXs) {
+        HStack(spacing: layout.spacingXs) {
             if orientationAdapter.orientation.isLandscape {
                 HStack(spacing: 0) {}
                     .frame(maxWidth: .infinity)
@@ -25,7 +26,7 @@ struct DemoReactionSelectorView: View {
                     .frame(maxWidth: .infinity)
                 HStack(spacing: 0) {
                     Spacer()
-                    ModalButton(image: videoAppearance.images.xmark, action: closeTapped)
+                    ModalButton(image: images.xmark, action: closeTapped)
                         .accessibility(identifier: "Close")
                 }
                 .frame(maxWidth: .infinity)
@@ -37,21 +38,20 @@ struct DemoReactionSelectorView: View {
 
     @ViewBuilder
     private var contentView: some View {
-        HStack(alignment: .center, spacing: tokens.layout.spacingXs) {
+        HStack(alignment: .center, spacing: layout.spacingXs) {
             ForEach(reactionsAdapter.availableReactions.filter { $0 != .raiseHand && $0 != .lowerHand }) { reaction in
                 DemoReactionButton(reaction: reaction)
             }
         }
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
 
 @MainActor
 struct DemoReactionButton: View {
 
-    @Injected(\.videoAppearance) private var videoAppearance
     @Injected(\.reactionsAdapter) var reactionsAdapter
+    @Injected(\.fonts) private var fonts
+    @Injected(\.layout) private var layout
 
     var reaction: Reaction
 
@@ -61,16 +61,14 @@ struct DemoReactionButton: View {
         } label: {
             reaction
                 .emojiView
-                .font(tokens.fonts.body)
+                .font(fonts.body)
                 .frame(
-                    minWidth: tokens.layout.buttonVisualHeightMd,
-                    minHeight: tokens.layout.buttonVisualHeightLg
+                    minWidth: layout.buttonVisualHeightMd,
+                    minHeight: layout.buttonVisualHeightLg
                 )
         }
         .buttonStyle(.plain)
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
 
 extension Reaction {

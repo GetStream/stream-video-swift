@@ -9,6 +9,10 @@ import UIKit
 
 extension VideoAppearance {
     /// VideoAppearance color tokens derived from StreamCoreUI.
+    ///
+    /// Shared colors from `DesignSystemTokens.Colors` are readable through
+    /// this type too, so `colors.textPrimary` resolves to the shared token.
+    @dynamicMemberLookup
     public final class Colors {
         private let colors: DesignSystemTokens.Colors
 
@@ -42,6 +46,11 @@ extension VideoAppearance {
 
         public init(tokens: DesignSystemTokens = DesignSystemTokens()) {
             colors = tokens.colors
+        }
+
+        /// Reads a shared color from `DesignSystemTokens.Colors`.
+        public subscript<T>(dynamicMember keyPath: KeyPath<DesignSystemTokens.Colors, T>) -> T {
+            colors[keyPath: keyPath]
         }
     }
 }

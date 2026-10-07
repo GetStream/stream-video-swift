@@ -8,7 +8,10 @@ import SwiftUI
 @available(iOS 14.0, *)
 public struct InviteParticipantsView<Factory: ViewFactory>: View {
 
-    @Injected(\.videoAppearance) private var videoAppearance
+    @Injected(\.colors) var colors
+    @Injected(\.fonts) var fonts
+    @Injected(\.layout) var layout
+    @Injected(\.images) private var images
 
     var viewFactory: Factory
     @StateObject var viewModel: InviteParticipantsViewModel
@@ -83,7 +86,7 @@ public struct InviteParticipantsView<Factory: ViewFactory>: View {
                 Button {
                     inviteParticipantsShown = false
                 } label: {
-                    videoAppearance.images.chevronLeft
+                    images.chevronLeft
                         .foregroundColor(Color(colors.textPrimary))
                 }
             }
@@ -114,6 +117,9 @@ public struct InviteParticipantsView<Factory: ViewFactory>: View {
 }
 
 struct UsersHeaderView: View {
+    @Injected(\.colors) var colors
+    @Injected(\.fonts) var fonts
+    @Injected(\.layout) var layout
 
     var title = L10n.Call.Participants.onPlatform
 
@@ -133,7 +139,10 @@ struct UsersHeaderView: View {
 
 struct VideoUserView<Factory: ViewFactory>: View {
 
-    @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.colors) var colors
+    @Injected(\.fonts) var fonts
+    @Injected(\.layout) var layout
+    @Injected(\.images) var images
 
     private let avatarSize: CGFloat = 56
 
@@ -170,11 +179,11 @@ struct VideoUserView<Factory: ViewFactory>: View {
     @ViewBuilder
     private var selectedCheckmark: some View {
         if #available(iOS 15.0, *) {
-            videoAppearance.images.checkmarkCircleFill
+            images.checkmarkCircleFill
                 .symbolRenderingMode(.palette)
                 .foregroundStyle(Color(colors.textOnAccent), Color(colors.accentPrimary))
         } else {
-            videoAppearance.images.checkmarkCircleFill
+            images.checkmarkCircleFill
                 .foregroundColor(Color(colors.accentPrimary))
         }
     }

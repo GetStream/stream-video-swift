@@ -8,7 +8,9 @@ import SwiftUI
 
 public struct CallConnectingView<CallControls: View, CallTopView: View, Factory: ViewFactory>: View {
     @Injected(\.streamVideo) var streamVideo
-    @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.colors) private var colors
+    @Injected(\.fonts) private var fonts
+    @Injected(\.layout) private var layout
 
     var viewFactory: Factory
     @State public var outgoingCallMembers: [Member]
@@ -32,7 +34,7 @@ public struct CallConnectingView<CallControls: View, CallTopView: View, Factory:
 
     public var body: some View {
         ZStack {
-            VStack(spacing: tokens.layout.spacingMd) {
+            VStack(spacing: layout.spacingMd) {
                 callTopView
                 
                 Spacer()
@@ -55,14 +57,14 @@ public struct CallConnectingView<CallControls: View, CallTopView: View, Factory:
                 CallingParticipantsView(
                     participants: outgoingCallMembers
                 )
-                .padding(tokens.layout.spacingMd)
+                .padding(layout.spacingMd)
                 
-                HStack(alignment: .firstTextBaseline, spacing: tokens.layout.spacingXxxs) {
+                HStack(alignment: .firstTextBaseline, spacing: layout.spacingXxxs) {
                     Text(title)
-                        .font(tokens.fonts.title2)
+                        .font(fonts.title2)
                         .fontWeight(.semibold)
                         .foregroundColor(
-                            Color(tokens.colors.textSecondary)
+                            Color(colors.textSecondary)
                         )
                         .accessibility(identifier: "callConnectingView")
                     CallingIndicator()
@@ -80,6 +82,4 @@ public struct CallConnectingView<CallControls: View, CallTopView: View, Factory:
             outgoingCallMembers = members.filter { $0.id != streamVideo.user.id }
         }
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }

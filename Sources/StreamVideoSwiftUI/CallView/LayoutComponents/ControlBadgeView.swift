@@ -8,7 +8,8 @@ import SwiftUI
 
 /// A view representing a control badge displaying a value.
 public struct ControlBadgeView: View {
-    @Injected(\.videoAppearance) private var videoAppearance
+    @Injected(\.fonts) private var fonts
+    @Injected(\.layout) private var layout
 
     enum Content {
         case text(String, foreground: Color, background: Color)
@@ -27,8 +28,8 @@ public struct ControlBadgeView: View {
     ///   - border: An optional ring that separates the badge from the control it overlaps.
     public init(
         _ value: String,
-        foreground: Color = Color(InjectedValues[\.videoAppearance].tokens.colors.badgeTextOnAccent),
-        background: Color = Color(InjectedValues[\.videoAppearance].tokens.colors.badgeBackgroundPrimary),
+        foreground: Color = Color(InjectedValues[\.colors].badgeTextOnAccent),
+        background: Color = Color(InjectedValues[\.colors].badgeBackgroundPrimary),
         border: Color? = nil
     ) {
         content = .text(
@@ -41,8 +42,8 @@ public struct ControlBadgeView: View {
 
     public init(
         _ image: Image,
-        foreground: Color = Color(InjectedValues[\.videoAppearance].tokens.colors.badgeTextOnAccent),
-        background: Color = Color(InjectedValues[\.videoAppearance].tokens.colors.badgeBackgroundPrimary),
+        foreground: Color = Color(InjectedValues[\.colors].badgeTextOnAccent),
+        background: Color = Color(InjectedValues[\.colors].badgeBackgroundPrimary),
         border: Color? = nil
     ) {
         content = .image(
@@ -57,11 +58,11 @@ public struct ControlBadgeView: View {
         TopRightView {
             contentView
                 .frame(
-                    width: videoAppearance.tokens.layout.iconSizeSm,
-                    height: videoAppearance.tokens.layout.iconSizeSm
+                    width: layout.iconSizeSm,
+                    height: layout.iconSizeSm
                 )
-                .padding(videoAppearance.tokens.layout.spacingXxxs)
-                .font(videoAppearance.tokens.fonts.caption1)
+                .padding(layout.spacingXxxs)
+                .font(fonts.caption1)
                 .foregroundColor(foregroundColor)
                 .background(badgeBackground)
         }
@@ -74,8 +75,8 @@ public struct ControlBadgeView: View {
                 .fill(backgroundColor)
                 .overlay(
                     Circle()
-                        .strokeBorder(border, lineWidth: videoAppearance.tokens.layout.iconStrokeDefault)
-                        .padding(-videoAppearance.tokens.layout.iconStrokeDefault)
+                        .strokeBorder(border, lineWidth: layout.iconStrokeDefault)
+                        .padding(-layout.iconStrokeDefault)
                 )
         } else {
             Circle().fill(backgroundColor)
@@ -117,8 +118,8 @@ extension View {
     @ViewBuilder
     public func badge(
         _ value: String,
-        foreground: Color = Color(InjectedValues[\.videoAppearance].tokens.colors.badgeTextOnAccent),
-        background: Color = Color(InjectedValues[\.videoAppearance].tokens.colors.badgeBackgroundPrimary)
+        foreground: Color = Color(InjectedValues[\.colors].badgeTextOnAccent),
+        background: Color = Color(InjectedValues[\.colors].badgeBackgroundPrimary)
     ) -> some View {
         overlay(
             ControlBadgeView(
@@ -132,8 +133,8 @@ extension View {
     @ViewBuilder
     public func badge(
         _ value: Image,
-        foreground: Color = Color(InjectedValues[\.videoAppearance].tokens.colors.badgeTextOnAccent),
-        background: Color = Color(InjectedValues[\.videoAppearance].tokens.colors.badgeBackgroundPrimary)
+        foreground: Color = Color(InjectedValues[\.colors].badgeTextOnAccent),
+        background: Color = Color(InjectedValues[\.colors].badgeBackgroundPrimary)
     ) -> some View {
         overlay(
             ControlBadgeView(

@@ -9,7 +9,9 @@ import SwiftUI
 
 struct DemoTranscriptionAndClosedCaptionsButtonView: View {
 
-    @Injected(\.videoAppearance) private var videoAppearance
+    @Injected(\.colors) private var colors
+    @Injected(\.images) private var images
+    @Injected(\.layout) private var layout
     @ObservedObject var viewModel: CallViewModel
 
     @State private var isTranscriptionAvailable = false
@@ -60,10 +62,10 @@ struct DemoTranscriptionAndClosedCaptionsButtonView: View {
                         Image(systemName: "captions.bubble")
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, tokens.layout.spacingMd)
-                    .frame(height: tokens.layout.buttonVisualHeightMd)
-                    .foregroundColor(Color(tokens.colors.buttonSecondaryText))
-                    .background(Color(tokens.colors.buttonSecondaryBackground))
+                    .padding(.horizontal, layout.spacingMd)
+                    .frame(height: layout.buttonVisualHeightMd)
+                    .foregroundColor(Color(colors.buttonSecondaryText))
+                    .background(Color(colors.buttonSecondaryBackground))
                     .clipShape(Capsule())
                 }
                 .onReceive(viewModel.call?.state.$transcribing) { isTranscribing = $0 }
@@ -213,7 +215,7 @@ struct DemoTranscriptionAndClosedCaptionsButtonView: View {
                 Label {
                     Text(value.description)
                 } icon: {
-                    videoAppearance.images.checkmark
+                    images.checkmark
                 }
             } else {
                 Text(value.description)
@@ -230,6 +232,4 @@ struct DemoTranscriptionAndClosedCaptionsButtonView: View {
             }
         }
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }

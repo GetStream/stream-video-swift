@@ -30,15 +30,14 @@ extension Image {
     
     @ViewBuilder
     func background(for type: BackgroundType) -> some View {
-        let videoAppearance = InjectedValues[\.videoAppearance]
-        let glyphColor = Color(videoAppearance.colors.callControlButtonText)
+        let glyphColor = Color(InjectedValues[\.colors].callControlButtonText)
         if type == .none {
             EmptyView()
         } else if type == .circle {
             glyphColor.mask(Circle())
         } else {
             glyphColor.mask(
-                Rectangle().padding(videoAppearance.tokens.layout.spacingSm)
+                Rectangle().padding(InjectedValues[\.layout].spacingSm)
             )
         }
     }
@@ -55,9 +54,10 @@ extension View {
 
 /// Modifier for adding shadow and corner radius to a view.
 struct ShadowViewModifier: ViewModifier {
+    @Injected(\.colors) var colors
     
-    var cornerRadius: CGFloat = InjectedValues[\.videoAppearance].tokens.layout.radiusXl
-    var borderColor: Color = Color(InjectedValues[\.videoAppearance].tokens.colors.borderCoreDefault)
+    var cornerRadius: CGFloat = InjectedValues[\.layout].radiusXl
+    var borderColor: Color = Color(InjectedValues[\.colors].borderCoreDefault)
 
     func body(content: Content) -> some View {
         content
@@ -79,6 +79,9 @@ struct ShadowModifier: ViewModifier {
     @Environment(\.colorScheme) private var colorScheme
 
     func body(content: Content) -> some View {
+        // A stored `@Injected` makes `init()` main-actor isolated on Swift 6.0,
+        // which breaks the nonisolated `Image.applyCallButtonStyle`.
+        let layout = InjectedValues[\.layout]
         let primary = colorScheme == .dark ? layout.darkElevation3 : layout.lightElevation3
         let contact = colorScheme == .dark ? layout.darkElevation1 : layout.lightElevation1
         content

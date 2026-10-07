@@ -8,7 +8,10 @@ import SwiftUI
 /// View that displays different types of toasts.
 public struct ToastView: View {
 
-    @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.colors) var colors
+    @Injected(\.fonts) var fonts
+    @Injected(\.layout) var layout
+    @Injected(\.images) var images
 
     var style: ToastStyle
     var message: String
@@ -49,7 +52,7 @@ public struct ToastView: View {
             Button {
                 onCancelTapped()
             } label: {
-                videoAppearance.images.xmark
+                images.xmark
                     .foregroundColor(style.themeColor)
             }
         }
@@ -61,6 +64,7 @@ public struct ToastView: View {
 }
 
 public struct ToastModifier: ViewModifier {
+    @Injected(\.layout) var layout
     
     @Binding var toast: Toast?
     @State private var workItem: Task<Void, Never>?

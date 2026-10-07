@@ -27,8 +27,6 @@ struct CallingParticipantView<Factory: ViewFactory>: View {
 }
 
 struct AnimatingParticipantView<Factory: ViewFactory>: View {
-
-    @Injected(\.videoAppearance) var videoAppearance
     
     @State var isCalling = false
 
@@ -76,7 +74,7 @@ struct AnimatingParticipantView<Factory: ViewFactory>: View {
 
 struct PulsatingCircle: View {
     
-    @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.colors) var colors
     var scaleEffect: CGFloat
     var opacity: CGFloat
     var isCalling: Bool
@@ -85,7 +83,7 @@ struct PulsatingCircle: View {
     
     var body: some View {
         Circle()
-            .fill(Color(videoAppearance.tokens.colors.accentPrimary))
+            .fill(Color(colors.accentPrimary))
             .frame(width: size, height: size)
             .opacity(opacity)
             .scaleEffect(scaleEffect)

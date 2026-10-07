@@ -18,7 +18,7 @@ struct Spacing: View {
 
 public struct CallIconView: View {
 
-    @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.layout) var layout
 
     var icon: Image
     var size: CGFloat = 64
@@ -43,8 +43,8 @@ public struct CallIconView: View {
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(
-                    maxWidth: videoAppearance.tokens.layout.iconSizeMd,
-                    maxHeight: videoAppearance.tokens.layout.iconSizeMd
+                    maxWidth: layout.iconSizeMd,
+                    maxHeight: layout.iconSizeMd
                 )
                 .foregroundColor(iconStyle.foregroundColor)
         }
@@ -63,72 +63,60 @@ extension CallIconStyle {
 
     public nonisolated(unsafe) static let primary = CallIconStyle(
         backgroundColor: Color(
-            InjectedValues[\.videoAppearance]
-                .tokens.colors.buttonSecondaryBackground
+            InjectedValues[\.colors].buttonSecondaryBackground
         ),
         foregroundColor: Color(
-            InjectedValues[\.videoAppearance]
-                .tokens.colors.buttonSecondaryText
+            InjectedValues[\.colors].buttonSecondaryText
         ),
         opacity: 1
     )
 
     public nonisolated(unsafe) static let secondary = CallIconStyle(
         backgroundColor: Color(
-            InjectedValues[\.videoAppearance]
-                .tokens.colors.buttonSecondaryBackground
+            InjectedValues[\.colors].buttonSecondaryBackground
         ),
         foregroundColor: Color(
-            InjectedValues[\.videoAppearance]
-                .tokens.colors.buttonSecondaryText
+            InjectedValues[\.colors].buttonSecondaryText
         ),
         opacity: 1
     )
 
     public nonisolated(unsafe) static let secondaryActive = CallIconStyle(
         backgroundColor: Color(
-            InjectedValues[\.videoAppearance]
-                .tokens.colors.accentPrimary
+            InjectedValues[\.colors].accentPrimary
         ),
         foregroundColor: Color(
-            InjectedValues[\.videoAppearance]
-                .tokens.colors.textOnAccent
+            InjectedValues[\.colors].textOnAccent
         ),
         opacity: 1
     )
 
     public nonisolated(unsafe) static let transparent = CallIconStyle(
         backgroundColor: Color(
-            InjectedValues[\.videoAppearance]
-                .tokens.colors.buttonSecondaryBackground
+            InjectedValues[\.colors].buttonSecondaryBackground
         ),
         foregroundColor: Color(
-            InjectedValues[\.videoAppearance]
-                .tokens.colors.buttonSecondaryText
+            InjectedValues[\.colors].buttonSecondaryText
         ),
         opacity: 1
     )
 
     public nonisolated(unsafe) static let disabled = CallIconStyle(
         backgroundColor: Color(
-            InjectedValues[\.videoAppearance]
-                .tokens.colors.accentError
+            InjectedValues[\.colors].accentError
         ),
         foregroundColor: Color(
-            InjectedValues[\.videoAppearance]
-                .tokens.colors.textOnAccent
+            InjectedValues[\.colors].textOnAccent
         ),
         opacity: 1
     )
 
     public nonisolated(unsafe) static let destructive = CallIconStyle(
         backgroundColor: Color(
-            InjectedValues[\.videoAppearance]
-                .colors.controlDeclineCallButtonBackground
+            InjectedValues[\.colors].controlDeclineCallButtonBackground
         ),
         foregroundColor: Color(
-            InjectedValues[\.videoAppearance]
-                .colors.controlDeclineCallButtonText
+            InjectedValues[\.colors].controlDeclineCallButtonText
         ),
         opacity: 1
     )
@@ -136,6 +124,7 @@ extension CallIconStyle {
 
 /// View used for the online indicator.
 public struct OnlineIndicatorView: View {
+    @Injected(\.colors) var colors
 
     var indicatorSize: CGFloat
 

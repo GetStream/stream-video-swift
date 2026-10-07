@@ -10,7 +10,9 @@ import SwiftUI
 
 struct DemoCallingTopView: View {
 
-    @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.colors) private var colors
+    @Injected(\.fonts) private var fonts
+    @Injected(\.layout) private var layout
 
     @ObservedObject var streamVideo = InjectedValues[\.streamVideo]
     @ObservedObject var callViewModel: CallViewModel
@@ -26,12 +28,12 @@ struct DemoCallingTopView: View {
     }
 
     var body: some View {
-        HStack(spacing: tokens.layout.spacingXs) {
+        HStack(spacing: layout.spacingXs) {
             if AppEnvironment.configuration.isRelease {
                 Label {
                     Text(username)
-                        .font(tokens.fonts.bodyBold)
-                        .foregroundColor(Color(tokens.colors.textPrimary))
+                        .font(fonts.bodyBold)
+                        .foregroundColor(Color(colors.textPrimary))
                 } icon: {
                     AppUserView(user: currentUser, overrideUserName: username)
                 }
@@ -41,8 +43,8 @@ struct DemoCallingTopView: View {
                 } label: {
                     Label {
                         Text(username)
-                            .font(tokens.fonts.bodyBold)
-                            .foregroundColor(Color(tokens.colors.textPrimary))
+                            .font(fonts.bodyBold)
+                            .foregroundColor(Color(colors.textPrimary))
                     } icon: {
                         AppUserView(user: currentUser, overrideUserName: username)
                     }
@@ -57,8 +59,8 @@ struct DemoCallingTopView: View {
                     DemoCallsView(callViewModel: callViewModel)
                 } label: {
                     Text("Calls")
-                        .font(tokens.fonts.body)
-                        .foregroundColor(Color(tokens.colors.textPrimary))
+                        .font(fonts.body)
+                        .foregroundColor(Color(colors.textPrimary))
                 }
             }
 
@@ -79,6 +81,4 @@ struct DemoCallingTopView: View {
             )
         }
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }

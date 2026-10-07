@@ -12,7 +12,8 @@ public struct StatelessParticipantsListButton: View {
     /// Defines a closure type for action handling.
     public typealias ActionHandler = () -> Void
 
-    @Injected(\.videoAppearance) private var videoAppearance
+    @Injected(\.colors) private var colors
+    @Injected(\.images) private var images
 
     /// The associated call for the participants list button.
     public weak var call: Call?
@@ -55,7 +56,7 @@ public struct StatelessParticipantsListButton: View {
             action: { actionHandler?() },
             label: {
                 CallIconView(
-                    icon: videoAppearance.images.participantsIcon,
+                    icon: images.participantsIcon,
                     size: size,
                     iconStyle: isActive.wrappedValue ? .secondaryActive : .secondary
                 )
@@ -64,7 +65,7 @@ public struct StatelessParticipantsListButton: View {
         .overlay(
             ControlBadgeView(
                 "\(count)",
-                border: Color(videoAppearance.tokens.colors.badgeBorder)
+                border: Color(colors.badgeBorder)
             )
             .opacity(count > 1 ? 1 : 0)
         )

@@ -6,6 +6,9 @@ import StreamVideo
 import SwiftUI
 
 public struct ReconnectionView<Factory: ViewFactory>: View {
+    @Injected(\.colors) var colors
+    @Injected(\.fonts) var fonts
+    @Injected(\.layout) var layout
     
     @ObservedObject var viewModel: CallViewModel
     var viewFactory: Factory

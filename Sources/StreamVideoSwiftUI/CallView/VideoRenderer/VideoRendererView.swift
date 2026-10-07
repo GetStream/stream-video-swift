@@ -9,6 +9,7 @@ import SwiftUI
 
 /// A view that wraps a `VideoRenderer` and integrates with SwiftUI.
 public struct VideoRendererView: UIViewRepresentable {
+    @Injected(\.colors) var colors
 
     /// The type of the `UIView` being represented.
     public typealias UIViewType = VideoRenderer

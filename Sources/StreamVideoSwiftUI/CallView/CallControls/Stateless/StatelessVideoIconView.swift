@@ -13,7 +13,8 @@ public struct StatelessVideoIconView: View {
     public typealias ActionHandler = () -> Void
 
     @Injected(\.permissions) private var permissions
-    @Injected(\.videoAppearance) private var videoAppearance
+    @Injected(\.colors) private var colors
+    @Injected(\.images) private var images
 
     /// The associated call for the video icon.
     public weak var call: Call?
@@ -43,11 +44,11 @@ public struct StatelessVideoIconView: View {
         size: CGFloat = 44,
         controlStyle: ToggleControlStyle = .init(
             enabled: .init(
-                icon: InjectedValues[\.videoAppearance].images.videoTurnOn,
+                icon: InjectedValues[\.images].videoTurnOn,
                 iconStyle: .transparent
             ),
             disabled: .init(
-                icon: InjectedValues[\.videoAppearance].images.videoTurnOff,
+                icon: InjectedValues[\.images].videoTurnOff,
                 iconStyle: .disabled
             )
         ),
@@ -94,12 +95,12 @@ public struct StatelessVideoIconView: View {
         } else {
             content
                 .badge(
-                    videoAppearance.images.callControlErrorBadge,
+                    images.callControlErrorBadge,
                     foreground: Color(
-                        videoAppearance.colors.controlCallControlErrorBadgeText
+                        colors.controlCallControlErrorBadgeText
                     ),
                     background: Color(
-                        videoAppearance.colors
+                        colors
                             .controlCallControlErrorBadgeBackground
                     )
                 )

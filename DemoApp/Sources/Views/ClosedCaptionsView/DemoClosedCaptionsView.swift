@@ -9,7 +9,8 @@ import SwiftUI
 
 struct DemoClosedCaptionsView: View {
 
-    @Injected(\.videoAppearance) private var videoAppearance
+    @Injected(\.colors) private var colors
+    @Injected(\.layout) private var layout
 
     @ObservedObject var viewModel: CallViewModel
     @State private var items: [CallClosedCaption] = []
@@ -24,29 +25,27 @@ struct DemoClosedCaptionsView: View {
                 if items.isEmpty {
                     EmptyView()
                 } else {
-                    VStack(spacing: tokens.layout.spacingXs) {
+                    VStack(spacing: layout.spacingXs) {
                         ForEach(items, id: \.hashValue) { item in
-                            HStack(alignment: .top, spacing: tokens.layout.spacingXs) {
+                            HStack(alignment: .top, spacing: layout.spacingXs) {
                                 Text(item.speakerId)
-                                    .foregroundColor(Color(tokens.colors.textOnAccent))
+                                    .foregroundColor(Color(colors.textOnAccent))
 
                                 Text(item.text)
                                     .lineLimit(3)
-                                    .foregroundColor(Color(tokens.colors.textOnAccent))
+                                    .foregroundColor(Color(colors.textOnAccent))
                                     .frame(maxWidth: .infinity)
                             }
                             .transition(.asymmetric(insertion: .move(edge: .bottom), removal: .move(edge: .top)))
                         }
                     }
-                    .padding(.horizontal, tokens.layout.spacingMd)
-                    .padding(.vertical, tokens.layout.spacingXs)
-                    .background(Color(tokens.colors.backgroundCoreOverlayDarkStrong))
+                    .padding(.horizontal, layout.spacingMd)
+                    .padding(.vertical, layout.spacingXs)
+                    .background(Color(colors.backgroundCoreOverlayDarkStrong))
                     .animation(.default, value: items)
                 }
             }
             .onReceive(viewModel.call?.state.$closedCaptions) { items = $0 }
         }
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }

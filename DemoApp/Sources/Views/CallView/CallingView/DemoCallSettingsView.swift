@@ -9,19 +9,20 @@ import SwiftUI
 
 /// Shipping mic/camera row plus a demo-only encryption button.
 struct DemoCallSettingsView: View {
-    @Injected(\.videoAppearance) private var videoAppearance
+    @Injected(\.images) private var images
+    @Injected(\.layout) private var layout
 
     @Binding var callSettings: CallSettings
 
     var body: some View {
-        HStack(spacing: tokens.layout.spacing2xl) {
+        HStack(spacing: layout.spacing2xl) {
             StatelessMicrophoneIconView(
                 call: nil,
                 callSettings: callSettings,
-                size: tokens.layout.buttonVisualHeightMd,
+                size: layout.buttonVisualHeightMd,
                 controlStyle: .init(
-                    enabled: .init(icon: videoAppearance.images.micTurnOn, iconStyle: .secondary),
-                    disabled: .init(icon: videoAppearance.images.micTurnOff, iconStyle: .disabled)
+                    enabled: .init(icon: images.micTurnOn, iconStyle: .secondary),
+                    disabled: .init(icon: images.micTurnOff, iconStyle: .disabled)
                 )
             ) {
                 callSettings = CallSettings(
@@ -34,10 +35,10 @@ struct DemoCallSettingsView: View {
             StatelessVideoIconView(
                 call: nil,
                 callSettings: callSettings,
-                size: tokens.layout.buttonVisualHeightMd,
+                size: layout.buttonVisualHeightMd,
                 controlStyle: .init(
-                    enabled: .init(icon: videoAppearance.images.videoTurnOn, iconStyle: .secondary),
-                    disabled: .init(icon: videoAppearance.images.videoTurnOff, iconStyle: .disabled)
+                    enabled: .init(icon: images.videoTurnOn, iconStyle: .secondary),
+                    disabled: .init(icon: images.videoTurnOff, iconStyle: .disabled)
                 )
             ) {
                 callSettings = CallSettings(
@@ -49,14 +50,12 @@ struct DemoCallSettingsView: View {
 
             DemoLobbyEncryptionButton()
         }
-        .padding(tokens.layout.spacingMd)
+        .padding(layout.spacingMd)
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
 
 struct DemoLobbyEncryptionButton: View {
-    @Injected(\.videoAppearance) private var videoAppearance
+    @Injected(\.layout) private var layout
 
     @ObservedObject private var keys = AppEnvironment.EncryptionKeys.shared
 
@@ -68,7 +67,7 @@ struct DemoLobbyEncryptionButton: View {
         } label: {
             CallIconView(
                 icon: Image(systemName: lockSymbol),
-                size: tokens.layout.buttonVisualHeightMd,
+                size: layout.buttonVisualHeightMd,
                 iconStyle: keys.wantsEncryption ? .secondary : .transparent
             )
         }
@@ -92,12 +91,11 @@ struct DemoLobbyEncryptionButton: View {
         }
         return "lock.fill"
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
 
 struct DemoLobbyEncryptionSection: View {
-    @Injected(\.videoAppearance) private var videoAppearance
+    @Injected(\.colors) private var colors
+    @Injected(\.layout) private var layout
     @ObservedObject private var keys = AppEnvironment.EncryptionKeys.shared
 
     var body: some View {
@@ -108,17 +106,17 @@ struct DemoLobbyEncryptionSection: View {
                 )
             ) {
                 Toggle(isOn: enabledBinding) {
-                    HStack(spacing: tokens.layout.spacingXs) {
+                    HStack(spacing: layout.spacingXs) {
                         Image(systemName: lockSymbol)
-                            .foregroundColor(Color(tokens.colors.accentSuccess))
+                            .foregroundColor(Color(colors.accentSuccess))
                         Text("End-to-end encrypted")
                     }
                 }
-                .toggleStyle(SwitchToggleStyle(tint: Color(tokens.colors.accentSuccess)))
+                .toggleStyle(SwitchToggleStyle(tint: Color(colors.accentSuccess)))
                 .accessibility(identifier: "e2eeToggle")
 
                 if keys.wantsEncryption {
-                    HStack(spacing: tokens.layout.spacingXs) {
+                    HStack(spacing: layout.spacingXs) {
                         TextField("Shared key", text: passphraseBinding)
                             .autocapitalization(.none)
                             .disableAutocorrection(true)
@@ -128,7 +126,7 @@ struct DemoLobbyEncryptionSection: View {
                         Button(action: keys.generatePassphrase) {
                             Image(systemName: "arrow.triangle.2.circlepath")
                                 .foregroundColor(
-                                    Color(tokens.colors.textSecondary)
+                                    Color(colors.textSecondary)
                                 )
                         }
                         .buttonStyle(BorderlessButtonStyle())
@@ -146,8 +144,6 @@ struct DemoLobbyEncryptionSection: View {
         }
         return "lock.fill"
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 
     private var enabledBinding: Binding<Bool> {
         Binding(

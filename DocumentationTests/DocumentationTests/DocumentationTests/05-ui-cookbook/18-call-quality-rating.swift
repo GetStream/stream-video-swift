@@ -26,7 +26,8 @@ private func content() {
         struct DemoFeedbackView: View {
 
             @Environment(\.openURL) private var openURL
-            @Injected(\.appearance) private var appearance
+            @Injected(\.colors) private var colors
+            @Injected(\.fonts) private var fonts
 
             @State private var email: String = ""
             @State private var comment: String = ""
@@ -49,13 +50,13 @@ private func content() {
 
                         VStack(spacing: 8) {
                             Text("How is your call going?")
-                                .font(appearance.fonts.headline)
-                                .foregroundColor(appearance.colors.text)
+                                .font(fonts.headline)
+                                .foregroundColor(Color(colors.textPrimary))
                                 .lineLimit(1)
 
                             Text("All feedback is celebrated!")
-                                .font(appearance.fonts.subheadline)
-                                .foregroundColor(.init(appearance.colors.textLowEmphasis))
+                                .font(fonts.subheadline)
+                                .foregroundColor(Color(colors.textSecondary))
                                 .lineLimit(2)
                         }
                         .frame(maxWidth: .infinity, alignment: .center)
@@ -74,8 +75,8 @@ private func content() {
 
                             HStack {
                                 Text("Rate Quality")
-                                    .font(appearance.fonts.body)
-                                    .foregroundColor(.init(appearance.colors.textLowEmphasis))
+                                    .font(fonts.body)
+                                    .foregroundColor(Color(colors.textSecondary))
                                     .frame(maxWidth: .infinity, alignment: .leading)
 
                                 DemoStarRatingView(rating: $rating)
@@ -90,10 +91,10 @@ private func content() {
                                 Text("Contact Us")
                             }
                             .frame(maxWidth: .infinity)
-                            .foregroundColor(appearance.colors.text)
+                            .foregroundColor(Color(colors.textPrimary))
                             .padding(.vertical, 4)
                             .clipShape(Capsule())
-                            .overlay(Capsule().stroke(Color(appearance.colors.textLowEmphasis), lineWidth: 1))
+                            .overlay(Capsule().stroke(Color(colors.textSecondary), lineWidth: 1))
 
                             Button {
                                 resignFirstResponder()
@@ -125,9 +126,15 @@ private func content() {
                                 }
                             }
                             .frame(maxWidth: .infinity)
-                            .foregroundColor(appearance.colors.text)
+                            .foregroundColor(Color(colors.textPrimary))
                             .padding(.vertical, 4)
-                            .background(isSubmitEnabled ? appearance.colors.accentBlue : appearance.colors.lightGray)
+                            .background(
+                                Color(
+                                    isSubmitEnabled
+                                        ? colors.buttonPrimaryBackground
+                                        : colors.backgroundUtilityDisabled
+                                )
+                            )
                             .disabled(!isSubmitEnabled)
                             .clipShape(Capsule())
                         }

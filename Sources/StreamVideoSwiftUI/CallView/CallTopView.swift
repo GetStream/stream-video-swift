@@ -8,6 +8,7 @@ import SwiftUI
 public struct CallTopView<Factory: ViewFactory>: View {
 
     @Injected(\.streamVideo) var streamVideo
+    @Injected(\.layout) var layout
 
     private var viewFactory: Factory
 
@@ -89,7 +90,10 @@ public struct CallTopView<Factory: ViewFactory>: View {
 }
 
 public struct SharingIndicator: View {
-    @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.colors) var colors
+    @Injected(\.fonts) var fonts
+    @Injected(\.layout) var layout
+    @Injected(\.images) var images
 
     @ObservedObject var viewModel: CallViewModel
     @Binding var sharingPopupDismissed: Bool
@@ -115,7 +119,7 @@ public struct SharingIndicator: View {
             Button {
                 sharingPopupDismissed = true
             } label: {
-                videoAppearance.images.xmark
+                images.xmark
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(height: 14)

@@ -9,6 +9,7 @@ import SwiftUI
 final class CallParticipantsInfoViewModel: ObservableObject {
 
     @Injected(\.streamVideo) var streamVideo
+    @Injected(\.images) var images
     
     @Published var inviteParticipantsShown = false
     
@@ -16,7 +17,7 @@ final class CallParticipantsInfoViewModel: ObservableObject {
         id: "mute-audio-user",
         title: "Mute user",
         requiredCapability: .muteUsers,
-        iconName: "speaker.slash",
+        icon: images.participantMuteAudio,
         action: { [weak self] in self?.muteAudio(for: $0) },
         confirmationPopup: nil,
         isDestructive: false
@@ -26,7 +27,7 @@ final class CallParticipantsInfoViewModel: ObservableObject {
         id: "mute-video-user",
         title: "Disable video",
         requiredCapability: .muteUsers,
-        iconName: "video.slash",
+        icon: images.participantMuteVideo,
         action: { [weak self] in self?.muteVideo(for: $0) },
         confirmationPopup: nil,
         isDestructive: false
@@ -36,7 +37,7 @@ final class CallParticipantsInfoViewModel: ObservableObject {
         id: "unblock-user",
         title: "Unblock user",
         requiredCapability: .blockUsers,
-        iconName: "person.badge.plus",
+        icon: images.participantUnblock,
         action: { [weak self] in self?.unblock(userId: $0) },
         confirmationPopup: nil,
         isDestructive: false
@@ -46,7 +47,7 @@ final class CallParticipantsInfoViewModel: ObservableObject {
         id: "block-user",
         title: "Block user",
         requiredCapability: .blockUsers,
-        iconName: "person.badge.minus",
+        icon: images.participantBlock,
         action: { [weak self] in self?.block(userId: $0) },
         confirmationPopup: nil,
         isDestructive: false

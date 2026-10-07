@@ -10,29 +10,28 @@ import SwiftUI
 @available(iOS 15.0, *)
 struct DemoBackgroundEffectSelector: View {
 
-    @Injected(\.videoAppearance) private var videoAppearance
+    @Injected(\.layout) private var layout
 
     var effects: [BackgroundEffect] = BackgroundEffect.allCases
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack(alignment: .center, spacing: tokens.layout.spacingXxs) {
+            HStack(alignment: .center, spacing: layout.spacingXxs) {
                 ForEach(effects) { effect in
                     DemoEffectButton(effect: effect)
                 }
             }
-            .padding(.horizontal, tokens.layout.spacingMd)
+            .padding(.horizontal, layout.spacingMd)
         }
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
 
 @available(iOS 15.0, *)
 @MainActor
 struct DemoEffectButton: View {
 
-    @Injected(\.videoAppearance) private var videoAppearance
+    @Injected(\.colors) private var colors
+    @Injected(\.layout) private var layout
 
     var effect: BackgroundEffect
     @ObservedObject var appState = AppState.shared
@@ -58,7 +57,7 @@ struct DemoEffectButton: View {
         } label: {
             ZStack {
                 Circle()
-                    .fill(Color(tokens.colors.backgroundCoreOnElevation))
+                    .fill(Color(colors.backgroundCoreOnElevation))
                     .overlay(
                         effect
                             .image
@@ -69,14 +68,14 @@ struct DemoEffectButton: View {
                     )
                     .clipped()
                     .frame(
-                        width: tokens.layout.buttonVisualHeightMd,
-                        height: tokens.layout.buttonVisualHeightMd
+                        width: layout.buttonVisualHeightMd,
+                        height: layout.buttonVisualHeightMd
                     )
 
                 if isSelected {
                     Circle()
                         .stroke(
-                            Color(tokens.colors.borderUtilityActive),
+                            Color(colors.borderUtilityActive),
                             lineWidth: 2
                         )
                         .frame(
@@ -86,18 +85,16 @@ struct DemoEffectButton: View {
                 }
             }
             .frame(
-                width: tokens.layout.buttonVisualHeightLg,
-                height: tokens.layout.buttonVisualHeightLg
+                width: layout.buttonVisualHeightLg,
+                height: layout.buttonVisualHeightLg
             )
         }
         .buttonStyle(.plain)
     }
 
     private var selectionRingSize: CGFloat {
-        tokens.layout.buttonVisualHeightLg - tokens.layout.spacingXxs
+        layout.buttonVisualHeightLg - layout.spacingXxs
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
 
 @available(iOS 15.0, *)
@@ -153,7 +150,7 @@ enum BackgroundEffect: String, CaseIterable, Identifiable {
     }
 
     var padding: Double {
-        let iconPadding = InjectedValues[\.videoAppearance].tokens.layout.buttonPaddingXIconOnlyMd
+        let iconPadding = InjectedValues[\.layout].buttonPaddingXIconOnlyMd
         switch self {
         case .none:
             return iconPadding

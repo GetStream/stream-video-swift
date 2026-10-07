@@ -10,7 +10,6 @@ import SwiftUI
 @available(iOS 14.0, *)
 public struct IncomingCallView<Factory: ViewFactory>: View {
 
-    @Injected(\.videoAppearance) var videoAppearance
     @Injected(\.utils) var utils
 
     var viewFactory: Factory
@@ -55,8 +54,11 @@ public struct IncomingCallView<Factory: ViewFactory>: View {
 /// The content view of the incoming call screen.
 struct IncomingCallViewContent<Factory: ViewFactory>: View {
 
-    @Injected(\.videoAppearance) var videoAppearance
     @Injected(\.utils) var utils
+    @Injected(\.colors) private var colors
+    @Injected(\.images) private var images
+    @Injected(\.fonts) private var fonts
+    @Injected(\.layout) private var layout
 
     var viewFactory: Factory
     var callParticipants: [Member]
@@ -65,7 +67,7 @@ struct IncomingCallViewContent<Factory: ViewFactory>: View {
     var onCallRejected: (String) -> Void
 
     var body: some View {
-        VStack(spacing: tokens.layout.spacingMd) {
+        VStack(spacing: layout.spacingMd) {
             Spacer()
 
             if callParticipants.count > 1 {
@@ -85,58 +87,58 @@ struct IncomingCallViewContent<Factory: ViewFactory>: View {
                 participants: callParticipants,
                 caller: callInfo.caller.name
             )
-            .padding(tokens.layout.spacingMd)
+            .padding(layout.spacingMd)
 
-            HStack(alignment: .firstTextBaseline, spacing: tokens.layout.spacingXxxs) {
+            HStack(alignment: .firstTextBaseline, spacing: layout.spacingXxxs) {
                 Text(L10n.Call.Incoming.title)
-                    .font(tokens.fonts.title2)
+                    .font(fonts.title2)
                     .fontWeight(.semibold)
                     .foregroundColor(
-                        Color(tokens.colors.textSecondary)
+                        Color(colors.textSecondary)
                     )
                 CallingIndicator()
             }
 
             Spacer()
 
-            HStack(spacing: tokens.layout.spacingXs) {
+            HStack(spacing: layout.spacingXs) {
                 Spacing()
 
                 Button {
                     onCallRejected(callInfo.id)
                 } label: {
-                    videoAppearance.images.declineCall
+                    images.declineCall
                         .applyCallButtonStyle(
                             color: Color(
-                                videoAppearance.colors
+                                colors
                                     .controlDeclineCallButtonBackground
                             ),
                             backgroundType: .circle,
                             size: 80
                         )
                 }
-                .padding(.all, tokens.layout.spacingXs)
+                .padding(.all, layout.spacingXs)
 
                 Spacing(size: 3)
 
                 Button {
                     onCallAccepted(callInfo.id)
                 } label: {
-                    videoAppearance.images.acceptCall
+                    images.acceptCall
                         .applyCallButtonStyle(
                             color: Color(
-                                videoAppearance.colors
+                                colors
                                     .controlAcceptCallButtonBackground
                             ),
                             backgroundType: .circle,
                             size: 80
                         )
                 }
-                .padding(.all, tokens.layout.spacingXs)
+                .padding(.all, layout.spacingXs)
 
                 Spacing()
             }
-            .padding(tokens.layout.spacingMd)
+            .padding(layout.spacingMd)
         }
         .background(
             CallBackground()
@@ -148,6 +150,4 @@ struct IncomingCallViewContent<Factory: ViewFactory>: View {
             utils.callSoundsPlayer.stopOngoingSound()
         }
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }

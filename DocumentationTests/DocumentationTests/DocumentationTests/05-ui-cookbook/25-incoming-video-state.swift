@@ -40,9 +40,8 @@ private func content() {
 
     container {
         struct ParticipantInfoView: View {
-            @Injected(\.images) var images
-            @Injected(\.fonts) var fonts
             @Injected(\.colors) var colors
+            @Injected(\.fonts) var fonts
 
             var participant: CallParticipant
             var isPinned: Bool
@@ -94,7 +93,7 @@ private func content() {
                 .cornerRadius(
                     8,
                     corners: [.topRight],
-                    backgroundColor: colors.participantInfoBackgroundColor
+                    backgroundColor: Color(colors.backgroundCoreOverlayDarkStrong)
                 )
             }
         }

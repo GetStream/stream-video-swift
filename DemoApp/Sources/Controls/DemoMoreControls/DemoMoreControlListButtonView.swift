@@ -9,7 +9,9 @@ import SwiftUI
 
 struct DemoMoreControlListButtonView<Icon: View>: View {
 
-    @Injected(\.videoAppearance) private var videoAppearance
+    @Injected(\.colors) private var colors
+    @Injected(\.fonts) private var fonts
+    @Injected(\.layout) private var layout
 
     var centered: Bool = false
     var primaryStyle: Bool = false
@@ -22,11 +24,11 @@ struct DemoMoreControlListButtonView<Icon: View>: View {
         Button {
             action()
         } label: {
-            HStack(spacing: tokens.layout.spacingSm) {
+            HStack(spacing: layout.spacingSm) {
                 Label(
                     title: {
                         Text(label)
-                            .font(primaryStyle ? tokens.fonts.bodyBold : tokens.fonts.body)
+                            .font(primaryStyle ? fonts.bodyBold : fonts.body)
                     },
                     icon: { icon() }
                 )
@@ -36,26 +38,24 @@ struct DemoMoreControlListButtonView<Icon: View>: View {
                 }
             }
             .frame(maxWidth: .infinity)
-            .padding(.horizontal, tokens.layout.spacingSm)
+            .padding(.horizontal, layout.spacingSm)
         }
-        .frame(minHeight: tokens.layout.buttonVisualHeightLg)
+        .frame(minHeight: layout.buttonVisualHeightLg)
         .buttonStyle(.borderless)
         .foregroundColor(
             primaryStyle
-                ? Color(tokens.colors.buttonPrimaryTextOnAccent)
-                : Color(tokens.colors.textPrimary)
+                ? Color(colors.buttonPrimaryTextOnAccent)
+                : Color(colors.textPrimary)
         )
         .background(
             primaryStyle
-                ? Color(tokens.colors.buttonPrimaryBackground)
-                : Color(tokens.colors.backgroundCoreElevation1)
+                ? Color(colors.buttonPrimaryBackground)
+                : Color(colors.backgroundCoreElevation1)
         )
         .clipShape(Capsule())
         .frame(maxWidth: .infinity)
         .disabled(disabled)
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
 
 @MainActor

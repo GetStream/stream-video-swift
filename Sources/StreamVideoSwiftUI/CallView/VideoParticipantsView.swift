@@ -64,6 +64,7 @@ public enum VideoCallParticipantDecoration: Hashable, CaseIterable {
 }
 
 public struct VideoCallParticipantModifier: ViewModifier {
+    @Injected(\.layout) var layout
 
     var participant: CallParticipant
     var call: Call?
@@ -150,7 +151,9 @@ extension View {
 @MainActor
 public struct VideoCallParticipantOptionsModifier: ViewModifier {
 
-    @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.colors) var colors
+    @Injected(\.layout) var layout
+    @Injected(\.images) var images
 
     @State private var presentActionSheet: Bool = false
 
@@ -201,7 +204,7 @@ public struct VideoCallParticipantOptionsModifier: ViewModifier {
 
     @ViewBuilder
     private var optionsButtonView: some View {
-        videoAppearance.images.participantOptions
+        images.participantOptions
             .foregroundColor(Color(colors.textOnAccent))
             .padding(layout.spacingXs)
             .background(Color(colors.backgroundCoreOverlayDarkStrong))
@@ -297,6 +300,8 @@ public struct VideoCallParticipantOptionsModifier: ViewModifier {
 }
 
 public struct VideoCallParticipantSpeakingModifier: ViewModifier {
+    @Injected(\.colors) var colors
+    @Injected(\.layout) var layout
 
     public var participant: CallParticipant
     public var participantCount: Int
@@ -305,7 +310,7 @@ public struct VideoCallParticipantSpeakingModifier: ViewModifier {
     public init(
         participant: CallParticipant,
         participantCount: Int,
-        cornerRadius: CGFloat = InjectedValues[\.videoAppearance].tokens.layout.radius2xl
+        cornerRadius: CGFloat = InjectedValues[\.layout].radius2xl
     ) {
         self.participant = participant
         self.participantCount = participantCount
@@ -432,7 +437,10 @@ public struct VideoCallParticipantView<Factory: ViewFactory>: View {
 }
 
 public struct ParticipantInfoView: View {
-    @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.colors) var colors
+    @Injected(\.fonts) var fonts
+    @Injected(\.layout) var layout
+    @Injected(\.images) var images
     
     var participant: CallParticipant
     var isPinned: Bool
@@ -454,7 +462,7 @@ public struct ParticipantInfoView: View {
     public var body: some View {
         HStack(spacing: layout.spacingXxs) {
             if isPinned {
-                videoAppearance.images.participantPinned
+                images.participantPinned
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(maxHeight: maxHeight)
@@ -470,7 +478,7 @@ public struct ParticipantInfoView: View {
                 .accessibility(identifier: "participantName")
 
             if participant.pausedTracks.contains(.video) {
-                videoAppearance.images.participantVideoPaused
+                images.participantVideoPaused
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(maxHeight: maxHeight)
@@ -492,7 +500,8 @@ public struct ParticipantInfoView: View {
 }
 
 public struct SoundIndicator: View {
-    @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.colors) var colors
+    @Injected(\.images) var images
     
     let participant: CallParticipant
     
@@ -501,7 +510,7 @@ public struct SoundIndicator: View {
     }
     
     public var body: some View {
-        (participant.hasAudio ? videoAppearance.images.micTurnOn : videoAppearance.images.micTurnOff)
+        (participant.hasAudio ? images.micTurnOn : images.micTurnOff)
             .resizable()
             .aspectRatio(contentMode: .fit)
             .foregroundColor(Color(colors.textOnAccent))
@@ -511,6 +520,8 @@ public struct SoundIndicator: View {
 }
 
 public struct PopoverButton: View {
+    @Injected(\.colors) var colors
+    @Injected(\.layout) var layout
         
     var title: String
     @Binding var popoverShown: Bool

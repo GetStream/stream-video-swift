@@ -11,8 +11,7 @@ import SwiftUI
 /// Shared color and layout tokens come from ``DesignSystemTokens``. Pass
 /// the same instance into Chat's appearance so both SDKs reskin together.
 /// Video-only colors live on ``colors``. Shared typography is
-/// ``tokens/fonts``. Existing views still use ``Appearance/fonts``
-/// until they migrate.
+/// ``tokens/fonts``.
 ///
 /// ```swift
 /// let tokens = DesignSystemTokens()
@@ -36,13 +35,30 @@ public final class VideoAppearance {
     /// The images the Video SDK renders. Icons stay on the product SDK.
     public var images: Images
 
+    /// The sounds played for incoming and outgoing calls.
+    public var sounds: Sounds
+
     public init(
         tokens: DesignSystemTokens = DesignSystemTokens(),
-        images: Images = Images()
+        images: Images = Images(),
+        sounds: Sounds = Sounds()
     ) {
         self.tokens = tokens
         self.colors = Colors(tokens: tokens)
         self.images = images
+        self.sounds = sounds
+    }
+
+    /// Provider for custom localization which is dependent on App Bundle.
+    public nonisolated(unsafe) static var localizationProvider: (
+        _ key: String,
+        _ table: String
+    ) -> String = { key, table in
+        Bundle.streamVideoUI.localizedString(
+            forKey: key,
+            value: nil,
+            table: table
+        )
     }
 }
 
@@ -60,37 +76,49 @@ extension InjectedValues {
             Self[VideoAppearanceKey.self] = newValue
         }
     }
-}
 
-// This will be changed once all views have been migrated.
-enum VideoTokens {
-    static var colors: DesignSystemTokens.Colors {
-        InjectedValues[\.videoAppearance].tokens.colors
+    /// Video-only colors plus every shared color token.
+    ///
+    /// In a file that also imports the Chat SDK, use
+    /// `\.videoAppearance.colors` or `\.videoAppearance.tokens.colors`.
+    public var colors: VideoAppearance.Colors {
+        get { videoAppearance.colors }
+        set { videoAppearance.colors = newValue }
     }
 
-    static var fonts: DesignSystemTokens.Fonts {
-        InjectedValues[\.videoAppearance].tokens.fonts
+    /// The images the Video SDK renders.
+    ///
+    /// In a file that also imports the Chat SDK, use
+    /// `\.videoAppearance.images`.
+    public var images: Images {
+        get { videoAppearance.images }
+        set { videoAppearance.images = newValue }
     }
 
-    static var layout: DesignSystemTokens.Layout {
-        InjectedValues[\.videoAppearance].tokens.layout
+    /// The sounds played for incoming and outgoing calls.
+    ///
+    /// In a file that also imports the Chat SDK, use
+    /// `\.videoAppearance.sounds`.
+    public var sounds: Sounds {
+        get { videoAppearance.sounds }
+        set { videoAppearance.sounds = newValue }
     }
-}
 
-extension View {
-    var colors: DesignSystemTokens.Colors { VideoTokens.colors }
-    var fonts: DesignSystemTokens.Fonts { VideoTokens.fonts }
-    var layout: DesignSystemTokens.Layout { VideoTokens.layout }
-}
+    /// Shared typography tokens.
+    ///
+    /// In a file that also imports the Chat SDK, use
+    /// `\.videoAppearance.tokens.fonts`.
+    public var fonts: DesignSystemTokens.Fonts {
+        get { videoAppearance.tokens.fonts }
+        set { videoAppearance.tokens.fonts = newValue }
+    }
 
-extension ButtonStyle {
-    var colors: DesignSystemTokens.Colors { VideoTokens.colors }
-    var fonts: DesignSystemTokens.Fonts { VideoTokens.fonts }
-    var layout: DesignSystemTokens.Layout { VideoTokens.layout }
-}
-
-extension ViewModifier {
-    var colors: DesignSystemTokens.Colors { VideoTokens.colors }
-    var fonts: DesignSystemTokens.Fonts { VideoTokens.fonts }
-    var layout: DesignSystemTokens.Layout { VideoTokens.layout }
+    /// Shared spacing, radius, stroke, and elevation tokens.
+    ///
+    /// In a file that also imports the Chat SDK, use
+    /// `\.videoAppearance.tokens.layout`.
+    public var layout: DesignSystemTokens.Layout {
+        get { videoAppearance.tokens.layout }
+        set { videoAppearance.tokens.layout = newValue }
+    }
 }

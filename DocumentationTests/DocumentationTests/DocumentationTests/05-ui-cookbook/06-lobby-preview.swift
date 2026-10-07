@@ -57,9 +57,8 @@ private func content() {
 
         struct CustomLobbyContentView: View {
 
-            @Injected(\.images) var images
-            @Injected(\.colors) var colors
             @Injected(\.streamVideo) var streamVideo
+            @Injected(\.colors) var colors
 
             @ObservedObject var viewModel: LobbyViewModel
             @ObservedObject var microphoneChecker: MicrophoneChecker
@@ -77,12 +76,12 @@ private func content() {
                             Spacer()
                             Text("Before Joining")
                                 .font(.title)
-                                .foregroundColor(colors.text)
+                                .foregroundColor(Color(colors.textPrimary))
                                 .bold()
 
                             Text("Setup your audio and video")
                                 .font(.body)
-                                .foregroundColor(Color(colors.textLowEmphasis))
+                                .foregroundColor(Color(colors.textSecondary))
 
                             CameraCheckView(
                                 viewModel: viewModel,
@@ -94,7 +93,7 @@ private func content() {
                             if microphoneChecker.isSilent {
                                 Text("Your microphone doesn't seem to be working. Make sure you have all permissions accepted.")
                                     .font(.caption)
-                                    .foregroundColor(colors.text)
+                                    .foregroundColor(Color(colors.textPrimary))
                             }
 
                             CallSettingsView(callSettings: $callSettings)
@@ -113,13 +112,13 @@ private func content() {
                                 onCloseLobby()
                             } label: {
                                 Image(systemName: "xmark")
-                                    .foregroundColor(colors.text)
+                                    .foregroundColor(Color(colors.textPrimary))
                             }
                             .padding()
                         }
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(colors.lobbyBackground.edgesIgnoringSafeArea(.all))
+                    .background(Color(colors.backgroundCoreApp).edgesIgnoringSafeArea(.all))
                 }
                 .onAppear {
                     viewModel.startCamera(front: true)
@@ -132,9 +131,8 @@ private func content() {
 
         struct CameraCheckView: View {
 
-            @Injected(\.images) var images
-            @Injected(\.colors) var colors
             @Injected(\.streamVideo) var streamVideo
+            @Injected(\.colors) var colors
 
             @ObservedObject var viewModel: LobbyViewModel
             @ObservedObject var microphoneChecker: MicrophoneChecker
@@ -154,7 +152,7 @@ private func content() {
                     } else {
                         ZStack {
                             Rectangle()
-                                .fill(colors.lobbySecondaryBackground)
+                                .fill(Color(colors.backgroundCoreSurfaceDefault))
                                 .frame(width: availableSize.width - 32, height: cameraSize)
                                 .cornerRadius(16)
 
@@ -274,12 +272,12 @@ private func content() {
                             .accessibility(identifier: "joinCall")
                     }
                     .frame(height: 50)
-                    .background(colors.primaryButtonBackground)
+                    .background(Color(colors.buttonPrimaryBackground))
                     .cornerRadius(16)
                     .foregroundColor(.white)
                 }
                 .padding()
-                .background(colors.lobbySecondaryBackground)
+                .background(Color(colors.backgroundCoreSurfaceDefault))
                 .cornerRadius(16)
             }
 

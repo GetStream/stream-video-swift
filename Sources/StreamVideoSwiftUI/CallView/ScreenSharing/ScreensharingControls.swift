@@ -7,7 +7,7 @@ import SwiftUI
 
 public struct ScreenshareIconView: View {
     
-    @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.images) var images
     
     @ObservedObject var viewModel: CallViewModel
     let size: CGFloat
@@ -22,7 +22,7 @@ public struct ScreenshareIconView: View {
             viewModel.startScreensharing(type: .inApp)
         } label: {
             CallIconView(
-                icon: videoAppearance.images.screenshareIcon,
+                icon: images.screenshareIcon,
                 size: size,
                 iconStyle: (viewModel.call?.state.isCurrentUserScreensharing == false ? .secondary : .secondaryActive)
             )

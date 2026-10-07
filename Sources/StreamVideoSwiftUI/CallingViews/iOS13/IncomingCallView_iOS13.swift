@@ -9,7 +9,6 @@ import SwiftUI
 @available(iOS, introduced: 13, deprecated: 14)
 public struct IncomingCallView_iOS13<Factory: ViewFactory>: View {
     @Injected(\.streamVideo) var streamVideo
-    @Injected(\.videoAppearance) var videoAppearance
     @Injected(\.utils) var utils
 
     var viewFactory: Factory

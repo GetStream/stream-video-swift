@@ -7,9 +7,12 @@ import StreamVideo
 import SwiftUI
 
 public struct MicrophoneCheckView: View {
-    @Injected(\.videoAppearance) var videoAppearance
     @Injected(\.streamVideo) var streamVideo
     @Injected(\.permissions) var permissions
+    @Injected(\.colors) private var colors
+    @Injected(\.images) private var images
+    @Injected(\.fonts) private var fonts
+    @Injected(\.layout) private var layout
 
     var audioLevels: [Float]
     var microphoneOn: Bool
@@ -35,21 +38,21 @@ public struct MicrophoneCheckView: View {
     }
     
     public var body: some View {
-        HStack(spacing: tokens.layout.spacingXxs) {
+        HStack(spacing: layout.spacingXxs) {
             if isPinned {
-                videoAppearance.images.participantPinned
+                images.participantPinned
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(maxHeight: CGFloat(maxHeight))
-                    .foregroundColor(Color(tokens.colors.textOnAccent))
-                    .padding(.trailing, tokens.layout.spacingXxs)
+                    .foregroundColor(Color(colors.textOnAccent))
+                    .padding(.trailing, layout.spacingXxs)
             }
 
             Text(streamVideo.user.name)
-                .foregroundColor(Color(tokens.colors.textOnAccent))
+                .foregroundColor(Color(colors.textOnAccent))
                 .multilineTextAlignment(.leading)
                 .lineLimit(1)
-                .font(tokens.fonts.caption1)
+                .font(fonts.caption1)
                 .minimumScaleFactor(0.7)
                 .accessibility(identifier: "participantName")
 
@@ -61,30 +64,29 @@ public struct MicrophoneCheckView: View {
                     maxValue: 1
                 )
             } else {
-                videoAppearance.images.micTurnOff
+                images.micTurnOff
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(height: CGFloat(maxHeight))
-                    .foregroundColor(Color(tokens.colors.accentError))
+                    .foregroundColor(Color(colors.accentError))
             }
         }
-        .padding(.all, tokens.layout.spacingXxxs)
-        .padding(.horizontal, tokens.layout.spacingXxs)
+        .padding(.all, layout.spacingXxxs)
+        .padding(.horizontal, layout.spacingXxs)
         .frame(height: 28)
         .cornerRadius(
-            tokens.layout.radiusMd,
+            layout.radiusMd,
             corners: [.topRight],
-            backgroundColor: Color(tokens.colors.backgroundCoreOverlayDarkStrong)
+            backgroundColor: Color(colors.backgroundCoreOverlayDarkStrong)
         )
         .onReceive(permissions.$hasMicrophonePermission) { hasMicrophoneAccess = $0 }
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
 
 public struct AudioVolumeIndicator: View {
     
-    @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.colors) private var colors
+    @Injected(\.layout) private var layout
     
     var audioLevels: [Float]
     var maxHeight: Float
@@ -104,19 +106,17 @@ public struct AudioVolumeIndicator: View {
     }
     
     public var body: some View {
-        HStack(spacing: tokens.layout.spacingXxxs) {
+        HStack(spacing: layout.spacingXxxs) {
             ForEach(levels) { level in
-                VStack(spacing: tokens.layout.spacingXs) {
-                    RoundedRectangle(cornerRadius: tokens.layout.radiusXs)
-                        .fill(Color(videoAppearance.colors.indicatorMicrophoneLevelBarActive))
-                        .frame(width: tokens.layout.spacingXxxs, height: height(for: level.value))
+                VStack(spacing: layout.spacingXs) {
+                    RoundedRectangle(cornerRadius: layout.radiusXs)
+                        .fill(Color(colors.indicatorMicrophoneLevelBarActive))
+                        .frame(width: layout.spacingXxxs, height: height(for: level.value))
                 }
                 .frame(height: CGFloat(maxHeight))
             }
         }
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 
     var levels: [AudioLevel] {
         var levels = [AudioLevel]()

@@ -29,6 +29,8 @@ struct HalfSheetView<Content: View>: View {
 }
 
 struct DraggableSheetView<Content: View>: View {
+    @Injected(\.colors) var colors
+    @Injected(\.layout) var layout
 
     var isPresented: Binding<Bool>
     var content: () -> Content
@@ -77,6 +79,8 @@ struct DraggableSheetView<Content: View>: View {
 }
 
 public struct DragHandleView: View {
+    @Injected(\.colors) var colors
+
     public init() {}
     
     public var body: some View {
@@ -99,6 +103,8 @@ extension View {
         onDismiss: (() -> Void)? = nil,
         @ViewBuilder content: @escaping () -> Content
     ) -> some View where Content: View {
+        let colors = InjectedValues[\.colors]
+        let layout = InjectedValues[\.layout]
         if #available(iOS 16.4, *) {
             sheet(isPresented: isPresented, onDismiss: onDismiss) {
                 content()

@@ -12,8 +12,9 @@ struct DemoMoreControlsViewModifier: ViewModifier {
     @ObservedObject var appState: AppState = .shared
     @ObservedObject var viewModel: CallViewModel
     @Injected(\.snapshotTrigger) var snapshotTrigger
-    @Injected(\.videoAppearance) private var videoAppearance
     @Injected(\.localParticipantSnapshotViewModel) var localParticipantSnapshotViewModel
+    @Injected(\.colors) private var colors
+    @Injected(\.layout) private var layout
 
     @State private var isStatsPresented = false
 
@@ -27,23 +28,23 @@ struct DemoMoreControlsViewModifier: ViewModifier {
             .halfSheet(isPresented: $viewModel.moreControlsShown) {
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: {
-                        if #available(iOS 15.0, *) { return tokens.layout.spacingXs }
-                        else { return tokens.layout.spacing2xl }
+                        if #available(iOS 15.0, *) { return layout.spacingXs }
+                        else { return layout.spacing2xl }
                     }()) {
-                        VStack(spacing: tokens.layout.spacingXs) {
-                            VStack(spacing: tokens.layout.spacingXs) {
+                        VStack(spacing: layout.spacingXs) {
+                            VStack(spacing: layout.spacingXs) {
                                 DemoReactionSelectorView { viewModel.moreControlsShown = false }
                                 DemoRaiseHandToggleButtonView(viewModel: viewModel)
                             }
-                            .padding(.horizontal, tokens.layout.spacingMd)
+                            .padding(.horizontal, layout.spacingMd)
 
                             if #available(iOS 15.0, *) {
                                 DemoBackgroundEffectSelector()
-                                    .padding(.top, tokens.layout.spacingMd)
+                                    .padding(.top, layout.spacingMd)
                             }
                         }
 
-                        VStack(spacing: tokens.layout.spacingXs) {
+                        VStack(spacing: layout.spacingXs) {
                             DemoNoiseCancellationButtonView(viewModel: viewModel)
 
                             DemoMoreControlListButtonView(
@@ -77,10 +78,10 @@ struct DemoMoreControlsViewModifier: ViewModifier {
                                 label: "Stats"
                             ) { Image(systemName: "chart.xyaxis.line") }
                         }
-                        .padding(.horizontal, tokens.layout.spacingMd)
+                        .padding(.horizontal, layout.spacingMd)
 
                         if AppEnvironment.configuration != .release {
-                            VStack(spacing: tokens.layout.spacingXs) {
+                            VStack(spacing: layout.spacingXs) {
                                 Divider()
 
                                 DemoAudioTrackButtonView()
@@ -148,11 +149,11 @@ struct DemoMoreControlsViewModifier: ViewModifier {
                                     viewModel: viewModel
                                 ) { viewModel.moreControlsShown = false }
                             }
-                            .padding(.horizontal, tokens.layout.spacingMd)
+                            .padding(.horizontal, layout.spacingMd)
                         }
                     }
                 }
-                .background(Color(tokens.colors.backgroundCoreElevation1))
+                .background(Color(colors.backgroundCoreElevation1))
                 .sheet(isPresented: $isStatsPresented) {
                     DemoStatsView(
                         viewModel: viewModel,
@@ -161,8 +162,6 @@ struct DemoMoreControlsViewModifier: ViewModifier {
                 }
             }
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }
 
 private struct DemoMoreLogsAndGleapButtonView: View {
@@ -173,7 +172,7 @@ private struct DemoMoreLogsAndGleapButtonView: View {
     @State private var activeLogsTask: Task<Void, Error>?
 
     var body: some View {
-        HStack(spacing: InjectedValues[\.videoAppearance].tokens.layout.spacingXs) {
+        HStack(spacing: InjectedValues[\.layout].spacingXs) {
             gleapButtonView
             logsViewButtonView
         }

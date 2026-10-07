@@ -32,7 +32,7 @@ private func content() {
                 VStack {
                     Spacer()
                     Text("Incoming call")
-                        .foregroundColor(Color(colors.textLowEmphasis))
+                        .foregroundColor(Color(colors.textSecondary))
                         .padding()
 
                     StreamLazyImage(imageURL: callInfo.caller.imageURL)
@@ -42,7 +42,7 @@ private func content() {
 
                     Text(callInfo.caller.name)
                         .font(.title)
-                        .foregroundColor(Color(colors.textLowEmphasis))
+                        .foregroundColor(Color(colors.textSecondary))
                         .padding()
 
                     Spacer()

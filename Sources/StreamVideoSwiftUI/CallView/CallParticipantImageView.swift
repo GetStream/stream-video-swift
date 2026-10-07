@@ -6,6 +6,7 @@ import StreamVideo
 import SwiftUI
 
 public struct CallParticipantImageView<Factory: ViewFactory>: View {
+    @Injected(\.colors) var colors
 
     private let size: CGFloat = 138
 

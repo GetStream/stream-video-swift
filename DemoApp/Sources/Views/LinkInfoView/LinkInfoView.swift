@@ -8,13 +8,15 @@ import SwiftUI
 
 struct LinkInfoView: View {
 
-    @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.colors) private var colors
+    @Injected(\.fonts) private var fonts
+    @Injected(\.layout) private var layout
 
     var body: some View {
-        HStack(spacing: tokens.layout.spacingMd) {
+        HStack(spacing: layout.spacingMd) {
             ZStack {
                 Circle()
-                    .fill(Color(tokens.colors.buttonPrimaryBackground))
+                    .fill(Color(colors.buttonPrimaryBackground))
                     .frame(width: 36, height: 36)
 
                 Image("logo")
@@ -22,18 +24,16 @@ struct LinkInfoView: View {
                     .renderingMode(.template)
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 22)
-                    .foregroundColor(Color(tokens.colors.buttonPrimaryTextOnAccent))
+                    .foregroundColor(Color(colors.buttonPrimaryTextOnAccent))
             }
 
             Text("Send the URL below to someone to have them join this call:")
-                .font(tokens.fonts.headline)
+                .font(fonts.headline)
                 .fixedSize(horizontal: false, vertical: true)
                 .lineLimit(3)
-                .foregroundColor(Color(tokens.colors.textPrimary))
+                .foregroundColor(Color(colors.textPrimary))
 
             Spacer()
         }
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }

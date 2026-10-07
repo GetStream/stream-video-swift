@@ -9,7 +9,8 @@ import SwiftUI
 
 struct MemoryLogViewer: View {
     
-    @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.colors) private var colors
+    @Injected(\.fonts) private var fonts
     
     @State private var logs = LogQueue.queue.elements
     @State private var isSharePresented = false
@@ -113,27 +114,25 @@ struct MemoryLogViewer: View {
         }
     }
 
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
-
     @ViewBuilder
     func makeEntryView(for entry: LogDetails) -> some View {
         let (iconName, iconColor): (String, Color) = {
             switch entry.level {
             case .debug:
-                return ("ladybug", Color(tokens.colors.textPrimary))
+                return ("ladybug", Color(colors.textPrimary))
             case .info:
-                return ("info.circle", Color(tokens.colors.accentPrimary))
+                return ("info.circle", Color(colors.accentPrimary))
             case .warning:
-                return ("exclamationmark.circle", Color(tokens.colors.accentWarning))
+                return ("exclamationmark.circle", Color(colors.accentWarning))
             case .error:
-                return ("x.circle", Color(tokens.colors.accentError))
+                return ("x.circle", Color(colors.accentError))
             }
         }()
         
         Label {
             Text(entry.message)
-                .font(tokens.fonts.body)
-                .foregroundColor(Color(tokens.colors.textPrimary))
+                .font(fonts.body)
+                .foregroundColor(Color(colors.textPrimary))
                 .lineLimit(3)
         } icon: {
             Image(systemName: iconName)
@@ -160,7 +159,9 @@ struct SearchableModifier: ViewModifier {
 
 struct MemoryLogEntryViewer: View {
     
-    @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.colors) private var colors
+    @Injected(\.fonts) private var fonts
+    @Injected(\.layout) private var layout
     
     var entry: LogDetails
     
@@ -168,31 +169,31 @@ struct MemoryLogEntryViewer: View {
         Label {
             ScrollView {
                 Text(entry.message)
-                    .font(tokens.fonts.body)
-                    .foregroundColor(Color(tokens.colors.textPrimary))
+                    .font(fonts.body)
+                    .foregroundColor(Color(colors.textPrimary))
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
         } icon: {
             iconView
         }
-        .padding(.horizontal, tokens.layout.spacingMd)
+        .padding(.horizontal, layout.spacingMd)
     }
     
     private var iconView: some View {
-        VStack(spacing: tokens.layout.spacingMd) {
+        VStack(spacing: layout.spacingMd) {
             switch entry.level {
             case .debug:
                 Image(systemName: "ladybug")
-                    .foregroundColor(Color(tokens.colors.textPrimary))
+                    .foregroundColor(Color(colors.textPrimary))
             case .info:
                 Image(systemName: "info.circle")
-                    .foregroundColor(Color(tokens.colors.accentPrimary))
+                    .foregroundColor(Color(colors.accentPrimary))
             case .warning:
                 Image(systemName: "exclamationmark.circle")
-                    .foregroundColor(Color(tokens.colors.accentWarning))
+                    .foregroundColor(Color(colors.accentWarning))
             case .error:
                 Image(systemName: "x.circle")
-                    .foregroundColor(Color(tokens.colors.accentError))
+                    .foregroundColor(Color(colors.accentError))
             }
             
             copyMessageView
@@ -204,9 +205,7 @@ struct MemoryLogEntryViewer: View {
             UIPasteboard.general.string = entry.message
         } label: {
             Image(systemName: "doc.on.doc")
-                .foregroundColor(Color(tokens.colors.accentPrimary))
+                .foregroundColor(Color(colors.accentPrimary))
         }
     }
-
-    private var tokens: DesignSystemTokens { videoAppearance.tokens }
 }

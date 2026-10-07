@@ -7,6 +7,8 @@ import StreamWebRTC
 import SwiftUI
 
 public struct CallView<Factory: ViewFactory>: View {
+    @Injected(\.colors) var colors
+    @Injected(\.layout) var layout
 
     var viewFactory: Factory
     @ObservedObject var viewModel: CallViewModel

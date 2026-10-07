@@ -8,7 +8,7 @@ import SwiftUI
 @available(iOS 14.0, *)
 public struct LayoutMenuView: View {
     
-    @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.images) var images
 
     @ObservedObject var viewModel: CallViewModel
     var size: CGFloat
@@ -43,7 +43,7 @@ public struct LayoutMenuView: View {
             }
         } label: {
             CallIconView(
-                icon: videoAppearance.images.layoutSelectorIcon,
+                icon: images.layoutSelectorIcon,
                 size: size,
                 iconStyle: .secondary
             )
@@ -52,7 +52,8 @@ public struct LayoutMenuView: View {
 }
 
 struct LayoutMenuItem: View {
-    @Injected(\.videoAppearance) var videoAppearance
+    @Injected(\.images) var images
+    @Injected(\.layout) private var layoutTokens
 
     var title: String
     var layout: ParticipantsLayout
@@ -65,11 +66,11 @@ struct LayoutMenuItem: View {
                 selectLayout(layout)
             }
         } label: {
-            HStack(spacing: layout.spacingXs) {
+            HStack(spacing: layoutTokens.spacingXs) {
                 Text(title)
                 Spacer()
                 if selectedLayout == layout {
-                    videoAppearance.images.checkmark
+                    images.checkmark
                 }
             }
         }

@@ -38,11 +38,11 @@ private func content() {
                             ForEach(items, id: \.hashValue) { item in
                                 HStack(alignment: .top) {
                                     Text(item.speakerId)
-                                        .foregroundColor(.init(colors.textLowEmphasis))
+                                        .foregroundColor(Color(colors.textSecondary))
 
                                     Text(item.text)
                                         .lineLimit(3)
-                                        .foregroundColor(colors.text)
+                                        .foregroundColor(Color(colors.textPrimary))
                                         .frame(maxWidth: .infinity)
                                 }
                                 .transition(.asymmetric(insertion: .move(edge: .bottom), removal: .move(edge: .top)))
