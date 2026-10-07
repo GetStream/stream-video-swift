@@ -4,15 +4,21 @@
 
 import Foundation
 import StreamVideo
+import StreamVideoSwiftUI
 import SwiftUI
 
 struct MemoryLogViewer: View {
     
     @Injected(\.appearance) var appearance
+
+    @Binding var isPresented: Bool
     
-    @State private var logs = LogQueue.queue.elements
+    @State private var logs: [LogDetails] = []
+    @State private var query = ""
     @State private var isSharePresented = false
     @State private var logFileURL: URL?
+    @State private var exportTask: Task<Void, Never>?
+    @State private var exportError: String?
 
     var body: some View {
         List {
@@ -25,28 +31,35 @@ struct MemoryLogViewer: View {
             }
         }
         .navigationTitle("Logs Viewer")
+        .task(id: query) {
+            while !Task.isCancelled {
+                let entries = LogQueue.queue.elements
+                logs = query.isEmpty
+                    ? entries
+                    : entries.filter { $0.message.contains(query) }
+                do {
+                    try await Task.sleep(nanoseconds: 1_000_000_000)
+                } catch {
+                    return
+                }
+            }
+        }
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 shareButtonView
             }
         }
-        .modifier(
-            SearchableModifier { query in
-                if query.isEmpty {
-                    logs = LogQueue.queue.elements
-                } else {
-                    logs = LogQueue.queue
-                        .elements
-                        .filter { $0.message.contains(query) }
-                }
-            }
-        )
+        .modifier(SearchableModifier(query: $query))
         .sheet(isPresented: $isSharePresented) {
             if let logFileURL = logFileURL {
                 ShareActivityView(activityItems: [logFileURL])
             }
         }
         .onDisappear {
+            if !isPresented {
+                logs.removeAll(keepingCapacity: false)
+            }
+            exportTask?.cancel()
             deleteTemporaryLogFile()
         }
         .onChange(of: isSharePresented) { isPresented in
@@ -54,6 +67,16 @@ struct MemoryLogViewer: View {
                 // Delete the file after sharing is complete
                 deleteTemporaryLogFile()
             }
+        }
+        .alert(isPresented: Binding(
+            get: { exportError != nil },
+            set: { if !$0 { exportError = nil } }
+        )) {
+            Alert(
+                title: Text("Unable to export logs"),
+                message: Text(exportError ?? ""),
+                dismissButton: .default(Text("OK"))
+            )
         }
     }
 
@@ -64,51 +87,33 @@ struct MemoryLogViewer: View {
         } label: {
             Image(systemName: "square.and.arrow.up.fill")
         }
+        .disabled(exportTask != nil)
     }
     
     private func createAndShareLogFile() {
-        Task {
-            // Delete any existing temporary file first
+        exportTask = Task { @MainActor in
+            defer { exportTask = nil }
             deleteTemporaryLogFile()
-
-            // Create a temporary file URL
-            let temporaryDirectoryURL = FileManager.default.temporaryDirectory
-            let fileName = "stream_video_logs_\(Date().timeIntervalSince1970).txt"
-            let fileURL = temporaryDirectoryURL.appendingPathComponent(fileName)
-
-            // Create log content
-
-            // Add all logs to the content
-            let logs = LogQueue.queue.elements
-            let logContent = """
-            Stream Video Logs - Generated: \(Date())
-            \(logs.reversed().map { "\($0.level) - [\($0.fileName):\($0.lineNumber):\($0.functionName)] \($0.message)" }
-                .joined(separator: "\n")
-            )
-            """
-
-            // Write to file
             do {
-                try logContent.write(to: fileURL, atomically: true, encoding: .utf8)
-                self.logFileURL = fileURL
-                Task { @MainActor in
-                    self.isSharePresented = true
+                let fileURL = try await LogQueue.createLogFile()
+                guard !Task.isCancelled else {
+                    LogQueue.deleteTemporaryLogFile(at: fileURL)
+                    return
                 }
+                logFileURL = fileURL
+                isSharePresented = true
             } catch {
-                print("Error creating log file: \(error)")
+                if !Task.isCancelled {
+                    exportError = error.localizedDescription
+                }
             }
         }
     }
     
     private func deleteTemporaryLogFile() {
         if let fileURL = logFileURL {
-            do {
-                try FileManager.default.removeItem(at: fileURL)
-                logFileURL = nil
-                print("Temporary log file deleted successfully")
-            } catch {
-                print("Error deleting temporary log file: \(error)")
-            }
+            logFileURL = nil
+            LogQueue.deleteTemporaryLogFile(at: fileURL)
         }
     }
 
@@ -141,14 +146,12 @@ struct MemoryLogViewer: View {
 
 struct SearchableModifier: ViewModifier {
     
-    @State var query: String = ""
-    var searchCompletionHandler: (String) -> Void
+    @Binding var query: String
     
     func body(content: Content) -> some View {
         if #available(iOS 15, *) {
             content
                 .searchable(text: $query)
-                .onChange(of: query) { searchCompletionHandler($0) }
         } else {
             content
         }
