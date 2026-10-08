@@ -57,6 +57,9 @@ rm -f \
 # delete the tmp path
 rm -rf "${OPENAPI_GENERATED_CODE_ROOT}/tmp"
 
+# re-apply the binary-size optimisations the generator does not know about
+"${PROJECT_ROOT}/Scripts/optimizeGeneratedCodeSize.py"
+
 # pull latest image to generate code from protobuf
 docker pull ghcr.io/getstream/protobuf-generate:latest
 
