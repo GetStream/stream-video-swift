@@ -49,7 +49,7 @@ extension AVAudioSession {
 
         /// Builds a new snapshot by pulling the latest values from the shared
         /// AVAudioSession instance.
-        init(_ source: AVAudioSession = .sharedInstance()) {
+        init(_ source: any AVAudioSessionProtocol = AVAudioSession.sharedInstance()) {
             self.category = source.category
             self.mode = source.mode
             self.categoryOptions = source.categoryOptions
@@ -64,23 +64,21 @@ extension AVAudioSession {
             #endif
 
             #if compiler(>=6.1)
-            if #available(iOS 18.2, *) { self.prefersEchoCancelledInput = source.prefersEchoCancelledInput
-            } else { self.prefersEchoCancelledInput = false }
+            let currentDevice = CurrentDevice.currentValue
+            if #available(iOS 18.2, *),
+               !currentDevice.isIOSAppOnMac,
+               !currentDevice.isMacCatalystApp {
+                self.prefersEchoCancelledInput = source.prefersEchoCancelledInput
+                self.isEchoCancelledInputEnabled = source.isEchoCancelledInputEnabled
+                self.isEchoCancelledInputAvailable = source.isEchoCancelledInputAvailable
+            } else {
+                self.prefersEchoCancelledInput = false
+                self.isEchoCancelledInputEnabled = false
+                self.isEchoCancelledInputAvailable = false
+            }
             #else
             self.prefersEchoCancelledInput = false
-            #endif
-
-            #if compiler(>=6.1)
-            if #available(iOS 18.2, *) { self.isEchoCancelledInputEnabled = source.isEchoCancelledInputEnabled
-            } else { self.isEchoCancelledInputEnabled = false }
-            #else
             self.isEchoCancelledInputEnabled = false
-            #endif
-
-            #if compiler(>=6.1)
-            if #available(iOS 18.2, *) { self.isEchoCancelledInputAvailable = source.isEchoCancelledInputAvailable
-            } else { self.isEchoCancelledInputAvailable = false }
-            #else
             self.isEchoCancelledInputAvailable = false
             #endif
             self.maximumOutputNumberOfChannels = source.maximumOutputNumberOfChannels

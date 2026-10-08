@@ -50,6 +50,19 @@ public final class CurrentDevice: @unchecked Sendable {
     /// The identified `DeviceType` for the current environment.
     public internal(set) var deviceType: DeviceType = .unspecified
     public internal(set) var systemVersion: String = "-"
+
+    /// Indicates whether an iOS app runs on Mac.
+    var isIOSAppOnMac: Bool = {
+        if #available(iOS 14.0, *) {
+            return ProcessInfo.processInfo.isiOSAppOnMac
+        } else {
+            return false
+        }
+    }()
+
+    /// Indicates whether the app uses Mac Catalyst.
+    var isMacCatalystApp: Bool = ProcessInfo.processInfo.isMacCatalystApp
+
     #if canImport(UIKit)
     @MainActor
     public var isProximityMonitoringEnabled: Bool {
