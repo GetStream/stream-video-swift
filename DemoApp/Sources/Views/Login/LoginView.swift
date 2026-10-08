@@ -219,7 +219,7 @@ struct AppUserView: View {
         if user.imageURL != nil {
             DemoAppViewFactory
                 .shared
-                .makeUserAvatar(user, with: .init(size: size))
+                .makeUserAvatar(options: .init(user: user, size: size))
                 .accessibilityIdentifier("userAvatar")
         } else if let firstCharacter = (overrideUserName ?? user.name).first {
             Text(String(firstCharacter))

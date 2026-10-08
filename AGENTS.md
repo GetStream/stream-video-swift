@@ -141,6 +141,23 @@ Typical substitutions from the lobby pass:
 | `16` padding or corner radius | `tokens.layout.spacingMd` / `radiusXl` |
 | `32` stack spacing | `tokens.layout.spacing2xl` |
 
+### ViewFactory options
+
+Every `ViewFactory` method takes a single `options:` argument:
+
+```swift
+func makeCallView(options: CallViewOptions) -> some View {
+    CustomCallView(viewModel: options.viewModel)
+}
+
+viewFactory.makeCallView(options: .init(viewModel: viewModel))
+```
+
+- Options types live in `Sources/StreamVideoSwiftUI/ViewFactory/Options/` and are `public final class …Options` with `public let` properties and a public `init`.
+- Conform to `Sendable` only when every stored property is `Sendable` (no `Binding`, closures, or non-Sendable models such as `ScreenSharingSession`).
+- New inputs for a slot go on its options type, not as new method parameters.
+- When an override forwards to `DefaultViewFactory`, pass `options` through instead of rebuilding it.
+
 ### Linking
 
 - `StreamVideo` depends on StreamCore.

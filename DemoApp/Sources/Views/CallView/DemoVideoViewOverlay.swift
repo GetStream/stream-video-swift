@@ -53,7 +53,7 @@ struct DemoCallContainer<Factory: ViewFactory>: View {
                 ZStack {
                     if call.state.backstage == true {
                         VStack(spacing: 0) {
-                            viewFactory.makeCallTopView(viewModel: viewModel)
+                            viewFactory.makeCallTopView(options: .init(viewModel: viewModel))
                             Spacer()
                         }
                     }

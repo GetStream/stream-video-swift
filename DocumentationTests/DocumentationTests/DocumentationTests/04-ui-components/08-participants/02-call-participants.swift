@@ -21,16 +21,12 @@ private func content() {
     container {
         class CustomViewFactory: ViewFactory {
 
-            public func makeVideoParticipantsView(
-                viewModel: CallViewModel,
-                availableFrame: CGRect,
-                onChangeTrackVisibility: @escaping @MainActor (CallParticipant, Bool) -> Void
-            ) -> some View {
+            public func makeVideoParticipantsView(options: VideoParticipantsViewOptions) -> some View {
                 CustomVideoParticipantsView(
                     viewFactory: self,
-                    viewModel: viewModel,
-                    availableFrame: availableFrame,
-                    onChangeTrackVisibility: onChangeTrackVisibility
+                    viewModel: options.viewModel,
+                    availableFrame: options.availableFrame,
+                    onChangeTrackVisibility: options.onChangeTrackVisibility
                 )
             }
         }

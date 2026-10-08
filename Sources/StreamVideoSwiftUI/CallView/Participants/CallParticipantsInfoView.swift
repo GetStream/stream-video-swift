@@ -341,8 +341,7 @@ struct CallParticipantView<Factory: ViewFactory>: View {
         VStack(spacing: layout.spacingXxs) {
             HStack(spacing: layout.spacingXs) {
                 viewFactory.makeUserAvatar(
-                    participant.user,
-                    with: .init(size: imageSize) {
+                    options: .init(user: participant.user, size: imageSize) {
                         AnyView(
                             CircledTitleView(
                                 title: participant.name.isEmpty

@@ -19,8 +19,8 @@ private func content() {
     container {
         class CustomViewFactory: ViewFactory {
 
-            func makeReconnectionView(viewModel: CallViewModel) -> some View {
-                ReconnectionView(viewModel: viewModel, viewFactory: self)
+            func makeReconnectionView(options: ReconnectionViewOptions) -> some View {
+                ReconnectionView(viewModel: options.viewModel, viewFactory: self)
             }
         }
     }

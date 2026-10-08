@@ -262,20 +262,24 @@ struct VerticalParticipantsView<Factory: ViewFactory>: View {
         VStack(spacing: innerItemSpace) {
             ForEach(participants) { participant in
                 viewFactory.makeVideoParticipantView(
-                    participant: participant,
-                    id: participant.id,
-                    availableFrame: itemFrame,
-                    contentMode: .scaleAspectFill,
-                    customData: [:],
-                    call: call
+                    options: .init(
+                        participant: participant,
+                        id: participant.id,
+                        availableFrame: itemFrame,
+                        contentMode: .scaleAspectFill,
+                        customData: [:],
+                        call: call
+                    )
                 )
                 .modifier(
                     viewFactory.makeVideoCallParticipantModifier(
-                        participant: participant,
-                        call: call,
-                        availableFrame: itemFrame,
-                        ratio: ratio,
-                        showAllInfo: true
+                        options: .init(
+                            participant: participant,
+                            call: call,
+                            availableFrame: itemFrame,
+                            ratio: ratio,
+                            showAllInfo: true
+                        )
                     )
                 )
                 .onAppear {
@@ -319,20 +323,24 @@ struct HorizontalParticipantsView<Factory: ViewFactory>: View {
         HStack(spacing: innerItemSpacing) {
             ForEach(participants) { participant in
                 viewFactory.makeVideoParticipantView(
-                    participant: participant,
-                    id: participant.id,
-                    availableFrame: bounds,
-                    contentMode: .scaleAspectFill,
-                    customData: [:],
-                    call: call
+                    options: .init(
+                        participant: participant,
+                        id: participant.id,
+                        availableFrame: bounds,
+                        contentMode: .scaleAspectFill,
+                        customData: [:],
+                        call: call
+                    )
                 )
                 .modifier(
                     viewFactory.makeVideoCallParticipantModifier(
-                        participant: participant,
-                        call: call,
-                        availableFrame: bounds,
-                        ratio: ratio,
-                        showAllInfo: true
+                        options: .init(
+                            participant: participant,
+                            call: call,
+                            availableFrame: bounds,
+                            ratio: ratio,
+                            showAllInfo: true
+                        )
                     )
                 )
                 .onAppear {

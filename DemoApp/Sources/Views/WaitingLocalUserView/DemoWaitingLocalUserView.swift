@@ -32,7 +32,7 @@ struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
 
     var body: some View {
         VStack(spacing: layout.spacingXs) {
-            viewFactory.makeCallTopView(viewModel: viewModel)
+            viewFactory.makeCallTopView(options: .init(viewModel: viewModel))
 
             Group {
                 if let localParticipant = viewModel.localParticipant {
@@ -46,9 +46,11 @@ struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
                             availableFrame: proxy.frame(in: .local)
                         )
                         .modifier(viewFactory.makeLocalParticipantViewModifier(
-                            localParticipant: localParticipant,
-                            callSettings: .init(get: { viewModel.callSettings }, set: { _ in }),
-                            call: viewModel.call
+                            options: .init(
+                                localParticipant: localParticipant,
+                                callSettings: .init(get: { viewModel.callSettings }, set: { _ in }),
+                                call: viewModel.call
+                            )
                         ))
                     }
                     .overlay(sharePromptView)
@@ -58,7 +60,7 @@ struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
             }
             .padding(.horizontal, layout.spacingMd)
 
-            viewFactory.makeCallControlsView(viewModel: viewModel)
+            viewFactory.makeCallControlsView(options: .init(viewModel: viewModel))
         }
         .presentParticipantListView(viewModel: viewModel, viewFactory: viewFactory)
         .chat(viewModel: viewModel, chatViewModel: chatViewModel)

@@ -24,7 +24,7 @@ public struct CallView<Factory: ViewFactory>: View {
     public var body: some View {
         VStack(spacing: layout.spacingXs) {
             viewFactory
-                .makeCallTopView(viewModel: viewModel)
+                .makeCallTopView(options: .init(viewModel: viewModel))
                 .presentParticipantEventsNotification(viewModel: viewModel)
 
             GeometryReader { videoFeedProxy in
@@ -36,7 +36,7 @@ public struct CallView<Factory: ViewFactory>: View {
             }
             .padding(.horizontal, layout.spacingXs)
 
-            viewFactory.makeCallControlsView(viewModel: viewModel)
+            viewFactory.makeCallControlsView(options: .init(viewModel: viewModel))
                 .opacity(viewModel.hideUIElements ? 0 : 1)
         }
         .background(Color(colors.backgroundCoreApp).edgesIgnoringSafeArea(.all))
@@ -54,9 +54,11 @@ public struct CallView<Factory: ViewFactory>: View {
             let screenSharingSession = viewModel.call?.state.screenSharingSession,
             viewModel.call?.state.isCurrentUserScreensharing == false {
             viewFactory.makeScreenSharingView(
-                viewModel: viewModel,
-                screensharingSession: screenSharingSession,
-                availableFrame: availableFrame
+                options: .init(
+                    viewModel: viewModel,
+                    screenSharingSession: screenSharingSession,
+                    availableFrame: availableFrame
+                )
             )
         } else {
             participantsView(bounds: availableFrame)
@@ -104,20 +106,24 @@ public struct CallView<Factory: ViewFactory>: View {
     private func minimizedView(bounds: CGRect) -> some View {
         if let firstParticipant = viewModel.participants.first {
             viewFactory.makeVideoParticipantView(
-                participant: firstParticipant,
-                id: firstParticipant.id,
-                availableFrame: bounds,
-                contentMode: .scaleAspectFill,
-                customData: [:],
-                call: viewModel.call
+                options: .init(
+                    participant: firstParticipant,
+                    id: firstParticipant.id,
+                    availableFrame: bounds,
+                    contentMode: .scaleAspectFill,
+                    customData: [:],
+                    call: viewModel.call
+                )
             )
             .modifier(
                 viewFactory.makeVideoCallParticipantModifier(
-                    participant: firstParticipant,
-                    call: viewModel.call,
-                    availableFrame: bounds,
-                    ratio: bounds.width / bounds.height,
-                    showAllInfo: true
+                    options: .init(
+                        participant: firstParticipant,
+                        call: viewModel.call,
+                        availableFrame: bounds,
+                        ratio: bounds.width / bounds.height,
+                        showAllInfo: true
+                    )
                 )
             )
             .accessibility(identifier: "minimizedParticipantView")
@@ -137,9 +143,11 @@ public struct CallView<Factory: ViewFactory>: View {
                 availableFrame: bounds
             )
             .modifier(viewFactory.makeLocalParticipantViewModifier(
-                localParticipant: localParticipant,
-                callSettings: $viewModel.callSettings,
-                call: viewModel.call
+                options: .init(
+                    localParticipant: localParticipant,
+                    callSettings: $viewModel.callSettings,
+                    call: viewModel.call
+                )
             ))
         } else {
             EmptyView()
@@ -148,9 +156,11 @@ public struct CallView<Factory: ViewFactory>: View {
 
     private func participantsView(bounds: CGRect) -> some View {
         viewFactory.makeVideoParticipantsView(
-            viewModel: viewModel,
-            availableFrame: bounds,
-            onChangeTrackVisibility: viewModel.changeTrackVisibility(for:isVisible:)
+            options: .init(
+                viewModel: viewModel,
+                availableFrame: bounds,
+                onChangeTrackVisibility: viewModel.changeTrackVisibility(for:isVisible:)
+            )
         )
     }
 

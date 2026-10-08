@@ -32,37 +32,24 @@ private func content() {
     container {
         class CustomViewFactory: ViewFactory {
 
-            public func makeVideoParticipantView(
-                participant: CallParticipant,
-                id: String,
-                availableFrame: CGRect,
-                contentMode: UIView.ContentMode,
-                customData: [String: RawJSON],
-                call: Call?
-            ) -> some View {
+            public func makeVideoParticipantView(options: VideoParticipantViewOptions) -> some View {
                 VideoCallParticipantView(
-                    participant: participant,
-                    id: id,
-                    availableFrame: availableFrame,
-                    contentMode: contentMode,
-                    customData: customData,
-                    call: call
+                    participant: options.participant,
+                    id: options.id,
+                    availableFrame: options.availableFrame,
+                    contentMode: options.contentMode,
+                    customData: options.customData,
+                    call: options.call
                 )
             }
 
-            public func makeVideoCallParticipantModifier(
-                participant: CallParticipant,
-                call: Call?,
-                availableFrame: CGRect,
-                ratio: CGFloat,
-                showAllInfo: Bool
-            ) -> some ViewModifier {
+            public func makeVideoCallParticipantModifier(options: VideoCallParticipantModifierOptions) -> some ViewModifier {
                 VideoCallParticipantModifier(
-                    participant: participant,
-                    call: call,
-                    availableFrame: availableFrame,
-                    ratio: ratio,
-                    showAllInfo: showAllInfo
+                    participant: options.participant,
+                    call: options.call,
+                    availableFrame: options.availableFrame,
+                    ratio: options.ratio,
+                    showAllInfo: options.showAllInfo
                 )
             }
         }

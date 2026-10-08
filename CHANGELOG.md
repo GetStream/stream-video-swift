@@ -5,15 +5,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 # 2.0.0
 
 ### ✅ Added
-- New `DesignSystemTokens` in `StreamCoreUI` is used in `VideoAppearance` for primitive UI tokens [#1258](https://github.com/GetStream/stream-video-swift/pull/1258)
+- UI has been redesigned with the Stream Design System
 
 ### 🔄 Changed
-- The `Appearance` object has been replaced with `VideoAppearance` object [#1258](https://github.com/GetStream/stream-video-swift/pull/1258)
-- Floating self view redesigned with Stream Design System [#1284](https://github.com/GetStream/stream-video-swift/pull/1284)
-- Lobby screen redesigned with the Stream Design System [#1271](https://github.com/GetStream/stream-video-swift/pull/1271)
-- Ringing screen redesigned with the Stream Design System [#1280](https://github.com/GetStream/stream-video-swift/pull/1280)
-- Livestream screen redesigned with the Stream Design System [#1282](https://github.com/GetStream/stream-video-swift/pull/1282)
-- Participants sheet redesigned with the Stream Design System [#1288](https://github.com/GetStream/stream-video-swift/pull/1288)
+- The `Appearance` object has been replaced with `VideoAppearance` object
+- `ViewFactory` methods now take an `options` argument
 
 # Upcoming
 

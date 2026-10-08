@@ -23,15 +23,11 @@ private func content() {
     container {
         class CustomViewFactory: ViewFactory {
 
-            public func makeScreenSharingView(
-                viewModel: CallViewModel,
-                screensharingSession: ScreenSharingSession,
-                availableFrame: CGRect
-            ) -> some View {
+            public func makeScreenSharingView(options: ScreenSharingViewOptions) -> some View {
                 CustomScreenSharingView(
-                    viewModel: viewModel,
-                    screenSharing: screensharingSession,
-                    availableFrame: availableFrame
+                    viewModel: options.viewModel,
+                    screenSharing: options.screenSharingSession,
+                    availableFrame: options.availableFrame
                 )
             }
         }

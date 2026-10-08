@@ -78,20 +78,24 @@ struct ParticipantsGridView<Factory: ViewFactory>: View {
     private func participantsContent(_ bounds: CGRect) -> some View {
         ForEach(participants) { participant in
             viewFactory.makeVideoParticipantView(
-                participant: participant,
-                id: participant.id,
-                availableFrame: .init(origin: .zero, size: itemSize),
-                contentMode: .scaleAspectFill,
-                customData: [:],
-                call: call
+                options: .init(
+                    participant: participant,
+                    id: participant.id,
+                    availableFrame: .init(origin: .zero, size: itemSize),
+                    contentMode: .scaleAspectFill,
+                    customData: [:],
+                    call: call
+                )
             )
             .modifier(
                 viewFactory.makeVideoCallParticipantModifier(
-                    participant: participant,
-                    call: call,
-                    availableFrame: .init(origin: .zero, size: itemSize),
-                    ratio: itemRatio,
-                    showAllInfo: true
+                    options: .init(
+                        participant: participant,
+                        call: call,
+                        availableFrame: .init(origin: .zero, size: itemSize),
+                        ratio: itemRatio,
+                        showAllInfo: true
+                    )
                 )
             )
             .visibilityObservation(in: bounds) {

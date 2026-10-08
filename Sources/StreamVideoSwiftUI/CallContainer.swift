@@ -53,15 +53,15 @@ public struct CallContainer<Factory: ViewFactory>: View {
             if shouldShowCallView {
                 if viewModel.callParticipants.count > 1 {
                     if viewModel.isMinimized {
-                        viewFactory.makeMinimizedCallView(viewModel: viewModel)
+                        viewFactory.makeMinimizedCallView(options: .init(viewModel: viewModel))
                     } else {
-                        viewFactory.makeCallView(viewModel: viewModel)
+                        viewFactory.makeCallView(options: .init(viewModel: viewModel))
                     }
                 } else {
-                    viewFactory.makeWaitingLocalUserView(viewModel: viewModel)
+                    viewFactory.makeWaitingLocalUserView(options: .init(viewModel: viewModel))
                 }
             } else if viewModel.callingState == .reconnecting {
-                viewFactory.makeReconnectionView(viewModel: viewModel)
+                viewFactory.makeReconnectionView(options: .init(viewModel: viewModel))
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -78,16 +78,18 @@ public struct CallContainer<Factory: ViewFactory>: View {
     @ViewBuilder
     private var overlayView: some View {
         if case let .incoming(callInfo) = viewModel.callingState {
-            viewFactory.makeIncomingCallView(viewModel: viewModel, callInfo: callInfo)
+            viewFactory.makeIncomingCallView(options: .init(viewModel: viewModel, callInfo: callInfo))
         } else if viewModel.callingState == .outgoing {
-            viewFactory.makeOutgoingCallView(viewModel: viewModel)
+            viewFactory.makeOutgoingCallView(options: .init(viewModel: viewModel))
         } else if viewModel.callingState == .joining {
-            viewFactory.makeJoiningCallView(viewModel: viewModel)
+            viewFactory.makeJoiningCallView(options: .init(viewModel: viewModel))
         } else if case let .lobby(lobbyInfo) = viewModel.callingState {
             viewFactory.makeLobbyView(
-                viewModel: viewModel,
-                lobbyInfo: lobbyInfo,
-                callSettings: $viewModel.callSettings
+                options: .init(
+                    viewModel: viewModel,
+                    lobbyInfo: lobbyInfo,
+                    callSettings: $viewModel.callSettings
+                )
             )
         } else {
             EmptyView()
@@ -122,7 +124,7 @@ public struct WaitingLocalUserView<Factory: ViewFactory>: View {
                 .edgesIgnoringSafeArea(.all)
 
             VStack(spacing: layout.spacingXs) {
-                viewFactory.makeCallTopView(viewModel: viewModel)
+                viewFactory.makeCallTopView(options: .init(viewModel: viewModel))
                     .opacity(viewModel.callingState == .reconnecting ? 0 : 1)
 
                 Group {
@@ -137,9 +139,11 @@ public struct WaitingLocalUserView<Factory: ViewFactory>: View {
                                 availableFrame: proxy.frame(in: .global)
                             )
                             .modifier(viewFactory.makeLocalParticipantViewModifier(
-                                localParticipant: localParticipant,
-                                callSettings: $viewModel.callSettings,
-                                call: viewModel.call
+                                options: .init(
+                                    localParticipant: localParticipant,
+                                    callSettings: $viewModel.callSettings,
+                                    call: viewModel.call
+                                )
                             ))
                         }
                     } else {
@@ -149,7 +153,7 @@ public struct WaitingLocalUserView<Factory: ViewFactory>: View {
                 .padding(.horizontal, layout.spacingXs)
                 .opacity(viewModel.callingState == .reconnecting ? 0 : 1)
 
-                viewFactory.makeCallControlsView(viewModel: viewModel)
+                viewFactory.makeCallControlsView(options: .init(viewModel: viewModel))
                     .opacity(viewModel.callingState == .reconnecting ? 0 : 1)
             }
             .presentParticipantListView(viewModel: viewModel, viewFactory: viewFactory)

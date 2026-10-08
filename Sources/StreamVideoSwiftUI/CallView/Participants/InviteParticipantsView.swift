@@ -162,7 +162,7 @@ struct VideoUserView<Factory: ViewFactory>: View {
 
     var body: some View {
         HStack(spacing: layout.spacingXs) {
-            viewFactory.makeUserAvatar(user, with: .init(size: avatarSize))
+            viewFactory.makeUserAvatar(options: .init(user: user, size: avatarSize))
 
             Text(user.name)
                 .lineLimit(1)

@@ -12,8 +12,8 @@ private func content() {
     container {
         class CustomViewFactory: ViewFactory {
 
-            public func makeCallControlsView(viewModel: CallViewModel) -> some View {
-                CustomCallControlsView(viewModel: viewModel)
+            public func makeCallControlsView(options: CallControlsViewOptions) -> some View {
+                CustomCallControlsView(viewModel: options.viewModel)
             }
         }
     }
@@ -95,8 +95,8 @@ private func content() {
 
             class CustomViewFactory: ViewFactory {
 
-                func makeCallControlsView(viewModel: CallViewModel) -> some View {
-                    FBCallControlsView(viewModel: viewModel)
+                func makeCallControlsView(options: CallControlsViewOptions) -> some View {
+                    FBCallControlsView(viewModel: options.viewModel)
                 }
             }
         }

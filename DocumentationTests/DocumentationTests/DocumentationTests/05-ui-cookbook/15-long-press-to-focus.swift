@@ -65,29 +65,15 @@ private func content() {
     container {
         class CustomViewFactory: ViewFactory {
 
-            func makeVideoParticipantView(
-                participant: CallParticipant,
-                id: String,
-                availableFrame: CGRect,
-                contentMode: UIView.ContentMode,
-                customData: [String: RawJSON],
-                call: Call?
-            ) -> some View {
-                DefaultViewFactory.shared.makeVideoParticipantView(
-                    participant: participant,
-                    id: id,
-                    availableFrame: availableFrame,
-                    contentMode: contentMode,
-                    customData: customData,
-                    call: call
-                )
-                .longPressToFocus(availableFrame: availableFrame) { point in
-                    Task {
-                        guard call?.state.sessionId == participant.sessionId
-                        else { return } // We are using this to only allow long pressing on our local video feed
-                        try await call?.focus(at: point)
+            func makeVideoParticipantView(options: VideoParticipantViewOptions) -> some View {
+                DefaultViewFactory.shared.makeVideoParticipantView(options: options)
+                    .longPressToFocus(availableFrame: options.availableFrame) { point in
+                        Task {
+                            guard options.call?.state.sessionId == options.participant.sessionId
+                            else { return } // We are using this to only allow long pressing on our local video feed
+                            try await options.call?.focus(at: point)
+                        }
                     }
-                }
             }
         }
     }

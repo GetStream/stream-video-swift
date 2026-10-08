@@ -105,10 +105,10 @@ private func content() {
 
         class CustomViewFactory: ViewFactory {
 
-            func makeOutgoingCallView(viewModel: CallViewModel) -> some View {
+            func makeOutgoingCallView(options: OutgoingCallViewOptions) -> some View {
                 // Here you can also provide your own custom view.
                 // In this example, we are re-using the standard one, while also adding an overlay.
-                let view = DefaultViewFactory.shared.makeOutgoingCallView(viewModel: viewModel)
+                let view = DefaultViewFactory.shared.makeOutgoingCallView(options: options)
                 return view.overlay(
                     Text("Custom text overlay")
                 )

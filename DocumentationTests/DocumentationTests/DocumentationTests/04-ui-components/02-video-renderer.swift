@@ -122,20 +122,24 @@ private func content() {
         viewContainer {
             ForEach(participants) { participant in
                 viewFactory.makeVideoParticipantView(
-                    participant: participant,
-                    id: participant.id,
-                    availableFrame: availableFrame,
-                    contentMode: .scaleAspectFill,
-                    customData: [:],
-                    call: call
+                    options: .init(
+                        participant: participant,
+                        id: participant.id,
+                        availableFrame: availableFrame,
+                        contentMode: .scaleAspectFill,
+                        customData: [:],
+                        call: call
+                    )
                 )
                 .modifier(
                     viewFactory.makeVideoCallParticipantModifier(
-                        participant: participant,
-                        call: call,
-                        availableFrame: availableFrame,
-                        ratio: ratio,
-                        showAllInfo: true
+                        options: .init(
+                            participant: participant,
+                            call: call,
+                            availableFrame: availableFrame,
+                            ratio: ratio,
+                            showAllInfo: true
+                        )
                     )
                 )
             }

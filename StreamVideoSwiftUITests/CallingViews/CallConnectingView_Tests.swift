@@ -33,8 +33,8 @@ final class CallConnectingView_Tests: StreamVideoUITestCase, @unchecked Sendable
         let view = CallConnectingView(
             outgoingCallMembers: [],
             title: "Test title 123",
-            callControls: factory.makeCallControlsView(viewModel: viewModel),
-            callTopView: factory.makeCallTopView(viewModel: viewModel)
+            callControls: factory.makeCallControlsView(options: .init(viewModel: viewModel)),
+            callTopView: factory.makeCallTopView(options: .init(viewModel: viewModel))
         )
         AssertSnapshot(view, variants: snapshotVariants)
     }

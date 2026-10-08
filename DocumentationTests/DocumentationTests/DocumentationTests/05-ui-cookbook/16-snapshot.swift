@@ -65,32 +65,24 @@ private func content() {
     container {
         class CustomViewFactory: ViewFactory {
 
-            func makeVideoParticipantsView(
-                viewModel: CallViewModel,
-                availableFrame: CGRect,
-                onChangeTrackVisibility: @escaping @MainActor (CallParticipant, Bool) -> Void
-            ) -> some View {
-                DefaultViewFactory.shared.makeVideoParticipantsView(
-                    viewModel: viewModel,
-                    availableFrame: availableFrame,
-                    onChangeTrackVisibility: onChangeTrackVisibility
-                )
-                .snapshot(trigger: snapshotTrigger) { [weak viewModel, weak self] in
-                    guard
-                        let resizedImage = self?.resize(image: $0, to: CGSize(width: 30, height: 30)),
-                        let snapshotData = resizedImage.jpegData(compressionQuality: 0.8)
-                    else { return }
-                    Task {
-                        do {
-                            try await viewModel?.call?.sendCustomEvent([
-                                "snapshot": .string(snapshotData.base64EncodedString())
-                            ])
-                            log.debug("Snapshot was sent successfully ✅")
-                        } catch {
-                            log.error("Snapshot failed to  send with error: \(error)")
+            func makeVideoParticipantsView(options: VideoParticipantsViewOptions) -> some View {
+                DefaultViewFactory.shared.makeVideoParticipantsView(options: options)
+                    .snapshot(trigger: snapshotTrigger) { [weak viewModel = options.viewModel, weak self] in
+                        guard
+                            let resizedImage = self?.resize(image: $0, to: CGSize(width: 30, height: 30)),
+                            let snapshotData = resizedImage.jpegData(compressionQuality: 0.8)
+                        else { return }
+                        Task {
+                            do {
+                                try await viewModel?.call?.sendCustomEvent([
+                                    "snapshot": .string(snapshotData.base64EncodedString())
+                                ])
+                                log.debug("Snapshot was sent successfully ✅")
+                            } catch {
+                                log.error("Snapshot failed to  send with error: \(error)")
+                            }
                         }
                     }
-                }
             }
 
             private func resize(

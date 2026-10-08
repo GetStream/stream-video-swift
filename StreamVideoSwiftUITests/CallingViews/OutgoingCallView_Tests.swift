@@ -35,7 +35,7 @@ final class OutgoingCallView_Tests: StreamVideoUITestCase, @unchecked Sendable {
         viewModel.setActiveCall(call)
         viewModel.callingState = .outgoing
 
-        let view = factory.makeOutgoingCallView(viewModel: viewModel)
+        let view = factory.makeOutgoingCallView(options: .init(viewModel: viewModel))
 
         AssertSnapshot(view, variants: snapshotVariants)
     }

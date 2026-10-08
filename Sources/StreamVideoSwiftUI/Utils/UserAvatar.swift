@@ -56,32 +56,3 @@ extension UserAvatar where Failback == EmptyView {
         self.init(imageURL: imageURL, size: size, failbackProvider: nil)
     }
 }
-
-/// Options to configure `UserAvatarView`.
-///
-/// `UserAvatarViewOptions` provides configuration options for the `UserAvatar`
-/// view, including the size of the avatar and a provider for the failback view.
-///
-/// - Parameters:
-///   - size: The size of the avatar.
-///   - failbackProvider: A provider that returns a failback view.
-public struct UserAvatarViewOptions {
-    /// Size of the avatar
-    public var size: CGFloat
-
-    /// Provider for the failback view
-    public var failbackProvider: (() -> AnyView)?
-
-    /// Initializes a `UserAvatarViewOptions` instance.
-    ///
-    /// - Parameters:
-    ///   - size: The size of the avatar.
-    ///   - failbackProvider: A provider that returns a failback view.
-    public init(
-        size: CGFloat,
-        failbackProvider: (() -> AnyView)? = nil
-    ) {
-        self.size = size
-        self.failbackProvider = failbackProvider
-    }
-}

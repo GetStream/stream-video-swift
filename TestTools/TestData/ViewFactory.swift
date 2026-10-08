@@ -17,15 +17,8 @@ class TestViewFactory: ViewFactory {
         isCustomGridFrame = participantLayout == .grid && (participantsCount == 2 || participantsCount == 3)
     }
         
-    func makeVideoParticipantView(
-        participant: CallParticipant,
-        id: String,
-        availableFrame: CGRect,
-        contentMode: UIView.ContentMode,
-        customData: [String: RawJSON],
-        call: Call?
-    ) -> some View {
-        let uiImage = UIImage(data: try! Data(contentsOf: participant.profileImageURL!))!
+    func makeVideoParticipantView(options: VideoParticipantViewOptions) -> some View {
+        let uiImage = UIImage(data: try! Data(contentsOf: options.participant.profileImageURL!))!
         let image = Image(uiImage: uiImage).resizable()
         let zstack =
             ZStack {
@@ -48,7 +41,7 @@ class TestViewFactory: ViewFactory {
             }
         
         if isCustomGridFrame {
-            return zstack.frame(maxWidth: availableFrame.width, maxHeight: availableFrame.height)
+            return zstack.frame(maxWidth: options.availableFrame.width, maxHeight: options.availableFrame.height)
         } else {
             return zstack.frame(maxWidth: .infinity, maxHeight: .infinity)
         }

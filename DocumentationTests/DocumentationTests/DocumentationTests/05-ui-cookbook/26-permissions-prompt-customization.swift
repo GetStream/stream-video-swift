@@ -12,7 +12,7 @@ private func content() {
     container {
         class NoPermissionsPromptViewFactory: ViewFactory {
 
-            func makePermissionsPromptView(call: Call?) -> some View {
+            func makePermissionsPromptView(options: PermissionsPromptViewOptions) -> some View {
                 EmptyView()
             }
         }
@@ -98,8 +98,8 @@ private func content() {
 
         class CustomPermissionsViewFactory: ViewFactory {
 
-            func makePermissionsPromptView(call: Call?) -> some View {
-                CustomPermissionsPromptView(call: call)
+            func makePermissionsPromptView(options: PermissionsPromptViewOptions) -> some View {
+                CustomPermissionsPromptView(call: options.call)
             }
         }
     }
