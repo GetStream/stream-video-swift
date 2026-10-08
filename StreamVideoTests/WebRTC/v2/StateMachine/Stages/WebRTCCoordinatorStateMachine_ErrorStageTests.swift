@@ -71,7 +71,8 @@ final class WebRTCCoordinatorStateMachine_ErrorStageTests: XCTestCase, @unchecke
                 XCTFail("No value expected before failure")
             }
         )
-        subject = .error(.init(), error: expectedError)
+        let stack = MockWebRTCCoordinatorStack(videoConfig: .dummy())
+        subject = .error(.init(coordinator: stack.coordinator), error: expectedError)
         subject.context.joinResponseHandler = handler
 
         let transitionExpectation = self.expectation(description: "Will transition to id:.cleanUp")
@@ -84,6 +85,10 @@ final class WebRTCCoordinatorStateMachine_ErrorStageTests: XCTestCase, @unchecke
 
         await fulfillment(of: [transitionExpectation, expectation])
         XCTAssertTrue(receivedError is ClientError)
+        let failure = await stack.clientEventReporter.abortedFailures.first
+        XCTAssertEqual(failure?.code, "CLIENT_ABORTED")
+        XCTAssertEqual(failure?.leaveInitiator, .sdkError)
+        XCTAssertEqual(failure?.leaveReason, "error")
         cancellable.cancel()
     }
 }

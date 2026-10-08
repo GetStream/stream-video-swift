@@ -173,7 +173,13 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
             .append(.setDisconnectionTimeout(timeout: timeout))
     }
 
-    override func leave(reason: String?) {
+    @Atomic var leaveInitiators: [Call.LeaveInitiator] = []
+
+    override func leave(
+        reason: String?,
+        initiator: Call.LeaveInitiator = .unknown
+    ) {
+        leaveInitiators.append(initiator)
         stubbedFunctionInput[.leave]?
             .append(.leave(reason: reason))
     }

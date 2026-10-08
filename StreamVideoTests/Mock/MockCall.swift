@@ -330,9 +330,19 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
     }
 
     override func leave(reason: String? = nil) {
+        leave(initiator: .unknown, reason: reason)
+    }
+
+    @Atomic var leaveInitiators: [Call.LeaveInitiator] = []
+
+    override func leave(
+        initiator: Call.LeaveInitiator,
+        reason: String? = nil
+    ) {
+        leaveInitiators.append(initiator)
         stubbedFunctionInput[.leave]?.append(.leave(reason: reason))
         joinWasCancelled = true
-        super.leave(reason: reason)
+        super.leave(initiator: initiator, reason: reason)
     }
 
     override func updateTrackSize(

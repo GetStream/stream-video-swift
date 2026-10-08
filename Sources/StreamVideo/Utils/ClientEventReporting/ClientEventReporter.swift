@@ -256,6 +256,10 @@ actor ClientEventReporter: ClientEventReporting {
         // `type` is not part of the generated memberwise initializer, so set it
         // explicitly to carry the call type (`<call_type>`).
         event.type = context.callType
+        event.leaveInitiator = failure?.leaveInitiator?.rawValue
+        event.leaveReason = failure?.leaveReason.map {
+            String(String.UnicodeScalarView($0.unicodeScalars.prefix(200)))
+        }
         return event
     }
 
@@ -315,6 +319,8 @@ extension ClientEvent: CustomStringConvertible {
         append(label: "iceState", value: iceState)
         append(label: "id", value: id)
         append(label: "joinAttemptId", value: joinAttemptId)
+        append(label: "leaveInitiator", value: leaveInitiator)
+        append(label: "leaveReason", value: leaveReason)
         append(label: "microphonePermissionStatus", value: microphonePermissionStatus)
         append(label: "outcome", value: outcome)
         append(label: "peerConnection", value: peerConnection)

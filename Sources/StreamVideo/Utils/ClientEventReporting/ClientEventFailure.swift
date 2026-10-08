@@ -17,17 +17,38 @@ struct ClientEventFailure: Sendable, Equatable {
     let code: String
     /// The failure reason string sent in `retry_failure_reason`.
     let reason: String
+    /// Source of the leave request, when the failure aborts a join.
+    let leaveInitiator: Call.LeaveInitiator?
+    /// Internal reason or event that caused the leave request.
+    let leaveReason: String?
 
     /// Creates a failure from a known client-side failure code.
-    init(code: ClientEventFailureCode, reason: String? = nil) {
-        self.code = code.rawValue
-        self.reason = reason ?? code.defaultReason
+    init(
+        code: ClientEventFailureCode,
+        reason: String? = nil,
+        leaveInitiator: Call.LeaveInitiator? = nil,
+        leaveReason: String? = nil
+    ) {
+        self.init(
+            code: code.rawValue,
+            reason: reason ?? code.defaultReason,
+            leaveInitiator: leaveInitiator,
+            leaveReason: leaveReason ?? (code == .clientAborted ? reason ?? "unknown" : nil)
+        )
     }
 
     /// Creates a failure with an explicit code and reason.
-    init(code: String, reason: String) {
+    init(
+        code: String,
+        reason: String,
+        leaveInitiator: Call.LeaveInitiator? = nil,
+        leaveReason: String? = nil
+    ) {
         self.code = code
         self.reason = reason
+        let isAborted = code == ClientEventFailureCode.clientAborted.rawValue
+        self.leaveInitiator = leaveInitiator ?? (isAborted ? .unknown : nil)
+        self.leaveReason = leaveReason ?? (isAborted ? reason : nil)
     }
 
     /// Maps an arbitrary error thrown during a join stage to a failure.

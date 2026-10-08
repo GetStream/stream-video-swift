@@ -510,10 +510,10 @@ class CallController: @unchecked Sendable {
         try await webRTCCoordinator.zoom(by: factor)
     }
 
-    func leave(reason: String?) {
+    func leave(reason: String?, initiator: Call.LeaveInitiator = .unknown) {
         guard call != nil else { return }
         call = nil
-        webRTCCoordinator.leave(reason: reason)
+        webRTCCoordinator.leave(reason: reason, initiator: initiator)
     }
 
     /// Cleans up the call controller.
@@ -822,7 +822,7 @@ class CallController: @unchecked Sendable {
                 if let call, let errorStage = stage as? WebRTCCoordinator.StateMachine.Stage.ErrorStage {
                     call.transitionDueToError(errorStage.error)
                 }
-                call?.leave()
+                call?.leave(initiator: .sdkError, reason: "error")
             }
         default:
             break

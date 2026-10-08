@@ -13,11 +13,13 @@ extension WebRTCCoordinator.StateMachine.Stage {
     ///   the WebRTC coordinator.
     static func leaving(
         _ context: Context,
-        reason: String?
+        reason: String?,
+        initiator: Call.LeaveInitiator = .sdkError
     ) -> WebRTCCoordinator.StateMachine.Stage {
         LeavingStage(
             context,
-            reason: reason
+            reason: reason,
+            initiator: initiator
         )
     }
 }
@@ -29,6 +31,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
         WebRTCCoordinator.StateMachine.Stage,
         @unchecked Sendable {
         private let reason: String?
+        private let initiator: Call.LeaveInitiator
         private let disposableBag = DisposableBag()
         private var coordinator: WebRTCCoordinator?
 
@@ -36,9 +39,11 @@ extension WebRTCCoordinator.StateMachine.Stage {
         /// - Parameter context: The context for the leaving stage.
         init(
             _ context: Context,
-            reason: String?
+            reason: String?,
+            initiator: Call.LeaveInitiator
         ) {
             self.reason = reason
+            self.initiator = initiator
             coordinator = context.coordinator
             super.init(id: .leaving, context: context)
         }
@@ -74,13 +79,14 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         throw ClientError("WebRCTAdapter instance not available.")
                     }
 
-                    // If the user leaves while a join stage is still in
-                    // progress, report it as a client-aborted failure so the
-                    // backend records an explicit failure instead of a no-show.
                     context.peerConnectionConnectReporters.forEach { $0.stop() }
                     await coordinator
                         .clientEventReporter
-                        .abortPendingStages(failure: .init(code: .clientAborted))
+                        .abortPendingStages(failure: .init(
+                            code: .clientAborted,
+                            leaveInitiator: initiator,
+                            leaveReason: reason
+                        ))
 
                     try Task.checkCancellation()
 
