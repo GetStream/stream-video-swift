@@ -2,6 +2,7 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 @testable import StreamVideo
 import XCTest
 
@@ -62,6 +63,49 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
     }
 
     // MARK: - transition from `.idle`
+
+    func test_willTransitionAway_pendingAuthentication_discardsLateResponse() async throws {
+        let authenticationStarted = expectation(description: "Authentication started")
+        let gate = AuthenticationGate()
+        let transitions = CurrentValueSubject<WebRTCCoordinator.StateMachine.Stage?, Never>(nil)
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.authenticator = mockCoordinatorStack.webRTCAuthenticator
+        mockCoordinatorStack.webRTCAuthenticator.stub(
+            for: .authenticate,
+            with: Result<(SFUAdapter, JoinCallResponse), Error>
+                .success((mockCoordinatorStack.sfuStack.adapter, .dummy()))
+        )
+        mockCoordinatorStack.webRTCAuthenticator.stub(
+            for: .waitForAuthentication,
+            with: Result<Void, Error>.success(())
+        )
+        mockCoordinatorStack.webRTCAuthenticator.onAuthenticate = {
+            await gate.wait { authenticationStarted.fulfill() }
+            XCTAssertTrue(Task.isCancelled)
+        }
+        subject.transition = { transitions.send($0) }
+        _ = subject.transition(from: .idle(subject.context))
+        await fulfillment(of: [authenticationStarted], timeout: defaultTimeout)
+
+        subject.willTransitionAway()
+        gate.resume()
+
+        let target = try await transitions.compactMap { $0 }
+            .nextValue(timeout: defaultTimeout)
+        XCTAssertEqual(target.id, .error)
+        XCTAssertTrue(
+            (target as? WebRTCCoordinator.StateMachine.Stage.ErrorStage)?
+                .error is CancellationError
+        )
+        XCTAssertEqual(
+            mockCoordinatorStack.webRTCAuthenticator.timesCalled(.waitForAuthentication),
+            0
+        )
+        XCTAssertNil(subject.context.initialJoinCallResponse)
+        XCTAssertNil(subject.context.sfuFullObserver)
+        let sfuAdapter = await mockCoordinatorStack.coordinator.stateAdapter.sfuAdapter
+        XCTAssertNil(sfuAdapter)
+    }
 
     func test_transition_fromIdleWithoutCoordinator_transitionsToError() async throws {
         try await assertTransition(
@@ -532,5 +576,21 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
         _ = subject.transition(from: .init(id: from, context: subject.context))
 
         await fulfillment(of: [transitionExpectation], timeout: defaultTimeout)
+    }
+}
+
+private final class AuthenticationGate: @unchecked Sendable {
+    @Atomic private var continuation: CheckedContinuation<Void, Never>?
+
+    func wait(onStarted: @Sendable () -> Void) async {
+        await withCheckedContinuation { continuation in
+            self.continuation = continuation
+            onStarted()
+        }
+    }
+
+    func resume() {
+        continuation?.resume()
+        continuation = nil
     }
 }

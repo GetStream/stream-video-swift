@@ -37,6 +37,38 @@ final class WebRTCAuthenticator_Tests: XCTestCase, @unchecked Sendable {
 
     // MARK: - authenticate
 
+    func test_authenticate_cancelledBeforeResponseReturns_doesNotApplyResponse() async throws {
+        let coordinator = mockCoordinatorStack.coordinator
+        await coordinator.stateAdapter.set(token: "existing-token")
+        mockCoordinatorStack.callAuthenticator.authenticateHandler = { _, _, _, _, _, _ in
+            withUnsafeCurrentTask { $0?.cancel() }
+            return .dummy()
+        }
+        let subject = try XCTUnwrap(subject)
+        let operation = Task {
+            try await subject.authenticate(
+                coordinator: coordinator,
+                currentSFU: nil,
+                migratingFromList: nil,
+                create: false,
+                ring: false,
+                notify: false,
+                options: nil
+            )
+        }
+
+        do {
+            _ = try await operation.value
+            XCTFail("Cancelled authentication applied a late response")
+        } catch {
+            XCTAssertTrue(error is CancellationError)
+        }
+        let token = await coordinator.stateAdapter.token
+        XCTAssertEqual(token, "existing-token")
+        let statsAdapter = await coordinator.stateAdapter.statsAdapter
+        XCTAssertNil(statsAdapter)
+    }
+
     func test_authenticate_withValidData_callAuthenticationWasCalledWithExpectedInput() async throws {
         let currentSFU = String.unique
         let create = true
