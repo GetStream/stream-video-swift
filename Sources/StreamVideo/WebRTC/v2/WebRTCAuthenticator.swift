@@ -77,6 +77,8 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
                 options
             )
 
+        try Task.checkCancellation()
+
         await coordinator.stateAdapter.set(
             token: response.credentials.token
         )
