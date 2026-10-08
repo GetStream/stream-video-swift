@@ -442,14 +442,42 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         set(sessionID: UUID().uuidString)
     }
 
-    /// Configures the peer connections for the session.
+    /// Creates the session's transports before audio capture starts.
     ///
-    /// - Throws: Throws an error if the SFU adapter is not set or other
-    ///   connection setup fails.
-    func configurePeerConnections() async throws {
+    /// Transport creation is separate from media setup so joins can register
+    /// audio callbacks before activation while media still waits for readiness.
+    func makePeerConnections() throws -> (
+        publisher: StreamRTCPeerConnection,
+        subscriber: StreamRTCPeerConnection
+    ) {
+        (
+            publisher: try StreamRTCPeerConnection(
+                peerConnectionFactory,
+                configuration: connectOptions.rtcConfiguration
+            ),
+            subscriber: try StreamRTCPeerConnection(
+                peerConnectionFactory,
+                configuration: connectOptions.rtcConfiguration
+            )
+        )
+    }
+
+    /// Configures media on prepared transports, creating them if needed.
+    ///
+    /// Joins reuse the prepared connections to avoid registering a replacement
+    /// audio transport after capture starts.
+    ///
+    /// - Throws: An error if the SFU adapter or connection setup is unavailable.
+    func configurePeerConnections(
+        peerConnections: (
+            publisher: StreamRTCPeerConnection,
+            subscriber: StreamRTCPeerConnection
+        )? = nil
+    ) async throws {
         guard let sfuAdapter = sfuAdapter else {
             throw ClientError("SFUAdapter hasn't been created.")
         }
+        let peerConnections = try peerConnections ?? makePeerConnections()
 
         log.debug(
             """
@@ -467,10 +495,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         let publisher = rtcPeerConnectionCoordinatorFactory.buildCoordinator(
             sessionId: sessionID,
             peerType: .publisher,
-            peerConnection: try StreamRTCPeerConnection(
-                peerConnectionFactory,
-                configuration: connectOptions.rtcConfiguration
-            ),
+            peerConnection: peerConnections.publisher,
             peerConnectionFactory: peerConnectionFactory,
             videoOptions: videoOptions,
             videoConfig: videoConfig,
@@ -500,10 +525,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         let subscriber = rtcPeerConnectionCoordinatorFactory.buildCoordinator(
             sessionId: sessionID,
             peerType: .subscriber,
-            peerConnection: try StreamRTCPeerConnection(
-                peerConnectionFactory,
-                configuration: connectOptions.rtcConfiguration
-            ),
+            peerConnection: peerConnections.subscriber,
             peerConnectionFactory: peerConnectionFactory,
             videoOptions: videoOptions,
             videoConfig: videoConfig,

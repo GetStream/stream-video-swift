@@ -554,6 +554,31 @@ final class CallAudioSession: @unchecked Sendable {
             ownCapabilities: ownCapabilities
         )
 
+        let categoryAction: StoreActionBox<RTCAudioStore.Namespace.Action> = .normal(
+            .conditioned(
+                .activeSessionIdentifier(identifier),
+                action: .avAudioSession(
+                    .setCategoryAndModeAndCategoryOptions(
+                        configuration.category,
+                        mode: configuration.mode,
+                        categoryOptions: configuration.options
+                    )
+                )
+            )
+        )
+        if configuration.isActive {
+            // Unmuting or enabling WebRTC audio can start native capture.
+            // Apply the category and activation first so voice processing
+            // initializes with the configured, active session.
+            actions.append(categoryAction)
+            actions.append(
+                .normal(.conditioned(
+                    .activeSessionIdentifier(identifier),
+                    action: .setActive(true)
+                ))
+            )
+        }
+
         actions.append(
             .normal(
                 .conditioned(
@@ -572,21 +597,9 @@ final class CallAudioSession: @unchecked Sendable {
             )
         )
 
-        actions.append(
-            .normal(
-                .conditioned(
-                    .activeSessionIdentifier(identifier),
-                    action: .avAudioSession(
-                        .setCategoryAndModeAndCategoryOptions(
-                            configuration.category,
-                            mode: configuration.mode,
-                            categoryOptions: configuration.options
-                        )
-                    )
-                )
-            )
-        )
-
+        if !configuration.isActive {
+            actions.append(categoryAction)
+        }
         actions.append(contentsOf: [
             // Setting only the audioEnabled doesn't stop the audio playout
             // as if a new track gets added later on WebRTC will try to restart
@@ -595,8 +608,19 @@ final class CallAudioSession: @unchecked Sendable {
             .normal(.conditioned(
                 .activeSessionIdentifier(identifier),
                 action: .webRTCAudioSession(.setAudioEnabled(configuration.isActive))
-            )),
-            .normal(.conditioned(.activeSessionIdentifier(identifier), action: .setActive(configuration.isActive))),
+            ))
+        ])
+        if !configuration.isActive {
+            // Disable WebRTC audio before deactivation so new tracks cannot
+            // restart playout while the session is shutting down.
+            actions.append(
+                .normal(.conditioned(
+                    .activeSessionIdentifier(identifier),
+                    action: .setActive(false)
+                ))
+            )
+        }
+        actions.append(contentsOf: [
             .normal(.conditioned(
                 .activeSessionIdentifier(identifier),
                 action: .avAudioSession(.setOverrideOutputAudioPort(configuration.overrideOutputAudioPort ?? .none))
