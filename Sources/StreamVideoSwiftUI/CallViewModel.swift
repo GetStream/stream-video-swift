@@ -604,15 +604,16 @@ open class CallViewModel: ObservableObject {
         if enteringCallTask != nil || callingState == .inCall {
             return
         }
+        let call = self.call ?? streamVideo.call(
+            callType: callType,
+            callId: callId,
+            callSettings: callSettings
+        )
+        pendingCall = call
         enteringCallTask = Task(disposableBag: disposableBag, priority: .userInitiated) { [weak self] in
             guard let self else { return }
             do {
                 log.debug("Starting call")
-                let call = call ?? streamVideo.call(
-                    callType: callType,
-                    callId: callId,
-                    callSettings: callSettings
-                )
                 var settingsRequest: CallSettingsRequest?
                 var limits: LimitsSettingsRequest?
                 if maxDuration != nil || maxParticipants != nil {
@@ -659,6 +660,7 @@ open class CallViewModel: ObservableObject {
                 setCallingState(.idle)
                 audioRecorder.stopRecording()
                 enteringCallTask = nil
+                pendingCall = nil
             }
         }
     }
@@ -905,7 +907,10 @@ open class CallViewModel: ObservableObject {
     }
 
     /// Leaves the current call.
-    private func leaveCall(reason: String?) {
+    private func leaveCall(
+        reason: String?,
+        initiator: Call.LeaveInitiator = .user
+    ) {
         log.debug("Leaving call")
         let callToLeave = pendingCall ?? call
         enteringCallTask?.cancel()
@@ -924,7 +929,7 @@ open class CallViewModel: ObservableObject {
         skipCallStateUpdates = false
         temporaryCallSettings = nil
         lastScreenSharingParticipant = nil
-        callToLeave?.leave(reason: reason)
+        callToLeave?.leave(initiator: initiator, reason: reason)
         pendingCall = nil
 
         pictureInPictureAdapter.call = nil
@@ -1035,7 +1040,7 @@ open class CallViewModel: ObservableObject {
     private func save(call: Call) {
         pendingCall = nil
         guard enteringCallTask != nil else {
-            call.leave()
+            call.leave(initiator: .unknown, reason: "join.cancelled")
             self.call = nil
             return
         }
@@ -1082,6 +1087,8 @@ open class CallViewModel: ObservableObject {
         ringTimeout: Bool = false,
         reason: String? = nil
     ) {
+        let initiator: Call.LeaveInitiator = ringTimeout ? .sdkError : .user
+        let leaveReason = reason ?? (ringTimeout ? "ringTimeout" : nil)
         if skipCallStateUpdates {
             skipCallStateUpdates = false
         }
@@ -1089,7 +1096,7 @@ open class CallViewModel: ObservableObject {
             let call,
             callingState == .outgoing
         else {
-            leaveCall(reason: reason)
+            leaveCall(reason: leaveReason, initiator: initiator)
             return
         }
 
@@ -1127,7 +1134,7 @@ open class CallViewModel: ObservableObject {
                 log.error(error)
             }
 
-            leaveCall(reason: reason)
+            leaveCall(reason: leaveReason, initiator: initiator)
         }
     }
 
@@ -1163,7 +1170,7 @@ open class CallViewModel: ObservableObject {
                         if
                             callEventInfo.user?.id == streamVideo.user.id,
                             callEventInfo.callCid == call?.cId {
-                            leaveCall(reason: "blocked")
+                            leaveCall(reason: "call.blocked_user", initiator: .remoteEvent)
                         }
                     case .userUnblocked:
                         break
@@ -1278,7 +1285,7 @@ open class CallViewModel: ObservableObject {
                     _ = try? await outgoingCall.reject(
                         reason: "Call rejected by all \(outgoingMembersCount) outgoing call members."
                     )
-                    self?.leaveCall(reason: "unanswered")
+                    self?.leaveCall(reason: "call.rejected", initiator: .remoteEvent)
                     // Clear after leaving so another poll cannot reject again.
                     self?.outgoingRejectionTask = nil
                 }
@@ -1314,13 +1321,13 @@ open class CallViewModel: ObservableObject {
 
         default:
             if call?.cId == event.callCid {
-                leaveCall(reason: "ended")
+                leaveCall(reason: "call.ended", initiator: .remoteEvent)
             }
         }
     }
 
     private func participantAutoLeavePolicyTriggered() {
-        leaveCall(reason: "auto-leave")
+        leaveCall(reason: "auto-leave", initiator: .app)
     }
 
     private func subscribeToApplicationLifecycleEvents() {

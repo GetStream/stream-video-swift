@@ -561,6 +561,11 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
 
         // Then
         await assertCallingState(.idle)
+        XCTAssertEqual(mockCall.leaveInitiators.first, .remoteEvent)
+        XCTAssertEqual(
+            mockCall.recordedInputPayload(String.self, for: .leave)?.first,
+            "call.ended"
+        )
     }
 
     func test_outgoingCall_blockEventCurrentUser() async throws {
@@ -693,6 +698,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
 
         // Then
         await assertCallingState(.idle)
+        XCTAssertEqual(mockCall.leaveInitiators.first, .user)
         XCTAssertEqual(
             mockCall.recordedInputPayload(String.self, for: .leave)?.first,
             expectedReason
@@ -713,6 +719,11 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
 
         // Then
         await assertCallingState(.idle, timeout: TimeInterval(ringTimeoutSeconds + 1 * 1000))
+        XCTAssertEqual(mockCall.leaveInitiators.first, .sdkError)
+        XCTAssertEqual(
+            mockCall.recordedInputPayload(String.self, for: .leave)?.first,
+            "ringTimeout"
+        )
     }
 
     // MARK: - Incoming
@@ -1039,6 +1050,26 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
 
         await fulfillment(of: [inCallExpectation], timeout: 1)
         await fulfilmentInMainActor { delayedCall.timesCalled(.leave) == 1 }
+        await assertCallingState(.idle)
+    }
+
+    func test_joinAndRingCall_hangUpDuringJoin_reportsUserInitiator() async {
+        await prepare()
+        mockCall.waitForJoinToResume = true
+        let joinStarted = expectation(description: "Join started")
+        mockCall.onJoinStarted = { joinStarted.fulfill() }
+
+        subject.joinAndRingCall(
+            callType: callType,
+            callId: callId,
+            members: participants
+        )
+        await fulfillment(of: [joinStarted], timeout: defaultTimeout)
+
+        subject.hangUp()
+
+        XCTAssertEqual(mockCall.leaveInitiators.first, .user)
+        mockCall.resumeJoin()
         await assertCallingState(.idle)
     }
 

@@ -394,6 +394,40 @@ final class ClientEventReporter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(json?["source"] as? String, "ring-ws")
     }
 
+    func test_completeStage_cancellation_reportsUnknownLeaveAttribution() async throws {
+        let attempt = await subject.beginStage(.coordinatorWS)
+        await subject.completeStage(
+            attempt,
+            retryCount: 0,
+            failure: .init(CancellationError())
+        )
+
+        await waitForEventCount(2)
+        let completed = try XCTUnwrap(event(stage: "CoordinatorWS", type: "completed"))
+        XCTAssertEqual(completed.leaveInitiator, "unknown")
+        XCTAssertEqual(completed.leaveReason, "unknown")
+    }
+
+    func test_completeStage_leaveReason_exceedsWireLimit_truncatesUnicodeScalars() async throws {
+        let reason = String(repeating: "e\u{301}", count: 150)
+        let attempt = await subject.beginStage(.coordinatorJoin)
+        let failure = ClientEventFailure(
+            code: .clientAborted,
+            leaveInitiator: .app,
+            leaveReason: reason
+        )
+        await subject.completeStage(attempt, retryCount: 0, failure: failure)
+
+        await waitForEventCount(2)
+        let completed = try XCTUnwrap(event(stage: "CoordinatorJoin", type: "completed"))
+        XCTAssertEqual(completed.leaveInitiator, "app")
+        XCTAssertEqual(completed.leaveReason, String(repeating: "e\u{301}", count: 100))
+        XCTAssertEqual(failure.leaveReason, reason)
+        let initiated = try XCTUnwrap(event(stage: "CoordinatorJoin", type: "initiated"))
+        XCTAssertNil(initiated.leaveInitiator)
+        XCTAssertNil(initiated.leaveReason)
+    }
+
     // MARK: - Helpers
 
     private func recordedEvents() -> [ClientEvent] {

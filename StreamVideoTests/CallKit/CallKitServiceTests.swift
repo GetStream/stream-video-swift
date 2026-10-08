@@ -802,6 +802,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
             call.recordedInputPayload(String.self, for: .leave)?.first,
             "callkit.join.timeout"
         )
+        XCTAssertEqual(call.leaveInitiators.first, .callkit)
         XCTAssertEqual(subject.callCount, 0)
         await fulfillment {
             if case .idle = self.subject.eventPipelineSubject.value {
@@ -826,7 +827,9 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
             call.recordedInputPayload(String.self, for: .leave)
         )
         XCTAssertEqual(leaveReasons.first, "callkit.join.timeout")
-        XCTAssertTrue(leaveReasons.dropFirst().allSatisfy(\.isEmpty))
+        XCTAssertTrue(leaveReasons.dropFirst().allSatisfy {
+            $0 == "CXAnswerCallAction.failed"
+        })
         XCTAssertFalse(
             callProvider.invocations.contains {
                 switch $0 {

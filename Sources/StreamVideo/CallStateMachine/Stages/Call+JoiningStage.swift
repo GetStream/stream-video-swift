@@ -102,7 +102,7 @@ extension Call.StateMachine.Stage {
                     // stage transitions into the error state.
                     await call.callController.trace(.init(error))
                     input.deliverySubject.send(completion: .failure(error))
-                    call.leave(reason: "join.interception.failed")
+                    call.leave(initiator: .app, reason: "join.interception.failed")
                     transitionErrorOrLog(error)
                 } catch {
                     // `joinCall` can still throw TimeOutError after leave.

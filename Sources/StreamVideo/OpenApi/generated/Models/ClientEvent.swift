@@ -23,6 +23,10 @@ public final class ClientEvent: @unchecked Sendable, Codable, JSONEncodable, Has
     public var joinAttemptId: String?
     /// Reason that triggered the coordinator join.
     public var joinReason: String?
+    /// Source of a leave request. Optional on failure events. Maximum 32 characters.
+    public var leaveInitiator: String?
+    /// Internal reason or triggering event for a leave. Maximum 200 characters.
+    public var leaveReason: String?
     /// Microphone permission status: INITIATED, FAILED, GRANTED, or NOT_INITIATED. Required on every MediaDevicePermission event.
     public var microphonePermissionStatus: String?
     /// Resolution of a completed event: success or failure. Required on completed join events; forbidden on initiated join events.
@@ -72,6 +76,8 @@ public final class ClientEvent: @unchecked Sendable, Codable, JSONEncodable, Has
         self.id = id
         self.joinAttemptId = joinAttemptId
         self.joinReason = joinReason
+        self.leaveInitiator = nil
+        self.leaveReason = nil
         self.microphonePermissionStatus = microphonePermissionStatus
         self.outcome = outcome
         self.peerConnection = peerConnection
@@ -102,6 +108,8 @@ public final class ClientEvent: @unchecked Sendable, Codable, JSONEncodable, Has
         case id
         case joinAttemptId = "join_attempt_id"
         case joinReason = "join_reason"
+        case leaveInitiator = "leave_initiator"
+        case leaveReason = "leave_reason"
         case microphonePermissionStatus = "microphone_permission_status"
         case outcome
         case peerConnection = "peer_connection"
@@ -132,7 +140,9 @@ public final class ClientEvent: @unchecked Sendable, Codable, JSONEncodable, Has
         lhs.iceState == rhs.iceState &&
         lhs.id == rhs.id &&
         lhs.joinAttemptId == rhs.joinAttemptId &&
-            lhs.joinReason == rhs.joinReason &&
+        lhs.joinReason == rhs.joinReason &&
+        lhs.leaveInitiator == rhs.leaveInitiator &&
+        lhs.leaveReason == rhs.leaveReason &&
         lhs.microphonePermissionStatus == rhs.microphonePermissionStatus &&
         lhs.outcome == rhs.outcome &&
         lhs.peerConnection == rhs.peerConnection &&
@@ -164,6 +174,8 @@ public final class ClientEvent: @unchecked Sendable, Codable, JSONEncodable, Has
         hasher.combine(id)
         hasher.combine(joinAttemptId)
         hasher.combine(joinReason)
+        hasher.combine(leaveInitiator)
+        hasher.combine(leaveReason)
         hasher.combine(microphonePermissionStatus)
         hasher.combine(outcome)
         hasher.combine(peerConnection)

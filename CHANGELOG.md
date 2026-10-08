@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🐞 Fixed
 
+- Aborted join events now identify the leave source and reason. Use `Call.leave(initiator:reason:)` to distinguish user actions from application logic. Existing `leave(reason:)` calls remain compatible and report `unknown`.
 - Configure and activate audio before capture starts, and prepare call transports before capture to avoid an engine rebuild during joining. [#1355](https://github.com/GetStream/stream-video-swift/pull/1355)
 - Fixed a launch crash when an iOS app that uses StreamVideo runs on Mac. [#1344](https://github.com/GetStream/stream-video-swift/issues/1344)
 - Kept blocking WebRTC operations and peer connection teardown off UI and Swift concurrency threads. [#1345](https://github.com/GetStream/stream-video-swift/pull/1345)

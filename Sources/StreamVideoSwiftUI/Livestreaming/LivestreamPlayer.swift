@@ -412,7 +412,7 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
     }
     
     func leaveLivestream() {
-        call.leave()
+        call.leave(initiator: .user, reason: "leaveLivestream")
         disposableBag.removeAll()
         livestreamState = .initial
     }

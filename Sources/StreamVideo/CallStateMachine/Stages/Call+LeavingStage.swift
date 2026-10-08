@@ -14,9 +14,10 @@ extension Call.StateMachine.Stage {
     /// - Returns: A new `LeavingStage` instance.
     static func leaving(
         _ context: Context,
-        reason: String?
+        reason: String?,
+        initiator: Call.LeaveInitiator = .unknown
     ) -> Call.StateMachine.Stage {
-        LeavingStage(context, reason: reason)
+        LeavingStage(context, reason: reason, initiator: initiator)
     }
 }
 
@@ -25,6 +26,7 @@ extension Call.StateMachine.Stage {
     /// Represents the leaving stage in the call state machine.
     final class LeavingStage: Call.StateMachine.Stage, @unchecked Sendable {
         private let reason: String?
+        private let initiator: Call.LeaveInitiator
         private let disposableBag = DisposableBag()
         /// When a replacement call leaves before it becomes `activeCall`, the
         /// previous active call may still be stored in `StreamVideo.State`.
@@ -37,9 +39,11 @@ extension Call.StateMachine.Stage {
 
         init(
             _ context: Context,
-            reason: String?
+            reason: String?,
+            initiator: Call.LeaveInitiator
         ) {
             self.reason = reason
+            self.initiator = initiator
             super.init(id: .leaving, context: context)
         }
 
@@ -69,7 +73,7 @@ extension Call.StateMachine.Stage {
             }
 
             input.disposableBag.removeAll()
-            input.callController.leave(reason: reason)
+            input.callController.leave(reason: reason, initiator: initiator)
             input.closedCaptionsAdapter.stop()
 
             /// Upon `Call.leave` we remove the call from the cache. Any

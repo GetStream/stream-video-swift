@@ -262,7 +262,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                     .nextValue(timeout: CallConfiguration.timeout.join)
             } catch {
                 if error is TimeOutError {
-                    leave(reason: "join.timeout")
+                    leave(initiator: .sdkError, reason: "join.timeout")
                 }
                 throw error
             }
@@ -695,6 +695,19 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     ///   Pass a custom value when you want the backend to distinguish between
     ///   different leave flows (for example, user action vs timeout).
     public func leave(reason: String? = nil) {
+        leave(initiator: .unknown, reason: reason)
+    }
+
+    /// Leaves the call and identifies the source in client call events.
+    ///
+    /// Use `.user` for a user action and `.app` for integration logic.
+    /// Existing calls to ``leave(reason:)`` report `.unknown`.
+    ///
+    /// - Parameters:
+    ///   - initiator: The source of the leave request.
+    ///   - reason: Optional reason forwarded to the SFU. Client call events
+    ///     limit this value to 200 Unicode scalars.
+    public func leave(initiator: LeaveInitiator, reason: String? = nil) {
         stateMachine.transition(
             .leaving(
                 .init(
@@ -715,9 +728,26 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                         )
                     )
                 ),
-                reason: reason
+                reason: reason,
+                initiator: initiator
             )
         )
+    }
+
+    /// Identifies the source of a leave request in client call events.
+    public enum LeaveInitiator: String, Sendable {
+        /// A user ended the call.
+        case user
+        /// The integration ended the call through application logic.
+        case app
+        /// CallKit ended the call or aborted its answer action.
+        case callkit
+        /// A remote call event ended the call.
+        case remoteEvent = "remote_event"
+        /// An SDK error or recovery limit ended the call.
+        case sdkError = "sdk_error"
+        /// The caller did not identify the source.
+        case unknown
     }
 
     /// Starts noise cancellation asynchronously.
