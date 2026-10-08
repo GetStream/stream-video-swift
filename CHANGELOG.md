@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### 🐞 Fixed
 
 - Configure and activate audio before capture starts, and prepare call transports before capture to avoid an engine rebuild during joining. [#1355](https://github.com/GetStream/stream-video-swift/pull/1355)
+- Fixed a launch crash when an iOS app that uses StreamVideo runs on Mac. [#1344](https://github.com/GetStream/stream-video-swift/issues/1344)
 - Kept blocking WebRTC operations and peer connection teardown off UI and Swift concurrency threads. [#1345](https://github.com/GetStream/stream-video-swift/pull/1345)
 - Old call connections now stop negotiating when reconnection cleanup begins. [#1342](https://github.com/GetStream/stream-video-swift/pull/1342)
 - Calls now finish cleanup and stop reporting stats when released during hang-up. [#1328](https://github.com/GetStream/stream-video-swift/pull/1328)
