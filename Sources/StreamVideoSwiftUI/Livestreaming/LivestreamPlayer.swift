@@ -406,7 +406,7 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
                 livestreamState = call.state.backstage ? .backstage : .live
             } catch {
                 livestreamState = .error
-                log.error("Error joining livestream")
+                log.error("Livestream join failed. cid=\(call.cId)", error: error)
             }
         }
     }

@@ -238,7 +238,6 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             callUUID:\(callUUID) 
             cid:\(cid)
             callerId:\(callerId)
-            callerName:\(localizedCallerName)
             hasVideo: \(hasVideo)
             """,
             subsystems: .callKit
@@ -295,7 +294,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 let callState = try await callEntry.call.get()
                 if let leaveReason = checkIfCallWasHandled(callState: callState) {
                     log.debug(
-                        "Ending call with reason:\(leaveReason) { uuid:\(callUUID), cid:\(cid), callerId:\(callerId), callerName:\(localizedCallerName) }",
+                        "Call ended. reason=\(leaveReason) uuid=\(callUUID) cid=\(cid) callerId=\(callerId)",
                         subsystems: .callKit
                     )
                     callEnded(

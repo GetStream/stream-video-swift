@@ -99,8 +99,7 @@ final class SFUAdapter: CustomStringConvertible, @unchecked Sendable {
         """
         Address: \(ObjectIdentifier(webSocket))
         ConnectionState: \(connectionState)
-        ConnectURL: \(connectURL)
-        Hostname: \(hostname)
+        Host: \(host)
         """
     }
 
@@ -432,7 +431,10 @@ final class SFUAdapter: CustomStringConvertible, @unchecked Sendable {
         request.sessionID = sessionId
         request.tracks = tracks
 
-        log.debug(request, subsystems: .sfu)
+        log.debug(
+            "SFU publisher set requested. sessionId=\(sessionId) trackCount=\(tracks.count)",
+            subsystems: .sfu
+        )
 
         subjectSendEvent.send(SetPublisherEvent(hostname: host, payload: request))
         let response = try await executeTask(retryPolicy: .fastCheckValue { true }) { [weak self] in
@@ -442,7 +444,10 @@ final class SFUAdapter: CustomStringConvertible, @unchecked Sendable {
             }
             return try await signalService.setPublisher(setPublisherRequest: request)
         }
-        log.debug(response, subsystems: .sfu)
+        log.debug(
+            "SFU publisher response received. sessionId=\(sessionId) code=\(response.error.code)",
+            subsystems: .sfu
+        )
         signalService.subject.send(response)
         if response.error.code != .unspecified && !response.error.message.isEmpty {
             throw response.error
@@ -515,13 +520,19 @@ final class SFUAdapter: CustomStringConvertible, @unchecked Sendable {
         request.sdp = sessionDescription
         request.negotiationID = negotiationID
 
-        log.debug(request, subsystems: .sfu)
+        log.debug(
+            "SFU answer send requested. sessionId=\(sessionId) peer=\(peerType) negotiationId=\(negotiationID)",
+            subsystems: .sfu
+        )
         subjectSendEvent.send(SendAnswerEvent(hostname: host, payload: request))
         let response = try await executeTask(retryPolicy: .fastCheckValue { true }) {
             try Task.checkCancellation()
             return try await signalService.sendAnswer(sendAnswerRequest: request)
         }
-        log.debug(response, subsystems: .sfu)
+        log.debug(
+            "SFU answer response received. sessionId=\(sessionId) code=\(response.error.code)",
+            subsystems: .sfu
+        )
         signalService.subject.send(response)
         if response.error.code != .unspecified && !response.error.message.isEmpty {
             throw response.error
@@ -613,17 +624,16 @@ final class SFUAdapter: CustomStringConvertible, @unchecked Sendable {
         webSocket
             .eventPublisher
             .log(.debug, subsystems: .sfu) {
-                """
-                SFU received event
-                \($0)
-                """
+                "SFU event received. type=\($0.name)"
             }
             .sink { [weak self] in self?.eventSubject.send($0) }
             .store(in: disposableBag)
 
         signalService
             .subject
-            .log(.debug, subsystems: .sfu)
+            .log(.debug, subsystems: .sfu) {
+                "SFU message processed. type=\(type(of: $0))"
+            }
             .sink { _ in }
             .store(in: disposableBag)
     }

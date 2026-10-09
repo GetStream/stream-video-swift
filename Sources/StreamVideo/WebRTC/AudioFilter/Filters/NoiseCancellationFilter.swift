@@ -119,7 +119,12 @@ public final class NoiseCancellationFilter: AudioFilter, @unchecked Sendable, Ob
                     log.debug("AudioFilter:\(id) is now active 🟢.")
                 } catch {
                     release()
-                    log.debug("AudioFilter:\(id) failed to activate with error:\(error)")
+                    log.log(
+                        .warning,
+                        message: "Noise cancellation activation failed. filterId=\(id) fallback=unfiltered",
+                        subsystems: .audioSession,
+                        error: error
+                    )
                 }
             } else if call == nil, isActive {
                 await stopNoiseCancellation(for: oldValue)

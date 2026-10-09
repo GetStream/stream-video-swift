@@ -289,7 +289,7 @@ final class StreamVideoCapturer: StreamVideoCapturing, @unchecked Sendable {
                 return ".stopCapture(videoCapturer:\(customString(for: videoCapturer)))"
 
             case let .setCameraPosition(position, videoSource, videoCapturer, videoCapturerDelegate):
-                return ".startCapture(position:\(position), videoSource:\(customString(for: videoSource)), videoCapturer:\(customString(for: videoCapturer)), videoCapturerDelegate:\(customString(for: videoCapturerDelegate)))"
+                return ".setCameraPosition(position:\(position), videoSource:\(customString(for: videoSource)), videoCapturer:\(customString(for: videoCapturer)), videoCapturerDelegate:\(customString(for: videoCapturerDelegate)))"
 
             case let .updateCaptureQuality(
                 dimensions,

@@ -24,10 +24,6 @@ extension Logger {
             didSet { RTCLogger.default.didUpdate(mode: mode) }
         }
 
-        nonisolated(unsafe) static var severity: RTCLoggingSeverity = .init(LogConfig.level) {
-            didSet { RTCLogger.default.didUpdate(severity: severity) }
-        }
-
         enum ValidFile: String {
             case audioEngineDevice = "audio_engine_device.mm"
         }
@@ -62,58 +58,81 @@ extension Logger.WebRTC {
 
         private let logger = RTCCallbackLogger()
         private var isRunning = false
-        private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
-        private let levelCancellable: AnyCancellable
+        private var currentMode: LogMode = .none
+        private var currentSeverity = RTCLoggingSeverity(LogConfig.level)
+        private let processingQueue = DispatchQueue(label: "io.getstream.webrtc.logger")
+        private var levelCancellable: AnyCancellable?
 
         private init() {
             levelCancellable = LogConfig.levelPublisher
-                .dropFirst()
-                .sink { severity = .init($0) }
+                .sink { [weak self] in self?.didUpdate(severity: .init($0)) }
             didUpdate(mode: mode)
         }
 
         func didUpdate(severity: RTCLoggingSeverity) {
-            processingQueue.addOperation { [weak self] in
-                self?.logger.severity = severity
+            processingQueue.async { [weak self] in
+                guard let self, currentSeverity != severity else {
+                    return
+                }
+                currentSeverity = severity
+                restartLogging()
             }
         }
 
         func didUpdate(mode: LogMode) {
-            processingQueue.addOperation { [weak self] in
+            processingQueue.async { [weak self] in
                 guard let self else {
                     return
                 }
 
-                guard mode != .none else {
-                    logger.stop()
-                    isRunning = false
+                guard currentMode != mode else {
                     return
                 }
-
-                guard !self.isRunning else {
-                    return
-                }
-
-                logger.start { [weak self] in self?.process($0) }
-
-                self.isRunning = true
+                currentMode = mode
+                restartLogging()
             }
         }
 
-        private func process(_ message: String) {
+        private func restartLogging() {
+            if isRunning {
+                logger.stop()
+                isRunning = false
+            }
+            guard currentMode != .none else { return }
+
+            logger.severity = currentSeverity
+            let mode = currentMode
+            let files = validFiles
+            logger.start(messageAndSeverityHandler: { [weak self] in
+                self?.process($0, severity: $1, mode: mode, validFiles: files)
+            })
+            isRunning = true
+        }
+
+        private func process(
+            _ message: String,
+            severity: RTCLoggingSeverity,
+            mode: LogMode,
+            validFiles: [ValidFile]
+        ) {
             let trimmedMessage = message.trimmingCharacters(
                 in: .whitespacesAndNewlines
             )
 
+            if mode == .validFilesOnly,
+               !validFiles.isEmpty,
+               severity == .verbose || severity == .info,
+               !validFiles.contains(where: { trimmedMessage.contains($0.rawValue) }) {
+                return
+            }
+
             switch severity {
-            case .none, .verbose:
-                if isMessageFromValidFile(trimmedMessage) {
-                    log.debug(trimmedMessage, subsystems: .webRTC)
-                }
+            case .none:
+                return
+            case .verbose:
+                log.debug(trimmedMessage, subsystems: .webRTC)
             case .info:
-                if isMessageFromValidFile(trimmedMessage) {
-                    log.info(trimmedMessage, subsystems: .webRTC)
-                }
+                log.info(trimmedMessage, subsystems: .webRTC)
             case .warning:
                 log.warning(trimmedMessage, subsystems: .webRTC)
             case .error:
@@ -121,19 +140,6 @@ extension Logger.WebRTC {
             @unknown default:
                 log.debug(trimmedMessage, subsystems: .webRTC)
             }
-        }
-
-        private func isMessageFromValidFile(_ message: String) -> Bool {
-            guard mode == .validFilesOnly, !validFiles.isEmpty else {
-                return true
-            }
-
-            for validFile in validFiles {
-                if message.contains(validFile.rawValue) {
-                    return true
-                }
-            }
-            return false
         }
     }
 }

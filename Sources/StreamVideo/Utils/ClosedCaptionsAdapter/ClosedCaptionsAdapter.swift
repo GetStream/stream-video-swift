@@ -79,7 +79,7 @@ final class ClosedCaptionsAdapter {
             .eventPublisher(for: ClosedCaptionEvent.self)
             .map(\.closedCaption)
             .removeDuplicates()
-            .log(.debug) { "Processing closedCaption for speakerId:\($0.speakerId) text:\($0.text)." }
+            .log(.debug) { "Closed caption received. speakerId=\($0.speakerId)" }
             .sink { [weak self] in self?.items.append($0) }
 
         itemsCancellable = items

@@ -323,7 +323,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
                         Session ID: \(sessionId)
                         Connection type: \(peerType)
                         SFU: \(sfuAdapter.hostname)
-                        Event: \($0)
+                        Event: \($0.logDescription)
                         """,
                         subsystems: subsystem
                     )
@@ -590,12 +590,8 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     ) async throws {
         log.debug(
             """
-            PeerConnection will set localDescription
-            Identifier: \(identifier)
-            type:\(peerType)
-            sessionID: \(sessionId)
-            sfu: \(sfuAdapter.hostname)
-            SDP: \(sessionDescription.sdp.replacingOccurrences(of: "\r\n", with: " ").replacingOccurrences(of: "\n", with: " "))
+            Local description set requested. pcId=\(identifier) peer=\(peerType) \
+            sessionId=\(sessionId) sfu=\(sfuAdapter.host) type=\(sessionDescription.type)
             """,
             subsystems: subsystem
         )
@@ -617,12 +613,8 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     ) async throws {
         log.debug(
             """
-            PeerConnection will set remoteDescription
-            Identifier: \(identifier)
-            type:\(peerType)
-            sessionID: \(sessionId)
-            sfu: \(sfuAdapter.hostname)
-            SDP: \(sessionDescription.sdp.replacingOccurrences(of: "\r\n", with: " ").replacingOccurrences(of: "\n", with: " "))
+            Remote description set requested. pcId=\(identifier) peer=\(peerType) \
+            sessionId=\(sessionId) sfu=\(sfuAdapter.host) type=\(sessionDescription.type)
             """,
             subsystems: subsystem
         )
@@ -1020,7 +1012,9 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     private func configureSubscriberOfferObserver() {
         sfuAdapter
             .publisher(eventType: Stream_Video_Sfu_Event_SubscriberOffer.self)
-            .log(.debug, subsystems: subsystem)
+            .log(.debug, subsystems: subsystem) {
+                "Subscriber offer received. negotiationId=\($0.negotiationID)"
+            }
             .receive(on: dispatchQueue)
             .sinkTask(queue: subscriberOfferProcessingQueue) { [weak self] in await self?.handleSubscriberOffer($0) }
             .store(in: disposableBag)

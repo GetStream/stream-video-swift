@@ -231,7 +231,12 @@ extension BroadcastBufferReader: StreamDelegate {
             stopCapturing()
             log.debug("stopping capture")
         case .errorOccurred:
-            log.debug("server stream error encountered: \(aStream.streamError?.localizedDescription ?? "")")
+            log.log(
+                .warning,
+                message: "Broadcast stream failed.",
+                subsystems: .videoCapturer,
+                error: aStream.streamError
+            )
         default:
             break
         }

@@ -76,7 +76,7 @@ final class SFUEventAdapter: @unchecked Sendable {
         sfuAdapter
             .publisher(eventType: Stream_Video_Sfu_Event_ParticipantJoined.self)
             .log(.debug, subsystems: .sfu) {
-                "Processing SFU event of type:\($0.name) on callCid:\($0.callCid) for participant:\($0.participant.name)."
+                "SFU participant joined. cid=\($0.callCid) sessionId=\($0.participant.sessionID)"
             }
             .sinkTask(queue: processingQueue) { [weak self] in await self?.handleParticipantJoined($0) }
             .store(in: disposableBag)
@@ -84,7 +84,7 @@ final class SFUEventAdapter: @unchecked Sendable {
         sfuAdapter
             .publisher(eventType: Stream_Video_Sfu_Event_ParticipantLeft.self)
             .log(.debug, subsystems: .sfu) {
-                "Processing SFU event of type:\($0.name) on callCid:\($0.callCid) for participant:\($0.participant.name)."
+                "SFU participant left. cid=\($0.callCid) sessionId=\($0.participant.sessionID)"
             }
             .sinkTask(queue: processingQueue) { [weak self] in await self?.handleParticipantLeft($0) }
             .store(in: disposableBag)
@@ -128,7 +128,7 @@ final class SFUEventAdapter: @unchecked Sendable {
         sfuAdapter
             .publisher(eventType: Stream_Video_Sfu_Event_ParticipantUpdated.self)
             .log(.debug, subsystems: .sfu) {
-                "Processing SFU event of type:\(type(of: $0)) on callCid:\($0.callCid) participant:\($0.participant.name)."
+                "SFU participant updated. cid=\($0.callCid) sessionId=\($0.participant.sessionID)"
             }
             .sinkTask(queue: processingQueue) { [weak self] in await self?.handleParticipantUpdated($0) }
             .store(in: disposableBag)
@@ -136,7 +136,7 @@ final class SFUEventAdapter: @unchecked Sendable {
         sfuAdapter
             .publisher(eventType: Stream_Video_Sfu_Event_ChangePublishOptions.self)
             .log(.debug, subsystems: .sfu) {
-                "Processing SFU event of type:\(type(of: $0)) on callCid:\($0.publishOptions.map(\.trackType.description).joined(separator: ",")) reason:\($0.reason)."
+                "SFU publish options changed. trackTypes=\($0.publishOptions.map(\.trackType.description).joined(separator: ",")) reason=\($0.reason)"
             }
             .sinkTask(queue: processingQueue) { [weak self] in await self?.handleChangePublishOptions($0) }
             .store(in: disposableBag)
@@ -244,12 +244,18 @@ final class SFUEventAdapter: @unchecked Sendable {
             return
         }
 
-        log.debug("Will enqueue participant joined event: \(event.participant.name)")
+        log.debug(
+            "Participant insert requested. cid=\(event.callCid) sessionId=\(event.participant.sessionID)",
+            subsystems: .sfu
+        )
         await stateAdapter.enqueue { [participantsThreshold] participants in
             var updatedParticipants = participants
 
             guard updatedParticipants[event.participant.sessionID] == nil else {
-                log.debug("enqueue participant failed, already exist: \(event.participant.name)")
+                log.debug(
+                    "Participant insert skipped. sessionId=\(event.participant.sessionID) reason=alreadyPresent",
+                    subsystems: .sfu
+                )
                 return participants
             }
 
@@ -267,7 +273,10 @@ final class SFUEventAdapter: @unchecked Sendable {
             }
 
             updatedParticipants[event.participant.sessionID] = participant
-            log.debug("Enqueue participant joined event: \(event.participant.name) success!")
+            log.debug(
+                "Participant inserted. sessionId=\(event.participant.sessionID)",
+                subsystems: .sfu
+            )
 
             return updatedParticipants
         }

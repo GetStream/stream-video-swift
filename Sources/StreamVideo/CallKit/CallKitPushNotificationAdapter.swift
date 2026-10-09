@@ -118,7 +118,8 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
 
         log
             .debug(
-                "Received VoIP push notification with cid:\(content.cid) callerId:\(content.callerId) callerName:\(content.localizedCallerName)."
+                "VoIP push received. cid=\(content.cid) callerId=\(content.callerId)",
+                subsystems: .callKit
             )
 
         let sendableCompletion = UncheckedSendableBox(completion)

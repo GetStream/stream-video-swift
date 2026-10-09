@@ -107,7 +107,11 @@ open class CallViewModel: ObservableObject {
                         do {
                             try await call?.speaker.enableSpeakerPhone()
                         } catch {
-                            log.error("Error enabling the speaker: \(error.localizedDescription)")
+                            log.error(
+                                "Speaker enable failed. cid=\(call?.cId ?? "none")",
+                                subsystems: .audioSession,
+                                error: error
+                            )
                         }
                     }
                 }

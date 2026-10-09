@@ -74,8 +74,8 @@ actor ICEAdapter: @unchecked Sendable {
             pendingLocalCandidates.append(candidate)
             log.debug(
                 """
-                PeerConnection type:\(peerType) doesn't have remoteDescription. Hold candidate for now.
-                Candidate: \(candidate)
+                ICE candidate deferred. peer=\(peerType) sessionId=\(sessionID) \
+                mid=\(candidate.sdpMid ?? "none") mLineIndex=\(candidate.sdpMLineIndex) reason=noRemoteDescription
                 """,
                 subsystems: .iceAdapter
             )
@@ -84,8 +84,8 @@ actor ICEAdapter: @unchecked Sendable {
 
         log.debug(
             """
-            PeerConnection type:\(peerType) has remoteDescription. Adding candidate now
-            Candidate: \(candidate)
+            ICE candidate add requested. peer=\(peerType) sessionId=\(sessionID) \
+            mid=\(candidate.sdpMid ?? "none") mLineIndex=\(candidate.sdpMLineIndex)
             """,
             subsystems: .iceAdapter
         )
@@ -109,7 +109,7 @@ actor ICEAdapter: @unchecked Sendable {
                 guard
                     let jsonString = String(data: json, encoding: .utf8)
                 else {
-                    throw ClientError("PeerConnection type:\(peerType) was unable to trickle generated candidate\(candidate).")
+                    throw ClientError("ICE candidate encoding failed. peer=\(peerType) sessionId=\(sessionID)")
                 }
 
                 try Task.checkCancellation()
@@ -260,13 +260,17 @@ actor ICEAdapter: @unchecked Sendable {
 
         peerConnection
             .publisher(eventType: StreamRTCPeerConnection.DidGenerateICECandidateEvent.self)
-            .log(.debug, subsystems: .iceAdapter) { [peerType] in "PeerConnection type:\(peerType) generated \($0)." }
+            .log(.debug, subsystems: .iceAdapter) { [peerType, sessionID] in
+                "ICE candidate generated. peer=\(peerType) sessionId=\(sessionID) mid=\($0.candidate.sdpMid ?? "none") mLineIndex=\($0.candidate.sdpMLineIndex)"
+            }
             .sinkTask(on: self, storeIn: disposableBag) { await $0.trickle($1.candidate) }
             .store(in: disposableBag)
 
         peerConnection
             .publisher(eventType: StreamRTCPeerConnection.HasRemoteDescription.self)
-            .log(.debug, subsystems: .iceAdapter)
+            .log(.debug, subsystems: .iceAdapter) { [peerType, sessionID] _ in
+                "Remote description available. peer=\(peerType) sessionId=\(sessionID)"
+            }
             .sinkTask(on: self, storeIn: disposableBag) { executor, _ in await executor.drainPendingSFUCandidates() }
             .store(in: disposableBag)
 
@@ -277,7 +281,9 @@ actor ICEAdapter: @unchecked Sendable {
         sfuAdapter
             .publisher(eventType: Stream_Video_Sfu_Models_ICETrickle.self)
             .filter { [_peerType] in $0.peerType == _peerType }
-            .log(.debug, subsystems: .iceAdapter)
+            .log(.debug, subsystems: .iceAdapter) {
+                "ICE candidate received. peer=\($0.peerType) sessionId=\($0.sessionID)"
+            }
             .sinkTask(on: self, storeIn: disposableBag) { await $0.handleICETrickle($1) }
             .store(in: disposableBag)
 

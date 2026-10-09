@@ -21,4 +21,31 @@ protocol RTCPeerConnectionEvent {
 
 extension RTCPeerConnectionEvent {
     var traceData: AnyEncodable { .init("") }
+
+    var logDescription: String {
+        switch self {
+        case let event as StreamRTCPeerConnection.HasRemoteDescription:
+            return "\(traceTag)(type: \(event.sessionDescription.type))"
+        case let event as StreamRTCPeerConnection.CreateOfferEvent:
+            return "\(traceTag)(type: \(event.sessionDescription.type))"
+        case let event as StreamRTCPeerConnection.CreateAnswerEvent:
+            return "\(traceTag)(type: \(event.sessionDescription.type))"
+        case let event as StreamRTCPeerConnection.SetLocalDescriptionEvent:
+            return "\(traceTag)(type: \(event.sessionDescription.type))"
+        case let event as StreamRTCPeerConnection.SetRemoteDescriptionEvent:
+            return "\(traceTag)(type: \(event.sessionDescription.type))"
+        case let event as StreamRTCPeerConnection.DidChangeLocalCandidateEvent:
+            return "\(traceTag)(mid: \(event.candidate.sdpMid ?? "none"), mLineIndex: \(event.candidate.sdpMLineIndex))"
+        case let event as StreamRTCPeerConnection.DidChangeRemoteCandidateEvent:
+            return "\(traceTag)(mid: \(event.candidate.sdpMid ?? "none"), mLineIndex: \(event.candidate.sdpMLineIndex))"
+        case let event as StreamRTCPeerConnection.DidGenerateICECandidateEvent:
+            return "\(traceTag)(mid: \(event.candidate.sdpMid ?? "none"), mLineIndex: \(event.candidate.sdpMLineIndex))"
+        case let event as StreamRTCPeerConnection.ICECandidatesRemovedEvent:
+            return "\(traceTag)(count: \(event.candidates.count))"
+        case let event as StreamRTCPeerConnection.DidRemoveICECandidatesEvent:
+            return "\(traceTag)(count: \(event.candidates.count))"
+        default:
+            return String(describing: self)
+        }
+    }
 }

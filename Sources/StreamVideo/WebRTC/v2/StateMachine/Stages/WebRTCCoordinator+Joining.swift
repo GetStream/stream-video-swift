@@ -579,8 +579,18 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     .publisher
                     .filter { $0 }
                     .nextValue(timeout: timeout)
+            } catch is CancellationError {
+                log.debug(
+                    "Audio session readiness wait cancelled.",
+                    subsystems: .audioSession
+                )
             } catch {
-                log.warning("AudioSession isn't ready after \(timeout) seconds. Will continue with the join flow.")
+                log.log(
+                    .warning,
+                    message: "Audio session readiness wait failed; join continues. timeoutMs=\(timeout * 1000)",
+                    subsystems: .audioSession,
+                    error: error
+                )
             }
 
             await context.coordinator?.stateAdapter.trace(.init(context.audioSessionWatchdog))

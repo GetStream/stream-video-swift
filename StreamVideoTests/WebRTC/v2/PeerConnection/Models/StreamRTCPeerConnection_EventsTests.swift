@@ -8,6 +8,34 @@ import XCTest
 
 final class RTCPeerConnectionEvent_AllEvents_Tests: XCTestCase, @unchecked Sendable {
 
+    func test_logDescription_sensitiveSDPAndCandidates_omitsPayloads() {
+        let privatePayload = "private-candidate-address-and-ice-credential"
+        let sdp = RTCSessionDescription(type: .offer, sdp: privatePayload)
+        let candidate = RTCIceCandidate(
+            sdp: privatePayload,
+            sdpMLineIndex: 1,
+            sdpMid: "video"
+        )
+        let events: [RTCPeerConnectionEvent] = [
+            StreamRTCPeerConnection.HasRemoteDescription(sessionDescription: sdp),
+            StreamRTCPeerConnection.CreateOfferEvent(sessionDescription: sdp),
+            StreamRTCPeerConnection.CreateAnswerEvent(sessionDescription: sdp),
+            StreamRTCPeerConnection.SetLocalDescriptionEvent(sessionDescription: sdp),
+            StreamRTCPeerConnection.SetRemoteDescriptionEvent(sessionDescription: sdp),
+            StreamRTCPeerConnection.DidChangeLocalCandidateEvent(candidate: candidate),
+            StreamRTCPeerConnection.DidChangeRemoteCandidateEvent(candidate: candidate),
+            StreamRTCPeerConnection.DidGenerateICECandidateEvent(candidate: candidate),
+            StreamRTCPeerConnection.ICECandidatesRemovedEvent(candidates: [candidate]),
+            StreamRTCPeerConnection.DidRemoveICECandidatesEvent(candidates: [candidate])
+        ]
+
+        for event in events {
+            XCTAssertFalse(event.logDescription.contains(privatePayload))
+            XCTAssertTrue(event.logDescription.contains(event.traceTag))
+        }
+        XCTAssertTrue(events[5].logDescription.contains("video"))
+    }
+
     func test_HasRemoteDescription_traceValues() {
         let sdp = RTCSessionDescription(type: .offer, sdp: "v=0")
         let event = StreamRTCPeerConnection.HasRemoteDescription(sessionDescription: sdp)

@@ -225,9 +225,11 @@ extension WebRTCCoordinator.StateMachine.Stage {
             } catch is CancellationError {
                 throw CancellationError()
             } catch {
-                log.warning(
-                    "PeerConnection wasn't ready in \(timeout) seconds. We continue joining and the connections should be ready after completing.",
-                    subsystems: subsystem
+                log.log(
+                    .warning,
+                    message: "Peer connection readiness wait failed; join continues. peer=\(peerConnection.peerType) timeoutMs=\(timeout * 1000)",
+                    subsystems: subsystem,
+                    error: error
                 )
             }
         }

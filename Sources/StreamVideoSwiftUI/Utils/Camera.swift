@@ -204,7 +204,11 @@ class Camera: NSObject, @unchecked Sendable {
         do {
             return try AVCaptureDeviceInput(device: validDevice)
         } catch {
-            log.error("Error getting capture device input: \(error.localizedDescription)")
+            log.error(
+                "Camera input creation failed. deviceId=\(validDevice.uniqueID)",
+                subsystems: .videoCapturer,
+                error: error
+            )
             return nil
         }
     }
