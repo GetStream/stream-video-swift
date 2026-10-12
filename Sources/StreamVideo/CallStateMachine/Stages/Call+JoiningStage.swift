@@ -86,7 +86,9 @@ extension Call.StateMachine.Stage {
                     return
                 }
 
-                log.debug("Will attempt joining call id:\(call.callId) type:\(call.callType) with input: \(input).")
+                log.debug(
+                    "Call join started. cid=\(call.cId) attempt=\(input.currentNumberOfRetries + 1) create=\(input.create) ring=\(input.ring) notify=\(input.notify)"
+                )
 
                 do {
                     let response = try await executeJoin(call: call, input: input)
@@ -120,8 +122,9 @@ extension Call.StateMachine.Stage {
                             (input.retryPolicy.delay(input.currentNumberOfRetries))
                                 * 1_000_000_000
                         )
-                        log.error(
-                            "Joining call id:\(call.callId) type:\(call.callType) failed. Will retry after a delay.",
+                        log.log(
+                            .warning,
+                            message: "Call join retry scheduled. cid=\(call.cId) attempt=\(input.currentNumberOfRetries) maxAttempts=\(input.retryPolicy.maxRetries) delayMs=\(delay / 1_000_000)",
                             error: error
                         )
                         // `try? Task.sleep` swallowed CancellationError

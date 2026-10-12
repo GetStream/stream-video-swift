@@ -55,7 +55,10 @@ open class CallSoundsPlayer: @unchecked Sendable {
     private func playSound(_ soundFile: Resource) {
         let bundle: Bundle = sounds.bundle
         guard let soundURL = bundle.url(forResource: soundFile.name, withExtension: soundFile.extension) else {
-            log.warning("There's no sound available")
+            log.warning(
+                "Call sound unavailable. resource=\(String(reflecting: soundFile.fileName))",
+                subsystems: .audioPlayback
+            )
             return
         }
         audioPlayer = try? AVAudioPlayer(contentsOf: soundURL)

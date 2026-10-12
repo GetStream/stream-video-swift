@@ -40,7 +40,7 @@ final class ClientEventDelivery: @unchecked Sendable {
             do {
                 _ = try await api.reportClientCallEvent(reportClientEventRequest: request)
                 log.debug(
-                    "ClientEvent retries:\(retries) request:\(request) reported successfully.",
+                    "Client event delivered. stage=\(event.stage ?? "none") type=\(event.eventType ?? "none") retryCount=\(retries)",
                     subsystems: .webRTC
                 )
                 return
@@ -48,9 +48,11 @@ final class ClientEventDelivery: @unchecked Sendable {
                 // `hasClientErrors` is `false` for `4xx` validation errors (do
                 // not retry) and `true` for `5xx`, network, and timeout errors.
                 guard retries < retryPolicy.maxRetries, error.hasClientErrors else {
-                    log.debug(
-                        "Failed to report client event stage:\(event.stage ?? "-") type:\(event.eventType ?? "-"): \(error)",
-                        subsystems: .webRTC
+                    log.log(
+                        .warning,
+                        message: "Client event delivery failed. stage=\(event.stage ?? "none") type=\(event.eventType ?? "none") retryCount=\(retries) maxRetries=\(retryPolicy.maxRetries)",
+                        subsystems: .webRTC,
+                        error: error
                     )
                     return
                 }

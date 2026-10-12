@@ -205,7 +205,8 @@ private final class TaskOperation<Output: Sendable>: Operation, @unchecked Senda
                 }
                 if !(error is CancellationError) {
                     log.error(
-                        error,
+                        "Queued task failed.",
+                        error: error,
                         functionName: function,
                         fileName: file,
                         lineNumber: line

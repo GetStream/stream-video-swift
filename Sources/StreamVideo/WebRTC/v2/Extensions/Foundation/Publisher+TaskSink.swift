@@ -66,7 +66,13 @@ extension Publisher where Output: Sendable {
                     }
                 } catch {
                     // Log any unexpected errors during task execution.
-                    LogConfig.logger.error(ClientError(with: error))
+                    LogConfig.logger.error(
+                        "Publisher task failed.",
+                        error: error,
+                        functionName: function,
+                        fileName: file,
+                        lineNumber: line
+                    )
                 }
             }
         }
@@ -103,7 +109,13 @@ extension Publisher where Output: Sendable {
                     }
                 } catch {
                     // Log any unexpected errors during task execution.
-                    LogConfig.logger.error(error)
+                    LogConfig.logger.error(
+                        "Publisher task failed.",
+                        error: error,
+                        functionName: function,
+                        fileName: file,
+                        lineNumber: line
+                    )
                 }
             }
         }
@@ -136,16 +148,8 @@ extension Publisher where Output: Sendable {
                 function: function,
                 line: line
             ) {
-                do {
-                    try Task.checkCancellation()
-                    await handler(actor, input)
-                } catch is CancellationError {
-                    if let error = ClientError("Task was cancelled.") as? Failure {
-                        LogConfig.logger.error(error)
-                    }
-                } catch {
-                    LogConfig.logger.error(ClientError(with: error))
-                }
+                guard !Task.isCancelled else { return }
+                await handler(actor, input)
             }
         }
     }

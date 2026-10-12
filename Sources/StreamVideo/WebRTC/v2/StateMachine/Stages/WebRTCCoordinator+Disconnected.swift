@@ -64,20 +64,30 @@ extension WebRTCCoordinator.StateMachine.Stage {
         override func transition(
             from previousStage: WebRTCCoordinator.StateMachine.Stage
         ) -> Self? {
-            if let source = context.disconnectionSource {
-                log.error(
-                    "WebSocket disconnected from \(previousStage.id) due to \(source).",
-                    subsystems: .webRTC
-                )
-            } else if let error = context.flowError {
+            if context.disconnectionSource == nil, let error = context.flowError {
                 // If we got here from an unrecoverable error, we won't attempt
                 // any reconnection and instead we will disconnect.
                 if let apiError = error as? APIError, apiError.unrecoverable == true {
                     context.reconnectionStrategy = .disconnected
                 }
-                log.error(
-                    "Disconnected from \(previousStage.id) due to \(error).",
-                    subsystems: .webRTC
+            }
+            if context.disconnectionSource != nil || context.flowError != nil {
+                let level: LogLevel
+                if context.disconnectionSource == .userInitiated {
+                    level = .info
+                } else {
+                    switch context.reconnectionStrategy {
+                    case .unknown, .disconnected:
+                        level = .error
+                    case .fast, .rejoin, .migrate:
+                        level = .warning
+                    }
+                }
+                log.log(
+                    level,
+                    message: "Call connection interrupted. coordinatorConnectId=\(context.coordinatorConnectId) fromStage=\(previousStage.id) source=\(context.disconnectionSource.map { String(reflecting: String(describing: $0)) } ?? "none") recovery=\(String(reflecting: String(describing: context.reconnectionStrategy)))",
+                    subsystems: .webRTC,
+                    error: context.flowError
                 )
             }
 
@@ -206,11 +216,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
         /// stops the internal reconnect/rejoin loop from continuing silently.
         private func transitionToRejoiningIfPossible() throws {
             guard context.registerRejoinAttempt() else {
-                log.warning(
-                    """
-                    Rejoin attempts exceeded \(context.rejoinMaxAttempts) within \
-                    \(context.rejoinAttemptWindow) seconds. Leaving call.
-                    """,
+                log.error(
+                    "Call rejoin limit reached. coordinatorConnectId=\(context.coordinatorConnectId) maxAttempts=\(context.rejoinMaxAttempts) windowSeconds=\(context.rejoinAttemptWindow) outcome=leave",
                     subsystems: .webRTC
                 )
                 try transition?(
@@ -229,7 +236,9 @@ extension WebRTCCoordinator.StateMachine.Stage {
             internetObservationCancellable = internetConnectionObserver
                 .statusPublisher
                 .filter { $0 != .unknown }
-                .log(.debug, subsystems: .webRTC) { "Internet connection status updated to \($0)" }
+                .log(.debug, subsystems: .webRTC) {
+                    "Call recovery network status changed. status=\(String(reflecting: String(describing: $0)))"
+                }
                 .debounce(for: 1, scheduler: processingQueue)
                 .removeDuplicates()
                 .receive(on: processingQueue)

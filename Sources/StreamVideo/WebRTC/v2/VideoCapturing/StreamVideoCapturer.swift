@@ -140,8 +140,9 @@ final class StreamVideoCapturer: StreamVideoCapturing, @unchecked Sendable {
                 try await streamCapturer.dispatch(action)
             } catch {
                 log.error(
-                    "Failed to dispatch camera restart action: \(error).",
-                    subsystems: .videoCapturer
+                    "Camera restart failed.",
+                    subsystems: .videoCapturer,
+                    error: error
                 )
             }
         }
@@ -153,8 +154,9 @@ final class StreamVideoCapturer: StreamVideoCapturing, @unchecked Sendable {
                     try await streamCapturer.dispatch(action)
                 } catch {
                     log.error(
-                        "Failed to dispatch system pressure action: \(error).",
-                        subsystems: .videoCapturer
+                        "Camera pressure update failed.",
+                        subsystems: .videoCapturer,
+                        error: error
                     )
                 }
             }

@@ -102,7 +102,10 @@ final class WebRTCStatsReporter: WebRTCStatsReporting, @unchecked Sendable {
             return
         }
 
-        log.debug("Delivery scheduled on hostname:\(sfuAdapter?.hostname) with interval:\(interval) seconds.")
+        log.debug(
+            "Stats delivery scheduled. hostname=\(sfuAdapter?.hostname ?? "none") intervalSeconds=\(interval)",
+            subsystems: .webRTC
+        )
     }
 
     /// Schedules periodic delivery without draining buffers during overlap.
@@ -116,7 +119,7 @@ final class WebRTCStatsReporter: WebRTCStatsReporting, @unchecked Sendable {
         guard sfuAdapter != nil else { return }
 
         guard interval > 0 else {
-            log.warning("Delivery interval should be greater than 0.", subsystems: .webRTC)
+            log.warning("Stats delivery skipped. reason=invalidInterval intervalSeconds=\(interval)", subsystems: .webRTC)
             return
         }
 
@@ -163,7 +166,14 @@ final class WebRTCStatsReporter: WebRTCStatsReporting, @unchecked Sendable {
                 )
             } catch {
                 input.onError(error)
-                log.error(error, subsystems: .webRTC)
+                if !(error is CancellationError) {
+                    log.log(
+                        .warning,
+                        message: "Stats delivery failed. sessionId=\(input.sessionID)",
+                        subsystems: .webRTC,
+                        error: error
+                    )
+                }
             }
             self?.activeDeliveryTask = nil
         }

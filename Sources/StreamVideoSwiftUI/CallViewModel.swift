@@ -1110,25 +1110,17 @@ open class CallViewModel: ObservableObject {
                     .rejectionReasonProvider
                     .reason(for: call.cId, ringTimeout: ringTimeout)
                 log.debug(
-                    """
-                    Rejecting with reason: \(rejectionReason ?? "nil")
-                    call:\(call.callId)
-                    callType: \(call.callType)
-                    ringTimeout: \(ringTimeout)
-                    """
+                    "Call rejection requested. cid=\(call.cId) reason=\(String(reflecting: rejectionReason ?? "none")) ringTimeout=\(ringTimeout)"
                 )
                 try await call.reject(reason: rejectionReason)
             } catch is OutgoingRingCreationCoordinator.CallNotCreatedYet {
                 // Expected during the race: the create path owns the cancel and
                 // will issue it as soon as create completes, so we only log.
-                log.warning(
-                    """
-                    Call was hung up before create completed. It will be \
-                    rejected immediately once create finishes.
-                    """
+                log.debug(
+                    "Call rejection deferred. cid=\(call.cId) reason=creationPending"
                 )
             } catch {
-                log.error(error)
+                log.error("Call rejection failed. cid=\(call.cId)", error: error)
             }
 
             leaveCall(reason: reason)
@@ -1385,7 +1377,8 @@ open class CallViewModel: ObservableObject {
         }.result
 
         log.warning(
-            "InApp screenSharing and Picture-in-Picture are mutually exclusive features. In order to allow the inApp screenSharing operation to go through, we automatically disabled the Picture-in-Picture feature. We recommend transition to a different method to share your screen in your app (e.g. broadcast). You can find more information here: https://getstream.io/video/docs/ios/advanced/screensharing/#broadcasting"
+            "Picture in Picture disabled. reason=inAppScreenSharing",
+            subsystems: .pictureInPicture
         )
     }
 }

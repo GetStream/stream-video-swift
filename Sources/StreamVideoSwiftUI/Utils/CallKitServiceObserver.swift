@@ -33,7 +33,7 @@ final class CallKitServiceObserver {
         cancellable = callKitService
             .eventPipeline
             .receive(on: processingQueue)
-            .log(.debug) { "CallKitService observer received:\($0)" }
+            .log(.debug, subsystems: .callKit) { "CallKit UI event received. event=\(String(reflecting: String(describing: $0)))" }
             // Cache the latest system event so new subscriptions can recover
             // the current transitional CallKit state immediately.
             .sink { [weak self] in self?.subject.send($0) }

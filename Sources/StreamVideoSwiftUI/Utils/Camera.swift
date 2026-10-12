@@ -154,7 +154,7 @@ class Camera: NSObject, @unchecked Sendable {
             let captureDevice = captureDevice,
             let deviceInput = try? AVCaptureDeviceInput(device: captureDevice)
         else {
-            log.error("Failed to obtain video input.")
+            log.error("Camera preview setup failed. reason=inputUnavailable", subsystems: .videoCapturer)
             return
         }
 
@@ -164,12 +164,12 @@ class Camera: NSObject, @unchecked Sendable {
         videoOutput.setSampleBufferDelegate(self, queue: frameProcessingQueue)
 
         guard captureSession.canAddInput(deviceInput) else {
-            log.error("Unable to add device input to capture session.")
+            log.error("Camera preview setup failed. reason=inputRejected", subsystems: .videoCapturer)
             return
         }
 
         guard captureSession.canAddOutput(videoOutput) else {
-            log.error("Unable to add video output to capture session.")
+            log.error("Camera preview setup failed. reason=outputRejected", subsystems: .videoCapturer)
             return
         }
         
@@ -193,7 +193,7 @@ class Camera: NSObject, @unchecked Sendable {
             do {
                 return try await permissions.requestCameraPermission()
             } catch {
-                log.error(error)
+                log.error("Camera permission request failed.", subsystems: .videoCapturer, error: error)
                 return false
             }
         }
@@ -248,7 +248,7 @@ class Camera: NSObject, @unchecked Sendable {
         }
         let authorized = await checkAuthorization()
         guard authorized else {
-            log.error("Camera access was not authorized.")
+            log.debug("Camera preview skipped. reason=permissionDenied", subsystems: .videoCapturer)
             return
         }
         

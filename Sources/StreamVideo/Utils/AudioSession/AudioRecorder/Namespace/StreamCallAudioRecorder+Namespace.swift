@@ -74,9 +74,9 @@ extension StreamCallAudioRecorder {
         /// Uses a specialized logger that aggregates meter updates to reduce
         /// log noise.
         ///
-        /// - Returns: A logger configured for the audio session subsystem.
+        /// - Returns: A logger configured for the audio recording subsystem.
         static func logger() -> StoreLogger<Namespace> {
-            StreamCallAudioRecorderLogger(logSubsystem: .audioSession)
+            StreamCallAudioRecorderLogger(logSubsystem: .audioRecording)
         }
     }
 }

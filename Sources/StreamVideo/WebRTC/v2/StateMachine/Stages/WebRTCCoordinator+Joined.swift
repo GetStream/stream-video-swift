@@ -210,7 +210,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 } catch {
                     try Task.checkCancellation()
                     context.reconnectionStrategy = .rejoin
-                    log.warning("Will disconnect because migrationStatus failed.", subsystems: .webRTC)
+                    log.log(.warning, message: "SFU migration failed. recovery=rejoin", subsystems: .webRTC, error: error)
                     throw error
                 }
             } else {
@@ -257,14 +257,6 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         )
                     }
 
-                    log
-                        .warning(
-                            """
-                            Will disconnect because ws connection state changed 
-                            to disconnecting/disconnected with source:\(source).
-                            """,
-                            subsystems: .webRTC
-                        )
                     transitionOrDisconnect(.disconnected(context))
                 }
                 .store(in: disposableBag)
@@ -278,7 +270,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
             let sfuAdapter = await context.coordinator?.stateAdapter.sfuAdapter
             sfuAdapter?
                 .publisher(eventType: Stream_Video_Sfu_Event_CallEnded.self)
-                .log(.debug, subsystems: .sfu) { "Call ended with reason: \($0.reason)." }
+                .log(.info, subsystems: .sfu) { "Call ended. reason=\($0.reason)" }
                 .receive(on: processingQueue)
                 .sink { [weak self] in
                     guard let self else { return }
@@ -301,7 +293,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     guard let self else { return }
                     context.reconnectionStrategy = .migrate
                     log.warning(
-                        "Will disconnect because received an SFU error.",
+                        "SFU migration requested. reason=sfuError",
                         subsystems: .webRTC
                     )
                     transitionOrDisconnect(.disconnected(context))
@@ -314,11 +306,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .sink { [weak self] _ in
                     guard let self else { return }
                     context.reconnectionStrategy = .migrate
-                    log.warning(
-                        """
-                        Will disconnect because received instruction to migrate 
-                        to another SFU.
-                        """,
+                    log.info(
+                        "SFU migration requested. reason=goAway",
                         subsystems: .webRTC
                     )
                     transitionOrDisconnect(.disconnected(context))
@@ -533,11 +522,6 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
                     context.disconnectionSource = .serverInitiated(
                         error: ClientError.NetworkError("Not available")
-                    )
-
-                    log.warning(
-                        "Will disconnect because internet connection is down.",
-                        subsystems: .webRTC
                     )
 
                     /// Trigger the transition to a disconnected state or handle the disconnection.

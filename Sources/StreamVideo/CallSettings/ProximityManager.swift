@@ -55,7 +55,7 @@ final class ProximityManager: @unchecked Sendable {
             throw ClientError("ProximityPolicy identifier:\(policy) cannot be attached while Call is nil.")
         }
         policies[type(of: policy).identifier] = policy
-        log.info("ProximityPolicy identifier:\(policy) has been attached on Call id:\(call.callId) type:\(call.callType).")
+        log.debug("Proximity policy attached. cid=\(call.cId) policy=\(type(of: policy).identifier)", subsystems: .audioSession)
     }
 
     /// Removes a proximity policy from management
@@ -68,7 +68,7 @@ final class ProximityManager: @unchecked Sendable {
         guard let call else {
             return
         }
-        log.info("ProximityPolicy identifier:\(policy) has been removed from Call id:\(call.callId) type:\(call.callType).")
+        log.debug("Proximity policy removed. cid=\(call.cId) policy=\(type(of: policy).identifier)", subsystems: .audioSession)
     }
 
     // MARK: - Private Helpers
@@ -87,14 +87,14 @@ final class ProximityManager: @unchecked Sendable {
                 .statePublisher
                 .removeDuplicates()
                 .sink { [weak self] in self?.didUpdateProximity($0) }
-            log.info("Proximity observation has started.")
+            log.debug("Proximity observation started. cid=\(activeCall.cId)", subsystems: .audioSession)
         } else if
             activeCall == nil,
             observationCancellable != nil {
             observationCancellable?.cancel()
             observationCancellable = nil
             proximityMonitor.stopObservation()
-            log.info("Proximity observation has stopped.")
+            log.debug("Proximity observation stopped.", subsystems: .audioSession)
         } else {
             /* No-op */
         }

@@ -71,7 +71,9 @@ final class VideoInternetConnection: @unchecked Sendable {
 
         processingCancellable = subject
             .removeDuplicates()
-            .log(.debug) { "Internet Connection: \($0)" }
+            .log(.debug, subsystems: .httpRequests) {
+                "Network status changed. status=\(String(reflecting: String(describing: $0)))"
+            }
             .receive(on: DispatchQueue.main)
             .assign(to: \.status, onWeak: self)
 
@@ -166,7 +168,10 @@ extension VideoInternetConnection {
         }
 
         private func updateStatus(with path: NWPath) {
-            log.info("Internet Connection info: \(path.debugDescription)", subsystems: .httpRequests)
+            log.debug(
+                "Network path changed. status=\(path.status) constrained=\(path.isConstrained) expensive=\(path.isExpensive)",
+                subsystems: .httpRequests
+            )
             delegate?.internetConnectionStatusDidChange(status: status(from: path))
         }
 

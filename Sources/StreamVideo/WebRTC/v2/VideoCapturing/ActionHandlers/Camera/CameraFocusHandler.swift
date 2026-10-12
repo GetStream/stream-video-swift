@@ -55,8 +55,8 @@ final class CameraFocusHandler: StreamVideoCapturerActionHandler, @unchecked Sen
         if activeCaptureDevice.isFocusPointOfInterestSupported {
             activeCaptureDevice.focusPointOfInterest = point
         } else {
-            log.warning(
-                "\(type(of: self)) capture device doesn't support focusPointOfInterest.",
+            log.debug(
+                "Camera focus point skipped. reason=unsupported",
                 subsystems: .videoCapturer
             )
         }
@@ -64,8 +64,8 @@ final class CameraFocusHandler: StreamVideoCapturerActionHandler, @unchecked Sen
         if activeCaptureDevice.isFocusModeSupported(.autoFocus) {
             activeCaptureDevice.focusMode = .autoFocus
         } else {
-            log.warning(
-                "\(type(of: self)) capture device doesn't support focusMode:.autoFocus.",
+            log.debug(
+                "Camera autofocus skipped. reason=unsupported",
                 subsystems: .videoCapturer
             )
         }
@@ -73,8 +73,8 @@ final class CameraFocusHandler: StreamVideoCapturerActionHandler, @unchecked Sen
         if activeCaptureDevice.isExposurePointOfInterestSupported {
             activeCaptureDevice.exposurePointOfInterest = point
         } else {
-            log.warning(
-                "\(type(of: self)) capture device doesn't support exposurePointOfInterest.",
+            log.debug(
+                "Camera exposure point skipped. reason=unsupported",
                 subsystems: .videoCapturer
             )
         }
@@ -82,8 +82,8 @@ final class CameraFocusHandler: StreamVideoCapturerActionHandler, @unchecked Sen
         if activeCaptureDevice.isExposureModeSupported(.autoExpose) {
             activeCaptureDevice.exposureMode = .autoExpose
         } else {
-            log.warning(
-                "\(type(of: self)) capture device doesn't support exposureMode:.autoExpose.",
+            log.debug(
+                "Camera autoexposure skipped. reason=unsupported",
                 subsystems: .videoCapturer
             )
         }

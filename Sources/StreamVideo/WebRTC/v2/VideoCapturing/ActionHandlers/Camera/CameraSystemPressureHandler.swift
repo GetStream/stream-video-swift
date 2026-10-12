@@ -440,8 +440,9 @@ final class CameraSystemPressureHandler:
             )
         } catch {
             log.error(
-                "Failed to update capture FPS under system pressure: \(error).",
-                subsystems: .videoCapturer
+                "Camera frame rate update failed. reason=systemPressure",
+                subsystems: .videoCapturer,
+                error: error
             )
         }
     }

@@ -108,6 +108,53 @@ final class LoggerConcurrency_Tests: XCTestCase, @unchecked Sendable {
         )
     }
 
+    func test_callDisconnection_recoveryPolicy_preservesSeverityAndCause() async throws {
+        let originalLevel = LogConfig.level
+        let originalDestinations = LogConfig.destinations
+        defer {
+            LogConfig.level = originalLevel
+            LogConfig.destinations = originalDestinations
+        }
+        LogConfig.level = .debug
+        let cases: [(WebSocketConnectionState.DisconnectionSource?, WebRTCCoordinator.StateMachine.ReconnectionStrategy, LogLevel)
+        ] =
+            [
+                (.userInitiated, .fast(disconnectedSince: .init(), deadline: 5), .info),
+                (.systemInitiated, .rejoin, .warning),
+                (nil, .rejoin, .warning),
+                (nil, .disconnected, .error),
+                (nil, .unknown, .error)
+            ]
+
+        for (source, recovery, expectedLevel) in cases {
+            let destination = CapturingDestination()
+            LogConfig.destinations = [destination]
+            var context = WebRTCCoordinator.StateMachine.Stage.Context()
+            context.disconnectionSource = source
+            context.reconnectionStrategy = recovery
+            if source == nil {
+                context.flowError = ClientError("Connection probe")
+            }
+            let subject = WebRTCCoordinator.StateMachine.Stage.disconnected(context)
+            XCTAssertNotNil(subject.transition(from: .init(id: .joined, context: context)))
+            subject.willTransitionAway()
+            let marker = UUID().uuidString
+            let drained = destination.markerExpectation(marker)
+            log.error(marker)
+            await fulfillment(of: [drained], timeout: defaultTimeout)
+
+            let details = try XCTUnwrap(destination.recordedDetails.first(where: {
+                String(describing: $0.fileName).hasSuffix("WebRTCCoordinator+Disconnected.swift")
+                    && String(describing: $0.functionName) == "transition(from:)"
+            }))
+            XCTAssertEqual(details.level, expectedLevel)
+            XCTAssertFalse(details.message.contains("\n"))
+            if source == nil {
+                XCTAssertNotNil(details.error)
+            }
+        }
+    }
+
     private func assertNativeLogs(
         _ destination: CapturingDestination,
         expectedLevels: [LogLevel],

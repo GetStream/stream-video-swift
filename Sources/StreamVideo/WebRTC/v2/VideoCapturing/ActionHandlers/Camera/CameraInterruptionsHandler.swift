@@ -370,8 +370,8 @@ final class CameraInterruptionsHandler: StreamVideoCapturerActionHandler, @unche
         }
         guard restartAttempts < Self.maxRestartAttempts else {
             log.error(
-                "CameraCapture did not recover (\(reason)) after \(Self.maxRestartAttempts) attempts.",
-                subsystems: .webRTC
+                "Camera recovery failed. reason=\(String(reflecting: reason)) maxAttempts=\(Self.maxRestartAttempts)",
+                subsystems: .videoCapturer
             )
             return
         }
@@ -389,8 +389,8 @@ final class CameraInterruptionsHandler: StreamVideoCapturerActionHandler, @unche
         let attempt = restartAttempts
 
         log.warning(
-            "CameraCapture needs recovery (\(reason)). Restarting capture (attempt \(attempt)).",
-            subsystems: .webRTC
+            "Camera recovery started. reason=\(String(reflecting: reason)) attempt=\(attempt) maxAttempts=\(Self.maxRestartAttempts)",
+            subsystems: .videoCapturer
         )
 
         Task { [weak self] in

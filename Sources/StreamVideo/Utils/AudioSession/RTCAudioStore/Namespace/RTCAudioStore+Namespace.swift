@@ -41,7 +41,7 @@ extension RTCAudioStore {
         }
 
         static func logger() -> StoreLogger<RTCAudioStore.Namespace> {
-            .init(logSkipped: false)
+            .init(logSubsystem: .audioSession, logSkipped: false)
         }
 
         static func coordinator() -> StoreCoordinator<RTCAudioStore.Namespace> {

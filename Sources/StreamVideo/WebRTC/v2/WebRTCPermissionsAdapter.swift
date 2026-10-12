@@ -94,14 +94,14 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
         permissions
             .$hasMicrophonePermission
             .removeDuplicates()
-            .log(.debug) { "Received microphone permission updated to granted:\($0)" }
+            .log(.debug, subsystems: .audioSession) { "Microphone permission changed. granted=\($0)" }
             .sink { [weak self] in self?.didUpdateMicrophonePermission($0) }
             .store(in: disposableBag)
 
         permissions
             .$hasCameraPermission
             .removeDuplicates()
-            .log(.debug) { "Received camera permission updated to granted:\($0)" }
+            .log(.debug, subsystems: .videoCapturer) { "Camera permission changed. granted=\($0)" }
             .sink { [weak self] in self?.didUpdateCameraPermission($0) }
             .store(in: disposableBag)
     }
@@ -138,25 +138,12 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
 
                     switch applicationStateAdapter.state {
                     case .foreground where shouldPrompt(for: updatedRequiredPermissions):
-                        log.debug(
-                            "Required permissions updated to:\(requiredPermissions)",
-                            subsystems: .webRTC
-                        )
-                        log.debug(
-                            "Application state is .foreground. Requesting permissions for:\(requiredPermissions)",
-                            subsystems: .webRTC
-                        )
-
                         _ = try await requestRequiredPermissions()
                     case .foreground:
                         break
                     default:
                         log.debug(
-                            "Required permissions updated to:\(requiredPermissions)",
-                            subsystems: .webRTC
-                        )
-                        log.debug(
-                            "Application state is \(applicationStateAdapter.state) but we won't request for permissions:\(requiredPermissions).",
+                            "Media permission request deferred. reason=appInactive appState=\(applicationStateAdapter.state) permissions=\(requiredPermissions.map(\.description).sorted().joined(separator: ","))",
                             subsystems: .webRTC
                         )
                     }
@@ -174,7 +161,7 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
                 return updatedCallSettings
             }
         } catch {
-            log.error(error, subsystems: .webRTC)
+            log.error("Media permission reconciliation failed.", subsystems: .webRTC, error: error)
             return callSettings
         }
     }
@@ -238,7 +225,7 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
             do {
                 try await requestRequiredPermissions()
             } catch {
-                log.error(error, subsystems: .webRTC)
+                log.error("Media permission request failed.", subsystems: .webRTC, error: error)
             }
         }
     }
@@ -254,7 +241,7 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
         }
 
         log.debug(
-            "WebRTC will request permissions for:\(Array(requiredPermissions)).",
+            "Media permission request started. permissions=\(requiredPermissions.map(\.description).sorted().joined(separator: ","))",
             subsystems: .webRTC
         )
 
