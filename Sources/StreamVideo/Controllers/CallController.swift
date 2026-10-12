@@ -626,7 +626,6 @@ class CallController: @unchecked Sendable {
         webRTCClientStateObserver = webRTCCoordinator
             .stateMachine
             .publisher
-            .log(.debug) { "WebRTC stack connection status updated to \($0.id)." }
             .receive(on: DispatchQueue.main)
             .sink { [weak self] in self?.webRTCClientDidUpdateStage($0) }
     }
@@ -786,7 +785,12 @@ class CallController: @unchecked Sendable {
             do {
                 self.cachedLocation = try await getLocation()
             } catch {
-                log.error(error)
+                log.log(
+                    .warning,
+                    message: "Location prefetch failed. source=call cid=\(String(reflecting: callCid(from: callId, callType: callType)))",
+                    subsystems: .httpRequests,
+                    error: error
+                )
             }
         }
     }
@@ -871,7 +875,9 @@ class CallController: @unchecked Sendable {
                 .state
                 .$blockedUserIds
                 .filter { $0.contains(currentUser.id) }
-                .log(.debug, subsystems: .webRTC) { _ in "Current user was blocked. Will leave the call now." }
+                .log(.info, subsystems: .webRTC) { [cid = call.cId] _ in
+                    "Call leave requested. cid=\(String(reflecting: cid)) reason=currentUserBlocked"
+                }
                 .sinkTask(storeIn: disposableBag) { [weak self] _ in
                     guard let self else { return }
                     self
@@ -924,7 +930,9 @@ class CallController: @unchecked Sendable {
             .stateAdapter
             .$isSpeakingWhileMuted
             .removeDuplicates()
-            .log(.debug) { "Speaking while muted updated to \($0)" }
+            .log(.debug, subsystems: .audioSession) { [callId, callType] in
+                "Speaking while muted changed. cid=\(String(reflecting: callCid(from: callId, callType: callType))) isSpeakingWhileMuted=\($0)"
+            }
             .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in
                 self?.call?.state.isSpeakingWhileMuted = $0
             }
@@ -942,7 +950,6 @@ class CallController: @unchecked Sendable {
             .stateAdapter
             .$ownCapabilities
             .removeDuplicates()
-            .log(.debug) { "OwnCapabilities updated to \($0)" }
             .sinkTask(storeIn: disposableBag) { @MainActor [weak self] value in
                 guard
                     let state = self?.call?.state,

@@ -115,7 +115,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     }
 
     deinit {
-        log.debug("Call cID:\(cId) is deallocating...")
+        log.debug("Call released. cid=\(String(reflecting: cId))")
         disposableBag.removeAll()
     }
 
@@ -789,7 +789,9 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// - Returns: A Boolean value indicating if the current user has the call capability.
     @MainActor public func currentUserHasCapability(_ capability: OwnCapability) -> Bool {
         if !state.isInitialized {
-            log.warning("currentUserHasCapability called before the call was initialized using .get .create or .join")
+            log.warning(
+                "Capability checked before call initialization. cid=\(String(reflecting: cId)) capability=\(capability.rawValue) requiredAction=getOrCreateOrJoin"
+            )
         }
         return state.ownCapabilities.contains(capability)
     }
@@ -1609,7 +1611,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     ) async {
         if itemPresentationDuration < 0.5 {
             log.warning(
-                "ClosedCaptions configuration is invalid. itemPresentationDuration should be more than 0.5 seconds."
+                "Closed caption duration ignored. cid=\(String(reflecting: cId)) durationSeconds=\(itemPresentationDuration) minDurationSeconds=0.5"
             )
         } else {
             closedCaptionsAdapter.itemPresentationDuration = itemPresentationDuration
@@ -1617,7 +1619,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
         if maxVisibleItems <= 0 {
             log.warning(
-                "ClosedCaptions configuration is invalid. maxVisibleItems should be more than 1."
+                "Closed caption capacity ignored. cid=\(String(reflecting: cId)) maxVisibleItems=\(maxVisibleItems) minVisibleItems=1"
             )
         } else {
             closedCaptionsAdapter.capacity = maxVisibleItems
@@ -1845,10 +1847,10 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// - Parameter value: The updated `NoiseCancellationSettings` value.
     private func didUpdate(_ value: NoiseCancellationSettingsRequest?) {
         guard let noiseCancellationFilter = streamVideo.videoConfig.noiseCancellationFilter else {
-            log
-                .warning(
-                    "Unable to handle NoiseCancellationSettings. Please refer to the docs to see how to react on those updates."
-                )
+            log.debug(
+                "Noise cancellation settings ignored. cid=\(String(reflecting: cId)) reason=filterUnavailable",
+                subsystems: .audioSession
+            )
             return
         }
 
@@ -1866,20 +1868,20 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 break
             case .disabled where isNoiseCancellationFilterInUse:
                 /// Clear NC even if music or screenshare stashed it live.
-                log
-                    .debug(
-                        "NoiseCancellationSettings updated with mode:\(value.mode). Will deactivate noiseCancellationFilter:\(noiseCancellationFilter.id)"
-                    )
+                log.debug(
+                    "Noise cancellation disable requested. cid=\(String(reflecting: cId)) filterId=\(String(reflecting: noiseCancellationFilter.id)) reason=settings",
+                    subsystems: .audioSession
+                )
                 setAudioFilter(nil)
             case .autoOn
                 where audioProcessingModule.activeAudioFilter?.id != noiseCancellationFilter.id
                 && streamVideo.isHardwareAccelerationAvailable:
                 /// Activate noiseCancellationFilter if mode is autoOn,  hardwareAcceleration is
                 /// available and the noiseCancellation audioFilter isn't already enabled.
-                log
-                    .debug(
-                        "NoiseCancellationSettings updated with mode:\(value.mode). Will activate noiseCancellationFilter:\(noiseCancellationFilter.id)"
-                    )
+                log.debug(
+                    "Noise cancellation enable requested. cid=\(String(reflecting: cId)) filterId=\(String(reflecting: noiseCancellationFilter.id)) reason=settings",
+                    subsystems: .audioSession
+                )
                 setAudioFilter(noiseCancellationFilter)
             default:
                 break
@@ -1891,7 +1893,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// - Parameter value: The updated `TranscriptionSettings` value.
     private func didUpdate(_ value: TranscriptionSettings?) {
         guard let value else {
-            log.debug("TranscriptionSettings updated. No action!")
             return
         }
 
@@ -1902,16 +1903,19 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             do {
                 switch value.mode {
                 case .disabled where state.transcribing == true:
-                    log.debug("TranscriptionSettings updated with mode:\(value.mode). Will deactivate transcriptions.")
+                    log.debug("Transcription stop requested. cid=\(String(reflecting: cId)) reason=settings")
                     try await stopTranscription()
                 case .autoOn where state.transcribing == false:
-                    log.debug("TranscriptionSettings updated with mode:\(value.mode). Will activate transcriptions.")
+                    log.debug("Transcription start requested. cid=\(String(reflecting: cId)) reason=settings")
                     try await startTranscription()
                 default:
-                    log.debug("TranscriptionSettings updated with mode:\(value.mode). No action required.")
+                    break
                 }
             } catch {
-                log.error(error)
+                log.error(
+                    "Transcription settings application failed. cid=\(String(reflecting: cId)) mode=\(value.mode.rawValue)",
+                    error: error
+                )
             }
         }
     }
@@ -1920,7 +1924,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// - Parameter value: The updated `TranscriptionSettings` value.
     private func didUpdate(_ mode: TranscriptionSettings.ClosedCaptionMode?) {
         guard let mode = mode else {
-            log.debug("ClosedCaptionSettings updated. No action!")
             return
         }
 
@@ -1931,16 +1934,19 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             do {
                 switch mode {
                 case .disabled where state.captioning == true:
-                    log.debug("ClosedCaptionSettings updated with mode:\(mode). Will deactivate closedCaptions.")
+                    log.debug("Closed captions stop requested. cid=\(String(reflecting: cId)) reason=settings")
                     try await stopClosedCaptions()
                 case .autoOn where state.captioning == false:
-                    log.debug("ClosedCaptionSettings updated with mode:\(mode). Will activate closedCaptions.")
+                    log.debug("Closed captions start requested. cid=\(String(reflecting: cId)) reason=settings")
                     try await startClosedCaptions()
                 default:
-                    log.debug("ClosedCaptionSettings updated with mode:\(mode). No action required.")
+                    break
                 }
             } catch {
-                log.error(error)
+                log.error(
+                    "Closed caption settings application failed. cid=\(String(reflecting: cId)) mode=\(mode.rawValue)",
+                    error: error
+                )
             }
         }
     }

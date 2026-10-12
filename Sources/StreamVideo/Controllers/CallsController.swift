@@ -92,7 +92,11 @@ public class CallsController: ObservableObject, @unchecked Sendable {
             }
             await state.update(loading: false)
         } catch {
-            log.error("Error querying calls", error: error)
+            log.error(
+                "Call query failed. refresh=\(shouldRefresh) limit=\(callsQuery.pageSize) watch=\(callsQuery.watch) hasNextPage=\(request.next != nil)",
+                subsystems: .httpRequests,
+                error: error
+            )
             await state.update(loading: false)
             throw error
         }
@@ -178,12 +182,9 @@ public class CallsController: ObservableObject, @unchecked Sendable {
         next = nil
         Task(disposableBag: disposableBag) { [weak self] in
             guard let self else { return }
-            do {
-                await state.update(loadedAllCalls: false)
-                try await loadCalls(shouldRefresh: true)
-            } catch {
-                log.error(error)
-            }
+            await state.update(loadedAllCalls: false)
+            // loadCalls reports query failures with refresh context.
+            try? await loadCalls(shouldRefresh: true)
         }
     }
     

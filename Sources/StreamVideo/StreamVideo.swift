@@ -495,14 +495,22 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
                     try Task.checkCancellation()
                     try await self.connectUser(isInitial: true)
                 } catch {
-                    log.error("Error connecting as guest", error: error)
+                    log.error(
+                        "Initial guest connection failed. userId=\(String(reflecting: user.id))",
+                        subsystems: .webSocket,
+                        error: error
+                    )
                 }
             } else if user.type != .anonymous {
                 do {
                     try Task.checkCancellation()
                     try await self.connectUser(isInitial: true)
                 } catch {
-                    log.error(error)
+                    log.error(
+                        "Initial user connection failed. userId=\(String(reflecting: user.id))",
+                        subsystems: .webSocket,
+                        error: error
+                    )
                 }
             }
 
@@ -544,16 +552,15 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             throw ClientError.Unknown()
         }
         
-        log.debug("Listening for WS connection")
+        log.debug("Coordinator connection wait started. timeoutSeconds=30", subsystems: .webSocket)
 
         do {
-            log.debug("Listening for WS connection")
             _ = try await DefaultTimer
                 .publish(every: 0.1)
                 .filter { [weak webSocketClient] _ in webSocketClient?.connectionState.isConnected == true }
                 .nextValue(timeout: 30)
         } catch {
-            log.debug("Timeout while waiting for WS connection opening")
+            log.log(.debug, message: "Coordinator connection wait failed.", subsystems: .webSocket, error: error)
             throw ClientError.NetworkError()
         }
     }
@@ -604,16 +611,16 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             return ""
         }
 
+        log.debug("Connection ID wait started. timeoutSeconds=5", subsystems: .webSocket)
         do {
             let result = try await DefaultTimer
                 .publish(every: 0.1)
-                .log(.debug) { _ in "Waiting for connection id" }
                 .compactMap { [weak self] _ in self?.loadConnectionIdFromHealthcheck() }
                 .nextValue(timeout: 5)
-            defer { log.debug("ConnectionId loaded: \(result)") }
+            log.debug("Connection ID loaded. connectionId=\(String(reflecting: result))", subsystems: .webSocket)
             return result
         } catch {
-            log.warning("Unable to load connectionId.")
+            log.log(.warning, message: "Connection ID wait failed.", subsystems: .webSocket, error: error)
             return ""
         }
     }
@@ -683,14 +690,17 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             voipToken: isVoip
         )
         
-        log.debug("Sending request to save device")
+        log.debug(
+            "Device registration requested. provider=\(provider.rawValue) providerName=\(String(reflecting: name)) isVoip=\(isVoip)",
+            subsystems: .httpRequests
+        )
 
         return try await coordinatorClient.createDevice(createDeviceRequest: createDeviceRequest)
     }
     
     private func connectUser(isInitial: Bool = false) async throws {
         if !isInitial && connectTask != nil {
-            log.debug("Waiting for already running connect task")
+            log.debug("User connection wait started. reason=initialConnectionPending", subsystems: .webSocket)
             _ = await connectTask?.result
         }
         if case .connected(healthCheckInfo: _) = webSocketClient?.connectionState {
@@ -757,7 +767,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             do {
                 self.cachedLocation = try await LocationFetcher.getLocation()
             } catch {
-                log.error(error)
+                log.log(.warning, message: "Location prefetch failed. source=client", subsystems: .httpRequests, error: error)
             }
         }
     }
@@ -782,10 +792,10 @@ extension StreamVideo {
                     do {
                         guard let apiTransport = apiTransport as? URLSessionTransport else { return }
                         self.tokenSubject.send(try await apiTransport.refreshToken())
-                        log.debug("user token updated, will reconnect ws")
+                        log.debug("User token refreshed. recovery=reconnectCoordinator", subsystems: .authentication)
                         webSocketClient?.connect()
                     } catch {
-                        log.error("Error refreshing token, will disconnect ws connection", error: error)
+                        log.error("User token refresh failed.", subsystems: .authentication, error: error)
                     }
                 }
             }
@@ -793,7 +803,10 @@ extension StreamVideo {
         case .connected(healthCheckInfo: _):
             eventSubject.send(.internalEvent(WSConnected()))
         default:
-            log.debug("Web socket connection state update \(state)")
+            log.debug(
+                "Coordinator connection state changed. state=\(String(reflecting: String(describing: state)))",
+                subsystems: .webSocket
+            )
         }
     }
 
