@@ -53,7 +53,7 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
     /// Registers for push notifications.
     open func register() {
         #if targetEnvironment(simulator) && !STREAM_TESTS
-        log.info("CallKit notifications are not supported on simulator.", subsystems: .callKit)
+        log.debug("VoIP push registration skipped. reason=simulator", subsystems: .callKit)
         #else
         registry.delegate = self
         registry.desiredPushTypes = [.voIP]
@@ -63,7 +63,7 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
     /// Unregisters for push notifications.
     open func unregister() {
         #if targetEnvironment(simulator) && !STREAM_TESTS
-        log.info("CallKit notifications are not supported on simulator.", subsystems: .callKit)
+        log.debug("VoIP push unregistration skipped. reason=simulator", subsystems: .callKit)
         #else
         registry.delegate = nil
         registry.desiredPushTypes = []
@@ -84,7 +84,7 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
 
         Task { @MainActor [weak self] in
             self?.deviceToken = deviceToken
-            log.debug("Device token updated to: \(deviceToken)", subsystems: .callKit)
+            log.debug("VoIP device token updated. token=\(deviceToken)", subsystems: .callKit)
         }
     }
 
@@ -95,7 +95,7 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
     ) {
         Task { @MainActor [weak self] in
             self?.deviceToken = ""
-            log.debug("Device token invalidated.", subsystems: .callKit)
+            log.debug("VoIP device token invalidated.", subsystems: .callKit)
         }
     }
 
@@ -131,7 +131,11 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
             hasVideo: content.hasVideo,
             completion: { error in
                 if let error {
-                    log.error(error, subsystems: .callKit)
+                    log.error(
+                        "Incoming call report failed. cid=\(content.cid)",
+                        subsystems: .callKit,
+                        error: error
+                    )
                 }
                 sendableCompletion.value()
             }

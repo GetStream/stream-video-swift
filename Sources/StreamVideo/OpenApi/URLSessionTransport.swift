@@ -52,13 +52,19 @@ final class URLSessionTransport: DefaultAPITransport, @unchecked Sendable {
                 return try await execute(request: request, isRetry: false)
             } catch {
                 if error.isTokenExpiredError && tokenProvider != nil {
-                    log.debug("Refreshing user token", subsystems: .httpRequests)
+                    log.debug(
+                        "HTTP token refresh started. method=\(request.httpMethod ?? "unknown") url=\(request.url?.absoluteString ?? "none") reason=expiredToken",
+                        subsystems: .httpRequests
+                    )
                     let token = try await refreshToken()
                     if let onTokenUpdate = onTokenUpdate {
                         onTokenUpdate(token)
                     }
                     let updated = update(request: request, with: token.rawValue)
-                    log.debug("Retrying failed request \(updated) with new token", subsystems: .httpRequests)
+                    log.debug(
+                        "HTTP request retry started. method=\(updated.httpMethod ?? "unknown") url=\(updated.url?.absoluteString ?? "none") reason=tokenRefreshed",
+                        subsystems: .httpRequests
+                    )
                     return try await execute(request: updated, isRetry: true)
                 } else {
                     throw error
@@ -121,11 +127,8 @@ final class URLSessionTransport: DefaultAPITransport, @unchecked Sendable {
         do {
             return try await execute(request: clone.urlRequest())
         } catch {
-            // Log error and rethrow
             log.error(
-                "URLSessionTransport: \(request.url.absoluteString)\n"
-                    + "Headers:\n\(request.headers)\n"
-                    + "Query items:\n\(request.queryParams)",
+                "HTTP request failed. method=\(request.method.rawValue) url=\(request.url.absoluteString) headers=\(String(reflecting: String(describing: request.headers))) query=\(String(reflecting: String(describing: request.queryParams)))",
                 subsystems: .httpRequests, error: error
             )
             throw error

@@ -233,22 +233,13 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         )
 
         log.debug(
-            """
-            Reporting VoIP incoming call with
-            callUUID:\(callUUID) 
-            cid:\(cid)
-            callerId:\(callerId)
-            hasVideo: \(hasVideo)
-            """,
+            "Incoming call report requested. cid=\(cid) callUUID=\(callUUID) callerId=\(callerId) hasVideo=\(hasVideo)",
             subsystems: .callKit
         )
 
         guard let streamVideo, let callEntry = callEntry(for: callUUID) else {
-            log.warning(
-                """
-                CallKit operation:reportIncomingCall cannot be fulfilled because 
-                StreamVideo is nil.
-                """,
+            log.error(
+                "Incoming call setup failed. cid=\(cid) callUUID=\(callUUID) reason=missingClientOrCallEntry",
                 subsystems: .callKit
             )
             callEnded(
@@ -294,7 +285,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 let callState = try await callEntry.call.get()
                 if let leaveReason = checkIfCallWasHandled(callState: callState) {
                     log.debug(
-                        "Call ended. reason=\(leaveReason) uuid=\(callUUID) cid=\(cid) callerId=\(callerId)",
+                        "Incoming call end requested. cid=\(cid) callUUID=\(callUUID) reason=\(String(reflecting: leaveReason))",
                         subsystems: .callKit
                     )
                     callEnded(
@@ -308,12 +299,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 }
             } catch {
                 log.error(
-                    """
-                    Failed to report incoming call with 
-                    cid: \(cid)
-                    localizedCallerName: \(localizedCallerName)
-                    hasVideo: \(hasVideo)
-                    """,
+                    "Incoming call preparation failed. cid=\(cid) callUUID=\(callUUID) hasVideo=\(hasVideo)",
                     subsystems: .callKit,
                     error: error
                 )
@@ -340,15 +326,8 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         else {
             return
         }
-        log.debug(
-            """
-            Call accepted
-            callId:\(newCallEntry.call.callId)
-            callType:\(newCallEntry.call.callType)
-            callerId:\(newCallEntry.createdBy?.id)
-            ringingTimedOut:\(newCallEntry.ringingTimedOut)
-            isEndedElsewhere:\(newCallEntry.isEndedElsewhere)
-            """,
+        log.info(
+            "Incoming call accepted elsewhere. cid=\(newCallEntry.call.cId) callUUID=\(newCallEntry.callUUID) userId=\(response.user.id)",
             subsystems: .callKit
         )
 
@@ -380,17 +359,8 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         else {
             return
         }
-        log.debug(
-            """
-            Call rejected
-            callId:\(newCallEntry.call.callId)
-            callType:\(newCallEntry.call.callType)
-            callerId:\(newCallEntry.createdBy?.id)
-            ringingTimedOut:\(newCallEntry.ringingTimedOut)
-            isEndedElsewhere:\(newCallEntry.isEndedElsewhere)
-            isCurrentUserRejection:\(isCurrentUserRejection)
-            isCallCreatorRejection:\(isCallCreatorRejection)
-            """,
+        log.info(
+            "Incoming call rejected elsewhere. cid=\(newCallEntry.call.cId) callUUID=\(newCallEntry.callUUID) userId=\(response.user.id) isCurrentUser=\(isCurrentUserRejection) isCallCreator=\(isCallCreatorRejection)",
             subsystems: .callKit
         )
 
@@ -447,7 +417,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
 
     /// Provider reset: end and clean up calls.
     open func providerDidReset(_ provider: CXProvider) {
-        log.debug("CXProvider didReset.", subsystems: .callKit)
+        log.info("CallKit provider reset.", subsystems: .callKit)
         storageAccessQueue.sync {
             for (_, entry) in _storage {
                 entry.call.didPerform(.didReset)
@@ -461,15 +431,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         didActivate audioSession: AVAudioSession
     ) {
         log.debug(
-            """
-            CallKit audioSession was activated:
-                category: \(audioSession.category)
-                mode: \(audioSession.mode)
-                options: \(audioSession.categoryOptions)
-                route: \(audioSession.currentRoute)
-            
-            CallSettings: \(callSettings)
-            """,
+            "CallKit audio session activated. callUUID=\(active?.uuidString ?? "none") category=\(audioSession.category.rawValue) mode=\(audioSession.mode.rawValue) categoryOptions=\(audioSession.categoryOptions.rawValue) inputs=\(String(reflecting: audioSession.currentRoute.inputs.map { "\($0.portType.rawValue):\($0.uid)" }.joined(separator: ","))) outputs=\(String(reflecting: audioSession.currentRoute.outputs.map { "\($0.portType.rawValue):\($0.uid)" }.joined(separator: ","))) audioOn=\(callSettings?.audioOn.description ?? "none") speakerOn=\(callSettings?.speakerOn.description ?? "none") audioOutputOn=\(callSettings?.audioOutputOn.description ?? "none")",
             subsystems: .callKit
         )
 
@@ -487,15 +449,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         didDeactivate audioSession: AVAudioSession
     ) {
         log.debug(
-            """
-            CallKit audioSession was deactivated:
-                category: \(audioSession.category)
-                mode: \(audioSession.mode)
-                options: \(audioSession.categoryOptions)
-                route: \(audioSession.currentRoute)
-            
-            CallSettings: \(callSettings)
-            """,
+            "CallKit audio session deactivated. callUUID=\(active?.uuidString ?? "none") category=\(audioSession.category.rawValue) mode=\(audioSession.mode.rawValue) categoryOptions=\(audioSession.categoryOptions.rawValue) inputs=\(String(reflecting: audioSession.currentRoute.inputs.map { "\($0.portType.rawValue):\($0.uid)" }.joined(separator: ","))) outputs=\(String(reflecting: audioSession.currentRoute.outputs.map { "\($0.portType.rawValue):\($0.uid)" }.joined(separator: ","))) audioOn=\(callSettings?.audioOn.description ?? "none") speakerOn=\(callSettings?.speakerOn.description ?? "none") audioOutputOn=\(callSettings?.audioOutputOn.description ?? "none")",
             subsystems: .callKit
         )
 
@@ -565,7 +519,8 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             }
             log
                 .debug(
-                    "Answering VoIP incoming call with callId:\(callToJoinEntry.call.callId) callType:\(callToJoinEntry.call.callType) callerId:\(callToJoinEntry.createdBy?.id)."
+                    "Call answer started. cid=\(callToJoinEntry.call.cId) callUUID=\(action.callUUID) actionId=\(action.uuid)",
+                    subsystems: .callKit
                 )
 
             do {
@@ -575,7 +530,11 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 eventPipelineSubject.send(.accept)
                 try await callToJoinEntry.call.accept()
             } catch {
-                log.error(error, subsystems: .callKit)
+                log.error(
+                    "Call acceptance failed. cid=\(callToJoinEntry.call.cId) callUUID=\(action.callUUID) actionId=\(action.uuid)",
+                    subsystems: .callKit,
+                    error: error
+                )
                 completeActionOnce { action.fail() }
             }
 
@@ -633,7 +592,11 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                     callToJoinEntry.call.leave()
                 }
                 set(nil, for: action.callUUID)
-                log.error(error, subsystems: .callKit)
+                log.error(
+                    "Call answer join failed. cid=\(callToJoinEntry.call.cId) callUUID=\(action.callUUID) actionId=\(action.uuid)",
+                    subsystems: .callKit,
+                    error: error
+                )
                 // Reset the bridge if the CallKit-driven join flow aborts
                 // before the call becomes active.
                 eventPipelineSubject.send(.idle)
@@ -668,19 +631,14 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             let callToJoinEntry = callEntry(for: answerAction.callUUID)
         else {
             log.warning(
-                "CallKit timed out performing action:\(action).",
+                "CallKit action timed out. action=\(type(of: action)) actionId=\(action.uuid) callUUID=\((action as? CXCallAction)?.callUUID.uuidString ?? "none")",
                 subsystems: .callKit
             )
             return
         }
 
-        log.warning(
-            """
-            CallKit timed out performing the answer action while joining
-            callId:\(callToJoinEntry.call.callId)
-            callType:\(callToJoinEntry.call.callType)
-            callerId:\(callToJoinEntry.createdBy?.id)
-            """,
+        log.error(
+            "Call answer timed out. cid=\(callToJoinEntry.call.cId) callUUID=\(answerAction.callUUID) actionId=\(answerAction.uuid)",
             subsystems: .callKit
         )
 
@@ -708,12 +666,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 return
             }
             log.debug(
-                """
-                Ending VoIP call with
-                callId:\(stackEntry.call.callId)
-                callType:\(stackEntry.call.callType)
-                callerId:\(stackEntry.createdBy?.id)
-                """,
+                "Call end started. cid=\(stackEntry.call.cId) callUUID=\(actionCallUUID) isActive=\(currentCallWasEnded)",
                 subsystems: .callKit
             )
             if currentCallWasEnded {
@@ -735,11 +688,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                             )
                     }
                     log.debug(
-                        """
-                        Rejecting with reason: \(rejectionReason ?? "nil")
-                        call:\(stackEntry.call.callId)
-                        callType: \(stackEntry.call.callType)
-                        """,
+                        "Call rejection requested. cid=\(stackEntry.call.cId) callUUID=\(actionCallUUID) reason=\(String(reflecting: rejectionReason ?? "none"))",
                         subsystems: .callKit
                     )
                     // Keep CallViewModel in sync when an incoming CallKit call
@@ -748,7 +697,11 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                     stackEntry.call.didPerform(.performRejectCall)
                     try await stackEntry.call.reject(reason: rejectionReason)
                 } catch {
-                    log.error(error, subsystems: .callKit)
+                    log.error(
+                        "Call rejection failed. cid=\(stackEntry.call.cId) callUUID=\(actionCallUUID)",
+                        subsystems: .callKit,
+                        error: error
+                    )
                 }
             }
             set(nil, for: actionCallUUID)
@@ -812,7 +765,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     open func checkIfCallWasHandled(callState: GetCallResponse) -> String? {
         guard let streamVideo else {
             log.warning(
-                "CallKit operation:\(#function) cannot be fulfilled because StreamVideo is nil.",
+                "Incoming call state check failed. cid=\(callState.call.cid) reason=missingClient",
                 subsystems: .callKit
             )
             return StreamRejectionReasonProvider
@@ -833,7 +786,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             .publish(every: timeout)
             .sink { [weak self] _ in
                 log.debug(
-                    "Detected ringing timeout, hanging up...",
+                    "Call ringing timed out. cid=\(callState.call.cid) timeoutSeconds=\(timeout)",
                     subsystems: .callKit
                 )
                 self?.callEnded(callState.call.cid, ringingTimedOut: true)
@@ -859,13 +812,6 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         disposableBag.removeAll()
 
         guard let streamVideo else {
-            log.warning(
-                """
-                CallKit operation:\(#function) cannot be fulfilled because
-                StreamVideo is nil.
-                """,
-                subsystems: .callKit
-            )
             return
         }
 
@@ -894,11 +840,6 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 }
             }
             .store(in: disposableBag)
-
-        log.debug(
-            "\(type(of: self)) is now subscribed to CallEvent updates.",
-            subsystems: .callKit
-        )
     }
 
     private func endCall(
@@ -945,21 +886,14 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
 
         let (callEndedEntry, shouldRequestTransaction) = result
 
-        log.debug(
-            """
-            CallEnded
-            callId:\(callEndedEntry.call.callId)
-            callType:\(callEndedEntry.call.callType)
-            callerId:\(callEndedEntry.createdBy?.id)
-            ringingTimedOut:\(callEndedEntry.ringingTimedOut)
-            isEndedElsewhere:\(callEndedEntry.isEndedElsewhere)
-            leaveReason:\(callEndedEntry.leaveReason ?? "nil")
-            """,
-            subsystems: .callKit
-        )
         guard shouldRequestTransaction else {
             return
         }
+
+        log.debug(
+            "Call end requested. cid=\(callEndedEntry.call.cId) callUUID=\(callEndedEntry.callUUID) ringingTimedOut=\(callEndedEntry.ringingTimedOut) isEndedElsewhere=\(callEndedEntry.isEndedElsewhere) reason=\(String(reflecting: callEndedEntry.leaveReason ?? "none"))",
+            subsystems: .callKit
+        )
 
         // Only the first transition to ended should enqueue a CallKit end
         // action. Later callers reuse the stored end state and exit above.
@@ -972,7 +906,11 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                     )
                 )
             } catch {
-                log.error(error, subsystems: .callKit)
+                log.error(
+                    "Call end request failed. cid=\(callEndedEntry.call.cId) callUUID=\(callEndedEntry.callUUID)",
+                    subsystems: .callKit,
+                    error: error
+                )
             }
         }
     }
@@ -1048,7 +986,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
 
         if supportsHolding {
             log.warning(
-                "CallKit hold isn't supported.",
+                "Call hold unavailable. cid=\(cid) reason=unsupported",
                 subsystems: .callKit
             )
         } else {
@@ -1099,7 +1037,6 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 .$callSettings
                 .map { $0.audioOn == false }
                 .removeDuplicates()
-                .log(.debug, subsystems: .callKit) { "Will perform SetMutedCallAction with muted:\($0). " }
                 .sink { [weak self] in self?.performCallSettingMuteRequest($0, callUUID: callUUID) }
                 .store(in: disposableBag, key: key)
         }
@@ -1117,11 +1054,20 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             else {
                 return
             }
+            log.debug(
+                "System mute update requested. callUUID=\(callUUID) isMuted=\(muted) source=callSettings",
+                subsystems: .callKit
+            )
             do {
                 try await requestTransaction(CXSetMutedCallAction(call: callUUID, muted: muted))
                 isMuted = muted
             } catch {
-                log.warning("Unable to apply CallSettings.audioOn:\(!muted).", subsystems: .callKit)
+                log.log(
+                    .warning,
+                    message: "System mute update failed. callUUID=\(callUUID) isMuted=\(muted) source=callSettings",
+                    subsystems: .callKit,
+                    error: error
+                )
             }
         }
     }
@@ -1148,7 +1094,8 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 isMuted = request.isMuted
             } catch {
                 log.error(
-                    "Unable to set call uuid:\(request.callUUID) muted:\(request.isMuted) state.",
+                    "Microphone mute update failed. cid=\(stackEntry.call.cId) callUUID=\(request.callUUID) isMuted=\(request.isMuted) source=callKit",
+                    subsystems: .callKit,
                     error: error
                 )
             }
