@@ -42,7 +42,7 @@ struct WebSocketJoinTelemetryReporter {
     ) async {
         guard let stateAdapter, let clientEventReporter else {
             log.warning(
-                "WebSocket join telemetry skipped. operation=begin reason=unconfigured coordinatorConnectId=\(String(reflecting: coordinatorConnectId))",
+                "WebSocket join telemetry skipped. operation=begin reason=unconfigured coordinatorConnectId=\(coordinatorConnectId)",
                 subsystems: .webRTC
             )
             return
@@ -73,7 +73,7 @@ struct WebSocketJoinTelemetryReporter {
     ) async {
         guard let clientEventReporter, details != nil, let stageAttempt else {
             log.warning(
-                "WebSocket join telemetry skipped. operation=complete reason=noActiveAttempt coordinatorConnectId=\(String(reflecting: details?.coordinatorConnectId ?? "unknown")) retryCount=\(retryCount)",
+                "WebSocket join telemetry skipped. operation=complete reason=noActiveAttempt coordinatorConnectId=\(details?.coordinatorConnectId ?? "unknown") retryCount=\(retryCount)",
                 subsystems: .webRTC
             )
             return
@@ -101,7 +101,7 @@ struct WebSocketJoinTelemetryReporter {
         guard let clientEventReporter, let details, let stageAttempt else {
             log.log(
                 .warning,
-                message: "WebSocket join telemetry skipped. operation=fail reason=noActiveAttempt coordinatorConnectId=\(String(reflecting: details?.coordinatorConnectId ?? "unknown")) retryCount=\(retryCount)",
+                message: "WebSocket join telemetry skipped. operation=fail reason=noActiveAttempt coordinatorConnectId=\(details?.coordinatorConnectId ?? "unknown") retryCount=\(retryCount)",
                 subsystems: .webRTC,
                 error: error
             )

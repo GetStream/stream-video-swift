@@ -58,13 +58,13 @@ extension Call.StateMachine.Stage {
                         throw ClientError()
                     }
                     log.error(
-                        "Call operation failed. cid=\(String(reflecting: context.call?.cId ?? "unknown")) stage=\(previousStageId)",
+                        "Call operation failed. cid=\(context.call?.cId ?? "unknown") stage=\(previousStageId)",
                         error: error
                     )
                     try transition?(.idle(context))
                 } catch let transitionError {
                     log.error(
-                        "Call error handling failed. cid=\(String(reflecting: self?.context.call?.cId ?? "unknown")) next=idle",
+                        "Call error handling failed. cid=\(self?.context.call?.cId ?? "unknown") next=idle",
                         error: transitionError
                     )
                 }

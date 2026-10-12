@@ -123,7 +123,7 @@ extension Call.StateMachine {
                 try transition?(.error(.init(call: context.call), error: error))
             } catch {
                 log.error(
-                    "Call error transition failed. cid=\(String(reflecting: context.call?.cId ?? "unknown")) from=\(id)",
+                    "Call error transition failed. cid=\(context.call?.cId ?? "unknown") from=\(id)",
                     error: error
                 )
             }

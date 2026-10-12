@@ -126,13 +126,13 @@ final class PictureInPictureTrackStateAdapter: @unchecked Sendable {
         case let .participant(_, participant, track) where track != nil:
             track?.isEnabled = false
             log.debug(
-                "Picture-in-Picture track disabled. source=camera participantSessionId=\(String(reflecting: participant.sessionId)) trackId=\(String(reflecting: track?.trackId ?? "none"))",
+                "Picture-in-Picture track disabled. source=camera participantSessionId=\(participant.sessionId) trackId=\(track?.trackId ?? "none")",
                 subsystems: .pictureInPicture
             )
         case let .screenSharing(_, participant, track):
             track.isEnabled = false
             log.debug(
-                "Picture-in-Picture track disabled. source=screenSharing participantSessionId=\(String(reflecting: participant.sessionId)) trackId=\(String(reflecting: track.trackId))",
+                "Picture-in-Picture track disabled. source=screenSharing participantSessionId=\(participant.sessionId) trackId=\(track.trackId)",
                 subsystems: .pictureInPicture
             )
         default:
@@ -150,13 +150,13 @@ final class PictureInPictureTrackStateAdapter: @unchecked Sendable {
         case let .participant(_, participant, track) where track != nil && track?.isEnabled == false:
             track?.isEnabled = true
             log.debug(
-                "Picture-in-Picture track enabled. source=camera participantSessionId=\(String(reflecting: participant.sessionId)) trackId=\(String(reflecting: track?.trackId ?? "none"))",
+                "Picture-in-Picture track enabled. source=camera participantSessionId=\(participant.sessionId) trackId=\(track?.trackId ?? "none")",
                 subsystems: .pictureInPicture
             )
         case let .screenSharing(_, participant, track) where track.isEnabled == false:
             track.isEnabled = true
             log.debug(
-                "Picture-in-Picture track enabled. source=screenSharing participantSessionId=\(String(reflecting: participant.sessionId)) trackId=\(String(reflecting: track.trackId))",
+                "Picture-in-Picture track enabled. source=screenSharing participantSessionId=\(participant.sessionId) trackId=\(track.trackId)",
                 subsystems: .pictureInPicture
             )
         default:

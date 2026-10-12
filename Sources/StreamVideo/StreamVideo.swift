@@ -496,7 +496,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
                     try await self.connectUser(isInitial: true)
                 } catch {
                     log.error(
-                        "Initial guest connection failed. userId=\(String(reflecting: user.id))",
+                        "Initial guest connection failed. userId=\(user.id)",
                         subsystems: .webSocket,
                         error: error
                     )
@@ -507,7 +507,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
                     try await self.connectUser(isInitial: true)
                 } catch {
                     log.error(
-                        "Initial user connection failed. userId=\(String(reflecting: user.id))",
+                        "Initial user connection failed. userId=\(user.id)",
                         subsystems: .webSocket,
                         error: error
                     )
@@ -617,7 +617,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
                 .publish(every: 0.1)
                 .compactMap { [weak self] _ in self?.loadConnectionIdFromHealthcheck() }
                 .nextValue(timeout: 5)
-            log.debug("Connection ID loaded. connectionId=\(String(reflecting: result))", subsystems: .webSocket)
+            log.debug("Connection ID loaded. connectionId=\(result)", subsystems: .webSocket)
             return result
         } catch {
             log.log(.warning, message: "Connection ID wait failed.", subsystems: .webSocket, error: error)

@@ -57,7 +57,7 @@ public class CallState: ObservableObject {
                 return
             }
             log.debug(
-                "Call capabilities changed. callSessionId=\(String(reflecting: session?.id ?? "none")) participantSessionId=\(String(reflecting: sessionId)) added=\(String(reflecting: newValue.subtracting(oldValue).map(\.rawValue).sorted().joined(separator: ","))) removed=\(String(reflecting: oldValue.subtracting(newValue).map(\.rawValue).sorted().joined(separator: ",")))",
+                "Call capabilities changed. callSessionId=\(session?.id ?? "none") participantSessionId=\(sessionId) added=\(newValue.subtracting(oldValue).map(\.rawValue).sorted().joined(separator: ",")) removed=\(oldValue.subtracting(newValue).map(\.rawValue).sorted().joined(separator: ","))",
                 subsystems: .webRTC
             )
         }

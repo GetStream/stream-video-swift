@@ -61,7 +61,7 @@ final class PollingRingingRecoveryPolicy: RingingRecoveryPolicy, @unchecked Send
         }
 
         guard let callSessionId = call.state.session?.id else {
-            log.warning("Ring state polling unavailable. cid=\(String(reflecting: call.cId)) reason=missingSession")
+            log.warning("Ring state polling unavailable. cid=\(call.cId) reason=missingSession")
             return
         }
 
@@ -84,7 +84,7 @@ final class PollingRingingRecoveryPolicy: RingingRecoveryPolicy, @unchecked Send
             .sink { [weak self] in self?.actionSubject.send(action) }
 
         log.debug(
-            "Ring state polling scheduled. cid=\(String(reflecting: call.cId)) callSessionId=\(String(reflecting: callSessionId)) pollingId=\(pollingId) startAfterSeconds=\(startAfter) intervalSeconds=\(interval) timeoutSeconds=\(ringTimeout)"
+            "Ring state polling scheduled. cid=\(call.cId) callSessionId=\(callSessionId) pollingId=\(pollingId) startAfterSeconds=\(startAfter) intervalSeconds=\(interval) timeoutSeconds=\(ringTimeout)"
         )
     }
 
@@ -149,7 +149,7 @@ final class PollingRingingRecoveryPolicy: RingingRecoveryPolicy, @unchecked Send
         self.pollingId = nil
         pollingCancellable = nil
         log.debug(
-            "Ring state polling stopped. cid=\(String(reflecting: call.cId)) pollingId=\(pollingId) reason=terminalAPIError"
+            "Ring state polling stopped. cid=\(call.cId) pollingId=\(pollingId) reason=terminalAPIError"
         )
     }
 }

@@ -237,7 +237,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .statusPublisher
                 .filter { $0 != .unknown }
                 .log(.debug, subsystems: .webRTC) {
-                    "Call recovery network status changed. status=\(String(reflecting: String(describing: $0)))"
+                    "Call recovery network status changed. status=\($0)"
                 }
                 .debounce(for: 1, scheduler: processingQueue)
                 .removeDuplicates()

@@ -243,7 +243,7 @@ public struct VideoCallParticipantOptionsModifier: ViewModifier {
                 )
             } catch {
                 log.error(
-                    "Participant unpin failed. cid=\(String(reflecting: call?.cId ?? "none")) participantSessionId=\(String(reflecting: participant.sessionId)) scope=local",
+                    "Participant unpin failed. cid=\(call?.cId ?? "none") participantSessionId=\(participant.sessionId) scope=local",
                     error: error
                 )
             }
@@ -258,7 +258,7 @@ public struct VideoCallParticipantOptionsModifier: ViewModifier {
                 )
             } catch {
                 log.error(
-                    "Participant pin failed. cid=\(String(reflecting: call?.cId ?? "none")) participantSessionId=\(String(reflecting: participant.sessionId)) scope=local",
+                    "Participant pin failed. cid=\(call?.cId ?? "none") participantSessionId=\(participant.sessionId) scope=local",
                     error: error
                 )
             }
@@ -274,7 +274,7 @@ public struct VideoCallParticipantOptionsModifier: ViewModifier {
                 )
             } catch {
                 log.error(
-                    "Participant unpin failed. cid=\(String(reflecting: call?.cId ?? "none")) participantSessionId=\(String(reflecting: participant.id)) scope=everyone",
+                    "Participant unpin failed. cid=\(call?.cId ?? "none") participantSessionId=\(participant.id) scope=everyone",
                     error: error
                 )
             }
@@ -290,7 +290,7 @@ public struct VideoCallParticipantOptionsModifier: ViewModifier {
                 )
             } catch {
                 log.error(
-                    "Participant pin failed. cid=\(String(reflecting: call?.cId ?? "none")) participantSessionId=\(String(reflecting: participant.id)) scope=everyone",
+                    "Participant pin failed. cid=\(call?.cId ?? "none") participantSessionId=\(participant.id) scope=everyone",
                     error: error
                 )
             }
@@ -303,7 +303,7 @@ public struct VideoCallParticipantOptionsModifier: ViewModifier {
                 _ = try await call?.kickUser(userId: participant.userId)
             } catch {
                 log.error(
-                    "Participant removal failed. cid=\(String(reflecting: call?.cId ?? "none")) userId=\(String(reflecting: participant.userId))",
+                    "Participant removal failed. cid=\(call?.cId ?? "none") userId=\(participant.userId)",
                     error: error
                 )
             }

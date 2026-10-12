@@ -39,7 +39,7 @@ public struct ParticipantPopoverView<CustomView: View>: View {
                                 )
                             } catch {
                                 log.error(
-                                    "Participant unpin failed. cid=\(String(reflecting: call?.cId ?? "none")) participantSessionId=\(String(reflecting: participant.sessionId)) scope=local",
+                                    "Participant unpin failed. cid=\(call?.cId ?? "none") participantSessionId=\(participant.sessionId) scope=local",
                                     error: error
                                 )
                             }
@@ -52,7 +52,7 @@ public struct ParticipantPopoverView<CustomView: View>: View {
                                 )
                             } catch {
                                 log.error(
-                                    "Participant pin failed. cid=\(String(reflecting: call?.cId ?? "none")) participantSessionId=\(String(reflecting: participant.sessionId)) scope=local",
+                                    "Participant pin failed. cid=\(call?.cId ?? "none") participantSessionId=\(participant.sessionId) scope=local",
                                     error: error
                                 )
                             }
@@ -75,7 +75,7 @@ public struct ParticipantPopoverView<CustomView: View>: View {
                                 )
                             } catch {
                                 log.error(
-                                    "Participant unpin failed. cid=\(String(reflecting: call?.cId ?? "none")) participantSessionId=\(String(reflecting: participant.id)) scope=everyone",
+                                    "Participant unpin failed. cid=\(call?.cId ?? "none") participantSessionId=\(participant.id) scope=everyone",
                                     error: error
                                 )
                             }
@@ -89,7 +89,7 @@ public struct ParticipantPopoverView<CustomView: View>: View {
                                 )
                             } catch {
                                 log.error(
-                                    "Participant pin failed. cid=\(String(reflecting: call?.cId ?? "none")) participantSessionId=\(String(reflecting: participant.id)) scope=everyone",
+                                    "Participant pin failed. cid=\(call?.cId ?? "none") participantSessionId=\(participant.id) scope=everyone",
                                     error: error
                                 )
                             }

@@ -245,7 +245,7 @@ extension WebRTCCoordinator.StateMachine {
                 try transition?(.error(context, error: error))
             } catch {
                 log.error(
-                    "WebRTC error transition failed. coordinatorConnectId=\(String(reflecting: context.coordinatorConnectId)) from=\(id)",
+                    "WebRTC error transition failed. coordinatorConnectId=\(context.coordinatorConnectId) from=\(id)",
                     subsystems: .webRTC,
                     error: error
                 )

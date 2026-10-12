@@ -72,7 +72,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     try Task.checkCancellation()
 
                     log.debug(
-                        "SFU WebSocket reconnect started. coordinatorConnectId=\(String(reflecting: context.coordinatorConnectId)) attempt=\(context.fastReconnectionAttempts)",
+                        "SFU WebSocket reconnect started. coordinatorConnectId=\(context.coordinatorConnectId) attempt=\(context.fastReconnectionAttempts)",
                         subsystems: .webRTC
                     )
                     sfuAdapter.refresh(
@@ -84,7 +84,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     try Task.checkCancellation()
 
                     log.debug(
-                        "SFU WebSocket authentication wait started. coordinatorConnectId=\(String(reflecting: context.coordinatorConnectId))",
+                        "SFU WebSocket authentication wait started. coordinatorConnectId=\(context.coordinatorConnectId)",
                         subsystems: .webRTC
                     )
 

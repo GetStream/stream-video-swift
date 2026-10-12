@@ -34,9 +34,9 @@ enum PictureInPictureContent: Equatable, CustomStringConvertible {
         case .inactive:
             return "type=inactive"
         case let .participant(call, participant, track):
-            return "type=participant cid=\(String(reflecting: call?.cId ?? "none")) participantSessionId=\(String(reflecting: participant.sessionId)) trackId=\(String(reflecting: track?.trackId ?? "none"))"
+            return "type=participant cid=\(call?.cId ?? "none") participantSessionId=\(participant.sessionId) trackId=\(track?.trackId ?? "none")"
         case let .screenSharing(call, participant, track):
-            return "type=screenSharing cid=\(String(reflecting: call?.cId ?? "none")) participantSessionId=\(String(reflecting: participant.sessionId)) trackId=\(String(reflecting: track.trackId))"
+            return "type=screenSharing cid=\(call?.cId ?? "none") participantSessionId=\(participant.sessionId) trackId=\(track.trackId)"
         case .reconnecting:
             return "type=reconnecting"
         }

@@ -52,7 +52,7 @@ struct JoinedStateTelemetryReporter {
         }()
 
         log.debug(
-            "Join flow completed. flow=\(flowType) sessionId=\(String(reflecting: sessionId)) unifiedSessionId=\(String(reflecting: unifiedSessionId)) durationMs=\(duration * 1000)",
+            "Join flow completed. flow=\(flowType) sessionId=\(sessionId) unifiedSessionId=\(unifiedSessionId) durationMs=\(duration * 1000)",
             subsystems: .webRTC
         )
         do {
@@ -64,7 +64,7 @@ struct JoinedStateTelemetryReporter {
         } catch {
             log.log(
                 .warning,
-                message: "Join telemetry upload failed. flow=\(flowType) sessionId=\(String(reflecting: sessionId)) unifiedSessionId=\(String(reflecting: unifiedSessionId))",
+                message: "Join telemetry upload failed. flow=\(flowType) sessionId=\(sessionId) unifiedSessionId=\(unifiedSessionId)",
                 subsystems: .webRTC,
                 error: error
             )

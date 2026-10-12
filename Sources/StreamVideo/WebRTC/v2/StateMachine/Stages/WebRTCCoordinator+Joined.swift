@@ -212,7 +212,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     context.reconnectionStrategy = .rejoin
                     log.log(
                         .warning,
-                        message: "SFU migration failed. coordinatorConnectId=\(String(reflecting: context.coordinatorConnectId)) recovery=rejoin",
+                        message: "SFU migration failed. coordinatorConnectId=\(context.coordinatorConnectId) recovery=rejoin",
                         subsystems: .webRTC,
                         error: error
                     )
@@ -276,7 +276,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
             sfuAdapter?
                 .publisher(eventType: Stream_Video_Sfu_Event_CallEnded.self)
                 .log(.info, subsystems: .sfu) { [coordinatorConnectId = context.coordinatorConnectId] in
-                    "Call ended. coordinatorConnectId=\(String(reflecting: coordinatorConnectId)) reason=\($0.reason)"
+                    "Call ended. coordinatorConnectId=\(coordinatorConnectId) reason=\($0.reason)"
                 }
                 .receive(on: processingQueue)
                 .sink { [weak self] in
@@ -300,7 +300,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     guard let self else { return }
                     context.reconnectionStrategy = .migrate
                     log.warning(
-                        "SFU migration requested. coordinatorConnectId=\(String(reflecting: context.coordinatorConnectId)) reason=sfuError",
+                        "SFU migration requested. coordinatorConnectId=\(context.coordinatorConnectId) reason=sfuError",
                         subsystems: .webRTC
                     )
                     transitionOrDisconnect(.disconnected(context))
@@ -314,7 +314,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     guard let self else { return }
                     context.reconnectionStrategy = .migrate
                     log.info(
-                        "SFU migration requested. coordinatorConnectId=\(String(reflecting: context.coordinatorConnectId)) reason=goAway",
+                        "SFU migration requested. coordinatorConnectId=\(context.coordinatorConnectId) reason=goAway",
                         subsystems: .webRTC
                     )
                     transitionOrDisconnect(.disconnected(context))
@@ -411,7 +411,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     )
                 }
                 .log(.debug, subsystems: .webRTC) { [coordinatorConnectId = context.coordinatorConnectId] in
-                    "Reconnection strategy changed. coordinatorConnectId=\(String(reflecting: coordinatorConnectId)) strategy=\(String(reflecting: String(describing: $0)))"
+                    "Reconnection strategy changed. coordinatorConnectId=\(coordinatorConnectId) strategy=\(String(reflecting: String(describing: $0)))"
                 }
                 .receive(on: processingQueue)
                 .sink { [weak self] in self?.context.reconnectionStrategy = $0 }
@@ -433,7 +433,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
             publisher
                 .disconnectedPublisher
                 .log(.debug, subsystems: .webRTC) { [coordinatorConnectId = context.coordinatorConnectId] in
-                    "Peer connection disconnected. coordinatorConnectId=\(String(reflecting: coordinatorConnectId)) peer=publisher recovery=rejoin"
+                    "Peer connection disconnected. coordinatorConnectId=\(coordinatorConnectId) peer=publisher recovery=rejoin"
                 }
                 .receive(on: processingQueue)
                 .sink { [weak self] in
@@ -446,7 +446,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
             subscriber
                 .disconnectedPublisher
                 .log(.debug, subsystems: .webRTC) { [coordinatorConnectId = context.coordinatorConnectId] in
-                    "Peer connection disconnected. coordinatorConnectId=\(String(reflecting: coordinatorConnectId)) peer=subscriber recovery=rejoin"
+                    "Peer connection disconnected. coordinatorConnectId=\(coordinatorConnectId) peer=subscriber recovery=rejoin"
                 }
                 .receive(on: processingQueue)
                 .sink { [weak self] in
@@ -512,7 +512,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .statusPublisher
                 .filter { $0 != .unknown }
                 .log(.debug, subsystems: .webRTC) { [coordinatorConnectId = context.coordinatorConnectId] in
-                    "Internet connection status changed. coordinatorConnectId=\(String(reflecting: coordinatorConnectId)) status=\(String(reflecting: String(describing: $0)))"
+                    "Internet connection status changed. coordinatorConnectId=\(coordinatorConnectId) status=\($0)"
                 }
                 .filter { !$0.isAvailable }
                 .removeDuplicates()
@@ -562,7 +562,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .publisher
                 .receive(on: processingQueue)
                 .log(.warning, subsystems: .sfu) { [coordinatorConnectId = context.coordinatorConnectId] in
-                    "SFU capacity exhausted. coordinatorConnectId=\(String(reflecting: coordinatorConnectId)) requestedRecovery=\($0.reconnectStrategy)"
+                    "SFU capacity exhausted. coordinatorConnectId=\(coordinatorConnectId) requestedRecovery=\($0.reconnectStrategy)"
                 }
                 .sink { [weak self] in
                     guard let self else { return }
@@ -618,7 +618,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
             DefaultTimer
                 .publish(every: interval)
                 .log(.warning, subsystems: .audioSession) { [coordinatorConnectId = context.coordinatorConnectId] _ in
-                    "Audio session readiness timed out. coordinatorConnectId=\(String(reflecting: coordinatorConnectId)) timeoutMs=\(interval * 1000) recovery=rejoin"
+                    "Audio session readiness timed out. coordinatorConnectId=\(coordinatorConnectId) timeoutMs=\(interval * 1000) recovery=rejoin"
                 }
                 .sinkTask(storeIn: disposableBag) { [weak self] _ in
                     guard let self else { return }

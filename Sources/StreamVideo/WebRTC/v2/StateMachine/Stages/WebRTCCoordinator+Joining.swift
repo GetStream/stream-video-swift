@@ -581,13 +581,13 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     .nextValue(timeout: timeout)
             } catch is CancellationError {
                 log.debug(
-                    "Audio session readiness wait cancelled. coordinatorConnectId=\(String(reflecting: context.coordinatorConnectId))",
+                    "Audio session readiness wait cancelled. coordinatorConnectId=\(context.coordinatorConnectId)",
                     subsystems: .audioSession
                 )
             } catch {
                 log.log(
                     .warning,
-                    message: "Audio session readiness wait failed; join continues. coordinatorConnectId=\(String(reflecting: context.coordinatorConnectId)) timeoutMs=\(timeout * 1000)",
+                    message: "Audio session readiness wait failed; join continues. coordinatorConnectId=\(context.coordinatorConnectId) timeoutMs=\(timeout * 1000)",
                     subsystems: .audioSession,
                     error: error
                 )

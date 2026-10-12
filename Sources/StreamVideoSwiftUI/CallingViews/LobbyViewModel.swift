@@ -94,7 +94,7 @@ public class LobbyViewModel: ObservableObject, @unchecked Sendable {
                     participants = response.call.session?.participants.map(\.user.toUser) ?? []
                 }
             } catch {
-                log.error("Lobby participants load failed. cid=\(String(reflecting: call.cId))", error: error)
+                log.error("Lobby participants load failed. cid=\(call.cId)", error: error)
             }
         }
     }

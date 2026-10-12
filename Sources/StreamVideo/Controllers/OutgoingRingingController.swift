@@ -59,7 +59,7 @@ final class OutgoingRingingController: @unchecked Sendable {
             /// We ignore .unknown on purpose to cover cases like, starting a call from the Recents app where
             /// entering the ringing flow may happen before the AppState has been stabilised
             .filter { $0 == .background }
-            .log(.info) { [callCiD] _ in "Ringing call end requested. cid=\(String(reflecting: callCiD)) reason=background" }
+            .log(.info) { [callCiD] _ in "Ringing call end requested. cid=\(callCiD) reason=background" }
             .receive(on: processingQueue)
             .sinkTask(storeIn: disposableBag) { [weak self] _ in await self?.endCall() }
     }
@@ -73,7 +73,7 @@ final class OutgoingRingingController: @unchecked Sendable {
         do {
             try await handler()
         } catch {
-            log.error("Ringing call end failed. cid=\(String(reflecting: callCiD)) reason=background", error: error)
+            log.error("Ringing call end failed. cid=\(callCiD) reason=background", error: error)
         }
         deactivate()
     }

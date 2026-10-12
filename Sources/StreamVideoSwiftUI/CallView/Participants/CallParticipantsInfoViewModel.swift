@@ -101,7 +101,7 @@ final class CallParticipantsInfoViewModel: ObservableObject {
                 try await call.blockUser(with: userId)
             } catch {
                 log.error(
-                    "Participant block failed. cid=\(String(reflecting: call.cId)) userId=\(String(reflecting: userId))",
+                    "Participant block failed. cid=\(call.cId) userId=\(userId)",
                     error: error
                 )
             }
@@ -115,7 +115,7 @@ final class CallParticipantsInfoViewModel: ObservableObject {
                 try await call.unblockUser(with: userId)
             } catch {
                 log.error(
-                    "Participant unblock failed. cid=\(String(reflecting: call.cId)) userId=\(String(reflecting: userId))",
+                    "Participant unblock failed. cid=\(call.cId) userId=\(userId)",
                     error: error
                 )
             }
@@ -129,7 +129,7 @@ final class CallParticipantsInfoViewModel: ObservableObject {
                 try await call.mute(userId: userId, audio: audio, video: video)
             } catch {
                 log.error(
-                    "Participant mute failed. cid=\(String(reflecting: call.cId)) userId=\(String(reflecting: userId)) audio=\(audio) video=\(video)",
+                    "Participant mute failed. cid=\(call.cId) userId=\(userId) audio=\(audio) video=\(video)",
                     error: error
                 )
             }

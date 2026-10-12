@@ -101,7 +101,7 @@ extension Call.StateMachine.Stage {
                     try transition?(.idle(.init(call: call)))
                 } catch {
                     log.error(
-                        "Call idle transition failed. cid=\(String(reflecting: call.cId)) from=leaving",
+                        "Call idle transition failed. cid=\(call.cId) from=leaving",
                         error: error
                     )
                 }

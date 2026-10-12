@@ -82,7 +82,7 @@ public class VideoRenderer: RTCVideoRenderingView, @unchecked Sendable {
         self.maxInFlightFrames = videoRenderingOptions.maxInFlightFrames
 
         log.debug(
-            "Renderer configured. rendererId=\(identifier) backend=\(String(reflecting: String(describing: videoRenderingOptions.backend))) maxInFlightFrames=\(videoRenderingOptions.maxInFlightFrames)",
+            "Renderer configured. rendererId=\(identifier) backend=\(videoRenderingOptions.backend) maxInFlightFrames=\(videoRenderingOptions.maxInFlightFrames)",
             subsystems: .webRTC
         )
     }
@@ -126,7 +126,7 @@ public class VideoRenderer: RTCVideoRenderingView, @unchecked Sendable {
             self.track = track
             track.add(self)
             log.debug(
-                "Renderer attached. rendererId=\(identifier) trackId=\(String(reflecting: track.trackId))",
+                "Renderer attached. rendererId=\(identifier) trackId=\(track.trackId)",
                 subsystems: .webRTC
             )
         }
@@ -143,7 +143,7 @@ public class VideoRenderer: RTCVideoRenderingView, @unchecked Sendable {
             track?.remove(self)
             if let track {
                 log.debug(
-                    "Renderer detached. rendererId=\(identifier) trackId=\(String(reflecting: track.trackId))",
+                    "Renderer detached. rendererId=\(identifier) trackId=\(track.trackId)",
                     subsystems: .webRTC
                 )
             }
@@ -203,7 +203,7 @@ extension VideoRenderer {
                 if let viewSize, prev != viewSize {
                     log.debug(
                         "Renderer size changed. rendererId=\(identifier)"
-                            + " trackId=\(String(reflecting: track.trackId)) participantSessionId=\(String(reflecting: participant.sessionId))"
+                            + " trackId=\(track.trackId) participantSessionId=\(participant.sessionId)"
                             + " width=\(viewSize.width) height=\(viewSize.height)",
                         subsystems: .webRTC
                     )

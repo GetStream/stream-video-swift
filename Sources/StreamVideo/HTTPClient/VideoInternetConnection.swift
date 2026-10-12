@@ -72,7 +72,7 @@ final class VideoInternetConnection: @unchecked Sendable {
         processingCancellable = subject
             .removeDuplicates()
             .log(.debug, subsystems: .httpRequests) {
-                "Network status changed. status=\(String(reflecting: String(describing: $0)))"
+                "Network status changed. status=\($0)"
             }
             .receive(on: DispatchQueue.main)
             .assign(to: \.status, onWeak: self)

@@ -49,13 +49,13 @@ class InviteParticipantsViewModel: ObservableObject {
         Task {
             do {
                 let result = try await call.addMembers(ids: selectedUsers.map(\.id))
-                log.debug("Call members added. cid=\(String(reflecting: call.cId)) count=\(result.members.count)")
+                log.debug("Call members added. cid=\(call.cId) count=\(result.members.count)")
                 withAnimation {
                     allUsers = allUsers.filter { !selectedUsers.contains($0) }
                     selectedUsers = []
                 }
             } catch {
-                log.error("Call member invitation failed. cid=\(String(reflecting: call.cId))", error: error)
+                log.error("Call member invitation failed. cid=\(call.cId)", error: error)
             }
         }
     }

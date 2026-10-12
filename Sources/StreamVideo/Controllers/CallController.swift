@@ -787,7 +787,7 @@ class CallController: @unchecked Sendable {
             } catch {
                 log.log(
                     .warning,
-                    message: "Location prefetch failed. source=call cid=\(String(reflecting: callCid(from: callId, callType: callType)))",
+                    message: "Location prefetch failed. source=call cid=\(callCid(from: callId, callType: callType))",
                     subsystems: .httpRequests,
                     error: error
                 )
@@ -876,7 +876,7 @@ class CallController: @unchecked Sendable {
                 .$blockedUserIds
                 .filter { $0.contains(currentUser.id) }
                 .log(.info, subsystems: .webRTC) { [cid = call.cId] _ in
-                    "Call leave requested. cid=\(String(reflecting: cid)) reason=currentUserBlocked"
+                    "Call leave requested. cid=\(cid) reason=currentUserBlocked"
                 }
                 .sinkTask(storeIn: disposableBag) { [weak self] _ in
                     guard let self else { return }
@@ -931,7 +931,7 @@ class CallController: @unchecked Sendable {
             .$isSpeakingWhileMuted
             .removeDuplicates()
             .log(.debug, subsystems: .audioSession) { [callId, callType] in
-                "Speaking while muted changed. cid=\(String(reflecting: callCid(from: callId, callType: callType))) isSpeakingWhileMuted=\($0)"
+                "Speaking while muted changed. cid=\(callCid(from: callId, callType: callType)) isSpeakingWhileMuted=\($0)"
             }
             .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in
                 self?.call?.state.isSpeakingWhileMuted = $0

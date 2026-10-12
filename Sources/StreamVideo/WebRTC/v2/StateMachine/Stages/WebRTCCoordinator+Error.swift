@@ -67,7 +67,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
                     try Task.checkCancellation()
                     log.error(
-                        "WebRTC flow failed. coordinatorConnectId=\(String(reflecting: context.coordinatorConnectId)) stage=\(previousStageId)",
+                        "WebRTC flow failed. coordinatorConnectId=\(context.coordinatorConnectId) stage=\(previousStageId)",
                         subsystems: .webRTC,
                         error: error
                     )
@@ -76,7 +76,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     try transition?(.cleanUp(context))
                 } catch let transitionError {
                     log.error(
-                        "WebRTC error handling failed. coordinatorConnectId=\(String(reflecting: self?.context.coordinatorConnectId ?? "unknown")) next=cleanUp",
+                        "WebRTC error handling failed. coordinatorConnectId=\(self?.context.coordinatorConnectId ?? "unknown") next=cleanUp",
                         subsystems: .webRTC,
                         error: transitionError
                     )

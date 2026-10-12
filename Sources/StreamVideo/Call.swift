@@ -115,7 +115,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     }
 
     deinit {
-        log.debug("Call released. cid=\(String(reflecting: cId))")
+        log.debug("Call released. cid=\(cId)")
         disposableBag.removeAll()
     }
 
@@ -790,7 +790,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     @MainActor public func currentUserHasCapability(_ capability: OwnCapability) -> Bool {
         if !state.isInitialized {
             log.warning(
-                "Capability checked before call initialization. cid=\(String(reflecting: cId)) capability=\(capability.rawValue) requiredAction=getOrCreateOrJoin"
+                "Capability checked before call initialization. cid=\(cId) capability=\(capability.rawValue) requiredAction=getOrCreateOrJoin"
             )
         }
         return state.ownCapabilities.contains(capability)
@@ -1611,7 +1611,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     ) async {
         if itemPresentationDuration < 0.5 {
             log.warning(
-                "Closed caption duration ignored. cid=\(String(reflecting: cId)) durationSeconds=\(itemPresentationDuration) minDurationSeconds=0.5"
+                "Closed caption duration ignored. cid=\(cId) durationSeconds=\(itemPresentationDuration) minDurationSeconds=0.5"
             )
         } else {
             closedCaptionsAdapter.itemPresentationDuration = itemPresentationDuration
@@ -1619,7 +1619,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
         if maxVisibleItems <= 0 {
             log.warning(
-                "Closed caption capacity ignored. cid=\(String(reflecting: cId)) maxVisibleItems=\(maxVisibleItems) minVisibleItems=1"
+                "Closed caption capacity ignored. cid=\(cId) maxVisibleItems=\(maxVisibleItems) minVisibleItems=1"
             )
         } else {
             closedCaptionsAdapter.capacity = maxVisibleItems
@@ -1848,7 +1848,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     private func didUpdate(_ value: NoiseCancellationSettingsRequest?) {
         guard let noiseCancellationFilter = streamVideo.videoConfig.noiseCancellationFilter else {
             log.debug(
-                "Noise cancellation settings ignored. cid=\(String(reflecting: cId)) reason=filterUnavailable",
+                "Noise cancellation settings ignored. cid=\(cId) reason=filterUnavailable",
                 subsystems: .audioSession
             )
             return
@@ -1869,7 +1869,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             case .disabled where isNoiseCancellationFilterInUse:
                 /// Clear NC even if music or screenshare stashed it live.
                 log.debug(
-                    "Noise cancellation disable requested. cid=\(String(reflecting: cId)) filterId=\(String(reflecting: noiseCancellationFilter.id)) reason=settings",
+                    "Noise cancellation disable requested. cid=\(cId) filterId=\(noiseCancellationFilter.id) reason=settings",
                     subsystems: .audioSession
                 )
                 setAudioFilter(nil)
@@ -1879,7 +1879,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 /// Activate noiseCancellationFilter if mode is autoOn,  hardwareAcceleration is
                 /// available and the noiseCancellation audioFilter isn't already enabled.
                 log.debug(
-                    "Noise cancellation enable requested. cid=\(String(reflecting: cId)) filterId=\(String(reflecting: noiseCancellationFilter.id)) reason=settings",
+                    "Noise cancellation enable requested. cid=\(cId) filterId=\(noiseCancellationFilter.id) reason=settings",
                     subsystems: .audioSession
                 )
                 setAudioFilter(noiseCancellationFilter)
@@ -1903,17 +1903,17 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             do {
                 switch value.mode {
                 case .disabled where state.transcribing == true:
-                    log.debug("Transcription stop requested. cid=\(String(reflecting: cId)) reason=settings")
+                    log.debug("Transcription stop requested. cid=\(cId) reason=settings")
                     try await stopTranscription()
                 case .autoOn where state.transcribing == false:
-                    log.debug("Transcription start requested. cid=\(String(reflecting: cId)) reason=settings")
+                    log.debug("Transcription start requested. cid=\(cId) reason=settings")
                     try await startTranscription()
                 default:
                     break
                 }
             } catch {
                 log.error(
-                    "Transcription settings application failed. cid=\(String(reflecting: cId)) mode=\(value.mode.rawValue)",
+                    "Transcription settings application failed. cid=\(cId) mode=\(value.mode.rawValue)",
                     error: error
                 )
             }
@@ -1934,17 +1934,17 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             do {
                 switch mode {
                 case .disabled where state.captioning == true:
-                    log.debug("Closed captions stop requested. cid=\(String(reflecting: cId)) reason=settings")
+                    log.debug("Closed captions stop requested. cid=\(cId) reason=settings")
                     try await stopClosedCaptions()
                 case .autoOn where state.captioning == false:
-                    log.debug("Closed captions start requested. cid=\(String(reflecting: cId)) reason=settings")
+                    log.debug("Closed captions start requested. cid=\(cId) reason=settings")
                     try await startClosedCaptions()
                 default:
                     break
                 }
             } catch {
                 log.error(
-                    "Closed caption settings application failed. cid=\(String(reflecting: cId)) mode=\(mode.rawValue)",
+                    "Closed caption settings application failed. cid=\(cId) mode=\(mode.rawValue)",
                     error: error
                 )
             }

@@ -155,7 +155,7 @@ final class PictureInPictureController: @unchecked Sendable {
         }
 
         log.debug(
-            "Picture-in-Picture source updated. cid=\(String(reflecting: call?.cId ?? "none")) width=\(contentViewController.preferredContentSize.width) height=\(contentViewController.preferredContentSize.height)",
+            "Picture-in-Picture source updated. cid=\(call?.cId ?? "none") width=\(contentViewController.preferredContentSize.width) height=\(contentViewController.preferredContentSize.height)",
             subsystems: .pictureInPicture
         )
     }
