@@ -259,6 +259,11 @@ final class WebRTCCoordinator: @unchecked Sendable {
             var updatedParticipants = participants
             updatedParticipants[participant.id] = participant
                 .withUpdated(showTrack: isVisible)
+            log.debug(
+                "Track visibility changed. sessionId=\(participant.sessionId)"
+                    + " trackId=\(participant.track?.trackId ?? "none") visible=\(isVisible)",
+                subsystems: .webRTC
+            )
             return updatedParticipants
         }
     }

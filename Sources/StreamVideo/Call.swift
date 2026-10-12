@@ -1863,7 +1863,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         if let value {
             switch value.mode {
             case .available:
-                log.debug("NoiseCancellationSettings updated with mode:\(value.mode).")
+                break
             case .disabled where isNoiseCancellationFilterInUse:
                 /// Clear NC even if music or screenshare stashed it live.
                 log
@@ -1882,14 +1882,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                     )
                 setAudioFilter(noiseCancellationFilter)
             default:
-                /// Log a debug message for other cases where no action is required.
-                log
-                    .debug(
-                        "NoiseCancellationSettings updated with mode:\(value.mode) isHardwareAccelerationAvailable:\(streamVideo.isHardwareAccelerationAvailable). No action!"
-                    )
+                break
             }
-        } else {
-            log.debug("NoiseCancellationSettings updated. No action!")
         }
     }
 

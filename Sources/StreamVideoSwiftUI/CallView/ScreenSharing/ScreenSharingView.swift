@@ -86,10 +86,6 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
             contentMode: .scaleAspectFit
         ) { view in
             if let track = screenSharing.participant.screenshareTrack {
-                log.info(
-                    "Found \(track.kind) track:\(track.trackId) for \(screenSharing.participant.name) and will add on \(type(of: self)):\(identifier))",
-                    subsystems: .webRTC
-                )
                 view.add(track: track)
             }
         }

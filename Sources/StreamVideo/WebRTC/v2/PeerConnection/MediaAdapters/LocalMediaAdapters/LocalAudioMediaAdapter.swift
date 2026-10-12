@@ -305,12 +305,11 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             applyCurrentProfileBitrate()
 
             log.debug(
-                """
-                Local audio tracks updated:
-                    PublishOptions: \(self.publishOptions)
-                    TransceiverStorage: \(transceiverStorage)
-                """,
-                subsystems: .webRTC
+                "Audio publish options applied. sessionId=\(sessionID)"
+                    + " options=\(self.publishOptions.map { "\($0.id):\($0.codec)" }.joined(separator: ","))"
+                    +
+                    " tracks=\(transceiverStorage.map { "\($0.key.id):\($0.key.codec):\($0.value.track.trackId)" }.sorted().joined(separator: ","))",
+                subsystems: .mediaAdapter
             )
         }
     }

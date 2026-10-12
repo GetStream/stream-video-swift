@@ -27,23 +27,17 @@ final class CallCache {
         queue.sync {
             if let cached = storage[cId] {
                 log.debug(
-                    "Will reuse call:\(cId).",
+                    "Call cache hit. cid=\(cId) count=\(storage.count)",
                     functionName: function,
                     fileName: file,
                     lineNumber: line
                 )
                 return cached
             } else {
-                log.debug(
-                    "Will create and cache call:\(cId)",
-                    functionName: function,
-                    fileName: file,
-                    lineNumber: line
-                )
                 let call = factory()
                 storage[cId] = call
                 log.debug(
-                    "CallCache count:\(storage.count).",
+                    "Call cached. cid=\(cId) count=\(storage.count)",
                     functionName: function,
                     fileName: file,
                     lineNumber: line
@@ -58,18 +52,22 @@ final class CallCache {
     /// - Parameters:
     ///   - cId: The ``cID`` of the call.
     func remove(for cId: String) {
-        log.debug("Will remove call:\(cId)")
         queue.sync {
+            let wasCached = storage[cId] != nil
             storage[cId] = nil
-            log.debug("CallCache count:\(storage.count).")
+            if wasCached {
+                log.debug("Call removed from cache. cid=\(cId) count=\(storage.count)")
+            }
         }
     }
 
     func removeAll() {
         queue.sync {
-            log.debug("Will remove \(storage.count) calls.")
+            let removedCount = storage.count
             storage.removeAll()
-            log.debug("CallCache count:\(storage.count).")
+            if removedCount > 0 {
+                log.debug("Call cache cleared. removedCount=\(removedCount)")
+            }
         }
     }
 }

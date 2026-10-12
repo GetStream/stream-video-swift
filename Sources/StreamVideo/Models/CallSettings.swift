@@ -72,13 +72,6 @@ public final class CallSettings: ObservableObject, Sendable, Equatable, CustomSt
             }
             self.videoOn = false
         }
-
-        log.debug(
-            "Created \(self)",
-            functionName: function,
-            fileName: file,
-            lineNumber: line
-        )
     }
 
     public static func == (lhs: CallSettings, rhs: CallSettings) -> Bool {

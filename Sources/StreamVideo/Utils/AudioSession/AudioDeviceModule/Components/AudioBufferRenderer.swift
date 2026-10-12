@@ -65,7 +65,10 @@ final class AudioBufferRenderer {
         self.context = newContext
 
         guard let context else {
-            log.debug("Configured with nil context ")
+            log.debug(
+                "Audio renderer unconfigured. rendererId=\(identifier)",
+                subsystems: .audioRecording
+            )
             return
         }
 
@@ -105,7 +108,12 @@ final class AudioBufferRenderer {
         }
         #endif
 
-        log.debug("Configured with non-nil context and playerNode.engine is not nil.")
+        log.debug(
+            "Audio renderer configured. rendererId=\(identifier)"
+                + " sampleRateHz=\(context.format.sampleRate) channels=\(context.format.channelCount)"
+                + " format=\(context.format.commonFormat.rawValue) interleaved=\(context.format.isInterleaved)",
+            subsystems: .audioRecording
+        )
     }
 
     /// Stops playback without tearing down the engine graph.
@@ -122,7 +130,7 @@ final class AudioBufferRenderer {
             let engine = context?.engine
         else {
             context = nil
-            log.debug("Resetted...")
+            log.debug("Audio renderer reset. rendererId=\(identifier)", subsystems: .audioRecording)
             return
         }
 
@@ -138,7 +146,7 @@ final class AudioBufferRenderer {
         detachIfNeeded(mixerNode, from: engine)
         #endif
         context = nil
-        log.debug("Resetted...")
+        log.debug("Audio renderer reset. rendererId=\(identifier)", subsystems: .audioRecording)
     }
 
     // MARK: - Private Helpers
@@ -147,7 +155,10 @@ final class AudioBufferRenderer {
         guard
             let context
         else {
-            log.warning("Context is nil. PlayerNode cannot start playing.")
+            log.warning(
+                "Audio playback unavailable. rendererId=\(identifier) reason=contextMissing",
+                subsystems: .audioRecording
+            )
             return
         }
 
@@ -161,12 +172,14 @@ final class AudioBufferRenderer {
         else {
             log
                 .warning(
-                    "PlayerNode cannot start playing playerNode.engine:\(playerNode.engine != nil) context.engine == playerNode.engine:\(playerNode.engine === context.engine)"
+                    "Audio playback unavailable. rendererId=\(identifier)"
+                        + " reason=engineMismatch engineAttached=\(playerNode.engine != nil)",
+                    subsystems: .audioRecording
                 )
             return
         }
         playerNode.play()
-        log.debug("PlayerNode started playing")
+        log.debug("Audio playback started. rendererId=\(identifier)", subsystems: .audioRecording)
     }
 
     private func enqueue(_ buffer: AVAudioPCMBuffer) {
@@ -183,11 +196,6 @@ final class AudioBufferRenderer {
         }
 
         playerNode.scheduleBuffer(buffer, completionHandler: nil)
-        
-        log.debug(
-            "AVAudioPCMBuffer:\(buffer) with info:\(info) was enqueued.",
-            subsystems: .audioRecording
-        )
     }
 
     private func attachIfNeeded(

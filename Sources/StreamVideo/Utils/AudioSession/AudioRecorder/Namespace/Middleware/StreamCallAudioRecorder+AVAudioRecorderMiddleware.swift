@@ -235,7 +235,6 @@ extension StreamCallAudioRecorder.Namespace {
             case .audioDeviceModule(let audioDeviceModule):
                 updateMetersCancellable = audioDeviceModule
                     .audioLevelPublisher
-                    .log(.debug, subsystems: .audioRecording) { "AVAudioDeviceModule audioLevel observation value:\($0)." }
                     .sink { [weak self] in self?.dispatcher?.dispatch(.setMeter($0)) }
                 log.debug("AVAudioDeviceModule audioLevel observation started...", subsystems: .audioRecording)
             }

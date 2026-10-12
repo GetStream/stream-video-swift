@@ -47,11 +47,11 @@ final class ReusePool<Element: AnyObject & Hashable> {
             if let available = available.popLast() {
                 element = available
                 inUse.insert(available)
-                log.debug("Reusing \(type(of: element)):\(String(describing: element)).")
+                log.debug("Pool object reused. objectId=\(ObjectIdentifier(available))")
             } else {
                 element = factory()
                 inUse.insert(element)
-                log.debug("Created new \(type(of: element)):\(String(describing: element)).")
+                log.debug("Pool object created. objectId=\(ObjectIdentifier(element))")
             }
         }
 
@@ -69,10 +69,10 @@ final class ReusePool<Element: AnyObject & Hashable> {
             if inUse.contains(element), available.endIndex < initialCapacity {
                 inUse.remove(element)
                 available.append(element)
-                log.debug("Will make available \(type(of: element)):\(String(describing: element)).")
+                log.debug("Pool object returned. objectId=\(ObjectIdentifier(element)) retained=true")
             } else {
                 inUse.remove(element)
-                log.debug("Will release \(type(of: element)):\(String(describing: element)).")
+                log.debug("Pool object returned. objectId=\(ObjectIdentifier(element)) retained=false")
             }
         }
     }
@@ -80,16 +80,23 @@ final class ReusePool<Element: AnyObject & Hashable> {
     /// Releases all elements currently in use back to the pool for reuse.
     func releaseAll() {
         queue.sync {
+            let inUseCount = inUse.count
+            defer {
+                if inUseCount > 0 {
+                    log.debug(
+                        "Pool release completed. previousInUseCount=\(inUseCount)"
+                            + " inUseCount=\(inUse.count) availableCount=\(available.count)"
+                    )
+                }
+            }
             for element in inUse {
                 guard available.endIndex < initialCapacity else {
                     return
                 }
                 inUse.remove(element)
                 available.append(element)
-                log.debug("Will make available \(type(of: element)):\(String(describing: element)).")
             }
             if !inUse.isEmpty {
-                log.debug("Will release \(inUse.count) \(String(describing: type(of: Element.self))) instances.")
                 inUse.removeAll()
             }
         }

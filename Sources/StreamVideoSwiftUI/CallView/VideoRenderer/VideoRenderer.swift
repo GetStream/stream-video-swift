@@ -125,7 +125,10 @@ public class VideoRenderer: RTCVideoRenderingView, @unchecked Sendable {
             self.track?.remove(self)
             self.track = track
             track.add(self)
-            log.info("\(type(of: self)):\(identifier) was added on track:\(track.trackId)", subsystems: .other)
+            log.debug(
+                "Renderer attached. rendererId=\(identifier) trackId=\(track.trackId)",
+                subsystems: .webRTC
+            )
         }
     }
 
@@ -138,6 +141,12 @@ public class VideoRenderer: RTCVideoRenderingView, @unchecked Sendable {
     nonisolated func removeTrack() {
         queue.async { [self] in
             track?.remove(self)
+            if let track {
+                log.debug(
+                    "Renderer detached. rendererId=\(identifier) trackId=\(track.trackId)",
+                    subsystems: .webRTC
+                )
+            }
             track = nil
         }
     }
@@ -186,10 +195,6 @@ extension VideoRenderer {
         onTrackSizeUpdate: @escaping @Sendable (CGSize, CallParticipant) -> Void
     ) {
         if let track = participant.track {
-            log.info(
-                "Found \(track.kind) track:\(track.trackId) for \(participant.name) and will add on \(type(of: self)):\(identifier)",
-                subsystems: .other
-            )
             self.participant = participant
             add(track: track)
             DispatchQueue.global(qos: .userInteractive).asyncAfter(deadline: .now() + 0.01) { [weak self] in
@@ -197,17 +202,14 @@ extension VideoRenderer {
                 let prev = participant.trackSize
                 if let viewSize, prev != viewSize {
                     log.debug(
-                        "Update trackSize of \(track.kind) track for \(participant.name) on \(type(of: self)):\(identifier)), \(prev) → \(viewSize)",
-                        subsystems: .other
+                        "Renderer size changed. rendererId=\(identifier)"
+                            + " trackId=\(track.trackId) sessionId=\(participant.sessionId)"
+                            + " width=\(viewSize.width) height=\(viewSize.height)",
+                        subsystems: .webRTC
                     )
                     onTrackSizeUpdate(viewSize, participant)
                 }
             }
-        } else {
-            log.debug(
-                "Participant id:\(participant.id) doesn't have a track. trackLookUpPrefix:\(participant.trackLookupPrefix ?? "n/a").",
-                subsystems: .webRTC
-            )
         }
     }
 }

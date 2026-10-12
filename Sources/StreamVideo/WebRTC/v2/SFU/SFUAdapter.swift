@@ -623,18 +623,7 @@ final class SFUAdapter: CustomStringConvertible, @unchecked Sendable {
 
         webSocket
             .eventPublisher
-            .log(.debug, subsystems: .sfu) {
-                "SFU event received. type=\($0.name)"
-            }
             .sink { [weak self] in self?.eventSubject.send($0) }
-            .store(in: disposableBag)
-
-        signalService
-            .subject
-            .log(.debug, subsystems: .sfu) {
-                "SFU message processed. type=\(type(of: $0))"
-            }
-            .sink { _ in }
             .store(in: disposableBag)
     }
 

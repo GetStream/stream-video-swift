@@ -286,14 +286,11 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
                 }
 
             log.debug(
-                """
-                Local screenShareTracks updated with:
-                    PublishOptions:
-                        \(self.publishOptions.map { "\($0)" }.joined(separator: "\n"))
-                    TransceiverStorage:
-                        \(transceiverStorage)
-                """,
-                subsystems: .webRTC
+                "Screen share publish options applied. sessionId=\(sessionID)"
+                    + " options=\(self.publishOptions.map { "\($0.id):\($0.codec)" }.joined(separator: ","))"
+                    +
+                    " tracks=\(transceiverStorage.map { "\($0.key.id):\($0.key.codec):\($0.value.track.trackId)" }.sorted().joined(separator: ","))",
+                subsystems: .mediaAdapter
             )
         }
     }
@@ -316,30 +313,29 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
                     let transceiver = transceiverStorage.get(for: key)?.transceiver
                 else {
                     log.debug(
-                        """
-                        We didn't apply publish quality change because transceiver
-                        not found for publishOptionID:\(videoSender.publishOptionID) and codec:\(VideoCodec(videoSender.codec)).
-                        Available transceivers: \(transceiverStorage.map { "publishOptionID:\($0.key.id), codec:\($0.key.codec)" })
-                        """,
-                        subsystems: .webRTC
+                        "Screen share quality change skipped. sessionId=\(sessionID)"
+                            + " publishOptionId=\(videoSender.publishOptionID)"
+                            + " codec=\(VideoCodec(videoSender.codec)) reason=transceiverMissing"
+                            +
+                            " availableOptions=\(transceiverStorage.map { "\($0.key.id):\($0.key.codec)" }.sorted().joined(separator: ","))",
+                        subsystems: .mediaAdapter
                     )
                     continue
                 }
 
                 let params = transceiver.sender.parameters
                 guard params.setDegradationPreference(videoSender.degradationPreference) else {
-                    log.info(
-                        "Update publish quality, degradation preference unchanged",
-                        subsystems: .webRTC
-                    )
                     continue
                 }
 
-                log.info(
-                    "Update publish quality degradation preference for publishOptionID:\(videoSender.publishOptionID) codec:\(VideoCodec(videoSender.codec))",
-                    subsystems: .webRTC
-                )
                 transceiver.sender.parameters = params
+                log.debug(
+                    "Screen share quality applied. sessionId=\(sessionID)"
+                        + " publishOptionId=\(videoSender.publishOptionID)"
+                        + " codec=\(VideoCodec(videoSender.codec))"
+                        + " degradationPreference=\(videoSender.degradationPreference)",
+                    subsystems: .mediaAdapter
+                )
             }
         }
     }

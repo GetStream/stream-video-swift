@@ -300,7 +300,6 @@ final class WebRTCTracesAdapter: WebRTCTracing, @unchecked Sendable {
             .eventPublisher
             .filter { [weak self] _ in self?.isEnabled == true }
             .map { WebRTCTrace(peerType: .publisher, event: $0) }
-            .log(.debug, subsystems: .webRTC) { "Trace tag:\($0.tag) create for id:\($0.id) at timestamp:\($0.timestamp)." }
             .sink { [weak self] in self?.peerConnectionBucket.append($0) }
             .store(in: disposableBag, key: DisposableKey.publisher.rawValue)
     }
@@ -328,7 +327,6 @@ final class WebRTCTracesAdapter: WebRTCTracing, @unchecked Sendable {
             .eventPublisher
             .filter { [weak self] _ in self?.isEnabled == true }
             .map { WebRTCTrace(peerType: .subscriber, event: $0) }
-            .log(.debug, subsystems: .webRTC) { "Trace tag:\($0.tag) create for id:\($0.id) at timestamp:\($0.timestamp)." }
             .sink { [weak self] in self?.peerConnectionBucket.append($0) }
             .store(in: disposableBag, key: DisposableKey.subscriber.rawValue)
     }

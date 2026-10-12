@@ -266,11 +266,6 @@ final class WebRTCStatsAdapter: @unchecked Sendable, WebRTCStatsAdapting {
                 return value
             }
 
-        log.debug(
-            "PeerConnection traces flushed: \(peerConnectionTraces.map { $0.id != nil ? "\($0.id):\($0.tag):\($0.timestamp)" : "\($0.tag):\($0.timestamp)" })",
-            subsystems: .webRTC
-        )
-
         return .init(
             sessionID: sessionID,
             unifiedSessionID: unifiedSessionID,

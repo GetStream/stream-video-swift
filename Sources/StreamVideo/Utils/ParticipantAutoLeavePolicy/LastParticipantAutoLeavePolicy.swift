@@ -109,7 +109,6 @@ public final class LastParticipantAutoLeavePolicy: ParticipantAutoLeavePolicy, @
                 .state
                 .$participantsMap
                 .map(\.count)
-                .log(.debug) { "LastParticipantAutoLeavePolicy received updated participants count:\($0)." }
                 .receive(on: processingQueue)
                 .debounce(for: .seconds(1), scheduler: DispatchQueue.main)
                 .assign(to: \.currentParticipantsCount, onWeak: self)
@@ -118,7 +117,6 @@ public final class LastParticipantAutoLeavePolicy: ParticipantAutoLeavePolicy, @
                 .state
                 .$reconnectionStatus
                 .map { $0 == .connected }
-                .log(.debug) { "LastParticipantAutoLeavePolicy will set isActive:\($0)." }
                 .receive(on: processingQueue)
                 .assign(to: \.isActive, onWeak: self)
         }
@@ -141,14 +139,6 @@ public final class LastParticipantAutoLeavePolicy: ParticipantAutoLeavePolicy, @
             // Conditions to trigger the policy: single participant and previously
             // had more than one participant.
             guard currentCount == 1, maxCount > 1 else {
-                log.debug(
-                    """
-                    Participants updated without triggering \(type(of: self)).
-                    CallCid: \(activeCall.cId)
-                    Participants count: \(currentCount)
-                    Max Participants count: \(maxCount)
-                    """
-                )
                 return
             }
 
@@ -156,27 +146,14 @@ public final class LastParticipantAutoLeavePolicy: ParticipantAutoLeavePolicy, @
             guard
                 activeCall.state.session?.acceptedBy.isEmpty == false
             else {
-                log.debug(
-                    """
-                    Participants updated without triggering \(type(of: self)).
-                    CallCid: \(activeCall.cId)
-                    Participants count: \(currentCount)
-                    Max Participants count: \(maxCount)
-                    Session acceptedBy: \(activeCall.state.session?.acceptedBy)
-                    """
-                )
                 return
             }
 
             // Log the trigger and execute the closure.
             log.debug(
-                """
-                Participants updated triggering \(type(of: self)).
-                CallCid: \(activeCall.cId)
-                Participants count: \(currentCount)
-                Max Participants count: \(maxCount)
-                Session acceptedBy: \(activeCall.state.session?.acceptedBy)
-                """
+                "Auto-leave triggered. cid=\(activeCall.cId) reason=lastParticipant"
+                    + " participantCount=\(currentCount) maxParticipantCount=\(maxCount)"
+                    + " accepted=true"
             )
             onPolicyTriggered?()
         }

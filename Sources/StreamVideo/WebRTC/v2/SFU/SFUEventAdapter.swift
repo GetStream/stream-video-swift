@@ -51,33 +51,21 @@ final class SFUEventAdapter: @unchecked Sendable {
 
         sfuAdapter
             .publisher(eventType: Stream_Video_Sfu_Event_ConnectionQualityChanged.self)
-            .log(.debug, subsystems: .sfu) {
-                "Processing SFU event of type:\($0.name) for userIds:\($0.connectionQualityUpdates.map(\.userID).joined(separator: ","))."
-            }
             .sinkTask(queue: processingQueue) { [weak self] in await self?.handleConnectionQualityChanged($0) }
             .store(in: disposableBag)
 
         sfuAdapter
             .publisher(eventType: Stream_Video_Sfu_Event_AudioLevelChanged.self)
-            .log(.debug, subsystems: .sfu) {
-                "Processing SFU event of type:\($0.name) for userIds:\($0.audioLevels.map(\.userID).joined(separator: ","))."
-            }
             .sinkTask(queue: processingQueue) { [weak self] in await self?.handleAudioLevelChanged($0) }
             .store(in: disposableBag)
 
         sfuAdapter
             .publisher(eventType: Stream_Video_Sfu_Event_ChangePublishQuality.self)
-            .log(.debug, subsystems: .sfu) {
-                "Processing SFU event of type:\($0.name) with \($0.audioSenders.endIndex) audioRenders and \($0.videoSenders.endIndex) videoRenderers."
-            }
             .sinkTask(queue: processingQueue) { [weak self] in await self?.handleChangePublishQuality($0) }
             .store(in: disposableBag)
 
         sfuAdapter
             .publisher(eventType: Stream_Video_Sfu_Event_ParticipantJoined.self)
-            .log(.debug, subsystems: .sfu) {
-                "SFU participant joined. cid=\($0.callCid) sessionId=\($0.participant.sessionID)"
-            }
             .sinkTask(queue: processingQueue) { [weak self] in await self?.handleParticipantJoined($0) }
             .store(in: disposableBag)
 
@@ -91,31 +79,24 @@ final class SFUEventAdapter: @unchecked Sendable {
 
         sfuAdapter
             .publisher(eventType: Stream_Video_Sfu_Event_DominantSpeakerChanged.self)
-            .log(.debug, subsystems: .sfu) { "Processing SFU event of type:\($0.name) for userId:\($0.userID)." }
+            .log(.debug, subsystems: .sfu) {
+                "Dominant speaker changed. sessionId=\($0.sessionID)"
+            }
             .sinkTask(queue: processingQueue) { [weak self] in await self?.handleDominantSpeakerChanged($0) }
             .store(in: disposableBag)
 
         sfuAdapter
             .publisher(eventType: Stream_Video_Sfu_Event_HealthCheckResponse.self)
-            .log(.debug, subsystems: .sfu) {
-                "Processing SFU event of type:\($0.name) with anonymous:\($0.participantCount.anonymous) total:\($0.participantCount.total)."
-            }
             .sinkTask(queue: processingQueue) { [weak self] in await self?.handleHealthCheckResponse($0) }
             .store(in: disposableBag)
 
         sfuAdapter
             .publisher(eventType: Stream_Video_Sfu_Event_TrackPublished.self)
-            .log(.debug, subsystems: .sfu) {
-                "Processing SFU event of type:\($0.name) for userID:\($0.userID) trackType:\($0.type.rawValue)."
-            }
             .sinkTask(queue: processingQueue) { [weak self] in await self?.handleTrackPublished($0) }
             .store(in: disposableBag)
 
         sfuAdapter
             .publisher(eventType: Stream_Video_Sfu_Event_TrackUnpublished.self)
-            .log(.debug, subsystems: .sfu) {
-                "Processing SFU event of type:\($0.name) for userID:\($0.userID) trackType:\($0.type.rawValue)."
-            }
             .sinkTask(queue: processingQueue) { [weak self] in await self?.handleTrackUnpublished($0) }
             .store(in: disposableBag)
 
@@ -244,10 +225,6 @@ final class SFUEventAdapter: @unchecked Sendable {
             return
         }
 
-        log.debug(
-            "Participant insert requested. cid=\(event.callCid) sessionId=\(event.participant.sessionID)",
-            subsystems: .sfu
-        )
         await stateAdapter.enqueue { [participantsThreshold] participants in
             var updatedParticipants = participants
 
@@ -274,7 +251,7 @@ final class SFUEventAdapter: @unchecked Sendable {
 
             updatedParticipants[event.participant.sessionID] = participant
             log.debug(
-                "Participant inserted. sessionId=\(event.participant.sessionID)",
+                "Participant inserted. cid=\(event.callCid) sessionId=\(event.participant.sessionID)",
                 subsystems: .sfu
             )
 
@@ -365,32 +342,23 @@ final class SFUEventAdapter: @unchecked Sendable {
             case .audio:
                 updatedParticipants[sessionID] = participant.withUpdated(audio: true)
                 log.debug(
-                    """
-                    AudioTrack was published
-                    name: \(participant.name)
-                    """,
-                    subsystems: .webRTC
+                    "Track published. sessionId=\(sessionID) trackType=audio",
+                    subsystems: .sfu
                 )
 
             case .video:
                 updatedParticipants[sessionID] = participant.withUpdated(video: true)
                 log.debug(
-                    """
-                    VideoTrack was published
-                    name: \(participant.name)
-                    """,
-                    subsystems: .webRTC
+                    "Track published. sessionId=\(sessionID) trackType=video",
+                    subsystems: .sfu
                 )
 
             case .screenShare:
                 updatedParticipants[sessionID] = participant
                     .withUpdated(screensharing: true)
                 log.debug(
-                    """
-                    ScreenShareTrack was published
-                    name: \(participant.name)
-                    """,
-                    subsystems: .webRTC
+                    "Track published. sessionId=\(sessionID) trackType=screenshare",
+                    subsystems: .sfu
                 )
 
             default:
@@ -425,12 +393,9 @@ final class SFUEventAdapter: @unchecked Sendable {
                     .withUpdated(audio: false)
                     .withUnpausedTrack(.audio)
                 log.debug(
-                    """
-                    AudioTrack was unpublished
-                    name: \(participant.name)
-                    cause: \(event.cause)
-                    """,
-                    subsystems: .webRTC
+                    "Track unpublished. sessionId=\(sessionID) trackType=audio"
+                        + " cause=\(event.cause)",
+                    subsystems: .sfu
                 )
 
             case .video:
@@ -438,12 +403,9 @@ final class SFUEventAdapter: @unchecked Sendable {
                     .withUpdated(video: false)
                     .withUnpausedTrack(.video)
                 log.debug(
-                    """
-                    VideoTrack was unpublished
-                    name: \(participant.name)
-                    cause: \(event.cause)
-                    """,
-                    subsystems: .webRTC
+                    "Track unpublished. sessionId=\(sessionID) trackType=video"
+                        + " cause=\(event.cause)",
+                    subsystems: .sfu
                 )
 
             case .screenShare:
@@ -452,12 +414,9 @@ final class SFUEventAdapter: @unchecked Sendable {
                     .withUpdated(screensharingTrack: nil)
                     .withUnpausedTrack(.screenshare)
                 log.debug(
-                    """
-                    ScreenShareTrack was unpublished
-                    name: \(participant.name)
-                    cause: \(event.cause)
-                    """,
-                    subsystems: .webRTC
+                    "Track unpublished. sessionId=\(sessionID) trackType=screenshare"
+                        + " cause=\(event.cause)",
+                    subsystems: .sfu
                 )
 
             default:

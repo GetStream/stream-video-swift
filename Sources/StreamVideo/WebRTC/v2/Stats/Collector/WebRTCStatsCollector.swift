@@ -80,11 +80,10 @@ final class WebRTCStatsCollector: WebRTCStatsCollecting, @unchecked Sendable {
         collectionCancellable = DefaultTimer
             .publish(every: interval)
             .receive(on: DispatchQueue.global(qos: .utility))
-            .log(.debug, subsystems: .webRTC) { _ in "Will collect stats." }
             .sink { [weak self] _ in self?.collectStats() }
 
         log.debug(
-            "Stats collection is now scheduled with interval:\(interval).",
+            "Stats collection scheduled. intervalSeconds=\(interval)",
             subsystems: .webRTC
         )
     }

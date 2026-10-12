@@ -60,7 +60,7 @@ class StoreLogger<Namespace: StoreNamespace> {
     ///   Defaults to `.other`.
     init(
         logSubsystem: LogSubsystem = .other,
-        logSkipped: Bool = true
+        logSkipped: Bool = false
     ) {
         self.logSubsystem = logSubsystem
         self.logSkipped = logSkipped
@@ -95,8 +95,8 @@ class StoreLogger<Namespace: StoreNamespace> {
     ) {
         defer { statistics.record(action) }
         log.debug(
-            "Store identifier:\(identifier) completed action:\(action) "
-                + "state:\(state).",
+            "Store action completed. store=\(identifier)"
+                + " action=\(String(reflecting: String(describing: action)))",
             subsystems: logSubsystem,
             functionName: function,
             fileName: file,
@@ -129,7 +129,8 @@ class StoreLogger<Namespace: StoreNamespace> {
         guard logSkipped else { return }
 
         log.debug(
-            "Store identifier:\(identifier) skipped action:\(action).",
+            "Store action skipped. store=\(identifier)"
+                + " action=\(String(reflecting: String(describing: action)))",
             subsystems: logSubsystem,
             functionName: function,
             fileName: file,
@@ -159,7 +160,8 @@ class StoreLogger<Namespace: StoreNamespace> {
     ) {
         defer { statistics.record(action) }
         log.error(
-            "Store identifier:\(identifier) failed to apply action:\(action).",
+            "Store action failed. store=\(identifier)"
+                + " action=\(String(reflecting: String(describing: action)))",
             subsystems: logSubsystem,
             error: error,
             functionName: function,
@@ -181,8 +183,8 @@ class StoreLogger<Namespace: StoreNamespace> {
         interval: TimeInterval
     ) {
         log.debug(
-            "Store identifier:\(Namespace.identifier) performs "
-                + "\(numberOfActions) per \(interval) seconds.",
+            "Store activity summary. store=\(Namespace.identifier)"
+                + " actionCount=\(numberOfActions) intervalSeconds=\(interval)",
             subsystems: logSubsystem
         )
     }

@@ -135,11 +135,6 @@ final class WebRTCStatsReporter: WebRTCStatsReporting, @unchecked Sendable {
             return
         }
 
-        log.debug(
-            "Will deliver stats report timestamp:\(input.report.timestamp) on hostname: \(sfuAdapter?.host)",
-            subsystems: .webRTC
-        )
-
         activeDeliveryTask?.cancel()
         // swiftlint:disable discourage_task_init
         activeDeliveryTask = Task { [weak self] in

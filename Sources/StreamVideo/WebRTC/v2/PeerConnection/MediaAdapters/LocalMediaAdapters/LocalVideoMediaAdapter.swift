@@ -342,15 +342,11 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                 }
 
             log.debug(
-                """
-                Local videoTracks updated with:
-                    PublishOptions:
-                        \(self.publishOptions.map { "\($0)" }.joined(separator: "\n"))
-                
-                    TransceiverStorage:
-                        \(transceiverStorage)
-                """,
-                subsystems: .webRTC
+                "Video publish options applied. sessionId=\(sessionID)"
+                    + " options=\(self.publishOptions.map { "\($0.id):\($0.codec)" }.joined(separator: ","))"
+                    +
+                    " tracks=\(transceiverStorage.map { "\($0.key.id):\($0.key.codec):\($0.value.track.trackId)" }.sorted().joined(separator: ","))",
+                subsystems: .mediaAdapter
             )
         }
     }
@@ -412,12 +408,12 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                     let transceiver = transceiverStorage.get(for: key)?.transceiver
                 else {
                     log.debug(
-                        """
-                        We didn't apply publish quality change because transceiver 
-                        not found for publishOptionID:\(videoSender.publishOptionID) and codec:\(VideoCodec(videoSender.codec)). 
-                        Available transceivers: \(transceiverStorage.map { "publishOptionID:\($0.key.id), codec:\($0.key.codec)" })
-                        """,
-                        subsystems: .webRTC
+                        "Video quality change skipped. sessionId=\(sessionID)"
+                            + " publishOptionId=\(videoSender.publishOptionID)"
+                            + " codec=\(VideoCodec(videoSender.codec)) reason=transceiverMissing"
+                            +
+                            " availableOptions=\(transceiverStorage.map { "\($0.key.id):\($0.key.codec)" }.sorted().joined(separator: ","))",
+                        subsystems: .mediaAdapter
                     )
                     continue
                 }
@@ -499,33 +495,19 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                     updatedEncodings.append(encoding)
                 }
 
-                let activeLayers = videoSender
-                    .layers
-                    .filter { $0.active }
-                    .map {
-                        let value = [
-                            "name:\($0.name)",
-                            "scaleResolutionDownBy:\($0.scaleResolutionDownBy)",
-                            "maxBitrate:\($0.maxBitrate)",
-                            "maxFramerate:\($0.maxFramerate)",
-                            "scalabilityMode:\($0.scalabilityMode)"
-                        ]
-                        return "[\(value.joined(separator: ","))]"
-                    }
-
                 guard hasChanges else {
-                    log.info(
-                        "Update publish quality, no change: \(activeLayers.joined(separator: ","))",
-                        subsystems: .webRTC
-                    )
                     return
                 }
-                log.info(
-                    "Update publish quality for publishOptionID:\(videoSender.publishOptionID) codec:\(VideoCodec(videoSender.codec)), enabled rids: \(activeLayers.joined(separator: ","))",
-                    subsystems: .webRTC
-                )
                 params.encodings = updatedEncodings
                 transceiver.sender.parameters = params
+                log.debug(
+                    "Video quality applied. sessionId=\(sessionID)"
+                        + " publishOptionId=\(videoSender.publishOptionID)"
+                        + " codec=\(VideoCodec(videoSender.codec))"
+                        +
+                        " layers=\(videoSender.layers.filter { $0.active }.map { "\($0.name):scale=\($0.scaleResolutionDownBy):bitrateBps=\($0.maxBitrate):fps=\($0.maxFramerate):mode=\($0.scalabilityMode)" }.joined(separator: ","))",
+                    subsystems: .mediaAdapter
+                )
             }
 
             await adaptCaptureDimensions(for: layerSettings)

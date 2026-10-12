@@ -1004,9 +1004,6 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         peerConnection
             .eventPublisher
             .map { WebRTCTrace(peerType: peerType, event: $0) }
-            .log(.debug, subsystems: .webRTC) {
-                "Trace tag:\($0.tag) create for id:\($0.id) at timestamp:\($0.timestamp)."
-            }
             .sink { queuedTraces.append($0) }
             .store(in: pendingPeerConnectionTracesDisposableBag)
     }
@@ -1028,14 +1025,6 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         /// Participant ids may now resolve user ids for tracks that arrived
         /// earlier; attach any decryptors that were waiting.
         flushPendingDecryptors()
-
-        /// Logs the completion of the participant operation.
-        log.debug(
-            "Participant operation completed. Participants count:\(updated.count).",
-            functionName: functionName,
-            fileName: fileName,
-            lineNumber: lineNumber
-        )
     }
 
     /// Assigns media tracks to participants based on their media type.
@@ -1064,6 +1053,20 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
             }
 
             partialResult[entry.key] = newParticipant
+
+            if
+                entry.value.audioTrack !== newParticipant.audioTrack
+                || entry.value.track !== newParticipant.track
+                || entry.value.screenshareTrack !== newParticipant.screenshareTrack {
+                log.debug(
+                    "Participant tracks changed. sessionId=\(newParticipant.sessionId)"
+                        + " lookupId=\(newParticipant.trackLookupPrefix ?? "none")"
+                        + " audioTrackId=\(newParticipant.audioTrack?.trackId ?? "none")"
+                        + " videoTrackId=\(newParticipant.track?.trackId ?? "none")"
+                        + " screenShareTrackId=\(newParticipant.screenshareTrack?.trackId ?? "none")",
+                    subsystems: .webRTC
+                )
+            }
         }
     }
 
@@ -1228,44 +1231,10 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
 
     // MARK: Participant Operations
 
-    /// Updates the current participants and logs those with video tracks.
+    /// Updates the current participants.
     /// - Parameter participants: The storage containing participant information.
     private func set(participants: ParticipantsStorage) {
-        /// Updates the local participants storage.
         self.participants = participants
-
-        /// Filters participants who have audio tracks.
-        let participantsWithAudioTracks = participants
-            .filter { $0.value.audioTrack != nil }
-            .map(\.value.name)
-            .sorted()
-            .joined(separator: ",")
-
-        /// Filters participants who have video tracks.
-        let participantsWithVideoTracks = participants
-            .filter { $0.value.track != nil }
-            .map(\.value.name)
-            .sorted()
-            .joined(separator: ",")
-
-        var logMessage = "\(participants.count) total participants."
-
-        switch (participantsWithAudioTracks.isEmpty, participantsWithVideoTracks.isEmpty) {
-        case (true, true):
-            logMessage += " No participant has video or audio tracks."
-
-        case (true, false):
-            logMessage += " \(participantsWithVideoTracks) have video track assigned."
-
-        case (false, true):
-            logMessage += " \(participantsWithAudioTracks) have audio track assigned."
-
-        case (false, false):
-            logMessage += " \(participantsWithAudioTracks) have audio track assigned."
-            logMessage += " \(participantsWithVideoTracks) have video track assigned."
-        }
-
-        log.debug(logMessage, subsystems: .webRTC)
     }
 
     func configureAudioSession(source: JoinSource?) async throws {

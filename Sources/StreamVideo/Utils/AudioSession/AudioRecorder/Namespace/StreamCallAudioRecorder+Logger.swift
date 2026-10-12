@@ -57,7 +57,8 @@ extension StreamCallAudioRecorder.Namespace {
                 metersUpdated = []
 
                 log.debug(
-                    "Store identifier:\(identifier) completed action:\(action) state:\(state). Average:\(average)db",
+                    "Audio meter summary. store=\(identifier)"
+                        + " sampleCount=\(metersUpdatedLimit) average=\(average)",
                     subsystems: logSubsystem,
                     functionName: function,
                     fileName: file,
