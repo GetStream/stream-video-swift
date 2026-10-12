@@ -40,7 +40,7 @@ public class CallEventsHandler {
             )
             return .rejected(callEventInfo)
         case let .typeCallRingEvent(ringEvent):
-            log.debug("Received ring event \(ringEvent)")
+            log.debug("Call ring received. cid=\(String(reflecting: ringEvent.callCid))")
             let cId = ringEvent.callCid
             let id = cId.components(separatedBy: ":").last ?? cId
             let caller = ringEvent.call.createdBy.toUser

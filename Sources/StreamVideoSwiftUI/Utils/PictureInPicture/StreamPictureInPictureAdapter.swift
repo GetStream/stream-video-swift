@@ -36,7 +36,7 @@ public final class StreamPictureInPictureAdapter: @unchecked Sendable {
             guard
                 #available(iOS 15.0, *)
             else {
-                log.warning("Not supported.", subsystems: .pictureInPicture)
+                log.debug("Picture-in-Picture unavailable. reason=unsupportedOS", subsystems: .pictureInPicture)
                 return
             }
 
@@ -55,7 +55,7 @@ public final class StreamPictureInPictureAdapter: @unchecked Sendable {
             store
                 .publisher(for: \.content)
                 .removeDuplicates()
-                .log(.debug, subsystems: .pictureInPicture) { "Content updated: \($0)." }
+                .log(.debug, subsystems: .pictureInPicture) { "Picture-in-Picture content changed. \($0)" }
                 .sink { _ in }
                 .store(in: disposableBag)
 
@@ -63,11 +63,7 @@ public final class StreamPictureInPictureAdapter: @unchecked Sendable {
                 .CombineLatest(store.publisher(for: \.call), store.publisher(for: \.sourceView))
                 .filter { $0 == nil && $1 != nil }
                 .log(.warning, subsystems: .pictureInPicture) { _, _ in
-                    """
-                    PictureInPicture adapter has received a sourceView but the required
-                    call is nil. Please ensure that you provide a call instance in order
-                    to activate correctly Picture-in-Picture.
-                    """
+                    "Picture-in-Picture setup incomplete. reason=missingCall hasSourceView=true"
                 }
                 .sink { _ in }
                 .store(in: disposableBag)
@@ -76,7 +72,7 @@ public final class StreamPictureInPictureAdapter: @unchecked Sendable {
                 .publisher(for: \.sourceView)
                 .removeDuplicates()
                 .log(.debug, subsystems: .pictureInPicture) {
-                    "SourceView updated frame:\($0?.frame ?? .zero) hasWindow:\($0?.window != nil)."
+                    "Picture-in-Picture source view changed. frame=\(String(reflecting: String(describing: $0?.frame ?? .zero))) hasWindow=\($0?.window != nil)"
                 }
                 .sink { _ in }
                 .store(in: disposableBag)

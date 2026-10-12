@@ -39,7 +39,7 @@ public class VideoRenderer: RTCVideoRenderingView, @unchecked Sendable {
     private(set) var preferredFramesPerSecond: Int = UIScreen.main.maximumFramesPerSecond {
         didSet {
             metalView?.preferredFramesPerSecond = preferredFramesPerSecond
-            log.debug("🔄 preferredFramesPerSecond was updated to \(preferredFramesPerSecond).")
+            log.debug("Renderer frame rate set. rendererId=\(identifier) fps=\(preferredFramesPerSecond)", subsystems: .webRTC)
         }
     }
 
@@ -82,7 +82,7 @@ public class VideoRenderer: RTCVideoRenderingView, @unchecked Sendable {
         self.maxInFlightFrames = videoRenderingOptions.maxInFlightFrames
 
         log.debug(
-            "Active videoRenderingOptions: \(videoRenderingOptions)",
+            "Renderer configured. rendererId=\(identifier) backend=\(String(reflecting: String(describing: videoRenderingOptions.backend))) maxInFlightFrames=\(videoRenderingOptions.maxInFlightFrames)",
             subsystems: .webRTC
         )
     }
@@ -98,7 +98,7 @@ public class VideoRenderer: RTCVideoRenderingView, @unchecked Sendable {
     /// worker thread.
     deinit {
         cancellable?.cancel()
-        log.debug("\(type(of: self)):\(identifier) deallocating", subsystems: .other)
+        log.debug("Renderer released. rendererId=\(identifier)", subsystems: .webRTC)
     }
 
     /// Overrides the hash value to return the identifier's hash value.
@@ -126,7 +126,7 @@ public class VideoRenderer: RTCVideoRenderingView, @unchecked Sendable {
             self.track = track
             track.add(self)
             log.debug(
-                "Renderer attached. rendererId=\(identifier) trackId=\(track.trackId)",
+                "Renderer attached. rendererId=\(identifier) trackId=\(String(reflecting: track.trackId))",
                 subsystems: .webRTC
             )
         }
@@ -143,7 +143,7 @@ public class VideoRenderer: RTCVideoRenderingView, @unchecked Sendable {
             track?.remove(self)
             if let track {
                 log.debug(
-                    "Renderer detached. rendererId=\(identifier) trackId=\(track.trackId)",
+                    "Renderer detached. rendererId=\(identifier) trackId=\(String(reflecting: track.trackId))",
                     subsystems: .webRTC
                 )
             }
@@ -203,7 +203,7 @@ extension VideoRenderer {
                 if let viewSize, prev != viewSize {
                     log.debug(
                         "Renderer size changed. rendererId=\(identifier)"
-                            + " trackId=\(track.trackId) sessionId=\(participant.sessionId)"
+                            + " trackId=\(String(reflecting: track.trackId)) participantSessionId=\(String(reflecting: participant.sessionId))"
                             + " width=\(viewSize.width) height=\(viewSize.height)",
                         subsystems: .webRTC
                     )

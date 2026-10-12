@@ -74,12 +74,7 @@ private struct CallEndedViewModifier<Subview: View>: ViewModifier {
             }
             .onReceive(viewModel.$activeCall.removeDuplicates { $0?.cId == $1?.cId }) { call in
                 log.debug(
-                    """
-                    Call id:\(call?.callId ?? "nil") has ended.
-                    LastCall id:\(viewModel.lastCall?.cId ?? "nil")
-                    isPresentingSubview: \(viewModel.isPresentingSubview)
-                    maxParticipantsCount:\(viewModel.maxParticipantsCount)
-                    """
+                    "Call ended presentation evaluated. activeCid=\(String(reflecting: call?.cId ?? "none")) lastCid=\(String(reflecting: viewModel.lastCall?.cId ?? "none")) isPresenting=\(viewModel.isPresentingSubview) maxParticipantsCount=\(viewModel.maxParticipantsCount)"
                 )
 
                 switch (call, viewModel.lastCall, viewModel.isPresentingSubview) {

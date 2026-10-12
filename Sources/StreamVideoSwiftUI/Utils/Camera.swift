@@ -72,7 +72,10 @@ class Camera: NSObject, @unchecked Sendable {
     private var captureDevice: AVCaptureDevice? {
         didSet {
             guard let captureDevice = captureDevice else { return }
-            log.debug("Using capture device: \(captureDevice.localizedName)")
+            log.debug(
+                "Camera preview device selected. deviceId=\(String(reflecting: captureDevice.uniqueID))",
+                subsystems: .videoCapturer
+            )
             sessionQueue.async {
                 self.updateSessionForCaptureDevice(captureDevice)
             }
@@ -205,7 +208,7 @@ class Camera: NSObject, @unchecked Sendable {
             return try AVCaptureDeviceInput(device: validDevice)
         } catch {
             log.error(
-                "Camera input creation failed. deviceId=\(validDevice.uniqueID)",
+                "Camera input creation failed. deviceId=\(String(reflecting: validDevice.uniqueID))",
                 subsystems: .videoCapturer,
                 error: error
             )

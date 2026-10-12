@@ -108,7 +108,7 @@ open class CallViewModel: ObservableObject {
                             try await call?.speaker.enableSpeakerPhone()
                         } catch {
                             log.error(
-                                "Speaker enable failed. cid=\(call?.cId ?? "none")",
+                                "Speaker enable failed. cid=\(String(reflecting: call?.cId ?? "none"))",
                                 subsystems: .audioSession,
                                 error: error
                             )
@@ -363,7 +363,7 @@ open class CallViewModel: ObservableObject {
                 try await call.camera.toggle()
                 localCallSettingsChange = true
             } catch {
-                log.error("Error toggling camera", error: error)
+                log.error("Camera toggle failed. cid=\(String(reflecting: call.cId))", error: error)
             }
         }
     }
@@ -380,7 +380,7 @@ open class CallViewModel: ObservableObject {
                 try await call.microphone.toggle()
                 localCallSettingsChange = true
             } catch {
-                log.error("Error toggling microphone", error: error)
+                log.error("Microphone toggle failed. cid=\(String(reflecting: call.cId))", error: error)
             }
         }
     }
@@ -397,7 +397,7 @@ open class CallViewModel: ObservableObject {
                 try await call.camera.flip()
                 localCallSettingsChange = true
             } catch {
-                log.error("Error toggling camera position", error: error)
+                log.error("Camera flip failed. cid=\(String(reflecting: call.cId))", error: error)
             }
         }
     }
@@ -418,7 +418,7 @@ open class CallViewModel: ObservableObject {
                 }
                 localCallSettingsChange = true
             } catch {
-                log.error("Error toggling audio output", error: error)
+                log.error("Audio output toggle failed. cid=\(String(reflecting: call.cId))", error: error)
             }
         }
     }
@@ -435,7 +435,7 @@ open class CallViewModel: ObservableObject {
                 try await call.speaker.toggleSpeakerPhone()
                 localCallSettingsChange = true
             } catch {
-                log.error("Error toggling speaker", error: error)
+                log.error("Speaker toggle failed. cid=\(String(reflecting: call.cId))", error: error)
             }
         }
     }
@@ -611,12 +611,12 @@ open class CallViewModel: ObservableObject {
         enteringCallTask = Task(disposableBag: disposableBag, priority: .userInitiated) { [weak self] in
             guard let self else { return }
             do {
-                log.debug("Starting call")
                 let call = call ?? streamVideo.call(
                     callType: callType,
                     callId: callId,
                     callSettings: callSettings
                 )
+                log.debug("Call join and ring started. cid=\(String(reflecting: call.cId))")
                 var settingsRequest: CallSettingsRequest?
                 var limits: LimitsSettingsRequest?
                 if maxDuration != nil || maxParticipants != nil {
@@ -658,7 +658,10 @@ open class CallViewModel: ObservableObject {
                 hasAcceptedCall = false
             } catch {
                 hasAcceptedCall = false
-                log.error("Error starting a call", error: error)
+                log.error(
+                    "Call join and ring failed. cid=\(String(reflecting: call?.cId ?? callCid(from: callId, callType: callType)))",
+                    error: error
+                )
                 self.error = error
                 setCallingState(.idle)
                 audioRecorder.stopRecording()
@@ -687,7 +690,10 @@ open class CallViewModel: ObservableObject {
                     let info = try await call.get()
                     self.callSettings = .init(info.call.settings)
                 } catch {
-                    log.error(error)
+                    log.error(
+                        "Lobby settings load failed. cid=\(String(reflecting: callCid(from: callId, callType: callType)))",
+                        error: error
+                    )
                 }
             }
         }
@@ -745,12 +751,7 @@ open class CallViewModel: ObservableObject {
                 .rejectionReasonProvider
                 .reason(for: call.cId, ringTimeout: false)
             log.debug(
-                """
-                Rejecting with reason: \(rejectionReason ?? "nil")
-                call:\(call.callId)
-                callType: \(call.callType)
-                ringTimeout: \(false)
-                """
+                "Call rejection requested. cid=\(String(reflecting: call.cId)) reason=\(String(reflecting: rejectionReason ?? "none")) ringTimeout=false"
             )
             _ = try? await call.reject(reason: rejectionReason)
             setCallingState(.idle)
@@ -775,7 +776,6 @@ open class CallViewModel: ObservableObject {
     public func updateTrackSize(_ trackSize: CGSize, for participant: CallParticipant) {
         Task(disposableBag: disposableBag, priority: .userInitiated) { [weak self] in
             guard let self else { return }
-            log.debug("Updating track size for participant \(participant.name) to \(trackSize)")
             await call?.updateTrackSize(trackSize, for: participant)
         }
     }
@@ -792,7 +792,10 @@ open class CallViewModel: ObservableObject {
                 await disablePictureInPictureIfRequired(type)
                 try await call?.startScreensharing(type: type, includeAudio: includeAudio)
             } catch {
-                log.error(error)
+                log.error(
+                    "Screen sharing start failed. cid=\(String(reflecting: call?.cId ?? "none")) type=\(type) includeAudio=\(includeAudio)",
+                    error: error
+                )
             }
         }
     }
@@ -803,7 +806,7 @@ open class CallViewModel: ObservableObject {
             do {
                 try await call?.stopScreensharing()
             } catch {
-                log.error(error)
+                log.error("Screen sharing stop failed. cid=\(String(reflecting: call?.cId ?? "none"))", error: error)
             }
         }
     }
@@ -836,7 +839,7 @@ open class CallViewModel: ObservableObject {
         line: UInt = #line
     ) {
         log.debug(
-            "Will setActiveCall to cID:\(call?.cId ?? "-")",
+            "Active call update requested. cid=\(String(reflecting: call?.cId ?? "none"))",
             functionName: function,
             fileName: file,
             lineNumber: line
@@ -888,13 +891,13 @@ open class CallViewModel: ObservableObject {
         guard callingState != newValue else {
             return
         }
-        log.debug(
-            "CallingState will be updated \(callingState) → \(newValue)",
-            functionName: function,
-            fileName: file,
-            lineNumber: line
-        )
         guard !Thread.isMainThread else {
+            log.debug(
+                "Call UI state changed. from=\(String(reflecting: callingState.description)) to=\(String(reflecting: newValue.description))",
+                functionName: function,
+                fileName: file,
+                lineNumber: line
+            )
             callingState = newValue
             return
         }
@@ -910,8 +913,10 @@ open class CallViewModel: ObservableObject {
 
     /// Leaves the current call.
     private func leaveCall(reason: String?) {
-        log.debug("Leaving call")
         let callToLeave = pendingCall ?? call
+        log.debug(
+            "Call leave requested. cid=\(String(reflecting: callToLeave?.cId ?? "none")) reason=\(String(reflecting: reason ?? "none"))"
+        )
         enteringCallTask?.cancel()
         enteringCallTask = nil
         participantUpdates?.cancel()
@@ -978,7 +983,7 @@ open class CallViewModel: ObservableObject {
         enteringCallTask = Task(disposableBag: disposableBag, priority: .userInitiated) { [weak self] in
             guard let self else { return }
             do {
-                log.debug("Starting call")
+                log.debug("Call join started. cid=\(String(reflecting: resolvedCall.cId)) ring=\(ring)")
                 var settingsRequest: CallSettingsRequest?
                 var limits: LimitsSettingsRequest?
                 if maxDuration != nil || maxParticipants != nil {
@@ -1021,12 +1026,16 @@ open class CallViewModel: ObservableObject {
                     return
                 }
                 if resumesRingingOnFailure, resumeRinging(resolvedCall) {
-                    log.error("Failed to join an accepted call", error: error)
+                    log.log(
+                        .warning,
+                        message: "Accepted call join failed. cid=\(String(reflecting: resolvedCall.cId)) recovery=resumeRinging",
+                        error: error
+                    )
                     enteringCallTask = nil
                     pendingCall = nil
                     return
                 }
-                log.error("Error starting a call", error: error)
+                log.error("Call join failed. cid=\(String(reflecting: resolvedCall.cId))", error: error)
                 self.error = error
                 setCallingState(.idle)
                 audioRecorder.stopRecording()
@@ -1044,7 +1053,7 @@ open class CallViewModel: ObservableObject {
             return
         }
         setActiveCall(call)
-        log.debug("Started call")
+        log.debug("Joined call saved. cid=\(String(reflecting: call.cId))")
     }
 
     private func handleRingingEvents() {
@@ -1063,7 +1072,7 @@ open class CallViewModel: ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 guard let self = self else { return }
-                log.debug("Detected ringing timeout, hanging up...")
+                log.debug("Call ringing timed out. cid=\(String(reflecting: call?.cId ?? "none")) timeoutSeconds=\(timeout)")
                 handleCallHangUp(ringTimeout: true)
             }
     }
@@ -1110,17 +1119,17 @@ open class CallViewModel: ObservableObject {
                     .rejectionReasonProvider
                     .reason(for: call.cId, ringTimeout: ringTimeout)
                 log.debug(
-                    "Call rejection requested. cid=\(call.cId) reason=\(String(reflecting: rejectionReason ?? "none")) ringTimeout=\(ringTimeout)"
+                    "Call rejection requested. cid=\(String(reflecting: call.cId)) reason=\(String(reflecting: rejectionReason ?? "none")) ringTimeout=\(ringTimeout)"
                 )
                 try await call.reject(reason: rejectionReason)
             } catch is OutgoingRingCreationCoordinator.CallNotCreatedYet {
                 // Expected during the race: the create path owns the cancel and
                 // will issue it as soon as create completes, so we only log.
                 log.debug(
-                    "Call rejection deferred. cid=\(call.cId) reason=creationPending"
+                    "Call rejection deferred. cid=\(String(reflecting: call.cId)) reason=creationPending"
                 )
             } catch {
-                log.error("Call rejection failed. cid=\(call.cId)", error: error)
+                log.error("Call rejection failed. cid=\(String(reflecting: call.cId))", error: error)
             }
 
             leaveCall(reason: reason)
@@ -1170,7 +1179,6 @@ open class CallViewModel: ObservableObject {
                     let participantEvent = callEventsHandler.checkForParticipantEvents(from: event),
                     participantEvent.callCid == call?.cId {
                     guard participants.count < 25 else {
-                        log.debug("Skipping participant events for big calls")
                         return
                     }
 
@@ -1202,7 +1210,7 @@ open class CallViewModel: ObservableObject {
             Task {
                 log
                     .debug(
-                        "Will reject call as isEnteringCall:\(enteringCallTask != nil) isUserIDSameAsLoggedInUser:\(event.user?.id == streamVideo.user.id)"
+                        "Call rejection requested. cid=\(String(reflecting: event.callCid)) reason=acceptedElsewhere"
                     )
                 _ = try? await streamVideo
                     .call(callType: incomingCall.type, callId: incomingCall.id)
@@ -1335,15 +1343,11 @@ open class CallViewModel: ObservableObject {
             .filter { $0.hasVideo && $0.track?.isEnabled == false }
 
         guard !tracksToBeActivated.isEmpty else {
-            log.debug("\(type(of: self)) application lifecycle observer found no tracks to activate.")
             return
         }
 
         log.debug(
-            """
-            \(tracksToBeActivated.count) tracks have been deactivate while in background 
-            and now the app is active need to be activated again.
-            """
+            "Video track activation requested. cid=\(String(reflecting: call.cId)) count=\(tracksToBeActivated.count) reason=foreground"
         )
 
         tracksToBeActivated.forEach { $0.track?.isEnabled = true }
@@ -1376,8 +1380,8 @@ open class CallViewModel: ObservableObject {
             isPictureInPictureEnabled = false
         }.result
 
-        log.warning(
-            "Picture in Picture disabled. reason=inAppScreenSharing",
+        log.info(
+            "Picture-in-Picture disabled. reason=inAppScreenSharing",
             subsystems: .pictureInPicture
         )
     }

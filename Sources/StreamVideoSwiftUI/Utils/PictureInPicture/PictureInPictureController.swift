@@ -73,8 +73,8 @@ final class PictureInPictureController: @unchecked Sendable {
         }
     ) {
         guard isPictureInPictureSupported else {
-            log.warning(
-                "Picture-in-Picture isn't supported on this device.",
+            log.debug(
+                "Picture-in-Picture unavailable. reason=unsupportedDevice",
                 subsystems: .pictureInPicture
             )
             return nil
@@ -104,8 +104,7 @@ final class PictureInPictureController: @unchecked Sendable {
                     return nil
                 }
             }
-            .log(.error, subsystems: .pictureInPicture) { "Picture-in-Picture failed to start: \($0)." }
-            .sink { _ in }
+            .sink { log.error("Picture-in-Picture start failed.", subsystems: .pictureInPicture, error: $0) }
             .store(in: disposableBag)
     }
 
@@ -156,7 +155,7 @@ final class PictureInPictureController: @unchecked Sendable {
         }
 
         log.debug(
-            "SourceView updated and contentViewController preferredContentSize:\(contentViewController.preferredContentSize)",
+            "Picture-in-Picture source updated. cid=\(String(reflecting: call?.cId ?? "none")) width=\(contentViewController.preferredContentSize.width) height=\(contentViewController.preferredContentSize.height)",
             subsystems: .pictureInPicture
         )
     }
@@ -177,25 +176,25 @@ final class PictureInPictureController: @unchecked Sendable {
             pictureInPictureController
                 .publisher(for: \.isPictureInPicturePossible)
                 .removeDuplicates()
-                .log(.debug, subsystems: .pictureInPicture) { "isPossible:\($0)" }
+                .log(.debug, subsystems: .pictureInPicture) { "Picture-in-Picture availability changed. isPossible=\($0)" }
                 .sink { _ in }
                 .store(in: disposableBag, key: DisposableKey.isPossible.rawValue)
 
             pictureInPictureController
                 .publisher(for: \.isPictureInPictureActive)
                 .removeDuplicates()
-                .log(.debug, subsystems: .pictureInPicture) { "isActive:\($0)" }
+                .log(.debug, subsystems: .pictureInPicture) { "Picture-in-Picture activity changed. isActive=\($0)" }
                 .sink { [weak self] in self?.store.dispatch(.setActive($0)) }
                 .store(in: disposableBag, key: DisposableKey.isActive.rawValue)
 
             enforcedStopAdapter = .init(pictureInPictureController)
 
-            log.debug("Controller has been configured.", subsystems: .pictureInPicture)
+            log.debug("Picture-in-Picture controller configured.", subsystems: .pictureInPicture)
         } else {
             enforcedStopAdapter = nil
             disposableBag.remove(DisposableKey.isPossible.rawValue)
             disposableBag.remove(DisposableKey.isActive.rawValue)
-            log.debug("Controller has been released.", subsystems: .pictureInPicture)
+            log.debug("Picture-in-Picture controller released.", subsystems: .pictureInPicture)
         }
     }
 }

@@ -46,7 +46,9 @@ final class PictureInPictureVideoCallViewController: AVPictureInPictureVideoCall
             .removeDuplicates()
             .filter { $0 != .zero }
             .receive(on: DispatchQueue.main)
-            .log(.debug, subsystems: .pictureInPicture) { "PreferredContent size will be updated to \($0)." }
+            .log(.debug, subsystems: .pictureInPicture) {
+                "Picture-in-Picture content size changed. width=\($0.width) height=\($0.height)"
+            }
             .assign(to: \.preferredContentSize, onWeak: self)
             .store(in: disposableBag)
     }

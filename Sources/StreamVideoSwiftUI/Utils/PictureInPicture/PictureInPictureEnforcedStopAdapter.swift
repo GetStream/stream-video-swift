@@ -64,10 +64,10 @@ final class PictureInPictureEnforcedStopAdapter {
     ) {
         switch (applicationState, isPictureInPictureActive) {
         case (.foreground, true):
+            log.debug("Picture-in-Picture stop enforcement started. reason=foreground", subsystems: .pictureInPicture)
             DefaultTimer
                 .publish(every: screenProperties.refreshRate)
                 .filter { [weak self] _ in self?.applicationStateAdapter.state == .foreground }
-                .log(.debug) { _ in "Will attempt to forcefully stop Picture-in-Picture." }
                 .receive(on: DispatchQueue.main)
                 .sink { [weak pictureInPictureController] _ in pictureInPictureController?.stopPictureInPicture() }
                 .store(in: disposableBag, key: DisposableKey.stopEnforceOperation.rawValue)

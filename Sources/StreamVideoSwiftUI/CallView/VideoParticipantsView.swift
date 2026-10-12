@@ -242,7 +242,10 @@ public struct VideoCallParticipantOptionsModifier: ViewModifier {
                     sessionId: participant.sessionId
                 )
             } catch {
-                log.error(error)
+                log.error(
+                    "Participant unpin failed. cid=\(String(reflecting: call?.cId ?? "none")) participantSessionId=\(String(reflecting: participant.sessionId)) scope=local",
+                    error: error
+                )
             }
         }
     }
@@ -254,7 +257,10 @@ public struct VideoCallParticipantOptionsModifier: ViewModifier {
                     sessionId: participant.sessionId
                 )
             } catch {
-                log.error(error)
+                log.error(
+                    "Participant pin failed. cid=\(String(reflecting: call?.cId ?? "none")) participantSessionId=\(String(reflecting: participant.sessionId)) scope=local",
+                    error: error
+                )
             }
         }
     }
@@ -267,7 +273,10 @@ public struct VideoCallParticipantOptionsModifier: ViewModifier {
                     sessionId: participant.id
                 )
             } catch {
-                log.error(error)
+                log.error(
+                    "Participant unpin failed. cid=\(String(reflecting: call?.cId ?? "none")) participantSessionId=\(String(reflecting: participant.id)) scope=everyone",
+                    error: error
+                )
             }
         }
     }
@@ -280,7 +289,10 @@ public struct VideoCallParticipantOptionsModifier: ViewModifier {
                     sessionId: participant.id
                 )
             } catch {
-                log.error(error)
+                log.error(
+                    "Participant pin failed. cid=\(String(reflecting: call?.cId ?? "none")) participantSessionId=\(String(reflecting: participant.id)) scope=everyone",
+                    error: error
+                )
             }
         }
     }
@@ -290,7 +302,10 @@ public struct VideoCallParticipantOptionsModifier: ViewModifier {
             do {
                 _ = try await call?.kickUser(userId: participant.userId)
             } catch {
-                log.error(error)
+                log.error(
+                    "Participant removal failed. cid=\(String(reflecting: call?.cId ?? "none")) userId=\(String(reflecting: participant.userId))",
+                    error: error
+                )
             }
         }
     }

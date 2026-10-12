@@ -58,7 +58,7 @@ final class PictureInPictureTrackStateAdapter: @unchecked Sendable {
         guard isActive else {
             activeTracksBeforePiP.forEach { $0.isEnabled = true }
             activeTracksBeforePiP = []
-            log.debug("Track activeState observation is now inactive.", subsystems: .pictureInPicture)
+            log.debug("Picture-in-Picture track observation stopped.", subsystems: .pictureInPicture)
             return
         }
 
@@ -81,7 +81,7 @@ final class PictureInPictureTrackStateAdapter: @unchecked Sendable {
             .sink { [weak self] _ in self?.checkTracksState() }
             .store(in: disposableBag, key: DisposableKey.timePublisher.rawValue)
 
-        log.debug("Track activeState observation is now active.", subsystems: .pictureInPicture)
+        log.debug("Picture-in-Picture track observation started.", subsystems: .pictureInPicture)
     }
 
     /// Updates track state when Picture-in-Picture content changes.
@@ -126,13 +126,13 @@ final class PictureInPictureTrackStateAdapter: @unchecked Sendable {
         case let .participant(_, participant, track) where track != nil:
             track?.isEnabled = false
             log.debug(
-                "Track activeState observation has disabled the track:\(track?.trackId ?? "-") for participant name:\(participant.name).",
+                "Picture-in-Picture track disabled. source=camera participantSessionId=\(String(reflecting: participant.sessionId)) trackId=\(String(reflecting: track?.trackId ?? "none"))",
                 subsystems: .pictureInPicture
             )
         case let .screenSharing(_, participant, track):
             track.isEnabled = false
             log.debug(
-                "Track activeState observation has disabled the screenSharing track:\(track.trackId) for participant name:\(participant.name).",
+                "Picture-in-Picture track disabled. source=screenSharing participantSessionId=\(String(reflecting: participant.sessionId)) trackId=\(String(reflecting: track.trackId))",
                 subsystems: .pictureInPicture
             )
         default:
@@ -150,13 +150,13 @@ final class PictureInPictureTrackStateAdapter: @unchecked Sendable {
         case let .participant(_, participant, track) where track != nil && track?.isEnabled == false:
             track?.isEnabled = true
             log.debug(
-                "Track activeState observation has enabled the track:\(track?.trackId ?? "-") for participant name:\(participant.name).",
+                "Picture-in-Picture track enabled. source=camera participantSessionId=\(String(reflecting: participant.sessionId)) trackId=\(String(reflecting: track?.trackId ?? "none"))",
                 subsystems: .pictureInPicture
             )
         case let .screenSharing(_, participant, track) where track.isEnabled == false:
             track.isEnabled = true
             log.debug(
-                "Track activeState observation has enabled the screenSharing track:\(track.trackId) for participant name:\(participant.name).",
+                "Picture-in-Picture track enabled. source=screenSharing participantSessionId=\(String(reflecting: participant.sessionId)) trackId=\(String(reflecting: track.trackId))",
                 subsystems: .pictureInPicture
             )
         default:

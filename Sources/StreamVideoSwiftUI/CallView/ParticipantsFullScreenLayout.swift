@@ -47,7 +47,6 @@ public struct ParticipantsFullScreenLayout<Factory: ViewFactory>: View {
             )
         )
         .onAppear {
-            log.debug("Participant \(participant.name) is visible")
             onChangeTrackVisibility(participant, true)
         }
         .modifier(
@@ -72,7 +71,6 @@ struct ParticipantChangeModifier: ViewModifier {
         if #available(iOS 14, *) {
             content
                 .onChange(of: participant) { newValue in
-                    log.debug("Participant \(newValue.name) is visible")
                     onChangeTrackVisibility(newValue, true)
                 }
         } else {

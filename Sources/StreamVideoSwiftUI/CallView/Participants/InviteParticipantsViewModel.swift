@@ -49,13 +49,13 @@ class InviteParticipantsViewModel: ObservableObject {
         Task {
             do {
                 let result = try await call.addMembers(ids: selectedUsers.map(\.id))
-                log.debug("added call members \(result)")
+                log.debug("Call members added. cid=\(String(reflecting: call.cId)) count=\(result.members.count)")
                 withAnimation {
                     allUsers = allUsers.filter { !selectedUsers.contains($0) }
                     selectedUsers = []
                 }
             } catch {
-                log.error(error.localizedDescription, error: error)
+                log.error("Call member invitation failed. cid=\(String(reflecting: call.cId))", error: error)
             }
         }
     }
@@ -106,7 +106,7 @@ class InviteParticipantsViewModel: ObservableObject {
                 offset = allUsers.count
                 loading = false
             } catch {
-                log.error(error)
+                log.error("Invite user list load failed. offset=\(offset) limit=\(limit)", error: error)
             }
         }
     }

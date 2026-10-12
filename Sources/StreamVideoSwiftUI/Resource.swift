@@ -53,7 +53,7 @@ public struct Resource: ExpressibleByStringLiteral {
     /// - Parameter value: The string literal to parse.
     public init(stringLiteral value: StringLiteralType) {
         guard !value.hasPrefix(".") else {
-            log.warning("Resource name cannot start with `.`")
+            log.warning("Resource name rejected. reason=leadingDot")
             name = ""
             return
         }
@@ -61,7 +61,7 @@ public struct Resource: ExpressibleByStringLiteral {
         let components = value.split(separator: ".").map { String($0) }
 
         guard !components.isEmpty else {
-            log.warning("Resource name cannot be empty.")
+            log.warning("Resource name rejected. reason=empty")
             name = ""
             return
         }

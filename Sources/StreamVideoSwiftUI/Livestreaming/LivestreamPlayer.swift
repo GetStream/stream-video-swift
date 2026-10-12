@@ -210,7 +210,7 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
                 }
                 muted.toggle()
             } catch {
-                log.error(error)
+                log.error("Livestream audio output toggle failed. cid=\(String(reflecting: call.cId))", error: error)
             }
         }
     }
@@ -222,7 +222,7 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
                 try await call.speaker.disableAudioOutput()
                 mutedOnJoin = true
             } catch {
-                log.error(error)
+                log.error("Livestream mute failed. cid=\(String(reflecting: call.cId))", error: error)
             }
         }
     }
@@ -283,7 +283,7 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
                             do {
                                 recordings = try await call.listRecordings()
                             } catch {
-                                log.error("Error fetching recordings: \(error)")
+                                log.error("Livestream recordings load failed. cid=\(String(reflecting: call.cId))", error: error)
                                 recordings = []
                             }
                         }
@@ -406,7 +406,7 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
                 livestreamState = call.state.backstage ? .backstage : .live
             } catch {
                 livestreamState = .error
-                log.error("Livestream join failed. cid=\(call.cId)", error: error)
+                log.error("Livestream join failed. cid=\(String(reflecting: call.cId))", error: error)
             }
         }
     }

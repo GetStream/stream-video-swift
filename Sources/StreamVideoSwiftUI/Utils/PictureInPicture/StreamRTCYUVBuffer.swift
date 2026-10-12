@@ -104,18 +104,18 @@ final class StreamRTCYUVBuffer: NSObject, RTCVideoFrameBuffer {
 
         var timingInfo = CMSampleTimingInfo()
         var formatDescription: CMFormatDescription?
-        CMVideoFormatDescriptionCreateForImageBuffer(
+        let formatStatus = CMVideoFormatDescriptionCreateForImageBuffer(
             allocator: kCFAllocatorDefault,
             imageBuffer: pixelBuffer,
             formatDescriptionOut: &formatDescription
         )
 
         guard let formatDescription = formatDescription else {
-            log.error("Cannot create sample buffer formatDescription.", subsystems: .pictureInPicture)
+            log.error("Video format description creation failed. status=\(formatStatus)", subsystems: .pictureInPicture)
             return nil
         }
 
-        _ = CMSampleBufferCreateReadyWithImageBuffer(
+        let bufferStatus = CMSampleBufferCreateReadyWithImageBuffer(
             allocator: kCFAllocatorDefault,
             imageBuffer: pixelBuffer,
             formatDescription: formatDescription,
@@ -124,7 +124,7 @@ final class StreamRTCYUVBuffer: NSObject, RTCVideoFrameBuffer {
         )
 
         guard let buffer = sampleBuffer else {
-            log.error("Cannot create sample buffer", subsystems: .pictureInPicture)
+            log.error("Video sample buffer creation failed. status=\(bufferStatus)", subsystems: .pictureInPicture)
             return nil
         }
 
@@ -187,11 +187,18 @@ final class StreamRTCYUVBuffer: NSObject, RTCVideoFrameBuffer {
             if error == kvImageNoError {
                 return pixelBuffer
             } else {
-                log.error(error, subsystems: .pictureInPicture)
+                log.error(
+                    "Video buffer conversion failed. status=\(error) width=\(width) height=\(height)",
+                    subsystems: .pictureInPicture
+                )
                 return nil
             }
         } catch {
-            log.error(error, subsystems: .pictureInPicture)
+            log.error(
+                "Video buffer preparation failed. width=\(width) height=\(height)",
+                subsystems: .pictureInPicture,
+                error: error
+            )
             return nil
         }
     }

@@ -32,13 +32,13 @@ enum PictureInPictureContent: Equatable, CustomStringConvertible {
     var description: String {
         switch self {
         case .inactive:
-            return ".inactive"
+            return "type=inactive"
         case let .participant(call, participant, track):
-            return ".participant(cId:\(call?.cId ?? "-"), name:\(participant.name), track:\(track?.trackId ?? "-"))"
+            return "type=participant cid=\(String(reflecting: call?.cId ?? "none")) participantSessionId=\(String(reflecting: participant.sessionId)) trackId=\(String(reflecting: track?.trackId ?? "none"))"
         case let .screenSharing(call, participant, track):
-            return ".screenSharing(cId:\(call?.cId ?? "-"), name:\(participant.name), track:\(track.trackId))"
+            return "type=screenSharing cid=\(String(reflecting: call?.cId ?? "none")) participantSessionId=\(String(reflecting: participant.sessionId)) trackId=\(String(reflecting: track.trackId))"
         case .reconnecting:
-            return ".reconnecting"
+            return "type=reconnecting"
         }
     }
 
