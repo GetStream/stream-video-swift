@@ -30,7 +30,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         var call: Call
         var callUUID: UUID
         var createdBy: User?
-        var isActive: Bool = false
+        var hasBeenAnswered: Bool = false
         var ringingTimedOut: Bool = false
         var isEndedElsewhere: Bool = false
         var leaveReason: String?
@@ -263,7 +263,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             return
         }
 
-        Task(disposableBag: disposableBag) { [weak self] in
+        Task(disposableBag: disposableBag) { @MainActor [weak self] in
             guard let self else {
                 return
             }
@@ -282,10 +282,13 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                     }
                 }
 
+                guard
+                    self.callEntry(for: callUUID) === callEntry,
+                    !callEntry.hasBeenAnswered
+                else { return }
+
                 if streamVideo.state.ringingCall?.cId != callEntry.call.cId {
-                    Task(disposableBag: disposableBag) { @MainActor [weak self] in
-                        self?.streamVideo?.state.ringingCall = callEntry.call
-                    }
+                    streamVideo.state.ringingCall = callEntry.call
                 }
 
                 try missingPermissionPolicy
@@ -293,6 +296,12 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                     .reportCall()
 
                 let callState = try await callEntry.call.get()
+                // A delayed GET can include this device's own acceptance.
+                guard
+                    self.callEntry(for: callUUID) === callEntry,
+                    !callEntry.hasBeenAnswered
+                else { return }
+
                 if let leaveReason = checkIfCallWasHandled(callState: callState) {
                     log.debug(
                         "Ending call with reason:\(leaveReason) { uuid:\(callUUID), cid:\(cid), callerId:\(callerId), callerName:\(localizedCallerName) }",
@@ -308,6 +317,11 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                     setUpRingingTimer(for: callState)
                 }
             } catch {
+                guard
+                    self.callEntry(for: callUUID) === callEntry,
+                    !callEntry.hasBeenAnswered
+                else { return }
+
                 log.error(
                     """
                     Failed to report incoming call with 
@@ -537,6 +551,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         ringingTimerCancellable?.cancel()
         ringingTimerCancellable = nil
         active = action.callUUID
+        callToJoinEntry.hasBeenAnswered = true
         callToJoinEntry.call.didPerform(.performAnswerCall)
 
         // Guards the answer action so it is completed exactly once across the
@@ -1032,14 +1047,21 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     ) -> (UUID, CXCallUpdate) {
         let update = CXCallUpdate()
         let idComponents = cid.components(separatedBy: ":")
-        let uuid = uuidFactory.get()
+        var uuid = uuidFactory.get()
         if
             idComponents.count >= 2,
             let call = streamVideo?.call(
                 callType: idComponents[0],
                 callId: idComponents[1]
             ) {
-            set(.init(call: call, callUUID: uuid), for: uuid)
+            storageAccessQueue.sync {
+                // Duplicate pushes must retain the original call entry.
+                if let existing = _storage.values.first(where: { $0.call.cId == cid }) {
+                    uuid = existing.callUUID
+                } else {
+                    _storage[uuid] = .init(call: call, callUUID: uuid)
+                }
+            }
         }
 
         update.localizedCallerName = localizedCallerName

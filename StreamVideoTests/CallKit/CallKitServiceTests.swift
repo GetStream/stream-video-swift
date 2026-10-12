@@ -86,6 +86,31 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
     // MARK: - reportIncomingCall
 
     @MainActor
+    func test_reportIncomingCall_getReturnsLocalAccept_keepsAnsweredCall_() async throws {
+        try await assertIncomingReportDoesNotEndAnsweredCall(acceptedByCurrentUser: true)
+    }
+
+    @MainActor
+    func test_reportIncomingCall_getReturnsRingingState_doesNotRestartRinging_() async throws {
+        try await assertIncomingReportDoesNotEndAnsweredCall(acceptedByCurrentUser: false)
+    }
+
+    @MainActor
+    func test_reportIncomingCall_getFailsAfterAnswer_keepsAnsweredCall_() async throws {
+        try await assertIncomingReportDoesNotEndAnsweredCall(getFails: true)
+    }
+
+    @MainActor
+    func test_reportIncomingCall_duplicateBeforeAnswer_keepsOneEntry_() async throws {
+        try await assertIncomingReportDoesNotEndAnsweredCall(duplicateBeforeAnswer: true)
+    }
+
+    @MainActor
+    func test_reportIncomingCall_duplicateAfterAnswer_keepsOneEntry_() async throws {
+        try await assertIncomingReportDoesNotEndAnsweredCall(duplicateAfterAnswer: true)
+    }
+
+    @MainActor
     func test_reportIncomingCall_hasVideoTrue_callUpdateWasConfiguredCorrectly() throws {
         subject.reportIncomingCall(
             cid,
@@ -1475,6 +1500,98 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
     // MARK: - Private Helpers
 
     @MainActor
+    private func assertIncomingReportDoesNotEndAnsweredCall(
+        acceptedByCurrentUser: Bool = true,
+        getFails: Bool = false,
+        duplicateBeforeAnswer: Bool = false,
+        duplicateAfterAnswer: Bool = false,
+        file: StaticString = #file,
+        filePath: StaticString = #filePath,
+        line: UInt = #line
+    ) async throws {
+        let service = RecordingIncomingCallService()
+        subject = service
+        subject.callController = callController
+        subject.callProvider = callProvider
+        stubConnectionState(to: duplicateAfterAnswer ? .connected : .disconnected(error: nil))
+        let response = defaultGetCallResponse!
+        response.call.session = .dummy(
+            acceptedBy: acceptedByCurrentUser && !duplicateAfterAnswer
+                ? [user.id: Date()] : [:]
+        )
+        let call = stubCall(response: response)
+        let (getGate, getContinuation) = AsyncStream<Void>.makeStream()
+        defer { getContinuation.finish() }
+        call.onGet = {
+            for await _ in getGate {}
+            if getFails { throw ClientError("GET failed") }
+        }
+        call.waitForJoinToResume = true
+        defer { call.resumeJoin() }
+        subject.streamVideo = mockedStreamVideo
+        let duplicateReportError = NSError(
+            domain: CXErrorDomainIncomingCall,
+            code: CXErrorCodeIncomingCallError.Code.callUUIDAlreadyExists.rawValue
+        )
+
+        func report() {
+            subject.reportIncomingCall(
+                cid,
+                localizedCallerName: localizedCallerName,
+                callerId: callerId
+            ) { self.completionError = $0 }
+        }
+
+        report()
+        guard case let .reportNewIncomingCall(uuid, _, _) = callProvider.invocations.first else {
+            return XCTFail("Expected an incoming CallKit report.", file: filePath, line: line)
+        }
+        await fulfillment(file: file, line: line) { call.timesCalled(.get) == 1 }
+        if duplicateBeforeAnswer {
+            callProvider.reportNewIncomingCallError = duplicateReportError
+            report()
+        }
+        if duplicateAfterAnswer {
+            getContinuation.finish()
+            await fulfillment(file: file, line: line) { service.ringingTimerCallCount == 1 }
+            response.call.session?.acceptedBy = [user.id: Date()]
+        }
+
+        subject.provider(callProvider, perform: CXAnswerCallAction(call: uuid))
+        await fulfillment(file: file, line: line) { call.timesCalled(.join) == 1 }
+
+        try await assertNotRequestTransaction(CXEndCallAction.self) {
+            getContinuation.finish()
+        }
+        if duplicateAfterAnswer {
+            callProvider.reportNewIncomingCallError = duplicateReportError
+            report()
+            try await assertNotRequestTransaction(CXEndCallAction.self) {}
+        }
+
+        if duplicateBeforeAnswer || duplicateAfterAnswer {
+            XCTAssertEqual(completionError as NSError?, duplicateReportError, file: filePath, line: line)
+        }
+
+        XCTAssertEqual(subject.callCount, 1, file: filePath, line: line)
+        XCTAssertEqual(subject.callId, callId, file: filePath, line: line)
+        XCTAssertEqual(
+            service.ringingTimerCallCount,
+            duplicateAfterAnswer ? 1 : 0,
+            file: filePath,
+            line: line
+        )
+        XCTAssertEqual(call.timesCalled(.leave), 0, file: filePath, line: line)
+        XCTAssertEqual(call.timesCalled(.reject), 0, file: filePath, line: line)
+
+        call.resumeJoin()
+        await fulfillment {
+            if case .joined = service.eventPipelineSubject.value { return true }
+            return false
+        }
+    }
+
+    @MainActor
     private func assertReportCallEnded(
         _ expectedReason: CXCallEndedReason,
         actionBlock: @MainActor @Sendable () -> Void,
@@ -1849,6 +1966,15 @@ private class MockUUIDFactory: UUIDProviding {
 
     func get() -> UUID {
         getResult ?? .init()
+    }
+}
+
+private final class RecordingIncomingCallService: CallKitService, @unchecked Sendable {
+    @Atomic var ringingTimerCallCount = 0
+
+    override func setUpRingingTimer(for callState: GetCallResponse) {
+        ringingTimerCallCount += 1
+        super.setUpRingingTimer(for: callState)
     }
 }
 

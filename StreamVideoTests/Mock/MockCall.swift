@@ -96,6 +96,7 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
     var onJoinResumed: (@Sendable (MockCall) async -> Void)?
     /// Lets a test suspend a poll while another ring starts.
     var onUpdateRingState: (@Sendable () async throws -> Void)?
+    var onGet: (@Sendable () async throws -> Void)?
     /// When true, `reject` suspends until ``resumeReject()`` is called.
     var waitForRejectToResume = false
     private var rejectContinuation: CheckedContinuation<Void, Never>?
@@ -232,6 +233,7 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
         notify: Bool = false
     ) async throws -> GetCallResponse {
         stubbedFunctionInput[.get]?.append(.get)
+        try await onGet?()
         return stubbedFunction[.get] as! GetCallResponse
     }
 
