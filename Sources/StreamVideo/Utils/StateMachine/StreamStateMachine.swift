@@ -57,7 +57,9 @@ public final class StreamStateMachine<StageType: StreamStateMachineStage> {
         _ operation: (StageType, (StageType) -> Void) -> T
     ) -> T {
         queue.sync {
-            operation(currentStage) { performTransition(to: $0) }
+            operation(currentStage) {
+                performTransition(to: $0, file: file, function: function, line: line)
+            }
         }
     }
 
@@ -93,6 +95,7 @@ public final class StreamStateMachine<StageType: StreamStateMachineStage> {
             let error = ClientError.InvalidStateMachineTransition(from: currentStage, to: nextStage)
             log.warning(
                 error,
+                subsystems: logSubsystem,
                 functionName: function,
                 fileName: file,
                 lineNumber: line
@@ -104,13 +107,8 @@ public final class StreamStateMachine<StageType: StreamStateMachineStage> {
         // subscriptions and timers. Only an accepted transition may tear down.
         transitioningFromStage.willTransitionAway()
         transitioningFromStage.didTransitionAway()
-        var logMessage = "Transition \(currentStage.description) → \(newStage.description)"
-
-        if let transitionToStageAt {
-            logMessage += " after \(Date().timeIntervalSince(transitionToStageAt))s"
-        }
         log.debug(
-            logMessage,
+            "State transition completed. machine=\(String(reflecting: currentStage.container)) from=\(String(reflecting: String(describing: currentStage.id))) to=\(String(reflecting: String(describing: newStage.id))) elapsedMs=\(transitionToStageAt.map { String(Date().timeIntervalSince($0) * 1000) } ?? "unknown")",
             subsystems: logSubsystem,
             functionName: function,
             fileName: file,
@@ -137,7 +135,7 @@ extension ClientError {
         ///   - from: The stage from which the transition was attempted.
         ///   - to: The stage to which the transition was attempted.
         init(from: any StreamStateMachineStage, to: any StreamStateMachineStage) {
-            message = "Cannot transition from \(from.description) → \(to.description)"
+            message = "State transition rejected. machine=\(String(reflecting: from.container)) from=\(String(reflecting: String(describing: from.id))) to=\(String(reflecting: String(describing: to.id)))"
         }
     }
 }

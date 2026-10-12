@@ -100,7 +100,10 @@ extension Call.StateMachine.Stage {
                 do {
                     try transition?(.idle(.init(call: call)))
                 } catch {
-                    log.error(error)
+                    log.error(
+                        "Call idle transition failed. cid=\(String(reflecting: call.cId)) from=leaving",
+                        error: error
+                    )
                 }
 
                 postNotification(with: CallNotification.callEnded, object: call)

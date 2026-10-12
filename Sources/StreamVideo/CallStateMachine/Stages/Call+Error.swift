@@ -52,15 +52,21 @@ extension Call.StateMachine.Stage {
         override func transition(
             from previousStage: Call.StateMachine.Stage
         ) -> Self? {
-            Task(disposableBag: disposableBag) { [weak self] in
+            Task(disposableBag: disposableBag) { [weak self, previousStageId = previousStage.id] in
                 do {
                     guard let self else {
                         throw ClientError()
                     }
-                    log.error(error)
+                    log.error(
+                        "Call operation failed. cid=\(String(reflecting: context.call?.cId ?? "unknown")) stage=\(previousStageId)",
+                        error: error
+                    )
                     try transition?(.idle(context))
                 } catch let transitionError {
-                    log.error(transitionError)
+                    log.error(
+                        "Call error handling failed. cid=\(String(reflecting: self?.context.call?.cId ?? "unknown")) next=idle",
+                        error: transitionError
+                    )
                 }
             }
             return self

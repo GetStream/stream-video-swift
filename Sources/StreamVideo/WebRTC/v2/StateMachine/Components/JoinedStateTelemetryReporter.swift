@@ -51,15 +51,23 @@ struct JoinedStateTelemetryReporter {
             }
         }()
 
+        log.debug(
+            "Join flow completed. flow=\(flowType) sessionId=\(String(reflecting: sessionId)) unifiedSessionId=\(String(reflecting: unifiedSessionId)) durationMs=\(duration * 1000)",
+            subsystems: .webRTC
+        )
         do {
             try await sfuAdapter.sendStats(
                 for: sessionId,
                 unifiedSessionId: unifiedSessionId,
                 telemetry: telemetry
             )
-            log.debug("Join call completed in \(duration) seconds.")
         } catch {
-            log.error(error)
+            log.log(
+                .warning,
+                message: "Join telemetry upload failed. flow=\(flowType) sessionId=\(String(reflecting: sessionId)) unifiedSessionId=\(String(reflecting: unifiedSessionId))",
+                subsystems: .webRTC,
+                error: error
+            )
         }
     }
 }

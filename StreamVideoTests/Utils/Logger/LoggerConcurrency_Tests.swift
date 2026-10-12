@@ -155,6 +155,55 @@ final class LoggerConcurrency_Tests: XCTestCase, @unchecked Sendable {
         }
     }
 
+    func test_stateTransitions_preserveSubsystemAndCaller() async {
+        let originalLevel = LogConfig.level
+        let originalDestinations = LogConfig.destinations
+        defer {
+            LogConfig.level = originalLevel
+            LogConfig.destinations = originalDestinations
+        }
+        LogConfig.level = .debug
+        let destination = CapturingDestination()
+        LogConfig.destinations = [destination]
+        let subject = StreamStateMachine<Call.StateMachine.Stage>(
+            initialStage: .init(id: .joined, context: .init()),
+            logSubsystem: .webRTC
+        )
+
+        subject.transition(
+            to: .idle(.init()),
+            file: "StateTransitionProbe.swift",
+            function: "transitionProbe()",
+            line: 41
+        )
+        subject.withLock(
+            file: "StateTransitionProbe.swift",
+            function: "transitionProbe()",
+            line: 42
+        ) { _, transition in
+            transition(.init(id: .joining, context: .init()))
+        }
+        let marker = UUID().uuidString
+        log.error(marker)
+        await fulfillment(of: [destination.markerExpectation(marker)], timeout: defaultTimeout)
+
+        let details = destination.recordedDetails.filter { detail in
+            ["StateTransitionProbe.swift", "StreamStateMachine.swift"].contains {
+                String(describing: detail.fileName).hasSuffix($0)
+            }
+        }
+        XCTAssertEqual(details.count, 2)
+        for (index, detail) in details.enumerated() {
+            XCTAssertEqual(detail.level, index == 0 ? .debug : .warning)
+            XCTAssertEqual(detail.subsystem, .webRTC)
+            XCTAssertEqual(String(describing: detail.fileName), "StateTransitionProbe.swift")
+            XCTAssertEqual(String(describing: detail.functionName), "transitionProbe()")
+            XCTAssertEqual(detail.lineNumber, UInt(41 + index))
+            XCTAssertFalse(detail.message.contains("\n"))
+        }
+        XCTAssertEqual(subject.currentStage.id, .idle)
+    }
+
     private func assertNativeLogs(
         _ destination: CapturingDestination,
         expectedLevels: [LogLevel],

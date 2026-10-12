@@ -149,7 +149,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     /// during `migration`.
                     context.currentSFU = response.credentials.server.edgeName
                     log.debug(
-                        "Migrating from \(context.migratingFromSFU) → \(context.currentSFU).",
+                        "SFU migration target selected. coordinatorConnectId=\(String(reflecting: context.coordinatorConnectId)) from=\(String(reflecting: context.migratingFromSFU)) to=\(String(reflecting: context.currentSFU))",
                         subsystems: .webRTC
                     )
 

@@ -54,7 +54,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
         override func transition(
             from previousStage: WebRTCCoordinator.StateMachine.Stage
         ) -> Self? {
-            Task(disposableBag: disposableBag) { [weak self] in
+            Task(disposableBag: disposableBag) { [weak self, previousStageId = previousStage.id] in
                 do {
                     guard let self else {
                         throw ClientError()
@@ -66,12 +66,20 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     }
 
                     try Task.checkCancellation()
-                    log.error(error, subsystems: .webRTC)
+                    log.error(
+                        "WebRTC flow failed. coordinatorConnectId=\(String(reflecting: context.coordinatorConnectId)) stage=\(previousStageId)",
+                        subsystems: .webRTC,
+                        error: error
+                    )
 
                     try Task.checkCancellation()
                     try transition?(.cleanUp(context))
                 } catch let transitionError {
-                    log.error(transitionError, subsystems: .webRTC)
+                    log.error(
+                        "WebRTC error handling failed. coordinatorConnectId=\(String(reflecting: self?.context.coordinatorConnectId ?? "unknown")) next=cleanUp",
+                        subsystems: .webRTC,
+                        error: transitionError
+                    )
                 }
             }
             return self

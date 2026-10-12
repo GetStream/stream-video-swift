@@ -219,7 +219,12 @@ extension WebRTCCoordinator.StateMachine.Stage {
             do {
                 _ = try await peerConnection
                     .connectionStatePublisher
-                    .log(.debug, subsystems: subsystem) { "PeerConnection transitioned to \($0)" }
+                    .log(.debug, subsystems: subsystem) { [
+                        coordinatorConnectId = context.coordinatorConnectId,
+                        peerType = peerConnection.peerType
+                    ] in
+                        "Peer connection state changed. coordinatorConnectId=\(String(reflecting: coordinatorConnectId)) peer=\(peerType) state=\($0)"
+                    }
                     .filter { $0 == .connected }
                     .nextValue(timeout: timeout)
             } catch is CancellationError {
@@ -227,7 +232,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
             } catch {
                 log.log(
                     .warning,
-                    message: "Peer connection readiness wait failed; join continues. peer=\(peerConnection.peerType) timeoutMs=\(timeout * 1000)",
+                    message: "Peer connection readiness wait failed; join continues. coordinatorConnectId=\(String(reflecting: context.coordinatorConnectId)) peer=\(peerConnection.peerType) timeoutMs=\(timeout * 1000)",
                     subsystems: subsystem,
                     error: error
                 )
