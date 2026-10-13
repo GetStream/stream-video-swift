@@ -4,6 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### 🔄 Changed
+
+# [1.55.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.55.0)
+_October 13, 2026_
+
 ### 🐞 Fixed
 
 - Configure and activate audio before capture starts, and prepare call transports before capture to avoid an engine rebuild during joining. [#1355](https://github.com/GetStream/stream-video-swift/pull/1355)
