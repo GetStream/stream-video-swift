@@ -51,19 +51,19 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         callProvider.setDelegate(subject, queue: nil)
     }
 
-    override func tearDown() {
+    override func tearDown() async throws {
+        // Restore the process-global UUID factory. Tests set a fixed
+        // `getResult` on the mock; leaving it injected makes every SDK
+        // `Task(disposableBag:)`/`sinkTask` share one identifier, so tasks
+        // cancel each other and real joins in the same process time out.
+        defer { InjectedValues[\.uuidFactory] = StreamUUIDFactory() }
+        subject = nil
         mockApplicationStateAdapter.dismante()
         mockPermissions.dismantle()
         // Restore the process-global audio store. Leaving the mock shared
         // poisons every subsequent real join in the same xctest process
         // (joins stall waiting on the stale store and time out).
-        mockAudioStore.dismantle()
-        // Restore the process-global UUID factory. Tests set a fixed
-        // `getResult` on the mock; leaving it injected makes every SDK
-        // `Task(disposableBag:)`/`sinkTask` share one identifier, so tasks
-        // cancel each other and real joins in the same process time out.
-        InjectedValues[\.uuidFactory] = StreamUUIDFactory()
-        subject = nil
+        try await mockAudioStore.dismantle()
         uuidFactory = nil
         callController = nil
         callProvider = nil
@@ -74,7 +74,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         callerId = nil
         mockAudioStore = nil
         completionError = nil
-        super.tearDown()
+        try await super.tearDown()
     }
 
     // MARK: - participantAutoLeavePolicy
