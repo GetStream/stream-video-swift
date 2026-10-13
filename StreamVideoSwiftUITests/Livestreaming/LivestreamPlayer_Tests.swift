@@ -6,6 +6,7 @@ import SnapshotTesting
 @preconcurrency import StreamSwiftTestHelpers
 @testable import StreamVideo
 @testable import StreamVideoSwiftUI
+import SwiftUI
 import XCTest
 
 final class LivestreamPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
@@ -17,6 +18,33 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
     override func tearDown() async throws {
         mockStreamVideo = nil
         try await super.tearDown()
+    }
+
+    @MainActor
+    func test_livestreamPlayer_disappears_reportsAppInitiator() async {
+        let call = MockCall()
+        call.stub(for: .join, with: JoinCallResponse.dummy())
+        let subject = UIHostingController(rootView: LivestreamPlayer(call: call))
+        let window = UIWindow(frame: UIScreen.main.bounds)
+        window.rootViewController = subject
+        window.makeKeyAndVisible()
+        defer { window.isHidden = true }
+        await fulfillment { call.timesCalled(.join) == 1 }
+
+        window.rootViewController = nil
+
+        await fulfillment { call.timesCalled(.leave) == 1 }
+        XCTAssertEqual(call.leaveInitiators, [.app])
+    }
+
+    @MainActor
+    func test_livestreamPlayer_leave_reportsUserInitiator() {
+        let call = MockCall()
+        let subject = LivestreamPlayer(call: call)
+
+        subject.leaveLivestream()
+
+        XCTAssertEqual(call.leaveInitiators, [.user])
     }
 
     @MainActor

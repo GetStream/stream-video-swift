@@ -195,7 +195,7 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
             case .none:
                 break
             case .auto:
-                leaveLivestream()
+                leaveLivestream(initiator: .app)
             }
         }
     }
@@ -411,8 +411,8 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
         }
     }
     
-    func leaveLivestream() {
-        call.leave(initiator: .user, reason: "leaveLivestream")
+    func leaveLivestream(initiator: Call.LeaveInitiator = .user) {
+        call.leave(initiator: initiator, reason: "leaveLivestream")
         disposableBag.removeAll()
         livestreamState = .initial
     }

@@ -613,6 +613,7 @@ open class CallViewModel: ObservableObject {
         enteringCallTask = Task(disposableBag: disposableBag, priority: .userInitiated) { [weak self] in
             guard let self else { return }
             do {
+                try Task.checkCancellation()
                 log.debug("Starting call")
                 var settingsRequest: CallSettingsRequest?
                 var limits: LimitsSettingsRequest?
@@ -638,22 +639,24 @@ open class CallViewModel: ObservableObject {
                     callSettings: settings,
                     joinInterceptor: callJoinInterceptor
                 )
+                try Task.checkCancellation()
                 
                 temporaryCallSettings = call.state.callSettings
                 try? await call.speaker.disableSpeakerPhone()
+                try Task.checkCancellation()
 
                 try await call.ring(
                     request: .init(membersIds: members.map(\.id).filter { $0 != self.streamVideo.user.id }, video: video)
                 )
+                try Task.checkCancellation()
                 
                 let autoCancelTimeoutMs = call.state.settings?.ring.autoCancelTimeoutMs
                     ?? joinResponse.call.settings.ring.autoCancelTimeoutMs
                 let timeoutSeconds = TimeInterval(autoCancelTimeoutMs) / 1000
                 startTimer(timeout: timeoutSeconds)
                 save(call: call)
-                enteringCallTask = nil
-                hasAcceptedCall = false
             } catch {
+                guard pendingCall === call, !Task.isCancelled else { return }
                 hasAcceptedCall = false
                 log.error("Error starting a call", error: error)
                 self.error = error
@@ -979,6 +982,7 @@ open class CallViewModel: ObservableObject {
         enteringCallTask = Task(disposableBag: disposableBag, priority: .userInitiated) { [weak self] in
             guard let self else { return }
             do {
+                try Task.checkCancellation()
                 log.debug("Starting call")
                 var settingsRequest: CallSettingsRequest?
                 var limits: LimitsSettingsRequest?
@@ -1012,9 +1016,8 @@ open class CallViewModel: ObservableObject {
                 )
                 try Task.checkCancellation()
                 save(call: resolvedCall)
-                enteringCallTask = nil
-                hasAcceptedCall = false
             } catch {
+                guard pendingCall === resolvedCall, !Task.isCancelled else { return }
                 hasAcceptedCall = false
                 if error is CancellationError {
                     enteringCallTask = nil
@@ -1038,12 +1041,10 @@ open class CallViewModel: ObservableObject {
     }
 
     private func save(call: Call) {
+        guard pendingCall === call else { return }
         pendingCall = nil
-        guard enteringCallTask != nil else {
-            call.leave(initiator: .unknown, reason: "join.cancelled")
-            self.call = nil
-            return
-        }
+        enteringCallTask = nil
+        hasAcceptedCall = false
         setActiveCall(call)
         log.debug("Started call")
     }

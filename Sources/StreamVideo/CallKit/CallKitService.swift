@@ -886,7 +886,6 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 guard let self else { return }
                 switch event {
                 case let .typeCallEndedEvent(response):
-                    callEntry(for: response.callCid)?.leaveInitiator = .remoteEvent
                     callEnded(
                         response.callCid,
                         ringingTimedOut: false,
@@ -944,6 +943,14 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
 
             if let leaveReason {
                 callEndedEntry.leaveReason = leaveReason
+            }
+            switch leaveReason {
+            case StreamRejectionReasonProvider.HandledCallReason.callEventReceived.rawValue:
+                callEndedEntry.leaveInitiator = .remoteEvent
+            case StreamRejectionReasonProvider.HandledCallReason.autoLeave.rawValue:
+                callEndedEntry.leaveInitiator = .app
+            default:
+                break
             }
 
             _storage[callEndedEntry.callUUID] = callEndedEntry
