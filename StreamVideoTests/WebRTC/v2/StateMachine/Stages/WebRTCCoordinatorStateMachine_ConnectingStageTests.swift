@@ -107,6 +107,37 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
         XCTAssertNil(sfuAdapter)
     }
 
+    func test_willTransitionAway_completingAuthentication_discardsResponse() async throws {
+        let subject = try XCTUnwrap(subject)
+        let transitions = CurrentValueSubject<WebRTCCoordinator.StateMachine.Stage?, Never>(nil)
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.authenticator = mockCoordinatorStack.webRTCAuthenticator
+        mockCoordinatorStack.webRTCAuthenticator.stub(
+            for: .authenticate,
+            with: Result<(SFUAdapter, JoinCallResponse), Error>
+                .success((mockCoordinatorStack.sfuStack.adapter, .dummy()))
+        )
+        await mockCoordinatorStack.clientEventReporter.setCompleteStageHandler { [weak subject] in
+            subject?.willTransitionAway()
+        }
+        subject.transition = { transitions.send($0) }
+
+        _ = subject.transition(from: .idle(subject.context))
+
+        let target = try await transitions.compactMap { $0 }
+            .nextValue(timeout: defaultTimeout)
+        XCTAssertTrue(
+            (target as? WebRTCCoordinator.StateMachine.Stage.ErrorStage)?
+                .error is CancellationError
+        )
+        XCTAssertNil(subject.context.initialJoinCallResponse)
+        XCTAssertNil(subject.context.sfuFullObserver)
+        XCTAssertEqual(
+            mockCoordinatorStack.webRTCAuthenticator.timesCalled(.waitForAuthentication),
+            0
+        )
+    }
+
     func test_transition_fromIdleWithoutCoordinator_transitionsToError() async throws {
         try await assertTransition(
             from: .idle,

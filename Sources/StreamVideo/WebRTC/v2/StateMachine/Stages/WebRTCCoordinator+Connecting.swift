@@ -221,6 +221,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
                             failure: nil
                         )
 
+                    try Task.checkCancellation()
+
                     context.initialJoinCallResponse = response
 
                     // Start observing SFU full events before the WS handshake

@@ -69,6 +69,64 @@ final class WebRTCAuthenticator_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertNil(statsAdapter)
     }
 
+    func test_authenticate_cancelledDuringCapabilitiesUpdate_doesNotRestoreCleanedState() async throws {
+        let coordinator = mockCoordinatorStack.coordinator
+        let stateAdapter = coordinator.stateAdapter
+        await stateAdapter.set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
+        try await stateAdapter.configurePeerConnections()
+        let publisher = try await XCTAsyncUnwrap(
+            await stateAdapter.publisher as? MockRTCPeerConnectionCoordinator
+        )
+        let audioSettings = AudioSettings.dummy(micDefaultOn: true)
+        await stateAdapter.set(audioSettings: audioSettings)
+        let screenShareSessionProvider = await stateAdapter.screenShareSessionProvider
+        screenShareSessionProvider.activeSession = .init(
+            localTrack: await stateAdapter.peerConnectionFactory.mockVideoTrack(forScreenShare: true),
+            screenSharingType: .inApp,
+            capturer: MockStreamVideoCapturer(),
+            includeAudio: false
+        )
+        mockCoordinatorStack.callAuthenticator.authenticateResult = .success(
+            .dummy(
+                call: .dummy(settings: .dummy(audio: .dummy(micDefaultOn: false))),
+                ownCapabilities: [.sendAudio, .sendVideo]
+            )
+        )
+        let leaveDuringUpdate: @Sendable () async -> Void = {
+            withUnsafeCurrentTask { $0?.cancel() }
+            await stateAdapter.cleanUp()
+        }
+        publisher.stub(for: .stopScreenSharing, with: leaveDuringUpdate)
+        let subject = try XCTUnwrap(subject)
+        let operation = Task {
+            try await subject.authenticate(
+                coordinator: coordinator,
+                currentSFU: nil,
+                migratingFromList: nil,
+                create: false,
+                ring: false,
+                notify: false,
+                options: nil
+            )
+        }
+
+        do {
+            _ = try await operation.value
+            XCTFail("Cancelled authentication restored cleaned state")
+        } catch {
+            XCTAssertTrue(error is CancellationError)
+        }
+        XCTAssertEqual(publisher.timesCalled(.stopScreenSharing), 1)
+        let token = await stateAdapter.token
+        let ownCapabilities = await stateAdapter.ownCapabilities
+        let currentAudioSettings = await stateAdapter.audioSettings
+        XCTAssertEqual(token, "")
+        XCTAssertEqual(ownCapabilities, [])
+        XCTAssertEqual(currentAudioSettings, audioSettings)
+        let statsAdapter = await stateAdapter.statsAdapter
+        XCTAssertNil(statsAdapter)
+    }
+
     func test_authenticate_withValidData_callAuthenticationWasCalledWithExpectedInput() async throws {
         let currentSFU = String.unique
         let create = true
