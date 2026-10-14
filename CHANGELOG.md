@@ -4,6 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### 🔄 Changed
+
+# [1.55.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.55.0)
+_October 13, 2026_
+
 ### 🐞 Fixed
 
 - Aborted join events now identify the leave source and reason. Use `Call.leave(initiator:reason:)` to distinguish user actions from application logic. Existing `leave(reason:)` calls remain compatible and report `unknown`.
