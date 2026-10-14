@@ -44,7 +44,6 @@ final class MicrophoneChecker_Tests: XCTestCase, @unchecked Sendable {
 
         for value in inputs {
             mockAudioRecorder.mockStore.dispatch(.setMeter(.init(value)))
-            await wait(for: 0.1)
         }
 
         let values = try await subject
