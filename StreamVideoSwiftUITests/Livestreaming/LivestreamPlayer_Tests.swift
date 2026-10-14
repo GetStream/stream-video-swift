@@ -26,7 +26,17 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
         call.stub(for: .join, with: JoinCallResponse.dummy())
         let subject = UIHostingController(rootView: LivestreamPlayer(call: call))
         let window = UIWindow(frame: UIScreen.main.bounds)
-        window.rootViewController = subject
+        let container = UIViewController()
+        container.addChild(subject)
+        // Match snapshot traits before the spinner is first rendered.
+        container.setOverrideTraitCollection(
+            SnapshotVariant.defaultLight.traits,
+            forChild: subject
+        )
+        subject.view.frame = window.bounds
+        container.view.addSubview(subject.view)
+        subject.didMove(toParent: container)
+        window.rootViewController = container
         window.makeKeyAndVisible()
         defer { window.isHidden = true }
         await fulfillment { call.timesCalled(.join) == 1 }
