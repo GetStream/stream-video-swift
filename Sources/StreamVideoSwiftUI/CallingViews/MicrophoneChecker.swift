@@ -26,8 +26,8 @@ public final class MicrophoneChecker: ObservableObject {
         audioLevels = [Float](repeating: 0.0, count: valueLimit)
         updateMetersCancellable = audioRecorder
             .$meters
-            .compactMap { [weak self] in self?.normaliseAndAppend($0) }
             .receive(on: DispatchQueue.main)
+            .compactMap { [weak self] in self?.normaliseAndAppend($0) }
             .assign(to: \.audioLevels, onWeak: self)
     }
 

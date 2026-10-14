@@ -4,6 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### 🔄 Changed
+
+# [1.55.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.55.0)
+_October 13, 2026_
+
 ### 🐞 Fixed
 
 - Keep locally answered CallKit calls connected when an incoming-call check finishes late or a duplicate call report arrives.
