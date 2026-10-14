@@ -278,7 +278,12 @@ extension UserRobot {
     @discardableResult
     func assertReconnectingMessage(isVisible: Bool) -> Self {
         if isVisible {
-            XCTAssertTrue(CallPage.reconnectingMessage.wait().exists, "reconnectingMessage should appear")
+            XCTAssertTrue(
+                CallPage.reconnectingMessage.waitForExistence(
+                    timeout: UserRobot.defaultTimeout
+                ),
+                "reconnectingMessage should appear"
+            )
         } else {
             XCTAssertFalse(
                 CallPage.reconnectingMessage.waitForDisappearance(timeout: UserRobot.defaultTimeout * 2).exists,
