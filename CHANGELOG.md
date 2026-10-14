@@ -11,7 +11,7 @@ _October 13, 2026_
 
 ### 🐞 Fixed
 
-- Accepted-call events no longer make the incoming call UI reject a call that is joining on this device.
+- Accepted-call events no longer make the incoming call UI reject a call that is joining on this device. [#1365](https://github.com/GetStream/stream-video-swift/pull/1365)
 - Configure and activate audio before capture starts, and prepare call transports before capture to avoid an engine rebuild during joining. [#1355](https://github.com/GetStream/stream-video-swift/pull/1355)
 - Fixed a launch crash when an iOS app that uses StreamVideo runs on Mac. [#1344](https://github.com/GetStream/stream-video-swift/issues/1344)
 - Kept blocking WebRTC operations and peer connection teardown off UI and Swift concurrency threads. [#1345](https://github.com/GetStream/stream-video-swift/pull/1345)
