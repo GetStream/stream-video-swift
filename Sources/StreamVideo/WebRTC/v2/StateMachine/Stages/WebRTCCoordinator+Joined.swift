@@ -229,10 +229,11 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .receive(on: processingQueue)
                 .sink { [weak self] (source: WebSocketConnectionState.DisconnectionSource) in
                     guard let self else { return }
-                    // The error event owns SFU recovery and carries its strategy.
-                    if source
+                    // Retain recovery when the event preceded this subscription.
+                    if let event = source
                         .serverError?
-                        .underlyingError is Stream_Video_Sfu_Models_Error {
+                        .underlyingError as? Stream_Video_Sfu_Event_Error {
+                        handleSFUError(event)
                         return
                     }
                     context.disconnectionSource = source
@@ -307,13 +308,12 @@ extension WebRTCCoordinator.StateMachine.Stage {
         }
 
         private func handleSFUError(_ event: Stream_Video_Sfu_Event_Error) {
+            guard event.reconnectStrategy != .unspecified else { return }
             context.disconnectionSource = .serverInitiated(
                 error: .init(with: event.error)
             )
             context.reconnectionStrategy = .init(
-                from: event.error.code == .participantSignalLost
-                    && event.reconnectStrategy == .unspecified
-                    ? .fast : event.reconnectStrategy,
+                from: event.reconnectStrategy,
                 fastReconnectDeadlineSeconds: context.fastReconnectDeadlineSeconds
             )
             if event.error.code == .sfuFull,

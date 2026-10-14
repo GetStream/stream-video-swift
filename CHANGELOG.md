@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🐞 Fixed
 
-- Honor the SFU reconnect strategy after signaling errors, including explicit disconnect and migration requests.
+- Honor explicit SFU reconnect strategies and keep the call connected when an error has no reconnect instruction.
 
 # [1.55.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.55.0)
 _October 13, 2026_
