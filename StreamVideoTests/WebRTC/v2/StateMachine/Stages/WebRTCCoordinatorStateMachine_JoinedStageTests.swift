@@ -405,18 +405,71 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
 
     // MARK: observeConnection
 
-    func test_transition_webSocketDisconnectsWithSFUErrorWithShouldRetryTrue_transitionsToDisconnectCorrectlyConfigured() async {
+    func test_sfuError_fastStrategy_honorsStrategy_() async throws {
+        try await assertSFUErrorStrategy(.fast, expectedStrategy: .fast(
+            disconnectedSince: .init(),
+            deadline: 12
+        ))
+    }
+
+    func test_sfuError_rejoinStrategy_honorsStrategy_() async throws {
+        try await assertSFUErrorStrategy(.rejoin, expectedStrategy: .rejoin)
+    }
+
+    func test_sfuError_migrateStrategy_honorsStrategy_() async throws {
+        try await assertSFUErrorStrategy(.migrate, expectedStrategy: .migrate)
+    }
+
+    func test_sfuError_disconnectStrategy_leaves_() async throws {
+        try await assertSFUErrorStrategy(
+            .disconnect,
+            expectedStrategy: .disconnected,
+            expectedTarget: .leaving
+        )
+    }
+
+    func test_sfuError_unspecifiedStrategy_rejoins_() async throws {
+        try await assertSFUErrorStrategy(.unspecified, expectedStrategy: .rejoin)
+    }
+
+    func test_sfuError_unknownStrategy_rejoins_() async throws {
+        try await assertSFUErrorStrategy(.UNRECOGNIZED(99), expectedStrategy: .rejoin)
+    }
+
+    func test_sfuError_participantSignalLost_fastReconnects_() async throws {
+        try await assertSFUErrorStrategy(
+            .unspecified,
+            code: .participantSignalLost,
+            expectedStrategy: .fast(disconnectedSince: .init(), deadline: 12)
+        )
+    }
+
+    func test_sfuError_participantSignalLost_honorsExplicitStrategy_() async throws {
+        try await assertSFUErrorStrategy(
+            .disconnect,
+            code: .participantSignalLost,
+            expectedStrategy: .disconnected,
+            expectedTarget: .leaving
+        )
+        try await assertSFUErrorStrategy(
+            .migrate,
+            code: .participantSignalLost,
+            expectedStrategy: .migrate
+        )
+        try await assertSFUErrorStrategy(
+            .rejoin,
+            code: .participantSignalLost,
+            expectedStrategy: .rejoin
+        )
+    }
+
+    func test_webSocket_transportError_fastReconnects_() async {
         await mockCoordinatorStack.coordinator.stateAdapter.set(
             sfuAdapter: mockCoordinatorStack.sfuStack.adapter
         )
         subject.context.fastReconnectDeadlineSeconds = 12
-        let sfuError = {
-            var result = Stream_Video_Sfu_Models_Error()
-            result.shouldRetry = true
-            return result
-        }()
         let expectedSource: WebSocketConnectionState.DisconnectionSource = .serverInitiated(
-            error: .init(with: sfuError)
+            error: ClientError.NetworkError("Socket closed")
         )
 
         await assertTransitionAfterTrigger(
@@ -424,7 +477,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
             trigger: { [mockCoordinatorStack] in
                 mockCoordinatorStack?.sfuStack.setConnectionState(
                     to: .disconnected(
-                        source: .serverInitiated(error: .init(with: sfuError))
+                        source: expectedSource
                     )
                 )
             }
@@ -442,31 +495,27 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         }
     }
 
-    func test_transition_webSocketDisconnectsWithSFUErrorWithShouldRetryFalse_transitionsToDisconnectCorrectlyConfigured() async {
+    func test_webSocket_healthCheckTimeout_fastReconnects_() async {
         await mockCoordinatorStack.coordinator.stateAdapter.set(
             sfuAdapter: mockCoordinatorStack.sfuStack.adapter
         )
         subject.context.fastReconnectDeadlineSeconds = 12
-        let sfuError = {
-            var result = Stream_Video_Sfu_Models_Error()
-            result.shouldRetry = false
-            return result
-        }()
-        let expectedSource: WebSocketConnectionState.DisconnectionSource = .serverInitiated(
-            error: .init(with: sfuError)
-        )
+        let expectedSource: WebSocketConnectionState.DisconnectionSource = .noPongReceived
 
         await assertTransitionAfterTrigger(
             expectedTarget: .disconnected,
             trigger: { [mockCoordinatorStack] in
                 mockCoordinatorStack?.sfuStack.setConnectionState(
                     to: .disconnected(
-                        source: .serverInitiated(error: .init(with: sfuError))
+                        source: expectedSource
                     )
                 )
             }
         ) { target in
-            XCTAssertEqual(target.context.reconnectionStrategy, .rejoin)
+            guard case let .fast(_, deadline) = target.context.reconnectionStrategy else {
+                return XCTFail("Expected fast reconnect after health-check timeout")
+            }
+            XCTAssertEqual(deadline, 12)
             XCTAssertEqual(
                 target.context.disconnectionSource,
                 expectedSource
@@ -518,6 +567,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         )
 
         await assertTransitionAfterTrigger(
+            expectedTarget: .disconnected,
             trigger: { [mockCoordinatorStack] in
                 var error = Stream_Video_Sfu_Event_Error()
                 error.reconnectStrategy = .rejoin
@@ -537,6 +587,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         subject.context.fastReconnectDeadlineSeconds = 12
 
         await assertTransitionAfterTrigger(
+            expectedTarget: .disconnected,
             trigger: { [mockCoordinatorStack] in
                 var error = Stream_Video_Sfu_Event_Error()
                 error.reconnectStrategy = .fast
@@ -821,51 +872,6 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         XCTAssertEqual(subject.id, .joined)
     }
 
-    // MARK: observePreferredReconnectionStrategy
-
-    func test_transition_sfuErrorWithReconnectionStrategyFastReceived_updatesContext() async {
-        await mockCoordinatorStack.coordinator.stateAdapter.set(
-            sfuAdapter: mockCoordinatorStack.sfuStack.adapter
-        )
-        subject.context.fastReconnectDeadlineSeconds = 12
-
-        await assertTransitionAfterTrigger(
-            trigger: { [mockCoordinatorStack] in
-                var error = Stream_Video_Sfu_Event_Error()
-                error.reconnectStrategy = .fast
-                mockCoordinatorStack?
-                    .sfuStack
-                    .receiveEvent(.error(error))
-            }
-        ) { target in
-            switch target.context.reconnectionStrategy {
-            case let .fast(_, deadline):
-                XCTAssertEqual(deadline, 12)
-            default:
-                XCTFail()
-            }
-        }
-    }
-
-    func test_transition_sfuErrorWithReconnectionStrategyRejoinReceived_updatesContext() async {
-        await mockCoordinatorStack.coordinator.stateAdapter.set(
-            sfuAdapter: mockCoordinatorStack.sfuStack.adapter
-        )
-        subject.context.fastReconnectDeadlineSeconds = 12
-
-        await assertTransitionAfterTrigger(
-            trigger: { [mockCoordinatorStack] in
-                var error = Stream_Video_Sfu_Event_Error()
-                error.reconnectStrategy = .rejoin
-                mockCoordinatorStack?
-                    .sfuStack
-                    .receiveEvent(.error(error))
-            }
-        ) { target in
-            XCTAssertEqual(target.context.reconnectionStrategy, .rejoin)
-        }
-    }
-
     // MARK: observePeerConnectionState
 
     func test_transition_publisherDisconnects_restartICEWasTriggeredOnPublisher() async throws {
@@ -1043,6 +1049,86 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
             sessionID: stateAdapter.sessionID,
             clientCapabilities: stateAdapter.clientCapabilities
         )
+    }
+
+    private func assertSFUErrorStrategy(
+        _ strategy: Stream_Video_Sfu_Models_WebsocketReconnectStrategy,
+        code: Stream_Video_Sfu_Models_ErrorCode = .unspecified,
+        expectedStrategy: WebRTCCoordinator.StateMachine.ReconnectionStrategy,
+        expectedTarget: WebRTCCoordinator.StateMachine.Stage.ID = .disconnected,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) async throws {
+        await mockCoordinatorStack.coordinator.stateAdapter.set(
+            sfuAdapter: mockCoordinatorStack.sfuStack.adapter
+        )
+        mockCoordinatorStack.receiveHealthCheck(every: 0.01)
+
+        for shouldRetry in [false, true] {
+            for connectionStateFirst in [false, true] {
+                mockCoordinatorStack.sfuStack.setConnectionState(
+                    to: .connected(healthCheckInfo: .init())
+                )
+                subject = .joined(.init())
+                subject.context.coordinator = mockCoordinatorStack.coordinator
+                subject.context.fastReconnectDeadlineSeconds = 12
+                let transitions = CurrentValueSubject<
+                    WebRTCCoordinator.StateMachine.Stage?, Never
+                >(nil)
+                subject.transition = { [weak subject] target in
+                    subject?.willTransitionAway()
+                    transitions.send(target)
+                }
+                _ = subject.transition(from: .joining(subject.context))
+                await fulfillment { [subject] in
+                    subject?.context.lastHealthCheckReceivedAt != nil
+                }
+
+                var event = Stream_Video_Sfu_Event_Error()
+                event.reconnectStrategy = strategy
+                event.error.code = code
+                event.error.shouldRetry = shouldRetry
+                let source: WebSocketConnectionState.DisconnectionSource =
+                    .serverInitiated(error: .init(with: event.error))
+
+                if connectionStateFirst {
+                    mockCoordinatorStack.sfuStack.setConnectionState(
+                        to: .disconnecting(source: source)
+                    )
+                }
+                mockCoordinatorStack.sfuStack.receiveEvent(.error(event))
+                if !connectionStateFirst {
+                    mockCoordinatorStack.sfuStack.setConnectionState(
+                        to: .disconnecting(source: source)
+                    )
+                }
+                mockCoordinatorStack.sfuStack.setConnectionState(
+                    to: .disconnected(source: source)
+                )
+
+                let target = try await transitions.compactMap { $0 }
+                    .nextValue(timeout: defaultTimeout)
+                let scenario = "strategy: \(strategy), retry: \(shouldRetry), "
+                    + "connection first: \(connectionStateFirst)"
+                XCTAssertEqual(target.id, expectedTarget, scenario, file: file, line: line)
+                XCTAssertEqual(target.context.disconnectionSource, source, file: file, line: line)
+                if case .fast = expectedStrategy {
+                    guard case let .fast(_, deadline) = target.context.reconnectionStrategy else {
+                        XCTFail(scenario, file: file, line: line)
+                        continue
+                    }
+                    XCTAssertEqual(deadline, 12, scenario, file: file, line: line)
+                } else {
+                    XCTAssertEqual(
+                        target.context.reconnectionStrategy,
+                        expectedStrategy,
+                        scenario,
+                        file: file,
+                        line: line
+                    )
+                }
+            }
+        }
     }
 
     private func assertTransitions(
