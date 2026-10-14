@@ -6,10 +6,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🔄 Changed
 
-### 🐞 Fixed
-
-- Preserved microphone level history when audio meter updates arrive together.
-
 # [1.55.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.55.0)
 _October 13, 2026_
 
