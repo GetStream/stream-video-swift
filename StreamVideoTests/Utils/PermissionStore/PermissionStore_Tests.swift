@@ -24,14 +24,13 @@ final class PermissionStore_Tests: XCTestCase, @unchecked Sendable {
         _ = subject
     }
 
-    override func tearDown() {
-        mockAudioStore.dismantle()
-
+    override func tearDown() async throws {
         subject = nil
         store = nil
         mockReducer = nil
+        try await mockAudioStore.dismantle()
         mockAudioStore = nil
-        super.tearDown()
+        try await super.tearDown()
     }
 
     // MARK: - canRequestMicrophonePermission

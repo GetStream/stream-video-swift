@@ -54,7 +54,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
     override func tearDown() async throws {
         await subject.cleanUp()
         Self.videoConfig.audioProcessingModule.setAudioFilter(nil)
-        mockAudioStore.dismantle()
+        try await mockAudioStore.dismantle()
         mockPermissions.dismantle()
         subject = nil
         callSettings = nil

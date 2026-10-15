@@ -21,12 +21,13 @@ final class CallAudioSession_Tests: XCTestCase, @unchecked Sendable {
         cancellables = []
     }
 
-    override func tearDown() {
+    override func tearDown() async throws {
         cancellables = nil
+        await subject?.deactivate()
         subject = nil
-        mockAudioStore.dismantle()
+        try await mockAudioStore.dismantle()
         mockAudioStore = nil
-        super.tearDown()
+        try await super.tearDown()
     }
 
     func test_init_configuresAudioSessionForCalls() async {
@@ -1427,7 +1428,7 @@ final class CallAudioSession_InitializationOrder_Tests: XCTestCase,
         delegate = nil
         callSettings = nil
         capabilities = nil
-        mockAudioStore?.dismantle()
+        try await mockAudioStore?.dismantle()
         mockAudioStore = nil
         try await super.tearDown()
     }

@@ -756,9 +756,13 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         let previousTimeout = WebRTCConfiguration.timeout
         let mockAudioStore = MockRTCAudioStore()
         mockAudioStore.makeShared()
+        addTeardownBlock { [self] in
+            subject.willTransitionAway()
+            await mockCoordinatorStack.coordinator.stateAdapter.cleanUp()
+            try await mockAudioStore.dismantle()
+        }
         defer {
             WebRTCConfiguration.timeout = previousTimeout
-            mockAudioStore.dismantle()
         }
         WebRTCConfiguration.timeout.audioSessionReadinessWatchdog = 0.2
         subject.context.audioSessionWatchdog = .init()
@@ -777,9 +781,13 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         let previousTimeout = WebRTCConfiguration.timeout
         let mockAudioStore = MockRTCAudioStore()
         mockAudioStore.makeShared()
+        addTeardownBlock { [self] in
+            subject.willTransitionAway()
+            await mockCoordinatorStack.coordinator.stateAdapter.cleanUp()
+            try await mockAudioStore.dismantle()
+        }
         defer {
             WebRTCConfiguration.timeout = previousTimeout
-            mockAudioStore.dismantle()
         }
         WebRTCConfiguration.timeout.audioSessionReadinessWatchdog = 0.2
         subject.context.audioSessionWatchdog = .init()
@@ -791,17 +799,26 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         }
     }
 
-    func test_transition_audioSessionBecomesReadyBeforeWatchdog_remainsOnJoined() async {
+    func test_transition_audioSessionBecomesReadyBeforeWatchdog_remainsOnJoined() async throws {
         subject.context.coordinator = mockCoordinatorStack.coordinator
         let previousTimeout = WebRTCConfiguration.timeout
         let mockAudioStore = MockRTCAudioStore()
         mockAudioStore.makeShared()
+        addTeardownBlock { [self] in
+            subject.willTransitionAway()
+            await mockCoordinatorStack.coordinator.stateAdapter.cleanUp()
+            try await mockAudioStore.dismantle()
+        }
         defer {
             WebRTCConfiguration.timeout = previousTimeout
-            mockAudioStore.dismantle()
         }
         WebRTCConfiguration.timeout.audioSessionReadinessWatchdog = 1
         subject.context.audioSessionWatchdog = .init()
+        try await mockAudioStore.audioStore.dispatch([
+            .setCurrentRoute(.dummy(inputs: [])),
+            .setActive(true)
+        ]).result()
+        XCTAssertFalse(subject.context.audioSessionWatchdog.isReady)
 
         let transitionExpectation = expectation(
             description: "No transition should be triggered while joined."
@@ -812,10 +829,9 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         subject.transition = { _ in transitionExpectation.fulfill() }
         _ = subject.transition(from: .joining(subject.context))
 
-        mockAudioStore.audioStore.dispatch(.setActive(true))
-        mockAudioStore.audioStore.dispatch(
+        try await mockAudioStore.audioStore.dispatch(
             .setCurrentRoute(.dummy(inputs: [.dummy()]))
-        )
+        ).result()
 
         await fulfillment(of: [transitionExpectation], timeout: 1.5)
         XCTAssertEqual(subject.id, .joined)
