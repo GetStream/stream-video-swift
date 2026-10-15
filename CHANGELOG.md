@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🐞 Fixed
 
-- Aborted join events now identify the leave source and reason. Use `Call.leave(initiator:reason:)` to distinguish user actions from application logic. Existing `leave(reason:)` calls remain compatible and report `unknown`. [#1363](https://github.com/GetStream/stream-video-swift/pull/1363)
+- Aborted join events now identify the leave source and reason. Use `Call.leave(initiator:reason:)` with typed `Call.LeaveInitiator` values such as `.user` and `.app`. Existing `leave(reason:)` calls remain compatible and report `unknown`. [#1363](https://github.com/GetStream/stream-video-swift/pull/1363)
 
 # [1.55.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.55.0)
 _October 13, 2026_

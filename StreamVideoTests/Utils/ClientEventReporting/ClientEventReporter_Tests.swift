@@ -428,6 +428,38 @@ final class ClientEventReporter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertNil(initiated.leaveReason)
     }
 
+    func test_completeStage_customInitiator_respectsWireLimit() async throws {
+        let cases = [
+            ("live_communication_kit", "live_communication_kit"),
+            (
+                String(repeating: "e\u{301}", count: 20),
+                String(repeating: "e\u{301}", count: 16)
+            )
+        ]
+
+        for (index, values) in cases.enumerated() {
+            let (initiator, expectedInitiator) = values
+            let attempt = await subject.beginStage(.coordinatorJoin)
+            let failure = ClientEventFailure(
+                code: .clientAborted,
+                leaveInitiator: .init(rawValue: initiator)
+            )
+
+            await subject.completeStage(
+                attempt,
+                retryCount: 0,
+                failure: failure
+            )
+
+            await waitForEventCount((index + 1) * 2)
+            let completed = try XCTUnwrap(recordedEvents().last {
+                $0.eventType == "completed"
+            })
+            XCTAssertEqual(completed.leaveInitiator, expectedInitiator)
+            XCTAssertEqual(failure.leaveInitiator?.rawValue, initiator)
+        }
+    }
+
     // MARK: - Helpers
 
     private func recordedEvents() -> [ClientEvent] {

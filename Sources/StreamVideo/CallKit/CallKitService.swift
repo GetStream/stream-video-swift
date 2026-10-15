@@ -453,7 +453,10 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         storageAccessQueue.sync {
             for (_, entry) in _storage {
                 entry.call.didPerform(.didReset)
-                entry.call.leave(initiator: .callkit, reason: "CXProvider.reset")
+                entry.call.leave(
+                    initiator: .callkit,
+                    reason: Call.LeaveReason.callkitProviderReset.rawValue
+                )
             }
         }
     }
@@ -634,7 +637,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 if !(error is CallJoinInterceptionError), !(error is TimeOutError) {
                     callToJoinEntry.call.leave(
                         initiator: .callkit,
-                        reason: "CXAnswerCallAction.failed"
+                        reason: Call.LeaveReason.callkitAnswerFailed.rawValue
                     )
                 }
                 set(nil, for: action.callUUID)
@@ -691,7 +694,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
 
         callToJoinEntry.call.leave(
             initiator: .callkit,
-            reason: "callkit.join.timeout"
+            reason: Call.LeaveReason.callkitJoinTimeout.rawValue
         )
         set(nil, for: answerAction.callUUID)
         eventPipelineSubject.send(.idle)

@@ -49,7 +49,10 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
 
         private func didUpdateActiveCall(_ activeCall: Call?, oldValue: Call?) {
             if let oldValue, oldValue.cId != activeCall?.cId {
-                oldValue.leave(initiator: .unknown, reason: "active_call_replaced")
+                oldValue.leave(
+                    initiator: .unknown,
+                    reason: Call.LeaveReason.activeCallReplaced.rawValue
+                )
             }
 
             if ringingCall != nil {

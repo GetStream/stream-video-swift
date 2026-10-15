@@ -66,7 +66,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         failure: .init(
                             code: .clientAborted,
                             leaveInitiator: .sdkError,
-                            leaveReason: "error"
+                            leaveReason: Call.LeaveReason.error.rawValue
                         )
                     )
                     if let joinResponseHandler = context.joinResponseHandler {

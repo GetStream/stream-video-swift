@@ -74,7 +74,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         .abortPendingStages(failure: .init(
                             code: .backendLeave,
                             leaveInitiator: .remoteEvent,
-                            leaveReason: "call.blocked_user"
+                            leaveReason: Call.LeaveReason.blockedUser.rawValue
                         ))
 
                     try Task.checkCancellation()

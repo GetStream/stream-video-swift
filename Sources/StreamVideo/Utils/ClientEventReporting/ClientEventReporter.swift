@@ -256,7 +256,9 @@ actor ClientEventReporter: ClientEventReporting {
         // `type` is not part of the generated memberwise initializer, so set it
         // explicitly to carry the call type (`<call_type>`).
         event.type = context.callType
-        event.leaveInitiator = failure?.leaveInitiator?.rawValue
+        event.leaveInitiator = failure?.leaveInitiator.map {
+            String(String.UnicodeScalarView($0.rawValue.unicodeScalars.prefix(32)))
+        }
         event.leaveReason = failure?.leaveReason.map {
             String(String.UnicodeScalarView($0.unicodeScalars.prefix(200)))
         }

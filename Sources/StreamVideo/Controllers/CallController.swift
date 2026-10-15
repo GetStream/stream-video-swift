@@ -822,7 +822,10 @@ class CallController: @unchecked Sendable {
                 if let call, let errorStage = stage as? WebRTCCoordinator.StateMachine.Stage.ErrorStage {
                     call.transitionDueToError(errorStage.error)
                 }
-                call?.leave(initiator: .sdkError, reason: "error")
+                call?.leave(
+                    initiator: .sdkError,
+                    reason: Call.LeaveReason.error.rawValue
+                )
             }
         default:
             break

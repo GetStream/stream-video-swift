@@ -341,7 +341,10 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .receive(on: processingQueue)
                 .sink { [weak self] _ in
                     guard let self else { return }
-                    transitionOrError(.leaving(context, reason: "error"))
+                    transitionOrError(.leaving(
+                        context,
+                        reason: Call.LeaveReason.error.rawValue
+                    ))
                 }
                 .store(in: disposableBag)
         }
