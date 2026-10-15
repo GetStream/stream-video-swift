@@ -77,12 +77,23 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
                 options
             )
 
-        await coordinator.stateAdapter.set(
+        return try await apply(response, to: coordinator.stateAdapter)
+    }
+
+    private func apply(
+        _ response: JoinCallResponse,
+        to stateAdapter: isolated WebRTCStateAdapter
+    ) async throws -> (sfuAdapter: SFUAdapter, response: JoinCallResponse) {
+        try Task.checkCancellation()
+        await stateAdapter.enqueueOwnCapabilities { Set(response.ownCapabilities) }
+        // Cleanup can run while capability changes stop screen sharing.
+        try Task.checkCancellation()
+
+        stateAdapter.set(
             token: response.credentials.token
         )
-        await coordinator.stateAdapter.enqueueOwnCapabilities { Set(response.ownCapabilities) }
-        await coordinator.stateAdapter.set(audioSettings: response.call.settings.audio)
-        await coordinator.stateAdapter.set(
+        stateAdapter.set(audioSettings: response.call.settings.audio)
+        stateAdapter.set(
             connectOptions: ConnectOptions(
                 iceServers: response.credentials.iceServers
             )
@@ -100,7 +111,7 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
         ///   the settings to turn the speaker off. This prevents external
         ///   devices from mistakenly having the speaker route enabled.
         /// - Finally, applies the determined call settings to the state adapter.
-        let initialCallSettings = await coordinator.stateAdapter.initialCallSettings
+        let initialCallSettings = stateAdapter.initialCallSettings
         let remoteCallSettings = CallSettings(response.call.settings)
         let callSettings = {
             var result = initialCallSettings ?? remoteCallSettings
@@ -121,11 +132,9 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
 
         log.debug("CallSettings when joining speakerOn:\(callSettings.speakerOn)", subsystems: .webRTC)
 
-        await coordinator
-            .stateAdapter
-            .enqueueCallSettings { _ in callSettings }
+        stateAdapter.enqueueCallSettings { _ in callSettings }
 
-        await coordinator.stateAdapter.set(
+        stateAdapter.set(
             videoOptions: .init(preferredCameraPosition: {
                 switch response.call.settings.video.cameraFacing {
                 case .back:
@@ -140,7 +149,7 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
             }())
         )
 
-        await coordinator.stateAdapter.set(
+        stateAdapter.set(
             isTracingEnabled: response.statsOptions.enableRtcStats
         )
 
@@ -150,8 +159,8 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
                     .init(string: response.credentials.server.url),
                     errorMessage: "Server URL is invalid."
                 ),
-                apiKey: coordinator.stateAdapter.apiKey,
-                token: await coordinator.stateAdapter.token
+                apiKey: stateAdapter.apiKey,
+                token: stateAdapter.token
             ),
             webSocketConfiguration: .init(
                 url: try unwrap(
@@ -162,17 +171,17 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
         )
 
         let statsReportingInterval = response.statsOptions.reportingIntervalMs / 1000
-        if let statsReporter = await coordinator.stateAdapter.statsAdapter {
+        if let statsReporter = stateAdapter.statsAdapter {
             statsReporter.deliveryInterval = TimeInterval(statsReportingInterval)
         } else {
             let statsReporter = WebRTCStatsAdapter(
-                sessionID: await coordinator.stateAdapter.sessionID,
-                unifiedSessionID: coordinator.stateAdapter.unifiedSessionId,
-                isTracingEnabled: await coordinator.stateAdapter.isTracingEnabled,
-                trackStorage: coordinator.stateAdapter.trackStorage
+                sessionID: stateAdapter.sessionID,
+                unifiedSessionID: stateAdapter.unifiedSessionId,
+                isTracingEnabled: stateAdapter.isTracingEnabled,
+                trackStorage: stateAdapter.trackStorage
             )
             statsReporter.deliveryInterval = TimeInterval(statsReportingInterval)
-            await coordinator.stateAdapter.set(statsAdapter: statsReporter)
+            stateAdapter.set(statsAdapter: statsReporter)
         }
 
         return (sfuAdapter, response)
