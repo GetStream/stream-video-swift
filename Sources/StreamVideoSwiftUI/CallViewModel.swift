@@ -1208,19 +1208,7 @@ open class CallViewModel: ObservableObject {
             else {
                 break
             }
-            /// If the call that was accepted is the incoming call we are presenting, then we reject
-            /// and set the activeCall to the current one in order to reset the callingState to
-            /// inCall or idle.
-            Task {
-                log
-                    .debug(
-                        "Will reject call as isEnteringCall:\(enteringCallTask != nil) isUserIDSameAsLoggedInUser:\(event.user?.id == streamVideo.user.id)"
-                    )
-                _ = try? await streamVideo
-                    .call(callType: incomingCall.type, callId: incomingCall.id)
-                    .reject()
-                setActiveCall(call)
-            }
+            setActiveCall(call)
         case .outgoing where call?.cId == event.callCid:
             // Mirror `joinCall` so the incoming UI is dismissed before
             // `enterCall` finishes the async join flow, which may now be
