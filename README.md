@@ -74,6 +74,26 @@ This repository contains the following parts:
 - SwiftUI SDK (UI components developed in SwiftUI)
 - UIKit SDK (wrappers for easier usage in UIKit apps)
 
+### Working in this repository
+
+| Location | Purpose |
+| --- | --- |
+| `Sources/` | SDK modules: StreamVideo, StreamVideoSwiftUI, and StreamVideoUIKit. |
+| `StreamVideoTests/`, `StreamVideoSwiftUITests/`, `StreamVideoUIKitTests/` | SDK tests and snapshots. |
+| `DemoApp/`, `DemoAppUIKit/`, `CallIntent/`, `ScreenSharing/` | Sample apps and their extensions. |
+| `SwiftUIDemoAppUITests/`, `TestTools/`, `DocumentationTests/` | Demo UI tests, shared test helpers, and documentation examples. |
+| `fastlane/`, `Scripts/`, `.github/` | Build, test, generation, and release automation. |
+
+Start with [repository guidance](AGENTS.md) for shared conventions.
+The [development](skills/development/SKILL.md), [test](skills/test/SKILL.md),
+[review](skills/review/SKILL.md), [release](skills/release/SKILL.md), and
+[profile](skills/profile/SKILL.md) skills describe each workflow.
+These files travel with the checkout. They require no agent plugin.
+If your agent does not discover `skills/`, include the relevant file path
+in your request.
+The [optional setup guide](skills/setup.md) explains companion skills and
+installation choices for your agent.
+
 ### Main Principles
 
 - Progressive disclosure: The SDK can be used easily with very minimal knowledge of it. As you become more familiar with it, you can dig deeper and start customizing it on all levels.

@@ -34,6 +34,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         var ringingTimedOut: Bool = false
         var isEndedElsewhere: Bool = false
         var leaveReason: String?
+        @Atomic var leaveInitiator: Call.LeaveInitiator = .callkit
 
         init(
             call: Call,
@@ -466,7 +467,10 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         storageAccessQueue.sync {
             for (_, entry) in _storage {
                 entry.call.didPerform(.didReset)
-                entry.call.leave()
+                entry.call.leave(
+                    initiator: .callkit,
+                    reason: Call.LeaveReason.callkitProviderReset.rawValue
+                )
             }
         }
     }
@@ -646,7 +650,10 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 // original leave reason, so only leave for failures the join
                 // flow has not already handled.
                 if !(error is CallJoinInterceptionError), !(error is TimeOutError) {
-                    callToJoinEntry.call.leave()
+                    callToJoinEntry.call.leave(
+                        initiator: .callkit,
+                        reason: Call.LeaveReason.callkitAnswerFailed.rawValue
+                    )
                 }
                 set(nil, for: action.callUUID)
                 log.error(error, subsystems: .callKit)
@@ -700,7 +707,10 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             subsystems: .callKit
         )
 
-        callToJoinEntry.call.leave(reason: "callkit.join.timeout")
+        callToJoinEntry.call.leave(
+            initiator: .callkit,
+            reason: Call.LeaveReason.callkitJoinTimeout.rawValue
+        )
         set(nil, for: answerAction.callUUID)
         eventPipelineSubject.send(.idle)
     }
@@ -737,7 +747,10 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 // is ended before or during the join flow.
                 eventPipelineSubject.send(.reject)
                 stackEntry.call.didPerform(.performEndCall)
-                stackEntry.call.leave(reason: stackEntry.leaveReason)
+                stackEntry.call.leave(
+                    initiator: stackEntry.leaveInitiator,
+                    reason: stackEntry.leaveReason ?? "CXEndCallAction"
+                )
             } else {
                 do {
                     let rejectionReason = if let leaveReason = stackEntry.leaveReason {
@@ -948,6 +961,14 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
 
             if let leaveReason {
                 callEndedEntry.leaveReason = leaveReason
+            }
+            switch leaveReason {
+            case StreamRejectionReasonProvider.HandledCallReason.callEventReceived.rawValue:
+                callEndedEntry.leaveInitiator = .remoteEvent
+            case StreamRejectionReasonProvider.HandledCallReason.autoLeave.rawValue:
+                callEndedEntry.leaveInitiator = .app
+            default:
+                break
             }
 
             _storage[callEndedEntry.callUUID] = callEndedEntry

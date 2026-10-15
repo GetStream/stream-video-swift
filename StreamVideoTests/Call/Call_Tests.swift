@@ -937,6 +937,7 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
 
         subject.leave(reason: expectedReason)
 
+        XCTAssertEqual(mockCallController.leaveInitiators, [.unknown])
         XCTAssertEqual(
             mockCallController.recordedInputPayload(
                 String.self,
@@ -951,11 +952,13 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
         let subject = MockCall(.dummy(callController: mockCallController))
         subject.stub(for: \.state, with: .init(.dummy()))
         let expectedReason = "manual-hangup"
+        let expectedInitiator = Call.LeaveInitiator(rawValue: "custom_integration")
 
-        subject.leave(reason: expectedReason)
+        subject.leave(initiator: expectedInitiator, reason: expectedReason)
         subject.leave(reason: expectedReason)
 
         XCTAssertEqual(mockCallController.timesCalled(.leave), 1)
+        XCTAssertEqual(mockCallController.leaveInitiators, [expectedInitiator])
         XCTAssertEqual(
             mockCallController.recordedInputPayload(
                 String.self,

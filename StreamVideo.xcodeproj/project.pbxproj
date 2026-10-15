@@ -283,6 +283,7 @@
 				Mock/HTTPClient_Mock.swift,
 				Mock/MockAppStateAdapter.swift,
 				Mock/MockCall.swift,
+				Mock/MockCallController.swift,
 				Mock/MockDefaultAPI.swift,
 				Mock/MockDefaultAPIEndpoints.swift,
 				Mock/MockFunc.swift,
