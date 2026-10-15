@@ -262,7 +262,10 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                     .nextValue(timeout: CallConfiguration.timeout.join)
             } catch {
                 if error is TimeOutError {
-                    leave(reason: "join.timeout")
+                    leave(
+                        initiator: .sdkError,
+                        reason: LeaveReason.joinTimeout.rawValue
+                    )
                 }
                 throw error
             }
@@ -695,6 +698,21 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     ///   Pass a custom value when you want the backend to distinguish between
     ///   different leave flows (for example, user action vs timeout).
     public func leave(reason: String? = nil) {
+        leave(initiator: .unknown, reason: reason)
+    }
+
+    /// Leaves the call and identifies the source in client call events.
+    ///
+    /// Use ``LeaveInitiator/user`` for a user action and
+    /// ``LeaveInitiator/app`` for integration logic.
+    /// Existing calls to ``leave(reason:)`` report `unknown`.
+    ///
+    /// - Parameters:
+    ///   - initiator: The source of the leave request. Client call events
+    ///     limit this value to 32 Unicode scalars.
+    ///   - reason: Optional reason forwarded to the SFU. Client call events
+    ///     limit this value to 200 Unicode scalars.
+    public func leave(initiator: LeaveInitiator, reason: String? = nil) {
         stateMachine.transition(
             .leaving(
                 .init(
@@ -715,9 +733,48 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                         )
                     )
                 ),
-                reason: reason
+                reason: reason,
+                initiator: initiator
             )
         )
+    }
+
+    /// Identifies the source of a leave request in client call events.
+    public struct LeaveInitiator: Hashable, Sendable {
+        /// A user ended the call.
+        public static let user: Self = .init(rawValue: "user")
+        /// The integration ended the call through application logic.
+        public static let app: Self = .init(rawValue: "app")
+        /// CallKit ended the call or aborted its answer action.
+        public static let callkit: Self = .init(rawValue: "callkit")
+        /// A remote call event ended the call.
+        public static let remoteEvent: Self = .init(rawValue: "remote_event")
+        /// An SDK error or recovery limit ended the call.
+        public static let sdkError: Self = .init(rawValue: "sdk_error")
+        /// The caller did not identify the source.
+        public static let unknown: Self = .init(rawValue: "unknown")
+
+        /// The source identifier sent in client call events.
+        public let rawValue: String
+
+        /// Creates a custom leave initiator.
+        init(rawValue: String) {
+            self.rawValue = rawValue
+        }
+    }
+
+    /// Fixed reasons used by the core SDK when leaving a call.
+    enum LeaveReason: String {
+        case activeCallReplaced = "active_call_replaced"
+        case joinTimeout = "join.timeout"
+        case joinInterceptionFailed = "join.interception.failed"
+        case callkitProviderReset = "CXProvider.reset"
+        case callkitAnswerFailed = "CXAnswerCallAction.failed"
+        case callkitJoinTimeout = "callkit.join.timeout"
+        case blockedUser = "call.blocked_user"
+        case error
+        case disconnected
+        case rejoinAttemptLimitExceeded = "rejoin_attempt_limit_exceeded"
     }
 
     /// Starts noise cancellation asynchronously.

@@ -170,10 +170,16 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         context.flowError = nil
                         try transition?(.error(context, error: error))
                     } else {
-                        try transition?(.leaving(context, reason: "error"))
+                        try transition?(.leaving(
+                            context,
+                            reason: Call.LeaveReason.error.rawValue
+                        ))
                     }
                 case .disconnected:
-                    try transition?(.leaving(context, reason: "disconnected"))
+                    try transition?(.leaving(
+                        context,
+                        reason: Call.LeaveReason.disconnected.rawValue
+                    ))
                 }
             } catch let (blockError) {
                 if context.reconnectionStrategy == .disconnected {
@@ -214,7 +220,10 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     subsystems: .webRTC
                 )
                 try transition?(
-                    .leaving(context, reason: "rejoin_attempt_limit_exceeded")
+                    .leaving(
+                        context,
+                        reason: Call.LeaveReason.rejoinAttemptLimitExceeded.rawValue
+                    )
                 )
                 return
             }
