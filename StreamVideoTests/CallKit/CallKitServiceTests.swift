@@ -802,6 +802,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
             call.recordedInputPayload(String.self, for: .leave)?.first,
             "callkit.join.timeout"
         )
+        XCTAssertEqual(call.leaveInitiators.first, .callkit)
         XCTAssertEqual(subject.callCount, 0)
         await fulfillment {
             if case .idle = self.subject.eventPipelineSubject.value {
@@ -826,7 +827,9 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
             call.recordedInputPayload(String.self, for: .leave)
         )
         XCTAssertEqual(leaveReasons.first, "callkit.join.timeout")
-        XCTAssertTrue(leaveReasons.dropFirst().allSatisfy(\.isEmpty))
+        XCTAssertTrue(leaveReasons.dropFirst().allSatisfy {
+            $0 == "CXAnswerCallAction.failed"
+        })
         XCTAssertFalse(
             callProvider.invocations.contains {
                 switch $0 {
@@ -1303,9 +1306,39 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         let reason = try XCTUnwrap(
             call.recordedInputPayload(String.self, for: .leave)?.first
         )
+        XCTAssertEqual(call.leaveInitiators.first, .app)
         XCTAssertEqual(
             reason,
             StreamRejectionReasonProvider.HandledCallReason.autoLeave.rawValue
+        )
+    }
+
+    @MainActor
+    func test_callEnded_remoteEventAfterLocalEnd_preservesFirstCause() async throws {
+        let previousDevice = InjectedValues[\.currentDevice]
+        let device = CurrentDevice(currentDeviceProvider: { .phone })
+        device.didUpdate(.phone)
+        InjectedValues[\.currentDevice] = device
+        defer { InjectedValues[\.currentDevice] = previousDevice }
+        let call = try await acceptIncomingCall()
+
+        subject.callEnded(cid, ringingTimedOut: false, leaveReason: "local-end")
+        await fulfillment { self.callController.requestWasCalledWith != nil }
+        let action = try XCTUnwrap(
+            callController.requestWasCalledWith?.0.actions.first as? CXEndCallAction
+        )
+        mockedStreamVideo.process(.coordinatorEvent(.typeCallEndedEvent(.init(
+            call: .dummy(cid: cid, id: callId),
+            callCid: cid,
+            createdAt: .init()
+        ))))
+        subject.provider(callProvider, perform: action)
+
+        await fulfillment { call.timesCalled(.leave) == 1 }
+        XCTAssertEqual(call.leaveInitiators.first, .callkit)
+        XCTAssertEqual(
+            call.recordedInputPayload(String.self, for: .leave)?.first,
+            "local-end"
         )
     }
 

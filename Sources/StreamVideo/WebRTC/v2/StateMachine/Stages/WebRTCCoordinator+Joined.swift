@@ -267,7 +267,11 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .receive(on: processingQueue)
                 .sink { [weak self] in
                     guard let self else { return }
-                    transitionOrError(.leaving(context, reason: "\($0.reason)"))
+                    transitionOrError(.leaving(
+                        context,
+                        reason: "\($0.reason)",
+                        initiator: .remoteEvent
+                    ))
                 }
                 .store(in: disposableBag)
         }
@@ -327,7 +331,10 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 subsystems: .webRTC
             )
             if context.reconnectionStrategy == .disconnected {
-                transitionOrError(.leaving(context, reason: "error"))
+                transitionOrError(.leaving(
+                    context,
+                    reason: Call.LeaveReason.error.rawValue
+                ))
             } else {
                 transitionOrDisconnect(.disconnected(context))
             }

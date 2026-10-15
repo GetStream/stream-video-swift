@@ -4,7 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
-### 🔄 Changed
+### 🐞 Fixed
+
+- Aborted join events now identify the leave source and reason. Use `Call.leave(initiator:reason:)` with typed `Call.LeaveInitiator` values such as `.user` and `.app`. Existing `leave(reason:)` calls remain compatible and report `unknown`. [#1363](https://github.com/GetStream/stream-video-swift/pull/1363)
+- Cancelled call joins now discard late authentication responses instead of continuing the connection. [#1362](https://github.com/GetStream/stream-video-swift/pull/1362)
+- Accepted-call events no longer make the incoming call UI reject a call that is joining on this device. [#1365](https://github.com/GetStream/stream-video-swift/pull/1365)
 
 ### 🐞 Fixed
 

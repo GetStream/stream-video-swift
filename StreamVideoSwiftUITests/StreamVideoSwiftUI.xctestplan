@@ -26,7 +26,6 @@
         "CallViewModel_Tests\/test_inCall_participantJoinedAndLeft()",
         "CallViewModel_Tests\/test_incomingCall_acceptCall()",
         "CallViewModel_Tests\/test_incomingCall_acceptedAnotherCallElsewhere_callingStateShouldRemainInCall()",
-        "CallViewModel_Tests\/test_incomingCall_acceptedFromSameUserElsewhere_callingStateChangesToIdle()",
         "CallViewModel_Tests\/test_incomingCall_anotherUserAcceptedThisCall_callingStateShouldRemainIncoming()",
         "CallViewModel_Tests\/test_incomingCall_rejectCall()",
         "CallViewModel_Tests\/test_incomingCall_sameUserAcceptedAnotherCall_callingStateShouldRemainIncoming()",
