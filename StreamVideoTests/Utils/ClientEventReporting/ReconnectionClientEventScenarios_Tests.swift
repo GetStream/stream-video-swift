@@ -150,6 +150,7 @@ final class ReconnectionClientEventScenarios_Tests: XCTestCase, @unchecked Senda
         line: UInt = #line
     ) async throws {
         await harness.installSFUAdapter()
+        harness.stack.receiveHealthCheck(every: 0.01)
         let subject = WebRTCCoordinator.StateMachine.Stage.joined(
             .init(coordinator: harness.stack.coordinator)
         )
@@ -174,7 +175,8 @@ final class ReconnectionClientEventScenarios_Tests: XCTestCase, @unchecked Senda
         line: UInt = #line
     ) async throws {
         let expectation = expectation(description: "Transition to \(expectedTarget)")
-        subject.transition = { target in
+        subject.transition = { [weak subject] target in
+            subject?.willTransitionAway()
             guard target.id == expectedTarget else { return }
             Task {
                 do {
@@ -188,7 +190,9 @@ final class ReconnectionClientEventScenarios_Tests: XCTestCase, @unchecked Senda
 
         _ = subject.transition(from: .init(id: previousStageId, context: subject.context))
         if let trigger {
-            try await Task.sleep(nanoseconds: 150_000_000)
+            await fulfillment {
+                subject.context.lastHealthCheckReceivedAt != nil
+            }
             trigger()
         }
         await fulfillment(of: [expectation], timeout: defaultTimeout)
