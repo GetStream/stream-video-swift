@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🐞 Fixed
 
+- Keep locally answered CallKit calls connected when an incoming-call check finishes late or a duplicate call report arrives.
 - Aborted join events now identify the leave source and reason. Use `Call.leave(initiator:reason:)` with typed `Call.LeaveInitiator` values such as `.user` and `.app`. Existing `leave(reason:)` calls remain compatible and report `unknown`. [#1363](https://github.com/GetStream/stream-video-swift/pull/1363)
 - Cancelled call joins now discard late authentication responses instead of continuing the connection. [#1362](https://github.com/GetStream/stream-video-swift/pull/1362)
 - Accepted-call events no longer make the incoming call UI reject a call that is joining on this device. [#1365](https://github.com/GetStream/stream-video-swift/pull/1365)
@@ -15,7 +16,6 @@ _October 13, 2026_
 
 ### 🐞 Fixed
 
-- Keep locally answered CallKit calls connected when an incoming-call check finishes late or a duplicate call report arrives.
 - Configure and activate audio before capture starts, and prepare call transports before capture to avoid an engine rebuild during joining. [#1355](https://github.com/GetStream/stream-video-swift/pull/1355)
 - Fixed a launch crash when an iOS app that uses StreamVideo runs on Mac. [#1344](https://github.com/GetStream/stream-video-swift/issues/1344)
 - Kept blocking WebRTC operations and peer connection teardown off UI and Swift concurrency threads. [#1345](https://github.com/GetStream/stream-video-swift/pull/1345)
