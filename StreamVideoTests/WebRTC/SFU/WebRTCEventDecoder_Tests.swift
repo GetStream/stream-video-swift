@@ -73,8 +73,53 @@ final class WebRTCEventDecoder_Tests: XCTestCase, @unchecked Sendable {
             .error(errorEvent)
         )
         XCTAssertEqual(
-            (result.error() as? Stream_Video_Sfu_Models_Error)?.message,
-            error.message
+            result.error() as? Stream_Video_Sfu_Event_Error,
+            errorEvent
         )
+    }
+
+    func test_decode_unspecifiedError_keepsSocketConnectedUntilTransportCloses_() async throws {
+        for shouldRetry in [false, true] {
+            let client = WebSocketClient(
+                sessionConfiguration: .ephemeral,
+                eventDecoder: subject,
+                eventNotificationCenter: DefaultEventNotificationCenter(),
+                webSocketClientType: .sfu,
+                connectRequest: nil,
+                requiresAuth: false
+            )
+            client.webSocketDidConnect()
+            var healthCheck = Stream_Video_Sfu_Event_SfuEvent()
+            healthCheck.healthCheckResponse = .init()
+            client.webSocketDidReceiveMessage(try healthCheck.serializedData())
+
+            var event = Stream_Video_Sfu_Event_SfuEvent()
+            event.error.error.message = .unique
+            event.error.error.shouldRetry = shouldRetry
+            let received = expectation(description: "Unspecified error delivered")
+            let cancellable = client.eventSubject.sink { payload in
+                XCTAssertEqual(
+                    payload as? Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload,
+                    event.eventPayload
+                )
+                received.fulfill()
+            }
+            defer { cancellable.cancel() }
+
+            client.webSocketDidReceiveMessage(try event.serializedData())
+
+            await fulfillment(of: [received], timeout: defaultTimeout)
+            guard case .connected = client.connectionState else {
+                XCTFail("An unspecified SFU error must not disconnect the socket")
+                continue
+            }
+
+            client.webSocketDidDisconnect(error: nil)
+
+            XCTAssertEqual(
+                client.connectionState,
+                .disconnected(source: .serverInitiated(error: nil))
+            )
+        }
     }
 }
