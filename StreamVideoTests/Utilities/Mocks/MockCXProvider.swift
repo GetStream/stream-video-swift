@@ -12,6 +12,7 @@ final class MockCXProvider: CXProvider {
     }
 
     private(set) var invocations: [Invocation] = []
+    var reportNewIncomingCallError: Error?
 
     convenience init() {
         self.init(configuration: .init(localizedName: "test"))
@@ -29,7 +30,7 @@ final class MockCXProvider: CXProvider {
                 completion: completion
             )
         )
-        completion(nil)
+        completion(reportNewIncomingCallError)
     }
 
     override func reportCall(
