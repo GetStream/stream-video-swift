@@ -566,7 +566,11 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         let expectedResponse = JoinCallResponse.dummy(call: .dummy(cid: "test-cid"))
         let mockAudioStore = MockRTCAudioStore()
         mockAudioStore.makeShared()
-        defer { mockAudioStore.dismantle() }
+        addTeardownBlock { [self] in
+            await mockWebRTCCoordinatorFactory.mockCoordinatorStack
+                .coordinator.stateAdapter.cleanUp()
+            try await mockAudioStore.dismantle()
+        }
 
         mockWebRTCCoordinatorFactory
             .mockCoordinatorStack

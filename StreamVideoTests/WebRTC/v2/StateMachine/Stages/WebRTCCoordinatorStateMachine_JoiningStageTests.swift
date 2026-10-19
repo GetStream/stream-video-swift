@@ -108,10 +108,14 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
         let previousTimeout = WebRTCConfiguration.timeout
         let mockAudioStore = MockRTCAudioStore()
         mockAudioStore.makeShared()
+        addTeardownBlock { [self] in
+            subject.willTransitionAway()
+            await mockCoordinatorStack.coordinator.stateAdapter.cleanUp()
+            try await mockAudioStore.dismantle()
+        }
         subject.context.audioSessionWatchdog = .init()
         defer {
             WebRTCConfiguration.timeout = previousTimeout
-            mockAudioStore.dismantle()
         }
         WebRTCConfiguration.timeout.audioSessionConfigurationCompletion = 60
 
@@ -655,9 +659,13 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
         let previousTimeout = WebRTCConfiguration.timeout
         let mockAudioStore = MockRTCAudioStore()
         mockAudioStore.makeShared()
+        addTeardownBlock { [self] in
+            subject.willTransitionAway()
+            await mockCoordinatorStack.coordinator.stateAdapter.cleanUp()
+            try await mockAudioStore.dismantle()
+        }
         defer {
             WebRTCConfiguration.timeout = previousTimeout
-            mockAudioStore.dismantle()
         }
         WebRTCConfiguration.timeout.audioSessionConfigurationCompletion = 0.1
 
@@ -692,9 +700,13 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
         let previousTimeout = WebRTCConfiguration.timeout
         let mockAudioStore = MockRTCAudioStore()
         mockAudioStore.makeShared()
+        addTeardownBlock { [self] in
+            subject.willTransitionAway()
+            await mockCoordinatorStack.coordinator.stateAdapter.cleanUp()
+            try await mockAudioStore.dismantle()
+        }
         defer {
             WebRTCConfiguration.timeout = previousTimeout
-            mockAudioStore.dismantle()
         }
         // With a practically infinite readiness window and an inactive audio
         // store, the stage can only reach `.joined` within the assertion
