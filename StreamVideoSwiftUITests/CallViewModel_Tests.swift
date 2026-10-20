@@ -409,6 +409,17 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
 
     func test_outgoingCall_acceptedJoinFailsAfterDeadline_doesNotRestartRinging() async {
         await prepare(ringTimeOut: 3000)
+        let applicationStateAdapter = MockAppStateAdapter()
+        applicationStateAdapter.makeShared()
+        let endedAfterBackgrounding = expectation(description: "Expired recovery must not end the session")
+        endedAfterBackgrounding.isInverted = true
+        let ringingController = OutgoingRingingController(streamVideo: streamVideo, callCiD: cId) {
+            endedAfterBackgrounding.fulfill()
+        }
+        defer {
+            withExtendedLifetime(ringingController) {}
+            applicationStateAdapter.dismante()
+        }
         mockCall.stubbedJoinError = ClientError("join failed")
         mockCall.waitForJoinToResume = true
         subject.startCall(callType: .default, callId: callId, members: participants, ring: true)
@@ -428,6 +439,32 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertNotNil(subject.error)
         XCTAssertEqual(mockCall.timesCalled(.join), 1)
         XCTAssertEqual(mockCall.timesCalled(.reject), 0)
+        XCTAssertEqual(mockCall.timesCalled(.leave), 1)
+        XCTAssertEqual(mockCall.leaveInitiators, [.sdkError])
+        XCTAssertNil(subject.call)
+        await fulfilmentInMainActor { self.streamVideo.state.ringingCall == nil }
+
+        applicationStateAdapter.stubbedState = .background
+        await fulfillment(of: [endedAfterBackgrounding], timeout: 0.2)
+        subject.hangUp()
+        await fulfilmentInMainActor { self.streamVideo.state.ringingCall == nil }
+    }
+
+    func test_outgoingCall_firstSessionAssignedDuringHangUp_stillLeaves() async {
+        await prepare()
+        mockCall.state.session = nil
+        subject.setActiveCall(mockCall)
+        subject.setCallingState(.outgoing)
+
+        subject.hangUp()
+        // Create can publish the first session before the hang-up task runs.
+        mockCall.state.session = .dummy(id: "first-session")
+
+        await assertCallingState(.idle)
+        XCTAssertEqual(mockCall.timesCalled(.leave), 1)
+        XCTAssertEqual(mockCall.timesCalled(.reject), 1)
+        subject.hangUp()
+        await assertCallingState(.idle)
     }
 
     func test_outgoingCall_hangUpAfterAcceptance_leavesWithoutRejectingOrJoining() async {
@@ -837,6 +874,8 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         // the cancel to the create path, so nothing is rejected yet and these
         // synchronous checks still observe the outgoing state.
         subject.hangUp()
+        // The first session belongs to this create, not a replacement call.
+        mockCall.state.session = .dummy(id: "first-session")
         // Even though the reject will fail, the leaveCall should be completed
         await assertCallingState(.idle)
         XCTAssertEqual(

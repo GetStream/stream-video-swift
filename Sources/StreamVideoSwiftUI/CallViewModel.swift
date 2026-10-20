@@ -1032,6 +1032,10 @@ open class CallViewModel: ObservableObject {
                 }
                 log.error("Error starting a call", error: error)
                 self.error = error
+                if resumesRingingOnFailure {
+                    // Stop ring observers when accepted-call recovery is over.
+                    leaveCall(reason: "joinFailed", initiator: .sdkError)
+                }
                 setCallingState(.idle)
                 audioRecorder.stopRecording()
                 enteringCallTask = nil
@@ -1102,6 +1106,7 @@ open class CallViewModel: ObservableObject {
             leaveCall(reason: leaveReason, initiator: initiator)
             return
         }
+        // The first session may arrive after hang-up starts.
         let sessionId = call.state.session?.id
 
         Task(disposableBag: disposableBag, priority: .userInitiated) { [weak self] in
@@ -1118,7 +1123,8 @@ open class CallViewModel: ObservableObject {
                 let rejectionReason = await streamVideo
                     .rejectionReasonProvider
                     .reason(for: call.cId, ringTimeout: ringTimeout)
-                guard self.call === call, call.state.session?.id == sessionId else { return }
+                guard self.call === call,
+                      sessionId == nil || call.state.session?.id == sessionId else { return }
                 guard callingState == .outgoing else {
                     // Honor the user's hang-up even if acceptance started a join.
                     if !ringTimeout { leaveCall(reason: leaveReason, initiator: initiator) }
@@ -1147,7 +1153,8 @@ open class CallViewModel: ObservableObject {
                 log.error(error)
             }
 
-            guard self.call === call, call.state.session?.id == sessionId,
+            guard self.call === call,
+                  sessionId == nil || call.state.session?.id == sessionId,
                   !ringTimeout || callingState == .outgoing else { return }
             if ringTimeout, joinAcceptedOutgoingCall(call) { return }
             leaveCall(reason: leaveReason, initiator: initiator)
