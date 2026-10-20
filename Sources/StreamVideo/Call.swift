@@ -520,6 +520,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// - Throws: An error if the rejection fails.
     @discardableResult
     public func reject(reason: String? = nil) async throws -> RejectCallResponse {
+        try await checkOutgoingRingCancellation(reason: reason)
         let currentStage = stateMachine.currentStage
 
         if
@@ -546,6 +547,41 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             return try await deliverySubject
                 .compactMap { $0 }
                 .nextValue(timeout: CallConfiguration.timeout.reject)
+        }
+    }
+
+    @MainActor
+    private func checkOutgoingRingCancellation(reason: String?) async throws {
+        let stage = stateMachine.currentStage
+        guard
+            reason == nil || reason == RejectCallRequest.Reason.cancel,
+            state.createdBy?.id == streamVideo.user.id,
+            let sessionId = state.session?.id,
+            stage.id != .rejected,
+            stage.id != .rejecting
+        else { return }
+
+        if state.session?.acceptedBy.keys.contains(where: { $0 != streamVideo.user.id }) != true {
+            // The accept event may not have reached this socket yet.
+            let response = try await getRingState(callSessionId: sessionId)
+            try Task.checkCancellation()
+            // Ignore stale results if the ring changed during the request.
+            guard state.session?.id == sessionId else {
+                throw CancellationError()
+            }
+            let currentStage = stateMachine.currentStage
+            // Let reject() share the in-flight or completed rejection.
+            if currentStage.id == .rejecting || currentStage.id == .rejected {
+                return
+            }
+            guard currentStage === stage else {
+                throw CancellationError()
+            }
+            state.update(from: response)
+        }
+
+        guard state.session?.acceptedBy.keys.contains(where: { $0 != streamVideo.user.id }) != true else {
+            throw ClientError("Cannot cancel a call that has been accepted.")
         }
     }
 

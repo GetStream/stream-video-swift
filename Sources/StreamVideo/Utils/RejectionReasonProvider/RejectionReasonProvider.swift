@@ -110,11 +110,17 @@ final class StreamRejectionReasonProvider: RejectionReasonProviding, @unchecked 
 
         let isUserBusy = activeCall != nil
         let userId = streamVideo?.user.id
-        let isUserRejectingOutgoingCall = await Task(disposableBag: disposableBag) { @MainActor in
-            rejectingCall.state.createdBy?.id == userId
+        let (isUserRejectingOutgoingCall, hasAcceptedCallee) = await Task(disposableBag: disposableBag) { @MainActor in
+            (
+                rejectingCall.state.createdBy?.id == userId,
+                rejectingCall.state.session?.acceptedBy.keys.contains { $0 != userId } == true
+            )
         }.value
 
-        if isUserBusy {
+        // Acceptance takes precedence over busy or timeout rejection reasons.
+        if isUserRejectingOutgoingCall, hasAcceptedCallee {
+            return nil
+        } else if isUserBusy {
             return RejectCallRequest.Reason.busy
         } else if isUserRejectingOutgoingCall {
             return RejectCallRequest.Reason.cancel

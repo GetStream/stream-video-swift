@@ -23,6 +23,7 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
         case ring
         case setVideoFilter
         case updateRingState
+        case getRingState
     }
 
     enum MockCallFunctionInputKey: Payloadable {
@@ -97,6 +98,8 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
     /// Lets a test suspend a poll while another ring starts.
     var onUpdateRingState: (@Sendable () async throws -> Void)?
     var onGet: (@Sendable () async throws -> Void)?
+    var onGetRingState: (@Sendable () async throws -> Void)?
+    private(set) var ringStateRequests: [String?] = []
     /// When true, `reject` suspends until ``resumeReject()`` is called.
     var waitForRejectToResume = false
     private var rejectContinuation: CheckedContinuation<Void, Never>?
@@ -247,6 +250,15 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
         }
     }
 
+    override func getRingState(callSessionId: String? = nil) async throws -> GetCallRingStateResponse {
+        ringStateRequests.append(callSessionId)
+        try await onGetRingState?()
+        if let response = stubbedFunction[.getRingState] as? GetCallRingStateResponse {
+            return response
+        }
+        throw stubbedFunction[.getRingState] as? Error ?? ClientError("No ring state stub.")
+    }
+
     override func accept() async throws -> AcceptCallResponse {
         stubbedFunction[.accept] as! AcceptCallResponse
     }
@@ -263,7 +275,10 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
             await withCheckedContinuation { rejectContinuation = $0 }
         }
         successfulRejectCount += 1
-        return stubbedFunction[.reject] as! RejectCallResponse
+        if let response = stubbedFunction[.reject] as? RejectCallResponse {
+            return response
+        }
+        return try await super.reject(reason: reason)
     }
 
     override func join(

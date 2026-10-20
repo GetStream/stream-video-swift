@@ -15,6 +15,13 @@ struct UserAuth: @unchecked Sendable, DefaultAPIClientMiddleware {
     ) async throws -> (Data, URLResponse) {
         var modifiedRequest = request
         let connectionId = try await connectionId()
+        // Ringing needs a connected caller to receive acceptance events.
+        if requiresConnectionId(request) {
+            try Task.checkCancellation()
+            guard !connectionId.isEmpty else {
+                throw ClientError("Cannot ring a call without a connection id.")
+            }
+        }
         if !connectionId.isEmpty {
             modifiedRequest.queryParams.append(
                 .init(name: "connection_id", value: connectionId)
@@ -23,6 +30,23 @@ struct UserAuth: @unchecked Sendable, DefaultAPIClientMiddleware {
         modifiedRequest.headers["Authorization"] = tokenProvider()
         modifiedRequest.headers["stream-auth-type"] = "jwt"
         return try await next(modifiedRequest)
+    }
+
+    private func requiresConnectionId(_ request: Request) -> Bool {
+        let path = Array(request.url.pathComponents.dropFirst())
+        guard path.count >= 4, path.prefix(2) == ["video", "call"] else {
+            return false
+        }
+        if request.method == .get, path.count == 4 {
+            return request.queryParams.contains { $0.name == "ring" && $0.value == "true" }
+        }
+        guard request.method == .post else { return false }
+        if path.count == 5, path.last == "ring" { return true }
+        guard path.count == 4 || (path.count == 5 && path.last == "join"),
+              let body = request.body,
+              let payload = try? JSONSerialization.jsonObject(with: body) as? [String: Any]
+        else { return false }
+        return payload["ring"] as? Bool == true
     }
 }
 

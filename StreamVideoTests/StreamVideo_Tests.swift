@@ -150,6 +150,7 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
         let streamVideo = StreamVideo.mock(httpClient: httpClient)
         self.streamVideo = streamVideo
         let call = streamVideo.call(callType: callType, callId: callId)
+        try stubConnectionId(for: call)
 
         // When
         try await call.ring()
@@ -189,6 +190,7 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
         let streamVideo = StreamVideo.mock(httpClient: httpClient)
         self.streamVideo = streamVideo
         let call = streamVideo.call(callType: callType, callId: callId)
+        try stubConnectionId(for: call)
 
         // When
         try await call.ring()
@@ -229,6 +231,7 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
         nonisolated(unsafe) weak var previousCall: Call?
         do {
             let call = streamVideo.call(callType: callType, callId: previousCallId)
+            try stubConnectionId(for: call)
             previousCall = call
             // ring() configures the call's OutgoingRingingController and
             // sets it as `state.ringingCall`.
@@ -521,6 +524,15 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
     }
 
     // MARK: - private
+
+    private func stubConnectionId(for call: Call) throws {
+        let coordinator = try XCTUnwrap(call.coordinatorClient as? DefaultAPI)
+        coordinator.middlewares = coordinator.middlewares.map {
+            guard var auth = $0 as? UserAuth else { return $0 }
+            auth.connectionId = { "connection-id" }
+            return auth
+        }
+    }
 
     private func makeCallResponse() -> CallResponse {
         let callResponse = MockResponseBuilder().makeCallResponse(cid: cId)

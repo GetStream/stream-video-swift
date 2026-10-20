@@ -1072,9 +1072,11 @@ open class CallViewModel: ObservableObject {
 
     /// Resumes ringing after a failed join, keeping the original deadline.
     private func resumeRinging(_ call: Call) -> Bool {
+        // An expired deadline can cause a timeout and failed-join loop.
         guard
             streamVideo.state.ringingCall === call,
-            let ringingTimeoutDate
+            let ringingTimeoutDate,
+            ringingTimeoutDate > Date()
         else {
             return false
         }
@@ -1100,11 +1102,13 @@ open class CallViewModel: ObservableObject {
             leaveCall(reason: leaveReason, initiator: initiator)
             return
         }
+        let sessionId = call.state.session?.id
 
         Task(disposableBag: disposableBag, priority: .userInitiated) { [weak self] in
             guard let self else { return }
 
             do {
+                if joinAcceptedOutgoingCall(call) { return }
                 // Tell the coordinator the user hung up. If create is still in
                 // flight this throws `CallNotCreatedYet`, and we defer the
                 // cancel to the create path instead of rejecting a call the
@@ -1113,6 +1117,8 @@ open class CallViewModel: ObservableObject {
                 let rejectionReason = await streamVideo
                     .rejectionReasonProvider
                     .reason(for: call.cId, ringTimeout: ringTimeout)
+                guard self.call === call, call.state.session?.id == sessionId, callingState == .outgoing else { return }
+                if joinAcceptedOutgoingCall(call) { return }
                 log.debug(
                     """
                     Rejecting with reason: \(rejectionReason ?? "nil")
@@ -1135,8 +1141,21 @@ open class CallViewModel: ObservableObject {
                 log.error(error)
             }
 
+            guard self.call === call, call.state.session?.id == sessionId, callingState == .outgoing else { return }
+            if joinAcceptedOutgoingCall(call) { return }
             leaveCall(reason: leaveReason, initiator: initiator)
         }
+    }
+
+    private func joinAcceptedOutgoingCall(_ call: Call) -> Bool {
+        guard
+            self.call === call,
+            callingState == .outgoing,
+            call.state.session?.acceptedBy.keys.contains(where: { $0 != streamVideo.user.id }) == true
+        else { return false }
+        // Reuse the acceptance path so a failed join can resume ringing.
+        handleAcceptedEvent(.accepted(.init(callCid: call.cId, user: nil, action: .accept)))
+        return true
     }
 
     private func subscribeToCallEvents() {
