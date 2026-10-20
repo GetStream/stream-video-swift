@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🐞 Fixed
 
-- Check for accepted outgoing rings before cancelling and require a connection ID before ringing. [#1372](https://github.com/GetStream/stream-video-swift/pull/1372)
+- Check acceptance before cancelling outgoing rings and require a connection ID before ringing. Explicit hang-up still disconnects the caller. [#1372](https://github.com/GetStream/stream-video-swift/pull/1372)
 - Keep locally answered CallKit calls connected when an incoming-call check finishes late or a duplicate call report arrives. [#1366](https://github.com/GetStream/stream-video-swift/pull/1366)
 - Aborted join events now identify the leave source and reason. Use `Call.leave(initiator:reason:)` with typed `Call.LeaveInitiator` values such as `.user` and `.app`. Existing `leave(reason:)` calls remain compatible and report `unknown`. [#1363](https://github.com/GetStream/stream-video-swift/pull/1363)
 - Cancelled call joins now discard late authentication responses instead of continuing the connection. [#1362](https://github.com/GetStream/stream-video-swift/pull/1362)

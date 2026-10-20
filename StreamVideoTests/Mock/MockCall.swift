@@ -94,6 +94,7 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
     var stubbedJoinError: Error?
     var waitForJoinToResume = false
     var onJoinStarted: (@Sendable () -> Void)?
+    var onJoinFinished: (@Sendable () -> Void)?
     var onJoinResumed: (@Sendable (MockCall) async -> Void)?
     /// Lets a test suspend a poll while another ring starts.
     var onUpdateRingState: (@Sendable () async throws -> Void)?
@@ -290,6 +291,7 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
         policy: WebRTCJoinPolicy = .default,
         joinInterceptor: CallJoinIntercepting? = nil
     ) async throws -> JoinCallResponse {
+        defer { onJoinFinished?() }
         stubbedFunctionInput[.join]?.append(
             .join(
                 create: create,

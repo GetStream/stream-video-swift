@@ -23,6 +23,9 @@ For prose-only changes, use structural and link checks.
 
 1. Define expected behavior and affected callers. Read the owning type.
    Check shared contracts and dependencies against [related repositories](../../AGENTS.md#related-repositories).
+   For call lifecycle changes, compare user hang-up, automatic timeout,
+   acceptance, and failed-join recovery separately. Define each trigger's
+   expected behavior before reusing a shared path.
    For WebRTC APIs, signaling, media, threading, or teardown, read [Working with WebRTC](references/webrtc.md).
 2. Complete the TDD gate with the smallest test at the responsible component.
    Follow the [test design rules](../test/SKILL.md#test-design).

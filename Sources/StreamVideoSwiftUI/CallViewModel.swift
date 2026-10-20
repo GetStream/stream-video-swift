@@ -1108,7 +1108,8 @@ open class CallViewModel: ObservableObject {
             guard let self else { return }
 
             do {
-                if joinAcceptedOutgoingCall(call) { return }
+                // Only a timeout may recover acceptance by joining.
+                if ringTimeout, joinAcceptedOutgoingCall(call) { return }
                 // Tell the coordinator the user hung up. If create is still in
                 // flight this throws `CallNotCreatedYet`, and we defer the
                 // cancel to the create path instead of rejecting a call the
@@ -1117,8 +1118,13 @@ open class CallViewModel: ObservableObject {
                 let rejectionReason = await streamVideo
                     .rejectionReasonProvider
                     .reason(for: call.cId, ringTimeout: ringTimeout)
-                guard self.call === call, call.state.session?.id == sessionId, callingState == .outgoing else { return }
-                if joinAcceptedOutgoingCall(call) { return }
+                guard self.call === call, call.state.session?.id == sessionId else { return }
+                guard callingState == .outgoing else {
+                    // Honor the user's hang-up even if acceptance started a join.
+                    if !ringTimeout { leaveCall(reason: leaveReason, initiator: initiator) }
+                    return
+                }
+                if ringTimeout, joinAcceptedOutgoingCall(call) { return }
                 log.debug(
                     """
                     Rejecting with reason: \(rejectionReason ?? "nil")
@@ -1141,8 +1147,9 @@ open class CallViewModel: ObservableObject {
                 log.error(error)
             }
 
-            guard self.call === call, call.state.session?.id == sessionId, callingState == .outgoing else { return }
-            if joinAcceptedOutgoingCall(call) { return }
+            guard self.call === call, call.state.session?.id == sessionId,
+                  !ringTimeout || callingState == .outgoing else { return }
+            if ringTimeout, joinAcceptedOutgoingCall(call) { return }
             leaveCall(reason: leaveReason, initiator: initiator)
         }
     }
