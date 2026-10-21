@@ -32,6 +32,10 @@ For prose-only changes, use structural and link checks.
    Check cancellation, stale completions, teardown, and error paths when
    asynchronous state changes.
 4. Update affected callers, behavior tests, and target membership.
+   Place custom request behavior in `Utils/`, outside `OpenApi/`, so API
+   regeneration cannot remove it. Prefer existing middleware hooks.
+   Change generator inputs or templates when the generated request contract
+   itself must change.
    Match sibling membership in `StreamVideo.xcodeproj/project.pbxproj`.
    Check `Package.swift` for package resources and module changes.
    Follow the [documentation decision](#public-interface-documentation) for public interface changes.
