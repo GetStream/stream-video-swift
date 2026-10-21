@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🐞 Fixed
 
+- Prevent the caller from cancelling an accepted outgoing ring. Explicit hang-up leaves locally, while timeout recovery preserves the original ring deadline.
 - Keep locally answered CallKit calls connected when an incoming-call check finishes late or a duplicate call report arrives. [#1366](https://github.com/GetStream/stream-video-swift/pull/1366)
 - Aborted join events now identify the leave source and reason. Use `Call.leave(initiator:reason:)` with typed `Call.LeaveInitiator` values such as `.user` and `.app`. Existing `leave(reason:)` calls remain compatible and report `unknown`. [#1363](https://github.com/GetStream/stream-video-swift/pull/1363)
 - Cancelled call joins now discard late authentication responses instead of continuing the connection. [#1362](https://github.com/GetStream/stream-video-swift/pull/1362)

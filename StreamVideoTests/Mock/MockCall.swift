@@ -23,6 +23,7 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
         case ring
         case setVideoFilter
         case updateRingState
+        case getRingState
     }
 
     enum MockCallFunctionInputKey: Payloadable {
@@ -93,10 +94,13 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
     var stubbedJoinError: Error?
     var waitForJoinToResume = false
     var onJoinStarted: (@Sendable () -> Void)?
+    var onJoinFinished: (@Sendable () -> Void)?
     var onJoinResumed: (@Sendable (MockCall) async -> Void)?
     /// Lets a test suspend a poll while another ring starts.
     var onUpdateRingState: (@Sendable () async throws -> Void)?
     var onGet: (@Sendable () async throws -> Void)?
+    var onGetRingState: (@Sendable () async throws -> Void)?
+    private(set) var ringStateRequests: [String?] = []
     /// When true, `reject` suspends until ``resumeReject()`` is called.
     var waitForRejectToResume = false
     private var rejectContinuation: CheckedContinuation<Void, Never>?
@@ -247,10 +251,20 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
         }
     }
 
+    override func getRingState(callSessionId: String? = nil) async throws -> GetCallRingStateResponse {
+        ringStateRequests.append(callSessionId)
+        try await onGetRingState?()
+        if let response = stubbedFunction[.getRingState] as? GetCallRingStateResponse {
+            return response
+        }
+        throw stubbedFunction[.getRingState] as? Error ?? ClientError("No ring state stub.")
+    }
+
     override func accept() async throws -> AcceptCallResponse {
         stubbedFunction[.accept] as! AcceptCallResponse
     }
 
+    @discardableResult
     override func reject(reason: String? = nil) async throws -> RejectCallResponse {
         // Model the coordinator API: reject before create finishes fails, so a
         // hang-up that races create cannot cancel the eventual ring.
@@ -262,8 +276,14 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
         if waitForRejectToResume {
             await withCheckedContinuation { rejectContinuation = $0 }
         }
+        let response: RejectCallResponse
+        if let stubbedResponse = stubbedFunction[.reject] as? RejectCallResponse {
+            response = stubbedResponse
+        } else {
+            response = try await super.reject(reason: reason)
+        }
         successfulRejectCount += 1
-        return stubbedFunction[.reject] as! RejectCallResponse
+        return response
     }
 
     override func join(
@@ -275,6 +295,7 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
         policy: WebRTCJoinPolicy = .default,
         joinInterceptor: CallJoinIntercepting? = nil
     ) async throws -> JoinCallResponse {
+        defer { onJoinFinished?() }
         stubbedFunctionInput[.join]?.append(
             .join(
                 create: create,
