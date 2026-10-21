@@ -11,7 +11,7 @@ protocol OutgoingRingCancellationValidating: Sendable {
 }
 
 /// Prevents the creator from cancelling a ring already accepted by a callee.
-struct OutgoingRingCancellationValidator: OutgoingRingCancellationValidating {
+final class OutgoingRingCancellationValidator: OutgoingRingCancellationValidating {
 
     @MainActor
     func validate(call: Call, reason: String?, stateMachine: Call.StateMachine) async throws {
