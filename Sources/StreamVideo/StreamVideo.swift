@@ -223,13 +223,17 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         _ = ringingCallRecoveryAdapter
 
         if user.type != .anonymous {
-            let userAuth = UserAuth { [weak self] in
-                self?.token.rawValue ?? ""
-            } connectionId: { [weak self] in
+            let coordinatorConnection = CoordinatorConnectionMiddleware { [weak self] in
                 guard let self else {
                     throw ClientError.Unexpected()
                 }
                 return await self.loadConnectionId()
+            }
+            // Validate connection readiness before any request enrichment or
+            // authentication. The remaining middleware runs only afterward.
+            coordinatorClient.middlewares.insert(coordinatorConnection, at: 0)
+            let userAuth = UserAuth { [weak self] in
+                self?.token.rawValue ?? ""
             }
             coordinatorClient.middlewares.append(userAuth)
         } else {
