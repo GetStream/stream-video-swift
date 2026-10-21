@@ -75,5 +75,7 @@ If measurement cannot run, report size impact as unverified.
 
 ## Result
 
-Include the failing test and its passing result after the change.
+In the chat handoff, include the failing test and its passing result after the change.
 For behavior-preserving refactors, report baseline and final test results.
+For PR descriptions, follow the [template and content rules](../review/SKILL.md#pr-descriptions).
+Keep local validation reports and implementation-process details out of the PR description.

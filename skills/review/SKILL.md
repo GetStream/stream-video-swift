@@ -52,7 +52,22 @@ Delegation requires no separate model provider.
 
 ## Handoff
 
-Use `.github/PULL_REQUEST_TEMPLATE.md` for an authorized PR handoff.
-Describe the problem, resulting behavior, evidence, and pending checks.
-Keep required template sections and truthful checklist states.
+### PR descriptions
+
+For every PR description you create or edit, read the current [GitHub template](../../.github/PULL_REQUEST_TEMPLATE.md).
+Preserve its headings, order, required sections, and checklist wording. Keep checklist states truthful.
+Keep the description focused on the problem, fix, and manual testing steps:
+
+- Use Goal for the problem and its user impact.
+- Use Summary for the fix and resulting behavior.
+- Use Implementation only for technical details needed to understand the fix or a relevant design decision.
+  Exclude implementation-process details, such as work chronology, TDD steps, agent activity, and review workflow.
+- Use Manual Testing Notes for prerequisites, numbered actions, and expected results.
+  Describe steps a reviewer can follow. Do not imply that unperformed manual testing passed.
+  If manual testing does not apply, state that briefly.
+- Include relevant issue links and visual evidence in their template sections.
+
+Exclude local validation reports: build commands, test counts, pass/fail logs, toolchain details, and local environment failures.
+Report validation evidence and pending checks in the chat handoff, separate from the PR description.
+Before publication or update, compare the complete description with the current template and these content rules.
 Keep the PR draft while required checks or acceptance remain pending.

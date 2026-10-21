@@ -93,5 +93,7 @@ Passing repetitions provide evidence only for the tested conditions.
 
 ## Result
 
-Separate assertion failures, infrastructure failures, and canceled tests.
+In the chat handoff, separate assertion failures, infrastructure failures, and canceled tests.
 State untested live behavior, including CallKit, audible ringing, and media.
+For PR descriptions, follow the [template and content rules](../review/SKILL.md#pr-descriptions).
+Use Manual Testing Notes for reproducible manual steps and expected results, not local validation reports.
