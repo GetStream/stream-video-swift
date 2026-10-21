@@ -3,6 +3,7 @@
 //
 
 import Combine
+import Foundation
 import StreamVideo
 import StreamWebRTC
 import SwiftUI
@@ -10,6 +11,11 @@ import SwiftUI
 // View model that provides methods for views that present a call.
 @MainActor
 open class CallViewModel: ObservableObject {
+
+    /// Fixed leave reasons emitted by this view model.
+    private enum LeaveReason {
+        static let joinFailed = "joinFailed"
+    }
 
     @Injected(\.streamVideo) var streamVideo
     @Injected(\.pictureInPictureAdapter) var pictureInPictureAdapter
@@ -1032,6 +1038,10 @@ open class CallViewModel: ObservableObject {
                 }
                 log.error("Error starting a call", error: error)
                 self.error = error
+                if resumesRingingOnFailure {
+                    // Stop ring observers when accepted-call recovery is over.
+                    leaveCall(reason: LeaveReason.joinFailed, initiator: .sdkError)
+                }
                 setCallingState(.idle)
                 audioRecorder.stopRecording()
                 enteringCallTask = nil
@@ -1072,9 +1082,11 @@ open class CallViewModel: ObservableObject {
 
     /// Resumes ringing after a failed join, keeping the original deadline.
     private func resumeRinging(_ call: Call) -> Bool {
+        // An expired deadline can cause a timeout and failed-join loop.
         guard
             streamVideo.state.ringingCall === call,
-            let ringingTimeoutDate
+            let ringingTimeoutDate,
+            ringingTimeoutDate > Date()
         else {
             return false
         }
@@ -1100,11 +1112,14 @@ open class CallViewModel: ObservableObject {
             leaveCall(reason: leaveReason, initiator: initiator)
             return
         }
+        // The first session may arrive after hang-up starts.
+        let sessionId = call.state.session?.id
 
         Task(disposableBag: disposableBag, priority: .userInitiated) { [weak self] in
             guard let self else { return }
 
             do {
+                if ringTimeout, joinAcceptedOutgoingCall(call) { return }
                 // Tell the coordinator the user hung up. If create is still in
                 // flight this throws `CallNotCreatedYet`, and we defer the
                 // cancel to the create path instead of rejecting a call the
@@ -1113,6 +1128,15 @@ open class CallViewModel: ObservableObject {
                 let rejectionReason = await streamVideo
                     .rejectionReasonProvider
                     .reason(for: call.cId, ringTimeout: ringTimeout)
+                // A delayed cancellation must not leave a replacement session.
+                guard self.call === call,
+                      sessionId == nil || call.state.session?.id == sessionId else { return }
+                guard callingState == .outgoing else {
+                    // Honor the user's hang-up even if acceptance started a join.
+                    if !ringTimeout { leaveCall(reason: leaveReason, initiator: initiator) }
+                    return
+                }
+                if ringTimeout, joinAcceptedOutgoingCall(call) { return }
                 log.debug(
                     """
                     Rejecting with reason: \(rejectionReason ?? "nil")
@@ -1135,8 +1159,23 @@ open class CallViewModel: ObservableObject {
                 log.error(error)
             }
 
+            guard self.call === call,
+                  sessionId == nil || call.state.session?.id == sessionId,
+                  !ringTimeout || callingState == .outgoing else { return }
+            if ringTimeout, joinAcceptedOutgoingCall(call) { return }
             leaveCall(reason: leaveReason, initiator: initiator)
         }
+    }
+
+    /// Handles timeout acceptance through the existing join recovery path.
+    private func joinAcceptedOutgoingCall(_ call: Call) -> Bool {
+        guard
+            self.call === call,
+            callingState == .outgoing,
+            call.state.session?.acceptedBy.keys.contains(where: { $0 != streamVideo.user.id }) == true
+        else { return false }
+        handleAcceptedEvent(.accepted(.init(callCid: call.cId, user: nil, action: .accept)))
+        return true
     }
 
     private func subscribeToCallEvents() {

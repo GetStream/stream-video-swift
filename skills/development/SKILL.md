@@ -62,6 +62,7 @@ Describe the user-visible change briefly.
 Avoid unnecessary binary growth from code, dependencies, or resources. Keep test assets outside shipping targets.
 When size can change, compare Release artifacts from the same SDK target or representative consumer app.
 Match architecture, toolchain, optimization, stripping, and packaging.
+Disable code coverage instrumentation for Release size comparisons.
 Report binary and resource sizes separately: baseline, candidate, and delta in bytes and percent.
 Explain necessary growth and alternatives. Preserve behavior, compatibility, security, and accessibility.
 If measurement cannot run, report size impact as unverified.
@@ -69,6 +70,7 @@ If measurement cannot run, report size impact as unverified.
 ## Repository conventions
 
 - Use four spaces and nearby naming patterns. Use `// MARK: - Group` for sections.
+- Import Foundation explicitly in every Swift file by default.
 - Preserve deployment targets, media quality, and public API compatibility.
   Follow semantic versioning and deprecate breaking APIs with a transition path.
   Discuss new dependencies or breaking changes before implementation.

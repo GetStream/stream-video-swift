@@ -35,6 +35,7 @@ final class MockDefaultAPI: DefaultAPI, Mockable, @unchecked Sendable {
 
     var stubbedProperty: [String: Any] = [:]
     var stubbedFunction: [FunctionKey: Any] = [:]
+    var onRejectCall: (@Sendable () async throws -> Void)?
     @Atomic var stubbedFunctionInput: [FunctionKey: [MockFunctionInputKey]] = FunctionKey
         .allCases
         .reduce(into: [FunctionKey: [MockFunctionInputKey]]()) { $0[$1] = [] }
@@ -108,6 +109,7 @@ final class MockDefaultAPI: DefaultAPI, Mockable, @unchecked Sendable {
                 request: rejectCallRequest
             )
         )
+        try await onRejectCall?()
         if let response = stubbedFunction[.rejectCall] as? RejectCallResponse {
             return response
         } else if let error = stubbedFunction[.rejectCall] as? Error {

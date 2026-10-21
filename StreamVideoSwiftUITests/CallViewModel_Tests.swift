@@ -3,6 +3,7 @@
 //
 
 import Combine
+import Foundation
 @testable import StreamVideo
 @testable import StreamVideoSwiftUI
 import StreamWebRTC
@@ -392,6 +393,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         await assertCallingState(.outgoing)
         streamVideo.state.ringingCall = mockCall
         mockCall.stubbedJoinError = ClientError("join failed")
+        mockCall.state.session = .dummy(acceptedBy: [secondUser.id: .now])
 
         processAcceptedEvent()
 
@@ -405,6 +407,217 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         processAcceptedEvent()
 
         await assertCallingState(.inCall)
+    }
+
+    func test_outgoingCall_acceptedJoinFailsAfterDeadline_doesNotRestartRinging() async {
+        await prepare(ringTimeOut: 3000)
+        let applicationStateAdapter = MockAppStateAdapter()
+        applicationStateAdapter.makeShared()
+        let endedAfterBackgrounding = expectation(description: "Expired recovery must not end the session")
+        endedAfterBackgrounding.isInverted = true
+        let ringingController = OutgoingRingingController(streamVideo: streamVideo, callCiD: cId) {
+            endedAfterBackgrounding.fulfill()
+        }
+        defer {
+            withExtendedLifetime(ringingController) {}
+            applicationStateAdapter.dismante()
+        }
+        mockCall.stubbedJoinError = ClientError("join failed")
+        mockCall.waitForJoinToResume = true
+        subject.startCall(callType: .default, callId: callId, members: participants, ring: true)
+        await assertCallingState(.outgoing)
+        streamVideo.state.ringingCall = mockCall
+        mockCall.state.session = .dummy(acceptedBy: [secondUser.id: .now])
+
+        processAcceptedEvent()
+        await fulfilmentInMainActor { self.mockCall.timesCalled(.join) == 1 }
+        let deadlinePassed = expectation(description: "Original ring deadline passed")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.1) { deadlinePassed.fulfill() }
+        await fulfillment(of: [deadlinePassed], timeout: 4)
+        mockCall.waitForJoinToResume = false
+        mockCall.resumeJoin()
+
+        await assertCallingState(.idle, timeout: 2)
+        XCTAssertNotNil(subject.error)
+        XCTAssertEqual(mockCall.timesCalled(.join), 1)
+        XCTAssertEqual(mockCall.timesCalled(.reject), 0)
+        XCTAssertEqual(mockCall.timesCalled(.leave), 1)
+        XCTAssertEqual(mockCall.leaveInitiators, [.sdkError])
+        XCTAssertEqual(mockCall.recordedInputPayload(String.self, for: .leave), ["joinFailed"])
+        XCTAssertNil(subject.call)
+        await fulfilmentInMainActor { self.streamVideo.state.ringingCall == nil }
+
+        applicationStateAdapter.stubbedState = .background
+        await fulfillment(of: [endedAfterBackgrounding], timeout: 0.2)
+        subject.hangUp()
+        await fulfilmentInMainActor { self.streamVideo.state.ringingCall == nil }
+    }
+
+    func test_outgoingCall_firstSessionAssignedDuringHangUp_stillLeaves() async {
+        await prepare()
+        mockCall.state.session = nil
+        subject.setActiveCall(mockCall)
+        subject.setCallingState(.outgoing)
+
+        subject.hangUp()
+        // Create can publish the first session before the hang-up task runs.
+        mockCall.state.session = .dummy(id: "first-session")
+
+        await assertCallingState(.idle)
+        XCTAssertEqual(mockCall.timesCalled(.leave), 1)
+        XCTAssertEqual(mockCall.timesCalled(.reject), 1)
+        subject.hangUp()
+        await assertCallingState(.idle)
+    }
+
+    func test_outgoingCall_hangUpAfterAcceptance_leavesWithoutRejectingOrJoining() async {
+        await prepare()
+        mockCall.state.createdBy = firstUser.user
+        mockCall.state.session = .dummy(acceptedBy: [secondUser.id: .now])
+        mockCall.stubbedFunction[.reject] = nil
+        subject.setActiveCall(mockCall)
+        subject.setCallingState(.outgoing)
+
+        subject.hangUp()
+
+        await assertCallingState(.idle)
+        XCTAssertEqual(mockCall.timesCalled(.join), 0)
+        XCTAssertEqual(mockCoordinatorClient.timesCalled(.rejectCall), 0)
+        XCTAssertEqual(mockCall.timesCalled(.leave), 1)
+        XCTAssertEqual(mockCall.leaveInitiators, [.user])
+    }
+
+    func test_outgoingCall_hangUpRefreshFindsAcceptance_leavesWithoutRejectingOrJoining() async {
+        await prepare()
+        mockCall.state.createdBy = firstUser.user
+        mockCall.state.session = .dummy(id: "ring-session")
+        streamVideo.state.ringingCall = mockCall
+        mockCall.stubbedFunction[.reject] = nil
+        mockCoordinatorClient.stub(for: .rejectCall, with: RejectCallResponse(duration: "0"))
+        mockCall.stub(for: .getRingState, with: GetCallRingStateResponse(
+            acceptedBy: [secondUser.id: .now],
+            callCid: cId,
+            createdByUserId: firstUser.id,
+            duration: "0",
+            missedBy: [:],
+            rejectedBy: [:],
+            sessionId: "ring-session"
+        ))
+        subject.setActiveCall(mockCall)
+        subject.setCallingState(.outgoing)
+
+        subject.hangUp()
+
+        await assertCallingState(.idle)
+        XCTAssertEqual(mockCall.ringStateRequests, ["ring-session"])
+        XCTAssertEqual(mockCoordinatorClient.timesCalled(.rejectCall), 0)
+        XCTAssertEqual(mockCall.timesCalled(.join), 0)
+        XCTAssertEqual(mockCall.timesCalled(.leave), 1)
+        XCTAssertEqual(mockCall.leaveInitiators, [.user])
+    }
+
+    func test_outgoingCall_acceptanceStartsJoiningDuringHangUp_stillLeaves() async {
+        await prepare()
+        let refreshStarted = expectation(description: "Ring refresh started")
+        let joinFinished = expectation(description: "Pending join finished")
+        let refresh = AsyncStream<Void>.makeStream()
+        mockCall.onGetRingState = {
+            refreshStarted.fulfill()
+            for await _ in refresh.stream {}
+        }
+        mockCall.state.createdBy = firstUser.user
+        mockCall.state.session = .dummy(id: "ring-session")
+        mockCall.stubbedFunction[.reject] = nil
+        mockCall.waitForJoinToResume = true
+        mockCall.onJoinFinished = { joinFinished.fulfill() }
+        defer {
+            refresh.continuation.finish()
+            mockCall.resumeJoin()
+            mockCall.onGetRingState = nil
+            mockCall.onJoinFinished = nil
+        }
+        subject.setActiveCall(mockCall)
+        subject.setCallingState(.outgoing)
+
+        subject.hangUp()
+        await fulfillment(of: [refreshStarted], timeout: 2)
+        mockCall.state.session?.acceptedBy = [secondUser.id: .now]
+        processAcceptedEvent()
+        await fulfilmentInMainActor { self.mockCall.timesCalled(.join) == 1 }
+        await assertCallingState(.joining)
+        refresh.continuation.finish()
+
+        await assertCallingState(.idle)
+        XCTAssertEqual(mockCoordinatorClient.timesCalled(.rejectCall), 0)
+        XCTAssertEqual(mockCall.timesCalled(.leave), 1)
+        XCTAssertEqual(mockCall.leaveInitiators, [.user])
+        subject.hangUp()
+        mockCall.resumeJoin()
+        await fulfillment(of: [joinFinished], timeout: 2)
+    }
+
+    func test_outgoingCall_timeoutAfterAcceptance_joinsWithoutRejecting() async {
+        await prepare(ringTimeOut: 1000)
+        mockCall.state.session = .dummy(acceptedBy: [secondUser.id: .now])
+
+        subject.startCall(callType: .default, callId: callId, members: participants, ring: true)
+        await assertCallingState(.inCall)
+
+        XCTAssertEqual(mockCall.timesCalled(.join), 1)
+        XCTAssertEqual(mockCall.timesCalled(.reject), 0)
+        XCTAssertEqual(mockCall.timesCalled(.leave), 0)
+    }
+
+    func test_outgoingCall_timeoutRefreshFindsAcceptance_joinsWithoutRejecting() async {
+        await prepare(ringTimeOut: 1000)
+        mockCall.state.createdBy = firstUser.user
+        mockCall.state.session = .dummy(id: "ring-session")
+        mockCall.stubbedFunction[.reject] = nil
+        mockCall.stub(for: .getRingState, with: GetCallRingStateResponse(
+            acceptedBy: [secondUser.id: .now],
+            callCid: cId,
+            createdByUserId: firstUser.id,
+            duration: "0",
+            missedBy: [:],
+            rejectedBy: [:],
+            sessionId: "ring-session"
+        ))
+
+        subject.startCall(callType: .default, callId: callId, members: participants, ring: true)
+        await assertCallingState(.inCall)
+
+        XCTAssertEqual(mockCall.ringStateRequests, ["ring-session"])
+        XCTAssertEqual(mockCoordinatorClient.timesCalled(.rejectCall), 0)
+        XCTAssertEqual(mockCall.timesCalled(.join), 1)
+        XCTAssertEqual(mockCall.timesCalled(.leave), 0)
+    }
+
+    func test_outgoingCall_sessionChangesDuringHangUp_doesNotLeaveReplacement() async {
+        await prepare()
+        defer { mockCall.onGetRingState = nil }
+        mockCall.state.createdBy = firstUser.user
+        mockCall.state.session = .dummy(id: "ring-session")
+        streamVideo.state.ringingCall = mockCall
+        mockCall.stubbedFunction[.reject] = nil
+        let refreshed = expectation(description: "Ring state refresh completed")
+        mockCall.onGetRingState = { [mockCall] in
+            await MainActor.run { mockCall?.state.session = .dummy(id: "replacement") }
+            refreshed.fulfill()
+        }
+        subject.setActiveCall(mockCall)
+        subject.setCallingState(.outgoing)
+        let leftReplacement = expectation(description: "Must not leave replacement session")
+        leftReplacement.isInverted = true
+        let subscription = subject.$callingState.dropFirst().sink {
+            if $0 == .idle { leftReplacement.fulfill() }
+        }
+
+        subject.hangUp()
+
+        await fulfillment(of: [refreshed, leftReplacement], timeout: 0.5)
+        XCTAssertEqual(mockCall.timesCalled(.leave), 0)
+        XCTAssertEqual(mockCall.state.session?.id, "replacement")
+        subscription.cancel()
     }
 
     func test_outgoingCall_rejectedAgainWhileRejecting_rejectsOnce() async throws {
@@ -664,6 +877,8 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         // the cancel to the create path, so nothing is rejected yet and these
         // synchronous checks still observe the outgoing state.
         subject.hangUp()
+        // The first session belongs to this create, not a replacement call.
+        mockCall.state.session = .dummy(id: "first-session")
         // Even though the reject will fail, the leaveCall should be completed
         await assertCallingState(.idle)
         XCTAssertEqual(
