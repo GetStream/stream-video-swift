@@ -9,6 +9,11 @@ on:
 
   workflow_dispatch:
     inputs:
+      is_self_hosted:
+        description: 'Reuse self-hosted tools and dependencies without remote caches?'
+        type: boolean
+        required: false
+        default: false
       record_snapshots_swiftui:
         description: 'Record SwiftUI snapshots on CI?'
         type: boolean
@@ -34,6 +39,7 @@ permissions:
   pull-requests: write
 
 env:
+  IS_SELF_HOSTED: ${{ github.event.inputs.is_self_hosted == 'true' }}
   HOMEBREW_NO_INSTALL_CLEANUP: 1 # Disable cleanup for homebrew, we don't need it on CI
   IOS_SIMULATOR_DEVICE: "iPhone 17 Pro (26.2)"
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -52,7 +58,8 @@ jobs:
 
   test-llc-debug:
     name: Test LLC (Debug)
-    runs-on: macos-15
+    runs-on:
+      group: stream-macos
     needs: guard
     if: ${{ github.event.inputs.record_snapshots_swiftui != 'true' && github.event.inputs.record_snapshots_uikit != 'true' }}
     steps:
@@ -66,6 +73,12 @@ jobs:
     - name: Run LLC Tests (Debug)
       run: bundle exec fastlane test device:"${{ env.IOS_SIMULATOR_DEVICE }}" ${{ env.VERBOSE }}
       timeout-minutes: 40
+    - name: Upload raw Xcode logs
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: xcode-logs-${{ github.job }}
+        path: ~/Library/Logs/scan/*.log
     - name: Run Sonar analysis
       run: bundle exec fastlane sonar_upload
       env:
@@ -100,7 +113,8 @@ jobs:
 
   test-swiftui-debug:
     name: Test SwiftUI (Debug)
-    runs-on: macos-15
+    runs-on:
+      group: stream-macos
     needs: guard
     if: ${{ github.event.inputs.record_snapshots_uikit != 'true' || github.event.inputs.record_snapshots_swiftui == 'true' }}
     permissions:
@@ -117,6 +131,12 @@ jobs:
     - name: Run UI Tests (Debug)
       run: bundle exec fastlane test_swiftui device:"${{ env.IOS_SIMULATOR_DEVICE }}" record:"${{ github.event.inputs.record_snapshots_swiftui }}" ${{ env.VERBOSE }}
       timeout-minutes: 120
+    - name: Upload raw Xcode logs
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: xcode-logs-${{ github.job }}
+        path: ~/Library/Logs/scan/*.log
     - name: Parse xcresult
       if: failure()
       run: |
@@ -130,7 +150,8 @@ jobs:
 
   test-uikit-debug:
     name: Test UIKit (Debug)
-    runs-on: macos-15
+    runs-on:
+      group: stream-macos
     needs: guard
     if: ${{ github.event.inputs.record_snapshots_swiftui != 'true' || github.event.inputs.record_snapshots_uikit == 'true' }}
     permissions:
@@ -147,6 +168,12 @@ jobs:
     - name: Run UI Tests (Debug)
       run: bundle exec fastlane test_uikit device:"${{ env.IOS_SIMULATOR_DEVICE }}" record:"${{ github.event.inputs.record_snapshots_uikit }}" ${{ env.VERBOSE }}
       timeout-minutes: 120
+    - name: Upload raw Xcode logs
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: xcode-logs-${{ github.job }}
+        path: ~/Library/Logs/scan/*.log
     - name: Parse xcresult
       if: failure()
       run: |
@@ -160,7 +187,8 @@ jobs:
 
   automated-code-review:
     name: Automated Code Review
-    runs-on: macos-15
+    runs-on:
+      group: stream-macos
     needs: guard
     env:
       XCODE_VERSION: "16.4"
@@ -178,7 +206,8 @@ jobs:
 
   build-old-xcode:
     name: Build SDKs (Old Xcode)
-    runs-on: macos-15
+    runs-on:
+      group: stream-macos
     needs:
       - guard
       - test-llc-debug
@@ -206,7 +235,8 @@ jobs:
 
   build-test-app-and-frameworks:
     name: Build Test App and Frameworks
-    runs-on: macos-15
+    runs-on:
+      group: stream-macos
     needs:
       - guard
       - test-llc-debug
@@ -229,7 +259,8 @@ jobs:
 
   build-apps:
     name: Build Demo Apps
-    runs-on: macos-15
+    runs-on:
+      group: stream-macos
     needs:
       - guard
       - build-test-app-and-frameworks
@@ -251,7 +282,8 @@ jobs:
 
   allure_testops_launch:
     name: Launch Allure TestOps
-    runs-on: macos-15
+    runs-on:
+      group: stream-macos
     needs:
       - guard
       - build-test-app-and-frameworks
@@ -272,7 +304,8 @@ jobs:
 
   test-e2e-debug:
     name: Test E2E UI (Debug)
-    runs-on: macos-15
+    runs-on:
+      group: stream-macos
     if: ${{ github.event.inputs.record_snapshots_swiftui != 'true' && github.event.inputs.record_snapshots_uikit != 'true' }}
     needs:
       - guard
