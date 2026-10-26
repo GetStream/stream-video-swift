@@ -3,6 +3,7 @@
 //
 
 import Combine
+import Foundation
 @testable import StreamVideo
 @preconcurrency import XCTest
 
@@ -14,6 +15,214 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
     let callCid = "default:123"
     let userId = "test"
     let mockResponseBuilder = MockResponseBuilder()
+
+    func test_reject_validationFails_doesNotSendReject() async {
+        let (subject, coordinator) = makeOutgoingRing()
+        let validator = MockOutgoingRingCancellationValidator()
+        let expectedError = NSError(domain: "Validation", code: 1)
+        validator.stub(for: .validate, with: expectedError)
+        subject.outgoingRingCancellationValidator = validator
+        defer { subject.outgoingRingCancellationValidator = OutgoingRingCancellationValidator() }
+
+        do {
+            try await subject.reject(reason: RejectCallRequest.Reason.cancel)
+            XCTFail("A failed validation must prevent rejection.")
+        } catch {
+            XCTAssertEqual(error as NSError, expectedError)
+        }
+
+        XCTAssertEqual(validator.timesCalled(.validate), 1)
+        XCTAssertEqual(coordinator.timesCalled(.rejectCall), 0)
+        XCTAssertTrue(subject.ringStateRequests.isEmpty)
+    }
+
+    func test_reject_cancelRefreshFindsAcceptance_doesNotSendReject() async {
+        let (subject, coordinator) = makeOutgoingRing(acceptedBy: ["callee": .now])
+
+        do {
+            try await subject.reject(reason: RejectCallRequest.Reason.cancel)
+            XCTFail("An accepted outgoing call must not be cancelled.")
+        } catch {
+            XCTAssertTrue(error is ClientError)
+        }
+
+        XCTAssertEqual(coordinator.timesCalled(.rejectCall), 0)
+        XCTAssertNotNil(subject.state.session?.acceptedBy["callee"])
+    }
+
+    func test_reject_nilReasonWithKnownAcceptance_doesNotSendReject() async {
+        let (subject, coordinator) = makeOutgoingRing()
+        subject.state.session?.acceptedBy["callee"] = .now
+
+        do {
+            try await subject.reject()
+            XCTFail("A missing reason must not bypass the acceptance check.")
+        } catch {
+            XCTAssertTrue(error is ClientError)
+        }
+
+        XCTAssertEqual(coordinator.timesCalled(.rejectCall), 0)
+        XCTAssertTrue(subject.ringStateRequests.isEmpty)
+    }
+
+    func test_reject_sessionChangesDuringRefresh_doesNotSendReject() async {
+        let (subject, coordinator) = makeOutgoingRing()
+        defer { subject.onGetRingState = nil }
+        subject.onGetRingState = {
+            await MainActor.run { subject.state.session = .dummy(id: "replacement") }
+        }
+
+        do {
+            try await subject.reject(reason: RejectCallRequest.Reason.cancel)
+            XCTFail("An old cancellation must not reject a replacement session.")
+        } catch {
+            XCTAssertTrue(error is CancellationError)
+        }
+
+        XCTAssertEqual(coordinator.timesCalled(.rejectCall), 0)
+        XCTAssertEqual(subject.state.session?.id, "replacement")
+    }
+
+    func test_reject_acceptanceArrivesDuringRefresh_doesNotSendReject() async {
+        let (subject, coordinator) = makeOutgoingRing()
+        defer { subject.onGetRingState = nil }
+        subject.onGetRingState = {
+            await MainActor.run { subject.state.session?.acceptedBy["callee"] = .now }
+        }
+
+        do {
+            try await subject.reject(reason: RejectCallRequest.Reason.cancel)
+            XCTFail("A stale ring response must not erase an acceptance.")
+        } catch {
+            XCTAssertTrue(error is ClientError)
+        }
+
+        XCTAssertEqual(coordinator.timesCalled(.rejectCall), 0)
+        XCTAssertNotNil(subject.state.session?.acceptedBy["callee"])
+    }
+
+    func test_reject_callLeavesDuringRefresh_doesNotSendReject() async {
+        let (subject, coordinator) = makeOutgoingRing()
+        defer { subject.onGetRingState = nil }
+        let didLeave = expectation(
+            forNotification: Notification.Name(CallNotification.callEnded),
+            object: subject
+        )
+        subject.onGetRingState = {
+            subject.leave()
+            await self.fulfillment(of: [didLeave], timeout: 2)
+        }
+
+        do {
+            try await subject.reject(reason: RejectCallRequest.Reason.cancel)
+            XCTFail("A pending cancellation must not outlive the call.")
+        } catch {
+            XCTAssertTrue(error is CancellationError)
+        }
+
+        XCTAssertEqual(coordinator.timesCalled(.rejectCall), 0)
+    }
+
+    func test_reject_noCalleeAccepted_sendsCancel() async throws {
+        let (subject, coordinator) = makeOutgoingRing()
+
+        try await subject.reject(reason: RejectCallRequest.Reason.cancel)
+
+        XCTAssertEqual(coordinator.timesCalled(.rejectCall), 1)
+        let input = try XCTUnwrap(
+            coordinator.recordedInputPayload((String, String, RejectCallRequest).self, for: .rejectCall)?.first
+        )
+        XCTAssertEqual(input.2.reason, RejectCallRequest.Reason.cancel)
+    }
+
+    private func makeOutgoingRing(acceptedBy: [String: Date] = [:]) -> (MockCall, MockDefaultAPI) {
+        let coordinator = MockDefaultAPI()
+        coordinator.stub(for: .rejectCall, with: RejectCallResponse(duration: "0"))
+        let subject = MockCall(.dummy(coordinatorClient: coordinator))
+        subject.state.createdBy = streamVideo.user
+        subject.state.session = .dummy(id: "ring-session")
+        subject.stub(for: .getRingState, with: GetCallRingStateResponse(
+            acceptedBy: acceptedBy,
+            callCid: subject.cId,
+            createdByUserId: streamVideo.user.id,
+            duration: "0",
+            missedBy: [:],
+            rejectedBy: [:],
+            sessionId: "ring-session"
+        ))
+
+        return (subject, coordinator)
+    }
+
+    func test_reject_overlappingRefreshFinishesWhileRejecting_sharesResponse() async throws {
+        try await assertOverlappingRejections(refreshCompletesIn: .rejecting)
+    }
+
+    func test_reject_overlappingRefreshFinishesAfterRejected_returnsCachedResponse() async throws {
+        try await assertOverlappingRejections(refreshCompletesIn: .rejected)
+    }
+
+    private func assertOverlappingRejections(refreshCompletesIn stage: Call.StateMachine.Stage.ID) async throws {
+        let (subject, coordinator) = makeOutgoingRing()
+        let firstRefreshStarted = expectation(description: "First refresh started")
+        let secondRefreshStarted = expectation(description: "Second refresh started")
+        let rejectionSent = expectation(description: "Rejection reached coordinator")
+        let completedBeforeResponse = stage == .rejecting
+            ? expectation(description: "Second rejection must await the shared response")
+            : nil
+        completedBeforeResponse?.isInverted = true
+        let (firstRefresh, releaseFirstRefresh) = AsyncStream<Void>.makeStream()
+        let (secondRefresh, releaseSecondRefresh) = AsyncStream<Void>.makeStream()
+        let (rejectionResponse, releaseRejectionResponse) = AsyncStream<Void>.makeStream()
+        defer {
+            releaseFirstRefresh.finish()
+            releaseSecondRefresh.finish()
+            releaseRejectionResponse.finish()
+            subject.onGetRingState = nil
+            coordinator.onRejectCall = nil
+        }
+        subject.onGetRingState = {
+            firstRefreshStarted.fulfill()
+            for await _ in firstRefresh { break }
+        }
+        coordinator.onRejectCall = {
+            await MainActor.run { rejectionSent.fulfill() }
+            for await _ in rejectionResponse { break }
+        }
+        let first = Task { try await subject.reject(reason: RejectCallRequest.Reason.cancel) }
+        await fulfillment(of: [firstRefreshStarted], timeout: 2)
+        subject.onGetRingState = {
+            secondRefreshStarted.fulfill()
+            for await _ in secondRefresh { break }
+        }
+        var responseReleased = false
+        let second = Task {
+            defer {
+                if !responseReleased { completedBeforeResponse?.fulfill() }
+            }
+            return try await subject.reject()
+        }
+        await fulfillment(of: [secondRefreshStarted], timeout: 2)
+        releaseFirstRefresh.finish()
+        await fulfillment(of: [rejectionSent], timeout: 2)
+        if stage == .rejected {
+            responseReleased = true
+            releaseRejectionResponse.finish()
+            _ = await first.result
+        }
+        releaseSecondRefresh.finish()
+        if let completedBeforeResponse {
+            await fulfillment(of: [completedBeforeResponse], timeout: 0.2)
+            responseReleased = true
+            releaseRejectionResponse.finish()
+        }
+        let firstResult = await first.result
+        let secondResult = await second.result
+
+        XCTAssertEqual(try firstResult.get(), try secondResult.get())
+        XCTAssertEqual(subject.ringStateRequests, ["ring-session", "ring-session"])
+        XCTAssertEqual(coordinator.timesCalled(.rejectCall), 1)
+    }
 
     // MARK: - UpdateState
 

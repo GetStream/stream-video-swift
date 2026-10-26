@@ -62,6 +62,9 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     internal let coordinatorClient: DefaultAPIEndpoints
     private var outgoingRingingController: OutgoingRingingController?
 
+    /// Checks callee acceptance before an outgoing cancellation is sent.
+    var outgoingRingCancellationValidator: any OutgoingRingCancellationValidating = OutgoingRingCancellationValidator()
+
     /// This adapter is used to manage closed captions for the
     /// call.
     private lazy var closedCaptionsAdapter = ClosedCaptionsAdapter(self)
@@ -531,6 +534,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// - Throws: An error if the rejection fails.
     @discardableResult
     public func reject(reason: String? = nil) async throws -> RejectCallResponse {
+        try await outgoingRingCancellationValidator.validate(call: self, reason: reason, stateMachine: stateMachine)
         let currentStage = stateMachine.currentStage
 
         if
