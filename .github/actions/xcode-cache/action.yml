@@ -6,15 +6,15 @@ runs:
     - run: echo "IMAGE=${ImageOS}-${ImageVersion}" >> $GITHUB_ENV
       shell: bash
     - name: Cache SPM
-      if: env.IS_SELF_HOSTED != 'true'
-      uses: actions/cache@v4
+      if: runner.environment != 'self-hosted'
+      uses: actions/cache@v6
       id: spm-cache
       with:
         path: spm_cache
         key: ${{ env.IMAGE }}-spm-${{ hashFiles('**/Package.resolved') }}
         restore-keys: ${{ env.IMAGE }}-spm-
     - name: Use the image SPM cache
-      if: env.IS_SELF_HOSTED == 'true'
+      if: runner.environment == 'self-hosted'
       shell: bash
       run: |
         if [[ -n ${SPM_CACHE_PATH:-} && -d "$SPM_CACHE_PATH" ]]; then

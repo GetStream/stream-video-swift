@@ -23,7 +23,7 @@ source ./Githubfile
 reuse_version() {
   local version=$1 output pattern
   shift
-  [[ ${IS_SELF_HOSTED:-false} == true ]] || return 1
+  [[ ${RUNNER_ENVIRONMENT:-} == self-hosted ]] || return 1
   output=$("$@" 2>/dev/null) || return 1
   pattern=${version//./\\.}
   grep -Eq "(^|[^[:alnum:].+-])v?${pattern}([^[:alnum:].+-]|$)" <<< "$output" || return 1
@@ -33,7 +33,7 @@ reuse_version() {
 # These tools do not expose a version command. Match their pinned binaries.
 reuse_binary() {
   local name=$1 checksum=$2 binary
-  [[ ${IS_SELF_HOSTED:-false} == true ]] || return 1
+  [[ ${RUNNER_ENVIRONMENT:-} == self-hosted ]] || return 1
   binary=$(command -v "$name") || return 1
   [[ $(shasum -a 256 "$binary" | awk '{print $1}') == "$checksum" ]] || return 1
   puts "Reuse $name"
@@ -65,7 +65,9 @@ if [ "${SKIP_SWIFT_BOOTSTRAP:-}" != true ]; then
     DOWNLOAD_URL="https://github.com/nicklockwood/SwiftFormat/releases/download/${SWIFT_FORMAT_VERSION}/swiftformat.zip"
     DOWNLOAD_PATH="/tmp/swiftformat-${SWIFT_FORMAT_VERSION}.zip"
     BIN_PATH="/usr/local/bin/swiftformat"
-    brew uninstall swiftformat || true
+    if brew list --formula swiftformat >/dev/null 2>&1; then
+      brew uninstall swiftformat
+    fi
     wget "$DOWNLOAD_URL" -O "$DOWNLOAD_PATH"
     unzip -o "$DOWNLOAD_PATH" -d "/tmp/swiftformat-${SWIFT_FORMAT_VERSION}"
     sudo mv "/tmp/swiftformat-${SWIFT_FORMAT_VERSION}/swiftformat" "$BIN_PATH"

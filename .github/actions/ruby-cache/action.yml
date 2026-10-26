@@ -4,12 +4,12 @@ runs:
   using: "composite"
   steps:
     - uses: ruby/setup-ruby@v1
-      if: env.IS_SELF_HOSTED != 'true'
+      if: runner.environment != 'self-hosted'
       with:
         ruby-version: 3.1.0
         bundler-cache: true
     - name: Use the image Ruby and gem bundle
-      if: env.IS_SELF_HOSTED == 'true'
+      if: runner.environment == 'self-hosted'
       run: |
         runtime=$(mise where ruby@3.1.0)
         export PATH="$runtime/bin:$PATH"
