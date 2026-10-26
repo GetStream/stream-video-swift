@@ -7,12 +7,19 @@ import Foundation
 struct UserAuth: @unchecked Sendable, DefaultAPIClientMiddleware {
             
     var tokenProvider: () -> String
+    var connectionId: () async throws -> String
 
     func intercept(
         _ request: Request,
         next: (Request) async throws -> (Data, URLResponse)
     ) async throws -> (Data, URLResponse) {
         var modifiedRequest = request
+        let connectionId = try await connectionId()
+        if !connectionId.isEmpty {
+            modifiedRequest.queryParams.append(
+                .init(name: "connection_id", value: connectionId)
+            )
+        }
         modifiedRequest.headers["Authorization"] = tokenProvider()
         modifiedRequest.headers["stream-auth-type"] = "jwt"
         return try await next(modifiedRequest)

@@ -176,6 +176,10 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         policy: WebRTCJoinPolicy = .default,
         joinInterceptor: CallJoinIntercepting? = nil
     ) async throws -> JoinCallResponse {
+        if ring {
+            try await streamVideo.requireCoordinatorConnection()
+        }
+
         /// Determines the source from which the join action was initiated.
         ///
         /// This block checks if the `joinSource` has already been set in the current
@@ -287,6 +291,9 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         ring: Bool = false,
         notify: Bool = false
     ) async throws -> GetCallResponse {
+        if ring {
+            try await streamVideo.requireCoordinatorConnection()
+        }
         let response = try await coordinatorClient.getCall(
             type: callType,
             id: callId,
@@ -392,6 +399,9 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         transcription: TranscriptionSettingsRequest? = nil,
         encryption: EncryptionSettingsRequest? = nil
     ) async throws -> CallResponse {
+        if ring {
+            try await streamVideo.requireCoordinatorConnection()
+        }
         let membersFromMemberIds = memberIds?
             .map { MemberRequest(userId: $0) } ?? []
 
@@ -453,6 +463,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// - Throws: An error if the coordinator request fails or the call cannot be rung.
     @discardableResult
     public func ring(request: RingCallRequest) async throws -> RingCallResponse {
+        try await streamVideo.requireCoordinatorConnection()
         let response = try await coordinatorClient.ringCall(
             type: callType,
             id: callId,
