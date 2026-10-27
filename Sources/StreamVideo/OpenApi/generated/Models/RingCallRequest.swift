@@ -16,9 +16,16 @@ public final class RingCallRequest: @unchecked Sendable, Codable, JSONEncodable 
         self.video = video
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case membersIds = "members_ids"
-        case video
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.membersIds = try container.decodeIfPresent([String].self, forKey: .membersIds)
+        self.video = try container.decodeIfPresent(Bool.self, forKey: .video)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(membersIds, forKey: .membersIds)
+        try container.encodeIfPresent(video, forKey: .video)
     }
 }
 

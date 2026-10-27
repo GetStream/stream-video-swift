@@ -20,12 +20,22 @@ public final class IngressVideoLayerResponse: @unchecked Sendable, Codable, JSON
         self.minDimension = minDimension
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case bitrate
-        case codec
-        case frameRateLimit = "frame_rate_limit"
-        case maxDimension = "max_dimension"
-        case minDimension = "min_dimension"
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.bitrate = try container.decode(Int.self, forKey: .bitrate)
+        self.codec = try container.decode(String.self, forKey: .codec)
+        self.frameRateLimit = try container.decode(Int.self, forKey: .frameRateLimit)
+        self.maxDimension = try container.decode(Int.self, forKey: .maxDimension)
+        self.minDimension = try container.decode(Int.self, forKey: .minDimension)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(bitrate, forKey: .bitrate)
+        try container.encode(codec, forKey: .codec)
+        try container.encode(frameRateLimit, forKey: .frameRateLimit)
+        try container.encode(maxDimension, forKey: .maxDimension)
+        try container.encode(minDimension, forKey: .minDimension)
     }
 }
 

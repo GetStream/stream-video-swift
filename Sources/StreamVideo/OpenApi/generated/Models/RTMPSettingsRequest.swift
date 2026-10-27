@@ -41,9 +41,16 @@ public final class RTMPSettingsRequest: @unchecked Sendable, Codable, JSONEncoda
         self.quality = quality
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case enabled
-        case quality
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.enabled = try container.decodeIfPresent(Bool.self, forKey: .enabled)
+        self.quality = try container.decodeIfPresent(RTMPSettingsRequestQuality.self, forKey: .quality)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(enabled, forKey: .enabled)
+        try container.encodeIfPresent(quality, forKey: .quality)
     }
 }
 

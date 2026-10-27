@@ -44,12 +44,22 @@ public final class VideoSettings: @unchecked Sendable, Codable, JSONEncodable {
         self.targetResolution = targetResolution
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case accessRequestEnabled = "access_request_enabled"
-        case cameraDefaultOn = "camera_default_on"
-        case cameraFacing = "camera_facing"
-        case enabled
-        case targetResolution = "target_resolution"
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.accessRequestEnabled = try container.decode(Bool.self, forKey: .accessRequestEnabled)
+        self.cameraDefaultOn = try container.decode(Bool.self, forKey: .cameraDefaultOn)
+        self.cameraFacing = try container.decode(VideoSettingsCameraFacing.self, forKey: .cameraFacing)
+        self.enabled = try container.decode(Bool.self, forKey: .enabled)
+        self.targetResolution = try container.decode(TargetResolution.self, forKey: .targetResolution)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(accessRequestEnabled, forKey: .accessRequestEnabled)
+        try container.encode(cameraDefaultOn, forKey: .cameraDefaultOn)
+        try container.encode(cameraFacing, forKey: .cameraFacing)
+        try container.encode(enabled, forKey: .enabled)
+        try container.encode(targetResolution, forKey: .targetResolution)
     }
 }
 

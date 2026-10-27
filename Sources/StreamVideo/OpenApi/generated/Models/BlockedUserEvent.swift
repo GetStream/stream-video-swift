@@ -24,12 +24,22 @@ public final class BlockedUserEvent: @unchecked Sendable, Event, Codable, JSONEn
         self.user = user
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case blockedByUser = "blocked_by_user"
-        case callCid = "call_cid"
-        case createdAt = "created_at"
-        case type
-        case user
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.blockedByUser = try container.decodeIfPresent(UserResponse.self, forKey: .blockedByUser)
+        self.callCid = try container.decode(String.self, forKey: .callCid)
+        self.createdAt = try container.decode(Date.self, forKey: .createdAt)
+        self.type = try container.decode(String.self, forKey: .type)
+        self.user = try container.decode(UserResponse.self, forKey: .user)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(blockedByUser, forKey: .blockedByUser)
+        try container.encode(callCid, forKey: .callCid)
+        try container.encode(createdAt, forKey: .createdAt)
+        try container.encode(type, forKey: .type)
+        try container.encode(user, forKey: .user)
     }
 }
 

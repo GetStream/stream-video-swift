@@ -14,9 +14,16 @@ public final class BackstageSettings: @unchecked Sendable, Codable, JSONEncodabl
         self.joinAheadTimeSeconds = joinAheadTimeSeconds
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case enabled
-        case joinAheadTimeSeconds = "join_ahead_time_seconds"
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.enabled = try container.decode(Bool.self, forKey: .enabled)
+        self.joinAheadTimeSeconds = try container.decodeIfPresent(Int.self, forKey: .joinAheadTimeSeconds)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(enabled, forKey: .enabled)
+        try container.encodeIfPresent(joinAheadTimeSeconds, forKey: .joinAheadTimeSeconds)
     }
 }
 

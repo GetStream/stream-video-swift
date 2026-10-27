@@ -20,10 +20,18 @@ public final class StartTranscriptionRequest: @unchecked Sendable, Codable, JSON
         self.transcriptionExternalStorage = transcriptionExternalStorage
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case enableClosedCaptions = "enable_closed_captions"
-        case language
-        case transcriptionExternalStorage = "transcription_external_storage"
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.enableClosedCaptions = try container.decodeIfPresent(Bool.self, forKey: .enableClosedCaptions)
+        self.language = try container.decodeIfPresent(String.self, forKey: .language)
+        self.transcriptionExternalStorage = try container.decodeIfPresent(String.self, forKey: .transcriptionExternalStorage)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(enableClosedCaptions, forKey: .enableClosedCaptions)
+        try container.encodeIfPresent(language, forKey: .language)
+        try container.encodeIfPresent(transcriptionExternalStorage, forKey: .transcriptionExternalStorage)
     }
 }
 

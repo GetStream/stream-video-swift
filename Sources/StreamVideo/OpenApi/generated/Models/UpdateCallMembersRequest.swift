@@ -17,9 +17,16 @@ public final class UpdateCallMembersRequest: @unchecked Sendable, Codable, JSONE
         self.updateMembers = updateMembers
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case removeMembers = "remove_members"
-        case updateMembers = "update_members"
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.removeMembers = try container.decodeIfPresent([String].self, forKey: .removeMembers)
+        self.updateMembers = try container.decodeIfPresent([MemberRequest].self, forKey: .updateMembers)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(removeMembers, forKey: .removeMembers)
+        try container.encodeIfPresent(updateMembers, forKey: .updateMembers)
     }
 }
 

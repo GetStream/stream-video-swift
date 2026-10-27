@@ -12,8 +12,14 @@ public final class ThumbnailResponse: @unchecked Sendable, Codable, JSONEncodabl
         self.imageUrl = imageUrl
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case imageUrl = "image_url"
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.imageUrl = try container.decode(String.self, forKey: .imageUrl)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(imageUrl, forKey: .imageUrl)
     }
 }
 

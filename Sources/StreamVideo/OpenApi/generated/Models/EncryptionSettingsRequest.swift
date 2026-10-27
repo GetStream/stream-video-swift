@@ -31,8 +31,14 @@ public final class EncryptionSettingsRequest: @unchecked Sendable, Codable, JSON
         self.mode = mode
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case mode
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.mode = try container.decodeIfPresent(EncryptionSettingsRequestMode.self, forKey: .mode)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(mode, forKey: .mode)
     }
 }
 

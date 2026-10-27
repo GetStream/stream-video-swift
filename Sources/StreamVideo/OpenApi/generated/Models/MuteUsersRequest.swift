@@ -29,13 +29,24 @@ public final class MuteUsersRequest: @unchecked Sendable, Codable, JSONEncodable
         self.video = video
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case audio
-        case muteAllUsers = "mute_all_users"
-        case screenshare
-        case screenshareAudio = "screenshare_audio"
-        case userIds = "user_ids"
-        case video
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.audio = try container.decodeIfPresent(Bool.self, forKey: .audio)
+        self.muteAllUsers = try container.decodeIfPresent(Bool.self, forKey: .muteAllUsers)
+        self.screenshare = try container.decodeIfPresent(Bool.self, forKey: .screenshare)
+        self.screenshareAudio = try container.decodeIfPresent(Bool.self, forKey: .screenshareAudio)
+        self.userIds = try container.decodeIfPresent([String].self, forKey: .userIds)
+        self.video = try container.decodeIfPresent(Bool.self, forKey: .video)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(audio, forKey: .audio)
+        try container.encodeIfPresent(muteAllUsers, forKey: .muteAllUsers)
+        try container.encodeIfPresent(screenshare, forKey: .screenshare)
+        try container.encodeIfPresent(screenshareAudio, forKey: .screenshareAudio)
+        try container.encodeIfPresent(userIds, forKey: .userIds)
+        try container.encodeIfPresent(video, forKey: .video)
     }
 }
 

@@ -61,10 +61,18 @@ public final class RecordSettingsRequest: @unchecked Sendable, Codable, JSONEnco
         self.quality = quality
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case audioOnly = "audio_only"
-        case mode
-        case quality
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.audioOnly = try container.decodeIfPresent(Bool.self, forKey: .audioOnly)
+        self.mode = try container.decode(RecordSettingsRequestMode.self, forKey: .mode)
+        self.quality = try container.decodeIfPresent(RecordSettingsRequestQuality.self, forKey: .quality)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(audioOnly, forKey: .audioOnly)
+        try container.encode(mode, forKey: .mode)
+        try container.encodeIfPresent(quality, forKey: .quality)
     }
 }
 

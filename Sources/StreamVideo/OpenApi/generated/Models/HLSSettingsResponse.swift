@@ -17,10 +17,18 @@ public final class HLSSettingsResponse: @unchecked Sendable, Codable, JSONEncoda
         self.qualityTracks = qualityTracks
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case autoOn = "auto_on"
-        case enabled
-        case qualityTracks = "quality_tracks"
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.autoOn = try container.decode(Bool.self, forKey: .autoOn)
+        self.enabled = try container.decode(Bool.self, forKey: .enabled)
+        self.qualityTracks = try container.decode([String].self, forKey: .qualityTracks)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(autoOn, forKey: .autoOn)
+        try container.encode(enabled, forKey: .enabled)
+        try container.encode(qualityTracks, forKey: .qualityTracks)
     }
 }
 

@@ -20,11 +20,20 @@ public final class QueryCallStatsResponse: @unchecked Sendable, Codable, JSONEnc
         self.reports = reports
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case duration
-        case next
-        case prev
-        case reports
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.duration = try container.decode(String.self, forKey: .duration)
+        self.next = try container.decodeIfPresent(String.self, forKey: .next)
+        self.prev = try container.decodeIfPresent(String.self, forKey: .prev)
+        self.reports = try container.decode([CallStatsReportSummaryResponse].self, forKey: .reports)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(duration, forKey: .duration)
+        try container.encodeIfPresent(next, forKey: .next)
+        try container.encodeIfPresent(prev, forKey: .prev)
+        try container.encode(reports, forKey: .reports)
     }
 }
 

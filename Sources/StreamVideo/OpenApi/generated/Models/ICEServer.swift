@@ -20,10 +20,18 @@ public final class ICEServer: @unchecked Sendable, Codable, JSONEncodable {
         self.username = username
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case password
-        case urls
-        case username
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.password = try container.decode(String.self, forKey: .password)
+        self.urls = try container.decode([String].self, forKey: .urls)
+        self.username = try container.decode(String.self, forKey: .username)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(password, forKey: .password)
+        try container.encode(urls, forKey: .urls)
+        try container.encode(username, forKey: .username)
     }
 }
 

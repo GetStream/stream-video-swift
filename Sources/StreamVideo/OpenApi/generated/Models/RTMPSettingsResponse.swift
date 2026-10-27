@@ -15,9 +15,16 @@ public final class RTMPSettingsResponse: @unchecked Sendable, Codable, JSONEncod
         self.quality = quality
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case enabled
-        case quality
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.enabled = try container.decode(Bool.self, forKey: .enabled)
+        self.quality = try container.decode(String.self, forKey: .quality)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(enabled, forKey: .enabled)
+        try container.encode(quality, forKey: .quality)
     }
 }
 

@@ -14,9 +14,16 @@ public final class StatsOptions: @unchecked Sendable, Codable, JSONEncodable {
         self.reportingIntervalMs = reportingIntervalMs
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case enableRtcStats = "enable_rtc_stats"
-        case reportingIntervalMs = "reporting_interval_ms"
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.enableRtcStats = try container.decode(Bool.self, forKey: .enableRtcStats)
+        self.reportingIntervalMs = try container.decode(Int.self, forKey: .reportingIntervalMs)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(enableRtcStats, forKey: .enableRtcStats)
+        try container.encode(reportingIntervalMs, forKey: .reportingIntervalMs)
     }
 }
 

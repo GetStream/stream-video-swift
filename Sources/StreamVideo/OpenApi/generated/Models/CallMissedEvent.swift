@@ -39,15 +39,28 @@ public final class CallMissedEvent: @unchecked Sendable, Event, Codable, JSONEnc
         self.user = user
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case call
-        case callCid = "call_cid"
-        case createdAt = "created_at"
-        case members
-        case notifyUser = "notify_user"
-        case sessionId = "session_id"
-        case type
-        case user
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.call = try container.decode(CallResponse.self, forKey: .call)
+        self.callCid = try container.decode(String.self, forKey: .callCid)
+        self.createdAt = try container.decode(Date.self, forKey: .createdAt)
+        self.members = try container.decode([MemberResponse].self, forKey: .members)
+        self.notifyUser = try container.decode(Bool.self, forKey: .notifyUser)
+        self.sessionId = try container.decode(String.self, forKey: .sessionId)
+        self.type = try container.decode(String.self, forKey: .type)
+        self.user = try container.decode(UserResponse.self, forKey: .user)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(call, forKey: .call)
+        try container.encode(callCid, forKey: .callCid)
+        try container.encode(createdAt, forKey: .createdAt)
+        try container.encode(members, forKey: .members)
+        try container.encode(notifyUser, forKey: .notifyUser)
+        try container.encode(sessionId, forKey: .sessionId)
+        try container.encode(type, forKey: .type)
+        try container.encode(user, forKey: .user)
     }
 }
 

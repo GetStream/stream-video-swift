@@ -51,18 +51,34 @@ public final class JoinCallRequest: @unchecked Sendable, Codable, JSONEncodable 
         self.video = video
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case create
-        case data
-        case e2ee
-        case hintHighScaleLivestreamPublisher = "hint_high_scale_livestream_publisher"
-        case location
-        case membersLimit = "members_limit"
-        case migratingFrom = "migrating_from"
-        case migratingFromList = "migrating_from_list"
-        case notify
-        case ring
-        case video
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.create = try container.decodeIfPresent(Bool.self, forKey: .create)
+        self.data = try container.decodeIfPresent(CallRequest.self, forKey: .data)
+        self.e2ee = try container.decodeIfPresent(Bool.self, forKey: .e2ee)
+        self.hintHighScaleLivestreamPublisher = try container.decodeIfPresent(Bool.self, forKey: .hintHighScaleLivestreamPublisher)
+        self.location = try container.decode(String.self, forKey: .location)
+        self.membersLimit = try container.decodeIfPresent(Int.self, forKey: .membersLimit)
+        self.migratingFrom = try container.decodeIfPresent(String.self, forKey: .migratingFrom)
+        self.migratingFromList = try container.decodeIfPresent([String].self, forKey: .migratingFromList)
+        self.notify = try container.decodeIfPresent(Bool.self, forKey: .notify)
+        self.ring = try container.decodeIfPresent(Bool.self, forKey: .ring)
+        self.video = try container.decodeIfPresent(Bool.self, forKey: .video)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(create, forKey: .create)
+        try container.encodeIfPresent(data, forKey: .data)
+        try container.encodeIfPresent(e2ee, forKey: .e2ee)
+        try container.encodeIfPresent(hintHighScaleLivestreamPublisher, forKey: .hintHighScaleLivestreamPublisher)
+        try container.encode(location, forKey: .location)
+        try container.encodeIfPresent(membersLimit, forKey: .membersLimit)
+        try container.encodeIfPresent(migratingFrom, forKey: .migratingFrom)
+        try container.encodeIfPresent(migratingFromList, forKey: .migratingFromList)
+        try container.encodeIfPresent(notify, forKey: .notify)
+        try container.encodeIfPresent(ring, forKey: .ring)
+        try container.encodeIfPresent(video, forKey: .video)
     }
 }
 

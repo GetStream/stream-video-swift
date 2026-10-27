@@ -130,37 +130,72 @@ public final class ClientEvent: @unchecked Sendable, Codable, JSONEncodable {
         self.wasPreviouslyConnected = wasPreviouslyConnected
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case callSessionId = "call_session_id"
-        case cameraPermissionStatus = "camera_permission_status"
-        case coordinatorConnectId = "coordinator_connect_id"
-        case elapsedTime = "elapsed_time"
-        case eventType = "event_type"
-        case iceState = "ice_state"
-        case id
-        case joinAttemptId = "join_attempt_id"
-        case joinReason = "join_reason"
-        case leaveInitiator = "leave_initiator"
-        case leaveReason = "leave_reason"
-        case microphonePermissionStatus = "microphone_permission_status"
-        case outcome
-        case peerConnection = "peer_connection"
-        case previouslyConnectedTimestamp = "previously_connected_timestamp"
-        case retryCountAttempt = "retry_count_attempt"
-        case retryFailureCode = "retry_failure_code"
-        case retryFailureReason = "retry_failure_reason"
-        case screenShareStatus = "screen_share_status"
-        case sdkVersion = "sdk_version"
-        case sfuId = "sfu_id"
-        case source
-        case stage
-        case stageId = "stage_id"
-        case timestamp
-        case trackId = "track_id"
-        case type
-        case userAgent = "user_agent"
-        case userId = "user_id"
-        case wasPreviouslyConnected = "was_previously_connected"
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.callSessionId = try container.decodeIfPresent(String.self, forKey: .callSessionId)
+        self.cameraPermissionStatus = try container.decodeIfPresent(String.self, forKey: .cameraPermissionStatus)
+        self.coordinatorConnectId = try container.decodeIfPresent(String.self, forKey: .coordinatorConnectId)
+        self.elapsedTime = try container.decodeIfPresent(Int.self, forKey: .elapsedTime)
+        self.eventType = try container.decodeIfPresent(String.self, forKey: .eventType)
+        self.iceState = try container.decodeIfPresent(String.self, forKey: .iceState)
+        self.id = try container.decodeIfPresent(String.self, forKey: .id)
+        self.joinAttemptId = try container.decodeIfPresent(String.self, forKey: .joinAttemptId)
+        self.joinReason = try container.decodeIfPresent(String.self, forKey: .joinReason)
+        self.leaveInitiator = try container.decodeIfPresent(String.self, forKey: .leaveInitiator)
+        self.leaveReason = try container.decodeIfPresent(String.self, forKey: .leaveReason)
+        self.microphonePermissionStatus = try container.decodeIfPresent(String.self, forKey: .microphonePermissionStatus)
+        self.outcome = try container.decodeIfPresent(String.self, forKey: .outcome)
+        self.peerConnection = try container.decodeIfPresent(String.self, forKey: .peerConnection)
+        self.previouslyConnectedTimestamp = try container.decodeIfPresent(Date.self, forKey: .previouslyConnectedTimestamp)
+        self.retryCountAttempt = try container.decodeIfPresent(Int.self, forKey: .retryCountAttempt)
+        self.retryFailureCode = try container.decodeIfPresent(String.self, forKey: .retryFailureCode)
+        self.retryFailureReason = try container.decodeIfPresent(String.self, forKey: .retryFailureReason)
+        self.screenShareStatus = try container.decodeIfPresent(String.self, forKey: .screenShareStatus)
+        self.sdkVersion = try container.decodeIfPresent(String.self, forKey: .sdkVersion)
+        self.sfuId = try container.decodeIfPresent(String.self, forKey: .sfuId)
+        self.source = try container.decodeIfPresent(String.self, forKey: .source)
+        self.stage = try container.decodeIfPresent(String.self, forKey: .stage)
+        self.stageId = try container.decodeIfPresent(String.self, forKey: .stageId)
+        self.timestamp = try container.decodeIfPresent(Date.self, forKey: .timestamp)
+        self.trackId = try container.decodeIfPresent(String.self, forKey: .trackId)
+        self.type = try container.decodeIfPresent(String.self, forKey: .type)
+        self.userAgent = try container.decodeIfPresent(String.self, forKey: .userAgent)
+        self.userId = try container.decodeIfPresent(String.self, forKey: .userId)
+        self.wasPreviouslyConnected = try container.decodeIfPresent(Bool.self, forKey: .wasPreviouslyConnected)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(callSessionId, forKey: .callSessionId)
+        try container.encodeIfPresent(cameraPermissionStatus, forKey: .cameraPermissionStatus)
+        try container.encodeIfPresent(coordinatorConnectId, forKey: .coordinatorConnectId)
+        try container.encodeIfPresent(elapsedTime, forKey: .elapsedTime)
+        try container.encodeIfPresent(eventType, forKey: .eventType)
+        try container.encodeIfPresent(iceState, forKey: .iceState)
+        try container.encodeIfPresent(id, forKey: .id)
+        try container.encodeIfPresent(joinAttemptId, forKey: .joinAttemptId)
+        try container.encodeIfPresent(joinReason, forKey: .joinReason)
+        try container.encodeIfPresent(leaveInitiator, forKey: .leaveInitiator)
+        try container.encodeIfPresent(leaveReason, forKey: .leaveReason)
+        try container.encodeIfPresent(microphonePermissionStatus, forKey: .microphonePermissionStatus)
+        try container.encodeIfPresent(outcome, forKey: .outcome)
+        try container.encodeIfPresent(peerConnection, forKey: .peerConnection)
+        try container.encodeIfPresent(previouslyConnectedTimestamp, forKey: .previouslyConnectedTimestamp)
+        try container.encodeIfPresent(retryCountAttempt, forKey: .retryCountAttempt)
+        try container.encodeIfPresent(retryFailureCode, forKey: .retryFailureCode)
+        try container.encodeIfPresent(retryFailureReason, forKey: .retryFailureReason)
+        try container.encodeIfPresent(screenShareStatus, forKey: .screenShareStatus)
+        try container.encodeIfPresent(sdkVersion, forKey: .sdkVersion)
+        try container.encodeIfPresent(sfuId, forKey: .sfuId)
+        try container.encodeIfPresent(source, forKey: .source)
+        try container.encodeIfPresent(stage, forKey: .stage)
+        try container.encodeIfPresent(stageId, forKey: .stageId)
+        try container.encodeIfPresent(timestamp, forKey: .timestamp)
+        try container.encodeIfPresent(trackId, forKey: .trackId)
+        try container.encodeIfPresent(type, forKey: .type)
+        try container.encodeIfPresent(userAgent, forKey: .userAgent)
+        try container.encodeIfPresent(userId, forKey: .userId)
+        try container.encodeIfPresent(wasPreviouslyConnected, forKey: .wasPreviouslyConnected)
     }
 }
 

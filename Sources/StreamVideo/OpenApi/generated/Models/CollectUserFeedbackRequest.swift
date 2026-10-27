@@ -29,13 +29,24 @@ public final class CollectUserFeedbackRequest: @unchecked Sendable, Codable, JSO
         self.userSessionId = userSessionId
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case custom
-        case rating
-        case reason
-        case sdk
-        case sdkVersion = "sdk_version"
-        case userSessionId = "user_session_id"
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.custom = try container.decodeIfPresent([String: RawJSON].self, forKey: .custom)
+        self.rating = try container.decode(Int.self, forKey: .rating)
+        self.reason = try container.decodeIfPresent(String.self, forKey: .reason)
+        self.sdk = try container.decode(String.self, forKey: .sdk)
+        self.sdkVersion = try container.decode(String.self, forKey: .sdkVersion)
+        self.userSessionId = try container.decodeIfPresent(String.self, forKey: .userSessionId)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(custom, forKey: .custom)
+        try container.encode(rating, forKey: .rating)
+        try container.encodeIfPresent(reason, forKey: .reason)
+        try container.encode(sdk, forKey: .sdk)
+        try container.encode(sdkVersion, forKey: .sdkVersion)
+        try container.encodeIfPresent(userSessionId, forKey: .userSessionId)
     }
 }
 

@@ -29,13 +29,24 @@ public final class GoLiveRequest: @unchecked Sendable, Codable, JSONEncodable {
         self.transcriptionStorageName = transcriptionStorageName
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case recordingStorageName = "recording_storage_name"
-        case startClosedCaption = "start_closed_caption"
-        case startHls = "start_hls"
-        case startRecording = "start_recording"
-        case startTranscription = "start_transcription"
-        case transcriptionStorageName = "transcription_storage_name"
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.recordingStorageName = try container.decodeIfPresent(String.self, forKey: .recordingStorageName)
+        self.startClosedCaption = try container.decodeIfPresent(Bool.self, forKey: .startClosedCaption)
+        self.startHls = try container.decodeIfPresent(Bool.self, forKey: .startHls)
+        self.startRecording = try container.decodeIfPresent(Bool.self, forKey: .startRecording)
+        self.startTranscription = try container.decodeIfPresent(Bool.self, forKey: .startTranscription)
+        self.transcriptionStorageName = try container.decodeIfPresent(String.self, forKey: .transcriptionStorageName)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(recordingStorageName, forKey: .recordingStorageName)
+        try container.encodeIfPresent(startClosedCaption, forKey: .startClosedCaption)
+        try container.encodeIfPresent(startHls, forKey: .startHls)
+        try container.encodeIfPresent(startRecording, forKey: .startRecording)
+        try container.encodeIfPresent(startTranscription, forKey: .startTranscription)
+        try container.encodeIfPresent(transcriptionStorageName, forKey: .transcriptionStorageName)
     }
 }
 
