@@ -6,7 +6,7 @@ import Foundation
 import StreamCore
 
 /// This event is sent when the WS connection is established and authenticated, this event contains the full user object as it is stored on the server
-public final class ConnectedEvent: @unchecked Sendable, Event, Codable, JSONEncodable {
+public final class ConnectedEvent: @unchecked Sendable, Event, Decodable {
     /// The connection_id for this client
     public var connectionId: String
     public var createdAt: Date
@@ -26,14 +26,6 @@ public final class ConnectedEvent: @unchecked Sendable, Event, Codable, JSONEnco
         self.createdAt = try container.decode(Date.self, forKey: .createdAt)
         self.me = try container.decode(OwnUserResponse.self, forKey: .me)
         self.type = try container.decode(String.self, forKey: .type)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(connectionId, forKey: .connectionId)
-        try container.encode(createdAt, forKey: .createdAt)
-        try container.encode(me, forKey: .me)
-        try container.encode(type, forKey: .type)
     }
 }
 

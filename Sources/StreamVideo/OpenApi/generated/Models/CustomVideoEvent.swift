@@ -6,7 +6,7 @@ import Foundation
 import StreamCore
 
 /// A custom event, this event is used to send custom events to other participants in the call.
-public final class CustomVideoEvent: @unchecked Sendable, Event, Codable, JSONEncodable, WSCallEvent {
+public final class CustomVideoEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
     public var callCid: String
     public var createdAt: Date
     /// Custom data for this object
@@ -30,15 +30,6 @@ public final class CustomVideoEvent: @unchecked Sendable, Event, Codable, JSONEn
         self.custom = try container.decode([String: RawJSON].self, forKey: .custom)
         self.type = try container.decode(String.self, forKey: .type)
         self.user = try container.decode(UserResponse.self, forKey: .user)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(callCid, forKey: .callCid)
-        try container.encode(createdAt, forKey: .createdAt)
-        try container.encode(custom, forKey: .custom)
-        try container.encode(type, forKey: .type)
-        try container.encode(user, forKey: .user)
     }
 }
 

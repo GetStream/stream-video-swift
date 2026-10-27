@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class AppEventResponse: @unchecked Sendable, Codable, JSONEncodable {
+public final class AppEventResponse: @unchecked Sendable, Decodable {
     /// boolean
     public var asyncUrlEnrichEnabled: Bool?
     /// boolean
@@ -36,15 +36,6 @@ public final class AppEventResponse: @unchecked Sendable, Codable, JSONEncodable
         self.fileUploadConfig = try container.decodeIfPresent(FileUploadConfig.self, forKey: .fileUploadConfig)
         self.imageUploadConfig = try container.decodeIfPresent(FileUploadConfig.self, forKey: .imageUploadConfig)
         self.name = try container.decode(String.self, forKey: .name)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encodeIfPresent(asyncUrlEnrichEnabled, forKey: .asyncUrlEnrichEnabled)
-        try container.encode(autoTranslationEnabled, forKey: .autoTranslationEnabled)
-        try container.encodeIfPresent(fileUploadConfig, forKey: .fileUploadConfig)
-        try container.encodeIfPresent(imageUploadConfig, forKey: .imageUploadConfig)
-        try container.encode(name, forKey: .name)
     }
 }
 

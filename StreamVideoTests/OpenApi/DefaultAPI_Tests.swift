@@ -35,4 +35,12 @@ final class DefaultAPI_Tests: XCTestCase, @unchecked Sendable {
 
         XCTAssertEqual(transport.requests.last?.url.path, "/api/v2/video/call/default/123/ring_state")
     }
+
+    // MARK: - Coding directions
+
+    func test_models_conformOnlyToTheCodingDirectionTheAPIUses() {
+        XCTAssertFalse((GetCallResponse.self as Any.Type) is Encodable.Type)
+        XCTAssertFalse((CallCreatedEvent.self as Any.Type) is Encodable.Type)
+        XCTAssertFalse((GetOrCreateCallRequest.self as Any.Type) is Decodable.Type)
+    }
 }

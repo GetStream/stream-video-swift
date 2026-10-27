@@ -6,7 +6,7 @@ import Foundation
 import StreamCore
 
 /// This event is sent to notify about permission changes for a user, clients receiving this event should update their UI accordingly
-public final class UpdatedCallPermissionsEvent: @unchecked Sendable, Event, Codable, JSONEncodable, WSCallEvent {
+public final class UpdatedCallPermissionsEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
     public var callCid: String
     public var createdAt: Date
     /// The capabilities of the current user
@@ -30,15 +30,6 @@ public final class UpdatedCallPermissionsEvent: @unchecked Sendable, Event, Coda
         self.ownCapabilities = try container.decode([OwnCapability].self, forKey: .ownCapabilities)
         self.type = try container.decode(String.self, forKey: .type)
         self.user = try container.decode(UserResponse.self, forKey: .user)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(callCid, forKey: .callCid)
-        try container.encode(createdAt, forKey: .createdAt)
-        try container.encode(ownCapabilities, forKey: .ownCapabilities)
-        try container.encode(type, forKey: .type)
-        try container.encode(user, forKey: .user)
     }
 }
 

@@ -5,19 +5,13 @@
 import Foundation
 import StreamCore
 
-public final class IngressVideoEncodingOptionsRequest: @unchecked Sendable, Codable, JSONEncodable {
+public final class IngressVideoEncodingOptionsRequest: @unchecked Sendable, Encodable, JSONEncodable {
     public var layers: [IngressVideoLayerRequest]
     public var source: IngressSourceRequest
 
     public init(layers: [IngressVideoLayerRequest], source: IngressSourceRequest) {
         self.layers = layers
         self.source = source
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: StringCodingKey.self)
-        self.layers = try container.decode([IngressVideoLayerRequest].self, forKey: .layers)
-        self.source = try container.decode(IngressSourceRequest.self, forKey: .source)
     }
 
     public func encode(to encoder: Encoder) throws {

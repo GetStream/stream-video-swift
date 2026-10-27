@@ -6,7 +6,7 @@ import Foundation
 import StreamCore
 
 /// Represents a call
-public final class CallResponse: @unchecked Sendable, Codable, JSONEncodable {
+public final class CallResponse: @unchecked Sendable, Decodable {
     public var backstage: Bool
     public var blockedUserIds: [String]
     public var captioning: Bool
@@ -112,32 +112,6 @@ public final class CallResponse: @unchecked Sendable, Codable, JSONEncodable {
         self.transcribing = try container.decode(Bool.self, forKey: .transcribing)
         self.type = try container.decode(String.self, forKey: .type)
         self.updatedAt = try container.decode(Date.self, forKey: .updatedAt)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(backstage, forKey: .backstage)
-        try container.encode(blockedUserIds, forKey: .blockedUserIds)
-        try container.encode(captioning, forKey: .captioning)
-        try container.encode(cid, forKey: .cid)
-        try container.encode(createdAt, forKey: .createdAt)
-        try container.encode(createdBy, forKey: .createdBy)
-        try container.encode(currentSessionId, forKey: .currentSessionId)
-        try container.encode(custom, forKey: .custom)
-        try container.encode(egress, forKey: .egress)
-        try container.encodeIfPresent(endedAt, forKey: .endedAt)
-        try container.encode(id, forKey: .id)
-        try container.encode(ingress, forKey: .ingress)
-        try container.encodeIfPresent(joinAheadTimeSeconds, forKey: .joinAheadTimeSeconds)
-        try container.encode(recording, forKey: .recording)
-        try container.encodeIfPresent(session, forKey: .session)
-        try container.encode(settings, forKey: .settings)
-        try container.encodeIfPresent(startsAt, forKey: .startsAt)
-        try container.encodeIfPresent(team, forKey: .team)
-        try container.encodeIfPresent(thumbnails, forKey: .thumbnails)
-        try container.encode(transcribing, forKey: .transcribing)
-        try container.encode(type, forKey: .type)
-        try container.encode(updatedAt, forKey: .updatedAt)
     }
 }
 

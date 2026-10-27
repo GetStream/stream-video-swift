@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class IngressAudioEncodingResponse: @unchecked Sendable, Codable, JSONEncodable {
+public final class IngressAudioEncodingResponse: @unchecked Sendable, Decodable {
     public var bitrate: Int
     public var channels: Int
     public var enableDtx: Bool
@@ -21,13 +21,6 @@ public final class IngressAudioEncodingResponse: @unchecked Sendable, Codable, J
         self.bitrate = try container.decode(Int.self, forKey: .bitrate)
         self.channels = try container.decode(Int.self, forKey: .channels)
         self.enableDtx = try container.decode(Bool.self, forKey: .enableDtx)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(bitrate, forKey: .bitrate)
-        try container.encode(channels, forKey: .channels)
-        try container.encode(enableDtx, forKey: .enableDtx)
     }
 }
 

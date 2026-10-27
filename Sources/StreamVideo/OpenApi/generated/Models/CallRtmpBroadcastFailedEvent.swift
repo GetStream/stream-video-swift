@@ -6,7 +6,7 @@ import Foundation
 import StreamCore
 
 /// This event is sent when a call RTMP broadcast has failed
-public final class CallRtmpBroadcastFailedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, WSCallEvent {
+public final class CallRtmpBroadcastFailedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
     /// The unique identifier for a call (<type>:<id>)
     public var callCid: String
     /// Date/time of creation
@@ -28,14 +28,6 @@ public final class CallRtmpBroadcastFailedEvent: @unchecked Sendable, Event, Cod
         self.createdAt = try container.decode(Date.self, forKey: .createdAt)
         self.name = try container.decode(String.self, forKey: .name)
         self.type = try container.decode(String.self, forKey: .type)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(callCid, forKey: .callCid)
-        try container.encode(createdAt, forKey: .createdAt)
-        try container.encode(name, forKey: .name)
-        try container.encode(type, forKey: .type)
     }
 }
 

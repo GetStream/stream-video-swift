@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class RawRecordingSettingsRequest: @unchecked Sendable, Codable, JSONEncodable {
+public final class RawRecordingSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable {
     
     public enum RawRecordingSettingsRequestMode: String, Sendable, Codable, CaseIterable {
         case autoOn = "auto-on"
@@ -29,11 +29,6 @@ public final class RawRecordingSettingsRequest: @unchecked Sendable, Codable, JS
 
     public init(mode: RawRecordingSettingsRequestMode) {
         self.mode = mode
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: StringCodingKey.self)
-        self.mode = try container.decode(RawRecordingSettingsRequestMode.self, forKey: .mode)
     }
 
     public func encode(to encoder: Encoder) throws {

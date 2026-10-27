@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class CallSettingsResponse: @unchecked Sendable, Codable, JSONEncodable {
+public final class CallSettingsResponse: @unchecked Sendable, Decodable {
     public var audio: AudioSettings
     public var backstage: BackstageSettings
     /// BroadcastSettingsResponse is the payload for broadcasting settings
@@ -84,27 +84,6 @@ public final class CallSettingsResponse: @unchecked Sendable, Codable, JSONEncod
         self.thumbnails = try container.decode(ThumbnailsSettings.self, forKey: .thumbnails)
         self.transcription = try container.decode(TranscriptionSettings.self, forKey: .transcription)
         self.video = try container.decode(VideoSettings.self, forKey: .video)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(audio, forKey: .audio)
-        try container.encode(backstage, forKey: .backstage)
-        try container.encode(broadcasting, forKey: .broadcasting)
-        try container.encode(encryption, forKey: .encryption)
-        try container.encode(frameRecording, forKey: .frameRecording)
-        try container.encode(geofencing, forKey: .geofencing)
-        try container.encode(individualRecording, forKey: .individualRecording)
-        try container.encodeIfPresent(ingress, forKey: .ingress)
-        try container.encode(limits, forKey: .limits)
-        try container.encode(rawRecording, forKey: .rawRecording)
-        try container.encode(recording, forKey: .recording)
-        try container.encode(ring, forKey: .ring)
-        try container.encode(screensharing, forKey: .screensharing)
-        try container.encode(session, forKey: .session)
-        try container.encode(thumbnails, forKey: .thumbnails)
-        try container.encode(transcription, forKey: .transcription)
-        try container.encode(video, forKey: .video)
     }
 }
 

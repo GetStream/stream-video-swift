@@ -6,7 +6,7 @@ import Foundation
 import StreamCore
 
 /// Update call members
-public final class UpdateCallMembersRequest: @unchecked Sendable, Codable, JSONEncodable {
+public final class UpdateCallMembersRequest: @unchecked Sendable, Encodable, JSONEncodable {
     /// List of userID to remove
     public var removeMembers: [String]?
     /// List of members to update or insert
@@ -15,12 +15,6 @@ public final class UpdateCallMembersRequest: @unchecked Sendable, Codable, JSONE
     public init(removeMembers: [String]? = nil, updateMembers: [MemberRequest]? = nil) {
         self.removeMembers = removeMembers
         self.updateMembers = updateMembers
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: StringCodingKey.self)
-        self.removeMembers = try container.decodeIfPresent([String].self, forKey: .removeMembers)
-        self.updateMembers = try container.decodeIfPresent([MemberRequest].self, forKey: .updateMembers)
     }
 
     public func encode(to encoder: Encoder) throws {

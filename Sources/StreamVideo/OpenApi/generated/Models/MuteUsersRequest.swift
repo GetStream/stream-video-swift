@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class MuteUsersRequest: @unchecked Sendable, Codable, JSONEncodable {
+public final class MuteUsersRequest: @unchecked Sendable, Encodable, JSONEncodable {
     public var audio: Bool?
     public var muteAllUsers: Bool?
     public var screenshare: Bool?
@@ -27,16 +27,6 @@ public final class MuteUsersRequest: @unchecked Sendable, Codable, JSONEncodable
         self.screenshareAudio = screenshareAudio
         self.userIds = userIds
         self.video = video
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: StringCodingKey.self)
-        self.audio = try container.decodeIfPresent(Bool.self, forKey: .audio)
-        self.muteAllUsers = try container.decodeIfPresent(Bool.self, forKey: .muteAllUsers)
-        self.screenshare = try container.decodeIfPresent(Bool.self, forKey: .screenshare)
-        self.screenshareAudio = try container.decodeIfPresent(Bool.self, forKey: .screenshareAudio)
-        self.userIds = try container.decodeIfPresent([String].self, forKey: .userIds)
-        self.video = try container.decodeIfPresent(Bool.self, forKey: .video)
     }
 
     public func encode(to encoder: Encoder) throws {

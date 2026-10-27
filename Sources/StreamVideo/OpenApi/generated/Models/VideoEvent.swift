@@ -13,7 +13,7 @@ private class WSEventMapping: Decodable {
     let type: String
 }
 
-public enum VideoEvent: Codable, Hashable {
+public enum VideoEvent: Decodable, Hashable {
     case typeAppUpdatedEvent(AppUpdatedEvent)
     case typeCallAcceptedEvent(CallAcceptedEvent)
     case typeBlockedUserEvent(BlockedUserEvent)
@@ -312,128 +312,6 @@ public enum VideoEvent: Codable, Hashable {
             return value
         case .typeUserUpdatedEvent(let value):
             return value
-        }
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.singleValueContainer()
-        switch self {
-        case .typeAppUpdatedEvent(let value):
-            try container.encode(value)
-        case .typeCallAcceptedEvent(let value):
-            try container.encode(value)
-        case .typeBlockedUserEvent(let value):
-            try container.encode(value)
-        case .typeClosedCaptionEvent(let value):
-            try container.encode(value)
-        case .typeCallClosedCaptionsFailedEvent(let value):
-            try container.encode(value)
-        case .typeCallClosedCaptionsStartedEvent(let value):
-            try container.encode(value)
-        case .typeCallClosedCaptionsStoppedEvent(let value):
-            try container.encode(value)
-        case .typeCallCreatedEvent(let value):
-            try container.encode(value)
-        case .typeCallDeletedEvent(let value):
-            try container.encode(value)
-        case .typeCallEndedEvent(let value):
-            try container.encode(value)
-        case .typeCallFrameRecordingFailedEvent(let value):
-            try container.encode(value)
-        case .typeCallFrameRecordingFrameReadyEvent(let value):
-            try container.encode(value)
-        case .typeCallFrameRecordingStartedEvent(let value):
-            try container.encode(value)
-        case .typeCallFrameRecordingStoppedEvent(let value):
-            try container.encode(value)
-        case .typeCallHLSBroadcastingFailedEvent(let value):
-            try container.encode(value)
-        case .typeCallHLSBroadcastingStartedEvent(let value):
-            try container.encode(value)
-        case .typeCallHLSBroadcastingStoppedEvent(let value):
-            try container.encode(value)
-        case .typeKickedUserEvent(let value):
-            try container.encode(value)
-        case .typeCallLiveStartedEvent(let value):
-            try container.encode(value)
-        case .typeCallMemberAddedEvent(let value):
-            try container.encode(value)
-        case .typeCallMemberRemovedEvent(let value):
-            try container.encode(value)
-        case .typeCallMemberUpdatedEvent(let value):
-            try container.encode(value)
-        case .typeCallMemberUpdatedPermissionEvent(let value):
-            try container.encode(value)
-        case .typeCallMissedEvent(let value):
-            try container.encode(value)
-        case .typeCallModerationBlurEvent(let value):
-            try container.encode(value)
-        case .typeCallModerationWarningEvent(let value):
-            try container.encode(value)
-        case .typeCallNotificationEvent(let value):
-            try container.encode(value)
-        case .typePermissionRequestEvent(let value):
-            try container.encode(value)
-        case .typeUpdatedCallPermissionsEvent(let value):
-            try container.encode(value)
-        case .typeCallReactionEvent(let value):
-            try container.encode(value)
-        case .typeCallRecordingFailedEvent(let value):
-            try container.encode(value)
-        case .typeCallRecordingReadyEvent(let value):
-            try container.encode(value)
-        case .typeCallRecordingStartedEvent(let value):
-            try container.encode(value)
-        case .typeCallRecordingStoppedEvent(let value):
-            try container.encode(value)
-        case .typeCallRejectedEvent(let value):
-            try container.encode(value)
-        case .typeCallRingEvent(let value):
-            try container.encode(value)
-        case .typeCallRtmpBroadcastFailedEvent(let value):
-            try container.encode(value)
-        case .typeCallRtmpBroadcastStartedEvent(let value):
-            try container.encode(value)
-        case .typeCallRtmpBroadcastStoppedEvent(let value):
-            try container.encode(value)
-        case .typeCallSessionEndedEvent(let value):
-            try container.encode(value)
-        case .typeCallSessionParticipantCountsUpdatedEvent(let value):
-            try container.encode(value)
-        case .typeCallSessionParticipantJoinedEvent(let value):
-            try container.encode(value)
-        case .typeCallSessionParticipantLeftEvent(let value):
-            try container.encode(value)
-        case .typeCallSessionStartedEvent(let value):
-            try container.encode(value)
-        case .typeCallStatsReportReadyEvent(let value):
-            try container.encode(value)
-        case .typeCallTranscriptionFailedEvent(let value):
-            try container.encode(value)
-        case .typeCallTranscriptionReadyEvent(let value):
-            try container.encode(value)
-        case .typeCallTranscriptionStartedEvent(let value):
-            try container.encode(value)
-        case .typeCallTranscriptionStoppedEvent(let value):
-            try container.encode(value)
-        case .typeUnblockedUserEvent(let value):
-            try container.encode(value)
-        case .typeCallUpdatedEvent(let value):
-            try container.encode(value)
-        case .typeCallUserFeedbackSubmittedEvent(let value):
-            try container.encode(value)
-        case .typeCallUserMutedEvent(let value):
-            try container.encode(value)
-        case .typeConnectionErrorEvent(let value):
-            try container.encode(value)
-        case .typeConnectedEvent(let value):
-            try container.encode(value)
-        case .typeCustomVideoEvent(let value):
-            try container.encode(value)
-        case .typeHealthCheckEvent(let value):
-            try container.encode(value)
-        case .typeUserUpdatedEvent(let value):
-            try container.encode(value)
         }
     }
 

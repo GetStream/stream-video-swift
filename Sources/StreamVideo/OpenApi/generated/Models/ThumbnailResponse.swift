@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class ThumbnailResponse: @unchecked Sendable, Codable, JSONEncodable {
+public final class ThumbnailResponse: @unchecked Sendable, Decodable {
     public var imageUrl: String
 
     public init(imageUrl: String) {
@@ -15,11 +15,6 @@ public final class ThumbnailResponse: @unchecked Sendable, Codable, JSONEncodabl
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: StringCodingKey.self)
         self.imageUrl = try container.decode(String.self, forKey: .imageUrl)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(imageUrl, forKey: .imageUrl)
     }
 }
 

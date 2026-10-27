@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class JoinCallRequest: @unchecked Sendable, Codable, JSONEncodable {
+public final class JoinCallRequest: @unchecked Sendable, Encodable, JSONEncodable {
     /// if true the call will be created if it doesn't exist
     public var create: Bool?
     /// CallRequest is the payload for creating a call.
@@ -49,21 +49,6 @@ public final class JoinCallRequest: @unchecked Sendable, Codable, JSONEncodable 
         self.notify = notify
         self.ring = ring
         self.video = video
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: StringCodingKey.self)
-        self.create = try container.decodeIfPresent(Bool.self, forKey: .create)
-        self.data = try container.decodeIfPresent(CallRequest.self, forKey: .data)
-        self.e2ee = try container.decodeIfPresent(Bool.self, forKey: .e2ee)
-        self.hintHighScaleLivestreamPublisher = try container.decodeIfPresent(Bool.self, forKey: .hintHighScaleLivestreamPublisher)
-        self.location = try container.decode(String.self, forKey: .location)
-        self.membersLimit = try container.decodeIfPresent(Int.self, forKey: .membersLimit)
-        self.migratingFrom = try container.decodeIfPresent(String.self, forKey: .migratingFrom)
-        self.migratingFromList = try container.decodeIfPresent([String].self, forKey: .migratingFromList)
-        self.notify = try container.decodeIfPresent(Bool.self, forKey: .notify)
-        self.ring = try container.decodeIfPresent(Bool.self, forKey: .ring)
-        self.video = try container.decodeIfPresent(Bool.self, forKey: .video)
     }
 
     public func encode(to encoder: Encoder) throws {

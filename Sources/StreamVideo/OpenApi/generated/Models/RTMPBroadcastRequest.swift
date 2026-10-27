@@ -6,7 +6,7 @@ import Foundation
 import StreamCore
 
 /// RTMPBroadcastRequest is the payload for starting an RTMP broadcast.
-public final class RTMPBroadcastRequest: @unchecked Sendable, Codable, JSONEncodable {
+public final class RTMPBroadcastRequest: @unchecked Sendable, Encodable, JSONEncodable {
     
     public enum RTMPBroadcastRequestQuality: String, Sendable, Codable, CaseIterable {
         case _1080p = "1080p"
@@ -54,15 +54,6 @@ public final class RTMPBroadcastRequest: @unchecked Sendable, Codable, JSONEncod
         self.quality = quality
         self.streamKey = streamKey
         self.streamUrl = streamUrl
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: StringCodingKey.self)
-        self.layout = try container.decodeIfPresent(LayoutSettings.self, forKey: .layout)
-        self.name = try container.decode(String.self, forKey: .name)
-        self.quality = try container.decodeIfPresent(RTMPBroadcastRequestQuality.self, forKey: .quality)
-        self.streamKey = try container.decodeIfPresent(String.self, forKey: .streamKey)
-        self.streamUrl = try container.decode(String.self, forKey: .streamUrl)
     }
 
     public func encode(to encoder: Encoder) throws {

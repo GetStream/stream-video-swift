@@ -6,7 +6,7 @@ import Foundation
 import StreamCore
 
 /// CallClosedCaption represents a closed caption of a call.
-public final class CallClosedCaption: @unchecked Sendable, Codable, JSONEncodable {
+public final class CallClosedCaption: @unchecked Sendable, Decodable {
     public var endTime: Date
     public var speakerId: String
     public var startTime: Date
@@ -29,15 +29,6 @@ public final class CallClosedCaption: @unchecked Sendable, Codable, JSONEncodabl
         self.startTime = try container.decode(Date.self, forKey: .startTime)
         self.text = try container.decode(String.self, forKey: .text)
         self.user = try container.decode(UserResponse.self, forKey: .user)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(endTime, forKey: .endTime)
-        try container.encode(speakerId, forKey: .speakerId)
-        try container.encode(startTime, forKey: .startTime)
-        try container.encode(text, forKey: .text)
-        try container.encode(user, forKey: .user)
     }
 }
 

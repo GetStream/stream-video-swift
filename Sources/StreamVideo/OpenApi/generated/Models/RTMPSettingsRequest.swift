@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class RTMPSettingsRequest: @unchecked Sendable, Codable, JSONEncodable {
+public final class RTMPSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable {
     
     public enum RTMPSettingsRequestQuality: String, Sendable, Codable, CaseIterable {
         case _1080p = "1080p"
@@ -39,12 +39,6 @@ public final class RTMPSettingsRequest: @unchecked Sendable, Codable, JSONEncoda
     public init(enabled: Bool? = nil, quality: RTMPSettingsRequestQuality? = nil) {
         self.enabled = enabled
         self.quality = quality
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: StringCodingKey.self)
-        self.enabled = try container.decodeIfPresent(Bool.self, forKey: .enabled)
-        self.quality = try container.decodeIfPresent(RTMPSettingsRequestQuality.self, forKey: .quality)
     }
 
     public func encode(to encoder: Encoder) throws {

@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class CallSessionResponse: @unchecked Sendable, Codable, JSONEncodable {
+public final class CallSessionResponse: @unchecked Sendable, Decodable {
     public var acceptedBy: [String: Date]
     public var anonymousParticipantCount: Int
     public var endedAt: Date?
@@ -61,22 +61,6 @@ public final class CallSessionResponse: @unchecked Sendable, Codable, JSONEncoda
         self.rejectedBy = try container.decode([String: Date].self, forKey: .rejectedBy)
         self.startedAt = try container.decodeIfPresent(Date.self, forKey: .startedAt)
         self.timerEndsAt = try container.decodeIfPresent(Date.self, forKey: .timerEndsAt)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(acceptedBy, forKey: .acceptedBy)
-        try container.encode(anonymousParticipantCount, forKey: .anonymousParticipantCount)
-        try container.encodeIfPresent(endedAt, forKey: .endedAt)
-        try container.encode(id, forKey: .id)
-        try container.encodeIfPresent(liveEndedAt, forKey: .liveEndedAt)
-        try container.encodeIfPresent(liveStartedAt, forKey: .liveStartedAt)
-        try container.encode(missedBy, forKey: .missedBy)
-        try container.encode(participants, forKey: .participants)
-        try container.encode(participantsCountByRole, forKey: .participantsCountByRole)
-        try container.encode(rejectedBy, forKey: .rejectedBy)
-        try container.encodeIfPresent(startedAt, forKey: .startedAt)
-        try container.encodeIfPresent(timerEndsAt, forKey: .timerEndsAt)
     }
 }
 

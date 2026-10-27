@@ -6,17 +6,12 @@ import Foundation
 import StreamCore
 
 /// UnblockUserRequest is the payload for unblocking a user.
-public final class UnblockUserRequest: @unchecked Sendable, Codable, JSONEncodable {
+public final class UnblockUserRequest: @unchecked Sendable, Encodable, JSONEncodable {
     /// the user to unblock
     public var userId: String
 
     public init(userId: String) {
         self.userId = userId
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: StringCodingKey.self)
-        self.userId = try container.decode(String.self, forKey: .userId)
     }
 
     public func encode(to encoder: Encoder) throws {

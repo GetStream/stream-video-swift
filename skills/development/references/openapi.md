@@ -23,12 +23,16 @@ Do not edit `Sources/StreamVideo/OpenApi/generated/` by hand. Change the lists b
 | --- | --- |
 | `allowedEndpoints` | `DefaultAPI` functions to keep. The script fails if one is missing. |
 | `allowedEvents` | `VideoEvent` cases to keep. The script fails if one is missing. |
+| `codableModels` | Models that `DefaultAPI` both encodes and decodes. |
+| `decodableModels` | Models only in responses and events. They lose `Encodable` and `JSONEncodable`. |
+| `encodableModels` | Models only in request bodies. They lose `Decodable`. |
 | `removedProperties` | Model fields the SDK does not ship. Includes new backend fields until the SDK adopts them. |
 | `retypedProperties` | Property types the SDK keeps although the spec changed them. Optional types get a `nil` init default. |
 | `removedEnumCases` | Enum cases the SDK does not ship. Keys are `Model` or `Model.NestedEnum`. |
 | `v2Endpoints` | Endpoints the SDK calls on their `/api/v2/video` path. The v1 spec lists them under `/video`. |
 
 The script keeps only models that `DefaultAPI` and `VideoEvent` reach.
+It fails unless each kept model is in exactly one of the three coding lists.
 `Scripts/renamed-models.json` maps spec schema names to Swift names. Use it when the backend renames an exposed schema.
 
 ## Keep the public API stable
@@ -50,7 +54,10 @@ Breaking changes wait for a major version. Until then:
 ## Adopt an endpoint, event, or field
 
 1. Add the name to the matching list, or remove the field from `removedProperties`.
-2. Run the script and review new public types and fields in the diff.
+2. Run the script. When it lists unclassified models, add each to the coding list that matches
+   how `DefaultAPI` uses it, and run it again. Review new public types and fields in the diff.
 3. Update test mocks and dummies, for example `StreamVideoTests/Mock/MockDefaultAPIEndpoints.swift`.
+   Responses and events are not `Encodable`. Pass them as `PassthroughJSONDecoder.decodingData(for:)`,
+   as `HTTPClient_Mock` and `JsonEventDecoder_Tests` do.
 4. Build all schemes and run the tests. Required fields fail decoding when the server omits them or sends `null`.
 5. Follow the [changelog rule](../SKILL.md#changelog) for public changes.

@@ -6,17 +6,12 @@ import Foundation
 import StreamCore
 
 /// DeleteCallRequest is the payload for deleting a call.
-public final class DeleteCallRequest: @unchecked Sendable, Codable, JSONEncodable {
+public final class DeleteCallRequest: @unchecked Sendable, Encodable, JSONEncodable {
     /// if true the call will be hard deleted along with all related data
     public var hard: Bool?
 
     public init(hard: Bool? = nil) {
         self.hard = hard
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: StringCodingKey.self)
-        self.hard = try container.decodeIfPresent(Bool.self, forKey: .hard)
     }
 
     public func encode(to encoder: Encoder) throws {

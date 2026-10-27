@@ -6,7 +6,7 @@ import Foundation
 import StreamCore
 
 /// Basic response information
-public final class GetEdgesResponse: @unchecked Sendable, Codable, JSONEncodable {
+public final class GetEdgesResponse: @unchecked Sendable, Decodable {
     /// Duration of the request in milliseconds
     public var duration: String
     public var edges: [EdgeResponse]
@@ -20,12 +20,6 @@ public final class GetEdgesResponse: @unchecked Sendable, Codable, JSONEncodable
         let container = try decoder.container(keyedBy: StringCodingKey.self)
         self.duration = try container.decode(String.self, forKey: .duration)
         self.edges = try container.decode([EdgeResponse].self, forKey: .edges)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(duration, forKey: .duration)
-        try container.encode(edges, forKey: .edges)
     }
 }
 
