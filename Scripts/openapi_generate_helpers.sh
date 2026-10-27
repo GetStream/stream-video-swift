@@ -172,6 +172,45 @@ remove_unused_models() {
   done
 }
 
+# Narrows models to the coding direction DefaultAPI uses. The generator makes
+# every model Codable, so the unused coder only adds binary size.
+apply_coding_directions() {
+  local models_dir="$OUTPUT_DIR/Models"
+  local classified generated model
+  classified="$(jq -r '.codableModels[], .decodableModels[], .encodableModels[]' "$ALLOWED_FILE" | sort)"
+  generated="$(ls "$models_dir" | sed 's/\.swift$//' | sort)"
+  # Also fails for a model in more than one list.
+  if [ "$classified" != "$generated" ]; then
+    echo "Models must be in exactly one coding list (< listed, > generated):" >&2
+    diff <(echo "$classified") <(echo "$generated") >&2
+    exit 1
+  fi
+  sed -i '' 's/send<Response: Codable>/send<Response: Decodable>/' "$OUTPUT_DIR/APIs/DefaultAPI.swift"
+  for model in $(jq -r '.decodableModels[]' "$ALLOWED_FILE"); do
+    narrow_coding "$models_dir/$model.swift" "$model" Decodable
+  done
+  for model in $(jq -r '.encodableModels[]' "$ALLOWED_FILE"); do
+    narrow_coding "$models_dir/$model.swift" "$model" Encodable
+  done
+}
+
+# Replaces Codable with the given direction and drops the unused coder.
+# JSONEncodable goes too for Decodable, its default needs Encodable.
+narrow_coding() {
+  M="$2" D="$3" perl -0777 -pi -e '
+    my ($m, $d) = ($ENV{M}, $ENV{D});
+    s/^(public [a-z ]+ \Q$m\E: .*)\bCodable\b/$1$d/m or die "Codable model missing: $m\n";
+    if ($d eq "Decodable") {
+      s/^(public [a-z ]+ \Q$m\E: .*), JSONEncodable\b/$1/m;
+      # Enums with synthesized encoding have no encode(to:).
+      s/\n    public func encode\(to encoder: Encoder\) throws \{\n.*?\n    \}\n//s;
+    } else {
+      s/\n    public init\(from decoder: Decoder\) throws \{\n.*?\n    \}\n//s
+        or die "init(from:) missing: $m\n";
+    }
+  ' "$1"
+}
+
 # Moves the endpoints in v2Endpoints to their /api/v2 path, as the SDK uses
 # them. The v1 spec lists them under /video.
 keep_existing_v2_endpoints() {

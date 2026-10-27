@@ -5,16 +5,11 @@
 import Foundation
 import StreamCore
 
-public final class SessionSettingsRequest: @unchecked Sendable, Codable, JSONEncodable {
+public final class SessionSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable {
     public var inactivityTimeoutSeconds: Int
 
     public init(inactivityTimeoutSeconds: Int) {
         self.inactivityTimeoutSeconds = inactivityTimeoutSeconds
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: StringCodingKey.self)
-        self.inactivityTimeoutSeconds = try container.decode(Int.self, forKey: .inactivityTimeoutSeconds)
     }
 
     public func encode(to encoder: Encoder) throws {

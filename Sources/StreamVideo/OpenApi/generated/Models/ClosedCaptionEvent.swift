@@ -6,7 +6,7 @@ import Foundation
 import StreamCore
 
 /// This event is sent when closed captions are being sent in a call, clients should use this to show the closed captions in the call screen
-public final class ClosedCaptionEvent: @unchecked Sendable, Event, Codable, JSONEncodable, WSCallEvent {
+public final class ClosedCaptionEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
     public var callCid: String
     /// CallClosedCaption represents a closed caption of a call.
     public var closedCaption: CallClosedCaption
@@ -26,14 +26,6 @@ public final class ClosedCaptionEvent: @unchecked Sendable, Event, Codable, JSON
         self.closedCaption = try container.decode(CallClosedCaption.self, forKey: .closedCaption)
         self.createdAt = try container.decode(Date.self, forKey: .createdAt)
         self.type = try container.decode(String.self, forKey: .type)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(callCid, forKey: .callCid)
-        try container.encode(closedCaption, forKey: .closedCaption)
-        try container.encode(createdAt, forKey: .createdAt)
-        try container.encode(type, forKey: .type)
     }
 }
 

@@ -37,6 +37,8 @@ extension StreamVideo {
             )
         }
         
+        var jsonDecoder: JSONDecoder = .default
+        
         internal static func makeURLSession() -> URLSession {
             let config = URLSessionConfiguration.default
             config.requestCachePolicy = .reloadIgnoringLocalCacheData

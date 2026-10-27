@@ -6,7 +6,7 @@ import Foundation
 import StreamCore
 
 /// BroadcastSettingsResponse is the payload for broadcasting settings
-public final class BroadcastSettingsResponse: @unchecked Sendable, Codable, JSONEncodable {
+public final class BroadcastSettingsResponse: @unchecked Sendable, Decodable {
     public var enabled: Bool
     /// HLSSettings is the payload for HLS settings
     public var hls: HLSSettingsResponse
@@ -24,13 +24,6 @@ public final class BroadcastSettingsResponse: @unchecked Sendable, Codable, JSON
         self.enabled = try container.decode(Bool.self, forKey: .enabled)
         self.hls = try container.decode(HLSSettingsResponse.self, forKey: .hls)
         self.rtmp = try container.decode(RTMPSettingsResponse.self, forKey: .rtmp)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(enabled, forKey: .enabled)
-        try container.encode(hls, forKey: .hls)
-        try container.encode(rtmp, forKey: .rtmp)
     }
 }
 

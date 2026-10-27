@@ -6,7 +6,7 @@ import Foundation
 import StreamCore
 
 /// Response for ending a call
-public final class EndCallResponse: @unchecked Sendable, Codable, JSONEncodable {
+public final class EndCallResponse: @unchecked Sendable, Decodable {
     /// Duration of the request in milliseconds
     public var duration: String
 
@@ -17,11 +17,6 @@ public final class EndCallResponse: @unchecked Sendable, Codable, JSONEncodable 
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: StringCodingKey.self)
         self.duration = try container.decode(String.self, forKey: .duration)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(duration, forKey: .duration)
     }
 }
 

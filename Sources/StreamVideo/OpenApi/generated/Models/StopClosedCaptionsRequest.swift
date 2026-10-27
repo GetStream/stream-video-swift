@@ -5,16 +5,11 @@
 import Foundation
 import StreamCore
 
-public final class StopClosedCaptionsRequest: @unchecked Sendable, Codable, JSONEncodable {
+public final class StopClosedCaptionsRequest: @unchecked Sendable, Encodable, JSONEncodable {
     public var stopTranscription: Bool?
 
     public init(stopTranscription: Bool? = nil) {
         self.stopTranscription = stopTranscription
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: StringCodingKey.self)
-        self.stopTranscription = try container.decodeIfPresent(Bool.self, forKey: .stopTranscription)
     }
 
     public func encode(to encoder: Encoder) throws {

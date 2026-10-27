@@ -6,7 +6,7 @@ import Foundation
 import StreamCore
 
 /// Basic response information
-public final class SendReactionResponse: @unchecked Sendable, Codable, JSONEncodable {
+public final class SendReactionResponse: @unchecked Sendable, Decodable {
     /// Duration of the request in milliseconds
     public var duration: String
     public var reaction: ReactionResponse
@@ -20,12 +20,6 @@ public final class SendReactionResponse: @unchecked Sendable, Codable, JSONEncod
         let container = try decoder.container(keyedBy: StringCodingKey.self)
         self.duration = try container.decode(String.self, forKey: .duration)
         self.reaction = try container.decode(ReactionResponse.self, forKey: .reaction)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(duration, forKey: .duration)
-        try container.encode(reaction, forKey: .reaction)
     }
 }
 

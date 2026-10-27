@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class LayoutSettings: @unchecked Sendable, Codable, JSONEncodable {
+public final class LayoutSettings: @unchecked Sendable, Encodable, JSONEncodable {
     
     public enum LayoutSettingsName: String, Sendable, Codable, CaseIterable {
         case custom
@@ -44,15 +44,6 @@ public final class LayoutSettings: @unchecked Sendable, Codable, JSONEncodable {
         self.externalCssUrl = externalCssUrl
         self.name = name
         self.options = options
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: StringCodingKey.self)
-        self.detectOrientation = try container.decodeIfPresent(Bool.self, forKey: .detectOrientation)
-        self.externalAppUrl = try container.decodeIfPresent(String.self, forKey: .externalAppUrl)
-        self.externalCssUrl = try container.decodeIfPresent(String.self, forKey: .externalCssUrl)
-        self.name = try container.decode(LayoutSettingsName.self, forKey: .name)
-        self.options = try container.decodeIfPresent([String: RawJSON].self, forKey: .options)
     }
 
     public func encode(to encoder: Encoder) throws {

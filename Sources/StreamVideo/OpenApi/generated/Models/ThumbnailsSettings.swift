@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class ThumbnailsSettings: @unchecked Sendable, Codable, JSONEncodable {
+public final class ThumbnailsSettings: @unchecked Sendable, Decodable {
     public var enabled: Bool
 
     public init(enabled: Bool) {
@@ -15,11 +15,6 @@ public final class ThumbnailsSettings: @unchecked Sendable, Codable, JSONEncodab
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: StringCodingKey.self)
         self.enabled = try container.decode(Bool.self, forKey: .enabled)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(enabled, forKey: .enabled)
     }
 }
 

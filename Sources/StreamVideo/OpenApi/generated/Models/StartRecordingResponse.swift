@@ -6,7 +6,7 @@ import Foundation
 import StreamCore
 
 /// StartRecordingResponse is the response payload for the start recording endpoint.
-public final class StartRecordingResponse: @unchecked Sendable, Codable, JSONEncodable {
+public final class StartRecordingResponse: @unchecked Sendable, Decodable {
     /// Duration of the request in milliseconds
     public var duration: String
 
@@ -17,11 +17,6 @@ public final class StartRecordingResponse: @unchecked Sendable, Codable, JSONEnc
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: StringCodingKey.self)
         self.duration = try container.decode(String.self, forKey: .duration)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(duration, forKey: .duration)
     }
 }
 

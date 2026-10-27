@@ -5,16 +5,11 @@
 import Foundation
 import StreamCore
 
-public final class StartRecordingRequest: @unchecked Sendable, Codable, JSONEncodable {
+public final class StartRecordingRequest: @unchecked Sendable, Encodable, JSONEncodable {
     public var recordingExternalStorage: String?
 
     public init(recordingExternalStorage: String? = nil) {
         self.recordingExternalStorage = recordingExternalStorage
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: StringCodingKey.self)
-        self.recordingExternalStorage = try container.decodeIfPresent(String.self, forKey: .recordingExternalStorage)
     }
 
     public func encode(to encoder: Encoder) throws {

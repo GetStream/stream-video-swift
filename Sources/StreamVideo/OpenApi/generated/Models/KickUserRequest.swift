@@ -6,7 +6,7 @@ import Foundation
 import StreamCore
 
 /// KickUserRequest is the payload for kicking a user from a call. Optionally block the user as well.
-public final class KickUserRequest: @unchecked Sendable, Codable, JSONEncodable {
+public final class KickUserRequest: @unchecked Sendable, Encodable, JSONEncodable {
     /// If true, also block the user from rejoining the call
     public var block: Bool?
     /// The user to kick
@@ -15,12 +15,6 @@ public final class KickUserRequest: @unchecked Sendable, Codable, JSONEncodable 
     public init(block: Bool? = nil, userId: String) {
         self.block = block
         self.userId = userId
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: StringCodingKey.self)
-        self.block = try container.decodeIfPresent(Bool.self, forKey: .block)
-        self.userId = try container.decode(String.self, forKey: .userId)
     }
 
     public func encode(to encoder: Encoder) throws {

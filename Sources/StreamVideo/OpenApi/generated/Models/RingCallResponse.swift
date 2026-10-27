@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class RingCallResponse: @unchecked Sendable, Codable, JSONEncodable {
+public final class RingCallResponse: @unchecked Sendable, Decodable {
     public var duration: String
     /// List of members ringing notification was sent to
     public var membersIds: [String]
@@ -19,12 +19,6 @@ public final class RingCallResponse: @unchecked Sendable, Codable, JSONEncodable
         let container = try decoder.container(keyedBy: StringCodingKey.self)
         self.duration = try container.decode(String.self, forKey: .duration)
         self.membersIds = try container.decode([String].self, forKey: .membersIds)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(duration, forKey: .duration)
-        try container.encode(membersIds, forKey: .membersIds)
     }
 }
 

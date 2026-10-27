@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class CallStatsReportSummaryResponse: @unchecked Sendable, Codable, JSONEncodable {
+public final class CallStatsReportSummaryResponse: @unchecked Sendable, Decodable {
     public var callCid: String
     public var callDurationSeconds: Int
     public var callSessionId: String
@@ -45,18 +45,6 @@ public final class CallStatsReportSummaryResponse: @unchecked Sendable, Codable,
         self.firstStatsTime = try container.decode(Date.self, forKey: .firstStatsTime)
         self.minUserRating = try container.decodeIfPresent(Int.self, forKey: .minUserRating)
         self.qualityScore = try container.decodeIfPresent(Int.self, forKey: .qualityScore)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(callCid, forKey: .callCid)
-        try container.encode(callDurationSeconds, forKey: .callDurationSeconds)
-        try container.encode(callSessionId, forKey: .callSessionId)
-        try container.encode(callStatus, forKey: .callStatus)
-        try container.encodeIfPresent(createdAt, forKey: .createdAt)
-        try container.encode(firstStatsTime, forKey: .firstStatsTime)
-        try container.encodeIfPresent(minUserRating, forKey: .minUserRating)
-        try container.encodeIfPresent(qualityScore, forKey: .qualityScore)
     }
 }
 

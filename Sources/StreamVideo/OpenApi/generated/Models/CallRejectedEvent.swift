@@ -6,7 +6,7 @@ import Foundation
 import StreamCore
 
 /// This event is sent when a user rejects a notification to join a call.
-public final class CallRejectedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, WSCallEvent {
+public final class CallRejectedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
     /// Represents a call
     public var call: CallResponse
     public var callCid: String
@@ -34,16 +34,6 @@ public final class CallRejectedEvent: @unchecked Sendable, Event, Codable, JSONE
         self.reason = try container.decodeIfPresent(String.self, forKey: .reason)
         self.type = try container.decode(String.self, forKey: .type)
         self.user = try container.decode(UserResponse.self, forKey: .user)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(call, forKey: .call)
-        try container.encode(callCid, forKey: .callCid)
-        try container.encode(createdAt, forKey: .createdAt)
-        try container.encodeIfPresent(reason, forKey: .reason)
-        try container.encode(type, forKey: .type)
-        try container.encode(user, forKey: .user)
     }
 }
 

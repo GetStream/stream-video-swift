@@ -6,7 +6,7 @@ import Foundation
 import StreamCore
 
 /// This event is sent when one or more members get its role updated
-public final class CallMemberUpdatedPermissionEvent: @unchecked Sendable, Event, Codable, JSONEncodable, WSCallEvent {
+public final class CallMemberUpdatedPermissionEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
     /// Represents a call
     public var call: CallResponse
     public var callCid: String
@@ -40,16 +40,6 @@ public final class CallMemberUpdatedPermissionEvent: @unchecked Sendable, Event,
         self.createdAt = try container.decode(Date.self, forKey: .createdAt)
         self.members = try container.decode([MemberResponse].self, forKey: .members)
         self.type = try container.decode(String.self, forKey: .type)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(call, forKey: .call)
-        try container.encode(callCid, forKey: .callCid)
-        try container.encode(capabilitiesByRole, forKey: .capabilitiesByRole)
-        try container.encode(createdAt, forKey: .createdAt)
-        try container.encode(members, forKey: .members)
-        try container.encode(type, forKey: .type)
     }
 }
 

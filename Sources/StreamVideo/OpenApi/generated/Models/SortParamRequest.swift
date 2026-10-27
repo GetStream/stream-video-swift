@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class SortParamRequest: @unchecked Sendable, Codable, JSONEncodable {
+public final class SortParamRequest: @unchecked Sendable, Encodable, JSONEncodable {
     /// Direction of sorting, 1 for Ascending, -1 for Descending, default is 1. One of: -1, 1
     public var direction: Int?
     /// Name of field to sort by
@@ -14,12 +14,6 @@ public final class SortParamRequest: @unchecked Sendable, Codable, JSONEncodable
     public init(direction: Int? = nil, field: String? = nil) {
         self.direction = direction
         self.field = field
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: StringCodingKey.self)
-        self.direction = try container.decodeIfPresent(Int.self, forKey: .direction)
-        self.field = try container.decodeIfPresent(String.self, forKey: .field)
     }
 
     public func encode(to encoder: Encoder) throws {

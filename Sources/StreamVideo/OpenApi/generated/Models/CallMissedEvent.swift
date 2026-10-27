@@ -6,7 +6,7 @@ import Foundation
 import StreamCore
 
 /// This event is sent to call members who did not accept/reject/join the call to notify they missed the call
-public final class CallMissedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, WSCallEvent {
+public final class CallMissedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
     /// Represents a call
     public var call: CallResponse
     public var callCid: String
@@ -49,18 +49,6 @@ public final class CallMissedEvent: @unchecked Sendable, Event, Codable, JSONEnc
         self.sessionId = try container.decode(String.self, forKey: .sessionId)
         self.type = try container.decode(String.self, forKey: .type)
         self.user = try container.decode(UserResponse.self, forKey: .user)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(call, forKey: .call)
-        try container.encode(callCid, forKey: .callCid)
-        try container.encode(createdAt, forKey: .createdAt)
-        try container.encode(members, forKey: .members)
-        try container.encode(notifyUser, forKey: .notifyUser)
-        try container.encode(sessionId, forKey: .sessionId)
-        try container.encode(type, forKey: .type)
-        try container.encode(user, forKey: .user)
     }
 }
 

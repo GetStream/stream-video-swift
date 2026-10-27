@@ -6,7 +6,7 @@ import Foundation
 import StreamCore
 
 /// HLSSettings is the payload for HLS settings
-public final class HLSSettingsResponse: @unchecked Sendable, Codable, JSONEncodable {
+public final class HLSSettingsResponse: @unchecked Sendable, Decodable {
     public var autoOn: Bool
     public var enabled: Bool
     public var qualityTracks: [String]
@@ -22,13 +22,6 @@ public final class HLSSettingsResponse: @unchecked Sendable, Codable, JSONEncoda
         self.autoOn = try container.decode(Bool.self, forKey: .autoOn)
         self.enabled = try container.decode(Bool.self, forKey: .enabled)
         self.qualityTracks = try container.decode([String].self, forKey: .qualityTracks)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(autoOn, forKey: .autoOn)
-        try container.encode(enabled, forKey: .enabled)
-        try container.encode(qualityTracks, forKey: .qualityTracks)
     }
 }
 

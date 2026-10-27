@@ -6,7 +6,7 @@ import Foundation
 import StreamCore
 
 /// RTMPSettingsResponse is the payload for RTMP settings
-public final class RTMPSettingsResponse: @unchecked Sendable, Codable, JSONEncodable {
+public final class RTMPSettingsResponse: @unchecked Sendable, Decodable {
     public var enabled: Bool
     public var quality: String
 
@@ -19,12 +19,6 @@ public final class RTMPSettingsResponse: @unchecked Sendable, Codable, JSONEncod
         let container = try decoder.container(keyedBy: StringCodingKey.self)
         self.enabled = try container.decode(Bool.self, forKey: .enabled)
         self.quality = try container.decode(String.self, forKey: .quality)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(enabled, forKey: .enabled)
-        try container.encode(quality, forKey: .quality)
     }
 }
 

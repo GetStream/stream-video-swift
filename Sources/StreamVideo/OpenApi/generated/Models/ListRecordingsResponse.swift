@@ -6,7 +6,7 @@ import Foundation
 import StreamCore
 
 /// Response for listing recordings
-public final class ListRecordingsResponse: @unchecked Sendable, Codable, JSONEncodable {
+public final class ListRecordingsResponse: @unchecked Sendable, Decodable {
     public var duration: String
     public var recordings: [CallRecording]
 
@@ -19,12 +19,6 @@ public final class ListRecordingsResponse: @unchecked Sendable, Codable, JSONEnc
         let container = try decoder.container(keyedBy: StringCodingKey.self)
         self.duration = try container.decode(String.self, forKey: .duration)
         self.recordings = try container.decode([CallRecording].self, forKey: .recordings)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(duration, forKey: .duration)
-        try container.encode(recordings, forKey: .recordings)
     }
 }
 

@@ -6,7 +6,7 @@ import Foundation
 import StreamCore
 
 /// This event is sent when the participant counts in a call session are updated
-public final class CallSessionParticipantCountsUpdatedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, WSCallEvent {
+public final class CallSessionParticipantCountsUpdatedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
     public var anonymousParticipantCount: Int
     public var callCid: String
     public var createdAt: Date
@@ -38,16 +38,6 @@ public final class CallSessionParticipantCountsUpdatedEvent: @unchecked Sendable
         self.participantsCountByRole = try container.decode([String: Int].self, forKey: .participantsCountByRole)
         self.sessionId = try container.decode(String.self, forKey: .sessionId)
         self.type = try container.decode(String.self, forKey: .type)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(anonymousParticipantCount, forKey: .anonymousParticipantCount)
-        try container.encode(callCid, forKey: .callCid)
-        try container.encode(createdAt, forKey: .createdAt)
-        try container.encode(participantsCountByRole, forKey: .participantsCountByRole)
-        try container.encode(sessionId, forKey: .sessionId)
-        try container.encode(type, forKey: .type)
     }
 }
 

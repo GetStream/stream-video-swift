@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class RingSettings: @unchecked Sendable, Codable, JSONEncodable {
+public final class RingSettings: @unchecked Sendable, Decodable {
     public var autoCancelTimeoutMs: Int
     public var incomingCallTimeoutMs: Int
     public var missedCallTimeoutMs: Int
@@ -21,13 +21,6 @@ public final class RingSettings: @unchecked Sendable, Codable, JSONEncodable {
         self.autoCancelTimeoutMs = try container.decode(Int.self, forKey: .autoCancelTimeoutMs)
         self.incomingCallTimeoutMs = try container.decode(Int.self, forKey: .incomingCallTimeoutMs)
         self.missedCallTimeoutMs = try container.decode(Int.self, forKey: .missedCallTimeoutMs)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(autoCancelTimeoutMs, forKey: .autoCancelTimeoutMs)
-        try container.encode(incomingCallTimeoutMs, forKey: .incomingCallTimeoutMs)
-        try container.encode(missedCallTimeoutMs, forKey: .missedCallTimeoutMs)
     }
 }
 

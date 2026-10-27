@@ -68,6 +68,7 @@ remove_enum_cases
 
 # Run last, so models and keys only the removed properties used go too.
 remove_unused_models
+apply_coding_directions
 remove_unused_string_coding_keys
 
 # format the generated code, .swiftformat excludes it by default

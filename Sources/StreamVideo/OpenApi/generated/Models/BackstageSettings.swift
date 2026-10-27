@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class BackstageSettings: @unchecked Sendable, Codable, JSONEncodable {
+public final class BackstageSettings: @unchecked Sendable, Decodable {
     public var enabled: Bool
     public var joinAheadTimeSeconds: Int?
 
@@ -18,12 +18,6 @@ public final class BackstageSettings: @unchecked Sendable, Codable, JSONEncodabl
         let container = try decoder.container(keyedBy: StringCodingKey.self)
         self.enabled = try container.decode(Bool.self, forKey: .enabled)
         self.joinAheadTimeSeconds = try container.decodeIfPresent(Int.self, forKey: .joinAheadTimeSeconds)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(enabled, forKey: .enabled)
-        try container.encodeIfPresent(joinAheadTimeSeconds, forKey: .joinAheadTimeSeconds)
     }
 }
 

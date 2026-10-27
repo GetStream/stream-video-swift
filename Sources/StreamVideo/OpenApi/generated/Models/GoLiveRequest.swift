@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class GoLiveRequest: @unchecked Sendable, Codable, JSONEncodable {
+public final class GoLiveRequest: @unchecked Sendable, Encodable, JSONEncodable {
     public var recordingStorageName: String?
     public var startClosedCaption: Bool?
     public var startHls: Bool?
@@ -27,16 +27,6 @@ public final class GoLiveRequest: @unchecked Sendable, Codable, JSONEncodable {
         self.startRecording = startRecording
         self.startTranscription = startTranscription
         self.transcriptionStorageName = transcriptionStorageName
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: StringCodingKey.self)
-        self.recordingStorageName = try container.decodeIfPresent(String.self, forKey: .recordingStorageName)
-        self.startClosedCaption = try container.decodeIfPresent(Bool.self, forKey: .startClosedCaption)
-        self.startHls = try container.decodeIfPresent(Bool.self, forKey: .startHls)
-        self.startRecording = try container.decodeIfPresent(Bool.self, forKey: .startRecording)
-        self.startTranscription = try container.decodeIfPresent(Bool.self, forKey: .startTranscription)
-        self.transcriptionStorageName = try container.decodeIfPresent(String.self, forKey: .transcriptionStorageName)
     }
 
     public func encode(to encoder: Encoder) throws {

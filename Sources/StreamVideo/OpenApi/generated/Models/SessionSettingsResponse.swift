@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class SessionSettingsResponse: @unchecked Sendable, Codable, JSONEncodable {
+public final class SessionSettingsResponse: @unchecked Sendable, Decodable {
     public var inactivityTimeoutSeconds: Int
 
     public init(inactivityTimeoutSeconds: Int) {
@@ -15,11 +15,6 @@ public final class SessionSettingsResponse: @unchecked Sendable, Codable, JSONEn
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: StringCodingKey.self)
         self.inactivityTimeoutSeconds = try container.decode(Int.self, forKey: .inactivityTimeoutSeconds)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(inactivityTimeoutSeconds, forKey: .inactivityTimeoutSeconds)
     }
 }
 

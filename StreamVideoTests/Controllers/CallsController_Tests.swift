@@ -99,8 +99,7 @@ final class CallsController_Tests: ControllerTestCase, @unchecked Sendable {
     
     private func makeTestCallsController(watch: Bool = true) throws -> CallsController {
         let response = mockResponseBuilder.makeQueryCallsResponse()
-        let data = try JSONEncoder.streamCore.encode(response)
-        httpClient.dataResponses = [data, data]
+        httpClient.dataResponses = [response, response].map(httpClient.decoder.decodingData(for:))
         let query = CallsQuery(sortParams: [], watch: watch)
         let callsController = CallsController(
             streamVideo: streamVideo!,

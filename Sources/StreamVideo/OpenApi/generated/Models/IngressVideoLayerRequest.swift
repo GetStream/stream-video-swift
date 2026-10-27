@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class IngressVideoLayerRequest: @unchecked Sendable, Codable, JSONEncodable {
+public final class IngressVideoLayerRequest: @unchecked Sendable, Encodable, JSONEncodable {
     
     public enum IngressVideoLayerRequestCodec: String, Sendable, Codable, CaseIterable {
         case h264
@@ -35,15 +35,6 @@ public final class IngressVideoLayerRequest: @unchecked Sendable, Codable, JSONE
         self.frameRateLimit = frameRateLimit
         self.maxDimension = maxDimension
         self.minDimension = minDimension
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: StringCodingKey.self)
-        self.bitrate = try container.decode(Int.self, forKey: .bitrate)
-        self.codec = try container.decode(IngressVideoLayerRequestCodec.self, forKey: .codec)
-        self.frameRateLimit = try container.decode(Int.self, forKey: .frameRateLimit)
-        self.maxDimension = try container.decode(Int.self, forKey: .maxDimension)
-        self.minDimension = try container.decode(Int.self, forKey: .minDimension)
     }
 
     public func encode(to encoder: Encoder) throws {

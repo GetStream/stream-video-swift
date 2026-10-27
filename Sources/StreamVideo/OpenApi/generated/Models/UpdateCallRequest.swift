@@ -6,7 +6,7 @@ import Foundation
 import StreamCore
 
 /// Request for updating a call
-public final class UpdateCallRequest: @unchecked Sendable, Codable, JSONEncodable {
+public final class UpdateCallRequest: @unchecked Sendable, Encodable, JSONEncodable {
     /// Custom data for this object
     public var custom: [String: RawJSON]?
     public var settingsOverride: CallSettingsRequest?
@@ -17,13 +17,6 @@ public final class UpdateCallRequest: @unchecked Sendable, Codable, JSONEncodabl
         self.custom = custom
         self.settingsOverride = settingsOverride
         self.startsAt = startsAt
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: StringCodingKey.self)
-        self.custom = try container.decodeIfPresent([String: RawJSON].self, forKey: .custom)
-        self.settingsOverride = try container.decodeIfPresent(CallSettingsRequest.self, forKey: .settingsOverride)
-        self.startsAt = try container.decodeIfPresent(Date.self, forKey: .startsAt)
     }
 
     public func encode(to encoder: Encoder) throws {

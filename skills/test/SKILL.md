@@ -90,6 +90,8 @@ Passing repetitions provide evidence only for the tested conditions.
   Duplicate state assignments can hide a timer that still fires.
 - Change snapshot references only for an intended visual change.
   Inspect visual differences before accepting new references.
+  Run snapshot tests on the simulator model CI uses, as set in `.github/workflows/`.
+  Other models fail on perceptual precision without a visual change.
 
 ## Result
 

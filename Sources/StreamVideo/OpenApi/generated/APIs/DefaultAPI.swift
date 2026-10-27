@@ -26,7 +26,7 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         self.jsonEncoder = jsonEncoder
     }
 
-    func send<Response: Codable>(
+    func send<Response: Decodable>(
         request: Request,
         deserializer: (Data) throws -> Response
     ) async throws -> Response {
