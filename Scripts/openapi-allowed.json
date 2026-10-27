@@ -1,0 +1,307 @@
+{
+  "allowedEndpoints": [
+    "acceptCall",
+    "blockUser",
+    "collectUserFeedback",
+    "createDevice",
+    "createGuest",
+    "deleteCall",
+    "deleteDevice",
+    "deleteRecording",
+    "deleteTranscription",
+    "endCall",
+    "getCall",
+    "getCallRingState",
+    "getEdges",
+    "getOrCreateCall",
+    "goLive",
+    "joinCall",
+    "kickUser",
+    "listDevices",
+    "listRecordings",
+    "listTranscriptions",
+    "muteUsers",
+    "queryCallMembers",
+    "queryCallParticipants",
+    "queryCallStats",
+    "queryCalls",
+    "rejectCall",
+    "reportClientCallEvent",
+    "requestPermission",
+    "ringCall",
+    "sendCallEvent",
+    "sendVideoReaction",
+    "startClosedCaptions",
+    "startFrameRecording",
+    "startHLSBroadcasting",
+    "startRTMPBroadcasts",
+    "startRecording",
+    "startTranscription",
+    "stopAllRTMPBroadcasts",
+    "stopClosedCaptions",
+    "stopFrameRecording",
+    "stopHLSBroadcasting",
+    "stopLive",
+    "stopRTMPBroadcast",
+    "stopRecording",
+    "stopTranscription",
+    "unblockUser",
+    "updateCall",
+    "updateCallMembers",
+    "updateUserPermissions",
+    "videoConnect",
+    "videoPin",
+    "videoUnpin"
+  ],
+  "allowedEvents": [
+    "AppUpdatedEvent",
+    "BlockedUserEvent",
+    "CallAcceptedEvent",
+    "CallClosedCaptionsFailedEvent",
+    "CallClosedCaptionsStartedEvent",
+    "CallClosedCaptionsStoppedEvent",
+    "CallCreatedEvent",
+    "CallDeletedEvent",
+    "CallEndedEvent",
+    "CallFrameRecordingFailedEvent",
+    "CallFrameRecordingFrameReadyEvent",
+    "CallFrameRecordingStartedEvent",
+    "CallFrameRecordingStoppedEvent",
+    "CallHLSBroadcastingFailedEvent",
+    "CallHLSBroadcastingStartedEvent",
+    "CallHLSBroadcastingStoppedEvent",
+    "CallLiveStartedEvent",
+    "CallMemberAddedEvent",
+    "CallMemberRemovedEvent",
+    "CallMemberUpdatedEvent",
+    "CallMemberUpdatedPermissionEvent",
+    "CallMissedEvent",
+    "CallModerationBlurEvent",
+    "CallModerationWarningEvent",
+    "CallNotificationEvent",
+    "CallReactionEvent",
+    "CallRecordingFailedEvent",
+    "CallRecordingReadyEvent",
+    "CallRecordingStartedEvent",
+    "CallRecordingStoppedEvent",
+    "CallRejectedEvent",
+    "CallRingEvent",
+    "CallRtmpBroadcastFailedEvent",
+    "CallRtmpBroadcastStartedEvent",
+    "CallRtmpBroadcastStoppedEvent",
+    "CallSessionEndedEvent",
+    "CallSessionParticipantCountsUpdatedEvent",
+    "CallSessionParticipantJoinedEvent",
+    "CallSessionParticipantLeftEvent",
+    "CallSessionStartedEvent",
+    "CallStatsReportReadyEvent",
+    "CallTranscriptionFailedEvent",
+    "CallTranscriptionReadyEvent",
+    "CallTranscriptionStartedEvent",
+    "CallTranscriptionStoppedEvent",
+    "CallUpdatedEvent",
+    "CallUserFeedbackSubmittedEvent",
+    "CallUserMutedEvent",
+    "ClosedCaptionEvent",
+    "ConnectedEvent",
+    "ConnectionErrorEvent",
+    "CustomVideoEvent",
+    "HealthCheckEvent",
+    "KickedUserEvent",
+    "PermissionRequestEvent",
+    "UnblockedUserEvent",
+    "UpdatedCallPermissionsEvent",
+    "UserUpdatedEvent"
+  ],
+  "removedProperties": {
+    "CallClosedCaption": [
+      "id",
+      "language",
+      "service",
+      "translated"
+    ],
+    "CallEndedEvent": [
+      "members",
+      "reason"
+    ],
+    "CallHLSBroadcastingStartedEvent": [
+      "call"
+    ],
+    "CallIngressResponse": [
+      "srt",
+      "whip"
+    ],
+    "CallRecording": [
+      "recordingType",
+      "sessionId"
+    ],
+    "CallRecordingFailedEvent": [
+      "egressId",
+      "recordingType"
+    ],
+    "CallRecordingReadyEvent": [
+      "egressId",
+      "recordingType"
+    ],
+    "CallRequest": [
+      "channelCid"
+    ],
+    "CallResponse": [
+      "channelCid",
+      "routingNumber",
+      "translating"
+    ],
+    "CallRingEvent": [
+      "ringId"
+    ],
+    "CallSessionParticipantLeftEvent": [
+      "reason"
+    ],
+    "CallSettingsRequest": [
+      "lifecycle"
+    ],
+    "CallSettingsResponse": [
+      "lifecycle"
+    ],
+    "CallStatsReportReadyEvent": [
+      "counts",
+      "isTrimmed",
+      "participantsOverview"
+    ],
+    "CallTranscription": [
+      "sessionId"
+    ],
+    "CallTranscriptionFailedEvent": [
+      "egressId",
+      "error"
+    ],
+    "CallTranscriptionReadyEvent": [
+      "egressId"
+    ],
+    "CallTranscriptionStartedEvent": [
+      "egressId"
+    ],
+    "CallTranscriptionStoppedEvent": [
+      "egressId"
+    ],
+    "CallUserMutedEvent": [
+      "reason"
+    ],
+    "EgressHLSResponse": [
+      "status"
+    ],
+    "GoLiveRequest": [
+      "startCompositeRecording",
+      "startIndividualRecording",
+      "startRawRecording"
+    ],
+    "HealthCheckEvent": [
+      "custom"
+    ],
+    "IndividualRecordingSettingsRequest": [
+      "outputTypes"
+    ],
+    "IndividualRecordingSettingsResponse": [
+      "outputTypes"
+    ],
+    "LimitsSettingsRequest": [
+      "maxParticipantsExcludeOwner",
+      "maxParticipantsExcludeRoles"
+    ],
+    "LimitsSettingsResponse": [
+      "maxParticipantsExcludeOwner",
+      "maxParticipantsExcludeRoles"
+    ],
+    "OwnUserResponse": [
+      "avgResponseTime",
+      "pushPreferences",
+      "teamsRole"
+    ],
+    "RawRecordingSettingsRequest": [
+      "audioOnly"
+    ],
+    "RawRecordingSettingsResponse": [
+      "audioOnly"
+    ],
+    "RingCallRequest": [
+      "custom"
+    ],
+    "RingCallResponse": [
+      "ringId"
+    ],
+    "SortParamRequest": [
+      "type"
+    ],
+    "StartClosedCaptionsRequest": [
+      "speechSegmentConfig"
+    ],
+    "StopLiveRequest": [
+      "continueCompositeRecording",
+      "continueIndividualRecording",
+      "continueRawRecording"
+    ],
+    "TranscriptionSettings": [
+      "speechSegmentConfig",
+      "translation"
+    ],
+    "TranscriptionSettingsRequest": [
+      "speechSegmentConfig",
+      "translation"
+    ],
+    "UserEventPayload": [
+      "avgResponseTime",
+      "teamsRole"
+    ],
+    "UserResponse": [
+      "avgResponseTime",
+      "teamsRole"
+    ],
+    "UserUpdatedEvent": [
+      "custom"
+    ]
+  },
+  "retypedProperties": {
+    "AudioSettings": {
+      "hifiAudioEnabled": "Bool?"
+    },
+    "OwnUserResponse": {
+      "blockedUserIds": "[String]?"
+    },
+    "StartClosedCaptionsRequest": {
+      "language": "String?"
+    },
+    "StartTranscriptionRequest": {
+      "language": "String?"
+    },
+    "TranscriptionSettingsRequest": {
+      "mode": "TranscriptionSettingsRequestMode"
+    }
+  },
+  "removedEnumCases": {
+    "OwnCapability": [
+      "sendClosedCaptionsCall",
+      "startFrameRecordCall",
+      "startIndividualRecordCall",
+      "startRawRecordCall",
+      "stopFrameRecordCall",
+      "stopIndividualRecordCall",
+      "stopRawRecordCall"
+    ],
+    "TranscriptionSettings.TranscriptionSettingsLanguage": [
+      "bg",
+      "et",
+      "sk",
+      "sl"
+    ],
+    "TranscriptionSettingsRequest.TranscriptionSettingsRequestLanguage": [
+      "bg",
+      "et",
+      "sk",
+      "sl"
+    ]
+  },
+  "v2Endpoints": [
+    "getCallRingState",
+    "reportClientCallEvent"
+  ]
+}

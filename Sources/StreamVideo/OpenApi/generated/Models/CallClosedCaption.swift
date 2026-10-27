@@ -3,13 +3,15 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class CallClosedCaption: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+/// CallClosedCaption represents a closed caption of a call.
+public final class CallClosedCaption: @unchecked Sendable, Codable, JSONEncodable {
     public var endTime: Date
     public var speakerId: String
     public var startTime: Date
     public var text: String
+    /// User response object
     public var user: UserResponse
 
     public init(endTime: Date, speakerId: String, startTime: Date, text: String, user: UserResponse) {
@@ -19,7 +21,7 @@ public final class CallClosedCaption: @unchecked Sendable, Codable, JSONEncodabl
         self.text = text
         self.user = user
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case endTime = "end_time"
         case speakerId = "speaker_id"
@@ -27,7 +29,9 @@ public final class CallClosedCaption: @unchecked Sendable, Codable, JSONEncodabl
         case text
         case user
     }
-    
+}
+
+extension CallClosedCaption: Hashable {
     public static func == (lhs: CallClosedCaption, rhs: CallClosedCaption) -> Bool {
         lhs.endTime == rhs.endTime &&
             lhs.speakerId == rhs.speakerId &&

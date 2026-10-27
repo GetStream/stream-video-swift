@@ -2,21 +2,23 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
-import StreamCore
 import Foundation
+import StreamCore
 
-public final class SendEventRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+/// Send a call event to the other user
+public final class SendEventRequest: @unchecked Sendable, Codable, JSONEncodable {
     public var custom: [String: RawJSON]?
 
     public init(custom: [String: RawJSON]? = nil) {
         self.custom = custom
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case custom
     }
-    
+}
+
+extension SendEventRequest: Hashable {
     public static func == (lhs: SendEventRequest, rhs: SendEventRequest) -> Bool {
         lhs.custom == rhs.custom
     }

@@ -3,19 +3,21 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class SessionSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+public final class SessionSettingsRequest: @unchecked Sendable, Codable, JSONEncodable {
     public var inactivityTimeoutSeconds: Int
 
     public init(inactivityTimeoutSeconds: Int) {
         self.inactivityTimeoutSeconds = inactivityTimeoutSeconds
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case inactivityTimeoutSeconds = "inactivity_timeout_seconds"
     }
-    
+}
+
+extension SessionSettingsRequest: Hashable {
     public static func == (lhs: SessionSettingsRequest, rhs: SessionSettingsRequest) -> Bool {
         lhs.inactivityTimeoutSeconds == rhs.inactivityTimeoutSeconds
     }

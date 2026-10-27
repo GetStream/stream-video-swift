@@ -5,11 +5,13 @@
 import Foundation
 import StreamCore
 
-public final class ClosedCaptionEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
-    
+/// This event is sent when closed captions are being sent in a call, clients should use this to show the closed captions in the call screen
+public final class ClosedCaptionEvent: @unchecked Sendable, Event, Codable, JSONEncodable, WSCallEvent {
     public var callCid: String
+    /// CallClosedCaption represents a closed caption of a call.
     public var closedCaption: CallClosedCaption
     public var createdAt: Date
+    /// The type of event: "call.closed_caption" in this case
     public var type: String = "call.closed_caption"
 
     public init(callCid: String, closedCaption: CallClosedCaption, createdAt: Date) {
@@ -17,14 +19,16 @@ public final class ClosedCaptionEvent: @unchecked Sendable, Event, Codable, JSON
         self.closedCaption = closedCaption
         self.createdAt = createdAt
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case callCid = "call_cid"
         case closedCaption = "closed_caption"
         case createdAt = "created_at"
         case type
     }
-    
+}
+
+extension ClosedCaptionEvent: Hashable {
     public static func == (lhs: ClosedCaptionEvent, rhs: ClosedCaptionEvent) -> Bool {
         lhs.callCid == rhs.callCid &&
             lhs.closedCaption == rhs.closedCaption &&

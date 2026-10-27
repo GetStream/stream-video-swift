@@ -4,6 +4,7 @@
 
 import Foundation
 
+@available(*, deprecated, message: "No longer part of the video API. It will be removed in the next major version.")
 public final class PushNotificationSettingsResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var disabled: Bool?

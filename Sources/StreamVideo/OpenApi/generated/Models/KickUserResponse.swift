@@ -3,18 +3,23 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class KickUserResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+/// KickUserResponse is the payload for kicking a user from a call.
+public final class KickUserResponse: @unchecked Sendable, Codable, JSONEncodable {
+    /// Duration of the request in milliseconds
     public var duration: String
 
     public init(duration: String) {
         self.duration = duration
     }
 
-public enum CodingKeys: String, CodingKey {
-    case duration
+    public enum CodingKeys: String, CodingKey {
+        case duration
+    }
 }
 
+extension KickUserResponse: Hashable {
     public static func == (lhs: KickUserResponse, rhs: KickUserResponse) -> Bool {
         lhs.duration == rhs.duration
     }

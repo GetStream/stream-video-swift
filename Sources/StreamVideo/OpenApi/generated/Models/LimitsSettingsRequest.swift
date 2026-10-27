@@ -3,9 +3,9 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class LimitsSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+public final class LimitsSettingsRequest: @unchecked Sendable, Codable, JSONEncodable {
     public var maxDurationSeconds: Int?
     public var maxParticipants: Int?
 
@@ -13,12 +13,14 @@ public final class LimitsSettingsRequest: @unchecked Sendable, Codable, JSONEnco
         self.maxDurationSeconds = maxDurationSeconds
         self.maxParticipants = maxParticipants
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case maxDurationSeconds = "max_duration_seconds"
         case maxParticipants = "max_participants"
     }
-    
+}
+
+extension LimitsSettingsRequest: Hashable {
     public static func == (lhs: LimitsSettingsRequest, rhs: LimitsSettingsRequest) -> Bool {
         lhs.maxDurationSeconds == rhs.maxDurationSeconds &&
             lhs.maxParticipants == rhs.maxParticipants

@@ -3,9 +3,9 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class StatsOptions: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+public final class StatsOptions: @unchecked Sendable, Codable, JSONEncodable {
     public var enableRtcStats: Bool
     public var reportingIntervalMs: Int
 
@@ -13,12 +13,14 @@ public final class StatsOptions: @unchecked Sendable, Codable, JSONEncodable, Ha
         self.enableRtcStats = enableRtcStats
         self.reportingIntervalMs = reportingIntervalMs
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case enableRtcStats = "enable_rtc_stats"
         case reportingIntervalMs = "reporting_interval_ms"
     }
-    
+}
+
+extension StatsOptions: Hashable {
     public static func == (lhs: StatsOptions, rhs: StatsOptions) -> Bool {
         lhs.enableRtcStats == rhs.enableRtcStats &&
             lhs.reportingIntervalMs == rhs.reportingIntervalMs

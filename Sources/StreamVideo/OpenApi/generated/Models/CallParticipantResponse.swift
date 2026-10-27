@@ -3,11 +3,12 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class CallParticipantResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+public final class CallParticipantResponse: @unchecked Sendable, Codable, JSONEncodable {
     public var joinedAt: Date
     public var role: String
+    /// User response object
     public var user: UserResponse
     public var userSessionId: String
 
@@ -17,14 +18,16 @@ public final class CallParticipantResponse: @unchecked Sendable, Codable, JSONEn
         self.user = user
         self.userSessionId = userSessionId
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case joinedAt = "joined_at"
         case role
         case user
         case userSessionId = "user_session_id"
     }
-    
+}
+
+extension CallParticipantResponse: Hashable {
     public static func == (lhs: CallParticipantResponse, rhs: CallParticipantResponse) -> Bool {
         lhs.joinedAt == rhs.joinedAt &&
             lhs.role == rhs.role &&

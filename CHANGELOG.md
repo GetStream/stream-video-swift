@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🔄 Changed
 
+- Deprecate `GoLiveRequest.startRtmpBroadcasts`, `OwnUserResponse.pushNotifications`, and `revokeTokensIssuedBefore` on `OwnUserResponse`, `UserResponse` and `UserEventPayload`. The API no longer returns them, so they are always `nil`. `Call.goLive(startRtmpBroadcasts:)` now ignores that parameter. [#1378](https://github.com/GetStream/stream-video-swift/pull/1378)
+- Remove 20 unused API models that no endpoint or event returns, for example `AggregatedStats`, `UserStats` and `VideoResolution`. [#1378](https://github.com/GetStream/stream-video-swift/pull/1378)
+
 # [1.56.1](https://github.com/GetStream/stream-video-swift/releases/tag/1.56.1)
 _October 28, 2026_
 

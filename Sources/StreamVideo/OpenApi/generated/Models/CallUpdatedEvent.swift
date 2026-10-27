@@ -5,12 +5,16 @@
 import Foundation
 import StreamCore
 
-public final class CallUpdatedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
-    
+/// This event is sent when a call is updated, clients should use this update the local state of the call.
+/// This event also contains the capabilities by role for the call, clients should update the own_capability for the current.
+public final class CallUpdatedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, WSCallEvent {
+    /// Represents a call
     public var call: CallResponse
     public var callCid: String
+    /// The capabilities by role for this call
     public var capabilitiesByRole: [String: [String]]
     public var createdAt: Date
+    /// The type of event: "call.updated" in this case
     public var type: String = "call.updated"
 
     public init(call: CallResponse, callCid: String, capabilitiesByRole: [String: [String]], createdAt: Date) {
@@ -19,7 +23,7 @@ public final class CallUpdatedEvent: @unchecked Sendable, Event, Codable, JSONEn
         self.capabilitiesByRole = capabilitiesByRole
         self.createdAt = createdAt
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case call
         case callCid = "call_cid"
@@ -27,7 +31,9 @@ public final class CallUpdatedEvent: @unchecked Sendable, Event, Codable, JSONEn
         case createdAt = "created_at"
         case type
     }
-    
+}
+
+extension CallUpdatedEvent: Hashable {
     public static func == (lhs: CallUpdatedEvent, rhs: CallUpdatedEvent) -> Bool {
         lhs.call == rhs.call &&
             lhs.callCid == rhs.callCid &&

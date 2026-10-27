@@ -3,9 +3,9 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class BackstageSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+public final class BackstageSettingsRequest: @unchecked Sendable, Codable, JSONEncodable {
     public var enabled: Bool?
     public var joinAheadTimeSeconds: Int?
 
@@ -13,12 +13,14 @@ public final class BackstageSettingsRequest: @unchecked Sendable, Codable, JSONE
         self.enabled = enabled
         self.joinAheadTimeSeconds = joinAheadTimeSeconds
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case enabled
         case joinAheadTimeSeconds = "join_ahead_time_seconds"
     }
-    
+}
+
+extension BackstageSettingsRequest: Hashable {
     public static func == (lhs: BackstageSettingsRequest, rhs: BackstageSettingsRequest) -> Bool {
         lhs.enabled == rhs.enabled &&
             lhs.joinAheadTimeSeconds == rhs.joinAheadTimeSeconds

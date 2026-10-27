@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 
 public final class JoinCallRequest: @unchecked Sendable, Codable, JSONEncodable {
     /// if true the call will be created if it doesn't exist
@@ -68,16 +69,16 @@ public final class JoinCallRequest: @unchecked Sendable, Codable, JSONEncodable 
 extension JoinCallRequest: Hashable {
     public static func == (lhs: JoinCallRequest, rhs: JoinCallRequest) -> Bool {
         lhs.create == rhs.create &&
-        lhs.data == rhs.data &&
-        lhs.e2ee == rhs.e2ee &&
-        lhs.hintHighScaleLivestreamPublisher == rhs.hintHighScaleLivestreamPublisher &&
-        lhs.location == rhs.location &&
-        lhs.membersLimit == rhs.membersLimit &&
-        lhs.migratingFrom == rhs.migratingFrom &&
-        lhs.migratingFromList == rhs.migratingFromList &&
-        lhs.notify == rhs.notify &&
-        lhs.ring == rhs.ring &&
-        lhs.video == rhs.video
+            lhs.data == rhs.data &&
+            lhs.e2ee == rhs.e2ee &&
+            lhs.hintHighScaleLivestreamPublisher == rhs.hintHighScaleLivestreamPublisher &&
+            lhs.location == rhs.location &&
+            lhs.membersLimit == rhs.membersLimit &&
+            lhs.migratingFrom == rhs.migratingFrom &&
+            lhs.migratingFromList == rhs.migratingFromList &&
+            lhs.notify == rhs.notify &&
+            lhs.ring == rhs.ring &&
+            lhs.video == rhs.video
     }
 
     public func hash(into hasher: inout Hasher) {

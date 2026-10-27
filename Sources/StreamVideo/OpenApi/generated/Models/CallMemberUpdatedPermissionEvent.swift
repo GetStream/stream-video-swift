@@ -5,13 +5,17 @@
 import Foundation
 import StreamCore
 
-public final class CallMemberUpdatedPermissionEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
-    
+/// This event is sent when one or more members get its role updated
+public final class CallMemberUpdatedPermissionEvent: @unchecked Sendable, Event, Codable, JSONEncodable, WSCallEvent {
+    /// Represents a call
     public var call: CallResponse
     public var callCid: String
+    /// The capabilities by role for this call
     public var capabilitiesByRole: [String: [String]]
     public var createdAt: Date
+    /// The list of members that were updated
     public var members: [MemberResponse]
+    /// The type of event: "call.member_added" in this case
     public var type: String = "call.member_updated_permission"
 
     public init(
@@ -27,7 +31,7 @@ public final class CallMemberUpdatedPermissionEvent: @unchecked Sendable, Event,
         self.createdAt = createdAt
         self.members = members
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case call
         case callCid = "call_cid"
@@ -36,7 +40,9 @@ public final class CallMemberUpdatedPermissionEvent: @unchecked Sendable, Event,
         case members
         case type
     }
-    
+}
+
+extension CallMemberUpdatedPermissionEvent: Hashable {
     public static func == (lhs: CallMemberUpdatedPermissionEvent, rhs: CallMemberUpdatedPermissionEvent) -> Bool {
         lhs.call == rhs.call &&
             lhs.callCid == rhs.callCid &&

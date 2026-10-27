@@ -3,9 +3,11 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class SendReactionResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+/// Basic response information
+public final class SendReactionResponse: @unchecked Sendable, Codable, JSONEncodable {
+    /// Duration of the request in milliseconds
     public var duration: String
     public var reaction: ReactionResponse
 
@@ -13,12 +15,14 @@ public final class SendReactionResponse: @unchecked Sendable, Codable, JSONEncod
         self.duration = duration
         self.reaction = reaction
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case duration
         case reaction
     }
-    
+}
+
+extension SendReactionResponse: Hashable {
     public static func == (lhs: SendReactionResponse, rhs: SendReactionResponse) -> Bool {
         lhs.duration == rhs.duration &&
             lhs.reaction == rhs.reaction

@@ -3,19 +3,20 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class FrameRecordingSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class FrameRecordingSettingsRequest: @unchecked Sendable, Codable, JSONEncodable {
     
     public enum FrameRecordingSettingsRequestMode: String, Sendable, Codable, CaseIterable {
         case autoOn = "auto-on"
-        case available = "available"
-        case disabled = "disabled"
+        case available
+        case disabled
         case unknown = "_unknown"
 
         public init(from decoder: Decoder) throws {
             let container = try decoder.singleValueContainer()
             if let decodedValue = try? container.decode(String.self),
-                let value = Self(rawValue: decodedValue) {
+               let value = Self(rawValue: decodedValue) {
                 self = value
             } else {
                 self = .unknown
@@ -34,18 +35,23 @@ public final class FrameRecordingSettingsRequest: @unchecked Sendable, Codable, 
         public init(from decoder: Decoder) throws {
             let container = try decoder.singleValueContainer()
             if let decodedValue = try? container.decode(String.self),
-                let value = Self(rawValue: decodedValue) {
+               let value = Self(rawValue: decodedValue) {
                 self = value
             } else {
                 self = .unknown
             }
         }
     }
+
     public var captureIntervalInSeconds: Int
     public var mode: FrameRecordingSettingsRequestMode
     public var quality: FrameRecordingSettingsRequestQuality?
 
-    public init(captureIntervalInSeconds: Int, mode: FrameRecordingSettingsRequestMode, quality: FrameRecordingSettingsRequestQuality? = nil) {
+    public init(
+        captureIntervalInSeconds: Int,
+        mode: FrameRecordingSettingsRequestMode,
+        quality: FrameRecordingSettingsRequestQuality? = nil
+    ) {
         self.captureIntervalInSeconds = captureIntervalInSeconds
         self.mode = mode
         self.quality = quality
@@ -56,11 +62,13 @@ public final class FrameRecordingSettingsRequest: @unchecked Sendable, Codable, 
         case mode
         case quality
     }
+}
 
+extension FrameRecordingSettingsRequest: Hashable {
     public static func == (lhs: FrameRecordingSettingsRequest, rhs: FrameRecordingSettingsRequest) -> Bool {
         lhs.captureIntervalInSeconds == rhs.captureIntervalInSeconds &&
-        lhs.mode == rhs.mode &&
-        lhs.quality == rhs.quality
+            lhs.mode == rhs.mode &&
+            lhs.quality == rhs.quality
     }
 
     public func hash(into hasher: inout Hasher) {

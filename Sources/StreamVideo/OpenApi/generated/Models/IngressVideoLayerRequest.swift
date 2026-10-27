@@ -3,24 +3,26 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class IngressVideoLayerRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class IngressVideoLayerRequest: @unchecked Sendable, Codable, JSONEncodable {
     
     public enum IngressVideoLayerRequestCodec: String, Sendable, Codable, CaseIterable {
-        case h264 = "h264"
-        case vp8 = "vp8"
+        case h264
+        case vp8
         case unknown = "_unknown"
 
         public init(from decoder: Decoder) throws {
             let container = try decoder.singleValueContainer()
             if let decodedValue = try? container.decode(String.self),
-                let value = Self(rawValue: decodedValue) {
+               let value = Self(rawValue: decodedValue) {
                 self = value
             } else {
                 self = .unknown
             }
         }
     }
+
     public var bitrate: Int
     public var codec: IngressVideoLayerRequestCodec
     public var frameRateLimit: Int
@@ -42,13 +44,15 @@ public final class IngressVideoLayerRequest: @unchecked Sendable, Codable, JSONE
         case maxDimension = "max_dimension"
         case minDimension = "min_dimension"
     }
+}
 
+extension IngressVideoLayerRequest: Hashable {
     public static func == (lhs: IngressVideoLayerRequest, rhs: IngressVideoLayerRequest) -> Bool {
         lhs.bitrate == rhs.bitrate &&
-        lhs.codec == rhs.codec &&
-        lhs.frameRateLimit == rhs.frameRateLimit &&
-        lhs.maxDimension == rhs.maxDimension &&
-        lhs.minDimension == rhs.minDimension
+            lhs.codec == rhs.codec &&
+            lhs.frameRateLimit == rhs.frameRateLimit &&
+            lhs.maxDimension == rhs.maxDimension &&
+            lhs.minDimension == rhs.minDimension
     }
 
     public func hash(into hasher: inout Hasher) {

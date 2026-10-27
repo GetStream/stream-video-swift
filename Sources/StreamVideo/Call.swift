@@ -1007,7 +1007,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// - Parameters:
     ///  - startsHls: whether hls streaming should be started.
     ///  - startRecording: whether recording should be started.
-    ///  - startRtmpBroadcasts: whether RTMP broadcasting should be started.
+    ///  - startRtmpBroadcasts: Has no effect. The video API no longer supports it.
     ///  - startTranscription: whether transcription should be started.
     /// - Returns: `GoLiveResponse`.
     @discardableResult
@@ -1020,7 +1020,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         let goLiveRequest = GoLiveRequest(
             startHls: startHls,
             startRecording: startRecording,
-            startRtmpBroadcasts: startRtmpBroadcasts,
             startTranscription: startTranscription
         )
         return try await coordinatorClient.goLive(

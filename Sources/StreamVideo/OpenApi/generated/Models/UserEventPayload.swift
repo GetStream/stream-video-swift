@@ -2,11 +2,10 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
-import StreamCore
 import Foundation
+import StreamCore
 
-public final class UserEventPayload: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+public final class UserEventPayload: @unchecked Sendable, Codable, JSONEncodable {
     public var blockedUserIds: [String]
     public var createdAt: Date
     public var custom: [String: RawJSON]
@@ -18,7 +17,6 @@ public final class UserEventPayload: @unchecked Sendable, Codable, JSONEncodable
     public var language: String
     public var lastActive: Date?
     public var name: String?
-    public var revokeTokensIssuedBefore: Date?
     public var role: String
     public var teams: [String]
     public var updatedAt: Date
@@ -35,7 +33,6 @@ public final class UserEventPayload: @unchecked Sendable, Codable, JSONEncodable
         language: String,
         lastActive: Date? = nil,
         name: String? = nil,
-        revokeTokensIssuedBefore: Date? = nil,
         role: String,
         teams: [String],
         updatedAt: Date
@@ -51,12 +48,11 @@ public final class UserEventPayload: @unchecked Sendable, Codable, JSONEncodable
         self.language = language
         self.lastActive = lastActive
         self.name = name
-        self.revokeTokensIssuedBefore = revokeTokensIssuedBefore
         self.role = role
         self.teams = teams
         self.updatedAt = updatedAt
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case blockedUserIds = "blocked_user_ids"
         case createdAt = "created_at"
@@ -69,12 +65,13 @@ public final class UserEventPayload: @unchecked Sendable, Codable, JSONEncodable
         case language
         case lastActive = "last_active"
         case name
-        case revokeTokensIssuedBefore = "revoke_tokens_issued_before"
         case role
         case teams
         case updatedAt = "updated_at"
     }
-    
+}
+
+extension UserEventPayload: Hashable {
     public static func == (lhs: UserEventPayload, rhs: UserEventPayload) -> Bool {
         lhs.blockedUserIds == rhs.blockedUserIds &&
             lhs.createdAt == rhs.createdAt &&
@@ -87,7 +84,6 @@ public final class UserEventPayload: @unchecked Sendable, Codable, JSONEncodable
             lhs.language == rhs.language &&
             lhs.lastActive == rhs.lastActive &&
             lhs.name == rhs.name &&
-            lhs.revokeTokensIssuedBefore == rhs.revokeTokensIssuedBefore &&
             lhs.role == rhs.role &&
             lhs.teams == rhs.teams &&
             lhs.updatedAt == rhs.updatedAt
@@ -105,7 +101,6 @@ public final class UserEventPayload: @unchecked Sendable, Codable, JSONEncodable
         hasher.combine(language)
         hasher.combine(lastActive)
         hasher.combine(name)
-        hasher.combine(revokeTokensIssuedBefore)
         hasher.combine(role)
         hasher.combine(teams)
         hasher.combine(updatedAt)

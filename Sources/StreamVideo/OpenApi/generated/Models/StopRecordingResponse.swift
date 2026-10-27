@@ -3,19 +3,23 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class StopRecordingResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+/// Basic response information
+public final class StopRecordingResponse: @unchecked Sendable, Codable, JSONEncodable {
+    /// Duration of the request in milliseconds
     public var duration: String
 
     public init(duration: String) {
         self.duration = duration
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case duration
     }
-    
+}
+
+extension StopRecordingResponse: Hashable {
     public static func == (lhs: StopRecordingResponse, rhs: StopRecordingResponse) -> Bool {
         lhs.duration == rhs.duration
     }
