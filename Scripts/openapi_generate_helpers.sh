@@ -52,8 +52,9 @@ remove_properties() {
   for model in $(jq -r '.removedProperties | keys[]' "$ALLOWED_FILE"); do
     file="$OUTPUT_DIR/Models/$model.swift"
     for p in $(jq -r --arg m "$model" '.removedProperties[$m][]' "$ALLOWED_FILE"); do
-      if ! grep -qE "^ +public var $p: " "$file"; then
-        echo "Removed property missing: $model.$p" >&2
+      # Deprecated fields get a computed var, which the steps below miss.
+      if ! grep -qE "^ +public var $p: [^{]+$" "$file"; then
+        echo "Removed property missing or deprecated: $model.$p" >&2
         exit 1
       fi
       type="$(sed -nE "s/^ +public var $p: \[?([A-Za-z]+).*/\1/p" "$file")"
@@ -104,9 +105,9 @@ retype_properties() {
     file="$OUTPUT_DIR/Models/$model.swift"
     for p in $(jq -r --arg m "$model" '.retypedProperties[$m] | keys[]' "$ALLOWED_FILE"); do
       new="$(jq -r --arg m "$model" --arg p "$p" '.retypedProperties[$m][$p]' "$ALLOWED_FILE")"
-      old="$(sed -nE "s/^ +public var $p: (.*)$/\1/p" "$file")"
+      old="$(sed -nE "s/^ +public var $p: ([^{]+)$/\1/p" "$file")"
       if [ -z "$old" ]; then
-        echo "Retyped property missing: $model.$p" >&2
+        echo "Retyped property missing or deprecated: $model.$p" >&2
         exit 1
       fi
       # Optional types get a nil default in the init, non-optional ones none.
@@ -130,12 +131,14 @@ remove_enum_cases() {
     file="$OUTPUT_DIR/Models/$model.swift"
     for c in $(jq -r --arg e "$entry" '.removedEnumCases[$e][]' "$ALLOWED_FILE"); do
       if ! awk -v t="$name" -v c="$c" '
+        function flush() { for (i = 1; i <= n; i++) print b[i]; n = 0 }
         !inside && $0 ~ ("^ *public enum " t ":") {
           inside = 1; ind = substr($0, 1, match($0, /[^ ]/) - 1); print; next
         }
         inside && $0 == ind "}"                                         { inside = 0 }
-        inside && $0 ~ ("^" ind "    case " c "( = \"[^\"]*\")?$")    { removed = 1; next }
-        { print }
+        inside && $0 ~ ("^" ind "    (///|@available)")                 { b[++n] = $0; next }
+        inside && $0 ~ ("^" ind "    case " c "( = \"[^\"]*\")?$")    { n = 0; removed = 1; next }
+        { flush(); print }
         END { exit !removed }
       ' "$file" > "$file.tmp"; then
         rm "$file.tmp"
@@ -177,6 +180,7 @@ keep_existing_v2_endpoints() {
     if ! awk -v e="$e" '
       $0 ~ "^    open func " e "\\(" { inside = 1 }
       inside && sub(/path = "\/video\//, "path = \"/api/v2/video/") { moved = 1; inside = 0 }
+      inside && $0 == "    }"          { inside = 0 }
       { print }
       END { exit !moved }
     ' "$file" > "$file.tmp"; then
