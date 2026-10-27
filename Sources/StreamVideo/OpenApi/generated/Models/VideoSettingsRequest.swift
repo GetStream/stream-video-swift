@@ -3,10 +3,11 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class VideoSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class VideoSettingsRequest: @unchecked Sendable, Codable, JSONEncodable {
     
-    public enum CameraFacing: String, Sendable, Codable, CaseIterable {
+    public enum VideoSettingsRequestCameraFacing: String, Sendable, Codable, CaseIterable {
         case back
         case external
         case front
@@ -22,17 +23,17 @@ public final class VideoSettingsRequest: @unchecked Sendable, Codable, JSONEncod
             }
         }
     }
-    
+
     public var accessRequestEnabled: Bool?
     public var cameraDefaultOn: Bool?
-    public var cameraFacing: CameraFacing?
+    public var cameraFacing: VideoSettingsRequestCameraFacing?
     public var enabled: Bool?
     public var targetResolution: TargetResolution?
 
     public init(
         accessRequestEnabled: Bool? = nil,
         cameraDefaultOn: Bool? = nil,
-        cameraFacing: CameraFacing? = nil,
+        cameraFacing: VideoSettingsRequestCameraFacing? = nil,
         enabled: Bool? = nil,
         targetResolution: TargetResolution? = nil
     ) {
@@ -42,7 +43,7 @@ public final class VideoSettingsRequest: @unchecked Sendable, Codable, JSONEncod
         self.enabled = enabled
         self.targetResolution = targetResolution
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case accessRequestEnabled = "access_request_enabled"
         case cameraDefaultOn = "camera_default_on"
@@ -50,7 +51,9 @@ public final class VideoSettingsRequest: @unchecked Sendable, Codable, JSONEncod
         case enabled
         case targetResolution = "target_resolution"
     }
-    
+}
+
+extension VideoSettingsRequest: Hashable {
     public static func == (lhs: VideoSettingsRequest, rhs: VideoSettingsRequest) -> Bool {
         lhs.accessRequestEnabled == rhs.accessRequestEnabled &&
             lhs.cameraDefaultOn == rhs.cameraDefaultOn &&

@@ -3,8 +3,9 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class IngressSourceRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class IngressSourceRequest: @unchecked Sendable, Codable, JSONEncodable {
     
     public enum IngressSourceRequestFps: String, Sendable, Codable, CaseIterable {
         case _30 = "30"
@@ -14,13 +15,14 @@ public final class IngressSourceRequest: @unchecked Sendable, Codable, JSONEncod
         public init(from decoder: Decoder) throws {
             let container = try decoder.singleValueContainer()
             if let decodedValue = try? container.decode(String.self),
-                let value = Self(rawValue: decodedValue) {
+               let value = Self(rawValue: decodedValue) {
                 self = value
             } else {
                 self = .unknown
             }
         }
     }
+
     public var fps: IngressSourceRequestFps
     public var height: Int
     public var width: Int
@@ -36,11 +38,13 @@ public final class IngressSourceRequest: @unchecked Sendable, Codable, JSONEncod
         case height
         case width
     }
+}
 
+extension IngressSourceRequest: Hashable {
     public static func == (lhs: IngressSourceRequest, rhs: IngressSourceRequest) -> Bool {
         lhs.fps == rhs.fps &&
-        lhs.height == rhs.height &&
-        lhs.width == rhs.width
+            lhs.height == rhs.height &&
+            lhs.width == rhs.width
     }
 
     public func hash(into hasher: inout Hasher) {

@@ -5,11 +5,15 @@
 import Foundation
 import StreamCore
 
-public final class CallRtmpBroadcastStoppedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
-    
+/// This event is sent when RTMP broadcast has stopped
+public final class CallRtmpBroadcastStoppedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, WSCallEvent {
+    /// The unique identifier for a call (<type>:<id>)
     public var callCid: String
+    /// Date/time of creation
     public var createdAt: Date
+    /// Name of the given RTMP broadcast
     public var name: String
+    /// The type of event: "call.rtmp_broadcast_stopped" in this case
     public var type: String = "call.rtmp_broadcast_stopped"
 
     public init(callCid: String, createdAt: Date, name: String) {
@@ -17,14 +21,16 @@ public final class CallRtmpBroadcastStoppedEvent: @unchecked Sendable, Event, Co
         self.createdAt = createdAt
         self.name = name
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case callCid = "call_cid"
         case createdAt = "created_at"
         case name
         case type
     }
-    
+}
+
+extension CallRtmpBroadcastStoppedEvent: Hashable {
     public static func == (lhs: CallRtmpBroadcastStoppedEvent, rhs: CallRtmpBroadcastStoppedEvent) -> Bool {
         lhs.callCid == rhs.callCid &&
             lhs.createdAt == rhs.createdAt &&

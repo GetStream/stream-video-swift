@@ -3,9 +3,11 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class GetEdgesResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+/// Basic response information
+public final class GetEdgesResponse: @unchecked Sendable, Codable, JSONEncodable {
+    /// Duration of the request in milliseconds
     public var duration: String
     public var edges: [EdgeResponse]
 
@@ -13,12 +15,14 @@ public final class GetEdgesResponse: @unchecked Sendable, Codable, JSONEncodable
         self.duration = duration
         self.edges = edges
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case duration
         case edges
     }
-    
+}
+
+extension GetEdgesResponse: Hashable {
     public static func == (lhs: GetEdgesResponse, rhs: GetEdgesResponse) -> Bool {
         lhs.duration == rhs.duration &&
             lhs.edges == rhs.edges

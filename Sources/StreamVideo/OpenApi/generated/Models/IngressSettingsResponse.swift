@@ -3,13 +3,18 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class IngressSettingsResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class IngressSettingsResponse: @unchecked Sendable, Codable, JSONEncodable {
     public var audioEncodingOptions: IngressAudioEncodingResponse?
     public var enabled: Bool
     public var videoEncodingOptions: [String: IngressVideoEncodingResponse]?
 
-    public init(audioEncodingOptions: IngressAudioEncodingResponse? = nil, enabled: Bool, videoEncodingOptions: [String: IngressVideoEncodingResponse]? = nil) {
+    public init(
+        audioEncodingOptions: IngressAudioEncodingResponse? = nil,
+        enabled: Bool,
+        videoEncodingOptions: [String: IngressVideoEncodingResponse]? = nil
+    ) {
         self.audioEncodingOptions = audioEncodingOptions
         self.enabled = enabled
         self.videoEncodingOptions = videoEncodingOptions
@@ -20,11 +25,13 @@ public final class IngressSettingsResponse: @unchecked Sendable, Codable, JSONEn
         case enabled
         case videoEncodingOptions = "video_encoding_options"
     }
+}
 
+extension IngressSettingsResponse: Hashable {
     public static func == (lhs: IngressSettingsResponse, rhs: IngressSettingsResponse) -> Bool {
         lhs.audioEncodingOptions == rhs.audioEncodingOptions &&
-        lhs.enabled == rhs.enabled &&
-        lhs.videoEncodingOptions == rhs.videoEncodingOptions
+            lhs.enabled == rhs.enabled &&
+            lhs.videoEncodingOptions == rhs.videoEncodingOptions
     }
 
     public func hash(into hasher: inout Hasher) {

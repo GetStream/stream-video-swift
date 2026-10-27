@@ -3,10 +3,11 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class AudioSettings: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class AudioSettings: @unchecked Sendable, Codable, JSONEncodable {
     
-    public enum DefaultDevice: String, Sendable, Codable, CaseIterable {
+    public enum AudioSettingsDefaultDevice: String, Sendable, Codable, CaseIterable {
         case earpiece
         case speaker
         case unknown = "_unknown"
@@ -14,16 +15,16 @@ public final class AudioSettings: @unchecked Sendable, Codable, JSONEncodable, H
         public init(from decoder: Decoder) throws {
             let container = try decoder.singleValueContainer()
             if let decodedValue = try? container.decode(String.self),
-                let value = Self(rawValue: decodedValue) {
+               let value = Self(rawValue: decodedValue) {
                 self = value
             } else {
                 self = .unknown
             }
         }
     }
-    
+
     public var accessRequestEnabled: Bool
-    public var defaultDevice: DefaultDevice
+    public var defaultDevice: AudioSettingsDefaultDevice
     public var hifiAudioEnabled: Bool?
     public var micDefaultOn: Bool
     public var noiseCancellation: NoiseCancellationSettingsRequest?
@@ -33,7 +34,7 @@ public final class AudioSettings: @unchecked Sendable, Codable, JSONEncodable, H
 
     public init(
         accessRequestEnabled: Bool,
-        defaultDevice: DefaultDevice,
+        defaultDevice: AudioSettingsDefaultDevice,
         hifiAudioEnabled: Bool? = nil,
         micDefaultOn: Bool,
         noiseCancellation: NoiseCancellationSettingsRequest? = nil,
@@ -61,16 +62,18 @@ public final class AudioSettings: @unchecked Sendable, Codable, JSONEncodable, H
         case redundantCodingEnabled = "redundant_coding_enabled"
         case speakerDefaultOn = "speaker_default_on"
     }
-    
+}
+
+extension AudioSettings: Hashable {
     public static func == (lhs: AudioSettings, rhs: AudioSettings) -> Bool {
         lhs.accessRequestEnabled == rhs.accessRequestEnabled &&
-        lhs.defaultDevice == rhs.defaultDevice &&
-        lhs.hifiAudioEnabled == rhs.hifiAudioEnabled &&
-        lhs.micDefaultOn == rhs.micDefaultOn &&
-        lhs.noiseCancellation == rhs.noiseCancellation &&
-        lhs.opusDtxEnabled == rhs.opusDtxEnabled &&
-        lhs.redundantCodingEnabled == rhs.redundantCodingEnabled &&
-        lhs.speakerDefaultOn == rhs.speakerDefaultOn
+            lhs.defaultDevice == rhs.defaultDevice &&
+            lhs.hifiAudioEnabled == rhs.hifiAudioEnabled &&
+            lhs.micDefaultOn == rhs.micDefaultOn &&
+            lhs.noiseCancellation == rhs.noiseCancellation &&
+            lhs.opusDtxEnabled == rhs.opusDtxEnabled &&
+            lhs.redundantCodingEnabled == rhs.redundantCodingEnabled &&
+            lhs.speakerDefaultOn == rhs.speakerDefaultOn
     }
 
     public func hash(into hasher: inout Hasher) {

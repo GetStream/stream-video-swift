@@ -2,32 +2,42 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
-import StreamCore
 import Foundation
+import StreamCore
 
-public final class CallResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+/// Represents a call
+public final class CallResponse: @unchecked Sendable, Codable, JSONEncodable {
     public var backstage: Bool
     public var blockedUserIds: [String]
     public var captioning: Bool
+    /// The unique identifier for a call (<type>:<id>)
     public var cid: String
+    /// Date/time of creation
     public var createdAt: Date
+    /// User response object
     public var createdBy: UserResponse
     public var currentSessionId: String
+    /// Custom data for this object
     public var custom: [String: RawJSON]
     public var egress: EgressResponse
+    /// Date/time when the call ended
     public var endedAt: Date?
+    /// Call ID
     public var id: String
+    /// CallIngressResponse is the payload for ingress settings
     public var ingress: CallIngressResponse
     public var joinAheadTimeSeconds: Int?
     public var recording: Bool
     public var session: CallSessionResponse?
     public var settings: CallSettingsResponse
+    /// Date/time when the call will start
     public var startsAt: Date?
     public var team: String?
     public var thumbnails: ThumbnailResponse?
     public var transcribing: Bool
+    /// The type of call
     public var type: String
+    /// Date/time of the last update
     public var updatedAt: Date
 
     public init(
@@ -77,7 +87,7 @@ public final class CallResponse: @unchecked Sendable, Codable, JSONEncodable, Ha
         self.type = type
         self.updatedAt = updatedAt
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case backstage
         case blockedUserIds = "blocked_user_ids"
@@ -102,7 +112,9 @@ public final class CallResponse: @unchecked Sendable, Codable, JSONEncodable, Ha
         case type
         case updatedAt = "updated_at"
     }
-    
+}
+
+extension CallResponse: Hashable {
     public static func == (lhs: CallResponse, rhs: CallResponse) -> Bool {
         lhs.backstage == rhs.backstage &&
             lhs.blockedUserIds == rhs.blockedUserIds &&

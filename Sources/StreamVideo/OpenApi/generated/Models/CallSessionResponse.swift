@@ -3,9 +3,9 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class CallSessionResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+public final class CallSessionResponse: @unchecked Sendable, Codable, JSONEncodable {
     public var acceptedBy: [String: Date]
     public var anonymousParticipantCount: Int
     public var endedAt: Date?
@@ -46,7 +46,7 @@ public final class CallSessionResponse: @unchecked Sendable, Codable, JSONEncoda
         self.startedAt = startedAt
         self.timerEndsAt = timerEndsAt
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case acceptedBy = "accepted_by"
         case anonymousParticipantCount = "anonymous_participant_count"
@@ -61,7 +61,9 @@ public final class CallSessionResponse: @unchecked Sendable, Codable, JSONEncoda
         case startedAt = "started_at"
         case timerEndsAt = "timer_ends_at"
     }
-    
+}
+
+extension CallSessionResponse: Hashable {
     public static func == (lhs: CallSessionResponse, rhs: CallSessionResponse) -> Bool {
         lhs.acceptedBy == rhs.acceptedBy &&
             lhs.anonymousParticipantCount == rhs.anonymousParticipantCount &&

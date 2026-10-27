@@ -5,23 +5,26 @@
 import Foundation
 import StreamCore
 
-public final class CallHLSBroadcastingFailedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
-    
+/// This event is sent when HLS broadcasting has failed
+public final class CallHLSBroadcastingFailedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, WSCallEvent {
     public var callCid: String
     public var createdAt: Date
+    /// The type of event: "call.hls_broadcasting_failed" in this case
     public var type: String = "call.hls_broadcasting_failed"
 
     public init(callCid: String, createdAt: Date) {
         self.callCid = callCid
         self.createdAt = createdAt
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case callCid = "call_cid"
         case createdAt = "created_at"
         case type
     }
-    
+}
+
+extension CallHLSBroadcastingFailedEvent: Hashable {
     public static func == (lhs: CallHLSBroadcastingFailedEvent, rhs: CallHLSBroadcastingFailedEvent) -> Bool {
         lhs.callCid == rhs.callCid &&
             lhs.createdAt == rhs.createdAt &&

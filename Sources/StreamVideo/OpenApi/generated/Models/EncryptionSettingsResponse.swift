@@ -3,25 +3,28 @@
 //
 
 import Foundation
+import StreamCore
 
+/// EncryptionSettings is the payload for end-to-end encryption settings
 public final class EncryptionSettingsResponse: @unchecked Sendable, Codable, JSONEncodable {
     
     public enum EncryptionSettingsResponseMode: String, Sendable, Codable, CaseIterable {
         case autoOn = "auto-on"
-        case available = "available"
-        case disabled = "disabled"
+        case available
+        case disabled
         case unknown = "_unknown"
 
         public init(from decoder: Decoder) throws {
             let container = try decoder.singleValueContainer()
             if let decodedValue = try? container.decode(String.self),
-                let value = Self(rawValue: decodedValue) {
+               let value = Self(rawValue: decodedValue) {
                 self = value
             } else {
                 self = .unknown
             }
         }
     }
+
     /// the resolved encryption mode for the call
     public var mode: EncryptionSettingsResponseMode
 

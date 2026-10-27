@@ -5,14 +5,15 @@
 import Foundation
 import StreamCore
 
-public final class CallSessionParticipantCountsUpdatedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable,
-    WSCallEvent {
-    
+/// This event is sent when the participant counts in a call session are updated
+public final class CallSessionParticipantCountsUpdatedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, WSCallEvent {
     public var anonymousParticipantCount: Int
     public var callCid: String
     public var createdAt: Date
     public var participantsCountByRole: [String: Int]
+    /// Call session ID
     public var sessionId: String
+    /// The type of event: "call.session_participant_count_updated" in this case
     public var type: String = "call.session_participant_count_updated"
 
     public init(
@@ -28,7 +29,7 @@ public final class CallSessionParticipantCountsUpdatedEvent: @unchecked Sendable
         self.participantsCountByRole = participantsCountByRole
         self.sessionId = sessionId
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case anonymousParticipantCount = "anonymous_participant_count"
         case callCid = "call_cid"
@@ -37,7 +38,9 @@ public final class CallSessionParticipantCountsUpdatedEvent: @unchecked Sendable
         case sessionId = "session_id"
         case type
     }
-    
+}
+
+extension CallSessionParticipantCountsUpdatedEvent: Hashable {
     public static func == (lhs: CallSessionParticipantCountsUpdatedEvent, rhs: CallSessionParticipantCountsUpdatedEvent) -> Bool {
         lhs.anonymousParticipantCount == rhs.anonymousParticipantCount &&
             lhs.callCid == rhs.callCid &&

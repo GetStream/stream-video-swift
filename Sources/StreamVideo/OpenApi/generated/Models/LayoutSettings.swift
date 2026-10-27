@@ -2,12 +2,12 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
-import StreamCore
 import Foundation
+import StreamCore
 
-public final class LayoutSettings: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class LayoutSettings: @unchecked Sendable, Codable, JSONEncodable {
     
-    public enum Name: String, Sendable, Codable, CaseIterable {
+    public enum LayoutSettingsName: String, Sendable, Codable, CaseIterable {
         case custom
         case grid
         case mobile
@@ -25,18 +25,18 @@ public final class LayoutSettings: @unchecked Sendable, Codable, JSONEncodable, 
             }
         }
     }
-    
+
     public var detectOrientation: Bool?
     public var externalAppUrl: String?
     public var externalCssUrl: String?
-    public var name: Name
+    public var name: LayoutSettingsName
     public var options: [String: RawJSON]?
 
     public init(
         detectOrientation: Bool? = nil,
         externalAppUrl: String? = nil,
         externalCssUrl: String? = nil,
-        name: Name,
+        name: LayoutSettingsName,
         options: [String: RawJSON]? = nil
     ) {
         self.detectOrientation = detectOrientation
@@ -45,7 +45,7 @@ public final class LayoutSettings: @unchecked Sendable, Codable, JSONEncodable, 
         self.name = name
         self.options = options
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case detectOrientation = "detect_orientation"
         case externalAppUrl = "external_app_url"
@@ -53,7 +53,9 @@ public final class LayoutSettings: @unchecked Sendable, Codable, JSONEncodable, 
         case name
         case options
     }
-    
+}
+
+extension LayoutSettings: Hashable {
     public static func == (lhs: LayoutSettings, rhs: LayoutSettings) -> Bool {
         lhs.detectOrientation == rhs.detectOrientation &&
             lhs.externalAppUrl == rhs.externalAppUrl &&

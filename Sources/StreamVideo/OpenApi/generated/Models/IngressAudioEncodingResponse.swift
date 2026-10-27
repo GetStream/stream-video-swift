@@ -3,8 +3,9 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class IngressAudioEncodingResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class IngressAudioEncodingResponse: @unchecked Sendable, Codable, JSONEncodable {
     public var bitrate: Int
     public var channels: Int
     public var enableDtx: Bool
@@ -20,11 +21,13 @@ public final class IngressAudioEncodingResponse: @unchecked Sendable, Codable, J
         case channels
         case enableDtx = "enable_dtx"
     }
+}
 
+extension IngressAudioEncodingResponse: Hashable {
     public static func == (lhs: IngressAudioEncodingResponse, rhs: IngressAudioEncodingResponse) -> Bool {
         lhs.bitrate == rhs.bitrate &&
-        lhs.channels == rhs.channels &&
-        lhs.enableDtx == rhs.enableDtx
+            lhs.channels == rhs.channels &&
+            lhs.enableDtx == rhs.enableDtx
     }
 
     public func hash(into hasher: inout Hasher) {

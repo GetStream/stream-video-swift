@@ -3,9 +3,10 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class CallTranscription: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+/// CallTranscription represents a transcription of a call.
+public final class CallTranscription: @unchecked Sendable, Codable, JSONEncodable {
     public var endTime: Date
     public var filename: String
     public var startTime: Date
@@ -17,14 +18,16 @@ public final class CallTranscription: @unchecked Sendable, Codable, JSONEncodabl
         self.startTime = startTime
         self.url = url
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case endTime = "end_time"
         case filename
         case startTime = "start_time"
         case url
     }
-    
+}
+
+extension CallTranscription: Hashable {
     public static func == (lhs: CallTranscription, rhs: CallTranscription) -> Bool {
         lhs.endTime == rhs.endTime &&
             lhs.filename == rhs.filename &&

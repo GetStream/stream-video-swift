@@ -2,16 +2,20 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
-import StreamCore
 import Foundation
+import StreamCore
 
-public final class UserRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+/// User request object
+public final class UserRequest: @unchecked Sendable, Codable, JSONEncodable {
+    /// Custom user data
     public var custom: [String: RawJSON]?
+    /// User ID
     public var id: String
+    /// User's profile image URL
     public var image: String?
     public var invisible: Bool?
     public var language: String?
+    /// Optional name of user
     public var name: String?
 
     public init(
@@ -29,7 +33,7 @@ public final class UserRequest: @unchecked Sendable, Codable, JSONEncodable, Has
         self.language = language
         self.name = name
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case custom
         case id
@@ -38,7 +42,9 @@ public final class UserRequest: @unchecked Sendable, Codable, JSONEncodable, Has
         case language
         case name
     }
-    
+}
+
+extension UserRequest: Hashable {
     public static func == (lhs: UserRequest, rhs: UserRequest) -> Bool {
         lhs.custom == rhs.custom &&
             lhs.id == rhs.id &&

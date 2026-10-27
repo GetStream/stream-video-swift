@@ -3,7 +3,9 @@
 //
 
 import Foundation
+import StreamCore
 
+/// All possibility of string to use
 public enum OwnCapability: String, Sendable, Codable, CaseIterable {
     case blockUsers = "block-users"
     case changeMaxDuration = "change-max-duration"
@@ -14,6 +16,7 @@ public enum OwnCapability: String, Sendable, Codable, CaseIterable {
     case joinBackstage = "join-backstage"
     case joinCall = "join-call"
     case joinEndedCall = "join-ended-call"
+    case kickUser = "kick-user"
     case muteUsers = "mute-users"
     case pinForEveryone = "pin-for-everyone"
     case readCall = "read-call"
@@ -33,7 +36,6 @@ public enum OwnCapability: String, Sendable, Codable, CaseIterable {
     case updateCallMember = "update-call-member"
     case updateCallPermissions = "update-call-permissions"
     case updateCallSettings = "update-call-settings"
-    case kickUser = "kick-user"
     case unknown = "_unknown"
 
     public init(from decoder: Decoder) throws {

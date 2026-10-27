@@ -3,8 +3,9 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class IngressSourceResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class IngressSourceResponse: @unchecked Sendable, Codable, JSONEncodable {
     public var fps: Int
     public var height: Int
     public var width: Int
@@ -20,11 +21,13 @@ public final class IngressSourceResponse: @unchecked Sendable, Codable, JSONEnco
         case height
         case width
     }
+}
 
+extension IngressSourceResponse: Hashable {
     public static func == (lhs: IngressSourceResponse, rhs: IngressSourceResponse) -> Bool {
         lhs.fps == rhs.fps &&
-        lhs.height == rhs.height &&
-        lhs.width == rhs.width
+            lhs.height == rhs.height &&
+            lhs.width == rhs.width
     }
 
     public func hash(into hasher: inout Hasher) {

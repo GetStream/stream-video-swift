@@ -3,10 +3,11 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class RecordSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class RecordSettingsRequest: @unchecked Sendable, Codable, JSONEncodable {
     
-    public enum Mode: String, Sendable, Codable, CaseIterable {
+    public enum RecordSettingsRequestMode: String, Sendable, Codable, CaseIterable {
         case autoOn = "auto-on"
         case available
         case disabled
@@ -23,7 +24,7 @@ public final class RecordSettingsRequest: @unchecked Sendable, Codable, JSONEnco
         }
     }
     
-    public enum Quality: String, Sendable, Codable, CaseIterable {
+    public enum RecordSettingsRequestQuality: String, Sendable, Codable, CaseIterable {
         case _1080p = "1080p"
         case _1440p = "1440p"
         case _360p = "360p"
@@ -46,23 +47,28 @@ public final class RecordSettingsRequest: @unchecked Sendable, Codable, JSONEnco
             }
         }
     }
-    
-    public var audioOnly: Bool?
-    public var mode: Mode
-    public var quality: Quality?
 
-    public init(audioOnly: Bool? = nil, mode: Mode, quality: Quality? = nil) {
+    /// Whether to record audio only
+    public var audioOnly: Bool?
+    /// Recording mode. One of: available, disabled, auto-on
+    public var mode: RecordSettingsRequestMode
+    /// Recording quality. One of: 360p, 480p, 720p, 1080p, 1440p, portrait-360x640, portrait-480x854, portrait-720x1280, portrait-1080x1920, portrait-1440x2560
+    public var quality: RecordSettingsRequestQuality?
+
+    public init(audioOnly: Bool? = nil, mode: RecordSettingsRequestMode, quality: RecordSettingsRequestQuality? = nil) {
         self.audioOnly = audioOnly
         self.mode = mode
         self.quality = quality
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case audioOnly = "audio_only"
         case mode
         case quality
     }
-    
+}
+
+extension RecordSettingsRequest: Hashable {
     public static func == (lhs: RecordSettingsRequest, rhs: RecordSettingsRequest) -> Bool {
         lhs.audioOnly == rhs.audioOnly &&
             lhs.mode == rhs.mode &&

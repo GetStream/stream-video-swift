@@ -5,12 +5,15 @@
 import Foundation
 import StreamCore
 
-public final class UpdatedCallPermissionsEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
-    
+/// This event is sent to notify about permission changes for a user, clients receiving this event should update their UI accordingly
+public final class UpdatedCallPermissionsEvent: @unchecked Sendable, Event, Codable, JSONEncodable, WSCallEvent {
     public var callCid: String
     public var createdAt: Date
+    /// The capabilities of the current user
     public var ownCapabilities: [OwnCapability]
+    /// The type of event: "call.permissions_updated" in this case
     public var type: String = "call.permissions_updated"
+    /// User response object
     public var user: UserResponse
 
     public init(callCid: String, createdAt: Date, ownCapabilities: [OwnCapability], user: UserResponse) {
@@ -19,7 +22,7 @@ public final class UpdatedCallPermissionsEvent: @unchecked Sendable, Event, Coda
         self.ownCapabilities = ownCapabilities
         self.user = user
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case callCid = "call_cid"
         case createdAt = "created_at"
@@ -27,7 +30,9 @@ public final class UpdatedCallPermissionsEvent: @unchecked Sendable, Event, Coda
         case type
         case user
     }
-    
+}
+
+extension UpdatedCallPermissionsEvent: Hashable {
     public static func == (lhs: UpdatedCallPermissionsEvent, rhs: UpdatedCallPermissionsEvent) -> Bool {
         lhs.callCid == rhs.callCid &&
             lhs.createdAt == rhs.createdAt &&
