@@ -11,6 +11,7 @@ _October 27, 2026_
 
 ### 🐞 Fixed
 
+- Release the microphone after hang-up when the app creates a new `StreamVideo` client between calls.
 - Fix a crash during `StreamVideo.connect()` (`Fatal error: Received an output without requesting demand`) by requiring StreamCore 0.16.0, whose timer publisher now honors Combine demand. [#1376](https://github.com/GetStream/stream-video-swift/pull/1376)
 - Outgoing ring requests now fail when no coordinator connection is available, so callers do not start a ring without receiving its events. [#1373](https://github.com/GetStream/stream-video-swift/pull/1373)
 - Prevent the caller from cancelling an accepted outgoing ring. Explicit hang-up leaves locally, while timeout recovery preserves the original ring deadline. [#1374](https://github.com/GetStream/stream-video-swift/pull/1374)
