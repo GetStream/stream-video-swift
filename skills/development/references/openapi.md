@@ -34,8 +34,9 @@ The script keeps only models that `DefaultAPI` and `VideoEvent` reach.
 
 Breaking changes wait for a major version. Until then:
 
-1. To keep a model the spec no longer has, `generate.sh` saves its file before the cleanup and copies it back
-   after formatting, as for `PushNotificationSettingsResponse`. Deleting a public model is a breaking change.
+1. To keep a model the spec no longer has but a public member still uses, move it to the Deprecated section
+   of `Sources/StreamVideo/OpenApi/OpenAPI+Extensions.swift`, as for `PushNotificationSettingsResponse`.
+   The script drops models that no endpoint or event reaches. List removed public models in the changelog.
 2. Give removed fields a deprecated `get { nil } set {}` and a deprecated init with the old signature
    in the Deprecated section of `Sources/StreamVideo/OpenApi/OpenAPI+Extensions.swift`.
 3. Use `retypedProperties` for type changes and `removedEnumCases` for new enum cases.

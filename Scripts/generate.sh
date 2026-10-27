@@ -18,19 +18,14 @@ fi
 
 set -ex
 
-# The spec no longer has this model, but the deprecated
-# OwnUserResponse.pushNotifications returns it until IOS-2219 removes both.
-cp "$OUTPUT_DIR/Models/PushNotificationSettingsResponse.swift" "$SPEC_DIR/"
-
-# remove old generated code
-rm -rf "$OUTPUT_DIR"
-
 # run from the chat root: generate-spec reads tools/oasdiff relative to cwd
 (
   cd "$SOURCE_PATH" &&
   make -C tools/openapi build &&
   # v1 keeps the /video paths and the guest, devices and longpoll endpoints
   ./build/openapi generate-spec -products video -version v1 -clientside -output "$SPEC_DIR/video-openapi-clientside" -renamed-models "$SCRIPT_DIR/renamed-models.json" &&
+  # remove old generated code
+  rm -rf "$OUTPUT_DIR" &&
   # number_as_float keeps JSON numbers as Float. The generator defaults to Double
   # since Float truncates float64s, but our generated models are public, so
   # widening them would be a source and binary break.
@@ -75,6 +70,3 @@ remove_unused_models
 
 # format the generated code, .swiftformat excludes it by default
 swiftformat --unexclude "$OUTPUT_DIR" "$OUTPUT_DIR"
-
-# After formatting, so the kept model stays unchanged.
-cp "$SPEC_DIR/PushNotificationSettingsResponse.swift" "$OUTPUT_DIR/Models/"
