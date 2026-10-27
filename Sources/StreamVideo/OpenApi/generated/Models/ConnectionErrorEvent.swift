@@ -19,11 +19,20 @@ public final class ConnectionErrorEvent: @unchecked Sendable, Event, Codable, JS
         self.error = error
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case connectionId = "connection_id"
-        case createdAt = "created_at"
-        case error
-        case type
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.connectionId = try container.decode(String.self, forKey: .connectionId)
+        self.createdAt = try container.decode(Date.self, forKey: .createdAt)
+        self.error = try container.decode(APIError.self, forKey: .error)
+        self.type = try container.decode(String.self, forKey: .type)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(connectionId, forKey: .connectionId)
+        try container.encode(createdAt, forKey: .createdAt)
+        try container.encode(error, forKey: .error)
+        try container.encode(type, forKey: .type)
     }
 }
 

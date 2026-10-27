@@ -35,15 +35,28 @@ public final class CallStatsReportSummaryResponse: @unchecked Sendable, Codable,
         self.qualityScore = qualityScore
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case callCid = "call_cid"
-        case callDurationSeconds = "call_duration_seconds"
-        case callSessionId = "call_session_id"
-        case callStatus = "call_status"
-        case createdAt = "created_at"
-        case firstStatsTime = "first_stats_time"
-        case minUserRating = "min_user_rating"
-        case qualityScore = "quality_score"
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.callCid = try container.decode(String.self, forKey: .callCid)
+        self.callDurationSeconds = try container.decode(Int.self, forKey: .callDurationSeconds)
+        self.callSessionId = try container.decode(String.self, forKey: .callSessionId)
+        self.callStatus = try container.decode(String.self, forKey: .callStatus)
+        self.createdAt = try container.decodeIfPresent(Date.self, forKey: .createdAt)
+        self.firstStatsTime = try container.decode(Date.self, forKey: .firstStatsTime)
+        self.minUserRating = try container.decodeIfPresent(Int.self, forKey: .minUserRating)
+        self.qualityScore = try container.decodeIfPresent(Int.self, forKey: .qualityScore)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(callCid, forKey: .callCid)
+        try container.encode(callDurationSeconds, forKey: .callDurationSeconds)
+        try container.encode(callSessionId, forKey: .callSessionId)
+        try container.encode(callStatus, forKey: .callStatus)
+        try container.encodeIfPresent(createdAt, forKey: .createdAt)
+        try container.encode(firstStatsTime, forKey: .firstStatsTime)
+        try container.encodeIfPresent(minUserRating, forKey: .minUserRating)
+        try container.encodeIfPresent(qualityScore, forKey: .qualityScore)
     }
 }
 

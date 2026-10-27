@@ -20,10 +20,18 @@ public final class StartClosedCaptionsRequest: @unchecked Sendable, Codable, JSO
         self.language = language
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case enableTranscription = "enable_transcription"
-        case externalStorage = "external_storage"
-        case language
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.enableTranscription = try container.decodeIfPresent(Bool.self, forKey: .enableTranscription)
+        self.externalStorage = try container.decodeIfPresent(String.self, forKey: .externalStorage)
+        self.language = try container.decodeIfPresent(String.self, forKey: .language)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(enableTranscription, forKey: .enableTranscription)
+        try container.encodeIfPresent(externalStorage, forKey: .externalStorage)
+        try container.encodeIfPresent(language, forKey: .language)
     }
 }
 

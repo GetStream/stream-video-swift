@@ -41,17 +41,32 @@ public final class EdgeResponse: @unchecked Sendable, Codable, JSONEncodable {
         self.yellow = yellow
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case continentCode = "continent_code"
-        case countryIsoCode = "country_iso_code"
-        case green
-        case id
-        case latencyTestUrl = "latency_test_url"
-        case latitude
-        case longitude
-        case red
-        case subdivisionIsoCode = "subdivision_iso_code"
-        case yellow
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.continentCode = try container.decode(String.self, forKey: .continentCode)
+        self.countryIsoCode = try container.decode(String.self, forKey: .countryIsoCode)
+        self.green = try container.decode(Int.self, forKey: .green)
+        self.id = try container.decode(String.self, forKey: .id)
+        self.latencyTestUrl = try container.decode(String.self, forKey: .latencyTestUrl)
+        self.latitude = try container.decode(Float.self, forKey: .latitude)
+        self.longitude = try container.decode(Float.self, forKey: .longitude)
+        self.red = try container.decode(Int.self, forKey: .red)
+        self.subdivisionIsoCode = try container.decode(String.self, forKey: .subdivisionIsoCode)
+        self.yellow = try container.decode(Int.self, forKey: .yellow)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(continentCode, forKey: .continentCode)
+        try container.encode(countryIsoCode, forKey: .countryIsoCode)
+        try container.encode(green, forKey: .green)
+        try container.encode(id, forKey: .id)
+        try container.encode(latencyTestUrl, forKey: .latencyTestUrl)
+        try container.encode(latitude, forKey: .latitude)
+        try container.encode(longitude, forKey: .longitude)
+        try container.encode(red, forKey: .red)
+        try container.encode(subdivisionIsoCode, forKey: .subdivisionIsoCode)
+        try container.encode(yellow, forKey: .yellow)
     }
 }
 

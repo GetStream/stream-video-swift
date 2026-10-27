@@ -52,15 +52,28 @@ public final class AudioSettingsRequest: @unchecked Sendable, Codable, JSONEncod
         self.speakerDefaultOn = speakerDefaultOn
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case accessRequestEnabled = "access_request_enabled"
-        case defaultDevice = "default_device"
-        case hifiAudioEnabled = "hifi_audio_enabled"
-        case micDefaultOn = "mic_default_on"
-        case noiseCancellation = "noise_cancellation"
-        case opusDtxEnabled = "opus_dtx_enabled"
-        case redundantCodingEnabled = "redundant_coding_enabled"
-        case speakerDefaultOn = "speaker_default_on"
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.accessRequestEnabled = try container.decodeIfPresent(Bool.self, forKey: .accessRequestEnabled)
+        self.defaultDevice = try container.decode(AudioSettingsRequestDefaultDevice.self, forKey: .defaultDevice)
+        self.hifiAudioEnabled = try container.decodeIfPresent(Bool.self, forKey: .hifiAudioEnabled)
+        self.micDefaultOn = try container.decodeIfPresent(Bool.self, forKey: .micDefaultOn)
+        self.noiseCancellation = try container.decodeIfPresent(NoiseCancellationSettingsRequest.self, forKey: .noiseCancellation)
+        self.opusDtxEnabled = try container.decodeIfPresent(Bool.self, forKey: .opusDtxEnabled)
+        self.redundantCodingEnabled = try container.decodeIfPresent(Bool.self, forKey: .redundantCodingEnabled)
+        self.speakerDefaultOn = try container.decodeIfPresent(Bool.self, forKey: .speakerDefaultOn)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(accessRequestEnabled, forKey: .accessRequestEnabled)
+        try container.encode(defaultDevice, forKey: .defaultDevice)
+        try container.encodeIfPresent(hifiAudioEnabled, forKey: .hifiAudioEnabled)
+        try container.encodeIfPresent(micDefaultOn, forKey: .micDefaultOn)
+        try container.encodeIfPresent(noiseCancellation, forKey: .noiseCancellation)
+        try container.encodeIfPresent(opusDtxEnabled, forKey: .opusDtxEnabled)
+        try container.encodeIfPresent(redundantCodingEnabled, forKey: .redundantCodingEnabled)
+        try container.encodeIfPresent(speakerDefaultOn, forKey: .speakerDefaultOn)
     }
 }
 

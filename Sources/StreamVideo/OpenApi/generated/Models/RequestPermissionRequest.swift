@@ -12,8 +12,14 @@ public final class RequestPermissionRequest: @unchecked Sendable, Codable, JSONE
         self.permissions = permissions
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case permissions
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.permissions = try container.decode([String].self, forKey: .permissions)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(permissions, forKey: .permissions)
     }
 }
 

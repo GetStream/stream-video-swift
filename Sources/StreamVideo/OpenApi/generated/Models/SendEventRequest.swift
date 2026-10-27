@@ -13,8 +13,14 @@ public final class SendEventRequest: @unchecked Sendable, Codable, JSONEncodable
         self.custom = custom
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case custom
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.custom = try container.decodeIfPresent([String: RawJSON].self, forKey: .custom)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(custom, forKey: .custom)
     }
 }
 

@@ -16,10 +16,18 @@ public final class TargetResolution: @unchecked Sendable, Codable, JSONEncodable
         self.width = width
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case bitrate
-        case height
-        case width
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.bitrate = try container.decodeIfPresent(Int.self, forKey: .bitrate)
+        self.height = try container.decode(Int.self, forKey: .height)
+        self.width = try container.decode(Int.self, forKey: .width)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(bitrate, forKey: .bitrate)
+        try container.encode(height, forKey: .height)
+        try container.encode(width, forKey: .width)
     }
 }
 

@@ -23,12 +23,22 @@ public final class CallModerationBlurEvent: @unchecked Sendable, Event, Codable,
         self.userId = userId
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case callCid = "call_cid"
-        case createdAt = "created_at"
-        case custom
-        case type
-        case userId = "user_id"
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.callCid = try container.decode(String.self, forKey: .callCid)
+        self.createdAt = try container.decode(Date.self, forKey: .createdAt)
+        self.custom = try container.decode([String: RawJSON].self, forKey: .custom)
+        self.type = try container.decode(String.self, forKey: .type)
+        self.userId = try container.decode(String.self, forKey: .userId)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(callCid, forKey: .callCid)
+        try container.encode(createdAt, forKey: .createdAt)
+        try container.encode(custom, forKey: .custom)
+        try container.encode(type, forKey: .type)
+        try container.encode(userId, forKey: .userId)
     }
 }
 

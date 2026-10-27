@@ -21,11 +21,20 @@ public final class CallRecordingReadyEvent: @unchecked Sendable, Event, Codable,
         self.createdAt = createdAt
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case callCid = "call_cid"
-        case callRecording = "call_recording"
-        case createdAt = "created_at"
-        case type
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.callCid = try container.decode(String.self, forKey: .callCid)
+        self.callRecording = try container.decode(CallRecording.self, forKey: .callRecording)
+        self.createdAt = try container.decode(Date.self, forKey: .createdAt)
+        self.type = try container.decode(String.self, forKey: .type)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(callCid, forKey: .callCid)
+        try container.encode(callRecording, forKey: .callRecording)
+        try container.encode(createdAt, forKey: .createdAt)
+        try container.encode(type, forKey: .type)
     }
 }
 

@@ -11,6 +11,7 @@ Do not edit `Sources/StreamVideo/OpenApi/generated/` by hand. Change the lists b
 2. Run `Scripts/generate.sh`. It builds the backend `tools/openapi` binary, generates the v1 video spec,
    generates Swift, prunes the output, and formats it.
    The v1 spec keeps the `/video` paths and the guest, devices, and longpoll endpoints.
+   Models encode and decode with the shared `StringCodingKey` type. The script drops the keys no model uses.
    The post-processing steps live in `Scripts/openapi_generate_helpers.sh`.
 3. Run the script a second time. `git diff` must not change.
 
@@ -45,7 +46,6 @@ Breaking changes wait for a major version. Until then:
 4. Compare the public API with the base branch. Build both, then run
    `xcrun swift-api-digester -dump-sdk -module StreamVideo` with `-sdk`, `-target`, `-F`, and `-I`
    set to the `Debug-iphonesimulator` products, and `-diagnose-sdk` on the two dumps.
-   Removed `CodingKeys` cases of removed fields cannot be restored; mention them in the pull request.
 
 ## Adopt an endpoint, event, or field
 

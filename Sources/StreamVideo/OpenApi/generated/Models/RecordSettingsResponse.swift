@@ -17,10 +17,18 @@ public final class RecordSettingsResponse: @unchecked Sendable, Codable, JSONEnc
         self.quality = quality
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case audioOnly = "audio_only"
-        case mode
-        case quality
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.audioOnly = try container.decode(Bool.self, forKey: .audioOnly)
+        self.mode = try container.decode(String.self, forKey: .mode)
+        self.quality = try container.decode(String.self, forKey: .quality)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(audioOnly, forKey: .audioOnly)
+        try container.encode(mode, forKey: .mode)
+        try container.encode(quality, forKey: .quality)
     }
 }
 

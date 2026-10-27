@@ -23,12 +23,22 @@ public final class GetOrCreateCallRequest: @unchecked Sendable, Codable, JSONEnc
         self.video = video
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case data
-        case membersLimit = "members_limit"
-        case notify
-        case ring
-        case video
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.data = try container.decodeIfPresent(CallRequest.self, forKey: .data)
+        self.membersLimit = try container.decodeIfPresent(Int.self, forKey: .membersLimit)
+        self.notify = try container.decodeIfPresent(Bool.self, forKey: .notify)
+        self.ring = try container.decodeIfPresent(Bool.self, forKey: .ring)
+        self.video = try container.decodeIfPresent(Bool.self, forKey: .video)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(data, forKey: .data)
+        try container.encodeIfPresent(membersLimit, forKey: .membersLimit)
+        try container.encodeIfPresent(notify, forKey: .notify)
+        try container.encodeIfPresent(ring, forKey: .ring)
+        try container.encodeIfPresent(video, forKey: .video)
     }
 }
 

@@ -17,9 +17,16 @@ public final class KickUserRequest: @unchecked Sendable, Codable, JSONEncodable 
         self.userId = userId
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case block
-        case userId = "user_id"
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.block = try container.decodeIfPresent(Bool.self, forKey: .block)
+        self.userId = try container.decode(String.self, forKey: .userId)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(block, forKey: .block)
+        try container.encode(userId, forKey: .userId)
     }
 }
 

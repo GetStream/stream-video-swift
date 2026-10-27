@@ -34,14 +34,26 @@ public final class QueryMembersRequest: @unchecked Sendable, Codable, JSONEncoda
         self.type = type
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case filterConditions = "filter_conditions"
-        case id
-        case limit
-        case next
-        case prev
-        case sort
-        case type
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.filterConditions = try container.decodeIfPresent([String: RawJSON].self, forKey: .filterConditions)
+        self.id = try container.decode(String.self, forKey: .id)
+        self.limit = try container.decodeIfPresent(Int.self, forKey: .limit)
+        self.next = try container.decodeIfPresent(String.self, forKey: .next)
+        self.prev = try container.decodeIfPresent(String.self, forKey: .prev)
+        self.sort = try container.decodeIfPresent([SortParamRequest].self, forKey: .sort)
+        self.type = try container.decode(String.self, forKey: .type)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(filterConditions, forKey: .filterConditions)
+        try container.encode(id, forKey: .id)
+        try container.encodeIfPresent(limit, forKey: .limit)
+        try container.encodeIfPresent(next, forKey: .next)
+        try container.encodeIfPresent(prev, forKey: .prev)
+        try container.encodeIfPresent(sort, forKey: .sort)
+        try container.encode(type, forKey: .type)
     }
 }
 

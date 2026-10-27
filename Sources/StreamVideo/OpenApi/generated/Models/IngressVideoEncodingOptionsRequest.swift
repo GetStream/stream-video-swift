@@ -14,9 +14,16 @@ public final class IngressVideoEncodingOptionsRequest: @unchecked Sendable, Coda
         self.source = source
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case layers
-        case source
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.layers = try container.decode([IngressVideoLayerRequest].self, forKey: .layers)
+        self.source = try container.decode(IngressSourceRequest.self, forKey: .source)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(layers, forKey: .layers)
+        try container.encode(source, forKey: .source)
     }
 }
 

@@ -19,10 +19,18 @@ public final class RingSettingsRequest: @unchecked Sendable, Codable, JSONEncoda
         self.missedCallTimeoutMs = missedCallTimeoutMs
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case autoCancelTimeoutMs = "auto_cancel_timeout_ms"
-        case incomingCallTimeoutMs = "incoming_call_timeout_ms"
-        case missedCallTimeoutMs = "missed_call_timeout_ms"
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.autoCancelTimeoutMs = try container.decode(Int.self, forKey: .autoCancelTimeoutMs)
+        self.incomingCallTimeoutMs = try container.decode(Int.self, forKey: .incomingCallTimeoutMs)
+        self.missedCallTimeoutMs = try container.decodeIfPresent(Int.self, forKey: .missedCallTimeoutMs)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(autoCancelTimeoutMs, forKey: .autoCancelTimeoutMs)
+        try container.encode(incomingCallTimeoutMs, forKey: .incomingCallTimeoutMs)
+        try container.encodeIfPresent(missedCallTimeoutMs, forKey: .missedCallTimeoutMs)
     }
 }
 

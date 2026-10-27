@@ -14,8 +14,14 @@ public final class StopFrameRecordingResponse: @unchecked Sendable, Codable, JSO
         self.duration = duration
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case duration
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.duration = try container.decode(String.self, forKey: .duration)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(duration, forKey: .duration)
     }
 }
 

@@ -20,11 +20,20 @@ public final class ConnectedEvent: @unchecked Sendable, Event, Codable, JSONEnco
         self.me = me
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case connectionId = "connection_id"
-        case createdAt = "created_at"
-        case me
-        case type
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.connectionId = try container.decode(String.self, forKey: .connectionId)
+        self.createdAt = try container.decode(Date.self, forKey: .createdAt)
+        self.me = try container.decode(OwnUserResponse.self, forKey: .me)
+        self.type = try container.decode(String.self, forKey: .type)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(connectionId, forKey: .connectionId)
+        try container.encode(createdAt, forKey: .createdAt)
+        try container.encode(me, forKey: .me)
+        try container.encode(type, forKey: .type)
     }
 }
 

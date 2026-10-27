@@ -19,10 +19,18 @@ public final class CreateGuestResponse: @unchecked Sendable, Codable, JSONEncoda
         self.user = user
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case accessToken = "access_token"
-        case duration
-        case user
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.accessToken = try container.decode(String.self, forKey: .accessToken)
+        self.duration = try container.decode(String.self, forKey: .duration)
+        self.user = try container.decode(UserResponse.self, forKey: .user)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(accessToken, forKey: .accessToken)
+        try container.encode(duration, forKey: .duration)
+        try container.encode(user, forKey: .user)
     }
 }
 

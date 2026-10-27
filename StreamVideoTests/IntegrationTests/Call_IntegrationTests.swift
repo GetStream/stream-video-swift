@@ -262,7 +262,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
             .assertEventuallyInMainActor { $0.call.state.members.endIndex == 1 }
             .perform { try await $0.call.queryMembers() }
             .assert { $0.value.members.endIndex == 1 }
-            .perform { try await $0.call.queryMembers(filters: [MemberRequest.CodingKeys.userId.rawValue: .string(user1)]) }
+            .perform { try await $0.call.queryMembers(filters: ["user_id": .string(user1)]) }
             .assert { $0.value.members.endIndex == 1 }
     }
 
@@ -284,7 +284,7 @@ final class Call_IntegrationTests: XCTestCase, @unchecked Sendable {
             .assertEventuallyInMainActor { $0.call.state.members.endIndex == 1 && $0.call.state.members.first?.user.id == user1 }
             .perform { try await $0.call.addMembers(ids: [user2]) }
             .assertEventuallyInMainActor { $0.call.state.members.endIndex == 2 }
-            .perform { try await $0.call.queryMembers(filters: [MemberRequest.CodingKeys.userId.rawValue: .string(user2)]) }
+            .perform { try await $0.call.queryMembers(filters: ["user_id": .string(user2)]) }
             .assertEventuallyInMainActor { $0.value.members.endIndex == 1 }
             .perform { try await $0.call.queryMembers(limit: 1) }
             .assert { $0.value.members.endIndex == 1 && $0.value.members.first?.userId == user2 }

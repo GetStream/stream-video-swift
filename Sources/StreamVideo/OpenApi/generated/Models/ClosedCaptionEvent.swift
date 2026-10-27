@@ -20,11 +20,20 @@ public final class ClosedCaptionEvent: @unchecked Sendable, Event, Codable, JSON
         self.createdAt = createdAt
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case callCid = "call_cid"
-        case closedCaption = "closed_caption"
-        case createdAt = "created_at"
-        case type
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.callCid = try container.decode(String.self, forKey: .callCid)
+        self.closedCaption = try container.decode(CallClosedCaption.self, forKey: .closedCaption)
+        self.createdAt = try container.decode(Date.self, forKey: .createdAt)
+        self.type = try container.decode(String.self, forKey: .type)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(callCid, forKey: .callCid)
+        try container.encode(closedCaption, forKey: .closedCaption)
+        try container.encode(createdAt, forKey: .createdAt)
+        try container.encode(type, forKey: .type)
     }
 }
 

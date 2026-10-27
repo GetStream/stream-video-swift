@@ -19,10 +19,18 @@ public final class BroadcastSettingsResponse: @unchecked Sendable, Codable, JSON
         self.rtmp = rtmp
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case enabled
-        case hls
-        case rtmp
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.enabled = try container.decode(Bool.self, forKey: .enabled)
+        self.hls = try container.decode(HLSSettingsResponse.self, forKey: .hls)
+        self.rtmp = try container.decode(RTMPSettingsResponse.self, forKey: .rtmp)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(enabled, forKey: .enabled)
+        try container.encode(hls, forKey: .hls)
+        try container.encode(rtmp, forKey: .rtmp)
     }
 }
 

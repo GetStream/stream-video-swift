@@ -16,10 +16,18 @@ public final class ScreensharingSettings: @unchecked Sendable, Codable, JSONEnco
         self.targetResolution = targetResolution
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case accessRequestEnabled = "access_request_enabled"
-        case enabled
-        case targetResolution = "target_resolution"
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.accessRequestEnabled = try container.decode(Bool.self, forKey: .accessRequestEnabled)
+        self.enabled = try container.decode(Bool.self, forKey: .enabled)
+        self.targetResolution = try container.decodeIfPresent(TargetResolution.self, forKey: .targetResolution)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(accessRequestEnabled, forKey: .accessRequestEnabled)
+        try container.encode(enabled, forKey: .enabled)
+        try container.encodeIfPresent(targetResolution, forKey: .targetResolution)
     }
 }
 

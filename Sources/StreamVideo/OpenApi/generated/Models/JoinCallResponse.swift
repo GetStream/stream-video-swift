@@ -37,15 +37,28 @@ public final class JoinCallResponse: @unchecked Sendable, Codable, JSONEncodable
         self.statsOptions = statsOptions
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case call
-        case created
-        case credentials
-        case duration
-        case members
-        case membership
-        case ownCapabilities = "own_capabilities"
-        case statsOptions = "stats_options"
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.call = try container.decode(CallResponse.self, forKey: .call)
+        self.created = try container.decode(Bool.self, forKey: .created)
+        self.credentials = try container.decode(Credentials.self, forKey: .credentials)
+        self.duration = try container.decode(String.self, forKey: .duration)
+        self.members = try container.decode([MemberResponse].self, forKey: .members)
+        self.membership = try container.decodeIfPresent(MemberResponse.self, forKey: .membership)
+        self.ownCapabilities = try container.decode([OwnCapability].self, forKey: .ownCapabilities)
+        self.statsOptions = try container.decode(StatsOptions.self, forKey: .statsOptions)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(call, forKey: .call)
+        try container.encode(created, forKey: .created)
+        try container.encode(credentials, forKey: .credentials)
+        try container.encode(duration, forKey: .duration)
+        try container.encode(members, forKey: .members)
+        try container.encodeIfPresent(membership, forKey: .membership)
+        try container.encode(ownCapabilities, forKey: .ownCapabilities)
+        try container.encode(statsOptions, forKey: .statsOptions)
     }
 }
 
