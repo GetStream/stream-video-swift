@@ -596,6 +596,21 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         )
     }
     
+    /// Throws unless the coordinator socket is connected, so an outgoing
+    /// ring cannot start without a channel for its accept/reject events.
+    /// Waits briefly while a connection or reconnection is in progress.
+    func requireCoordinatorConnection() async throws {
+        if state.connection == .connecting {
+            _ = try? await state
+                .$connection
+                .filter { $0 != .connecting }
+                .nextValue(timeout: 5)
+        }
+        guard state.connection == .connected else {
+            throw ClientError("Cannot ring a call without a coordinator connection.")
+        }
+    }
+
     private func loadConnectionId() async -> String {
         if let connectionId = loadConnectionIdFromHealthcheck() {
             return connectionId

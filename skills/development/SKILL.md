@@ -29,6 +29,8 @@ For prose-only changes, use structural and link checks.
 3. Make the smallest change that passes the test.
    Rerun the same test without weakening its assertions.
    Reuse existing helpers and dependencies. Fix the shared owner once.
+   Enforce request preconditions in the owning public method, such as
+   `Call.ring()`. Do not classify encoded requests in middleware.
    Check cancellation, stale completions, teardown, and error paths when
    asynchronous state changes.
 4. Update affected callers, behavior tests, and target membership.
