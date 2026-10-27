@@ -4,6 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### 🔄 Changed
+
+# [1.56.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.56.0)
+_October 27, 2026_
+
 ### 🐞 Fixed
 
 - Fix a crash during `StreamVideo.connect()` (`Fatal error: Received an output without requesting demand`) by requiring StreamCore 0.16.0, whose timer publisher now honors Combine demand. [#1376](https://github.com/GetStream/stream-video-swift/pull/1376)
