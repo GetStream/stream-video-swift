@@ -57,6 +57,84 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
         XCTAssert(call.callId == callId)
     }
 
+    // MARK: - Ring requires a coordinator connection
+
+    func test_ring_withoutCoordinatorConnection_throwsWithoutSending() async throws {
+        let httpClient = httpClientWithGetCallResponse()
+        let subject = StreamVideo.mock(httpClient: httpClient)
+        self.streamVideo = subject
+        let call = subject.call(callType: callType, callId: callId)
+
+        _ = await XCTAssertThrowsErrorAsync { try await call.ring() }
+
+        XCTAssertEqual(httpClient.requestCounter, 0)
+        XCTAssertNil(subject.state.ringingCall)
+    }
+
+    func test_create_withRing_withoutCoordinatorConnection_throwsWithoutSending() async throws {
+        let httpClient = httpClientWithGetCallResponse()
+        let subject = StreamVideo.mock(httpClient: httpClient)
+        self.streamVideo = subject
+        let call = subject.call(callType: callType, callId: callId)
+
+        _ = await XCTAssertThrowsErrorAsync {
+            try await call.create(memberIds: ["callee"], ring: true)
+        }
+
+        XCTAssertEqual(httpClient.requestCounter, 0)
+        XCTAssertNil(subject.state.ringingCall)
+    }
+
+    func test_ringRequest_withoutCoordinatorConnection_throwsWithoutSending() async throws {
+        let httpClient = httpClientWithGetCallResponse()
+        let subject = StreamVideo.mock(httpClient: httpClient)
+        self.streamVideo = subject
+        let call = subject.call(callType: callType, callId: callId)
+
+        _ = await XCTAssertThrowsErrorAsync {
+            try await call.ring(request: .init(membersIds: ["callee"]))
+        }
+
+        XCTAssertEqual(httpClient.requestCounter, 0)
+    }
+
+    func test_join_withRing_withoutCoordinatorConnection_throws() async throws {
+        let subject = StreamVideo.mock(httpClient: httpClientWithGetCallResponse())
+        self.streamVideo = subject
+        let call = subject.call(callType: callType, callId: callId)
+
+        _ = await XCTAssertThrowsErrorAsync { try await call.join(ring: true) }
+
+        XCTAssertNil(subject.state.activeCall)
+    }
+
+    func test_get_withNotifyOnly_withoutCoordinatorConnection_sends() async throws {
+        let httpClient = httpClientWithGetCallResponse()
+        let subject = StreamVideo.mock(httpClient: httpClient)
+        self.streamVideo = subject
+        let call = subject.call(callType: callType, callId: callId)
+
+        _ = try await call.get(notify: true)
+
+        XCTAssertEqual(httpClient.requestCounter, 1)
+    }
+
+    func test_ring_whileCoordinatorConnecting_waitsForConnectionThenSends() async throws {
+        let httpClient = httpClientWithGetCallResponse()
+        let subject = StreamVideo.mock(httpClient: httpClient)
+        self.streamVideo = subject
+        let call = subject.call(callType: callType, callId: callId)
+        subject.state.connection = .connecting
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            subject.state.connection = .connected
+        }
+
+        try await call.ring()
+        await fulfillment { subject.state.ringingCall?.cId == call.cId }
+
+        XCTAssertEqual(httpClient.requestCounter, 1)
+    }
+
     func test_streamVideo_activeCallAndLeave() async throws {
         // Given
         let streamVideo = StreamVideo.mock(httpClient: HTTPClient_Mock())
@@ -150,6 +228,7 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
         let streamVideo = StreamVideo.mock(httpClient: httpClient)
         self.streamVideo = streamVideo
         let call = streamVideo.call(callType: callType, callId: callId)
+        streamVideo.state.connection = .connected
 
         // When
         try await call.ring()
@@ -189,6 +268,7 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
         let streamVideo = StreamVideo.mock(httpClient: httpClient)
         self.streamVideo = streamVideo
         let call = streamVideo.call(callType: callType, callId: callId)
+        streamVideo.state.connection = .connected
 
         // When
         try await call.ring()
@@ -229,6 +309,7 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
         nonisolated(unsafe) weak var previousCall: Call?
         do {
             let call = streamVideo.call(callType: callType, callId: previousCallId)
+            streamVideo.state.connection = .connected
             previousCall = call
             // ring() configures the call's OutgoingRingingController and
             // sets it as `state.ringingCall`.

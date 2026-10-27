@@ -718,6 +718,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         )
         await prepare()
         mockCall.stub(for: .create, with: ()) // We stub with something irrelevant to cause the mock to forward to super the request
+        streamVideo.state.connection = .connected
 
         subject.startCall(
             callType: .default,
