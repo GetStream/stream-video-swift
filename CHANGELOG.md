@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🐞 Fixed
 
+- Fix a crash during `StreamVideo.connect()` (`Fatal error: Received an output without requesting demand`) by requiring StreamCore 0.16.0, whose timer publisher now honors Combine demand. [#1376](https://github.com/GetStream/stream-video-swift/pull/1376)
 - Outgoing ring requests now fail when no coordinator connection is available, so callers do not start a ring without receiving its events. [#1373](https://github.com/GetStream/stream-video-swift/pull/1373)
 - Prevent the caller from cancelling an accepted outgoing ring. Explicit hang-up leaves locally, while timeout recovery preserves the original ring deadline. [#1374](https://github.com/GetStream/stream-video-swift/pull/1374)
 - Keep locally answered CallKit calls connected when an incoming-call check finishes late or a duplicate call report arrives. [#1366](https://github.com/GetStream/stream-video-swift/pull/1366)
