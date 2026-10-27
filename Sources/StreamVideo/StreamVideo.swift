@@ -875,5 +875,14 @@ extension StreamVideo: WSEventsSubscriber {
 
 /// Returns the current value for the `StreamVideo` instance.
 struct StreamVideoProviderKey: InjectionKey {
-    nonisolated(unsafe) static var currentValue: StreamVideo?
+    nonisolated(unsafe) static var currentValue: StreamVideo? {
+        didSet { subject.send(currentValue) }
+    }
+
+    /// Publishes the current `StreamVideo` instance on every change.
+    static var publisher: AnyPublisher<StreamVideo?, Never> {
+        subject.eraseToAnyPublisher()
+    }
+
+    private nonisolated(unsafe) static let subject = CurrentValueSubject<StreamVideo?, Never>(nil)
 }
