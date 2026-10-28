@@ -4,6 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### 🔄 Changed
+
+# [1.56.1](https://github.com/GetStream/stream-video-swift/releases/tag/1.56.1)
+_October 28, 2026_
+
 ### 🐞 Fixed
 
 - Release the microphone after hang-up when the app creates a new `StreamVideo` client between calls. [#1382](https://github.com/GetStream/stream-video-swift/pull/1382)
