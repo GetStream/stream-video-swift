@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### ✅ Added
 - `String.audioCall`, the identifier of the built-in `audio_call` call type, for 1:1 and group voice calls that ring and can't be reused once they have ended.
+- `String.agent`, the identifier of the built-in `agent` call type, for conversations between a user and an AI agent.
 
 ### 🔄 Changed
 
