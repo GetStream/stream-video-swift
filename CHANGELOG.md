@@ -4,6 +4,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### ✅ Added
+- `String.audioCall`, the identifier of the built-in `audio_call` call type, for 1:1 and group voice calls that ring and can't be reused once they have ended.
+
 ### 🔄 Changed
 
 # [1.56.1](https://github.com/GetStream/stream-video-swift/releases/tag/1.56.1)
