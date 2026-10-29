@@ -48,10 +48,12 @@ remove_unused_events() {
 
 # Drops model properties listed in removedProperties.
 remove_properties() {
-  local model file p type
-  for model in $(jq -r '.removedProperties | keys[]' "$ALLOWED_FILE"); do
+  local models model file props p type
+  models="$(jq -r '.removedProperties | keys[]' "$ALLOWED_FILE")"
+  for model in $models; do
     file="$OUTPUT_DIR/Models/$model.swift"
-    for p in $(jq -r --arg m "$model" '.removedProperties[$m][]' "$ALLOWED_FILE"); do
+    props="$(jq -r --arg m "$model" '.removedProperties[$m][]' "$ALLOWED_FILE")"
+    for p in $props; do
       # Deprecated fields get a computed var, which the steps below miss.
       if ! grep -qE "^ +public var $p: [^{]+$" "$file"; then
         echo "Removed property missing or deprecated: $model.$p" >&2
@@ -100,10 +102,12 @@ remove_unused_nested_enum() {
 
 # Restores the property types listed in retypedProperties.
 retype_properties() {
-  local model file p old new
-  for model in $(jq -r '.retypedProperties | keys[]' "$ALLOWED_FILE"); do
+  local models model file props p old new
+  models="$(jq -r '.retypedProperties | keys[]' "$ALLOWED_FILE")"
+  for model in $models; do
     file="$OUTPUT_DIR/Models/$model.swift"
-    for p in $(jq -r --arg m "$model" '.retypedProperties[$m] | keys[]' "$ALLOWED_FILE"); do
+    props="$(jq -r --arg m "$model" '.retypedProperties[$m] | keys[]' "$ALLOWED_FILE")"
+    for p in $props; do
       new="$(jq -r --arg m "$model" --arg p "$p" '.retypedProperties[$m][$p]' "$ALLOWED_FILE")"
       old="$(sed -nE "s/^ +public var $p: ([^{]+)$/\1/p" "$file")"
       if [ -z "$old" ]; then
@@ -124,12 +128,14 @@ retype_properties() {
 
 # Drops the enum cases listed in removedEnumCases. Keys are Model or Model.Enum.
 remove_enum_cases() {
-  local entry model name file c
-  for entry in $(jq -r '.removedEnumCases | keys[]' "$ALLOWED_FILE"); do
+  local entries entry model name file cases c
+  entries="$(jq -r '.removedEnumCases | keys[]' "$ALLOWED_FILE")"
+  for entry in $entries; do
     model="${entry%%.*}"
     name="${entry#*.}"
     file="$OUTPUT_DIR/Models/$model.swift"
-    for c in $(jq -r --arg e "$entry" '.removedEnumCases[$e][]' "$ALLOWED_FILE"); do
+    cases="$(jq -r --arg e "$entry" '.removedEnumCases[$e][]' "$ALLOWED_FILE")"
+    for c in $cases; do
       if ! awk -v t="$name" -v c="$c" '
         function flush() { for (i = 1; i <= n; i++) print b[i]; n = 0 }
         !inside && $0 ~ ("^ *public enum " t ":") {
@@ -175,8 +181,9 @@ remove_unused_models() {
 # them. The v1 spec lists them under /video.
 keep_existing_v2_endpoints() {
   local file="$OUTPUT_DIR/APIs/DefaultAPI.swift"
-  local e
-  for e in $(jq -r '.v2Endpoints[]' "$ALLOWED_FILE"); do
+  local endpoints e
+  endpoints="$(jq -r '.v2Endpoints[]' "$ALLOWED_FILE")"
+  for e in $endpoints; do
     if ! awk -v e="$e" '
       $0 ~ "^    open func " e "\\(" { inside = 1 }
       inside && sub(/path = "\/video\//, "path = \"/api/v2/video/") { moved = 1; inside = 0 }

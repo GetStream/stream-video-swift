@@ -16,7 +16,7 @@ then
   exit 1;
 fi
 
-set -ex
+set -exo pipefail
 
 # run from the chat root: generate-spec reads tools/oasdiff relative to cwd
 (
