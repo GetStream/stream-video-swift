@@ -19,11 +19,20 @@ public final class QueryCallsResponse: @unchecked Sendable, Codable, JSONEncodab
         self.prev = prev
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case calls
-        case duration
-        case next
-        case prev
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.calls = try container.decode([CallStateResponseFields].self, forKey: .calls)
+        self.duration = try container.decode(String.self, forKey: .duration)
+        self.next = try container.decodeIfPresent(String.self, forKey: .next)
+        self.prev = try container.decodeIfPresent(String.self, forKey: .prev)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(calls, forKey: .calls)
+        try container.encode(duration, forKey: .duration)
+        try container.encodeIfPresent(next, forKey: .next)
+        try container.encodeIfPresent(prev, forKey: .prev)
     }
 }
 

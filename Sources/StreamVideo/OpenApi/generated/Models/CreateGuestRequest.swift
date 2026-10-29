@@ -13,8 +13,14 @@ public final class CreateGuestRequest: @unchecked Sendable, Codable, JSONEncodab
         self.user = user
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case user
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.user = try container.decode(UserRequest.self, forKey: .user)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(user, forKey: .user)
     }
 }
 

@@ -12,8 +12,14 @@ public final class ThumbnailsSettings: @unchecked Sendable, Codable, JSONEncodab
         self.enabled = enabled
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case enabled
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.enabled = try container.decode(Bool.self, forKey: .enabled)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(enabled, forKey: .enabled)
     }
 }
 

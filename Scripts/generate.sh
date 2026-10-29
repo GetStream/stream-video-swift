@@ -29,7 +29,9 @@ set -exo pipefail
   # number_as_float keeps JSON numbers as Float. The generator defaults to Double
   # since Float truncates float64s, but our generated models are public, so
   # widening them would be a source and binary break.
-  ./build/openapi generate-client --language swift --spec "$SPEC_DIR/video-openapi-clientside.yaml" --opt number_as_float=true --output "$OUTPUT_DIR/"
+  # string_coding_keys replaces the CodingKeys enum of each model with one
+  # shared StringCodingKey type, which reduces binary size.
+  ./build/openapi generate-client --language swift --spec "$SPEC_DIR/video-openapi-clientside.yaml" --opt number_as_float=true --opt string_coding_keys=true --output "$OUTPUT_DIR/"
 )
 
 # The generator writes models/, git tracks Models/.
@@ -60,13 +62,13 @@ remove_unused_events
 # Keep the public API unchanged until the next major version removes these.
 # https://linear.app/stream/issue/IOS-2219
 keep_existing_v2_endpoints
-remove_coding_keys_case_iterable
 remove_properties
 retype_properties
 remove_enum_cases
 
-# Runs last, so models only the removed properties used go too.
+# Run last, so models and keys only the removed properties used go too.
 remove_unused_models
+remove_unused_string_coding_keys
 
 # format the generated code, .swiftformat excludes it by default
 swiftformat --unexclude "$OUTPUT_DIR" "$OUTPUT_DIR"

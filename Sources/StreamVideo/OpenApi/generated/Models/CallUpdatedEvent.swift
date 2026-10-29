@@ -24,12 +24,22 @@ public final class CallUpdatedEvent: @unchecked Sendable, Event, Codable, JSONEn
         self.createdAt = createdAt
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case call
-        case callCid = "call_cid"
-        case capabilitiesByRole = "capabilities_by_role"
-        case createdAt = "created_at"
-        case type
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.call = try container.decode(CallResponse.self, forKey: .call)
+        self.callCid = try container.decode(String.self, forKey: .callCid)
+        self.capabilitiesByRole = try container.decode([String: [String]].self, forKey: .capabilitiesByRole)
+        self.createdAt = try container.decode(Date.self, forKey: .createdAt)
+        self.type = try container.decode(String.self, forKey: .type)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(call, forKey: .call)
+        try container.encode(callCid, forKey: .callCid)
+        try container.encode(capabilitiesByRole, forKey: .capabilitiesByRole)
+        try container.encode(createdAt, forKey: .createdAt)
+        try container.encode(type, forKey: .type)
     }
 }
 

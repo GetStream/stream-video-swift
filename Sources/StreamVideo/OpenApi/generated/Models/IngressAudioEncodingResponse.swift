@@ -16,10 +16,18 @@ public final class IngressAudioEncodingResponse: @unchecked Sendable, Codable, J
         self.enableDtx = enableDtx
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case bitrate
-        case channels
-        case enableDtx = "enable_dtx"
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.bitrate = try container.decode(Int.self, forKey: .bitrate)
+        self.channels = try container.decode(Int.self, forKey: .channels)
+        self.enableDtx = try container.decode(Bool.self, forKey: .enableDtx)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(bitrate, forKey: .bitrate)
+        try container.encode(channels, forKey: .channels)
+        try container.encode(enableDtx, forKey: .enableDtx)
     }
 }
 

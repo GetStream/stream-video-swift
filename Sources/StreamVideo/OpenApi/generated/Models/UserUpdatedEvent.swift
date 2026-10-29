@@ -20,11 +20,20 @@ public final class UserUpdatedEvent: @unchecked Sendable, Event, Codable, JSONEn
         self.user = user
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case createdAt = "created_at"
-        case receivedAt = "received_at"
-        case type
-        case user
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.createdAt = try container.decode(Date.self, forKey: .createdAt)
+        self.receivedAt = try container.decodeIfPresent(Date.self, forKey: .receivedAt)
+        self.type = try container.decode(String.self, forKey: .type)
+        self.user = try container.decode(UserEventPayload.self, forKey: .user)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(createdAt, forKey: .createdAt)
+        try container.encodeIfPresent(receivedAt, forKey: .receivedAt)
+        try container.encode(type, forKey: .type)
+        try container.encode(user, forKey: .user)
     }
 }
 

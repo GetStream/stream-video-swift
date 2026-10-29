@@ -22,12 +22,22 @@ public final class CallClosedCaption: @unchecked Sendable, Codable, JSONEncodabl
         self.user = user
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case endTime = "end_time"
-        case speakerId = "speaker_id"
-        case startTime = "start_time"
-        case text
-        case user
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.endTime = try container.decode(Date.self, forKey: .endTime)
+        self.speakerId = try container.decode(String.self, forKey: .speakerId)
+        self.startTime = try container.decode(Date.self, forKey: .startTime)
+        self.text = try container.decode(String.self, forKey: .text)
+        self.user = try container.decode(UserResponse.self, forKey: .user)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(endTime, forKey: .endTime)
+        try container.encode(speakerId, forKey: .speakerId)
+        try container.encode(startTime, forKey: .startTime)
+        try container.encode(text, forKey: .text)
+        try container.encode(user, forKey: .user)
     }
 }
 

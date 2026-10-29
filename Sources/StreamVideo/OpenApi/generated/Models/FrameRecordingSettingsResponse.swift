@@ -34,10 +34,18 @@ public final class FrameRecordingSettingsResponse: @unchecked Sendable, Codable,
         self.quality = quality
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case captureIntervalInSeconds = "capture_interval_in_seconds"
-        case mode
-        case quality
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.captureIntervalInSeconds = try container.decode(Int.self, forKey: .captureIntervalInSeconds)
+        self.mode = try container.decode(FrameRecordingSettingsResponseMode.self, forKey: .mode)
+        self.quality = try container.decodeIfPresent(String.self, forKey: .quality)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(captureIntervalInSeconds, forKey: .captureIntervalInSeconds)
+        try container.encode(mode, forKey: .mode)
+        try container.encodeIfPresent(quality, forKey: .quality)
     }
 }
 

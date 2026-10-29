@@ -19,11 +19,20 @@ public final class CallTranscription: @unchecked Sendable, Codable, JSONEncodabl
         self.url = url
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case endTime = "end_time"
-        case filename
-        case startTime = "start_time"
-        case url
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.endTime = try container.decode(Date.self, forKey: .endTime)
+        self.filename = try container.decode(String.self, forKey: .filename)
+        self.startTime = try container.decode(Date.self, forKey: .startTime)
+        self.url = try container.decode(String.self, forKey: .url)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(endTime, forKey: .endTime)
+        try container.encode(filename, forKey: .filename)
+        try container.encode(startTime, forKey: .startTime)
+        try container.encode(url, forKey: .url)
     }
 }
 

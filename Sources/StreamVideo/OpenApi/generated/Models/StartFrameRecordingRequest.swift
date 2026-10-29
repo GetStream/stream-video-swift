@@ -12,8 +12,14 @@ public final class StartFrameRecordingRequest: @unchecked Sendable, Codable, JSO
         self.recordingExternalStorage = recordingExternalStorage
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case recordingExternalStorage = "recording_external_storage"
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.recordingExternalStorage = try container.decodeIfPresent(String.self, forKey: .recordingExternalStorage)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(recordingExternalStorage, forKey: .recordingExternalStorage)
     }
 }
 

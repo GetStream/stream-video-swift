@@ -30,13 +30,24 @@ public final class CallRequest: @unchecked Sendable, Codable, JSONEncodable {
         self.video = video
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case custom
-        case members
-        case settingsOverride = "settings_override"
-        case startsAt = "starts_at"
-        case team
-        case video
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.custom = try container.decodeIfPresent([String: RawJSON].self, forKey: .custom)
+        self.members = try container.decodeIfPresent([MemberRequest].self, forKey: .members)
+        self.settingsOverride = try container.decodeIfPresent(CallSettingsRequest.self, forKey: .settingsOverride)
+        self.startsAt = try container.decodeIfPresent(Date.self, forKey: .startsAt)
+        self.team = try container.decodeIfPresent(String.self, forKey: .team)
+        self.video = try container.decodeIfPresent(Bool.self, forKey: .video)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(custom, forKey: .custom)
+        try container.encodeIfPresent(members, forKey: .members)
+        try container.encodeIfPresent(settingsOverride, forKey: .settingsOverride)
+        try container.encodeIfPresent(startsAt, forKey: .startsAt)
+        try container.encodeIfPresent(team, forKey: .team)
+        try container.encodeIfPresent(video, forKey: .video)
     }
 }
 

@@ -13,8 +13,14 @@ public final class RTMPIngress: @unchecked Sendable, Codable, JSONEncodable {
         self.address = address
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case address
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.address = try container.decode(String.self, forKey: .address)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(address, forKey: .address)
     }
 }
 

@@ -22,11 +22,20 @@ public final class CallRtmpBroadcastFailedEvent: @unchecked Sendable, Event, Cod
         self.name = name
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case callCid = "call_cid"
-        case createdAt = "created_at"
-        case name
-        case type
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.callCid = try container.decode(String.self, forKey: .callCid)
+        self.createdAt = try container.decode(Date.self, forKey: .createdAt)
+        self.name = try container.decode(String.self, forKey: .name)
+        self.type = try container.decode(String.self, forKey: .type)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(callCid, forKey: .callCid)
+        try container.encode(createdAt, forKey: .createdAt)
+        try container.encode(name, forKey: .name)
+        try container.encode(type, forKey: .type)
     }
 }
 

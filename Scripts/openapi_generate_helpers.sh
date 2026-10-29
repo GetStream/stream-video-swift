@@ -63,11 +63,8 @@ remove_properties() {
       awk -v p="$p" '
         function flush() { for (i = 1; i <= n; i++) print b[i]; n = 0 }
         { s = $0; sub(/^[[:space:]]+/, "", s) }
-        s ~ /^(public )?enum CodingKeys/        { keys = 1 }
-        keys && s == "}"                        { keys = 0 }
         s ~ /^\/\/\//                           { b[++n] = $0; next }
         s ~ "^public var " p ": "               { n = 0; next }
-        keys && s ~ "^case " p "( = \"[^\"]*\")?$" { next }
         s ~ "^self\\." p " = " p "$"            { next }
         s ~ "^self\\." p " = try container\\.decode(IfPresent)?\\(.*, forKey: \\." p "\\)$" { next }
         s ~ "^lhs\\." p " == rhs\\." p "( &&)?$" { next }
@@ -114,12 +111,16 @@ retype_properties() {
         echo "Retyped property missing or deprecated: $model.$p" >&2
         exit 1
       fi
-      # Optional types get a nil default in the init, non-optional ones none.
+      # Optional types get a nil default in the init and the IfPresent coders.
       P="$p" O="$old" N="$new" perl -0777 -pi -e '
         my ($p, $o, $n) = ($ENV{P}, $ENV{O}, $ENV{N});
         my $d = $n =~ /\?$/ ? " = nil" : "";
+        my $c = $n =~ /\?$/ ? "IfPresent" : "";
+        my $t = $n =~ s/\?$//r;
         s/^(\h+public var \Q$p\E: )\Q$o\E$/$1$n/m;
         s/([(,]\h*)\Q$p\E: \Q$o\E(?: = nil)?(?=[,)])/$1$p: $n$d/;
+        s/^(\h+self\.\Q$p\E = try container\.decode)(?:IfPresent)?\(.*\.self(, forKey: \.\Q$p\E\))$/$1$c($t.self$2/m;
+        s/^(\h+try container\.encode)(?:IfPresent)?(\(\Q$p\E, forKey: \.\Q$p\E\))$/$1$c$2/m;
       ' "$file"
       remove_unused_nested_enum "$file" "$(sed -E 's/^\[?([A-Za-z]+).*/\1/' <<< "$old")"
     done
@@ -199,9 +200,18 @@ keep_existing_v2_endpoints() {
   done
 }
 
-# Drops CaseIterable from CodingKeys. Nothing iterates them, and each
-# conformance adds binary size.
-remove_coding_keys_case_iterable() {
-  sed -i '' 's/enum CodingKeys: String, CodingKey, CaseIterable/enum CodingKeys: String, CodingKey/' \
-    "$OUTPUT_DIR"/Models/*.swift
+# Drops the StringCodingKey lets which no model uses. The generator writes
+# one per wire key of every model in the spec.
+remove_unused_string_coding_keys() {
+  local file="$OUTPUT_DIR/StringCodingKey.swift"
+  grep -rhoE 'forKey: \.`?[A-Za-z0-9_]+' "$OUTPUT_DIR/Models" \
+    | sed -E 's/.*\.`?//' | sort -u \
+    | awk '
+      NR == FNR                     { used[$0]; next }
+      $1 == "static" && $2 == "let" {
+        key = $3; sub(/:$/, "", key); gsub(/`/, "", key)
+        if (!(key in used)) next
+      }
+      { print }
+    ' - "$file" > "$file.tmp" && mv "$file.tmp" "$file"
 }

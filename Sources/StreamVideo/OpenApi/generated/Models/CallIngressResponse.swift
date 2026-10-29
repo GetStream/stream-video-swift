@@ -14,8 +14,14 @@ public final class CallIngressResponse: @unchecked Sendable, Codable, JSONEncoda
         self.rtmp = rtmp
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case rtmp
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.rtmp = try container.decode(RTMPIngress.self, forKey: .rtmp)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(rtmp, forKey: .rtmp)
     }
 }
 

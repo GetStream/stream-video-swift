@@ -102,10 +102,18 @@ public final class TranscriptionSettings: @unchecked Sendable, Codable, JSONEnco
         self.mode = mode
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case closedCaptionMode = "closed_caption_mode"
-        case language
-        case mode
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.closedCaptionMode = try container.decode(TranscriptionSettingsClosedCaptionMode.self, forKey: .closedCaptionMode)
+        self.language = try container.decode(TranscriptionSettingsLanguage.self, forKey: .language)
+        self.mode = try container.decode(TranscriptionSettingsMode.self, forKey: .mode)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(closedCaptionMode, forKey: .closedCaptionMode)
+        try container.encode(language, forKey: .language)
+        try container.encode(mode, forKey: .mode)
     }
 }
 

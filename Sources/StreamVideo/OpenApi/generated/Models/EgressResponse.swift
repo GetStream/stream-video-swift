@@ -32,14 +32,26 @@ public final class EgressResponse: @unchecked Sendable, Codable, JSONEncodable {
         self.rtmps = rtmps
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case broadcasting
-        case compositeRecording = "composite_recording"
-        case frameRecording = "frame_recording"
-        case hls
-        case individualRecording = "individual_recording"
-        case rawRecording = "raw_recording"
-        case rtmps
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.broadcasting = try container.decode(Bool.self, forKey: .broadcasting)
+        self.compositeRecording = try container.decodeIfPresent(CompositeRecordingResponse.self, forKey: .compositeRecording)
+        self.frameRecording = try container.decodeIfPresent(FrameRecordingResponse.self, forKey: .frameRecording)
+        self.hls = try container.decodeIfPresent(EgressHLSResponse.self, forKey: .hls)
+        self.individualRecording = try container.decodeIfPresent(IndividualRecordingResponse.self, forKey: .individualRecording)
+        self.rawRecording = try container.decodeIfPresent(RawRecordingResponse.self, forKey: .rawRecording)
+        self.rtmps = try container.decode([EgressRTMPResponse].self, forKey: .rtmps)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(broadcasting, forKey: .broadcasting)
+        try container.encodeIfPresent(compositeRecording, forKey: .compositeRecording)
+        try container.encodeIfPresent(frameRecording, forKey: .frameRecording)
+        try container.encodeIfPresent(hls, forKey: .hls)
+        try container.encodeIfPresent(individualRecording, forKey: .individualRecording)
+        try container.encodeIfPresent(rawRecording, forKey: .rawRecording)
+        try container.encode(rtmps, forKey: .rtmps)
     }
 }
 

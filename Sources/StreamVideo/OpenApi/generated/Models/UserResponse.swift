@@ -62,20 +62,38 @@ public final class UserResponse: @unchecked Sendable, Codable, JSONEncodable {
         self.updatedAt = updatedAt
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case blockedUserIds = "blocked_user_ids"
-        case createdAt = "created_at"
-        case custom
-        case deactivatedAt = "deactivated_at"
-        case deletedAt = "deleted_at"
-        case id
-        case image
-        case language
-        case lastActive = "last_active"
-        case name
-        case role
-        case teams
-        case updatedAt = "updated_at"
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.blockedUserIds = try container.decode([String].self, forKey: .blockedUserIds)
+        self.createdAt = try container.decode(Date.self, forKey: .createdAt)
+        self.custom = try container.decode([String: RawJSON].self, forKey: .custom)
+        self.deactivatedAt = try container.decodeIfPresent(Date.self, forKey: .deactivatedAt)
+        self.deletedAt = try container.decodeIfPresent(Date.self, forKey: .deletedAt)
+        self.id = try container.decode(String.self, forKey: .id)
+        self.image = try container.decodeIfPresent(String.self, forKey: .image)
+        self.language = try container.decode(String.self, forKey: .language)
+        self.lastActive = try container.decodeIfPresent(Date.self, forKey: .lastActive)
+        self.name = try container.decodeIfPresent(String.self, forKey: .name)
+        self.role = try container.decode(String.self, forKey: .role)
+        self.teams = try container.decode([String].self, forKey: .teams)
+        self.updatedAt = try container.decode(Date.self, forKey: .updatedAt)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(blockedUserIds, forKey: .blockedUserIds)
+        try container.encode(createdAt, forKey: .createdAt)
+        try container.encode(custom, forKey: .custom)
+        try container.encodeIfPresent(deactivatedAt, forKey: .deactivatedAt)
+        try container.encodeIfPresent(deletedAt, forKey: .deletedAt)
+        try container.encode(id, forKey: .id)
+        try container.encodeIfPresent(image, forKey: .image)
+        try container.encode(language, forKey: .language)
+        try container.encodeIfPresent(lastActive, forKey: .lastActive)
+        try container.encodeIfPresent(name, forKey: .name)
+        try container.encode(role, forKey: .role)
+        try container.encode(teams, forKey: .teams)
+        try container.encode(updatedAt, forKey: .updatedAt)
     }
 }
 
