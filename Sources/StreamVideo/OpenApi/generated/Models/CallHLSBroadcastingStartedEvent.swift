@@ -6,7 +6,7 @@ import Foundation
 import StreamCore
 
 /// This event is sent when HLS broadcasting has started
-public final class CallHLSBroadcastingStartedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, WSCallEvent {
+public final class CallHLSBroadcastingStartedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
     public var callCid: String
     public var createdAt: Date
     public var hlsPlaylistUrl: String
@@ -25,14 +25,6 @@ public final class CallHLSBroadcastingStartedEvent: @unchecked Sendable, Event, 
         self.createdAt = try container.decode(Date.self, forKey: .createdAt)
         self.hlsPlaylistUrl = try container.decode(String.self, forKey: .hlsPlaylistUrl)
         self.type = try container.decode(String.self, forKey: .type)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(callCid, forKey: .callCid)
-        try container.encode(createdAt, forKey: .createdAt)
-        try container.encode(hlsPlaylistUrl, forKey: .hlsPlaylistUrl)
-        try container.encode(type, forKey: .type)
     }
 }
 

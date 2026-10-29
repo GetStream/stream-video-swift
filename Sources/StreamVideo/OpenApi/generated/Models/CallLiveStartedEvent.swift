@@ -6,7 +6,7 @@ import Foundation
 import StreamCore
 
 /// This event is sent when a call is started. Clients receiving this event should start the call.
-public final class CallLiveStartedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, WSCallEvent {
+public final class CallLiveStartedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
     /// Represents a call
     public var call: CallResponse
     public var callCid: String
@@ -26,14 +26,6 @@ public final class CallLiveStartedEvent: @unchecked Sendable, Event, Codable, JS
         self.callCid = try container.decode(String.self, forKey: .callCid)
         self.createdAt = try container.decode(Date.self, forKey: .createdAt)
         self.type = try container.decode(String.self, forKey: .type)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(call, forKey: .call)
-        try container.encode(callCid, forKey: .callCid)
-        try container.encode(createdAt, forKey: .createdAt)
-        try container.encode(type, forKey: .type)
     }
 }
 

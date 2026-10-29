@@ -6,7 +6,7 @@ import Foundation
 import StreamCore
 
 /// The ring state of a call session: who accepted, rejected, or missed the ring.
-public final class GetCallRingStateResponse: @unchecked Sendable, Codable, JSONEncodable {
+public final class GetCallRingStateResponse: @unchecked Sendable, Decodable {
     /// Users that accepted the call, mapped to when they accepted
     public var acceptedBy: [String: Date]
     /// The CID of the call
@@ -64,20 +64,6 @@ public final class GetCallRingStateResponse: @unchecked Sendable, Codable, JSONE
         self.sessionEndedAt = try container.decodeIfPresent(Date.self, forKey: .sessionEndedAt)
         self.sessionId = try container.decode(String.self, forKey: .sessionId)
         self.sessionStartedAt = try container.decodeIfPresent(Date.self, forKey: .sessionStartedAt)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(acceptedBy, forKey: .acceptedBy)
-        try container.encode(callCid, forKey: .callCid)
-        try container.encodeIfPresent(callEndedAt, forKey: .callEndedAt)
-        try container.encode(createdByUserId, forKey: .createdByUserId)
-        try container.encode(duration, forKey: .duration)
-        try container.encode(missedBy, forKey: .missedBy)
-        try container.encode(rejectedBy, forKey: .rejectedBy)
-        try container.encodeIfPresent(sessionEndedAt, forKey: .sessionEndedAt)
-        try container.encode(sessionId, forKey: .sessionId)
-        try container.encodeIfPresent(sessionStartedAt, forKey: .sessionStartedAt)
     }
 }
 

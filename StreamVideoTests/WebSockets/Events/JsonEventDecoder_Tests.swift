@@ -8,15 +8,18 @@ import XCTest
 
 final class JsonEventDecoder_Tests: XCTestCase, @unchecked Sendable {
 
+    private var decoder: PassthroughJSONDecoder!
     private var subject: JsonEventDecoder!
 
     override func setUp() {
         super.setUp()
-        subject = JsonEventDecoder()
+        decoder = PassthroughJSONDecoder()
+        subject = JsonEventDecoder(decoder: decoder)
     }
 
     override func tearDown() {
         subject = nil
+        decoder = nil
         super.tearDown()
     }
 
@@ -29,7 +32,7 @@ final class JsonEventDecoder_Tests: XCTestCase, @unchecked Sendable {
         )
 
         let result = try subject.decode(
-            from: JSONEncoder.streamCore.encode(expected)
+            from: decoder.decodingData(for: VideoEvent.typeCallModerationBlurEvent(expected))
         )
 
         guard
@@ -62,7 +65,7 @@ final class JsonEventDecoder_Tests: XCTestCase, @unchecked Sendable {
         )
 
         let result = try subject.decode(
-            from: JSONEncoder.streamCore.encode(event)
+            from: decoder.decodingData(for: VideoEvent.typeConnectedEvent(event))
         )
 
         XCTAssertEqual(
@@ -79,7 +82,7 @@ final class JsonEventDecoder_Tests: XCTestCase, @unchecked Sendable {
         )
 
         let result = try subject.decode(
-            from: JSONEncoder.streamCore.encode(event)
+            from: decoder.decodingData(for: VideoEvent.typeHealthCheckEvent(event))
         )
 
         XCTAssertEqual(
@@ -104,7 +107,7 @@ final class JsonEventDecoder_Tests: XCTestCase, @unchecked Sendable {
         )
 
         let result = try subject.decode(
-            from: JSONEncoder.streamCore.encode(event)
+            from: decoder.decodingData(for: VideoEvent.typeConnectionErrorEvent(event))
         )
 
         XCTAssertEqual(result.error() as? APIError, expected)

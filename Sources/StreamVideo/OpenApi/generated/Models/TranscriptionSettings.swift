@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class TranscriptionSettings: @unchecked Sendable, Codable, JSONEncodable {
+public final class TranscriptionSettings: @unchecked Sendable, Decodable {
     
     public enum TranscriptionSettingsClosedCaptionMode: String, Sendable, Codable, CaseIterable {
         case autoOn = "auto-on"
@@ -107,13 +107,6 @@ public final class TranscriptionSettings: @unchecked Sendable, Codable, JSONEnco
         self.closedCaptionMode = try container.decode(TranscriptionSettingsClosedCaptionMode.self, forKey: .closedCaptionMode)
         self.language = try container.decode(TranscriptionSettingsLanguage.self, forKey: .language)
         self.mode = try container.decode(TranscriptionSettingsMode.self, forKey: .mode)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(closedCaptionMode, forKey: .closedCaptionMode)
-        try container.encode(language, forKey: .language)
-        try container.encode(mode, forKey: .mode)
     }
 }
 

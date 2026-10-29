@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class QueryCallStatsRequest: @unchecked Sendable, Codable, JSONEncodable {
+public final class QueryCallStatsRequest: @unchecked Sendable, Encodable, JSONEncodable {
     /// Filter conditions to apply to the query
     public var filterConditions: [String: RawJSON]?
     public var limit: Int?
@@ -26,15 +26,6 @@ public final class QueryCallStatsRequest: @unchecked Sendable, Codable, JSONEnco
         self.next = next
         self.prev = prev
         self.sort = sort
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: StringCodingKey.self)
-        self.filterConditions = try container.decodeIfPresent([String: RawJSON].self, forKey: .filterConditions)
-        self.limit = try container.decodeIfPresent(Int.self, forKey: .limit)
-        self.next = try container.decodeIfPresent(String.self, forKey: .next)
-        self.prev = try container.decodeIfPresent(String.self, forKey: .prev)
-        self.sort = try container.decodeIfPresent([SortParamRequest].self, forKey: .sort)
     }
 
     public func encode(to encoder: Encoder) throws {

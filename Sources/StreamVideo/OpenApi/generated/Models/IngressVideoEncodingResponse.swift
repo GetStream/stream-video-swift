@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class IngressVideoEncodingResponse: @unchecked Sendable, Codable, JSONEncodable {
+public final class IngressVideoEncodingResponse: @unchecked Sendable, Decodable {
     public var layers: [IngressVideoLayerResponse]
     public var source: IngressSourceResponse
 
@@ -18,12 +18,6 @@ public final class IngressVideoEncodingResponse: @unchecked Sendable, Codable, J
         let container = try decoder.container(keyedBy: StringCodingKey.self)
         self.layers = try container.decode([IngressVideoLayerResponse].self, forKey: .layers)
         self.source = try container.decode(IngressSourceResponse.self, forKey: .source)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(layers, forKey: .layers)
-        try container.encode(source, forKey: .source)
     }
 }
 

@@ -6,7 +6,7 @@ import Foundation
 import StreamCore
 
 /// This event is sent when a moderation blur action is applied to a user's video stream
-public final class CallModerationBlurEvent: @unchecked Sendable, Event, Codable, JSONEncodable, WSCallEvent {
+public final class CallModerationBlurEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
     public var callCid: String
     public var createdAt: Date
     /// Custom data associated with the moderation action
@@ -30,15 +30,6 @@ public final class CallModerationBlurEvent: @unchecked Sendable, Event, Codable,
         self.custom = try container.decode([String: RawJSON].self, forKey: .custom)
         self.type = try container.decode(String.self, forKey: .type)
         self.userId = try container.decode(String.self, forKey: .userId)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(callCid, forKey: .callCid)
-        try container.encode(createdAt, forKey: .createdAt)
-        try container.encode(custom, forKey: .custom)
-        try container.encode(type, forKey: .type)
-        try container.encode(userId, forKey: .userId)
     }
 }
 

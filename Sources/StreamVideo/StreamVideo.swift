@@ -201,7 +201,8 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         coordinatorClient = DefaultAPI(
             basePath: Self.endpointConfig.baseVideoURL,
             transport: apiTransport,
-            middlewares: [defaultParams]
+            middlewares: [defaultParams],
+            jsonDecoder: environment.jsonDecoder
         )
         StreamVideoProviderKey.currentValue = self
 

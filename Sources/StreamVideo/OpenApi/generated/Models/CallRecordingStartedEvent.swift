@@ -6,7 +6,7 @@ import Foundation
 import StreamCore
 
 /// This event is sent when call recording has started
-public final class CallRecordingStartedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, WSCallEvent {
+public final class CallRecordingStartedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
     
     public enum CallRecordingStartedEventRecordingType: String, Sendable, Codable, CaseIterable {
         case composite
@@ -47,15 +47,6 @@ public final class CallRecordingStartedEvent: @unchecked Sendable, Event, Codabl
         self.egressId = try container.decode(String.self, forKey: .egressId)
         self.recordingType = try container.decode(CallRecordingStartedEventRecordingType.self, forKey: .recordingType)
         self.type = try container.decode(String.self, forKey: .type)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(callCid, forKey: .callCid)
-        try container.encode(createdAt, forKey: .createdAt)
-        try container.encode(egressId, forKey: .egressId)
-        try container.encode(recordingType, forKey: .recordingType)
-        try container.encode(type, forKey: .type)
     }
 }
 

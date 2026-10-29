@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class FileUploadConfig: @unchecked Sendable, Codable, JSONEncodable {
+public final class FileUploadConfig: @unchecked Sendable, Decodable {
     public var allowedFileExtensions: [String]
     public var allowedMimeTypes: [String]
     public var blockedFileExtensions: [String]
@@ -33,15 +33,6 @@ public final class FileUploadConfig: @unchecked Sendable, Codable, JSONEncodable
         self.blockedFileExtensions = try container.decode([String].self, forKey: .blockedFileExtensions)
         self.blockedMimeTypes = try container.decode([String].self, forKey: .blockedMimeTypes)
         self.sizeLimit = try container.decode(Int.self, forKey: .sizeLimit)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(allowedFileExtensions, forKey: .allowedFileExtensions)
-        try container.encode(allowedMimeTypes, forKey: .allowedMimeTypes)
-        try container.encode(blockedFileExtensions, forKey: .blockedFileExtensions)
-        try container.encode(blockedMimeTypes, forKey: .blockedMimeTypes)
-        try container.encode(sizeLimit, forKey: .sizeLimit)
     }
 }
 

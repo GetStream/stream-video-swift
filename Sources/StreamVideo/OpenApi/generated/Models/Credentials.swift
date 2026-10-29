@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class Credentials: @unchecked Sendable, Codable, JSONEncodable {
+public final class Credentials: @unchecked Sendable, Decodable {
     public var iceServers: [ICEServer]
     public var server: SFUResponse
     public var token: String
@@ -21,13 +21,6 @@ public final class Credentials: @unchecked Sendable, Codable, JSONEncodable {
         self.iceServers = try container.decode([ICEServer].self, forKey: .iceServers)
         self.server = try container.decode(SFUResponse.self, forKey: .server)
         self.token = try container.decode(String.self, forKey: .token)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(iceServers, forKey: .iceServers)
-        try container.encode(server, forKey: .server)
-        try container.encode(token, forKey: .token)
     }
 }
 

@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class ScreensharingSettingsRequest: @unchecked Sendable, Codable, JSONEncodable {
+public final class ScreensharingSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable {
     public var accessRequestEnabled: Bool?
     public var enabled: Bool?
     public var targetResolution: TargetResolution?
@@ -14,13 +14,6 @@ public final class ScreensharingSettingsRequest: @unchecked Sendable, Codable, J
         self.accessRequestEnabled = accessRequestEnabled
         self.enabled = enabled
         self.targetResolution = targetResolution
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: StringCodingKey.self)
-        self.accessRequestEnabled = try container.decodeIfPresent(Bool.self, forKey: .accessRequestEnabled)
-        self.enabled = try container.decodeIfPresent(Bool.self, forKey: .enabled)
-        self.targetResolution = try container.decodeIfPresent(TargetResolution.self, forKey: .targetResolution)
     }
 
     public func encode(to encoder: Encoder) throws {

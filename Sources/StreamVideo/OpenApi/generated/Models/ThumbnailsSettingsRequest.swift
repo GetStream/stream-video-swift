@@ -5,16 +5,11 @@
 import Foundation
 import StreamCore
 
-public final class ThumbnailsSettingsRequest: @unchecked Sendable, Codable, JSONEncodable {
+public final class ThumbnailsSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable {
     public var enabled: Bool?
 
     public init(enabled: Bool? = nil) {
         self.enabled = enabled
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: StringCodingKey.self)
-        self.enabled = try container.decodeIfPresent(Bool.self, forKey: .enabled)
     }
 
     public func encode(to encoder: Encoder) throws {

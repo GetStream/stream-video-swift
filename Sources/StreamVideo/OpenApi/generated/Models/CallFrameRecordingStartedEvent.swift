@@ -6,7 +6,7 @@ import Foundation
 import StreamCore
 
 /// This event is sent when frame recording has started
-public final class CallFrameRecordingStartedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, WSCallEvent {
+public final class CallFrameRecordingStartedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
     /// Represents a call
     public var call: CallResponse
     public var callCid: String
@@ -29,15 +29,6 @@ public final class CallFrameRecordingStartedEvent: @unchecked Sendable, Event, C
         self.createdAt = try container.decode(Date.self, forKey: .createdAt)
         self.egressId = try container.decode(String.self, forKey: .egressId)
         self.type = try container.decode(String.self, forKey: .type)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(call, forKey: .call)
-        try container.encode(callCid, forKey: .callCid)
-        try container.encode(createdAt, forKey: .createdAt)
-        try container.encode(egressId, forKey: .egressId)
-        try container.encode(type, forKey: .type)
     }
 }
 

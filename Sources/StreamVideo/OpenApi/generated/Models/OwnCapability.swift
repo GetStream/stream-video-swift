@@ -6,7 +6,7 @@ import Foundation
 import StreamCore
 
 /// All possibility of string to use
-public enum OwnCapability: String, Sendable, Codable, CaseIterable {
+public enum OwnCapability: String, Sendable, Decodable, CaseIterable {
     case blockUsers = "block-users"
     case changeMaxDuration = "change-max-duration"
     case createCall = "create-call"

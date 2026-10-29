@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class CallParticipantResponse: @unchecked Sendable, Codable, JSONEncodable {
+public final class CallParticipantResponse: @unchecked Sendable, Decodable {
     public var joinedAt: Date
     public var role: String
     /// User response object
@@ -25,14 +25,6 @@ public final class CallParticipantResponse: @unchecked Sendable, Codable, JSONEn
         self.role = try container.decode(String.self, forKey: .role)
         self.user = try container.decode(UserResponse.self, forKey: .user)
         self.userSessionId = try container.decode(String.self, forKey: .userSessionId)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(joinedAt, forKey: .joinedAt)
-        try container.encode(role, forKey: .role)
-        try container.encode(user, forKey: .user)
-        try container.encode(userSessionId, forKey: .userSessionId)
     }
 }
 

@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class EgressResponse: @unchecked Sendable, Codable, JSONEncodable {
+public final class EgressResponse: @unchecked Sendable, Decodable {
     public var broadcasting: Bool
     public var compositeRecording: CompositeRecordingResponse?
     public var frameRecording: FrameRecordingResponse?
@@ -41,17 +41,6 @@ public final class EgressResponse: @unchecked Sendable, Codable, JSONEncodable {
         self.individualRecording = try container.decodeIfPresent(IndividualRecordingResponse.self, forKey: .individualRecording)
         self.rawRecording = try container.decodeIfPresent(RawRecordingResponse.self, forKey: .rawRecording)
         self.rtmps = try container.decode([EgressRTMPResponse].self, forKey: .rtmps)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(broadcasting, forKey: .broadcasting)
-        try container.encodeIfPresent(compositeRecording, forKey: .compositeRecording)
-        try container.encodeIfPresent(frameRecording, forKey: .frameRecording)
-        try container.encodeIfPresent(hls, forKey: .hls)
-        try container.encodeIfPresent(individualRecording, forKey: .individualRecording)
-        try container.encodeIfPresent(rawRecording, forKey: .rawRecording)
-        try container.encode(rtmps, forKey: .rtmps)
     }
 }
 

@@ -6,7 +6,7 @@ import Foundation
 import StreamCore
 
 /// A single client-side telemetry event. JoinInitiated is the top-level marker emitted when a user begins a join attempt and carries only join_attempt_id (no stage_id or coordinator_connect_id). When stage is CoordinatorJoin, CoordinatorWS, WSJoin, or PeerConnectionConnect the event reports a join-lifecycle attempt; initiation and completion of a stage attempt share the same stage_id. FirstAudioFrame and FirstVideoFrame report media readiness and only ever carry an initiated event. MediaDevicePermission reports the result of requesting screen-share, microphone, and camera permissions. Other stage values denote generic client events.
-public final class ClientEvent: @unchecked Sendable, Codable, JSONEncodable {
+public final class ClientEvent: @unchecked Sendable, Encodable, JSONEncodable {
     /// Call session ID associated with the attempt. Required on every event except CoordinatorJoin initiation and CoordinatorJoin failure (where the call session is not yet established); optional on MediaDevicePermission.
     public var callSessionId: String?
     /// Camera permission status: INITIATED, FAILED, GRANTED, or NOT_INITIATED. Required on every MediaDevicePermission event.
@@ -128,40 +128,6 @@ public final class ClientEvent: @unchecked Sendable, Codable, JSONEncodable {
         self.userAgent = userAgent
         self.userId = userId
         self.wasPreviouslyConnected = wasPreviouslyConnected
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: StringCodingKey.self)
-        self.callSessionId = try container.decodeIfPresent(String.self, forKey: .callSessionId)
-        self.cameraPermissionStatus = try container.decodeIfPresent(String.self, forKey: .cameraPermissionStatus)
-        self.coordinatorConnectId = try container.decodeIfPresent(String.self, forKey: .coordinatorConnectId)
-        self.elapsedTime = try container.decodeIfPresent(Int.self, forKey: .elapsedTime)
-        self.eventType = try container.decodeIfPresent(String.self, forKey: .eventType)
-        self.iceState = try container.decodeIfPresent(String.self, forKey: .iceState)
-        self.id = try container.decodeIfPresent(String.self, forKey: .id)
-        self.joinAttemptId = try container.decodeIfPresent(String.self, forKey: .joinAttemptId)
-        self.joinReason = try container.decodeIfPresent(String.self, forKey: .joinReason)
-        self.leaveInitiator = try container.decodeIfPresent(String.self, forKey: .leaveInitiator)
-        self.leaveReason = try container.decodeIfPresent(String.self, forKey: .leaveReason)
-        self.microphonePermissionStatus = try container.decodeIfPresent(String.self, forKey: .microphonePermissionStatus)
-        self.outcome = try container.decodeIfPresent(String.self, forKey: .outcome)
-        self.peerConnection = try container.decodeIfPresent(String.self, forKey: .peerConnection)
-        self.previouslyConnectedTimestamp = try container.decodeIfPresent(Date.self, forKey: .previouslyConnectedTimestamp)
-        self.retryCountAttempt = try container.decodeIfPresent(Int.self, forKey: .retryCountAttempt)
-        self.retryFailureCode = try container.decodeIfPresent(String.self, forKey: .retryFailureCode)
-        self.retryFailureReason = try container.decodeIfPresent(String.self, forKey: .retryFailureReason)
-        self.screenShareStatus = try container.decodeIfPresent(String.self, forKey: .screenShareStatus)
-        self.sdkVersion = try container.decodeIfPresent(String.self, forKey: .sdkVersion)
-        self.sfuId = try container.decodeIfPresent(String.self, forKey: .sfuId)
-        self.source = try container.decodeIfPresent(String.self, forKey: .source)
-        self.stage = try container.decodeIfPresent(String.self, forKey: .stage)
-        self.stageId = try container.decodeIfPresent(String.self, forKey: .stageId)
-        self.timestamp = try container.decodeIfPresent(Date.self, forKey: .timestamp)
-        self.trackId = try container.decodeIfPresent(String.self, forKey: .trackId)
-        self.type = try container.decodeIfPresent(String.self, forKey: .type)
-        self.userAgent = try container.decodeIfPresent(String.self, forKey: .userAgent)
-        self.userId = try container.decodeIfPresent(String.self, forKey: .userId)
-        self.wasPreviouslyConnected = try container.decodeIfPresent(Bool.self, forKey: .wasPreviouslyConnected)
     }
 
     public func encode(to encoder: Encoder) throws {

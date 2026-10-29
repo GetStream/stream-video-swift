@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class CallSettingsRequest: @unchecked Sendable, Codable, JSONEncodable {
+public final class CallSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable {
     public var audio: AudioSettingsRequest?
     public var backstage: BackstageSettingsRequest?
     public var broadcasting: BroadcastSettingsRequest?
@@ -60,30 +60,6 @@ public final class CallSettingsRequest: @unchecked Sendable, Codable, JSONEncoda
         self.thumbnails = thumbnails
         self.transcription = transcription
         self.video = video
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: StringCodingKey.self)
-        self.audio = try container.decodeIfPresent(AudioSettingsRequest.self, forKey: .audio)
-        self.backstage = try container.decodeIfPresent(BackstageSettingsRequest.self, forKey: .backstage)
-        self.broadcasting = try container.decodeIfPresent(BroadcastSettingsRequest.self, forKey: .broadcasting)
-        self.encryption = try container.decodeIfPresent(EncryptionSettingsRequest.self, forKey: .encryption)
-        self.frameRecording = try container.decodeIfPresent(FrameRecordingSettingsRequest.self, forKey: .frameRecording)
-        self.geofencing = try container.decodeIfPresent(GeofenceSettingsRequest.self, forKey: .geofencing)
-        self.individualRecording = try container.decodeIfPresent(
-            IndividualRecordingSettingsRequest.self,
-            forKey: .individualRecording
-        )
-        self.ingress = try container.decodeIfPresent(IngressSettingsRequest.self, forKey: .ingress)
-        self.limits = try container.decodeIfPresent(LimitsSettingsRequest.self, forKey: .limits)
-        self.rawRecording = try container.decodeIfPresent(RawRecordingSettingsRequest.self, forKey: .rawRecording)
-        self.recording = try container.decodeIfPresent(RecordSettingsRequest.self, forKey: .recording)
-        self.ring = try container.decodeIfPresent(RingSettingsRequest.self, forKey: .ring)
-        self.screensharing = try container.decodeIfPresent(ScreensharingSettingsRequest.self, forKey: .screensharing)
-        self.session = try container.decodeIfPresent(SessionSettingsRequest.self, forKey: .session)
-        self.thumbnails = try container.decodeIfPresent(ThumbnailsSettingsRequest.self, forKey: .thumbnails)
-        self.transcription = try container.decodeIfPresent(TranscriptionSettingsRequest.self, forKey: .transcription)
-        self.video = try container.decodeIfPresent(VideoSettingsRequest.self, forKey: .video)
     }
 
     public func encode(to encoder: Encoder) throws {

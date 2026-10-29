@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class StartTranscriptionRequest: @unchecked Sendable, Codable, JSONEncodable {
+public final class StartTranscriptionRequest: @unchecked Sendable, Encodable, JSONEncodable {
     
     /// Enable closed captions along with transcriptions
     public var enableClosedCaptions: Bool?
@@ -18,13 +18,6 @@ public final class StartTranscriptionRequest: @unchecked Sendable, Codable, JSON
         self.enableClosedCaptions = enableClosedCaptions
         self.language = language
         self.transcriptionExternalStorage = transcriptionExternalStorage
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: StringCodingKey.self)
-        self.enableClosedCaptions = try container.decodeIfPresent(Bool.self, forKey: .enableClosedCaptions)
-        self.language = try container.decodeIfPresent(String.self, forKey: .language)
-        self.transcriptionExternalStorage = try container.decodeIfPresent(String.self, forKey: .transcriptionExternalStorage)
     }
 
     public func encode(to encoder: Encoder) throws {

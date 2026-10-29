@@ -6,7 +6,7 @@ import Foundation
 import StreamCore
 
 /// CallRequest is the payload for creating a call.
-public final class CallRequest: @unchecked Sendable, Codable, JSONEncodable {
+public final class CallRequest: @unchecked Sendable, Encodable, JSONEncodable {
     public var custom: [String: RawJSON]?
     public var members: [MemberRequest]?
     public var settingsOverride: CallSettingsRequest?
@@ -28,16 +28,6 @@ public final class CallRequest: @unchecked Sendable, Codable, JSONEncodable {
         self.startsAt = startsAt
         self.team = team
         self.video = video
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: StringCodingKey.self)
-        self.custom = try container.decodeIfPresent([String: RawJSON].self, forKey: .custom)
-        self.members = try container.decodeIfPresent([MemberRequest].self, forKey: .members)
-        self.settingsOverride = try container.decodeIfPresent(CallSettingsRequest.self, forKey: .settingsOverride)
-        self.startsAt = try container.decodeIfPresent(Date.self, forKey: .startsAt)
-        self.team = try container.decodeIfPresent(String.self, forKey: .team)
-        self.video = try container.decodeIfPresent(Bool.self, forKey: .video)
     }
 
     public func encode(to encoder: Encoder) throws {

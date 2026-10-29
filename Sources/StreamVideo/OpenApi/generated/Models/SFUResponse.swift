@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class SFUResponse: @unchecked Sendable, Codable, JSONEncodable {
+public final class SFUResponse: @unchecked Sendable, Decodable {
     public var edgeName: String
     public var url: String
     public var wsEndpoint: String
@@ -21,13 +21,6 @@ public final class SFUResponse: @unchecked Sendable, Codable, JSONEncodable {
         self.edgeName = try container.decode(String.self, forKey: .edgeName)
         self.url = try container.decode(String.self, forKey: .url)
         self.wsEndpoint = try container.decode(String.self, forKey: .wsEndpoint)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(edgeName, forKey: .edgeName)
-        try container.encode(url, forKey: .url)
-        try container.encode(wsEndpoint, forKey: .wsEndpoint)
     }
 }
 

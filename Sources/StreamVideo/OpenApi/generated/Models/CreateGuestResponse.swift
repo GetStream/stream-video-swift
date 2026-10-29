@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class CreateGuestResponse: @unchecked Sendable, Codable, JSONEncodable {
+public final class CreateGuestResponse: @unchecked Sendable, Decodable {
     /// the access token to authenticate the user
     public var accessToken: String
     /// Duration of the request in milliseconds
@@ -24,13 +24,6 @@ public final class CreateGuestResponse: @unchecked Sendable, Codable, JSONEncoda
         self.accessToken = try container.decode(String.self, forKey: .accessToken)
         self.duration = try container.decode(String.self, forKey: .duration)
         self.user = try container.decode(UserResponse.self, forKey: .user)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(accessToken, forKey: .accessToken)
-        try container.encode(duration, forKey: .duration)
-        try container.encode(user, forKey: .user)
     }
 }
 

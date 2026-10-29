@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class CollectUserFeedbackRequest: @unchecked Sendable, Codable, JSONEncodable {
+public final class CollectUserFeedbackRequest: @unchecked Sendable, Encodable, JSONEncodable {
     public var custom: [String: RawJSON]?
     public var rating: Int
     public var reason: String?
@@ -27,16 +27,6 @@ public final class CollectUserFeedbackRequest: @unchecked Sendable, Codable, JSO
         self.sdk = sdk
         self.sdkVersion = sdkVersion
         self.userSessionId = userSessionId
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: StringCodingKey.self)
-        self.custom = try container.decodeIfPresent([String: RawJSON].self, forKey: .custom)
-        self.rating = try container.decode(Int.self, forKey: .rating)
-        self.reason = try container.decodeIfPresent(String.self, forKey: .reason)
-        self.sdk = try container.decode(String.self, forKey: .sdk)
-        self.sdkVersion = try container.decode(String.self, forKey: .sdkVersion)
-        self.userSessionId = try container.decodeIfPresent(String.self, forKey: .userSessionId)
     }
 
     public func encode(to encoder: Encoder) throws {

@@ -6,7 +6,7 @@ import Foundation
 import StreamCore
 
 /// PinRequest is the payload for pinning a message.
-public final class PinRequest: @unchecked Sendable, Codable, JSONEncodable {
+public final class PinRequest: @unchecked Sendable, Encodable, JSONEncodable {
     /// the session ID of the user who pinned the message
     public var sessionId: String
     /// the user ID of the user who pinned the message
@@ -15,12 +15,6 @@ public final class PinRequest: @unchecked Sendable, Codable, JSONEncodable {
     public init(sessionId: String, userId: String) {
         self.sessionId = sessionId
         self.userId = userId
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: StringCodingKey.self)
-        self.sessionId = try container.decode(String.self, forKey: .sessionId)
-        self.userId = try container.decode(String.self, forKey: .userId)
     }
 
     public func encode(to encoder: Encoder) throws {

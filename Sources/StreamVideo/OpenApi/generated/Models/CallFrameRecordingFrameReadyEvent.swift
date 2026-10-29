@@ -6,7 +6,7 @@ import Foundation
 import StreamCore
 
 /// This event is sent when a frame is captured from a call
-public final class CallFrameRecordingFrameReadyEvent: @unchecked Sendable, Event, Codable, JSONEncodable, WSCallEvent {
+public final class CallFrameRecordingFrameReadyEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
     public var callCid: String
     /// The time the frame was captured
     public var capturedAt: Date
@@ -54,19 +54,6 @@ public final class CallFrameRecordingFrameReadyEvent: @unchecked Sendable, Event
         self.type = try container.decode(String.self, forKey: .type)
         self.url = try container.decode(String.self, forKey: .url)
         self.users = try container.decode([String: UserResponse].self, forKey: .users)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(callCid, forKey: .callCid)
-        try container.encode(capturedAt, forKey: .capturedAt)
-        try container.encode(createdAt, forKey: .createdAt)
-        try container.encode(egressId, forKey: .egressId)
-        try container.encode(sessionId, forKey: .sessionId)
-        try container.encode(trackType, forKey: .trackType)
-        try container.encode(type, forKey: .type)
-        try container.encode(url, forKey: .url)
-        try container.encode(users, forKey: .users)
     }
 }
 

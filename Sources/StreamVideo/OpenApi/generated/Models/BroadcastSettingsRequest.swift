@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class BroadcastSettingsRequest: @unchecked Sendable, Codable, JSONEncodable {
+public final class BroadcastSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable {
     public var enabled: Bool?
     public var hls: HLSSettingsRequest?
     public var rtmp: RTMPSettingsRequest?
@@ -14,13 +14,6 @@ public final class BroadcastSettingsRequest: @unchecked Sendable, Codable, JSONE
         self.enabled = enabled
         self.hls = hls
         self.rtmp = rtmp
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: StringCodingKey.self)
-        self.enabled = try container.decodeIfPresent(Bool.self, forKey: .enabled)
-        self.hls = try container.decodeIfPresent(HLSSettingsRequest.self, forKey: .hls)
-        self.rtmp = try container.decodeIfPresent(RTMPSettingsRequest.self, forKey: .rtmp)
     }
 
     public func encode(to encoder: Encoder) throws {

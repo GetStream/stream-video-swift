@@ -6,7 +6,7 @@ import Foundation
 import StreamCore
 
 /// DeleteCallResponse is the payload for deleting a call.
-public final class DeleteCallResponse: @unchecked Sendable, Codable, JSONEncodable {
+public final class DeleteCallResponse: @unchecked Sendable, Decodable {
     /// Represents a call
     public var call: CallResponse
     public var duration: String
@@ -23,13 +23,6 @@ public final class DeleteCallResponse: @unchecked Sendable, Codable, JSONEncodab
         self.call = try container.decode(CallResponse.self, forKey: .call)
         self.duration = try container.decode(String.self, forKey: .duration)
         self.taskId = try container.decodeIfPresent(String.self, forKey: .taskId)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(call, forKey: .call)
-        try container.encode(duration, forKey: .duration)
-        try container.encodeIfPresent(taskId, forKey: .taskId)
     }
 }
 

@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class AudioSettings: @unchecked Sendable, Codable, JSONEncodable {
+public final class AudioSettings: @unchecked Sendable, Decodable {
     
     public enum AudioSettingsDefaultDevice: String, Sendable, Codable, CaseIterable {
         case earpiece
@@ -62,18 +62,6 @@ public final class AudioSettings: @unchecked Sendable, Codable, JSONEncodable {
         self.opusDtxEnabled = try container.decode(Bool.self, forKey: .opusDtxEnabled)
         self.redundantCodingEnabled = try container.decode(Bool.self, forKey: .redundantCodingEnabled)
         self.speakerDefaultOn = try container.decode(Bool.self, forKey: .speakerDefaultOn)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(accessRequestEnabled, forKey: .accessRequestEnabled)
-        try container.encode(defaultDevice, forKey: .defaultDevice)
-        try container.encodeIfPresent(hifiAudioEnabled, forKey: .hifiAudioEnabled)
-        try container.encode(micDefaultOn, forKey: .micDefaultOn)
-        try container.encodeIfPresent(noiseCancellation, forKey: .noiseCancellation)
-        try container.encode(opusDtxEnabled, forKey: .opusDtxEnabled)
-        try container.encode(redundantCodingEnabled, forKey: .redundantCodingEnabled)
-        try container.encode(speakerDefaultOn, forKey: .speakerDefaultOn)
     }
 }
 

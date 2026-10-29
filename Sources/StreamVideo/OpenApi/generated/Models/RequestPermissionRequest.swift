@@ -5,16 +5,11 @@
 import Foundation
 import StreamCore
 
-public final class RequestPermissionRequest: @unchecked Sendable, Codable, JSONEncodable {
+public final class RequestPermissionRequest: @unchecked Sendable, Encodable, JSONEncodable {
     public var permissions: [String]
 
     public init(permissions: [String]) {
         self.permissions = permissions
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: StringCodingKey.self)
-        self.permissions = try container.decode([String].self, forKey: .permissions)
     }
 
     public func encode(to encoder: Encoder) throws {

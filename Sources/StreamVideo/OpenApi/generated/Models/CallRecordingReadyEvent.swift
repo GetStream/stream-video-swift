@@ -6,7 +6,7 @@ import Foundation
 import StreamCore
 
 /// This event is sent when call recording is ready
-public final class CallRecordingReadyEvent: @unchecked Sendable, Event, Codable, JSONEncodable, WSCallEvent {
+public final class CallRecordingReadyEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
     
     public var callCid: String
     /// CallRecording represents a recording of a call.
@@ -27,14 +27,6 @@ public final class CallRecordingReadyEvent: @unchecked Sendable, Event, Codable,
         self.callRecording = try container.decode(CallRecording.self, forKey: .callRecording)
         self.createdAt = try container.decode(Date.self, forKey: .createdAt)
         self.type = try container.decode(String.self, forKey: .type)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(callCid, forKey: .callCid)
-        try container.encode(callRecording, forKey: .callRecording)
-        try container.encode(createdAt, forKey: .createdAt)
-        try container.encode(type, forKey: .type)
     }
 }
 

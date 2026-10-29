@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class RingSettingsRequest: @unchecked Sendable, Codable, JSONEncodable {
+public final class RingSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable {
     /// When none of the callees accept a ring call in this time a rejection will be sent by the caller with reason 'timeout' by the SDKs
     public var autoCancelTimeoutMs: Int
     /// When a callee is online but doesn't answer a ring call in this time a rejection will be sent with reason 'timeout' by the SDKs
@@ -17,13 +17,6 @@ public final class RingSettingsRequest: @unchecked Sendable, Codable, JSONEncoda
         self.autoCancelTimeoutMs = autoCancelTimeoutMs
         self.incomingCallTimeoutMs = incomingCallTimeoutMs
         self.missedCallTimeoutMs = missedCallTimeoutMs
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: StringCodingKey.self)
-        self.autoCancelTimeoutMs = try container.decode(Int.self, forKey: .autoCancelTimeoutMs)
-        self.incomingCallTimeoutMs = try container.decode(Int.self, forKey: .incomingCallTimeoutMs)
-        self.missedCallTimeoutMs = try container.decodeIfPresent(Int.self, forKey: .missedCallTimeoutMs)
     }
 
     public func encode(to encoder: Encoder) throws {
