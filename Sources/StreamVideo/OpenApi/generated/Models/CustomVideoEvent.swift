@@ -2,15 +2,18 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
-import StreamCore
 import Foundation
+import StreamCore
 
-public final class CustomVideoEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
-    
+/// A custom event, this event is used to send custom events to other participants in the call.
+public final class CustomVideoEvent: @unchecked Sendable, Event, Codable, JSONEncodable, WSCallEvent {
     public var callCid: String
     public var createdAt: Date
+    /// Custom data for this object
     public var custom: [String: RawJSON]
+    /// The type of event, "custom" in this case
     public var type: String = "custom"
+    /// User response object
     public var user: UserResponse
 
     public init(callCid: String, createdAt: Date, custom: [String: RawJSON], user: UserResponse) {
@@ -19,7 +22,7 @@ public final class CustomVideoEvent: @unchecked Sendable, Event, Codable, JSONEn
         self.custom = custom
         self.user = user
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case callCid = "call_cid"
         case createdAt = "created_at"
@@ -27,7 +30,9 @@ public final class CustomVideoEvent: @unchecked Sendable, Event, Codable, JSONEn
         case type
         case user
     }
-    
+}
+
+extension CustomVideoEvent: Hashable {
     public static func == (lhs: CustomVideoEvent, rhs: CustomVideoEvent) -> Bool {
         lhs.callCid == rhs.callCid &&
             lhs.createdAt == rhs.createdAt &&

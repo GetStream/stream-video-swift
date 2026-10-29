@@ -2,14 +2,14 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
-import StreamCore
 import Foundation
+import StreamCore
 
-public final class ReactionResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+public final class ReactionResponse: @unchecked Sendable, Codable, JSONEncodable {
     public var custom: [String: RawJSON]?
     public var emojiCode: String?
     public var type: String
+    /// User response object
     public var user: UserResponse
 
     public init(custom: [String: RawJSON]? = nil, emojiCode: String? = nil, type: String, user: UserResponse) {
@@ -18,14 +18,16 @@ public final class ReactionResponse: @unchecked Sendable, Codable, JSONEncodable
         self.type = type
         self.user = user
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case custom
         case emojiCode = "emoji_code"
         case type
         case user
     }
-    
+}
+
+extension ReactionResponse: Hashable {
     public static func == (lhs: ReactionResponse, rhs: ReactionResponse) -> Bool {
         lhs.custom == rhs.custom &&
             lhs.emojiCode == rhs.emojiCode &&

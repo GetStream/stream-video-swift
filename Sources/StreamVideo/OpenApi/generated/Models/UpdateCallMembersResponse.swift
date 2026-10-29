@@ -3,9 +3,11 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class UpdateCallMembersResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+/// Basic response information
+public final class UpdateCallMembersResponse: @unchecked Sendable, Codable, JSONEncodable {
+    /// Duration of the request in milliseconds
     public var duration: String
     public var members: [MemberResponse]
 
@@ -13,12 +15,14 @@ public final class UpdateCallMembersResponse: @unchecked Sendable, Codable, JSON
         self.duration = duration
         self.members = members
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case duration
         case members
     }
-    
+}
+
+extension UpdateCallMembersResponse: Hashable {
     public static func == (lhs: UpdateCallMembersResponse, rhs: UpdateCallMembersResponse) -> Bool {
         lhs.duration == rhs.duration &&
             lhs.members == rhs.members

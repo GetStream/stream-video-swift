@@ -5,11 +5,13 @@
 import Foundation
 import StreamCore
 
-public final class ConnectedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
-    
+/// This event is sent when the WS connection is established and authenticated, this event contains the full user object as it is stored on the server
+public final class ConnectedEvent: @unchecked Sendable, Event, Codable, JSONEncodable {
+    /// The connection_id for this client
     public var connectionId: String
     public var createdAt: Date
     public var me: OwnUserResponse
+    /// The type of event: "connection.ok" in this case
     public var type: String = "connection.ok"
 
     public init(connectionId: String, createdAt: Date, me: OwnUserResponse) {
@@ -17,14 +19,16 @@ public final class ConnectedEvent: @unchecked Sendable, Event, Codable, JSONEnco
         self.createdAt = createdAt
         self.me = me
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case connectionId = "connection_id"
         case createdAt = "created_at"
         case me
         case type
     }
-    
+}
+
+extension ConnectedEvent: Hashable {
     public static func == (lhs: ConnectedEvent, rhs: ConnectedEvent) -> Bool {
         lhs.connectionId == rhs.connectionId &&
             lhs.createdAt == rhs.createdAt &&

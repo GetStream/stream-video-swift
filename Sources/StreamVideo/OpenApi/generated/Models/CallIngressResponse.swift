@@ -3,19 +3,23 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class CallIngressResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+/// CallIngressResponse is the payload for ingress settings
+public final class CallIngressResponse: @unchecked Sendable, Codable, JSONEncodable {
+    /// RTMP input settings
     public var rtmp: RTMPIngress
 
     public init(rtmp: RTMPIngress) {
         self.rtmp = rtmp
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case rtmp
     }
-    
+}
+
+extension CallIngressResponse: Hashable {
     public static func == (lhs: CallIngressResponse, rhs: CallIngressResponse) -> Bool {
         lhs.rtmp == rhs.rtmp
     }

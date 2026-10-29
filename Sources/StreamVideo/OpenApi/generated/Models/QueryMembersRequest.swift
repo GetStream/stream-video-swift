@@ -2,16 +2,17 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
-import StreamCore
 import Foundation
+import StreamCore
 
-public final class QueryMembersRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+public final class QueryMembersRequest: @unchecked Sendable, Codable, JSONEncodable {
+    /// Filter conditions to apply to the query
     public var filterConditions: [String: RawJSON]?
     public var id: String
     public var limit: Int?
     public var next: String?
     public var prev: String?
+    /// Array of sort parameters
     public var sort: [SortParamRequest]?
     public var type: String
 
@@ -32,7 +33,7 @@ public final class QueryMembersRequest: @unchecked Sendable, Codable, JSONEncoda
         self.sort = sort
         self.type = type
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case filterConditions = "filter_conditions"
         case id
@@ -42,7 +43,9 @@ public final class QueryMembersRequest: @unchecked Sendable, Codable, JSONEncoda
         case sort
         case type
     }
-    
+}
+
+extension QueryMembersRequest: Hashable {
     public static func == (lhs: QueryMembersRequest, rhs: QueryMembersRequest) -> Bool {
         lhs.filterConditions == rhs.filterConditions &&
             lhs.id == rhs.id &&

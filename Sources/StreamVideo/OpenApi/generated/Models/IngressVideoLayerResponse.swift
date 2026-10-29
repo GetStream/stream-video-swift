@@ -3,8 +3,9 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class IngressVideoLayerResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class IngressVideoLayerResponse: @unchecked Sendable, Codable, JSONEncodable {
     public var bitrate: Int
     public var codec: String
     public var frameRateLimit: Int
@@ -26,13 +27,15 @@ public final class IngressVideoLayerResponse: @unchecked Sendable, Codable, JSON
         case maxDimension = "max_dimension"
         case minDimension = "min_dimension"
     }
+}
 
+extension IngressVideoLayerResponse: Hashable {
     public static func == (lhs: IngressVideoLayerResponse, rhs: IngressVideoLayerResponse) -> Bool {
         lhs.bitrate == rhs.bitrate &&
-        lhs.codec == rhs.codec &&
-        lhs.frameRateLimit == rhs.frameRateLimit &&
-        lhs.maxDimension == rhs.maxDimension &&
-        lhs.minDimension == rhs.minDimension
+            lhs.codec == rhs.codec &&
+            lhs.frameRateLimit == rhs.frameRateLimit &&
+            lhs.maxDimension == rhs.maxDimension &&
+            lhs.minDimension == rhs.minDimension
     }
 
     public func hash(into hasher: inout Hasher) {

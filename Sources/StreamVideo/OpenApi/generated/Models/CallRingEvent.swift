@@ -5,14 +5,19 @@
 import Foundation
 import StreamCore
 
-public final class CallRingEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
-    
+/// This event is sent to all call members to notify they are getting called
+public final class CallRingEvent: @unchecked Sendable, Event, Codable, JSONEncodable, WSCallEvent {
+    /// Represents a call
     public var call: CallResponse
     public var callCid: String
     public var createdAt: Date
+    /// Call members
     public var members: [MemberResponse]
+    /// Call session ID
     public var sessionId: String
+    /// The type of event: "call.notification" in this case
     public var type: String = "call.ring"
+    /// User response object
     public var user: UserResponse
     public var video: Bool
 
@@ -33,7 +38,7 @@ public final class CallRingEvent: @unchecked Sendable, Event, Codable, JSONEncod
         self.user = user
         self.video = video
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case call
         case callCid = "call_cid"
@@ -44,7 +49,9 @@ public final class CallRingEvent: @unchecked Sendable, Event, Codable, JSONEncod
         case user
         case video
     }
-    
+}
+
+extension CallRingEvent: Hashable {
     public static func == (lhs: CallRingEvent, rhs: CallRingEvent) -> Bool {
         lhs.call == rhs.call &&
             lhs.callCid == rhs.callCid &&

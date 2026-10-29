@@ -2,14 +2,18 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
-import StreamCore
 import Foundation
+import StreamCore
 
-public final class CallModerationBlurEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
+/// This event is sent when a moderation blur action is applied to a user's video stream
+public final class CallModerationBlurEvent: @unchecked Sendable, Event, Codable, JSONEncodable, WSCallEvent {
     public var callCid: String
     public var createdAt: Date
+    /// Custom data associated with the moderation action
     public var custom: [String: RawJSON]
+    /// The type of event: "call.moderation_blur" in this case
     public var type: String = "call.moderation_blur"
+    /// The user ID whose video stream is being blurred
     public var userId: String
 
     public init(callCid: String, createdAt: Date, custom: [String: RawJSON], userId: String) {
@@ -26,13 +30,15 @@ public final class CallModerationBlurEvent: @unchecked Sendable, Event, Codable,
         case type
         case userId = "user_id"
     }
+}
 
+extension CallModerationBlurEvent: Hashable {
     public static func == (lhs: CallModerationBlurEvent, rhs: CallModerationBlurEvent) -> Bool {
         lhs.callCid == rhs.callCid &&
-        lhs.createdAt == rhs.createdAt &&
-        lhs.custom == rhs.custom &&
-        lhs.type == rhs.type &&
-        lhs.userId == rhs.userId
+            lhs.createdAt == rhs.createdAt &&
+            lhs.custom == rhs.custom &&
+            lhs.type == rhs.type &&
+            lhs.userId == rhs.userId
     }
 
     public func hash(into hasher: inout Hasher) {

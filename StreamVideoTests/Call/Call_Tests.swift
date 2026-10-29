@@ -596,6 +596,27 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
         )
     }
 
+    // MARK: - goLive
+
+    // Deprecated so that calling the deprecated overload does not warn.
+    @available(*, deprecated)
+    func test_goLive_withStartRtmpBroadcasts_coordinatorWasCalledWithExpectedValues() async throws {
+        let (call, mockCoordinatorClient) = makeCallWithMockCoordinator()
+
+        _ = try? await call.goLive(startHls: true, startRtmpBroadcasts: true)
+
+        let input = try XCTUnwrap(
+            mockCoordinatorClient
+                .recordedInputPayload(
+                    (String, String, GoLiveRequest).self,
+                    for: .goLive
+                )?.first
+        )
+        XCTAssertEqual(call.callType, input.0)
+        XCTAssertEqual(call.callId, input.1)
+        XCTAssertEqual(input.2.startHls, true)
+    }
+
     // MARK: - Frame recording
 
     func test_startFrameRecording_coordinatorWasCalledWithExpectedValues() async throws {

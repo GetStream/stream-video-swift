@@ -3,19 +3,22 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class RTMPIngress: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+/// RTMP input settings
+public final class RTMPIngress: @unchecked Sendable, Codable, JSONEncodable {
     public var address: String
 
     public init(address: String) {
         self.address = address
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case address
     }
-    
+}
+
+extension RTMPIngress: Hashable {
     public static func == (lhs: RTMPIngress, rhs: RTMPIngress) -> Bool {
         lhs.address == rhs.address
     }

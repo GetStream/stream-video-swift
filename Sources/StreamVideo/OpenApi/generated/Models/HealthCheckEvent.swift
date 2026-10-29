@@ -5,8 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class HealthCheckEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
-    
+public final class HealthCheckEvent: @unchecked Sendable, Event, Codable, JSONEncodable {
     public var cid: String?
     public var connectionId: String
     public var createdAt: Date
@@ -19,7 +18,7 @@ public final class HealthCheckEvent: @unchecked Sendable, Event, Codable, JSONEn
         self.createdAt = createdAt
         self.receivedAt = receivedAt
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case cid
         case connectionId = "connection_id"
@@ -27,7 +26,9 @@ public final class HealthCheckEvent: @unchecked Sendable, Event, Codable, JSONEn
         case receivedAt = "received_at"
         case type
     }
-    
+}
+
+extension HealthCheckEvent: Hashable {
     public static func == (lhs: HealthCheckEvent, rhs: HealthCheckEvent) -> Bool {
         lhs.cid == rhs.cid &&
             lhs.connectionId == rhs.connectionId &&

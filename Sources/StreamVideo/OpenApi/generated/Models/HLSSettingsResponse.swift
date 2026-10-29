@@ -3,9 +3,10 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class HLSSettingsResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+/// HLSSettings is the payload for HLS settings
+public final class HLSSettingsResponse: @unchecked Sendable, Codable, JSONEncodable {
     public var autoOn: Bool
     public var enabled: Bool
     public var qualityTracks: [String]
@@ -15,13 +16,15 @@ public final class HLSSettingsResponse: @unchecked Sendable, Codable, JSONEncoda
         self.enabled = enabled
         self.qualityTracks = qualityTracks
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case autoOn = "auto_on"
         case enabled
         case qualityTracks = "quality_tracks"
     }
-    
+}
+
+extension HLSSettingsResponse: Hashable {
     public static func == (lhs: HLSSettingsResponse, rhs: HLSSettingsResponse) -> Bool {
         lhs.autoOn == rhs.autoOn &&
             lhs.enabled == rhs.enabled &&

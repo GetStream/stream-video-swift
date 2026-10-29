@@ -3,8 +3,9 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class IngressVideoEncodingResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class IngressVideoEncodingResponse: @unchecked Sendable, Codable, JSONEncodable {
     public var layers: [IngressVideoLayerResponse]
     public var source: IngressSourceResponse
 
@@ -17,10 +18,12 @@ public final class IngressVideoEncodingResponse: @unchecked Sendable, Codable, J
         case layers
         case source
     }
+}
 
+extension IngressVideoEncodingResponse: Hashable {
     public static func == (lhs: IngressVideoEncodingResponse, rhs: IngressVideoEncodingResponse) -> Bool {
         lhs.layers == rhs.layers &&
-        lhs.source == rhs.source
+            lhs.source == rhs.source
     }
 
     public func hash(into hasher: inout Hasher) {

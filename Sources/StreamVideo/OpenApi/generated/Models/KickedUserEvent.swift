@@ -5,11 +5,15 @@
 import Foundation
 import StreamCore
 
-public final class KickedUserEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
+/// This event is sent to call participants to notify when a user is kicked from a call. Clients should make the kicked user leave the call UI.
+public final class KickedUserEvent: @unchecked Sendable, Event, Codable, JSONEncodable, WSCallEvent {
     public var callCid: String
     public var createdAt: Date
+    /// User response object
     public var kickedByUser: UserResponse?
+    /// The type of event: "call.kicked_user" in this case
     public var type: String = "call.kicked_user"
+    /// User response object
     public var user: UserResponse
 
     public init(callCid: String, createdAt: Date, kickedByUser: UserResponse? = nil, user: UserResponse) {
@@ -19,20 +23,22 @@ public final class KickedUserEvent: @unchecked Sendable, Event, Codable, JSONEnc
         self.user = user
     }
 
-public enum CodingKeys: String, CodingKey {
-    case callCid = "call_cid"
-    case createdAt = "created_at"
-    case kickedByUser = "kicked_by_user"
-    case type
-    case user
+    public enum CodingKeys: String, CodingKey {
+        case callCid = "call_cid"
+        case createdAt = "created_at"
+        case kickedByUser = "kicked_by_user"
+        case type
+        case user
+    }
 }
 
+extension KickedUserEvent: Hashable {
     public static func == (lhs: KickedUserEvent, rhs: KickedUserEvent) -> Bool {
         lhs.callCid == rhs.callCid &&
-        lhs.createdAt == rhs.createdAt &&
-        lhs.kickedByUser == rhs.kickedByUser &&
-        lhs.type == rhs.type &&
-        lhs.user == rhs.user
+            lhs.createdAt == rhs.createdAt &&
+            lhs.kickedByUser == rhs.kickedByUser &&
+            lhs.type == rhs.type &&
+            lhs.user == rhs.user
     }
 
     public func hash(into hasher: inout Hasher) {

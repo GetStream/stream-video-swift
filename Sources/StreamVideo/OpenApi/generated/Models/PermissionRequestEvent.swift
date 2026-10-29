@@ -5,12 +5,16 @@
 import Foundation
 import StreamCore
 
-public final class PermissionRequestEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
-    
+/// This event is sent when a user requests access to a feature on a call,
+/// clients receiving this event should display a permission request to the user
+public final class PermissionRequestEvent: @unchecked Sendable, Event, Codable, JSONEncodable, WSCallEvent {
     public var callCid: String
     public var createdAt: Date
+    /// The list of permissions requested by the user
     public var permissions: [String]
+    /// The type of event: "call.permission_request" in this case
     public var type: String = "call.permission_request"
+    /// User response object
     public var user: UserResponse
 
     public init(callCid: String, createdAt: Date, permissions: [String], user: UserResponse) {
@@ -19,7 +23,7 @@ public final class PermissionRequestEvent: @unchecked Sendable, Event, Codable, 
         self.permissions = permissions
         self.user = user
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case callCid = "call_cid"
         case createdAt = "created_at"
@@ -27,7 +31,9 @@ public final class PermissionRequestEvent: @unchecked Sendable, Event, Codable, 
         case type
         case user
     }
-    
+}
+
+extension PermissionRequestEvent: Hashable {
     public static func == (lhs: PermissionRequestEvent, rhs: PermissionRequestEvent) -> Bool {
         lhs.callCid == rhs.callCid &&
             lhs.createdAt == rhs.createdAt &&

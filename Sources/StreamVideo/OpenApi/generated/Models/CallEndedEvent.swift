@@ -5,12 +5,15 @@
 import Foundation
 import StreamCore
 
-public final class CallEndedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
-    
+/// This event is sent when a call is mark as ended for all its participants. Clients receiving this event should leave the call screen
+public final class CallEndedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, WSCallEvent {
+    /// Represents a call
     public var call: CallResponse
     public var callCid: String
     public var createdAt: Date
+    /// The type of event: "call.ended" in this case
     public var type: String = "call.ended"
+    /// User response object
     public var user: UserResponse?
 
     public init(call: CallResponse, callCid: String, createdAt: Date, user: UserResponse? = nil) {
@@ -19,7 +22,7 @@ public final class CallEndedEvent: @unchecked Sendable, Event, Codable, JSONEnco
         self.createdAt = createdAt
         self.user = user
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case call
         case callCid = "call_cid"
@@ -27,7 +30,9 @@ public final class CallEndedEvent: @unchecked Sendable, Event, Codable, JSONEnco
         case type
         case user
     }
-    
+}
+
+extension CallEndedEvent: Hashable {
     public static func == (lhs: CallEndedEvent, rhs: CallEndedEvent) -> Bool {
         lhs.call == rhs.call &&
             lhs.callCid == rhs.callCid &&

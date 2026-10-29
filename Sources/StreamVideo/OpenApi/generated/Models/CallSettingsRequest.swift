@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 
 public final class CallSettingsRequest: @unchecked Sendable, Codable, JSONEncodable {
     public var audio: AudioSettingsRequest?
@@ -85,22 +86,22 @@ public final class CallSettingsRequest: @unchecked Sendable, Codable, JSONEncoda
 extension CallSettingsRequest: Hashable {
     public static func == (lhs: CallSettingsRequest, rhs: CallSettingsRequest) -> Bool {
         lhs.audio == rhs.audio &&
-        lhs.backstage == rhs.backstage &&
-        lhs.broadcasting == rhs.broadcasting &&
-        lhs.encryption == rhs.encryption &&
-        lhs.frameRecording == rhs.frameRecording &&
-        lhs.geofencing == rhs.geofencing &&
-        lhs.individualRecording == rhs.individualRecording &&
-        lhs.ingress == rhs.ingress &&
-        lhs.limits == rhs.limits &&
-        lhs.rawRecording == rhs.rawRecording &&
-        lhs.recording == rhs.recording &&
-        lhs.ring == rhs.ring &&
-        lhs.screensharing == rhs.screensharing &&
-        lhs.session == rhs.session &&
-        lhs.thumbnails == rhs.thumbnails &&
-        lhs.transcription == rhs.transcription &&
-        lhs.video == rhs.video
+            lhs.backstage == rhs.backstage &&
+            lhs.broadcasting == rhs.broadcasting &&
+            lhs.encryption == rhs.encryption &&
+            lhs.frameRecording == rhs.frameRecording &&
+            lhs.geofencing == rhs.geofencing &&
+            lhs.individualRecording == rhs.individualRecording &&
+            lhs.ingress == rhs.ingress &&
+            lhs.limits == rhs.limits &&
+            lhs.rawRecording == rhs.rawRecording &&
+            lhs.recording == rhs.recording &&
+            lhs.ring == rhs.ring &&
+            lhs.screensharing == rhs.screensharing &&
+            lhs.session == rhs.session &&
+            lhs.thumbnails == rhs.thumbnails &&
+            lhs.transcription == rhs.transcription &&
+            lhs.video == rhs.video
     }
 
     public func hash(into hasher: inout Hasher) {

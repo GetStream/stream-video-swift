@@ -3,9 +3,9 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class ScreensharingSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+public final class ScreensharingSettingsRequest: @unchecked Sendable, Codable, JSONEncodable {
     public var accessRequestEnabled: Bool?
     public var enabled: Bool?
     public var targetResolution: TargetResolution?
@@ -15,13 +15,15 @@ public final class ScreensharingSettingsRequest: @unchecked Sendable, Codable, J
         self.enabled = enabled
         self.targetResolution = targetResolution
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case accessRequestEnabled = "access_request_enabled"
         case enabled
         case targetResolution = "target_resolution"
     }
-    
+}
+
+extension ScreensharingSettingsRequest: Hashable {
     public static func == (lhs: ScreensharingSettingsRequest, rhs: ScreensharingSettingsRequest) -> Bool {
         lhs.accessRequestEnabled == rhs.accessRequestEnabled &&
             lhs.enabled == rhs.enabled &&

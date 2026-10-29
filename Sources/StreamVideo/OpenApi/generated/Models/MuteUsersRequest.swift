@@ -3,9 +3,9 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class MuteUsersRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+public final class MuteUsersRequest: @unchecked Sendable, Codable, JSONEncodable {
     public var audio: Bool?
     public var muteAllUsers: Bool?
     public var screenshare: Bool?
@@ -28,7 +28,7 @@ public final class MuteUsersRequest: @unchecked Sendable, Codable, JSONEncodable
         self.userIds = userIds
         self.video = video
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case audio
         case muteAllUsers = "mute_all_users"
@@ -37,7 +37,9 @@ public final class MuteUsersRequest: @unchecked Sendable, Codable, JSONEncodable
         case userIds = "user_ids"
         case video
     }
-    
+}
+
+extension MuteUsersRequest: Hashable {
     public static func == (lhs: MuteUsersRequest, rhs: MuteUsersRequest) -> Bool {
         lhs.audio == rhs.audio &&
             lhs.muteAllUsers == rhs.muteAllUsers &&

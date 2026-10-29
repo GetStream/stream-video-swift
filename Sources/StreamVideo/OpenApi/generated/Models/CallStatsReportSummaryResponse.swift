@@ -3,9 +3,9 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class CallStatsReportSummaryResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+public final class CallStatsReportSummaryResponse: @unchecked Sendable, Codable, JSONEncodable {
     public var callCid: String
     public var callDurationSeconds: Int
     public var callSessionId: String
@@ -34,7 +34,7 @@ public final class CallStatsReportSummaryResponse: @unchecked Sendable, Codable,
         self.minUserRating = minUserRating
         self.qualityScore = qualityScore
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case callCid = "call_cid"
         case callDurationSeconds = "call_duration_seconds"
@@ -45,7 +45,9 @@ public final class CallStatsReportSummaryResponse: @unchecked Sendable, Codable,
         case minUserRating = "min_user_rating"
         case qualityScore = "quality_score"
     }
-    
+}
+
+extension CallStatsReportSummaryResponse: Hashable {
     public static func == (lhs: CallStatsReportSummaryResponse, rhs: CallStatsReportSummaryResponse) -> Bool {
         lhs.callCid == rhs.callCid &&
             lhs.callDurationSeconds == rhs.callDurationSeconds &&

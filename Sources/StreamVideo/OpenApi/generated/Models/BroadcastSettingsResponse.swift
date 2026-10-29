@@ -3,11 +3,14 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class BroadcastSettingsResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+/// BroadcastSettingsResponse is the payload for broadcasting settings
+public final class BroadcastSettingsResponse: @unchecked Sendable, Codable, JSONEncodable {
     public var enabled: Bool
+    /// HLSSettings is the payload for HLS settings
     public var hls: HLSSettingsResponse
+    /// RTMPSettingsResponse is the payload for RTMP settings
     public var rtmp: RTMPSettingsResponse
 
     public init(enabled: Bool, hls: HLSSettingsResponse, rtmp: RTMPSettingsResponse) {
@@ -15,13 +18,15 @@ public final class BroadcastSettingsResponse: @unchecked Sendable, Codable, JSON
         self.hls = hls
         self.rtmp = rtmp
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case enabled
         case hls
         case rtmp
     }
-    
+}
+
+extension BroadcastSettingsResponse: Hashable {
     public static func == (lhs: BroadcastSettingsResponse, rhs: BroadcastSettingsResponse) -> Bool {
         lhs.enabled == rhs.enabled &&
             lhs.hls == rhs.hls &&

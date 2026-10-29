@@ -3,12 +3,15 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class UpdateCallResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+/// Response for updating a call
+public final class UpdateCallResponse: @unchecked Sendable, Codable, JSONEncodable {
+    /// Represents a call
     public var call: CallResponse
     public var duration: String
     public var members: [MemberResponse]
+    /// MemberResponse is the payload for a member of a call.
     public var membership: MemberResponse?
     public var ownCapabilities: [OwnCapability]
 
@@ -25,7 +28,7 @@ public final class UpdateCallResponse: @unchecked Sendable, Codable, JSONEncodab
         self.membership = membership
         self.ownCapabilities = ownCapabilities
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case call
         case duration
@@ -33,7 +36,9 @@ public final class UpdateCallResponse: @unchecked Sendable, Codable, JSONEncodab
         case membership
         case ownCapabilities = "own_capabilities"
     }
-    
+}
+
+extension UpdateCallResponse: Hashable {
     public static func == (lhs: UpdateCallResponse, rhs: UpdateCallResponse) -> Bool {
         lhs.call == rhs.call &&
             lhs.duration == rhs.duration &&
