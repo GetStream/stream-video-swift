@@ -171,7 +171,6 @@ viewFactory.makeCallView(options: .init(viewModel: viewModel))
 - Icons and images stay on each SDK until a follow-up.
 - Danger `commit_lint` fails commit subjects that end with a period.
 - Do not change `CHANGELOG.md` or `README.md` unless explicitly asked.
-- Local simulator used for this work: `platform=iOS Simulator,name=iPhone 17,OS=26.5`.
 
 ### Tech & toolchain
 
@@ -180,7 +179,7 @@ viewFactory.makeCallView(options: .init(viewModel: viewModel))
 - Media stack: WebRTC/AVFoundation under the hood
 - Primary distribution: Swift Package Manager (SPM)
 - Project file: `StreamVideo.xcodeproj` (used for builds and tests)
-- Xcode: 15.x or newer (Apple Silicon supported); CI also validates on older Xcode
+- Xcode: 16.4 or newer (Apple Silicon supported); CI defaults to Xcode 26.2 and also builds on 16.4
 - Platforms / deployment targets: Use the values set in `Package.swift`; do not lower without approval
 - CI: GitHub Actions + Fastlane (see `.github/workflows/smoke-checks.yml`)
 - Linting: SwiftLint (v0.59.1) — config in `.swiftlint.yml`
@@ -193,7 +192,7 @@ viewFactory.makeCallView(options: .init(viewModel: viewModel))
 ### Dependencies
 
 - **StreamCore** / **StreamCoreUI** from [`stream-core-swift`](https://github.com/GetStream/stream-core-swift.git) (from 0.11.0, the first tag with the design tokens)
-- **swift-protobuf** (exact 1.30.0)
+- **swift-protobuf** (version range in `Package.swift`)
 - **stream-video-swift-webrtc** (exact 145.17.0)
 
 Do not add new third-party deps without discussion.
@@ -220,7 +219,7 @@ fastlane/                   # Fastlane lanes for CI
 
 ### New files & target membership
 
-When creating new source or resource files, add them to the correct Xcode target(s). Update the project (e.g. `project.pbxproj`) so each new file is included in the appropriate target's "Compile Sources" (or "Copy Bundle Resources" for assets). Match the target(s) used by sibling files in the same directory (e.g. `Sources/StreamVideo/` → StreamVideo; `Sources/StreamVideoSwiftUI/` → StreamVideoSwiftUI; `Sources/StreamVideoUIKit/` → StreamVideoUIKit; `Tests/StreamVideoTests/` → StreamVideoTests; `Tests/StreamVideoSwiftUITests/` → StreamVideoSwiftUITests; `Tests/StreamVideoUIKitTests/` → StreamVideoUIKitTests). Omitting target membership will cause build failures or unused files.
+When creating new source or resource files, add them to the correct Xcode target(s). Update the project (e.g. `project.pbxproj`) so each new file is included in the appropriate target's "Compile Sources" (or "Copy Bundle Resources" for assets). Match the target(s) used by sibling files in the same directory (e.g. `Sources/StreamVideo/` → StreamVideo; `Sources/StreamVideoSwiftUI/` → StreamVideoSwiftUI; `Sources/StreamVideoUIKit/` → StreamVideoUIKit; `StreamVideoTests/` → StreamVideoTests; `StreamVideoSwiftUITests/` → StreamVideoSwiftUITests; `StreamVideoUIKitTests/` → StreamVideoUIKitTests). Omitting target membership will cause build failures or unused files.
 
 ### Local setup (SPM)
 
@@ -317,8 +316,6 @@ The `smoke-checks.yml` workflow is the primary PR gate.
 
 ## Coding Style & Naming Conventions
 
-- Swift (SPM-first). Indentation: 4 spaces; avoid trailing whitespace.
-- Naming: Types/protocols `UpperCamelCase`; methods/variables `lowerCamelCase`; constants `lowerCamelCase`.
 - Structure large files with `// MARK:` and add `///` docs for public APIs.
 
 ### Development guidelines
@@ -351,7 +348,7 @@ Accessibility & UI quality
 - Run both `StreamVideo` and `StreamVideoSwiftUI` tests locally; keep/raise coverage.
 - Only add tests for .swift files.
 - Do not test private methods or add test-only hooks to expose them; test through public or internal behavior instead.
-- Integration tests in `StreamVideoTests/IntegrationTests/Call_IntegrationTests`:
+- Integration tests in `StreamVideoTests/IntegrationTests/`:
   - Purpose: end-to-end call-path validation using real Stream API responses.
   - Layout:
     - `Call_IntegrationTests.swift`: scenarios.
@@ -409,7 +406,6 @@ Accessibility & UI quality
 
 ## Comments
 
-- Use docC for non-private APIs.
 - Use `///` for doc comments.
 - Use `// MARK:` to group code.
 - Use `// MARK: - <Group Name>` to group code.
