@@ -61,6 +61,14 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     }
 
                     try Task.checkCancellation()
+                    context.peerConnectionConnectReporters.forEach { $0.stop() }
+                    await context.coordinator?.clientEventReporter.abortPendingStages(
+                        failure: .init(
+                            code: .clientAborted,
+                            leaveInitiator: .sdkError,
+                            leaveReason: Call.LeaveReason.error.rawValue
+                        )
+                    )
                     if let joinResponseHandler = context.joinResponseHandler {
                         joinResponseHandler.send(completion: .failure(error))
                     }

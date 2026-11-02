@@ -217,18 +217,30 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
     /// Updates the local audio media based on new call settings.
     ///
+    /// Muting disables local tracks before notifying the SFU, even after
+    /// publishing permission is revoked. Signaling failures are reported
+    /// without re-enabling local audio.
+    ///
     /// - Parameter settings: The updated settings for the call.
     func didUpdateCallSettings(
         _ settings: CallSettings
     ) async throws {
         try await processingQueue.addSynchronousTaskOperation { [weak self] in
-            guard let self, ownCapabilities.contains(.sendAudio) else { return }
-            registerPrimaryTrackIfPossible(settings)
-
-            guard lastUpdatedCallSettings != settings.audio else { return }
+            guard let self else { return }
 
             let isMuted = !settings.audioOn
             let isLocalMuted = !primaryTrack.isEnabled
+
+            if isMuted, !isLocalMuted {
+                try await unpublish()
+                // A failed SFU request must not suppress a later unmute.
+                lastUpdatedCallSettings = nil
+            }
+
+            guard ownCapabilities.contains(.sendAudio) else { return }
+            registerPrimaryTrackIfPossible(settings)
+
+            guard lastUpdatedCallSettings != settings.audio else { return }
 
             if isMuted != isLocalMuted {
                 try await sfuAdapter.updateTrackMuteState(
@@ -238,9 +250,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                 )
             }
 
-            if isMuted, primaryTrack.isEnabled {
-                try await unpublish()
-            } else if !isMuted {
+            if !isMuted {
                 try await publish()
             }
 

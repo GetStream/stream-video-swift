@@ -28,13 +28,15 @@ final class StreamCallAudioRecorder_AVAudioRecorderMiddlewareTests: StreamVideoT
         _ = subject
     }
 
-    override func tearDown() {
+    override func tearDown() async throws {
         mockPermissions.dismantle()
 
         subject = nil
         audioRecorder = nil
         actionsReceived = nil
-        super.tearDown()
+        try await mockAudioStore.dismantle()
+        mockAudioStore = nil
+        try await super.tearDown()
     }
 
     // MARK: - setIsRecording

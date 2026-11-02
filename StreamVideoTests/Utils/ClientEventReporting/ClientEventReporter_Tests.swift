@@ -162,6 +162,20 @@ final class ClientEventReporter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(initiated?.joinReason, "full-rejoin")
     }
 
+    func test_beginStage_withSource_includesSource() async {
+        await subject.reportJoinInitiated()
+
+        _ = await subject.beginStage(
+            .coordinatorJoin,
+            peerConnection: nil,
+            details: .init(source: .ringPollAPI)
+        )
+
+        await waitForEventCount(2)
+        let initiated = event(stage: "CoordinatorJoin", type: "initiated")
+        XCTAssertEqual(initiated?.source, "ring-poll-api")
+    }
+
     func test_eventsOfSameAttempt_shareJoinAttemptId() async {
         await subject.reportJoinInitiated()
         let attemptId = await subject.joinAttemptId
@@ -368,6 +382,82 @@ final class ClientEventReporter_Tests: XCTestCase, @unchecked Sendable {
             .flatMap { try? JSONSerialization.jsonObject(with: $0) as? [String: Any] }
 
         XCTAssertEqual(json?["join_reason"] as? String, "first-attempt")
+    }
+
+    func test_clientEvent_encodeToJSON_includesSource() {
+        let subject = ClientEvent(source: "ring-ws", stage: "CoordinatorJoin")
+
+        let data = try? CodableHelper.jsonEncoder.encode(subject)
+        let json = data
+            .flatMap { try? JSONSerialization.jsonObject(with: $0) as? [String: Any] }
+
+        XCTAssertEqual(json?["source"] as? String, "ring-ws")
+    }
+
+    func test_completeStage_cancellation_reportsUnknownLeaveAttribution() async throws {
+        let attempt = await subject.beginStage(.coordinatorWS)
+        await subject.completeStage(
+            attempt,
+            retryCount: 0,
+            failure: .init(CancellationError())
+        )
+
+        await waitForEventCount(2)
+        let completed = try XCTUnwrap(event(stage: "CoordinatorWS", type: "completed"))
+        XCTAssertEqual(completed.leaveInitiator, "unknown")
+        XCTAssertEqual(completed.leaveReason, "unknown")
+    }
+
+    func test_completeStage_leaveReason_exceedsWireLimit_truncatesUnicodeScalars() async throws {
+        let reason = String(repeating: "e\u{301}", count: 150)
+        let attempt = await subject.beginStage(.coordinatorJoin)
+        let failure = ClientEventFailure(
+            code: .clientAborted,
+            leaveInitiator: .app,
+            leaveReason: reason
+        )
+        await subject.completeStage(attempt, retryCount: 0, failure: failure)
+
+        await waitForEventCount(2)
+        let completed = try XCTUnwrap(event(stage: "CoordinatorJoin", type: "completed"))
+        XCTAssertEqual(completed.leaveInitiator, "app")
+        XCTAssertEqual(completed.leaveReason, String(repeating: "e\u{301}", count: 100))
+        XCTAssertEqual(failure.leaveReason, reason)
+        let initiated = try XCTUnwrap(event(stage: "CoordinatorJoin", type: "initiated"))
+        XCTAssertNil(initiated.leaveInitiator)
+        XCTAssertNil(initiated.leaveReason)
+    }
+
+    func test_completeStage_customInitiator_respectsWireLimit() async throws {
+        let cases = [
+            ("live_communication_kit", "live_communication_kit"),
+            (
+                String(repeating: "e\u{301}", count: 20),
+                String(repeating: "e\u{301}", count: 16)
+            )
+        ]
+
+        for (index, values) in cases.enumerated() {
+            let (initiator, expectedInitiator) = values
+            let attempt = await subject.beginStage(.coordinatorJoin)
+            let failure = ClientEventFailure(
+                code: .clientAborted,
+                leaveInitiator: .init(rawValue: initiator)
+            )
+
+            await subject.completeStage(
+                attempt,
+                retryCount: 0,
+                failure: failure
+            )
+
+            await waitForEventCount((index + 1) * 2)
+            let completed = try XCTUnwrap(recordedEvents().last {
+                $0.eventType == "completed"
+            })
+            XCTAssertEqual(completed.leaveInitiator, expectedInitiator)
+            XCTAssertEqual(failure.leaveInitiator?.rawValue, initiator)
+        }
     }
 
     // MARK: - Helpers

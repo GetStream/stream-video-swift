@@ -450,6 +450,7 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
         _ = try await subject.sendAnswer(
             sessionDescription: sessionDescription,
             peerType: .subscriber,
+            negotiationID: 7,
             for: sessionID
         )
 
@@ -458,6 +459,7 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(request.sdp, sessionDescription)
         XCTAssertEqual(request.peerType, .subscriber)
         XCTAssertEqual(request.sessionID, sessionID)
+        XCTAssertEqual(request.negotiationID, 7)
     }
 
     func test_sendAnswer_eventWasPublished() async throws {
@@ -469,6 +471,7 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
         request.sessionID = sessionID
         request.sdp = sessionDescription
         request.peerType = .subscriber
+        request.negotiationID = 7
 
         try await assertEventWasPublished(
             expected: SFUAdapter.SendAnswerEvent(
@@ -479,6 +482,7 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
                 _ = try await subject.sendAnswer(
                     sessionDescription: sessionDescription,
                     peerType: .subscriber,
+                    negotiationID: 7,
                     for: sessionID
                 )
             }

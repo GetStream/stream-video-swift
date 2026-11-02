@@ -132,13 +132,8 @@ buildServer.json
 # zed
 .zed
 
-# Codex shared environment
-.codex/*
-!.codex/environments/
-.codex/environments/*
-!.codex/environments/environment.toml
-!.codex/scripts/
-!.codex/scripts/*.sh
+# Local agent state
+.codex/
 .codegraph
 .cursor
 

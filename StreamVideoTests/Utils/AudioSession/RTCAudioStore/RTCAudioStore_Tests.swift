@@ -36,6 +36,48 @@ final class RTCAudioStore_Tests: XCTestCase, @unchecked Sendable {
         }
     }
 
+    func test_mockDismantle_unbalancedActivations_restoresNativeSession_()
+        async throws {
+        let audioSession = try XCTUnwrap(session)
+        addTeardownBlock { [self] in
+            let audioSession = try XCTUnwrap(session)
+            audioSession.lockForConfiguration()
+            defer { audioSession.unlockForConfiguration() }
+            while audioSession.activationCount > 0 {
+                try audioSession.setActive(false)
+            }
+        }
+
+        let scenarios = [
+            (activateThroughStore: false, deactivateNative: false),
+            (activateThroughStore: false, deactivateNative: true),
+            (activateThroughStore: true, deactivateNative: false)
+        ]
+        for scenario in scenarios {
+            let fixture = MockRTCAudioStore()
+            fixture.makeShared()
+            addTeardownBlock { try await fixture.dismantle() }
+            if scenario.activateThroughStore {
+                try await fixture.audioStore.dispatch(.setActive(true)).result()
+            } else {
+                audioSession.audioSessionDidActivate(.sharedInstance())
+                audioSession.audioSessionDidActivate(.sharedInstance())
+                XCTAssertFalse(fixture.audioStore.state.isActive)
+            }
+            XCTAssertTrue(audioSession.isActive)
+            if scenario.deactivateNative {
+                audioSession.audioSessionDidDeactivate(.sharedInstance())
+                XCTAssertFalse(audioSession.isActive)
+                XCTAssertGreaterThan(audioSession.activationCount, 0)
+            }
+
+            try await fixture.dismantle()
+
+            XCTAssertEqual(audioSession.activationCount, 0)
+            XCTAssertFalse(audioSession.isActive)
+        }
+    }
+
     func test_dispatch_singleAction_updatesState() async {
         subject.dispatch(.setInterrupted(true))
 

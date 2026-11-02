@@ -106,6 +106,18 @@ final class StreamRejectionReasonProviderTests: XCTestCase, @unchecked Sendable 
     }
 
     @MainActor
+    func test_rejectionReason_outgoingCallAcceptedByCallee_doesNotCancel() async {
+        let ringingCall = MockCall(.dummy())
+        mockStreamVideo.state.ringingCall = ringingCall
+        ringingCall.state.createdBy = mockStreamVideo.user
+        ringingCall.state.session = .dummy(acceptedBy: ["callee": .now])
+
+        let reason = await subject.reason(for: ringingCall.cId, ringTimeout: true)
+
+        XCTAssertNil(reason)
+    }
+
+    @MainActor
     func test_rejectionReason_givenNoRingingCall_thenReturnsNil() async {
         let reason = await subject.reason(
             for: .unique,

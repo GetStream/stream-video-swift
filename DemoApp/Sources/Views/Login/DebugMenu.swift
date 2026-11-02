@@ -343,7 +343,7 @@ struct DebugMenu: View {
         }
         .sheet(isPresented: $isLogsViewerVisible) {
             NavigationView {
-                MemoryLogViewer()
+                MemoryLogViewer(isPresented: $isLogsViewerVisible)
             }
         }
         .sheet(isPresented: $presentsCustomEnvironmentSetup) {

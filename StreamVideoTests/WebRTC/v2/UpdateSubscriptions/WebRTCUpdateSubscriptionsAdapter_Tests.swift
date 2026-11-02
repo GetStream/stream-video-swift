@@ -14,8 +14,12 @@ final class WebRTCUpdateSubscriptionsAdapter_Tests: XCTestCase, @unchecked Senda
     private lazy var mockSFUStack: MockSFUStack! = .init()
     private lazy var sessionID: String! = .unique
     private lazy var subject: WebRTCUpdateSubscriptionsAdapter! = .init(
-        participantsPublisher: participantsSubject.eraseToAnyPublisher(),
-        incomingVideoQualitySettingsPublisher: incomingVideoQualitySettingsSubject.eraseToAnyPublisher(),
+        participantsPublisher: participantsSubject
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher(),
+        incomingVideoQualitySettingsPublisher: incomingVideoQualitySettingsSubject
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher(),
         sfuAdapter: mockSFUStack.adapter,
         sessionID: sessionID,
         clientCapabilities: []
@@ -95,7 +99,15 @@ final class WebRTCUpdateSubscriptionsAdapter_Tests: XCTestCase, @unchecked Senda
             "4": .dummy(id: "4", isScreenSharing: true)
         ])
 
-        await fulfillment { self.mockSFUStack.service.timesCalled(.updateSubscriptions) == 1 }
+        // Wait for a later update on the same queue before checking the count.
+        participantsSubject.send([:])
+        await fulfillment {
+            self.mockSFUStack.service.recordedInputPayload(
+                Stream_Video_Sfu_Signal_UpdateSubscriptionsRequest.self,
+                for: .updateSubscriptions
+            )?.last?.tracks.isEmpty == true
+        }
+        XCTAssertEqual(mockSFUStack.service.timesCalled(.updateSubscriptions), 2)
     }
 
     func test_stopObservation_whenParticipantsUpdated_doesNotSendRequest() async throws {

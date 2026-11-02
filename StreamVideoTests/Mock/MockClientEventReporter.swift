@@ -42,6 +42,11 @@ actor MockClientEventReporter: ClientEventReporting {
     private(set) var completedStages: [CompletedStage] = []
     private(set) var updatedStages: [UpdatedStage] = []
     private(set) var abortedFailures: [ClientEventFailure] = []
+    private var completeStageHandler: (@Sendable () -> Void)?
+
+    func setCompleteStageHandler(_ handler: @escaping @Sendable () -> Void) {
+        completeStageHandler = handler
+    }
 
     func reportJoinInitiated(details: ClientEventStageDetails) async {
         reportJoinInitiatedCallCount += 1
@@ -97,6 +102,7 @@ actor MockClientEventReporter: ClientEventReporting {
                 failure: failure
             )
         )
+        completeStageHandler?()
     }
 
     func updateStage(

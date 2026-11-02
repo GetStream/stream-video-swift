@@ -50,6 +50,8 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     /// serially.
     private let setPublisherProcessingQueue = OperationQueue(maxConcurrentOperationCount: 1)
     private let subscriberOfferProcessingQueue = OperationQueue(maxConcurrentOperationCount: 1)
+    @Atomic private var isClosing = false
+    private let negotiationFailureSubject = PassthroughSubject<Void, Never>()
 
     // MARK: Adapters
 
@@ -124,6 +126,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             .publisher(eventType: StreamRTCPeerConnection.DidChangeConnectionStateEvent.self)
             .filter { $0.state == .failed }
             .map { _ in () }
+            .merge(with: negotiationFailureSubject)
             .eraseToAnyPublisher()
     }
 
@@ -351,12 +354,10 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
                 .sinkTask(queue: setPublisherProcessingQueue) { [weak self] in await self?.negotiate() }
                 .store(in: disposableBag)
         } else {
+            // SFUAdapter relays events across webSocket refreshes, so a single
+            // observer is enough. Re-subscribing on refresh would handle every
+            // offer once per refresh.
             configureSubscriberOfferObserver()
-
-            sfuAdapter
-                .refreshPublisher
-                .sink { [weak self] in self?.configureSubscriberOfferObserver() }
-                .store(in: disposableBag)
         }
     }
 
@@ -378,6 +379,10 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     }
 
     func prepareForClosing() async {
+        isClosing = true
+        disposableBag.removeAll()
+        setPublisherProcessingQueue.cancelAllOperations()
+        subscriberOfferProcessingQueue.cancelAllOperations()
         await iceAdapter.stopObserving()
     }
 
@@ -632,6 +637,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
 
     /// Closes the peer connection.
     func close() async {
+        isClosing = true
         log.debug(
             """
             Closing PeerConnection
@@ -642,7 +648,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             """,
             subsystems: subsystem
         )
-        disposableBag.removeAll()
+        await prepareForClosing()
         await peerConnection.close()
         peerConnection.subject.send(StreamRTCPeerConnection.CloseEvent())
     }
@@ -867,9 +873,13 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
 
             let offer = try await createOffer(constraints: constraints)
 
+            try Task.checkCancellation()
             try await setLocalDescription(offer)
 
+            try Task.checkCancellation()
             try await ensureSetUpHasBeenCompleted()
+
+            try Task.checkCancellation()
 
             /// - Note: Capabilities aren't required at this point and thus it's ok to leave it empty.
             let tracksInfo = WebRTCJoinRequestFactory(
@@ -904,14 +914,18 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
                 for: sessionId
             )
 
+            try Task.checkCancellation()
             try await setRemoteDescription(
                 .init(
                     type: .answer,
                     sdp: sessionDescription.sdp
                 )
             )
+        } catch is CancellationError {
+            return
         } catch {
             log.error(error, subsystems: subsystem)
+            await rollbackPendingNegotiation()
         }
     }
 
@@ -941,7 +955,9 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
                 )
             )
 
+            try Task.checkCancellation()
             var answer = try await createAnswer()
+            try Task.checkCancellation()
             if mungeSubscriberStereo {
                 let munger = SDPParser()
                 let visitor = StereoEnableVisitor()
@@ -957,18 +973,46 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
                 try await setLocalDescription(answer)
             }
 
+            try Task.checkCancellation()
             try await sfuAdapter.sendAnswer(
                 sessionDescription: answer.sdp,
                 peerType: .subscriber,
+                negotiationID: event.negotiationID,
                 for: sessionId
             )
             log.debug("Subscriber offer was handled.", subsystems: subsystem)
+        } catch is CancellationError {
+            return
         } catch {
             log.error(
                 "Error handling offer event",
                 subsystems: subsystem,
                 error: error
             )
+            await rollbackPendingNegotiation()
+        }
+    }
+
+    /// Recovers a pending offer on its serialized negotiation queue.
+    private func rollbackPendingNegotiation() async {
+        guard !isClosing else { return }
+        let expectedState: RTCSignalingState = peerType == .publisher
+            ? .haveLocalOffer : .haveRemoteOffer
+        guard peerConnection.signalingState == expectedState else { return }
+
+        do {
+            let rollback = RTCSessionDescription(type: .rollback, sdp: "")
+            if peerType == .publisher {
+                try await peerConnection.setLocalDescription(rollback)
+            } else {
+                try await peerConnection.setRemoteDescription(rollback)
+            }
+        } catch {
+            log.error(error, subsystems: subsystem)
+            guard !isClosing, peerConnection.signalingState != .closed else {
+                return
+            }
+            negotiationFailureSubject.send(())
         }
     }
 

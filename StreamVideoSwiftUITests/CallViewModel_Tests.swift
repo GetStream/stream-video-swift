@@ -3,6 +3,7 @@
 //
 
 import Combine
+import Foundation
 @testable import StreamVideo
 @testable import StreamVideoSwiftUI
 import StreamWebRTC
@@ -252,6 +253,23 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         await fulfilmentInMainActor { self.subject.call?.cId == self.mockCall.cId }
     }
 
+    func test_callKitJoin_idleAfterActiveCallWasCleared_resetsCallingStateAndCall() async {
+        let callKitService = MockCallKitService()
+        InjectedValues[\.callKitService] = callKitService
+        callKitService.send(.joining(mockCall))
+        subject = .init()
+        await assertCallingState(.joining)
+
+        subject.setActiveCall(nil)
+        XCTAssertEqual(subject.callingState, .joining)
+        XCTAssertNil(streamVideo.state.activeCall)
+
+        callKitService.send(.idle)
+
+        await assertCallingState(.idle)
+        await fulfilmentInMainActor { self.subject.call == nil }
+    }
+
     func test_reconnectionStatusMigratingThenConnected_keepsCallingStateJoining() async {
         // Given
         await prepareMediaScenario()
@@ -363,6 +381,267 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         await assertCallingState(.inCall)
     }
 
+    func test_outgoingCall_acceptedJoinFails_resumesRingingAndRetriesOnNextAccept(
+    ) async throws {
+        await prepare()
+        subject.startCall(
+            callType: .default,
+            callId: callId,
+            members: participants,
+            ring: true
+        )
+        await assertCallingState(.outgoing)
+        streamVideo.state.ringingCall = mockCall
+        mockCall.stubbedJoinError = ClientError("join failed")
+        mockCall.state.session = .dummy(acceptedBy: [secondUser.id: .now])
+
+        processAcceptedEvent()
+
+        await fulfilmentInMainActor {
+            self.mockCall.timesCalled(.join) == 1
+        }
+        await assertCallingState(.outgoing)
+        XCTAssertNil(subject.error)
+
+        mockCall.stubbedJoinError = nil
+        processAcceptedEvent()
+
+        await assertCallingState(.inCall)
+    }
+
+    func test_outgoingCall_acceptedJoinFailsAfterDeadline_doesNotRestartRinging() async {
+        await prepare(ringTimeOut: 3000)
+        let applicationStateAdapter = MockAppStateAdapter()
+        applicationStateAdapter.makeShared()
+        let endedAfterBackgrounding = expectation(description: "Expired recovery must not end the session")
+        endedAfterBackgrounding.isInverted = true
+        let ringingController = OutgoingRingingController(streamVideo: streamVideo, callCiD: cId) {
+            endedAfterBackgrounding.fulfill()
+        }
+        defer {
+            withExtendedLifetime(ringingController) {}
+            applicationStateAdapter.dismante()
+        }
+        mockCall.stubbedJoinError = ClientError("join failed")
+        mockCall.waitForJoinToResume = true
+        subject.startCall(callType: .default, callId: callId, members: participants, ring: true)
+        await assertCallingState(.outgoing)
+        streamVideo.state.ringingCall = mockCall
+        mockCall.state.session = .dummy(acceptedBy: [secondUser.id: .now])
+
+        processAcceptedEvent()
+        await fulfilmentInMainActor { self.mockCall.timesCalled(.join) == 1 }
+        let deadlinePassed = expectation(description: "Original ring deadline passed")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.1) { deadlinePassed.fulfill() }
+        await fulfillment(of: [deadlinePassed], timeout: 4)
+        mockCall.waitForJoinToResume = false
+        mockCall.resumeJoin()
+
+        await assertCallingState(.idle, timeout: 2)
+        XCTAssertNotNil(subject.error)
+        XCTAssertEqual(mockCall.timesCalled(.join), 1)
+        XCTAssertEqual(mockCall.timesCalled(.reject), 0)
+        XCTAssertEqual(mockCall.timesCalled(.leave), 1)
+        XCTAssertEqual(mockCall.leaveInitiators, [.sdkError])
+        XCTAssertEqual(mockCall.recordedInputPayload(String.self, for: .leave), ["joinFailed"])
+        XCTAssertNil(subject.call)
+        await fulfilmentInMainActor { self.streamVideo.state.ringingCall == nil }
+
+        applicationStateAdapter.stubbedState = .background
+        await fulfillment(of: [endedAfterBackgrounding], timeout: 0.2)
+        subject.hangUp()
+        await fulfilmentInMainActor { self.streamVideo.state.ringingCall == nil }
+    }
+
+    func test_outgoingCall_firstSessionAssignedDuringHangUp_stillLeaves() async {
+        await prepare()
+        mockCall.state.session = nil
+        subject.setActiveCall(mockCall)
+        subject.setCallingState(.outgoing)
+
+        subject.hangUp()
+        // Create can publish the first session before the hang-up task runs.
+        mockCall.state.session = .dummy(id: "first-session")
+
+        await assertCallingState(.idle)
+        XCTAssertEqual(mockCall.timesCalled(.leave), 1)
+        XCTAssertEqual(mockCall.timesCalled(.reject), 1)
+        subject.hangUp()
+        await assertCallingState(.idle)
+    }
+
+    func test_outgoingCall_hangUpAfterAcceptance_leavesWithoutRejectingOrJoining() async {
+        await prepare()
+        mockCall.state.createdBy = firstUser.user
+        mockCall.state.session = .dummy(acceptedBy: [secondUser.id: .now])
+        mockCall.stubbedFunction[.reject] = nil
+        subject.setActiveCall(mockCall)
+        subject.setCallingState(.outgoing)
+
+        subject.hangUp()
+
+        await assertCallingState(.idle)
+        XCTAssertEqual(mockCall.timesCalled(.join), 0)
+        XCTAssertEqual(mockCoordinatorClient.timesCalled(.rejectCall), 0)
+        XCTAssertEqual(mockCall.timesCalled(.leave), 1)
+        XCTAssertEqual(mockCall.leaveInitiators, [.user])
+    }
+
+    func test_outgoingCall_hangUpRefreshFindsAcceptance_leavesWithoutRejectingOrJoining() async {
+        await prepare()
+        mockCall.state.createdBy = firstUser.user
+        mockCall.state.session = .dummy(id: "ring-session")
+        streamVideo.state.ringingCall = mockCall
+        mockCall.stubbedFunction[.reject] = nil
+        mockCoordinatorClient.stub(for: .rejectCall, with: RejectCallResponse(duration: "0"))
+        mockCall.stub(for: .getRingState, with: GetCallRingStateResponse(
+            acceptedBy: [secondUser.id: .now],
+            callCid: cId,
+            createdByUserId: firstUser.id,
+            duration: "0",
+            missedBy: [:],
+            rejectedBy: [:],
+            sessionId: "ring-session"
+        ))
+        subject.setActiveCall(mockCall)
+        subject.setCallingState(.outgoing)
+
+        subject.hangUp()
+
+        await assertCallingState(.idle)
+        XCTAssertEqual(mockCall.ringStateRequests, ["ring-session"])
+        XCTAssertEqual(mockCoordinatorClient.timesCalled(.rejectCall), 0)
+        XCTAssertEqual(mockCall.timesCalled(.join), 0)
+        XCTAssertEqual(mockCall.timesCalled(.leave), 1)
+        XCTAssertEqual(mockCall.leaveInitiators, [.user])
+    }
+
+    func test_outgoingCall_acceptanceStartsJoiningDuringHangUp_stillLeaves() async {
+        await prepare()
+        let refreshStarted = expectation(description: "Ring refresh started")
+        let joinFinished = expectation(description: "Pending join finished")
+        let refresh = AsyncStream<Void>.makeStream()
+        mockCall.onGetRingState = {
+            refreshStarted.fulfill()
+            for await _ in refresh.stream {}
+        }
+        mockCall.state.createdBy = firstUser.user
+        mockCall.state.session = .dummy(id: "ring-session")
+        mockCall.stubbedFunction[.reject] = nil
+        mockCall.waitForJoinToResume = true
+        mockCall.onJoinFinished = { joinFinished.fulfill() }
+        defer {
+            refresh.continuation.finish()
+            mockCall.resumeJoin()
+            mockCall.onGetRingState = nil
+            mockCall.onJoinFinished = nil
+        }
+        subject.setActiveCall(mockCall)
+        subject.setCallingState(.outgoing)
+
+        subject.hangUp()
+        await fulfillment(of: [refreshStarted], timeout: 2)
+        mockCall.state.session?.acceptedBy = [secondUser.id: .now]
+        processAcceptedEvent()
+        await fulfilmentInMainActor { self.mockCall.timesCalled(.join) == 1 }
+        await assertCallingState(.joining)
+        refresh.continuation.finish()
+
+        await assertCallingState(.idle)
+        XCTAssertEqual(mockCoordinatorClient.timesCalled(.rejectCall), 0)
+        XCTAssertEqual(mockCall.timesCalled(.leave), 1)
+        XCTAssertEqual(mockCall.leaveInitiators, [.user])
+        subject.hangUp()
+        mockCall.resumeJoin()
+        await fulfillment(of: [joinFinished], timeout: 2)
+    }
+
+    func test_outgoingCall_timeoutAfterAcceptance_joinsWithoutRejecting() async {
+        await prepare(ringTimeOut: 1000)
+        mockCall.state.session = .dummy(acceptedBy: [secondUser.id: .now])
+
+        subject.startCall(callType: .default, callId: callId, members: participants, ring: true)
+        await assertCallingState(.inCall)
+
+        XCTAssertEqual(mockCall.timesCalled(.join), 1)
+        XCTAssertEqual(mockCall.timesCalled(.reject), 0)
+        XCTAssertEqual(mockCall.timesCalled(.leave), 0)
+    }
+
+    func test_outgoingCall_timeoutRefreshFindsAcceptance_joinsWithoutRejecting() async {
+        await prepare(ringTimeOut: 1000)
+        mockCall.state.createdBy = firstUser.user
+        mockCall.state.session = .dummy(id: "ring-session")
+        mockCall.stubbedFunction[.reject] = nil
+        mockCall.stub(for: .getRingState, with: GetCallRingStateResponse(
+            acceptedBy: [secondUser.id: .now],
+            callCid: cId,
+            createdByUserId: firstUser.id,
+            duration: "0",
+            missedBy: [:],
+            rejectedBy: [:],
+            sessionId: "ring-session"
+        ))
+
+        subject.startCall(callType: .default, callId: callId, members: participants, ring: true)
+        await assertCallingState(.inCall)
+
+        XCTAssertEqual(mockCall.ringStateRequests, ["ring-session"])
+        XCTAssertEqual(mockCoordinatorClient.timesCalled(.rejectCall), 0)
+        XCTAssertEqual(mockCall.timesCalled(.join), 1)
+        XCTAssertEqual(mockCall.timesCalled(.leave), 0)
+    }
+
+    func test_outgoingCall_sessionChangesDuringHangUp_doesNotLeaveReplacement() async {
+        await prepare()
+        defer { mockCall.onGetRingState = nil }
+        mockCall.state.createdBy = firstUser.user
+        mockCall.state.session = .dummy(id: "ring-session")
+        streamVideo.state.ringingCall = mockCall
+        mockCall.stubbedFunction[.reject] = nil
+        let refreshed = expectation(description: "Ring state refresh completed")
+        mockCall.onGetRingState = { [mockCall] in
+            await MainActor.run { mockCall?.state.session = .dummy(id: "replacement") }
+            refreshed.fulfill()
+        }
+        subject.setActiveCall(mockCall)
+        subject.setCallingState(.outgoing)
+        let leftReplacement = expectation(description: "Must not leave replacement session")
+        leftReplacement.isInverted = true
+        let subscription = subject.$callingState.dropFirst().sink {
+            if $0 == .idle { leftReplacement.fulfill() }
+        }
+
+        subject.hangUp()
+
+        await fulfillment(of: [refreshed, leftReplacement], timeout: 0.5)
+        XCTAssertEqual(mockCall.timesCalled(.leave), 0)
+        XCTAssertEqual(mockCall.state.session?.id, "replacement")
+        subscription.cancel()
+    }
+
+    func test_outgoingCall_rejectedAgainWhileRejecting_rejectsOnce() async throws {
+        await prepare()
+        subject.startCall(
+            callType: .default,
+            callId: callId,
+            members: participants,
+            ring: true
+        )
+        await assertCallingState(.outgoing)
+        mockCall.waitForRejectToResume = true
+
+        processRejectedEvent()
+        await fulfilmentInMainActor { self.mockCall.timesCalled(.reject) == 1 }
+        processRejectedEvent()
+        // Let the second event arrive while the first rejection is pending.
+        await wait(for: 0.5)
+        mockCall.resumeReject()
+
+        await assertCallingState(.idle)
+        XCTAssertEqual(mockCall.timesCalled(.reject), 1)
+    }
+
     func test_outgoingCall_rejectedEventThreeParticipants() async throws {
         // Given
         await prepare()
@@ -439,6 +718,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         )
         await prepare()
         mockCall.stub(for: .create, with: ()) // We stub with something irrelevant to cause the mock to forward to super the request
+        streamVideo.state.connection = .connected
 
         subject.startCall(
             callType: .default,
@@ -495,6 +775,11 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
 
         // Then
         await assertCallingState(.idle)
+        XCTAssertEqual(mockCall.leaveInitiators.first, .remoteEvent)
+        XCTAssertEqual(
+            mockCall.recordedInputPayload(String.self, for: .leave)?.first,
+            "call.ended"
+        )
     }
 
     func test_outgoingCall_blockEventCurrentUser() async throws {
@@ -593,6 +878,8 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         // the cancel to the create path, so nothing is rejected yet and these
         // synchronous checks still observe the outgoing state.
         subject.hangUp()
+        // The first session belongs to this create, not a replacement call.
+        mockCall.state.session = .dummy(id: "first-session")
         // Even though the reject will fail, the leaveCall should be completed
         await assertCallingState(.idle)
         XCTAssertEqual(
@@ -627,6 +914,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
 
         // Then
         await assertCallingState(.idle)
+        XCTAssertEqual(mockCall.leaveInitiators.first, .user)
         XCTAssertEqual(
             mockCall.recordedInputPayload(String.self, for: .leave)?.first,
             expectedReason
@@ -647,6 +935,11 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
 
         // Then
         await assertCallingState(.idle, timeout: TimeInterval(ringTimeoutSeconds + 1 * 1000))
+        XCTAssertEqual(mockCall.leaveInitiators.first, .sdkError)
+        XCTAssertEqual(
+            mockCall.recordedInputPayload(String.self, for: .leave)?.first,
+            "ringTimeout"
+        )
     }
 
     // MARK: - Incoming
@@ -711,11 +1004,18 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         }
     }
 
-    func test_incomingCall_acceptedFromSameUserElsewhere_callingStateChangesToIdle() async throws {
-        // Given
-        await prepareIncomingCallScenario()
+    func test_incomingCall_acceptedElsewhere_dismissesAndStopsRingingWithoutRejecting_() async throws {
+        let ringTimeout: TimeInterval = 2
+        await prepareIncomingCallScenario(ringTimeout: ringTimeout)
+        XCTAssertNil(subject.call)
+        XCTAssertNil(streamVideo.state.activeCall)
+        let incomingDismissed = expectation(description: "Incoming UI dismissed")
+        let dismissalObservation = subject.$callingState
+            .filter { $0 == .idle }
+            .first()
+            .sink { _ in incomingDismissed.fulfill() }
+        defer { dismissalObservation.cancel() }
 
-        // When
         streamVideo.process(
             .coordinatorEvent(
                 .typeCallAcceptedEvent(
@@ -727,8 +1027,96 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
             )
         )
 
-        // Then
-        await assertCallingState(.idle)
+        await fulfillment(of: [incomingDismissed], timeout: ringTimeout / 2)
+
+        // A stale ringing timeout would reset the next call's microphone setting.
+        subject.toggleMicrophoneEnabled()
+        XCTAssertFalse(subject.callSettings.audioOn)
+        let timeoutReset = expectation(description: "No ringing timeout after acceptance")
+        timeoutReset.isInverted = true
+        let observation = subject.$callSettings
+            .filter(\.audioOn)
+            .first()
+            .sink { _ in timeoutReset.fulfill() }
+        defer { observation.cancel() }
+
+        await fulfillment(of: [timeoutReset], timeout: ringTimeout + 1)
+        XCTAssertEqual(subject.callingState, .idle)
+        XCTAssertFalse(subject.callSettings.audioOn)
+        XCTAssertEqual(mockCall.timesCalled(.accept), 0)
+        XCTAssertEqual(mockCall.timesCalled(.join), 0)
+        XCTAssertEqual(mockCall.timesCalled(.reject), 0)
+        XCTAssertEqual(mockCall.timesCalled(.leave), 0)
+    }
+
+    func test_incomingCall_directJoin_acceptEchoPreservesJoin_() async throws {
+        await prepare()
+        let callController = MockCallController()
+        let call = Call(
+            callType: callType,
+            callId: callId,
+            coordinatorClient: mockCoordinatorClient,
+            callController: callController
+        )
+        streamVideo.stub(for: .call, with: call)
+        let response = JoinCallResponse.dummy()
+        callController.stub(for: .join, with: response)
+        subject.callingState = .incoming(
+            .init(
+                id: callId,
+                caller: secondUser.user,
+                type: callType,
+                members: participants,
+                timeout: 10
+            )
+        )
+        let joinStarted = expectation(description: "Join awaits the interceptor")
+        let resumeJoin = CurrentValueSubject<Bool, Never>(false)
+        let interceptor = CallJoinInterceptor_Mock { _ in
+            joinStarted.fulfill()
+            _ = try await resumeJoin.filter { $0 }
+                .nextValue(timeout: defaultTimeout * 2)
+        }
+        defer {
+            resumeJoin.send(true)
+            call.leave()
+        }
+
+        let joiningTask = Task {
+            try await call.join(joinInterceptor: interceptor)
+        }
+        await fulfillment(of: [joinStarted], timeout: defaultTimeout)
+        XCTAssertNil(streamVideo.state.activeCall)
+
+        let incomingDismissed = expectation(description: "Incoming UI dismissed")
+        let observation = subject.$callingState
+            .filter { $0 == .idle }
+            .first()
+            .sink { _ in incomingDismissed.fulfill() }
+        defer { observation.cancel() }
+
+        streamVideo.process(
+            .coordinatorEvent(
+                .typeCallAcceptedEvent(
+                    .dummy(
+                        callCid: cId,
+                        user: firstUser.user.toUserResponse()
+                    )
+                )
+            )
+        )
+
+        await fulfillment(
+            of: [incomingDismissed],
+            timeout: defaultTimeout / 2
+        )
+        XCTAssertEqual(subject.callingState, .idle)
+        resumeJoin.send(true)
+        let joinedResponse = try await joiningTask.value
+        XCTAssertEqual(joinedResponse, response)
+        XCTAssertTrue(streamVideo.state.activeCall === call)
+        XCTAssertEqual(callController.timesCalled(.join), 1)
+        XCTAssertEqual(callController.timesCalled(.leave), 0)
     }
 
     func test_incomingCall_sameUserAcceptedAnotherCall_callingStateShouldRemainIncoming() async throws {
@@ -974,6 +1362,42 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         await fulfillment(of: [inCallExpectation], timeout: 1)
         await fulfilmentInMainActor { delayedCall.timesCalled(.leave) == 1 }
         await assertCallingState(.idle)
+    }
+
+    func test_joinAndRingCall_hangUpDuringJoin_reportsUserInitiator() async {
+        await prepare()
+        mockCall.waitForJoinToResume = true
+        let joinStarted = expectation(description: "Join started")
+        mockCall.onJoinStarted = { joinStarted.fulfill() }
+
+        subject.joinAndRingCall(
+            callType: callType,
+            callId: callId,
+            members: participants
+        )
+        await fulfillment(of: [joinStarted], timeout: defaultTimeout)
+
+        subject.hangUp()
+
+        XCTAssertEqual(mockCall.leaveInitiators.first, .user)
+        mockCall.resumeJoin()
+        await assertCallingState(.idle)
+    }
+
+    func test_joinAndRingCall_cancelledJoinCompletes_preservesNextJoin() async {
+        await assertCancelledJoinPreservesNextJoin { callId in
+            subject.joinAndRingCall(
+                callType: callType,
+                callId: callId,
+                members: participants
+            )
+        }
+    }
+
+    func test_joinCall_cancelledJoinCompletes_preservesNextJoin() async {
+        await assertCancelledJoinPreservesNextJoin { callId in
+            subject.joinCall(callType: callType, callId: callId)
+        }
     }
 
     func test_joinAndRingCall_joinsAndRingsMembers() async throws {
@@ -1656,6 +2080,80 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
 
     // MARK: - Private helpers
 
+    private func processAcceptedEvent() {
+        streamVideo.process(
+            .coordinatorEvent(
+                .typeCallAcceptedEvent(
+                    .dummy(
+                        callCid: cId,
+                        user: secondUser.user.toUserResponse()
+                    )
+                )
+            )
+        )
+    }
+
+    private func processRejectedEvent() {
+        streamVideo.process(
+            .coordinatorEvent(
+                .typeCallRejectedEvent(.dummy(
+                    call: .dummy(
+                        cid: cId,
+                        session: .dummy(
+                            rejectedBy: [secondUser.userId: Date()]
+                        )
+                    ),
+                    callCid: cId,
+                    createdAt: Date(),
+                    user: secondUser.user.toUserResponse()
+                ))
+            )
+        )
+    }
+
+    private func assertCancelledJoinPreservesNextJoin(
+        startJoin: (String) -> Void
+    ) async {
+        await prepare()
+        let nextCall = MockCall(.dummy(callId: .unique))
+        defer {
+            nextCall.leave()
+            nextCall.resumeJoin()
+        }
+        mockCall.waitForJoinToResume = true
+        nextCall.waitForJoinToResume = true
+        let firstJoinStarted = expectation(description: "First join started")
+        let nextJoinStarted = expectation(description: "Next join started")
+        mockCall.onJoinStarted = { firstJoinStarted.fulfill() }
+        nextCall.onJoinStarted = { nextJoinStarted.fulfill() }
+
+        startJoin(mockCall.callId)
+        await fulfillment(of: [firstJoinStarted], timeout: defaultTimeout)
+        subject.hangUp()
+        streamVideo.stub(for: .call, with: nextCall)
+        startJoin(nextCall.callId)
+        await fulfillment(of: [nextJoinStarted], timeout: defaultTimeout)
+
+        let becameIdle = expectation(description: "Next join was cleared")
+        becameIdle.isInverted = true
+        let cancellable = subject.$callingState
+            .dropFirst()
+            .filter { $0 == .idle }
+            .sink { _ in becameIdle.fulfill() }
+
+        mockCall.resumeJoin()
+        await fulfillment(of: [becameIdle], timeout: 1)
+        cancellable.cancel()
+
+        subject.hangUp(reason: "next-hangup")
+        XCTAssertEqual(nextCall.leaveInitiators, [.user])
+        XCTAssertEqual(
+            nextCall.recordedInputPayload(String.self, for: .leave)?.first,
+            "next-hangup"
+        )
+        await assertCallingState(.idle)
+    }
+
     private func prepare(
         call: MockCall? = nil,
         ringTimeOut: Int = (Int(defaultTimeout) + 1) * 1000,
@@ -1719,6 +2217,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
     }
 
     private func prepareIncomingCallScenario(
+        ringTimeout: TimeInterval = 10,
         file: StaticString = #file,
         line: UInt = #line
     ) async {
@@ -1731,7 +2230,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
                 cid: cId,
                 createdBy: secondUser.user.toUserResponse(),
                 id: callId,
-                settings: .dummy(ring: .dummy(autoCancelTimeoutMs: 10000)),
+                settings: .dummy(ring: .dummy(autoCancelTimeoutMs: Int(ringTimeout * 1000))),
                 type: callType
             ),
             callCid: cId,
@@ -1757,7 +2256,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
                     caller: secondUser.user,
                     type: callType,
                     members: [firstUser, secondUser],
-                    timeout: 10
+                    timeout: ringTimeout
                 )
             ),
             file: file,
@@ -1876,7 +2375,17 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
 }
 
 private final class CallJoinInterceptor_Mock: CallJoinIntercepting, @unchecked Sendable {
-    func callReadyToJoin(_ call: Call) async throws {}
+    private let onCallReadyToJoin: @Sendable (Call) async throws -> Void
+
+    init(
+        onCallReadyToJoin: @escaping @Sendable (Call) async throws -> Void = { _ in }
+    ) {
+        self.onCallReadyToJoin = onCallReadyToJoin
+    }
+
+    func callReadyToJoin(_ call: Call) async throws {
+        try await onCallReadyToJoin(call)
+    }
 }
 
 extension User {

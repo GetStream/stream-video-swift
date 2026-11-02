@@ -185,6 +185,52 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertTrue(request.muteStates[0].muted)
     }
 
+    func test_didUpdateCallSettings_muteRequestFails_localTracksAreDisabled(
+    ) async throws {
+        publishOptions = [.dummy(codec: .opus)]
+        let transceiver = try makeTransceiver(
+            of: .audio,
+            audioOptions: publishOptions[0]
+        )
+        mockPeerConnection.stub(for: .addTransceiver, with: transceiver)
+        try await subject.setUp(
+            with: .init(audioOn: true),
+            ownCapabilities: [.sendAudio]
+        )
+        try await subject.didUpdateCallSettings(.init(audioOn: true))
+        let senderTrack = try XCTUnwrap(transceiver.sender.track)
+        XCTAssertTrue(subject.primaryTrack.isEnabled)
+        XCTAssertTrue(senderTrack.isEnabled)
+
+        var response = Stream_Video_Sfu_Signal_UpdateMuteStatesResponse()
+        response.error.code = .requestValidationFailed
+        response.error.message = "Mute request failed"
+        mockSFUStack.service.stub(for: .updateTrackMuteState, with: response)
+
+        let error = await XCTAssertThrowsErrorAsync {
+            try await subject.didUpdateCallSettings(.init(audioOn: false))
+        }
+
+        XCTAssertEqual(error as? Stream_Video_Sfu_Models_Error, response.error)
+        XCTAssertFalse(subject.primaryTrack.isEnabled)
+        XCTAssertFalse(senderTrack.isEnabled)
+        XCTAssertFalse(mockAudioRecorder.isRecording)
+        XCTAssertEqual(
+            mockSFUStack.service.updateMuteStatesWasCalledWithRequest?
+                .muteStates.first?.muted,
+            true
+        )
+
+        mockSFUStack.service.stub(
+            for: .updateTrackMuteState,
+            with: Stream_Video_Sfu_Signal_UpdateMuteStatesResponse()
+        )
+        try await subject.didUpdateCallSettings(.init(audioOn: true))
+
+        XCTAssertTrue(subject.primaryTrack.isEnabled)
+        XCTAssertTrue(senderTrack.isEnabled)
+    }
+
     func test_didUpdateCallSettings_isEnabledTrueCallSettingsFalseAndThenCallSettingsTrue_trackWasNotAddedAgain() async throws {
         try await assertTrackEvent {
             switch $0 {
@@ -306,7 +352,8 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertFalse(request.muteStates[0].muted)
     }
 
-    func test_didUpdateOwnCapabilities_removesAudioCapability_blocksMuteUpdate() async throws {
+    func test_didUpdateOwnCapabilities_sendAudioRevoked_localTrackIsDisabled(
+    ) async throws {
         try await subject.setUp(
             with: .init(audioOn: true),
             ownCapabilities: [.sendAudio]
@@ -320,7 +367,12 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
 
         await fulfillment { self.mockSFUStack.service.updateMuteStatesWasCalledWithRequest == nil }
         XCTAssertNil(mockSFUStack.service.updateMuteStatesWasCalledWithRequest)
-        XCTAssertTrue(subject.primaryTrack.isEnabled)
+        XCTAssertFalse(subject.primaryTrack.isEnabled)
+
+        try await subject.didUpdateCallSettings(.init(audioOn: true))
+
+        XCTAssertFalse(subject.primaryTrack.isEnabled)
+        XCTAssertNil(mockSFUStack.service.updateMuteStatesWasCalledWithRequest)
     }
 
     // MARK: - didUpdatePublishOptions

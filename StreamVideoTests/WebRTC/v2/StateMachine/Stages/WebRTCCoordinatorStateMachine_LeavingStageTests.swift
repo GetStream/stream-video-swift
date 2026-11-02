@@ -176,6 +176,77 @@ final class WebRTCCoordinatorStateMachine_LeavingStageTests: XCTestCase, @unchec
 
     // MARK: - Private helpers
 
+    func test_transition_pendingJoinStages_reportsLeaveAttribution() async throws {
+        let api = MockDefaultAPIEndpoints()
+        api.stub(
+            for: .clientCallEvent,
+            with: ReportClientEventResponse(duration: "1ms")
+        )
+        let reporter = ClientEventReporter(
+            api: api,
+            context: .init(userId: "user-1", callType: "default", callId: "call-1")
+        )
+        let stack = mockCoordinatorStack!
+        let coordinator = WebRTCCoordinator(
+            user: stack.user,
+            apiKey: stack.apiKey,
+            callCid: stack.callCid,
+            videoConfig: stack.videoConfig,
+            callSettings: .default,
+            clientEventReporter: reporter,
+            peerConnectionFactory: stack.peerConenctionFactory,
+            callAuthentication: stack.callAuthenticator.authenticate
+        )
+        for stage in [
+            ClientEventStage.coordinatorJoin,
+            .coordinatorWS,
+            .wsJoin,
+            .peerConnectionConnect
+        ] {
+            await reporter.beginStage(
+                stage,
+                peerConnection: stage == .peerConnectionConnect ? .subscribe : nil,
+                details: .init(
+                    callSessionId: "call-session-1",
+                    iceState: stage == .peerConnectionConnect ? .notConnected : nil
+                )
+            )
+        }
+        let subject = WebRTCCoordinator.StateMachine.Stage.leaving(
+            .init(coordinator: coordinator),
+            reason: "rejoin_attempt_limit_exceeded"
+        )
+
+        try await assertTransition(
+            from: .connecting,
+            expectedTarget: .cleanUp,
+            subject: subject
+        ) { _ in }
+        await fulfillment(of: [
+            expectation(for: NSPredicate { _, _ in
+                api.timesCalled(.clientCallEvent) == 8
+            }, evaluatedWith: nil)
+        ], timeout: defaultTimeout)
+        let events = (api.recordedInputPayload(
+            ReportClientEventRequest.self,
+            for: .clientCallEvent
+        ) ?? []).flatMap(\.events).filter { $0.eventType == "completed" }
+        XCTAssertEqual(events.count, 4)
+        for event in events {
+            let data = try CodableHelper.jsonEncoder.encode(event)
+            let json = try XCTUnwrap(
+                JSONSerialization.jsonObject(with: data) as? [String: Any]
+            )
+            XCTAssertEqual(json["leave_initiator"] as? String, "sdk_error")
+            XCTAssertEqual(
+                json["leave_reason"] as? String,
+                "rejoin_attempt_limit_exceeded"
+            )
+            XCTAssertEqual(event.retryFailureCode, "CLIENT_ABORTED")
+            XCTAssertEqual(event.callSessionId, "call-session-1")
+        }
+    }
+
     private func assertTransition(
         from: WebRTCCoordinator.StateMachine.Stage.ID,
         expectedTarget: WebRTCCoordinator.StateMachine.Stage.ID,

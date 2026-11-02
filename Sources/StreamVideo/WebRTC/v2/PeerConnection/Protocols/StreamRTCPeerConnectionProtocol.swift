@@ -16,6 +16,9 @@ protocol StreamRTCPeerConnectionProtocol: AnyObject, Sendable {
     /// The remote session description of the peer connection.
     var remoteDescription: RTCSessionDescription? { get }
 
+    /// The native SDP offer/answer signaling state.
+    var signalingState: RTCSignalingState { get }
+
     /// The list of RTP transceivers associated with this peer connection.
     var transceivers: [RTCRtpTransceiver] { get }
 

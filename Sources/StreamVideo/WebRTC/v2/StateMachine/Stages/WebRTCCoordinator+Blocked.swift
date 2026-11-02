@@ -71,7 +71,11 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     context.peerConnectionConnectReporters.forEach { $0.stop() }
                     await coordinator
                         .clientEventReporter
-                        .abortPendingStages(failure: .init(code: .backendLeave))
+                        .abortPendingStages(failure: .init(
+                            code: .backendLeave,
+                            leaveInitiator: .remoteEvent,
+                            leaveReason: Call.LeaveReason.blockedUser.rawValue
+                        ))
 
                     try Task.checkCancellation()
 
