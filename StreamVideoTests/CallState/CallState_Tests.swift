@@ -2,6 +2,7 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import Foundation
 @testable import StreamVideo
 import XCTest
@@ -221,6 +222,66 @@ final class CallState_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(subject.callSettings, initialCallSettings)
     }
 
+    func test_createResponse_delayedCreationEvent_keepsHydratedSession() {
+        let subject = CallState(.dummy())
+        let session = CallSessionResponse.dummy(id: "ring-session")
+        let response = CallResponse.dummy(
+            currentSessionId: session.id,
+            session: session
+        )
+        subject.update(from: GetOrCreateCallResponse(
+            call: response,
+            created: true,
+            duration: "",
+            members: [],
+            ownCapabilities: []
+        ))
+
+        subject.updateState(from: .typeCallCreatedEvent(.init(
+            call: .dummy(createdAt: response.createdAt),
+            callCid: response.cid,
+            createdAt: response.createdAt,
+            members: []
+        )))
+
+        XCTAssertEqual(subject.session, session)
+    }
+
+    func test_callCreatedEvent_withoutHydratedSession_updatesCall() {
+        let subject = CallState(.dummy())
+        let createdAt = Date(timeIntervalSince1970: 100)
+
+        subject.updateState(from: .typeCallCreatedEvent(.init(
+            call: .dummy(createdAt: createdAt),
+            callCid: "",
+            createdAt: createdAt,
+            members: []
+        )))
+
+        XCTAssertEqual(subject.createdAt, createdAt)
+        XCTAssertNil(subject.session)
+    }
+
+    func test_callCreatedEvent_newCallCreation_replacesPreviousSession() {
+        let subject = CallState(.dummy())
+        let createdAt = Date(timeIntervalSince1970: 100)
+        subject.update(from: CallResponse.dummy(
+            createdAt: createdAt,
+            session: .dummy(id: "previous-session")
+        ))
+        let newCreatedAt = createdAt.addingTimeInterval(1)
+
+        subject.updateState(from: .typeCallCreatedEvent(.init(
+            call: .dummy(createdAt: newCreatedAt),
+            callCid: "",
+            createdAt: newCreatedAt,
+            members: []
+        )))
+
+        XCTAssertEqual(subject.createdAt, newCreatedAt)
+        XCTAssertNil(subject.session)
+    }
+
     func test_update_fromCallResponse_withoutStartedSession_keepsDurationReset() {
         let subject = CallState(.dummy())
 
@@ -325,6 +386,82 @@ final class CallState_Tests: XCTestCase, @unchecked Sendable {
         subject.update(from: CallResponse.dummy(egress: .dummy()))
 
         XCTAssertEqual(subject.frameRecordingStatus, false)
+    }
+
+    // MARK: - Ring state
+
+    func test_update_fromRingState_addsOutcomesAndKeepsExistingOnes() {
+        let subject = CallState(.dummy())
+        let date = Date(timeIntervalSince1970: 1)
+        subject.session = .dummy(id: "session", rejectedBy: ["bob": date])
+
+        subject.update(
+            from: GetCallRingStateResponse.dummy(
+                acceptedBy: ["alice": date],
+                sessionEndedAt: date,
+                sessionId: "session"
+            )
+        )
+
+        XCTAssertEqual(subject.session?.acceptedBy, ["alice": date])
+        XCTAssertEqual(subject.session?.rejectedBy, ["bob": date])
+        XCTAssertEqual(subject.session?.endedAt, date)
+    }
+
+    func test_update_fromRingStateOfAnotherSession_ignoresIt() {
+        let subject = CallState(.dummy())
+        subject.session = .dummy(id: "session")
+
+        subject.update(
+            from: GetCallRingStateResponse.dummy(
+                acceptedBy: ["alice": Date()],
+                sessionId: "other-session"
+            )
+        )
+
+        XCTAssertEqual(subject.session?.acceptedBy, [:])
+    }
+
+    func test_update_fromRingStateWithFirstAccept_recordsPolledSession() {
+        let subject = CallState(.dummy())
+        subject.session = .dummy(id: "session")
+
+        subject.update(
+            from: GetCallRingStateResponse.dummy(
+                acceptedBy: ["alice": Date()],
+                sessionId: "session"
+            )
+        )
+
+        XCTAssertEqual(subject.sessionIdWithPolledAccept, "session")
+    }
+
+    func test_update_fromRingStateWithKnownAccept_doesNotRecordPolledSession() {
+        let subject = CallState(.dummy())
+        subject.session = .dummy(acceptedBy: ["alice": Date()], id: "session")
+
+        subject.update(
+            from: GetCallRingStateResponse.dummy(
+                acceptedBy: ["alice": Date(), "bob": Date()],
+                sessionId: "session"
+            )
+        )
+
+        XCTAssertNil(subject.sessionIdWithPolledAccept)
+    }
+
+    func test_update_fromRingStateWithoutChanges_publishesSession() {
+        let subject = CallState(.dummy())
+        subject.session = .dummy(id: "session")
+        var publishedCount = 0
+        let cancellable = subject.$session.dropFirst().sink { _ in
+            publishedCount += 1
+        }
+
+        subject.update(from: GetCallRingStateResponse.dummy(sessionId: "session"))
+
+        XCTAssertEqual(publishedCount, 1)
+        cancellable.cancel()
     }
 
     // MARK: - Private helpers

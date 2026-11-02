@@ -9,7 +9,8 @@ extension StreamCallAudioRecorder.Namespace {
     /// Middleware that keeps recording state aligned with call context,
     /// audio‑session activity, and recording permission.
     ///
-    /// It observes the active call to scope monitoring, then combines:
+    /// It observes the active call of the current `StreamVideo` instance,
+    /// following any replacement client, to scope monitoring, then combines:
     /// the call's `audioOn`, the audio session's `isActive`, and the
     /// recorder's permission status. Recording is enabled only when all
     /// conditions are satisfied.
@@ -21,8 +22,6 @@ extension StreamCallAudioRecorder.Namespace {
     /// - Disables recording when any condition becomes false.
     /// - On call end, stops monitoring and disables recording.
     final class ShouldRecordMiddleware: Middleware<StreamCallAudioRecorder.Namespace>, @unchecked Sendable {
-        /// Access to call state and `activeCall`.
-        @Injected(\.streamVideo) private var streamVideo
         /// Access to audio session state and recording permission.
         @Injected(\.audioStore) private var audioStore
 
@@ -39,10 +38,14 @@ extension StreamCallAudioRecorder.Namespace {
         override init() {
             super.init()
 
-            // Monitor changes to the active call
-            activeCallCancellable = streamVideo
-                .state
-                .$activeCall
+            // The recorder outlives clients, so follow the current one.
+            activeCallCancellable = StreamVideoProviderKey
+                .publisher
+                .map { streamVideo -> AnyPublisher<Call?, Never> in
+                    streamVideo?.state.$activeCall.eraseToAnyPublisher()
+                        ?? Just(nil).eraseToAnyPublisher()
+                }
+                .switchToLatest()
                 .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in await self?.didUpdate($0) }
         }
 

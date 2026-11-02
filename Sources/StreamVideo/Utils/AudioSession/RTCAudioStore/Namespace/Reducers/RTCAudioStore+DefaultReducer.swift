@@ -38,7 +38,12 @@ extension RTCAudioStore.Namespace {
                     }
                 }
                 updatedState.isActive = value
-                try updatedState.audioDeviceModule?.setPlayout(value)
+                // Activation prepares the session before capture starts.
+                // Starting playout while WebRTC audio is disabled would start
+                // the native engine before audio configuration is complete.
+                try updatedState.audioDeviceModule?.setPlayout(
+                    value && state.webRTCAudioSessionConfiguration.isAudioEnabled
+                )
 
             case let .setInterrupted(value):
                 updatedState.isInterrupted = value

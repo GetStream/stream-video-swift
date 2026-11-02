@@ -98,7 +98,18 @@ final class RingingFlowRecoveryAdapter: @unchecked Sendable {
             }
 
             let currentUserId = streamVideo.user.id
-            if
+            // Handle end before acceptance to avoid joining an ended session.
+            if session.endedAt != nil {
+                onEnded(
+                    .ended(
+                        .init(
+                            callCid: callCId,
+                            user: nil,
+                            action: .end
+                        )
+                    )
+                )
+            } else if
                 let userId = session.acceptedBy.keys.first(where: {
                     $0 != currentUserId
                 }) {
@@ -121,16 +132,6 @@ final class RingingFlowRecoveryAdapter: @unchecked Sendable {
                             callCid: callCId,
                             user: .init(id: userId),
                             action: .reject
-                        )
-                    )
-                )
-            } else if session.endedAt != nil {
-                onEnded(
-                    .ended(
-                        .init(
-                            callCid: callCId,
-                            user: nil,
-                            action: .end
                         )
                     )
                 )

@@ -46,6 +46,14 @@ extension WebRTCCoordinator.StateMachine.Stage {
             disposableBag.removeAll()
         }
 
+        /// Cancels observations as soon as this stage loses ownership.
+        override func willTransitionAway() {
+            // Awaiting migration completion retains this stage, so deinit
+            // cannot cancel it before an old deadline interrupts a new flow.
+            disposableBag.removeAll()
+            super.willTransitionAway()
+        }
+
         /// Performs the transition from a previous stage to this joined stage.
         /// - Parameter previousStage: The stage from which the transition is
         ///   occurring.
@@ -66,6 +74,13 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
         /// Executes the joined stage logic.
         private func execute() {
+            let migrationStatusObserver = context.migrationStatusObserver
+            if let migrationStatusObserver {
+                // The observer owns a separate timeout task. Cancelling only
+                // its awaiting caller would leave that task alive until expiry.
+                AnyCancellable { migrationStatusObserver.cancel() }
+                    .store(in: disposableBag)
+            }
             Task(disposableBag: disposableBag) { [weak self] in
                 guard let self else { return }
                 do {
@@ -84,7 +99,6 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
                     try Task.checkCancellation()
 
-                    let migrationStatusObserver = context.migrationStatusObserver
                     let previousSFUAdapter = context.previousSFUAdapter
                     await cleanUpPreviousSessionIfRequired()
 
@@ -94,6 +108,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         migrationStatusObserver,
                         previousSFUAdapter: previousSFUAdapter
                     )
+
+                    try Task.checkCancellation()
 
                     observeInternetConnection()
 
@@ -111,19 +127,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
                     try Task.checkCancellation()
 
-                    await observeDisconnectEvent()
-
-                    try Task.checkCancellation()
-
-                    await observePreferredReconnectionStrategy()
-
-                    try Task.checkCancellation()
-
                     await observePeerConnectionState()
-
-                    try Task.checkCancellation()
-
-                    await observeParticipantSignalLostEvent()
 
                     try Task.checkCancellation()
 
@@ -144,8 +148,13 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     try Task.checkCancellation()
 
                     observeAudioSessionReadiness()
+                } catch is CancellationError {
+                    // Stage exit is normal lifecycle cancellation, not a new
+                    // failure that should disconnect the replacement session.
                 } catch {
+                    guard !Task.isCancelled else { return }
                     await cleanUpPreviousSessionIfRequired()
+                    guard !Task.isCancelled else { return }
                     transitionDisconnectOrError(error)
                 }
             }
@@ -178,24 +187,22 @@ extension WebRTCCoordinator.StateMachine.Stage {
             _ migrationStatusObserver: WebRTCMigrationStatusObserver?,
             previousSFUAdapter: SFUAdapter?
         ) async throws {
-            if let migrationStatusObserver = migrationStatusObserver {
-                let task = Task(disposableBag: disposableBag) { [weak self] in
-                    guard let self else { return }
-                    do {
-                        try Task.checkCancellation()
-                        try await migrationStatusObserver
-                            .observeMigrationStatus()
-                        await previousSFUAdapter?.disconnect()
-                    } catch is CancellationError {
-                        /* No-op */
-                    } catch {
-                        context.reconnectionStrategy = .rejoin
-                        log.warning("Will disconnect because migrationStatus failed.", subsystems: .webRTC)
-                        throw error
-                    }
+            if let migrationStatusObserver {
+                do {
+                    try Task.checkCancellation()
+                    try await migrationStatusObserver.observeMigrationStatus()
+                    try Task.checkCancellation()
+                    await previousSFUAdapter?.disconnect()
+                } catch is CancellationError {
+                    throw CancellationError()
+                } catch {
+                    try Task.checkCancellation()
+                    context.reconnectionStrategy = .rejoin
+                    log.warning("Will disconnect because migrationStatus failed.", subsystems: .webRTC)
+                    throw error
                 }
-                _ = try await task.value
             } else {
+                try Task.checkCancellation()
                 await previousSFUAdapter?.disconnect()
             }
         }
@@ -206,6 +213,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
         /// strategy and handles the disconnection.
         private func observeConnection() async {
             let sfuAdapter = await context.coordinator?.stateAdapter.sfuAdapter
+            observeSFUError(sfuAdapter)
             sfuAdapter?
                 .$connectionState
                 .compactMap {
@@ -221,22 +229,18 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .receive(on: processingQueue)
                 .sink { [weak self] (source: WebSocketConnectionState.DisconnectionSource) in
                     guard let self else { return }
-                    context.disconnectionSource = source
-                    if let sfuError = source
+                    // Retain recovery when the event preceded this subscription.
+                    if let event = source
                         .serverError?
-                        .underlyingError as? Stream_Video_Sfu_Models_Error {
-                        context.reconnectionStrategy = sfuError.shouldRetry
-                            ? .fast(
-                                disconnectedSince: .init(),
-                                deadline: context.fastReconnectDeadlineSeconds
-                            )
-                            : .rejoin
-                    } else {
-                        context.reconnectionStrategy = .fast(
-                            disconnectedSince: .init(),
-                            deadline: context.fastReconnectDeadlineSeconds
-                        )
+                        .underlyingError as? Stream_Video_Sfu_Event_Error {
+                        handleSFUError(event)
+                        return
                     }
+                    context.disconnectionSource = source
+                    context.reconnectionStrategy = .fast(
+                        disconnectedSince: .init(),
+                        deadline: context.fastReconnectDeadlineSeconds
+                    )
 
                     log
                         .warning(
@@ -263,32 +267,17 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .receive(on: processingQueue)
                 .sink { [weak self] in
                     guard let self else { return }
-                    transitionOrError(.leaving(context, reason: "\($0.reason)"))
+                    transitionOrError(.leaving(
+                        context,
+                        reason: "\($0.reason)",
+                        initiator: .remoteEvent
+                    ))
                 }
                 .store(in: disposableBag)
         }
 
-        /// Observes migration events from the SFU (Selective Forwarding Unit) adapter.
-        /// If an error or "go away" event with a migration strategy is published, the
-        /// method triggers the appropriate transition to handle the migration by
-        /// disconnecting and setting the reconnection strategy to `.migrate`.
         private func observeMigrationEvent() async {
             let sfuAdapter = await context.coordinator?.stateAdapter.sfuAdapter
-            sfuAdapter?
-                .publisher(eventType: Stream_Video_Sfu_Event_Error.self)
-                .filter { $0.reconnectStrategy == .migrate }
-                .receive(on: processingQueue)
-                .sink { [weak self] _ in
-                    guard let self else { return }
-                    context.reconnectionStrategy = .migrate
-                    log.warning(
-                        "Will disconnect because received an SFU error.",
-                        subsystems: .webRTC
-                    )
-                    transitionOrDisconnect(.disconnected(context))
-                }
-                .store(in: disposableBag)
-
             sfuAdapter?
                 .publisher(eventType: Stream_Video_Sfu_Event_GoAway.self)
                 .receive(on: processingQueue)
@@ -307,39 +296,48 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .store(in: disposableBag)
         }
 
-        /// Observes disconnect events from the SFU (Selective Forwarding Unit) adapter.
-        /// If an error event with a `disconnect` reconnection strategy is published,
-        /// the method triggers the appropriate transition to handle the disconnect.
-        private func observeDisconnectEvent() async {
-            let sfuAdapter = await context.coordinator?.stateAdapter.sfuAdapter
+        private func observeSFUError(_ sfuAdapter: SFUAdapter?) {
             sfuAdapter?
                 .publisher(eventType: Stream_Video_Sfu_Event_Error.self)
-                .filter { $0.reconnectStrategy == .disconnect }
                 .receive(on: processingQueue)
-                .sink { [weak self] _ in
+                .sink { [weak self] event in
                     guard let self else { return }
-                    transitionOrError(.leaving(context, reason: "error"))
+                    // The buffered observer owns SFU_FULL across join stages.
+                    if event.error.code == .sfuFull, context.sfuFullObserver != nil {
+                        return
+                    }
+                    handleSFUError(event)
                 }
                 .store(in: disposableBag)
         }
 
-        /// Observes the SFU errors looking for the `PARTICIPANT_SIGNAL_LOST`. Once found
-        /// triggers fast reconnection based on this: https://www.notion.so/stream-wiki/Improved-Reconnects-and-ICE-connection-handling-2186a5d7f9f680c29236c2c37cfa11a3?source=copy_link#2186a5d7f9f68090bd0ec38594902805
-        private func observeParticipantSignalLostEvent() async {
-            let sfuAdapter = await context.coordinator?.stateAdapter.sfuAdapter
-            sfuAdapter?
-                .publisher(eventType: Stream_Video_Sfu_Event_Error.self)
-                .filter { $0.error.code == .participantSignalLost }
-                .receive(on: processingQueue)
-                .sink { [weak self] _ in
-                    guard let self else { return }
-                    context.reconnectionStrategy = .fast(
-                        disconnectedSince: .init(),
-                        deadline: context.fastReconnectDeadlineSeconds
-                    )
-                    transitionOrError(.disconnected(context))
-                }
-                .store(in: disposableBag)
+        private func handleSFUError(_ event: Stream_Video_Sfu_Event_Error) {
+            guard event.reconnectStrategy != .unspecified else { return }
+            context.disconnectionSource = .serverInitiated(
+                error: .init(with: event.error)
+            )
+            context.reconnectionStrategy = .init(
+                from: event.reconnectStrategy,
+                fastReconnectDeadlineSeconds: context.fastReconnectDeadlineSeconds
+            )
+            if event.error.code == .sfuFull,
+               context.currentSFU.isEmpty == false,
+               context.migratingFromList.contains(context.currentSFU) == false {
+                context.migratingFromList.append(context.currentSFU)
+            }
+
+            log.warning(
+                "SFU error requested recovery: \(context.reconnectionStrategy).",
+                subsystems: .webRTC
+            )
+            if context.reconnectionStrategy == .disconnected {
+                transitionOrError(.leaving(
+                    context,
+                    reason: Call.LeaveReason.error.rawValue
+                ))
+            } else {
+                transitionOrDisconnect(.disconnected(context))
+            }
         }
 
         /// Observes the frequency the HealthCheck responses are flowing via the SFU webSocket. If
@@ -377,27 +375,6 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     )
                     transitionOrDisconnect(.disconnected(context))
                 }
-                .store(in: disposableBag)
-        }
-
-        /// Observes the preferred reconnection strategy based on error events from the
-        /// SFU (Selective Forwarding Unit) adapter. When an error event with a
-        /// reconnection strategy is published, the method updates the reconnection
-        /// strategy in the context accordingly.
-        private func observePreferredReconnectionStrategy() async {
-            let sfuAdapter = await context.coordinator?.stateAdapter.sfuAdapter
-            sfuAdapter?
-                .publisher(eventType: Stream_Video_Sfu_Event_Error.self)
-                .map(\.reconnectStrategy)
-                .compactMap { [fastReconnectDeadlineSeconds = context.fastReconnectDeadlineSeconds] in
-                    WebRTCCoordinator.StateMachine.ReconnectionStrategy(
-                        from: $0,
-                        fastReconnectDeadlineSeconds: fastReconnectDeadlineSeconds
-                    )
-                }
-                .log(.debug, subsystems: .webRTC) { "Reconnection strategy updated to \($0)." }
-                .receive(on: processingQueue)
-                .sink { [weak self] in self?.context.reconnectionStrategy = $0 }
                 .store(in: disposableBag)
         }
 
@@ -546,24 +523,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .log(.warning, subsystems: .sfu) { _ in
                     "Will disconnect because the current SFU is full."
                 }
-                .sink { [weak self] in
-                    guard let self else { return }
-
-                    // SFU-full means this edge rejected the join path. Respect
-                    // the backend-provided reconnect strategy and keep track of
-                    // the rejected edge for the next authenticate request.
-                    context.reconnectionStrategy = .init(
-                        from: $0.reconnectStrategy,
-                        fastReconnectDeadlineSeconds: context.fastReconnectDeadlineSeconds
-                    )
-                    if
-                        context.currentSFU.isEmpty == false,
-                        context.migratingFromList.contains(context.currentSFU) == false {
-                        context.migratingFromList = context.migratingFromList + [context.currentSFU]
-                    }
-
-                    transitionOrDisconnect(.disconnected(context))
-                }
+                .sink { [weak self] in self?.handleSFUError($0) }
                 .store(in: disposableBag)
         }
 

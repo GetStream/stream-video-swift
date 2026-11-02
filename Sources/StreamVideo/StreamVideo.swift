@@ -49,7 +49,10 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
 
         private func didUpdateActiveCall(_ activeCall: Call?, oldValue: Call?) {
             if let oldValue, oldValue.cId != activeCall?.cId {
-                oldValue.leave()
+                oldValue.leave(
+                    initiator: .unknown,
+                    reason: Call.LeaveReason.activeCallReplaced.rawValue
+                )
             }
 
             if ringingCall != nil {
@@ -593,6 +596,21 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         )
     }
     
+    /// Throws unless the coordinator socket is connected, so an outgoing
+    /// ring cannot start without a channel for its accept/reject events.
+    /// Waits briefly while a connection or reconnection is in progress.
+    func requireCoordinatorConnection() async throws {
+        if state.connection == .connecting {
+            _ = try? await state
+                .$connection
+                .filter { $0 != .connecting }
+                .nextValue(timeout: 5)
+        }
+        guard state.connection == .connected else {
+            throw ClientError("Cannot ring a call without a coordinator connection.")
+        }
+    }
+
     private func loadConnectionId() async -> String {
         if let connectionId = loadConnectionIdFromHealthcheck() {
             return connectionId
@@ -857,5 +875,14 @@ extension StreamVideo: WSEventsSubscriber {
 
 /// Returns the current value for the `StreamVideo` instance.
 struct StreamVideoProviderKey: InjectionKey {
-    nonisolated(unsafe) static var currentValue: StreamVideo?
+    nonisolated(unsafe) static var currentValue: StreamVideo? {
+        didSet { subject.send(currentValue) }
+    }
+
+    /// Publishes the current `StreamVideo` instance on every change.
+    static var publisher: AnyPublisher<StreamVideo?, Never> {
+        subject.eraseToAnyPublisher()
+    }
+
+    private nonisolated(unsafe) static let subject = CurrentValueSubject<StreamVideo?, Never>(nil)
 }

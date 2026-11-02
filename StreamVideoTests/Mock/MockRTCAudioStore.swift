@@ -27,13 +27,36 @@ final class MockRTCAudioStore: @unchecked Sendable {
         RTCAudioStore.currentValue = audioStore
     }
 
-    func dismantle() {
-        if let previousStore {
-            InjectedValues[\.audioStore] = previousStore
+    func dismantle() async throws {
+        defer {
+            if let previousStore {
+                InjectedValues[\.audioStore] = previousStore
+            }
+
+            if let previousCurrentValue {
+                RTCAudioStore.currentValue = previousCurrentValue
+            }
         }
 
-        if let previousCurrentValue {
-            RTCAudioStore.currentValue = previousCurrentValue
+        let storeResult: Result<Void, Error>
+        do {
+            try await audioStore.dispatch([
+                .setAudioDeviceModule(nil),
+                .webRTCAudioSession(.setAudioEnabled(false)),
+                .setActive(false)
+            ]).result()
+            storeResult = .success(())
+        } catch {
+            storeResult = .failure(error)
         }
+
+        audioSession.lockForConfiguration()
+        defer { audioSession.unlockForConfiguration() }
+        audioSession.isAudioEnabled = false
+        // The cached activity flag can miss native and CallKit activations.
+        for _ in 0..<max(0, audioSession.activationCount) {
+            try audioSession.setActive(false)
+        }
+        try storeResult.get()
     }
 }

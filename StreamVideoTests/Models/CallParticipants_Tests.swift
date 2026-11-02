@@ -144,6 +144,21 @@ final class CallParticipants_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(subject.withUpdated(dominantSpeaker: true).source, .rtmp)
     }
 
+    func test_withPausedTrack_preservesSource() {
+        let subject = CallParticipant.dummy(source: .rtmp)
+
+        XCTAssertEqual(subject.withPausedTrack(.video).source, .rtmp)
+    }
+
+    func test_withUnpausedTrack_preservesSource() {
+        let subject = CallParticipant.dummy(
+            pausedTracks: [.video],
+            source: .rtmp
+        )
+
+        XCTAssertEqual(subject.withUnpausedTrack(.video).source, .rtmp)
+    }
+
     func test_isEqual_participantsWithDifferentSourceAreNotEqual() {
         let subject = CallParticipant.dummy(id: "1", source: .rtmp)
         let other = CallParticipant.dummy(id: "1", source: .webRTCUnspecified)

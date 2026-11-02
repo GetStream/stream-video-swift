@@ -77,6 +77,18 @@ final class RingingFlowRecoveryAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertTrue(rejected.isEmpty)
     }
 
+    func test_outgoingRing_sessionEndedAndAccepted_onEnded() async {
+        await attachOutgoingRing()
+
+        call.state.session = .dummy(
+            acceptedBy: [User.dummy().id: Date()],
+            endedAt: Date()
+        )
+
+        await fulfilmentInMainActor { self.ended.count == 1 }
+        XCTAssertTrue(accepted.isEmpty)
+    }
+
     func test_outgoingRing_emptySession_noCallbacks() async {
         await attachOutgoingRing()
 

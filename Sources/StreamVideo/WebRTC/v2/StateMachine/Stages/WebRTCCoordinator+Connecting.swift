@@ -113,6 +113,11 @@ extension WebRTCCoordinator.StateMachine.Stage {
             }
         }
 
+        override func willTransitionAway() {
+            super.willTransitionAway()
+            disposableBag.removeAll()
+        }
+
         /// Executes the call connecting process.
         /// - Parameters:
         ///   - create: A Boolean indicating whether to create a new session.
@@ -164,7 +169,9 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     /// coordinator `JoinCall` REST request.
                     let coordinatorJoinDetails = ClientEventStageDetails(
                         coordinatorConnectId: context.coordinatorConnectId,
-                        joinReason: updateSession ? .fullRejoin : .firstAttempt
+                        joinReason: updateSession ? .fullRejoin : .firstAttempt,
+                        // A rejoin is a recovery, not a reaction to the ring.
+                        source: updateSession ? nil : context.ringJoinSource
                     )
                     let coordinatorJoinAttempt = await coordinator
                         .clientEventReporter
@@ -187,6 +194,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                                 notify: notify,
                                 options: options
                             )
+                        try Task.checkCancellation()
                     } catch {
                         await coordinator
                             .clientEventReporter
@@ -213,6 +221,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
                             failure: nil
                         )
 
+                    try Task.checkCancellation()
+
                     context.initialJoinCallResponse = response
 
                     // Start observing SFU full events before the WS handshake
@@ -237,6 +247,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                             details: coordinatorWSDetails
                         )
                     do {
+                        try Task.checkCancellation()
                         try await context.authenticator.waitForAuthentication(on: sfuAdapter)
                     } catch {
                         await coordinator

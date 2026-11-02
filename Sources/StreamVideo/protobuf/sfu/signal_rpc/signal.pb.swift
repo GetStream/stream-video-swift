@@ -176,16 +176,6 @@ nonisolated struct Stream_Video_Sfu_Signal_SendStatsRequest: @unchecked Sendable
     set {_uniqueStorage()._sessionID = newValue}
   }
 
-  var subscriberStats: String {
-    get {_storage._subscriberStats}
-    set {_uniqueStorage()._subscriberStats = newValue}
-  }
-
-  var publisherStats: String {
-    get {_storage._publisherStats}
-    set {_uniqueStorage()._publisherStats = newValue}
-  }
-
   var webrtcVersion: String {
     get {_storage._webrtcVersion}
     set {_uniqueStorage()._webrtcVersion = newValue}
@@ -200,24 +190,6 @@ nonisolated struct Stream_Video_Sfu_Signal_SendStatsRequest: @unchecked Sendable
     get {_storage._sdkVersion}
     set {_uniqueStorage()._sdkVersion = newValue}
   }
-
-  var audioDevices: Stream_Video_Sfu_Models_InputDevices {
-    get {_storage._audioDevices ?? Stream_Video_Sfu_Models_InputDevices()}
-    set {_uniqueStorage()._audioDevices = newValue}
-  }
-  /// Returns true if `audioDevices` has been explicitly set.
-  var hasAudioDevices: Bool {_storage._audioDevices != nil}
-  /// Clears the value of `audioDevices`. Subsequent reads from it will return its default value.
-  mutating func clearAudioDevices() {_uniqueStorage()._audioDevices = nil}
-
-  var videoDevices: Stream_Video_Sfu_Models_InputDevices {
-    get {_storage._videoDevices ?? Stream_Video_Sfu_Models_InputDevices()}
-    set {_uniqueStorage()._videoDevices = newValue}
-  }
-  /// Returns true if `videoDevices` has been explicitly set.
-  var hasVideoDevices: Bool {_storage._videoDevices != nil}
-  /// Clears the value of `videoDevices`. Subsequent reads from it will return its default value.
-  mutating func clearVideoDevices() {_uniqueStorage()._videoDevices = nil}
 
   var deviceState: OneOf_DeviceState? {
     get {return _storage._deviceState}
@@ -257,18 +229,6 @@ nonisolated struct Stream_Video_Sfu_Signal_SendStatsRequest: @unchecked Sendable
   var hasRtmp: Bool {_storage._rtmp != nil}
   /// Clears the value of `rtmp`. Subsequent reads from it will return its default value.
   mutating func clearRtmp() {_uniqueStorage()._rtmp = nil}
-
-  /// NOTE: This field was marked as deprecated in the .proto file.
-  var subscriberRtcStats: String {
-    get {_storage._subscriberRtcStats}
-    set {_uniqueStorage()._subscriberRtcStats = newValue}
-  }
-
-  /// NOTE: This field was marked as deprecated in the .proto file.
-  var publisherRtcStats: String {
-    get {_storage._publisherRtcStats}
-    set {_uniqueStorage()._publisherRtcStats = newValue}
-  }
 
   var rtcStats: String {
     get {_storage._rtcStats}
@@ -909,22 +869,16 @@ nonisolated extension Stream_Video_Sfu_Signal_SendMetricsResponse: SwiftProtobuf
 
 nonisolated extension Stream_Video_Sfu_Signal_SendStatsRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".SendStatsRequest"
-  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}session_id\0\u{3}subscriber_stats\0\u{3}publisher_stats\0\u{3}webrtc_version\0\u{1}sdk\0\u{3}sdk_version\0\u{3}audio_devices\0\u{3}video_devices\0\u{1}android\0\u{1}apple\0\u{1}telemetry\0\u{1}rtmp\0\u{3}subscriber_rtc_stats\0\u{3}publisher_rtc_stats\0\u{3}rtc_stats\0\u{3}encode_stats\0\u{3}decode_stats\0\u{3}unified_session_id\0")
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}session_id\0\u{4}\u{3}webrtc_version\0\u{1}sdk\0\u{3}sdk_version\0\u{2}\u{3}android\0\u{1}apple\0\u{1}telemetry\0\u{1}rtmp\0\u{4}\u{3}rtc_stats\0\u{3}encode_stats\0\u{3}decode_stats\0\u{3}unified_session_id\0\u{c}\u{2}\u{1}\u{c}\u{3}\u{1}\u{c}\u{7}\u{1}\u{c}\u{8}\u{1}\u{c}\u{d}\u{1}\u{c}\u{e}\u{1}")
 
   fileprivate class _StorageClass {
     var _sessionID: String = String()
-    var _subscriberStats: String = String()
-    var _publisherStats: String = String()
     var _webrtcVersion: String = String()
     var _sdk: String = String()
     var _sdkVersion: String = String()
-    var _audioDevices: Stream_Video_Sfu_Models_InputDevices? = nil
-    var _videoDevices: Stream_Video_Sfu_Models_InputDevices? = nil
     var _deviceState: Stream_Video_Sfu_Signal_SendStatsRequest.OneOf_DeviceState?
     var _telemetry: Stream_Video_Sfu_Signal_Telemetry? = nil
     var _rtmp: Stream_Video_Sfu_Models_RTMPIngress? = nil
-    var _subscriberRtcStats: String = String()
-    var _publisherRtcStats: String = String()
     var _rtcStats: String = String()
     var _encodeStats: [Stream_Video_Sfu_Models_PerformanceStats] = []
     var _decodeStats: [Stream_Video_Sfu_Models_PerformanceStats] = []
@@ -940,18 +894,12 @@ nonisolated extension Stream_Video_Sfu_Signal_SendStatsRequest: SwiftProtobuf.Me
 
     init(copying source: _StorageClass) {
       _sessionID = source._sessionID
-      _subscriberStats = source._subscriberStats
-      _publisherStats = source._publisherStats
       _webrtcVersion = source._webrtcVersion
       _sdk = source._sdk
       _sdkVersion = source._sdkVersion
-      _audioDevices = source._audioDevices
-      _videoDevices = source._videoDevices
       _deviceState = source._deviceState
       _telemetry = source._telemetry
       _rtmp = source._rtmp
-      _subscriberRtcStats = source._subscriberRtcStats
-      _publisherRtcStats = source._publisherRtcStats
       _rtcStats = source._rtcStats
       _encodeStats = source._encodeStats
       _decodeStats = source._decodeStats
@@ -975,13 +923,9 @@ nonisolated extension Stream_Video_Sfu_Signal_SendStatsRequest: SwiftProtobuf.Me
         // enabled. https://github.com/apple/swift-protobuf/issues/1034
         switch fieldNumber {
         case 1: try { try decoder.decodeSingularStringField(value: &_storage._sessionID) }()
-        case 2: try { try decoder.decodeSingularStringField(value: &_storage._subscriberStats) }()
-        case 3: try { try decoder.decodeSingularStringField(value: &_storage._publisherStats) }()
         case 4: try { try decoder.decodeSingularStringField(value: &_storage._webrtcVersion) }()
         case 5: try { try decoder.decodeSingularStringField(value: &_storage._sdk) }()
         case 6: try { try decoder.decodeSingularStringField(value: &_storage._sdkVersion) }()
-        case 7: try { try decoder.decodeSingularMessageField(value: &_storage._audioDevices) }()
-        case 8: try { try decoder.decodeSingularMessageField(value: &_storage._videoDevices) }()
         case 9: try {
           var v: Stream_Video_Sfu_Models_AndroidState?
           var hadOneofValue = false
@@ -1010,8 +954,6 @@ nonisolated extension Stream_Video_Sfu_Signal_SendStatsRequest: SwiftProtobuf.Me
         }()
         case 11: try { try decoder.decodeSingularMessageField(value: &_storage._telemetry) }()
         case 12: try { try decoder.decodeSingularMessageField(value: &_storage._rtmp) }()
-        case 13: try { try decoder.decodeSingularStringField(value: &_storage._subscriberRtcStats) }()
-        case 14: try { try decoder.decodeSingularStringField(value: &_storage._publisherRtcStats) }()
         case 15: try { try decoder.decodeSingularStringField(value: &_storage._rtcStats) }()
         case 16: try { try decoder.decodeRepeatedMessageField(value: &_storage._encodeStats) }()
         case 17: try { try decoder.decodeRepeatedMessageField(value: &_storage._decodeStats) }()
@@ -1031,12 +973,6 @@ nonisolated extension Stream_Video_Sfu_Signal_SendStatsRequest: SwiftProtobuf.Me
       if !_storage._sessionID.isEmpty {
         try visitor.visitSingularStringField(value: _storage._sessionID, fieldNumber: 1)
       }
-      if !_storage._subscriberStats.isEmpty {
-        try visitor.visitSingularStringField(value: _storage._subscriberStats, fieldNumber: 2)
-      }
-      if !_storage._publisherStats.isEmpty {
-        try visitor.visitSingularStringField(value: _storage._publisherStats, fieldNumber: 3)
-      }
       if !_storage._webrtcVersion.isEmpty {
         try visitor.visitSingularStringField(value: _storage._webrtcVersion, fieldNumber: 4)
       }
@@ -1046,12 +982,6 @@ nonisolated extension Stream_Video_Sfu_Signal_SendStatsRequest: SwiftProtobuf.Me
       if !_storage._sdkVersion.isEmpty {
         try visitor.visitSingularStringField(value: _storage._sdkVersion, fieldNumber: 6)
       }
-      try { if let v = _storage._audioDevices {
-        try visitor.visitSingularMessageField(value: v, fieldNumber: 7)
-      } }()
-      try { if let v = _storage._videoDevices {
-        try visitor.visitSingularMessageField(value: v, fieldNumber: 8)
-      } }()
       switch _storage._deviceState {
       case .android?: try {
         guard case .android(let v)? = _storage._deviceState else { preconditionFailure() }
@@ -1069,12 +999,6 @@ nonisolated extension Stream_Video_Sfu_Signal_SendStatsRequest: SwiftProtobuf.Me
       try { if let v = _storage._rtmp {
         try visitor.visitSingularMessageField(value: v, fieldNumber: 12)
       } }()
-      if !_storage._subscriberRtcStats.isEmpty {
-        try visitor.visitSingularStringField(value: _storage._subscriberRtcStats, fieldNumber: 13)
-      }
-      if !_storage._publisherRtcStats.isEmpty {
-        try visitor.visitSingularStringField(value: _storage._publisherRtcStats, fieldNumber: 14)
-      }
       if !_storage._rtcStats.isEmpty {
         try visitor.visitSingularStringField(value: _storage._rtcStats, fieldNumber: 15)
       }
@@ -1097,18 +1021,12 @@ nonisolated extension Stream_Video_Sfu_Signal_SendStatsRequest: SwiftProtobuf.Me
         let _storage = _args.0
         let rhs_storage = _args.1
         if _storage._sessionID != rhs_storage._sessionID {return false}
-        if _storage._subscriberStats != rhs_storage._subscriberStats {return false}
-        if _storage._publisherStats != rhs_storage._publisherStats {return false}
         if _storage._webrtcVersion != rhs_storage._webrtcVersion {return false}
         if _storage._sdk != rhs_storage._sdk {return false}
         if _storage._sdkVersion != rhs_storage._sdkVersion {return false}
-        if _storage._audioDevices != rhs_storage._audioDevices {return false}
-        if _storage._videoDevices != rhs_storage._videoDevices {return false}
         if _storage._deviceState != rhs_storage._deviceState {return false}
         if _storage._telemetry != rhs_storage._telemetry {return false}
         if _storage._rtmp != rhs_storage._rtmp {return false}
-        if _storage._subscriberRtcStats != rhs_storage._subscriberRtcStats {return false}
-        if _storage._publisherRtcStats != rhs_storage._publisherRtcStats {return false}
         if _storage._rtcStats != rhs_storage._rtcStats {return false}
         if _storage._encodeStats != rhs_storage._encodeStats {return false}
         if _storage._decodeStats != rhs_storage._decodeStats {return false}

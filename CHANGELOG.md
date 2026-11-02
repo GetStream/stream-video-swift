@@ -14,13 +14,67 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 # Upcoming
 
 ### ✅ Added
-- Added framed AES-GCM end-to-end encryption via `Call.setE2EEManager(_:)` and `EncryptionManager`. Attach the manager before `join()`, or pass `nil` to detach it. [#1249](https://github.com/GetStream/stream-video-swift/pull/1249)
-- `Call.create`, `CallViewModel.startCall`, `joinCall`, and `joinAndRingCall` accept optional `encryption` settings so get-or-create can set mode `auto-on`. [#1249](https://github.com/GetStream/stream-video-swift/pull/1249)
+- `String.audioCall`, the identifier of the built-in `audio_call` call type, for 1:1 and group voice calls that ring and can't be reused once they have ended. [#1385](https://github.com/GetStream/stream-video-swift/pull/1385)
+- `String.agent`, the identifier of the built-in `agent` call type, for conversations between a user and an AI agent. [#1385](https://github.com/GetStream/stream-video-swift/pull/1385)
+
+### 🔄 Changed
+
+# [1.56.1](https://github.com/GetStream/stream-video-swift/releases/tag/1.56.1)
+_October 28, 2026_
 
 ### 🐞 Fixed
 
+- Release the microphone after hang-up when the app creates a new `StreamVideo` client between calls. [#1382](https://github.com/GetStream/stream-video-swift/pull/1382)
+
+# [1.56.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.56.0)
+_October 27, 2026_
+
+### 🐞 Fixed
+
+- Fix a crash during `StreamVideo.connect()` (`Fatal error: Received an output without requesting demand`) by requiring StreamCore 0.16.0, whose timer publisher now honors Combine demand. [#1376](https://github.com/GetStream/stream-video-swift/pull/1376)
+- Outgoing ring requests now fail when no coordinator connection is available, so callers do not start a ring without receiving its events. [#1373](https://github.com/GetStream/stream-video-swift/pull/1373)
+- Prevent the caller from cancelling an accepted outgoing ring. Explicit hang-up leaves locally, while timeout recovery preserves the original ring deadline. [#1374](https://github.com/GetStream/stream-video-swift/pull/1374)
+- Keep locally answered CallKit calls connected when an incoming-call check finishes late or a duplicate call report arrives. [#1366](https://github.com/GetStream/stream-video-swift/pull/1366)
+- Aborted join events now identify the leave source and reason. Use `Call.leave(initiator:reason:)` with typed `Call.LeaveInitiator` values such as `.user` and `.app`. Existing `leave(reason:)` calls remain compatible and report `unknown`. [#1363](https://github.com/GetStream/stream-video-swift/pull/1363)
+- Cancelled call joins now discard late authentication responses instead of continuing the connection. [#1362](https://github.com/GetStream/stream-video-swift/pull/1362)
+- Accepted-call events no longer make the incoming call UI reject a call that is joining on this device. [#1365](https://github.com/GetStream/stream-video-swift/pull/1365)
+- Honor explicit SFU reconnect strategies and keep the call connected when an error has no reconnect instruction. [#1369](https://github.com/GetStream/stream-video-swift/pull/1369)
+
+# [1.55.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.55.0)
+_October 13, 2026_
+
+### 🐞 Fixed
+
+- Configure and activate audio before capture starts, and prepare call transports before capture to avoid an engine rebuild during joining. [#1355](https://github.com/GetStream/stream-video-swift/pull/1355)
+- Fixed a launch crash when an iOS app that uses StreamVideo runs on Mac. [#1344](https://github.com/GetStream/stream-video-swift/issues/1344)
+- Kept blocking WebRTC operations and peer connection teardown off UI and Swift concurrency threads. [#1345](https://github.com/GetStream/stream-video-swift/pull/1345)
+- Old call connections now stop negotiating when reconnection cleanup begins. [#1342](https://github.com/GetStream/stream-video-swift/pull/1342)
+- Calls now finish cleanup and stop reporting stats when released during hang-up. [#1328](https://github.com/GetStream/stream-video-swift/pull/1328)
+- Reduced UI freezes when updating video views or logging media events. [#1346](https://github.com/GetStream/stream-video-swift/pull/1346)
+- Calls no longer enter a repeated subscriber renegotiation loop after a fast reconnect, and subscriber answers identify the offer they answer. [#1343](https://github.com/GetStream/stream-video-swift/pull/1343)
+- OBS video remains identified as RTMP when its track is paused and resumed, so viewers can return to the correct video source. [#1331](https://github.com/GetStream/stream-video-swift/pull/1331)
+- Muting now stops outgoing audio even if the server rejects the request or speaking permission has been revoked. [#1327](https://github.com/GetStream/stream-video-swift/pull/1327)
+- Stale migration callbacks no longer interrupt call recovery, and rejected state transitions preserve reconnection timers and subscriptions. [#1350](https://github.com/GetStream/stream-video-swift/pull/1350)
+- Repeated video-view cleanup no longer detaches a track from a reused renderer. [#1348](https://github.com/GetStream/stream-video-swift/pull/1348)
+- Failed SDP negotiations now roll back pending offers so later negotiations can succeed. A failed rollback requests call recovery. [#1352](https://github.com/GetStream/stream-video-swift/pull/1352)
+- Late WebRTC callbacks no longer accept remote SDP after close or report first frames from retired track registrations. [#1349](https://github.com/GetStream/stream-video-swift/pull/1349)
+- Preserved CallKit audio activation during rejoin and migration so microphone capture and playback can recover without another system activation callback. [#1351](https://github.com/GetStream/stream-video-swift/pull/1351)
+
+# [1.54.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.54.0)
+_October 01, 2026_
+
+### ✅ Added
+- Added framed AES-GCM end-to-end encryption via `Call.setE2EEManager(_:)` and `EncryptionManager`. Attach the manager before `join()`, or pass `nil` to detach it. [#1249](https://github.com/GetStream/stream-video-swift/pull/1249)
+- `Call.create`, `CallViewModel.startCall`, `joinCall`, and `joinAndRingCall` accept optional `encryption` settings so get-or-create can set mode `auto-on`. [#1249](https://github.com/GetStream/stream-video-swift/pull/1249)
+- `Call.getRingState(callSessionId:)` and `VideoConfig.ringStatePolling`, to tune or turn off ring state polling. [#1302](https://github.com/GetStream/stream-video-swift/pull/1302)
+
+### 🐞 Fixed
+
+- The joining screen now closes when answering a CallKit call fails. [#1334](https://github.com/GetStream/stream-video-swift/pull/1334)
+- A caller no longer stays stuck ringing when an accept, reject, or end event is lost. [#1302](https://github.com/GetStream/stream-video-swift/pull/1302)
 - Fixed a race condition when compressing WebRTC statistics concurrently. [#1311](https://github.com/GetStream/stream-video-swift/pull/1311)
 - The microphone indicator in the floating local-participant view is now left-aligned when connection quality is unavailable. [#1287](https://github.com/GetStream/stream-video-swift/pull/1287)
+- A join that fails with an unrecoverable error is no longer retried, and a call that failed to join is no longer reused by the next join. [#1335](https://github.com/GetStream/stream-video-swift/pull/1335)
 
 # [1.53.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.53.0)
 _September 18, 2026_

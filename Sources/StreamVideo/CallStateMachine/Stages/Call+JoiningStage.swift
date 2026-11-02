@@ -30,6 +30,7 @@ extension Call.StateMachine.Stage {
     /// Represents the joining stage in the call state machine.
     final class JoiningStage: Call.StateMachine.Stage, @unchecked Sendable {
         @Injected(\.streamVideo) private var streamVideo
+        @Injected(\.callCache) private var callCache
 
         private let disposableBag = DisposableBag()
         private var iterations = 0
@@ -101,7 +102,10 @@ extension Call.StateMachine.Stage {
                     // stage transitions into the error state.
                     await call.callController.trace(.init(error))
                     input.deliverySubject.send(completion: .failure(error))
-                    call.leave(reason: "join.interception.failed")
+                    call.leave(
+                        initiator: .app,
+                        reason: Call.LeaveReason.joinInterceptionFailed.rawValue
+                    )
                     transitionErrorOrLog(error)
                 } catch {
                     // `joinCall` can still throw TimeOutError after leave.
@@ -111,8 +115,10 @@ extension Call.StateMachine.Stage {
 
                     var input = input
                     input.currentNumberOfRetries += 1
+                    let isUnrecoverable = (error as? APIError)?.unrecoverable == true
 
-                    if input.currentNumberOfRetries < input.retryPolicy.maxRetries {
+                    if !isUnrecoverable,
+                       input.currentNumberOfRetries < input.retryPolicy.maxRetries {
                         let delay = UInt64(
                             (input.retryPolicy.delay(input.currentNumberOfRetries))
                                 * 1_000_000_000
@@ -133,6 +139,9 @@ extension Call.StateMachine.Stage {
                         transitionOrError(.joining(call, input: .join(input)))
                     } else {
                         input.deliverySubject.send(completion: .failure(error))
+                        // The call never joined, so there is nothing to leave.
+                        // Evict it so the next lookup creates a fresh instance.
+                        callCache.remove(for: call.cId)
                         transitionErrorOrLog(error)
                     }
                 }

@@ -51,19 +51,19 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         callProvider.setDelegate(subject, queue: nil)
     }
 
-    override func tearDown() {
+    override func tearDown() async throws {
+        // Restore the process-global UUID factory. Tests set a fixed
+        // `getResult` on the mock; leaving it injected makes every SDK
+        // `Task(disposableBag:)`/`sinkTask` share one identifier, so tasks
+        // cancel each other and real joins in the same process time out.
+        defer { InjectedValues[\.uuidFactory] = StreamUUIDFactory() }
+        subject = nil
         mockApplicationStateAdapter.dismante()
         mockPermissions.dismantle()
         // Restore the process-global audio store. Leaving the mock shared
         // poisons every subsequent real join in the same xctest process
         // (joins stall waiting on the stale store and time out).
-        mockAudioStore.dismantle()
-        // Restore the process-global UUID factory. Tests set a fixed
-        // `getResult` on the mock; leaving it injected makes every SDK
-        // `Task(disposableBag:)`/`sinkTask` share one identifier, so tasks
-        // cancel each other and real joins in the same process time out.
-        InjectedValues[\.uuidFactory] = StreamUUIDFactory()
-        subject = nil
+        try await mockAudioStore.dismantle()
         uuidFactory = nil
         callController = nil
         callProvider = nil
@@ -74,7 +74,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         callerId = nil
         mockAudioStore = nil
         completionError = nil
-        super.tearDown()
+        try await super.tearDown()
     }
 
     // MARK: - participantAutoLeavePolicy
@@ -84,6 +84,31 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
     }
 
     // MARK: - reportIncomingCall
+
+    @MainActor
+    func test_reportIncomingCall_getReturnsLocalAccept_keepsAnsweredCall_() async throws {
+        try await assertIncomingReportDoesNotEndAnsweredCall(acceptedByCurrentUser: true)
+    }
+
+    @MainActor
+    func test_reportIncomingCall_getReturnsRingingState_doesNotRestartRinging_() async throws {
+        try await assertIncomingReportDoesNotEndAnsweredCall(acceptedByCurrentUser: false)
+    }
+
+    @MainActor
+    func test_reportIncomingCall_getFailsAfterAnswer_keepsAnsweredCall_() async throws {
+        try await assertIncomingReportDoesNotEndAnsweredCall(getFails: true)
+    }
+
+    @MainActor
+    func test_reportIncomingCall_duplicateBeforeAnswer_keepsOneEntry_() async throws {
+        try await assertIncomingReportDoesNotEndAnsweredCall(duplicateBeforeAnswer: true)
+    }
+
+    @MainActor
+    func test_reportIncomingCall_duplicateAfterAnswer_keepsOneEntry_() async throws {
+        try await assertIncomingReportDoesNotEndAnsweredCall(duplicateAfterAnswer: true)
+    }
 
     @MainActor
     func test_reportIncomingCall_hasVideoTrue_callUpdateWasConfiguredCorrectly() throws {
@@ -640,6 +665,8 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
             XCTFail()
         case .get:
             XCTFail()
+        case .updateRingState:
+            XCTFail()
         }
     }
 
@@ -800,6 +827,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
             call.recordedInputPayload(String.self, for: .leave)?.first,
             "callkit.join.timeout"
         )
+        XCTAssertEqual(call.leaveInitiators.first, .callkit)
         XCTAssertEqual(subject.callCount, 0)
         await fulfillment {
             if case .idle = self.subject.eventPipelineSubject.value {
@@ -824,7 +852,9 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
             call.recordedInputPayload(String.self, for: .leave)
         )
         XCTAssertEqual(leaveReasons.first, "callkit.join.timeout")
-        XCTAssertTrue(leaveReasons.dropFirst().allSatisfy(\.isEmpty))
+        XCTAssertTrue(leaveReasons.dropFirst().allSatisfy {
+            $0 == "CXAnswerCallAction.failed"
+        })
         XCTAssertFalse(
             callProvider.invocations.contains {
                 switch $0 {
@@ -898,6 +928,8 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         case .setVideoFilter:
             XCTFail()
         case .get:
+            XCTFail()
+        case .updateRingState:
             XCTFail()
         }
         XCTAssertEqual(call.microphone.status, .enabled)
@@ -1299,9 +1331,39 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         let reason = try XCTUnwrap(
             call.recordedInputPayload(String.self, for: .leave)?.first
         )
+        XCTAssertEqual(call.leaveInitiators.first, .app)
         XCTAssertEqual(
             reason,
             StreamRejectionReasonProvider.HandledCallReason.autoLeave.rawValue
+        )
+    }
+
+    @MainActor
+    func test_callEnded_remoteEventAfterLocalEnd_preservesFirstCause() async throws {
+        let previousDevice = InjectedValues[\.currentDevice]
+        let device = CurrentDevice(currentDeviceProvider: { .phone })
+        device.didUpdate(.phone)
+        InjectedValues[\.currentDevice] = device
+        defer { InjectedValues[\.currentDevice] = previousDevice }
+        let call = try await acceptIncomingCall()
+
+        subject.callEnded(cid, ringingTimedOut: false, leaveReason: "local-end")
+        await fulfillment { self.callController.requestWasCalledWith != nil }
+        let action = try XCTUnwrap(
+            callController.requestWasCalledWith?.0.actions.first as? CXEndCallAction
+        )
+        mockedStreamVideo.process(.coordinatorEvent(.typeCallEndedEvent(.init(
+            call: .dummy(cid: cid, id: callId),
+            callCid: cid,
+            createdAt: .init()
+        ))))
+        subject.provider(callProvider, perform: action)
+
+        await fulfillment { call.timesCalled(.leave) == 1 }
+        XCTAssertEqual(call.leaveInitiators.first, .callkit)
+        XCTAssertEqual(
+            call.recordedInputPayload(String.self, for: .leave)?.first,
+            "local-end"
         )
     }
 
@@ -1469,6 +1531,98 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
     }
 
     // MARK: - Private Helpers
+
+    @MainActor
+    private func assertIncomingReportDoesNotEndAnsweredCall(
+        acceptedByCurrentUser: Bool = true,
+        getFails: Bool = false,
+        duplicateBeforeAnswer: Bool = false,
+        duplicateAfterAnswer: Bool = false,
+        file: StaticString = #file,
+        filePath: StaticString = #filePath,
+        line: UInt = #line
+    ) async throws {
+        let service = RecordingIncomingCallService()
+        subject = service
+        subject.callController = callController
+        subject.callProvider = callProvider
+        stubConnectionState(to: duplicateAfterAnswer ? .connected : .disconnected(error: nil))
+        let response = defaultGetCallResponse!
+        response.call.session = .dummy(
+            acceptedBy: acceptedByCurrentUser && !duplicateAfterAnswer
+                ? [user.id: Date()] : [:]
+        )
+        let call = stubCall(response: response)
+        let (getGate, getContinuation) = AsyncStream<Void>.makeStream()
+        defer { getContinuation.finish() }
+        call.onGet = {
+            for await _ in getGate {}
+            if getFails { throw ClientError("GET failed") }
+        }
+        call.waitForJoinToResume = true
+        defer { call.resumeJoin() }
+        subject.streamVideo = mockedStreamVideo
+        let duplicateReportError = NSError(
+            domain: CXErrorDomainIncomingCall,
+            code: CXErrorCodeIncomingCallError.Code.callUUIDAlreadyExists.rawValue
+        )
+
+        func report() {
+            subject.reportIncomingCall(
+                cid,
+                localizedCallerName: localizedCallerName,
+                callerId: callerId
+            ) { self.completionError = $0 }
+        }
+
+        report()
+        guard case let .reportNewIncomingCall(uuid, _, _) = callProvider.invocations.first else {
+            return XCTFail("Expected an incoming CallKit report.", file: filePath, line: line)
+        }
+        await fulfillment(file: file, line: line) { call.timesCalled(.get) == 1 }
+        if duplicateBeforeAnswer {
+            callProvider.reportNewIncomingCallError = duplicateReportError
+            report()
+        }
+        if duplicateAfterAnswer {
+            getContinuation.finish()
+            await fulfillment(file: file, line: line) { service.ringingTimerCallCount == 1 }
+            response.call.session?.acceptedBy = [user.id: Date()]
+        }
+
+        subject.provider(callProvider, perform: CXAnswerCallAction(call: uuid))
+        await fulfillment(file: file, line: line) { call.timesCalled(.join) == 1 }
+
+        try await assertNotRequestTransaction(CXEndCallAction.self) {
+            getContinuation.finish()
+        }
+        if duplicateAfterAnswer {
+            callProvider.reportNewIncomingCallError = duplicateReportError
+            report()
+            try await assertNotRequestTransaction(CXEndCallAction.self) {}
+        }
+
+        if duplicateBeforeAnswer || duplicateAfterAnswer {
+            XCTAssertEqual(completionError as NSError?, duplicateReportError, file: filePath, line: line)
+        }
+
+        XCTAssertEqual(subject.callCount, 1, file: filePath, line: line)
+        XCTAssertEqual(subject.callId, callId, file: filePath, line: line)
+        XCTAssertEqual(
+            service.ringingTimerCallCount,
+            duplicateAfterAnswer ? 1 : 0,
+            file: filePath,
+            line: line
+        )
+        XCTAssertEqual(call.timesCalled(.leave), 0, file: filePath, line: line)
+        XCTAssertEqual(call.timesCalled(.reject), 0, file: filePath, line: line)
+
+        call.resumeJoin()
+        await fulfillment {
+            if case .joined = service.eventPipelineSubject.value { return true }
+            return false
+        }
+    }
 
     @MainActor
     private func assertReportCallEnded(
@@ -1845,6 +1999,15 @@ private class MockUUIDFactory: UUIDProviding {
 
     func get() -> UUID {
         getResult ?? .init()
+    }
+}
+
+private final class RecordingIncomingCallService: CallKitService, @unchecked Sendable {
+    @Atomic var ringingTimerCallCount = 0
+
+    override func setUpRingingTimer(for callState: GetCallResponse) {
+        ringingTimerCallCount += 1
+        super.setUpRingingTimer(for: callState)
     }
 }
 

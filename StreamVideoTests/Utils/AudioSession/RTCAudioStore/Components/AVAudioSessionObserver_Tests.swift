@@ -26,6 +26,29 @@ final class AVAudioSessionObserver_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(AVAudioSession.Snapshot().renderingMode, "")
     }
 
+    #if compiler(>=6.1)
+    func test_snapshot_iOSAppOnMac_doesNotReadEchoCancellation() throws {
+        try assertEchoCancellationSnapshot(
+            isIOSAppOnMac: true,
+            isMacCatalystApp: false
+        )
+    }
+
+    func test_snapshot_macCatalyst_doesNotReadEchoCancellation() throws {
+        try assertEchoCancellationSnapshot(
+            isIOSAppOnMac: false,
+            isMacCatalystApp: true
+        )
+    }
+
+    func test_snapshot_iOS_readsEchoCancellation() throws {
+        try assertEchoCancellationSnapshot(
+            isIOSAppOnMac: false,
+            isMacCatalystApp: false
+        )
+    }
+    #endif
+
     func test_startObserving_emitsSnapshotsFromTimer() async {
         let observer = AVAudioSessionObserver()
         let expectation = expectation(description: "snapshots")
@@ -74,4 +97,39 @@ final class AVAudioSessionObserver_Tests: XCTestCase, @unchecked Sendable {
         observer.stopObserving()
         await fulfillment(of: [noMoreSnapshots], timeout: 0.3)
     }
+
+    // MARK: - Private Helpers
+
+    #if compiler(>=6.1)
+    private func assertEchoCancellationSnapshot(
+        isIOSAppOnMac: Bool,
+        isMacCatalystApp: Bool,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) throws {
+        guard #available(iOS 18.2, *) else {
+            throw XCTSkip("Requires iOS 18.2 or later.")
+        }
+
+        let originalDevice = CurrentDevice.currentValue
+        let currentDevice = CurrentDevice(currentDeviceProvider: { .phone })
+        currentDevice.isIOSAppOnMac = isIOSAppOnMac
+        currentDevice.isMacCatalystApp = isMacCatalystApp
+        CurrentDevice.currentValue = currentDevice
+        defer { CurrentDevice.currentValue = originalDevice }
+
+        let source = MockAVAudioSession()
+        source.stub(for: \.prefersEchoCancelledInput, with: true)
+        source.stub(for: \.isEchoCancelledInputEnabled, with: true)
+        source.stub(for: \.isEchoCancelledInputAvailable, with: true)
+        let subject = AVAudioSession.Snapshot(source)
+        let expected = !isIOSAppOnMac && !isMacCatalystApp
+
+        XCTAssertEqual(subject.prefersEchoCancelledInput, expected, file: file, line: line)
+        XCTAssertEqual(subject.isEchoCancelledInputEnabled, expected, file: file, line: line)
+        XCTAssertEqual(subject.isEchoCancelledInputAvailable, expected, file: file, line: line)
+        XCTAssertEqual(source.echoCancellationReadCount, expected ? 3 : 0, file: file, line: line)
+        XCTAssertEqual(subject.category, source.category, file: file, line: line)
+    }
+    #endif
 }

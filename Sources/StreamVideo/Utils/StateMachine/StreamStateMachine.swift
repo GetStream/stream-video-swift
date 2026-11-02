@@ -20,6 +20,7 @@ public final class StreamStateMachine<StageType: StreamStateMachineStage> {
     private let logSubsystem: LogSubsystem
     /// Timestamp of the latest successful stage transition.
     private var transitionToStageAt: Date?
+    private var currentStageToken = UUID()
 
     /// Initializes the state machine with an initial stage.
     ///
@@ -67,17 +68,24 @@ public final class StreamStateMachine<StageType: StreamStateMachineStage> {
         line: UInt = #line
     ) {
         var nextStage = nextStage
-        nextStage.transition = {
-            [weak self] in self?.transition(
-                to: $0,
-                file: file,
-                function: function,
-                line: line
-            )
+        let nextStageToken = UUID()
+        nextStage.transition = { [weak self] stage in
+            guard let self else { return }
+            queue.sync {
+                // Check the origin while holding the transition lock. A late
+                // callback may belong to an earlier instance with the same ID,
+                // or to a candidate whose transition was rejected.
+                guard self.currentStageToken == nextStageToken else { return }
+                self.performTransition(
+                    to: stage,
+                    file: file,
+                    function: function,
+                    line: line
+                )
+            }
         }
 
         let transitioningFromStage = currentStage
-        transitioningFromStage.willTransitionAway()
 
         guard
             let newStage = nextStage.transition(from: currentStage)
@@ -92,6 +100,9 @@ public final class StreamStateMachine<StageType: StreamStateMachineStage> {
             return
         }
 
+        // Rejection leaves the current stage active, including its recovery
+        // subscriptions and timers. Only an accepted transition may tear down.
+        transitioningFromStage.willTransitionAway()
         transitioningFromStage.didTransitionAway()
         var logMessage = "Transition \(currentStage.description) → \(newStage.description)"
 
@@ -107,6 +118,7 @@ public final class StreamStateMachine<StageType: StreamStateMachineStage> {
         )
 
         transitionToStageAt = .init()
+        currentStageToken = nextStageToken
         publisher.send(newStage)
     }
 }

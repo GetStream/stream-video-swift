@@ -5,59 +5,41 @@
 import Combine
 import Foundation
 
-/// Reloads the ringing call from the coordinator after the WebSocket
-/// reconnects.
-///
-/// Accept, reject, and end for an outgoing ring arrive as coordinator
-/// events. If the socket drops while we are still ringing, those events
-/// never reach this device and `Call.state` stays stale — the caller
-/// never joins.
-///
-/// On every `WSConnected` this adapter calls `get()` on
-/// `state.ringingCall` without `ring: true`, so session fields such as
-/// `acceptedBy` are current again without paging callees a second time.
-/// SwiftUI then turns that session into the same events it already
-/// handles from the socket.
+/// Runs ringing recovery actions serially when ring events are lost.
 final class RingingCallRecoveryAdapter: @unchecked Sendable {
 
-    private let disposableBag = DisposableBag()
+    /// Serializes fetches so responses cannot arrive out of order.
     private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
-    private weak var streamVideo: StreamVideo?
+    /// Subscriptions alone do not keep policies alive.
+    private let policies: [RingingRecoveryPolicy]
+    private let disposableBag = DisposableBag()
 
-    init(_ streamVideo: StreamVideo) {
-        self.streamVideo = streamVideo
-
-        streamVideo
-            .rawEventPublisher
-            .compactMap {
-                switch $0 {
-                case let .internalEvent(event):
-                    return event
-                default:
-                    return nil
-                }
-            }
-            .filter { $0 is WSConnected }
-            .receive(on: processingQueue)
-            .sinkTask(storeIn: disposableBag) { [weak self] _ in
-                await self?.didConnect()
-            }
-            .store(in: disposableBag)
+    convenience init(_ streamVideo: StreamVideo) {
+        var policies: [RingingRecoveryPolicy] = [
+            ReconnectRingingRecoveryPolicy(streamVideo)
+        ]
+        if let options = streamVideo.videoConfig.ringStatePolling {
+            policies.append(
+                PollingRingingRecoveryPolicy(streamVideo, options: options)
+            )
+        }
+        self.init(streamVideo, policies: policies)
     }
 
-    private func didConnect() async {
-        guard
-            let ringingCall = await MainActor.run(body: {
-                streamVideo?.state.ringingCall
-            })
-        else {
-            return
-        }
-
-        do {
-            _ = try await ringingCall.get()
-        } catch {
-            log.error(error)
-        }
+    init(_ streamVideo: StreamVideo, policies: [RingingRecoveryPolicy]) {
+        self.policies = policies
+        streamVideo.state.$ringingCall
+            .dropFirst()
+            .filter { $0 == nil }
+            // Cancel now so an old ring cannot cancel a new ring's work.
+            .sink { [weak processingQueue] _ in
+                processingQueue?.cancelAllOperations()
+            }
+            .store(in: disposableBag)
+        Publishers
+            .MergeMany(policies.map(\.actionPublisher))
+            // Serialize reconnect and polling fetches without deduplicating.
+            .sinkTask(queue: processingQueue) { try await $0() }
+            .store(in: disposableBag)
     }
 }

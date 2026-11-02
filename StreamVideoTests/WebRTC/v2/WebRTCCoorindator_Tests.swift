@@ -231,6 +231,14 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
 
     // MARK: - leave
 
+    func test_leave_coordinatorReleasedBeforeStageRuns_completesTeardown() async throws {
+        try await assertTeardownAfterReleasingCoordinator(stageID: .leaving)
+    }
+
+    func test_cleanUp_coordinatorReleasedBeforeStageRuns_completesTeardown() async throws {
+        try await assertTeardownAfterReleasingCoordinator(stageID: .cleanUp)
+    }
+
     func test_leave_shouldTransitionStateMachineToLeaving() async throws {
         mockWebRTCAuthenticator
             .stub(
@@ -695,6 +703,49 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
     }
 
     // MARK: - Private helpers
+
+    private func assertTeardownAfterReleasingCoordinator(
+        stageID: WebRTCCoordinator.StateMachine.Stage.ID
+    ) async throws {
+        try await prepareAsConnected(videoFilter: nil)
+        let stateAdapter = subject.stateAdapter
+        let publisher = try await XCTAsyncUnwrap(
+            await stateAdapter.publisher as? MockRTCPeerConnectionCoordinator
+        )
+        let subscriber = try await XCTAsyncUnwrap(
+            await stateAdapter.subscriber as? MockRTCPeerConnectionCoordinator
+        )
+        weak var coordinator = subject
+        var context = subject.stateMachine.currentStage.context
+        context.sfuEventObserver = .init(
+            sfuAdapter: mockSFUStack.adapter,
+            stateAdapter: stateAdapter
+        )
+        let stateMachine = StreamStateMachine<WebRTCCoordinator.StateMachine.Stage>(
+            initialStage: .init(id: .joined, context: context)
+        )
+        let stage: WebRTCCoordinator.StateMachine.Stage = stageID == .leaving
+            ? .leaving(context, reason: nil)
+            : .cleanUp(context)
+        let reachedIdle = expectation(description: "Teardown reached idle")
+        let subscription = stateMachine.publisher
+            .filter { $0.id == .idle }
+            .prefix(1)
+            .sink { _ in reachedIdle.fulfill() }
+        defer { subscription.cancel() }
+
+        subject = nil
+        stateMachine.transition(to: stage)
+
+        await fulfillment(of: [reachedIdle], timeout: defaultTimeout)
+        XCTAssertEqual(publisher.timesCalled(.close), 1)
+        XCTAssertEqual(subscriber.timesCalled(.close), 1)
+        await assertNilAsync(await stateAdapter.sfuAdapter)
+        await assertNilAsync(await stateAdapter.statsAdapter)
+        await fulfillment { [weak coordinator] in coordinator == nil }
+        XCTAssertNil(coordinator)
+        await stateAdapter.cleanUp()
+    }
 
     private func assertEqualAsync<T: Equatable>(
         _ expression: @autoclosure () async throws -> T,

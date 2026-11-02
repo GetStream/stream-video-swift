@@ -21,12 +21,12 @@ final class WebRTCAudioSessionWatchdog_Tests: XCTestCase, @unchecked Sendable {
         mockAudioStore.makeShared()
     }
 
-    override func tearDown() {
+    override func tearDown() async throws {
         disposableBag.removeAll()
-        mockAudioStore.dismantle()
         subject = nil
+        try await mockAudioStore.dismantle()
         mockAudioStore = nil
-        super.tearDown()
+        try await super.tearDown()
     }
 
     // MARK: - tests

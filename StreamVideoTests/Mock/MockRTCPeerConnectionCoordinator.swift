@@ -305,6 +305,9 @@ final class MockRTCPeerConnectionCoordinator:
 
     override func stopScreenSharing() async throws {
         record(.stopScreenSharing, for: .stopScreenSharing)
+        if let handler = stubbedFunction[.stopScreenSharing] as? @Sendable () async -> Void {
+            await handler()
+        }
     }
 
     override func focus(at point: CGPoint) async throws {

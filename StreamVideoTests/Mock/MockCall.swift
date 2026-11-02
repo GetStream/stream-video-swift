@@ -22,6 +22,8 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
         case callKitActivated
         case ring
         case setVideoFilter
+        case updateRingState
+        case getRingState
     }
 
     enum MockCallFunctionInputKey: Payloadable {
@@ -48,6 +50,8 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
 
         case get
 
+        case updateRingState(callSessionId: String)
+
         var payload: Any {
             switch self {
             case let .join(create, options, ring, notify, callSettings, policy):
@@ -73,6 +77,9 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
 
             case .get:
                 return NSNull()
+
+            case let .updateRingState(callSessionId):
+                return callSessionId
             }
         }
     }
@@ -87,7 +94,16 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
     var stubbedJoinError: Error?
     var waitForJoinToResume = false
     var onJoinStarted: (@Sendable () -> Void)?
+    var onJoinFinished: (@Sendable () -> Void)?
     var onJoinResumed: (@Sendable (MockCall) async -> Void)?
+    /// Lets a test suspend a poll while another ring starts.
+    var onUpdateRingState: (@Sendable () async throws -> Void)?
+    var onGet: (@Sendable () async throws -> Void)?
+    var onGetRingState: (@Sendable () async throws -> Void)?
+    private(set) var ringStateRequests: [String?] = []
+    /// When true, `reject` suspends until ``resumeReject()`` is called.
+    var waitForRejectToResume = false
+    private var rejectContinuation: CheckedContinuation<Void, Never>?
     /// When true, `create` suspends until ``resumeCreate()`` is called.
     var waitForCreateToResume = false
     var onCreateStarted: (@Sendable () -> Void)?
@@ -221,13 +237,34 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
         notify: Bool = false
     ) async throws -> GetCallResponse {
         stubbedFunctionInput[.get]?.append(.get)
+        try await onGet?()
         return stubbedFunction[.get] as! GetCallResponse
+    }
+
+    override func updateRingState(callSessionId: String) async throws {
+        stubbedFunctionInput[.updateRingState]?.append(
+            .updateRingState(callSessionId: callSessionId)
+        )
+        try await onUpdateRingState?()
+        if let error = stubbedFunction[.updateRingState] as? Error {
+            throw error
+        }
+    }
+
+    override func getRingState(callSessionId: String? = nil) async throws -> GetCallRingStateResponse {
+        ringStateRequests.append(callSessionId)
+        try await onGetRingState?()
+        if let response = stubbedFunction[.getRingState] as? GetCallRingStateResponse {
+            return response
+        }
+        throw stubbedFunction[.getRingState] as? Error ?? ClientError("No ring state stub.")
     }
 
     override func accept() async throws -> AcceptCallResponse {
         stubbedFunction[.accept] as! AcceptCallResponse
     }
 
+    @discardableResult
     override func reject(reason: String? = nil) async throws -> RejectCallResponse {
         // Model the coordinator API: reject before create finishes fails, so a
         // hang-up that races create cannot cancel the eventual ring.
@@ -236,8 +273,17 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
             throw ClientError("Call has not been created yet.")
         }
         stubbedFunctionInput[.reject]?.append(.reject(reason: reason))
+        if waitForRejectToResume {
+            await withCheckedContinuation { rejectContinuation = $0 }
+        }
+        let response: RejectCallResponse
+        if let stubbedResponse = stubbedFunction[.reject] as? RejectCallResponse {
+            response = stubbedResponse
+        } else {
+            response = try await super.reject(reason: reason)
+        }
         successfulRejectCount += 1
-        return stubbedFunction[.reject] as! RejectCallResponse
+        return response
     }
 
     override func join(
@@ -249,6 +295,7 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
         policy: WebRTCJoinPolicy = .default,
         joinInterceptor: CallJoinIntercepting? = nil
     ) async throws -> JoinCallResponse {
+        defer { onJoinFinished?() }
         stubbedFunctionInput[.join]?.append(
             .join(
                 create: create,
@@ -300,10 +347,25 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
         joinContinuation = nil
     }
 
+    func resumeReject() {
+        rejectContinuation?.resume()
+        rejectContinuation = nil
+    }
+
     override func leave(reason: String? = nil) {
+        leave(initiator: .unknown, reason: reason)
+    }
+
+    @Atomic var leaveInitiators: [Call.LeaveInitiator] = []
+
+    override func leave(
+        initiator: Call.LeaveInitiator,
+        reason: String? = nil
+    ) {
+        leaveInitiators.append(initiator)
         stubbedFunctionInput[.leave]?.append(.leave(reason: reason))
         joinWasCancelled = true
-        super.leave(reason: reason)
+        super.leave(initiator: initiator, reason: reason)
     }
 
     override func updateTrackSize(

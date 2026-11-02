@@ -27,6 +27,45 @@ final class CoordinatorJoinClientEventScenarios_Tests: XCTestCase, @unchecked Se
         XCTAssertEqual(trace.begun(.coordinatorJoin).first?.details.joinReason, .firstAttempt)
     }
 
+    func test_ringJoinSource_firstAttempt_reportsSource() async throws {
+        let harness = ClientEventScenarioHarness()
+        let subject = makeConnectingStage(
+            harness: harness,
+            reconnectAttempts: 0,
+            ringJoinSource: .ringPollAPI
+        )
+
+        try await assertTransition(
+            subject,
+            from: .idle,
+            expectedTarget: .error
+        ) { _ in }
+
+        let trace = await harness.trace
+        XCTAssertEqual(
+            trace.begun(.coordinatorJoin).first?.details.source,
+            .ringPollAPI
+        )
+    }
+
+    func test_ringJoinSource_fullRejoin_reportsNoSource() async throws {
+        let harness = ClientEventScenarioHarness()
+        let subject = makeConnectingStage(
+            harness: harness,
+            reconnectAttempts: 0,
+            ringJoinSource: .ringWS
+        )
+
+        try await assertTransition(
+            subject,
+            from: .rejoining,
+            expectedTarget: .disconnected
+        ) { _ in }
+
+        let trace = await harness.trace
+        XCTAssertNil(trace.begun(.coordinatorJoin).first?.details.source)
+    }
+
     func test_authenticationSucceedsAfterRetries_reportsCoordinatorJoinSuccessWithRetryCount(
     ) async throws {
         let harness = ClientEventScenarioHarness()
@@ -105,7 +144,8 @@ final class CoordinatorJoinClientEventScenarios_Tests: XCTestCase, @unchecked Se
         harness: ClientEventScenarioHarness,
         reconnectAttempts: UInt32,
         coordinatorJoinAttemptCount: Int = 0,
-        hasPendingJoinCompletion: Bool = false
+        hasPendingJoinCompletion: Bool = false,
+        ringJoinSource: ClientEventJoinSource? = nil
     ) -> WebRTCCoordinator.StateMachine.Stage {
         var context = WebRTCCoordinator.StateMachine.Stage.Context(
             coordinator: harness.stack.coordinator,
@@ -113,6 +153,7 @@ final class CoordinatorJoinClientEventScenarios_Tests: XCTestCase, @unchecked Se
         )
         context.authenticator = harness.stack.webRTCAuthenticator
         context.coordinatorJoinAttemptCount = coordinatorJoinAttemptCount
+        context.ringJoinSource = ringJoinSource
         if hasPendingJoinCompletion {
             context.joinResponseHandler = PassthroughSubject<JoinCallResponse, Error>()
         }

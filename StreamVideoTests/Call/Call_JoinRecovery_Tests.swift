@@ -344,7 +344,7 @@ final class Call_JoinRecovery_Tests: StreamVideoTestCase, @unchecked Sendable {
     func test_join_afterAbnormalWebSocketClosure_issuesAdditionalBackendJoinRequest() async throws {
         let audioStore = MockRTCAudioStore()
         audioStore.makeShared()
-        defer { audioStore.dismantle() }
+        addTeardownBlock { try await audioStore.dismantle() }
         audioStore.audioStore.dispatch(.setActive(true))
         audioStore.audioStore.dispatch(
             .setCurrentRoute(.dummy(outputs: [.dummy(isReceiver: true)]))
@@ -360,6 +360,10 @@ final class Call_JoinRecovery_Tests: StreamVideoTestCase, @unchecked Sendable {
         let webRTCCoordinatorFactory = MockWebRTCCoordinatorFactory(
             videoConfig: videoConfig
         )
+        addTeardownBlock {
+            await webRTCCoordinatorFactory.mockCoordinatorStack
+                .coordinator.stateAdapter.cleanUp()
+        }
         let controller = CallController(
             defaultAPI: defaultAPI,
             user: .dummy(),

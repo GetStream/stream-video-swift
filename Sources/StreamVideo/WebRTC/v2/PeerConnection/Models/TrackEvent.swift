@@ -32,3 +32,22 @@ enum TrackEvent {
         track: RTCMediaStreamTrack
     )
 }
+
+/// Logs ids only.
+///
+/// The default description prints the track, and
+/// `RTCMediaStreamTrack.description` reads `isEnabled`, which waits on
+/// WebRTC's signaling thread, and `readyState`, which waits on the worker
+/// thread for video tracks. These events are logged while WebRTC may be
+/// busy, so a stalled WebRTC thread would block the logging thread. `kind`
+/// and `trackId` are read without switching threads.
+extension TrackEvent: CustomStringConvertible {
+    var description: String {
+        switch self {
+        case let .added(id, trackType, track):
+            return "added(id: \(id), trackType: \(trackType), track: \(track.kind):\(track.trackId))"
+        case let .removed(id, trackType, track):
+            return "removed(id: \(id), trackType: \(trackType), track: \(track.kind):\(track.trackId))"
+        }
+    }
+}

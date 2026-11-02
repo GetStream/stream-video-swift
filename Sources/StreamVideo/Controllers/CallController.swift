@@ -183,6 +183,7 @@ class CallController: @unchecked Sendable {
             ring: ring,
             notify: notify,
             source: source,
+            ringJoinSource: await ringJoinSource(),
             joinResponseHandler: joinCallResponseSubject,
             policy: policy,
             coordinatorJoinAttemptCount: coordinatorJoinAttemptCount
@@ -509,10 +510,10 @@ class CallController: @unchecked Sendable {
         try await webRTCCoordinator.zoom(by: factor)
     }
 
-    func leave(reason: String?) {
+    func leave(reason: String?, initiator: Call.LeaveInitiator = .unknown) {
         guard call != nil else { return }
         call = nil
-        webRTCCoordinator.leave(reason: reason)
+        webRTCCoordinator.leave(reason: reason, initiator: initiator)
     }
 
     /// Cleans up the call controller.
@@ -659,6 +660,26 @@ class CallController: @unchecked Sendable {
 
     // MARK: - private
 
+    /// Source of an outgoing ring's acceptance, or nil for other joins.
+    /// Ringing clears only after the call becomes active.
+    @MainActor
+    private func ringJoinSource() -> ClientEventJoinSource? {
+        guard
+            let call,
+            call.streamVideo.state.ringingCall === call,
+            call.state.createdBy?.id == user.id
+        else {
+            return nil
+        }
+
+        if
+            let sessionId = call.state.session?.id,
+            sessionId == call.state.sessionIdWithPolledAccept {
+            return .ringPollAPI
+        }
+        return .ringWS
+    }
+
     private func handleParticipantsUpdated() {
         webRTCParticipantsObserver = participants?
             .$value
@@ -801,7 +822,10 @@ class CallController: @unchecked Sendable {
                 if let call, let errorStage = stage as? WebRTCCoordinator.StateMachine.Stage.ErrorStage {
                     call.transitionDueToError(errorStage.error)
                 }
-                call?.leave()
+                call?.leave(
+                    initiator: .sdkError,
+                    reason: Call.LeaveReason.error.rawValue
+                )
             }
         default:
             break

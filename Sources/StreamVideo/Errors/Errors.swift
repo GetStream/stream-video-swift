@@ -9,6 +9,10 @@ extension Stream_Video_Sfu_Models_Error:
     Error,
     ReflectiveStringConvertible {}
 
+extension Stream_Video_Sfu_Event_Error:
+    Error,
+    ReflectiveStringConvertible {}
+
 extension Error {
     var isRateLimitError: Bool {
         if let error = (self as? ClientError)?.underlyingError as? ErrorPayload,

@@ -42,6 +42,14 @@ enum ClientEventJoinReason: String, Sendable, Equatable {
     case fullRejoin = "full-rejoin"
 }
 
+/// Ring acceptance source reported on the caller's `CoordinatorJoin` events.
+enum ClientEventJoinSource: String, Sendable, Equatable {
+    /// The accept arrived as a WebSocket event.
+    case ringWS = "ring-ws"
+    /// Polling the ring state found the accept first.
+    case ringPollAPI = "ring-poll-api"
+}
+
 /// Whether an event marks the start or the resolution of a stage attempt.
 enum ClientEventType: String, Sendable {
     /// Emitted when the client begins the stage attempt.

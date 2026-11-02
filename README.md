@@ -8,10 +8,10 @@
   <a href="https://swift.org"><img src="https://img.shields.io/badge/Swift-5.9%2B-orange.svg" /></a>
 </p>
 <p align="center">
-  <img id="stream-video-label" alt="StreamVideo" src="https://img.shields.io/badge/StreamVideo-8.99%20MB-blue"/>
-  <img id="stream-video-swiftui-label" alt="StreamVideoSwiftUI" src="https://img.shields.io/badge/StreamVideoSwiftUI-2.39%20MB-blue"/>
-  <img id="stream-video-uikit-label" alt="StreamVideoUIKit" src="https://img.shields.io/badge/StreamVideoUIKit-2.51%20MB-blue"/>
-  <img id="stream-web-rtc-label" alt="StreamWebRTC" src="https://img.shields.io/badge/StreamWebRTC-11.88%20MB-blue"/>
+  <img id="stream-video-label" alt="StreamVideo" src="https://img.shields.io/badge/StreamVideo-9.13%20MB-blue"/>
+  <img id="stream-video-swiftui-label" alt="StreamVideoSwiftUI" src="https://img.shields.io/badge/StreamVideoSwiftUI-2.41%20MB-blue"/>
+  <img id="stream-video-uikit-label" alt="StreamVideoUIKit" src="https://img.shields.io/badge/StreamVideoUIKit-2.53%20MB-blue"/>
+  <img id="stream-web-rtc-label" alt="StreamWebRTC" src="https://img.shields.io/badge/StreamWebRTC-11.47%20MB-blue"/>
 </p>
 <p align="center">
   <a href="https://deepwiki.com/GetStream/stream-video-swift"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
@@ -73,6 +73,26 @@ This repository contains the following parts:
 - low-level client for calling (can be used standalone if you want to build your own UI)
 - SwiftUI SDK (UI components developed in SwiftUI)
 - UIKit SDK (wrappers for easier usage in UIKit apps)
+
+### Working in this repository
+
+| Location | Purpose |
+| --- | --- |
+| `Sources/` | SDK modules: StreamVideo, StreamVideoSwiftUI, and StreamVideoUIKit. |
+| `StreamVideoTests/`, `StreamVideoSwiftUITests/`, `StreamVideoUIKitTests/` | SDK tests and snapshots. |
+| `DemoApp/`, `DemoAppUIKit/`, `CallIntent/`, `ScreenSharing/` | Sample apps and their extensions. |
+| `SwiftUIDemoAppUITests/`, `TestTools/`, `DocumentationTests/` | Demo UI tests, shared test helpers, and documentation examples. |
+| `fastlane/`, `Scripts/`, `.github/` | Build, test, generation, and release automation. |
+
+Start with [repository guidance](AGENTS.md) for shared conventions.
+The [development](skills/development/SKILL.md), [test](skills/test/SKILL.md),
+[review](skills/review/SKILL.md), [release](skills/release/SKILL.md), and
+[profile](skills/profile/SKILL.md) skills describe each workflow.
+These files travel with the checkout. They require no agent plugin.
+If your agent does not discover `skills/`, include the relevant file path
+in your request.
+The [optional setup guide](skills/setup.md) explains companion skills and
+installation choices for your agent.
 
 ### Main Principles
 

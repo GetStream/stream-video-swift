@@ -12,9 +12,12 @@ extension Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload {
         return nil
     }
 
+    /// Classifies errors that must change the StreamCore connection state.
+    /// Unspecified errors stay on the event stream without disconnecting.
     public func error() -> Error? {
-        if case let .error(event) = self {
-            return event.error
+        if case let .error(event) = self,
+           event.reconnectStrategy != .unspecified {
+            return event
         }
         return nil
     }
