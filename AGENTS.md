@@ -424,6 +424,7 @@ Accessibility & UI quality
 - The v2 integration branch is `v2`. Feature branches for SDK 2.0 merge into `v2`, not `develop`.
 - Name branches with a descriptive kebab-case prefix, e.g. `v2-design-fonts`, `v2-design-tokens`.
 - Update `CHANGELOG.md` under the `# Upcoming` section when making client-facing changes (follow the Keep a Changelog format).
+- After a release, `# Upcoming` holds only an empty `### 🔄 Changed` placeholder. When adding the first entry, remove that empty placeholder, unless the new entry belongs under `### 🔄 Changed`.
 - Only update `CHANGELOG.md` **after the PR has been opened**, so the entry can include the PR link. Push the changelog update as a follow-up commit on the same branch.
 - Keep changelog entries short and user-visible; do not explain implementation details.
 
