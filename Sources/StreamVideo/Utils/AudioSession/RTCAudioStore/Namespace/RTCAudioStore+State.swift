@@ -229,6 +229,7 @@ extension RTCAudioStore {
 
         var isActive: Bool
         var isInterrupted: Bool
+        var callKitActivationCount: UInt = 0
         var isRecording: Bool
         var isMicrophoneMuted: Bool
         var isMutedSpeechDetectionEnabled: Bool
@@ -247,6 +248,7 @@ extension RTCAudioStore {
         var description: String {
             " { " +
                 "isActive:\(isActive)" +
+                ", callKitActivationCount:\(callKitActivationCount)" +
                 ", activeSessionIdentifier:\(activeSessionIdentifier)" +
                 ", isInterrupted:\(isInterrupted)" +
                 ", isRecording:\(isRecording)" +
@@ -312,6 +314,7 @@ extension RTCAudioStore {
 
         static func == (lhs: StoreState, rhs: StoreState) -> Bool {
             lhs.isActive == rhs.isActive
+                && lhs.callKitActivationCount == rhs.callKitActivationCount
                 && lhs.isInterrupted == rhs.isInterrupted
                 && lhs.isRecording == rhs.isRecording
                 && lhs.isMicrophoneMuted == rhs.isMicrophoneMuted
@@ -327,6 +330,7 @@ extension RTCAudioStore {
 
         func hash(into hasher: inout Hasher) {
             hasher.combine(isActive)
+            hasher.combine(callKitActivationCount)
             hasher.combine(isInterrupted)
             hasher.combine(isRecording)
             hasher.combine(isMicrophoneMuted)

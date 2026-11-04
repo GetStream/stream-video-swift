@@ -15,6 +15,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Remove the public `CodingKeys` enums from the API models to reduce binary size. The models encode and decode the same JSON as before. [#1379](https://github.com/GetStream/stream-video-swift/pull/1379)
 - API models now conform only to the coding direction the API uses, to reduce binary size. Request models are `Encodable`, and response and event models are `Decodable`. [#1381](https://github.com/GetStream/stream-video-swift/pull/1381)
 
+### 🐞 Fixed
+
+- Start the microphone when CallKit activates a call that was accepted while another call still owned audio.
+
 # [1.56.1](https://github.com/GetStream/stream-video-swift/releases/tag/1.56.1)
 _October 28, 2026_
 

@@ -1279,9 +1279,14 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
             return true
         }()
 
+        // Same-session rejoin is already active, so the engine can run.
+        // A different CallKit session stays down until CallKit activates.
+        let callKitSessionAlreadyActive = sourceIsCallKit
+            && audioStore.state.isActive
+            && audioStore.state.activeSessionIdentifier == audioSession.identifier
         let isAudioEngineAvailable = peerConnectionFactory
             .audioEngineAvailabilityOverride
-            ?? (!sourceIsCallKit || audioStore.state.isActive)
+            ?? (!sourceIsCallKit || callKitSessionAlreadyActive)
         try peerConnectionFactory.audioDeviceModule
             .setEngineAvailability(isAudioEngineAvailable)
 
@@ -1305,13 +1310,10 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
             delegate: self,
             statsAdapter: statsAdapter,
             /// When joining from CallKit we configure the session here but
-            /// never activate it ourselves. The ordering is: the joining
-            /// stage fulfils the pending answer action once the call has
-            /// joined, CallKit then activates the session and `didActivate`
-            /// dispatches `.callKit(.activate)` into the audio store, whose
-            /// `isActive` flip wakes the deferred activation scheduled by
-            /// `CallAudioSession` below. Activating locally as well would
-            /// race CallKit's ownership of the session.
+            /// never activate it ourselves. CallKit activates the session
+            /// after the answer action is fulfilled, and that activation
+            /// wakes the deferred `CallAudioSession` work. Activating
+            /// locally as well would race CallKit's ownership of the session.
             shouldSetActive: !sourceIsCallKit
         )
     }
