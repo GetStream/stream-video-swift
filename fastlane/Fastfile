@@ -26,7 +26,7 @@ before_all do |lane|
   if is_ci
     setup_ci
     setup_git_config
-    select_xcode(version: xcode_version) unless [:sonar_upload, :allure_launch, :allure_upload, :stop_e2e_helpers, :merge_main, :pr].include?(lane)
+    select_xcode(version: xcode_version) unless [:sonar_upload, :allure_launch, :allure_upload, :stop_e2e_helpers, :merge_main, :pr, :openapi].include?(lane)
   elsif lane == :test_e2e
     stop_e2e_helpers
   end
@@ -471,16 +471,40 @@ lane :code_generation do
   sync_xcodeproj_references
 end
 
+desc 'Generate OpenAPI models and open a pull request when they change'
+lane :openapi do
+  Dir.chdir('..') { sh('bash Scripts/generate.sh') }
+  sync_xcodeproj_references
+  next unless is_ci
+
+  changed = Dir.chdir('..') do
+    sh('git status --porcelain -- Sources/StreamVideo/OpenApi/generated StreamVideo.xcodeproj/project.pbxproj')
+  end
+  next if changed.strip.empty?
+
+  base_branch = current_branch
+  pr_create(
+    title: '[Hygiene]OpenAPI models generation',
+    base_branch: base_branch,
+    head_branch: "#{base_branch}-openapi-#{Time.now.to_i}",
+    git_add: '../Sources/StreamVideo/OpenApi/generated ../StreamVideo.xcodeproj/project.pbxproj'
+  )
+end
+
 lane :sync_xcodeproj_references do
   Dir.chdir('..') do
     project = Xcodeproj::Project.open(xcode_project)
     status = git_status(ext: '.swift')
+    changed = false
 
     status[:d].each do |file_path|
       next if file_path !~ %r{(/OpenApi/|/protobuf/)}
 
       file = project.files.find { |f| f.full_path.to_s == file_path }
-      file.remove_from_project if file
+      next unless file
+
+      file.remove_from_project
+      changed = true
     end
 
     status[:a].each do |file_path|
@@ -502,9 +526,10 @@ lane :sync_xcodeproj_references do
       file_reference = group.new_file(file_path)
       file_reference.path = file_name
       project.targets.find { |n| n.name == 'StreamVideo' }.source_build_phase.add_file_reference(file_reference)
+      changed = true
     end
 
-    project.save
+    project.save if changed
   end
 end
 

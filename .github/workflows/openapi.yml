@@ -1,0 +1,56 @@
+name: OpenAPI
+
+on:
+  workflow_dispatch:
+    inputs:
+      chat_ref:
+        description: 'GetStream/chat branch name or commit hash'
+        required: false
+        default: master
+        type: string
+
+env:
+  HOMEBREW_NO_INSTALL_CLEANUP: 1 # Disable cleanup for homebrew, we don't need it on CI
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  generate:
+    name: Generate
+    runs-on: macos-15
+    timeout-minutes: 45
+    steps:
+    - uses: actions/checkout@v4.1.1
+    - uses: actions/checkout@v4.1.1
+      with:
+        repository: GetStream/chat
+        ref: ${{ inputs.chat_ref }}
+        path: chat-source
+        token: ${{ secrets.CI_BOT_GITHUB_TOKEN }}
+    - name: Place chat next to this repo
+      # Scripts/generate.sh reads the private chat repo from the parent directory.
+      run: |
+        rm -rf "$GITHUB_WORKSPACE/../chat"
+        mv "$GITHUB_WORKSPACE/chat-source" "$GITHUB_WORKSPACE/../chat"
+    - uses: ./.github/actions/ruby-cache
+    - uses: actions/setup-go@v5
+      with:
+        go-version: stable
+    - name: Install formatters
+      run: ./Scripts/bootstrap.sh
+    - name: Generate OpenAPI models
+      run: bundle exec fastlane openapi
+      timeout-minutes: 30
+      env:
+        GITHUB_TOKEN: ${{ secrets.CI_BOT_GITHUB_TOKEN }}
+    - uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        text: "You shall not pass!"
+        job_name: "${{ github.workflow }}: ${{ github.job }}"
+        fields: repo,commit,author,workflow
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      if: failure()
