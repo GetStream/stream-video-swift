@@ -17,7 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🐞 Fixed
 
-- Start the microphone when CallKit activates a call that was accepted while another call still owned audio.
+- Start the microphone when CallKit activates a call that was accepted while another call still owned audio. [#1394](https://github.com/GetStream/stream-video-swift/pull/1394)
 
 # [1.56.1](https://github.com/GetStream/stream-video-swift/releases/tag/1.56.1)
 _October 28, 2026_
