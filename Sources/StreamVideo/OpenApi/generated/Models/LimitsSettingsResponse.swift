@@ -5,9 +5,9 @@
 import Foundation
 import StreamCore
 
-public final class LimitsSettingsResponse: @unchecked Sendable, Decodable {
-    public var maxDurationSeconds: Int?
-    public var maxParticipants: Int?
+public final class LimitsSettingsResponse: Sendable, Decodable {
+    public let maxDurationSeconds: Int?
+    public let maxParticipants: Int?
 
     public init(maxDurationSeconds: Int? = nil, maxParticipants: Int? = nil) {
         self.maxDurationSeconds = maxDurationSeconds

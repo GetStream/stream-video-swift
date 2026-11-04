@@ -7,21 +7,28 @@ import StreamCore
 
 /// This event is sent when a call is updated, clients should use this update the local state of the call.
 /// This event also contains the capabilities by role for the call, clients should update the own_capability for the current.
-public final class CallUpdatedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
+public final class CallUpdatedEvent: Sendable, Event, Decodable, WSCallEvent {
     /// Represents a call
-    public var call: CallResponse
-    public var callCid: String
+    public let call: CallResponse
+    public let callCid: String
     /// The capabilities by role for this call
-    public var capabilitiesByRole: [String: [String]]
-    public var createdAt: Date
+    public let capabilitiesByRole: [String: [String]]
+    public let createdAt: Date
     /// The type of event: "call.updated" in this case
-    public var type: String = "call.updated"
+    public let type: String
 
-    public init(call: CallResponse, callCid: String, capabilitiesByRole: [String: [String]], createdAt: Date) {
+    public init(
+        call: CallResponse,
+        callCid: String,
+        capabilitiesByRole: [String: [String]],
+        createdAt: Date,
+        type: String = "call.updated"
+    ) {
         self.call = call
         self.callCid = callCid
         self.capabilitiesByRole = capabilitiesByRole
         self.createdAt = createdAt
+        self.type = type
     }
 
     public init(from decoder: Decoder) throws {

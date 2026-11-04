@@ -6,20 +6,27 @@ import Foundation
 import StreamCore
 
 /// This event is sent when a participant joins a call session
-public final class CallSessionParticipantJoinedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
-    public var callCid: String
-    public var createdAt: Date
-    public var participant: CallParticipantResponse
+public final class CallSessionParticipantJoinedEvent: Sendable, Event, Decodable, WSCallEvent {
+    public let callCid: String
+    public let createdAt: Date
+    public let participant: CallParticipantResponse
     /// Call session ID
-    public var sessionId: String
+    public let sessionId: String
     /// The type of event: "call.session_participant_joined" in this case
-    public var type: String = "call.session_participant_joined"
+    public let type: String
 
-    public init(callCid: String, createdAt: Date, participant: CallParticipantResponse, sessionId: String) {
+    public init(
+        callCid: String,
+        createdAt: Date,
+        participant: CallParticipantResponse,
+        sessionId: String,
+        type: String = "call.session_participant_joined"
+    ) {
         self.callCid = callCid
         self.createdAt = createdAt
         self.participant = participant
         self.sessionId = sessionId
+        self.type = type
     }
 
     public init(from decoder: Decoder) throws {

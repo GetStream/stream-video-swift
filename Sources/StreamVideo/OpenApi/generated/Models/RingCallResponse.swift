@@ -5,10 +5,10 @@
 import Foundation
 import StreamCore
 
-public final class RingCallResponse: @unchecked Sendable, Decodable {
-    public var duration: String
+public final class RingCallResponse: Sendable, Decodable {
+    public let duration: String
     /// List of members ringing notification was sent to
-    public var membersIds: [String]
+    public let membersIds: [String]
 
     public init(duration: String, membersIds: [String]) {
         self.duration = duration

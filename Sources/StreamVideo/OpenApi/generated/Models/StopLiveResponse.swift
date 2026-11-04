@@ -5,10 +5,10 @@
 import Foundation
 import StreamCore
 
-public final class StopLiveResponse: @unchecked Sendable, Decodable {
+public final class StopLiveResponse: Sendable, Decodable {
     /// Represents a call
-    public var call: CallResponse
-    public var duration: String
+    public let call: CallResponse
+    public let duration: String
 
     public init(call: CallResponse, duration: String) {
         self.call = call

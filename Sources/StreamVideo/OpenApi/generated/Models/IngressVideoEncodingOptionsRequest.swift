@@ -5,9 +5,9 @@
 import Foundation
 import StreamCore
 
-public final class IngressVideoEncodingOptionsRequest: @unchecked Sendable, Encodable, JSONEncodable {
-    public var layers: [IngressVideoLayerRequest]
-    public var source: IngressSourceRequest
+public final class IngressVideoEncodingOptionsRequest: Sendable, Encodable, JSONEncodable {
+    public let layers: [IngressVideoLayerRequest]
+    public let source: IngressSourceRequest
 
     public init(layers: [IngressVideoLayerRequest], source: IngressSourceRequest) {
         self.layers = layers

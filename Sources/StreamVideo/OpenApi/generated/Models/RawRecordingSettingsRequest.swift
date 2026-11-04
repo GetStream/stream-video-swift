@@ -19,9 +19,9 @@ public final class RawRecordingSettingsRequestMode: RawRepresentable, Codable, C
     public static let disabled = RawRecordingSettingsRequestMode(rawValue: "disabled")
 }
 
-public final class RawRecordingSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable {
+public final class RawRecordingSettingsRequest: Sendable, Encodable, JSONEncodable {
     /// Recording mode. One of: available, disabled, auto-on
-    public var mode: RawRecordingSettingsRequestMode
+    public let mode: RawRecordingSettingsRequestMode
 
     public init(mode: RawRecordingSettingsRequestMode) {
         self.mode = mode

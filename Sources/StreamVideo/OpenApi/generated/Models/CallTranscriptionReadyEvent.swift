@@ -6,18 +6,19 @@ import Foundation
 import StreamCore
 
 /// This event is sent when call transcription is ready
-public final class CallTranscriptionReadyEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
-    public var callCid: String
+public final class CallTranscriptionReadyEvent: Sendable, Event, Decodable, WSCallEvent {
+    public let callCid: String
     /// CallTranscription represents a transcription of a call.
-    public var callTranscription: CallTranscription
-    public var createdAt: Date
+    public let callTranscription: CallTranscription
+    public let createdAt: Date
     /// The type of event: "call.transcription_ready" in this case
-    public var type: String = "call.transcription_ready"
+    public let type: String
 
-    public init(callCid: String, callTranscription: CallTranscription, createdAt: Date) {
+    public init(callCid: String, callTranscription: CallTranscription, createdAt: Date, type: String = "call.transcription_ready") {
         self.callCid = callCid
         self.callTranscription = callTranscription
         self.createdAt = createdAt
+        self.type = type
     }
 
     public init(from decoder: Decoder) throws {

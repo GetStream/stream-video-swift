@@ -5,10 +5,10 @@
 import Foundation
 import StreamCore
 
-public final class RingSettings: @unchecked Sendable, Decodable {
-    public var autoCancelTimeoutMs: Int
-    public var incomingCallTimeoutMs: Int
-    public var missedCallTimeoutMs: Int
+public final class RingSettings: Sendable, Decodable {
+    public let autoCancelTimeoutMs: Int
+    public let incomingCallTimeoutMs: Int
+    public let missedCallTimeoutMs: Int
 
     public init(autoCancelTimeoutMs: Int, incomingCallTimeoutMs: Int, missedCallTimeoutMs: Int) {
         self.autoCancelTimeoutMs = autoCancelTimeoutMs

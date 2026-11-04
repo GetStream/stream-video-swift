@@ -6,9 +6,9 @@ import Foundation
 import StreamCore
 
 /// RTMPSettingsResponse is the payload for RTMP settings
-public final class RTMPSettingsResponse: @unchecked Sendable, Decodable {
-    public var enabled: Bool
-    public var quality: String
+public final class RTMPSettingsResponse: Sendable, Decodable {
+    public let enabled: Bool
+    public let quality: String
 
     public init(enabled: Bool, quality: String) {
         self.enabled = enabled

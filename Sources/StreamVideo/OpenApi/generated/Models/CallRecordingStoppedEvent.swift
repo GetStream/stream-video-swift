@@ -20,20 +20,27 @@ public final class CallRecordingStoppedEventRecordingType: RawRepresentable, Cod
 }
 
 /// This event is sent when call recording has stopped
-public final class CallRecordingStoppedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
-    public var callCid: String
-    public var createdAt: Date
-    public var egressId: String
+public final class CallRecordingStoppedEvent: Sendable, Event, Decodable, WSCallEvent {
+    public let callCid: String
+    public let createdAt: Date
+    public let egressId: String
     /// The type of recording
-    public var recordingType: CallRecordingStoppedEventRecordingType
+    public let recordingType: CallRecordingStoppedEventRecordingType
     /// The type of event: "call.recording_stopped" in this case
-    public var type: String = "call.recording_stopped"
+    public let type: String
 
-    public init(callCid: String, createdAt: Date, egressId: String, recordingType: CallRecordingStoppedEventRecordingType) {
+    public init(
+        callCid: String,
+        createdAt: Date,
+        egressId: String,
+        recordingType: CallRecordingStoppedEventRecordingType,
+        type: String = "call.recording_stopped"
+    ) {
         self.callCid = callCid
         self.createdAt = createdAt
         self.egressId = egressId
         self.recordingType = recordingType
+        self.type = type
     }
 
     public init(from decoder: Decoder) throws {

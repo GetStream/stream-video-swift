@@ -6,31 +6,31 @@ import Foundation
 import StreamCore
 
 /// User response object
-public final class UserResponse: @unchecked Sendable, Decodable {
-    public var blockedUserIds: [String]
+public final class UserResponse: Sendable, Decodable {
+    public let blockedUserIds: [String]
     /// Date/time of creation
-    public var createdAt: Date
+    public let createdAt: Date
     /// Custom data for this object
-    public var custom: [String: RawJSON]
+    public let custom: [String: RawJSON]
     /// Date of deactivation
-    public var deactivatedAt: Date?
+    public let deactivatedAt: Date?
     /// Date/time of deletion
-    public var deletedAt: Date?
+    public let deletedAt: Date?
     /// Unique user identifier
-    public var id: String
-    public var image: String?
+    public let id: String
+    public let image: String?
     /// Preferred language of a user
-    public var language: String
+    public let language: String
     /// Date of last activity
-    public var lastActive: Date?
+    public let lastActive: Date?
     /// Optional name of user
-    public var name: String?
+    public let name: String?
     /// Determines the set of user permissions
-    public var role: String
+    public let role: String
     /// List of teams user is a part of
-    public var teams: [String]
+    public let teams: [String]
     /// Date/time of the last update
-    public var updatedAt: Date
+    public let updatedAt: Date
 
     public init(
         blockedUserIds: [String],

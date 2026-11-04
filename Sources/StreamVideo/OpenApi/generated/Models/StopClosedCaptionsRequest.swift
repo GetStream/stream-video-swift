@@ -5,8 +5,8 @@
 import Foundation
 import StreamCore
 
-public final class StopClosedCaptionsRequest: @unchecked Sendable, Encodable, JSONEncodable {
-    public var stopTranscription: Bool?
+public final class StopClosedCaptionsRequest: Sendable, Encodable, JSONEncodable {
+    public let stopTranscription: Bool?
 
     public init(stopTranscription: Bool? = nil) {
         self.stopTranscription = stopTranscription

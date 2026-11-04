@@ -6,18 +6,19 @@ import Foundation
 import StreamCore
 
 /// This event is sent when a call is deleted. Clients receiving this event should leave the call screen
-public final class CallDeletedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
+public final class CallDeletedEvent: Sendable, Event, Decodable, WSCallEvent {
     /// Represents a call
-    public var call: CallResponse
-    public var callCid: String
-    public var createdAt: Date
+    public let call: CallResponse
+    public let callCid: String
+    public let createdAt: Date
     /// The type of event: "call.deleted" in this case
-    public var type: String = "call.deleted"
+    public let type: String
 
-    public init(call: CallResponse, callCid: String, createdAt: Date) {
+    public init(call: CallResponse, callCid: String, createdAt: Date, type: String = "call.deleted") {
         self.call = call
         self.callCid = callCid
         self.createdAt = createdAt
+        self.type = type
     }
 
     public init(from decoder: Decoder) throws {

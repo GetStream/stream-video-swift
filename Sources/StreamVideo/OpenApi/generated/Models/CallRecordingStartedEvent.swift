@@ -20,20 +20,27 @@ public final class CallRecordingStartedEventRecordingType: RawRepresentable, Cod
 }
 
 /// This event is sent when call recording has started
-public final class CallRecordingStartedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
-    public var callCid: String
-    public var createdAt: Date
-    public var egressId: String
+public final class CallRecordingStartedEvent: Sendable, Event, Decodable, WSCallEvent {
+    public let callCid: String
+    public let createdAt: Date
+    public let egressId: String
     /// The type of recording
-    public var recordingType: CallRecordingStartedEventRecordingType
+    public let recordingType: CallRecordingStartedEventRecordingType
     /// The type of event: "call.recording_started" in this case
-    public var type: String = "call.recording_started"
+    public let type: String
 
-    public init(callCid: String, createdAt: Date, egressId: String, recordingType: CallRecordingStartedEventRecordingType) {
+    public init(
+        callCid: String,
+        createdAt: Date,
+        egressId: String,
+        recordingType: CallRecordingStartedEventRecordingType,
+        type: String = "call.recording_started"
+    ) {
         self.callCid = callCid
         self.createdAt = createdAt
         self.egressId = egressId
         self.recordingType = recordingType
+        self.type = type
     }
 
     public init(from decoder: Decoder) throws {

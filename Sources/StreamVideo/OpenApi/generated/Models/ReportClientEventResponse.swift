@@ -6,9 +6,9 @@ import Foundation
 import StreamCore
 
 /// Response for reporting client-side telemetry events
-public final class ReportClientEventResponse: @unchecked Sendable, Decodable {
+public final class ReportClientEventResponse: Sendable, Decodable {
     /// Duration of the request in milliseconds
-    public var duration: String
+    public let duration: String
 
     public init(duration: String) {
         self.duration = duration

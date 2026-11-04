@@ -5,12 +5,12 @@
 import Foundation
 import StreamCore
 
-public final class ReactionResponse: @unchecked Sendable, Decodable {
-    public var custom: [String: RawJSON]?
-    public var emojiCode: String?
-    public var type: String
+public final class ReactionResponse: Sendable, Decodable {
+    public let custom: [String: RawJSON]?
+    public let emojiCode: String?
+    public let type: String
     /// User response object
-    public var user: UserResponse
+    public let user: UserResponse
 
     public init(custom: [String: RawJSON]? = nil, emojiCode: String? = nil, type: String, user: UserResponse) {
         self.custom = custom

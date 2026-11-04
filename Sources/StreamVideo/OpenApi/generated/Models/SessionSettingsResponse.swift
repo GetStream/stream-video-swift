@@ -5,8 +5,8 @@
 import Foundation
 import StreamCore
 
-public final class SessionSettingsResponse: @unchecked Sendable, Decodable {
-    public var inactivityTimeoutSeconds: Int
+public final class SessionSettingsResponse: Sendable, Decodable {
+    public let inactivityTimeoutSeconds: Int
 
     public init(inactivityTimeoutSeconds: Int) {
         self.inactivityTimeoutSeconds = inactivityTimeoutSeconds

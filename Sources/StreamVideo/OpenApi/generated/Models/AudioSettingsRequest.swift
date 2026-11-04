@@ -18,15 +18,15 @@ public final class AudioSettingsRequestDefaultDevice: RawRepresentable, Codable,
     public static let speaker = AudioSettingsRequestDefaultDevice(rawValue: "speaker")
 }
 
-public final class AudioSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable {
-    public var accessRequestEnabled: Bool?
-    public var defaultDevice: AudioSettingsRequestDefaultDevice
-    public var hifiAudioEnabled: Bool?
-    public var micDefaultOn: Bool?
-    public var noiseCancellation: NoiseCancellationSettingsRequest?
-    public var opusDtxEnabled: Bool?
-    public var redundantCodingEnabled: Bool?
-    public var speakerDefaultOn: Bool?
+public final class AudioSettingsRequest: Sendable, Encodable, JSONEncodable {
+    public let accessRequestEnabled: Bool?
+    public let defaultDevice: AudioSettingsRequestDefaultDevice
+    public let hifiAudioEnabled: Bool?
+    public let micDefaultOn: Bool?
+    public let noiseCancellation: NoiseCancellationSettingsRequest?
+    public let opusDtxEnabled: Bool?
+    public let redundantCodingEnabled: Bool?
+    public let speakerDefaultOn: Bool?
 
     public init(
         accessRequestEnabled: Bool? = nil,

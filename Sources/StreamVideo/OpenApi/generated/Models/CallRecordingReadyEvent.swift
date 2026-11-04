@@ -6,18 +6,19 @@ import Foundation
 import StreamCore
 
 /// This event is sent when call recording is ready
-public final class CallRecordingReadyEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
-    public var callCid: String
+public final class CallRecordingReadyEvent: Sendable, Event, Decodable, WSCallEvent {
+    public let callCid: String
     /// CallRecording represents a recording of a call.
-    public var callRecording: CallRecording
-    public var createdAt: Date
+    public let callRecording: CallRecording
+    public let createdAt: Date
     /// The type of event: "call.recording_ready" in this case
-    public var type: String = "call.recording_ready"
+    public let type: String
 
-    public init(callCid: String, callRecording: CallRecording, createdAt: Date) {
+    public init(callCid: String, callRecording: CallRecording, createdAt: Date, type: String = "call.recording_ready") {
         self.callCid = callCid
         self.callRecording = callRecording
         self.createdAt = createdAt
+        self.type = type
     }
 
     public init(from decoder: Decoder) throws {

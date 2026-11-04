@@ -5,17 +5,17 @@
 import Foundation
 import StreamCore
 
-public final class EdgeResponse: @unchecked Sendable, Decodable {
-    public var continentCode: String
-    public var countryIsoCode: String
-    public var green: Int
-    public var id: String
-    public var latencyTestUrl: String
-    public var latitude: Float
-    public var longitude: Float
-    public var red: Int
-    public var subdivisionIsoCode: String
-    public var yellow: Int
+public final class EdgeResponse: Sendable, Decodable {
+    public let continentCode: String
+    public let countryIsoCode: String
+    public let green: Int
+    public let id: String
+    public let latencyTestUrl: String
+    public let latitude: Float
+    public let longitude: Float
+    public let red: Int
+    public let subdivisionIsoCode: String
+    public let yellow: Int
 
     public init(
         continentCode: String,

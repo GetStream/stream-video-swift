@@ -19,8 +19,8 @@ public final class RawRecordingSettingsResponseMode: RawRepresentable, Codable, 
     public static let disabled = RawRecordingSettingsResponseMode(rawValue: "disabled")
 }
 
-public final class RawRecordingSettingsResponse: @unchecked Sendable, Decodable {
-    public var mode: RawRecordingSettingsResponseMode
+public final class RawRecordingSettingsResponse: Sendable, Decodable {
+    public let mode: RawRecordingSettingsResponseMode
 
     public init(mode: RawRecordingSettingsResponseMode) {
         self.mode = mode

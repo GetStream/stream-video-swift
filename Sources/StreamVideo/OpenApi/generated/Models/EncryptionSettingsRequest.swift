@@ -19,9 +19,9 @@ public final class EncryptionSettingsRequestMode: RawRepresentable, Codable, Cus
     public static let disabled = EncryptionSettingsRequestMode(rawValue: "disabled")
 }
 
-public final class EncryptionSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable {
+public final class EncryptionSettingsRequest: Sendable, Encodable, JSONEncodable {
     /// Encryption mode. One of: available, disabled, auto-on
-    public var mode: EncryptionSettingsRequestMode?
+    public let mode: EncryptionSettingsRequestMode?
 
     public init(mode: EncryptionSettingsRequestMode? = nil) {
         self.mode = mode

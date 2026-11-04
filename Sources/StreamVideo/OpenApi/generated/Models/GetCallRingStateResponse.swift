@@ -6,27 +6,27 @@ import Foundation
 import StreamCore
 
 /// The ring state of a call session: who accepted, rejected, or missed the ring.
-public final class GetCallRingStateResponse: @unchecked Sendable, Decodable {
+public final class GetCallRingStateResponse: Sendable, Decodable {
     /// Users that accepted the call, mapped to when they accepted
-    public var acceptedBy: [String: Date]
+    public let acceptedBy: [String: Date]
     /// The CID of the call
-    public var callCid: String
+    public let callCid: String
     /// When the call ended
-    public var callEndedAt: Date?
+    public let callEndedAt: Date?
     /// The user that created the call, i.e. the caller
-    public var createdByUserId: String
+    public let createdByUserId: String
     /// Duration of the request in milliseconds
-    public var duration: String
+    public let duration: String
     /// Users that missed the call, mapped to when they were marked as missed
-    public var missedBy: [String: Date]
+    public let missedBy: [String: Date]
     /// Users that rejected the call, mapped to when they rejected
-    public var rejectedBy: [String: Date]
+    public let rejectedBy: [String: Date]
     /// When the call session ended
-    public var sessionEndedAt: Date?
+    public let sessionEndedAt: Date?
     /// The call session this state belongs to, empty when the call has never rung
-    public var sessionId: String
+    public let sessionId: String
     /// When the call session started
-    public var sessionStartedAt: Date?
+    public let sessionStartedAt: Date?
 
     public init(
         acceptedBy: [String: Date],

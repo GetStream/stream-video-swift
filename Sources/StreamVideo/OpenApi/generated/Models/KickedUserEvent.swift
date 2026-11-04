@@ -6,20 +6,27 @@ import Foundation
 import StreamCore
 
 /// This event is sent to call participants to notify when a user is kicked from a call. Clients should make the kicked user leave the call UI.
-public final class KickedUserEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
-    public var callCid: String
-    public var createdAt: Date
+public final class KickedUserEvent: Sendable, Event, Decodable, WSCallEvent {
+    public let callCid: String
+    public let createdAt: Date
     /// User response object
-    public var kickedByUser: UserResponse?
+    public let kickedByUser: UserResponse?
     /// The type of event: "call.kicked_user" in this case
-    public var type: String = "call.kicked_user"
+    public let type: String
     /// User response object
-    public var user: UserResponse
+    public let user: UserResponse
 
-    public init(callCid: String, createdAt: Date, kickedByUser: UserResponse? = nil, user: UserResponse) {
+    public init(
+        callCid: String,
+        createdAt: Date,
+        kickedByUser: UserResponse? = nil,
+        type: String = "call.kicked_user",
+        user: UserResponse
+    ) {
         self.callCid = callCid
         self.createdAt = createdAt
         self.kickedByUser = kickedByUser
+        self.type = type
         self.user = user
     }
 

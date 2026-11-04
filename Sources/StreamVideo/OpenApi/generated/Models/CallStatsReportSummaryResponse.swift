@@ -5,15 +5,15 @@
 import Foundation
 import StreamCore
 
-public final class CallStatsReportSummaryResponse: @unchecked Sendable, Decodable {
-    public var callCid: String
-    public var callDurationSeconds: Int
-    public var callSessionId: String
-    public var callStatus: String
-    public var createdAt: Date?
-    public var firstStatsTime: Date
-    public var minUserRating: Int?
-    public var qualityScore: Int?
+public final class CallStatsReportSummaryResponse: Sendable, Decodable {
+    public let callCid: String
+    public let callDurationSeconds: Int
+    public let callSessionId: String
+    public let callStatus: String
+    public let createdAt: Date?
+    public let firstStatsTime: Date
+    public let minUserRating: Int?
+    public let qualityScore: Int?
 
     public init(
         callCid: String,

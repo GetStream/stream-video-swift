@@ -5,8 +5,8 @@
 import Foundation
 import StreamCore
 
-public final class ThumbnailsSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable {
-    public var enabled: Bool?
+public final class ThumbnailsSettingsRequest: Sendable, Encodable, JSONEncodable {
+    public let enabled: Bool?
 
     public init(enabled: Bool? = nil) {
         self.enabled = enabled

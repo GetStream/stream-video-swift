@@ -6,9 +6,9 @@ import Foundation
 import StreamCore
 
 /// UnpinResponse is the payload for unpinning a message.
-public final class UnpinResponse: @unchecked Sendable, Decodable {
+public final class UnpinResponse: Sendable, Decodable {
     /// Duration of the request in milliseconds
-    public var duration: String
+    public let duration: String
 
     public init(duration: String) {
         self.duration = duration

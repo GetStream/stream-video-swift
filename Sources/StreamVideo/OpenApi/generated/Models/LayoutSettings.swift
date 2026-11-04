@@ -21,12 +21,12 @@ public final class LayoutSettingsName: RawRepresentable, Codable, CustomStringCo
     public static let spotlight = LayoutSettingsName(rawValue: "spotlight")
 }
 
-public final class LayoutSettings: @unchecked Sendable, Encodable, JSONEncodable {
-    public var detectOrientation: Bool?
-    public var externalAppUrl: String?
-    public var externalCssUrl: String?
-    public var name: LayoutSettingsName
-    public var options: [String: RawJSON]?
+public final class LayoutSettings: Sendable, Encodable, JSONEncodable {
+    public let detectOrientation: Bool?
+    public let externalAppUrl: String?
+    public let externalCssUrl: String?
+    public let name: LayoutSettingsName
+    public let options: [String: RawJSON]?
 
     public init(
         detectOrientation: Bool? = nil,

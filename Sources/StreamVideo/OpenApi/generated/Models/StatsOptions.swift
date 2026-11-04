@@ -5,9 +5,9 @@
 import Foundation
 import StreamCore
 
-public final class StatsOptions: @unchecked Sendable, Decodable {
-    public var enableRtcStats: Bool
-    public var reportingIntervalMs: Int
+public final class StatsOptions: Sendable, Decodable {
+    public let enableRtcStats: Bool
+    public let reportingIntervalMs: Int
 
     public init(enableRtcStats: Bool, reportingIntervalMs: Int) {
         self.enableRtcStats = enableRtcStats

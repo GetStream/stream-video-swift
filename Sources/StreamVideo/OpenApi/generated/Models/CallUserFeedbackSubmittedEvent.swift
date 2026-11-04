@@ -6,23 +6,23 @@ import Foundation
 import StreamCore
 
 /// This event is sent when a user submits feedback for a call.
-public final class CallUserFeedbackSubmittedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
-    public var callCid: String
-    public var createdAt: Date
+public final class CallUserFeedbackSubmittedEvent: Sendable, Event, Decodable, WSCallEvent {
+    public let callCid: String
+    public let createdAt: Date
     /// Custom data provided by the user
-    public var custom: [String: RawJSON]?
+    public let custom: [String: RawJSON]?
     /// The rating given by the user (1-5)
-    public var rating: Int
+    public let rating: Int
     /// The reason provided by the user for the rating
-    public var reason: String?
-    public var sdk: String?
-    public var sdkVersion: String?
+    public let reason: String?
+    public let sdk: String?
+    public let sdkVersion: String?
     /// Call session ID
-    public var sessionId: String
+    public let sessionId: String
     /// The type of event, "call.user_feedback" in this case
-    public var type: String = "call.user_feedback_submitted"
+    public let type: String
     /// User response object
-    public var user: UserResponse
+    public let user: UserResponse
 
     public init(
         callCid: String,
@@ -33,6 +33,7 @@ public final class CallUserFeedbackSubmittedEvent: @unchecked Sendable, Event, D
         sdk: String? = nil,
         sdkVersion: String? = nil,
         sessionId: String,
+        type: String = "call.user_feedback_submitted",
         user: UserResponse
     ) {
         self.callCid = callCid
@@ -43,6 +44,7 @@ public final class CallUserFeedbackSubmittedEvent: @unchecked Sendable, Event, D
         self.sdk = sdk
         self.sdkVersion = sdkVersion
         self.sessionId = sessionId
+        self.type = type
         self.user = user
     }
 

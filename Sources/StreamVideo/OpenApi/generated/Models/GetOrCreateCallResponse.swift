@@ -5,15 +5,15 @@
 import Foundation
 import StreamCore
 
-public final class GetOrCreateCallResponse: @unchecked Sendable, Decodable {
+public final class GetOrCreateCallResponse: Sendable, Decodable {
     /// Represents a call
-    public var call: CallResponse
-    public var created: Bool
-    public var duration: String
-    public var members: [MemberResponse]
+    public let call: CallResponse
+    public let created: Bool
+    public let duration: String
+    public let members: [MemberResponse]
     /// MemberResponse is the payload for a member of a call.
-    public var membership: MemberResponse?
-    public var ownCapabilities: [OwnCapability]
+    public let membership: MemberResponse?
+    public let ownCapabilities: [OwnCapability]
 
     public init(
         call: CallResponse,

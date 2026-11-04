@@ -5,13 +5,13 @@
 import Foundation
 import StreamCore
 
-public final class HLSSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable {
+public final class HLSSettingsRequest: Sendable, Encodable, JSONEncodable {
     /// Whether HLS broadcasting should start automatically
-    public var autoOn: Bool?
+    public let autoOn: Bool?
     /// Whether HLS broadcasting is enabled
-    public var enabled: Bool?
+    public let enabled: Bool?
     /// Quality tracks for HLS. One of: 360p, 480p, 720p, 1080p, 1440p, portrait-360x640, portrait-480x854, portrait-720x1280, portrait-1080x1920, portrait-1440x2560
-    public var qualityTracks: [String]
+    public let qualityTracks: [String]
 
     public init(autoOn: Bool? = nil, enabled: Bool? = nil, qualityTracks: [String]) {
         self.autoOn = autoOn

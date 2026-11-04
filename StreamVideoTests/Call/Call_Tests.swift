@@ -52,7 +52,7 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
 
     func test_reject_nilReasonWithKnownAcceptance_doesNotSendReject() async {
         let (subject, coordinator) = makeOutgoingRing()
-        subject.state.session?.acceptedBy["callee"] = .now
+        subject.state.session = .dummy(acceptedBy: ["callee": .now], id: "ring-session")
 
         do {
             try await subject.reject()
@@ -87,7 +87,9 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
         let (subject, coordinator) = makeOutgoingRing()
         defer { subject.onGetRingState = nil }
         subject.onGetRingState = {
-            await MainActor.run { subject.state.session?.acceptedBy["callee"] = .now }
+            await MainActor.run {
+                subject.state.session = .dummy(acceptedBy: ["callee": .now], id: "ring-session")
+            }
         }
 
         do {
@@ -529,8 +531,10 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
             cid: callCid
         )
         call?.state.members = [Member(user: .init(id: userId), updatedAt: Date())]
-        let member = mockResponseBuilder.makeMemberResponse(id: userId)
-        member.user.name = "newname"
+        let member = MemberResponse.dummy(
+            user: .dummy(id: userId, name: "newname"),
+            userId: userId
+        )
         let event = CallMemberUpdatedEvent(
             call: callResponse,
             callCid: callCid,

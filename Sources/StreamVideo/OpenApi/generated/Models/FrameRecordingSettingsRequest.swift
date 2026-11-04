@@ -35,10 +35,10 @@ public final class FrameRecordingSettingsRequestQuality: RawRepresentable, Codab
     public static let _720p = FrameRecordingSettingsRequestQuality(rawValue: "720p")
 }
 
-public final class FrameRecordingSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable {
-    public var captureIntervalInSeconds: Int
-    public var mode: FrameRecordingSettingsRequestMode
-    public var quality: FrameRecordingSettingsRequestQuality?
+public final class FrameRecordingSettingsRequest: Sendable, Encodable, JSONEncodable {
+    public let captureIntervalInSeconds: Int
+    public let mode: FrameRecordingSettingsRequestMode
+    public let quality: FrameRecordingSettingsRequestQuality?
 
     public init(
         captureIntervalInSeconds: Int,

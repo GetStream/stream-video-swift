@@ -5,8 +5,8 @@
 import Foundation
 import StreamCore
 
-public final class StartClosedCaptionsResponse: @unchecked Sendable, Decodable {
-    public var duration: String
+public final class StartClosedCaptionsResponse: Sendable, Decodable {
+    public let duration: String
 
     public init(duration: String) {
         self.duration = duration

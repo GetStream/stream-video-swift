@@ -6,9 +6,9 @@ import Foundation
 import StreamCore
 
 /// UnblockUserResponse is the payload for unblocking a user.
-public final class UnblockUserResponse: @unchecked Sendable, Decodable {
+public final class UnblockUserResponse: Sendable, Decodable {
     /// Duration of the request in milliseconds
-    public var duration: String
+    public let duration: String
 
     public init(duration: String) {
         self.duration = duration

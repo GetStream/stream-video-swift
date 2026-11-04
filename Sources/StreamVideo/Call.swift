@@ -1650,7 +1650,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
         // We update the closedCaptions & transcription language to the provided
         // one.
-        await state.settings?.transcription.language = .init(rawValue: request.language ?? "")
+        await state.update(transcriptionLanguage: .init(rawValue: request.language ?? ""))
 
         return response
     }

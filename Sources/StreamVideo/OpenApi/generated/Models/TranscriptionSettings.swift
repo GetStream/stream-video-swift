@@ -81,10 +81,10 @@ public final class TranscriptionSettingsMode: RawRepresentable, Codable, CustomS
     public static let disabled = TranscriptionSettingsMode(rawValue: "disabled")
 }
 
-public final class TranscriptionSettings: @unchecked Sendable, Decodable {
-    public var closedCaptionMode: TranscriptionSettingsClosedCaptionMode
-    public var language: TranscriptionSettingsLanguage
-    public var mode: TranscriptionSettingsMode
+public final class TranscriptionSettings: Sendable, Decodable {
+    public let closedCaptionMode: TranscriptionSettingsClosedCaptionMode
+    public let language: TranscriptionSettingsLanguage
+    public let mode: TranscriptionSettingsMode
 
     public init(
         closedCaptionMode: TranscriptionSettingsClosedCaptionMode,

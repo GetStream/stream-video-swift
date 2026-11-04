@@ -6,14 +6,14 @@ import Foundation
 import StreamCore
 
 /// Response for updating a call
-public final class UpdateCallResponse: @unchecked Sendable, Decodable {
+public final class UpdateCallResponse: Sendable, Decodable {
     /// Represents a call
-    public var call: CallResponse
-    public var duration: String
-    public var members: [MemberResponse]
+    public let call: CallResponse
+    public let duration: String
+    public let members: [MemberResponse]
     /// MemberResponse is the payload for a member of a call.
-    public var membership: MemberResponse?
-    public var ownCapabilities: [OwnCapability]
+    public let membership: MemberResponse?
+    public let ownCapabilities: [OwnCapability]
 
     public init(
         call: CallResponse,
