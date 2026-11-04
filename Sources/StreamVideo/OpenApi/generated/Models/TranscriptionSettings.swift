@@ -5,89 +5,77 @@
 import Foundation
 import StreamCore
 
+public final class TranscriptionSettingsClosedCaptionMode: RawRepresentable, Codable, Hashable, Sendable {
+    public let rawValue: String
+
+    public init(rawValue: String) {
+        self.rawValue = rawValue
+    }
+
+    public static let autoOn = TranscriptionSettingsClosedCaptionMode(rawValue: "auto-on")
+    public static let available = TranscriptionSettingsClosedCaptionMode(rawValue: "available")
+    public static let disabled = TranscriptionSettingsClosedCaptionMode(rawValue: "disabled")
+}
+
+public final class TranscriptionSettingsLanguage: RawRepresentable, Codable, Hashable, Sendable {
+    public let rawValue: String
+
+    public init(rawValue: String) {
+        self.rawValue = rawValue
+    }
+
+    public static let ar = TranscriptionSettingsLanguage(rawValue: "ar")
+    public static let auto = TranscriptionSettingsLanguage(rawValue: "auto")
+    public static let bg = TranscriptionSettingsLanguage(rawValue: "bg")
+    public static let ca = TranscriptionSettingsLanguage(rawValue: "ca")
+    public static let cs = TranscriptionSettingsLanguage(rawValue: "cs")
+    public static let da = TranscriptionSettingsLanguage(rawValue: "da")
+    public static let de = TranscriptionSettingsLanguage(rawValue: "de")
+    public static let el = TranscriptionSettingsLanguage(rawValue: "el")
+    public static let en = TranscriptionSettingsLanguage(rawValue: "en")
+    public static let es = TranscriptionSettingsLanguage(rawValue: "es")
+    public static let et = TranscriptionSettingsLanguage(rawValue: "et")
+    public static let fi = TranscriptionSettingsLanguage(rawValue: "fi")
+    public static let fr = TranscriptionSettingsLanguage(rawValue: "fr")
+    public static let he = TranscriptionSettingsLanguage(rawValue: "he")
+    public static let hi = TranscriptionSettingsLanguage(rawValue: "hi")
+    public static let hr = TranscriptionSettingsLanguage(rawValue: "hr")
+    public static let hu = TranscriptionSettingsLanguage(rawValue: "hu")
+    public static let id = TranscriptionSettingsLanguage(rawValue: "id")
+    public static let it = TranscriptionSettingsLanguage(rawValue: "it")
+    public static let ja = TranscriptionSettingsLanguage(rawValue: "ja")
+    public static let ko = TranscriptionSettingsLanguage(rawValue: "ko")
+    public static let ms = TranscriptionSettingsLanguage(rawValue: "ms")
+    public static let nl = TranscriptionSettingsLanguage(rawValue: "nl")
+    public static let no = TranscriptionSettingsLanguage(rawValue: "no")
+    public static let pl = TranscriptionSettingsLanguage(rawValue: "pl")
+    public static let pt = TranscriptionSettingsLanguage(rawValue: "pt")
+    public static let ro = TranscriptionSettingsLanguage(rawValue: "ro")
+    public static let ru = TranscriptionSettingsLanguage(rawValue: "ru")
+    public static let sk = TranscriptionSettingsLanguage(rawValue: "sk")
+    public static let sl = TranscriptionSettingsLanguage(rawValue: "sl")
+    public static let sv = TranscriptionSettingsLanguage(rawValue: "sv")
+    public static let ta = TranscriptionSettingsLanguage(rawValue: "ta")
+    public static let th = TranscriptionSettingsLanguage(rawValue: "th")
+    public static let tl = TranscriptionSettingsLanguage(rawValue: "tl")
+    public static let tr = TranscriptionSettingsLanguage(rawValue: "tr")
+    public static let uk = TranscriptionSettingsLanguage(rawValue: "uk")
+    public static let zh = TranscriptionSettingsLanguage(rawValue: "zh")
+}
+
+public final class TranscriptionSettingsMode: RawRepresentable, Codable, Hashable, Sendable {
+    public let rawValue: String
+
+    public init(rawValue: String) {
+        self.rawValue = rawValue
+    }
+
+    public static let autoOn = TranscriptionSettingsMode(rawValue: "auto-on")
+    public static let available = TranscriptionSettingsMode(rawValue: "available")
+    public static let disabled = TranscriptionSettingsMode(rawValue: "disabled")
+}
+
 public final class TranscriptionSettings: @unchecked Sendable, Decodable {
-    
-    public enum TranscriptionSettingsClosedCaptionMode: String, Sendable, Codable, CaseIterable {
-        case autoOn = "auto-on"
-        case available
-        case disabled
-        case unknown = "_unknown"
-
-        public init(from decoder: Decoder) throws {
-            let container = try decoder.singleValueContainer()
-            if let decodedValue = try? container.decode(String.self),
-               let value = Self(rawValue: decodedValue) {
-                self = value
-            } else {
-                self = .unknown
-            }
-        }
-    }
-    
-    public enum TranscriptionSettingsLanguage: String, Sendable, Codable, CaseIterable {
-        case ar
-        case auto
-        case ca
-        case cs
-        case da
-        case de
-        case el
-        case en
-        case es
-        case fi
-        case fr
-        case he
-        case hi
-        case hr
-        case hu
-        case id
-        case it
-        case ja
-        case ko
-        case ms
-        case nl
-        case no
-        case pl
-        case pt
-        case ro
-        case ru
-        case sv
-        case ta
-        case th
-        case tl
-        case tr
-        case uk
-        case zh
-        case unknown = "_unknown"
-
-        public init(from decoder: Decoder) throws {
-            let container = try decoder.singleValueContainer()
-            if let decodedValue = try? container.decode(String.self),
-               let value = Self(rawValue: decodedValue) {
-                self = value
-            } else {
-                self = .unknown
-            }
-        }
-    }
-    
-    public enum TranscriptionSettingsMode: String, Sendable, Codable, CaseIterable {
-        case autoOn = "auto-on"
-        case available
-        case disabled
-        case unknown = "_unknown"
-
-        public init(from decoder: Decoder) throws {
-            let container = try decoder.singleValueContainer()
-            if let decodedValue = try? container.decode(String.self),
-               let value = Self(rawValue: decodedValue) {
-                self = value
-            } else {
-                self = .unknown
-            }
-        }
-    }
-
     public var closedCaptionMode: TranscriptionSettingsClosedCaptionMode
     public var language: TranscriptionSettingsLanguage
     public var mode: TranscriptionSettingsMode

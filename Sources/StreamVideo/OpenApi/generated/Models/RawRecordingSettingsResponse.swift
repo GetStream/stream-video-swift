@@ -5,25 +5,19 @@
 import Foundation
 import StreamCore
 
-public final class RawRecordingSettingsResponse: @unchecked Sendable, Decodable {
-    
-    public enum RawRecordingSettingsResponseMode: String, Sendable, Codable, CaseIterable {
-        case autoOn = "auto-on"
-        case available
-        case disabled
-        case unknown = "_unknown"
+public final class RawRecordingSettingsResponseMode: RawRepresentable, Codable, Hashable, Sendable {
+    public let rawValue: String
 
-        public init(from decoder: Decoder) throws {
-            let container = try decoder.singleValueContainer()
-            if let decodedValue = try? container.decode(String.self),
-               let value = Self(rawValue: decodedValue) {
-                self = value
-            } else {
-                self = .unknown
-            }
-        }
+    public init(rawValue: String) {
+        self.rawValue = rawValue
     }
 
+    public static let autoOn = RawRecordingSettingsResponseMode(rawValue: "auto-on")
+    public static let available = RawRecordingSettingsResponseMode(rawValue: "available")
+    public static let disabled = RawRecordingSettingsResponseMode(rawValue: "disabled")
+}
+
+public final class RawRecordingSettingsResponse: @unchecked Sendable, Decodable {
     public var mode: RawRecordingSettingsResponseMode
 
     public init(mode: RawRecordingSettingsResponseMode) {

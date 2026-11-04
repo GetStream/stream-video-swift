@@ -31,7 +31,10 @@ set -exo pipefail
   # widening them would be a source and binary break.
   # string_coding_keys replaces the CodingKeys enum of each model with one
   # shared StringCodingKey type, which reduces binary size.
-  ./build/openapi generate-client --language swift --spec "$SPEC_DIR/video-openapi-clientside.yaml" --opt number_as_float=true --opt string_coding_keys=true --output "$OUTPUT_DIR/"
+  # raw_representable_over_enum generates string enums as top-level
+  # RawRepresentable classes, which reduces binary size and keeps unknown
+  # server values.
+  ./build/openapi generate-client --language swift --spec "$SPEC_DIR/video-openapi-clientside.yaml" --opt number_as_float=true --opt raw_representable_over_enum=true --opt string_coding_keys=true --output "$OUTPUT_DIR/"
 )
 
 # The generator writes models/, git tracks Models/.
@@ -64,7 +67,6 @@ remove_unused_events
 keep_existing_v2_endpoints
 remove_properties
 retype_properties
-remove_enum_cases
 
 # Run last, so models and keys only the removed properties used go too.
 remove_unused_models

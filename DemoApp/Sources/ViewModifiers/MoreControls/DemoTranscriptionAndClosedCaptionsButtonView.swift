@@ -20,10 +20,10 @@ struct DemoTranscriptionAndClosedCaptionsButtonView: View {
     @State private var areClosedCaptionsAvailable = false
     @State private var isCaptioning = false
 
-    private var availableLanguages: [TranscriptionSettings.Language] = TranscriptionSettings
-        .Language
-        .allCases
-        .filter { $0 != .unknown && $0 != .auto }
+    private var availableLanguages: [TranscriptionSettings.Language] = [
+        .ar, .bg, .ca, .cs, .da, .de, .el, .en, .es, .et, .fi, .fr, .he, .hi, .hr, .hu, .id, .it,
+        .ja, .ko, .ms, .nl, .no, .pl, .pt, .ro, .ru, .sk, .sl, .sv, .ta, .th, .tl, .tr, .uk, .zh
+    ]
 
     init(viewModel: CallViewModel) {
         self.viewModel = viewModel
@@ -166,12 +166,7 @@ struct DemoTranscriptionAndClosedCaptionsButtonView: View {
     private var closedCaptionsLanguageContentView: some View {
         Menu {
             selectableView("Unknown") { _ in
-                viewModel
-                    .call?
-                    .state
-                    .settings?
-                    .transcription
-                    .language == .unknown
+                closedCaptionsLanguage != .auto && !availableLanguages.contains(closedCaptionsLanguage)
             } action: {
                 execute {
                     try await viewModel.call?.stopClosedCaptions()

@@ -5,25 +5,19 @@
 import Foundation
 import StreamCore
 
-public final class EncryptionSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable {
-    
-    public enum EncryptionSettingsRequestMode: String, Sendable, Codable, CaseIterable {
-        case autoOn = "auto-on"
-        case available
-        case disabled
-        case unknown = "_unknown"
+public final class EncryptionSettingsRequestMode: RawRepresentable, Codable, Hashable, Sendable {
+    public let rawValue: String
 
-        public init(from decoder: Decoder) throws {
-            let container = try decoder.singleValueContainer()
-            if let decodedValue = try? container.decode(String.self),
-               let value = Self(rawValue: decodedValue) {
-                self = value
-            } else {
-                self = .unknown
-            }
-        }
+    public init(rawValue: String) {
+        self.rawValue = rawValue
     }
 
+    public static let autoOn = EncryptionSettingsRequestMode(rawValue: "auto-on")
+    public static let available = EncryptionSettingsRequestMode(rawValue: "available")
+    public static let disabled = EncryptionSettingsRequestMode(rawValue: "disabled")
+}
+
+public final class EncryptionSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable {
     /// Encryption mode. One of: available, disabled, auto-on
     public var mode: EncryptionSettingsRequestMode?
 

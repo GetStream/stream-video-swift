@@ -5,26 +5,20 @@
 import Foundation
 import StreamCore
 
-/// This event is sent when call recording has stopped
-public final class CallRecordingStoppedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
-    
-    public enum CallRecordingStoppedEventRecordingType: String, Sendable, Codable, CaseIterable {
-        case composite
-        case individual
-        case raw
-        case unknown = "_unknown"
+public final class CallRecordingStoppedEventRecordingType: RawRepresentable, Codable, Hashable, Sendable {
+    public let rawValue: String
 
-        public init(from decoder: Decoder) throws {
-            let container = try decoder.singleValueContainer()
-            if let decodedValue = try? container.decode(String.self),
-               let value = Self(rawValue: decodedValue) {
-                self = value
-            } else {
-                self = .unknown
-            }
-        }
+    public init(rawValue: String) {
+        self.rawValue = rawValue
     }
 
+    public static let composite = CallRecordingStoppedEventRecordingType(rawValue: "composite")
+    public static let individual = CallRecordingStoppedEventRecordingType(rawValue: "individual")
+    public static let raw = CallRecordingStoppedEventRecordingType(rawValue: "raw")
+}
+
+/// This event is sent when call recording has stopped
+public final class CallRecordingStoppedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
     public var callCid: String
     public var createdAt: Date
     public var egressId: String

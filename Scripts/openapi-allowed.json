@@ -511,29 +511,6 @@
       "mode": "TranscriptionSettingsRequestMode"
     }
   },
-  "removedEnumCases": {
-    "OwnCapability": [
-      "sendClosedCaptionsCall",
-      "startFrameRecordCall",
-      "startIndividualRecordCall",
-      "startRawRecordCall",
-      "stopFrameRecordCall",
-      "stopIndividualRecordCall",
-      "stopRawRecordCall"
-    ],
-    "TranscriptionSettings.TranscriptionSettingsLanguage": [
-      "bg",
-      "et",
-      "sk",
-      "sl"
-    ],
-    "TranscriptionSettingsRequest.TranscriptionSettingsRequestLanguage": [
-      "bg",
-      "et",
-      "sk",
-      "sl"
-    ]
-  },
   "v2Endpoints": [
     "getCallRingState",
     "reportClientCallEvent"

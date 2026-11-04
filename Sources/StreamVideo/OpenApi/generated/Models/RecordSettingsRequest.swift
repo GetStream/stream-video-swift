@@ -5,49 +5,38 @@
 import Foundation
 import StreamCore
 
+public final class RecordSettingsRequestMode: RawRepresentable, Codable, Hashable, Sendable {
+    public let rawValue: String
+
+    public init(rawValue: String) {
+        self.rawValue = rawValue
+    }
+
+    public static let autoOn = RecordSettingsRequestMode(rawValue: "auto-on")
+    public static let available = RecordSettingsRequestMode(rawValue: "available")
+    public static let disabled = RecordSettingsRequestMode(rawValue: "disabled")
+}
+
+public final class RecordSettingsRequestQuality: RawRepresentable, Codable, Hashable, Sendable {
+    public let rawValue: String
+
+    public init(rawValue: String) {
+        self.rawValue = rawValue
+    }
+
+    public static let _1080p = RecordSettingsRequestQuality(rawValue: "1080p")
+    public static let _1440p = RecordSettingsRequestQuality(rawValue: "1440p")
+    public static let _360p = RecordSettingsRequestQuality(rawValue: "360p")
+    public static let _480p = RecordSettingsRequestQuality(rawValue: "480p")
+    public static let _720p = RecordSettingsRequestQuality(rawValue: "720p")
+    public static let portrait1080x1920 = RecordSettingsRequestQuality(rawValue: "portrait-1080x1920")
+    public static let portrait1440x2560 = RecordSettingsRequestQuality(rawValue: "portrait-1440x2560")
+    public static let portrait360x640 = RecordSettingsRequestQuality(rawValue: "portrait-360x640")
+    public static let portrait480x854 = RecordSettingsRequestQuality(rawValue: "portrait-480x854")
+    public static let portrait720x1280 = RecordSettingsRequestQuality(rawValue: "portrait-720x1280")
+}
+
 public final class RecordSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable {
-    
-    public enum RecordSettingsRequestMode: String, Sendable, Codable, CaseIterable {
-        case autoOn = "auto-on"
-        case available
-        case disabled
-        case unknown = "_unknown"
-
-        public init(from decoder: Decoder) throws {
-            let container = try decoder.singleValueContainer()
-            if let decodedValue = try? container.decode(String.self),
-               let value = Self(rawValue: decodedValue) {
-                self = value
-            } else {
-                self = .unknown
-            }
-        }
-    }
-    
-    public enum RecordSettingsRequestQuality: String, Sendable, Codable, CaseIterable {
-        case _1080p = "1080p"
-        case _1440p = "1440p"
-        case _360p = "360p"
-        case _480p = "480p"
-        case _720p = "720p"
-        case portrait1080x1920 = "portrait-1080x1920"
-        case portrait1440x2560 = "portrait-1440x2560"
-        case portrait360x640 = "portrait-360x640"
-        case portrait480x854 = "portrait-480x854"
-        case portrait720x1280 = "portrait-720x1280"
-        case unknown = "_unknown"
-
-        public init(from decoder: Decoder) throws {
-            let container = try decoder.singleValueContainer()
-            if let decodedValue = try? container.decode(String.self),
-               let value = Self(rawValue: decodedValue) {
-                self = value
-            } else {
-                self = .unknown
-            }
-        }
-    }
-
     /// Whether to record audio only
     public var audioOnly: Bool?
     /// Recording mode. One of: available, disabled, auto-on

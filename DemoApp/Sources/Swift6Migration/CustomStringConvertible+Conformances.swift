@@ -24,8 +24,8 @@ extension TranscriptionSettings.Mode {
             return "Available"
         case .disabled:
             return "Disabled"
-        case .unknown:
-            return "Unknown"
+        default:
+            return rawValue
         }
     }
 }
@@ -39,8 +39,8 @@ extension TranscriptionSettings.ClosedCaptionMode {
             return "Available"
         case .disabled:
             return "Disabled"
-        case .unknown:
-            return "Unknown"
+        default:
+            return rawValue
         }
     }
 }
@@ -50,6 +50,7 @@ extension TranscriptionSettings.Language {
         switch self {
         case .ar: return "Arabic"
         case .auto: return "Auto"
+        case .bg: return "Bulgarian"
         case .ca: return "Catalan"
         case .cs: return "Czech"
         case .da: return "Danish"
@@ -57,6 +58,7 @@ extension TranscriptionSettings.Language {
         case .el: return "Greek"
         case .en: return "English"
         case .es: return "Spanish"
+        case .et: return "Estonian"
         case .fi: return "Finnish"
         case .fr: return "French"
         case .he: return "Hebrew"
@@ -74,6 +76,8 @@ extension TranscriptionSettings.Language {
         case .pt: return "Portuguese"
         case .ro: return "Romanian"
         case .ru: return "Russian"
+        case .sk: return "Slovak"
+        case .sl: return "Slovenian"
         case .sv: return "Swedish"
         case .ta: return "Tamil"
         case .th: return "Thai"
@@ -81,8 +85,8 @@ extension TranscriptionSettings.Language {
         case .tr: return "Turkish"
         case .uk: return "Ukrainian"
         case .zh: return "Chinese"
-        case .unknown:
-            return "Unknown"
+        default:
+            return rawValue
         }
     }
 }

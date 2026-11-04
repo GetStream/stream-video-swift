@@ -7,7 +7,6 @@ import StreamCore
 
 /// This event is sent when call recording has failed
 public final class CallRecordingFailedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
-    
     public var callCid: String
     public var createdAt: Date
     /// The type of event: "call.recording_failed" in this case

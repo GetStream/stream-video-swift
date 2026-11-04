@@ -5,89 +5,77 @@
 import Foundation
 import StreamCore
 
+public final class TranscriptionSettingsRequestClosedCaptionMode: RawRepresentable, Codable, Hashable, Sendable {
+    public let rawValue: String
+
+    public init(rawValue: String) {
+        self.rawValue = rawValue
+    }
+
+    public static let autoOn = TranscriptionSettingsRequestClosedCaptionMode(rawValue: "auto-on")
+    public static let available = TranscriptionSettingsRequestClosedCaptionMode(rawValue: "available")
+    public static let disabled = TranscriptionSettingsRequestClosedCaptionMode(rawValue: "disabled")
+}
+
+public final class TranscriptionSettingsRequestLanguage: RawRepresentable, Codable, Hashable, Sendable {
+    public let rawValue: String
+
+    public init(rawValue: String) {
+        self.rawValue = rawValue
+    }
+
+    public static let ar = TranscriptionSettingsRequestLanguage(rawValue: "ar")
+    public static let auto = TranscriptionSettingsRequestLanguage(rawValue: "auto")
+    public static let bg = TranscriptionSettingsRequestLanguage(rawValue: "bg")
+    public static let ca = TranscriptionSettingsRequestLanguage(rawValue: "ca")
+    public static let cs = TranscriptionSettingsRequestLanguage(rawValue: "cs")
+    public static let da = TranscriptionSettingsRequestLanguage(rawValue: "da")
+    public static let de = TranscriptionSettingsRequestLanguage(rawValue: "de")
+    public static let el = TranscriptionSettingsRequestLanguage(rawValue: "el")
+    public static let en = TranscriptionSettingsRequestLanguage(rawValue: "en")
+    public static let es = TranscriptionSettingsRequestLanguage(rawValue: "es")
+    public static let et = TranscriptionSettingsRequestLanguage(rawValue: "et")
+    public static let fi = TranscriptionSettingsRequestLanguage(rawValue: "fi")
+    public static let fr = TranscriptionSettingsRequestLanguage(rawValue: "fr")
+    public static let he = TranscriptionSettingsRequestLanguage(rawValue: "he")
+    public static let hi = TranscriptionSettingsRequestLanguage(rawValue: "hi")
+    public static let hr = TranscriptionSettingsRequestLanguage(rawValue: "hr")
+    public static let hu = TranscriptionSettingsRequestLanguage(rawValue: "hu")
+    public static let id = TranscriptionSettingsRequestLanguage(rawValue: "id")
+    public static let it = TranscriptionSettingsRequestLanguage(rawValue: "it")
+    public static let ja = TranscriptionSettingsRequestLanguage(rawValue: "ja")
+    public static let ko = TranscriptionSettingsRequestLanguage(rawValue: "ko")
+    public static let ms = TranscriptionSettingsRequestLanguage(rawValue: "ms")
+    public static let nl = TranscriptionSettingsRequestLanguage(rawValue: "nl")
+    public static let no = TranscriptionSettingsRequestLanguage(rawValue: "no")
+    public static let pl = TranscriptionSettingsRequestLanguage(rawValue: "pl")
+    public static let pt = TranscriptionSettingsRequestLanguage(rawValue: "pt")
+    public static let ro = TranscriptionSettingsRequestLanguage(rawValue: "ro")
+    public static let ru = TranscriptionSettingsRequestLanguage(rawValue: "ru")
+    public static let sk = TranscriptionSettingsRequestLanguage(rawValue: "sk")
+    public static let sl = TranscriptionSettingsRequestLanguage(rawValue: "sl")
+    public static let sv = TranscriptionSettingsRequestLanguage(rawValue: "sv")
+    public static let ta = TranscriptionSettingsRequestLanguage(rawValue: "ta")
+    public static let th = TranscriptionSettingsRequestLanguage(rawValue: "th")
+    public static let tl = TranscriptionSettingsRequestLanguage(rawValue: "tl")
+    public static let tr = TranscriptionSettingsRequestLanguage(rawValue: "tr")
+    public static let uk = TranscriptionSettingsRequestLanguage(rawValue: "uk")
+    public static let zh = TranscriptionSettingsRequestLanguage(rawValue: "zh")
+}
+
+public final class TranscriptionSettingsRequestMode: RawRepresentable, Codable, Hashable, Sendable {
+    public let rawValue: String
+
+    public init(rawValue: String) {
+        self.rawValue = rawValue
+    }
+
+    public static let autoOn = TranscriptionSettingsRequestMode(rawValue: "auto-on")
+    public static let available = TranscriptionSettingsRequestMode(rawValue: "available")
+    public static let disabled = TranscriptionSettingsRequestMode(rawValue: "disabled")
+}
+
 public final class TranscriptionSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable {
-    
-    public enum TranscriptionSettingsRequestClosedCaptionMode: String, Sendable, Codable, CaseIterable {
-        case autoOn = "auto-on"
-        case available
-        case disabled
-        case unknown = "_unknown"
-
-        public init(from decoder: Decoder) throws {
-            let container = try decoder.singleValueContainer()
-            if let decodedValue = try? container.decode(String.self),
-               let value = Self(rawValue: decodedValue) {
-                self = value
-            } else {
-                self = .unknown
-            }
-        }
-    }
-    
-    public enum TranscriptionSettingsRequestLanguage: String, Sendable, Codable, CaseIterable {
-        case ar
-        case auto
-        case ca
-        case cs
-        case da
-        case de
-        case el
-        case en
-        case es
-        case fi
-        case fr
-        case he
-        case hi
-        case hr
-        case hu
-        case id
-        case it
-        case ja
-        case ko
-        case ms
-        case nl
-        case no
-        case pl
-        case pt
-        case ro
-        case ru
-        case sv
-        case ta
-        case th
-        case tl
-        case tr
-        case uk
-        case zh
-        case unknown = "_unknown"
-
-        public init(from decoder: Decoder) throws {
-            let container = try decoder.singleValueContainer()
-            if let decodedValue = try? container.decode(String.self),
-               let value = Self(rawValue: decodedValue) {
-                self = value
-            } else {
-                self = .unknown
-            }
-        }
-    }
-    
-    public enum TranscriptionSettingsRequestMode: String, Sendable, Codable, CaseIterable {
-        case autoOn = "auto-on"
-        case available
-        case disabled
-        case unknown = "_unknown"
-
-        public init(from decoder: Decoder) throws {
-            let container = try decoder.singleValueContainer()
-            if let decodedValue = try? container.decode(String.self),
-               let value = Self(rawValue: decodedValue) {
-                self = value
-            } else {
-                self = .unknown
-            }
-        }
-    }
-
     public var closedCaptionMode: TranscriptionSettingsRequestClosedCaptionMode?
     public var language: TranscriptionSettingsRequestLanguage?
     public var mode: TranscriptionSettingsRequestMode

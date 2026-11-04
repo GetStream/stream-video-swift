@@ -6,7 +6,6 @@ import Foundation
 import StreamCore
 
 public final class StartClosedCaptionsRequest: @unchecked Sendable, Encodable, JSONEncodable {
-    
     /// Enable transcriptions along with closed captions
     public var enableTranscription: Bool?
     /// Which external storage to use for transcriptions (only applicable if enable_transcription is true)

@@ -5,27 +5,21 @@
 import Foundation
 import StreamCore
 
-public final class LayoutSettings: @unchecked Sendable, Encodable, JSONEncodable {
-    
-    public enum LayoutSettingsName: String, Sendable, Codable, CaseIterable {
-        case custom
-        case grid
-        case mobile
-        case singleParticipant = "single-participant"
-        case spotlight
-        case unknown = "_unknown"
+public final class LayoutSettingsName: RawRepresentable, Codable, Hashable, Sendable {
+    public let rawValue: String
 
-        public init(from decoder: Decoder) throws {
-            let container = try decoder.singleValueContainer()
-            if let decodedValue = try? container.decode(String.self),
-               let value = Self(rawValue: decodedValue) {
-                self = value
-            } else {
-                self = .unknown
-            }
-        }
+    public init(rawValue: String) {
+        self.rawValue = rawValue
     }
 
+    public static let custom = LayoutSettingsName(rawValue: "custom")
+    public static let grid = LayoutSettingsName(rawValue: "grid")
+    public static let mobile = LayoutSettingsName(rawValue: "mobile")
+    public static let singleParticipant = LayoutSettingsName(rawValue: "single-participant")
+    public static let spotlight = LayoutSettingsName(rawValue: "spotlight")
+}
+
+public final class LayoutSettings: @unchecked Sendable, Encodable, JSONEncodable {
     public var detectOrientation: Bool?
     public var externalAppUrl: String?
     public var externalCssUrl: String?

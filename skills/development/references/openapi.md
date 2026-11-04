@@ -28,7 +28,6 @@ Do not edit `Sources/StreamVideo/OpenApi/generated/` by hand. Change the lists b
 | `encodableModels` | Models only in request bodies. They lose `Decodable`. |
 | `removedProperties` | Model fields the SDK does not ship. Includes new backend fields until the SDK adopts them. |
 | `retypedProperties` | Property types the SDK keeps although the spec changed them. Optional types get a `nil` init default. |
-| `removedEnumCases` | Enum cases the SDK does not ship. Keys are `Model` or `Model.NestedEnum`. |
 | `v2Endpoints` | Endpoints the SDK calls on their `/api/v2/video` path. The v1 spec lists them under `/video`. |
 
 The script keeps only models that `DefaultAPI` and `VideoEvent` reach.
@@ -44,9 +43,10 @@ Breaking changes wait for a major version. Until then:
    The script drops models that no endpoint or event reaches. List removed public models in the changelog.
 2. Give removed fields a deprecated `get { nil } set {}` and a deprecated init with the old signature
    in the Deprecated section of `Sources/StreamVideo/OpenApi/OpenAPI+Extensions.swift`.
-3. Use `retypedProperties` for type changes and `removedEnumCases` for new enum cases.
-   Both use the generated names. The generator prefixes nested enums with the model name.
-   Keep old nested enum names as typealiases in `Sources/StreamVideo/OpenApi/OpenAPI+Extensions.swift`.
+3. Use `retypedProperties` for type changes. It uses the generated names.
+   String enums are `RawRepresentable` classes, so new enum values do not break the API.
+   The generator names inline enums `<Model><Field>` and declares them at the top level.
+   Keep the short names as typealiases in `Sources/StreamVideo/OpenApi/OpenAPI+Extensions.swift`.
 4. Compare the public API with the base branch. Build both, then run
    `xcrun swift-api-digester -dump-sdk -module StreamVideo` with `-sdk`, `-target`, `-F`, and `-I`
    set to the `Debug-iphonesimulator` products, and `-diagnose-sdk` on the two dumps.

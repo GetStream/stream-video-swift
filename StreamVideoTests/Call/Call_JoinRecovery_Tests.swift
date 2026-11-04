@@ -618,7 +618,7 @@ final class CallAuthenticationBackedWebRTCAuthenticator:
                 switch response.call.settings.video.cameraFacing {
                 case .back:
                     return .back
-                case .external, .front, .unknown:
+                default:
                     return .front
                 }
             }())

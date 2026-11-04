@@ -5,26 +5,20 @@
 import Foundation
 import StreamCore
 
-/// This event is sent when call recording has started
-public final class CallRecordingStartedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
-    
-    public enum CallRecordingStartedEventRecordingType: String, Sendable, Codable, CaseIterable {
-        case composite
-        case individual
-        case raw
-        case unknown = "_unknown"
+public final class CallRecordingStartedEventRecordingType: RawRepresentable, Codable, Hashable, Sendable {
+    public let rawValue: String
 
-        public init(from decoder: Decoder) throws {
-            let container = try decoder.singleValueContainer()
-            if let decodedValue = try? container.decode(String.self),
-               let value = Self(rawValue: decodedValue) {
-                self = value
-            } else {
-                self = .unknown
-            }
-        }
+    public init(rawValue: String) {
+        self.rawValue = rawValue
     }
 
+    public static let composite = CallRecordingStartedEventRecordingType(rawValue: "composite")
+    public static let individual = CallRecordingStartedEventRecordingType(rawValue: "individual")
+    public static let raw = CallRecordingStartedEventRecordingType(rawValue: "raw")
+}
+
+/// This event is sent when call recording has started
+public final class CallRecordingStartedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
     public var callCid: String
     public var createdAt: Date
     public var egressId: String

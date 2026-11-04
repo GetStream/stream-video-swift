@@ -43,4 +43,15 @@ final class DefaultAPI_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertFalse((CallCreatedEvent.self as Any.Type) is Encodable.Type)
         XCTAssertFalse((GetOrCreateCallRequest.self as Any.Type) is Decodable.Type)
     }
+
+    // MARK: - Enums
+
+    func test_enum_decodesUnknownValueLosslessly() throws {
+        let capability = try JSONDecoder().decode(
+            OwnCapability.self,
+            from: Data(#""future-capability""#.utf8)
+        )
+
+        XCTAssertEqual(capability.rawValue, "future-capability")
+    }
 }

@@ -7,7 +7,6 @@ import StreamCore
 
 /// This event is sent when call recording is ready
 public final class CallRecordingReadyEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
-    
     public var callCid: String
     /// CallRecording represents a recording of a call.
     public var callRecording: CallRecording

@@ -5,25 +5,19 @@
 import Foundation
 import StreamCore
 
-public final class IndividualRecordingSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable {
-    
-    public enum IndividualRecordingSettingsRequestMode: String, Sendable, Codable, CaseIterable {
-        case autoOn = "auto-on"
-        case available
-        case disabled
-        case unknown = "_unknown"
+public final class IndividualRecordingSettingsRequestMode: RawRepresentable, Codable, Hashable, Sendable {
+    public let rawValue: String
 
-        public init(from decoder: Decoder) throws {
-            let container = try decoder.singleValueContainer()
-            if let decodedValue = try? container.decode(String.self),
-               let value = Self(rawValue: decodedValue) {
-                self = value
-            } else {
-                self = .unknown
-            }
-        }
+    public init(rawValue: String) {
+        self.rawValue = rawValue
     }
 
+    public static let autoOn = IndividualRecordingSettingsRequestMode(rawValue: "auto-on")
+    public static let available = IndividualRecordingSettingsRequestMode(rawValue: "available")
+    public static let disabled = IndividualRecordingSettingsRequestMode(rawValue: "disabled")
+}
+
+public final class IndividualRecordingSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable {
     /// Recording mode. One of: available, disabled, auto-on
     public var mode: IndividualRecordingSettingsRequestMode
 

@@ -5,25 +5,19 @@
 import Foundation
 import StreamCore
 
-public final class NoiseCancellationSettingsRequest: @unchecked Sendable, Codable, JSONEncodable {
-    
-    public enum NoiseCancellationSettingsRequestMode: String, Sendable, Codable, CaseIterable {
-        case autoOn = "auto-on"
-        case available
-        case disabled
-        case unknown = "_unknown"
+public final class NoiseCancellationSettingsRequestMode: RawRepresentable, Codable, Hashable, Sendable {
+    public let rawValue: String
 
-        public init(from decoder: Decoder) throws {
-            let container = try decoder.singleValueContainer()
-            if let decodedValue = try? container.decode(String.self),
-               let value = Self(rawValue: decodedValue) {
-                self = value
-            } else {
-                self = .unknown
-            }
-        }
+    public init(rawValue: String) {
+        self.rawValue = rawValue
     }
 
+    public static let autoOn = NoiseCancellationSettingsRequestMode(rawValue: "auto-on")
+    public static let available = NoiseCancellationSettingsRequestMode(rawValue: "available")
+    public static let disabled = NoiseCancellationSettingsRequestMode(rawValue: "disabled")
+}
+
+public final class NoiseCancellationSettingsRequest: @unchecked Sendable, Codable, JSONEncodable {
     public var mode: NoiseCancellationSettingsRequestMode
 
     public init(mode: NoiseCancellationSettingsRequestMode) {
