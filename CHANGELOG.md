@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `String.audioCall`, the identifier of the built-in `audio_call` call type, for 1:1 and group voice calls that ring and can't be reused once they have ended. [#1385](https://github.com/GetStream/stream-video-swift/pull/1385)
 - `String.agent`, the identifier of the built-in `agent` call type, for conversations between a user and an AI agent. [#1385](https://github.com/GetStream/stream-video-swift/pull/1385)
 
+### 🐞 Fixed
+
+- Apply the loudspeaker when call settings request it, after an idle route already reported Speaker.
+
 ### 🔄 Changed
 
 - Deprecate `GoLiveRequest.startRtmpBroadcasts`, `OwnUserResponse.pushNotifications`, `PushNotificationSettingsResponse`, and `revokeTokensIssuedBefore` on `OwnUserResponse`, `UserResponse` and `UserEventPayload`. The video API no longer has them. The response fields are always `nil`, and the API ignores `startRtmpBroadcasts`. Deprecate `Call.goLive(startRtmpBroadcasts:)`; use `goLive(startHls:startRecording:startTranscription:)` instead. [#1378](https://github.com/GetStream/stream-video-swift/pull/1378)
