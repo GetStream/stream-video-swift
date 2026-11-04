@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class GetOrCreateCallRequest: @unchecked Sendable, Codable, JSONEncodable {
+public final class GetOrCreateCallRequest: @unchecked Sendable, Encodable, JSONEncodable {
     /// CallRequest is the payload for creating a call.
     public var data: CallRequest?
     public var membersLimit: Int?
@@ -21,15 +21,6 @@ public final class GetOrCreateCallRequest: @unchecked Sendable, Codable, JSONEnc
         self.notify = notify
         self.ring = ring
         self.video = video
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: StringCodingKey.self)
-        self.data = try container.decodeIfPresent(CallRequest.self, forKey: .data)
-        self.membersLimit = try container.decodeIfPresent(Int.self, forKey: .membersLimit)
-        self.notify = try container.decodeIfPresent(Bool.self, forKey: .notify)
-        self.ring = try container.decodeIfPresent(Bool.self, forKey: .ring)
-        self.video = try container.decodeIfPresent(Bool.self, forKey: .video)
     }
 
     public func encode(to encoder: Encoder) throws {

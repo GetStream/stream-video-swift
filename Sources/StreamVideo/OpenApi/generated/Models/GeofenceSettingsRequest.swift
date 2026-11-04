@@ -5,16 +5,11 @@
 import Foundation
 import StreamCore
 
-public final class GeofenceSettingsRequest: @unchecked Sendable, Codable, JSONEncodable {
+public final class GeofenceSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable {
     public var names: [String]?
 
     public init(names: [String]? = nil) {
         self.names = names
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: StringCodingKey.self)
-        self.names = try container.decodeIfPresent([String].self, forKey: .names)
     }
 
     public func encode(to encoder: Encoder) throws {

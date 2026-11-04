@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class IngressSettingsRequest: @unchecked Sendable, Codable, JSONEncodable {
+public final class IngressSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable {
     public var audioEncodingOptions: IngressAudioEncodingOptionsRequest?
     public var enabled: Bool?
     public var videoEncodingOptions: [String: IngressVideoEncodingOptionsRequest]?
@@ -18,19 +18,6 @@ public final class IngressSettingsRequest: @unchecked Sendable, Codable, JSONEnc
         self.audioEncodingOptions = audioEncodingOptions
         self.enabled = enabled
         self.videoEncodingOptions = videoEncodingOptions
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: StringCodingKey.self)
-        self.audioEncodingOptions = try container.decodeIfPresent(
-            IngressAudioEncodingOptionsRequest.self,
-            forKey: .audioEncodingOptions
-        )
-        self.enabled = try container.decodeIfPresent(Bool.self, forKey: .enabled)
-        self.videoEncodingOptions = try container.decodeIfPresent(
-            [String: IngressVideoEncodingOptionsRequest].self,
-            forKey: .videoEncodingOptions
-        )
     }
 
     public func encode(to encoder: Encoder) throws {

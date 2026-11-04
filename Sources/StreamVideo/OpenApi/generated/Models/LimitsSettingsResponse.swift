@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class LimitsSettingsResponse: @unchecked Sendable, Codable, JSONEncodable {
+public final class LimitsSettingsResponse: @unchecked Sendable, Decodable {
     public var maxDurationSeconds: Int?
     public var maxParticipants: Int?
 
@@ -18,12 +18,6 @@ public final class LimitsSettingsResponse: @unchecked Sendable, Codable, JSONEnc
         let container = try decoder.container(keyedBy: StringCodingKey.self)
         self.maxDurationSeconds = try container.decodeIfPresent(Int.self, forKey: .maxDurationSeconds)
         self.maxParticipants = try container.decodeIfPresent(Int.self, forKey: .maxParticipants)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encodeIfPresent(maxDurationSeconds, forKey: .maxDurationSeconds)
-        try container.encodeIfPresent(maxParticipants, forKey: .maxParticipants)
     }
 }
 

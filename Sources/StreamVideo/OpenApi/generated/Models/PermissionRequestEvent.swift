@@ -7,7 +7,7 @@ import StreamCore
 
 /// This event is sent when a user requests access to a feature on a call,
 /// clients receiving this event should display a permission request to the user
-public final class PermissionRequestEvent: @unchecked Sendable, Event, Codable, JSONEncodable, WSCallEvent {
+public final class PermissionRequestEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
     public var callCid: String
     public var createdAt: Date
     /// The list of permissions requested by the user
@@ -31,15 +31,6 @@ public final class PermissionRequestEvent: @unchecked Sendable, Event, Codable, 
         self.permissions = try container.decode([String].self, forKey: .permissions)
         self.type = try container.decode(String.self, forKey: .type)
         self.user = try container.decode(UserResponse.self, forKey: .user)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(callCid, forKey: .callCid)
-        try container.encode(createdAt, forKey: .createdAt)
-        try container.encode(permissions, forKey: .permissions)
-        try container.encode(type, forKey: .type)
-        try container.encode(user, forKey: .user)
     }
 }
 

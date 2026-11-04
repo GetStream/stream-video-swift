@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class EncryptionSettingsRequest: @unchecked Sendable, Codable, JSONEncodable {
+public final class EncryptionSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable {
     
     public enum EncryptionSettingsRequestMode: String, Sendable, Codable, CaseIterable {
         case autoOn = "auto-on"
@@ -29,11 +29,6 @@ public final class EncryptionSettingsRequest: @unchecked Sendable, Codable, JSON
 
     public init(mode: EncryptionSettingsRequestMode? = nil) {
         self.mode = mode
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: StringCodingKey.self)
-        self.mode = try container.decodeIfPresent(EncryptionSettingsRequestMode.self, forKey: .mode)
     }
 
     public func encode(to encoder: Encoder) throws {

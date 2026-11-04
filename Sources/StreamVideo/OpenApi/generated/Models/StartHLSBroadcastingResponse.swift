@@ -6,7 +6,7 @@ import Foundation
 import StreamCore
 
 /// StartHLSBroadcastingResponse is the payload for starting an HLS broadcasting.
-public final class StartHLSBroadcastingResponse: @unchecked Sendable, Codable, JSONEncodable {
+public final class StartHLSBroadcastingResponse: @unchecked Sendable, Decodable {
     public var duration: String
     /// the URL of the HLS playlist
     public var playlistUrl: String
@@ -20,12 +20,6 @@ public final class StartHLSBroadcastingResponse: @unchecked Sendable, Codable, J
         let container = try decoder.container(keyedBy: StringCodingKey.self)
         self.duration = try container.decode(String.self, forKey: .duration)
         self.playlistUrl = try container.decode(String.self, forKey: .playlistUrl)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(duration, forKey: .duration)
-        try container.encode(playlistUrl, forKey: .playlistUrl)
     }
 }
 

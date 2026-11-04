@@ -6,7 +6,7 @@ import Foundation
 import StreamCore
 
 /// CallRecording represents a recording of a call.
-public final class CallRecording: @unchecked Sendable, Codable, JSONEncodable {
+public final class CallRecording: @unchecked Sendable, Decodable {
     public var endTime: Date
     public var filename: String
     public var startTime: Date
@@ -25,14 +25,6 @@ public final class CallRecording: @unchecked Sendable, Codable, JSONEncodable {
         self.filename = try container.decode(String.self, forKey: .filename)
         self.startTime = try container.decode(Date.self, forKey: .startTime)
         self.url = try container.decode(String.self, forKey: .url)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(endTime, forKey: .endTime)
-        try container.encode(filename, forKey: .filename)
-        try container.encode(startTime, forKey: .startTime)
-        try container.encode(url, forKey: .url)
     }
 }
 

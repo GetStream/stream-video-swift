@@ -6,7 +6,7 @@ import Foundation
 import StreamCore
 
 /// This event is sent when a reaction is sent in a call, clients should use this to show the reaction in the call screen
-public final class CallReactionEvent: @unchecked Sendable, Event, Codable, JSONEncodable, WSCallEvent {
+public final class CallReactionEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
     public var callCid: String
     public var createdAt: Date
     public var reaction: ReactionResponse
@@ -25,14 +25,6 @@ public final class CallReactionEvent: @unchecked Sendable, Event, Codable, JSONE
         self.createdAt = try container.decode(Date.self, forKey: .createdAt)
         self.reaction = try container.decode(ReactionResponse.self, forKey: .reaction)
         self.type = try container.decode(String.self, forKey: .type)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(callCid, forKey: .callCid)
-        try container.encode(createdAt, forKey: .createdAt)
-        try container.encode(reaction, forKey: .reaction)
-        try container.encode(type, forKey: .type)
     }
 }
 

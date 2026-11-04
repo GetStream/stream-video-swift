@@ -6,7 +6,7 @@ import Foundation
 import StreamCore
 
 /// MemberRequest is the payload for adding a member to a call.
-public final class MemberRequest: @unchecked Sendable, Codable, JSONEncodable {
+public final class MemberRequest: @unchecked Sendable, Encodable, JSONEncodable {
     /// Custom data for this object
     public var custom: [String: RawJSON]?
     public var role: String?
@@ -16,13 +16,6 @@ public final class MemberRequest: @unchecked Sendable, Codable, JSONEncodable {
         self.custom = custom
         self.role = role
         self.userId = userId
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: StringCodingKey.self)
-        self.custom = try container.decodeIfPresent([String: RawJSON].self, forKey: .custom)
-        self.role = try container.decodeIfPresent(String.self, forKey: .role)
-        self.userId = try container.decode(String.self, forKey: .userId)
     }
 
     public func encode(to encoder: Encoder) throws {

@@ -6,7 +6,7 @@ import Foundation
 import StreamCore
 
 /// This event is sent when call transcription is ready
-public final class CallTranscriptionReadyEvent: @unchecked Sendable, Event, Codable, JSONEncodable, WSCallEvent {
+public final class CallTranscriptionReadyEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
     public var callCid: String
     /// CallTranscription represents a transcription of a call.
     public var callTranscription: CallTranscription
@@ -26,14 +26,6 @@ public final class CallTranscriptionReadyEvent: @unchecked Sendable, Event, Coda
         self.callTranscription = try container.decode(CallTranscription.self, forKey: .callTranscription)
         self.createdAt = try container.decode(Date.self, forKey: .createdAt)
         self.type = try container.decode(String.self, forKey: .type)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(callCid, forKey: .callCid)
-        try container.encode(callTranscription, forKey: .callTranscription)
-        try container.encode(createdAt, forKey: .createdAt)
-        try container.encode(type, forKey: .type)
     }
 }
 

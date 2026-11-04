@@ -6,7 +6,7 @@ import Foundation
 import StreamCore
 
 /// MemberResponse is the payload for a member of a call.
-public final class MemberResponse: @unchecked Sendable, Codable, JSONEncodable {
+public final class MemberResponse: @unchecked Sendable, Decodable {
     /// Date/time of creation
     public var createdAt: Date
     /// Custom member response data
@@ -47,17 +47,6 @@ public final class MemberResponse: @unchecked Sendable, Codable, JSONEncodable {
         self.updatedAt = try container.decode(Date.self, forKey: .updatedAt)
         self.user = try container.decode(UserResponse.self, forKey: .user)
         self.userId = try container.decode(String.self, forKey: .userId)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(createdAt, forKey: .createdAt)
-        try container.encode(custom, forKey: .custom)
-        try container.encodeIfPresent(deletedAt, forKey: .deletedAt)
-        try container.encodeIfPresent(role, forKey: .role)
-        try container.encode(updatedAt, forKey: .updatedAt)
-        try container.encode(user, forKey: .user)
-        try container.encode(userId, forKey: .userId)
     }
 }
 

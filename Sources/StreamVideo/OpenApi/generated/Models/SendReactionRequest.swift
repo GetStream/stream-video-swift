@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class SendReactionRequest: @unchecked Sendable, Codable, JSONEncodable {
+public final class SendReactionRequest: @unchecked Sendable, Encodable, JSONEncodable {
     public var custom: [String: RawJSON]?
     public var emojiCode: String?
     public var type: String
@@ -14,13 +14,6 @@ public final class SendReactionRequest: @unchecked Sendable, Codable, JSONEncoda
         self.custom = custom
         self.emojiCode = emojiCode
         self.type = type
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: StringCodingKey.self)
-        self.custom = try container.decodeIfPresent([String: RawJSON].self, forKey: .custom)
-        self.emojiCode = try container.decodeIfPresent(String.self, forKey: .emojiCode)
-        self.type = try container.decode(String.self, forKey: .type)
     }
 
     public func encode(to encoder: Encoder) throws {

@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class StopLiveRequest: @unchecked Sendable, Codable, JSONEncodable {
+public final class StopLiveRequest: @unchecked Sendable, Encodable, JSONEncodable {
     public var continueClosedCaption: Bool?
     public var continueHls: Bool?
     public var continueRecording: Bool?
@@ -24,15 +24,6 @@ public final class StopLiveRequest: @unchecked Sendable, Codable, JSONEncodable 
         self.continueRecording = continueRecording
         self.continueRtmpBroadcasts = continueRtmpBroadcasts
         self.continueTranscription = continueTranscription
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: StringCodingKey.self)
-        self.continueClosedCaption = try container.decodeIfPresent(Bool.self, forKey: .continueClosedCaption)
-        self.continueHls = try container.decodeIfPresent(Bool.self, forKey: .continueHls)
-        self.continueRecording = try container.decodeIfPresent(Bool.self, forKey: .continueRecording)
-        self.continueRtmpBroadcasts = try container.decodeIfPresent(Bool.self, forKey: .continueRtmpBroadcasts)
-        self.continueTranscription = try container.decodeIfPresent(Bool.self, forKey: .continueTranscription)
     }
 
     public func encode(to encoder: Encoder) throws {

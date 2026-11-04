@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class GetCallResponse: @unchecked Sendable, Codable, JSONEncodable {
+public final class GetCallResponse: @unchecked Sendable, Decodable {
     /// Represents a call
     public var call: CallResponse
     public var duration: String
@@ -35,15 +35,6 @@ public final class GetCallResponse: @unchecked Sendable, Codable, JSONEncodable 
         self.members = try container.decode([MemberResponse].self, forKey: .members)
         self.membership = try container.decodeIfPresent(MemberResponse.self, forKey: .membership)
         self.ownCapabilities = try container.decode([OwnCapability].self, forKey: .ownCapabilities)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(call, forKey: .call)
-        try container.encode(duration, forKey: .duration)
-        try container.encode(members, forKey: .members)
-        try container.encodeIfPresent(membership, forKey: .membership)
-        try container.encode(ownCapabilities, forKey: .ownCapabilities)
     }
 }
 

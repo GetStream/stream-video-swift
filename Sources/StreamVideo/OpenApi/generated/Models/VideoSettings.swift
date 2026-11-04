@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class VideoSettings: @unchecked Sendable, Codable, JSONEncodable {
+public final class VideoSettings: @unchecked Sendable, Decodable {
     
     public enum VideoSettingsCameraFacing: String, Sendable, Codable, CaseIterable {
         case back
@@ -51,15 +51,6 @@ public final class VideoSettings: @unchecked Sendable, Codable, JSONEncodable {
         self.cameraFacing = try container.decode(VideoSettingsCameraFacing.self, forKey: .cameraFacing)
         self.enabled = try container.decode(Bool.self, forKey: .enabled)
         self.targetResolution = try container.decode(TargetResolution.self, forKey: .targetResolution)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(accessRequestEnabled, forKey: .accessRequestEnabled)
-        try container.encode(cameraDefaultOn, forKey: .cameraDefaultOn)
-        try container.encode(cameraFacing, forKey: .cameraFacing)
-        try container.encode(enabled, forKey: .enabled)
-        try container.encode(targetResolution, forKey: .targetResolution)
     }
 }
 

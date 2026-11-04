@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class HealthCheckEvent: @unchecked Sendable, Event, Codable, JSONEncodable {
+public final class HealthCheckEvent: @unchecked Sendable, Event, Decodable {
     public var cid: String?
     public var connectionId: String
     public var createdAt: Date
@@ -26,15 +26,6 @@ public final class HealthCheckEvent: @unchecked Sendable, Event, Codable, JSONEn
         self.createdAt = try container.decode(Date.self, forKey: .createdAt)
         self.receivedAt = try container.decodeIfPresent(Date.self, forKey: .receivedAt)
         self.type = try container.decode(String.self, forKey: .type)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encodeIfPresent(cid, forKey: .cid)
-        try container.encode(connectionId, forKey: .connectionId)
-        try container.encode(createdAt, forKey: .createdAt)
-        try container.encodeIfPresent(receivedAt, forKey: .receivedAt)
-        try container.encode(type, forKey: .type)
     }
 }
 

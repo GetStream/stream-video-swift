@@ -6,7 +6,7 @@ import Foundation
 import StreamCore
 
 /// This event is sent when call closed caption has started
-public final class CallClosedCaptionsStartedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, WSCallEvent {
+public final class CallClosedCaptionsStartedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
     public var callCid: String
     public var createdAt: Date
     /// The type of event: "call.closed_captions_started" in this case
@@ -22,13 +22,6 @@ public final class CallClosedCaptionsStartedEvent: @unchecked Sendable, Event, C
         self.callCid = try container.decode(String.self, forKey: .callCid)
         self.createdAt = try container.decode(Date.self, forKey: .createdAt)
         self.type = try container.decode(String.self, forKey: .type)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(callCid, forKey: .callCid)
-        try container.encode(createdAt, forKey: .createdAt)
-        try container.encode(type, forKey: .type)
     }
 }
 

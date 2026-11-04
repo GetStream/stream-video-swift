@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class FrameRecordingSettingsResponse: @unchecked Sendable, Codable, JSONEncodable {
+public final class FrameRecordingSettingsResponse: @unchecked Sendable, Decodable {
     
     public enum FrameRecordingSettingsResponseMode: String, Sendable, Codable, CaseIterable {
         case autoOn = "auto-on"
@@ -39,13 +39,6 @@ public final class FrameRecordingSettingsResponse: @unchecked Sendable, Codable,
         self.captureIntervalInSeconds = try container.decode(Int.self, forKey: .captureIntervalInSeconds)
         self.mode = try container.decode(FrameRecordingSettingsResponseMode.self, forKey: .mode)
         self.quality = try container.decodeIfPresent(String.self, forKey: .quality)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(captureIntervalInSeconds, forKey: .captureIntervalInSeconds)
-        try container.encode(mode, forKey: .mode)
-        try container.encodeIfPresent(quality, forKey: .quality)
     }
 }
 

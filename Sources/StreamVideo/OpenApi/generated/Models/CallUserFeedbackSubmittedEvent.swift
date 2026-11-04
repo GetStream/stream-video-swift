@@ -6,7 +6,7 @@ import Foundation
 import StreamCore
 
 /// This event is sent when a user submits feedback for a call.
-public final class CallUserFeedbackSubmittedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, WSCallEvent {
+public final class CallUserFeedbackSubmittedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
     public var callCid: String
     public var createdAt: Date
     /// Custom data provided by the user
@@ -58,20 +58,6 @@ public final class CallUserFeedbackSubmittedEvent: @unchecked Sendable, Event, C
         self.sessionId = try container.decode(String.self, forKey: .sessionId)
         self.type = try container.decode(String.self, forKey: .type)
         self.user = try container.decode(UserResponse.self, forKey: .user)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(callCid, forKey: .callCid)
-        try container.encode(createdAt, forKey: .createdAt)
-        try container.encodeIfPresent(custom, forKey: .custom)
-        try container.encode(rating, forKey: .rating)
-        try container.encodeIfPresent(reason, forKey: .reason)
-        try container.encodeIfPresent(sdk, forKey: .sdk)
-        try container.encodeIfPresent(sdkVersion, forKey: .sdkVersion)
-        try container.encode(sessionId, forKey: .sessionId)
-        try container.encode(type, forKey: .type)
-        try container.encode(user, forKey: .user)
     }
 }
 

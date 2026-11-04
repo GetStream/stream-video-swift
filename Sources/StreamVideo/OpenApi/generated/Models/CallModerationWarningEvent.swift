@@ -6,7 +6,7 @@ import Foundation
 import StreamCore
 
 /// This event is sent when a moderation warning is issued to a user
-public final class CallModerationWarningEvent: @unchecked Sendable, Event, Codable, JSONEncodable, WSCallEvent {
+public final class CallModerationWarningEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
     public var callCid: String
     public var createdAt: Date
     /// Custom data associated with the moderation action
@@ -34,16 +34,6 @@ public final class CallModerationWarningEvent: @unchecked Sendable, Event, Codab
         self.message = try container.decode(String.self, forKey: .message)
         self.type = try container.decode(String.self, forKey: .type)
         self.userId = try container.decode(String.self, forKey: .userId)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(callCid, forKey: .callCid)
-        try container.encode(createdAt, forKey: .createdAt)
-        try container.encode(custom, forKey: .custom)
-        try container.encode(message, forKey: .message)
-        try container.encode(type, forKey: .type)
-        try container.encode(userId, forKey: .userId)
     }
 }
 

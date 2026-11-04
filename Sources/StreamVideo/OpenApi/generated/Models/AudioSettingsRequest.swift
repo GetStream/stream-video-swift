@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class AudioSettingsRequest: @unchecked Sendable, Codable, JSONEncodable {
+public final class AudioSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable {
     
     public enum AudioSettingsRequestDefaultDevice: String, Sendable, Codable, CaseIterable {
         case earpiece
@@ -50,18 +50,6 @@ public final class AudioSettingsRequest: @unchecked Sendable, Codable, JSONEncod
         self.opusDtxEnabled = opusDtxEnabled
         self.redundantCodingEnabled = redundantCodingEnabled
         self.speakerDefaultOn = speakerDefaultOn
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: StringCodingKey.self)
-        self.accessRequestEnabled = try container.decodeIfPresent(Bool.self, forKey: .accessRequestEnabled)
-        self.defaultDevice = try container.decode(AudioSettingsRequestDefaultDevice.self, forKey: .defaultDevice)
-        self.hifiAudioEnabled = try container.decodeIfPresent(Bool.self, forKey: .hifiAudioEnabled)
-        self.micDefaultOn = try container.decodeIfPresent(Bool.self, forKey: .micDefaultOn)
-        self.noiseCancellation = try container.decodeIfPresent(NoiseCancellationSettingsRequest.self, forKey: .noiseCancellation)
-        self.opusDtxEnabled = try container.decodeIfPresent(Bool.self, forKey: .opusDtxEnabled)
-        self.redundantCodingEnabled = try container.decodeIfPresent(Bool.self, forKey: .redundantCodingEnabled)
-        self.speakerDefaultOn = try container.decodeIfPresent(Bool.self, forKey: .speakerDefaultOn)
     }
 
     public func encode(to encoder: Encoder) throws {

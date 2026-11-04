@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class IngressAudioEncodingOptionsRequest: @unchecked Sendable, Codable, JSONEncodable {
+public final class IngressAudioEncodingOptionsRequest: @unchecked Sendable, Encodable, JSONEncodable {
     
     public enum IngressAudioEncodingOptionsRequestChannels: String, Sendable, Codable, CaseIterable {
         case _1 = "1"
@@ -31,13 +31,6 @@ public final class IngressAudioEncodingOptionsRequest: @unchecked Sendable, Coda
         self.bitrate = bitrate
         self.channels = channels
         self.enableDtx = enableDtx
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: StringCodingKey.self)
-        self.bitrate = try container.decode(Int.self, forKey: .bitrate)
-        self.channels = try container.decode(IngressAudioEncodingOptionsRequestChannels.self, forKey: .channels)
-        self.enableDtx = try container.decodeIfPresent(Bool.self, forKey: .enableDtx)
     }
 
     public func encode(to encoder: Encoder) throws {

@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class RecordSettingsRequest: @unchecked Sendable, Codable, JSONEncodable {
+public final class RecordSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable {
     
     public enum RecordSettingsRequestMode: String, Sendable, Codable, CaseIterable {
         case autoOn = "auto-on"
@@ -59,13 +59,6 @@ public final class RecordSettingsRequest: @unchecked Sendable, Codable, JSONEnco
         self.audioOnly = audioOnly
         self.mode = mode
         self.quality = quality
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: StringCodingKey.self)
-        self.audioOnly = try container.decodeIfPresent(Bool.self, forKey: .audioOnly)
-        self.mode = try container.decode(RecordSettingsRequestMode.self, forKey: .mode)
-        self.quality = try container.decodeIfPresent(RecordSettingsRequestQuality.self, forKey: .quality)
     }
 
     public func encode(to encoder: Encoder) throws {

@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class StopAllRTMPBroadcastsResponse: @unchecked Sendable, Codable, JSONEncodable {
+public final class StopAllRTMPBroadcastsResponse: @unchecked Sendable, Decodable {
     /// Duration of the request in milliseconds
     public var duration: String
 
@@ -16,11 +16,6 @@ public final class StopAllRTMPBroadcastsResponse: @unchecked Sendable, Codable, 
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: StringCodingKey.self)
         self.duration = try container.decode(String.self, forKey: .duration)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(duration, forKey: .duration)
     }
 }
 

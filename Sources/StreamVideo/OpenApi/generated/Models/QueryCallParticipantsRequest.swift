@@ -5,17 +5,12 @@
 import Foundation
 import StreamCore
 
-public final class QueryCallParticipantsRequest: @unchecked Sendable, Codable, JSONEncodable {
+public final class QueryCallParticipantsRequest: @unchecked Sendable, Encodable, JSONEncodable {
     /// Filter conditions to apply to the query
     public var filterConditions: [String: RawJSON]?
 
     public init(filterConditions: [String: RawJSON]? = nil) {
         self.filterConditions = filterConditions
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: StringCodingKey.self)
-        self.filterConditions = try container.decodeIfPresent([String: RawJSON].self, forKey: .filterConditions)
     }
 
     public func encode(to encoder: Encoder) throws {

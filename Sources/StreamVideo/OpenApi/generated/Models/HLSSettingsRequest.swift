@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class HLSSettingsRequest: @unchecked Sendable, Codable, JSONEncodable {
+public final class HLSSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable {
     /// Whether HLS broadcasting should start automatically
     public var autoOn: Bool?
     /// Whether HLS broadcasting is enabled
@@ -17,13 +17,6 @@ public final class HLSSettingsRequest: @unchecked Sendable, Codable, JSONEncodab
         self.autoOn = autoOn
         self.enabled = enabled
         self.qualityTracks = qualityTracks
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: StringCodingKey.self)
-        self.autoOn = try container.decodeIfPresent(Bool.self, forKey: .autoOn)
-        self.enabled = try container.decodeIfPresent(Bool.self, forKey: .enabled)
-        self.qualityTracks = try container.decode([String].self, forKey: .qualityTracks)
     }
 
     public func encode(to encoder: Encoder) throws {

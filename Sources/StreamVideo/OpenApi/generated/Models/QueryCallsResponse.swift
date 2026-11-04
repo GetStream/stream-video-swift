@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class QueryCallsResponse: @unchecked Sendable, Codable, JSONEncodable {
+public final class QueryCallsResponse: @unchecked Sendable, Decodable {
     public var calls: [CallStateResponseFields]
     /// Duration of the request in milliseconds
     public var duration: String
@@ -25,14 +25,6 @@ public final class QueryCallsResponse: @unchecked Sendable, Codable, JSONEncodab
         self.duration = try container.decode(String.self, forKey: .duration)
         self.next = try container.decodeIfPresent(String.self, forKey: .next)
         self.prev = try container.decodeIfPresent(String.self, forKey: .prev)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(calls, forKey: .calls)
-        try container.encode(duration, forKey: .duration)
-        try container.encodeIfPresent(next, forKey: .next)
-        try container.encodeIfPresent(prev, forKey: .prev)
     }
 }
 

@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class IngressSourceResponse: @unchecked Sendable, Codable, JSONEncodable {
+public final class IngressSourceResponse: @unchecked Sendable, Decodable {
     public var fps: Int
     public var height: Int
     public var width: Int
@@ -21,13 +21,6 @@ public final class IngressSourceResponse: @unchecked Sendable, Codable, JSONEnco
         self.fps = try container.decode(Int.self, forKey: .fps)
         self.height = try container.decode(Int.self, forKey: .height)
         self.width = try container.decode(Int.self, forKey: .width)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(fps, forKey: .fps)
-        try container.encode(height, forKey: .height)
-        try container.encode(width, forKey: .width)
     }
 }
 

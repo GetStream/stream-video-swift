@@ -6,17 +6,12 @@ import Foundation
 import StreamCore
 
 /// StartRTMPBroadcastsRequest is the payload for starting RTMP broadcasts.
-public final class StartRTMPBroadcastsRequest: @unchecked Sendable, Codable, JSONEncodable {
+public final class StartRTMPBroadcastsRequest: @unchecked Sendable, Encodable, JSONEncodable {
     /// List of broadcasts to start
     public var broadcasts: [RTMPBroadcastRequest]
 
     public init(broadcasts: [RTMPBroadcastRequest]) {
         self.broadcasts = broadcasts
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: StringCodingKey.self)
-        self.broadcasts = try container.decode([RTMPBroadcastRequest].self, forKey: .broadcasts)
     }
 
     public func encode(to encoder: Encoder) throws {

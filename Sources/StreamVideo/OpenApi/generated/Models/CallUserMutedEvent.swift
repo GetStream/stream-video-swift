@@ -6,7 +6,7 @@ import Foundation
 import StreamCore
 
 /// This event is sent when a call member is muted
-public final class CallUserMutedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, WSCallEvent {
+public final class CallUserMutedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
     public var callCid: String
     public var createdAt: Date
     public var fromUserId: String
@@ -28,15 +28,6 @@ public final class CallUserMutedEvent: @unchecked Sendable, Event, Codable, JSON
         self.fromUserId = try container.decode(String.self, forKey: .fromUserId)
         self.mutedUserIds = try container.decode([String].self, forKey: .mutedUserIds)
         self.type = try container.decode(String.self, forKey: .type)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(callCid, forKey: .callCid)
-        try container.encode(createdAt, forKey: .createdAt)
-        try container.encode(fromUserId, forKey: .fromUserId)
-        try container.encode(mutedUserIds, forKey: .mutedUserIds)
-        try container.encode(type, forKey: .type)
     }
 }
 

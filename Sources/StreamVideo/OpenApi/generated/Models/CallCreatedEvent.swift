@@ -7,7 +7,7 @@ import StreamCore
 
 /// This event is sent when a call is created. Clients receiving this event should check if the ringing
 /// field is set to true and if so, show the call screen
-public final class CallCreatedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, WSCallEvent {
+public final class CallCreatedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
     /// Represents a call
     public var call: CallResponse
     public var callCid: String
@@ -31,15 +31,6 @@ public final class CallCreatedEvent: @unchecked Sendable, Event, Codable, JSONEn
         self.createdAt = try container.decode(Date.self, forKey: .createdAt)
         self.members = try container.decode([MemberResponse].self, forKey: .members)
         self.type = try container.decode(String.self, forKey: .type)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(call, forKey: .call)
-        try container.encode(callCid, forKey: .callCid)
-        try container.encode(createdAt, forKey: .createdAt)
-        try container.encode(members, forKey: .members)
-        try container.encode(type, forKey: .type)
     }
 }
 

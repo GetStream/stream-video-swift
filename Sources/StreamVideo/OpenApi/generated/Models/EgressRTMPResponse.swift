@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class EgressRTMPResponse: @unchecked Sendable, Codable, JSONEncodable {
+public final class EgressRTMPResponse: @unchecked Sendable, Decodable {
     public var name: String
     public var startedAt: Date
     public var streamKey: String?
@@ -24,14 +24,6 @@ public final class EgressRTMPResponse: @unchecked Sendable, Codable, JSONEncodab
         self.startedAt = try container.decode(Date.self, forKey: .startedAt)
         self.streamKey = try container.decodeIfPresent(String.self, forKey: .streamKey)
         self.streamUrl = try container.decodeIfPresent(String.self, forKey: .streamUrl)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(name, forKey: .name)
-        try container.encode(startedAt, forKey: .startedAt)
-        try container.encodeIfPresent(streamKey, forKey: .streamKey)
-        try container.encodeIfPresent(streamUrl, forKey: .streamUrl)
     }
 }
 

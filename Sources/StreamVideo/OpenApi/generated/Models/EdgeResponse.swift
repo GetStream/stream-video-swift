@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class EdgeResponse: @unchecked Sendable, Codable, JSONEncodable {
+public final class EdgeResponse: @unchecked Sendable, Decodable {
     public var continentCode: String
     public var countryIsoCode: String
     public var green: Int
@@ -53,20 +53,6 @@ public final class EdgeResponse: @unchecked Sendable, Codable, JSONEncodable {
         self.red = try container.decode(Int.self, forKey: .red)
         self.subdivisionIsoCode = try container.decode(String.self, forKey: .subdivisionIsoCode)
         self.yellow = try container.decode(Int.self, forKey: .yellow)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(continentCode, forKey: .continentCode)
-        try container.encode(countryIsoCode, forKey: .countryIsoCode)
-        try container.encode(green, forKey: .green)
-        try container.encode(id, forKey: .id)
-        try container.encode(latencyTestUrl, forKey: .latencyTestUrl)
-        try container.encode(latitude, forKey: .latitude)
-        try container.encode(longitude, forKey: .longitude)
-        try container.encode(red, forKey: .red)
-        try container.encode(subdivisionIsoCode, forKey: .subdivisionIsoCode)
-        try container.encode(yellow, forKey: .yellow)
     }
 }
 

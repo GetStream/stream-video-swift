@@ -6,7 +6,7 @@ import Foundation
 import StreamCore
 
 /// This event is sent when a participant joins a call session
-public final class CallSessionParticipantJoinedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, WSCallEvent {
+public final class CallSessionParticipantJoinedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
     public var callCid: String
     public var createdAt: Date
     public var participant: CallParticipantResponse
@@ -29,15 +29,6 @@ public final class CallSessionParticipantJoinedEvent: @unchecked Sendable, Event
         self.participant = try container.decode(CallParticipantResponse.self, forKey: .participant)
         self.sessionId = try container.decode(String.self, forKey: .sessionId)
         self.type = try container.decode(String.self, forKey: .type)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        try container.encode(callCid, forKey: .callCid)
-        try container.encode(createdAt, forKey: .createdAt)
-        try container.encode(participant, forKey: .participant)
-        try container.encode(sessionId, forKey: .sessionId)
-        try container.encode(type, forKey: .type)
     }
 }
 
