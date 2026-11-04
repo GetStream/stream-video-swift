@@ -56,12 +56,22 @@ public final class RTMPBroadcastRequest: @unchecked Sendable, Codable, JSONEncod
         self.streamUrl = streamUrl
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case layout
-        case name
-        case quality
-        case streamKey = "stream_key"
-        case streamUrl = "stream_url"
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.layout = try container.decodeIfPresent(LayoutSettings.self, forKey: .layout)
+        self.name = try container.decode(String.self, forKey: .name)
+        self.quality = try container.decodeIfPresent(RTMPBroadcastRequestQuality.self, forKey: .quality)
+        self.streamKey = try container.decodeIfPresent(String.self, forKey: .streamKey)
+        self.streamUrl = try container.decode(String.self, forKey: .streamUrl)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(layout, forKey: .layout)
+        try container.encode(name, forKey: .name)
+        try container.encodeIfPresent(quality, forKey: .quality)
+        try container.encodeIfPresent(streamKey, forKey: .streamKey)
+        try container.encode(streamUrl, forKey: .streamUrl)
     }
 }
 

@@ -43,16 +43,30 @@ public final class CallFrameRecordingFrameReadyEvent: @unchecked Sendable, Event
         self.users = users
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case callCid = "call_cid"
-        case capturedAt = "captured_at"
-        case createdAt = "created_at"
-        case egressId = "egress_id"
-        case sessionId = "session_id"
-        case trackType = "track_type"
-        case type
-        case url
-        case users
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.callCid = try container.decode(String.self, forKey: .callCid)
+        self.capturedAt = try container.decode(Date.self, forKey: .capturedAt)
+        self.createdAt = try container.decode(Date.self, forKey: .createdAt)
+        self.egressId = try container.decode(String.self, forKey: .egressId)
+        self.sessionId = try container.decode(String.self, forKey: .sessionId)
+        self.trackType = try container.decode(String.self, forKey: .trackType)
+        self.type = try container.decode(String.self, forKey: .type)
+        self.url = try container.decode(String.self, forKey: .url)
+        self.users = try container.decode([String: UserResponse].self, forKey: .users)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(callCid, forKey: .callCid)
+        try container.encode(capturedAt, forKey: .capturedAt)
+        try container.encode(createdAt, forKey: .createdAt)
+        try container.encode(egressId, forKey: .egressId)
+        try container.encode(sessionId, forKey: .sessionId)
+        try container.encode(trackType, forKey: .trackType)
+        try container.encode(type, forKey: .type)
+        try container.encode(url, forKey: .url)
+        try container.encode(users, forKey: .users)
     }
 }
 

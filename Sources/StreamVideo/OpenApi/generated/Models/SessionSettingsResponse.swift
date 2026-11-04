@@ -12,8 +12,14 @@ public final class SessionSettingsResponse: @unchecked Sendable, Codable, JSONEn
         self.inactivityTimeoutSeconds = inactivityTimeoutSeconds
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case inactivityTimeoutSeconds = "inactivity_timeout_seconds"
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.inactivityTimeoutSeconds = try container.decode(Int.self, forKey: .inactivityTimeoutSeconds)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(inactivityTimeoutSeconds, forKey: .inactivityTimeoutSeconds)
     }
 }
 

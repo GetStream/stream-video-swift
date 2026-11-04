@@ -52,17 +52,32 @@ public final class GetCallRingStateResponse: @unchecked Sendable, Codable, JSONE
         self.sessionStartedAt = sessionStartedAt
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case acceptedBy = "accepted_by"
-        case callCid = "call_cid"
-        case callEndedAt = "call_ended_at"
-        case createdByUserId = "created_by_user_id"
-        case duration
-        case missedBy = "missed_by"
-        case rejectedBy = "rejected_by"
-        case sessionEndedAt = "session_ended_at"
-        case sessionId = "session_id"
-        case sessionStartedAt = "session_started_at"
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.acceptedBy = try container.decode([String: Date].self, forKey: .acceptedBy)
+        self.callCid = try container.decode(String.self, forKey: .callCid)
+        self.callEndedAt = try container.decodeIfPresent(Date.self, forKey: .callEndedAt)
+        self.createdByUserId = try container.decode(String.self, forKey: .createdByUserId)
+        self.duration = try container.decode(String.self, forKey: .duration)
+        self.missedBy = try container.decode([String: Date].self, forKey: .missedBy)
+        self.rejectedBy = try container.decode([String: Date].self, forKey: .rejectedBy)
+        self.sessionEndedAt = try container.decodeIfPresent(Date.self, forKey: .sessionEndedAt)
+        self.sessionId = try container.decode(String.self, forKey: .sessionId)
+        self.sessionStartedAt = try container.decodeIfPresent(Date.self, forKey: .sessionStartedAt)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(acceptedBy, forKey: .acceptedBy)
+        try container.encode(callCid, forKey: .callCid)
+        try container.encodeIfPresent(callEndedAt, forKey: .callEndedAt)
+        try container.encode(createdByUserId, forKey: .createdByUserId)
+        try container.encode(duration, forKey: .duration)
+        try container.encode(missedBy, forKey: .missedBy)
+        try container.encode(rejectedBy, forKey: .rejectedBy)
+        try container.encodeIfPresent(sessionEndedAt, forKey: .sessionEndedAt)
+        try container.encode(sessionId, forKey: .sessionId)
+        try container.encodeIfPresent(sessionStartedAt, forKey: .sessionStartedAt)
     }
 }
 

@@ -13,8 +13,14 @@ public final class RejectCallRequest: @unchecked Sendable, Codable, JSONEncodabl
         self.reason = reason
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case reason
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.reason = try container.decodeIfPresent(String.self, forKey: .reason)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(reason, forKey: .reason)
     }
 }
 

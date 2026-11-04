@@ -16,9 +16,16 @@ public final class StartHLSBroadcastingResponse: @unchecked Sendable, Codable, J
         self.playlistUrl = playlistUrl
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case duration
-        case playlistUrl = "playlist_url"
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.duration = try container.decode(String.self, forKey: .duration)
+        self.playlistUrl = try container.decode(String.self, forKey: .playlistUrl)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(duration, forKey: .duration)
+        try container.encode(playlistUrl, forKey: .playlistUrl)
     }
 }
 

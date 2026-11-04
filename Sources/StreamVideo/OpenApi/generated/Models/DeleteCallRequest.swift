@@ -14,8 +14,14 @@ public final class DeleteCallRequest: @unchecked Sendable, Codable, JSONEncodabl
         self.hard = hard
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case hard
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.hard = try container.decodeIfPresent(Bool.self, forKey: .hard)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(hard, forKey: .hard)
     }
 }
 

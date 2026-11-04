@@ -22,12 +22,22 @@ public final class AppUpdatedEvent: @unchecked Sendable, Event, Codable, JSONEnc
         self.receivedAt = receivedAt
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case app
-        case createdAt = "created_at"
-        case custom
-        case receivedAt = "received_at"
-        case type
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.app = try container.decode(AppEventResponse.self, forKey: .app)
+        self.createdAt = try container.decode(Date.self, forKey: .createdAt)
+        self.custom = try container.decode([String: RawJSON].self, forKey: .custom)
+        self.receivedAt = try container.decodeIfPresent(Date.self, forKey: .receivedAt)
+        self.type = try container.decode(String.self, forKey: .type)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(app, forKey: .app)
+        try container.encode(createdAt, forKey: .createdAt)
+        try container.encode(custom, forKey: .custom)
+        try container.encodeIfPresent(receivedAt, forKey: .receivedAt)
+        try container.encode(type, forKey: .type)
     }
 }
 

@@ -16,10 +16,18 @@ public final class SFUResponse: @unchecked Sendable, Codable, JSONEncodable {
         self.wsEndpoint = wsEndpoint
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case edgeName = "edge_name"
-        case url
-        case wsEndpoint = "ws_endpoint"
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.edgeName = try container.decode(String.self, forKey: .edgeName)
+        self.url = try container.decode(String.self, forKey: .url)
+        self.wsEndpoint = try container.decode(String.self, forKey: .wsEndpoint)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(edgeName, forKey: .edgeName)
+        try container.encode(url, forKey: .url)
+        try container.encode(wsEndpoint, forKey: .wsEndpoint)
     }
 }
 

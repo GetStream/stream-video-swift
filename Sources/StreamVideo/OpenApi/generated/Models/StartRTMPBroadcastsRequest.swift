@@ -14,8 +14,14 @@ public final class StartRTMPBroadcastsRequest: @unchecked Sendable, Codable, JSO
         self.broadcasts = broadcasts
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case broadcasts
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.broadcasts = try container.decode([RTMPBroadcastRequest].self, forKey: .broadcasts)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(broadcasts, forKey: .broadcasts)
     }
 }
 

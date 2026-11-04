@@ -12,8 +12,14 @@ public final class StopTranscriptionRequest: @unchecked Sendable, Codable, JSONE
         self.stopClosedCaptions = stopClosedCaptions
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case stopClosedCaptions = "stop_closed_captions"
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.stopClosedCaptions = try container.decodeIfPresent(Bool.self, forKey: .stopClosedCaptions)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(stopClosedCaptions, forKey: .stopClosedCaptions)
     }
 }
 

@@ -16,9 +16,16 @@ public final class GetEdgesResponse: @unchecked Sendable, Codable, JSONEncodable
         self.edges = edges
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case duration
-        case edges
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.duration = try container.decode(String.self, forKey: .duration)
+        self.edges = try container.decode([EdgeResponse].self, forKey: .edges)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(duration, forKey: .duration)
+        try container.encode(edges, forKey: .edges)
     }
 }
 

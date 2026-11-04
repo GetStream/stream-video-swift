@@ -12,8 +12,14 @@ public final class StopClosedCaptionsRequest: @unchecked Sendable, Codable, JSON
         self.stopTranscription = stopTranscription
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case stopTranscription = "stop_transcription"
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.stopTranscription = try container.decodeIfPresent(Bool.self, forKey: .stopTranscription)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(stopTranscription, forKey: .stopTranscription)
     }
 }
 

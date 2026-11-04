@@ -16,10 +16,18 @@ public final class BroadcastSettingsRequest: @unchecked Sendable, Codable, JSONE
         self.rtmp = rtmp
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case enabled
-        case hls
-        case rtmp
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.enabled = try container.decodeIfPresent(Bool.self, forKey: .enabled)
+        self.hls = try container.decodeIfPresent(HLSSettingsRequest.self, forKey: .hls)
+        self.rtmp = try container.decodeIfPresent(RTMPSettingsRequest.self, forKey: .rtmp)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(enabled, forKey: .enabled)
+        try container.encodeIfPresent(hls, forKey: .hls)
+        try container.encodeIfPresent(rtmp, forKey: .rtmp)
     }
 }
 

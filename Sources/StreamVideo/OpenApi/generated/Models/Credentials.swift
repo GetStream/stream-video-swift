@@ -16,10 +16,18 @@ public final class Credentials: @unchecked Sendable, Codable, JSONEncodable {
         self.token = token
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case iceServers = "ice_servers"
-        case server
-        case token
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.iceServers = try container.decode([ICEServer].self, forKey: .iceServers)
+        self.server = try container.decode(SFUResponse.self, forKey: .server)
+        self.token = try container.decode(String.self, forKey: .token)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(iceServers, forKey: .iceServers)
+        try container.encode(server, forKey: .server)
+        try container.encode(token, forKey: .token)
     }
 }
 

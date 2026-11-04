@@ -34,13 +34,24 @@ public final class UserRequest: @unchecked Sendable, Codable, JSONEncodable {
         self.name = name
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case custom
-        case id
-        case image
-        case invisible
-        case language
-        case name
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.custom = try container.decodeIfPresent([String: RawJSON].self, forKey: .custom)
+        self.id = try container.decode(String.self, forKey: .id)
+        self.image = try container.decodeIfPresent(String.self, forKey: .image)
+        self.invisible = try container.decodeIfPresent(Bool.self, forKey: .invisible)
+        self.language = try container.decodeIfPresent(String.self, forKey: .language)
+        self.name = try container.decodeIfPresent(String.self, forKey: .name)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(custom, forKey: .custom)
+        try container.encode(id, forKey: .id)
+        try container.encodeIfPresent(image, forKey: .image)
+        try container.encodeIfPresent(invisible, forKey: .invisible)
+        try container.encodeIfPresent(language, forKey: .language)
+        try container.encodeIfPresent(name, forKey: .name)
     }
 }
 

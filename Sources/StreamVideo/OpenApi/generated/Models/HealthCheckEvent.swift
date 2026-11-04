@@ -19,12 +19,22 @@ public final class HealthCheckEvent: @unchecked Sendable, Event, Codable, JSONEn
         self.receivedAt = receivedAt
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case cid
-        case connectionId = "connection_id"
-        case createdAt = "created_at"
-        case receivedAt = "received_at"
-        case type
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.cid = try container.decodeIfPresent(String.self, forKey: .cid)
+        self.connectionId = try container.decode(String.self, forKey: .connectionId)
+        self.createdAt = try container.decode(Date.self, forKey: .createdAt)
+        self.receivedAt = try container.decodeIfPresent(Date.self, forKey: .receivedAt)
+        self.type = try container.decode(String.self, forKey: .type)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(cid, forKey: .cid)
+        try container.encode(connectionId, forKey: .connectionId)
+        try container.encode(createdAt, forKey: .createdAt)
+        try container.encodeIfPresent(receivedAt, forKey: .receivedAt)
+        try container.encode(type, forKey: .type)
     }
 }
 

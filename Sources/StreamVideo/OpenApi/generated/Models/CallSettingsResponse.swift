@@ -65,24 +65,46 @@ public final class CallSettingsResponse: @unchecked Sendable, Codable, JSONEncod
         self.video = video
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case audio
-        case backstage
-        case broadcasting
-        case encryption
-        case frameRecording = "frame_recording"
-        case geofencing
-        case individualRecording = "individual_recording"
-        case ingress
-        case limits
-        case rawRecording = "raw_recording"
-        case recording
-        case ring
-        case screensharing
-        case session
-        case thumbnails
-        case transcription
-        case video
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.audio = try container.decode(AudioSettings.self, forKey: .audio)
+        self.backstage = try container.decode(BackstageSettings.self, forKey: .backstage)
+        self.broadcasting = try container.decode(BroadcastSettingsResponse.self, forKey: .broadcasting)
+        self.encryption = try container.decode(EncryptionSettingsResponse.self, forKey: .encryption)
+        self.frameRecording = try container.decode(FrameRecordingSettingsResponse.self, forKey: .frameRecording)
+        self.geofencing = try container.decode(GeofenceSettings.self, forKey: .geofencing)
+        self.individualRecording = try container.decode(IndividualRecordingSettingsResponse.self, forKey: .individualRecording)
+        self.ingress = try container.decodeIfPresent(IngressSettingsResponse.self, forKey: .ingress)
+        self.limits = try container.decode(LimitsSettingsResponse.self, forKey: .limits)
+        self.rawRecording = try container.decode(RawRecordingSettingsResponse.self, forKey: .rawRecording)
+        self.recording = try container.decode(RecordSettingsResponse.self, forKey: .recording)
+        self.ring = try container.decode(RingSettings.self, forKey: .ring)
+        self.screensharing = try container.decode(ScreensharingSettings.self, forKey: .screensharing)
+        self.session = try container.decode(SessionSettingsResponse.self, forKey: .session)
+        self.thumbnails = try container.decode(ThumbnailsSettings.self, forKey: .thumbnails)
+        self.transcription = try container.decode(TranscriptionSettings.self, forKey: .transcription)
+        self.video = try container.decode(VideoSettings.self, forKey: .video)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(audio, forKey: .audio)
+        try container.encode(backstage, forKey: .backstage)
+        try container.encode(broadcasting, forKey: .broadcasting)
+        try container.encode(encryption, forKey: .encryption)
+        try container.encode(frameRecording, forKey: .frameRecording)
+        try container.encode(geofencing, forKey: .geofencing)
+        try container.encode(individualRecording, forKey: .individualRecording)
+        try container.encodeIfPresent(ingress, forKey: .ingress)
+        try container.encode(limits, forKey: .limits)
+        try container.encode(rawRecording, forKey: .rawRecording)
+        try container.encode(recording, forKey: .recording)
+        try container.encode(ring, forKey: .ring)
+        try container.encode(screensharing, forKey: .screensharing)
+        try container.encode(session, forKey: .session)
+        try container.encode(thumbnails, forKey: .thumbnails)
+        try container.encode(transcription, forKey: .transcription)
+        try container.encode(video, forKey: .video)
     }
 }
 

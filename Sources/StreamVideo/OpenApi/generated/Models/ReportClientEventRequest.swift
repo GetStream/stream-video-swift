@@ -14,8 +14,14 @@ public final class ReportClientEventRequest: @unchecked Sendable, Codable, JSONE
         self.events = events
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case events
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.events = try container.decode([ClientEvent].self, forKey: .events)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(events, forKey: .events)
     }
 }
 

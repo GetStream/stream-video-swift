@@ -19,11 +19,20 @@ public final class ReactionResponse: @unchecked Sendable, Codable, JSONEncodable
         self.user = user
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case custom
-        case emojiCode = "emoji_code"
-        case type
-        case user
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.custom = try container.decodeIfPresent([String: RawJSON].self, forKey: .custom)
+        self.emojiCode = try container.decodeIfPresent(String.self, forKey: .emojiCode)
+        self.type = try container.decode(String.self, forKey: .type)
+        self.user = try container.decode(UserResponse.self, forKey: .user)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(custom, forKey: .custom)
+        try container.encodeIfPresent(emojiCode, forKey: .emojiCode)
+        try container.encode(type, forKey: .type)
+        try container.encode(user, forKey: .user)
     }
 }
 

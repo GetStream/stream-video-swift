@@ -18,11 +18,20 @@ public final class EgressRTMPResponse: @unchecked Sendable, Codable, JSONEncodab
         self.streamUrl = streamUrl
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case name
-        case startedAt = "started_at"
-        case streamKey = "stream_key"
-        case streamUrl = "stream_url"
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.name = try container.decode(String.self, forKey: .name)
+        self.startedAt = try container.decode(Date.self, forKey: .startedAt)
+        self.streamKey = try container.decodeIfPresent(String.self, forKey: .streamKey)
+        self.streamUrl = try container.decodeIfPresent(String.self, forKey: .streamUrl)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(name, forKey: .name)
+        try container.encode(startedAt, forKey: .startedAt)
+        try container.encodeIfPresent(streamKey, forKey: .streamKey)
+        try container.encodeIfPresent(streamUrl, forKey: .streamUrl)
     }
 }
 

@@ -46,12 +46,22 @@ public final class LayoutSettings: @unchecked Sendable, Codable, JSONEncodable {
         self.options = options
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case detectOrientation = "detect_orientation"
-        case externalAppUrl = "external_app_url"
-        case externalCssUrl = "external_css_url"
-        case name
-        case options
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.detectOrientation = try container.decodeIfPresent(Bool.self, forKey: .detectOrientation)
+        self.externalAppUrl = try container.decodeIfPresent(String.self, forKey: .externalAppUrl)
+        self.externalCssUrl = try container.decodeIfPresent(String.self, forKey: .externalCssUrl)
+        self.name = try container.decode(LayoutSettingsName.self, forKey: .name)
+        self.options = try container.decodeIfPresent([String: RawJSON].self, forKey: .options)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(detectOrientation, forKey: .detectOrientation)
+        try container.encodeIfPresent(externalAppUrl, forKey: .externalAppUrl)
+        try container.encodeIfPresent(externalCssUrl, forKey: .externalCssUrl)
+        try container.encode(name, forKey: .name)
+        try container.encodeIfPresent(options, forKey: .options)
     }
 }
 

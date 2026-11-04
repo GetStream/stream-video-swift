@@ -40,12 +40,22 @@ public final class CallRecordingStartedEvent: @unchecked Sendable, Event, Codabl
         self.recordingType = recordingType
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case callCid = "call_cid"
-        case createdAt = "created_at"
-        case egressId = "egress_id"
-        case recordingType = "recording_type"
-        case type
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.callCid = try container.decode(String.self, forKey: .callCid)
+        self.createdAt = try container.decode(Date.self, forKey: .createdAt)
+        self.egressId = try container.decode(String.self, forKey: .egressId)
+        self.recordingType = try container.decode(CallRecordingStartedEventRecordingType.self, forKey: .recordingType)
+        self.type = try container.decode(String.self, forKey: .type)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(callCid, forKey: .callCid)
+        try container.encode(createdAt, forKey: .createdAt)
+        try container.encode(egressId, forKey: .egressId)
+        try container.encode(recordingType, forKey: .recordingType)
+        try container.encode(type, forKey: .type)
     }
 }
 

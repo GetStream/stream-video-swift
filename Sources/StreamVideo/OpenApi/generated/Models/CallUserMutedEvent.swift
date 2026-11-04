@@ -21,12 +21,22 @@ public final class CallUserMutedEvent: @unchecked Sendable, Event, Codable, JSON
         self.mutedUserIds = mutedUserIds
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case callCid = "call_cid"
-        case createdAt = "created_at"
-        case fromUserId = "from_user_id"
-        case mutedUserIds = "muted_user_ids"
-        case type
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.callCid = try container.decode(String.self, forKey: .callCid)
+        self.createdAt = try container.decode(Date.self, forKey: .createdAt)
+        self.fromUserId = try container.decode(String.self, forKey: .fromUserId)
+        self.mutedUserIds = try container.decode([String].self, forKey: .mutedUserIds)
+        self.type = try container.decode(String.self, forKey: .type)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(callCid, forKey: .callCid)
+        try container.encode(createdAt, forKey: .createdAt)
+        try container.encode(fromUserId, forKey: .fromUserId)
+        try container.encode(mutedUserIds, forKey: .mutedUserIds)
+        try container.encode(type, forKey: .type)
     }
 }
 

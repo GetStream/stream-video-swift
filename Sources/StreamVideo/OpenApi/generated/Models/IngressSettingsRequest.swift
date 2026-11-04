@@ -20,10 +20,24 @@ public final class IngressSettingsRequest: @unchecked Sendable, Codable, JSONEnc
         self.videoEncodingOptions = videoEncodingOptions
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case audioEncodingOptions = "audio_encoding_options"
-        case enabled
-        case videoEncodingOptions = "video_encoding_options"
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.audioEncodingOptions = try container.decodeIfPresent(
+            IngressAudioEncodingOptionsRequest.self,
+            forKey: .audioEncodingOptions
+        )
+        self.enabled = try container.decodeIfPresent(Bool.self, forKey: .enabled)
+        self.videoEncodingOptions = try container.decodeIfPresent(
+            [String: IngressVideoEncodingOptionsRequest].self,
+            forKey: .videoEncodingOptions
+        )
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(audioEncodingOptions, forKey: .audioEncodingOptions)
+        try container.encodeIfPresent(enabled, forKey: .enabled)
+        try container.encodeIfPresent(videoEncodingOptions, forKey: .videoEncodingOptions)
     }
 }
 

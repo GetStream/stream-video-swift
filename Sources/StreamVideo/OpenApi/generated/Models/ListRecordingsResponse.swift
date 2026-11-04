@@ -15,9 +15,16 @@ public final class ListRecordingsResponse: @unchecked Sendable, Codable, JSONEnc
         self.recordings = recordings
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case duration
-        case recordings
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.duration = try container.decode(String.self, forKey: .duration)
+        self.recordings = try container.decode([CallRecording].self, forKey: .recordings)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(duration, forKey: .duration)
+        try container.encode(recordings, forKey: .recordings)
     }
 }
 

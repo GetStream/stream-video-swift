@@ -14,9 +14,16 @@ public final class LimitsSettingsResponse: @unchecked Sendable, Codable, JSONEnc
         self.maxParticipants = maxParticipants
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case maxDurationSeconds = "max_duration_seconds"
-        case maxParticipants = "max_participants"
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.maxDurationSeconds = try container.decodeIfPresent(Int.self, forKey: .maxDurationSeconds)
+        self.maxParticipants = try container.decodeIfPresent(Int.self, forKey: .maxParticipants)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(maxDurationSeconds, forKey: .maxDurationSeconds)
+        try container.encodeIfPresent(maxParticipants, forKey: .maxParticipants)
     }
 }
 

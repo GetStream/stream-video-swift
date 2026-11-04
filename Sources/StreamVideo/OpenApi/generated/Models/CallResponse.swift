@@ -88,29 +88,56 @@ public final class CallResponse: @unchecked Sendable, Codable, JSONEncodable {
         self.updatedAt = updatedAt
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case backstage
-        case blockedUserIds = "blocked_user_ids"
-        case captioning
-        case cid
-        case createdAt = "created_at"
-        case createdBy = "created_by"
-        case currentSessionId = "current_session_id"
-        case custom
-        case egress
-        case endedAt = "ended_at"
-        case id
-        case ingress
-        case joinAheadTimeSeconds = "join_ahead_time_seconds"
-        case recording
-        case session
-        case settings
-        case startsAt = "starts_at"
-        case team
-        case thumbnails
-        case transcribing
-        case type
-        case updatedAt = "updated_at"
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.backstage = try container.decode(Bool.self, forKey: .backstage)
+        self.blockedUserIds = try container.decode([String].self, forKey: .blockedUserIds)
+        self.captioning = try container.decode(Bool.self, forKey: .captioning)
+        self.cid = try container.decode(String.self, forKey: .cid)
+        self.createdAt = try container.decode(Date.self, forKey: .createdAt)
+        self.createdBy = try container.decode(UserResponse.self, forKey: .createdBy)
+        self.currentSessionId = try container.decode(String.self, forKey: .currentSessionId)
+        self.custom = try container.decode([String: RawJSON].self, forKey: .custom)
+        self.egress = try container.decode(EgressResponse.self, forKey: .egress)
+        self.endedAt = try container.decodeIfPresent(Date.self, forKey: .endedAt)
+        self.id = try container.decode(String.self, forKey: .id)
+        self.ingress = try container.decode(CallIngressResponse.self, forKey: .ingress)
+        self.joinAheadTimeSeconds = try container.decodeIfPresent(Int.self, forKey: .joinAheadTimeSeconds)
+        self.recording = try container.decode(Bool.self, forKey: .recording)
+        self.session = try container.decodeIfPresent(CallSessionResponse.self, forKey: .session)
+        self.settings = try container.decode(CallSettingsResponse.self, forKey: .settings)
+        self.startsAt = try container.decodeIfPresent(Date.self, forKey: .startsAt)
+        self.team = try container.decodeIfPresent(String.self, forKey: .team)
+        self.thumbnails = try container.decodeIfPresent(ThumbnailResponse.self, forKey: .thumbnails)
+        self.transcribing = try container.decode(Bool.self, forKey: .transcribing)
+        self.type = try container.decode(String.self, forKey: .type)
+        self.updatedAt = try container.decode(Date.self, forKey: .updatedAt)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(backstage, forKey: .backstage)
+        try container.encode(blockedUserIds, forKey: .blockedUserIds)
+        try container.encode(captioning, forKey: .captioning)
+        try container.encode(cid, forKey: .cid)
+        try container.encode(createdAt, forKey: .createdAt)
+        try container.encode(createdBy, forKey: .createdBy)
+        try container.encode(currentSessionId, forKey: .currentSessionId)
+        try container.encode(custom, forKey: .custom)
+        try container.encode(egress, forKey: .egress)
+        try container.encodeIfPresent(endedAt, forKey: .endedAt)
+        try container.encode(id, forKey: .id)
+        try container.encode(ingress, forKey: .ingress)
+        try container.encodeIfPresent(joinAheadTimeSeconds, forKey: .joinAheadTimeSeconds)
+        try container.encode(recording, forKey: .recording)
+        try container.encodeIfPresent(session, forKey: .session)
+        try container.encode(settings, forKey: .settings)
+        try container.encodeIfPresent(startsAt, forKey: .startsAt)
+        try container.encodeIfPresent(team, forKey: .team)
+        try container.encodeIfPresent(thumbnails, forKey: .thumbnails)
+        try container.encode(transcribing, forKey: .transcribing)
+        try container.encode(type, forKey: .type)
+        try container.encode(updatedAt, forKey: .updatedAt)
     }
 }
 
