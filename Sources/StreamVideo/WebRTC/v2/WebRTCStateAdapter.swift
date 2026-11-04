@@ -1281,29 +1281,39 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
 
         // Rejoin can run only after this session has activated.
         // Owning an already active store is not activation.
+        let activeIdentifier = audioStore.state.activeSessionIdentifier
         let callKitSessionAlreadyActive = sourceIsCallKit
             && audioSession.didPerformActivation
             && audioStore.state.isActive
-            && audioStore.state.activeSessionIdentifier == audioSession.identifier
+            && activeIdentifier == audioSession.identifier
+        // This session already activated, then another call took the
+        // store. Leave that call's module in place.
+        let otherCallOwnsActiveStore = sourceIsCallKit
+            && audioSession.didPerformActivation
+            && audioStore.state.isActive
+            && !activeIdentifier.isEmpty
+            && activeIdentifier != audioSession.identifier
         let isAudioEngineAvailable = peerConnectionFactory
             .audioEngineAvailabilityOverride
             ?? (!sourceIsCallKit || callKitSessionAlreadyActive)
         try peerConnectionFactory.audioDeviceModule
             .setEngineAvailability(isAudioEngineAvailable)
 
-        try await audioStore.dispatch(
-            [
-                // Claim ownership before installing the ADM so any late
-                // teardown from a previous call becomes a no-op. Both
-                // actions run in the same batch on the store's serial
-                // processing queue, so no other dispatch can interleave
-                // between them. That makes the ADM install implicitly
-                // ownership-safe and removes the need to wrap it in a
-                // `.conditioned(...)` action.
-                .setActiveSessionIdentifier(audioSession.identifier),
-                .setAudioDeviceModule(peerConnectionFactory.audioDeviceModule)
-            ]
-        ).result()
+        if !otherCallOwnsActiveStore {
+            try await audioStore.dispatch(
+                [
+                    // Claim ownership before installing the ADM so any late
+                    // teardown from a previous call becomes a no-op. Both
+                    // actions run in the same batch on the store's serial
+                    // processing queue, so no other dispatch can interleave
+                    // between them. That makes the ADM install implicitly
+                    // ownership-safe and removes the need to wrap it in a
+                    // `.conditioned(...)` action.
+                    .setActiveSessionIdentifier(audioSession.identifier),
+                    .setAudioDeviceModule(peerConnectionFactory.audioDeviceModule)
+                ]
+            ).result()
+        }
 
         audioSession.activate(
             callSettingsPublisher: $callSettings.removeDuplicates().eraseToAnyPublisher(),
