@@ -3,9 +3,9 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class SFUResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+public final class SFUResponse: @unchecked Sendable, Decodable {
     public var edgeName: String
     public var url: String
     public var wsEndpoint: String
@@ -15,13 +15,16 @@ public final class SFUResponse: @unchecked Sendable, Codable, JSONEncodable, Has
         self.url = url
         self.wsEndpoint = wsEndpoint
     }
-    
-    public enum CodingKeys: String, CodingKey {
-        case edgeName = "edge_name"
-        case url
-        case wsEndpoint = "ws_endpoint"
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.edgeName = try container.decode(String.self, forKey: .edgeName)
+        self.url = try container.decode(String.self, forKey: .url)
+        self.wsEndpoint = try container.decode(String.self, forKey: .wsEndpoint)
     }
-    
+}
+
+extension SFUResponse: Hashable {
     public static func == (lhs: SFUResponse, rhs: SFUResponse) -> Bool {
         lhs.edgeName == rhs.edgeName &&
             lhs.url == rhs.url &&

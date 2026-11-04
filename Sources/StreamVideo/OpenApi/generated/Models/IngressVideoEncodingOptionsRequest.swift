@@ -3,8 +3,9 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class IngressVideoEncodingOptionsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class IngressVideoEncodingOptionsRequest: @unchecked Sendable, Encodable, JSONEncodable {
     public var layers: [IngressVideoLayerRequest]
     public var source: IngressSourceRequest
 
@@ -13,14 +14,17 @@ public final class IngressVideoEncodingOptionsRequest: @unchecked Sendable, Coda
         self.source = source
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case layers
-        case source
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(layers, forKey: .layers)
+        try container.encode(source, forKey: .source)
     }
+}
 
+extension IngressVideoEncodingOptionsRequest: Hashable {
     public static func == (lhs: IngressVideoEncodingOptionsRequest, rhs: IngressVideoEncodingOptionsRequest) -> Bool {
         lhs.layers == rhs.layers &&
-        lhs.source == rhs.source
+            lhs.source == rhs.source
     }
 
     public func hash(into hasher: inout Hasher) {

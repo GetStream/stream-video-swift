@@ -3,9 +3,11 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class QueryCallStatsResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+/// Basic response information
+public final class QueryCallStatsResponse: @unchecked Sendable, Decodable {
+    /// Duration of the request in milliseconds
     public var duration: String
     public var next: String?
     public var prev: String?
@@ -17,14 +19,17 @@ public final class QueryCallStatsResponse: @unchecked Sendable, Codable, JSONEnc
         self.prev = prev
         self.reports = reports
     }
-    
-    public enum CodingKeys: String, CodingKey {
-        case duration
-        case next
-        case prev
-        case reports
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.duration = try container.decode(String.self, forKey: .duration)
+        self.next = try container.decodeIfPresent(String.self, forKey: .next)
+        self.prev = try container.decodeIfPresent(String.self, forKey: .prev)
+        self.reports = try container.decode([CallStatsReportSummaryResponse].self, forKey: .reports)
     }
-    
+}
+
+extension QueryCallStatsResponse: Hashable {
     public static func == (lhs: QueryCallStatsResponse, rhs: QueryCallStatsResponse) -> Bool {
         lhs.duration == rhs.duration &&
             lhs.next == rhs.next &&

@@ -5,12 +5,15 @@
 import Foundation
 import StreamCore
 
-public final class CallSessionStartedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
-    
+/// This event is sent when a call session starts
+public final class CallSessionStartedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
+    /// Represents a call
     public var call: CallResponse
     public var callCid: String
     public var createdAt: Date
+    /// Call session ID
     public var sessionId: String
+    /// The type of event: "call.session_started" in this case
     public var type: String = "call.session_started"
 
     public init(call: CallResponse, callCid: String, createdAt: Date, sessionId: String) {
@@ -19,15 +22,18 @@ public final class CallSessionStartedEvent: @unchecked Sendable, Event, Codable,
         self.createdAt = createdAt
         self.sessionId = sessionId
     }
-    
-    public enum CodingKeys: String, CodingKey {
-        case call
-        case callCid = "call_cid"
-        case createdAt = "created_at"
-        case sessionId = "session_id"
-        case type
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.call = try container.decode(CallResponse.self, forKey: .call)
+        self.callCid = try container.decode(String.self, forKey: .callCid)
+        self.createdAt = try container.decode(Date.self, forKey: .createdAt)
+        self.sessionId = try container.decode(String.self, forKey: .sessionId)
+        self.type = try container.decode(String.self, forKey: .type)
     }
-    
+}
+
+extension CallSessionStartedEvent: Hashable {
     public static func == (lhs: CallSessionStartedEvent, rhs: CallSessionStartedEvent) -> Bool {
         lhs.call == rhs.call &&
             lhs.callCid == rhs.callCid &&

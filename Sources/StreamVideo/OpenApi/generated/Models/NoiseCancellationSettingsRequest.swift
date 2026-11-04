@@ -3,10 +3,11 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class NoiseCancellationSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class NoiseCancellationSettingsRequest: @unchecked Sendable, Codable, JSONEncodable {
     
-    public enum Mode: String, Sendable, Codable, CaseIterable {
+    public enum NoiseCancellationSettingsRequestMode: String, Sendable, Codable, CaseIterable {
         case autoOn = "auto-on"
         case available
         case disabled
@@ -22,17 +23,25 @@ public final class NoiseCancellationSettingsRequest: @unchecked Sendable, Codabl
             }
         }
     }
-    
-    public var mode: Mode
 
-    public init(mode: Mode) {
+    public var mode: NoiseCancellationSettingsRequestMode
+
+    public init(mode: NoiseCancellationSettingsRequestMode) {
         self.mode = mode
     }
-    
-    public enum CodingKeys: String, CodingKey {
-        case mode
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.mode = try container.decode(NoiseCancellationSettingsRequestMode.self, forKey: .mode)
     }
-    
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(mode, forKey: .mode)
+    }
+}
+
+extension NoiseCancellationSettingsRequest: Hashable {
     public static func == (lhs: NoiseCancellationSettingsRequest, rhs: NoiseCancellationSettingsRequest) -> Bool {
         lhs.mode == rhs.mode
     }

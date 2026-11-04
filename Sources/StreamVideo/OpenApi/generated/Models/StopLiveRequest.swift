@@ -3,9 +3,9 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class StopLiveRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+public final class StopLiveRequest: @unchecked Sendable, Encodable, JSONEncodable {
     public var continueClosedCaption: Bool?
     public var continueHls: Bool?
     public var continueRecording: Bool?
@@ -25,15 +25,18 @@ public final class StopLiveRequest: @unchecked Sendable, Codable, JSONEncodable,
         self.continueRtmpBroadcasts = continueRtmpBroadcasts
         self.continueTranscription = continueTranscription
     }
-    
-    public enum CodingKeys: String, CodingKey {
-        case continueClosedCaption = "continue_closed_caption"
-        case continueHls = "continue_hls"
-        case continueRecording = "continue_recording"
-        case continueRtmpBroadcasts = "continue_rtmp_broadcasts"
-        case continueTranscription = "continue_transcription"
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(continueClosedCaption, forKey: .continueClosedCaption)
+        try container.encodeIfPresent(continueHls, forKey: .continueHls)
+        try container.encodeIfPresent(continueRecording, forKey: .continueRecording)
+        try container.encodeIfPresent(continueRtmpBroadcasts, forKey: .continueRtmpBroadcasts)
+        try container.encodeIfPresent(continueTranscription, forKey: .continueTranscription)
     }
-    
+}
+
+extension StopLiveRequest: Hashable {
     public static func == (lhs: StopLiveRequest, rhs: StopLiveRequest) -> Bool {
         lhs.continueClosedCaption == rhs.continueClosedCaption &&
             lhs.continueHls == rhs.continueHls &&

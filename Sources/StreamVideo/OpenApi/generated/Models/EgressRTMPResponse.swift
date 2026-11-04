@@ -3,9 +3,9 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class EgressRTMPResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+public final class EgressRTMPResponse: @unchecked Sendable, Decodable {
     public var name: String
     public var startedAt: Date
     public var streamKey: String?
@@ -17,14 +17,17 @@ public final class EgressRTMPResponse: @unchecked Sendable, Codable, JSONEncodab
         self.streamKey = streamKey
         self.streamUrl = streamUrl
     }
-    
-    public enum CodingKeys: String, CodingKey {
-        case name
-        case startedAt = "started_at"
-        case streamKey = "stream_key"
-        case streamUrl = "stream_url"
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.name = try container.decode(String.self, forKey: .name)
+        self.startedAt = try container.decode(Date.self, forKey: .startedAt)
+        self.streamKey = try container.decodeIfPresent(String.self, forKey: .streamKey)
+        self.streamUrl = try container.decodeIfPresent(String.self, forKey: .streamUrl)
     }
-    
+}
+
+extension EgressRTMPResponse: Hashable {
     public static func == (lhs: EgressRTMPResponse, rhs: EgressRTMPResponse) -> Bool {
         lhs.name == rhs.name &&
             lhs.startedAt == rhs.startedAt &&

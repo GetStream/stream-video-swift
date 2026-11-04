@@ -3,9 +3,9 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class EdgeResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+public final class EdgeResponse: @unchecked Sendable, Decodable {
     public var continentCode: String
     public var countryIsoCode: String
     public var green: Int
@@ -40,20 +40,23 @@ public final class EdgeResponse: @unchecked Sendable, Codable, JSONEncodable, Ha
         self.subdivisionIsoCode = subdivisionIsoCode
         self.yellow = yellow
     }
-    
-    public enum CodingKeys: String, CodingKey {
-        case continentCode = "continent_code"
-        case countryIsoCode = "country_iso_code"
-        case green
-        case id
-        case latencyTestUrl = "latency_test_url"
-        case latitude
-        case longitude
-        case red
-        case subdivisionIsoCode = "subdivision_iso_code"
-        case yellow
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.continentCode = try container.decode(String.self, forKey: .continentCode)
+        self.countryIsoCode = try container.decode(String.self, forKey: .countryIsoCode)
+        self.green = try container.decode(Int.self, forKey: .green)
+        self.id = try container.decode(String.self, forKey: .id)
+        self.latencyTestUrl = try container.decode(String.self, forKey: .latencyTestUrl)
+        self.latitude = try container.decode(Float.self, forKey: .latitude)
+        self.longitude = try container.decode(Float.self, forKey: .longitude)
+        self.red = try container.decode(Int.self, forKey: .red)
+        self.subdivisionIsoCode = try container.decode(String.self, forKey: .subdivisionIsoCode)
+        self.yellow = try container.decode(Int.self, forKey: .yellow)
     }
-    
+}
+
+extension EdgeResponse: Hashable {
     public static func == (lhs: EdgeResponse, rhs: EdgeResponse) -> Bool {
         lhs.continentCode == rhs.continentCode &&
             lhs.countryIsoCode == rhs.countryIsoCode &&

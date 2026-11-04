@@ -3,24 +3,26 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class IngressVideoLayerRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class IngressVideoLayerRequest: @unchecked Sendable, Encodable, JSONEncodable {
     
     public enum IngressVideoLayerRequestCodec: String, Sendable, Codable, CaseIterable {
-        case h264 = "h264"
-        case vp8 = "vp8"
+        case h264
+        case vp8
         case unknown = "_unknown"
 
         public init(from decoder: Decoder) throws {
             let container = try decoder.singleValueContainer()
             if let decodedValue = try? container.decode(String.self),
-                let value = Self(rawValue: decodedValue) {
+               let value = Self(rawValue: decodedValue) {
                 self = value
             } else {
                 self = .unknown
             }
         }
     }
+
     public var bitrate: Int
     public var codec: IngressVideoLayerRequestCodec
     public var frameRateLimit: Int
@@ -35,20 +37,23 @@ public final class IngressVideoLayerRequest: @unchecked Sendable, Codable, JSONE
         self.minDimension = minDimension
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case bitrate
-        case codec
-        case frameRateLimit = "frame_rate_limit"
-        case maxDimension = "max_dimension"
-        case minDimension = "min_dimension"
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(bitrate, forKey: .bitrate)
+        try container.encode(codec, forKey: .codec)
+        try container.encode(frameRateLimit, forKey: .frameRateLimit)
+        try container.encode(maxDimension, forKey: .maxDimension)
+        try container.encode(minDimension, forKey: .minDimension)
     }
+}
 
+extension IngressVideoLayerRequest: Hashable {
     public static func == (lhs: IngressVideoLayerRequest, rhs: IngressVideoLayerRequest) -> Bool {
         lhs.bitrate == rhs.bitrate &&
-        lhs.codec == rhs.codec &&
-        lhs.frameRateLimit == rhs.frameRateLimit &&
-        lhs.maxDimension == rhs.maxDimension &&
-        lhs.minDimension == rhs.minDimension
+            lhs.codec == rhs.codec &&
+            lhs.frameRateLimit == rhs.frameRateLimit &&
+            lhs.maxDimension == rhs.maxDimension &&
+            lhs.minDimension == rhs.minDimension
     }
 
     public func hash(into hasher: inout Hasher) {

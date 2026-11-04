@@ -3,14 +3,16 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class JoinCallResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+public final class JoinCallResponse: @unchecked Sendable, Decodable {
+    /// Represents a call
     public var call: CallResponse
     public var created: Bool
     public var credentials: Credentials
     public var duration: String
     public var members: [MemberResponse]
+    /// MemberResponse is the payload for a member of a call.
     public var membership: MemberResponse?
     public var ownCapabilities: [OwnCapability]
     public var statsOptions: StatsOptions
@@ -34,18 +36,21 @@ public final class JoinCallResponse: @unchecked Sendable, Codable, JSONEncodable
         self.ownCapabilities = ownCapabilities
         self.statsOptions = statsOptions
     }
-    
-    public enum CodingKeys: String, CodingKey {
-        case call
-        case created
-        case credentials
-        case duration
-        case members
-        case membership
-        case ownCapabilities = "own_capabilities"
-        case statsOptions = "stats_options"
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.call = try container.decode(CallResponse.self, forKey: .call)
+        self.created = try container.decode(Bool.self, forKey: .created)
+        self.credentials = try container.decode(Credentials.self, forKey: .credentials)
+        self.duration = try container.decode(String.self, forKey: .duration)
+        self.members = try container.decode([MemberResponse].self, forKey: .members)
+        self.membership = try container.decodeIfPresent(MemberResponse.self, forKey: .membership)
+        self.ownCapabilities = try container.decode([OwnCapability].self, forKey: .ownCapabilities)
+        self.statsOptions = try container.decode(StatsOptions.self, forKey: .statsOptions)
     }
-    
+}
+
+extension JoinCallResponse: Hashable {
     public static func == (lhs: JoinCallResponse, rhs: JoinCallResponse) -> Bool {
         lhs.call == rhs.call &&
             lhs.created == rhs.created &&

@@ -3,19 +3,22 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class GeofenceSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+public final class GeofenceSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable {
     public var names: [String]?
 
     public init(names: [String]? = nil) {
         self.names = names
     }
-    
-    public enum CodingKeys: String, CodingKey {
-        case names
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(names, forKey: .names)
     }
-    
+}
+
+extension GeofenceSettingsRequest: Hashable {
     public static func == (lhs: GeofenceSettingsRequest, rhs: GeofenceSettingsRequest) -> Bool {
         lhs.names == rhs.names
     }

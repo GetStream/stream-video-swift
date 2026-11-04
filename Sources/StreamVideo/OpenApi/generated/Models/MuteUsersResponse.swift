@@ -3,19 +3,24 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class MuteUsersResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+/// MuteUsersResponse is the response payload for the mute users endpoint.
+public final class MuteUsersResponse: @unchecked Sendable, Decodable {
+    /// Duration of the request in milliseconds
     public var duration: String
 
     public init(duration: String) {
         self.duration = duration
     }
-    
-    public enum CodingKeys: String, CodingKey {
-        case duration
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.duration = try container.decode(String.self, forKey: .duration)
     }
-    
+}
+
+extension MuteUsersResponse: Hashable {
     public static func == (lhs: MuteUsersResponse, rhs: MuteUsersResponse) -> Bool {
         lhs.duration == rhs.duration
     }

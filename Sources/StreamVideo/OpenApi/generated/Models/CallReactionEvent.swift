@@ -5,11 +5,12 @@
 import Foundation
 import StreamCore
 
-public final class CallReactionEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
-    
+/// This event is sent when a reaction is sent in a call, clients should use this to show the reaction in the call screen
+public final class CallReactionEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
     public var callCid: String
     public var createdAt: Date
     public var reaction: ReactionResponse
+    /// The type of event: "call.reaction_new" in this case
     public var type: String = "call.reaction_new"
 
     public init(callCid: String, createdAt: Date, reaction: ReactionResponse) {
@@ -17,14 +18,17 @@ public final class CallReactionEvent: @unchecked Sendable, Event, Codable, JSONE
         self.createdAt = createdAt
         self.reaction = reaction
     }
-    
-    public enum CodingKeys: String, CodingKey {
-        case callCid = "call_cid"
-        case createdAt = "created_at"
-        case reaction
-        case type
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.callCid = try container.decode(String.self, forKey: .callCid)
+        self.createdAt = try container.decode(Date.self, forKey: .createdAt)
+        self.reaction = try container.decode(ReactionResponse.self, forKey: .reaction)
+        self.type = try container.decode(String.self, forKey: .type)
     }
-    
+}
+
+extension CallReactionEvent: Hashable {
     public static func == (lhs: CallReactionEvent, rhs: CallReactionEvent) -> Bool {
         lhs.callCid == rhs.callCid &&
             lhs.createdAt == rhs.createdAt &&

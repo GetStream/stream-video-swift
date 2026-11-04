@@ -13,7 +13,7 @@ private class WSEventMapping: Decodable {
     let type: String
 }
 
-public enum VideoEvent: Codable, Hashable {
+public enum VideoEvent: Decodable, Hashable {
     case typeAppUpdatedEvent(AppUpdatedEvent)
     case typeCallAcceptedEvent(CallAcceptedEvent)
     case typeBlockedUserEvent(BlockedUserEvent)
@@ -75,365 +75,243 @@ public enum VideoEvent: Codable, Hashable {
 
     public var type: String {
         switch self {
-        case let .typeAppUpdatedEvent(value):
+        case .typeAppUpdatedEvent(let value):
             return value.type
-        case let .typeCallAcceptedEvent(value):
+        case .typeCallAcceptedEvent(let value):
             return value.type
-        case let .typeBlockedUserEvent(value):
+        case .typeBlockedUserEvent(let value):
             return value.type
-        case let .typeClosedCaptionEvent(value):
+        case .typeClosedCaptionEvent(let value):
             return value.type
-        case let .typeCallClosedCaptionsFailedEvent(value):
+        case .typeCallClosedCaptionsFailedEvent(let value):
             return value.type
-        case let .typeCallClosedCaptionsStartedEvent(value):
+        case .typeCallClosedCaptionsStartedEvent(let value):
             return value.type
-        case let .typeCallClosedCaptionsStoppedEvent(value):
+        case .typeCallClosedCaptionsStoppedEvent(let value):
             return value.type
-        case let .typeCallCreatedEvent(value):
+        case .typeCallCreatedEvent(let value):
             return value.type
-        case let .typeCallDeletedEvent(value):
+        case .typeCallDeletedEvent(let value):
             return value.type
-        case let .typeCallEndedEvent(value):
+        case .typeCallEndedEvent(let value):
             return value.type
-        case let .typeCallFrameRecordingFailedEvent(value):
+        case .typeCallFrameRecordingFailedEvent(let value):
             return value.type
-        case let .typeCallFrameRecordingFrameReadyEvent(value):
+        case .typeCallFrameRecordingFrameReadyEvent(let value):
             return value.type
-        case let .typeCallFrameRecordingStartedEvent(value):
+        case .typeCallFrameRecordingStartedEvent(let value):
             return value.type
-        case let .typeCallFrameRecordingStoppedEvent(value):
+        case .typeCallFrameRecordingStoppedEvent(let value):
             return value.type
-        case let .typeCallHLSBroadcastingFailedEvent(value):
+        case .typeCallHLSBroadcastingFailedEvent(let value):
             return value.type
-        case let .typeCallHLSBroadcastingStartedEvent(value):
+        case .typeCallHLSBroadcastingStartedEvent(let value):
             return value.type
-        case let .typeCallHLSBroadcastingStoppedEvent(value):
+        case .typeCallHLSBroadcastingStoppedEvent(let value):
             return value.type
-        case let .typeKickedUserEvent(value):
+        case .typeKickedUserEvent(let value):
             return value.type
-        case let .typeCallLiveStartedEvent(value):
+        case .typeCallLiveStartedEvent(let value):
             return value.type
-        case let .typeCallMemberAddedEvent(value):
+        case .typeCallMemberAddedEvent(let value):
             return value.type
-        case let .typeCallMemberRemovedEvent(value):
+        case .typeCallMemberRemovedEvent(let value):
             return value.type
-        case let .typeCallMemberUpdatedEvent(value):
+        case .typeCallMemberUpdatedEvent(let value):
             return value.type
-        case let .typeCallMemberUpdatedPermissionEvent(value):
+        case .typeCallMemberUpdatedPermissionEvent(let value):
             return value.type
-        case let .typeCallMissedEvent(value):
+        case .typeCallMissedEvent(let value):
             return value.type
-        case let .typeCallModerationBlurEvent(value):
+        case .typeCallModerationBlurEvent(let value):
             return value.type
-        case let .typeCallModerationWarningEvent(value):
+        case .typeCallModerationWarningEvent(let value):
             return value.type
-        case let .typeCallNotificationEvent(value):
+        case .typeCallNotificationEvent(let value):
             return value.type
-        case let .typePermissionRequestEvent(value):
+        case .typePermissionRequestEvent(let value):
             return value.type
-        case let .typeUpdatedCallPermissionsEvent(value):
+        case .typeUpdatedCallPermissionsEvent(let value):
             return value.type
-        case let .typeCallReactionEvent(value):
+        case .typeCallReactionEvent(let value):
             return value.type
-        case let .typeCallRecordingFailedEvent(value):
+        case .typeCallRecordingFailedEvent(let value):
             return value.type
-        case let .typeCallRecordingReadyEvent(value):
+        case .typeCallRecordingReadyEvent(let value):
             return value.type
-        case let .typeCallRecordingStartedEvent(value):
+        case .typeCallRecordingStartedEvent(let value):
             return value.type
-        case let .typeCallRecordingStoppedEvent(value):
+        case .typeCallRecordingStoppedEvent(let value):
             return value.type
-        case let .typeCallRejectedEvent(value):
+        case .typeCallRejectedEvent(let value):
             return value.type
-        case let .typeCallRingEvent(value):
+        case .typeCallRingEvent(let value):
             return value.type
-        case let .typeCallRtmpBroadcastFailedEvent(value):
+        case .typeCallRtmpBroadcastFailedEvent(let value):
             return value.type
-        case let .typeCallRtmpBroadcastStartedEvent(value):
+        case .typeCallRtmpBroadcastStartedEvent(let value):
             return value.type
-        case let .typeCallRtmpBroadcastStoppedEvent(value):
+        case .typeCallRtmpBroadcastStoppedEvent(let value):
             return value.type
-        case let .typeCallSessionEndedEvent(value):
+        case .typeCallSessionEndedEvent(let value):
             return value.type
-        case let .typeCallSessionParticipantCountsUpdatedEvent(value):
+        case .typeCallSessionParticipantCountsUpdatedEvent(let value):
             return value.type
-        case let .typeCallSessionParticipantJoinedEvent(value):
+        case .typeCallSessionParticipantJoinedEvent(let value):
             return value.type
-        case let .typeCallSessionParticipantLeftEvent(value):
+        case .typeCallSessionParticipantLeftEvent(let value):
             return value.type
-        case let .typeCallSessionStartedEvent(value):
+        case .typeCallSessionStartedEvent(let value):
             return value.type
-        case let .typeCallStatsReportReadyEvent(value):
+        case .typeCallStatsReportReadyEvent(let value):
             return value.type
-        case let .typeCallTranscriptionFailedEvent(value):
+        case .typeCallTranscriptionFailedEvent(let value):
             return value.type
-        case let .typeCallTranscriptionReadyEvent(value):
+        case .typeCallTranscriptionReadyEvent(let value):
             return value.type
-        case let .typeCallTranscriptionStartedEvent(value):
+        case .typeCallTranscriptionStartedEvent(let value):
             return value.type
-        case let .typeCallTranscriptionStoppedEvent(value):
+        case .typeCallTranscriptionStoppedEvent(let value):
             return value.type
-        case let .typeUnblockedUserEvent(value):
+        case .typeUnblockedUserEvent(let value):
             return value.type
-        case let .typeCallUpdatedEvent(value):
+        case .typeCallUpdatedEvent(let value):
             return value.type
-        case let .typeCallUserFeedbackSubmittedEvent(value):
+        case .typeCallUserFeedbackSubmittedEvent(let value):
             return value.type
-        case let .typeCallUserMutedEvent(value):
+        case .typeCallUserMutedEvent(let value):
             return value.type
-        case let .typeConnectionErrorEvent(value):
+        case .typeConnectionErrorEvent(let value):
             return value.type
-        case let .typeConnectedEvent(value):
+        case .typeConnectedEvent(let value):
             return value.type
-        case let .typeCustomVideoEvent(value):
+        case .typeCustomVideoEvent(let value):
             return value.type
-        case let .typeHealthCheckEvent(value):
+        case .typeHealthCheckEvent(let value):
             return value.type
-        case let .typeUserUpdatedEvent(value):
+        case .typeUserUpdatedEvent(let value):
             return value.type
         }
     }
 
     public var rawValue: Event {
         switch self {
-        case let .typeAppUpdatedEvent(value):
+        case .typeAppUpdatedEvent(let value):
             return value
-        case let .typeCallAcceptedEvent(value):
+        case .typeCallAcceptedEvent(let value):
             return value
-        case let .typeBlockedUserEvent(value):
+        case .typeBlockedUserEvent(let value):
             return value
-        case let .typeClosedCaptionEvent(value):
+        case .typeClosedCaptionEvent(let value):
             return value
-        case let .typeCallClosedCaptionsFailedEvent(value):
+        case .typeCallClosedCaptionsFailedEvent(let value):
             return value
-        case let .typeCallClosedCaptionsStartedEvent(value):
+        case .typeCallClosedCaptionsStartedEvent(let value):
             return value
-        case let .typeCallClosedCaptionsStoppedEvent(value):
+        case .typeCallClosedCaptionsStoppedEvent(let value):
             return value
-        case let .typeCallCreatedEvent(value):
+        case .typeCallCreatedEvent(let value):
             return value
-        case let .typeCallDeletedEvent(value):
+        case .typeCallDeletedEvent(let value):
             return value
-        case let .typeCallEndedEvent(value):
+        case .typeCallEndedEvent(let value):
             return value
-        case let .typeCallFrameRecordingFailedEvent(value):
+        case .typeCallFrameRecordingFailedEvent(let value):
             return value
-        case let .typeCallFrameRecordingFrameReadyEvent(value):
+        case .typeCallFrameRecordingFrameReadyEvent(let value):
             return value
-        case let .typeCallFrameRecordingStartedEvent(value):
+        case .typeCallFrameRecordingStartedEvent(let value):
             return value
-        case let .typeCallFrameRecordingStoppedEvent(value):
+        case .typeCallFrameRecordingStoppedEvent(let value):
             return value
-        case let .typeCallHLSBroadcastingFailedEvent(value):
+        case .typeCallHLSBroadcastingFailedEvent(let value):
             return value
-        case let .typeCallHLSBroadcastingStartedEvent(value):
+        case .typeCallHLSBroadcastingStartedEvent(let value):
             return value
-        case let .typeCallHLSBroadcastingStoppedEvent(value):
+        case .typeCallHLSBroadcastingStoppedEvent(let value):
             return value
-        case let .typeKickedUserEvent(value):
+        case .typeKickedUserEvent(let value):
             return value
-        case let .typeCallLiveStartedEvent(value):
+        case .typeCallLiveStartedEvent(let value):
             return value
-        case let .typeCallMemberAddedEvent(value):
+        case .typeCallMemberAddedEvent(let value):
             return value
-        case let .typeCallMemberRemovedEvent(value):
+        case .typeCallMemberRemovedEvent(let value):
             return value
-        case let .typeCallMemberUpdatedEvent(value):
+        case .typeCallMemberUpdatedEvent(let value):
             return value
-        case let .typeCallMemberUpdatedPermissionEvent(value):
+        case .typeCallMemberUpdatedPermissionEvent(let value):
             return value
-        case let .typeCallMissedEvent(value):
+        case .typeCallMissedEvent(let value):
             return value
-        case let .typeCallModerationBlurEvent(value):
+        case .typeCallModerationBlurEvent(let value):
             return value
-        case let .typeCallModerationWarningEvent(value):
+        case .typeCallModerationWarningEvent(let value):
             return value
-        case let .typeCallNotificationEvent(value):
+        case .typeCallNotificationEvent(let value):
             return value
-        case let .typePermissionRequestEvent(value):
+        case .typePermissionRequestEvent(let value):
             return value
-        case let .typeUpdatedCallPermissionsEvent(value):
+        case .typeUpdatedCallPermissionsEvent(let value):
             return value
-        case let .typeCallReactionEvent(value):
+        case .typeCallReactionEvent(let value):
             return value
-        case let .typeCallRecordingFailedEvent(value):
+        case .typeCallRecordingFailedEvent(let value):
             return value
-        case let .typeCallRecordingReadyEvent(value):
+        case .typeCallRecordingReadyEvent(let value):
             return value
-        case let .typeCallRecordingStartedEvent(value):
+        case .typeCallRecordingStartedEvent(let value):
             return value
-        case let .typeCallRecordingStoppedEvent(value):
+        case .typeCallRecordingStoppedEvent(let value):
             return value
-        case let .typeCallRejectedEvent(value):
+        case .typeCallRejectedEvent(let value):
             return value
-        case let .typeCallRingEvent(value):
+        case .typeCallRingEvent(let value):
             return value
-        case let .typeCallRtmpBroadcastFailedEvent(value):
+        case .typeCallRtmpBroadcastFailedEvent(let value):
             return value
-        case let .typeCallRtmpBroadcastStartedEvent(value):
+        case .typeCallRtmpBroadcastStartedEvent(let value):
             return value
-        case let .typeCallRtmpBroadcastStoppedEvent(value):
+        case .typeCallRtmpBroadcastStoppedEvent(let value):
             return value
-        case let .typeCallSessionEndedEvent(value):
+        case .typeCallSessionEndedEvent(let value):
             return value
-        case let .typeCallSessionParticipantCountsUpdatedEvent(value):
+        case .typeCallSessionParticipantCountsUpdatedEvent(let value):
             return value
-        case let .typeCallSessionParticipantJoinedEvent(value):
+        case .typeCallSessionParticipantJoinedEvent(let value):
             return value
-        case let .typeCallSessionParticipantLeftEvent(value):
+        case .typeCallSessionParticipantLeftEvent(let value):
             return value
-        case let .typeCallSessionStartedEvent(value):
+        case .typeCallSessionStartedEvent(let value):
             return value
-        case let .typeCallStatsReportReadyEvent(value):
+        case .typeCallStatsReportReadyEvent(let value):
             return value
-        case let .typeCallTranscriptionFailedEvent(value):
+        case .typeCallTranscriptionFailedEvent(let value):
             return value
-        case let .typeCallTranscriptionReadyEvent(value):
+        case .typeCallTranscriptionReadyEvent(let value):
             return value
-        case let .typeCallTranscriptionStartedEvent(value):
+        case .typeCallTranscriptionStartedEvent(let value):
             return value
-        case let .typeCallTranscriptionStoppedEvent(value):
+        case .typeCallTranscriptionStoppedEvent(let value):
             return value
-        case let .typeUnblockedUserEvent(value):
+        case .typeUnblockedUserEvent(let value):
             return value
-        case let .typeCallUpdatedEvent(value):
+        case .typeCallUpdatedEvent(let value):
             return value
-        case let .typeCallUserFeedbackSubmittedEvent(value):
+        case .typeCallUserFeedbackSubmittedEvent(let value):
             return value
-        case let .typeCallUserMutedEvent(value):
+        case .typeCallUserMutedEvent(let value):
             return value
-        case let .typeConnectionErrorEvent(value):
+        case .typeConnectionErrorEvent(let value):
             return value
-        case let .typeConnectedEvent(value):
+        case .typeConnectedEvent(let value):
             return value
-        case let .typeCustomVideoEvent(value):
+        case .typeCustomVideoEvent(let value):
             return value
-        case let .typeHealthCheckEvent(value):
+        case .typeHealthCheckEvent(let value):
             return value
-        case let .typeUserUpdatedEvent(value):
+        case .typeUserUpdatedEvent(let value):
             return value
-        }
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.singleValueContainer()
-        switch self {
-        case let .typeAppUpdatedEvent(value):
-            try container.encode(value)
-        case let .typeCallAcceptedEvent(value):
-            try container.encode(value)
-        case let .typeBlockedUserEvent(value):
-            try container.encode(value)
-        case let .typeClosedCaptionEvent(value):
-            try container.encode(value)
-        case let .typeCallClosedCaptionsFailedEvent(value):
-            try container.encode(value)
-        case let .typeCallClosedCaptionsStartedEvent(value):
-            try container.encode(value)
-        case let .typeCallClosedCaptionsStoppedEvent(value):
-            try container.encode(value)
-        case let .typeCallCreatedEvent(value):
-            try container.encode(value)
-        case let .typeCallDeletedEvent(value):
-            try container.encode(value)
-        case let .typeCallEndedEvent(value):
-            try container.encode(value)
-        case let .typeCallFrameRecordingFailedEvent(value):
-            try container.encode(value)
-        case let .typeCallFrameRecordingFrameReadyEvent(value):
-            try container.encode(value)
-        case let .typeCallFrameRecordingStartedEvent(value):
-            try container.encode(value)
-        case let .typeCallFrameRecordingStoppedEvent(value):
-            try container.encode(value)
-        case let .typeCallHLSBroadcastingFailedEvent(value):
-            try container.encode(value)
-        case let .typeCallHLSBroadcastingStartedEvent(value):
-            try container.encode(value)
-        case let .typeCallHLSBroadcastingStoppedEvent(value):
-            try container.encode(value)
-        case let .typeKickedUserEvent(value):
-            try container.encode(value)
-        case let .typeCallLiveStartedEvent(value):
-            try container.encode(value)
-        case let .typeCallMemberAddedEvent(value):
-            try container.encode(value)
-        case let .typeCallMemberRemovedEvent(value):
-            try container.encode(value)
-        case let .typeCallMemberUpdatedEvent(value):
-            try container.encode(value)
-        case let .typeCallMemberUpdatedPermissionEvent(value):
-            try container.encode(value)
-        case let .typeCallMissedEvent(value):
-            try container.encode(value)
-        case let .typeCallModerationBlurEvent(value):
-            try container.encode(value)
-        case let .typeCallModerationWarningEvent(value):
-            try container.encode(value)
-        case let .typeCallNotificationEvent(value):
-            try container.encode(value)
-        case let .typePermissionRequestEvent(value):
-            try container.encode(value)
-        case let .typeUpdatedCallPermissionsEvent(value):
-            try container.encode(value)
-        case let .typeCallReactionEvent(value):
-            try container.encode(value)
-        case let .typeCallRecordingFailedEvent(value):
-            try container.encode(value)
-        case let .typeCallRecordingReadyEvent(value):
-            try container.encode(value)
-        case let .typeCallRecordingStartedEvent(value):
-            try container.encode(value)
-        case let .typeCallRecordingStoppedEvent(value):
-            try container.encode(value)
-        case let .typeCallRejectedEvent(value):
-            try container.encode(value)
-        case let .typeCallRingEvent(value):
-            try container.encode(value)
-        case let .typeCallRtmpBroadcastFailedEvent(value):
-            try container.encode(value)
-        case let .typeCallRtmpBroadcastStartedEvent(value):
-            try container.encode(value)
-        case let .typeCallRtmpBroadcastStoppedEvent(value):
-            try container.encode(value)
-        case let .typeCallSessionEndedEvent(value):
-            try container.encode(value)
-        case let .typeCallSessionParticipantCountsUpdatedEvent(value):
-            try container.encode(value)
-        case let .typeCallSessionParticipantJoinedEvent(value):
-            try container.encode(value)
-        case let .typeCallSessionParticipantLeftEvent(value):
-            try container.encode(value)
-        case let .typeCallSessionStartedEvent(value):
-            try container.encode(value)
-        case let .typeCallStatsReportReadyEvent(value):
-            try container.encode(value)
-        case let .typeCallTranscriptionFailedEvent(value):
-            try container.encode(value)
-        case let .typeCallTranscriptionReadyEvent(value):
-            try container.encode(value)
-        case let .typeCallTranscriptionStartedEvent(value):
-            try container.encode(value)
-        case let .typeCallTranscriptionStoppedEvent(value):
-            try container.encode(value)
-        case let .typeUnblockedUserEvent(value):
-            try container.encode(value)
-        case let .typeCallUpdatedEvent(value):
-            try container.encode(value)
-        case let .typeCallUserFeedbackSubmittedEvent(value):
-            try container.encode(value)
-        case let .typeCallUserMutedEvent(value):
-            try container.encode(value)
-        case let .typeConnectionErrorEvent(value):
-            try container.encode(value)
-        case let .typeConnectedEvent(value):
-            try container.encode(value)
-        case let .typeCustomVideoEvent(value):
-            try container.encode(value)
-        case let .typeHealthCheckEvent(value):
-            try container.encode(value)
-        case let .typeUserUpdatedEvent(value):
-            try container.encode(value)
         }
     }
 

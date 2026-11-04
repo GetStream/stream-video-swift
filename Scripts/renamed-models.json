@@ -19,5 +19,10 @@
   "TimeStats": "Stats",
   "NoiseCancellationSettings": "NoiseCancellationSettingsRequest",
   "VideoDimension": "VideoResolution",
-  "DeviceResponse": "Device"
+  "DeviceResponse": "Device",
+  "ICEServerResponse": "ICEServer",
+  "SendVideoReactionRequest": "SendReactionRequest",
+  "SendVideoReactionResponse": "SendReactionResponse",
+  "UserResponsePrivacyFields": "UserEventPayload",
+  "VideoReactionResponse": "ReactionResponse"
 }

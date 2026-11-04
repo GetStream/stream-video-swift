@@ -3,25 +3,28 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class EncryptionSettingsResponse: @unchecked Sendable, Codable, JSONEncodable {
+/// EncryptionSettings is the payload for end-to-end encryption settings
+public final class EncryptionSettingsResponse: @unchecked Sendable, Decodable {
     
     public enum EncryptionSettingsResponseMode: String, Sendable, Codable, CaseIterable {
         case autoOn = "auto-on"
-        case available = "available"
-        case disabled = "disabled"
+        case available
+        case disabled
         case unknown = "_unknown"
 
         public init(from decoder: Decoder) throws {
             let container = try decoder.singleValueContainer()
             if let decodedValue = try? container.decode(String.self),
-                let value = Self(rawValue: decodedValue) {
+               let value = Self(rawValue: decodedValue) {
                 self = value
             } else {
                 self = .unknown
             }
         }
     }
+
     /// the resolved encryption mode for the call
     public var mode: EncryptionSettingsResponseMode
 
@@ -29,8 +32,9 @@ public final class EncryptionSettingsResponse: @unchecked Sendable, Codable, JSO
         self.mode = mode
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case mode
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.mode = try container.decode(EncryptionSettingsResponseMode.self, forKey: .mode)
     }
 }
 

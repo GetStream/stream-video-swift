@@ -5,12 +5,16 @@
 import Foundation
 import StreamCore
 
-public final class CallCreatedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
-    
+/// This event is sent when a call is created. Clients receiving this event should check if the ringing
+/// field is set to true and if so, show the call screen
+public final class CallCreatedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
+    /// Represents a call
     public var call: CallResponse
     public var callCid: String
     public var createdAt: Date
+    /// the members added to this call
     public var members: [MemberResponse]
+    /// The type of event: "call.created" in this case
     public var type: String = "call.created"
 
     public init(call: CallResponse, callCid: String, createdAt: Date, members: [MemberResponse]) {
@@ -19,15 +23,18 @@ public final class CallCreatedEvent: @unchecked Sendable, Event, Codable, JSONEn
         self.createdAt = createdAt
         self.members = members
     }
-    
-    public enum CodingKeys: String, CodingKey {
-        case call
-        case callCid = "call_cid"
-        case createdAt = "created_at"
-        case members
-        case type
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.call = try container.decode(CallResponse.self, forKey: .call)
+        self.callCid = try container.decode(String.self, forKey: .callCid)
+        self.createdAt = try container.decode(Date.self, forKey: .createdAt)
+        self.members = try container.decode([MemberResponse].self, forKey: .members)
+        self.type = try container.decode(String.self, forKey: .type)
     }
-    
+}
+
+extension CallCreatedEvent: Hashable {
     public static func == (lhs: CallCreatedEvent, rhs: CallCreatedEvent) -> Bool {
         lhs.call == rhs.call &&
             lhs.callCid == rhs.callCid &&

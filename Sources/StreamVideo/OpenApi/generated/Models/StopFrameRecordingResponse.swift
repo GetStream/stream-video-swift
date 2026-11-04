@@ -3,18 +3,24 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class StopFrameRecordingResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+/// Basic response information
+public final class StopFrameRecordingResponse: @unchecked Sendable, Decodable {
+    /// Duration of the request in milliseconds
     public var duration: String
 
     public init(duration: String) {
         self.duration = duration
     }
 
-public enum CodingKeys: String, CodingKey {
-    case duration
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.duration = try container.decode(String.self, forKey: .duration)
+    }
 }
 
+extension StopFrameRecordingResponse: Hashable {
     public static func == (lhs: StopFrameRecordingResponse, rhs: StopFrameRecordingResponse) -> Bool {
         lhs.duration == rhs.duration
     }

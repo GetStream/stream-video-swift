@@ -2,32 +2,42 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
-import StreamCore
 import Foundation
+import StreamCore
 
-public final class CallResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+/// Represents a call
+public final class CallResponse: @unchecked Sendable, Decodable {
     public var backstage: Bool
     public var blockedUserIds: [String]
     public var captioning: Bool
+    /// The unique identifier for a call (<type>:<id>)
     public var cid: String
+    /// Date/time of creation
     public var createdAt: Date
+    /// User response object
     public var createdBy: UserResponse
     public var currentSessionId: String
+    /// Custom data for this object
     public var custom: [String: RawJSON]
     public var egress: EgressResponse
+    /// Date/time when the call ended
     public var endedAt: Date?
+    /// Call ID
     public var id: String
+    /// CallIngressResponse is the payload for ingress settings
     public var ingress: CallIngressResponse
     public var joinAheadTimeSeconds: Int?
     public var recording: Bool
     public var session: CallSessionResponse?
     public var settings: CallSettingsResponse
+    /// Date/time when the call will start
     public var startsAt: Date?
     public var team: String?
     public var thumbnails: ThumbnailResponse?
     public var transcribing: Bool
+    /// The type of call
     public var type: String
+    /// Date/time of the last update
     public var updatedAt: Date
 
     public init(
@@ -77,32 +87,35 @@ public final class CallResponse: @unchecked Sendable, Codable, JSONEncodable, Ha
         self.type = type
         self.updatedAt = updatedAt
     }
-    
-    public enum CodingKeys: String, CodingKey {
-        case backstage
-        case blockedUserIds = "blocked_user_ids"
-        case captioning
-        case cid
-        case createdAt = "created_at"
-        case createdBy = "created_by"
-        case currentSessionId = "current_session_id"
-        case custom
-        case egress
-        case endedAt = "ended_at"
-        case id
-        case ingress
-        case joinAheadTimeSeconds = "join_ahead_time_seconds"
-        case recording
-        case session
-        case settings
-        case startsAt = "starts_at"
-        case team
-        case thumbnails
-        case transcribing
-        case type
-        case updatedAt = "updated_at"
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.backstage = try container.decode(Bool.self, forKey: .backstage)
+        self.blockedUserIds = try container.decode([String].self, forKey: .blockedUserIds)
+        self.captioning = try container.decode(Bool.self, forKey: .captioning)
+        self.cid = try container.decode(String.self, forKey: .cid)
+        self.createdAt = try container.decode(Date.self, forKey: .createdAt)
+        self.createdBy = try container.decode(UserResponse.self, forKey: .createdBy)
+        self.currentSessionId = try container.decode(String.self, forKey: .currentSessionId)
+        self.custom = try container.decode([String: RawJSON].self, forKey: .custom)
+        self.egress = try container.decode(EgressResponse.self, forKey: .egress)
+        self.endedAt = try container.decodeIfPresent(Date.self, forKey: .endedAt)
+        self.id = try container.decode(String.self, forKey: .id)
+        self.ingress = try container.decode(CallIngressResponse.self, forKey: .ingress)
+        self.joinAheadTimeSeconds = try container.decodeIfPresent(Int.self, forKey: .joinAheadTimeSeconds)
+        self.recording = try container.decode(Bool.self, forKey: .recording)
+        self.session = try container.decodeIfPresent(CallSessionResponse.self, forKey: .session)
+        self.settings = try container.decode(CallSettingsResponse.self, forKey: .settings)
+        self.startsAt = try container.decodeIfPresent(Date.self, forKey: .startsAt)
+        self.team = try container.decodeIfPresent(String.self, forKey: .team)
+        self.thumbnails = try container.decodeIfPresent(ThumbnailResponse.self, forKey: .thumbnails)
+        self.transcribing = try container.decode(Bool.self, forKey: .transcribing)
+        self.type = try container.decode(String.self, forKey: .type)
+        self.updatedAt = try container.decode(Date.self, forKey: .updatedAt)
     }
-    
+}
+
+extension CallResponse: Hashable {
     public static func == (lhs: CallResponse, rhs: CallResponse) -> Bool {
         lhs.backstage == rhs.backstage &&
             lhs.blockedUserIds == rhs.blockedUserIds &&

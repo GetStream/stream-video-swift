@@ -3,11 +3,14 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class CreateGuestResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+public final class CreateGuestResponse: @unchecked Sendable, Decodable {
+    /// the access token to authenticate the user
     public var accessToken: String
+    /// Duration of the request in milliseconds
     public var duration: String
+    /// User response object
     public var user: UserResponse
 
     public init(accessToken: String, duration: String, user: UserResponse) {
@@ -15,13 +18,16 @@ public final class CreateGuestResponse: @unchecked Sendable, Codable, JSONEncoda
         self.duration = duration
         self.user = user
     }
-    
-    public enum CodingKeys: String, CodingKey {
-        case accessToken = "access_token"
-        case duration
-        case user
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.accessToken = try container.decode(String.self, forKey: .accessToken)
+        self.duration = try container.decode(String.self, forKey: .duration)
+        self.user = try container.decode(UserResponse.self, forKey: .user)
     }
-    
+}
+
+extension CreateGuestResponse: Hashable {
     public static func == (lhs: CreateGuestResponse, rhs: CreateGuestResponse) -> Bool {
         lhs.accessToken == rhs.accessToken &&
             lhs.duration == rhs.duration &&

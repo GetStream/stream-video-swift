@@ -3,9 +3,10 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class ListRecordingsResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+/// Response for listing recordings
+public final class ListRecordingsResponse: @unchecked Sendable, Decodable {
     public var duration: String
     public var recordings: [CallRecording]
 
@@ -13,12 +14,15 @@ public final class ListRecordingsResponse: @unchecked Sendable, Codable, JSONEnc
         self.duration = duration
         self.recordings = recordings
     }
-    
-    public enum CodingKeys: String, CodingKey {
-        case duration
-        case recordings
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.duration = try container.decode(String.self, forKey: .duration)
+        self.recordings = try container.decode([CallRecording].self, forKey: .recordings)
     }
-    
+}
+
+extension ListRecordingsResponse: Hashable {
     public static func == (lhs: ListRecordingsResponse, rhs: ListRecordingsResponse) -> Bool {
         lhs.duration == rhs.duration &&
             lhs.recordings == rhs.recordings

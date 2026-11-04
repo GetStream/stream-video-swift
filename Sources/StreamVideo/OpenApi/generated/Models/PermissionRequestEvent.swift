@@ -5,12 +5,16 @@
 import Foundation
 import StreamCore
 
-public final class PermissionRequestEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
-    
+/// This event is sent when a user requests access to a feature on a call,
+/// clients receiving this event should display a permission request to the user
+public final class PermissionRequestEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
     public var callCid: String
     public var createdAt: Date
+    /// The list of permissions requested by the user
     public var permissions: [String]
+    /// The type of event: "call.permission_request" in this case
     public var type: String = "call.permission_request"
+    /// User response object
     public var user: UserResponse
 
     public init(callCid: String, createdAt: Date, permissions: [String], user: UserResponse) {
@@ -19,15 +23,18 @@ public final class PermissionRequestEvent: @unchecked Sendable, Event, Codable, 
         self.permissions = permissions
         self.user = user
     }
-    
-    public enum CodingKeys: String, CodingKey {
-        case callCid = "call_cid"
-        case createdAt = "created_at"
-        case permissions
-        case type
-        case user
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.callCid = try container.decode(String.self, forKey: .callCid)
+        self.createdAt = try container.decode(Date.self, forKey: .createdAt)
+        self.permissions = try container.decode([String].self, forKey: .permissions)
+        self.type = try container.decode(String.self, forKey: .type)
+        self.user = try container.decode(UserResponse.self, forKey: .user)
     }
-    
+}
+
+extension PermissionRequestEvent: Hashable {
     public static func == (lhs: PermissionRequestEvent, rhs: PermissionRequestEvent) -> Bool {
         lhs.callCid == rhs.callCid &&
             lhs.createdAt == rhs.createdAt &&

@@ -3,9 +3,11 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class DeleteCallResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+/// DeleteCallResponse is the payload for deleting a call.
+public final class DeleteCallResponse: @unchecked Sendable, Decodable {
+    /// Represents a call
     public var call: CallResponse
     public var duration: String
     public var taskId: String?
@@ -15,13 +17,16 @@ public final class DeleteCallResponse: @unchecked Sendable, Codable, JSONEncodab
         self.duration = duration
         self.taskId = taskId
     }
-    
-    public enum CodingKeys: String, CodingKey {
-        case call
-        case duration
-        case taskId = "task_id"
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.call = try container.decode(CallResponse.self, forKey: .call)
+        self.duration = try container.decode(String.self, forKey: .duration)
+        self.taskId = try container.decodeIfPresent(String.self, forKey: .taskId)
     }
-    
+}
+
+extension DeleteCallResponse: Hashable {
     public static func == (lhs: DeleteCallResponse, rhs: DeleteCallResponse) -> Bool {
         lhs.call == rhs.call &&
             lhs.duration == rhs.duration &&

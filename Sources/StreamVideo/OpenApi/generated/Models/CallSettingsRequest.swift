@@ -3,8 +3,9 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class CallSettingsRequest: @unchecked Sendable, Codable, JSONEncodable {
+public final class CallSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable {
     public var audio: AudioSettingsRequest?
     public var backstage: BackstageSettingsRequest?
     public var broadcasting: BroadcastSettingsRequest?
@@ -61,46 +62,47 @@ public final class CallSettingsRequest: @unchecked Sendable, Codable, JSONEncoda
         self.video = video
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case audio
-        case backstage
-        case broadcasting
-        case encryption
-        case frameRecording = "frame_recording"
-        case geofencing
-        case individualRecording = "individual_recording"
-        case ingress
-        case limits
-        case rawRecording = "raw_recording"
-        case recording
-        case ring
-        case screensharing
-        case session
-        case thumbnails
-        case transcription
-        case video
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(audio, forKey: .audio)
+        try container.encodeIfPresent(backstage, forKey: .backstage)
+        try container.encodeIfPresent(broadcasting, forKey: .broadcasting)
+        try container.encodeIfPresent(encryption, forKey: .encryption)
+        try container.encodeIfPresent(frameRecording, forKey: .frameRecording)
+        try container.encodeIfPresent(geofencing, forKey: .geofencing)
+        try container.encodeIfPresent(individualRecording, forKey: .individualRecording)
+        try container.encodeIfPresent(ingress, forKey: .ingress)
+        try container.encodeIfPresent(limits, forKey: .limits)
+        try container.encodeIfPresent(rawRecording, forKey: .rawRecording)
+        try container.encodeIfPresent(recording, forKey: .recording)
+        try container.encodeIfPresent(ring, forKey: .ring)
+        try container.encodeIfPresent(screensharing, forKey: .screensharing)
+        try container.encodeIfPresent(session, forKey: .session)
+        try container.encodeIfPresent(thumbnails, forKey: .thumbnails)
+        try container.encodeIfPresent(transcription, forKey: .transcription)
+        try container.encodeIfPresent(video, forKey: .video)
     }
 }
 
 extension CallSettingsRequest: Hashable {
     public static func == (lhs: CallSettingsRequest, rhs: CallSettingsRequest) -> Bool {
         lhs.audio == rhs.audio &&
-        lhs.backstage == rhs.backstage &&
-        lhs.broadcasting == rhs.broadcasting &&
-        lhs.encryption == rhs.encryption &&
-        lhs.frameRecording == rhs.frameRecording &&
-        lhs.geofencing == rhs.geofencing &&
-        lhs.individualRecording == rhs.individualRecording &&
-        lhs.ingress == rhs.ingress &&
-        lhs.limits == rhs.limits &&
-        lhs.rawRecording == rhs.rawRecording &&
-        lhs.recording == rhs.recording &&
-        lhs.ring == rhs.ring &&
-        lhs.screensharing == rhs.screensharing &&
-        lhs.session == rhs.session &&
-        lhs.thumbnails == rhs.thumbnails &&
-        lhs.transcription == rhs.transcription &&
-        lhs.video == rhs.video
+            lhs.backstage == rhs.backstage &&
+            lhs.broadcasting == rhs.broadcasting &&
+            lhs.encryption == rhs.encryption &&
+            lhs.frameRecording == rhs.frameRecording &&
+            lhs.geofencing == rhs.geofencing &&
+            lhs.individualRecording == rhs.individualRecording &&
+            lhs.ingress == rhs.ingress &&
+            lhs.limits == rhs.limits &&
+            lhs.rawRecording == rhs.rawRecording &&
+            lhs.recording == rhs.recording &&
+            lhs.ring == rhs.ring &&
+            lhs.screensharing == rhs.screensharing &&
+            lhs.session == rhs.session &&
+            lhs.thumbnails == rhs.thumbnails &&
+            lhs.transcription == rhs.transcription &&
+            lhs.video == rhs.video
     }
 
     public func hash(into hasher: inout Hasher) {

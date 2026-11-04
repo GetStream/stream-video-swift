@@ -3,9 +3,9 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class BroadcastSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+public final class BroadcastSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable {
     public var enabled: Bool?
     public var hls: HLSSettingsRequest?
     public var rtmp: RTMPSettingsRequest?
@@ -15,13 +15,16 @@ public final class BroadcastSettingsRequest: @unchecked Sendable, Codable, JSONE
         self.hls = hls
         self.rtmp = rtmp
     }
-    
-    public enum CodingKeys: String, CodingKey {
-        case enabled
-        case hls
-        case rtmp
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(enabled, forKey: .enabled)
+        try container.encodeIfPresent(hls, forKey: .hls)
+        try container.encodeIfPresent(rtmp, forKey: .rtmp)
     }
-    
+}
+
+extension BroadcastSettingsRequest: Hashable {
     public static func == (lhs: BroadcastSettingsRequest, rhs: BroadcastSettingsRequest) -> Bool {
         lhs.enabled == rhs.enabled &&
             lhs.hls == rhs.hls &&

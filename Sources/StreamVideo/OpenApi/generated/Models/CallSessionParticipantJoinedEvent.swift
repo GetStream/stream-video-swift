@@ -5,12 +5,14 @@
 import Foundation
 import StreamCore
 
-public final class CallSessionParticipantJoinedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
-    
+/// This event is sent when a participant joins a call session
+public final class CallSessionParticipantJoinedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
     public var callCid: String
     public var createdAt: Date
     public var participant: CallParticipantResponse
+    /// Call session ID
     public var sessionId: String
+    /// The type of event: "call.session_participant_joined" in this case
     public var type: String = "call.session_participant_joined"
 
     public init(callCid: String, createdAt: Date, participant: CallParticipantResponse, sessionId: String) {
@@ -19,15 +21,18 @@ public final class CallSessionParticipantJoinedEvent: @unchecked Sendable, Event
         self.participant = participant
         self.sessionId = sessionId
     }
-    
-    public enum CodingKeys: String, CodingKey {
-        case callCid = "call_cid"
-        case createdAt = "created_at"
-        case participant
-        case sessionId = "session_id"
-        case type
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.callCid = try container.decode(String.self, forKey: .callCid)
+        self.createdAt = try container.decode(Date.self, forKey: .createdAt)
+        self.participant = try container.decode(CallParticipantResponse.self, forKey: .participant)
+        self.sessionId = try container.decode(String.self, forKey: .sessionId)
+        self.type = try container.decode(String.self, forKey: .type)
     }
-    
+}
+
+extension CallSessionParticipantJoinedEvent: Hashable {
     public static func == (lhs: CallSessionParticipantJoinedEvent, rhs: CallSessionParticipantJoinedEvent) -> Bool {
         lhs.callCid == rhs.callCid &&
             lhs.createdAt == rhs.createdAt &&

@@ -3,9 +3,9 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class CallSessionResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+public final class CallSessionResponse: @unchecked Sendable, Decodable {
     public var acceptedBy: [String: Date]
     public var anonymousParticipantCount: Int
     public var endedAt: Date?
@@ -46,22 +46,25 @@ public final class CallSessionResponse: @unchecked Sendable, Codable, JSONEncoda
         self.startedAt = startedAt
         self.timerEndsAt = timerEndsAt
     }
-    
-    public enum CodingKeys: String, CodingKey {
-        case acceptedBy = "accepted_by"
-        case anonymousParticipantCount = "anonymous_participant_count"
-        case endedAt = "ended_at"
-        case id
-        case liveEndedAt = "live_ended_at"
-        case liveStartedAt = "live_started_at"
-        case missedBy = "missed_by"
-        case participants
-        case participantsCountByRole = "participants_count_by_role"
-        case rejectedBy = "rejected_by"
-        case startedAt = "started_at"
-        case timerEndsAt = "timer_ends_at"
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.acceptedBy = try container.decode([String: Date].self, forKey: .acceptedBy)
+        self.anonymousParticipantCount = try container.decode(Int.self, forKey: .anonymousParticipantCount)
+        self.endedAt = try container.decodeIfPresent(Date.self, forKey: .endedAt)
+        self.id = try container.decode(String.self, forKey: .id)
+        self.liveEndedAt = try container.decodeIfPresent(Date.self, forKey: .liveEndedAt)
+        self.liveStartedAt = try container.decodeIfPresent(Date.self, forKey: .liveStartedAt)
+        self.missedBy = try container.decode([String: Date].self, forKey: .missedBy)
+        self.participants = try container.decode([CallParticipantResponse].self, forKey: .participants)
+        self.participantsCountByRole = try container.decode([String: Int].self, forKey: .participantsCountByRole)
+        self.rejectedBy = try container.decode([String: Date].self, forKey: .rejectedBy)
+        self.startedAt = try container.decodeIfPresent(Date.self, forKey: .startedAt)
+        self.timerEndsAt = try container.decodeIfPresent(Date.self, forKey: .timerEndsAt)
     }
-    
+}
+
+extension CallSessionResponse: Hashable {
     public static func == (lhs: CallSessionResponse, rhs: CallSessionResponse) -> Bool {
         lhs.acceptedBy == rhs.acceptedBy &&
             lhs.anonymousParticipantCount == rhs.anonymousParticipantCount &&

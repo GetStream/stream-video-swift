@@ -2,11 +2,10 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
-import StreamCore
 import Foundation
+import StreamCore
 
-public final class OwnUserResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+public final class OwnUserResponse: @unchecked Sendable, Decodable {
     public var blockedUserIds: [String]?
     public var createdAt: Date
     public var custom: [String: RawJSON]
@@ -18,8 +17,6 @@ public final class OwnUserResponse: @unchecked Sendable, Codable, JSONEncodable,
     public var language: String
     public var lastActive: Date?
     public var name: String?
-    public var pushNotifications: PushNotificationSettingsResponse?
-    public var revokeTokensIssuedBefore: Date?
     public var role: String
     public var teams: [String]
     public var updatedAt: Date
@@ -36,8 +33,6 @@ public final class OwnUserResponse: @unchecked Sendable, Codable, JSONEncodable,
         language: String,
         lastActive: Date? = nil,
         name: String? = nil,
-        pushNotifications: PushNotificationSettingsResponse? = nil,
-        revokeTokensIssuedBefore: Date? = nil,
         role: String,
         teams: [String],
         updatedAt: Date
@@ -53,32 +48,31 @@ public final class OwnUserResponse: @unchecked Sendable, Codable, JSONEncodable,
         self.language = language
         self.lastActive = lastActive
         self.name = name
-        self.pushNotifications = pushNotifications
-        self.revokeTokensIssuedBefore = revokeTokensIssuedBefore
         self.role = role
         self.teams = teams
         self.updatedAt = updatedAt
     }
-    
-    public enum CodingKeys: String, CodingKey {
-        case blockedUserIds = "blocked_user_ids"
-        case createdAt = "created_at"
-        case custom
-        case deactivatedAt = "deactivated_at"
-        case deletedAt = "deleted_at"
-        case devices
-        case id
-        case image
-        case language
-        case lastActive = "last_active"
-        case name
-        case pushNotifications = "push_notifications"
-        case revokeTokensIssuedBefore = "revoke_tokens_issued_before"
-        case role
-        case teams
-        case updatedAt = "updated_at"
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.blockedUserIds = try container.decodeIfPresent([String].self, forKey: .blockedUserIds)
+        self.createdAt = try container.decode(Date.self, forKey: .createdAt)
+        self.custom = try container.decode([String: RawJSON].self, forKey: .custom)
+        self.deactivatedAt = try container.decodeIfPresent(Date.self, forKey: .deactivatedAt)
+        self.deletedAt = try container.decodeIfPresent(Date.self, forKey: .deletedAt)
+        self.devices = try container.decode([Device].self, forKey: .devices)
+        self.id = try container.decode(String.self, forKey: .id)
+        self.image = try container.decodeIfPresent(String.self, forKey: .image)
+        self.language = try container.decode(String.self, forKey: .language)
+        self.lastActive = try container.decodeIfPresent(Date.self, forKey: .lastActive)
+        self.name = try container.decodeIfPresent(String.self, forKey: .name)
+        self.role = try container.decode(String.self, forKey: .role)
+        self.teams = try container.decode([String].self, forKey: .teams)
+        self.updatedAt = try container.decode(Date.self, forKey: .updatedAt)
     }
-    
+}
+
+extension OwnUserResponse: Hashable {
     public static func == (lhs: OwnUserResponse, rhs: OwnUserResponse) -> Bool {
         lhs.blockedUserIds == rhs.blockedUserIds &&
             lhs.createdAt == rhs.createdAt &&
@@ -91,8 +85,6 @@ public final class OwnUserResponse: @unchecked Sendable, Codable, JSONEncodable,
             lhs.language == rhs.language &&
             lhs.lastActive == rhs.lastActive &&
             lhs.name == rhs.name &&
-            lhs.pushNotifications == rhs.pushNotifications &&
-            lhs.revokeTokensIssuedBefore == rhs.revokeTokensIssuedBefore &&
             lhs.role == rhs.role &&
             lhs.teams == rhs.teams &&
             lhs.updatedAt == rhs.updatedAt
@@ -110,8 +102,6 @@ public final class OwnUserResponse: @unchecked Sendable, Codable, JSONEncodable,
         hasher.combine(language)
         hasher.combine(lastActive)
         hasher.combine(name)
-        hasher.combine(pushNotifications)
-        hasher.combine(revokeTokensIssuedBefore)
         hasher.combine(role)
         hasher.combine(teams)
         hasher.combine(updatedAt)

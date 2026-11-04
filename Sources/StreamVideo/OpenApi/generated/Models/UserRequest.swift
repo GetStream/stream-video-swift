@@ -2,16 +2,20 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
-import StreamCore
 import Foundation
+import StreamCore
 
-public final class UserRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+/// User request object
+public final class UserRequest: @unchecked Sendable, Encodable, JSONEncodable {
+    /// Custom user data
     public var custom: [String: RawJSON]?
+    /// User ID
     public var id: String
+    /// User's profile image URL
     public var image: String?
     public var invisible: Bool?
     public var language: String?
+    /// Optional name of user
     public var name: String?
 
     public init(
@@ -29,16 +33,19 @@ public final class UserRequest: @unchecked Sendable, Codable, JSONEncodable, Has
         self.language = language
         self.name = name
     }
-    
-    public enum CodingKeys: String, CodingKey {
-        case custom
-        case id
-        case image
-        case invisible
-        case language
-        case name
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(custom, forKey: .custom)
+        try container.encode(id, forKey: .id)
+        try container.encodeIfPresent(image, forKey: .image)
+        try container.encodeIfPresent(invisible, forKey: .invisible)
+        try container.encodeIfPresent(language, forKey: .language)
+        try container.encodeIfPresent(name, forKey: .name)
     }
-    
+}
+
+extension UserRequest: Hashable {
     public static func == (lhs: UserRequest, rhs: UserRequest) -> Bool {
         lhs.custom == rhs.custom &&
             lhs.id == rhs.id &&

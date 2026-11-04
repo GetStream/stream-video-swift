@@ -2,16 +2,17 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
-import StreamCore
 import Foundation
+import StreamCore
 
-public final class QueryMembersRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+public final class QueryMembersRequest: @unchecked Sendable, Encodable, JSONEncodable {
+    /// Filter conditions to apply to the query
     public var filterConditions: [String: RawJSON]?
     public var id: String
     public var limit: Int?
     public var next: String?
     public var prev: String?
+    /// Array of sort parameters
     public var sort: [SortParamRequest]?
     public var type: String
 
@@ -32,17 +33,20 @@ public final class QueryMembersRequest: @unchecked Sendable, Codable, JSONEncoda
         self.sort = sort
         self.type = type
     }
-    
-    public enum CodingKeys: String, CodingKey {
-        case filterConditions = "filter_conditions"
-        case id
-        case limit
-        case next
-        case prev
-        case sort
-        case type
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(filterConditions, forKey: .filterConditions)
+        try container.encode(id, forKey: .id)
+        try container.encodeIfPresent(limit, forKey: .limit)
+        try container.encodeIfPresent(next, forKey: .next)
+        try container.encodeIfPresent(prev, forKey: .prev)
+        try container.encodeIfPresent(sort, forKey: .sort)
+        try container.encode(type, forKey: .type)
     }
-    
+}
+
+extension QueryMembersRequest: Hashable {
     public static func == (lhs: QueryMembersRequest, rhs: QueryMembersRequest) -> Bool {
         lhs.filterConditions == rhs.filterConditions &&
             lhs.id == rhs.id &&

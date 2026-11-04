@@ -3,19 +3,22 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class SessionSettingsResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+public final class SessionSettingsResponse: @unchecked Sendable, Decodable {
     public var inactivityTimeoutSeconds: Int
 
     public init(inactivityTimeoutSeconds: Int) {
         self.inactivityTimeoutSeconds = inactivityTimeoutSeconds
     }
-    
-    public enum CodingKeys: String, CodingKey {
-        case inactivityTimeoutSeconds = "inactivity_timeout_seconds"
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.inactivityTimeoutSeconds = try container.decode(Int.self, forKey: .inactivityTimeoutSeconds)
     }
-    
+}
+
+extension SessionSettingsResponse: Hashable {
     public static func == (lhs: SessionSettingsResponse, rhs: SessionSettingsResponse) -> Bool {
         lhs.inactivityTimeoutSeconds == rhs.inactivityTimeoutSeconds
     }

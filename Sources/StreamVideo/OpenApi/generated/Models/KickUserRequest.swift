@@ -3,9 +3,13 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class KickUserRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+/// KickUserRequest is the payload for kicking a user from a call. Optionally block the user as well.
+public final class KickUserRequest: @unchecked Sendable, Encodable, JSONEncodable {
+    /// If true, also block the user from rejoining the call
     public var block: Bool?
+    /// The user to kick
     public var userId: String
 
     public init(block: Bool? = nil, userId: String) {
@@ -13,14 +17,17 @@ public final class KickUserRequest: @unchecked Sendable, Codable, JSONEncodable,
         self.userId = userId
     }
 
-public enum CodingKeys: String, CodingKey {
-    case block
-    case userId = "user_id"
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(block, forKey: .block)
+        try container.encode(userId, forKey: .userId)
+    }
 }
 
+extension KickUserRequest: Hashable {
     public static func == (lhs: KickUserRequest, rhs: KickUserRequest) -> Bool {
         lhs.block == rhs.block &&
-        lhs.userId == rhs.userId
+            lhs.userId == rhs.userId
     }
 
     public func hash(into hasher: inout Hasher) {
