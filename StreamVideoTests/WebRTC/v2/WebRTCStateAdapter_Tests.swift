@@ -833,6 +833,20 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(availability?.1, false)
     }
 
+    func test_configureAudioSession_callKitSource_secondConfigureBeforeActivation_keepsAudioEngineUnavailable() async throws {
+        try await mockAudioStore.audioStore.dispatch(.setActive(true)).result()
+
+        try await subject.configureAudioSession(source: .callKit(.init {}))
+        try await subject.configureAudioSession(source: .callKit(.init {}))
+
+        let availability = mockAudioDeviceModuleSource.recordedInputPayload(
+            (Bool, Bool).self,
+            for: .setEngineAvailability
+        )?.last
+        XCTAssertEqual(availability?.0, false)
+        XCTAssertEqual(availability?.1, false)
+    }
+
     // MARK: - cleanUp
 
     func test_cleanUp_retainedStatsAdapter_stopsReporting() async {

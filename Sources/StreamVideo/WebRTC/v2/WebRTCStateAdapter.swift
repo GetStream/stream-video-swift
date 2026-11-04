@@ -1279,9 +1279,10 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
             return true
         }()
 
-        // Same-session rejoin is already active, so the engine can run.
-        // A different CallKit session stays down until CallKit activates.
+        // Rejoin can run only after this session has activated.
+        // Owning an already active store is not activation.
         let callKitSessionAlreadyActive = sourceIsCallKit
+            && audioSession.didPerformActivation
             && audioStore.state.isActive
             && audioStore.state.activeSessionIdentifier == audioSession.identifier
         let isAudioEngineAvailable = peerConnectionFactory

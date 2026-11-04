@@ -73,7 +73,7 @@ final class CallAudioSession: @unchecked Sendable {
     /// music profile, so Apple Voice Processing can actually be disabled.
     private var audioBitrateProfile: AudioBitrateProfile = .voiceStandard
     /// True after this session has applied its configuration once.
-    private var didPerformActivation = false
+    private(set) var didPerformActivation = false
 
     init(policy: AudioSessionPolicy = DefaultAudioSessionPolicy()) {
         self.policy = policy
