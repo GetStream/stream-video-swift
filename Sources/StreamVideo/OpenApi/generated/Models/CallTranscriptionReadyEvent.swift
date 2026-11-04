@@ -5,11 +5,13 @@
 import Foundation
 import StreamCore
 
-public final class CallTranscriptionReadyEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
-    
+/// This event is sent when call transcription is ready
+public final class CallTranscriptionReadyEvent: @unchecked Sendable, Event, Codable, JSONEncodable, WSCallEvent {
     public var callCid: String
+    /// CallTranscription represents a transcription of a call.
     public var callTranscription: CallTranscription
     public var createdAt: Date
+    /// The type of event: "call.transcription_ready" in this case
     public var type: String = "call.transcription_ready"
 
     public init(callCid: String, callTranscription: CallTranscription, createdAt: Date) {
@@ -17,14 +19,16 @@ public final class CallTranscriptionReadyEvent: @unchecked Sendable, Event, Coda
         self.callTranscription = callTranscription
         self.createdAt = createdAt
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case callCid = "call_cid"
         case callTranscription = "call_transcription"
         case createdAt = "created_at"
         case type
     }
-    
+}
+
+extension CallTranscriptionReadyEvent: Hashable {
     public static func == (lhs: CallTranscriptionReadyEvent, rhs: CallTranscriptionReadyEvent) -> Bool {
         lhs.callCid == rhs.callCid &&
             lhs.callTranscription == rhs.callTranscription &&

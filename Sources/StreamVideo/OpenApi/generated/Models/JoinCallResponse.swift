@@ -3,14 +3,16 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class JoinCallResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+public final class JoinCallResponse: @unchecked Sendable, Codable, JSONEncodable {
+    /// Represents a call
     public var call: CallResponse
     public var created: Bool
     public var credentials: Credentials
     public var duration: String
     public var members: [MemberResponse]
+    /// MemberResponse is the payload for a member of a call.
     public var membership: MemberResponse?
     public var ownCapabilities: [OwnCapability]
     public var statsOptions: StatsOptions
@@ -34,7 +36,7 @@ public final class JoinCallResponse: @unchecked Sendable, Codable, JSONEncodable
         self.ownCapabilities = ownCapabilities
         self.statsOptions = statsOptions
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case call
         case created
@@ -45,7 +47,9 @@ public final class JoinCallResponse: @unchecked Sendable, Codable, JSONEncodable
         case ownCapabilities = "own_capabilities"
         case statsOptions = "stats_options"
     }
-    
+}
+
+extension JoinCallResponse: Hashable {
     public static func == (lhs: JoinCallResponse, rhs: JoinCallResponse) -> Bool {
         lhs.call == rhs.call &&
             lhs.created == rhs.created &&

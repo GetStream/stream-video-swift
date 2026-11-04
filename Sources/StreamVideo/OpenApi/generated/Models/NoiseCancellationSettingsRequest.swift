@@ -3,10 +3,11 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class NoiseCancellationSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class NoiseCancellationSettingsRequest: @unchecked Sendable, Codable, JSONEncodable {
     
-    public enum Mode: String, Sendable, Codable, CaseIterable {
+    public enum NoiseCancellationSettingsRequestMode: String, Sendable, Codable, CaseIterable {
         case autoOn = "auto-on"
         case available
         case disabled
@@ -22,17 +23,19 @@ public final class NoiseCancellationSettingsRequest: @unchecked Sendable, Codabl
             }
         }
     }
-    
-    public var mode: Mode
 
-    public init(mode: Mode) {
+    public var mode: NoiseCancellationSettingsRequestMode
+
+    public init(mode: NoiseCancellationSettingsRequestMode) {
         self.mode = mode
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case mode
     }
-    
+}
+
+extension NoiseCancellationSettingsRequest: Hashable {
     public static func == (lhs: NoiseCancellationSettingsRequest, rhs: NoiseCancellationSettingsRequest) -> Bool {
         lhs.mode == rhs.mode
     }

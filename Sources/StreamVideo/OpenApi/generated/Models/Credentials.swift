@@ -3,9 +3,9 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class Credentials: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+public final class Credentials: @unchecked Sendable, Codable, JSONEncodable {
     public var iceServers: [ICEServer]
     public var server: SFUResponse
     public var token: String
@@ -15,13 +15,15 @@ public final class Credentials: @unchecked Sendable, Codable, JSONEncodable, Has
         self.server = server
         self.token = token
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case iceServers = "ice_servers"
         case server
         case token
     }
-    
+}
+
+extension Credentials: Hashable {
     public static func == (lhs: Credentials, rhs: Credentials) -> Bool {
         lhs.iceServers == rhs.iceServers &&
             lhs.server == rhs.server &&

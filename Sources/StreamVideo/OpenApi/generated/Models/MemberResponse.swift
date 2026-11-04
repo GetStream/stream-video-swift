@@ -2,16 +2,21 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
-import StreamCore
 import Foundation
+import StreamCore
 
-public final class MemberResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+/// MemberResponse is the payload for a member of a call.
+public final class MemberResponse: @unchecked Sendable, Codable, JSONEncodable {
+    /// Date/time of creation
     public var createdAt: Date
+    /// Custom member response data
     public var custom: [String: RawJSON]
+    /// Date/time of deletion
     public var deletedAt: Date?
     public var role: String?
+    /// Date/time of the last update
     public var updatedAt: Date
+    /// User response object
     public var user: UserResponse
     public var userId: String
 
@@ -32,7 +37,7 @@ public final class MemberResponse: @unchecked Sendable, Codable, JSONEncodable, 
         self.user = user
         self.userId = userId
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case createdAt = "created_at"
         case custom
@@ -42,7 +47,9 @@ public final class MemberResponse: @unchecked Sendable, Codable, JSONEncodable, 
         case user
         case userId = "user_id"
     }
-    
+}
+
+extension MemberResponse: Hashable {
     public static func == (lhs: MemberResponse, rhs: MemberResponse) -> Bool {
         lhs.createdAt == rhs.createdAt &&
             lhs.custom == rhs.custom &&

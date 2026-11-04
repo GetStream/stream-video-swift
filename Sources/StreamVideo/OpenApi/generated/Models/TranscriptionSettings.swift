@@ -3,10 +3,11 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class TranscriptionSettings: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class TranscriptionSettings: @unchecked Sendable, Codable, JSONEncodable {
     
-    public enum ClosedCaptionMode: String, Sendable, Codable, CaseIterable {
+    public enum TranscriptionSettingsClosedCaptionMode: String, Sendable, Codable, CaseIterable {
         case autoOn = "auto-on"
         case available
         case disabled
@@ -23,7 +24,7 @@ public final class TranscriptionSettings: @unchecked Sendable, Codable, JSONEnco
         }
     }
     
-    public enum Language: String, Sendable, Codable, CaseIterable {
+    public enum TranscriptionSettingsLanguage: String, Sendable, Codable, CaseIterable {
         case ar
         case auto
         case ca
@@ -70,7 +71,7 @@ public final class TranscriptionSettings: @unchecked Sendable, Codable, JSONEnco
         }
     }
     
-    public enum Mode: String, Sendable, Codable, CaseIterable {
+    public enum TranscriptionSettingsMode: String, Sendable, Codable, CaseIterable {
         case autoOn = "auto-on"
         case available
         case disabled
@@ -86,23 +87,29 @@ public final class TranscriptionSettings: @unchecked Sendable, Codable, JSONEnco
             }
         }
     }
-    
-    public var closedCaptionMode: ClosedCaptionMode
-    public var language: Language
-    public var mode: Mode
 
-    public init(closedCaptionMode: ClosedCaptionMode, language: Language, mode: Mode) {
+    public var closedCaptionMode: TranscriptionSettingsClosedCaptionMode
+    public var language: TranscriptionSettingsLanguage
+    public var mode: TranscriptionSettingsMode
+
+    public init(
+        closedCaptionMode: TranscriptionSettingsClosedCaptionMode,
+        language: TranscriptionSettingsLanguage,
+        mode: TranscriptionSettingsMode
+    ) {
         self.closedCaptionMode = closedCaptionMode
         self.language = language
         self.mode = mode
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case closedCaptionMode = "closed_caption_mode"
         case language
         case mode
     }
-    
+}
+
+extension TranscriptionSettings: Hashable {
     public static func == (lhs: TranscriptionSettings, rhs: TranscriptionSettings) -> Bool {
         lhs.closedCaptionMode == rhs.closedCaptionMode &&
             lhs.language == rhs.language &&

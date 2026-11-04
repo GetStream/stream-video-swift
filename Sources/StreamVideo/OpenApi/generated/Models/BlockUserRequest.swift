@@ -3,19 +3,23 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class BlockUserRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+/// BlockUserRequest is the payload for blocking a user.
+public final class BlockUserRequest: @unchecked Sendable, Codable, JSONEncodable {
+    /// the user to block
     public var userId: String
 
     public init(userId: String) {
         self.userId = userId
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case userId = "user_id"
     }
-    
+}
+
+extension BlockUserRequest: Hashable {
     public static func == (lhs: BlockUserRequest, rhs: BlockUserRequest) -> Bool {
         lhs.userId == rhs.userId
     }

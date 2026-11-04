@@ -5,12 +5,15 @@
 import Foundation
 import StreamCore
 
-public final class CallMemberUpdatedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
-    
+/// This event is sent when one or more members are updated
+public final class CallMemberUpdatedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, WSCallEvent {
+    /// Represents a call
     public var call: CallResponse
     public var callCid: String
     public var createdAt: Date
+    /// The list of members that were updated
     public var members: [MemberResponse]
+    /// The type of event: "call.member_updated" in this case
     public var type: String = "call.member_updated"
 
     public init(call: CallResponse, callCid: String, createdAt: Date, members: [MemberResponse]) {
@@ -19,7 +22,7 @@ public final class CallMemberUpdatedEvent: @unchecked Sendable, Event, Codable, 
         self.createdAt = createdAt
         self.members = members
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case call
         case callCid = "call_cid"
@@ -27,7 +30,9 @@ public final class CallMemberUpdatedEvent: @unchecked Sendable, Event, Codable, 
         case members
         case type
     }
-    
+}
+
+extension CallMemberUpdatedEvent: Hashable {
     public static func == (lhs: CallMemberUpdatedEvent, rhs: CallMemberUpdatedEvent) -> Bool {
         lhs.call == rhs.call &&
             lhs.callCid == rhs.callCid &&

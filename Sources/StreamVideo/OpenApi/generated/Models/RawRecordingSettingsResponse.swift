@@ -3,25 +3,27 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class RawRecordingSettingsResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class RawRecordingSettingsResponse: @unchecked Sendable, Codable, JSONEncodable {
     
     public enum RawRecordingSettingsResponseMode: String, Sendable, Codable, CaseIterable {
         case autoOn = "auto-on"
-        case available = "available"
-        case disabled = "disabled"
+        case available
+        case disabled
         case unknown = "_unknown"
 
         public init(from decoder: Decoder) throws {
             let container = try decoder.singleValueContainer()
             if let decodedValue = try? container.decode(String.self),
-                let value = Self(rawValue: decodedValue) {
+               let value = Self(rawValue: decodedValue) {
                 self = value
             } else {
                 self = .unknown
             }
         }
     }
+
     public var mode: RawRecordingSettingsResponseMode
 
     public init(mode: RawRecordingSettingsResponseMode) {
@@ -31,7 +33,9 @@ public final class RawRecordingSettingsResponse: @unchecked Sendable, Codable, J
     public enum CodingKeys: String, CodingKey {
         case mode
     }
+}
 
+extension RawRecordingSettingsResponse: Hashable {
     public static func == (lhs: RawRecordingSettingsResponse, rhs: RawRecordingSettingsResponse) -> Bool {
         lhs.mode == rhs.mode
     }

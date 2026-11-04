@@ -5,18 +5,34 @@
 import Foundation
 import StreamCore
 
-public final class CallFrameRecordingFrameReadyEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
+/// This event is sent when a frame is captured from a call
+public final class CallFrameRecordingFrameReadyEvent: @unchecked Sendable, Event, Codable, JSONEncodable, WSCallEvent {
     public var callCid: String
+    /// The time the frame was captured
     public var capturedAt: Date
     public var createdAt: Date
     public var egressId: String
+    /// Call session ID
     public var sessionId: String
+    /// The type of the track frame was captured from (TRACK_TYPE_VIDEO|TRACK_TYPE_SCREEN_SHARE)
     public var trackType: String
+    /// The type of event: "call.frame_recording_ready" in this case
     public var type: String = "call.frame_recording_ready"
+    /// The URL of the frame
     public var url: String
+    /// The users in the frame
     public var users: [String: UserResponse]
 
-    public init(callCid: String, capturedAt: Date, createdAt: Date, egressId: String, sessionId: String, trackType: String, url: String, users: [String: UserResponse]) {
+    public init(
+        callCid: String,
+        capturedAt: Date,
+        createdAt: Date,
+        egressId: String,
+        sessionId: String,
+        trackType: String,
+        url: String,
+        users: [String: UserResponse]
+    ) {
         self.callCid = callCid
         self.capturedAt = capturedAt
         self.createdAt = createdAt
@@ -27,28 +43,30 @@ public final class CallFrameRecordingFrameReadyEvent: @unchecked Sendable, Event
         self.users = users
     }
 
-public enum CodingKeys: String, CodingKey {
-    case callCid = "call_cid"
-    case capturedAt = "captured_at"
-    case createdAt = "created_at"
-    case egressId = "egress_id"
-    case sessionId = "session_id"
-    case trackType = "track_type"
-    case type
-    case url
-    case users
+    public enum CodingKeys: String, CodingKey {
+        case callCid = "call_cid"
+        case capturedAt = "captured_at"
+        case createdAt = "created_at"
+        case egressId = "egress_id"
+        case sessionId = "session_id"
+        case trackType = "track_type"
+        case type
+        case url
+        case users
+    }
 }
 
+extension CallFrameRecordingFrameReadyEvent: Hashable {
     public static func == (lhs: CallFrameRecordingFrameReadyEvent, rhs: CallFrameRecordingFrameReadyEvent) -> Bool {
         lhs.callCid == rhs.callCid &&
-        lhs.capturedAt == rhs.capturedAt &&
-        lhs.createdAt == rhs.createdAt &&
-        lhs.egressId == rhs.egressId &&
-        lhs.sessionId == rhs.sessionId &&
-        lhs.trackType == rhs.trackType &&
-        lhs.type == rhs.type &&
-        lhs.url == rhs.url &&
-        lhs.users == rhs.users
+            lhs.capturedAt == rhs.capturedAt &&
+            lhs.createdAt == rhs.createdAt &&
+            lhs.egressId == rhs.egressId &&
+            lhs.sessionId == rhs.sessionId &&
+            lhs.trackType == rhs.trackType &&
+            lhs.type == rhs.type &&
+            lhs.url == rhs.url &&
+            lhs.users == rhs.users
     }
 
     public func hash(into hasher: inout Hasher) {

@@ -3,19 +3,21 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class EgressHLSResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+public final class EgressHLSResponse: @unchecked Sendable, Codable, JSONEncodable {
     public var playlistUrl: String
 
     public init(playlistUrl: String) {
         self.playlistUrl = playlistUrl
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case playlistUrl = "playlist_url"
     }
-    
+}
+
+extension EgressHLSResponse: Hashable {
     public static func == (lhs: EgressHLSResponse, rhs: EgressHLSResponse) -> Bool {
         lhs.playlistUrl == rhs.playlistUrl
     }

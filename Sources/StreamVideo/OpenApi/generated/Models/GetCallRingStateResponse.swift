@@ -3,7 +3,9 @@
 //
 
 import Foundation
+import StreamCore
 
+/// The ring state of a call session: who accepted, rejected, or missed the ring.
 public final class GetCallRingStateResponse: @unchecked Sendable, Codable, JSONEncodable {
     /// Users that accepted the call, mapped to when they accepted
     public var acceptedBy: [String: Date]
@@ -26,7 +28,18 @@ public final class GetCallRingStateResponse: @unchecked Sendable, Codable, JSONE
     /// When the call session started
     public var sessionStartedAt: Date?
 
-    public init(acceptedBy: [String: Date], callCid: String, callEndedAt: Date? = nil, createdByUserId: String, duration: String, missedBy: [String: Date], rejectedBy: [String: Date], sessionEndedAt: Date? = nil, sessionId: String, sessionStartedAt: Date? = nil) {
+    public init(
+        acceptedBy: [String: Date],
+        callCid: String,
+        callEndedAt: Date? = nil,
+        createdByUserId: String,
+        duration: String,
+        missedBy: [String: Date],
+        rejectedBy: [String: Date],
+        sessionEndedAt: Date? = nil,
+        sessionId: String,
+        sessionStartedAt: Date? = nil
+    ) {
         self.acceptedBy = acceptedBy
         self.callCid = callCid
         self.callEndedAt = callEndedAt
@@ -56,15 +69,15 @@ public final class GetCallRingStateResponse: @unchecked Sendable, Codable, JSONE
 extension GetCallRingStateResponse: Hashable {
     public static func == (lhs: GetCallRingStateResponse, rhs: GetCallRingStateResponse) -> Bool {
         lhs.acceptedBy == rhs.acceptedBy &&
-        lhs.callCid == rhs.callCid &&
-        lhs.callEndedAt == rhs.callEndedAt &&
-        lhs.createdByUserId == rhs.createdByUserId &&
-        lhs.duration == rhs.duration &&
-        lhs.missedBy == rhs.missedBy &&
-        lhs.rejectedBy == rhs.rejectedBy &&
-        lhs.sessionEndedAt == rhs.sessionEndedAt &&
-        lhs.sessionId == rhs.sessionId &&
-        lhs.sessionStartedAt == rhs.sessionStartedAt
+            lhs.callCid == rhs.callCid &&
+            lhs.callEndedAt == rhs.callEndedAt &&
+            lhs.createdByUserId == rhs.createdByUserId &&
+            lhs.duration == rhs.duration &&
+            lhs.missedBy == rhs.missedBy &&
+            lhs.rejectedBy == rhs.rejectedBy &&
+            lhs.sessionEndedAt == rhs.sessionEndedAt &&
+            lhs.sessionId == rhs.sessionId &&
+            lhs.sessionStartedAt == rhs.sessionStartedAt
     }
 
     public func hash(into hasher: inout Hasher) {

@@ -3,11 +3,15 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class CallStateResponseFields: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+/// CallStateResponseFields is the payload for call state response
+public final class CallStateResponseFields: @unchecked Sendable, Codable, JSONEncodable {
+    /// Represents a call
     public var call: CallResponse
+    /// List of call members
     public var members: [MemberResponse]
+    /// MemberResponse is the payload for a member of a call.
     public var membership: MemberResponse?
     public var ownCapabilities: [OwnCapability]
 
@@ -22,14 +26,16 @@ public final class CallStateResponseFields: @unchecked Sendable, Codable, JSONEn
         self.membership = membership
         self.ownCapabilities = ownCapabilities
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case call
         case members
         case membership
         case ownCapabilities = "own_capabilities"
     }
-    
+}
+
+extension CallStateResponseFields: Hashable {
     public static func == (lhs: CallStateResponseFields, rhs: CallStateResponseFields) -> Bool {
         lhs.call == rhs.call &&
             lhs.members == rhs.members &&

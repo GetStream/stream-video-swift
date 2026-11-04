@@ -3,9 +3,9 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class EdgeResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+public final class EdgeResponse: @unchecked Sendable, Codable, JSONEncodable {
     public var continentCode: String
     public var countryIsoCode: String
     public var green: Int
@@ -40,7 +40,7 @@ public final class EdgeResponse: @unchecked Sendable, Codable, JSONEncodable, Ha
         self.subdivisionIsoCode = subdivisionIsoCode
         self.yellow = yellow
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case continentCode = "continent_code"
         case countryIsoCode = "country_iso_code"
@@ -53,7 +53,9 @@ public final class EdgeResponse: @unchecked Sendable, Codable, JSONEncodable, Ha
         case subdivisionIsoCode = "subdivision_iso_code"
         case yellow
     }
-    
+}
+
+extension EdgeResponse: Hashable {
     public static func == (lhs: EdgeResponse, rhs: EdgeResponse) -> Bool {
         lhs.continentCode == rhs.continentCode &&
             lhs.countryIsoCode == rhs.countryIsoCode &&

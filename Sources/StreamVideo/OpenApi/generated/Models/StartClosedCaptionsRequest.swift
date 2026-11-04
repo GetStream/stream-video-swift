@@ -3,11 +3,15 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class StartClosedCaptionsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class StartClosedCaptionsRequest: @unchecked Sendable, Codable, JSONEncodable {
     
+    /// Enable transcriptions along with closed captions
     public var enableTranscription: Bool?
+    /// Which external storage to use for transcriptions (only applicable if enable_transcription is true)
     public var externalStorage: String?
+    /// The spoken language in the call, if not provided the language defined in the transcription settings will be used. One of: auto, ar, bg, ca, cs, da, de, el, en, es, et, fi, fr, he, hi, hr, hu, id, it, ja, ko, ms, nl, no, pl, pt, ro, ru, sk, sl, sv, ta, th, tl, tr, uk, zh
     public var language: String?
 
     public init(enableTranscription: Bool? = nil, externalStorage: String? = nil, language: String? = nil) {
@@ -15,13 +19,15 @@ public final class StartClosedCaptionsRequest: @unchecked Sendable, Codable, JSO
         self.externalStorage = externalStorage
         self.language = language
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case enableTranscription = "enable_transcription"
         case externalStorage = "external_storage"
         case language
     }
-    
+}
+
+extension StartClosedCaptionsRequest: Hashable {
     public static func == (lhs: StartClosedCaptionsRequest, rhs: StartClosedCaptionsRequest) -> Bool {
         lhs.enableTranscription == rhs.enableTranscription &&
             lhs.externalStorage == rhs.externalStorage &&

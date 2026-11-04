@@ -3,19 +3,22 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class RequestPermissionResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+public final class RequestPermissionResponse: @unchecked Sendable, Codable, JSONEncodable {
+    /// Duration of the request in milliseconds
     public var duration: String
 
     public init(duration: String) {
         self.duration = duration
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case duration
     }
-    
+}
+
+extension RequestPermissionResponse: Hashable {
     public static func == (lhs: RequestPermissionResponse, rhs: RequestPermissionResponse) -> Bool {
         lhs.duration == rhs.duration
     }
