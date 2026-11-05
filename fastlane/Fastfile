@@ -471,9 +471,8 @@ lane :code_generation do
   sync_xcodeproj_references
 end
 
-desc 'Generate OpenAPI models and open a pull request when they change'
+desc 'Open a pull request when generated OpenAPI models changed'
 lane :openapi do
-  Dir.chdir('..') { sh('bash Scripts/generate.sh') }
   next unless is_ci
 
   changed = Dir.chdir('..') do

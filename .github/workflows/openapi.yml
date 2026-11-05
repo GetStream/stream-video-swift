@@ -13,42 +13,86 @@ env:
   HOMEBREW_NO_INSTALL_CLEANUP: 1 # Disable cleanup for homebrew, we don't need it on CI
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 jobs:
   generate:
     name: Generate
     runs-on: macos-15
     timeout-minutes: 45
+    permissions:
+      contents: read
     env:
       GOPRIVATE: github.com/GetStream/*
     steps:
     - uses: actions/checkout@v4.1.1
+      with:
+        persist-credentials: false
     - uses: actions/checkout@v4.1.1
       with:
         repository: GetStream/chat
         ref: ${{ inputs.chat_ref }}
         path: chat-source
         token: ${{ secrets.CI_BOT_GITHUB_TOKEN }}
+        persist-credentials: false
     - name: Place chat next to this repo
       # Scripts/generate.sh reads the private chat repo from the parent directory.
       run: |
         rm -rf "$GITHUB_WORKSPACE/../chat"
         mv "$GITHUB_WORKSPACE/chat-source" "$GITHUB_WORKSPACE/../chat"
-    - uses: ./.github/actions/ruby-cache
     - uses: actions/setup-go@v5
       with:
         go-version-file: ../chat/tools/openapi/go.mod
     - name: Install formatters
       run: ./Scripts/bootstrap.sh
-    - name: Authenticate private Go modules
-      run: git config --global url."https://x-access-token:${TOKEN}@github.com/".insteadOf "https://github.com/"
+    - name: Download private Go modules
       env:
         TOKEN: ${{ secrets.CI_BOT_GITHUB_TOKEN }}
+      run: |
+        git config --global url."https://x-access-token:${TOKEN}@github.com/".insteadOf "https://github.com/"
+        trap 'git config --global --unset-all "url.https://x-access-token:${TOKEN}@github.com/.insteadof"' EXIT
+        go mod download
+      working-directory: ../chat/tools/openapi
     - name: Generate OpenAPI models
-      run: bundle exec fastlane openapi
+      run: bash Scripts/generate.sh
       timeout-minutes: 30
+      env:
+        GITHUB_TOKEN: ""
+        GOPROXY: "off"
+    - uses: actions/upload-artifact@v4
+      with:
+        name: openapi-generated
+        path: Sources/StreamVideo/OpenApi/generated
+        if-no-files-found: error
+    - uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        text: "You shall not pass!"
+        job_name: "${{ github.workflow }}: ${{ github.job }}"
+        fields: repo,commit,author,workflow
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      if: failure()
+
+  pull-request:
+    name: Pull request
+    needs: generate
+    runs-on: macos-15
+    timeout-minutes: 20
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+    - uses: actions/checkout@v4.1.1
+      with:
+        token: ${{ secrets.CI_BOT_GITHUB_TOKEN }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: openapi-generated
+        path: Sources/StreamVideo/OpenApi/generated
+    - uses: ./.github/actions/ruby-cache
+    - name: Open pull request
+      run: bundle exec fastlane openapi
       env:
         GITHUB_TOKEN: ${{ secrets.CI_BOT_GITHUB_TOKEN }}
     - uses: 8398a7/action-slack@v3

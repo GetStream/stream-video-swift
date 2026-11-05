@@ -18,9 +18,9 @@ Do not edit `Sources/StreamVideo/OpenApi/generated/` by hand. Change the lists b
 ## CI
 
 `.github/workflows/openapi.yml` starts with `workflow_dispatch` on the selected branch.
-The `chat_ref` input is a `GetStream/chat` branch name or commit hash. It defaults to `master`. The workflow checks out that ref with `CI_BOT_GITHUB_TOKEN`.
-`GOPRIVATE` is `github.com/GetStream/*`. The same token rewrites `https://github.com/` so the OpenAPI Go build can download private modules. Go comes from `tools/openapi/go.mod`.
-The workflow runs `Scripts/generate.sh` and opens a pull request only when the generated files changed.
+The `chat_ref` input is a `GetStream/chat` branch name or commit hash. It defaults to `master`.
+The generate job has read permission only. It uses `CI_BOT_GITHUB_TOKEN` to download private Go modules, removes that login, then runs `Scripts/generate.sh` with `GOPROXY=off`.
+The pull request job checks out this repository only, downloads the generated files, and opens a pull request when they changed.
 The pull request targets the branch the workflow ran on. Its title is `[Hygiene]OpenAPI models generation`.
 
 ## Control the output
