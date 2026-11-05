@@ -56,8 +56,9 @@ Update `CHANGELOG.md` only for added or updated public interfaces or bugs fixed 
 Internal refactors, tests, tooling, and documentation alone do not qualify.
 Place every entry under `# Upcoming`, before the first released version heading.
 Never add or edit entries under a released version.
-Include a real, relevant URL in every entry, preferably its pull request or issue.
-If no URL is available, ask the user and leave the entry pending. Never invent links or use placeholders.
+Include a pull request link when one exists.
+Do not cite a ticket number or a ticket URL.
+If no pull request exists yet, leave the entry without a link. Never invent links or use placeholders.
 Describe the user-visible change briefly.
 
 ## Binary size

@@ -72,6 +72,8 @@ final class CallAudioSession: @unchecked Sendable {
     /// Play-and-record uses `.default` instead of VoiceChat while this is a
     /// music profile, so Apple Voice Processing can actually be disabled.
     private var audioBitrateProfile: AudioBitrateProfile = .voiceStandard
+    /// True after this session has applied its configuration once.
+    private(set) var didPerformActivation = false
 
     init(policy: AudioSessionPolicy = DefaultAudioSessionPolicy()) {
         self.policy = policy
@@ -103,6 +105,12 @@ final class CallAudioSession: @unchecked Sendable {
         statsAdapter: WebRTCStatsAdapting?,
         shouldSetActive: Bool
     ) {
+        // Rejoin configures this session again without a new CallKit
+        // activation. Apply now. A session that has not activated yet waits.
+        let resumeActiveSession = didPerformActivation
+            && audioStore.state.isActive
+            && audioStore.state.activeSessionIdentifier == identifier
+
         disposableBag.removeAll()
 
         processingPipeline
@@ -114,7 +122,7 @@ final class CallAudioSession: @unchecked Sendable {
         self.delegate = delegate
         self.statsAdapter = statsAdapter
 
-        guard shouldSetActive else {
+        guard shouldSetActive || resumeActiveSession else {
             scheduleDeferredActivation(
                 callSettingsPublisher: callSettingsPublisher,
                 ownCapabilitiesPublisher: ownCapabilitiesPublisher
@@ -129,6 +137,7 @@ final class CallAudioSession: @unchecked Sendable {
     }
 
     func deactivate() async {
+        didPerformActivation = false
         let statsAdapter = statsAdapter
         self.statsAdapter = nil
         guard delegate != nil else {
@@ -275,17 +284,22 @@ final class CallAudioSession: @unchecked Sendable {
         ownCapabilitiesPublisher: AnyPublisher<Set<OwnCapability>, Never>
     ) {
         disposableBag.remove(DisposableKey.deferredActivation.rawValue)
-        audioStore
-            .publisher(\.isActive)
-            /// Make the current value part of the sequence so a stale
-            /// `isActive == true` left behind by a previous call we are
-            /// taking over from still wakes us up. By the time this
-            /// subscription is installed we have already claimed ownership
-            /// of the shared audio store, so a current `true` means we
-            /// inherited an already-active session and should proceed.
-            .prepend(audioStore.state.isActive)
-            .removeDuplicates()
-            .first(where: { $0 })
+        let ready: AnyPublisher<Void, Never>
+        if audioStore.state.isActive {
+            let activationCount = audioStore.state.callKitActivationCount
+            ready = audioStore
+                .publisher(\.callKitActivationCount)
+                .first(where: { $0 != activationCount })
+                .map { _ in () }
+                .eraseToAnyPublisher()
+        } else {
+            ready = audioStore
+                .publisher(\.isActive)
+                .first(where: { $0 })
+                .map { _ in () }
+                .eraseToAnyPublisher()
+        }
+        ready
             .receive(on: processingQueue)
             .sink { [weak self] _ in
                 self?.performActivation(
@@ -300,6 +314,7 @@ final class CallAudioSession: @unchecked Sendable {
         callSettingsPublisher: AnyPublisher<CallSettings, Never>,
         ownCapabilitiesPublisher: AnyPublisher<Set<OwnCapability>, Never>
     ) {
+        didPerformActivation = true
         disposableBag.remove(DisposableKey.deferredActivation.rawValue)
 
         // Expose the policy's stereo preference so the audio device module can
