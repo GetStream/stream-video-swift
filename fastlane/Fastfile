@@ -474,20 +474,18 @@ end
 desc 'Generate OpenAPI models and open a pull request when they change'
 lane :openapi do
   Dir.chdir('..') { sh('bash Scripts/generate.sh') }
-  sync_xcodeproj_references
   next unless is_ci
 
   changed = Dir.chdir('..') do
-    sh('git status --porcelain -- Sources/StreamVideo/OpenApi/generated StreamVideo.xcodeproj/project.pbxproj')
+    sh('git status --porcelain -- Sources/StreamVideo/OpenApi/generated')
   end
   next if changed.strip.empty?
 
-  base_branch = current_branch
   pr_create(
     title: '[Hygiene]OpenAPI models generation',
-    base_branch: base_branch,
-    head_branch: "#{base_branch}-openapi-#{Time.now.to_i}",
-    git_add: '../Sources/StreamVideo/OpenApi/generated ../StreamVideo.xcodeproj/project.pbxproj'
+    base_branch: current_branch,
+    head_branch: "#{current_branch}-openapi-#{Time.now.to_i}",
+    git_add: '../Sources/StreamVideo/OpenApi/generated'
   )
 end
 

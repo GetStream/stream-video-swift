@@ -19,7 +19,8 @@ Do not edit `Sources/StreamVideo/OpenApi/generated/` by hand. Change the lists b
 
 `.github/workflows/openapi.yml` starts with `workflow_dispatch` on the selected branch.
 The `chat_ref` input is a `GetStream/chat` branch name or commit hash. It defaults to `master`. The workflow checks out that ref with `CI_BOT_GITHUB_TOKEN`.
-The workflow runs `Scripts/generate.sh`, updates Xcode references when generated Swift files were added or removed, and opens a pull request only when those files or `project.pbxproj` changed.
+`GOPRIVATE` is `github.com/GetStream/*`. The same token rewrites `https://github.com/` so the OpenAPI Go build can download private modules. Go comes from `tools/openapi/go.mod`.
+The workflow runs `Scripts/generate.sh` and opens a pull request only when the generated files changed.
 The pull request targets the branch the workflow ran on. Its title is `[Hygiene]OpenAPI models generation`.
 
 ## Control the output
