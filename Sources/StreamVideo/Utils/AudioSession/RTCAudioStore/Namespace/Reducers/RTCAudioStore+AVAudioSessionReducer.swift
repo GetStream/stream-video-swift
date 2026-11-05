@@ -32,8 +32,12 @@ extension RTCAudioStore.Namespace {
         ) async throws -> State {
             var updatedState = state
 
+            // Idle `.unknown` routes can report Speaker. Caching
+            // that report skips the later speaker override.
+            // `.noSuitableRouteForCategory` does not reapply
+            // policy, so it still refreshes the cached port.
             if case let .setCurrentRoute(value) = action,
-               value.reason.isValidRouteChange {
+               value.reason == .override || value.reason == .noSuitableRouteForCategory {
                 updatedState.audioSessionConfiguration.overrideOutputAudioPort = value.isSpeaker ? .speaker : .none
             }
 

@@ -120,6 +120,13 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
     }
 
     func test_ring_whileCoordinatorConnecting_waitsForConnectionThenSends() async throws {
+        // The suite host can already be in the background. Pin
+        // foreground so this test counts the ring request only.
+        let applicationStateAdapter = MockAppStateAdapter()
+        applicationStateAdapter.makeShared()
+        defer { applicationStateAdapter.dismante() }
+        applicationStateAdapter.stubbedState = .foreground
+
         let httpClient = httpClientWithGetCallResponse()
         let subject = StreamVideo.mock(httpClient: httpClient)
         self.streamVideo = subject
