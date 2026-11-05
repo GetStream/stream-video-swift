@@ -54,9 +54,11 @@ extension StreamVideo {
                     initialCallSettings: initialCallSettings,
                     cachedLocation: cachedLocation
                 )
-            }
-        ) { _ in
-            httpClient as! any DefaultAPITransport
-        }
+            },
+            apiTransportBuilder: { _ in
+                httpClient as! any DefaultAPITransport
+            },
+            jsonDecoder: (httpClient as? HTTPClient_Mock)?.decoder ?? .default
+        )
     }
 }

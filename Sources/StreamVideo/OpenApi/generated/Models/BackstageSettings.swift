@@ -3,9 +3,9 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class BackstageSettings: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+public final class BackstageSettings: @unchecked Sendable, Decodable {
     public var enabled: Bool
     public var joinAheadTimeSeconds: Int?
 
@@ -13,12 +13,15 @@ public final class BackstageSettings: @unchecked Sendable, Codable, JSONEncodabl
         self.enabled = enabled
         self.joinAheadTimeSeconds = joinAheadTimeSeconds
     }
-    
-    public enum CodingKeys: String, CodingKey {
-        case enabled
-        case joinAheadTimeSeconds = "join_ahead_time_seconds"
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.enabled = try container.decode(Bool.self, forKey: .enabled)
+        self.joinAheadTimeSeconds = try container.decodeIfPresent(Int.self, forKey: .joinAheadTimeSeconds)
     }
-    
+}
+
+extension BackstageSettings: Hashable {
     public static func == (lhs: BackstageSettings, rhs: BackstageSettings) -> Bool {
         lhs.enabled == rhs.enabled &&
             lhs.joinAheadTimeSeconds == rhs.joinAheadTimeSeconds

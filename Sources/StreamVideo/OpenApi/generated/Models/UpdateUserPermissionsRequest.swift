@@ -3,9 +3,9 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class UpdateUserPermissionsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+public final class UpdateUserPermissionsRequest: @unchecked Sendable, Encodable, JSONEncodable {
     public var grantPermissions: [String]?
     public var revokePermissions: [String]?
     public var userId: String
@@ -15,13 +15,16 @@ public final class UpdateUserPermissionsRequest: @unchecked Sendable, Codable, J
         self.revokePermissions = revokePermissions
         self.userId = userId
     }
-    
-    public enum CodingKeys: String, CodingKey {
-        case grantPermissions = "grant_permissions"
-        case revokePermissions = "revoke_permissions"
-        case userId = "user_id"
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(grantPermissions, forKey: .grantPermissions)
+        try container.encodeIfPresent(revokePermissions, forKey: .revokePermissions)
+        try container.encode(userId, forKey: .userId)
     }
-    
+}
+
+extension UpdateUserPermissionsRequest: Hashable {
     public static func == (lhs: UpdateUserPermissionsRequest, rhs: UpdateUserPermissionsRequest) -> Bool {
         lhs.grantPermissions == rhs.grantPermissions &&
             lhs.revokePermissions == rhs.revokePermissions &&

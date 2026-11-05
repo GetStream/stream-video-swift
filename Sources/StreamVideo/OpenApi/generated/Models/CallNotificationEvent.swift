@@ -5,14 +5,19 @@
 import Foundation
 import StreamCore
 
-public final class CallNotificationEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
-    
+/// This event is sent to all call members to notify they are getting called
+public final class CallNotificationEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
+    /// Represents a call
     public var call: CallResponse
     public var callCid: String
     public var createdAt: Date
+    /// Call members
     public var members: [MemberResponse]
+    /// Call session ID
     public var sessionId: String
+    /// The type of event: "call.notification" in this case
     public var type: String = "call.notification"
+    /// User response object
     public var user: UserResponse
 
     public init(
@@ -30,17 +35,20 @@ public final class CallNotificationEvent: @unchecked Sendable, Event, Codable, J
         self.sessionId = sessionId
         self.user = user
     }
-    
-    public enum CodingKeys: String, CodingKey {
-        case call
-        case callCid = "call_cid"
-        case createdAt = "created_at"
-        case members
-        case sessionId = "session_id"
-        case type
-        case user
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.call = try container.decode(CallResponse.self, forKey: .call)
+        self.callCid = try container.decode(String.self, forKey: .callCid)
+        self.createdAt = try container.decode(Date.self, forKey: .createdAt)
+        self.members = try container.decode([MemberResponse].self, forKey: .members)
+        self.sessionId = try container.decode(String.self, forKey: .sessionId)
+        self.type = try container.decode(String.self, forKey: .type)
+        self.user = try container.decode(UserResponse.self, forKey: .user)
     }
-    
+}
+
+extension CallNotificationEvent: Hashable {
     public static func == (lhs: CallNotificationEvent, rhs: CallNotificationEvent) -> Bool {
         lhs.call == rhs.call &&
             lhs.callCid == rhs.callCid &&

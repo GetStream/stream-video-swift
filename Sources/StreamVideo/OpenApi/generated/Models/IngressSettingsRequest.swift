@@ -3,28 +3,36 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class IngressSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class IngressSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable {
     public var audioEncodingOptions: IngressAudioEncodingOptionsRequest?
     public var enabled: Bool?
     public var videoEncodingOptions: [String: IngressVideoEncodingOptionsRequest]?
 
-    public init(audioEncodingOptions: IngressAudioEncodingOptionsRequest? = nil, enabled: Bool? = nil, videoEncodingOptions: [String: IngressVideoEncodingOptionsRequest]? = nil) {
+    public init(
+        audioEncodingOptions: IngressAudioEncodingOptionsRequest? = nil,
+        enabled: Bool? = nil,
+        videoEncodingOptions: [String: IngressVideoEncodingOptionsRequest]? = nil
+    ) {
         self.audioEncodingOptions = audioEncodingOptions
         self.enabled = enabled
         self.videoEncodingOptions = videoEncodingOptions
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case audioEncodingOptions = "audio_encoding_options"
-        case enabled
-        case videoEncodingOptions = "video_encoding_options"
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(audioEncodingOptions, forKey: .audioEncodingOptions)
+        try container.encodeIfPresent(enabled, forKey: .enabled)
+        try container.encodeIfPresent(videoEncodingOptions, forKey: .videoEncodingOptions)
     }
+}
 
+extension IngressSettingsRequest: Hashable {
     public static func == (lhs: IngressSettingsRequest, rhs: IngressSettingsRequest) -> Bool {
         lhs.audioEncodingOptions == rhs.audioEncodingOptions &&
-        lhs.enabled == rhs.enabled &&
-        lhs.videoEncodingOptions == rhs.videoEncodingOptions
+            lhs.enabled == rhs.enabled &&
+            lhs.videoEncodingOptions == rhs.videoEncodingOptions
     }
 
     public func hash(into hasher: inout Hasher) {

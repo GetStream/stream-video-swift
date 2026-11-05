@@ -3,22 +3,28 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class PinRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+/// PinRequest is the payload for pinning a message.
+public final class PinRequest: @unchecked Sendable, Encodable, JSONEncodable {
+    /// the session ID of the user who pinned the message
     public var sessionId: String
+    /// the user ID of the user who pinned the message
     public var userId: String
 
     public init(sessionId: String, userId: String) {
         self.sessionId = sessionId
         self.userId = userId
     }
-    
-    public enum CodingKeys: String, CodingKey {
-        case sessionId = "session_id"
-        case userId = "user_id"
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(sessionId, forKey: .sessionId)
+        try container.encode(userId, forKey: .userId)
     }
-    
+}
+
+extension PinRequest: Hashable {
     public static func == (lhs: PinRequest, rhs: PinRequest) -> Bool {
         lhs.sessionId == rhs.sessionId &&
             lhs.userId == rhs.userId

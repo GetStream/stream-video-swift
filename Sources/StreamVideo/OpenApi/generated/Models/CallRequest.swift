@@ -2,11 +2,11 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
-import StreamCore
 import Foundation
+import StreamCore
 
-public final class CallRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+/// CallRequest is the payload for creating a call.
+public final class CallRequest: @unchecked Sendable, Encodable, JSONEncodable {
     public var custom: [String: RawJSON]?
     public var members: [MemberRequest]?
     public var settingsOverride: CallSettingsRequest?
@@ -29,16 +29,19 @@ public final class CallRequest: @unchecked Sendable, Codable, JSONEncodable, Has
         self.team = team
         self.video = video
     }
-    
-    public enum CodingKeys: String, CodingKey {
-        case custom
-        case members
-        case settingsOverride = "settings_override"
-        case startsAt = "starts_at"
-        case team
-        case video
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(custom, forKey: .custom)
+        try container.encodeIfPresent(members, forKey: .members)
+        try container.encodeIfPresent(settingsOverride, forKey: .settingsOverride)
+        try container.encodeIfPresent(startsAt, forKey: .startsAt)
+        try container.encodeIfPresent(team, forKey: .team)
+        try container.encodeIfPresent(video, forKey: .video)
     }
-    
+}
+
+extension CallRequest: Hashable {
     public static func == (lhs: CallRequest, rhs: CallRequest) -> Bool {
         lhs.custom == rhs.custom &&
             lhs.members == rhs.members &&

@@ -3,9 +3,9 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class CallStatsReportSummaryResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+public final class CallStatsReportSummaryResponse: @unchecked Sendable, Decodable {
     public var callCid: String
     public var callDurationSeconds: Int
     public var callSessionId: String
@@ -34,18 +34,21 @@ public final class CallStatsReportSummaryResponse: @unchecked Sendable, Codable,
         self.minUserRating = minUserRating
         self.qualityScore = qualityScore
     }
-    
-    public enum CodingKeys: String, CodingKey {
-        case callCid = "call_cid"
-        case callDurationSeconds = "call_duration_seconds"
-        case callSessionId = "call_session_id"
-        case callStatus = "call_status"
-        case createdAt = "created_at"
-        case firstStatsTime = "first_stats_time"
-        case minUserRating = "min_user_rating"
-        case qualityScore = "quality_score"
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.callCid = try container.decode(String.self, forKey: .callCid)
+        self.callDurationSeconds = try container.decode(Int.self, forKey: .callDurationSeconds)
+        self.callSessionId = try container.decode(String.self, forKey: .callSessionId)
+        self.callStatus = try container.decode(String.self, forKey: .callStatus)
+        self.createdAt = try container.decodeIfPresent(Date.self, forKey: .createdAt)
+        self.firstStatsTime = try container.decode(Date.self, forKey: .firstStatsTime)
+        self.minUserRating = try container.decodeIfPresent(Int.self, forKey: .minUserRating)
+        self.qualityScore = try container.decodeIfPresent(Int.self, forKey: .qualityScore)
     }
-    
+}
+
+extension CallStatsReportSummaryResponse: Hashable {
     public static func == (lhs: CallStatsReportSummaryResponse, rhs: CallStatsReportSummaryResponse) -> Bool {
         lhs.callCid == rhs.callCid &&
             lhs.callDurationSeconds == rhs.callDurationSeconds &&

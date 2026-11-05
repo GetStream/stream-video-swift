@@ -5,11 +5,14 @@
 import Foundation
 import StreamCore
 
-public final class CallFrameRecordingStartedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
+/// This event is sent when frame recording has started
+public final class CallFrameRecordingStartedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
+    /// Represents a call
     public var call: CallResponse
     public var callCid: String
     public var createdAt: Date
     public var egressId: String
+    /// The type of event: "call.frame_recording_started" in this case
     public var type: String = "call.frame_recording_started"
 
     public init(call: CallResponse, callCid: String, createdAt: Date, egressId: String) {
@@ -19,20 +22,23 @@ public final class CallFrameRecordingStartedEvent: @unchecked Sendable, Event, C
         self.egressId = egressId
     }
 
-public enum CodingKeys: String, CodingKey {
-    case call
-    case callCid = "call_cid"
-    case createdAt = "created_at"
-    case egressId = "egress_id"
-    case type
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.call = try container.decode(CallResponse.self, forKey: .call)
+        self.callCid = try container.decode(String.self, forKey: .callCid)
+        self.createdAt = try container.decode(Date.self, forKey: .createdAt)
+        self.egressId = try container.decode(String.self, forKey: .egressId)
+        self.type = try container.decode(String.self, forKey: .type)
+    }
 }
 
+extension CallFrameRecordingStartedEvent: Hashable {
     public static func == (lhs: CallFrameRecordingStartedEvent, rhs: CallFrameRecordingStartedEvent) -> Bool {
         lhs.call == rhs.call &&
-        lhs.callCid == rhs.callCid &&
-        lhs.createdAt == rhs.createdAt &&
-        lhs.egressId == rhs.egressId &&
-        lhs.type == rhs.type
+            lhs.callCid == rhs.callCid &&
+            lhs.createdAt == rhs.createdAt &&
+            lhs.egressId == rhs.egressId &&
+            lhs.type == rhs.type
     }
 
     public func hash(into hasher: inout Hasher) {

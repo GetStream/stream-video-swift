@@ -3,19 +3,24 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class CallIngressResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+/// CallIngressResponse is the payload for ingress settings
+public final class CallIngressResponse: @unchecked Sendable, Decodable {
+    /// RTMP input settings
     public var rtmp: RTMPIngress
 
     public init(rtmp: RTMPIngress) {
         self.rtmp = rtmp
     }
-    
-    public enum CodingKeys: String, CodingKey {
-        case rtmp
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.rtmp = try container.decode(RTMPIngress.self, forKey: .rtmp)
     }
-    
+}
+
+extension CallIngressResponse: Hashable {
     public static func == (lhs: CallIngressResponse, rhs: CallIngressResponse) -> Bool {
         lhs.rtmp == rhs.rtmp
     }

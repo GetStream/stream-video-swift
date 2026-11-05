@@ -5,12 +5,15 @@
 import Foundation
 import StreamCore
 
-public final class CallSessionEndedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
-    
+/// This event is sent when a call session ends
+public final class CallSessionEndedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
+    /// Represents a call
     public var call: CallResponse
     public var callCid: String
     public var createdAt: Date
+    /// Call session ID
     public var sessionId: String
+    /// The type of event: "call.session_ended" in this case
     public var type: String = "call.session_ended"
 
     public init(call: CallResponse, callCid: String, createdAt: Date, sessionId: String) {
@@ -19,15 +22,18 @@ public final class CallSessionEndedEvent: @unchecked Sendable, Event, Codable, J
         self.createdAt = createdAt
         self.sessionId = sessionId
     }
-    
-    public enum CodingKeys: String, CodingKey {
-        case call
-        case callCid = "call_cid"
-        case createdAt = "created_at"
-        case sessionId = "session_id"
-        case type
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.call = try container.decode(CallResponse.self, forKey: .call)
+        self.callCid = try container.decode(String.self, forKey: .callCid)
+        self.createdAt = try container.decode(Date.self, forKey: .createdAt)
+        self.sessionId = try container.decode(String.self, forKey: .sessionId)
+        self.type = try container.decode(String.self, forKey: .type)
     }
-    
+}
+
+extension CallSessionEndedEvent: Hashable {
     public static func == (lhs: CallSessionEndedEvent, rhs: CallSessionEndedEvent) -> Bool {
         lhs.call == rhs.call &&
             lhs.callCid == rhs.callCid &&

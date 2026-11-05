@@ -3,28 +3,39 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class IngressSettingsResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class IngressSettingsResponse: @unchecked Sendable, Decodable {
     public var audioEncodingOptions: IngressAudioEncodingResponse?
     public var enabled: Bool
     public var videoEncodingOptions: [String: IngressVideoEncodingResponse]?
 
-    public init(audioEncodingOptions: IngressAudioEncodingResponse? = nil, enabled: Bool, videoEncodingOptions: [String: IngressVideoEncodingResponse]? = nil) {
+    public init(
+        audioEncodingOptions: IngressAudioEncodingResponse? = nil,
+        enabled: Bool,
+        videoEncodingOptions: [String: IngressVideoEncodingResponse]? = nil
+    ) {
         self.audioEncodingOptions = audioEncodingOptions
         self.enabled = enabled
         self.videoEncodingOptions = videoEncodingOptions
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case audioEncodingOptions = "audio_encoding_options"
-        case enabled
-        case videoEncodingOptions = "video_encoding_options"
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.audioEncodingOptions = try container.decodeIfPresent(IngressAudioEncodingResponse.self, forKey: .audioEncodingOptions)
+        self.enabled = try container.decode(Bool.self, forKey: .enabled)
+        self.videoEncodingOptions = try container.decodeIfPresent(
+            [String: IngressVideoEncodingResponse].self,
+            forKey: .videoEncodingOptions
+        )
     }
+}
 
+extension IngressSettingsResponse: Hashable {
     public static func == (lhs: IngressSettingsResponse, rhs: IngressSettingsResponse) -> Bool {
         lhs.audioEncodingOptions == rhs.audioEncodingOptions &&
-        lhs.enabled == rhs.enabled &&
-        lhs.videoEncodingOptions == rhs.videoEncodingOptions
+            lhs.enabled == rhs.enabled &&
+            lhs.videoEncodingOptions == rhs.videoEncodingOptions
     }
 
     public func hash(into hasher: inout Hasher) {

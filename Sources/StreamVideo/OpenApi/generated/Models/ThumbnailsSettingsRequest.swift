@@ -3,19 +3,22 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class ThumbnailsSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+public final class ThumbnailsSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable {
     public var enabled: Bool?
 
     public init(enabled: Bool? = nil) {
         self.enabled = enabled
     }
-    
-    public enum CodingKeys: String, CodingKey {
-        case enabled
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(enabled, forKey: .enabled)
     }
-    
+}
+
+extension ThumbnailsSettingsRequest: Hashable {
     public static func == (lhs: ThumbnailsSettingsRequest, rhs: ThumbnailsSettingsRequest) -> Bool {
         lhs.enabled == rhs.enabled
     }

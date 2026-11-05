@@ -3,9 +3,9 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class RingSettings: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+public final class RingSettings: @unchecked Sendable, Decodable {
     public var autoCancelTimeoutMs: Int
     public var incomingCallTimeoutMs: Int
     public var missedCallTimeoutMs: Int
@@ -15,13 +15,16 @@ public final class RingSettings: @unchecked Sendable, Codable, JSONEncodable, Ha
         self.incomingCallTimeoutMs = incomingCallTimeoutMs
         self.missedCallTimeoutMs = missedCallTimeoutMs
     }
-    
-    public enum CodingKeys: String, CodingKey {
-        case autoCancelTimeoutMs = "auto_cancel_timeout_ms"
-        case incomingCallTimeoutMs = "incoming_call_timeout_ms"
-        case missedCallTimeoutMs = "missed_call_timeout_ms"
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.autoCancelTimeoutMs = try container.decode(Int.self, forKey: .autoCancelTimeoutMs)
+        self.incomingCallTimeoutMs = try container.decode(Int.self, forKey: .incomingCallTimeoutMs)
+        self.missedCallTimeoutMs = try container.decode(Int.self, forKey: .missedCallTimeoutMs)
     }
-    
+}
+
+extension RingSettings: Hashable {
     public static func == (lhs: RingSettings, rhs: RingSettings) -> Bool {
         lhs.autoCancelTimeoutMs == rhs.autoCancelTimeoutMs &&
             lhs.incomingCallTimeoutMs == rhs.incomingCallTimeoutMs &&

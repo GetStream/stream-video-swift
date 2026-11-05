@@ -2,16 +2,21 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
-import StreamCore
 import Foundation
+import StreamCore
 
-public final class MemberResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+/// MemberResponse is the payload for a member of a call.
+public final class MemberResponse: @unchecked Sendable, Decodable {
+    /// Date/time of creation
     public var createdAt: Date
+    /// Custom member response data
     public var custom: [String: RawJSON]
+    /// Date/time of deletion
     public var deletedAt: Date?
     public var role: String?
+    /// Date/time of the last update
     public var updatedAt: Date
+    /// User response object
     public var user: UserResponse
     public var userId: String
 
@@ -32,17 +37,20 @@ public final class MemberResponse: @unchecked Sendable, Codable, JSONEncodable, 
         self.user = user
         self.userId = userId
     }
-    
-    public enum CodingKeys: String, CodingKey {
-        case createdAt = "created_at"
-        case custom
-        case deletedAt = "deleted_at"
-        case role
-        case updatedAt = "updated_at"
-        case user
-        case userId = "user_id"
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.createdAt = try container.decode(Date.self, forKey: .createdAt)
+        self.custom = try container.decode([String: RawJSON].self, forKey: .custom)
+        self.deletedAt = try container.decodeIfPresent(Date.self, forKey: .deletedAt)
+        self.role = try container.decodeIfPresent(String.self, forKey: .role)
+        self.updatedAt = try container.decode(Date.self, forKey: .updatedAt)
+        self.user = try container.decode(UserResponse.self, forKey: .user)
+        self.userId = try container.decode(String.self, forKey: .userId)
     }
-    
+}
+
+extension MemberResponse: Hashable {
     public static func == (lhs: MemberResponse, rhs: MemberResponse) -> Bool {
         lhs.createdAt == rhs.createdAt &&
             lhs.custom == rhs.custom &&

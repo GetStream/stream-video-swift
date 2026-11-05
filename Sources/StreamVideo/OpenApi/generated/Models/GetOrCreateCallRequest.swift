@@ -3,12 +3,15 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class GetOrCreateCallRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+public final class GetOrCreateCallRequest: @unchecked Sendable, Encodable, JSONEncodable {
+    /// CallRequest is the payload for creating a call.
     public var data: CallRequest?
     public var membersLimit: Int?
+    /// if provided it sends a notification event to the members for this call
     public var notify: Bool?
+    /// if provided it sends a ring event to the members for this call
     public var ring: Bool?
     public var video: Bool?
 
@@ -19,15 +22,18 @@ public final class GetOrCreateCallRequest: @unchecked Sendable, Codable, JSONEnc
         self.ring = ring
         self.video = video
     }
-    
-    public enum CodingKeys: String, CodingKey {
-        case data
-        case membersLimit = "members_limit"
-        case notify
-        case ring
-        case video
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(data, forKey: .data)
+        try container.encodeIfPresent(membersLimit, forKey: .membersLimit)
+        try container.encodeIfPresent(notify, forKey: .notify)
+        try container.encodeIfPresent(ring, forKey: .ring)
+        try container.encodeIfPresent(video, forKey: .video)
     }
-    
+}
+
+extension GetOrCreateCallRequest: Hashable {
     public static func == (lhs: GetOrCreateCallRequest, rhs: GetOrCreateCallRequest) -> Bool {
         lhs.data == rhs.data &&
             lhs.membersLimit == rhs.membersLimit &&

@@ -3,8 +3,9 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class JoinCallRequest: @unchecked Sendable, Codable, JSONEncodable {
+public final class JoinCallRequest: @unchecked Sendable, Encodable, JSONEncodable {
     /// if true the call will be created if it doesn't exist
     public var create: Bool?
     /// CallRequest is the payload for creating a call.
@@ -50,34 +51,35 @@ public final class JoinCallRequest: @unchecked Sendable, Codable, JSONEncodable 
         self.video = video
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case create
-        case data
-        case e2ee
-        case hintHighScaleLivestreamPublisher = "hint_high_scale_livestream_publisher"
-        case location
-        case membersLimit = "members_limit"
-        case migratingFrom = "migrating_from"
-        case migratingFromList = "migrating_from_list"
-        case notify
-        case ring
-        case video
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(create, forKey: .create)
+        try container.encodeIfPresent(data, forKey: .data)
+        try container.encodeIfPresent(e2ee, forKey: .e2ee)
+        try container.encodeIfPresent(hintHighScaleLivestreamPublisher, forKey: .hintHighScaleLivestreamPublisher)
+        try container.encode(location, forKey: .location)
+        try container.encodeIfPresent(membersLimit, forKey: .membersLimit)
+        try container.encodeIfPresent(migratingFrom, forKey: .migratingFrom)
+        try container.encodeIfPresent(migratingFromList, forKey: .migratingFromList)
+        try container.encodeIfPresent(notify, forKey: .notify)
+        try container.encodeIfPresent(ring, forKey: .ring)
+        try container.encodeIfPresent(video, forKey: .video)
     }
 }
 
 extension JoinCallRequest: Hashable {
     public static func == (lhs: JoinCallRequest, rhs: JoinCallRequest) -> Bool {
         lhs.create == rhs.create &&
-        lhs.data == rhs.data &&
-        lhs.e2ee == rhs.e2ee &&
-        lhs.hintHighScaleLivestreamPublisher == rhs.hintHighScaleLivestreamPublisher &&
-        lhs.location == rhs.location &&
-        lhs.membersLimit == rhs.membersLimit &&
-        lhs.migratingFrom == rhs.migratingFrom &&
-        lhs.migratingFromList == rhs.migratingFromList &&
-        lhs.notify == rhs.notify &&
-        lhs.ring == rhs.ring &&
-        lhs.video == rhs.video
+            lhs.data == rhs.data &&
+            lhs.e2ee == rhs.e2ee &&
+            lhs.hintHighScaleLivestreamPublisher == rhs.hintHighScaleLivestreamPublisher &&
+            lhs.location == rhs.location &&
+            lhs.membersLimit == rhs.membersLimit &&
+            lhs.migratingFrom == rhs.migratingFrom &&
+            lhs.migratingFromList == rhs.migratingFromList &&
+            lhs.notify == rhs.notify &&
+            lhs.ring == rhs.ring &&
+            lhs.video == rhs.video
     }
 
     public func hash(into hasher: inout Hasher) {

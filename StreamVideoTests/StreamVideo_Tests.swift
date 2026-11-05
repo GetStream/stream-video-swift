@@ -263,8 +263,7 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
 
     func test_streamVideo_ringCallReject() async throws {
         let httpClient = httpClientWithGetCallResponse()
-        let rejectCallResponse = RejectCallResponse(duration: "1")
-        let data = try! JSONEncoder.streamCore.encode(rejectCallResponse)
+        let data = httpClient.decoder.decodingData(for: RejectCallResponse(duration: "1"))
         let streamVideo = StreamVideo.mock(httpClient: httpClient)
         self.streamVideo = streamVideo
         let call = streamVideo.call(callType: callType, callId: callId)
@@ -304,7 +303,7 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
             members: [],
             ownCapabilities: []
         )
-        httpClient.dataResponses = [try JSONEncoder.streamCore.encode(getCallResponse)]
+        httpClient.dataResponses = [httpClient.decoder.decodingData(for: getCallResponse)]
 
         nonisolated(unsafe) weak var previousCall: Call?
         do {
@@ -372,7 +371,7 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
     func test_streamVideo_incomingCallReject() async throws {
         // Given
         let httpClient = HTTPClient_Mock()
-        let data = try! JSONEncoder().encode(RejectCallResponse(duration: "1"))
+        let data = httpClient.decoder.decodingData(for: RejectCallResponse(duration: "1"))
         httpClient.dataResponses = [data]
         let streamVideo = StreamVideo.mock(httpClient: httpClient)
         self.streamVideo = streamVideo
@@ -434,8 +433,8 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
         let expected = makeEdgeResponse()
         let httpClient = HTTPClient_Mock()
         httpClient.dataResponses = [
-            try JSONEncoder.streamCore.encode(
-                GetEdgesResponse(duration: "1", edges: [expected])
+            httpClient.decoder.decodingData(
+                for: GetEdgesResponse(duration: "1", edges: [expected])
             )
         ]
         let streamVideo = StreamVideo.mock(httpClient: httpClient)
@@ -645,7 +644,7 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
             members: [],
             ownCapabilities: []
         )
-        let data = try! JSONEncoder.streamCore.encode(getCallResponse)
+        let data = httpClient.decoder.decodingData(for: getCallResponse)
         httpClient.dataResponses = [data]
         return httpClient
     }

@@ -3,8 +3,9 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class EgressResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class EgressResponse: @unchecked Sendable, Decodable {
     public var broadcasting: Bool
     public var compositeRecording: CompositeRecordingResponse?
     public var frameRecording: FrameRecordingResponse?
@@ -13,7 +14,15 @@ public final class EgressResponse: @unchecked Sendable, Codable, JSONEncodable, 
     public var rawRecording: RawRecordingResponse?
     public var rtmps: [EgressRTMPResponse]
 
-    public init(broadcasting: Bool, compositeRecording: CompositeRecordingResponse? = nil, frameRecording: FrameRecordingResponse? = nil, hls: EgressHLSResponse? = nil, individualRecording: IndividualRecordingResponse? = nil, rawRecording: RawRecordingResponse? = nil, rtmps: [EgressRTMPResponse]) {
+    public init(
+        broadcasting: Bool,
+        compositeRecording: CompositeRecordingResponse? = nil,
+        frameRecording: FrameRecordingResponse? = nil,
+        hls: EgressHLSResponse? = nil,
+        individualRecording: IndividualRecordingResponse? = nil,
+        rawRecording: RawRecordingResponse? = nil,
+        rtmps: [EgressRTMPResponse]
+    ) {
         self.broadcasting = broadcasting
         self.compositeRecording = compositeRecording
         self.frameRecording = frameRecording
@@ -23,24 +32,27 @@ public final class EgressResponse: @unchecked Sendable, Codable, JSONEncodable, 
         self.rtmps = rtmps
     }
 
-public enum CodingKeys: String, CodingKey {
-    case broadcasting
-    case compositeRecording = "composite_recording"
-    case frameRecording = "frame_recording"
-    case hls
-    case individualRecording = "individual_recording"
-    case rawRecording = "raw_recording"
-    case rtmps
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.broadcasting = try container.decode(Bool.self, forKey: .broadcasting)
+        self.compositeRecording = try container.decodeIfPresent(CompositeRecordingResponse.self, forKey: .compositeRecording)
+        self.frameRecording = try container.decodeIfPresent(FrameRecordingResponse.self, forKey: .frameRecording)
+        self.hls = try container.decodeIfPresent(EgressHLSResponse.self, forKey: .hls)
+        self.individualRecording = try container.decodeIfPresent(IndividualRecordingResponse.self, forKey: .individualRecording)
+        self.rawRecording = try container.decodeIfPresent(RawRecordingResponse.self, forKey: .rawRecording)
+        self.rtmps = try container.decode([EgressRTMPResponse].self, forKey: .rtmps)
+    }
 }
 
+extension EgressResponse: Hashable {
     public static func == (lhs: EgressResponse, rhs: EgressResponse) -> Bool {
         lhs.broadcasting == rhs.broadcasting &&
-        lhs.compositeRecording == rhs.compositeRecording &&
-        lhs.frameRecording == rhs.frameRecording &&
-        lhs.hls == rhs.hls &&
-        lhs.individualRecording == rhs.individualRecording &&
-        lhs.rawRecording == rhs.rawRecording &&
-        lhs.rtmps == rhs.rtmps
+            lhs.compositeRecording == rhs.compositeRecording &&
+            lhs.frameRecording == rhs.frameRecording &&
+            lhs.hls == rhs.hls &&
+            lhs.individualRecording == rhs.individualRecording &&
+            lhs.rawRecording == rhs.rawRecording &&
+            lhs.rtmps == rhs.rtmps
     }
 
     public func hash(into hasher: inout Hasher) {

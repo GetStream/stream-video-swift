@@ -5,11 +5,14 @@
 import Foundation
 import StreamCore
 
-public final class CallRecordingReadyEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
+/// This event is sent when call recording is ready
+public final class CallRecordingReadyEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
     
     public var callCid: String
+    /// CallRecording represents a recording of a call.
     public var callRecording: CallRecording
     public var createdAt: Date
+    /// The type of event: "call.recording_ready" in this case
     public var type: String = "call.recording_ready"
 
     public init(callCid: String, callRecording: CallRecording, createdAt: Date) {
@@ -17,14 +20,17 @@ public final class CallRecordingReadyEvent: @unchecked Sendable, Event, Codable,
         self.callRecording = callRecording
         self.createdAt = createdAt
     }
-    
-    public enum CodingKeys: String, CodingKey {
-        case callCid = "call_cid"
-        case callRecording = "call_recording"
-        case createdAt = "created_at"
-        case type
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.callCid = try container.decode(String.self, forKey: .callCid)
+        self.callRecording = try container.decode(CallRecording.self, forKey: .callRecording)
+        self.createdAt = try container.decode(Date.self, forKey: .createdAt)
+        self.type = try container.decode(String.self, forKey: .type)
     }
-    
+}
+
+extension CallRecordingReadyEvent: Hashable {
     public static func == (lhs: CallRecordingReadyEvent, rhs: CallRecordingReadyEvent) -> Bool {
         lhs.callCid == rhs.callCid &&
             lhs.callRecording == rhs.callRecording &&

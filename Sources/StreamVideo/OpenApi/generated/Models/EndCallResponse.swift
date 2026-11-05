@@ -3,19 +3,24 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class EndCallResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+/// Response for ending a call
+public final class EndCallResponse: @unchecked Sendable, Decodable {
+    /// Duration of the request in milliseconds
     public var duration: String
 
     public init(duration: String) {
         self.duration = duration
     }
-    
-    public enum CodingKeys: String, CodingKey {
-        case duration
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.duration = try container.decode(String.self, forKey: .duration)
     }
-    
+}
+
+extension EndCallResponse: Hashable {
     public static func == (lhs: EndCallResponse, rhs: EndCallResponse) -> Bool {
         lhs.duration == rhs.duration
     }

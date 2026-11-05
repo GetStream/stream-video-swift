@@ -3,11 +3,15 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class ICEServer: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+/// ICE server configuration for WebRTC connections
+public final class ICEServer: @unchecked Sendable, Decodable {
+    /// ICE server password
     public var password: String
+    /// ICE server URLs
     public var urls: [String]
+    /// ICE server username
     public var username: String
 
     public init(password: String, urls: [String], username: String) {
@@ -15,13 +19,16 @@ public final class ICEServer: @unchecked Sendable, Codable, JSONEncodable, Hasha
         self.urls = urls
         self.username = username
     }
-    
-    public enum CodingKeys: String, CodingKey {
-        case password
-        case urls
-        case username
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.password = try container.decode(String.self, forKey: .password)
+        self.urls = try container.decode([String].self, forKey: .urls)
+        self.username = try container.decode(String.self, forKey: .username)
     }
-    
+}
+
+extension ICEServer: Hashable {
     public static func == (lhs: ICEServer, rhs: ICEServer) -> Bool {
         lhs.password == rhs.password &&
             lhs.urls == rhs.urls &&

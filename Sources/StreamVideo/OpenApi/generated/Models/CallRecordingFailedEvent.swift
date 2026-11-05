@@ -5,23 +5,28 @@
 import Foundation
 import StreamCore
 
-public final class CallRecordingFailedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
+/// This event is sent when call recording has failed
+public final class CallRecordingFailedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
     
     public var callCid: String
     public var createdAt: Date
+    /// The type of event: "call.recording_failed" in this case
     public var type: String = "call.recording_failed"
 
     public init(callCid: String, createdAt: Date) {
         self.callCid = callCid
         self.createdAt = createdAt
     }
-    
-    public enum CodingKeys: String, CodingKey {
-        case callCid = "call_cid"
-        case createdAt = "created_at"
-        case type
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.callCid = try container.decode(String.self, forKey: .callCid)
+        self.createdAt = try container.decode(Date.self, forKey: .createdAt)
+        self.type = try container.decode(String.self, forKey: .type)
     }
-    
+}
+
+extension CallRecordingFailedEvent: Hashable {
     public static func == (lhs: CallRecordingFailedEvent, rhs: CallRecordingFailedEvent) -> Bool {
         lhs.callCid == rhs.callCid &&
             lhs.createdAt == rhs.createdAt &&

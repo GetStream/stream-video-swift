@@ -3,19 +3,22 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class StopTranscriptionRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+public final class StopTranscriptionRequest: @unchecked Sendable, Encodable, JSONEncodable {
     public var stopClosedCaptions: Bool?
 
     public init(stopClosedCaptions: Bool? = nil) {
         self.stopClosedCaptions = stopClosedCaptions
     }
-    
-    public enum CodingKeys: String, CodingKey {
-        case stopClosedCaptions = "stop_closed_captions"
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(stopClosedCaptions, forKey: .stopClosedCaptions)
     }
-    
+}
+
+extension StopTranscriptionRequest: Hashable {
     public static func == (lhs: StopTranscriptionRequest, rhs: StopTranscriptionRequest) -> Bool {
         lhs.stopClosedCaptions == rhs.stopClosedCaptions
     }

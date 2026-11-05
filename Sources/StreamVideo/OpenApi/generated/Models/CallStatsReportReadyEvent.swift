@@ -5,10 +5,13 @@
 import Foundation
 import StreamCore
 
-public final class CallStatsReportReadyEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
+/// This event is sent when the insights report is ready
+public final class CallStatsReportReadyEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
     public var callCid: String
     public var createdAt: Date
+    /// Call session ID
     public var sessionId: String
+    /// The type of event, "call.report_ready" in this case
     public var type: String = "call.stats_report_ready"
 
     public init(callCid: String, createdAt: Date, sessionId: String) {
@@ -17,18 +20,21 @@ public final class CallStatsReportReadyEvent: @unchecked Sendable, Event, Codabl
         self.sessionId = sessionId
     }
 
-public enum CodingKeys: String, CodingKey {
-    case callCid = "call_cid"
-    case createdAt = "created_at"
-    case sessionId = "session_id"
-    case type
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.callCid = try container.decode(String.self, forKey: .callCid)
+        self.createdAt = try container.decode(Date.self, forKey: .createdAt)
+        self.sessionId = try container.decode(String.self, forKey: .sessionId)
+        self.type = try container.decode(String.self, forKey: .type)
+    }
 }
 
+extension CallStatsReportReadyEvent: Hashable {
     public static func == (lhs: CallStatsReportReadyEvent, rhs: CallStatsReportReadyEvent) -> Bool {
         lhs.callCid == rhs.callCid &&
-        lhs.createdAt == rhs.createdAt &&
-        lhs.sessionId == rhs.sessionId &&
-        lhs.type == rhs.type
+            lhs.createdAt == rhs.createdAt &&
+            lhs.sessionId == rhs.sessionId &&
+            lhs.type == rhs.type
     }
 
     public func hash(into hasher: inout Hasher) {

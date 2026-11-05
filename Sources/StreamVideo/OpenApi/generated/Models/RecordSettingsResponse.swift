@@ -3,9 +3,10 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class RecordSettingsResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+/// RecordSettings is the payload for recording settings
+public final class RecordSettingsResponse: @unchecked Sendable, Decodable {
     public var audioOnly: Bool
     public var mode: String
     public var quality: String
@@ -15,13 +16,16 @@ public final class RecordSettingsResponse: @unchecked Sendable, Codable, JSONEnc
         self.mode = mode
         self.quality = quality
     }
-    
-    public enum CodingKeys: String, CodingKey {
-        case audioOnly = "audio_only"
-        case mode
-        case quality
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.audioOnly = try container.decode(Bool.self, forKey: .audioOnly)
+        self.mode = try container.decode(String.self, forKey: .mode)
+        self.quality = try container.decode(String.self, forKey: .quality)
     }
-    
+}
+
+extension RecordSettingsResponse: Hashable {
     public static func == (lhs: RecordSettingsResponse, rhs: RecordSettingsResponse) -> Bool {
         lhs.audioOnly == rhs.audioOnly &&
             lhs.mode == rhs.mode &&

@@ -3,8 +3,10 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class GetCallRingStateResponse: @unchecked Sendable, Codable, JSONEncodable {
+/// The ring state of a call session: who accepted, rejected, or missed the ring.
+public final class GetCallRingStateResponse: @unchecked Sendable, Decodable {
     /// Users that accepted the call, mapped to when they accepted
     public var acceptedBy: [String: Date]
     /// The CID of the call
@@ -26,7 +28,18 @@ public final class GetCallRingStateResponse: @unchecked Sendable, Codable, JSONE
     /// When the call session started
     public var sessionStartedAt: Date?
 
-    public init(acceptedBy: [String: Date], callCid: String, callEndedAt: Date? = nil, createdByUserId: String, duration: String, missedBy: [String: Date], rejectedBy: [String: Date], sessionEndedAt: Date? = nil, sessionId: String, sessionStartedAt: Date? = nil) {
+    public init(
+        acceptedBy: [String: Date],
+        callCid: String,
+        callEndedAt: Date? = nil,
+        createdByUserId: String,
+        duration: String,
+        missedBy: [String: Date],
+        rejectedBy: [String: Date],
+        sessionEndedAt: Date? = nil,
+        sessionId: String,
+        sessionStartedAt: Date? = nil
+    ) {
         self.acceptedBy = acceptedBy
         self.callCid = callCid
         self.callEndedAt = callEndedAt
@@ -39,32 +52,33 @@ public final class GetCallRingStateResponse: @unchecked Sendable, Codable, JSONE
         self.sessionStartedAt = sessionStartedAt
     }
 
-    public enum CodingKeys: String, CodingKey {
-        case acceptedBy = "accepted_by"
-        case callCid = "call_cid"
-        case callEndedAt = "call_ended_at"
-        case createdByUserId = "created_by_user_id"
-        case duration
-        case missedBy = "missed_by"
-        case rejectedBy = "rejected_by"
-        case sessionEndedAt = "session_ended_at"
-        case sessionId = "session_id"
-        case sessionStartedAt = "session_started_at"
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.acceptedBy = try container.decode([String: Date].self, forKey: .acceptedBy)
+        self.callCid = try container.decode(String.self, forKey: .callCid)
+        self.callEndedAt = try container.decodeIfPresent(Date.self, forKey: .callEndedAt)
+        self.createdByUserId = try container.decode(String.self, forKey: .createdByUserId)
+        self.duration = try container.decode(String.self, forKey: .duration)
+        self.missedBy = try container.decode([String: Date].self, forKey: .missedBy)
+        self.rejectedBy = try container.decode([String: Date].self, forKey: .rejectedBy)
+        self.sessionEndedAt = try container.decodeIfPresent(Date.self, forKey: .sessionEndedAt)
+        self.sessionId = try container.decode(String.self, forKey: .sessionId)
+        self.sessionStartedAt = try container.decodeIfPresent(Date.self, forKey: .sessionStartedAt)
     }
 }
 
 extension GetCallRingStateResponse: Hashable {
     public static func == (lhs: GetCallRingStateResponse, rhs: GetCallRingStateResponse) -> Bool {
         lhs.acceptedBy == rhs.acceptedBy &&
-        lhs.callCid == rhs.callCid &&
-        lhs.callEndedAt == rhs.callEndedAt &&
-        lhs.createdByUserId == rhs.createdByUserId &&
-        lhs.duration == rhs.duration &&
-        lhs.missedBy == rhs.missedBy &&
-        lhs.rejectedBy == rhs.rejectedBy &&
-        lhs.sessionEndedAt == rhs.sessionEndedAt &&
-        lhs.sessionId == rhs.sessionId &&
-        lhs.sessionStartedAt == rhs.sessionStartedAt
+            lhs.callCid == rhs.callCid &&
+            lhs.callEndedAt == rhs.callEndedAt &&
+            lhs.createdByUserId == rhs.createdByUserId &&
+            lhs.duration == rhs.duration &&
+            lhs.missedBy == rhs.missedBy &&
+            lhs.rejectedBy == rhs.rejectedBy &&
+            lhs.sessionEndedAt == rhs.sessionEndedAt &&
+            lhs.sessionId == rhs.sessionId &&
+            lhs.sessionStartedAt == rhs.sessionStartedAt
     }
 
     public func hash(into hasher: inout Hasher) {

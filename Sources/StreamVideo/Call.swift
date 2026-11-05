@@ -1007,26 +1007,39 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// - Parameters:
     ///  - startsHls: whether hls streaming should be started.
     ///  - startRecording: whether recording should be started.
-    ///  - startRtmpBroadcasts: whether RTMP broadcasting should be started.
     ///  - startTranscription: whether transcription should be started.
     /// - Returns: `GoLiveResponse`.
     @discardableResult
     public func goLive(
         startHls: Bool? = nil,
         startRecording: Bool? = nil,
-        startRtmpBroadcasts: Bool? = nil,
         startTranscription: Bool? = nil
     ) async throws -> GoLiveResponse {
         let goLiveRequest = GoLiveRequest(
             startHls: startHls,
             startRecording: startRecording,
-            startRtmpBroadcasts: startRtmpBroadcasts,
             startTranscription: startTranscription
         )
         return try await coordinatorClient.goLive(
             type: callType,
             id: callId,
             goLiveRequest: goLiveRequest
+        )
+    }
+
+    /// Starts a live call. The video API ignores `startRtmpBroadcasts`.
+    @available(*, deprecated, message: "No longer part of the video API. It will be removed in the next major version.")
+    @discardableResult
+    public func goLive(
+        startHls: Bool? = nil,
+        startRecording: Bool? = nil,
+        startRtmpBroadcasts: Bool?,
+        startTranscription: Bool? = nil
+    ) async throws -> GoLiveResponse {
+        try await goLive(
+            startHls: startHls,
+            startRecording: startRecording,
+            startTranscription: startTranscription
         )
     }
 

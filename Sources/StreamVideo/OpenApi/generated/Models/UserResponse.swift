@@ -2,24 +2,34 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
-import StreamCore
 import Foundation
+import StreamCore
 
-public final class UserResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+/// User response object
+public final class UserResponse: @unchecked Sendable, Decodable {
     public var blockedUserIds: [String]
+    /// Date/time of creation
     public var createdAt: Date
+    /// Custom data for this object
     public var custom: [String: RawJSON]
+    /// Date of deactivation
     public var deactivatedAt: Date?
+    /// Date/time of deletion
     public var deletedAt: Date?
+    /// Unique user identifier
     public var id: String
     public var image: String?
+    /// Preferred language of a user
     public var language: String
+    /// Date of last activity
     public var lastActive: Date?
+    /// Optional name of user
     public var name: String?
-    public var revokeTokensIssuedBefore: Date?
+    /// Determines the set of user permissions
     public var role: String
+    /// List of teams user is a part of
     public var teams: [String]
+    /// Date/time of the last update
     public var updatedAt: Date
 
     public init(
@@ -33,7 +43,6 @@ public final class UserResponse: @unchecked Sendable, Codable, JSONEncodable, Ha
         language: String,
         lastActive: Date? = nil,
         name: String? = nil,
-        revokeTokensIssuedBefore: Date? = nil,
         role: String,
         teams: [String],
         updatedAt: Date
@@ -48,29 +57,30 @@ public final class UserResponse: @unchecked Sendable, Codable, JSONEncodable, Ha
         self.language = language
         self.lastActive = lastActive
         self.name = name
-        self.revokeTokensIssuedBefore = revokeTokensIssuedBefore
         self.role = role
         self.teams = teams
         self.updatedAt = updatedAt
     }
-    
-    public enum CodingKeys: String, CodingKey {
-        case blockedUserIds = "blocked_user_ids"
-        case createdAt = "created_at"
-        case custom
-        case deactivatedAt = "deactivated_at"
-        case deletedAt = "deleted_at"
-        case id
-        case image
-        case language
-        case lastActive = "last_active"
-        case name
-        case revokeTokensIssuedBefore = "revoke_tokens_issued_before"
-        case role
-        case teams
-        case updatedAt = "updated_at"
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.blockedUserIds = try container.decode([String].self, forKey: .blockedUserIds)
+        self.createdAt = try container.decode(Date.self, forKey: .createdAt)
+        self.custom = try container.decode([String: RawJSON].self, forKey: .custom)
+        self.deactivatedAt = try container.decodeIfPresent(Date.self, forKey: .deactivatedAt)
+        self.deletedAt = try container.decodeIfPresent(Date.self, forKey: .deletedAt)
+        self.id = try container.decode(String.self, forKey: .id)
+        self.image = try container.decodeIfPresent(String.self, forKey: .image)
+        self.language = try container.decode(String.self, forKey: .language)
+        self.lastActive = try container.decodeIfPresent(Date.self, forKey: .lastActive)
+        self.name = try container.decodeIfPresent(String.self, forKey: .name)
+        self.role = try container.decode(String.self, forKey: .role)
+        self.teams = try container.decode([String].self, forKey: .teams)
+        self.updatedAt = try container.decode(Date.self, forKey: .updatedAt)
     }
-    
+}
+
+extension UserResponse: Hashable {
     public static func == (lhs: UserResponse, rhs: UserResponse) -> Bool {
         lhs.blockedUserIds == rhs.blockedUserIds &&
             lhs.createdAt == rhs.createdAt &&
@@ -82,7 +92,6 @@ public final class UserResponse: @unchecked Sendable, Codable, JSONEncodable, Ha
             lhs.language == rhs.language &&
             lhs.lastActive == rhs.lastActive &&
             lhs.name == rhs.name &&
-            lhs.revokeTokensIssuedBefore == rhs.revokeTokensIssuedBefore &&
             lhs.role == rhs.role &&
             lhs.teams == rhs.teams &&
             lhs.updatedAt == rhs.updatedAt
@@ -99,7 +108,6 @@ public final class UserResponse: @unchecked Sendable, Codable, JSONEncodable, Ha
         hasher.combine(language)
         hasher.combine(lastActive)
         hasher.combine(name)
-        hasher.combine(revokeTokensIssuedBefore)
         hasher.combine(role)
         hasher.combine(teams)
         hasher.combine(updatedAt)

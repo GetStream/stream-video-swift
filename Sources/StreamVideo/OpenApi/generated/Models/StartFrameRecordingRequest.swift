@@ -3,18 +3,22 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class StartFrameRecordingRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class StartFrameRecordingRequest: @unchecked Sendable, Encodable, JSONEncodable {
     public var recordingExternalStorage: String?
 
     public init(recordingExternalStorage: String? = nil) {
         self.recordingExternalStorage = recordingExternalStorage
     }
 
-public enum CodingKeys: String, CodingKey {
-    case recordingExternalStorage = "recording_external_storage"
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(recordingExternalStorage, forKey: .recordingExternalStorage)
+    }
 }
 
+extension StartFrameRecordingRequest: Hashable {
     public static func == (lhs: StartFrameRecordingRequest, rhs: StartFrameRecordingRequest) -> Bool {
         lhs.recordingExternalStorage == rhs.recordingExternalStorage
     }

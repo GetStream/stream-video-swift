@@ -1,16 +1,24 @@
-import Foundation
+//
+// Copyright © 2026 Stream.io Inc. All rights reserved.
+//
 
-public final class CompositeRecordingResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+import Foundation
+import StreamCore
+
+public final class CompositeRecordingResponse: @unchecked Sendable, Decodable {
     public var status: String
 
     public init(status: String) {
         self.status = status
     }
 
-public enum CodingKeys: String, CodingKey {
-    case status
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.status = try container.decode(String.self, forKey: .status)
+    }
 }
 
+extension CompositeRecordingResponse: Hashable {
     public static func == (lhs: CompositeRecordingResponse, rhs: CompositeRecordingResponse) -> Bool {
         lhs.status == rhs.status
     }

@@ -3,19 +3,22 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class RequestPermissionRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+public final class RequestPermissionRequest: @unchecked Sendable, Encodable, JSONEncodable {
     public var permissions: [String]
 
     public init(permissions: [String]) {
         self.permissions = permissions
     }
-    
-    public enum CodingKeys: String, CodingKey {
-        case permissions
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encode(permissions, forKey: .permissions)
     }
-    
+}
+
+extension RequestPermissionRequest: Hashable {
     public static func == (lhs: RequestPermissionRequest, rhs: RequestPermissionRequest) -> Bool {
         lhs.permissions == rhs.permissions
     }

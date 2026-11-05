@@ -5,12 +5,13 @@
 import Foundation
 import StreamCore
 
-public final class CallUserMutedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
-    
+/// This event is sent when a call member is muted
+public final class CallUserMutedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
     public var callCid: String
     public var createdAt: Date
     public var fromUserId: String
     public var mutedUserIds: [String]
+    /// The type of event: "call.user_muted" in this case
     public var type: String = "call.user_muted"
 
     public init(callCid: String, createdAt: Date, fromUserId: String, mutedUserIds: [String]) {
@@ -19,15 +20,18 @@ public final class CallUserMutedEvent: @unchecked Sendable, Event, Codable, JSON
         self.fromUserId = fromUserId
         self.mutedUserIds = mutedUserIds
     }
-    
-    public enum CodingKeys: String, CodingKey {
-        case callCid = "call_cid"
-        case createdAt = "created_at"
-        case fromUserId = "from_user_id"
-        case mutedUserIds = "muted_user_ids"
-        case type
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.callCid = try container.decode(String.self, forKey: .callCid)
+        self.createdAt = try container.decode(Date.self, forKey: .createdAt)
+        self.fromUserId = try container.decode(String.self, forKey: .fromUserId)
+        self.mutedUserIds = try container.decode([String].self, forKey: .mutedUserIds)
+        self.type = try container.decode(String.self, forKey: .type)
     }
-    
+}
+
+extension CallUserMutedEvent: Hashable {
     public static func == (lhs: CallUserMutedEvent, rhs: CallUserMutedEvent) -> Bool {
         lhs.callCid == rhs.callCid &&
             lhs.createdAt == rhs.createdAt &&

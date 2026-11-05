@@ -5,14 +5,15 @@
 import Foundation
 import StreamCore
 
-public final class CallSessionParticipantCountsUpdatedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable,
-    WSCallEvent {
-    
+/// This event is sent when the participant counts in a call session are updated
+public final class CallSessionParticipantCountsUpdatedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
     public var anonymousParticipantCount: Int
     public var callCid: String
     public var createdAt: Date
     public var participantsCountByRole: [String: Int]
+    /// Call session ID
     public var sessionId: String
+    /// The type of event: "call.session_participant_count_updated" in this case
     public var type: String = "call.session_participant_count_updated"
 
     public init(
@@ -28,16 +29,19 @@ public final class CallSessionParticipantCountsUpdatedEvent: @unchecked Sendable
         self.participantsCountByRole = participantsCountByRole
         self.sessionId = sessionId
     }
-    
-    public enum CodingKeys: String, CodingKey {
-        case anonymousParticipantCount = "anonymous_participant_count"
-        case callCid = "call_cid"
-        case createdAt = "created_at"
-        case participantsCountByRole = "participants_count_by_role"
-        case sessionId = "session_id"
-        case type
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.anonymousParticipantCount = try container.decode(Int.self, forKey: .anonymousParticipantCount)
+        self.callCid = try container.decode(String.self, forKey: .callCid)
+        self.createdAt = try container.decode(Date.self, forKey: .createdAt)
+        self.participantsCountByRole = try container.decode([String: Int].self, forKey: .participantsCountByRole)
+        self.sessionId = try container.decode(String.self, forKey: .sessionId)
+        self.type = try container.decode(String.self, forKey: .type)
     }
-    
+}
+
+extension CallSessionParticipantCountsUpdatedEvent: Hashable {
     public static func == (lhs: CallSessionParticipantCountsUpdatedEvent, rhs: CallSessionParticipantCountsUpdatedEvent) -> Bool {
         lhs.anonymousParticipantCount == rhs.anonymousParticipantCount &&
             lhs.callCid == rhs.callCid &&

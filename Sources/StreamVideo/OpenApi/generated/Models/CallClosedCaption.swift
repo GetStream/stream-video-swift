@@ -3,13 +3,15 @@
 //
 
 import Foundation
+import StreamCore
 
-public final class CallClosedCaption: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+/// CallClosedCaption represents a closed caption of a call.
+public final class CallClosedCaption: @unchecked Sendable, Decodable {
     public var endTime: Date
     public var speakerId: String
     public var startTime: Date
     public var text: String
+    /// User response object
     public var user: UserResponse
 
     public init(endTime: Date, speakerId: String, startTime: Date, text: String, user: UserResponse) {
@@ -19,15 +21,18 @@ public final class CallClosedCaption: @unchecked Sendable, Codable, JSONEncodabl
         self.text = text
         self.user = user
     }
-    
-    public enum CodingKeys: String, CodingKey {
-        case endTime = "end_time"
-        case speakerId = "speaker_id"
-        case startTime = "start_time"
-        case text
-        case user
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.endTime = try container.decode(Date.self, forKey: .endTime)
+        self.speakerId = try container.decode(String.self, forKey: .speakerId)
+        self.startTime = try container.decode(Date.self, forKey: .startTime)
+        self.text = try container.decode(String.self, forKey: .text)
+        self.user = try container.decode(UserResponse.self, forKey: .user)
     }
-    
+}
+
+extension CallClosedCaption: Hashable {
     public static func == (lhs: CallClosedCaption, rhs: CallClosedCaption) -> Bool {
         lhs.endTime == rhs.endTime &&
             lhs.speakerId == rhs.speakerId &&

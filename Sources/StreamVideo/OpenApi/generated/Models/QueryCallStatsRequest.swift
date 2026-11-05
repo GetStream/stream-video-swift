@@ -2,15 +2,16 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
-import StreamCore
 import Foundation
+import StreamCore
 
-public final class QueryCallStatsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+public final class QueryCallStatsRequest: @unchecked Sendable, Encodable, JSONEncodable {
+    /// Filter conditions to apply to the query
     public var filterConditions: [String: RawJSON]?
     public var limit: Int?
     public var next: String?
     public var prev: String?
+    /// Array of sort parameters
     public var sort: [SortParamRequest]?
 
     public init(
@@ -26,15 +27,18 @@ public final class QueryCallStatsRequest: @unchecked Sendable, Codable, JSONEnco
         self.prev = prev
         self.sort = sort
     }
-    
-    public enum CodingKeys: String, CodingKey {
-        case filterConditions = "filter_conditions"
-        case limit
-        case next
-        case prev
-        case sort
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(filterConditions, forKey: .filterConditions)
+        try container.encodeIfPresent(limit, forKey: .limit)
+        try container.encodeIfPresent(next, forKey: .next)
+        try container.encodeIfPresent(prev, forKey: .prev)
+        try container.encodeIfPresent(sort, forKey: .sort)
     }
-    
+}
+
+extension QueryCallStatsRequest: Hashable {
     public static func == (lhs: QueryCallStatsRequest, rhs: QueryCallStatsRequest) -> Bool {
         lhs.filterConditions == rhs.filterConditions &&
             lhs.limit == rhs.limit &&

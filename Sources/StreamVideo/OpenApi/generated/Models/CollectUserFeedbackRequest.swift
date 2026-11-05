@@ -2,11 +2,10 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
-import StreamCore
 import Foundation
+import StreamCore
 
-public final class CollectUserFeedbackRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+public final class CollectUserFeedbackRequest: @unchecked Sendable, Encodable, JSONEncodable {
     public var custom: [String: RawJSON]?
     public var rating: Int
     public var reason: String?
@@ -29,16 +28,19 @@ public final class CollectUserFeedbackRequest: @unchecked Sendable, Codable, JSO
         self.sdkVersion = sdkVersion
         self.userSessionId = userSessionId
     }
-    
-    public enum CodingKeys: String, CodingKey {
-        case custom
-        case rating
-        case reason
-        case sdk
-        case sdkVersion = "sdk_version"
-        case userSessionId = "user_session_id"
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(custom, forKey: .custom)
+        try container.encode(rating, forKey: .rating)
+        try container.encodeIfPresent(reason, forKey: .reason)
+        try container.encode(sdk, forKey: .sdk)
+        try container.encode(sdkVersion, forKey: .sdkVersion)
+        try container.encodeIfPresent(userSessionId, forKey: .userSessionId)
     }
-    
+}
+
+extension CollectUserFeedbackRequest: Hashable {
     public static func == (lhs: CollectUserFeedbackRequest, rhs: CollectUserFeedbackRequest) -> Bool {
         lhs.custom == rhs.custom &&
             lhs.rating == rhs.rating &&
