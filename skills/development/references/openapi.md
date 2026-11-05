@@ -15,6 +15,14 @@ Do not edit `Sources/StreamVideo/OpenApi/generated/` by hand. Change the lists b
    The post-processing steps live in `Scripts/openapi_generate_helpers.sh`.
 3. Run the script a second time. `git diff` must not change.
 
+## CI
+
+`.github/workflows/openapi.yml` starts with `workflow_dispatch` on the selected branch.
+The `chat_ref` input is a `GetStream/chat` branch name or commit hash. It defaults to `master`.
+The generate job has read permission only. It uses `CI_BOT_GITHUB_TOKEN` to download private Go modules, removes that login, then runs `Scripts/generate.sh` with `GOPROXY=off`.
+The pull request job checks out this repository only, downloads the generated files, and opens a pull request when they changed.
+The pull request targets the branch the workflow ran on. Its title is `[Hygiene]OpenAPI models generation`.
+
 ## Control the output
 
 `Scripts/openapi-allowed.json` holds sorted lists:
