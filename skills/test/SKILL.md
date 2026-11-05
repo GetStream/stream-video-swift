@@ -94,7 +94,8 @@ Passing repetitions provide evidence only for the tested conditions.
   `.github/workflows/` sets the model. `fastlane/Fastfile` sets the default Xcode version.
   Other models or Xcode versions fail on perceptual precision without a visual change.
   If that setup is unavailable, run the failing snapshot tests on the base branch with the same setup.
-  Matching precision values on both branches mean the change did not cause the failures.
+  Matching failures and precision values on both branches point to the setup, not the change.
+  Still inspect the image differences.
 
 ## Result
 

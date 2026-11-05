@@ -86,7 +86,7 @@ extension TranscriptionSettings.Language {
         case .uk: return "Ukrainian"
         case .zh: return "Chinese"
         default:
-            return rawValue
+            return rawValue.isEmpty ? "Unknown" : rawValue
         }
     }
 }
