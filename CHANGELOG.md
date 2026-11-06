@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🔄 Changed
 
+- Updated WebRTC to 156.0.2. [#1396](https://github.com/GetStream/stream-video-swift/pull/1396)
 - Deprecate `GoLiveRequest.startRtmpBroadcasts`, `OwnUserResponse.pushNotifications`, `PushNotificationSettingsResponse`, and `revokeTokensIssuedBefore` on `OwnUserResponse`, `UserResponse` and `UserEventPayload`. The video API no longer has them. The response fields are always `nil`, and the API ignores `startRtmpBroadcasts`. Deprecate `Call.goLive(startRtmpBroadcasts:)`; use `goLive(startHls:startRecording:startTranscription:)` instead. [#1378](https://github.com/GetStream/stream-video-swift/pull/1378)
 - Remove 20 unused API models that no endpoint or event returns, for example `AggregatedStats`, `UserStats` and `VideoResolution`. [#1378](https://github.com/GetStream/stream-video-swift/pull/1378)
 - Remove the public `CodingKeys` enums from the API models to reduce binary size. The models encode and decode the same JSON as before. [#1379](https://github.com/GetStream/stream-video-swift/pull/1379)
