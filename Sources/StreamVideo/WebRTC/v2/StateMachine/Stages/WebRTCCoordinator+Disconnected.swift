@@ -70,9 +70,9 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     subsystems: .webRTC
                 )
             } else if let error = context.flowError {
-                // If we got here from an unrecoverable error, we won't attempt
-                // any reconnection and instead we will disconnect.
-                if let apiError = error as? APIError, apiError.unrecoverable == true {
+                // A terminal join failure cannot succeed on another attempt.
+                // Leave instead of starting another rejoin.
+                if error.isTerminalJoinFailure {
                     context.reconnectionStrategy = .disconnected
                 }
                 log.error(

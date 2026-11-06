@@ -791,6 +791,36 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
         XCTAssertEqual(callController.timesCalled(.join), 1)
     }
 
+    func test_execute_withRetries_joinFailsWithBackstageRefusal_doesNotRetry() async throws {
+        try await assertJoining(
+            makeJoinContext(maxRetries: 3),
+            joinResponse: APIError(
+                code: 17,
+                message: "User 'viewer' with role 'user' is not allowed to perform action JoinBackstage",
+                statusCode: 403,
+                unrecoverable: false
+            ),
+            expectedTransition: .error
+        )
+
+        XCTAssertEqual(callController.timesCalled(.join), 1)
+    }
+
+    func test_execute_withRetries_joinFailsWithRateLimit_doesNotRetry() async throws {
+        try await assertJoining(
+            makeJoinContext(maxRetries: 3),
+            joinResponse: APIError(
+                code: 9,
+                message: "Too many requests",
+                statusCode: 429,
+                unrecoverable: false
+            ),
+            expectedTransition: .error
+        )
+
+        XCTAssertEqual(callController.timesCalled(.join), 1)
+    }
+
     func test_execute_withRetries_joinFailsAfterAllRetries_removesCallFromCacheWithoutLeaving() async throws {
         let callCache = InjectedValues[\.callCache]
         _ = callCache.call(for: call.cId) { call }
