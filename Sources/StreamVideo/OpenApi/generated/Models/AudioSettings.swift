@@ -5,24 +5,20 @@
 import Foundation
 import StreamCore
 
-public final class AudioSettings: @unchecked Sendable, Decodable {
-    
-    public enum AudioSettingsDefaultDevice: String, Sendable, Codable, CaseIterable {
-        case earpiece
-        case speaker
-        case unknown = "_unknown"
+public final class AudioSettingsDefaultDevice: RawRepresentable, Codable, CustomStringConvertible, Hashable, Sendable {
+    public let rawValue: String
 
-        public init(from decoder: Decoder) throws {
-            let container = try decoder.singleValueContainer()
-            if let decodedValue = try? container.decode(String.self),
-               let value = Self(rawValue: decodedValue) {
-                self = value
-            } else {
-                self = .unknown
-            }
-        }
+    public var description: String { rawValue }
+
+    public init(rawValue: String) {
+        self.rawValue = rawValue
     }
 
+    public static let earpiece = AudioSettingsDefaultDevice(rawValue: "earpiece")
+    public static let speaker = AudioSettingsDefaultDevice(rawValue: "speaker")
+}
+
+public final class AudioSettings: @unchecked Sendable, Decodable {
     public var accessRequestEnabled: Bool
     public var defaultDevice: AudioSettingsDefaultDevice
     public var hifiAudioEnabled: Bool?

@@ -19,8 +19,8 @@ extension JSONEncoder {
 
 // MARK: - Typealiases
 
-// The generator prefixes nested enums with the model name. These aliases keep
-// the unprefixed names.
+// The generator names inline enums after their model. These aliases keep the
+// short names.
 
 extension AudioSettings {
     /// Same as ``AudioSettingsDefaultDevice``.
@@ -125,6 +125,18 @@ extension GoLiveRequest {
             transcriptionStorageName: transcriptionStorageName
         )
     }
+}
+
+extension IngressAudioEncodingOptionsRequest {
+    /// The API takes `channels` as a number.
+    @available(*, deprecated, message: "Use Int. It will be removed in the next major version.")
+    public typealias IngressAudioEncodingOptionsRequestChannels = Int
+}
+
+extension IngressSourceRequest {
+    /// The API takes `fps` as a number.
+    @available(*, deprecated, message: "Use Int. It will be removed in the next major version.")
+    public typealias IngressSourceRequestFps = Int
 }
 
 extension OwnUserResponse {

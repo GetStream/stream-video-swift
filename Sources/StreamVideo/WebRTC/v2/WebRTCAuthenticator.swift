@@ -143,7 +143,7 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
                     return .front
                 case .front:
                     return .front
-                case .unknown:
+                default:
                     return .front
                 }
             }())

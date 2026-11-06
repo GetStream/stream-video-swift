@@ -5,33 +5,29 @@
 import Foundation
 import StreamCore
 
-/// RTMPBroadcastRequest is the payload for starting an RTMP broadcast.
-public final class RTMPBroadcastRequest: @unchecked Sendable, Encodable, JSONEncodable {
-    
-    public enum RTMPBroadcastRequestQuality: String, Sendable, Codable, CaseIterable {
-        case _1080p = "1080p"
-        case _1440p = "1440p"
-        case _360p = "360p"
-        case _480p = "480p"
-        case _720p = "720p"
-        case portrait1080x1920 = "portrait-1080x1920"
-        case portrait1440x2560 = "portrait-1440x2560"
-        case portrait360x640 = "portrait-360x640"
-        case portrait480x854 = "portrait-480x854"
-        case portrait720x1280 = "portrait-720x1280"
-        case unknown = "_unknown"
+public final class RTMPBroadcastRequestQuality: RawRepresentable, Codable, CustomStringConvertible, Hashable, Sendable {
+    public let rawValue: String
 
-        public init(from decoder: Decoder) throws {
-            let container = try decoder.singleValueContainer()
-            if let decodedValue = try? container.decode(String.self),
-               let value = Self(rawValue: decodedValue) {
-                self = value
-            } else {
-                self = .unknown
-            }
-        }
+    public var description: String { rawValue }
+
+    public init(rawValue: String) {
+        self.rawValue = rawValue
     }
 
+    public static let _1080p = RTMPBroadcastRequestQuality(rawValue: "1080p")
+    public static let _1440p = RTMPBroadcastRequestQuality(rawValue: "1440p")
+    public static let _360p = RTMPBroadcastRequestQuality(rawValue: "360p")
+    public static let _480p = RTMPBroadcastRequestQuality(rawValue: "480p")
+    public static let _720p = RTMPBroadcastRequestQuality(rawValue: "720p")
+    public static let portrait1080x1920 = RTMPBroadcastRequestQuality(rawValue: "portrait-1080x1920")
+    public static let portrait1440x2560 = RTMPBroadcastRequestQuality(rawValue: "portrait-1440x2560")
+    public static let portrait360x640 = RTMPBroadcastRequestQuality(rawValue: "portrait-360x640")
+    public static let portrait480x854 = RTMPBroadcastRequestQuality(rawValue: "portrait-480x854")
+    public static let portrait720x1280 = RTMPBroadcastRequestQuality(rawValue: "portrait-720x1280")
+}
+
+/// RTMPBroadcastRequest is the payload for starting an RTMP broadcast.
+public final class RTMPBroadcastRequest: @unchecked Sendable, Encodable, JSONEncodable {
     public var layout: LayoutSettings?
     /// Name identifier for RTMP broadcast, must be unique in call
     public var name: String

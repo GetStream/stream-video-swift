@@ -5,25 +5,21 @@
 import Foundation
 import StreamCore
 
-public final class FrameRecordingSettingsResponse: @unchecked Sendable, Decodable {
-    
-    public enum FrameRecordingSettingsResponseMode: String, Sendable, Codable, CaseIterable {
-        case autoOn = "auto-on"
-        case available
-        case disabled
-        case unknown = "_unknown"
+public final class FrameRecordingSettingsResponseMode: RawRepresentable, Codable, CustomStringConvertible, Hashable, Sendable {
+    public let rawValue: String
 
-        public init(from decoder: Decoder) throws {
-            let container = try decoder.singleValueContainer()
-            if let decodedValue = try? container.decode(String.self),
-               let value = Self(rawValue: decodedValue) {
-                self = value
-            } else {
-                self = .unknown
-            }
-        }
+    public var description: String { rawValue }
+
+    public init(rawValue: String) {
+        self.rawValue = rawValue
     }
 
+    public static let autoOn = FrameRecordingSettingsResponseMode(rawValue: "auto-on")
+    public static let available = FrameRecordingSettingsResponseMode(rawValue: "available")
+    public static let disabled = FrameRecordingSettingsResponseMode(rawValue: "disabled")
+}
+
+public final class FrameRecordingSettingsResponse: @unchecked Sendable, Decodable {
     public var captureIntervalInSeconds: Int
     public var mode: FrameRecordingSettingsResponseMode
     public var quality: String?

@@ -5,25 +5,21 @@
 import Foundation
 import StreamCore
 
-public final class VideoSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable {
-    
-    public enum VideoSettingsRequestCameraFacing: String, Sendable, Codable, CaseIterable {
-        case back
-        case external
-        case front
-        case unknown = "_unknown"
+public final class VideoSettingsRequestCameraFacing: RawRepresentable, Codable, CustomStringConvertible, Hashable, Sendable {
+    public let rawValue: String
 
-        public init(from decoder: Decoder) throws {
-            let container = try decoder.singleValueContainer()
-            if let decodedValue = try? container.decode(String.self),
-               let value = Self(rawValue: decodedValue) {
-                self = value
-            } else {
-                self = .unknown
-            }
-        }
+    public var description: String { rawValue }
+
+    public init(rawValue: String) {
+        self.rawValue = rawValue
     }
 
+    public static let back = VideoSettingsRequestCameraFacing(rawValue: "back")
+    public static let external = VideoSettingsRequestCameraFacing(rawValue: "external")
+    public static let front = VideoSettingsRequestCameraFacing(rawValue: "front")
+}
+
+public final class VideoSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable {
     public var accessRequestEnabled: Bool?
     public var cameraDefaultOn: Bool?
     public var cameraFacing: VideoSettingsRequestCameraFacing?

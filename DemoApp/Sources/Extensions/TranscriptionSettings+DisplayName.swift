@@ -5,18 +5,8 @@
 import Foundation
 import StreamVideo
 
-#if compiler(>=6.0)
-extension TranscriptionSettings.Mode: @retroactive CustomStringConvertible {}
-extension TranscriptionSettings.ClosedCaptionMode: @retroactive CustomStringConvertible {}
-extension TranscriptionSettings.Language: @retroactive CustomStringConvertible {}
-#else
-extension TranscriptionSettings.Mode: CustomStringConvertible {}
-extension TranscriptionSettings.ClosedCaptionMode: CustomStringConvertible {}
-extension TranscriptionSettings.Language: CustomStringConvertible {}
-#endif
-
 extension TranscriptionSettings.Mode {
-    public var description: String {
+    var displayName: String {
         switch self {
         case .autoOn:
             return "auto-on"
@@ -24,14 +14,14 @@ extension TranscriptionSettings.Mode {
             return "Available"
         case .disabled:
             return "Disabled"
-        case .unknown:
-            return "Unknown"
+        default:
+            return rawValue
         }
     }
 }
 
 extension TranscriptionSettings.ClosedCaptionMode {
-    public var description: String {
+    var displayName: String {
         switch self {
         case .autoOn:
             return "auto-on"
@@ -39,17 +29,18 @@ extension TranscriptionSettings.ClosedCaptionMode {
             return "Available"
         case .disabled:
             return "Disabled"
-        case .unknown:
-            return "Unknown"
+        default:
+            return rawValue
         }
     }
 }
 
 extension TranscriptionSettings.Language {
-    public var description: String {
+    var displayName: String {
         switch self {
         case .ar: return "Arabic"
         case .auto: return "Auto"
+        case .bg: return "Bulgarian"
         case .ca: return "Catalan"
         case .cs: return "Czech"
         case .da: return "Danish"
@@ -57,6 +48,7 @@ extension TranscriptionSettings.Language {
         case .el: return "Greek"
         case .en: return "English"
         case .es: return "Spanish"
+        case .et: return "Estonian"
         case .fi: return "Finnish"
         case .fr: return "French"
         case .he: return "Hebrew"
@@ -74,6 +66,8 @@ extension TranscriptionSettings.Language {
         case .pt: return "Portuguese"
         case .ro: return "Romanian"
         case .ru: return "Russian"
+        case .sk: return "Slovak"
+        case .sl: return "Slovenian"
         case .sv: return "Swedish"
         case .ta: return "Tamil"
         case .th: return "Thai"
@@ -81,8 +75,8 @@ extension TranscriptionSettings.Language {
         case .tr: return "Turkish"
         case .uk: return "Ukrainian"
         case .zh: return "Chinese"
-        case .unknown:
-            return "Unknown"
+        default:
+            return rawValue.isEmpty ? "Unknown" : rawValue
         }
     }
 }

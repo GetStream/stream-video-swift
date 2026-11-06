@@ -8,7 +8,7 @@ extension AudioSettings {
     convenience init() {
         self.init(
             accessRequestEnabled: false,
-            defaultDevice: .unknown,
+            defaultDevice: .init(rawValue: ""),
             micDefaultOn: false,
             opusDtxEnabled: false,
             redundantCodingEnabled: false,

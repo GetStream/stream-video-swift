@@ -60,7 +60,7 @@ final class StatelessSpeakerIconView_Tests: StreamVideoUITestCase, @unchecked Se
     func test_appearance_audioDefaultDeviceUnknown_wasConfiguredCorrectly() throws {
         AssertSnapshot(
             try makeSubject(
-                audioDefaultDevice: .unknown
+                audioDefaultDevice: .init(rawValue: "")
             ),
             variants: snapshotVariants,
             size: sizeThatFits
@@ -72,7 +72,7 @@ final class StatelessSpeakerIconView_Tests: StreamVideoUITestCase, @unchecked Se
     @MainActor
     private func makeSubject(
         cameraOn: Bool = false,
-        audioDefaultDevice: AudioSettings.DefaultDevice = .unknown,
+        audioDefaultDevice: AudioSettings.DefaultDevice = .init(rawValue: ""),
         actionHandler: (() -> Void)? = nil,
         file: StaticString = #filePath,
         line: UInt = #line

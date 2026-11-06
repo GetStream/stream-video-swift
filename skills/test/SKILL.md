@@ -90,8 +90,12 @@ Passing repetitions provide evidence only for the tested conditions.
   Duplicate state assignments can hide a timer that still fires.
 - Change snapshot references only for an intended visual change.
   Inspect visual differences before accepting new references.
-  Run snapshot tests on the simulator model CI uses, as set in `.github/workflows/`.
-  Other models fail on perceptual precision without a visual change.
+  Run snapshot tests on the simulator model and Xcode version CI uses.
+  `.github/workflows/` sets the model. `fastlane/Fastfile` sets the default Xcode version.
+  Other models or Xcode versions fail on perceptual precision without a visual change.
+  If that setup is unavailable, run the failing snapshot tests on the base branch with the same setup.
+  Matching failures and precision values on both branches point to the setup, not the change.
+  Still inspect the image differences.
 
 ## Result
 

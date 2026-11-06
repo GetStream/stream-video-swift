@@ -922,6 +922,42 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
         )
     }
 
+    func test_startClosedCaptions_withLanguage_updatesTranscriptionLanguage() async throws {
+        let mockCoordinatorClient = MockDefaultAPIEndpoints()
+        mockCoordinatorClient.stub(
+            for: .startClosedCaptions,
+            with: StartClosedCaptionsResponse(duration: "0")
+        )
+        let call = Call(
+            from: .init(call: .dummy(), members: [], ownCapabilities: []),
+            coordinatorClient: mockCoordinatorClient,
+            callController: .dummy(defaultAPI: mockCoordinatorClient)
+        )
+        await fulfilmentInMainActor { call.state.settings != nil }
+
+        try await call.startClosedCaptions(.init(language: "future-language"))
+
+        XCTAssertEqual(call.state.settings?.transcription.language.rawValue, "future-language")
+    }
+
+    func test_startClosedCaptions_withoutLanguage_clearsTranscriptionLanguage() async throws {
+        let mockCoordinatorClient = MockDefaultAPIEndpoints()
+        mockCoordinatorClient.stub(
+            for: .startClosedCaptions,
+            with: StartClosedCaptionsResponse(duration: "0")
+        )
+        let call = Call(
+            from: .init(call: .dummy(), members: [], ownCapabilities: []),
+            coordinatorClient: mockCoordinatorClient,
+            callController: .dummy(defaultAPI: mockCoordinatorClient)
+        )
+        await fulfilmentInMainActor { call.state.settings != nil }
+
+        try await call.startClosedCaptions()
+
+        XCTAssertEqual(call.state.settings?.transcription.language.rawValue, "")
+    }
+
     // MARK: - Recording
 
     func test_coordinatorEventReceived_startedRecording_updatesStateCorrectly() async throws {

@@ -77,21 +77,21 @@ remove_properties() {
       ' "$file" > "$file.tmp" && mv "$file.tmp" "$file"
       # Drop the `&&` left dangling when the last field of an == chain goes.
       perl -0777 -pi -e 's/ &&(\n\s*\})/$1/g' "$file"
-      remove_unused_nested_enum "$file" "$type"
+      remove_unused_raw_representable "$file" "$type"
     done
   done
 }
 
-# Drops a nested enum when nothing else in the file uses it.
-remove_unused_nested_enum() {
+# Drops a RawRepresentable enum class when nothing else in the file uses it.
+remove_unused_raw_representable() {
   local file="$1" type="$2"
-  grep -q "^    public enum $type:" "$file" || return 0
+  grep -q "^public final class $type: RawRepresentable" "$file" || return 0
   awk -v t="$type" '
     function flush() { for (i = 1; i <= n; i++) print b[i]; n = 0 }
-    !skip && /^    \/\/\//            { b[++n] = $0; next }
-    $0 ~ "^    public enum " t ":" { n = 0; skip = 1; next }
-    skip && $0 == "    }"          { skip = 0; next }
-    skip                            { next }
+    !skip && /^\/\/\//                                 { b[++n] = $0; next }
+    $0 ~ "^public final class " t ": RawRepresentable" { n = 0; skip = 1; next }
+    skip && $0 == "}"                                  { skip = 0; next }
+    skip                                               { next }
     { flush(); print }
   ' "$file" > "$file.tmp"
   if grep -qw "$type" "$file.tmp"; then rm "$file.tmp"; else mv "$file.tmp" "$file"; fi
@@ -122,37 +122,7 @@ retype_properties() {
         s/^(\h+self\.\Q$p\E = try container\.decode)(?:IfPresent)?\(.*\.self(, forKey: \.\Q$p\E\))$/$1$c($t.self$2/m;
         s/^(\h+try container\.encode)(?:IfPresent)?(\(\Q$p\E, forKey: \.\Q$p\E\))$/$1$c$2/m;
       ' "$file"
-      remove_unused_nested_enum "$file" "$(sed -E 's/^\[?([A-Za-z]+).*/\1/' <<< "$old")"
-    done
-  done
-}
-
-# Drops the enum cases listed in removedEnumCases. Keys are Model or Model.Enum.
-remove_enum_cases() {
-  local entries entry model name file cases c
-  entries="$(jq -r '.removedEnumCases | keys[]' "$ALLOWED_FILE")"
-  for entry in $entries; do
-    model="${entry%%.*}"
-    name="${entry#*.}"
-    file="$OUTPUT_DIR/Models/$model.swift"
-    cases="$(jq -r --arg e "$entry" '.removedEnumCases[$e][]' "$ALLOWED_FILE")"
-    for c in $cases; do
-      if ! awk -v t="$name" -v c="$c" '
-        function flush() { for (i = 1; i <= n; i++) print b[i]; n = 0 }
-        !inside && $0 ~ ("^ *public enum " t ":") {
-          inside = 1; ind = substr($0, 1, match($0, /[^ ]/) - 1); print; next
-        }
-        inside && $0 == ind "}"                                         { inside = 0 }
-        inside && $0 ~ ("^" ind "    (///|@available)")                 { b[++n] = $0; next }
-        inside && $0 ~ ("^" ind "    case " c "( = \"[^\"]*\")?$")    { n = 0; removed = 1; next }
-        { flush(); print }
-        END { exit !removed }
-      ' "$file" > "$file.tmp"; then
-        rm "$file.tmp"
-        echo "Removed enum case missing: $entry.$c" >&2
-        exit 1
-      fi
-      mv "$file.tmp" "$file"
+      remove_unused_raw_representable "$file" "$(sed -E 's/^\[?([A-Za-z]+).*/\1/' <<< "$old")"
     done
   done
 }

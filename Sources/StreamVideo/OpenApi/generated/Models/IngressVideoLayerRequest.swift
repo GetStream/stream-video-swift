@@ -5,24 +5,20 @@
 import Foundation
 import StreamCore
 
-public final class IngressVideoLayerRequest: @unchecked Sendable, Encodable, JSONEncodable {
-    
-    public enum IngressVideoLayerRequestCodec: String, Sendable, Codable, CaseIterable {
-        case h264
-        case vp8
-        case unknown = "_unknown"
+public final class IngressVideoLayerRequestCodec: RawRepresentable, Codable, CustomStringConvertible, Hashable, Sendable {
+    public let rawValue: String
 
-        public init(from decoder: Decoder) throws {
-            let container = try decoder.singleValueContainer()
-            if let decodedValue = try? container.decode(String.self),
-               let value = Self(rawValue: decodedValue) {
-                self = value
-            } else {
-                self = .unknown
-            }
-        }
+    public var description: String { rawValue }
+
+    public init(rawValue: String) {
+        self.rawValue = rawValue
     }
 
+    public static let h264 = IngressVideoLayerRequestCodec(rawValue: "h264")
+    public static let vp8 = IngressVideoLayerRequestCodec(rawValue: "vp8")
+}
+
+public final class IngressVideoLayerRequest: @unchecked Sendable, Encodable, JSONEncodable {
     public var bitrate: Int
     public var codec: IngressVideoLayerRequestCodec
     public var frameRateLimit: Int
