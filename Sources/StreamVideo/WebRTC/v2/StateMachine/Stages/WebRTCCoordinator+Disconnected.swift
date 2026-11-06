@@ -71,7 +71,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 )
             } else if let error = context.flowError {
                 // Leave instead of starting another rejoin.
-                if joinCallShouldStop(error) {
+                if JoinCallAttempt.shouldStop(error) {
                     context.reconnectionStrategy = .disconnected
                 }
                 log.error(
@@ -144,23 +144,6 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 observeInternetConnection()
                 observeDurationInStage()
             }
-        }
-
-        /// Another `joinCall` cannot fix a backstage refusal, a rate limit,
-        /// or an error the backend marks unrecoverable.
-        private func joinCallShouldStop(_ error: Error) -> Bool {
-            let apiError = (error as? APIError) ?? (error as? ClientError)?.apiError
-            guard let apiError else {
-                return false
-            }
-            if apiError.unrecoverable == true {
-                return true
-            }
-            if apiError.statusCode == 429 {
-                return true
-            }
-            return apiError.statusCode == 403
-                && apiError.message.contains("JoinBackstage")
         }
 
         /// Attempts to reconnect based on the current reconnection strategy.
