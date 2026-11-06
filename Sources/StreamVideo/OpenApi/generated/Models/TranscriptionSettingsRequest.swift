@@ -5,8 +5,10 @@
 import Foundation
 import StreamCore
 
-public final class TranscriptionSettingsRequestClosedCaptionMode: RawRepresentable, Codable, Hashable, Sendable {
+public final class TranscriptionSettingsRequestClosedCaptionMode: RawRepresentable, Codable, CustomStringConvertible, Hashable, Sendable {
     public let rawValue: String
+
+    public var description: String { rawValue }
 
     public init(rawValue: String) {
         self.rawValue = rawValue
@@ -17,8 +19,10 @@ public final class TranscriptionSettingsRequestClosedCaptionMode: RawRepresentab
     public static let disabled = TranscriptionSettingsRequestClosedCaptionMode(rawValue: "disabled")
 }
 
-public final class TranscriptionSettingsRequestLanguage: RawRepresentable, Codable, Hashable, Sendable {
+public final class TranscriptionSettingsRequestLanguage: RawRepresentable, Codable, CustomStringConvertible, Hashable, Sendable {
     public let rawValue: String
+
+    public var description: String { rawValue }
 
     public init(rawValue: String) {
         self.rawValue = rawValue
@@ -63,8 +67,10 @@ public final class TranscriptionSettingsRequestLanguage: RawRepresentable, Codab
     public static let zh = TranscriptionSettingsRequestLanguage(rawValue: "zh")
 }
 
-public final class TranscriptionSettingsRequestMode: RawRepresentable, Codable, Hashable, Sendable {
+public final class TranscriptionSettingsRequestMode: RawRepresentable, Codable, CustomStringConvertible, Hashable, Sendable {
     public let rawValue: String
+
+    public var description: String { rawValue }
 
     public init(rawValue: String) {
         self.rawValue = rawValue

@@ -95,13 +95,13 @@ struct DemoTranscriptionAndClosedCaptionsButtonView: View {
     private var transcriptionContentView: some View {
         Menu {
             selectableView(
-                TranscriptionSettings.Mode.available,
-                isEqualHandler: { _ in isTranscribing }
+                TranscriptionSettings.Mode.available.displayName,
+                isSelected: isTranscribing
             ) { execute { try await viewModel.call?.startTranscription() } }
 
             selectableView(
-                TranscriptionSettings.Mode.disabled,
-                isEqualHandler: { _ in !isTranscribing }
+                TranscriptionSettings.Mode.disabled.displayName,
+                isSelected: !isTranscribing
             ) { execute { try await viewModel.call?.stopTranscription() } }
         } label: {
             Label {
@@ -116,16 +116,16 @@ struct DemoTranscriptionAndClosedCaptionsButtonView: View {
     private var closedCaptionsContentView: some View {
         Menu {
             selectableView(
-                TranscriptionSettings.ClosedCaptionMode.available,
-                isEqualHandler: { _ in isCaptioning && AppEnvironment.closedCaptionsIntegration == .enabled }
+                TranscriptionSettings.ClosedCaptionMode.available.displayName,
+                isSelected: isCaptioning && AppEnvironment.closedCaptionsIntegration == .enabled
             ) { execute {
                 try await viewModel.call?.startClosedCaptions()
             }
             }
 
             selectableView(
-                TranscriptionSettings.ClosedCaptionMode.disabled,
-                isEqualHandler: { _ in !isCaptioning && AppEnvironment.closedCaptionsIntegration == .enabled }
+                TranscriptionSettings.ClosedCaptionMode.disabled.displayName,
+                isSelected: !isCaptioning && AppEnvironment.closedCaptionsIntegration == .enabled
             ) { execute { try await viewModel.call?.stopClosedCaptions() } }
 
             Divider()
@@ -165,9 +165,10 @@ struct DemoTranscriptionAndClosedCaptionsButtonView: View {
     @ViewBuilder
     private var closedCaptionsLanguageContentView: some View {
         Menu {
-            selectableView("Unknown") { _ in
-                closedCaptionsLanguage != .auto && !availableLanguages.contains(closedCaptionsLanguage)
-            } action: {
+            selectableView(
+                "Unknown",
+                isSelected: closedCaptionsLanguage != .auto && !availableLanguages.contains(closedCaptionsLanguage)
+            ) {
                 execute {
                     try await viewModel.call?.stopClosedCaptions()
                     try await viewModel.call?.startClosedCaptions(.init(language: nil))
@@ -178,42 +179,40 @@ struct DemoTranscriptionAndClosedCaptionsButtonView: View {
 
             ForEach(availableLanguages, id: \.self) { language in
                 selectableView(
-                    language,
-                    isEqualHandler: {
-                        viewModel
-                            .call?
-                            .state
-                            .settings?
-                            .transcription
-                            .language == $0
-                    }
+                    language.displayName,
+                    isSelected: viewModel
+                        .call?
+                        .state
+                        .settings?
+                        .transcription
+                        .language == language
                 ) { execute {
                     try await viewModel.call?.stopClosedCaptions()
                     try await viewModel.call?.startClosedCaptions(.init(language: language.rawValue))
                 } }
             }
         } label: {
-            Text("Language: \(closedCaptionsLanguage.description)")
+            Text("Language: \(closedCaptionsLanguage.displayName)")
         }
     }
 
     @ViewBuilder
-    private func selectableView<T: Equatable & CustomStringConvertible>(
-        _ value: T,
-        isEqualHandler: (T) -> Bool,
+    private func selectableView(
+        _ title: String,
+        isSelected: Bool,
         action: @escaping () -> Void
     ) -> some View {
         Button {
             action()
         } label: {
-            if isEqualHandler(value) {
+            if isSelected {
                 Label {
-                    Text(value.description)
+                    Text(title)
                 } icon: {
                     images.checkmark
                 }
             } else {
-                Text(value.description)
+                Text(title)
             }
         }
     }

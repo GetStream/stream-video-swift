@@ -1946,12 +1946,12 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         if let value {
             switch value.mode {
             case .available:
-                log.debug("NoiseCancellationSettings updated with mode:\(value.mode.rawValue).")
+                log.debug("NoiseCancellationSettings updated with mode:\(value.mode).")
             case .disabled where isNoiseCancellationFilterInUse:
                 /// Clear NC even if music or screenshare stashed it live.
                 log
                     .debug(
-                        "NoiseCancellationSettings updated with mode:\(value.mode.rawValue). Will deactivate noiseCancellationFilter:\(noiseCancellationFilter.id)"
+                        "NoiseCancellationSettings updated with mode:\(value.mode). Will deactivate noiseCancellationFilter:\(noiseCancellationFilter.id)"
                     )
                 setAudioFilter(nil)
             case .autoOn
@@ -1961,14 +1961,14 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 /// available and the noiseCancellation audioFilter isn't already enabled.
                 log
                     .debug(
-                        "NoiseCancellationSettings updated with mode:\(value.mode.rawValue). Will activate noiseCancellationFilter:\(noiseCancellationFilter.id)"
+                        "NoiseCancellationSettings updated with mode:\(value.mode). Will activate noiseCancellationFilter:\(noiseCancellationFilter.id)"
                     )
                 setAudioFilter(noiseCancellationFilter)
             default:
                 /// Log a debug message for other cases where no action is required.
                 log
                     .debug(
-                        "NoiseCancellationSettings updated with mode:\(value.mode.rawValue) isHardwareAccelerationAvailable:\(streamVideo.isHardwareAccelerationAvailable). No action!"
+                        "NoiseCancellationSettings updated with mode:\(value.mode) isHardwareAccelerationAvailable:\(streamVideo.isHardwareAccelerationAvailable). No action!"
                     )
             }
         } else {
@@ -1991,13 +1991,13 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             do {
                 switch value.mode {
                 case .disabled where state.transcribing == true:
-                    log.debug("TranscriptionSettings updated with mode:\(value.mode.rawValue). Will deactivate transcriptions.")
+                    log.debug("TranscriptionSettings updated with mode:\(value.mode). Will deactivate transcriptions.")
                     try await stopTranscription()
                 case .autoOn where state.transcribing == false:
-                    log.debug("TranscriptionSettings updated with mode:\(value.mode.rawValue). Will activate transcriptions.")
+                    log.debug("TranscriptionSettings updated with mode:\(value.mode). Will activate transcriptions.")
                     try await startTranscription()
                 default:
-                    log.debug("TranscriptionSettings updated with mode:\(value.mode.rawValue). No action required.")
+                    log.debug("TranscriptionSettings updated with mode:\(value.mode). No action required.")
                 }
             } catch {
                 log.error(error)

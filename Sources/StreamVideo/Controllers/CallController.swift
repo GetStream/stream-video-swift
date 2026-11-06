@@ -945,7 +945,7 @@ class CallController: @unchecked Sendable {
             .stateAdapter
             .$ownCapabilities
             .removeDuplicates()
-            .log(.debug) { "OwnCapabilities updated to \($0.map(\.rawValue))" }
+            .log(.debug) { "OwnCapabilities updated to \($0)" }
             .sinkTask(storeIn: disposableBag) { @MainActor [weak self] value in
                 guard
                     let state = self?.call?.state,

@@ -5,18 +5,8 @@
 import Foundation
 import StreamVideo
 
-#if compiler(>=6.0)
-extension TranscriptionSettings.Mode: @retroactive CustomStringConvertible {}
-extension TranscriptionSettings.ClosedCaptionMode: @retroactive CustomStringConvertible {}
-extension TranscriptionSettings.Language: @retroactive CustomStringConvertible {}
-#else
-extension TranscriptionSettings.Mode: CustomStringConvertible {}
-extension TranscriptionSettings.ClosedCaptionMode: CustomStringConvertible {}
-extension TranscriptionSettings.Language: CustomStringConvertible {}
-#endif
-
 extension TranscriptionSettings.Mode {
-    public var description: String {
+    var displayName: String {
         switch self {
         case .autoOn:
             return "auto-on"
@@ -31,7 +21,7 @@ extension TranscriptionSettings.Mode {
 }
 
 extension TranscriptionSettings.ClosedCaptionMode {
-    public var description: String {
+    var displayName: String {
         switch self {
         case .autoOn:
             return "auto-on"
@@ -46,7 +36,7 @@ extension TranscriptionSettings.ClosedCaptionMode {
 }
 
 extension TranscriptionSettings.Language {
-    public var description: String {
+    var displayName: String {
         switch self {
         case .ar: return "Arabic"
         case .auto: return "Auto"

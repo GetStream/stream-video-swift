@@ -5,8 +5,10 @@
 import Foundation
 import StreamCore
 
-public final class RecordSettingsRequestMode: RawRepresentable, Codable, Hashable, Sendable {
+public final class RecordSettingsRequestMode: RawRepresentable, Codable, CustomStringConvertible, Hashable, Sendable {
     public let rawValue: String
+
+    public var description: String { rawValue }
 
     public init(rawValue: String) {
         self.rawValue = rawValue
@@ -17,8 +19,10 @@ public final class RecordSettingsRequestMode: RawRepresentable, Codable, Hashabl
     public static let disabled = RecordSettingsRequestMode(rawValue: "disabled")
 }
 
-public final class RecordSettingsRequestQuality: RawRepresentable, Codable, Hashable, Sendable {
+public final class RecordSettingsRequestQuality: RawRepresentable, Codable, CustomStringConvertible, Hashable, Sendable {
     public let rawValue: String
+
+    public var description: String { rawValue }
 
     public init(rawValue: String) {
         self.rawValue = rawValue

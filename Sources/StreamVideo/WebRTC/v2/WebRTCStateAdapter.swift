@@ -854,7 +854,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
                 ownCapabilities.allows(callSettings: updatedCallSettings)
             else {
                 log.warning(
-                    "Unable to update callSettings:\(updatedCallSettings) due to missing capabilities:\(ownCapabilities.map(\.rawValue))",
+                    "Unable to update callSettings:\(updatedCallSettings) due to missing capabilities:\(ownCapabilities)",
                     subsystems: .webRTC,
                     functionName: functionName,
                     fileName: fileName,

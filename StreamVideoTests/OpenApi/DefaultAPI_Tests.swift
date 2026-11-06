@@ -54,4 +54,8 @@ final class DefaultAPI_Tests: XCTestCase, @unchecked Sendable {
 
         XCTAssertEqual(capability.rawValue, "future-capability")
     }
+
+    func test_enum_descriptionIsRawValue() {
+        XCTAssertEqual("\(OwnCapability.blockUsers)", "block-users")
+    }
 }
