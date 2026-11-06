@@ -55,16 +55,16 @@ remove_properties() {
     props="$(jq -r --arg m "$model" '.removedProperties[$m][]' "$ALLOWED_FILE")"
     for p in $props; do
       # Deprecated fields get a computed var, which the steps below miss.
-      if ! grep -qE "^ +public var $p: [^{]+$" "$file"; then
+      if ! grep -qE "^ +public let $p: [^{]+$" "$file"; then
         echo "Removed property missing or deprecated: $model.$p" >&2
         exit 1
       fi
-      type="$(sed -nE "s/^ +public var $p: \[?([A-Za-z]+).*/\1/p" "$file")"
+      type="$(sed -nE "s/^ +public let $p: \[?([A-Za-z]+).*/\1/p" "$file")"
       awk -v p="$p" '
         function flush() { for (i = 1; i <= n; i++) print b[i]; n = 0 }
         { s = $0; sub(/^[[:space:]]+/, "", s) }
         s ~ /^\/\/\//                           { b[++n] = $0; next }
-        s ~ "^public var " p ": "               { n = 0; next }
+        s ~ "^public let " p ": "               { n = 0; next }
         s ~ "^self\\." p " = " p "$"            { next }
         s ~ "^self\\." p " = try container\\.decode(IfPresent)?\\(.*, forKey: \\." p "\\)$" { next }
         s ~ "^lhs\\." p " == rhs\\." p "( &&)?$" { next }
@@ -106,7 +106,7 @@ retype_properties() {
     props="$(jq -r --arg m "$model" '.retypedProperties[$m] | keys[]' "$ALLOWED_FILE")"
     for p in $props; do
       new="$(jq -r --arg m "$model" --arg p "$p" '.retypedProperties[$m][$p]' "$ALLOWED_FILE")"
-      old="$(sed -nE "s/^ +public var $p: ([^{]+)$/\1/p" "$file")"
+      old="$(sed -nE "s/^ +public let $p: ([^{]+)$/\1/p" "$file")"
       if [ -z "$old" ]; then
         echo "Retyped property missing or deprecated: $model.$p" >&2
         exit 1
@@ -117,7 +117,7 @@ retype_properties() {
         my $d = $n =~ /\?$/ ? " = nil" : "";
         my $c = $n =~ /\?$/ ? "IfPresent" : "";
         my $t = $n =~ s/\?$//r;
-        s/^(\h+public var \Q$p\E: )\Q$o\E$/$1$n/m;
+        s/^(\h+public let \Q$p\E: )\Q$o\E$/$1$n/m;
         s/([(,]\h*)\Q$p\E: \Q$o\E(?: = nil)?(?=[,)])/$1$p: $n$d/;
         s/^(\h+self\.\Q$p\E = try container\.decode)(?:IfPresent)?\(.*\.self(, forKey: \.\Q$p\E\))$/$1$c($t.self$2/m;
         s/^(\h+try container\.encode)(?:IfPresent)?(\(\Q$p\E, forKey: \.\Q$p\E\))$/$1$c$2/m;

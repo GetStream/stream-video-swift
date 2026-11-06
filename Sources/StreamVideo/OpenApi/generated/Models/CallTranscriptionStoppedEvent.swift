@@ -6,15 +6,16 @@ import Foundation
 import StreamCore
 
 /// This event is sent when call transcription has stopped
-public final class CallTranscriptionStoppedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
-    public var callCid: String
-    public var createdAt: Date
+public final class CallTranscriptionStoppedEvent: Sendable, Event, Decodable, WSCallEvent {
+    public let callCid: String
+    public let createdAt: Date
     /// The type of event: "call.transcription_stopped" in this case
-    public var type: String = "call.transcription_stopped"
+    public let type: String
 
-    public init(callCid: String, createdAt: Date) {
+    public init(callCid: String, createdAt: Date, type: String = "call.transcription_stopped") {
         self.callCid = callCid
         self.createdAt = createdAt
+        self.type = type
     }
 
     public init(from decoder: Decoder) throws {

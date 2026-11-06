@@ -6,17 +6,18 @@ import Foundation
 import StreamCore
 
 /// This event is sent when HLS broadcasting has started
-public final class CallHLSBroadcastingStartedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
-    public var callCid: String
-    public var createdAt: Date
-    public var hlsPlaylistUrl: String
+public final class CallHLSBroadcastingStartedEvent: Sendable, Event, Decodable, WSCallEvent {
+    public let callCid: String
+    public let createdAt: Date
+    public let hlsPlaylistUrl: String
     /// The type of event: "call.hls_broadcasting_started" in this case
-    public var type: String = "call.hls_broadcasting_started"
+    public let type: String
 
-    public init(callCid: String, createdAt: Date, hlsPlaylistUrl: String) {
+    public init(callCid: String, createdAt: Date, hlsPlaylistUrl: String, type: String = "call.hls_broadcasting_started") {
         self.callCid = callCid
         self.createdAt = createdAt
         self.hlsPlaylistUrl = hlsPlaylistUrl
+        self.type = type
     }
 
     public init(from decoder: Decoder) throws {

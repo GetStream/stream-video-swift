@@ -19,8 +19,8 @@ public final class NoiseCancellationSettingsRequestMode: RawRepresentable, Codab
     public static let disabled = NoiseCancellationSettingsRequestMode(rawValue: "disabled")
 }
 
-public final class NoiseCancellationSettingsRequest: @unchecked Sendable, Codable, JSONEncodable {
-    public var mode: NoiseCancellationSettingsRequestMode
+public final class NoiseCancellationSettingsRequest: Sendable, Codable, JSONEncodable {
+    public let mode: NoiseCancellationSettingsRequestMode
 
     public init(mode: NoiseCancellationSettingsRequestMode) {
         self.mode = mode

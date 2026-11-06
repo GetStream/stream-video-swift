@@ -5,8 +5,8 @@
 import Foundation
 import StreamCore
 
-public final class GeofenceSettings: @unchecked Sendable, Decodable {
-    public var names: [String]
+public final class GeofenceSettings: Sendable, Decodable {
+    public let names: [String]
 
     public init(names: [String]) {
         self.names = names

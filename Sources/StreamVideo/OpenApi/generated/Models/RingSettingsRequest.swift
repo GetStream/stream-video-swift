@@ -5,13 +5,13 @@
 import Foundation
 import StreamCore
 
-public final class RingSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable {
+public final class RingSettingsRequest: Sendable, Encodable, JSONEncodable {
     /// When none of the callees accept a ring call in this time a rejection will be sent by the caller with reason 'timeout' by the SDKs
-    public var autoCancelTimeoutMs: Int
+    public let autoCancelTimeoutMs: Int
     /// When a callee is online but doesn't answer a ring call in this time a rejection will be sent with reason 'timeout' by the SDKs
-    public var incomingCallTimeoutMs: Int
+    public let incomingCallTimeoutMs: Int
     /// When a callee doesn't accept or reject a ring call in this time a missed call event will be sent
-    public var missedCallTimeoutMs: Int?
+    public let missedCallTimeoutMs: Int?
 
     public init(autoCancelTimeoutMs: Int, incomingCallTimeoutMs: Int, missedCallTimeoutMs: Int? = nil) {
         self.autoCancelTimeoutMs = autoCancelTimeoutMs

@@ -20,9 +20,9 @@ public final class EncryptionSettingsResponseMode: RawRepresentable, Codable, Cu
 }
 
 /// EncryptionSettings is the payload for end-to-end encryption settings
-public final class EncryptionSettingsResponse: @unchecked Sendable, Decodable {
+public final class EncryptionSettingsResponse: Sendable, Decodable {
     /// the resolved encryption mode for the call
-    public var mode: EncryptionSettingsResponseMode
+    public let mode: EncryptionSettingsResponseMode
 
     public init(mode: EncryptionSettingsResponseMode) {
         self.mode = mode

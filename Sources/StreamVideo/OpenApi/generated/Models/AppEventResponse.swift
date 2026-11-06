@@ -5,15 +5,15 @@
 import Foundation
 import StreamCore
 
-public final class AppEventResponse: @unchecked Sendable, Decodable {
+public final class AppEventResponse: Sendable, Decodable {
     /// boolean
-    public var asyncUrlEnrichEnabled: Bool?
+    public let asyncUrlEnrichEnabled: Bool?
     /// boolean
-    public var autoTranslationEnabled: Bool
-    public var fileUploadConfig: FileUploadConfig?
-    public var imageUploadConfig: FileUploadConfig?
+    public let autoTranslationEnabled: Bool
+    public let fileUploadConfig: FileUploadConfig?
+    public let imageUploadConfig: FileUploadConfig?
     /// string
-    public var name: String
+    public let name: String
 
     public init(
         asyncUrlEnrichEnabled: Bool? = nil,

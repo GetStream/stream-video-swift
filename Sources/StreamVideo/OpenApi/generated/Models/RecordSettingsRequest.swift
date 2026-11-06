@@ -40,13 +40,13 @@ public final class RecordSettingsRequestQuality: RawRepresentable, Codable, Cust
     public static let portrait720x1280 = RecordSettingsRequestQuality(rawValue: "portrait-720x1280")
 }
 
-public final class RecordSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable {
+public final class RecordSettingsRequest: Sendable, Encodable, JSONEncodable {
     /// Whether to record audio only
-    public var audioOnly: Bool?
+    public let audioOnly: Bool?
     /// Recording mode. One of: available, disabled, auto-on
-    public var mode: RecordSettingsRequestMode
+    public let mode: RecordSettingsRequestMode
     /// Recording quality. One of: 360p, 480p, 720p, 1080p, 1440p, portrait-360x640, portrait-480x854, portrait-720x1280, portrait-1080x1920, portrait-1440x2560
-    public var quality: RecordSettingsRequestQuality?
+    public let quality: RecordSettingsRequestQuality?
 
     public init(audioOnly: Bool? = nil, mode: RecordSettingsRequestMode, quality: RecordSettingsRequestQuality? = nil) {
         self.audioOnly = audioOnly

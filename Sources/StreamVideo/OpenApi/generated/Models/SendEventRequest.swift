@@ -6,8 +6,8 @@ import Foundation
 import StreamCore
 
 /// Send a call event to the other user
-public final class SendEventRequest: @unchecked Sendable, Encodable, JSONEncodable {
-    public var custom: [String: RawJSON]?
+public final class SendEventRequest: Sendable, Encodable, JSONEncodable {
+    public let custom: [String: RawJSON]?
 
     public init(custom: [String: RawJSON]? = nil) {
         self.custom = custom

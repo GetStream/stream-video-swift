@@ -5,25 +5,25 @@
 import Foundation
 import StreamCore
 
-public final class JoinCallRequest: @unchecked Sendable, Encodable, JSONEncodable {
+public final class JoinCallRequest: Sendable, Encodable, JSONEncodable {
     /// if true the call will be created if it doesn't exist
-    public var create: Bool?
+    public let create: Bool?
     /// CallRequest is the payload for creating a call.
-    public var data: CallRequest?
+    public let data: CallRequest?
     /// the encryption mode the client intends to use for this join; the join is rejected if it does not match the call's encryption configuration
-    public var e2ee: Bool?
+    public let e2ee: Bool?
     /// if true, the participant will be marked as publsihing to large audience
-    public var hintHighScaleLivestreamPublisher: Bool?
-    public var location: String
-    public var membersLimit: Int?
+    public let hintHighScaleLivestreamPublisher: Bool?
+    public let location: String
+    public let membersLimit: Int?
     /// If the participant is migrating from another SFU, then this is the ID of the previous SFU
-    public var migratingFrom: String?
+    public let migratingFrom: String?
     /// List of SFU IDs to exclude when picking a new SFU for the participant
-    public var migratingFromList: [String]?
-    public var notify: Bool?
+    public let migratingFromList: [String]?
+    public let notify: Bool?
     /// if true and the call is created, the notification will include ring=true
-    public var ring: Bool?
-    public var video: Bool?
+    public let ring: Bool?
+    public let video: Bool?
 
     public init(
         create: Bool? = nil,

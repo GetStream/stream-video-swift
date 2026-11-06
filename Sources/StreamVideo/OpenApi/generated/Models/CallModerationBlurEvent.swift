@@ -6,20 +6,27 @@ import Foundation
 import StreamCore
 
 /// This event is sent when a moderation blur action is applied to a user's video stream
-public final class CallModerationBlurEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
-    public var callCid: String
-    public var createdAt: Date
+public final class CallModerationBlurEvent: Sendable, Event, Decodable, WSCallEvent {
+    public let callCid: String
+    public let createdAt: Date
     /// Custom data associated with the moderation action
-    public var custom: [String: RawJSON]
+    public let custom: [String: RawJSON]
     /// The type of event: "call.moderation_blur" in this case
-    public var type: String = "call.moderation_blur"
+    public let type: String
     /// The user ID whose video stream is being blurred
-    public var userId: String
+    public let userId: String
 
-    public init(callCid: String, createdAt: Date, custom: [String: RawJSON], userId: String) {
+    public init(
+        callCid: String,
+        createdAt: Date,
+        custom: [String: RawJSON],
+        type: String = "call.moderation_blur",
+        userId: String
+    ) {
         self.callCid = callCid
         self.createdAt = createdAt
         self.custom = custom
+        self.type = type
         self.userId = userId
     }
 

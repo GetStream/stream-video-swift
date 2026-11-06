@@ -6,10 +6,10 @@ import Foundation
 import StreamCore
 
 /// StartHLSBroadcastingResponse is the payload for starting an HLS broadcasting.
-public final class StartHLSBroadcastingResponse: @unchecked Sendable, Decodable {
-    public var duration: String
+public final class StartHLSBroadcastingResponse: Sendable, Decodable {
+    public let duration: String
     /// the URL of the HLS playlist
-    public var playlistUrl: String
+    public let playlistUrl: String
 
     public init(duration: String, playlistUrl: String) {
         self.duration = duration

@@ -5,9 +5,9 @@
 import Foundation
 import StreamCore
 
-public final class RejectCallRequest: @unchecked Sendable, Encodable, JSONEncodable {
+public final class RejectCallRequest: Sendable, Encodable, JSONEncodable {
     /// Reason for rejecting the call
-    public var reason: String?
+    public let reason: String?
 
     public init(reason: String? = nil) {
         self.reason = reason

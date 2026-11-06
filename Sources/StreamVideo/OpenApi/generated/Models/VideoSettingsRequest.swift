@@ -19,12 +19,12 @@ public final class VideoSettingsRequestCameraFacing: RawRepresentable, Codable, 
     public static let front = VideoSettingsRequestCameraFacing(rawValue: "front")
 }
 
-public final class VideoSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable {
-    public var accessRequestEnabled: Bool?
-    public var cameraDefaultOn: Bool?
-    public var cameraFacing: VideoSettingsRequestCameraFacing?
-    public var enabled: Bool?
-    public var targetResolution: TargetResolution?
+public final class VideoSettingsRequest: Sendable, Encodable, JSONEncodable {
+    public let accessRequestEnabled: Bool?
+    public let cameraDefaultOn: Bool?
+    public let cameraFacing: VideoSettingsRequestCameraFacing?
+    public let enabled: Bool?
+    public let targetResolution: TargetResolution?
 
     public init(
         accessRequestEnabled: Bool? = nil,

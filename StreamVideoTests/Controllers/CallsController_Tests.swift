@@ -50,8 +50,7 @@ final class CallsController_Tests: ControllerTestCase, @unchecked Sendable {
         try await callsController.loadNextCalls()
         XCTAssert(callsController.calls[0].state.backstage == false)
         let updatedCallId = "default:123"
-        let call = mockResponseBuilder.makeCallResponse(cid: updatedCallId)
-        call.backstage = true
+        let call = mockResponseBuilder.makeCallResponse(cid: updatedCallId, backstage: true)
         let callUpdatedEvent = CallUpdatedEvent(
             call: call,
             callCid: updatedCallId,

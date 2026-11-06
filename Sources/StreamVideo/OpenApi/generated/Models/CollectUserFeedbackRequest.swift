@@ -5,13 +5,13 @@
 import Foundation
 import StreamCore
 
-public final class CollectUserFeedbackRequest: @unchecked Sendable, Encodable, JSONEncodable {
-    public var custom: [String: RawJSON]?
-    public var rating: Int
-    public var reason: String?
-    public var sdk: String
-    public var sdkVersion: String
-    public var userSessionId: String?
+public final class CollectUserFeedbackRequest: Sendable, Encodable, JSONEncodable {
+    public let custom: [String: RawJSON]?
+    public let rating: Int
+    public let reason: String?
+    public let sdk: String
+    public let sdkVersion: String
+    public let userSessionId: String?
 
     public init(
         custom: [String: RawJSON]? = nil,

@@ -6,13 +6,13 @@ import Foundation
 import StreamCore
 
 /// CallRequest is the payload for creating a call.
-public final class CallRequest: @unchecked Sendable, Encodable, JSONEncodable {
-    public var custom: [String: RawJSON]?
-    public var members: [MemberRequest]?
-    public var settingsOverride: CallSettingsRequest?
-    public var startsAt: Date?
-    public var team: String?
-    public var video: Bool?
+public final class CallRequest: Sendable, Encodable, JSONEncodable {
+    public let custom: [String: RawJSON]?
+    public let members: [MemberRequest]?
+    public let settingsOverride: CallSettingsRequest?
+    public let startsAt: Date?
+    public let team: String?
+    public let video: Bool?
 
     public init(
         custom: [String: RawJSON]? = nil,

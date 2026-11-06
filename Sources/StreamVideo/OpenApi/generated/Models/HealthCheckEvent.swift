@@ -5,18 +5,19 @@
 import Foundation
 import StreamCore
 
-public final class HealthCheckEvent: @unchecked Sendable, Event, Decodable {
-    public var cid: String?
-    public var connectionId: String
-    public var createdAt: Date
-    public var receivedAt: Date?
-    public var type: String = "health.check"
+public final class HealthCheckEvent: Sendable, Event, Decodable {
+    public let cid: String?
+    public let connectionId: String
+    public let createdAt: Date
+    public let receivedAt: Date?
+    public let type: String
 
-    public init(cid: String? = nil, connectionId: String, createdAt: Date, receivedAt: Date? = nil) {
+    public init(cid: String? = nil, connectionId: String, createdAt: Date, receivedAt: Date? = nil, type: String = "health.check") {
         self.cid = cid
         self.connectionId = connectionId
         self.createdAt = createdAt
         self.receivedAt = receivedAt
+        self.type = type
     }
 
     public init(from decoder: Decoder) throws {

@@ -5,9 +5,9 @@
 import Foundation
 import StreamCore
 
-public final class BackstageSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable {
-    public var enabled: Bool?
-    public var joinAheadTimeSeconds: Int?
+public final class BackstageSettingsRequest: Sendable, Encodable, JSONEncodable {
+    public let enabled: Bool?
+    public let joinAheadTimeSeconds: Int?
 
     public init(enabled: Bool? = nil, joinAheadTimeSeconds: Int? = nil) {
         self.enabled = enabled

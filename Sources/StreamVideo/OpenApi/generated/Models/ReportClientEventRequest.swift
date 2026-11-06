@@ -6,9 +6,9 @@ import Foundation
 import StreamCore
 
 /// Reports a batch of client-side telemetry events. Each event is validated and processed independently; one invalid event does not block the rest of the batch.
-public final class ReportClientEventRequest: @unchecked Sendable, Encodable, JSONEncodable {
+public final class ReportClientEventRequest: Sendable, Encodable, JSONEncodable {
     /// Client-side events to report (1-100 per request)
-    public var events: [ClientEvent]
+    public let events: [ClientEvent]
 
     public init(events: [ClientEvent]) {
         self.events = events

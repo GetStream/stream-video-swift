@@ -6,21 +6,22 @@ import Foundation
 import StreamCore
 
 /// This event is sent when a call session starts
-public final class CallSessionStartedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
+public final class CallSessionStartedEvent: Sendable, Event, Decodable, WSCallEvent {
     /// Represents a call
-    public var call: CallResponse
-    public var callCid: String
-    public var createdAt: Date
+    public let call: CallResponse
+    public let callCid: String
+    public let createdAt: Date
     /// Call session ID
-    public var sessionId: String
+    public let sessionId: String
     /// The type of event: "call.session_started" in this case
-    public var type: String = "call.session_started"
+    public let type: String
 
-    public init(call: CallResponse, callCid: String, createdAt: Date, sessionId: String) {
+    public init(call: CallResponse, callCid: String, createdAt: Date, sessionId: String, type: String = "call.session_started") {
         self.call = call
         self.callCid = callCid
         self.createdAt = createdAt
         self.sessionId = sessionId
+        self.type = type
     }
 
     public init(from decoder: Decoder) throws {

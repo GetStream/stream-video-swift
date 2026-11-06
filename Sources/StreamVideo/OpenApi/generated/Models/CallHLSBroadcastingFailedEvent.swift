@@ -6,15 +6,16 @@ import Foundation
 import StreamCore
 
 /// This event is sent when HLS broadcasting has failed
-public final class CallHLSBroadcastingFailedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
-    public var callCid: String
-    public var createdAt: Date
+public final class CallHLSBroadcastingFailedEvent: Sendable, Event, Decodable, WSCallEvent {
+    public let callCid: String
+    public let createdAt: Date
     /// The type of event: "call.hls_broadcasting_failed" in this case
-    public var type: String = "call.hls_broadcasting_failed"
+    public let type: String
 
-    public init(callCid: String, createdAt: Date) {
+    public init(callCid: String, createdAt: Date, type: String = "call.hls_broadcasting_failed") {
         self.callCid = callCid
         self.createdAt = createdAt
+        self.type = type
     }
 
     public init(from decoder: Decoder) throws {

@@ -7,17 +7,18 @@ import StreamCore
 
 /// This event is sent when a user is unblocked on a call,
 /// this can be useful to notify the user that they can now join the call again
-public final class UnblockedUserEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
-    public var callCid: String
-    public var createdAt: Date
+public final class UnblockedUserEvent: Sendable, Event, Decodable, WSCallEvent {
+    public let callCid: String
+    public let createdAt: Date
     /// The type of event: "call.unblocked_user" in this case
-    public var type: String = "call.unblocked_user"
+    public let type: String
     /// User response object
-    public var user: UserResponse
+    public let user: UserResponse
 
-    public init(callCid: String, createdAt: Date, user: UserResponse) {
+    public init(callCid: String, createdAt: Date, type: String = "call.unblocked_user", user: UserResponse) {
         self.callCid = callCid
         self.createdAt = createdAt
+        self.type = type
         self.user = user
     }
 

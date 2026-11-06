@@ -6,10 +6,10 @@ import Foundation
 import StreamCore
 
 /// Basic response information
-public final class GetEdgesResponse: @unchecked Sendable, Decodable {
+public final class GetEdgesResponse: Sendable, Decodable {
     /// Duration of the request in milliseconds
-    public var duration: String
-    public var edges: [EdgeResponse]
+    public let duration: String
+    public let edges: [EdgeResponse]
 
     public init(duration: String, edges: [EdgeResponse]) {
         self.duration = duration

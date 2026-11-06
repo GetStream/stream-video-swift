@@ -18,12 +18,12 @@ public final class IngressVideoLayerRequestCodec: RawRepresentable, Codable, Cus
     public static let vp8 = IngressVideoLayerRequestCodec(rawValue: "vp8")
 }
 
-public final class IngressVideoLayerRequest: @unchecked Sendable, Encodable, JSONEncodable {
-    public var bitrate: Int
-    public var codec: IngressVideoLayerRequestCodec
-    public var frameRateLimit: Int
-    public var maxDimension: Int
-    public var minDimension: Int
+public final class IngressVideoLayerRequest: Sendable, Encodable, JSONEncodable {
+    public let bitrate: Int
+    public let codec: IngressVideoLayerRequestCodec
+    public let frameRateLimit: Int
+    public let maxDimension: Int
+    public let minDimension: Int
 
     public init(bitrate: Int, codec: IngressVideoLayerRequestCodec, frameRateLimit: Int, maxDimension: Int, minDimension: Int) {
         self.bitrate = bitrate

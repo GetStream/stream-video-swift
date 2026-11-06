@@ -224,7 +224,7 @@ actor ClientEventReporter: ClientEventReporting {
         details: ClientEventStageDetails = .init(),
         failure: ClientEventFailure? = nil
     ) -> ClientEvent {
-        let event = ClientEvent(
+        ClientEvent(
             callSessionId: details.callSessionId,
             cameraPermissionStatus: details.cameraPermissionStatus?.rawValue,
             coordinatorConnectId: details.coordinatorConnectId,
@@ -234,6 +234,12 @@ actor ClientEventReporter: ClientEventReporting {
             id: context.callId,
             joinAttemptId: stage == .coordinatorWS ? nil : joinAttemptId ?? self.joinAttemptId,
             joinReason: details.joinReason?.rawValue,
+            leaveInitiator: failure?.leaveInitiator.map {
+                String(String.UnicodeScalarView($0.rawValue.unicodeScalars.prefix(32)))
+            },
+            leaveReason: failure?.leaveReason.map {
+                String(String.UnicodeScalarView($0.unicodeScalars.prefix(200)))
+            },
             microphonePermissionStatus: details.microphonePermissionStatus?.rawValue,
             outcome: outcome?.rawValue,
             peerConnection: peerConnection?.rawValue,
@@ -249,20 +255,11 @@ actor ClientEventReporter: ClientEventReporting {
             stageId: stageId,
             timestamp: currentDate(),
             trackId: details.trackId,
+            type: context.callType,
             userAgent: context.userAgent,
             userId: context.userId,
             wasPreviouslyConnected: details.wasPreviouslyConnected
         )
-        // `type` is not part of the generated memberwise initializer, so set it
-        // explicitly to carry the call type (`<call_type>`).
-        event.type = context.callType
-        event.leaveInitiator = failure?.leaveInitiator.map {
-            String(String.UnicodeScalarView($0.rawValue.unicodeScalars.prefix(32)))
-        }
-        event.leaveReason = failure?.leaveReason.map {
-            String(String.UnicodeScalarView($0.unicodeScalars.prefix(200)))
-        }
-        return event
     }
 
     /// Schedules delivery of a single event in its own task.

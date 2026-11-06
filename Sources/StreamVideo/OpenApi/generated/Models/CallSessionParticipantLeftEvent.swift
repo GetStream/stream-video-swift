@@ -6,23 +6,31 @@ import Foundation
 import StreamCore
 
 /// This event is sent when a participant leaves a call session
-public final class CallSessionParticipantLeftEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
-    public var callCid: String
-    public var createdAt: Date
+public final class CallSessionParticipantLeftEvent: Sendable, Event, Decodable, WSCallEvent {
+    public let callCid: String
+    public let createdAt: Date
     /// The duration participant was in the session in seconds
-    public var durationSeconds: Int
-    public var participant: CallParticipantResponse
+    public let durationSeconds: Int
+    public let participant: CallParticipantResponse
     /// Call session ID
-    public var sessionId: String
+    public let sessionId: String
     /// The type of event: "call.session_participant_left" in this case
-    public var type: String = "call.session_participant_left"
+    public let type: String
 
-    public init(callCid: String, createdAt: Date, durationSeconds: Int, participant: CallParticipantResponse, sessionId: String) {
+    public init(
+        callCid: String,
+        createdAt: Date,
+        durationSeconds: Int,
+        participant: CallParticipantResponse,
+        sessionId: String,
+        type: String = "call.session_participant_left"
+    ) {
         self.callCid = callCid
         self.createdAt = createdAt
         self.durationSeconds = durationSeconds
         self.participant = participant
         self.sessionId = sessionId
+        self.type = type
     }
 
     public init(from decoder: Decoder) throws {

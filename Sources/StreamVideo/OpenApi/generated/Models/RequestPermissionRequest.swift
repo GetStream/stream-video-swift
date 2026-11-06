@@ -5,8 +5,8 @@
 import Foundation
 import StreamCore
 
-public final class RequestPermissionRequest: @unchecked Sendable, Encodable, JSONEncodable {
-    public var permissions: [String]
+public final class RequestPermissionRequest: Sendable, Encodable, JSONEncodable {
+    public let permissions: [String]
 
     public init(permissions: [String]) {
         self.permissions = permissions

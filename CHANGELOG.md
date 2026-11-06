@@ -28,6 +28,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - String enums in the API models, such as `OwnCapability`, are now `RawRepresentable` classes with a static property for each value. [#1387](https://github.com/GetStream/stream-video-swift/pull/1387)
 - Unknown server values keep their `rawValue` and no longer decode as `.unknown`. [#1387](https://github.com/GetStream/stream-video-swift/pull/1387)
 - `IngressAudioEncodingOptionsRequestChannels` and `IngressSourceRequestFps` are deprecated. Use `Int` values instead. [#1387](https://github.com/GetStream/stream-video-swift/pull/1387)
+- API model properties are now `let` constants, and the models are `Sendable` without `@unchecked`. To change a value, create a new model. [#1390](https://github.com/GetStream/stream-video-swift/pull/1390)
 
 # [1.56.1](https://github.com/GetStream/stream-video-swift/releases/tag/1.56.1)
 _October 28, 2026_

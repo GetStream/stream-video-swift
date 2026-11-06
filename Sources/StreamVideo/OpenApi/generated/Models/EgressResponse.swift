@@ -5,14 +5,14 @@
 import Foundation
 import StreamCore
 
-public final class EgressResponse: @unchecked Sendable, Decodable {
-    public var broadcasting: Bool
-    public var compositeRecording: CompositeRecordingResponse?
-    public var frameRecording: FrameRecordingResponse?
-    public var hls: EgressHLSResponse?
-    public var individualRecording: IndividualRecordingResponse?
-    public var rawRecording: RawRecordingResponse?
-    public var rtmps: [EgressRTMPResponse]
+public final class EgressResponse: Sendable, Decodable {
+    public let broadcasting: Bool
+    public let compositeRecording: CompositeRecordingResponse?
+    public let frameRecording: FrameRecordingResponse?
+    public let hls: EgressHLSResponse?
+    public let individualRecording: IndividualRecordingResponse?
+    public let rawRecording: RawRecordingResponse?
+    public let rtmps: [EgressRTMPResponse]
 
     public init(
         broadcasting: Bool,

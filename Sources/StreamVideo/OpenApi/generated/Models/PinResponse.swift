@@ -6,9 +6,9 @@ import Foundation
 import StreamCore
 
 /// Basic response information
-public final class PinResponse: @unchecked Sendable, Decodable {
+public final class PinResponse: Sendable, Decodable {
     /// Duration of the request in milliseconds
-    public var duration: String
+    public let duration: String
 
     public init(duration: String) {
         self.duration = duration

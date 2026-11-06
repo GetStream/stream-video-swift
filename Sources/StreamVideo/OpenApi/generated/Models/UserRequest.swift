@@ -6,17 +6,17 @@ import Foundation
 import StreamCore
 
 /// User request object
-public final class UserRequest: @unchecked Sendable, Encodable, JSONEncodable {
+public final class UserRequest: Sendable, Encodable, JSONEncodable {
     /// Custom user data
-    public var custom: [String: RawJSON]?
+    public let custom: [String: RawJSON]?
     /// User ID
-    public var id: String
+    public let id: String
     /// User's profile image URL
-    public var image: String?
-    public var invisible: Bool?
-    public var language: String?
+    public let image: String?
+    public let invisible: Bool?
+    public let language: String?
     /// Optional name of user
-    public var name: String?
+    public let name: String?
 
     public init(
         custom: [String: RawJSON]? = nil,

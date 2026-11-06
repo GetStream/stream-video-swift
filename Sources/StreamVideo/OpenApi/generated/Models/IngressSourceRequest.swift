@@ -5,10 +5,10 @@
 import Foundation
 import StreamCore
 
-public final class IngressSourceRequest: @unchecked Sendable, Encodable, JSONEncodable {
-    public var fps: Int
-    public var height: Int
-    public var width: Int
+public final class IngressSourceRequest: Sendable, Encodable, JSONEncodable {
+    public let fps: Int
+    public let height: Int
+    public let width: Int
 
     public init(fps: Int, height: Int, width: Int) {
         self.fps = fps
