@@ -35,6 +35,7 @@ extension CallSettingsResponse {
             frameRecording: frameRecording,
             geofencing: geofencing,
             individualRecording: individualRecording,
+            lifecycle: .init(mode: .singleUse),
             limits: limits,
             rawRecording: rawRecording,
             recording: recording,

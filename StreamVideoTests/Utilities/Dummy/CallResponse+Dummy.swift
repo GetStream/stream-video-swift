@@ -48,6 +48,7 @@ extension CallResponse {
             team: team,
             thumbnails: thumbnails,
             transcribing: transcribing,
+            translating: false,
             type: type,
             updatedAt: updatedAt
         )

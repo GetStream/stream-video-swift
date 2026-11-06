@@ -8,17 +8,45 @@ import StreamCore
 /// This event is sent when call recording is ready
 public final class CallRecordingReadyEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
     
+    public enum CallRecordingReadyEventRecordingType: String, Sendable, Codable, CaseIterable {
+        case composite
+        case individual
+        case raw
+        case unknown = "_unknown"
+
+        public init(from decoder: Decoder) throws {
+            let container = try decoder.singleValueContainer()
+            if let decodedValue = try? container.decode(String.self),
+               let value = Self(rawValue: decodedValue) {
+                self = value
+            } else {
+                self = .unknown
+            }
+        }
+    }
+
     public var callCid: String
     /// CallRecording represents a recording of a call.
     public var callRecording: CallRecording
     public var createdAt: Date
+    public var egressId: String
+    /// The type of recording
+    public var recordingType: CallRecordingReadyEventRecordingType
     /// The type of event: "call.recording_ready" in this case
     public var type: String = "call.recording_ready"
 
-    public init(callCid: String, callRecording: CallRecording, createdAt: Date) {
+    public init(
+        callCid: String,
+        callRecording: CallRecording,
+        createdAt: Date,
+        egressId: String,
+        recordingType: CallRecordingReadyEventRecordingType
+    ) {
         self.callCid = callCid
         self.callRecording = callRecording
         self.createdAt = createdAt
+        self.egressId = egressId
+        self.recordingType = recordingType
     }
 
     public init(from decoder: Decoder) throws {
@@ -26,6 +54,8 @@ public final class CallRecordingReadyEvent: @unchecked Sendable, Event, Decodabl
         self.callCid = try container.decode(String.self, forKey: .callCid)
         self.callRecording = try container.decode(CallRecording.self, forKey: .callRecording)
         self.createdAt = try container.decode(Date.self, forKey: .createdAt)
+        self.egressId = try container.decode(String.self, forKey: .egressId)
+        self.recordingType = try container.decode(CallRecordingReadyEventRecordingType.self, forKey: .recordingType)
         self.type = try container.decode(String.self, forKey: .type)
     }
 }
@@ -35,6 +65,8 @@ extension CallRecordingReadyEvent: Hashable {
         lhs.callCid == rhs.callCid &&
             lhs.callRecording == rhs.callRecording &&
             lhs.createdAt == rhs.createdAt &&
+            lhs.egressId == rhs.egressId &&
+            lhs.recordingType == rhs.recordingType &&
             lhs.type == rhs.type
     }
 
@@ -42,6 +74,8 @@ extension CallRecordingReadyEvent: Hashable {
         hasher.combine(callCid)
         hasher.combine(callRecording)
         hasher.combine(createdAt)
+        hasher.combine(egressId)
+        hasher.combine(recordingType)
         hasher.combine(type)
     }
 }

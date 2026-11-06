@@ -12,16 +12,26 @@ public final class CallSessionParticipantLeftEvent: @unchecked Sendable, Event, 
     /// The duration participant was in the session in seconds
     public var durationSeconds: Int
     public var participant: CallParticipantResponse
+    /// The reason why the participant left the session
+    public var reason: String?
     /// Call session ID
     public var sessionId: String
     /// The type of event: "call.session_participant_left" in this case
     public var type: String = "call.session_participant_left"
 
-    public init(callCid: String, createdAt: Date, durationSeconds: Int, participant: CallParticipantResponse, sessionId: String) {
+    public init(
+        callCid: String,
+        createdAt: Date,
+        durationSeconds: Int,
+        participant: CallParticipantResponse,
+        reason: String? = nil,
+        sessionId: String
+    ) {
         self.callCid = callCid
         self.createdAt = createdAt
         self.durationSeconds = durationSeconds
         self.participant = participant
+        self.reason = reason
         self.sessionId = sessionId
     }
 
@@ -31,6 +41,7 @@ public final class CallSessionParticipantLeftEvent: @unchecked Sendable, Event, 
         self.createdAt = try container.decode(Date.self, forKey: .createdAt)
         self.durationSeconds = try container.decode(Int.self, forKey: .durationSeconds)
         self.participant = try container.decode(CallParticipantResponse.self, forKey: .participant)
+        self.reason = try container.decodeIfPresent(String.self, forKey: .reason)
         self.sessionId = try container.decode(String.self, forKey: .sessionId)
         self.type = try container.decode(String.self, forKey: .type)
     }
@@ -42,6 +53,7 @@ extension CallSessionParticipantLeftEvent: Hashable {
             lhs.createdAt == rhs.createdAt &&
             lhs.durationSeconds == rhs.durationSeconds &&
             lhs.participant == rhs.participant &&
+            lhs.reason == rhs.reason &&
             lhs.sessionId == rhs.sessionId &&
             lhs.type == rhs.type
     }
@@ -51,6 +63,7 @@ extension CallSessionParticipantLeftEvent: Hashable {
         hasher.combine(createdAt)
         hasher.combine(durationSeconds)
         hasher.combine(participant)
+        hasher.combine(reason)
         hasher.combine(sessionId)
         hasher.combine(type)
     }

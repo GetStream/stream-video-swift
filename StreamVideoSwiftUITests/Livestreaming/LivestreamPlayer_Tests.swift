@@ -139,6 +139,8 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
         let recording = CallRecording(
             endTime: .now,
             filename: "test",
+            recordingType: "composite",
+            sessionId: "test",
             startTime: .distantFuture,
             url: "https://test.com"
         )

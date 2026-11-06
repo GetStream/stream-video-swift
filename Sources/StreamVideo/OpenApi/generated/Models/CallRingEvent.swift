@@ -13,6 +13,8 @@ public final class CallRingEvent: @unchecked Sendable, Event, Decodable, WSCallE
     public var createdAt: Date
     /// Call members
     public var members: [MemberResponse]
+    /// Identifies this ring of the call session
+    public var ringId: String?
     /// Call session ID
     public var sessionId: String
     /// The type of event: "call.notification" in this case
@@ -26,6 +28,7 @@ public final class CallRingEvent: @unchecked Sendable, Event, Decodable, WSCallE
         callCid: String,
         createdAt: Date,
         members: [MemberResponse],
+        ringId: String? = nil,
         sessionId: String,
         user: UserResponse,
         video: Bool
@@ -34,6 +37,7 @@ public final class CallRingEvent: @unchecked Sendable, Event, Decodable, WSCallE
         self.callCid = callCid
         self.createdAt = createdAt
         self.members = members
+        self.ringId = ringId
         self.sessionId = sessionId
         self.user = user
         self.video = video
@@ -45,6 +49,7 @@ public final class CallRingEvent: @unchecked Sendable, Event, Decodable, WSCallE
         self.callCid = try container.decode(String.self, forKey: .callCid)
         self.createdAt = try container.decode(Date.self, forKey: .createdAt)
         self.members = try container.decode([MemberResponse].self, forKey: .members)
+        self.ringId = try container.decodeIfPresent(String.self, forKey: .ringId)
         self.sessionId = try container.decode(String.self, forKey: .sessionId)
         self.type = try container.decode(String.self, forKey: .type)
         self.user = try container.decode(UserResponse.self, forKey: .user)
@@ -58,6 +63,7 @@ extension CallRingEvent: Hashable {
             lhs.callCid == rhs.callCid &&
             lhs.createdAt == rhs.createdAt &&
             lhs.members == rhs.members &&
+            lhs.ringId == rhs.ringId &&
             lhs.sessionId == rhs.sessionId &&
             lhs.type == rhs.type &&
             lhs.user == rhs.user &&
@@ -69,6 +75,7 @@ extension CallRingEvent: Hashable {
         hasher.combine(callCid)
         hasher.combine(createdAt)
         hasher.combine(members)
+        hasher.combine(ringId)
         hasher.combine(sessionId)
         hasher.combine(type)
         hasher.combine(user)

@@ -25,23 +25,28 @@ public final class IndividualRecordingSettingsResponse: @unchecked Sendable, Dec
     }
 
     public var mode: IndividualRecordingSettingsResponseMode
+    public var outputTypes: [String]?
 
-    public init(mode: IndividualRecordingSettingsResponseMode) {
+    public init(mode: IndividualRecordingSettingsResponseMode, outputTypes: [String]? = nil) {
         self.mode = mode
+        self.outputTypes = outputTypes
     }
 
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: StringCodingKey.self)
         self.mode = try container.decode(IndividualRecordingSettingsResponseMode.self, forKey: .mode)
+        self.outputTypes = try container.decodeIfPresent([String].self, forKey: .outputTypes)
     }
 }
 
 extension IndividualRecordingSettingsResponse: Hashable {
     public static func == (lhs: IndividualRecordingSettingsResponse, rhs: IndividualRecordingSettingsResponse) -> Bool {
-        lhs.mode == rhs.mode
+        lhs.mode == rhs.mode &&
+            lhs.outputTypes == rhs.outputTypes
     }
 
     public func hash(into hasher: inout Hasher) {
         hasher.combine(mode)
+        hasher.combine(outputTypes)
     }
 }

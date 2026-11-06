@@ -9,12 +9,16 @@ import StreamCore
 public final class CallRecording: @unchecked Sendable, Decodable {
     public var endTime: Date
     public var filename: String
+    public var recordingType: String
+    public var sessionId: String
     public var startTime: Date
     public var url: String
 
-    public init(endTime: Date, filename: String, startTime: Date, url: String) {
+    public init(endTime: Date, filename: String, recordingType: String, sessionId: String, startTime: Date, url: String) {
         self.endTime = endTime
         self.filename = filename
+        self.recordingType = recordingType
+        self.sessionId = sessionId
         self.startTime = startTime
         self.url = url
     }
@@ -23,6 +27,8 @@ public final class CallRecording: @unchecked Sendable, Decodable {
         let container = try decoder.container(keyedBy: StringCodingKey.self)
         self.endTime = try container.decode(Date.self, forKey: .endTime)
         self.filename = try container.decode(String.self, forKey: .filename)
+        self.recordingType = try container.decode(String.self, forKey: .recordingType)
+        self.sessionId = try container.decode(String.self, forKey: .sessionId)
         self.startTime = try container.decode(Date.self, forKey: .startTime)
         self.url = try container.decode(String.self, forKey: .url)
     }
@@ -32,6 +38,8 @@ extension CallRecording: Hashable {
     public static func == (lhs: CallRecording, rhs: CallRecording) -> Bool {
         lhs.endTime == rhs.endTime &&
             lhs.filename == rhs.filename &&
+            lhs.recordingType == rhs.recordingType &&
+            lhs.sessionId == rhs.sessionId &&
             lhs.startTime == rhs.startTime &&
             lhs.url == rhs.url
     }
@@ -39,6 +47,8 @@ extension CallRecording: Hashable {
     public func hash(into hasher: inout Hasher) {
         hasher.combine(endTime)
         hasher.combine(filename)
+        hasher.combine(recordingType)
+        hasher.combine(sessionId)
         hasher.combine(startTime)
         hasher.combine(url)
     }

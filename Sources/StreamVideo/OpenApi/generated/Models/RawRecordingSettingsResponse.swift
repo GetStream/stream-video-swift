@@ -24,24 +24,29 @@ public final class RawRecordingSettingsResponse: @unchecked Sendable, Decodable 
         }
     }
 
+    public var audioOnly: Bool?
     public var mode: RawRecordingSettingsResponseMode
 
-    public init(mode: RawRecordingSettingsResponseMode) {
+    public init(audioOnly: Bool? = nil, mode: RawRecordingSettingsResponseMode) {
+        self.audioOnly = audioOnly
         self.mode = mode
     }
 
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.audioOnly = try container.decodeIfPresent(Bool.self, forKey: .audioOnly)
         self.mode = try container.decode(RawRecordingSettingsResponseMode.self, forKey: .mode)
     }
 }
 
 extension RawRecordingSettingsResponse: Hashable {
     public static func == (lhs: RawRecordingSettingsResponse, rhs: RawRecordingSettingsResponse) -> Bool {
-        lhs.mode == rhs.mode
+        lhs.audioOnly == rhs.audioOnly &&
+            lhs.mode == rhs.mode
     }
 
     public func hash(into hasher: inout Hasher) {
+        hasher.combine(audioOnly)
         hasher.combine(mode)
     }
 }

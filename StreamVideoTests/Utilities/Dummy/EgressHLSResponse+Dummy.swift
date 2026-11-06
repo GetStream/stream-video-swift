@@ -9,6 +9,6 @@ extension EgressHLSResponse {
     static func dummy(
         playlistUrl: String = ""
     ) -> EgressHLSResponse {
-        .init(playlistUrl: playlistUrl)
+        .init(playlistUrl: playlistUrl, status: "")
     }
 }
