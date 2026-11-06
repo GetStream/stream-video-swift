@@ -367,11 +367,11 @@ lane :test_e2e do |options|
 end
 
 # Runs scan and re-runs only the tests that failed, up to `retries` times.
-# Every attempt recalculates the failing set from the previous run's junit
-# report, so a shrinking set of flaky tests converges instead of dragging
+# Every attempt recalculates the failing set from the previous run's result
+# bundle, so a shrinking set of flaky tests converges instead of dragging
 # the whole suite along.
 private_lane :scan_with_retries do |options|
-  scan_options = options[:scan_options]
+  scan_options = options[:scan_options].merge(result_bundle: true)
   attempts_left = options[:retries] || 3
 
   begin
@@ -389,30 +389,33 @@ private_lane :scan_with_retries do |options|
   end
 end
 
+# The tests that failed in the last scan, as `Bundle/Suite/test()` for `only_testing`.
+# Read from the result bundle rather than scan's junit report: scan skips the report when the
+# formatted output lacks a test summary, as xcbeautify's does for Swift Testing, and the report
+# names Swift Testing tests by their display names, which `only_testing` doesn't accept.
 private_lane :retreive_failed_tests do
-  report_path = 'test_output/report.junit'
-  next [] unless File.file?(report_path)
+  result_bundle_path = lane_context[SharedValues::SCAN_GENERATED_XCRESULT_PATH]
+  next [] if result_bundle_path.nil? || !File.directory?(result_bundle_path)
 
-  junit_report = Nokogiri::XML(File.read(report_path))
-  failed_tests = []
-  passed_tests = []
-  suite = junit_report.xpath('//testsuite').first
-  suite_name = suite && suite['name']
-  next [] if suite_name.nil? || suite_name.empty?
-
-  suite_name = suite_name.split('.').first
-  junit_report.xpath('//testcase').each do |testcase|
-    class_name = testcase['classname'].split('.').last
-    test_name = testcase['name'].delete('()')
-
-    if testcase.at_xpath('failure')
-      failed_tests << "#{suite_name}/#{class_name}/#{test_name}"
-    else
-      passed_tests << "#{suite_name}/#{class_name}/#{test_name}"
-    end
+  begin
+    results = JSON.parse(sh('xcrun', 'xcresulttool', 'get', 'test-results', 'tests', '--path', result_bundle_path, log: false))
+  rescue StandardError => e
+    UI.error("Couldn't read the failed tests from #{result_bundle_path}: #{e.message}")
+    next []
   end
 
-  (failed_tests - passed_tests).uniq
+  failed_tests = []
+  collect_failed = lambda do |node, bundle|
+    bundle = node['name'] if ['Unit test bundle', 'UI test bundle'].include?(node['nodeType'])
+    if node['nodeType'] == 'Test Case'
+      failed_tests << "#{bundle}/#{node['nodeIdentifier']}" if node['result'] == 'Failed' && bundle && node['nodeIdentifier']
+    else
+      node.fetch('children', []).each { |child| collect_failed.call(child, bundle) }
+    end
+  end
+  results.fetch('testNodes', []).each { |node| collect_failed.call(node, nil) }
+
+  failed_tests.uniq
 end
 
 lane :stop_e2e_helpers do
