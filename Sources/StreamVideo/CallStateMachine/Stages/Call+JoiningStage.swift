@@ -115,9 +115,8 @@ extension Call.StateMachine.Stage {
 
                     var input = input
                     input.currentNumberOfRetries += 1
-                    let isTerminal = error.isTerminalJoinFailure
 
-                    if !isTerminal,
+                    if !joinCallShouldStop(error),
                        input.currentNumberOfRetries < input.retryPolicy.maxRetries {
                         let delay = UInt64(
                             (input.retryPolicy.delay(input.currentNumberOfRetries))
@@ -278,6 +277,23 @@ extension Call.StateMachine.Stage {
             case .cancelled:
                 throw CancellationError()
             }
+        }
+
+        /// Another `joinCall` cannot fix a backstage refusal, a rate limit,
+        /// or an error the backend marks unrecoverable.
+        private func joinCallShouldStop(_ error: Error) -> Bool {
+            let apiError = (error as? APIError) ?? (error as? ClientError)?.apiError
+            guard let apiError else {
+                return false
+            }
+            if apiError.unrecoverable == true {
+                return true
+            }
+            if apiError.statusCode == 429 {
+                return true
+            }
+            return apiError.statusCode == 403
+                && apiError.message.contains("JoinBackstage")
         }
     }
 }

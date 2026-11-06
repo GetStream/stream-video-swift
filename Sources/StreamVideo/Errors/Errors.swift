@@ -21,31 +21,6 @@ extension Error {
         }
         return false
     }
-
-    /// A join or rejoin must stop when another attempt cannot succeed.
-    ///
-    /// The backend sets `unrecoverable` for some of these errors. A backstage
-    /// refusal and an API rate limit stop the loop when that flag is absent.
-    var isTerminalJoinFailure: Bool {
-        guard let apiError = streamAPIError else {
-            return false
-        }
-        if apiError.unrecoverable == true {
-            return true
-        }
-        if apiError.statusCode == 429 {
-            return true
-        }
-        return apiError.statusCode == 403
-            && apiError.message.contains("JoinBackstage")
-    }
-
-    private var streamAPIError: APIError? {
-        if let apiError = self as? APIError {
-            return apiError
-        }
-        return (self as? ClientError)?.apiError
-    }
 }
 
 extension Error {
