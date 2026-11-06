@@ -649,6 +649,50 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         )
     }
 
+    func test_setVideoFilter_captureSessionKeptAfterReconnection_appliesFilterToSurvivingCapturer() async throws {
+        let survivingCapturer = MockStreamVideoCapturer()
+        let track = peerConnectionFactory.mockVideoTrack(forScreenShare: false)
+        videoCaptureSessionProvider.activeSession = .init(
+            position: .front,
+            localTrack: track,
+            capturer: survivingCapturer
+        )
+
+        try await subject.setUp(
+            with: .init(videoOn: true),
+            ownCapabilities: [.sendVideo]
+        )
+
+        subject.setVideoFilter(
+            .init(id: "blur-background", name: "blur", filter: { _ in fatalError() })
+        )
+
+        await fulfillment { survivingCapturer.timesCalled(.setVideoFilter) == 1 }
+        XCTAssertEqual(
+            survivingCapturer.recordedInputPayload(VideoFilter.self, for: .setVideoFilter)?.first?.id,
+            "blur-background"
+        )
+    }
+
+    func test_setVideoFilter_nil_captureSessionKeptAfterReconnection_clearsSurvivingCapturer() async throws {
+        let survivingCapturer = MockStreamVideoCapturer()
+        let track = peerConnectionFactory.mockVideoTrack(forScreenShare: false)
+        videoCaptureSessionProvider.activeSession = .init(
+            position: .front,
+            localTrack: track,
+            capturer: survivingCapturer
+        )
+
+        try await subject.setUp(
+            with: .init(videoOn: true),
+            ownCapabilities: [.sendVideo]
+        )
+
+        subject.setVideoFilter(nil)
+
+        await fulfillment { survivingCapturer.timesCalled(.setVideoFilter) == 1 }
+    }
+
     // MARK: - zoom(by:)
 
     func test_zoom_videoCapturerWasCalledWithExpectedInput() async throws {
