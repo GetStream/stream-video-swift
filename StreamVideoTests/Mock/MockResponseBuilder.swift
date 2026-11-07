@@ -37,7 +37,9 @@ class MockResponseBuilder: @unchecked Sendable {
     ) -> CallResponse {
         let userResponse = makeUserResponse()
         let callIngressResponse = CallIngressResponse(
-            rtmp: RTMPIngress(address: "test")
+            rtmp: RTMPIngress(address: "test"),
+            srt: SRTIngress(address: "test"),
+            whip: WHIPIngress(address: "test")
         )
         let session = makeCallSessionResponse(
             cid: cid,
@@ -65,6 +67,7 @@ class MockResponseBuilder: @unchecked Sendable {
             session: session,
             settings: makeCallSettingsResponse(),
             transcribing: false,
+            translating: false,
             type: String(cid.split(separator: ":")[0]),
             updatedAt: Date()
         )
@@ -179,6 +182,7 @@ class MockResponseBuilder: @unchecked Sendable {
             frameRecording: frameRecordingSettings,
             geofencing: geofenceSettings,
             individualRecording: individualRecordingSettings,
+            lifecycle: LifecycleSettingsResponse(mode: .singleUse),
             limits: .dummy(),
             rawRecording: rawRecordingSettings,
             recording: recordSettings,

@@ -11,14 +11,16 @@ public final class CallUserMutedEvent: @unchecked Sendable, Event, Decodable, WS
     public var createdAt: Date
     public var fromUserId: String
     public var mutedUserIds: [String]
+    public var reason: String
     /// The type of event: "call.user_muted" in this case
     public var type: String = "call.user_muted"
 
-    public init(callCid: String, createdAt: Date, fromUserId: String, mutedUserIds: [String]) {
+    public init(callCid: String, createdAt: Date, fromUserId: String, mutedUserIds: [String], reason: String) {
         self.callCid = callCid
         self.createdAt = createdAt
         self.fromUserId = fromUserId
         self.mutedUserIds = mutedUserIds
+        self.reason = reason
     }
 
     public init(from decoder: Decoder) throws {
@@ -27,6 +29,7 @@ public final class CallUserMutedEvent: @unchecked Sendable, Event, Decodable, WS
         self.createdAt = try container.decode(Date.self, forKey: .createdAt)
         self.fromUserId = try container.decode(String.self, forKey: .fromUserId)
         self.mutedUserIds = try container.decode([String].self, forKey: .mutedUserIds)
+        self.reason = try container.decode(String.self, forKey: .reason)
         self.type = try container.decode(String.self, forKey: .type)
     }
 }
@@ -37,6 +40,7 @@ extension CallUserMutedEvent: Hashable {
             lhs.createdAt == rhs.createdAt &&
             lhs.fromUserId == rhs.fromUserId &&
             lhs.mutedUserIds == rhs.mutedUserIds &&
+            lhs.reason == rhs.reason &&
             lhs.type == rhs.type
     }
 
@@ -45,6 +49,7 @@ extension CallUserMutedEvent: Hashable {
         hasher.combine(createdAt)
         hasher.combine(fromUserId)
         hasher.combine(mutedUserIds)
+        hasher.combine(reason)
         hasher.combine(type)
     }
 }

@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### ✅ Added
 - `String.audioCall`, the identifier of the built-in `audio_call` call type, for 1:1 and group voice calls that ring and can't be reused once they have ended. [#1385](https://github.com/GetStream/stream-video-swift/pull/1385)
 - `String.agent`, the identifier of the built-in `agent` call type, for conversations between a user and an AI agent. [#1385](https://github.com/GetStream/stream-video-swift/pull/1385)
+- Add 51 properties to 33 API models. For example: `CallResponse.translating`, `CallSettingsResponse.lifecycle`, `CallIngressResponse.srt` and `whip`, `translation` and `speechSegmentConfig` on `TranscriptionSettings`, and the composite, individual and raw recording options on `GoLiveRequest` and `StopLiveRequest`. [#1397](https://github.com/GetStream/stream-video-swift/pull/1397)
 
 ### 🐞 Fixed
 
@@ -18,6 +19,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Remove 20 unused API models that no endpoint or event returns, for example `AggregatedStats`, `UserStats` and `VideoResolution`. [#1378](https://github.com/GetStream/stream-video-swift/pull/1378)
 - Remove the public `CodingKeys` enums from the API models to reduce binary size. The models encode and decode the same JSON as before. [#1379](https://github.com/GetStream/stream-video-swift/pull/1379)
 - API models now conform only to the coding direction the API uses, to reduce binary size. Request models are `Encodable`, and response and event models are `Decodable`. [#1381](https://github.com/GetStream/stream-video-swift/pull/1381)
+- The public initializers of some API models take new required arguments, for example `CallRecording` and `CallResponse`. [#1397](https://github.com/GetStream/stream-video-swift/pull/1397)
+- `IngressAudioEncodingOptionsRequest.channels` and `IngressSourceRequest.fps` are now `Int`, and the `IngressAudioEncodingOptionsRequestChannels` and `IngressSourceRequestFps` enums are deprecated. [#1397](https://github.com/GetStream/stream-video-swift/pull/1397)
 
 ### 🐞 Fixed
 

@@ -552,7 +552,7 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
             with: [
                 .init(
                     event: .typeCallTranscriptionStoppedEvent(
-                        CallTranscriptionStoppedEvent(callCid: callCid, createdAt: .init())
+                        CallTranscriptionStoppedEvent(callCid: callCid, createdAt: .init(), egressId: .unique)
                     ),
                     keyPath: \.state.transcribing,
                     expected: false
@@ -566,7 +566,7 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
             with: [
                 .init(
                     event: .typeCallTranscriptionStartedEvent(
-                        CallTranscriptionStartedEvent(callCid: callCid, createdAt: .init())
+                        CallTranscriptionStartedEvent(callCid: callCid, createdAt: .init(), egressId: .unique)
                     ),
                     keyPath: \.state.transcribing,
                     expected: true
@@ -580,14 +580,14 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
             with: [
                 .init(
                     event: .typeCallTranscriptionStartedEvent(
-                        CallTranscriptionStartedEvent(callCid: callCid, createdAt: .init())
+                        CallTranscriptionStartedEvent(callCid: callCid, createdAt: .init(), egressId: .unique)
                     ),
                     keyPath: \.state.transcribing,
                     expected: true
                 ),
                 .init(
                     event: .typeCallTranscriptionFailedEvent(
-                        CallTranscriptionFailedEvent(callCid: callCid, createdAt: .init())
+                        CallTranscriptionFailedEvent(callCid: callCid, createdAt: .init(), egressId: .unique)
                     ),
                     keyPath: \.state.transcribing,
                     expected: false
@@ -892,9 +892,12 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
     func test_updateState_closedCaptionEventReceived() async throws {
         let expected = CallClosedCaption(
             endTime: .init(),
+            id: .unique,
+            language: "en",
             speakerId: .unique,
             startTime: .init(),
             text: .unique,
+            translated: false,
             user: .dummy()
         )
         try await assertUpdateState(

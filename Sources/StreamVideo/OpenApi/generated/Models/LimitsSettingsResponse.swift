@@ -8,27 +8,42 @@ import StreamCore
 public final class LimitsSettingsResponse: @unchecked Sendable, Decodable {
     public var maxDurationSeconds: Int?
     public var maxParticipants: Int?
+    public var maxParticipantsExcludeOwner: Bool?
+    public var maxParticipantsExcludeRoles: [String]
 
-    public init(maxDurationSeconds: Int? = nil, maxParticipants: Int? = nil) {
+    public init(
+        maxDurationSeconds: Int? = nil,
+        maxParticipants: Int? = nil,
+        maxParticipantsExcludeOwner: Bool? = nil,
+        maxParticipantsExcludeRoles: [String]
+    ) {
         self.maxDurationSeconds = maxDurationSeconds
         self.maxParticipants = maxParticipants
+        self.maxParticipantsExcludeOwner = maxParticipantsExcludeOwner
+        self.maxParticipantsExcludeRoles = maxParticipantsExcludeRoles
     }
 
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: StringCodingKey.self)
         self.maxDurationSeconds = try container.decodeIfPresent(Int.self, forKey: .maxDurationSeconds)
         self.maxParticipants = try container.decodeIfPresent(Int.self, forKey: .maxParticipants)
+        self.maxParticipantsExcludeOwner = try container.decodeIfPresent(Bool.self, forKey: .maxParticipantsExcludeOwner)
+        self.maxParticipantsExcludeRoles = try container.decode([String].self, forKey: .maxParticipantsExcludeRoles)
     }
 }
 
 extension LimitsSettingsResponse: Hashable {
     public static func == (lhs: LimitsSettingsResponse, rhs: LimitsSettingsResponse) -> Bool {
         lhs.maxDurationSeconds == rhs.maxDurationSeconds &&
-            lhs.maxParticipants == rhs.maxParticipants
+            lhs.maxParticipants == rhs.maxParticipants &&
+            lhs.maxParticipantsExcludeOwner == rhs.maxParticipantsExcludeOwner &&
+            lhs.maxParticipantsExcludeRoles == rhs.maxParticipantsExcludeRoles
     }
 
     public func hash(into hasher: inout Hasher) {
         hasher.combine(maxDurationSeconds)
         hasher.combine(maxParticipants)
+        hasher.combine(maxParticipantsExcludeOwner)
+        hasher.combine(maxParticipantsExcludeRoles)
     }
 }

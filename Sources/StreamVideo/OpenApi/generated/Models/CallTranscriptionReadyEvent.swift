@@ -11,13 +11,15 @@ public final class CallTranscriptionReadyEvent: @unchecked Sendable, Event, Deco
     /// CallTranscription represents a transcription of a call.
     public var callTranscription: CallTranscription
     public var createdAt: Date
+    public var egressId: String
     /// The type of event: "call.transcription_ready" in this case
     public var type: String = "call.transcription_ready"
 
-    public init(callCid: String, callTranscription: CallTranscription, createdAt: Date) {
+    public init(callCid: String, callTranscription: CallTranscription, createdAt: Date, egressId: String) {
         self.callCid = callCid
         self.callTranscription = callTranscription
         self.createdAt = createdAt
+        self.egressId = egressId
     }
 
     public init(from decoder: Decoder) throws {
@@ -25,6 +27,7 @@ public final class CallTranscriptionReadyEvent: @unchecked Sendable, Event, Deco
         self.callCid = try container.decode(String.self, forKey: .callCid)
         self.callTranscription = try container.decode(CallTranscription.self, forKey: .callTranscription)
         self.createdAt = try container.decode(Date.self, forKey: .createdAt)
+        self.egressId = try container.decode(String.self, forKey: .egressId)
         self.type = try container.decode(String.self, forKey: .type)
     }
 }
@@ -34,6 +37,7 @@ extension CallTranscriptionReadyEvent: Hashable {
         lhs.callCid == rhs.callCid &&
             lhs.callTranscription == rhs.callTranscription &&
             lhs.createdAt == rhs.createdAt &&
+            lhs.egressId == rhs.egressId &&
             lhs.type == rhs.type
     }
 
@@ -41,6 +45,7 @@ extension CallTranscriptionReadyEvent: Hashable {
         hasher.combine(callCid)
         hasher.combine(callTranscription)
         hasher.combine(createdAt)
+        hasher.combine(egressId)
         hasher.combine(type)
     }
 }

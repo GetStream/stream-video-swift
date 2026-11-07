@@ -17,6 +17,8 @@ public final class OwnUserResponse: @unchecked Sendable, Decodable {
     public var language: String
     public var lastActive: Date?
     public var name: String?
+    /// The push preference details.
+    public var pushPreferences: PushPreferencesResponse?
     public var role: String
     public var teams: [String]
     public var updatedAt: Date
@@ -33,6 +35,7 @@ public final class OwnUserResponse: @unchecked Sendable, Decodable {
         language: String,
         lastActive: Date? = nil,
         name: String? = nil,
+        pushPreferences: PushPreferencesResponse? = nil,
         role: String,
         teams: [String],
         updatedAt: Date
@@ -48,6 +51,7 @@ public final class OwnUserResponse: @unchecked Sendable, Decodable {
         self.language = language
         self.lastActive = lastActive
         self.name = name
+        self.pushPreferences = pushPreferences
         self.role = role
         self.teams = teams
         self.updatedAt = updatedAt
@@ -66,6 +70,7 @@ public final class OwnUserResponse: @unchecked Sendable, Decodable {
         self.language = try container.decode(String.self, forKey: .language)
         self.lastActive = try container.decodeIfPresent(Date.self, forKey: .lastActive)
         self.name = try container.decodeIfPresent(String.self, forKey: .name)
+        self.pushPreferences = try container.decodeIfPresent(PushPreferencesResponse.self, forKey: .pushPreferences)
         self.role = try container.decode(String.self, forKey: .role)
         self.teams = try container.decode([String].self, forKey: .teams)
         self.updatedAt = try container.decode(Date.self, forKey: .updatedAt)
@@ -85,6 +90,7 @@ extension OwnUserResponse: Hashable {
             lhs.language == rhs.language &&
             lhs.lastActive == rhs.lastActive &&
             lhs.name == rhs.name &&
+            lhs.pushPreferences == rhs.pushPreferences &&
             lhs.role == rhs.role &&
             lhs.teams == rhs.teams &&
             lhs.updatedAt == rhs.updatedAt
@@ -102,6 +108,7 @@ extension OwnUserResponse: Hashable {
         hasher.combine(language)
         hasher.combine(lastActive)
         hasher.combine(name)
+        hasher.combine(pushPreferences)
         hasher.combine(role)
         hasher.combine(teams)
         hasher.combine(updatedAt)
