@@ -43,20 +43,21 @@ env:
 jobs:
   guard:
     name: Guard
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4.1.1
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/ci-guard
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
   test-llc-debug:
     name: Test LLC (Debug)
-    runs-on: macos-15
+    runs-on:
+      group: stream-macos
     needs: guard
     if: ${{ github.event.inputs.record_snapshots_swiftui != 'true' && github.event.inputs.record_snapshots_uikit != 'true' }}
     steps:
-    - uses: actions/checkout@v4.1.1
+    - uses: actions/checkout@v7
       with:
         fetch-depth: 0
     - uses: ./.github/actions/bootstrap
@@ -66,26 +67,38 @@ jobs:
     - name: Run LLC Tests (Debug)
       run: bundle exec fastlane test device:"${{ env.IOS_SIMULATOR_DEVICE }}" ${{ env.VERBOSE }}
       timeout-minutes: 40
+    - name: Upload raw Xcode logs
+      if: always()
+      uses: actions/upload-artifact@v7
+      with:
+        name: xcode-logs-${{ github.job }}
+        path: ~/Library/Logs/scan/*.log
     - name: Run Sonar analysis
       run: bundle exec fastlane sonar_upload
       env:
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-    - uses: 8398a7/action-slack@v3
-      with:
-        status: ${{ job.status }}
-        text: "You shall not pass!"
-        job_name: "Test LLC (Debug)"
-        fields: repo,commit,author,workflow
-      env:
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+    - uses: slackapi/slack-github-action@v4
       if: ${{ github.event_name == 'push' && failure() }}
+      with:
+        webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+        webhook-type: incoming-webhook
+        errors: true
+        payload: |
+          text: ${{ toJSON('You shall not pass!') }}
+          attachments:
+            - color: danger
+              title: ${{ toJSON(format('{0}: {1} ({2})', github.workflow, 'Test LLC (Debug)', job.status)) }}
+              text: ${{ toJSON(format('Repository: {0} | Commit: {1} | Actor: {2}', github.repository, github.sha, github.actor)) }}
+              footer: ${{ toJSON(format('{0}/{1}/actions/runs/{2}', github.server_url, github.repository, github.run_id)) }}
     - name: Parse xcresult
       if: failure()
       run: |
-        brew install chargepoint/xcparse/xcparse
+        if [[ ${RUNNER_ENVIRONMENT:-} != self-hosted ]] || ! command -v xcparse >/dev/null; then
+          brew install chargepoint/xcparse/xcparse
+        fi
         xcparse logs fastlane/test_output/StreamVideo.xcresult fastlane/test_output/logs/
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       if: failure()
       with:
         name: Test Data LLC
@@ -93,14 +106,15 @@ jobs:
           fastlane/test_output/logs/*/Diagnostics/**/*.txt
           fastlane/test_output/logs/*/Diagnostics/simctl_diagnostics/DiagnosticReports/*
     - name: Upload Test Coverage
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: test-coverage-${{ github.event.pull_request.number }}
         path: reports/sonarqube-generic-coverage.xml
 
   test-swiftui-debug:
     name: Test SwiftUI (Debug)
-    runs-on: macos-15
+    runs-on:
+      group: stream-macos
     needs: guard
     if: ${{ github.event.inputs.record_snapshots_uikit != 'true' || github.event.inputs.record_snapshots_swiftui == 'true' }}
     permissions:
@@ -109,7 +123,7 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ secrets.CI_BOT_GITHUB_TOKEN }} # to open a PR
     steps:
-    - uses: actions/checkout@v4.1.1
+    - uses: actions/checkout@v7
     - uses: ./.github/actions/bootstrap
       env:
         INSTALL_YEETD: true
@@ -117,12 +131,20 @@ jobs:
     - name: Run UI Tests (Debug)
       run: bundle exec fastlane test_swiftui device:"${{ env.IOS_SIMULATOR_DEVICE }}" record:"${{ github.event.inputs.record_snapshots_swiftui }}" ${{ env.VERBOSE }}
       timeout-minutes: 120
+    - name: Upload raw Xcode logs
+      if: always()
+      uses: actions/upload-artifact@v7
+      with:
+        name: xcode-logs-${{ github.job }}
+        path: ~/Library/Logs/scan/*.log
     - name: Parse xcresult
       if: failure()
       run: |
-        brew install chargepoint/xcparse/xcparse
+        if [[ ${RUNNER_ENVIRONMENT:-} != self-hosted ]] || ! command -v xcparse >/dev/null; then
+          brew install chargepoint/xcparse/xcparse
+        fi
         xcparse screenshots fastlane/test_output/StreamVideoSwiftUI.xcresult fastlane/test_output/snapshots --test
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       if: failure()
       with:
         name: SwiftUI Test Data
@@ -130,7 +152,8 @@ jobs:
 
   test-uikit-debug:
     name: Test UIKit (Debug)
-    runs-on: macos-15
+    runs-on:
+      group: stream-macos
     needs: guard
     if: ${{ github.event.inputs.record_snapshots_swiftui != 'true' || github.event.inputs.record_snapshots_uikit == 'true' }}
     permissions:
@@ -139,7 +162,7 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ secrets.CI_BOT_GITHUB_TOKEN }} # to open a PR
     steps:
-    - uses: actions/checkout@v4.1.1
+    - uses: actions/checkout@v7
     - uses: ./.github/actions/bootstrap
       env:
         INSTALL_YEETD: true
@@ -147,12 +170,20 @@ jobs:
     - name: Run UI Tests (Debug)
       run: bundle exec fastlane test_uikit device:"${{ env.IOS_SIMULATOR_DEVICE }}" record:"${{ github.event.inputs.record_snapshots_uikit }}" ${{ env.VERBOSE }}
       timeout-minutes: 120
+    - name: Upload raw Xcode logs
+      if: always()
+      uses: actions/upload-artifact@v7
+      with:
+        name: xcode-logs-${{ github.job }}
+        path: ~/Library/Logs/scan/*.log
     - name: Parse xcresult
       if: failure()
       run: |
-        brew install chargepoint/xcparse/xcparse
+        if [[ ${RUNNER_ENVIRONMENT:-} != self-hosted ]] || ! command -v xcparse >/dev/null; then
+          brew install chargepoint/xcparse/xcparse
+        fi
         xcparse screenshots fastlane/test_output/StreamVideoUIKit.xcresult fastlane/test_output/snapshots --test
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       if: failure()
       with:
         name: UIKit Test Data
@@ -160,13 +191,14 @@ jobs:
 
   automated-code-review:
     name: Automated Code Review
-    runs-on: macos-15
+    runs-on:
+      group: stream-macos
     needs: guard
     env:
       XCODE_VERSION: "16.4"
     if: ${{ github.event.inputs.record_snapshots_swiftui != 'true' && github.event.inputs.record_snapshots_uikit != 'true' }}
     steps:
-    - uses: actions/checkout@v4.1.1
+    - uses: actions/checkout@v7
     - uses: ./.github/actions/bootstrap
       env:
         INSTALL_INTERFACE_ANALYZER: true
@@ -178,7 +210,8 @@ jobs:
 
   build-old-xcode:
     name: Build SDKs (Old Xcode)
-    runs-on: macos-15
+    runs-on:
+      group: stream-macos
     needs:
       - guard
       - test-llc-debug
@@ -187,10 +220,10 @@ jobs:
       XCODE_VERSION: "16.4"
     steps:
     - name: Connect Bot
-      uses: webfactory/ssh-agent@v0.7.0
+      uses: webfactory/ssh-agent@v0.10.0
       with:
         ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
-    - uses: actions/checkout@v3.1.0
+    - uses: actions/checkout@v7
     - uses: ./.github/actions/xcode-cache
     - uses: ./.github/actions/ruby-cache
     - name: List Xcode versions
@@ -206,19 +239,20 @@ jobs:
 
   build-test-app-and-frameworks:
     name: Build Test App and Frameworks
-    runs-on: macos-15
+    runs-on:
+      group: stream-macos
     needs:
       - guard
       - test-llc-debug
     if: ${{ github.event.inputs.record_snapshots_swiftui != 'true' && github.event.inputs.record_snapshots_uikit != 'true' }}
     steps:
-    - uses: actions/checkout@v4.1.1
+    - uses: actions/checkout@v7
     - uses: ./.github/actions/ruby-cache
     - uses: ./.github/actions/xcode-cache
     - name: Build
       run: bundle exec fastlane build_test_app_and_frameworks ${{ env.VERBOSE }}
       timeout-minutes: 60
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       if: success()
       with:
         name: cache-derived-data
@@ -229,17 +263,14 @@ jobs:
 
   build-apps:
     name: Build Demo Apps
-    runs-on: macos-15
+    runs-on:
+      group: stream-macos
     needs:
       - guard
       - build-test-app-and-frameworks
     if: ${{ github.event.inputs.record_snapshots_swiftui != 'true' && github.event.inputs.record_snapshots_uikit != 'true' }}
     steps:
-    - uses: actions/checkout@v4.1.1
-    - uses: actions/download-artifact@v4
-      with:
-        name: cache-derived-data
-        path: derived_data/Build/
+    - uses: actions/checkout@v7
     - uses: ./.github/actions/ruby-cache
     - uses: ./.github/actions/xcode-cache
     - name: Build SwiftUI Demo App
@@ -251,7 +282,8 @@ jobs:
 
   allure_testops_launch:
     name: Launch Allure TestOps
-    runs-on: macos-15
+    runs-on:
+      group: stream-macos
     needs:
       - guard
       - build-test-app-and-frameworks
@@ -259,7 +291,7 @@ jobs:
     outputs:
       launch_id: ${{ steps.get_launch_id.outputs.launch_id }}
     steps:
-    - uses: actions/checkout@v4.1.1
+    - uses: actions/checkout@v7
     - uses: ./.github/actions/ruby-cache
     - name: Launch Allure TestOps
       run: bundle exec fastlane allure_launch
@@ -267,12 +299,13 @@ jobs:
         ALLURE_TOKEN: ${{ secrets.ALLURE_TOKEN }}
         GITHUB_EVENT: ${{ toJson(github.event) }}
     - id: get_launch_id
-      run: echo "launch_id=${{env.LAUNCH_ID}}" >> $GITHUB_OUTPUT
+      run: echo "launch_id=$LAUNCH_ID" >> "$GITHUB_OUTPUT"
       if: env.LAUNCH_ID != ''
 
   test-e2e-debug:
     name: Test E2E UI (Debug)
-    runs-on: macos-15
+    runs-on:
+      group: stream-macos
     if: ${{ github.event.inputs.record_snapshots_swiftui != 'true' && github.event.inputs.record_snapshots_uikit != 'true' }}
     needs:
       - guard
@@ -286,8 +319,8 @@ jobs:
         batch: [0]
       fail-fast: false
     steps:
-    - uses: actions/checkout@v4.1.1
-    - uses: actions/download-artifact@v4
+    - uses: actions/checkout@v7
+    - uses: actions/download-artifact@v8
       with:
         name: cache-derived-data
         path: derived_data/Build/
@@ -308,16 +341,18 @@ jobs:
         STREAM_SDK_TEST_ACCOUNT_OTP_SECRET: ${{ secrets.STREAM_SDK_TEST_ACCOUNT_OTP_SECRET }}
     - name: Allure TestOps Upload
       if: env.LAUNCH_ID != '' && (success() || failure())
-      run: bundle exec fastlane allure_upload launch_id:$LAUNCH_ID
+      run: bundle exec fastlane allure_upload launch_id:"$LAUNCH_ID"
     - name: Allure TestOps Launch Removal
       if: env.LAUNCH_ID != '' && cancelled()
-      run: bundle exec fastlane allure_launch_removal launch_id:$LAUNCH_ID
+      run: bundle exec fastlane allure_launch_removal launch_id:"$LAUNCH_ID"
     - name: Parse xcresult
       if: failure()
       run: |
-        brew install chargepoint/xcparse/xcparse
+        if [[ ${RUNNER_ENVIRONMENT:-} != self-hosted ]] || ! command -v xcparse >/dev/null; then
+          brew install chargepoint/xcparse/xcparse
+        fi
         xcparse logs fastlane/test_output/DemoApp.xcresult fastlane/test_output/logs/
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       if: failure()
       with:
         name: E2E Test Data ${{ matrix.batch }}

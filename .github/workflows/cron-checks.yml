@@ -30,13 +30,13 @@ jobs:
     name: Build Test App and Frameworks
     runs-on: macos-15
     steps:
-    - uses: actions/checkout@v4.1.1
+    - uses: actions/checkout@v7
     - uses: ./.github/actions/ruby-cache
     - uses: ./.github/actions/xcode-cache
     - name: Build
       run: bundle exec fastlane build_test_app_and_frameworks ${{ env.VERBOSE }}
       timeout-minutes: 60
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       if: success()
       with:
         name: cache-derived-data
@@ -65,8 +65,8 @@ jobs:
       XCODE_VERSION: "26.1.1"
       IOS_SIMULATOR_DEVICE: "${{ matrix.device }} (${{ matrix.ios }})"
     steps:
-    - uses: actions/checkout@v4.1.1
-    - uses: actions/download-artifact@v4
+    - uses: actions/checkout@v7
+    - uses: actions/download-artifact@v8
       with:
         name: cache-derived-data
         path: derived_data/Build/
@@ -95,16 +95,18 @@ jobs:
         STREAM_SDK_TEST_ACCOUNT_OTP_SECRET: ${{ secrets.STREAM_SDK_TEST_ACCOUNT_OTP_SECRET }}
     - name: Allure TestOps Upload
       if: success() || failure()
-      run: bundle exec fastlane allure_upload launch_id:$LAUNCH_ID
+      run: bundle exec fastlane allure_upload launch_id:"$LAUNCH_ID"
     - name: Allure TestOps Launch Removal
       if: cancelled()
-      run: bundle exec fastlane allure_launch_removal launch_id:$LAUNCH_ID
+      run: bundle exec fastlane allure_launch_removal launch_id:"$LAUNCH_ID"
     - name: Parse xcresult
       if: failure()
       run: |
-        brew install chargepoint/xcparse/xcparse
+        if [[ ${RUNNER_ENVIRONMENT:-} != self-hosted ]] || ! command -v xcparse >/dev/null; then
+          brew install chargepoint/xcparse/xcparse
+        fi
         xcparse logs fastlane/test_output/DemoApp.xcresult fastlane/test_output/logs/
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       if: failure()
       with:
         name: Test Data E2E (iOS ${{ matrix.ios }})
@@ -132,7 +134,7 @@ jobs:
       XCODE_VERSION: "26.2"
       IOS_SIMULATOR_DEVICE: "${{ matrix.device }} (${{ matrix.ios }})"
     steps:
-    - uses: actions/checkout@v4.1.1
+    - uses: actions/checkout@v7
     - uses: ./.github/actions/bootstrap
       env:
         INSTALL_YEETD: true
@@ -149,9 +151,11 @@ jobs:
     - name: Parse xcresult
       if: failure()
       run: |
-        brew install chargepoint/xcparse/xcparse
+        if [[ ${RUNNER_ENVIRONMENT:-} != self-hosted ]] || ! command -v xcparse >/dev/null; then
+          brew install chargepoint/xcparse/xcparse
+        fi
         xcparse logs fastlane/test_output/StreamVideo.xcresult fastlane/test_output/logs/
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       if: failure()
       with:
         name: Test Data LLC (iOS ${{ matrix.ios }})
@@ -164,11 +168,7 @@ jobs:
     runs-on: macos-15
     needs: build-test-app-and-frameworks
     steps:
-    - uses: actions/checkout@v4.1.1
-    - uses: actions/download-artifact@v4
-      with:
-        name: cache-derived-data
-        path: derived_data/Build/
+    - uses: actions/checkout@v7
     - uses: ./.github/actions/ruby-cache
     - uses: ./.github/actions/xcode-cache
     - name: Build SwiftUI Demo App
@@ -181,15 +181,15 @@ jobs:
   build-old-xcode:
     name: Build SDKs (Old Xcode)
     runs-on: macos-15
-    if: ${{ github.event_name != 'push' && github.event.inputs.snapshots != 'true' }}
+    if: ${{ github.event_name != 'push' }}
     env:
       XCODE_VERSION: "16.4"
     steps:
     - name: Connect Bot
-      uses: webfactory/ssh-agent@v0.7.0
+      uses: webfactory/ssh-agent@v0.10.0
       with:
         ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
-    - uses: actions/checkout@v3.1.0
+    - uses: actions/checkout@v7
     - uses: ./.github/actions/xcode-cache
     - uses: ./.github/actions/ruby-cache
     - name: List Xcode versions
@@ -209,22 +209,26 @@ jobs:
     env:
       XCODE_VERSION: "16.4"
     steps:
-    - uses: actions/checkout@v4.1.1
+    - uses: actions/checkout@v7
     - uses: ./.github/actions/bootstrap
     - run: bundle exec fastlane rubocop
     - run: bundle exec fastlane run_swift_format strict:true
 
   slack:
     name: Slack Report
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [build-and-test-debug, test-e2e-debug, build-test-app-and-frameworks, build-apps, build-old-xcode, automated-code-review]
     if: failure() && github.event_name == 'schedule'
     steps:
-      - uses: 8398a7/action-slack@v3
+      - uses: slackapi/slack-github-action@v4
         with:
-          status: cancelled
-          text: "You shall not pass!"
-          job_name: "${{ github.workflow }}: ${{ github.job }}"
-          fields: repo,commit,author,workflow
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_NIGHTLY_CHECKS }}
+          webhook: ${{ secrets.SLACK_WEBHOOK_NIGHTLY_CHECKS }}
+          webhook-type: incoming-webhook
+          errors: true
+          payload: |
+            text: ${{ toJSON('You shall not pass!') }}
+            attachments:
+              - color: warning
+                title: ${{ toJSON(format('{0}: {1} ({2})', github.workflow, github.job, 'cancelled')) }}
+                text: ${{ toJSON(format('Repository: {0} | Commit: {1} | Actor: {2}', github.repository, github.sha, github.actor)) }}
+                footer: ${{ toJSON(format('{0}/{1}/actions/runs/{2}', github.server_url, github.repository, github.run_id)) }}

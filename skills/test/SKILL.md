@@ -54,6 +54,16 @@ Select the project, scheme, test plan, and destination from current metadata.
 Preserve the command's exit status when filtering its output.
 Fastlane can skip suites or retry failures. Check actual test execution.
 
+### CI automation
+
+Check workflow expressions with `actionlint` and shell scripts with `shellcheck`.
+Use `RUNNER_ENVIRONMENT` in shell scripts and `runner.environment` in action conditions.
+Check the latest action releases at their source, including their minimum runner version.
+Verify major references before use. Some actions use a branch or only publish exact tags.
+A local check does not prove a GitHub Actions run or a Slack delivery.
+Check simulator availability before installing runtimes or creating devices.
+Match the requested runtime and device model. Preserve existing simulator data.
+
 ## Documentation tests
 
 After approval through the [documentation decision](../development/SKILL.md#public-interface-documentation),
