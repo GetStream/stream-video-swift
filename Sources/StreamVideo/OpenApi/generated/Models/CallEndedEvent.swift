@@ -6,20 +6,21 @@ import Foundation
 import StreamCore
 
 /// This event is sent when a call is mark as ended for all its participants. Clients receiving this event should leave the call screen
-public final class CallEndedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
+public final class CallEndedEvent: Sendable, Event, Decodable, WSCallEvent {
     /// Represents a call
-    public var call: CallResponse
-    public var callCid: String
-    public var createdAt: Date
+    public let call: CallResponse
+    public let callCid: String
+    public let createdAt: Date
     /// The type of event: "call.ended" in this case
-    public var type: String = "call.ended"
+    public let type: String
     /// User response object
-    public var user: UserResponse?
+    public let user: UserResponse?
 
-    public init(call: CallResponse, callCid: String, createdAt: Date, user: UserResponse? = nil) {
+    public init(call: CallResponse, callCid: String, createdAt: Date, type: String = "call.ended", user: UserResponse? = nil) {
         self.call = call
         self.callCid = callCid
         self.createdAt = createdAt
+        self.type = type
         self.user = user
     }
 

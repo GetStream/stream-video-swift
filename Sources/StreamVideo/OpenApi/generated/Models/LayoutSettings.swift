@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class LayoutSettings: @unchecked Sendable, Encodable, JSONEncodable {
+public final class LayoutSettings: Sendable, Encodable, JSONEncodable {
     
     public enum LayoutSettingsName: String, Sendable, Codable, CaseIterable {
         case custom
@@ -26,11 +26,11 @@ public final class LayoutSettings: @unchecked Sendable, Encodable, JSONEncodable
         }
     }
 
-    public var detectOrientation: Bool?
-    public var externalAppUrl: String?
-    public var externalCssUrl: String?
-    public var name: LayoutSettingsName
-    public var options: [String: RawJSON]?
+    public let detectOrientation: Bool?
+    public let externalAppUrl: String?
+    public let externalCssUrl: String?
+    public let name: LayoutSettingsName
+    public let options: [String: RawJSON]?
 
     public init(
         detectOrientation: Bool? = nil,

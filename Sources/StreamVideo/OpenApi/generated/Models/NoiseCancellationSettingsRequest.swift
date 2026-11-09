@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class NoiseCancellationSettingsRequest: @unchecked Sendable, Codable, JSONEncodable {
+public final class NoiseCancellationSettingsRequest: Sendable, Codable, JSONEncodable {
     
     public enum NoiseCancellationSettingsRequestMode: String, Sendable, Codable, CaseIterable {
         case autoOn = "auto-on"
@@ -24,7 +24,7 @@ public final class NoiseCancellationSettingsRequest: @unchecked Sendable, Codabl
         }
     }
 
-    public var mode: NoiseCancellationSettingsRequestMode
+    public let mode: NoiseCancellationSettingsRequestMode
 
     public init(mode: NoiseCancellationSettingsRequestMode) {
         self.mode = mode

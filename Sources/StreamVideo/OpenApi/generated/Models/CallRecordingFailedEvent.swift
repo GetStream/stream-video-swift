@@ -6,16 +6,17 @@ import Foundation
 import StreamCore
 
 /// This event is sent when call recording has failed
-public final class CallRecordingFailedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
+public final class CallRecordingFailedEvent: Sendable, Event, Decodable, WSCallEvent {
     
-    public var callCid: String
-    public var createdAt: Date
+    public let callCid: String
+    public let createdAt: Date
     /// The type of event: "call.recording_failed" in this case
-    public var type: String = "call.recording_failed"
+    public let type: String
 
-    public init(callCid: String, createdAt: Date) {
+    public init(callCid: String, createdAt: Date, type: String = "call.recording_failed") {
         self.callCid = callCid
         self.createdAt = createdAt
+        self.type = type
     }
 
     public init(from decoder: Decoder) throws {

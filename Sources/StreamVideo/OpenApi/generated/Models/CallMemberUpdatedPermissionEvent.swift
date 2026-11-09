@@ -6,30 +6,32 @@ import Foundation
 import StreamCore
 
 /// This event is sent when one or more members get its role updated
-public final class CallMemberUpdatedPermissionEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
+public final class CallMemberUpdatedPermissionEvent: Sendable, Event, Decodable, WSCallEvent {
     /// Represents a call
-    public var call: CallResponse
-    public var callCid: String
+    public let call: CallResponse
+    public let callCid: String
     /// The capabilities by role for this call
-    public var capabilitiesByRole: [String: [String]]
-    public var createdAt: Date
+    public let capabilitiesByRole: [String: [String]]
+    public let createdAt: Date
     /// The list of members that were updated
-    public var members: [MemberResponse]
+    public let members: [MemberResponse]
     /// The type of event: "call.member_added" in this case
-    public var type: String = "call.member_updated_permission"
+    public let type: String
 
     public init(
         call: CallResponse,
         callCid: String,
         capabilitiesByRole: [String: [String]],
         createdAt: Date,
-        members: [MemberResponse]
+        members: [MemberResponse],
+        type: String = "call.member_updated_permission"
     ) {
         self.call = call
         self.callCid = callCid
         self.capabilitiesByRole = capabilitiesByRole
         self.createdAt = createdAt
         self.members = members
+        self.type = type
     }
 
     public init(from decoder: Decoder) throws {

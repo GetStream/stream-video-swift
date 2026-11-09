@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class AudioSettings: @unchecked Sendable, Decodable {
+public final class AudioSettings: Sendable, Decodable {
     
     public enum AudioSettingsDefaultDevice: String, Sendable, Codable, CaseIterable {
         case earpiece
@@ -23,14 +23,14 @@ public final class AudioSettings: @unchecked Sendable, Decodable {
         }
     }
 
-    public var accessRequestEnabled: Bool
-    public var defaultDevice: AudioSettingsDefaultDevice
-    public var hifiAudioEnabled: Bool?
-    public var micDefaultOn: Bool
-    public var noiseCancellation: NoiseCancellationSettingsRequest?
-    public var opusDtxEnabled: Bool
-    public var redundantCodingEnabled: Bool
-    public var speakerDefaultOn: Bool
+    public let accessRequestEnabled: Bool
+    public let defaultDevice: AudioSettingsDefaultDevice
+    public let hifiAudioEnabled: Bool?
+    public let micDefaultOn: Bool
+    public let noiseCancellation: NoiseCancellationSettingsRequest?
+    public let opusDtxEnabled: Bool
+    public let redundantCodingEnabled: Bool
+    public let speakerDefaultOn: Bool
 
     public init(
         accessRequestEnabled: Bool,

@@ -6,23 +6,31 @@ import Foundation
 import StreamCore
 
 /// This event is sent when a moderation warning is issued to a user
-public final class CallModerationWarningEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
-    public var callCid: String
-    public var createdAt: Date
+public final class CallModerationWarningEvent: Sendable, Event, Decodable, WSCallEvent {
+    public let callCid: String
+    public let createdAt: Date
     /// Custom data associated with the moderation action
-    public var custom: [String: RawJSON]
+    public let custom: [String: RawJSON]
     /// The warning message
-    public var message: String
+    public let message: String
     /// The type of event: "call.moderation_warning" in this case
-    public var type: String = "call.moderation_warning"
+    public let type: String
     /// The user ID who is receiving the warning
-    public var userId: String
+    public let userId: String
 
-    public init(callCid: String, createdAt: Date, custom: [String: RawJSON], message: String, userId: String) {
+    public init(
+        callCid: String,
+        createdAt: Date,
+        custom: [String: RawJSON],
+        message: String,
+        type: String = "call.moderation_warning",
+        userId: String
+    ) {
         self.callCid = callCid
         self.createdAt = createdAt
         self.custom = custom
         self.message = message
+        self.type = type
         self.userId = userId
     }
 

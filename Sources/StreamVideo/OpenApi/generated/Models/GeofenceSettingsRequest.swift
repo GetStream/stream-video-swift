@@ -5,8 +5,8 @@
 import Foundation
 import StreamCore
 
-public final class GeofenceSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable {
-    public var names: [String]?
+public final class GeofenceSettingsRequest: Sendable, Encodable, JSONEncodable {
+    public let names: [String]?
 
     public init(names: [String]? = nil) {
         self.names = names

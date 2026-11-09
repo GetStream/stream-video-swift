@@ -5,9 +5,9 @@
 import Foundation
 import StreamCore
 
-public final class IngressVideoEncodingResponse: @unchecked Sendable, Decodable {
-    public var layers: [IngressVideoLayerResponse]
-    public var source: IngressSourceResponse
+public final class IngressVideoEncodingResponse: Sendable, Decodable {
+    public let layers: [IngressVideoLayerResponse]
+    public let source: IngressSourceResponse
 
     public init(layers: [IngressVideoLayerResponse], source: IngressSourceResponse) {
         self.layers = layers

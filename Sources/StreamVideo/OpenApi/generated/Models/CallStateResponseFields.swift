@@ -6,14 +6,14 @@ import Foundation
 import StreamCore
 
 /// CallStateResponseFields is the payload for call state response
-public final class CallStateResponseFields: @unchecked Sendable, Decodable {
+public final class CallStateResponseFields: Sendable, Decodable {
     /// Represents a call
-    public var call: CallResponse
+    public let call: CallResponse
     /// List of call members
-    public var members: [MemberResponse]
+    public let members: [MemberResponse]
     /// MemberResponse is the payload for a member of a call.
-    public var membership: MemberResponse?
-    public var ownCapabilities: [OwnCapability]
+    public let membership: MemberResponse?
+    public let ownCapabilities: [OwnCapability]
 
     public init(
         call: CallResponse,

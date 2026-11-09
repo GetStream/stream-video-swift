@@ -6,39 +6,39 @@ import Foundation
 import StreamCore
 
 /// Represents a call
-public final class CallResponse: @unchecked Sendable, Decodable {
-    public var backstage: Bool
-    public var blockedUserIds: [String]
-    public var captioning: Bool
+public final class CallResponse: Sendable, Decodable {
+    public let backstage: Bool
+    public let blockedUserIds: [String]
+    public let captioning: Bool
     /// The unique identifier for a call (<type>:<id>)
-    public var cid: String
+    public let cid: String
     /// Date/time of creation
-    public var createdAt: Date
+    public let createdAt: Date
     /// User response object
-    public var createdBy: UserResponse
-    public var currentSessionId: String
+    public let createdBy: UserResponse
+    public let currentSessionId: String
     /// Custom data for this object
-    public var custom: [String: RawJSON]
-    public var egress: EgressResponse
+    public let custom: [String: RawJSON]
+    public let egress: EgressResponse
     /// Date/time when the call ended
-    public var endedAt: Date?
+    public let endedAt: Date?
     /// Call ID
-    public var id: String
+    public let id: String
     /// CallIngressResponse is the payload for ingress settings
-    public var ingress: CallIngressResponse
-    public var joinAheadTimeSeconds: Int?
-    public var recording: Bool
-    public var session: CallSessionResponse?
-    public var settings: CallSettingsResponse
+    public let ingress: CallIngressResponse
+    public let joinAheadTimeSeconds: Int?
+    public let recording: Bool
+    public let session: CallSessionResponse?
+    public let settings: CallSettingsResponse
     /// Date/time when the call will start
-    public var startsAt: Date?
-    public var team: String?
-    public var thumbnails: ThumbnailResponse?
-    public var transcribing: Bool
+    public let startsAt: Date?
+    public let team: String?
+    public let thumbnails: ThumbnailResponse?
+    public let transcribing: Bool
     /// The type of call
-    public var type: String
+    public let type: String
     /// Date/time of the last update
-    public var updatedAt: Date
+    public let updatedAt: Date
 
     public init(
         backstage: Bool,

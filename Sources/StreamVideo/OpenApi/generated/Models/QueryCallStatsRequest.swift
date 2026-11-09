@@ -5,14 +5,14 @@
 import Foundation
 import StreamCore
 
-public final class QueryCallStatsRequest: @unchecked Sendable, Encodable, JSONEncodable {
+public final class QueryCallStatsRequest: Sendable, Encodable, JSONEncodable {
     /// Filter conditions to apply to the query
-    public var filterConditions: [String: RawJSON]?
-    public var limit: Int?
-    public var next: String?
-    public var prev: String?
+    public let filterConditions: [String: RawJSON]?
+    public let limit: Int?
+    public let next: String?
+    public let prev: String?
     /// Array of sort parameters
-    public var sort: [SortParamRequest]?
+    public let sort: [SortParamRequest]?
 
     public init(
         filterConditions: [String: RawJSON]? = nil,

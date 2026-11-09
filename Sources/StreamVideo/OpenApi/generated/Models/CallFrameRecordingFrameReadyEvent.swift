@@ -6,22 +6,22 @@ import Foundation
 import StreamCore
 
 /// This event is sent when a frame is captured from a call
-public final class CallFrameRecordingFrameReadyEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
-    public var callCid: String
+public final class CallFrameRecordingFrameReadyEvent: Sendable, Event, Decodable, WSCallEvent {
+    public let callCid: String
     /// The time the frame was captured
-    public var capturedAt: Date
-    public var createdAt: Date
-    public var egressId: String
+    public let capturedAt: Date
+    public let createdAt: Date
+    public let egressId: String
     /// Call session ID
-    public var sessionId: String
+    public let sessionId: String
     /// The type of the track frame was captured from (TRACK_TYPE_VIDEO|TRACK_TYPE_SCREEN_SHARE)
-    public var trackType: String
+    public let trackType: String
     /// The type of event: "call.frame_recording_ready" in this case
-    public var type: String = "call.frame_recording_ready"
+    public let type: String
     /// The URL of the frame
-    public var url: String
+    public let url: String
     /// The users in the frame
-    public var users: [String: UserResponse]
+    public let users: [String: UserResponse]
 
     public init(
         callCid: String,
@@ -30,6 +30,7 @@ public final class CallFrameRecordingFrameReadyEvent: @unchecked Sendable, Event
         egressId: String,
         sessionId: String,
         trackType: String,
+        type: String = "call.frame_recording_ready",
         url: String,
         users: [String: UserResponse]
     ) {
@@ -39,6 +40,7 @@ public final class CallFrameRecordingFrameReadyEvent: @unchecked Sendable, Event
         self.egressId = egressId
         self.sessionId = sessionId
         self.trackType = trackType
+        self.type = type
         self.url = url
         self.users = users
     }

@@ -5,10 +5,10 @@
 import Foundation
 import StreamCore
 
-public final class BroadcastSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable {
-    public var enabled: Bool?
-    public var hls: HLSSettingsRequest?
-    public var rtmp: RTMPSettingsRequest?
+public final class BroadcastSettingsRequest: Sendable, Encodable, JSONEncodable {
+    public let enabled: Bool?
+    public let hls: HLSSettingsRequest?
+    public let rtmp: RTMPSettingsRequest?
 
     public init(enabled: Bool? = nil, hls: HLSSettingsRequest? = nil, rtmp: RTMPSettingsRequest? = nil) {
         self.enabled = enabled

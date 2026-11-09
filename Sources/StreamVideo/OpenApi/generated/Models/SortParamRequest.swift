@@ -5,11 +5,11 @@
 import Foundation
 import StreamCore
 
-public final class SortParamRequest: @unchecked Sendable, Encodable, JSONEncodable {
+public final class SortParamRequest: Sendable, Encodable, JSONEncodable {
     /// Direction of sorting, 1 for Ascending, -1 for Descending, default is 1. One of: -1, 1
-    public var direction: Int?
+    public let direction: Int?
     /// Name of field to sort by
-    public var field: String?
+    public let field: String?
 
     public init(direction: Int? = nil, field: String? = nil) {
         self.direction = direction

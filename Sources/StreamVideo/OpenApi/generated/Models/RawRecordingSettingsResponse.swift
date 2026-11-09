@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class RawRecordingSettingsResponse: @unchecked Sendable, Decodable {
+public final class RawRecordingSettingsResponse: Sendable, Decodable {
     
     public enum RawRecordingSettingsResponseMode: String, Sendable, Codable, CaseIterable {
         case autoOn = "auto-on"
@@ -24,7 +24,7 @@ public final class RawRecordingSettingsResponse: @unchecked Sendable, Decodable 
         }
     }
 
-    public var mode: RawRecordingSettingsResponseMode
+    public let mode: RawRecordingSettingsResponseMode
 
     public init(mode: RawRecordingSettingsResponseMode) {
         self.mode = mode

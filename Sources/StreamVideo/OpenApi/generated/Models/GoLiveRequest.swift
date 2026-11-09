@@ -5,13 +5,13 @@
 import Foundation
 import StreamCore
 
-public final class GoLiveRequest: @unchecked Sendable, Encodable, JSONEncodable {
-    public var recordingStorageName: String?
-    public var startClosedCaption: Bool?
-    public var startHls: Bool?
-    public var startRecording: Bool?
-    public var startTranscription: Bool?
-    public var transcriptionStorageName: String?
+public final class GoLiveRequest: Sendable, Encodable, JSONEncodable {
+    public let recordingStorageName: String?
+    public let startClosedCaption: Bool?
+    public let startHls: Bool?
+    public let startRecording: Bool?
+    public let startTranscription: Bool?
+    public let transcriptionStorageName: String?
 
     public init(
         recordingStorageName: String? = nil,

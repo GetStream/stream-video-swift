@@ -6,9 +6,9 @@ import Foundation
 import StreamCore
 
 /// Basic response information
-public final class StopRecordingResponse: @unchecked Sendable, Decodable {
+public final class StopRecordingResponse: Sendable, Decodable {
     /// Duration of the request in milliseconds
-    public var duration: String
+    public let duration: String
 
     public init(duration: String) {
         self.duration = duration

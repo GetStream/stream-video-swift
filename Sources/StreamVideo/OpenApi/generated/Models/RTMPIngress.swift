@@ -6,8 +6,8 @@ import Foundation
 import StreamCore
 
 /// RTMP input settings
-public final class RTMPIngress: @unchecked Sendable, Decodable {
-    public var address: String
+public final class RTMPIngress: Sendable, Decodable {
+    public let address: String
 
     public init(address: String) {
         self.address = address

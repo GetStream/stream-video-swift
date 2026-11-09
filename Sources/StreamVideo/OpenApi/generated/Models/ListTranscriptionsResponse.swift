@@ -5,10 +5,10 @@
 import Foundation
 import StreamCore
 
-public final class ListTranscriptionsResponse: @unchecked Sendable, Decodable {
-    public var duration: String
+public final class ListTranscriptionsResponse: Sendable, Decodable {
+    public let duration: String
     /// List of transcriptions for the call
-    public var transcriptions: [CallTranscription]
+    public let transcriptions: [CallTranscription]
 
     public init(duration: String, transcriptions: [CallTranscription]) {
         self.duration = duration

@@ -5,10 +5,10 @@
 import Foundation
 import StreamCore
 
-public final class SFUResponse: @unchecked Sendable, Decodable {
-    public var edgeName: String
-    public var url: String
-    public var wsEndpoint: String
+public final class SFUResponse: Sendable, Decodable {
+    public let edgeName: String
+    public let url: String
+    public let wsEndpoint: String
 
     public init(edgeName: String, url: String, wsEndpoint: String) {
         self.edgeName = edgeName

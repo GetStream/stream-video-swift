@@ -5,10 +5,10 @@
 import Foundation
 import StreamCore
 
-public final class Credentials: @unchecked Sendable, Decodable {
-    public var iceServers: [ICEServer]
-    public var server: SFUResponse
-    public var token: String
+public final class Credentials: Sendable, Decodable {
+    public let iceServers: [ICEServer]
+    public let server: SFUResponse
+    public let token: String
 
     public init(iceServers: [ICEServer], server: SFUResponse, token: String) {
         self.iceServers = iceServers

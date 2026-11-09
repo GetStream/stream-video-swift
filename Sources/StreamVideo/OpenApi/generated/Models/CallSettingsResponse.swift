@@ -5,27 +5,27 @@
 import Foundation
 import StreamCore
 
-public final class CallSettingsResponse: @unchecked Sendable, Decodable {
-    public var audio: AudioSettings
-    public var backstage: BackstageSettings
+public final class CallSettingsResponse: Sendable, Decodable {
+    public let audio: AudioSettings
+    public let backstage: BackstageSettings
     /// BroadcastSettingsResponse is the payload for broadcasting settings
-    public var broadcasting: BroadcastSettingsResponse
+    public let broadcasting: BroadcastSettingsResponse
     /// EncryptionSettings is the payload for end-to-end encryption settings
-    public var encryption: EncryptionSettingsResponse
-    public var frameRecording: FrameRecordingSettingsResponse
-    public var geofencing: GeofenceSettings
-    public var individualRecording: IndividualRecordingSettingsResponse
-    public var ingress: IngressSettingsResponse?
-    public var limits: LimitsSettingsResponse
-    public var rawRecording: RawRecordingSettingsResponse
+    public let encryption: EncryptionSettingsResponse
+    public let frameRecording: FrameRecordingSettingsResponse
+    public let geofencing: GeofenceSettings
+    public let individualRecording: IndividualRecordingSettingsResponse
+    public let ingress: IngressSettingsResponse?
+    public let limits: LimitsSettingsResponse
+    public let rawRecording: RawRecordingSettingsResponse
     /// RecordSettings is the payload for recording settings
-    public var recording: RecordSettingsResponse
-    public var ring: RingSettings
-    public var screensharing: ScreensharingSettings
-    public var session: SessionSettingsResponse
-    public var thumbnails: ThumbnailsSettings
-    public var transcription: TranscriptionSettings
-    public var video: VideoSettings
+    public let recording: RecordSettingsResponse
+    public let ring: RingSettings
+    public let screensharing: ScreensharingSettings
+    public let session: SessionSettingsResponse
+    public let thumbnails: ThumbnailsSettings
+    public let transcription: TranscriptionSettings
+    public let video: VideoSettings
 
     public init(
         audio: AudioSettings,

@@ -6,21 +6,28 @@ import Foundation
 import StreamCore
 
 /// This event is sent when one or more members are added to a call
-public final class CallMemberAddedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
+public final class CallMemberAddedEvent: Sendable, Event, Decodable, WSCallEvent {
     /// Represents a call
-    public var call: CallResponse
-    public var callCid: String
-    public var createdAt: Date
+    public let call: CallResponse
+    public let callCid: String
+    public let createdAt: Date
     /// the members added to this call
-    public var members: [MemberResponse]
+    public let members: [MemberResponse]
     /// The type of event: "call.member_added" in this case
-    public var type: String = "call.member_added"
+    public let type: String
 
-    public init(call: CallResponse, callCid: String, createdAt: Date, members: [MemberResponse]) {
+    public init(
+        call: CallResponse,
+        callCid: String,
+        createdAt: Date,
+        members: [MemberResponse],
+        type: String = "call.member_added"
+    ) {
         self.call = call
         self.callCid = callCid
         self.createdAt = createdAt
         self.members = members
+        self.type = type
     }
 
     public init(from decoder: Decoder) throws {

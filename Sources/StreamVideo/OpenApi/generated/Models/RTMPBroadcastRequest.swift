@@ -6,7 +6,7 @@ import Foundation
 import StreamCore
 
 /// RTMPBroadcastRequest is the payload for starting an RTMP broadcast.
-public final class RTMPBroadcastRequest: @unchecked Sendable, Encodable, JSONEncodable {
+public final class RTMPBroadcastRequest: Sendable, Encodable, JSONEncodable {
     
     public enum RTMPBroadcastRequestQuality: String, Sendable, Codable, CaseIterable {
         case _1080p = "1080p"
@@ -32,15 +32,15 @@ public final class RTMPBroadcastRequest: @unchecked Sendable, Encodable, JSONEnc
         }
     }
 
-    public var layout: LayoutSettings?
+    public let layout: LayoutSettings?
     /// Name identifier for RTMP broadcast, must be unique in call
-    public var name: String
+    public let name: String
     /// If provided, will override the call's RTMP settings quality. One of: 360p, 480p, 720p, 1080p, 1440p, portrait-360x640, portrait-480x854, portrait-720x1280, portrait-1080x1920, portrait-1440x2560
-    public var quality: RTMPBroadcastRequestQuality?
+    public let quality: RTMPBroadcastRequestQuality?
     /// If provided, will be appended at the end of stream_url
-    public var streamKey: String?
+    public let streamKey: String?
     /// URL for the RTMP server to send the call to
-    public var streamUrl: String
+    public let streamUrl: String
 
     public init(
         layout: LayoutSettings? = nil,

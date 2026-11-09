@@ -6,11 +6,11 @@ import Foundation
 import StreamCore
 
 /// DeleteCallResponse is the payload for deleting a call.
-public final class DeleteCallResponse: @unchecked Sendable, Decodable {
+public final class DeleteCallResponse: Sendable, Decodable {
     /// Represents a call
-    public var call: CallResponse
-    public var duration: String
-    public var taskId: String?
+    public let call: CallResponse
+    public let duration: String
+    public let taskId: String?
 
     public init(call: CallResponse, duration: String, taskId: String? = nil) {
         self.call = call

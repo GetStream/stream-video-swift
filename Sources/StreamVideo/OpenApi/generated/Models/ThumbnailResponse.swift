@@ -5,8 +5,8 @@
 import Foundation
 import StreamCore
 
-public final class ThumbnailResponse: @unchecked Sendable, Decodable {
-    public var imageUrl: String
+public final class ThumbnailResponse: Sendable, Decodable {
+    public let imageUrl: String
 
     public init(imageUrl: String) {
         self.imageUrl = imageUrl

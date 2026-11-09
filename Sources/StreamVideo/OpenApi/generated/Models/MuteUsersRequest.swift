@@ -5,13 +5,13 @@
 import Foundation
 import StreamCore
 
-public final class MuteUsersRequest: @unchecked Sendable, Encodable, JSONEncodable {
-    public var audio: Bool?
-    public var muteAllUsers: Bool?
-    public var screenshare: Bool?
-    public var screenshareAudio: Bool?
-    public var userIds: [String]?
-    public var video: Bool?
+public final class MuteUsersRequest: Sendable, Encodable, JSONEncodable {
+    public let audio: Bool?
+    public let muteAllUsers: Bool?
+    public let screenshare: Bool?
+    public let screenshareAudio: Bool?
+    public let userIds: [String]?
+    public let video: Bool?
 
     public init(
         audio: Bool? = nil,

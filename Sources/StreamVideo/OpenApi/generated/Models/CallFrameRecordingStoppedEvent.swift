@@ -6,20 +6,27 @@ import Foundation
 import StreamCore
 
 /// This event is sent when frame recording has stopped
-public final class CallFrameRecordingStoppedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
+public final class CallFrameRecordingStoppedEvent: Sendable, Event, Decodable, WSCallEvent {
     /// Represents a call
-    public var call: CallResponse
-    public var callCid: String
-    public var createdAt: Date
-    public var egressId: String
+    public let call: CallResponse
+    public let callCid: String
+    public let createdAt: Date
+    public let egressId: String
     /// The type of event: "call.frame_recording_stopped" in this case
-    public var type: String = "call.frame_recording_stopped"
+    public let type: String
 
-    public init(call: CallResponse, callCid: String, createdAt: Date, egressId: String) {
+    public init(
+        call: CallResponse,
+        callCid: String,
+        createdAt: Date,
+        egressId: String,
+        type: String = "call.frame_recording_stopped"
+    ) {
         self.call = call
         self.callCid = callCid
         self.createdAt = createdAt
         self.egressId = egressId
+        self.type = type
     }
 
     public init(from decoder: Decoder) throws {

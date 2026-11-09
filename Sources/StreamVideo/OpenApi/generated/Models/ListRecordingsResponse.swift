@@ -6,9 +6,9 @@ import Foundation
 import StreamCore
 
 /// Response for listing recordings
-public final class ListRecordingsResponse: @unchecked Sendable, Decodable {
-    public var duration: String
-    public var recordings: [CallRecording]
+public final class ListRecordingsResponse: Sendable, Decodable {
+    public let duration: String
+    public let recordings: [CallRecording]
 
     public init(duration: String, recordings: [CallRecording]) {
         self.duration = duration

@@ -5,15 +5,15 @@
 import Foundation
 import StreamCore
 
-public final class GetOrCreateCallRequest: @unchecked Sendable, Encodable, JSONEncodable {
+public final class GetOrCreateCallRequest: Sendable, Encodable, JSONEncodable {
     /// CallRequest is the payload for creating a call.
-    public var data: CallRequest?
-    public var membersLimit: Int?
+    public let data: CallRequest?
+    public let membersLimit: Int?
     /// if provided it sends a notification event to the members for this call
-    public var notify: Bool?
+    public let notify: Bool?
     /// if provided it sends a ring event to the members for this call
-    public var ring: Bool?
-    public var video: Bool?
+    public let ring: Bool?
+    public let video: Bool?
 
     public init(data: CallRequest? = nil, membersLimit: Int? = nil, notify: Bool? = nil, ring: Bool? = nil, video: Bool? = nil) {
         self.data = data

@@ -6,9 +6,9 @@ import Foundation
 import StreamCore
 
 /// AcceptCallResponse is the payload for accepting a call.
-public final class AcceptCallResponse: @unchecked Sendable, Decodable {
+public final class AcceptCallResponse: Sendable, Decodable {
     /// Duration of the request in milliseconds
-    public var duration: String
+    public let duration: String
 
     public init(duration: String) {
         self.duration = duration

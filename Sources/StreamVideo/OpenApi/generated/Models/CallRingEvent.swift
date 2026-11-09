@@ -6,20 +6,20 @@ import Foundation
 import StreamCore
 
 /// This event is sent to all call members to notify they are getting called
-public final class CallRingEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
+public final class CallRingEvent: Sendable, Event, Decodable, WSCallEvent {
     /// Represents a call
-    public var call: CallResponse
-    public var callCid: String
-    public var createdAt: Date
+    public let call: CallResponse
+    public let callCid: String
+    public let createdAt: Date
     /// Call members
-    public var members: [MemberResponse]
+    public let members: [MemberResponse]
     /// Call session ID
-    public var sessionId: String
+    public let sessionId: String
     /// The type of event: "call.notification" in this case
-    public var type: String = "call.ring"
+    public let type: String
     /// User response object
-    public var user: UserResponse
-    public var video: Bool
+    public let user: UserResponse
+    public let video: Bool
 
     public init(
         call: CallResponse,
@@ -27,6 +27,7 @@ public final class CallRingEvent: @unchecked Sendable, Event, Decodable, WSCallE
         createdAt: Date,
         members: [MemberResponse],
         sessionId: String,
+        type: String = "call.ring",
         user: UserResponse,
         video: Bool
     ) {
@@ -35,6 +36,7 @@ public final class CallRingEvent: @unchecked Sendable, Event, Decodable, WSCallE
         self.createdAt = createdAt
         self.members = members
         self.sessionId = sessionId
+        self.type = type
         self.user = user
         self.video = video
     }

@@ -178,9 +178,9 @@ public class CallState: ObservableObject {
         case let .typeCallAcceptedEvent(event):
             update(from: event.call)
         case .typeCallHLSBroadcastingStartedEvent:
-            egress?.broadcasting = true
+            updateEgress(broadcasting: true)
         case .typeCallHLSBroadcastingStoppedEvent:
-            egress?.broadcasting = false
+            updateEgress(broadcasting: false)
         case let .typeCallCreatedEvent(event):
             // A delayed creation snapshot must not clear the hydrated session.
             if session != nil,
@@ -243,17 +243,21 @@ public class CallState: ObservableObject {
         case let .typeCallSessionEndedEvent(event):
             update(from: event.call)
         case let .typeCallSessionParticipantJoinedEvent(event):
-            if let index = session?.participants.firstIndex(where: {
+            guard var participants = session?.participants else { break }
+            if let index = participants.firstIndex(where: {
                 $0.userSessionId == event.participant.userSessionId
-            }), index < (session?.participants.count ?? 0) {
-                session?.participants[index] = event.participant
+            }) {
+                participants[index] = event.participant
             } else {
-                session?.participants.append(event.participant)
+                participants.append(event.participant)
             }
+            updateSession(participants: participants)
         case let .typeCallSessionParticipantLeftEvent(event):
-            session?.participants.removeAll(where: { participant in
+            guard var participants = session?.participants else { break }
+            participants.removeAll(where: { participant in
                 participant.userSessionId == event.participant.userSessionId
             })
+            updateSession(participants: participants)
         case let .typeCallSessionStartedEvent(event):
             update(from: event.call)
         case let .typeCallUpdatedEvent(event):
@@ -615,6 +619,65 @@ public class CallState: ObservableObject {
         self.activeSpeakers = activeSpeakers
     }
     
+    func update(transcriptionLanguage: TranscriptionSettings.Language) {
+        guard let settings else { return }
+        let transcription = settings.transcription
+        self.settings = CallSettingsResponse(
+            audio: settings.audio,
+            backstage: settings.backstage,
+            broadcasting: settings.broadcasting,
+            encryption: settings.encryption,
+            frameRecording: settings.frameRecording,
+            geofencing: settings.geofencing,
+            individualRecording: settings.individualRecording,
+            ingress: settings.ingress,
+            limits: settings.limits,
+            rawRecording: settings.rawRecording,
+            recording: settings.recording,
+            ring: settings.ring,
+            screensharing: settings.screensharing,
+            session: settings.session,
+            thumbnails: settings.thumbnails,
+            transcription: TranscriptionSettings(
+                closedCaptionMode: transcription.closedCaptionMode,
+                language: transcriptionLanguage,
+                mode: transcription.mode
+            ),
+            video: settings.video
+        )
+    }
+
+    private func updateEgress(broadcasting: Bool) {
+        guard let egress else { return }
+        self.egress = EgressResponse(
+            broadcasting: broadcasting,
+            compositeRecording: egress.compositeRecording,
+            frameRecording: egress.frameRecording,
+            hls: egress.hls,
+            individualRecording: egress.individualRecording,
+            rawRecording: egress.rawRecording,
+            rtmps: egress.rtmps
+        )
+    }
+
+    private func updateSession(participants: [CallParticipantResponse]) {
+        guard let session else { return }
+        self.session = CallSessionResponse(
+            acceptedBy: session.acceptedBy,
+            anonymousParticipantCount: session.anonymousParticipantCount,
+            endedAt: session.endedAt,
+            id: session.id,
+            liveEndedAt: session.liveEndedAt,
+            liveStartedAt: session.liveStartedAt,
+            missedBy: session.missedBy,
+            participants: participants,
+            participantsCountByRole: session.participantsCountByRole,
+            rejectedBy: session.rejectedBy,
+            startedAt: session.startedAt,
+            timerEndsAt: session.timerEndsAt
+        )
+    }
+
     private func didUpdate(_ egress: EgressResponse?) {
         broadcasting = egress?.broadcasting ?? false
         let runningStatus = "running"

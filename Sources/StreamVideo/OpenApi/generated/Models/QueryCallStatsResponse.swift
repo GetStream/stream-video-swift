@@ -6,12 +6,12 @@ import Foundation
 import StreamCore
 
 /// Basic response information
-public final class QueryCallStatsResponse: @unchecked Sendable, Decodable {
+public final class QueryCallStatsResponse: Sendable, Decodable {
     /// Duration of the request in milliseconds
-    public var duration: String
-    public var next: String?
-    public var prev: String?
-    public var reports: [CallStatsReportSummaryResponse]
+    public let duration: String
+    public let next: String?
+    public let prev: String?
+    public let reports: [CallStatsReportSummaryResponse]
 
     public init(duration: String, next: String? = nil, prev: String? = nil, reports: [CallStatsReportSummaryResponse]) {
         self.duration = duration

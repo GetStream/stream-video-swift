@@ -5,10 +5,10 @@
 import Foundation
 import StreamCore
 
-public final class TargetResolution: @unchecked Sendable, Codable, JSONEncodable {
-    public var bitrate: Int?
-    public var height: Int
-    public var width: Int
+public final class TargetResolution: Sendable, Codable, JSONEncodable {
+    public let bitrate: Int?
+    public let height: Int
+    public let width: Int
 
     public init(bitrate: Int? = nil, height: Int, width: Int) {
         self.bitrate = bitrate

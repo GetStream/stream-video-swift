@@ -5,19 +5,19 @@
 import Foundation
 import StreamCore
 
-public final class CallSessionResponse: @unchecked Sendable, Decodable {
-    public var acceptedBy: [String: Date]
-    public var anonymousParticipantCount: Int
-    public var endedAt: Date?
-    public var id: String
-    public var liveEndedAt: Date?
-    public var liveStartedAt: Date?
-    public var missedBy: [String: Date]
-    public var participants: [CallParticipantResponse]
-    public var participantsCountByRole: [String: Int]
-    public var rejectedBy: [String: Date]
-    public var startedAt: Date?
-    public var timerEndsAt: Date?
+public final class CallSessionResponse: Sendable, Decodable {
+    public let acceptedBy: [String: Date]
+    public let anonymousParticipantCount: Int
+    public let endedAt: Date?
+    public let id: String
+    public let liveEndedAt: Date?
+    public let liveStartedAt: Date?
+    public let missedBy: [String: Date]
+    public let participants: [CallParticipantResponse]
+    public let participantsCountByRole: [String: Int]
+    public let rejectedBy: [String: Date]
+    public let startedAt: Date?
+    public let timerEndsAt: Date?
 
     public init(
         acceptedBy: [String: Date],
