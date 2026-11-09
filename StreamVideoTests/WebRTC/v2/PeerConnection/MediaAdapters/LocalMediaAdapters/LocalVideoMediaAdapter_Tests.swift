@@ -691,6 +691,14 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         subject.setVideoFilter(nil)
 
         await fulfillment { survivingCapturer.timesCalled(.setVideoFilter) == 1 }
+        let input = try XCTUnwrap(
+            survivingCapturer.stubbedFunctionInput[.setVideoFilter]?.first
+        )
+        guard case .setVideoFilter(videoFilter: let videoFilter) = input else {
+            XCTFail("Expected a setVideoFilter recording")
+            return
+        }
+        XCTAssertNil(videoFilter)
     }
 
     // MARK: - zoom(by:)
