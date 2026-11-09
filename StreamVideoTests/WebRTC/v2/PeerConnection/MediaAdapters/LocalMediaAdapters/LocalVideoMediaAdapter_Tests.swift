@@ -674,6 +674,7 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         )
     }
 
+    /// The capturer that stays open receives `nil` when the filter is cleared.
     func test_setVideoFilter_nil_captureSessionKeptAfterReconnection_clearsSurvivingCapturer() async throws {
         let survivingCapturer = MockStreamVideoCapturer()
         let track = peerConnectionFactory.mockVideoTrack(forScreenShare: false)
