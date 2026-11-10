@@ -498,7 +498,8 @@ public class CallState: ObservableObject {
     }
 
     /// Applies an SFU event to the local call state.
-    /// `liveEnded` marks the call as backstage and records `liveEndedAt`.
+    /// `liveEnded` records `liveEndedAt`.
+    /// It marks the call backstage only when that setting is enabled.
     /// Any other `callEnded` reason records `endedAt`.
     internal func update(
         from event: Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload
@@ -518,8 +519,11 @@ public class CallState: ObservableObject {
     }
 
     /// Records the end of the live segment for every participant.
+    /// The backstage flag follows `settings.backstage.enabled`.
     private func markLiveEnded() {
-        backstage = true
+        if settings?.backstage.enabled == true {
+            backstage = true
+        }
         guard let session else { return }
         session.liveEndedAt = Date()
         self.session = session

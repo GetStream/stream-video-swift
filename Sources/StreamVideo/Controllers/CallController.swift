@@ -11,6 +11,7 @@ class CallController: @unchecked Sendable {
     private enum DisposableKey: String {
         case participantsCountUpdatesEvent
         case currentUserBlocked
+        case backstageSetting
     }
 
     private lazy var clientEventReporter: ClientEventReporting = ClientEventReporter(
@@ -49,6 +50,7 @@ class CallController: @unchecked Sendable {
         didSet {
             subscribeToParticipantsCountUpdatesEvent(call)
             subscribeToCurrentUserBlockedState(call)
+            subscribeToBackstageSetting(call)
             if let call {
                 Task(disposableBag: disposableBag) { @MainActor [weak self] in
                     guard let self else { return }
@@ -860,6 +862,29 @@ class CallController: @unchecked Sendable {
                 }
             }
             .store(in: disposableBag, key: DisposableKey.participantsCountUpdatesEvent.rawValue)
+    }
+
+    /// Copies `settings.backstage.enabled` onto the active WebRTC stage.
+    /// A `join-backstage` user leaves on `liveEnded` when this is false.
+    private func subscribeToBackstageSetting(_ call: Call?) {
+        disposableBag.remove(DisposableKey.backstageSetting.rawValue)
+        guard let call else { return }
+        Task(disposableBag: disposableBag) { @MainActor [weak self] in
+            guard let self else { return }
+            call.state
+                .$settings
+                .sink { [weak self] settings in
+                    self?.webRTCCoordinator
+                        .stateMachine
+                        .currentStage
+                        .context
+                        .isBackstageEnabled = settings?.backstage.enabled == true
+                }
+                .store(
+                    in: self.disposableBag,
+                    key: DisposableKey.backstageSetting.rawValue
+                )
+        }
     }
 
     private func subscribeToCurrentUserBlockedState(_ call: Call?) {

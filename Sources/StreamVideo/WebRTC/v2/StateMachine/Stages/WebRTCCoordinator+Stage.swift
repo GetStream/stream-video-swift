@@ -26,6 +26,9 @@ extension WebRTCCoordinator.StateMachine {
             var disconnectionTimeout: TimeInterval = 0
             var reportingIntervalMs: TimeInterval = 0
             var reconnectionStrategy: ReconnectionStrategy = .unknown
+            /// `settings.backstage.enabled` for the current call.
+            /// A `join-backstage` user leaves on `liveEnded` when this is false.
+            var isBackstageEnabled: Bool = false
             var disconnectionSource: WebSocketConnectionState.DisconnectionSource?
             var flowError: Error?
             var joinSource: JoinSource?

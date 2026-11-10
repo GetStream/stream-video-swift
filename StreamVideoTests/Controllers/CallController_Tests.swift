@@ -225,6 +225,25 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         }
     }
 
+    func test_backstageSetting_reachesWebRTCStage() async throws {
+        let call = await MockCall(.dummy())
+        _ = subject
+        subject.call = call
+        await MainActor.run {
+            call.state.settings = .dummy(backstage: .dummy(enabled: true))
+        }
+
+        await fulfillment {
+            self.mockWebRTCCoordinatorFactory
+                .mockCoordinatorStack
+                .coordinator
+                .stateMachine
+                .currentStage
+                .context
+                .isBackstageEnabled
+        }
+    }
+
     func test_setCall_ownCapabilitiesUpdatedOnStateAdapter_updatesCallState() async throws {
         let call = await MockCall(.dummy())
         _ = subject

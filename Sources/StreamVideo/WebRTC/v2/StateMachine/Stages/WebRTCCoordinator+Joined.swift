@@ -259,7 +259,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .store(in: disposableBag)
         }
 
-        /// `liveEnded` for a viewer always leaves.
+        /// `liveEnded` leaves when backstage is disabled.
         /// A `join-backstage` user leaves only on `disconnect`.
         /// `fast`, `rejoin`, and `migrate` use that SFU strategy.
         /// `unspecified` stays on the current socket.
@@ -289,12 +289,13 @@ extension WebRTCCoordinator.StateMachine.Stage {
             }
         }
 
-        /// A viewer stays through `liveEnded` only with `join-backstage`.
+        /// Stays through `liveEnded` only when backstage is enabled
+        /// and the user has `join-backstage`.
         /// Every other end reason still leaves.
         private func staysForLiveEnded(
             _ reason: Stream_Video_Sfu_Models_CallEndedReason
         ) async -> Bool {
-            guard reason == .liveEnded else {
+            guard reason == .liveEnded, context.isBackstageEnabled else {
                 return false
             }
             let capabilities = await context
@@ -305,7 +306,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
         }
 
         /// Leaves when the SFU ends the call.
-        /// Stays on `liveEnded` when the user has `join-backstage`.
+        /// Stays on `liveEnded` when backstage is enabled
+        /// and the user has `join-backstage`.
         private func observeCallEndedEvent() async {
             let sfuAdapter = await context.coordinator?.stateAdapter.sfuAdapter
             sfuAdapter?

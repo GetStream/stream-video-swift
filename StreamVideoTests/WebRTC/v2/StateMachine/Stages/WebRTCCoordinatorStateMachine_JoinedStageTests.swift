@@ -603,6 +603,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
     }
 
     func test_transition_callEndedLiveEndedWithJoinBackstage_remainsJoined() async {
+        subject.context.isBackstageEnabled = true
         await mockCoordinatorStack.coordinator.stateAdapter.enqueueOwnCapabilities {
             [.joinBackstage]
         }
@@ -661,7 +662,29 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         ) { _ in }
     }
 
+    func test_transition_callEndedLiveEndedWithJoinBackstageWhenDisabled_landsOnLeaving() async {
+        subject.context.isBackstageEnabled = false
+        await mockCoordinatorStack.coordinator.stateAdapter.enqueueOwnCapabilities {
+            [.joinBackstage]
+        }
+        await mockCoordinatorStack.coordinator.stateAdapter.set(
+            sfuAdapter: mockCoordinatorStack.sfuStack.adapter
+        )
+
+        await assertTransitionAfterTrigger(
+            expectedTarget: .leaving,
+            trigger: { [mockCoordinatorStack] in
+                var event = Stream_Video_Sfu_Event_CallEnded()
+                event.reason = .liveEnded
+                mockCoordinatorStack?
+                    .sfuStack
+                    .receiveEvent(.callEnded(event))
+            }
+        ) { _ in }
+    }
+
     func test_transition_socketDisconnectsOnLiveEndedWithJoinBackstage_usesRejoinStrategy() async {
+        subject.context.isBackstageEnabled = true
         await mockCoordinatorStack.coordinator.stateAdapter.enqueueOwnCapabilities {
             [.joinBackstage]
         }
@@ -687,6 +710,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
     }
 
     func test_transition_sfuErrorLiveEndedWithJoinBackstageAndUnspecified_remainsJoined() async {
+        subject.context.isBackstageEnabled = true
         await mockCoordinatorStack.coordinator.stateAdapter.enqueueOwnCapabilities {
             [.joinBackstage]
         }
@@ -709,6 +733,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
     }
 
     func test_transition_sfuErrorLiveEndedWithJoinBackstageAndDisconnect_landsOnLeaving() async {
+        subject.context.isBackstageEnabled = true
         await mockCoordinatorStack.coordinator.stateAdapter.enqueueOwnCapabilities {
             [.joinBackstage]
         }
@@ -729,7 +754,30 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         ) { _ in }
     }
 
+    func test_transition_sfuErrorLiveEndedWithJoinBackstageWhenDisabled_landsOnLeaving() async {
+        subject.context.isBackstageEnabled = false
+        await mockCoordinatorStack.coordinator.stateAdapter.enqueueOwnCapabilities {
+            [.joinBackstage]
+        }
+        await mockCoordinatorStack.coordinator.stateAdapter.set(
+            sfuAdapter: mockCoordinatorStack.sfuStack.adapter
+        )
+
+        await assertTransitionAfterTrigger(
+            expectedTarget: .leaving,
+            trigger: { [mockCoordinatorStack] in
+                var event = Stream_Video_Sfu_Event_Error()
+                event.error.code = .liveEnded
+                event.reconnectStrategy = .rejoin
+                mockCoordinatorStack?
+                    .sfuStack
+                    .receiveEvent(.error(event))
+            }
+        ) { _ in }
+    }
+
     func test_transition_sfuErrorLiveEndedWithJoinBackstageAndRejoin_landsOnDisconnected() async {
+        subject.context.isBackstageEnabled = true
         await mockCoordinatorStack.coordinator.stateAdapter.enqueueOwnCapabilities {
             [.joinBackstage]
         }
@@ -753,6 +801,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
     }
 
     func test_transition_sfuErrorLiveEndedWithJoinBackstageAndFast_landsOnDisconnected() async {
+        subject.context.isBackstageEnabled = true
         await mockCoordinatorStack.coordinator.stateAdapter.enqueueOwnCapabilities {
             [.joinBackstage]
         }
