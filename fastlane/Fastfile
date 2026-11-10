@@ -220,6 +220,7 @@ lane :test do |options|
     cloned_source_packages_path: source_packages_path,
     devices: options[:device],
     destination: options[:destination],
+    skip_detect_devices: !options[:destination].nil?,
     concurrent_workers: 2,
     skip_build: options[:skip_build],
     build_for_testing: options[:build_for_testing],
@@ -276,6 +277,7 @@ private_lane :test_ui do |options|
     result_bundle: true,
     devices: options[:device],
     destination: options[:destination],
+    skip_detect_devices: !options[:destination].nil?,
     build_for_testing: options[:build_for_testing],
     fail_build: !record_mode,
     xcodebuild_formatter: xcodebuild_formatter
