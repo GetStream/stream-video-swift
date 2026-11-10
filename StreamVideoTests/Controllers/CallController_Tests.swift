@@ -175,6 +175,56 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         }
     }
 
+    func test_sfuAdapterReplaced_liveEndedStillMarksBackstage() async throws {
+        let call = await prepareCallForSFUEvents()
+        var event = Stream_Video_Sfu_Event_CallEnded()
+        event.reason = .liveEnded
+        await fulfilmentInMainActor {
+            self.mockWebRTCCoordinatorFactory
+                .mockCoordinatorStack
+                .sfuStack
+                .receiveEvent(.callEnded(event))
+            return call.state.backstage
+        }
+        await MainActor.run { call.state.backstage = false }
+        let replacement = MockSFUStack()
+        await mockWebRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .set(sfuAdapter: replacement.adapter)
+
+        await fulfilmentInMainActor {
+            replacement.receiveEvent(.callEnded(event))
+            return call.state.backstage
+        }
+    }
+
+    func test_sfuRefresh_liveEndedStillMarksBackstage() async throws {
+        let call = await prepareCallForSFUEvents()
+        var event = Stream_Video_Sfu_Event_CallEnded()
+        event.reason = .liveEnded
+        await fulfilmentInMainActor {
+            self.mockWebRTCCoordinatorFactory
+                .mockCoordinatorStack
+                .sfuStack
+                .receiveEvent(.callEnded(event))
+            return call.state.backstage
+        }
+        await MainActor.run { call.state.backstage = false }
+        let stack = mockWebRTCCoordinatorFactory.mockCoordinatorStack.sfuStack
+        let refreshed = MockSFUWebSocket()
+        stack.nextWebSocket = refreshed
+        stack.adapter.refresh(
+            webSocketConfiguration: .init(url: stack.adapter.connectURL)
+        )
+
+        await fulfilmentInMainActor {
+            refreshed.inject(.callEnded(event))
+            return call.state.backstage
+        }
+    }
+
     func test_setCall_ownCapabilitiesUpdatedOnStateAdapter_updatesCallState() async throws {
         let call = await MockCall(.dummy())
         _ = subject

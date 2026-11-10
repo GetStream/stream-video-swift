@@ -936,6 +936,8 @@ class CallController: @unchecked Sendable {
     }
 
     /// Applies SFU events that change call state, such as `liveEnded`.
+    /// Rejoin and migration replace the adapter. `switchToLatest` follows
+    /// that instance. Refresh keeps the adapter and its event relay.
     private func observeSFUEvents() async {
         await webRTCCoordinator
             .stateAdapter
