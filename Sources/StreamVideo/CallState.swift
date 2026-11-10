@@ -497,6 +497,22 @@ public class CallState: ObservableObject {
         ingress = Ingress(rtmp: rtmp)
     }
 
+    /// Applies an SFU event to the local call state.
+    /// `liveEnded` marks the call as backstage.
+    /// Other payloads leave the current values in place.
+    internal func update(
+        from event: Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload
+    ) {
+        switch event {
+        case .callEnded(let callEnded) where callEnded.reason == .liveEnded:
+            backstage = true
+        case .error(let error) where error.error.code == .liveEnded:
+            backstage = true
+        default:
+            break
+        }
+    }
+
     /// Adds ring outcomes without removing updates received over WebSocket.
     internal func update(from ringState: GetCallRingStateResponse) {
         guard let session, session.id == ringState.sessionId else {

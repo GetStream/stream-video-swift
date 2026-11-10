@@ -222,6 +222,47 @@ final class CallState_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(subject.callSettings, initialCallSettings)
     }
 
+    func test_update_sfuCallEndedLiveEnded_setsBackstage() {
+        let subject = CallState(.dummy())
+        var event = Stream_Video_Sfu_Event_CallEnded()
+        event.reason = .liveEnded
+
+        subject.update(from: .callEnded(event))
+
+        XCTAssertTrue(subject.backstage)
+    }
+
+    func test_update_sfuCallEndedOtherReason_keepsBackstage() {
+        let subject = CallState(.dummy())
+        subject.backstage = true
+        var event = Stream_Video_Sfu_Event_CallEnded()
+        event.reason = .ended
+
+        subject.update(from: .callEnded(event))
+
+        XCTAssertTrue(subject.backstage)
+    }
+
+    func test_update_sfuErrorLiveEnded_setsBackstage() {
+        let subject = CallState(.dummy())
+        var event = Stream_Video_Sfu_Event_Error()
+        event.error.code = .liveEnded
+
+        subject.update(from: .error(event))
+
+        XCTAssertTrue(subject.backstage)
+    }
+
+    func test_update_sfuErrorOtherCode_leavesBackstageFalse() {
+        let subject = CallState(.dummy())
+        var event = Stream_Video_Sfu_Event_Error()
+        event.error.code = .unspecified
+
+        subject.update(from: .error(event))
+
+        XCTAssertFalse(subject.backstage)
+    }
+
     func test_createResponse_delayedCreationEvent_keepsHydratedSession() {
         let subject = CallState(.dummy())
         let session = CallSessionResponse.dummy(id: "ring-session")

@@ -116,6 +116,7 @@ class CallController: @unchecked Sendable {
             await observeCallSettingsUpdates()
             await observeSpeakingWhileMutedUpdates()
             await observeOwnCapabilitiesUpdates()
+            await observeSFUEvents()
         }
     }
 
@@ -930,6 +931,26 @@ class CallController: @unchecked Sendable {
             .log(.debug) { "Speaking while muted updated to \($0)" }
             .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in
                 self?.call?.state.isSpeakingWhileMuted = $0
+            }
+            .store(in: disposableBag)
+    }
+
+    /// Applies SFU events that change call state, such as `liveEnded`.
+    private func observeSFUEvents() async {
+        await webRTCCoordinator
+            .stateAdapter
+            .$sfuAdapter
+            .map { adapter in
+                adapter?.publisher
+                    ?? Empty<
+                        Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload,
+                        Never
+                    >()
+                    .eraseToAnyPublisher()
+            }
+            .switchToLatest()
+            .sinkTask(storeIn: disposableBag) { @MainActor [weak self] event in
+                self?.call?.state.update(from: event)
             }
             .store(in: disposableBag)
     }
