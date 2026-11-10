@@ -499,13 +499,20 @@ public class CallState: ObservableObject {
 
     /// Applies an SFU event to the local call state.
     /// `liveEnded` marks the call as backstage.
-    /// Other payloads leave the current values in place.
+    /// A `callEnded` event also sets `endedAt`, except when a
+    /// `join-backstage` user stays for `liveEnded`.
     internal func update(
         from event: Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload
     ) {
         switch event {
-        case .callEnded(let callEnded) where callEnded.reason == .liveEnded:
-            backstage = true
+        case .callEnded(let callEnded):
+            if callEnded.reason == .liveEnded {
+                backstage = true
+                if ownCapabilities.contains(.joinBackstage) {
+                    break
+                }
+            }
+            endedAt = Date()
         case .error(let error) where error.error.code == .liveEnded:
             backstage = true
         default:

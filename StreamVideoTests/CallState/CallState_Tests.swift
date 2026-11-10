@@ -230,6 +230,19 @@ final class CallState_Tests: XCTestCase, @unchecked Sendable {
         subject.update(from: .callEnded(event))
 
         XCTAssertTrue(subject.backstage)
+        XCTAssertNotNil(subject.endedAt)
+    }
+
+    func test_update_sfuCallEndedLiveEndedWithJoinBackstage_keepsEndedAtNil() {
+        let subject = CallState(.dummy())
+        subject.ownCapabilities = [.joinBackstage]
+        var event = Stream_Video_Sfu_Event_CallEnded()
+        event.reason = .liveEnded
+
+        subject.update(from: .callEnded(event))
+
+        XCTAssertTrue(subject.backstage)
+        XCTAssertNil(subject.endedAt)
     }
 
     func test_update_sfuCallEndedOtherReason_keepsBackstage() {
@@ -241,6 +254,7 @@ final class CallState_Tests: XCTestCase, @unchecked Sendable {
         subject.update(from: .callEnded(event))
 
         XCTAssertTrue(subject.backstage)
+        XCTAssertNotNil(subject.endedAt)
     }
 
     func test_update_sfuErrorLiveEnded_setsBackstage() {
@@ -251,6 +265,7 @@ final class CallState_Tests: XCTestCase, @unchecked Sendable {
         subject.update(from: .error(event))
 
         XCTAssertTrue(subject.backstage)
+        XCTAssertNil(subject.endedAt)
     }
 
     func test_update_sfuErrorOtherCode_leavesBackstageFalse() {
