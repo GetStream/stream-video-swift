@@ -1742,6 +1742,9 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         let call = await MockCall(.dummy())
         _ = subject
         subject.call = call
+        await MainActor.run {
+            call.state.settings = .dummy(backstage: .dummy(enabled: true))
+        }
         await mockWebRTCCoordinatorFactory
             .mockCoordinatorStack
             .coordinator
