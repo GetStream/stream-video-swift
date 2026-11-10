@@ -233,6 +233,12 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     if let event = source
                         .serverError?
                         .underlyingError as? Stream_Video_Sfu_Event_Error {
+                        // The socket is already down. A host who stays for
+                        // liveEnded still needs the normal transport recovery.
+                        if event.error.code == .liveEnded {
+                            recoverOrLeaveAfterLiveEnded(source)
+                            return
+                        }
                         handleSFUError(event)
                         return
                     }
@@ -253,6 +259,31 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     transitionOrDisconnect(.disconnected(context))
                 }
                 .store(in: disposableBag)
+        }
+
+        /// The socket already dropped on `liveEnded`.
+        /// A host with `join-backstage` recovers the transport.
+        /// A viewer leaves and does not rejoin.
+        private func recoverOrLeaveAfterLiveEnded(
+            _ source: WebSocketConnectionState.DisconnectionSource
+        ) {
+            Task { [weak self] in
+                guard let self else { return }
+                if await staysForLiveEnded(.liveEnded) {
+                    context.disconnectionSource = source
+                    context.reconnectionStrategy = .fast(
+                        disconnectedSince: .init(),
+                        deadline: context.fastReconnectDeadlineSeconds
+                    )
+                    transitionOrDisconnect(.disconnected(context))
+                    return
+                }
+                transitionOrError(.leaving(
+                    context,
+                    reason: "\(Stream_Video_Sfu_Models_CallEndedReason.liveEnded)",
+                    initiator: .remoteEvent
+                ))
+            }
         }
 
         /// A viewer stays through `liveEnded` only with `join-backstage`.

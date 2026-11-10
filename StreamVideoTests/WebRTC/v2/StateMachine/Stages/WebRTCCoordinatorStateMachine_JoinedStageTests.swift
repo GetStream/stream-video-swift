@@ -641,6 +641,56 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         ) { _ in }
     }
 
+    func test_transition_socketDisconnectsOnLiveEndedWithoutJoinBackstage_landsOnLeaving() async {
+        await mockCoordinatorStack.coordinator.stateAdapter.set(
+            sfuAdapter: mockCoordinatorStack.sfuStack.adapter
+        )
+
+        await assertTransitionAfterTrigger(
+            expectedTarget: .leaving,
+            trigger: { [mockCoordinatorStack] in
+                var event = Stream_Video_Sfu_Event_Error()
+                event.error.code = .liveEnded
+                event.reconnectStrategy = .rejoin
+                let source: WebSocketConnectionState.DisconnectionSource =
+                    .serverInitiated(error: .init(with: event))
+                mockCoordinatorStack?.sfuStack.setConnectionState(
+                    to: .disconnecting(source: source)
+                )
+            }
+        ) { _ in }
+    }
+
+    func test_transition_socketDisconnectsOnLiveEndedWithJoinBackstage_fastReconnects() async {
+        await mockCoordinatorStack.coordinator.stateAdapter.enqueueOwnCapabilities {
+            [.joinBackstage]
+        }
+        await mockCoordinatorStack.coordinator.stateAdapter.set(
+            sfuAdapter: mockCoordinatorStack.sfuStack.adapter
+        )
+        subject.context.fastReconnectDeadlineSeconds = 12
+
+        await assertTransitionAfterTrigger(
+            expectedTarget: .disconnected,
+            trigger: { [mockCoordinatorStack] in
+                var event = Stream_Video_Sfu_Event_Error()
+                event.error.code = .liveEnded
+                event.reconnectStrategy = .rejoin
+                let source: WebSocketConnectionState.DisconnectionSource =
+                    .serverInitiated(error: .init(with: event))
+                mockCoordinatorStack?.sfuStack.setConnectionState(
+                    to: .disconnecting(source: source)
+                )
+            }
+        ) { target in
+            guard case let .fast(_, deadline) = target.context.reconnectionStrategy else {
+                XCTFail("Expected fast reconnect after the socket dropped")
+                return
+            }
+            XCTAssertEqual(deadline, 12)
+        }
+    }
+
     func test_transition_sfuErrorLiveEndedWithJoinBackstage_remainsJoined() async {
         await mockCoordinatorStack.coordinator.stateAdapter.enqueueOwnCapabilities {
             [.joinBackstage]
