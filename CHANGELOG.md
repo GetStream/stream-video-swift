@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🐞 Fixed
 
+- Apply and clear a video background after reconnection. The rebuilt publisher uses the capture session that stayed open. [#1402](https://github.com/GetStream/stream-video-swift/pull/1402)
 - Apply the loudspeaker when call settings request it, after an idle route already reported Speaker. [#1395](https://github.com/GetStream/stream-video-swift/pull/1395)
 
 ### 🔄 Changed
