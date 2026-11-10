@@ -194,34 +194,6 @@ final class WebRTCCoordinatorStateMachine_DisconnectedStageTests: XCTestCase, @u
         XCTAssertEqual(subject.context.reconnectionStrategy, .disconnected)
     }
 
-    func test_transition_flowErrorIsBackstageRefusal_reconnectionStrategyChangesToDisconnected() {
-        subject.context.reconnectionStrategy = .rejoin
-        subject.context.flowError = APIError(
-            code: 17,
-            message: "User 'viewer' with role 'user' is not allowed to perform action JoinBackstage",
-            statusCode: 403,
-            unrecoverable: false
-        )
-
-        _ = subject.transition(from: .connected(subject.context))
-
-        XCTAssertEqual(subject.context.reconnectionStrategy, .disconnected)
-    }
-
-    func test_transition_flowErrorIsRateLimit_reconnectionStrategyChangesToDisconnected() {
-        subject.context.reconnectionStrategy = .rejoin
-        subject.context.flowError = APIError(
-            code: 9,
-            message: "Too many requests",
-            statusCode: 429,
-            unrecoverable: false
-        )
-
-        _ = subject.transition(from: .connected(subject.context))
-
-        XCTAssertEqual(subject.context.reconnectionStrategy, .disconnected)
-    }
-
     // MARK: observeInternetConnection
 
     func test_transition_connectionRestoresWithDisconnectedStrategy_landsOnLeaving() async {

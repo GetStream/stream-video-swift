@@ -115,8 +115,9 @@ extension Call.StateMachine.Stage {
 
                     var input = input
                     input.currentNumberOfRetries += 1
+                    let isUnrecoverable = (error as? APIError)?.unrecoverable == true
 
-                    if !JoinCallAttempt.shouldStop(error),
+                    if !isUnrecoverable,
                        input.currentNumberOfRetries < input.retryPolicy.maxRetries {
                         let delay = UInt64(
                             (input.retryPolicy.delay(input.currentNumberOfRetries))

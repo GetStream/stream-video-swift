@@ -255,23 +255,42 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .store(in: disposableBag)
         }
 
-        /// Observes call-ended events from the SFU (Selective Forwarding Unit) adapter.
-        /// When a `Stream_Video_Sfu_Event_CallEnded` event is detected, the method logs
-        /// the reason for the call ending and triggers a transition to the "leaving"
-        /// state.
+        /// A viewer stays through `liveEnded` only with `join-backstage`.
+        /// Every other end reason still leaves.
+        private func staysForLiveEnded(
+            _ reason: Stream_Video_Sfu_Models_CallEndedReason
+        ) async -> Bool {
+            guard reason == .liveEnded else {
+                return false
+            }
+            let capabilities = await context
+                .coordinator?
+                .stateAdapter
+                .ownCapabilities ?? []
+            return capabilities.contains(.joinBackstage)
+        }
+
+        /// Leaves when the SFU ends the call.
+        /// Stays on `liveEnded` when the user has `join-backstage`.
         private func observeCallEndedEvent() async {
             let sfuAdapter = await context.coordinator?.stateAdapter.sfuAdapter
             sfuAdapter?
                 .publisher(eventType: Stream_Video_Sfu_Event_CallEnded.self)
                 .log(.debug, subsystems: .sfu) { "Call ended with reason: \($0.reason)." }
                 .receive(on: processingQueue)
-                .sink { [weak self] in
+                .sink { [weak self] event in
                     guard let self else { return }
-                    transitionOrError(.leaving(
-                        context,
-                        reason: "\($0.reason)",
-                        initiator: .remoteEvent
-                    ))
+                    Task { [weak self] in
+                        guard let self else { return }
+                        if await staysForLiveEnded(event.reason) {
+                            return
+                        }
+                        transitionOrError(.leaving(
+                            context,
+                            reason: "\(event.reason)",
+                            initiator: .remoteEvent
+                        ))
+                    }
                 }
                 .store(in: disposableBag)
         }
@@ -312,6 +331,20 @@ extension WebRTCCoordinator.StateMachine.Stage {
         }
 
         private func handleSFUError(_ event: Stream_Video_Sfu_Event_Error) {
+            if event.error.code == .liveEnded {
+                Task { [weak self] in
+                    guard let self else { return }
+                    if await staysForLiveEnded(.liveEnded) {
+                        return
+                    }
+                    transitionOrError(.leaving(
+                        context,
+                        reason: "\(Stream_Video_Sfu_Models_CallEndedReason.liveEnded)",
+                        initiator: .remoteEvent
+                    ))
+                }
+                return
+            }
             guard event.reconnectStrategy != .unspecified else { return }
             context.disconnectionSource = .serverInitiated(
                 error: .init(with: event.error)

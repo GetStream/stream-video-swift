@@ -585,6 +585,85 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         ) { _ in }
     }
 
+    func test_transition_callEndedLiveEndedWithoutJoinBackstage_landsOnLeaving() async {
+        await mockCoordinatorStack.coordinator.stateAdapter.set(
+            sfuAdapter: mockCoordinatorStack.sfuStack.adapter
+        )
+
+        await assertTransitionAfterTrigger(
+            expectedTarget: .leaving,
+            trigger: { [mockCoordinatorStack] in
+                var event = Stream_Video_Sfu_Event_CallEnded()
+                event.reason = .liveEnded
+                mockCoordinatorStack?
+                    .sfuStack
+                    .receiveEvent(.callEnded(event))
+            }
+        ) { _ in }
+    }
+
+    func test_transition_callEndedLiveEndedWithJoinBackstage_remainsJoined() async {
+        await mockCoordinatorStack.coordinator.stateAdapter.enqueueOwnCapabilities {
+            [.joinBackstage]
+        }
+        await mockCoordinatorStack.coordinator.stateAdapter.set(
+            sfuAdapter: mockCoordinatorStack.sfuStack.adapter
+        )
+
+        await assertTransitionAfterTrigger(
+            trigger: { [mockCoordinatorStack] in
+                var event = Stream_Video_Sfu_Event_CallEnded()
+                event.reason = .liveEnded
+                mockCoordinatorStack?
+                    .sfuStack
+                    .receiveEvent(.callEnded(event))
+            }
+        ) { stage in
+            XCTAssertEqual(stage.id, .joined)
+        }
+    }
+
+    func test_transition_sfuErrorLiveEndedWithoutJoinBackstage_landsOnLeaving() async {
+        await mockCoordinatorStack.coordinator.stateAdapter.set(
+            sfuAdapter: mockCoordinatorStack.sfuStack.adapter
+        )
+
+        await assertTransitionAfterTrigger(
+            expectedTarget: .leaving,
+            trigger: { [mockCoordinatorStack] in
+                var event = Stream_Video_Sfu_Event_Error()
+                event.error.code = .liveEnded
+                event.reconnectStrategy = .rejoin
+                mockCoordinatorStack?
+                    .sfuStack
+                    .receiveEvent(.error(event))
+            }
+        ) { _ in }
+    }
+
+    func test_transition_sfuErrorLiveEndedWithJoinBackstage_remainsJoined() async {
+        await mockCoordinatorStack.coordinator.stateAdapter.enqueueOwnCapabilities {
+            [.joinBackstage]
+        }
+        await mockCoordinatorStack.coordinator.stateAdapter.set(
+            sfuAdapter: mockCoordinatorStack.sfuStack.adapter
+        )
+
+        await assertTransitionAfterTrigger(
+            trigger: { [mockCoordinatorStack] in
+                var event = Stream_Video_Sfu_Event_Error()
+                event.error.code = .liveEnded
+                event.reconnectStrategy = .rejoin
+                mockCoordinatorStack?
+                    .sfuStack
+                    .receiveEvent(.error(event))
+            }
+        ) { stage in
+            XCTAssertEqual(stage.id, .joined)
+            XCTAssertEqual(stage.context.reconnectionStrategy, .rejoin)
+        }
+    }
+
     // MARK: observeMigrationEvent
 
     func test_transition_sfuErrorWithReconnectionStrategyMigrateReceived_landsOnDisconnected() async {
