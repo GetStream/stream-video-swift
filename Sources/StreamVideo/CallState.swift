@@ -498,26 +498,32 @@ public class CallState: ObservableObject {
     }
 
     /// Applies an SFU event to the local call state.
-    /// `liveEnded` marks the call as backstage.
-    /// A `callEnded` event also sets `endedAt`, except when a
-    /// `join-backstage` user stays for `liveEnded`.
+    /// `liveEnded` marks the call as backstage and records `liveEndedAt`.
+    /// Any other `callEnded` reason records `endedAt`.
     internal func update(
         from event: Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload
     ) {
         switch event {
         case .callEnded(let callEnded):
             if callEnded.reason == .liveEnded {
-                backstage = true
-                if ownCapabilities.contains(.joinBackstage) {
-                    break
-                }
+                markLiveEnded()
+            } else {
+                endedAt = Date()
             }
-            endedAt = Date()
         case .error(let error) where error.error.code == .liveEnded:
-            backstage = true
+            markLiveEnded()
         default:
             break
         }
+    }
+
+    /// Records the end of the live segment for every participant.
+    private func markLiveEnded() {
+        backstage = true
+        guard let session else { return }
+        session.liveEndedAt = Date()
+        self.session = session
+        configureDuration(for: session)
     }
 
     /// Adds ring outcomes without removing updates received over WebSocket.
