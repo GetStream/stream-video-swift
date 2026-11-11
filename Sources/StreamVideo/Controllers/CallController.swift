@@ -873,14 +873,11 @@ class CallController: @unchecked Sendable {
             guard let self else { return }
             call.state
                 .$settings
-                .sink { [weak self] settings in
-                    guard let self else { return }
+                .sinkTask(storeIn: disposableBag) { [weak self] settings in
                     let enabled = settings?.backstage.enabled == true
-                    Task { [weak self] in
-                        await self?.webRTCCoordinator
-                            .stateAdapter
-                            .set(isBackstageEnabled: enabled)
-                    }
+                    await self?.webRTCCoordinator
+                        .stateAdapter
+                        .set(isBackstageEnabled: enabled)
                 }
                 .store(
                     in: self.disposableBag,
