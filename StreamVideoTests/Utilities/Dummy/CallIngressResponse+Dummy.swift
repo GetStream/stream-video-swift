@@ -9,6 +9,6 @@ extension CallIngressResponse {
     static func dummy(
         rtmp: RTMPIngress = RTMPIngress.dummy()
     ) -> CallIngressResponse {
-        .init(rtmp: rtmp)
+        .init(rtmp: rtmp, srt: .init(address: ""), whip: .init(address: ""))
     }
 }

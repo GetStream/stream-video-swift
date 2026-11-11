@@ -6,28 +6,11 @@ import Foundation
 import StreamCore
 
 public final class IngressAudioEncodingOptionsRequest: @unchecked Sendable, Encodable, JSONEncodable {
-    
-    public enum IngressAudioEncodingOptionsRequestChannels: String, Sendable, Codable, CaseIterable {
-        case _1 = "1"
-        case _2 = "2"
-        case unknown = "_unknown"
-
-        public init(from decoder: Decoder) throws {
-            let container = try decoder.singleValueContainer()
-            if let decodedValue = try? container.decode(String.self),
-               let value = Self(rawValue: decodedValue) {
-                self = value
-            } else {
-                self = .unknown
-            }
-        }
-    }
-
     public var bitrate: Int
-    public var channels: IngressAudioEncodingOptionsRequestChannels
+    public var channels: Int
     public var enableDtx: Bool?
 
-    public init(bitrate: Int, channels: IngressAudioEncodingOptionsRequestChannels, enableDtx: Bool? = nil) {
+    public init(bitrate: Int, channels: Int, enableDtx: Bool? = nil) {
         self.bitrate = bitrate
         self.channels = channels
         self.enableDtx = enableDtx

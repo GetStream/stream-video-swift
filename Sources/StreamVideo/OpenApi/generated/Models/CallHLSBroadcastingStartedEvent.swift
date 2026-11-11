@@ -7,13 +7,16 @@ import StreamCore
 
 /// This event is sent when HLS broadcasting has started
 public final class CallHLSBroadcastingStartedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
+    /// Represents a call
+    public var call: CallResponse
     public var callCid: String
     public var createdAt: Date
     public var hlsPlaylistUrl: String
     /// The type of event: "call.hls_broadcasting_started" in this case
     public var type: String = "call.hls_broadcasting_started"
 
-    public init(callCid: String, createdAt: Date, hlsPlaylistUrl: String) {
+    public init(call: CallResponse, callCid: String, createdAt: Date, hlsPlaylistUrl: String) {
+        self.call = call
         self.callCid = callCid
         self.createdAt = createdAt
         self.hlsPlaylistUrl = hlsPlaylistUrl
@@ -21,6 +24,7 @@ public final class CallHLSBroadcastingStartedEvent: @unchecked Sendable, Event, 
 
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.call = try container.decode(CallResponse.self, forKey: .call)
         self.callCid = try container.decode(String.self, forKey: .callCid)
         self.createdAt = try container.decode(Date.self, forKey: .createdAt)
         self.hlsPlaylistUrl = try container.decode(String.self, forKey: .hlsPlaylistUrl)
@@ -30,13 +34,15 @@ public final class CallHLSBroadcastingStartedEvent: @unchecked Sendable, Event, 
 
 extension CallHLSBroadcastingStartedEvent: Hashable {
     public static func == (lhs: CallHLSBroadcastingStartedEvent, rhs: CallHLSBroadcastingStartedEvent) -> Bool {
-        lhs.callCid == rhs.callCid &&
+        lhs.call == rhs.call &&
+            lhs.callCid == rhs.callCid &&
             lhs.createdAt == rhs.createdAt &&
             lhs.hlsPlaylistUrl == rhs.hlsPlaylistUrl &&
             lhs.type == rhs.type
     }
 
     public func hash(into hasher: inout Hasher) {
+        hasher.combine(call)
         hasher.combine(callCid)
         hasher.combine(createdAt)
         hasher.combine(hlsPlaylistUrl)
