@@ -216,7 +216,7 @@ final class CallAudioSession_Tests: XCTestCase, @unchecked Sendable {
 
     // MARK: shouldSetActive = false
 
-    func test_activate_shouldSetActiveFalse_isActiveOnStoreAlreadyTrue_firesDeferredActivationImmediately() async {
+    func test_activate_shouldSetActiveFalse_activeStore_waitsForCallKitActivation() async {
         let callSettingsSubject = CurrentValueSubject<CallSettings, Never>(.default)
         let capabilitiesSubject = CurrentValueSubject<Set<OwnCapability>, Never>([.sendAudio])
         let delegate = SpyAudioSessionAdapterDelegate()
@@ -238,6 +238,19 @@ final class CallAudioSession_Tests: XCTestCase, @unchecked Sendable {
         subject = .init(policy: policy)
         await claimOwnership(of: subject)
 
+        let unexpectedUnmute = expectation(
+            description: "Deferred activation stays muted until CallKit activates."
+        )
+        unexpectedUnmute.assertForOverFulfill = false
+        unexpectedUnmute.isInverted = true
+        mockAudioStore.audioStore
+            .publisher(\.isMicrophoneMuted)
+            .removeDuplicates()
+            .dropFirst()
+            .filter { $0 == false }
+            .sink { _ in unexpectedUnmute.fulfill() }
+            .store(in: &cancellables)
+
         subject.activate(
             callSettingsPublisher: callSettingsSubject.eraseToAnyPublisher(),
             ownCapabilitiesPublisher: capabilitiesSubject.eraseToAnyPublisher(),
@@ -246,9 +259,11 @@ final class CallAudioSession_Tests: XCTestCase, @unchecked Sendable {
             shouldSetActive: false
         )
 
-        // No further `.setActive(true)` dispatch is emitted; the deferred
-        // activation must still fire because the store already owned by this
-        // session is active.
+        await safeFulfillment(of: [unexpectedUnmute], timeout: 0.5)
+        XCTAssertTrue(mockAudioStore.audioStore.state.isMicrophoneMuted)
+
+        mockAudioStore.audioStore.dispatch(.callKit(.activate(.sharedInstance())))
+
         await fulfillment {
             let state = self.mockAudioStore.audioStore.state
             return state.audioSessionConfiguration.category == policyConfiguration.category

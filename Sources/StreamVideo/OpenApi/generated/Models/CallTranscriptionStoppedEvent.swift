@@ -9,18 +9,21 @@ import StreamCore
 public final class CallTranscriptionStoppedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
     public var callCid: String
     public var createdAt: Date
+    public var egressId: String
     /// The type of event: "call.transcription_stopped" in this case
     public var type: String = "call.transcription_stopped"
 
-    public init(callCid: String, createdAt: Date) {
+    public init(callCid: String, createdAt: Date, egressId: String) {
         self.callCid = callCid
         self.createdAt = createdAt
+        self.egressId = egressId
     }
 
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: StringCodingKey.self)
         self.callCid = try container.decode(String.self, forKey: .callCid)
         self.createdAt = try container.decode(Date.self, forKey: .createdAt)
+        self.egressId = try container.decode(String.self, forKey: .egressId)
         self.type = try container.decode(String.self, forKey: .type)
     }
 }
@@ -29,12 +32,14 @@ extension CallTranscriptionStoppedEvent: Hashable {
     public static func == (lhs: CallTranscriptionStoppedEvent, rhs: CallTranscriptionStoppedEvent) -> Bool {
         lhs.callCid == rhs.callCid &&
             lhs.createdAt == rhs.createdAt &&
+            lhs.egressId == rhs.egressId &&
             lhs.type == rhs.type
     }
 
     public func hash(into hasher: inout Hasher) {
         hasher.combine(callCid)
         hasher.combine(createdAt)
+        hasher.combine(egressId)
         hasher.combine(type)
     }
 }

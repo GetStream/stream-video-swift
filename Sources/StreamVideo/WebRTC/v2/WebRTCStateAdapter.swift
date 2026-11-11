@@ -1279,25 +1279,41 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
             return true
         }()
 
+        // Rejoin can run only after this session has activated.
+        // Owning an already active store is not activation.
+        let activeIdentifier = audioStore.state.activeSessionIdentifier
+        let callKitSessionAlreadyActive = sourceIsCallKit
+            && audioSession.didPerformActivation
+            && audioStore.state.isActive
+            && activeIdentifier == audioSession.identifier
+        // This session already activated, then another call took the
+        // store. Leave that call's module in place.
+        let otherCallOwnsActiveStore = sourceIsCallKit
+            && audioSession.didPerformActivation
+            && audioStore.state.isActive
+            && !activeIdentifier.isEmpty
+            && activeIdentifier != audioSession.identifier
         let isAudioEngineAvailable = peerConnectionFactory
             .audioEngineAvailabilityOverride
-            ?? (!sourceIsCallKit || audioStore.state.isActive)
+            ?? (!sourceIsCallKit || callKitSessionAlreadyActive)
         try peerConnectionFactory.audioDeviceModule
             .setEngineAvailability(isAudioEngineAvailable)
 
-        try await audioStore.dispatch(
-            [
-                // Claim ownership before installing the ADM so any late
-                // teardown from a previous call becomes a no-op. Both
-                // actions run in the same batch on the store's serial
-                // processing queue, so no other dispatch can interleave
-                // between them. That makes the ADM install implicitly
-                // ownership-safe and removes the need to wrap it in a
-                // `.conditioned(...)` action.
-                .setActiveSessionIdentifier(audioSession.identifier),
-                .setAudioDeviceModule(peerConnectionFactory.audioDeviceModule)
-            ]
-        ).result()
+        if !otherCallOwnsActiveStore {
+            try await audioStore.dispatch(
+                [
+                    // Claim ownership before installing the ADM so any late
+                    // teardown from a previous call becomes a no-op. Both
+                    // actions run in the same batch on the store's serial
+                    // processing queue, so no other dispatch can interleave
+                    // between them. That makes the ADM install implicitly
+                    // ownership-safe and removes the need to wrap it in a
+                    // `.conditioned(...)` action.
+                    .setActiveSessionIdentifier(audioSession.identifier),
+                    .setAudioDeviceModule(peerConnectionFactory.audioDeviceModule)
+                ]
+            ).result()
+        }
 
         audioSession.activate(
             callSettingsPublisher: $callSettings.removeDuplicates().eraseToAnyPublisher(),
@@ -1305,13 +1321,10 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
             delegate: self,
             statsAdapter: statsAdapter,
             /// When joining from CallKit we configure the session here but
-            /// never activate it ourselves. The ordering is: the joining
-            /// stage fulfils the pending answer action once the call has
-            /// joined, CallKit then activates the session and `didActivate`
-            /// dispatches `.callKit(.activate)` into the audio store, whose
-            /// `isActive` flip wakes the deferred activation scheduled by
-            /// `CallAudioSession` below. Activating locally as well would
-            /// race CallKit's ownership of the session.
+            /// never activate it ourselves. CallKit activates the session
+            /// after the answer action is fulfilled, and that activation
+            /// wakes the deferred `CallAudioSession` work. Activating
+            /// locally as well would race CallKit's ownership of the session.
             shouldSetActive: !sourceIsCallKit
         )
     }

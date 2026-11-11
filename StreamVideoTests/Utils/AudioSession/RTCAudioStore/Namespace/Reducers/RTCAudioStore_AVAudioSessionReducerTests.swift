@@ -258,21 +258,11 @@ final class RTCAudioStore_AVAudioSessionReducerTests: XCTestCase, @unchecked Sen
         XCTAssertEqual(session.timesCalled(.setConfiguration), 0)
     }
 
-    func test_reduce_setCurrentRoute_updatesOverridePort() async throws {
+    func test_reduce_setCurrentRoute_override_updatesOverridePort() async throws {
         let state = makeState(overrideOutput: .none)
-        let speakerRoute = RTCAudioStore.StoreState.AudioRoute(
-            inputs: [],
-            outputs: [
-                .init(
-                    type: .unique,
-                    name: .unique,
-                    id: .unique,
-                    isExternal: false,
-                    isSpeaker: true,
-                    isReceiver: false,
-                    channels: 2
-                )
-            ]
+        let speakerRoute = RTCAudioStore.StoreState.AudioRoute.dummy(
+            outputs: [.dummy(isSpeaker: true)],
+            reason: .override
         )
 
         let result = try await subject.reduce(
@@ -284,6 +274,44 @@ final class RTCAudioStore_AVAudioSessionReducerTests: XCTestCase, @unchecked Sen
         )
 
         XCTAssertEqual(result.audioSessionConfiguration.overrideOutputAudioPort, .speaker)
+    }
+
+    func test_reduce_setCurrentRoute_unknownSpeaker_preservesOverridePort() async throws {
+        let state = makeState(overrideOutput: .none)
+        let speakerRoute = RTCAudioStore.StoreState.AudioRoute.dummy(
+            outputs: [.dummy(isSpeaker: true)],
+            reason: .unknown
+        )
+
+        let result = try await subject.reduce(
+            state: state,
+            action: .setCurrentRoute(speakerRoute),
+            file: #file,
+            function: #function,
+            line: #line
+        )
+
+        XCTAssertEqual(result.audioSessionConfiguration.overrideOutputAudioPort, .none)
+        XCTAssertEqual(session.timesCalled(.overrideOutputAudioPort), 0)
+    }
+
+    func test_reduce_setCurrentRoute_noSuitableRoute_clearsStaleSpeakerOverride() async throws {
+        let state = makeState(overrideOutput: .speaker)
+        let receiverRoute = RTCAudioStore.StoreState.AudioRoute.dummy(
+            outputs: [.dummy(isReceiver: true)],
+            reason: .noSuitableRouteForCategory
+        )
+
+        let result = try await subject.reduce(
+            state: state,
+            action: .setCurrentRoute(receiverRoute),
+            file: #file,
+            function: #function,
+            line: #line
+        )
+
+        XCTAssertEqual(result.audioSessionConfiguration.overrideOutputAudioPort, .none)
+        XCTAssertEqual(session.timesCalled(.overrideOutputAudioPort), 0)
     }
 
     func test_reduce_setCurrentRoute_categoryChange_preservesOverridePort() async throws {

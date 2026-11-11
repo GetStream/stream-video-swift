@@ -36,6 +36,7 @@ extension RTCAudioStore.Namespace {
             case let .activate(audioSession):
                 source.audioSessionDidActivate(audioSession)
                 updatedState.isActive = source.isActive
+                updatedState.callKitActivationCount += 1
 
             case let .deactivate(audioSession):
                 source.audioSessionDidDeactivate(audioSession)

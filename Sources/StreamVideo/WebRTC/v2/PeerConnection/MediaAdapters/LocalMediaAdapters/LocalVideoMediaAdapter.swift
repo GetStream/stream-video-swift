@@ -684,6 +684,12 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             )
             try await activeSession.capturer.setCameraPosition(position)
         }
+
+        if capturer == nil {
+            // Reconnect keeps this session and builds a new adapter.
+            // Adopt the live capturer so set and clear still reach it.
+            capturer = videoCaptureSessionProvider.activeSession?.capturer
+        }
     }
 
     /// Starts the video capturing session.

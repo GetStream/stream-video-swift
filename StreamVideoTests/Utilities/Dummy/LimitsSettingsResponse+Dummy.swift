@@ -12,7 +12,8 @@ extension LimitsSettingsResponse {
     ) -> LimitsSettingsResponse {
         .init(
             maxDurationSeconds: maxDurationSeconds,
-            maxParticipants: maxParticipants
+            maxParticipants: maxParticipants,
+            maxParticipantsExcludeRoles: []
         )
     }
 }

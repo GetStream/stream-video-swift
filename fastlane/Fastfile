@@ -26,7 +26,7 @@ before_all do |lane|
   if is_ci
     setup_ci
     setup_git_config
-    select_xcode(version: xcode_version) unless [:sonar_upload, :allure_launch, :allure_upload, :stop_e2e_helpers, :merge_main, :pr].include?(lane)
+    select_xcode(version: xcode_version) unless [:sonar_upload, :allure_launch, :allure_upload, :stop_e2e_helpers, :merge_main, :pr, :openapi].include?(lane)
   elsif lane == :test_e2e
     stop_e2e_helpers
   end
@@ -219,6 +219,8 @@ lane :test do |options|
     derived_data_path: derived_data_path,
     cloned_source_packages_path: source_packages_path,
     devices: options[:device],
+    destination: options[:destination],
+    skip_detect_devices: !options[:destination].nil?,
     concurrent_workers: 2,
     skip_build: options[:skip_build],
     build_for_testing: options[:build_for_testing],
@@ -236,6 +238,7 @@ lane :test_swiftui do |options|
     scheme: 'StreamVideoSwiftUI',
     source: :swiftui,
     device: options[:device],
+    destination: options[:destination],
     record: options[:record],
     skip_build: options[:skip_build],
     build_for_testing: options[:build_for_testing]
@@ -248,6 +251,7 @@ lane :test_uikit do |options|
     scheme: 'StreamVideoUIKit',
     source: :uikit,
     device: options[:device],
+    destination: options[:destination],
     record: options[:record],
     skip_build: options[:skip_build],
     build_for_testing: options[:build_for_testing]
@@ -272,6 +276,8 @@ private_lane :test_ui do |options|
     skip_build: options[:skip_build],
     result_bundle: true,
     devices: options[:device],
+    destination: options[:destination],
+    skip_detect_devices: !options[:destination].nil?,
     build_for_testing: options[:build_for_testing],
     fail_build: !record_mode,
     xcodebuild_formatter: xcodebuild_formatter
@@ -367,11 +373,11 @@ lane :test_e2e do |options|
 end
 
 # Runs scan and re-runs only the tests that failed, up to `retries` times.
-# Every attempt recalculates the failing set from the previous run's junit
-# report, so a shrinking set of flaky tests converges instead of dragging
+# Every attempt recalculates the failing set from the previous run's result
+# bundle, so a shrinking set of flaky tests converges instead of dragging
 # the whole suite along.
 private_lane :scan_with_retries do |options|
-  scan_options = options[:scan_options]
+  scan_options = options[:scan_options].merge(result_bundle: true)
   attempts_left = options[:retries] || 3
 
   begin
@@ -389,30 +395,33 @@ private_lane :scan_with_retries do |options|
   end
 end
 
+# The tests that failed in the last scan, as `Bundle/Suite/test()` for `only_testing`.
+# Read from the result bundle rather than scan's junit report: scan skips the report when the
+# formatted output lacks a test summary, as xcbeautify's does for Swift Testing, and the report
+# names Swift Testing tests by their display names, which `only_testing` doesn't accept.
 private_lane :retreive_failed_tests do
-  report_path = 'test_output/report.junit'
-  next [] unless File.file?(report_path)
+  result_bundle_path = lane_context[SharedValues::SCAN_GENERATED_XCRESULT_PATH]
+  next [] if result_bundle_path.nil? || !File.directory?(result_bundle_path)
 
-  junit_report = Nokogiri::XML(File.read(report_path))
-  failed_tests = []
-  passed_tests = []
-  suite = junit_report.xpath('//testsuite').first
-  suite_name = suite && suite['name']
-  next [] if suite_name.nil? || suite_name.empty?
-
-  suite_name = suite_name.split('.').first
-  junit_report.xpath('//testcase').each do |testcase|
-    class_name = testcase['classname'].split('.').last
-    test_name = testcase['name'].delete('()')
-
-    if testcase.at_xpath('failure')
-      failed_tests << "#{suite_name}/#{class_name}/#{test_name}"
-    else
-      passed_tests << "#{suite_name}/#{class_name}/#{test_name}"
-    end
+  begin
+    results = JSON.parse(sh('xcrun', 'xcresulttool', 'get', 'test-results', 'tests', '--path', result_bundle_path, log: false))
+  rescue StandardError => e
+    UI.error("Couldn't read the failed tests from #{result_bundle_path}: #{e.message}")
+    next []
   end
 
-  (failed_tests - passed_tests).uniq
+  failed_tests = []
+  collect_failed = lambda do |node, bundle|
+    bundle = node['name'] if ['Unit test bundle', 'UI test bundle'].include?(node['nodeType'])
+    if node['nodeType'] == 'Test Case'
+      failed_tests << "#{bundle}/#{node['nodeIdentifier']}" if node['result'] == 'Failed' && bundle && node['nodeIdentifier']
+    else
+      node.fetch('children', []).each { |child| collect_failed.call(child, bundle) }
+    end
+  end
+  results.fetch('testNodes', []).each { |node| collect_failed.call(node, nil) }
+
+  failed_tests.uniq
 end
 
 lane :stop_e2e_helpers do
@@ -471,16 +480,37 @@ lane :code_generation do
   sync_xcodeproj_references
 end
 
+desc 'Open a pull request when generated OpenAPI models changed'
+lane :openapi do
+  next unless is_ci
+
+  changed = Dir.chdir('..') do
+    sh('git status --porcelain -- Sources/StreamVideo/OpenApi/generated')
+  end
+  next if changed.strip.empty?
+
+  pr_create(
+    title: '[Hygiene]OpenAPI models generation',
+    base_branch: current_branch,
+    head_branch: "#{current_branch}-openapi-#{Time.now.to_i}",
+    git_add: '../Sources/StreamVideo/OpenApi/generated'
+  )
+end
+
 lane :sync_xcodeproj_references do
   Dir.chdir('..') do
     project = Xcodeproj::Project.open(xcode_project)
     status = git_status(ext: '.swift')
+    changed = false
 
     status[:d].each do |file_path|
       next if file_path !~ %r{(/OpenApi/|/protobuf/)}
 
       file = project.files.find { |f| f.full_path.to_s == file_path }
-      file.remove_from_project if file
+      next unless file
+
+      file.remove_from_project
+      changed = true
     end
 
     status[:a].each do |file_path|
@@ -502,9 +532,10 @@ lane :sync_xcodeproj_references do
       file_reference = group.new_file(file_path)
       file_reference.path = file_name
       project.targets.find { |n| n.name == 'StreamVideo' }.source_build_phase.add_file_reference(file_reference)
+      changed = true
     end
 
-    project.save
+    project.save if changed
   end
 end
 

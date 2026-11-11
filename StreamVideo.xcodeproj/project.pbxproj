@@ -264,6 +264,8 @@
 				Sources/Components/MemoryLogDestination/LogQueue.swift,
 				Sources/Components/MemoryLogDestination/Queue.swift,
 				Sources/Components/MemoryLogDestination/SessionLogFile.swift,
+				Sources/Components/VideoFilters/PixelateVideoFilter/ModerationPixelateVideoFilter.swift,
+				Sources/Controls/DemoMoreControls/BackgroundEffect.swift,
 			);
 			target = 84F737F3287C13AD00A363F4 /* StreamVideoTests */;
 		};

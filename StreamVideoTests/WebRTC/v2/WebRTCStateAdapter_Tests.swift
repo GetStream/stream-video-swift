@@ -820,7 +820,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(availability?.1, false)
     }
 
-    func test_configureAudioSession_activeCallKitSource_makesAudioEngineAvailable() async throws {
+    func test_configureAudioSession_callKitSource_activeStore_keepsAudioEngineUnavailable() async throws {
         try await mockAudioStore.audioStore.dispatch(.setActive(true)).result()
 
         try await subject.configureAudioSession(source: .callKit(.init {}))
@@ -829,8 +829,47 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
             (Bool, Bool).self,
             for: .setEngineAvailability
         )?.last
-        XCTAssertEqual(availability?.0, true)
-        XCTAssertEqual(availability?.1, true)
+        XCTAssertEqual(availability?.0, false)
+        XCTAssertEqual(availability?.1, false)
+    }
+
+    func test_configureAudioSession_callKitSource_secondConfigureBeforeActivation_keepsAudioEngineUnavailable() async throws {
+        try await mockAudioStore.audioStore.dispatch(.setActive(true)).result()
+
+        try await subject.configureAudioSession(source: .callKit(.init {}))
+        try await subject.configureAudioSession(source: .callKit(.init {}))
+
+        let availability = mockAudioDeviceModuleSource.recordedInputPayload(
+            (Bool, Bool).self,
+            for: .setEngineAvailability
+        )?.last
+        XCTAssertEqual(availability?.0, false)
+        XCTAssertEqual(availability?.1, false)
+    }
+
+    func test_configureAudioSession_callKitSource_otherActiveSession_doesNotTakeAudio_() async throws {
+        try await configureActiveCallKitAudio()
+        let otherModule = AudioDeviceModule(MockRTCAudioDeviceModule())
+        let otherIdentifier = String.unique
+        try await mockAudioStore.audioStore.dispatch(
+            [
+                .setActiveSessionIdentifier(otherIdentifier),
+                .setAudioDeviceModule(otherModule)
+            ]
+        ).result()
+
+        try await subject.configureAudioSession(source: .callKit(.init {}))
+
+        let state = mockAudioStore.audioStore.state
+        XCTAssertEqual(state.activeSessionIdentifier, otherIdentifier)
+        XCTAssertTrue(state.audioDeviceModule === otherModule)
+        XCTAssertTrue(state.isActive)
+        let availability = mockAudioDeviceModuleSource.recordedInputPayload(
+            (Bool, Bool).self,
+            for: .setEngineAvailability
+        )?.last
+        XCTAssertEqual(availability?.0, false)
+        XCTAssertEqual(availability?.1, false)
     }
 
     // MARK: - cleanUp
@@ -1033,6 +1072,17 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
             )?.last
             XCTAssertEqual(availability?.0, true)
             XCTAssertEqual(availability?.1, true)
+        }
+
+        let muteCalls = mockAudioDeviceModuleSource.timesCalled(.setMicrophoneMuted)
+        mockAudioDeviceModuleSource.stub(for: \.isMicrophoneMuted, with: false)
+        await subject.enqueueCallSettings { _ in CallSettings(audioOn: false, videoOn: false) }
+        await fulfillment {
+            let payloads = self.mockAudioDeviceModuleSource.recordedInputPayload(
+                Bool.self,
+                for: .setMicrophoneMuted
+            )
+            return (payloads?.count ?? 0) > muteCalls && payloads?.last == true
         }
     }
 
