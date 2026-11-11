@@ -323,6 +323,16 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         }
     }
 
+    /// `settings.backstage.enabled` for the current call.
+    /// Stored here so a stage reads the latest value. `Context` is a struct
+    /// and would keep the value from the last transition.
+    private(set) var isBackstageEnabled = false
+
+    /// Sets whether backstage is enabled for the current call.
+    func set(isBackstageEnabled value: Bool) {
+        isBackstageEnabled = value
+    }
+
     /// Sets the SFU (Selective Forwarding Unit) adapter and updates the stats
     /// reporter.
     func set(sfuAdapter value: SFUAdapter?) {
