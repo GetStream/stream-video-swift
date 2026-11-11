@@ -145,6 +145,103 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         await fulfilmentInMainActor { call.state.isSpeakingWhileMuted }
     }
 
+    func test_sfuCallEndedLiveEnded_marksCallBackstage() async throws {
+        let call = await prepareCallForSFUEvents()
+        var event = Stream_Video_Sfu_Event_CallEnded()
+        event.reason = .liveEnded
+
+        // The publisher drops events that arrive before subscription.
+        await fulfilmentInMainActor {
+            self.mockWebRTCCoordinatorFactory
+                .mockCoordinatorStack
+                .sfuStack
+                .receiveEvent(.callEnded(event))
+            return call.state.backstage
+        }
+    }
+
+    func test_sfuErrorLiveEnded_marksCallBackstage() async throws {
+        let call = await prepareCallForSFUEvents()
+        var event = Stream_Video_Sfu_Event_Error()
+        event.error.code = .liveEnded
+
+        // The publisher drops events that arrive before subscription.
+        await fulfilmentInMainActor {
+            self.mockWebRTCCoordinatorFactory
+                .mockCoordinatorStack
+                .sfuStack
+                .receiveEvent(.error(event))
+            return call.state.backstage
+        }
+    }
+
+    func test_sfuAdapterReplaced_liveEndedStillMarksBackstage() async throws {
+        let call = await prepareCallForSFUEvents()
+        var event = Stream_Video_Sfu_Event_CallEnded()
+        event.reason = .liveEnded
+        await fulfilmentInMainActor {
+            self.mockWebRTCCoordinatorFactory
+                .mockCoordinatorStack
+                .sfuStack
+                .receiveEvent(.callEnded(event))
+            return call.state.backstage
+        }
+        await MainActor.run { call.state.backstage = false }
+        let replacement = MockSFUStack()
+        await mockWebRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .set(sfuAdapter: replacement.adapter)
+
+        await fulfilmentInMainActor {
+            replacement.receiveEvent(.callEnded(event))
+            return call.state.backstage
+        }
+    }
+
+    func test_sfuRefresh_liveEndedStillMarksBackstage() async throws {
+        let call = await prepareCallForSFUEvents()
+        var event = Stream_Video_Sfu_Event_CallEnded()
+        event.reason = .liveEnded
+        await fulfilmentInMainActor {
+            self.mockWebRTCCoordinatorFactory
+                .mockCoordinatorStack
+                .sfuStack
+                .receiveEvent(.callEnded(event))
+            return call.state.backstage
+        }
+        await MainActor.run { call.state.backstage = false }
+        let stack = mockWebRTCCoordinatorFactory.mockCoordinatorStack.sfuStack
+        let refreshed = MockSFUWebSocket()
+        stack.nextWebSocket = refreshed
+        stack.adapter.refresh(
+            webSocketConfiguration: .init(url: stack.adapter.connectURL)
+        )
+
+        await fulfilmentInMainActor {
+            refreshed.inject(.callEnded(event))
+            return call.state.backstage
+        }
+    }
+
+    func test_backstageSetting_reachesWebRTCStage() async throws {
+        let call = await MockCall(.dummy())
+        _ = subject
+        subject.call = call
+        await MainActor.run {
+            call.state.settings = .dummy(backstage: .dummy(enabled: true))
+        }
+
+        await fulfillment {
+            await self.mockWebRTCCoordinatorFactory
+                .mockCoordinatorStack
+                .coordinator
+                .stateAdapter
+                .isBackstageEnabled
+        }
+    }
+
     func test_setCall_ownCapabilitiesUpdatedOnStateAdapter_updatesCallState() async throws {
         let call = await MockCall(.dummy())
         _ = subject
@@ -1637,6 +1734,32 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
             let thrower = { throw error }
             XCTAssertNoThrow(try thrower(), file: file, line: line)
         }
+    }
+
+    private func prepareCallForSFUEvents() async -> MockCall {
+        let call = await MockCall(.dummy())
+        _ = subject
+        subject.call = call
+        await MainActor.run {
+            call.state.settings = .dummy(backstage: .dummy(enabled: true))
+        }
+        await mockWebRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .set(
+                sfuAdapter: mockWebRTCCoordinatorFactory
+                    .mockCoordinatorStack
+                    .sfuStack
+                    .adapter
+            )
+        await mockWebRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .enqueueOwnCapabilities { [.sendAudio] }
+        await fulfilmentInMainActor { call.state.ownCapabilities == [.sendAudio] }
+        return call
     }
 
     private func assertEqualAsync<T: Equatable>(

@@ -222,6 +222,94 @@ final class CallState_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(subject.callSettings, initialCallSettings)
     }
 
+    func test_update_sfuCallEndedLiveEnded_setsBackstageAndLiveEndedAt() {
+        let subject = CallState(.dummy())
+        subject.settings = .dummy(backstage: .dummy(enabled: true))
+        let started = Date(timeIntervalSince1970: 1_700_000_000)
+        subject.session = .dummy(
+            id: "session",
+            liveStartedAt: started,
+            startedAt: started
+        )
+        subject.startedAt = started
+        var event = Stream_Video_Sfu_Event_CallEnded()
+        event.reason = .liveEnded
+
+        subject.update(from: .callEnded(event))
+
+        XCTAssertTrue(subject.backstage)
+        XCTAssertNil(subject.endedAt)
+        XCTAssertNotNil(subject.session?.liveEndedAt)
+        XCTAssertNil(subject.startedAt)
+    }
+
+    func test_update_sfuCallEndedLiveEndedWithJoinBackstage_setsLiveEndedAt() {
+        let subject = CallState(.dummy())
+        subject.ownCapabilities = [.joinBackstage]
+        subject.settings = .dummy(backstage: .dummy(enabled: true))
+        subject.session = .dummy(id: "session")
+        var event = Stream_Video_Sfu_Event_CallEnded()
+        event.reason = .liveEnded
+
+        subject.update(from: .callEnded(event))
+
+        XCTAssertTrue(subject.backstage)
+        XCTAssertNil(subject.endedAt)
+        XCTAssertNotNil(subject.session?.liveEndedAt)
+    }
+
+    func test_update_sfuCallEndedOtherReason_keepsBackstage() {
+        let subject = CallState(.dummy())
+        subject.backstage = true
+        var event = Stream_Video_Sfu_Event_CallEnded()
+        event.reason = .ended
+
+        subject.update(from: .callEnded(event))
+
+        XCTAssertTrue(subject.backstage)
+        XCTAssertNotNil(subject.endedAt)
+        XCTAssertNil(subject.session?.liveEndedAt)
+    }
+
+    func test_update_sfuCallEndedLiveEndedWhenBackstageDisabled_keepsBackstageFalse() {
+        let subject = CallState(.dummy())
+        subject.settings = .dummy(backstage: .dummy(enabled: false))
+        subject.session = .dummy(id: "session")
+        var event = Stream_Video_Sfu_Event_CallEnded()
+        event.reason = .liveEnded
+
+        subject.update(from: .callEnded(event))
+
+        XCTAssertFalse(subject.backstage)
+        XCTAssertNil(subject.endedAt)
+        XCTAssertNotNil(subject.session?.liveEndedAt)
+    }
+
+    func test_update_sfuErrorLiveEnded_setsBackstageAndLiveEndedAt() {
+        let subject = CallState(.dummy())
+        subject.ownCapabilities = [.joinBackstage]
+        subject.settings = .dummy(backstage: .dummy(enabled: true))
+        subject.session = .dummy(id: "session")
+        var event = Stream_Video_Sfu_Event_Error()
+        event.error.code = .liveEnded
+
+        subject.update(from: .error(event))
+
+        XCTAssertTrue(subject.backstage)
+        XCTAssertNil(subject.endedAt)
+        XCTAssertNotNil(subject.session?.liveEndedAt)
+    }
+
+    func test_update_sfuErrorOtherCode_leavesBackstageFalse() {
+        let subject = CallState(.dummy())
+        var event = Stream_Video_Sfu_Event_Error()
+        event.error.code = .unspecified
+
+        subject.update(from: .error(event))
+
+        XCTAssertFalse(subject.backstage)
+    }
+
     func test_createResponse_delayedCreationEvent_keepsHydratedSession() {
         let subject = CallState(.dummy())
         let session = CallSessionResponse.dummy(id: "ring-session")

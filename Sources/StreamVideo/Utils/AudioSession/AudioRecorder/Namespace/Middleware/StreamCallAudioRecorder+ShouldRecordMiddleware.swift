@@ -33,6 +33,9 @@ extension StreamCallAudioRecorder.Namespace {
         
         /// Monitors combined conditions that control recording.
         private var aggregatedCancellable: AnyCancellable?
+        /// Bumps on every active-call change so a late update cannot
+        /// subscribe after hang-up.
+        private var callMonitoringGeneration = 0
 
         /// Sets up monitoring of the active call lifecycle.
         override init() {
@@ -62,7 +65,7 @@ extension StreamCallAudioRecorder.Namespace {
         ///   there is no active call.
         private func didUpdate(_ activeCall: Call?) async {
             if let activeCall {
-                aggregatedCancellable?.cancel()
+                guard let generation = await beginMonitoring(activeCall) else { return }
 
                 let audioOnPublisher = await activeCall
                     .state
@@ -70,6 +73,11 @@ extension StreamCallAudioRecorder.Namespace {
                     .map(\.audioOn)
                     .removeDuplicates()
                     .eraseToAnyPublisher()
+
+                // Hang-up can win while this read is in flight.
+                guard await stillMonitors(activeCall, generation: generation) else {
+                    return
+                }
 
                 let isAudioSessionActivePublisher = audioStore
                     .publisher(\.isActive)
@@ -88,13 +96,32 @@ extension StreamCallAudioRecorder.Namespace {
                     .debounce(for: .seconds(0.5), scheduler: DispatchQueue.main)
                     .sink { [weak self] in self?.dispatcher?.dispatch(.setShouldRecord($0)) }
             } else {
-                guard aggregatedCancellable != nil else {
-                    return
+                await MainActor.run {
+                    callMonitoringGeneration += 1
+                    aggregatedCancellable?.cancel()
+                    aggregatedCancellable = nil
                 }
-
-                aggregatedCancellable?.cancel()
-                aggregatedCancellable = nil
                 dispatcher?.dispatch(.setShouldRecord(false))
+            }
+        }
+
+        /// Starts a monitoring generation when `call` is still active.
+        private func beginMonitoring(_ call: Call) async -> Int? {
+            await MainActor.run {
+                guard StreamVideoProviderKey.currentValue?.state.activeCall?.cId == call.cId else {
+                    return nil
+                }
+                callMonitoringGeneration += 1
+                aggregatedCancellable?.cancel()
+                return callMonitoringGeneration
+            }
+        }
+
+        /// `true` when hang-up has not replaced this monitoring generation.
+        private func stillMonitors(_ call: Call, generation: Int) async -> Bool {
+            await MainActor.run {
+                generation == callMonitoringGeneration
+                    && StreamVideoProviderKey.currentValue?.state.activeCall?.cId == call.cId
             }
         }
     }

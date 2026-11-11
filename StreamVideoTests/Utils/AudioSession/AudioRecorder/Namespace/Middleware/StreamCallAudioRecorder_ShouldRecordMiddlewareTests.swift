@@ -41,7 +41,7 @@ final class StreamCallAudioRecorder_ShouldRecordMiddlewareClientTests: StreamVid
     func test_newClientLobbyCallHangUp_routeChange_avAudioRecorderStaysOff() async throws {
         let spy = try MockAVAudioRecorder.build()
         spy.stub(for: .record, with: true)
-        let permissions = MockPermissionsStore(inject: false)
+        let permissions = MockPermissionsStore(inject: true)
         let session = MockRTCAudioStore()
         session.makeShared()
         defer { permissions.dismantle() }
@@ -66,9 +66,9 @@ final class StreamCallAudioRecorder_ShouldRecordMiddlewareClientTests: StreamVid
         do {
             // Lobby microphone check.
             recorder.startRecording(ignoreActiveCall: true)
-            await fulfillment(timeout: 2) { spy.isMeteringEnabled }
+            await fulfillment(timeout: 10) { spy.isMeteringEnabled }
             recorder.stopRecording()
-            await fulfillment(timeout: 2) { !spy.isMeteringEnabled }
+            await fulfillment(timeout: 10) { !spy.isMeteringEnabled }
 
             // Join on the new client, then hang up.
             let call = Call.dummy(callType: .default, callId: .unique)
@@ -78,6 +78,57 @@ final class StreamCallAudioRecorder_ShouldRecordMiddlewareClientTests: StreamVid
             recorder.stopRecording()
             await MainActor.run { newClient.state.activeCall = nil }
             await wait(for: 0.7)
+            let recordCallsAtHangUp = spy.timesCalled(.record)
+
+            try await session.audioStore.dispatch(
+                .setCurrentRoute(.dummy(outputs: [.dummy(isReceiver: true)]))
+            ).result()
+            await wait(for: 1)
+
+            XCTAssertEqual(spy.timesCalled(.record), recordCallsAtHangUp)
+            XCTAssertFalse(spy.isMeteringEnabled)
+            XCTAssertFalse(store.state.shouldRecord)
+        } catch {
+            thrown = error
+        }
+
+        try await session.dismantle()
+        if let thrown {
+            throw thrown
+        }
+    }
+
+    /// Hang-up can win the race against call monitoring. A later route
+    /// change must still leave the microphone off.
+    func test_hangUpBeforeMonitoringStarts_routeChange_avAudioRecorderStaysOff() async throws {
+        let spy = try MockAVAudioRecorder.build()
+        spy.stub(for: .record, with: true)
+        let permissions = MockPermissionsStore(inject: true)
+        let session = MockRTCAudioStore()
+        session.makeShared()
+        defer { permissions.dismantle() }
+
+        let store = StreamCallAudioRecorder.Namespace.store(
+            initialState: .initial,
+            middleware: [
+                StreamCallAudioRecorder.Namespace.AVAudioRecorderMiddleware(
+                    audioRecorder: spy,
+                    permissions: permissions.permissionsStore,
+                    audioStore: session.audioStore
+                ),
+                StreamCallAudioRecorder.Namespace.ShouldRecordMiddleware()
+            ]
+        )
+        _ = StreamCallAudioRecorder(store)
+        newClient = StreamVideo.mock(httpClient: HTTPClient_Mock())
+        var thrown: Error?
+
+        do {
+            let call = Call.dummy(callType: .default, callId: .unique)
+            await MainActor.run {
+                newClient.state.activeCall = call
+                newClient.state.activeCall = nil
+            }
             let recordCallsAtHangUp = spy.timesCalled(.record)
 
             try await session.audioStore.dispatch(

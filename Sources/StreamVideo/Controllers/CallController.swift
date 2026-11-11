@@ -11,6 +11,7 @@ class CallController: @unchecked Sendable {
     private enum DisposableKey: String {
         case participantsCountUpdatesEvent
         case currentUserBlocked
+        case backstageSetting
     }
 
     private lazy var clientEventReporter: ClientEventReporting = ClientEventReporter(
@@ -49,6 +50,7 @@ class CallController: @unchecked Sendable {
         didSet {
             subscribeToParticipantsCountUpdatesEvent(call)
             subscribeToCurrentUserBlockedState(call)
+            subscribeToBackstageSetting(call)
             if let call {
                 Task(disposableBag: disposableBag) { @MainActor [weak self] in
                     guard let self else { return }
@@ -116,6 +118,7 @@ class CallController: @unchecked Sendable {
             await observeCallSettingsUpdates()
             await observeSpeakingWhileMutedUpdates()
             await observeOwnCapabilitiesUpdates()
+            await observeSFUEvents()
         }
     }
 
@@ -861,6 +864,28 @@ class CallController: @unchecked Sendable {
             .store(in: disposableBag, key: DisposableKey.participantsCountUpdatesEvent.rawValue)
     }
 
+    /// Copies `settings.backstage.enabled` onto the WebRTC state adapter.
+    /// A `join-backstage` user leaves on `liveEnded` when this is false.
+    private func subscribeToBackstageSetting(_ call: Call?) {
+        disposableBag.remove(DisposableKey.backstageSetting.rawValue)
+        guard let call else { return }
+        Task(disposableBag: disposableBag) { @MainActor [weak self] in
+            guard let self else { return }
+            call.state
+                .$settings
+                .sinkTask(storeIn: disposableBag) { [weak self] settings in
+                    let enabled = settings?.backstage.enabled == true
+                    await self?.webRTCCoordinator
+                        .stateAdapter
+                        .set(isBackstageEnabled: enabled)
+                }
+                .store(
+                    in: self.disposableBag,
+                    key: DisposableKey.backstageSetting.rawValue
+                )
+        }
+    }
+
     private func subscribeToCurrentUserBlockedState(_ call: Call?) {
         disposableBag.remove(DisposableKey.currentUserBlocked.rawValue)
         guard let call else { return }
@@ -930,6 +955,28 @@ class CallController: @unchecked Sendable {
             .log(.debug) { "Speaking while muted updated to \($0)" }
             .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in
                 self?.call?.state.isSpeakingWhileMuted = $0
+            }
+            .store(in: disposableBag)
+    }
+
+    /// Applies SFU events that change call state, such as `liveEnded`.
+    /// Rejoin and migration replace the adapter. `switchToLatest` follows
+    /// that instance. Refresh keeps the adapter and its event relay.
+    private func observeSFUEvents() async {
+        await webRTCCoordinator
+            .stateAdapter
+            .$sfuAdapter
+            .map { adapter in
+                adapter?.publisher
+                    ?? Empty<
+                        Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload,
+                        Never
+                    >()
+                    .eraseToAnyPublisher()
+            }
+            .switchToLatest()
+            .sinkTask(storeIn: disposableBag) { @MainActor [weak self] event in
+                self?.call?.state.update(from: event)
             }
             .store(in: disposableBag)
     }
