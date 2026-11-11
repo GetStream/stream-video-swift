@@ -24,25 +24,31 @@ public final class RawRecordingSettingsRequest: Sendable, Encodable, JSONEncodab
         }
     }
 
+    /// If true, only audio tracks will be recorded
+    public let audioOnly: Bool?
     /// Recording mode. One of: available, disabled, auto-on
     public let mode: RawRecordingSettingsRequestMode
 
-    public init(mode: RawRecordingSettingsRequestMode) {
+    public init(audioOnly: Bool? = nil, mode: RawRecordingSettingsRequestMode) {
+        self.audioOnly = audioOnly
         self.mode = mode
     }
 
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: StringCodingKey.self)
+        try container.encodeIfPresent(audioOnly, forKey: .audioOnly)
         try container.encode(mode, forKey: .mode)
     }
 }
 
 extension RawRecordingSettingsRequest: Hashable {
     public static func == (lhs: RawRecordingSettingsRequest, rhs: RawRecordingSettingsRequest) -> Bool {
-        lhs.mode == rhs.mode
+        lhs.audioOnly == rhs.audioOnly &&
+            lhs.mode == rhs.mode
     }
 
     public func hash(into hasher: inout Hasher) {
+        hasher.combine(audioOnly)
         hasher.combine(mode)
     }
 }

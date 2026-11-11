@@ -11,13 +11,21 @@ public final class CallTranscriptionReadyEvent: Sendable, Event, Decodable, WSCa
     /// CallTranscription represents a transcription of a call.
     public let callTranscription: CallTranscription
     public let createdAt: Date
+    public let egressId: String
     /// The type of event: "call.transcription_ready" in this case
     public let type: String
 
-    public init(callCid: String, callTranscription: CallTranscription, createdAt: Date, type: String = "call.transcription_ready") {
+    public init(
+        callCid: String,
+        callTranscription: CallTranscription,
+        createdAt: Date,
+        egressId: String,
+        type: String = "call.transcription_ready"
+    ) {
         self.callCid = callCid
         self.callTranscription = callTranscription
         self.createdAt = createdAt
+        self.egressId = egressId
         self.type = type
     }
 
@@ -26,6 +34,7 @@ public final class CallTranscriptionReadyEvent: Sendable, Event, Decodable, WSCa
         self.callCid = try container.decode(String.self, forKey: .callCid)
         self.callTranscription = try container.decode(CallTranscription.self, forKey: .callTranscription)
         self.createdAt = try container.decode(Date.self, forKey: .createdAt)
+        self.egressId = try container.decode(String.self, forKey: .egressId)
         self.type = try container.decode(String.self, forKey: .type)
     }
 }
@@ -35,6 +44,7 @@ extension CallTranscriptionReadyEvent: Hashable {
         lhs.callCid == rhs.callCid &&
             lhs.callTranscription == rhs.callTranscription &&
             lhs.createdAt == rhs.createdAt &&
+            lhs.egressId == rhs.egressId &&
             lhs.type == rhs.type
     }
 
@@ -42,6 +52,7 @@ extension CallTranscriptionReadyEvent: Hashable {
         hasher.combine(callCid)
         hasher.combine(callTranscription)
         hasher.combine(createdAt)
+        hasher.combine(egressId)
         hasher.combine(type)
     }
 }

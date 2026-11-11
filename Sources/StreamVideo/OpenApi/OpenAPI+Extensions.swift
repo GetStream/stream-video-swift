@@ -116,14 +116,55 @@ extension GoLiveRequest {
         startTranscription: Bool? = nil,
         transcriptionStorageName: String? = nil
     ) {
+        // The explicit nil arguments select the generated init. Without them,
+        // this init calls itself.
         self.init(
             recordingStorageName: recordingStorageName,
             startClosedCaption: startClosedCaption,
+            startCompositeRecording: nil,
             startHls: startHls,
+            startIndividualRecording: nil,
+            startRawRecording: nil,
             startRecording: startRecording,
             startTranscription: startTranscription,
             transcriptionStorageName: transcriptionStorageName
         )
+    }
+}
+
+extension IngressAudioEncodingOptionsRequest {
+    /// The API takes `channels` as a number.
+    @available(*, deprecated, message: "Use Int. It will be removed in the next major version.")
+    public enum IngressAudioEncodingOptionsRequestChannels: String, Sendable, Codable, CaseIterable {
+        case _1 = "1"
+        case _2 = "2"
+        case unknown = "_unknown"
+    }
+
+    /// Creates options from a deprecated channel count.
+    @available(*, deprecated, message: "Pass channels as Int. It will be removed in the next major version.")
+    public convenience init(
+        bitrate: Int,
+        channels: IngressAudioEncodingOptionsRequestChannels,
+        enableDtx: Bool? = nil
+    ) {
+        self.init(bitrate: bitrate, channels: Int(channels.rawValue) ?? 0, enableDtx: enableDtx)
+    }
+}
+
+extension IngressSourceRequest {
+    /// The API takes `fps` as a number.
+    @available(*, deprecated, message: "Use Int. It will be removed in the next major version.")
+    public enum IngressSourceRequestFps: String, Sendable, Codable, CaseIterable {
+        case _30 = "30"
+        case _60 = "60"
+        case unknown = "_unknown"
+    }
+
+    /// Creates a source from a deprecated frame rate.
+    @available(*, deprecated, message: "Pass fps as Int. It will be removed in the next major version.")
+    public convenience init(fps: IngressSourceRequestFps, height: Int, width: Int) {
+        self.init(fps: Int(fps.rawValue) ?? 0, height: height, width: width)
     }
 }
 
@@ -163,6 +204,8 @@ extension OwnUserResponse {
         teams: [String],
         updatedAt: Date
     ) {
+        // The explicit nil argument selects the generated init. Without it,
+        // overload ranking decides which init this calls.
         self.init(
             blockedUserIds: blockedUserIds,
             createdAt: createdAt,
@@ -175,6 +218,7 @@ extension OwnUserResponse {
             language: language,
             lastActive: lastActive,
             name: name,
+            pushPreferences: nil,
             role: role,
             teams: teams,
             updatedAt: updatedAt

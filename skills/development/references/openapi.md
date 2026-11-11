@@ -34,7 +34,7 @@ The pull request targets the branch the workflow ran on. Its title is `[Hygiene]
 | `codableModels` | Models that `DefaultAPI` both encodes and decodes. |
 | `decodableModels` | Models only in responses and events. They lose `Encodable` and `JSONEncodable`. |
 | `encodableModels` | Models only in request bodies. They lose `Decodable`. |
-| `removedProperties` | Model fields the SDK does not ship. Includes new backend fields until the SDK adopts them. |
+| `removedProperties` | Model fields the SDK does not ship: chat fields, including links to chat such as `channel_cid`, deprecated fields, and fields whose types only excluded endpoints use, such as the `call.stats_report_ready` payload. Remove an entry when the backend drops the field from the video client spec. Fields that are constant or unused today still ship. |
 | `retypedProperties` | Property types the SDK keeps although the spec changed them. Optional types get a `nil` init default. |
 | `removedEnumCases` | Enum cases the SDK does not ship. Keys are `Model` or `Model.NestedEnum`. |
 | `v2Endpoints` | Endpoints the SDK calls on their `/api/v2/video` path. The v1 spec lists them under `/video`. |
@@ -67,5 +67,9 @@ Breaking changes wait for a major version. Until then:
 3. Update test mocks and dummies, for example `StreamVideoTests/Mock/MockDefaultAPIEndpoints.swift`.
    Responses and events are not `Encodable`. Pass them as `PassthroughJSONDecoder.decodingData(for:)`,
    as `HTTPClient_Mock` and `JsonEventDecoder_Tests` do.
+   Hand-written code that rebuilds a model with its init must pass the new fields.
+   Optional fields compile without them and are silently dropped.
+   A deprecated convenience init in `OpenAPI+Extensions.swift` must pass the new fields to `self.init`.
+   Otherwise overload ranking can pick the convenience init itself, and it recurses.
 4. Build all schemes and run the tests. Required fields fail decoding when the server omits them or sends `null`.
 5. Follow the [changelog rule](../SKILL.md#changelog) for public changes.

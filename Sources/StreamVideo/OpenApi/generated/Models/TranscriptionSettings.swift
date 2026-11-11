@@ -91,15 +91,21 @@ public final class TranscriptionSettings: Sendable, Decodable {
     public let closedCaptionMode: TranscriptionSettingsClosedCaptionMode
     public let language: TranscriptionSettingsLanguage
     public let mode: TranscriptionSettingsMode
+    public let speechSegmentConfig: SpeechSegmentConfig?
+    public let translation: TranslationSettings?
 
     public init(
         closedCaptionMode: TranscriptionSettingsClosedCaptionMode,
         language: TranscriptionSettingsLanguage,
-        mode: TranscriptionSettingsMode
+        mode: TranscriptionSettingsMode,
+        speechSegmentConfig: SpeechSegmentConfig? = nil,
+        translation: TranslationSettings? = nil
     ) {
         self.closedCaptionMode = closedCaptionMode
         self.language = language
         self.mode = mode
+        self.speechSegmentConfig = speechSegmentConfig
+        self.translation = translation
     }
 
     public init(from decoder: Decoder) throws {
@@ -107,6 +113,8 @@ public final class TranscriptionSettings: Sendable, Decodable {
         self.closedCaptionMode = try container.decode(TranscriptionSettingsClosedCaptionMode.self, forKey: .closedCaptionMode)
         self.language = try container.decode(TranscriptionSettingsLanguage.self, forKey: .language)
         self.mode = try container.decode(TranscriptionSettingsMode.self, forKey: .mode)
+        self.speechSegmentConfig = try container.decodeIfPresent(SpeechSegmentConfig.self, forKey: .speechSegmentConfig)
+        self.translation = try container.decodeIfPresent(TranslationSettings.self, forKey: .translation)
     }
 }
 
@@ -114,12 +122,16 @@ extension TranscriptionSettings: Hashable {
     public static func == (lhs: TranscriptionSettings, rhs: TranscriptionSettings) -> Bool {
         lhs.closedCaptionMode == rhs.closedCaptionMode &&
             lhs.language == rhs.language &&
-            lhs.mode == rhs.mode
+            lhs.mode == rhs.mode &&
+            lhs.speechSegmentConfig == rhs.speechSegmentConfig &&
+            lhs.translation == rhs.translation
     }
 
     public func hash(into hasher: inout Hasher) {
         hasher.combine(closedCaptionMode)
         hasher.combine(language)
         hasher.combine(mode)
+        hasher.combine(speechSegmentConfig)
+        hasher.combine(translation)
     }
 }

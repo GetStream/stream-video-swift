@@ -11,14 +11,23 @@ public final class CallUserMutedEvent: Sendable, Event, Decodable, WSCallEvent {
     public let createdAt: Date
     public let fromUserId: String
     public let mutedUserIds: [String]
+    public let reason: String
     /// The type of event: "call.user_muted" in this case
     public let type: String
 
-    public init(callCid: String, createdAt: Date, fromUserId: String, mutedUserIds: [String], type: String = "call.user_muted") {
+    public init(
+        callCid: String,
+        createdAt: Date,
+        fromUserId: String,
+        mutedUserIds: [String],
+        reason: String,
+        type: String = "call.user_muted"
+    ) {
         self.callCid = callCid
         self.createdAt = createdAt
         self.fromUserId = fromUserId
         self.mutedUserIds = mutedUserIds
+        self.reason = reason
         self.type = type
     }
 
@@ -28,6 +37,7 @@ public final class CallUserMutedEvent: Sendable, Event, Decodable, WSCallEvent {
         self.createdAt = try container.decode(Date.self, forKey: .createdAt)
         self.fromUserId = try container.decode(String.self, forKey: .fromUserId)
         self.mutedUserIds = try container.decode([String].self, forKey: .mutedUserIds)
+        self.reason = try container.decode(String.self, forKey: .reason)
         self.type = try container.decode(String.self, forKey: .type)
     }
 }
@@ -38,6 +48,7 @@ extension CallUserMutedEvent: Hashable {
             lhs.createdAt == rhs.createdAt &&
             lhs.fromUserId == rhs.fromUserId &&
             lhs.mutedUserIds == rhs.mutedUserIds &&
+            lhs.reason == rhs.reason &&
             lhs.type == rhs.type
     }
 
@@ -46,6 +57,7 @@ extension CallUserMutedEvent: Hashable {
         hasher.combine(createdAt)
         hasher.combine(fromUserId)
         hasher.combine(mutedUserIds)
+        hasher.combine(reason)
         hasher.combine(type)
     }
 }

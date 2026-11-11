@@ -631,6 +631,7 @@ public class CallState: ObservableObject {
             geofencing: settings.geofencing,
             individualRecording: settings.individualRecording,
             ingress: settings.ingress,
+            lifecycle: settings.lifecycle,
             limits: settings.limits,
             rawRecording: settings.rawRecording,
             recording: settings.recording,
@@ -641,7 +642,9 @@ public class CallState: ObservableObject {
             transcription: TranscriptionSettings(
                 closedCaptionMode: transcription.closedCaptionMode,
                 language: transcriptionLanguage,
-                mode: transcription.mode
+                mode: transcription.mode,
+                speechSegmentConfig: transcription.speechSegmentConfig,
+                translation: transcription.translation
             ),
             video: settings.video
         )

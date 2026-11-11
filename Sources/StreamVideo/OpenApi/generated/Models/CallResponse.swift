@@ -28,6 +28,8 @@ public final class CallResponse: Sendable, Decodable {
     public let ingress: CallIngressResponse
     public let joinAheadTimeSeconds: Int?
     public let recording: Bool
+    /// 10-digit routing number for SIP routing
+    public let routingNumber: String?
     public let session: CallSessionResponse?
     public let settings: CallSettingsResponse
     /// Date/time when the call will start
@@ -35,6 +37,7 @@ public final class CallResponse: Sendable, Decodable {
     public let team: String?
     public let thumbnails: ThumbnailResponse?
     public let transcribing: Bool
+    public let translating: Bool
     /// The type of call
     public let type: String
     /// Date/time of the last update
@@ -55,12 +58,14 @@ public final class CallResponse: Sendable, Decodable {
         ingress: CallIngressResponse,
         joinAheadTimeSeconds: Int? = nil,
         recording: Bool,
+        routingNumber: String? = nil,
         session: CallSessionResponse? = nil,
         settings: CallSettingsResponse,
         startsAt: Date? = nil,
         team: String? = nil,
         thumbnails: ThumbnailResponse? = nil,
         transcribing: Bool,
+        translating: Bool,
         type: String,
         updatedAt: Date
     ) {
@@ -78,12 +83,14 @@ public final class CallResponse: Sendable, Decodable {
         self.ingress = ingress
         self.joinAheadTimeSeconds = joinAheadTimeSeconds
         self.recording = recording
+        self.routingNumber = routingNumber
         self.session = session
         self.settings = settings
         self.startsAt = startsAt
         self.team = team
         self.thumbnails = thumbnails
         self.transcribing = transcribing
+        self.translating = translating
         self.type = type
         self.updatedAt = updatedAt
     }
@@ -104,12 +111,14 @@ public final class CallResponse: Sendable, Decodable {
         self.ingress = try container.decode(CallIngressResponse.self, forKey: .ingress)
         self.joinAheadTimeSeconds = try container.decodeIfPresent(Int.self, forKey: .joinAheadTimeSeconds)
         self.recording = try container.decode(Bool.self, forKey: .recording)
+        self.routingNumber = try container.decodeIfPresent(String.self, forKey: .routingNumber)
         self.session = try container.decodeIfPresent(CallSessionResponse.self, forKey: .session)
         self.settings = try container.decode(CallSettingsResponse.self, forKey: .settings)
         self.startsAt = try container.decodeIfPresent(Date.self, forKey: .startsAt)
         self.team = try container.decodeIfPresent(String.self, forKey: .team)
         self.thumbnails = try container.decodeIfPresent(ThumbnailResponse.self, forKey: .thumbnails)
         self.transcribing = try container.decode(Bool.self, forKey: .transcribing)
+        self.translating = try container.decode(Bool.self, forKey: .translating)
         self.type = try container.decode(String.self, forKey: .type)
         self.updatedAt = try container.decode(Date.self, forKey: .updatedAt)
     }
@@ -131,12 +140,14 @@ extension CallResponse: Hashable {
             lhs.ingress == rhs.ingress &&
             lhs.joinAheadTimeSeconds == rhs.joinAheadTimeSeconds &&
             lhs.recording == rhs.recording &&
+            lhs.routingNumber == rhs.routingNumber &&
             lhs.session == rhs.session &&
             lhs.settings == rhs.settings &&
             lhs.startsAt == rhs.startsAt &&
             lhs.team == rhs.team &&
             lhs.thumbnails == rhs.thumbnails &&
             lhs.transcribing == rhs.transcribing &&
+            lhs.translating == rhs.translating &&
             lhs.type == rhs.type &&
             lhs.updatedAt == rhs.updatedAt
     }
@@ -156,12 +167,14 @@ extension CallResponse: Hashable {
         hasher.combine(ingress)
         hasher.combine(joinAheadTimeSeconds)
         hasher.combine(recording)
+        hasher.combine(routingNumber)
         hasher.combine(session)
         hasher.combine(settings)
         hasher.combine(startsAt)
         hasher.combine(team)
         hasher.combine(thumbnails)
         hasher.combine(transcribing)
+        hasher.combine(translating)
         hasher.combine(type)
         hasher.combine(updatedAt)
     }

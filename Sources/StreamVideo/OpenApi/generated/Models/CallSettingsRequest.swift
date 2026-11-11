@@ -14,6 +14,7 @@ public final class CallSettingsRequest: Sendable, Encodable, JSONEncodable {
     public let geofencing: GeofenceSettingsRequest?
     public let individualRecording: IndividualRecordingSettingsRequest?
     public let ingress: IngressSettingsRequest?
+    public let lifecycle: LifecycleSettingsRequest?
     public let limits: LimitsSettingsRequest?
     public let rawRecording: RawRecordingSettingsRequest?
     public let recording: RecordSettingsRequest?
@@ -33,6 +34,7 @@ public final class CallSettingsRequest: Sendable, Encodable, JSONEncodable {
         geofencing: GeofenceSettingsRequest? = nil,
         individualRecording: IndividualRecordingSettingsRequest? = nil,
         ingress: IngressSettingsRequest? = nil,
+        lifecycle: LifecycleSettingsRequest? = nil,
         limits: LimitsSettingsRequest? = nil,
         rawRecording: RawRecordingSettingsRequest? = nil,
         recording: RecordSettingsRequest? = nil,
@@ -51,6 +53,7 @@ public final class CallSettingsRequest: Sendable, Encodable, JSONEncodable {
         self.geofencing = geofencing
         self.individualRecording = individualRecording
         self.ingress = ingress
+        self.lifecycle = lifecycle
         self.limits = limits
         self.rawRecording = rawRecording
         self.recording = recording
@@ -72,6 +75,7 @@ public final class CallSettingsRequest: Sendable, Encodable, JSONEncodable {
         try container.encodeIfPresent(geofencing, forKey: .geofencing)
         try container.encodeIfPresent(individualRecording, forKey: .individualRecording)
         try container.encodeIfPresent(ingress, forKey: .ingress)
+        try container.encodeIfPresent(lifecycle, forKey: .lifecycle)
         try container.encodeIfPresent(limits, forKey: .limits)
         try container.encodeIfPresent(rawRecording, forKey: .rawRecording)
         try container.encodeIfPresent(recording, forKey: .recording)
@@ -94,6 +98,7 @@ extension CallSettingsRequest: Hashable {
             lhs.geofencing == rhs.geofencing &&
             lhs.individualRecording == rhs.individualRecording &&
             lhs.ingress == rhs.ingress &&
+            lhs.lifecycle == rhs.lifecycle &&
             lhs.limits == rhs.limits &&
             lhs.rawRecording == rhs.rawRecording &&
             lhs.recording == rhs.recording &&
@@ -114,6 +119,7 @@ extension CallSettingsRequest: Hashable {
         hasher.combine(geofencing)
         hasher.combine(individualRecording)
         hasher.combine(ingress)
+        hasher.combine(lifecycle)
         hasher.combine(limits)
         hasher.combine(rawRecording)
         hasher.combine(recording)

@@ -6,28 +6,11 @@ import Foundation
 import StreamCore
 
 public final class IngressSourceRequest: Sendable, Encodable, JSONEncodable {
-    
-    public enum IngressSourceRequestFps: String, Sendable, Codable, CaseIterable {
-        case _30 = "30"
-        case _60 = "60"
-        case unknown = "_unknown"
-
-        public init(from decoder: Decoder) throws {
-            let container = try decoder.singleValueContainer()
-            if let decodedValue = try? container.decode(String.self),
-               let value = Self(rawValue: decodedValue) {
-                self = value
-            } else {
-                self = .unknown
-            }
-        }
-    }
-
-    public let fps: IngressSourceRequestFps
+    public let fps: Int
     public let height: Int
     public let width: Int
 
-    public init(fps: IngressSourceRequestFps, height: Int, width: Int) {
+    public init(fps: Int, height: Int, width: Int) {
         self.fps = fps
         self.height = height
         self.width = width

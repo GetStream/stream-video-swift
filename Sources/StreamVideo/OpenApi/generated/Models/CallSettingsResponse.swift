@@ -16,6 +16,8 @@ public final class CallSettingsResponse: Sendable, Decodable {
     public let geofencing: GeofenceSettings
     public let individualRecording: IndividualRecordingSettingsResponse
     public let ingress: IngressSettingsResponse?
+    /// LifecycleSettings is the payload for call lifecycle settings
+    public let lifecycle: LifecycleSettingsResponse
     public let limits: LimitsSettingsResponse
     public let rawRecording: RawRecordingSettingsResponse
     /// RecordSettings is the payload for recording settings
@@ -36,6 +38,7 @@ public final class CallSettingsResponse: Sendable, Decodable {
         geofencing: GeofenceSettings,
         individualRecording: IndividualRecordingSettingsResponse,
         ingress: IngressSettingsResponse? = nil,
+        lifecycle: LifecycleSettingsResponse,
         limits: LimitsSettingsResponse,
         rawRecording: RawRecordingSettingsResponse,
         recording: RecordSettingsResponse,
@@ -54,6 +57,7 @@ public final class CallSettingsResponse: Sendable, Decodable {
         self.geofencing = geofencing
         self.individualRecording = individualRecording
         self.ingress = ingress
+        self.lifecycle = lifecycle
         self.limits = limits
         self.rawRecording = rawRecording
         self.recording = recording
@@ -75,6 +79,7 @@ public final class CallSettingsResponse: Sendable, Decodable {
         self.geofencing = try container.decode(GeofenceSettings.self, forKey: .geofencing)
         self.individualRecording = try container.decode(IndividualRecordingSettingsResponse.self, forKey: .individualRecording)
         self.ingress = try container.decodeIfPresent(IngressSettingsResponse.self, forKey: .ingress)
+        self.lifecycle = try container.decode(LifecycleSettingsResponse.self, forKey: .lifecycle)
         self.limits = try container.decode(LimitsSettingsResponse.self, forKey: .limits)
         self.rawRecording = try container.decode(RawRecordingSettingsResponse.self, forKey: .rawRecording)
         self.recording = try container.decode(RecordSettingsResponse.self, forKey: .recording)
@@ -97,6 +102,7 @@ extension CallSettingsResponse: Hashable {
             lhs.geofencing == rhs.geofencing &&
             lhs.individualRecording == rhs.individualRecording &&
             lhs.ingress == rhs.ingress &&
+            lhs.lifecycle == rhs.lifecycle &&
             lhs.limits == rhs.limits &&
             lhs.rawRecording == rhs.rawRecording &&
             lhs.recording == rhs.recording &&
@@ -117,6 +123,7 @@ extension CallSettingsResponse: Hashable {
         hasher.combine(geofencing)
         hasher.combine(individualRecording)
         hasher.combine(ingress)
+        hasher.combine(lifecycle)
         hasher.combine(limits)
         hasher.combine(rawRecording)
         hasher.combine(recording)

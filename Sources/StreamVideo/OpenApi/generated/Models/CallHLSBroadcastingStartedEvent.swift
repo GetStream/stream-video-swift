@@ -7,13 +7,22 @@ import StreamCore
 
 /// This event is sent when HLS broadcasting has started
 public final class CallHLSBroadcastingStartedEvent: Sendable, Event, Decodable, WSCallEvent {
+    /// Represents a call
+    public let call: CallResponse
     public let callCid: String
     public let createdAt: Date
     public let hlsPlaylistUrl: String
     /// The type of event: "call.hls_broadcasting_started" in this case
     public let type: String
 
-    public init(callCid: String, createdAt: Date, hlsPlaylistUrl: String, type: String = "call.hls_broadcasting_started") {
+    public init(
+        call: CallResponse,
+        callCid: String,
+        createdAt: Date,
+        hlsPlaylistUrl: String,
+        type: String = "call.hls_broadcasting_started"
+    ) {
+        self.call = call
         self.callCid = callCid
         self.createdAt = createdAt
         self.hlsPlaylistUrl = hlsPlaylistUrl
@@ -22,6 +31,7 @@ public final class CallHLSBroadcastingStartedEvent: Sendable, Event, Decodable, 
 
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: StringCodingKey.self)
+        self.call = try container.decode(CallResponse.self, forKey: .call)
         self.callCid = try container.decode(String.self, forKey: .callCid)
         self.createdAt = try container.decode(Date.self, forKey: .createdAt)
         self.hlsPlaylistUrl = try container.decode(String.self, forKey: .hlsPlaylistUrl)
@@ -31,13 +41,15 @@ public final class CallHLSBroadcastingStartedEvent: Sendable, Event, Decodable, 
 
 extension CallHLSBroadcastingStartedEvent: Hashable {
     public static func == (lhs: CallHLSBroadcastingStartedEvent, rhs: CallHLSBroadcastingStartedEvent) -> Bool {
-        lhs.callCid == rhs.callCid &&
+        lhs.call == rhs.call &&
+            lhs.callCid == rhs.callCid &&
             lhs.createdAt == rhs.createdAt &&
             lhs.hlsPlaylistUrl == rhs.hlsPlaylistUrl &&
             lhs.type == rhs.type
     }
 
     public func hash(into hasher: inout Hasher) {
+        hasher.combine(call)
         hasher.combine(callCid)
         hasher.combine(createdAt)
         hasher.combine(hlsPlaylistUrl)
