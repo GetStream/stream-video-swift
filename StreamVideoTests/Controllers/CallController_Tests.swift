@@ -234,12 +234,10 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         }
 
         await fulfillment {
-            self.mockWebRTCCoordinatorFactory
+            await self.mockWebRTCCoordinatorFactory
                 .mockCoordinatorStack
                 .coordinator
-                .stateMachine
-                .currentStage
-                .context
+                .stateAdapter
                 .isBackstageEnabled
         }
     }

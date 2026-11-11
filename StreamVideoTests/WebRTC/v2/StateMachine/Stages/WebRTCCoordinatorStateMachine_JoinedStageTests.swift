@@ -603,7 +603,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
     }
 
     func test_transition_callEndedLiveEndedWithJoinBackstage_remainsJoined() async {
-        subject.context.isBackstageEnabled = true
+        await mockCoordinatorStack.coordinator.stateAdapter.set(isBackstageEnabled: true)
         await mockCoordinatorStack.coordinator.stateAdapter.enqueueOwnCapabilities {
             [.joinBackstage]
         }
@@ -663,7 +663,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
     }
 
     func test_transition_callEndedLiveEndedWithJoinBackstageWhenDisabled_landsOnLeaving() async {
-        subject.context.isBackstageEnabled = false
+        await mockCoordinatorStack.coordinator.stateAdapter.set(isBackstageEnabled: false)
         await mockCoordinatorStack.coordinator.stateAdapter.enqueueOwnCapabilities {
             [.joinBackstage]
         }
@@ -684,7 +684,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
     }
 
     func test_transition_socketDisconnectsOnLiveEndedWithJoinBackstage_usesRejoinStrategy() async {
-        subject.context.isBackstageEnabled = true
+        await mockCoordinatorStack.coordinator.stateAdapter.set(isBackstageEnabled: true)
         await mockCoordinatorStack.coordinator.stateAdapter.enqueueOwnCapabilities {
             [.joinBackstage]
         }
@@ -710,7 +710,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
     }
 
     func test_transition_sfuErrorLiveEndedWithJoinBackstageAndUnspecified_remainsJoined() async {
-        subject.context.isBackstageEnabled = true
+        await mockCoordinatorStack.coordinator.stateAdapter.set(isBackstageEnabled: true)
         await mockCoordinatorStack.coordinator.stateAdapter.enqueueOwnCapabilities {
             [.joinBackstage]
         }
@@ -733,7 +733,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
     }
 
     func test_transition_sfuErrorLiveEndedWithJoinBackstageAndDisconnect_landsOnLeaving() async {
-        subject.context.isBackstageEnabled = true
+        await mockCoordinatorStack.coordinator.stateAdapter.set(isBackstageEnabled: true)
         await mockCoordinatorStack.coordinator.stateAdapter.enqueueOwnCapabilities {
             [.joinBackstage]
         }
@@ -755,7 +755,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
     }
 
     func test_transition_sfuErrorLiveEndedWithJoinBackstageWhenDisabled_landsOnLeaving() async {
-        subject.context.isBackstageEnabled = false
+        await mockCoordinatorStack.coordinator.stateAdapter.set(isBackstageEnabled: false)
         await mockCoordinatorStack.coordinator.stateAdapter.enqueueOwnCapabilities {
             [.joinBackstage]
         }
@@ -777,7 +777,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
     }
 
     func test_transition_sfuErrorLiveEndedWithJoinBackstageAndRejoin_landsOnDisconnected() async {
-        subject.context.isBackstageEnabled = true
+        await mockCoordinatorStack.coordinator.stateAdapter.set(isBackstageEnabled: true)
         await mockCoordinatorStack.coordinator.stateAdapter.enqueueOwnCapabilities {
             [.joinBackstage]
         }
@@ -801,7 +801,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
     }
 
     func test_transition_sfuErrorLiveEndedWithJoinBackstageAndFast_landsOnDisconnected() async {
-        subject.context.isBackstageEnabled = true
+        await mockCoordinatorStack.coordinator.stateAdapter.set(isBackstageEnabled: true)
         await mockCoordinatorStack.coordinator.stateAdapter.enqueueOwnCapabilities {
             [.joinBackstage]
         }

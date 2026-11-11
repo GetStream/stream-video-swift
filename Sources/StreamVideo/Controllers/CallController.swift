@@ -864,7 +864,7 @@ class CallController: @unchecked Sendable {
             .store(in: disposableBag, key: DisposableKey.participantsCountUpdatesEvent.rawValue)
     }
 
-    /// Copies `settings.backstage.enabled` onto the active WebRTC stage.
+    /// Copies `settings.backstage.enabled` onto the WebRTC state adapter.
     /// A `join-backstage` user leaves on `liveEnded` when this is false.
     private func subscribeToBackstageSetting(_ call: Call?) {
         disposableBag.remove(DisposableKey.backstageSetting.rawValue)
@@ -874,11 +874,13 @@ class CallController: @unchecked Sendable {
             call.state
                 .$settings
                 .sink { [weak self] settings in
-                    self?.webRTCCoordinator
-                        .stateMachine
-                        .currentStage
-                        .context
-                        .isBackstageEnabled = settings?.backstage.enabled == true
+                    guard let self else { return }
+                    let enabled = settings?.backstage.enabled == true
+                    Task { [weak self] in
+                        await self?.webRTCCoordinator
+                            .stateAdapter
+                            .set(isBackstageEnabled: enabled)
+                    }
                 }
                 .store(
                     in: self.disposableBag,

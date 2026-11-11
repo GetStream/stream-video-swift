@@ -295,13 +295,12 @@ extension WebRTCCoordinator.StateMachine.Stage {
         private func staysForLiveEnded(
             _ reason: Stream_Video_Sfu_Models_CallEndedReason
         ) async -> Bool {
-            guard reason == .liveEnded, context.isBackstageEnabled else {
+            let stateAdapter = context.coordinator?.stateAdapter
+            let backstageEnabled = await stateAdapter?.isBackstageEnabled ?? false
+            guard reason == .liveEnded, backstageEnabled else {
                 return false
             }
-            let capabilities = await context
-                .coordinator?
-                .stateAdapter
-                .ownCapabilities ?? []
+            let capabilities = await stateAdapter?.ownCapabilities ?? []
             return capabilities.contains(.joinBackstage)
         }
 
