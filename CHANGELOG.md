@@ -11,6 +11,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🐞 Fixed
 
+- Leave a livestream when the SFU reports that the live segment ended, unless the user can join backstage. A user who can join backstage follows the SFU reconnect strategy. [#1400](https://github.com/GetStream/stream-video-swift/pull/1400)
+- Mark the call as backstage when the SFU reports that the live segment ended. [#1400](https://github.com/GetStream/stream-video-swift/pull/1400)
+- Record `liveEndedAt` when the SFU reports that the live segment ended. [#1400](https://github.com/GetStream/stream-video-swift/pull/1400)
+- Leave a livestream when backstage is disabled, even if the user can join backstage. [#1400](https://github.com/GetStream/stream-video-swift/pull/1400)
 - Apply and clear a video background after reconnection. The rebuilt publisher uses the capture session that stayed open. [#1402](https://github.com/GetStream/stream-video-swift/pull/1402)
 - Apply the loudspeaker when call settings request it, after an idle route already reported Speaker. [#1395](https://github.com/GetStream/stream-video-swift/pull/1395)
 
