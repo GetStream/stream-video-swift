@@ -544,6 +544,127 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         XCTAssertEqual(request.e2ee, true)
     }
 
+    // MARK: - joinCall (HLS grant)
+
+    func test_joinCall_hlsGrant_returnsTheGrantAndEntersHLSPlayback() async throws {
+        let grant = JoinCallResponse.dummyHLSGrant()
+        let (subject, stack) = makeHLSJoinSubject(response: grant)
+
+        let response = try await subject.joinCall(callSettings: nil, source: .inApp)
+
+        XCTAssertEqual(response, grant)
+        XCTAssertEqual(stack.coordinator.stateMachine.currentStage.id, .hlsPlayback)
+    }
+
+    func test_joinCall_hlsGrant_doesNotConnectToSFUOrStartMedia() async throws {
+        let (subject, stack) = makeHLSJoinSubject(response: .dummyHLSGrant())
+
+        _ = try await subject.joinCall(callSettings: nil, source: .inApp)
+
+        let stateAdapter = stack.coordinator.stateAdapter
+        let sfuAdapter = await stateAdapter.sfuAdapter
+        let publisher = await stateAdapter.publisher
+        let subscriber = await stateAdapter.subscriber
+        let statsAdapter = await stateAdapter.statsAdapter
+        let didActivateAudioSession = await stateAdapter.audioSession.didPerformActivation
+        XCTAssertNil(sfuAdapter)
+        XCTAssertNil(publisher)
+        XCTAssertNil(subscriber)
+        XCTAssertNil(statsAdapter)
+        XCTAssertFalse(didActivateAudioSession)
+    }
+
+    func test_leave_afterHLSJoin_leavesAudioSessionOwnershipUntouched() async throws {
+        let mockAudioStore = MockRTCAudioStore()
+        mockAudioStore.makeShared()
+        addTeardownBlock { try await mockAudioStore.dismantle() }
+        try await mockAudioStore.audioStore
+            .dispatch(.setActiveSessionIdentifier("other-call"))
+            .result()
+        let (subject, stack) = makeHLSJoinSubject(response: .dummyHLSGrant())
+        _ = try await subject.joinCall(callSettings: nil, source: .inApp)
+
+        stack.coordinator.leave(reason: nil)
+        await fulfillment { stack.coordinator.stateMachine.currentStage.id == .idle }
+
+        let state = mockAudioStore.audioStore.state
+        XCTAssertEqual(state.activeSessionIdentifier, "other-call")
+        XCTAssertFalse(state.isActive)
+    }
+
+    func test_joinCall_hlsGrant_reachesTheCallStateWithAudioAndVideoOff() async throws {
+        let (subject, _) = makeHLSJoinSubject(
+            response: .dummyHLSGrant(ownCapabilities: [.sendAudio, .sendVideo])
+        )
+        let call = Call.dummy(callController: subject)
+
+        _ = try await subject.joinCall(callSettings: nil, source: .inApp)
+
+        await fulfilmentInMainActor {
+            !call.state.callSettings.audioOn && !call.state.callSettings.videoOn
+        }
+    }
+
+    func test_joinCall_afterAFailedFirstAttempt_declaresPlaybackCapabilitiesAgain() async throws {
+        let stack = mockWebRTCCoordinatorFactory.mockCoordinatorStack
+        let authenticator = stack.webRTCAuthenticator
+        authenticator.stub(
+            for: .authenticate,
+            with: Result<(SFUAdapter, JoinCallResponse), Error>
+                .failure(ClientError("auth failed"))
+        )
+
+        for _ in 0..<2 {
+            stack.coordinator.stateMachine.currentStage.context.authenticator = authenticator
+            _ = try? await subject.joinCall(callSettings: nil, source: .inApp)
+            await fulfillment { stack.coordinator.stateMachine.currentStage.id == .idle }
+        }
+
+        XCTAssertEqual(authenticator.declaredPlaybackCapabilities, [true, true])
+    }
+
+    func test_joinCall_hlsGrantWithUnknownType_throwsClientError() async throws {
+        let (subject, _) = makeHLSJoinSubject(
+            response: .dummyHLSGrant(playback: .dummy(type: .unknown))
+        )
+
+        do {
+            _ = try await subject.joinCall(callSettings: nil, source: .inApp)
+            XCTFail("Expected the join to fail.")
+        } catch {
+            XCTAssertTrue(error is ClientError)
+            XCTAssertTrue(error.localizedDescription.contains("playback type"))
+        }
+    }
+
+    @MainActor
+    func test_hlsPlaybackStage_participantCountsEvent_updatesParticipantCount() async throws {
+        let call = Call.dummy(callController: subject)
+        subject.observeWebRTCStateUpdated()
+        mockWebRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .coordinator
+            .stateMachine
+            .transition(MockTestOnlyStage(id: .hlsPlayback, context: .init()))
+        await drainMainQueue()
+
+        await call.onEvent(
+            .coordinatorEvent(
+                .typeCallSessionParticipantCountsUpdatedEvent(
+                    .init(
+                        anonymousParticipantCount: 0,
+                        callCid: call.cId,
+                        createdAt: .init(),
+                        participantsCountByRole: ["user": 5, "admin": 2],
+                        sessionId: call.state.sessionId
+                    )
+                )
+            )
+        )
+
+        await fulfilmentInMainActor { call.state.participantCount == 7 }
+    }
+
     func test_authenticateCall_declaringPlaybackCapabilities_setsJoinRequestPlaybackCapabilities() async throws {
         let request = try await joinRequest(declaresPlaybackCapabilities: true)
 
@@ -1661,6 +1782,39 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
                 for: .joinCall
             )?.first?.2
         )
+    }
+
+    /// Waits until the main queue ran the work queued before this call.
+    private func drainMainQueue() async {
+        await withCheckedContinuation { continuation in
+            DispatchQueue.main.async { continuation.resume() }
+        }
+    }
+
+    /// Builds a controller whose join API returns `response`. Its coordinator
+    /// uses the real authenticator, so the response decides the playback route.
+    private func makeHLSJoinSubject(
+        response: JoinCallResponse
+    ) -> (CallController, MockWebRTCCoordinatorStack) {
+        let defaultAPI = MockDefaultAPIEndpoints()
+        defaultAPI.stub(for: .joinCall, with: response)
+        let webRTCCoordinatorFactory = MockWebRTCCoordinatorFactory(
+            videoConfig: Self.videoConfig
+        )
+        let subject = CallController(
+            defaultAPI: defaultAPI,
+            user: user,
+            callId: callId,
+            callType: callType,
+            apiKey: apiKey,
+            videoConfig: Self.videoConfig,
+            initialCallSettings: initialCallSettings,
+            cachedLocation: cachedLocation,
+            webRTCCoordinatorFactory: webRTCCoordinatorFactory
+        )
+        let stack = webRTCCoordinatorFactory.mockCoordinatorStack
+        stack.coordinator.stateMachine.currentStage.context.authenticator = WebRTCAuthenticator()
+        return (subject, stack)
     }
 
     private func makeSubjectWithMockAPI() -> (

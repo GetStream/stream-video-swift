@@ -818,6 +818,11 @@ class CallController: @unchecked Sendable {
             call?.update(reconnectionStatus: .migrating)
         case .leaving:
             call?.leave()
+        case .hlsPlayback:
+            /// HLS has no SFU health check, so coordinator count events stay
+            /// the source of `participantCount`. It has no reconnection
+            /// either, so the status stays `.connected`.
+            break
         case .joined:
             /// Once connected we should stop listening for CallSessionParticipantCountsUpdatedEvent
             /// updates and only rely on the healthCheck event.

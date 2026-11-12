@@ -192,7 +192,8 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
                 create: Bool,
                 ring: Bool,
                 notify: Bool,
-                options: CreateCallOptions?
+                options: CreateCallOptions?,
+                declaresPlaybackCapabilities: Bool
             ).self
             let input = try XCTUnwrap(
                 mockCoordinatorStack?.webRTCAuthenticator.recordedInputPayload(
@@ -234,7 +235,8 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
                 create: Bool,
                 ring: Bool,
                 notify: Bool,
-                options: CreateCallOptions?
+                options: CreateCallOptions?,
+                declaresPlaybackCapabilities: Bool
             ).self
             let input = try XCTUnwrap(
                 mockCoordinatorStack?.webRTCAuthenticator.recordedInputPayload(
@@ -289,6 +291,32 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
                 mockCoordinatorStack?.webRTCAuthenticator.declaredPlaybackCapabilities,
                 [false]
             )
+        }
+    }
+
+    func test_transition_fromIdleHLSGrant_transitionsToHLSPlaybackWithoutConnectingToSFU() async throws {
+        let response = JoinCallResponse.dummyHLSGrant()
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.authenticator = mockCoordinatorStack.webRTCAuthenticator
+        mockCoordinatorStack.webRTCAuthenticator.stub(
+            for: .authenticate,
+            with: Result<(SFUAdapter?, JoinCallResponse), Error>.success((nil, response))
+        )
+
+        try await assertTransition(
+            from: .idle,
+            expectedTarget: .hlsPlayback,
+            subject: subject
+        ) { [mockCoordinatorStack] target in
+            XCTAssertEqual(target.context.initialJoinCallResponse, response)
+            XCTAssertNil(target.context.sfuFullObserver)
+            XCTAssertEqual(target.context.currentSFU, "")
+            XCTAssertEqual(
+                mockCoordinatorStack?.webRTCAuthenticator.timesCalled(.waitForAuthentication),
+                0
+            )
+            let sfuAdapter = await mockCoordinatorStack?.coordinator.stateAdapter.sfuAdapter
+            XCTAssertNil(sfuAdapter)
         }
     }
 
@@ -478,7 +506,8 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
                 create: Bool,
                 ring: Bool,
                 notify: Bool,
-                options: CreateCallOptions?
+                options: CreateCallOptions?,
+                declaresPlaybackCapabilities: Bool
             ).self
             let input = try XCTUnwrap(
                 mockCoordinatorStack?.webRTCAuthenticator.recordedInputPayload(
@@ -523,7 +552,8 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
                 create: Bool,
                 ring: Bool,
                 notify: Bool,
-                options: CreateCallOptions?
+                options: CreateCallOptions?,
+                declaresPlaybackCapabilities: Bool
             ).self
             let input = try XCTUnwrap(
                 mockCoordinatorStack?.webRTCAuthenticator.recordedInputPayload(

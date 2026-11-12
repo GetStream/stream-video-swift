@@ -53,12 +53,14 @@ extension WebRTCCoordinator.StateMachine.Stage {
         ///   occurring.
         /// - Returns: This `LeavingStage` instance if the transition is valid,
         ///   otherwise `nil`.
-        /// - Note: Valid transition from: `.joined`, `.disconnected`
+        /// - Note: Valid transition from: `.joined`, `.disconnected`,
+        ///   `.connecting`, `.connected`, `.joining`,
+        ///   `.peerConnectionPreparing`, `.hlsPlayback`
         override func transition(
             from previousStage: WebRTCCoordinator.StateMachine.Stage
         ) -> Self? {
             switch previousStage.id {
-            case .joined, .disconnected, .connecting, .connected, .joining, .peerConnectionPreparing:
+            case .joined, .disconnected, .connecting, .connected, .joining, .peerConnectionPreparing, .hlsPlayback:
                 execute()
                 return self
             default:
