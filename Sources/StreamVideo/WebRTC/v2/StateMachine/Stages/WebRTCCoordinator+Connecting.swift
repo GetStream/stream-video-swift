@@ -236,6 +236,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     /// nothing to connect to, so the flow ends in the HLS
                     /// playback stage.
                     guard let sfuAdapter = grantedSFUAdapter else {
+                        try await configureHLSAudioSession(on: coordinator)
+                        try Task.checkCancellation()
                         transitionOrError(.hlsPlayback(context))
                         return
                     }
@@ -310,6 +312,25 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         transitionErrorOrLog(error)
                     }
                 }
+            }
+        }
+
+        /// Configures the audio session for playback before the join is
+        /// reported, so CallKit activates the playback configuration.
+        ///
+        /// A failure is logged and does not fail the join: the video still
+        /// plays, with the session configuration of the app.
+        private func configureHLSAudioSession(
+            on coordinator: WebRTCCoordinator
+        ) async throws {
+            do {
+                try await coordinator
+                    .stateAdapter
+                    .configureHLSAudioSession(source: context.joinSource)
+            } catch is CancellationError {
+                throw CancellationError()
+            } catch {
+                log.error(error, subsystems: .audioSession)
             }
         }
     }

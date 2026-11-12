@@ -296,6 +296,7 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
 
     func test_transition_fromIdleHLSGrant_transitionsToHLSPlaybackWithoutConnectingToSFU() async throws {
         let response = JoinCallResponse.dummyHLSGrant()
+        _ = prepareAudioStore()
         subject.context.coordinator = mockCoordinatorStack.coordinator
         subject.context.authenticator = mockCoordinatorStack.webRTCAuthenticator
         mockCoordinatorStack.webRTCAuthenticator.stub(
@@ -317,6 +318,76 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
             )
             let sfuAdapter = await mockCoordinatorStack?.coordinator.stateAdapter.sfuAdapter
             XCTAssertNil(sfuAdapter)
+        }
+    }
+
+    func test_transition_fromIdleHLSGrant_configuresTheHLSAudioSession() async throws {
+        let mockAudioStore = prepareAudioStore()
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.authenticator = mockCoordinatorStack.webRTCAuthenticator
+        mockCoordinatorStack.webRTCAuthenticator.stub(
+            for: .authenticate,
+            with: Result<(SFUAdapter?, JoinCallResponse), Error>
+                .success((nil, .dummyHLSGrant()))
+        )
+
+        try await assertTransition(
+            from: .idle,
+            expectedTarget: .hlsPlayback,
+            subject: subject
+        ) { [mockCoordinatorStack] _ in
+            let identifier = await mockCoordinatorStack?.coordinator.stateAdapter.hlsAudioSession.identifier
+            let state = mockAudioStore.audioStore.state
+            XCTAssertEqual(state.audioSessionConfiguration.category, .playback)
+            XCTAssertEqual(state.activeSessionIdentifier, identifier)
+        }
+    }
+
+    func test_transition_fromIdleHLSGrant_callKitSource_doesNotConfigureTheHLSAudioSession() async throws {
+        let mockAudioStore = prepareAudioStore()
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.authenticator = mockCoordinatorStack.webRTCAuthenticator
+        subject.context.joinSource = .callKit(.init {})
+        mockCoordinatorStack.webRTCAuthenticator.stub(
+            for: .authenticate,
+            with: Result<(SFUAdapter?, JoinCallResponse), Error>
+                .success((nil, .dummyHLSGrant()))
+        )
+
+        try await assertTransition(
+            from: .idle,
+            expectedTarget: .hlsPlayback,
+            subject: subject
+        ) { _ in
+            let state = mockAudioStore.audioStore.state
+            XCTAssertEqual(state.activeSessionIdentifier, "")
+            XCTAssertNotEqual(state.audioSessionConfiguration.category, .playback)
+        }
+    }
+
+    func test_transition_fromIdleSFUGrant_doesNotConfigureTheHLSAudioSession() async throws {
+        let mockAudioStore = prepareAudioStore()
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.authenticator = mockCoordinatorStack.webRTCAuthenticator
+        mockCoordinatorStack.webRTCAuthenticator.stub(
+            for: .authenticate,
+            with: Result<(SFUAdapter, JoinCallResponse), Error>
+                .success((mockCoordinatorStack.sfuStack.adapter, .dummy()))
+        )
+        mockCoordinatorStack.webRTCAuthenticator.stub(
+            for: .waitForAuthentication,
+            with: Result<Void, Error>.success(())
+        )
+
+        try await assertTransition(
+            from: .idle,
+            expectedTarget: .connected,
+            subject: subject
+        ) { [mockCoordinatorStack] _ in
+            let identifier = await mockCoordinatorStack?.coordinator.stateAdapter.hlsAudioSession.identifier
+            let state = mockAudioStore.audioStore.state
+            XCTAssertNotEqual(state.audioSessionConfiguration.category, .playback)
+            XCTAssertNotEqual(state.activeSessionIdentifier, identifier)
         }
     }
 
@@ -649,6 +720,17 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
     }
 
     // MARK: - Private helpers
+
+    /// Replaces the shared audio store for the test and restores it after.
+    private func prepareAudioStore() -> MockRTCAudioStore {
+        let mockAudioStore = MockRTCAudioStore()
+        mockAudioStore.makeShared()
+        addTeardownBlock {
+            await self.mockCoordinatorStack.coordinator.stateAdapter.cleanUp()
+            try await mockAudioStore.dismantle()
+        }
+        return mockAudioStore
+    }
 
     private func assertTransition(
         from: WebRTCCoordinator.StateMachine.Stage.ID,

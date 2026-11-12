@@ -6,6 +6,20 @@ import AVFoundation
 import Combine
 import Foundation
 
+extension RTCAudioStore.StoreAction {
+
+    /// The configuration that makes the audio session valid for a call.
+    /// `CallAudioSession` applies it while the store is unowned, and
+    /// `HLSAudioSession` restores it when it releases the store.
+    static let callBootstrapConfiguration: Self = .avAudioSession(
+        .setCategoryAndModeAndCategoryOptions(
+            .playAndRecord,
+            mode: .voiceChat,
+            categoryOptions: [.allowBluetoothHFP, .allowBluetoothA2DP]
+        )
+    )
+}
+
 /// `CallAudioSession` manages the audio session for calls, handling configuration,
 /// activation, and deactivation.
 final class CallAudioSession: @unchecked Sendable {
@@ -87,13 +101,7 @@ final class CallAudioSession: @unchecked Sendable {
         audioStore.dispatch(
             .conditioned(
                 .activeSessionIdentifier(""),
-                action: .avAudioSession(
-                    .setCategoryAndModeAndCategoryOptions(
-                        .playAndRecord,
-                        mode: .voiceChat,
-                        categoryOptions: [.allowBluetoothHFP, .allowBluetoothA2DP]
-                    )
-                )
+                action: .callBootstrapConfiguration
             )
         )
     }
