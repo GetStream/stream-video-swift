@@ -12,6 +12,7 @@ class CallController: @unchecked Sendable {
         case participantsCountUpdatesEvent
         case currentUserBlocked
         case backstageSetting
+        case hlsCallEnded
     }
 
     private lazy var clientEventReporter: ClientEventReporting = ClientEventReporter(
@@ -821,6 +822,10 @@ class CallController: @unchecked Sendable {
     private func webRTCClientDidUpdateStage(
         _ stage: WebRTCCoordinator.StateMachine.Stage
     ) {
+        if stage.id != .hlsPlayback {
+            disposableBag.remove(DisposableKey.hlsCallEnded.rawValue)
+        }
+
         switch stage.id {
         case .idle:
             resetPlaybackType(of: call)
@@ -835,7 +840,7 @@ class CallController: @unchecked Sendable {
             /// HLS has no SFU health check, so coordinator count events stay
             /// the source of `participantCount`. It has no reconnection
             /// either, so the status stays `.connected`.
-            break
+            subscribeToHLSCallEndedEvent(call)
         case .joined:
             /// Once connected we should stop listening for CallSessionParticipantCountsUpdatedEvent
             /// updates and only rely on the healthCheck event.
@@ -856,6 +861,25 @@ class CallController: @unchecked Sendable {
         default:
             break
         }
+    }
+
+    /// Leaves when the coordinator ends the call. In HLS there is no SFU, so
+    /// the SFU `CallEnded` event that ends a WebRTC call never arrives.
+    /// The event has no counterpart of `liveEnded`, so it always leaves.
+    private func subscribeToHLSCallEndedEvent(_ call: Call?) {
+        disposableBag.remove(DisposableKey.hlsCallEnded.rawValue)
+
+        guard let call else { return }
+
+        call
+            .eventPublisher(for: CallEndedEvent.self)
+            .sink { [weak call] _ in
+                call?.leave(
+                    initiator: .remoteEvent,
+                    reason: Call.LeaveReason.callEnded.rawValue
+                )
+            }
+            .store(in: disposableBag, key: DisposableKey.hlsCallEnded.rawValue)
     }
 
     private func subscribeToParticipantsCountUpdatesEvent(_ call: Call?) {
