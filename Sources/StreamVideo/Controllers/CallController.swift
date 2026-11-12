@@ -14,6 +14,7 @@ class CallController: @unchecked Sendable {
         case backstageSetting
         case hlsCallEnded
         case hlsBackstage
+        case hlsAudioOwnership
     }
 
     private lazy var clientEventReporter: ClientEventReporting = ClientEventReporter(
@@ -827,6 +828,7 @@ class CallController: @unchecked Sendable {
         if stage.id != .hlsPlayback {
             disposableBag.remove(DisposableKey.hlsCallEnded.rawValue)
             disposableBag.remove(DisposableKey.hlsBackstage.rawValue)
+            disposableBag.remove(DisposableKey.hlsAudioOwnership.rawValue)
         }
 
         switch stage.id {
@@ -846,6 +848,7 @@ class CallController: @unchecked Sendable {
             let hlsStage = stage as? WebRTCCoordinator.StateMachine.Stage.HLSPlaybackStage
             subscribeToHLSCallEndedEvent(call, joinEndedAt: hlsStage?.joinEndedAt)
             subscribeToHLSBackstage(call)
+            subscribeToHLSAudioOwnershipLoss(call)
         case .joined:
             /// Once connected we should stop listening for CallSessionParticipantCountsUpdatedEvent
             /// updates and only rely on the healthCheck event.
@@ -929,6 +932,32 @@ class CallController: @unchecked Sendable {
                     )
                 }
                 .store(in: disposableBag, key: DisposableKey.hlsBackstage.rawValue)
+        }
+    }
+
+    /// Leaves when another call takes the audio store from the HLS session.
+    /// A call that becomes the active call also replaces this one, but only
+    /// once its join completes. It takes the store earlier.
+    private func subscribeToHLSAudioOwnershipLoss(_ call: Call?) {
+        guard let call else { return }
+
+        Task(disposableBag: disposableBag) { [weak self, weak call] in
+            guard let self else { return }
+            let ownershipLost = await webRTCCoordinator.stateAdapter.hlsAudioSession.ownershipLost
+            // The stage can end while the session is being read.
+            guard webRTCCoordinator.stateMachine.currentStage.id == .hlsPlayback else {
+                return
+            }
+            ownershipLost
+                .filter { $0 }
+                .first()
+                .sink { _ in
+                    call?.leave(
+                        initiator: .unknown,
+                        reason: Call.LeaveReason.activeCallReplaced.rawValue
+                    )
+                }
+                .store(in: disposableBag, key: DisposableKey.hlsAudioOwnership.rawValue)
         }
     }
 

@@ -3,6 +3,7 @@
 //
 
 import AVFoundation
+import Combine
 import Foundation
 
 /// Owns the shared audio session while a call plays HLS.
@@ -22,12 +23,20 @@ actor HLSAudioSession {
         UUID().uuidString.replacingOccurrences(of: "-", with: "").prefix(8)
     )
 
+    /// Becomes `true` when another session takes the shared audio state
+    /// from this one, and replays its value to late subscribers.
+    nonisolated var ownershipLost: AnyPublisher<Bool, Never> {
+        ownershipLostSubject.eraseToAnyPublisher()
+    }
+
+    private nonisolated let ownershipLostSubject = CurrentValueSubject<Bool, Never>(false)
     private let dispatchOverride: Dispatch?
 
     /// Whether this session claimed the shared audio state and has not yet
     /// released it. Set before the first await, so a release that runs while
     /// the activation is in flight still undoes it.
     private var isActive = false
+    private var ownershipObserver: AnyCancellable?
 
     /// - Parameter dispatch: Sends the actions to the audio store. Pass a
     ///   replacement to observe or fail the dispatches.
@@ -41,6 +50,7 @@ actor HLSAudioSession {
         try Task.checkCancellation()
         guard !isActive else { return }
         isActive = true
+        ownershipLostSubject.send(false)
 
         // The claim applies only to an unowned store, so an active call keeps
         // its session. The rest applies only while this session owns it.
@@ -71,6 +81,7 @@ actor HLSAudioSession {
             await deactivate()
             throw error
         }
+        observeOwnership()
     }
 
     /// Releases the session. A call without a matching activation is a no-op.
@@ -82,6 +93,7 @@ actor HLSAudioSession {
     func deactivate() async {
         guard isActive else { return }
         isActive = false
+        ownershipObserver = nil
 
         await attempt(.conditioned(owned, action: .setActive(false)))
         // A call created while HLS played has no bootstrap of its own left to
@@ -91,6 +103,28 @@ actor HLSAudioSession {
     }
 
     // MARK: - Private Helpers
+
+    /// Reports the loss when another session takes the store. Only a session
+    /// that holds the store can lose it: after a failed claim, another call
+    /// keeps the store and there is nothing to lose.
+    private func observeOwnership() {
+        guard
+            isActive,
+            audioStore.state.activeSessionIdentifier == identifier
+        else {
+            return
+        }
+        let identifier = identifier
+        let subject = ownershipLostSubject
+        ownershipObserver = audioStore
+            .publisher(\.activeSessionIdentifier)
+            .removeDuplicates()
+            .sink { current in
+                if !current.isEmpty, current != identifier {
+                    subject.send(true)
+                }
+            }
+    }
 
     private var owned: RTCAudioStore.Namespace.Action.Condition {
         .activeSessionIdentifier(identifier)

@@ -230,6 +230,19 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
         XCTAssertNil(subject.state.ringingCall)
     }
 
+    @MainActor
+    func test_streamVideo_activeCallReplacement_hlsCall_leavesAndReturnsToWebRTC() async throws {
+        let subject = StreamVideo.mock(httpClient: HTTPClient_Mock())
+        self.streamVideo = subject
+        let hlsCall = subject.call(callType: callType, callId: String(String.unique.prefix(10)))
+        hlsCall.state.playbackType = .hls(try XCTUnwrap(URL(string: "https://example.com/live.m3u8")))
+        subject.state.activeCall = hlsCall
+
+        subject.state.activeCall = subject.call(callType: callType, callId: callId)
+
+        await fulfilmentInMainActor { hlsCall.state.playbackType == .webRTC }
+    }
+
     func test_streamVideo_ringCallAccept() async throws {
         let httpClient = httpClientWithGetCallResponse()
         let streamVideo = StreamVideo.mock(httpClient: httpClient)

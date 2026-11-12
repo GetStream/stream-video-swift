@@ -117,6 +117,84 @@ final class HLSAudioSession_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertFalse(state.isActive)
     }
 
+    // MARK: - ownershipLost
+
+    func test_ownershipLost_anotherSessionClaimsTheStore_becomesTrue() async throws {
+        try await subject.activate()
+
+        mockAudioStore.audioStore.dispatch(.setActiveSessionIdentifier(.unique))
+
+        let lost = try await subject.ownershipLost
+            .filter { $0 }
+            .nextValue(timeout: defaultTimeout)
+        XCTAssertTrue(lost)
+    }
+
+    func test_ownershipLost_ownRelease_staysFalse() async throws {
+        try await subject.activate()
+
+        await subject.deactivate()
+        await fulfillment { self.state.activeSessionIdentifier == "" }
+
+        let lost = try await subject.ownershipLost.nextValue(timeout: defaultTimeout)
+        XCTAssertFalse(lost)
+    }
+
+    func test_ownershipLost_neverActivated_staysFalse() async throws {
+        mockAudioStore.audioStore.dispatch(.setActiveSessionIdentifier(.unique))
+        await fulfillment { self.state.activeSessionIdentifier != "" }
+
+        let lost = try await subject.ownershipLost.nextValue(timeout: defaultTimeout)
+
+        XCTAssertFalse(lost)
+    }
+
+    func test_ownershipLost_anotherSessionOwnedTheStoreAtActivation_staysFalse() async throws {
+        mockAudioStore.audioStore.dispatch(.setActiveSessionIdentifier(.unique))
+        await fulfillment { self.state.activeSessionIdentifier != "" }
+        try await subject.activate()
+
+        mockAudioStore.audioStore.dispatch(.setActiveSessionIdentifier(.unique))
+        await fulfillment { self.state.activeSessionIdentifier != "" }
+
+        let lost = try await subject.ownershipLost.nextValue(timeout: defaultTimeout)
+        XCTAssertFalse(lost)
+    }
+
+    func test_ownershipLost_afterTheLoss_replaysToLateSubscribers() async throws {
+        try await subject.activate()
+        mockAudioStore.audioStore.dispatch(.setActiveSessionIdentifier(.unique))
+        _ = try await subject.ownershipLost.filter { $0 }.nextValue(timeout: defaultTimeout)
+
+        let lost = try await subject.ownershipLost.nextValue(timeout: defaultTimeout)
+
+        XCTAssertTrue(lost)
+    }
+
+    func test_deactivate_afterTheLoss_leavesTheNewOwnersConfigurationAlone() async throws {
+        try await subject.activate()
+        let owner = String.unique
+        mockAudioStore.audioStore.dispatch(
+            [
+                .setActiveSessionIdentifier(owner),
+                .avAudioSession(
+                    .setCategoryAndModeAndCategoryOptions(
+                        .playAndRecord,
+                        mode: .videoChat,
+                        categoryOptions: [.allowBluetoothA2DP]
+                    )
+                )
+            ]
+        )
+        await fulfillment { self.state.audioSessionConfiguration.mode == .videoChat }
+
+        await subject.deactivate()
+
+        XCTAssertEqual(state.activeSessionIdentifier, owner)
+        XCTAssertEqual(state.audioSessionConfiguration.mode, .videoChat)
+        XCTAssertEqual(state.audioSessionConfiguration.options, [.allowBluetoothA2DP])
+    }
+
     // MARK: - deactivate
 
     func test_deactivate_afterActivate_deactivatesAndReleasesOwnership() async throws {
