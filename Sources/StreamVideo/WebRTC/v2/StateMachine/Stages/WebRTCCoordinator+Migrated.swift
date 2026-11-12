@@ -99,7 +99,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
                                 create: false,
                                 ring: false,
                                 notify: false,
-                                options: context.recoveryJoinOptions()
+                                options: context.recoveryJoinOptions(),
+                                declaresPlaybackCapabilities: false
                             )
                     } catch {
                         // Authentication failed before assigning a new SFU, so

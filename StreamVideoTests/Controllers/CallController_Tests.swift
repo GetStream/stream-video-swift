@@ -544,6 +544,20 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         XCTAssertEqual(request.e2ee, true)
     }
 
+    func test_authenticateCall_declaringPlaybackCapabilities_setsJoinRequestPlaybackCapabilities() async throws {
+        let request = try await joinRequest(declaresPlaybackCapabilities: true)
+
+        XCTAssertEqual(request.playbackCapabilities, ["hls"])
+        XCTAssertNil(request.prefer)
+    }
+
+    func test_authenticateCall_notDeclaringPlaybackCapabilities_omitsJoinRequestPlaybackCapabilities() async throws {
+        let request = try await joinRequest(declaresPlaybackCapabilities: false)
+
+        XCTAssertNil(request.playbackCapabilities)
+        XCTAssertNil(request.prefer)
+    }
+
     func test_joinCall_withoutHighScaleHint_clearsRequestHint() async throws {
         let defaultAPI = MockDefaultAPIEndpoints()
         let webRTCCoordinatorFactory = MockWebRTCCoordinatorFactory(
@@ -1604,6 +1618,50 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
     }
 
     // MARK: - Private helpers
+
+    /// Sends a join request through the coordinator's authentication closure
+    /// and returns the request that reached the API.
+    private func joinRequest(
+        declaresPlaybackCapabilities: Bool
+    ) async throws -> JoinCallRequest {
+        let defaultAPI = MockDefaultAPIEndpoints()
+        defaultAPI.stub(for: .joinCall, with: JoinCallResponse.dummy())
+        let webRTCCoordinatorFactory = MockWebRTCCoordinatorFactory(
+            videoConfig: Self.videoConfig
+        )
+        let subject = CallController(
+            defaultAPI: defaultAPI,
+            user: user,
+            callId: callId,
+            callType: callType,
+            apiKey: apiKey,
+            videoConfig: Self.videoConfig,
+            initialCallSettings: initialCallSettings,
+            cachedLocation: cachedLocation,
+            webRTCCoordinatorFactory: webRTCCoordinatorFactory
+        )
+        _ = await subject.sessionID()
+
+        _ = try await webRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .coordinator
+            .callAuthentication(
+                false,
+                false,
+                nil,
+                nil,
+                false,
+                nil,
+                declaresPlaybackCapabilities
+            )
+
+        return try XCTUnwrap(
+            defaultAPI.recordedInputPayload(
+                (String, String, JoinCallRequest).self,
+                for: .joinCall
+            )?.first?.2
+        )
+    }
 
     private func makeSubjectWithMockAPI() -> (
         CallController,

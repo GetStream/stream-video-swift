@@ -40,7 +40,7 @@ final class WebRTCAuthenticator_Tests: XCTestCase, @unchecked Sendable {
     func test_authenticate_cancelledBeforeResponseReturns_doesNotApplyResponse() async throws {
         let coordinator = mockCoordinatorStack.coordinator
         await coordinator.stateAdapter.set(token: "existing-token")
-        mockCoordinatorStack.callAuthenticator.authenticateHandler = { _, _, _, _, _, _ in
+        mockCoordinatorStack.callAuthenticator.authenticateHandler = { _, _, _, _, _, _, _ in
             withUnsafeCurrentTask { $0?.cancel() }
             return .dummy()
         }
@@ -53,7 +53,8 @@ final class WebRTCAuthenticator_Tests: XCTestCase, @unchecked Sendable {
                 create: false,
                 ring: false,
                 notify: false,
-                options: nil
+                options: nil,
+                declaresPlaybackCapabilities: false
             )
         }
 
@@ -106,7 +107,8 @@ final class WebRTCAuthenticator_Tests: XCTestCase, @unchecked Sendable {
                 create: false,
                 ring: false,
                 notify: false,
-                options: nil
+                options: nil,
+                declaresPlaybackCapabilities: false
             )
         }
 
@@ -143,7 +145,8 @@ final class WebRTCAuthenticator_Tests: XCTestCase, @unchecked Sendable {
             create: create,
             ring: ring,
             notify: notify,
-            options: options
+            options: options,
+            declaresPlaybackCapabilities: false
         )
 
         let input = try XCTUnwrap(mockCoordinatorStack.callAuthenticator.authenticateCalledWithInput.first)
@@ -166,11 +169,48 @@ final class WebRTCAuthenticator_Tests: XCTestCase, @unchecked Sendable {
             create: false,
             ring: false,
             notify: false,
-            options: nil
+            options: nil,
+            declaresPlaybackCapabilities: false
         )
 
         let input = try XCTUnwrap(mockCoordinatorStack.callAuthenticator.authenticateCalledWithInput.first)
         XCTAssertEqual(input.migratingFromList, migratingFromList)
+    }
+
+    func test_authenticate_declaringPlaybackCapabilities_callAuthenticationReceivesTheFlag() async throws {
+        mockCoordinatorStack.callAuthenticator.authenticateResult = .success(.dummy())
+
+        _ = try await subject.authenticate(
+            coordinator: mockCoordinatorStack.coordinator,
+            currentSFU: nil,
+            migratingFromList: nil,
+            create: false,
+            ring: false,
+            notify: false,
+            options: nil,
+            declaresPlaybackCapabilities: true
+        )
+
+        let input = try XCTUnwrap(mockCoordinatorStack.callAuthenticator.authenticateCalledWithInput.first)
+        XCTAssertTrue(input.declaresPlaybackCapabilities)
+    }
+
+    func test_authenticate_notDeclaringPlaybackCapabilities_callAuthenticationReceivesTheFlag() async throws {
+        mockCoordinatorStack.callAuthenticator.authenticateResult = .success(.dummy())
+
+        _ = try await subject.authenticate(
+            coordinator: mockCoordinatorStack.coordinator,
+            currentSFU: nil,
+            migratingFromList: nil,
+            create: false,
+            ring: false,
+            notify: false,
+            options: nil,
+            declaresPlaybackCapabilities: false
+        )
+
+        let input = try XCTUnwrap(mockCoordinatorStack.callAuthenticator.authenticateCalledWithInput.first)
+        XCTAssertFalse(input.declaresPlaybackCapabilities)
     }
 
     func test_authenticate_withValidData_shouldReturnSFUAdapterAndJoinCallResponse() async throws {
@@ -189,7 +229,8 @@ final class WebRTCAuthenticator_Tests: XCTestCase, @unchecked Sendable {
             create: create,
             ring: ring,
             notify: notify,
-            options: options
+            options: options,
+            declaresPlaybackCapabilities: false
         )
 
         XCTAssertEqual(response, expected)
@@ -212,7 +253,8 @@ final class WebRTCAuthenticator_Tests: XCTestCase, @unchecked Sendable {
             create: create,
             ring: ring,
             notify: notify,
-            options: options
+            options: options,
+            declaresPlaybackCapabilities: false
         )
 
         XCTAssertEqual(response, expected)
@@ -770,7 +812,8 @@ final class WebRTCAuthenticator_Tests: XCTestCase, @unchecked Sendable {
             create: create,
             ring: ring,
             notify: notify,
-            options: options
+            options: options,
+            declaresPlaybackCapabilities: false
         )
 
         let videoOptions = await mockCoordinatorStack
@@ -797,7 +840,8 @@ final class WebRTCAuthenticator_Tests: XCTestCase, @unchecked Sendable {
             create: create,
             ring: ring,
             notify: notify,
-            options: options
+            options: options,
+            declaresPlaybackCapabilities: false
         )
 
         let statsReporter = await mockCoordinatorStack
@@ -895,7 +939,8 @@ final class WebRTCAuthenticator_Tests: XCTestCase, @unchecked Sendable {
             create: create,
             ring: ring,
             notify: notify,
-            options: options
+            options: options,
+            declaresPlaybackCapabilities: false
         )
 
         await fulfillment(file: file, line: line) {

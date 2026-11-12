@@ -18,6 +18,8 @@ protocol WebRTCAuthenticating {
     ///   - ring: Whether to ring the call.
     ///   - notify: Whether notification side effects should be emitted.
     ///   - options: Additional join/create options sent to the backend.
+    ///   - declaresPlaybackCapabilities: Whether the join request declares
+    ///     that the client can play HLS.
     /// - Returns: A tuple containing the SFU adapter and join call response.
     /// - Throws: An error if authentication fails.
     func authenticate(
@@ -27,7 +29,8 @@ protocol WebRTCAuthenticating {
         create: Bool,
         ring: Bool,
         notify: Bool,
-        options: CreateCallOptions?
+        options: CreateCallOptions?,
+        declaresPlaybackCapabilities: Bool
     ) async throws -> (sfuAdapter: SFUAdapter, response: JoinCallResponse)
 
     /// Awaits the SFU to allow authentication
@@ -56,6 +59,8 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
     ///   - ring: Whether to ring the call.
     ///   - notify: Whether to notify other participants.
     ///   - options: Additional call creation options for the join request.
+    ///   - declaresPlaybackCapabilities: Whether the join request declares
+    ///     that the client can play HLS.
     /// - Returns: A tuple containing the SFU adapter and join call response.
     /// - Throws: An error if authentication fails.
     func authenticate(
@@ -65,7 +70,8 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
         create: Bool,
         ring: Bool,
         notify: Bool,
-        options: CreateCallOptions?
+        options: CreateCallOptions?,
+        declaresPlaybackCapabilities: Bool
     ) async throws -> (sfuAdapter: SFUAdapter, response: JoinCallResponse) {
         let response = try await coordinator
             .callAuthentication(
@@ -74,7 +80,8 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
                 currentSFU,
                 migratingFromList,
                 notify,
-                options
+                options,
+                declaresPlaybackCapabilities
             )
 
         return try await apply(response, to: coordinator.stateAdapter)

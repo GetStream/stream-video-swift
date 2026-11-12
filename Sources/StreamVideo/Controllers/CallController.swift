@@ -31,7 +31,7 @@ class CallController: @unchecked Sendable {
         callSettings: initialCallSettings,
         clientEventReporter: clientEventReporter
     ) {
-        [weak self, callId] create, ring, migratingFrom, migratingFromList, notify, options in
+        [weak self, callId] create, ring, migratingFrom, migratingFromList, notify, options, declaresPlaybackCapabilities in
         if let self {
             return try await authenticateCall(
                 create: create,
@@ -39,7 +39,8 @@ class CallController: @unchecked Sendable {
                 migratingFrom: migratingFrom,
                 migratingFromList: migratingFromList,
                 notify: notify,
-                options: options
+                options: options,
+                declaresPlaybackCapabilities: declaresPlaybackCapabilities
             )
         } else {
             throw ClientError("Unable to authenticate callId:\(callId).")
@@ -716,6 +717,8 @@ class CallController: @unchecked Sendable {
     ///   - migratingFromList: All exhausted SFU edges that should be avoided.
     ///   - notify: Whether the backend should notify call members.
     ///   - options: Additional call creation options and join-only hints.
+    ///   - declaresPlaybackCapabilities: Whether the request tells the backend
+    ///     that this client can play HLS.
     /// - Returns: The backend join response used to continue the WebRTC flow.
     /// - Throws: An error if location fetch or join request fails.
     ///
@@ -727,7 +730,8 @@ class CallController: @unchecked Sendable {
         migratingFrom: String?,
         migratingFromList: [String]?,
         notify: Bool,
-        options: CreateCallOptions?
+        options: CreateCallOptions?,
+        declaresPlaybackCapabilities: Bool
     ) async throws -> JoinCallResponse {
         let location = try await getLocation()
         var membersRequest = [MemberRequest]()
@@ -755,6 +759,7 @@ class CallController: @unchecked Sendable {
             migratingFrom: migratingFrom,
             migratingFromList: migratingFromList?.isEmpty == false ? migratingFromList : nil,
             notify: notify,
+            playbackCapabilities: declaresPlaybackCapabilities ? ["hls"] : nil,
             ring: ring
         )
 
