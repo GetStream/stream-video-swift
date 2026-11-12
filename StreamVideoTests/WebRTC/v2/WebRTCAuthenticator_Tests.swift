@@ -213,6 +213,138 @@ final class WebRTCAuthenticator_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertFalse(input.declaresPlaybackCapabilities)
     }
 
+    // MARK: - authenticate (HLS grant)
+
+    func test_authenticate_hlsGrant_returnsResponseWithoutSFUAdapter() async throws {
+        let expected = JoinCallResponse.dummyHLSGrant()
+        mockCoordinatorStack.callAuthenticator.authenticateResult = .success(expected)
+
+        let (sfuAdapter, response) = try await authenticate(declaresPlaybackCapabilities: true)
+
+        XCTAssertNil(sfuAdapter)
+        XCTAssertEqual(response, expected)
+    }
+
+    func test_authenticate_hlsGrant_appliesOwnCapabilities() async throws {
+        let stateAdapter = mockCoordinatorStack.coordinator.stateAdapter
+        mockCoordinatorStack.callAuthenticator.authenticateResult = .success(
+            .dummyHLSGrant(ownCapabilities: [.sendAudio, .sendVideo])
+        )
+
+        _ = try await authenticate(declaresPlaybackCapabilities: true)
+
+        let ownCapabilities = await stateAdapter.ownCapabilities
+        XCTAssertEqual(ownCapabilities, [.sendAudio, .sendVideo])
+    }
+
+    func test_authenticate_hlsGrant_doesNotApplySFUStatsOrAudioState() async throws {
+        let stateAdapter = mockCoordinatorStack.coordinator.stateAdapter
+        let audioSettings = await stateAdapter.audioSettings
+        mockCoordinatorStack.callAuthenticator.authenticateResult = .success(
+            .dummyHLSGrant(
+                call: .dummy(settings: .dummy(audio: .dummy(micDefaultOn: true)))
+            )
+        )
+
+        _ = try await authenticate(declaresPlaybackCapabilities: true)
+
+        let token = await stateAdapter.token
+        let currentAudioSettings = await stateAdapter.audioSettings
+        let statsAdapter = await stateAdapter.statsAdapter
+        XCTAssertEqual(token, "")
+        XCTAssertEqual(currentAudioSettings, audioSettings)
+        XCTAssertNil(statsAdapter)
+    }
+
+    func test_authenticate_hlsGrant_turnsAudioAndVideoOff() async throws {
+        let stateAdapter = mockCoordinatorStack.coordinator.stateAdapter
+        mockCoordinatorStack.callAuthenticator.authenticateResult = .success(
+            .dummyHLSGrant(ownCapabilities: [.sendAudio, .sendVideo])
+        )
+
+        _ = try await authenticate(declaresPlaybackCapabilities: true)
+
+        let callSettings = try await stateAdapter
+            .$callSettings
+            .filter { !$0.audioOn && !$0.videoOn }
+            .nextValue(timeout: defaultTimeout)
+        XCTAssertFalse(callSettings.audioOn)
+        XCTAssertFalse(callSettings.videoOn)
+    }
+
+    func test_authenticate_hlsGrant_keepsTheOtherCallSettings() async throws {
+        let stateAdapter = mockCoordinatorStack.coordinator.stateAdapter
+        let initial = await stateAdapter.callSettings
+        mockCoordinatorStack.callAuthenticator.authenticateResult = .success(
+            .dummyHLSGrant(ownCapabilities: [.sendAudio, .sendVideo])
+        )
+
+        _ = try await authenticate(declaresPlaybackCapabilities: true)
+
+        let updated = try await stateAdapter
+            .$callSettings
+            .filter { !$0.audioOn && !$0.videoOn }
+            .nextValue(timeout: defaultTimeout)
+        XCTAssertEqual(updated.speakerOn, initial.speakerOn)
+        XCTAssertEqual(updated.audioOutputOn, initial.audioOutputOn)
+        XCTAssertEqual(updated.cameraPosition, initial.cameraPosition)
+    }
+
+    func test_authenticate_hlsGrantNotDeclared_throwsClientError() async throws {
+        mockCoordinatorStack.callAuthenticator.authenticateResult = .success(
+            .dummyHLSGrant(ownCapabilities: [.sendAudio])
+        )
+
+        await assertAuthenticateThrowsClientError(
+            declaresPlaybackCapabilities: false,
+            containing: "not requested"
+        )
+    }
+
+    func test_authenticate_hlsGrantWithHTTPPlaylistURL_throwsClientError() async throws {
+        mockCoordinatorStack.callAuthenticator.authenticateResult = .success(
+            .dummyHLSGrant(
+                ownCapabilities: [.sendAudio],
+                playback: .dummy(playlistUrl: "http://example.com/live.m3u8")
+            )
+        )
+
+        await assertAuthenticateThrowsClientError(containing: "playlist URL")
+    }
+
+    func test_authenticate_hlsGrantWithUnknownType_throwsClientError() async throws {
+        mockCoordinatorStack.callAuthenticator.authenticateResult = .success(
+            .dummyHLSGrant(
+                ownCapabilities: [.sendAudio],
+                playback: .dummy(type: .unknown)
+            )
+        )
+
+        await assertAuthenticateThrowsClientError(containing: "playback type")
+    }
+
+    func test_authenticate_hlsGrantWithEmptyPlaylistURL_throwsClientError() async throws {
+        mockCoordinatorStack.callAuthenticator.authenticateResult = .success(
+            .dummyHLSGrant(
+                ownCapabilities: [.sendAudio],
+                playback: .dummy(playlistUrl: "")
+            )
+        )
+
+        await assertAuthenticateThrowsClientError(containing: "playlist URL")
+    }
+
+    func test_authenticate_hlsGrantWithRelativePlaylistURL_throwsClientError() async throws {
+        mockCoordinatorStack.callAuthenticator.authenticateResult = .success(
+            .dummyHLSGrant(
+                ownCapabilities: [.sendAudio],
+                playback: .dummy(playlistUrl: "/live.m3u8")
+            )
+        )
+
+        await assertAuthenticateThrowsClientError(containing: "playlist URL")
+    }
+
     func test_authenticate_withValidData_shouldReturnSFUAdapterAndJoinCallResponse() async throws {
         let currentSFU = String.unique
         let create = true
@@ -234,8 +366,9 @@ final class WebRTCAuthenticator_Tests: XCTestCase, @unchecked Sendable {
         )
 
         XCTAssertEqual(response, expected)
-        XCTAssertEqual(sfuAdapter.hostname, "getstream.io")
-        XCTAssertEqual(sfuAdapter.connectURL.absoluteString, "wss://getstream.io")
+        let unwrappedSFUAdapter = try XCTUnwrap(sfuAdapter)
+        XCTAssertEqual(unwrappedSFUAdapter.hostname, "getstream.io")
+        XCTAssertEqual(unwrappedSFUAdapter.connectURL.absoluteString, "wss://getstream.io")
     }
 
     func test_authenticate_withNilCurrentSFU_shouldStillReturnSFUAdapterAndJoinCallResponse() async throws {
@@ -258,8 +391,9 @@ final class WebRTCAuthenticator_Tests: XCTestCase, @unchecked Sendable {
         )
 
         XCTAssertEqual(response, expected)
-        XCTAssertEqual(sfuAdapter.hostname, "getstream.io")
-        XCTAssertEqual(sfuAdapter.connectURL.absoluteString, "wss://getstream.io")
+        let unwrappedSFUAdapter = try XCTUnwrap(sfuAdapter)
+        XCTAssertEqual(unwrappedSFUAdapter.hostname, "getstream.io")
+        XCTAssertEqual(unwrappedSFUAdapter.connectURL.absoluteString, "wss://getstream.io")
     }
 
     // MARK: with sendAudio and sendVideo capabilities
@@ -910,6 +1044,48 @@ final class WebRTCAuthenticator_Tests: XCTestCase, @unchecked Sendable {
     }
 
     // MARK: - Private Helpers
+
+    /// Authenticates with the shared coordinator and the given capability flag.
+    private func authenticate(
+        declaresPlaybackCapabilities: Bool
+    ) async throws -> (sfuAdapter: SFUAdapter?, response: JoinCallResponse) {
+        try await subject.authenticate(
+            coordinator: mockCoordinatorStack.coordinator,
+            currentSFU: nil,
+            migratingFromList: nil,
+            create: false,
+            ring: false,
+            notify: false,
+            options: nil,
+            declaresPlaybackCapabilities: declaresPlaybackCapabilities
+        )
+    }
+
+    /// Asserts that a rejected grant fails with a ``ClientError`` before the
+    /// response is applied to the state adapter.
+    private func assertAuthenticateThrowsClientError(
+        declaresPlaybackCapabilities: Bool = true,
+        containing message: String,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) async {
+        do {
+            _ = try await authenticate(
+                declaresPlaybackCapabilities: declaresPlaybackCapabilities
+            )
+            XCTFail("Expected authenticate to throw.", file: file, line: line)
+        } catch {
+            XCTAssertTrue(error is ClientError, file: file, line: line)
+            XCTAssertTrue(
+                error.localizedDescription.contains(message),
+                "Unexpected error: \(error)",
+                file: file,
+                line: line
+            )
+        }
+        let ownCapabilities = await mockCoordinatorStack.coordinator.stateAdapter.ownCapabilities
+        XCTAssertTrue(ownCapabilities.isEmpty, file: file, line: line)
+    }
 
     private func assertCallSettings(
         create: Bool = true,

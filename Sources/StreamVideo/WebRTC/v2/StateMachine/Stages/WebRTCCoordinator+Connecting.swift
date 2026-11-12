@@ -186,10 +186,10 @@ extension WebRTCCoordinator.StateMachine.Stage {
                             peerConnection: nil,
                             details: coordinatorJoinDetails
                         )
-                    let sfuAdapter: SFUAdapter
+                    let grantedSFUAdapter: SFUAdapter?
                     let response: JoinCallResponse
                     do {
-                        (sfuAdapter, response) = try await context
+                        (grantedSFUAdapter, response) = try await context
                             .authenticator
                             .authenticate(
                                 coordinator: coordinator,
@@ -231,6 +231,14 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     try Task.checkCancellation()
 
                     context.initialJoinCallResponse = response
+
+                    /// The backend granted HLS instead of an SFU. There is
+                    /// nothing to connect to, so the flow ends in the HLS
+                    /// playback stage.
+                    guard let sfuAdapter = grantedSFUAdapter else {
+                        transitionOrError(.hlsPlayback(context))
+                        return
+                    }
 
                     // Start observing SFU full events before the WS handshake
                     // progresses so early server-side rejections are not lost.
