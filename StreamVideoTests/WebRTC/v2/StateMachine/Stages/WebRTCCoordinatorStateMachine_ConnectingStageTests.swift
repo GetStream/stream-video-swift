@@ -253,6 +253,45 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
         }
     }
 
+    func test_transition_fromIdle_declaresPlaybackCapabilities() async throws {
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.authenticator = mockCoordinatorStack.webRTCAuthenticator
+
+        try await assertTransition(
+            from: .idle,
+            expectedTarget: .error,
+            subject: subject
+        ) { [mockCoordinatorStack] _ in
+            XCTAssertEqual(
+                mockCoordinatorStack?.webRTCAuthenticator.declaredPlaybackCapabilities,
+                [true]
+            )
+        }
+    }
+
+    func test_transition_fromRejoining_doesNotDeclarePlaybackCapabilities() async throws {
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.authenticator = mockCoordinatorStack.webRTCAuthenticator
+        let rejoining = WebRTCCoordinator.StateMachine.Stage.connecting(
+            subject.context,
+            create: false,
+            options: nil,
+            ring: false,
+            notify: false
+        )
+
+        try await assertTransition(
+            from: .rejoining,
+            expectedTarget: .disconnected,
+            subject: rejoining
+        ) { [mockCoordinatorStack] _ in
+            XCTAssertEqual(
+                mockCoordinatorStack?.webRTCAuthenticator.declaredPlaybackCapabilities,
+                [false]
+            )
+        }
+    }
+
     func test_transition_fromIdleSFUConnectFails_transitionsToDisconnected() async throws {
         subject.context.coordinator = mockCoordinatorStack.coordinator
         subject.context.authenticator = mockCoordinatorStack.webRTCAuthenticator

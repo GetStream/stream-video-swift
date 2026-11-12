@@ -90,6 +90,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     notify: notify,
                     options: options,
                     updateSession: false,
+                    declaresPlaybackCapabilities: true,
                     onErrorDisconnect: false
                 )
                 return self
@@ -105,6 +106,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     notify: false,
                     options: options,
                     updateSession: true,
+                    declaresPlaybackCapabilities: false,
                     onErrorDisconnect: true
                 )
                 return self
@@ -127,6 +129,9 @@ extension WebRTCCoordinator.StateMachine.Stage {
         ///   creating a call.
         ///   - updateSession: A Boolean indicating whether to update the
         ///     existing session.
+        ///   - declaresPlaybackCapabilities: A Boolean indicating whether the
+        ///     join request declares HLS playback support. Only the first
+        ///     join does, so a rejoin never switches the playback mode.
         ///   - onErrorDisconnect: If `true`, failures move to the disconnected
         ///     stage instead of error stage.
         private func execute(
@@ -135,6 +140,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
             notify: Bool,
             options: CreateCallOptions?,
             updateSession: Bool,
+            declaresPlaybackCapabilities: Bool,
             onErrorDisconnect: Bool
         ) {
             Task(disposableBag: disposableBag) { [weak self] in
@@ -192,7 +198,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
                                 create: create,
                                 ring: ring,
                                 notify: notify,
-                                options: options
+                                options: options,
+                                declaresPlaybackCapabilities: declaresPlaybackCapabilities
                             )
                         try Task.checkCancellation()
                     } catch {

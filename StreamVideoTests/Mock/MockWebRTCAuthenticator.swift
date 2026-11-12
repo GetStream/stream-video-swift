@@ -49,6 +49,9 @@ final class MockWebRTCAuthenticator: WebRTCAuthenticating, Mockable, @unchecked 
     /// test is ready, preventing the connecting stage from racing.
     var onAuthenticate: (@Sendable () async throws -> Void)?
 
+    /// The `declaresPlaybackCapabilities` value of each ``authenticate`` call.
+    @Atomic var declaredPlaybackCapabilities: [Bool] = []
+
     var stubbedProperty: [String: Any] = [:]
     var stubbedFunction: [FunctionKey: Any] = [:]
     @Atomic var stubbedFunctionInput: [FunctionKey: [MockFunctionInputKey]] = FunctionKey.allCases
@@ -83,8 +86,10 @@ final class MockWebRTCAuthenticator: WebRTCAuthenticating, Mockable, @unchecked 
         create: Bool,
         ring: Bool,
         notify: Bool,
-        options: CreateCallOptions?
+        options: CreateCallOptions?,
+        declaresPlaybackCapabilities: Bool
     ) async throws -> (sfuAdapter: SFUAdapter, response: JoinCallResponse) {
+        declaredPlaybackCapabilities.append(declaresPlaybackCapabilities)
         stubbedFunctionInput[.authenticate]?
             .append(
                 .authenticate(

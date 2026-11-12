@@ -21,6 +21,8 @@ final class WebRTCCoordinator: @unchecked Sendable {
     ///     capacity-related errors during the same join flow.
     ///   - notify: Whether users should receive notification side effects.
     ///   - options: Additional call creation options.
+    ///   - declaresPlaybackCapabilities: Whether the join request tells the
+    ///     backend that the client can play HLS. Only a first join declares it.
     /// - Returns: A `JoinCallResponse` wrapped in an async throw.
     typealias AuthenticationHandler = (
         Bool,
@@ -28,7 +30,8 @@ final class WebRTCCoordinator: @unchecked Sendable {
         String?,
         [String]?,
         Bool,
-        CreateCallOptions?
+        CreateCallOptions?,
+        Bool
     ) async throws -> JoinCallResponse
 
     private static let recordingUserId = "recording-egress"
