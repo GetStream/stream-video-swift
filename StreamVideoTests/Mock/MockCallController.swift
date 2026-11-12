@@ -15,6 +15,7 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
         case trace
         case changeAudioState
         case changeVideoState
+        case changeSoundState
         case changeCameraMode
         case updateOwnCapabilities
         case enableClientCapabilities
@@ -45,6 +46,8 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
         case changeAudioState(Bool)
 
         case changeVideoState(Bool)
+
+        case changeSoundState(Bool)
 
         case changeCameraMode(CameraPosition)
 
@@ -80,6 +83,8 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
             case let .changeAudioState(value):
                 return value
             case let .changeVideoState(value):
+                return value
+            case let .changeSoundState(value):
                 return value
             case let .changeCameraMode(value):
                 return value
@@ -206,6 +211,11 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
     override func changeVideoState(isEnabled: Bool) async throws {
         stubbedFunctionInput[.changeVideoState]?
             .append(.changeVideoState(isEnabled))
+    }
+
+    override func changeSoundState(isEnabled: Bool) async throws {
+        stubbedFunctionInput[.changeSoundState]?
+            .append(.changeSoundState(isEnabled))
     }
 
     override func changeAudioState(
