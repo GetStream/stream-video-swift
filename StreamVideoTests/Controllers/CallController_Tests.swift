@@ -674,6 +674,54 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         }
     }
 
+    // MARK: - HLS call ended
+
+    @MainActor
+    func test_hlsPlaybackStage_callEndedEventForTheCall_leavesWithRemoteEventInitiator() async throws {
+        let call = MockCall(.dummy(callController: subject))
+        enterStage(.hlsPlayback)
+        await drainMainQueue()
+
+        await call.onEvent(callEndedEvent(for: call.cId))
+
+        XCTAssertEqual(call.leaveInitiators, [.remoteEvent])
+    }
+
+    @MainActor
+    func test_hlsPlaybackStage_callEndedEventForAnotherCall_doesNotLeave() async throws {
+        let call = MockCall(.dummy(callController: subject))
+        enterStage(.hlsPlayback)
+        await drainMainQueue()
+
+        await call.onEvent(callEndedEvent(for: "default:\(String.unique)"))
+
+        XCTAssertTrue(call.leaveInitiators.isEmpty)
+    }
+
+    @MainActor
+    func test_joinedStage_callEndedEvent_doesNotLeave() async throws {
+        let call = MockCall(.dummy(callController: subject))
+        enterStage(.joined)
+        await drainMainQueue()
+
+        await call.onEvent(callEndedEvent(for: call.cId))
+
+        XCTAssertTrue(call.leaveInitiators.isEmpty)
+    }
+
+    @MainActor
+    func test_hlsPlaybackStageLeft_callEndedEvent_doesNotLeave() async throws {
+        let call = MockCall(.dummy(callController: subject))
+        enterStage(.hlsPlayback)
+        await drainMainQueue()
+        enterStage(.joined)
+        await drainMainQueue()
+
+        await call.onEvent(callEndedEvent(for: call.cId))
+
+        XCTAssertTrue(call.leaveInitiators.isEmpty)
+    }
+
     @MainActor
     func test_hlsPlaybackStage_participantCountsEvent_updatesParticipantCount() async throws {
         let call = Call.dummy(callController: subject)
@@ -1818,6 +1866,25 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
                 (String, String, JoinCallRequest).self,
                 for: .joinCall
             )?.first?.2
+        )
+    }
+
+    /// Puts the coordinator in a stage that the controller observes.
+    @MainActor
+    private func enterStage(_ id: WebRTCCoordinator.StateMachine.Stage.ID) {
+        subject.observeWebRTCStateUpdated()
+        mockWebRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .coordinator
+            .stateMachine
+            .transition(MockTestOnlyStage(id: id, context: .init()))
+    }
+
+    private func callEndedEvent(for cid: String) -> WrappedEvent {
+        .coordinatorEvent(
+            .typeCallEndedEvent(
+                .init(call: .dummy(cid: cid), callCid: cid, createdAt: .init())
+            )
         )
     }
 
