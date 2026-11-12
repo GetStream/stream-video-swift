@@ -11,7 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🐞 Fixed
 
-- `LivestreamPlayer` joins a fresh call when the host goes live again after Stop Live. The player shows the waiting view until that join finishes. [#1411](https://github.com/GetStream/stream-video-swift/pull/1411)
+- `LivestreamPlayer` joins a fresh call when the host goes live again after Stop Live. The player shows the waiting view until that join finishes. After the live segment ends, call `streamVideo.call(callType:callId:)` again. Leave removes the old call from the cache. [#1411](https://github.com/GetStream/stream-video-swift/pull/1411)
 - Leave a livestream when the SFU reports that the live segment ended, unless the user can join backstage. A user who can join backstage follows the SFU reconnect strategy. [#1400](https://github.com/GetStream/stream-video-swift/pull/1400)
 - Mark the call as backstage when the SFU reports that the live segment ended. [#1400](https://github.com/GetStream/stream-video-swift/pull/1400)
 - Record `liveEndedAt` when the SFU reports that the live segment ended. [#1400](https://github.com/GetStream/stream-video-swift/pull/1400)
