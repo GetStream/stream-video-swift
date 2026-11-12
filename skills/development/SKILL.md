@@ -54,6 +54,8 @@ Otherwise, report pending updates and continue independent work, including TDD c
 
 Update `CHANGELOG.md` only for added or updated public interfaces or bugs fixed in this change.
 Internal refactors, tests, tooling, and documentation alone do not qualify.
+Keep each entry to one short sentence about the user-visible change.
+Leave causes and implementation details to the pull request.
 Place every entry under `# Upcoming`, before the first released version heading.
 Never add or edit entries under a released version.
 Include a pull request link when one exists.
