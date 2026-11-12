@@ -7,20 +7,27 @@ import StreamCore
 
 /// This event is sent when a user requests access to a feature on a call,
 /// clients receiving this event should display a permission request to the user
-public final class PermissionRequestEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
-    public var callCid: String
-    public var createdAt: Date
+public final class PermissionRequestEvent: Sendable, Event, Decodable, WSCallEvent {
+    public let callCid: String
+    public let createdAt: Date
     /// The list of permissions requested by the user
-    public var permissions: [String]
+    public let permissions: [String]
     /// The type of event: "call.permission_request" in this case
-    public var type: String = "call.permission_request"
+    public let type: String
     /// User response object
-    public var user: UserResponse
+    public let user: UserResponse
 
-    public init(callCid: String, createdAt: Date, permissions: [String], user: UserResponse) {
+    public init(
+        callCid: String,
+        createdAt: Date,
+        permissions: [String],
+        type: String = "call.permission_request",
+        user: UserResponse
+    ) {
         self.callCid = callCid
         self.createdAt = createdAt
         self.permissions = permissions
+        self.type = type
         self.user = user
     }
 

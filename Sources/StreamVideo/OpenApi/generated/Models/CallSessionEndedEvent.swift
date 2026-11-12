@@ -6,21 +6,22 @@ import Foundation
 import StreamCore
 
 /// This event is sent when a call session ends
-public final class CallSessionEndedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
+public final class CallSessionEndedEvent: Sendable, Event, Decodable, WSCallEvent {
     /// Represents a call
-    public var call: CallResponse
-    public var callCid: String
-    public var createdAt: Date
+    public let call: CallResponse
+    public let callCid: String
+    public let createdAt: Date
     /// Call session ID
-    public var sessionId: String
+    public let sessionId: String
     /// The type of event: "call.session_ended" in this case
-    public var type: String = "call.session_ended"
+    public let type: String
 
-    public init(call: CallResponse, callCid: String, createdAt: Date, sessionId: String) {
+    public init(call: CallResponse, callCid: String, createdAt: Date, sessionId: String, type: String = "call.session_ended") {
         self.call = call
         self.callCid = callCid
         self.createdAt = createdAt
         self.sessionId = sessionId
+        self.type = type
     }
 
     public init(from decoder: Decoder) throws {

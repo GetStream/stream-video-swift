@@ -5,25 +5,25 @@
 import Foundation
 import StreamCore
 
-public final class CallSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable {
-    public var audio: AudioSettingsRequest?
-    public var backstage: BackstageSettingsRequest?
-    public var broadcasting: BroadcastSettingsRequest?
-    public var encryption: EncryptionSettingsRequest?
-    public var frameRecording: FrameRecordingSettingsRequest?
-    public var geofencing: GeofenceSettingsRequest?
-    public var individualRecording: IndividualRecordingSettingsRequest?
-    public var ingress: IngressSettingsRequest?
-    public var lifecycle: LifecycleSettingsRequest?
-    public var limits: LimitsSettingsRequest?
-    public var rawRecording: RawRecordingSettingsRequest?
-    public var recording: RecordSettingsRequest?
-    public var ring: RingSettingsRequest?
-    public var screensharing: ScreensharingSettingsRequest?
-    public var session: SessionSettingsRequest?
-    public var thumbnails: ThumbnailsSettingsRequest?
-    public var transcription: TranscriptionSettingsRequest?
-    public var video: VideoSettingsRequest?
+public final class CallSettingsRequest: Sendable, Encodable, JSONEncodable {
+    public let audio: AudioSettingsRequest?
+    public let backstage: BackstageSettingsRequest?
+    public let broadcasting: BroadcastSettingsRequest?
+    public let encryption: EncryptionSettingsRequest?
+    public let frameRecording: FrameRecordingSettingsRequest?
+    public let geofencing: GeofenceSettingsRequest?
+    public let individualRecording: IndividualRecordingSettingsRequest?
+    public let ingress: IngressSettingsRequest?
+    public let lifecycle: LifecycleSettingsRequest?
+    public let limits: LimitsSettingsRequest?
+    public let rawRecording: RawRecordingSettingsRequest?
+    public let recording: RecordSettingsRequest?
+    public let ring: RingSettingsRequest?
+    public let screensharing: ScreensharingSettingsRequest?
+    public let session: SessionSettingsRequest?
+    public let thumbnails: ThumbnailsSettingsRequest?
+    public let transcription: TranscriptionSettingsRequest?
+    public let video: VideoSettingsRequest?
 
     public init(
         audio: AudioSettingsRequest? = nil,

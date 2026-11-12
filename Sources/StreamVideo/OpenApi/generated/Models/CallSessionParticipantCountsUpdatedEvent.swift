@@ -6,28 +6,30 @@ import Foundation
 import StreamCore
 
 /// This event is sent when the participant counts in a call session are updated
-public final class CallSessionParticipantCountsUpdatedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
-    public var anonymousParticipantCount: Int
-    public var callCid: String
-    public var createdAt: Date
-    public var participantsCountByRole: [String: Int]
+public final class CallSessionParticipantCountsUpdatedEvent: Sendable, Event, Decodable, WSCallEvent {
+    public let anonymousParticipantCount: Int
+    public let callCid: String
+    public let createdAt: Date
+    public let participantsCountByRole: [String: Int]
     /// Call session ID
-    public var sessionId: String
+    public let sessionId: String
     /// The type of event: "call.session_participant_count_updated" in this case
-    public var type: String = "call.session_participant_count_updated"
+    public let type: String
 
     public init(
         anonymousParticipantCount: Int,
         callCid: String,
         createdAt: Date,
         participantsCountByRole: [String: Int],
-        sessionId: String
+        sessionId: String,
+        type: String = "call.session_participant_count_updated"
     ) {
         self.anonymousParticipantCount = anonymousParticipantCount
         self.callCid = callCid
         self.createdAt = createdAt
         self.participantsCountByRole = participantsCountByRole
         self.sessionId = sessionId
+        self.type = type
     }
 
     public init(from decoder: Decoder) throws {

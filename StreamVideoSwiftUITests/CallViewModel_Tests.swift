@@ -541,7 +541,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
 
         subject.hangUp()
         await fulfillment(of: [refreshStarted], timeout: 2)
-        mockCall.state.session?.acceptedBy = [secondUser.id: .now]
+        mockCall.state.session = .dummy(acceptedBy: [secondUser.id: .now], id: "ring-session")
         processAcceptedEvent()
         await fulfilmentInMainActor { self.mockCall.timesCalled(.join) == 1 }
         await assertCallingState(.joining)

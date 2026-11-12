@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class FrameRecordingSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable {
+public final class FrameRecordingSettingsRequest: Sendable, Encodable, JSONEncodable {
     
     public enum FrameRecordingSettingsRequestMode: String, Sendable, Codable, CaseIterable {
         case autoOn = "auto-on"
@@ -43,9 +43,9 @@ public final class FrameRecordingSettingsRequest: @unchecked Sendable, Encodable
         }
     }
 
-    public var captureIntervalInSeconds: Int
-    public var mode: FrameRecordingSettingsRequestMode
-    public var quality: FrameRecordingSettingsRequestQuality?
+    public let captureIntervalInSeconds: Int
+    public let mode: FrameRecordingSettingsRequestMode
+    public let quality: FrameRecordingSettingsRequestQuality?
 
     public init(
         captureIntervalInSeconds: Int,

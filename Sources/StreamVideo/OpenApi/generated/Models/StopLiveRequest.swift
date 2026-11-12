@@ -5,15 +5,15 @@
 import Foundation
 import StreamCore
 
-public final class StopLiveRequest: @unchecked Sendable, Encodable, JSONEncodable {
-    public var continueClosedCaption: Bool?
-    public var continueCompositeRecording: Bool?
-    public var continueHls: Bool?
-    public var continueIndividualRecording: Bool?
-    public var continueRawRecording: Bool?
-    public var continueRecording: Bool?
-    public var continueRtmpBroadcasts: Bool?
-    public var continueTranscription: Bool?
+public final class StopLiveRequest: Sendable, Encodable, JSONEncodable {
+    public let continueClosedCaption: Bool?
+    public let continueCompositeRecording: Bool?
+    public let continueHls: Bool?
+    public let continueIndividualRecording: Bool?
+    public let continueRawRecording: Bool?
+    public let continueRecording: Bool?
+    public let continueRtmpBroadcasts: Bool?
+    public let continueTranscription: Bool?
 
     public init(
         continueClosedCaption: Bool? = nil,

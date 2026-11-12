@@ -5,10 +5,10 @@
 import Foundation
 import StreamCore
 
-public final class UpdateUserPermissionsRequest: @unchecked Sendable, Encodable, JSONEncodable {
-    public var grantPermissions: [String]?
-    public var revokePermissions: [String]?
-    public var userId: String
+public final class UpdateUserPermissionsRequest: Sendable, Encodable, JSONEncodable {
+    public let grantPermissions: [String]?
+    public let revokePermissions: [String]?
+    public let userId: String
 
     public init(grantPermissions: [String]? = nil, revokePermissions: [String]? = nil, userId: String) {
         self.grantPermissions = grantPermissions

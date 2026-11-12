@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class IngressVideoLayerRequest: @unchecked Sendable, Encodable, JSONEncodable {
+public final class IngressVideoLayerRequest: Sendable, Encodable, JSONEncodable {
     
     public enum IngressVideoLayerRequestCodec: String, Sendable, Codable, CaseIterable {
         case h264
@@ -23,11 +23,11 @@ public final class IngressVideoLayerRequest: @unchecked Sendable, Encodable, JSO
         }
     }
 
-    public var bitrate: Int
-    public var codec: IngressVideoLayerRequestCodec
-    public var frameRateLimit: Int
-    public var maxDimension: Int
-    public var minDimension: Int
+    public let bitrate: Int
+    public let codec: IngressVideoLayerRequestCodec
+    public let frameRateLimit: Int
+    public let maxDimension: Int
+    public let minDimension: Int
 
     public init(bitrate: Int, codec: IngressVideoLayerRequestCodec, frameRateLimit: Int, maxDimension: Int, minDimension: Int) {
         self.bitrate = bitrate

@@ -5,11 +5,11 @@
 import Foundation
 import StreamCore
 
-public final class EgressRTMPResponse: @unchecked Sendable, Decodable {
-    public var name: String
-    public var startedAt: Date
-    public var streamKey: String?
-    public var streamUrl: String?
+public final class EgressRTMPResponse: Sendable, Decodable {
+    public let name: String
+    public let startedAt: Date
+    public let streamKey: String?
+    public let streamUrl: String?
 
     public init(name: String, startedAt: Date, streamKey: String? = nil, streamUrl: String? = nil) {
         self.name = name

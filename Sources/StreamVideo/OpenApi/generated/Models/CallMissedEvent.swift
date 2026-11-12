@@ -6,20 +6,20 @@ import Foundation
 import StreamCore
 
 /// This event is sent to call members who did not accept/reject/join the call to notify they missed the call
-public final class CallMissedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
+public final class CallMissedEvent: Sendable, Event, Decodable, WSCallEvent {
     /// Represents a call
-    public var call: CallResponse
-    public var callCid: String
-    public var createdAt: Date
+    public let call: CallResponse
+    public let callCid: String
+    public let createdAt: Date
     /// List of members who missed the call
-    public var members: [MemberResponse]
-    public var notifyUser: Bool
+    public let members: [MemberResponse]
+    public let notifyUser: Bool
     /// Call session ID
-    public var sessionId: String
+    public let sessionId: String
     /// The type of event: "call.notification" in this case
-    public var type: String = "call.missed"
+    public let type: String
     /// User response object
-    public var user: UserResponse
+    public let user: UserResponse
 
     public init(
         call: CallResponse,
@@ -28,6 +28,7 @@ public final class CallMissedEvent: @unchecked Sendable, Event, Decodable, WSCal
         members: [MemberResponse],
         notifyUser: Bool,
         sessionId: String,
+        type: String = "call.missed",
         user: UserResponse
     ) {
         self.call = call
@@ -36,6 +37,7 @@ public final class CallMissedEvent: @unchecked Sendable, Event, Decodable, WSCal
         self.members = members
         self.notifyUser = notifyUser
         self.sessionId = sessionId
+        self.type = type
         self.user = user
     }
 

@@ -6,17 +6,18 @@ import Foundation
 import StreamCore
 
 /// This event is sent when a reaction is sent in a call, clients should use this to show the reaction in the call screen
-public final class CallReactionEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
-    public var callCid: String
-    public var createdAt: Date
-    public var reaction: ReactionResponse
+public final class CallReactionEvent: Sendable, Event, Decodable, WSCallEvent {
+    public let callCid: String
+    public let createdAt: Date
+    public let reaction: ReactionResponse
     /// The type of event: "call.reaction_new" in this case
-    public var type: String = "call.reaction_new"
+    public let type: String
 
-    public init(callCid: String, createdAt: Date, reaction: ReactionResponse) {
+    public init(callCid: String, createdAt: Date, reaction: ReactionResponse, type: String = "call.reaction_new") {
         self.callCid = callCid
         self.createdAt = createdAt
         self.reaction = reaction
+        self.type = type
     }
 
     public init(from decoder: Decoder) throws {

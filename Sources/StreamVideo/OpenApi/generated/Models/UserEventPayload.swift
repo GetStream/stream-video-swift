@@ -5,21 +5,21 @@
 import Foundation
 import StreamCore
 
-public final class UserEventPayload: @unchecked Sendable, Decodable {
-    public var blockedUserIds: [String]
-    public var createdAt: Date
-    public var custom: [String: RawJSON]
-    public var deactivatedAt: Date?
-    public var deletedAt: Date?
-    public var id: String
-    public var image: String?
-    public var invisible: Bool?
-    public var language: String
-    public var lastActive: Date?
-    public var name: String?
-    public var role: String
-    public var teams: [String]
-    public var updatedAt: Date
+public final class UserEventPayload: Sendable, Decodable {
+    public let blockedUserIds: [String]
+    public let createdAt: Date
+    public let custom: [String: RawJSON]
+    public let deactivatedAt: Date?
+    public let deletedAt: Date?
+    public let id: String
+    public let image: String?
+    public let invisible: Bool?
+    public let language: String
+    public let lastActive: Date?
+    public let name: String?
+    public let role: String
+    public let teams: [String]
+    public let updatedAt: Date
 
     public init(
         blockedUserIds: [String],

@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class EncryptionSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable {
+public final class EncryptionSettingsRequest: Sendable, Encodable, JSONEncodable {
     
     public enum EncryptionSettingsRequestMode: String, Sendable, Codable, CaseIterable {
         case autoOn = "auto-on"
@@ -25,7 +25,7 @@ public final class EncryptionSettingsRequest: @unchecked Sendable, Encodable, JS
     }
 
     /// Encryption mode. One of: available, disabled, auto-on
-    public var mode: EncryptionSettingsRequestMode?
+    public let mode: EncryptionSettingsRequestMode?
 
     public init(mode: EncryptionSettingsRequestMode? = nil) {
         self.mode = mode

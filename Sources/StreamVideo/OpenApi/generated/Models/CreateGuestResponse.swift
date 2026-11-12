@@ -5,13 +5,13 @@
 import Foundation
 import StreamCore
 
-public final class CreateGuestResponse: @unchecked Sendable, Decodable {
+public final class CreateGuestResponse: Sendable, Decodable {
     /// the access token to authenticate the user
-    public var accessToken: String
+    public let accessToken: String
     /// Duration of the request in milliseconds
-    public var duration: String
+    public let duration: String
     /// User response object
-    public var user: UserResponse
+    public let user: UserResponse
 
     public init(accessToken: String, duration: String, user: UserResponse) {
         self.accessToken = accessToken

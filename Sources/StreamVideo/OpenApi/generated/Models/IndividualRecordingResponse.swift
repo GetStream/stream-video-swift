@@ -5,8 +5,8 @@
 import Foundation
 import StreamCore
 
-public final class IndividualRecordingResponse: @unchecked Sendable, Decodable {
-    public var status: String
+public final class IndividualRecordingResponse: Sendable, Decodable {
+    public let status: String
 
     public init(status: String) {
         self.status = status

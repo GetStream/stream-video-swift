@@ -6,10 +6,10 @@ import Foundation
 import StreamCore
 
 /// HLSSettings is the payload for HLS settings
-public final class HLSSettingsResponse: @unchecked Sendable, Decodable {
-    public var autoOn: Bool
-    public var enabled: Bool
-    public var qualityTracks: [String]
+public final class HLSSettingsResponse: Sendable, Decodable {
+    public let autoOn: Bool
+    public let enabled: Bool
+    public let qualityTracks: [String]
 
     public init(autoOn: Bool, enabled: Bool, qualityTracks: [String]) {
         self.autoOn = autoOn

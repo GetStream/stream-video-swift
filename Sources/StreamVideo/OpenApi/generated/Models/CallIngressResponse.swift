@@ -6,11 +6,11 @@ import Foundation
 import StreamCore
 
 /// CallIngressResponse is the payload for ingress settings
-public final class CallIngressResponse: @unchecked Sendable, Decodable {
+public final class CallIngressResponse: Sendable, Decodable {
     /// RTMP input settings
-    public var rtmp: RTMPIngress
-    public var srt: SRTIngress
-    public var whip: WHIPIngress
+    public let rtmp: RTMPIngress
+    public let srt: SRTIngress
+    public let whip: WHIPIngress
 
     public init(rtmp: RTMPIngress, srt: SRTIngress, whip: WHIPIngress) {
         self.rtmp = rtmp

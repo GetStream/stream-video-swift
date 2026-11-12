@@ -6,9 +6,9 @@ import Foundation
 import StreamCore
 
 /// MuteUsersResponse is the response payload for the mute users endpoint.
-public final class MuteUsersResponse: @unchecked Sendable, Decodable {
+public final class MuteUsersResponse: Sendable, Decodable {
     /// Duration of the request in milliseconds
-    public var duration: String
+    public let duration: String
 
     public init(duration: String) {
         self.duration = duration

@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class RTMPSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable {
+public final class RTMPSettingsRequest: Sendable, Encodable, JSONEncodable {
     
     public enum RTMPSettingsRequestQuality: String, Sendable, Codable, CaseIterable {
         case _1080p = "1080p"
@@ -32,9 +32,9 @@ public final class RTMPSettingsRequest: @unchecked Sendable, Encodable, JSONEnco
     }
 
     /// Whether RTMP broadcasting is enabled
-    public var enabled: Bool?
+    public let enabled: Bool?
     /// Resolution to set for the RTMP stream. One of: 360p, 480p, 720p, 1080p, 1440p, portrait-360x640, portrait-480x854, portrait-720x1280, portrait-1080x1920, portrait-1440x2560
-    public var quality: RTMPSettingsRequestQuality?
+    public let quality: RTMPSettingsRequestQuality?
 
     public init(enabled: Bool? = nil, quality: RTMPSettingsRequestQuality? = nil) {
         self.enabled = enabled

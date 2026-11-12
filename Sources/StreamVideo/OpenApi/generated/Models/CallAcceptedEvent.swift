@@ -6,20 +6,21 @@ import Foundation
 import StreamCore
 
 /// This event is sent when a user accepts a notification to join a call.
-public final class CallAcceptedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
+public final class CallAcceptedEvent: Sendable, Event, Decodable, WSCallEvent {
     /// Represents a call
-    public var call: CallResponse
-    public var callCid: String
-    public var createdAt: Date
+    public let call: CallResponse
+    public let callCid: String
+    public let createdAt: Date
     /// The type of event: "call.accepted" in this case
-    public var type: String = "call.accepted"
+    public let type: String
     /// User response object
-    public var user: UserResponse
+    public let user: UserResponse
 
-    public init(call: CallResponse, callCid: String, createdAt: Date, user: UserResponse) {
+    public init(call: CallResponse, callCid: String, createdAt: Date, type: String = "call.accepted", user: UserResponse) {
         self.call = call
         self.callCid = callCid
         self.createdAt = createdAt
+        self.type = type
         self.user = user
     }
 

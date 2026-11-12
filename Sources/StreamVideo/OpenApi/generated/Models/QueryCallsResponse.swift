@@ -5,12 +5,12 @@
 import Foundation
 import StreamCore
 
-public final class QueryCallsResponse: @unchecked Sendable, Decodable {
-    public var calls: [CallStateResponseFields]
+public final class QueryCallsResponse: Sendable, Decodable {
+    public let calls: [CallStateResponseFields]
     /// Duration of the request in milliseconds
-    public var duration: String
-    public var next: String?
-    public var prev: String?
+    public let duration: String
+    public let next: String?
+    public let prev: String?
 
     public init(calls: [CallStateResponseFields], duration: String, next: String? = nil, prev: String? = nil) {
         self.calls = calls

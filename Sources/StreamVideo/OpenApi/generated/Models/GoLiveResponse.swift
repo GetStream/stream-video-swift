@@ -6,11 +6,11 @@ import Foundation
 import StreamCore
 
 /// Basic response information
-public final class GoLiveResponse: @unchecked Sendable, Decodable {
+public final class GoLiveResponse: Sendable, Decodable {
     /// Represents a call
-    public var call: CallResponse
+    public let call: CallResponse
     /// Duration of the request in milliseconds
-    public var duration: String
+    public let duration: String
 
     public init(call: CallResponse, duration: String) {
         self.call = call

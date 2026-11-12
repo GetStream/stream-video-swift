@@ -5,8 +5,8 @@
 import Foundation
 import StreamCore
 
-public final class SessionSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable {
-    public var inactivityTimeoutSeconds: Int
+public final class SessionSettingsRequest: Sendable, Encodable, JSONEncodable {
+    public let inactivityTimeoutSeconds: Int
 
     public init(inactivityTimeoutSeconds: Int) {
         self.inactivityTimeoutSeconds = inactivityTimeoutSeconds

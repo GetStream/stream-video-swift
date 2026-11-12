@@ -6,11 +6,11 @@ import Foundation
 import StreamCore
 
 /// A recurring quiet-hours schedule: while any quiet window is active, push notifications for the user are suppressed. Suppressed notifications are dropped, not delayed.
-public final class PushScheduleResponse: @unchecked Sendable, Decodable {
+public final class PushScheduleResponse: Sendable, Decodable {
     /// The quiet windows. Push is suppressed while any rule is active.
-    public var quietHours: [QuietHoursRuleResponse]
+    public let quietHours: [QuietHoursRuleResponse]
     /// IANA time zone name the quiet windows are evaluated in, for example Europe/Amsterdam.
-    public var timezone: String
+    public let timezone: String
 
     public init(quietHours: [QuietHoursRuleResponse], timezone: String) {
         self.quietHours = quietHours

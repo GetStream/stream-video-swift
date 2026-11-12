@@ -5,9 +5,9 @@
 import Foundation
 import StreamCore
 
-public final class WHIPIngress: @unchecked Sendable, Decodable {
+public final class WHIPIngress: Sendable, Decodable {
     /// URL for a new whip input, every time a new link is created
-    public var address: String
+    public let address: String
 
     public init(address: String) {
         self.address = address

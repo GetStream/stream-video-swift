@@ -5,12 +5,12 @@
 import Foundation
 import StreamCore
 
-public final class FileUploadConfig: @unchecked Sendable, Decodable {
-    public var allowedFileExtensions: [String]
-    public var allowedMimeTypes: [String]
-    public var blockedFileExtensions: [String]
-    public var blockedMimeTypes: [String]
-    public var sizeLimit: Int
+public final class FileUploadConfig: Sendable, Decodable {
+    public let allowedFileExtensions: [String]
+    public let allowedMimeTypes: [String]
+    public let blockedFileExtensions: [String]
+    public let blockedMimeTypes: [String]
+    public let sizeLimit: Int
 
     public init(
         allowedFileExtensions: [String],

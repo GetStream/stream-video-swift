@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class TranscriptionSettings: @unchecked Sendable, Decodable {
+public final class TranscriptionSettings: Sendable, Decodable {
     
     public enum TranscriptionSettingsClosedCaptionMode: String, Sendable, Codable, CaseIterable {
         case autoOn = "auto-on"
@@ -88,11 +88,11 @@ public final class TranscriptionSettings: @unchecked Sendable, Decodable {
         }
     }
 
-    public var closedCaptionMode: TranscriptionSettingsClosedCaptionMode
-    public var language: TranscriptionSettingsLanguage
-    public var mode: TranscriptionSettingsMode
-    public var speechSegmentConfig: SpeechSegmentConfig?
-    public var translation: TranslationSettings?
+    public let closedCaptionMode: TranscriptionSettingsClosedCaptionMode
+    public let language: TranscriptionSettingsLanguage
+    public let mode: TranscriptionSettingsMode
+    public let speechSegmentConfig: SpeechSegmentConfig?
+    public let translation: TranslationSettings?
 
     public init(
         closedCaptionMode: TranscriptionSettingsClosedCaptionMode,

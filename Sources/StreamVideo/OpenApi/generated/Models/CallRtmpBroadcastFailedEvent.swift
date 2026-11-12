@@ -6,20 +6,21 @@ import Foundation
 import StreamCore
 
 /// This event is sent when a call RTMP broadcast has failed
-public final class CallRtmpBroadcastFailedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
+public final class CallRtmpBroadcastFailedEvent: Sendable, Event, Decodable, WSCallEvent {
     /// The unique identifier for a call (<type>:<id>)
-    public var callCid: String
+    public let callCid: String
     /// Date/time of creation
-    public var createdAt: Date
+    public let createdAt: Date
     /// Name of the given RTMP broadcast
-    public var name: String
+    public let name: String
     /// The type of event: "call.rtmp_broadcast_failed" in this case
-    public var type: String = "call.rtmp_broadcast_failed"
+    public let type: String
 
-    public init(callCid: String, createdAt: Date, name: String) {
+    public init(callCid: String, createdAt: Date, name: String, type: String = "call.rtmp_broadcast_failed") {
         self.callCid = callCid
         self.createdAt = createdAt
         self.name = name
+        self.type = type
     }
 
     public init(from decoder: Decoder) throws {

@@ -5,14 +5,14 @@
 import Foundation
 import StreamCore
 
-public final class StartTranscriptionRequest: @unchecked Sendable, Encodable, JSONEncodable {
+public final class StartTranscriptionRequest: Sendable, Encodable, JSONEncodable {
     
     /// Enable closed captions along with transcriptions
-    public var enableClosedCaptions: Bool?
+    public let enableClosedCaptions: Bool?
     /// The spoken language in the call, if not provided the language defined in the transcription settings will be used. One of: auto, ar, bg, ca, cs, da, de, el, en, es, et, fi, fr, he, hi, hr, hu, id, it, ja, ko, ms, nl, no, pl, pt, ro, ru, sk, sl, sv, ta, th, tl, tr, uk, zh
-    public var language: String?
+    public let language: String?
     /// Store transcriptions in this external storage
-    public var transcriptionExternalStorage: String?
+    public let transcriptionExternalStorage: String?
 
     public init(enableClosedCaptions: Bool? = nil, language: String? = nil, transcriptionExternalStorage: String? = nil) {
         self.enableClosedCaptions = enableClosedCaptions

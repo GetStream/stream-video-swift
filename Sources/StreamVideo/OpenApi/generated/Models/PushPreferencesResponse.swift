@@ -6,12 +6,12 @@ import Foundation
 import StreamCore
 
 /// The push preference details.
-public final class PushPreferencesResponse: @unchecked Sendable, Decodable {
-    public var callLevel: String?
+public final class PushPreferencesResponse: Sendable, Decodable {
+    public let callLevel: String?
     /// If provided the notifications will be disabled until the set date.
-    public var disabledUntil: Date?
+    public let disabledUntil: Date?
     /// A recurring quiet-hours schedule: while any quiet window is active, push notifications for the user are suppressed. Suppressed notifications are dropped, not delayed.
-    public var schedule: PushScheduleResponse?
+    public let schedule: PushScheduleResponse?
 
     public init(callLevel: String? = nil, disabledUntil: Date? = nil, schedule: PushScheduleResponse? = nil) {
         self.callLevel = callLevel

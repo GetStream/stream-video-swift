@@ -5,10 +5,10 @@
 import Foundation
 import StreamCore
 
-public final class ScreensharingSettings: @unchecked Sendable, Decodable {
-    public var accessRequestEnabled: Bool
-    public var enabled: Bool
-    public var targetResolution: TargetResolution?
+public final class ScreensharingSettings: Sendable, Decodable {
+    public let accessRequestEnabled: Bool
+    public let enabled: Bool
+    public let targetResolution: TargetResolution?
 
     public init(accessRequestEnabled: Bool, enabled: Bool, targetResolution: TargetResolution? = nil) {
         self.accessRequestEnabled = accessRequestEnabled

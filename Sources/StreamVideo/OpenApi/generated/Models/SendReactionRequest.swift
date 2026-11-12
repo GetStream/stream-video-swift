@@ -5,10 +5,10 @@
 import Foundation
 import StreamCore
 
-public final class SendReactionRequest: @unchecked Sendable, Encodable, JSONEncodable {
-    public var custom: [String: RawJSON]?
-    public var emojiCode: String?
-    public var type: String
+public final class SendReactionRequest: Sendable, Encodable, JSONEncodable {
+    public let custom: [String: RawJSON]?
+    public let emojiCode: String?
+    public let type: String
 
     public init(custom: [String: RawJSON]? = nil, emojiCode: String? = nil, type: String) {
         self.custom = custom

@@ -5,12 +5,12 @@
 import Foundation
 import StreamCore
 
-public final class RingCallResponse: @unchecked Sendable, Decodable {
-    public var duration: String
+public final class RingCallResponse: Sendable, Decodable {
+    public let duration: String
     /// List of members ringing notification was sent to
-    public var membersIds: [String]
+    public let membersIds: [String]
     /// The ring this call created, for correlating the accept, reject and missed outcomes that follow
-    public var ringId: String?
+    public let ringId: String?
 
     public init(duration: String, membersIds: [String], ringId: String? = nil) {
         self.duration = duration

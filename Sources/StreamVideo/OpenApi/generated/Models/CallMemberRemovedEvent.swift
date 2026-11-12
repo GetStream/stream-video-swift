@@ -6,21 +6,22 @@ import Foundation
 import StreamCore
 
 /// This event is sent when one or more members are removed from a call
-public final class CallMemberRemovedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
+public final class CallMemberRemovedEvent: Sendable, Event, Decodable, WSCallEvent {
     /// Represents a call
-    public var call: CallResponse
-    public var callCid: String
-    public var createdAt: Date
+    public let call: CallResponse
+    public let callCid: String
+    public let createdAt: Date
     /// the list of member IDs removed from the call
-    public var members: [String]
+    public let members: [String]
     /// The type of event: "call.member_removed" in this case
-    public var type: String = "call.member_removed"
+    public let type: String
 
-    public init(call: CallResponse, callCid: String, createdAt: Date, members: [String]) {
+    public init(call: CallResponse, callCid: String, createdAt: Date, members: [String], type: String = "call.member_removed") {
         self.call = call
         self.callCid = callCid
         self.createdAt = createdAt
         self.members = members
+        self.type = type
     }
 
     public init(from decoder: Decoder) throws {

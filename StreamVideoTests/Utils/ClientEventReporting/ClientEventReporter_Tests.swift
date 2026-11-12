@@ -355,9 +355,9 @@ final class ClientEventReporter_Tests: XCTestCase, @unchecked Sendable {
             elapsedTime: 414,
             eventType: "completed",
             stage: "WSJoin",
+            type: "default",
             wasPreviouslyConnected: false
         )
-        subject.type = "default"
 
         let description = subject.description
 

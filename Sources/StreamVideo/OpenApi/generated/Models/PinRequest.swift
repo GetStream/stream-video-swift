@@ -6,11 +6,11 @@ import Foundation
 import StreamCore
 
 /// PinRequest is the payload for pinning a message.
-public final class PinRequest: @unchecked Sendable, Encodable, JSONEncodable {
+public final class PinRequest: Sendable, Encodable, JSONEncodable {
     /// the session ID of the user who pinned the message
-    public var sessionId: String
+    public let sessionId: String
     /// the user ID of the user who pinned the message
-    public var userId: String
+    public let userId: String
 
     public init(sessionId: String, userId: String) {
         self.sessionId = sessionId

@@ -5,12 +5,12 @@
 import Foundation
 import StreamCore
 
-public final class IngressVideoLayerResponse: @unchecked Sendable, Decodable {
-    public var bitrate: Int
-    public var codec: String
-    public var frameRateLimit: Int
-    public var maxDimension: Int
-    public var minDimension: Int
+public final class IngressVideoLayerResponse: Sendable, Decodable {
+    public let bitrate: Int
+    public let codec: String
+    public let frameRateLimit: Int
+    public let maxDimension: Int
+    public let minDimension: Int
 
     public init(bitrate: Int, codec: String, frameRateLimit: Int, maxDimension: Int, minDimension: Int) {
         self.bitrate = bitrate
