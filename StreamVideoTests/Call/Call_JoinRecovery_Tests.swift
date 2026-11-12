@@ -574,7 +574,7 @@ final class CallAuthenticationBackedWebRTCAuthenticator:
         notify: Bool,
         options: CreateCallOptions?,
         declaresPlaybackCapabilities: Bool
-    ) async throws -> (sfuAdapter: SFUAdapter, response: JoinCallResponse) {
+    ) async throws -> (sfuAdapter: SFUAdapter?, response: JoinCallResponse) {
         let response = try await coordinator.callAuthentication(
             create,
             ring,
