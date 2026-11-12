@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import protocol StreamChat.AudioSessionConfiguring
 import struct StreamChat.ChannelId
 import class StreamChat.ChatChannel
 import class StreamChat.ChatChannelController
@@ -27,13 +28,25 @@ import StreamVideoSwiftUI
 /// the call's audio I/O and mutes both mic and speakers (IOS-1821). Keep chat
 /// away from the session entirely: playback/recording of voice messages still
 /// works against the already-active call session.
+///
+/// Conforms to the protocol instead of subclassing: chat's player calls the
+/// completion variants, and the protocol's defaults route those to the no-ops
+/// below (IOS-2254). A subclass would inherit the real completion variants.
 /// ponytail: unconditional no-op; if chat ever becomes reachable outside a
 /// call, gate these on `AppState.shared.activeCall == nil` instead.
-final class DemoChatAudioSessionConfigurator: StreamAudioSessionConfigurator, @unchecked Sendable {
-    override func activateRecordingSession() throws {}
-    override func deactivateRecordingSession() throws {}
-    override func activatePlaybackSession() throws {}
-    override func deactivatePlaybackSession() throws {}
+struct DemoChatAudioSessionConfigurator: AudioSessionConfiguring {
+    private let permissionProvider = StreamAudioSessionConfigurator()
+
+    func activateRecordingSession() throws {}
+    func deactivateRecordingSession() throws {}
+    func activatePlaybackSession() throws {}
+    func deactivatePlaybackSession() throws {}
+
+    func requestRecordPermission(
+        _ completionHandler: @escaping @Sendable (Bool) -> Void
+    ) {
+        permissionProvider.requestRecordPermission(completionHandler)
+    }
 }
 
 struct DemoChatAdapter {
