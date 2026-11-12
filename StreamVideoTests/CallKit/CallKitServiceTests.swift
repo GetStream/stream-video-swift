@@ -953,7 +953,10 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
     func test_mute_noMicrophonePermission_attemptsToUnmute_actionFails() async throws {
         let firstCallUUID = UUID()
         uuidFactory.getResult = firstCallUUID
-        let call = stubCall(response: defaultGetCallResponse)
+        let call = stubCall(
+            response: defaultGetCallResponse,
+            initialCallSettings: .init(audioOn: false)
+        )
         subject.streamVideo = mockedStreamVideo
         subject.missingPermissionPolicy = .none
         let callStateWithMicOff = CallState(.dummy())
@@ -1978,14 +1981,25 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         )
     }
 
+    /// - Parameter initialCallSettings: What the call controller mirrors to
+    ///   the call state, whenever its observation starts.
     @MainActor
     @discardableResult
     private func stubCall(
         overrideCallId: String? = nil,
-        response: GetCallResponse
+        response: GetCallResponse,
+        initialCallSettings: CallSettings = .default
     ) -> MockCall {
         let callId = overrideCallId ?? callId
-        let call = MockCall(.dummy(callId: callId))
+        let call = MockCall(
+            .dummy(
+                callId: callId,
+                callController: .dummy(
+                    callId: callId,
+                    initialCallSettings: initialCallSettings
+                )
+            )
+        )
         call.stub(for: .get, with: response)
         call.stub(
             for: .join,

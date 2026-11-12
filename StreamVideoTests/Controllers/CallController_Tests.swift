@@ -1801,6 +1801,28 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         XCTAssertEqual(call.state.anonymousParticipantCount, 0)
     }
 
+    // MARK: - call settings mirror
+
+    @MainActor
+    func test_callSettingsUpdates_inARow_endWithTheLastValueOnTheCallState() async throws {
+        let call = Call.dummy(callController: subject)
+        let stateAdapter = mockWebRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+        // Starting on, an even number of toggles ends with the speaker on.
+        let toggles = 40
+
+        for index in 0..<toggles {
+            await stateAdapter.enqueueCallSettings { $0.withUpdatedSpeakerState(index % 2 == 1) }
+        }
+        let lastSpeakerOn = toggles % 2 == 0
+        await fulfillment { await stateAdapter.callSettings.speakerOn == lastSpeakerOn }
+        let expected = await stateAdapter.callSettings
+
+        await fulfilmentInMainActor { call.state.callSettings == expected }
+    }
+
     // MARK: - enableClientCapabilities
 
     func test_enableClientCapabilities_correctlyUpdatesStateAdapter() async throws {

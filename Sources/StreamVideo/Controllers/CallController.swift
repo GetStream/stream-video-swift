@@ -81,6 +81,7 @@ class CallController: @unchecked Sendable {
     private var participants: CollectionDelayedUpdateObserver<[String: CallParticipant]>?
 
     private let disposableBag = DisposableBag()
+    private let callSettingsProcessingQueue = OperationQueue(maxConcurrentOperationCount: 1)
 
     init(
         defaultAPI: DefaultAPIEndpoints,
@@ -990,7 +991,11 @@ class CallController: @unchecked Sendable {
             .stateAdapter
             .$callSettings
             .removeDuplicates()
-            .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in self?.call?.state.update(callSettings: $0) }
+            // A task per value is unordered, and a stale value would
+            // overwrite a newer one on the call state.
+            .sinkTask(queue: callSettingsProcessingQueue) { @MainActor [weak self] in
+                self?.call?.state.update(callSettings: $0)
+            }
             .store(in: disposableBag)
     }
 
