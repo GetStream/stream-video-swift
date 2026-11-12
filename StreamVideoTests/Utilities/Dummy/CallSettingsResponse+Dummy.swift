@@ -25,13 +25,15 @@ extension CallSettingsResponse {
         transcription: TranscriptionSettings = TranscriptionSettings.dummy(),
         video: VideoSettings = VideoSettings.dummy(),
         sessionSettings: SessionSettingsResponse = SessionSettingsResponse.dummy(),
-        encryption: EncryptionSettingsResponse = EncryptionSettingsResponse.dummy()
+        encryption: EncryptionSettingsResponse = EncryptionSettingsResponse.dummy(),
+        extraOpts: [String: RawJSON]? = nil
     ) -> CallSettingsResponse {
         .init(
             audio: audio,
             backstage: backstage,
             broadcasting: broadcasting,
             encryption: encryption,
+            extraOpts: extraOpts,
             frameRecording: frameRecording,
             geofencing: geofencing,
             individualRecording: individualRecording,
