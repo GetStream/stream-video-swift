@@ -714,6 +714,58 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         }
     }
 
+    // MARK: - HLS audio ownership lost
+
+    @MainActor
+    func test_hlsPlaybackStage_anotherSessionTakesTheAudioStore_leavesOnce() async throws {
+        let fixture = try await makeHLSAudioFixture(stage: .hlsPlayback)
+
+        fixture.takeTheStore()
+
+        await fulfillment { fixture.call.leaveInitiators.count == 1 }
+        await drainMainQueue()
+        XCTAssertEqual(fixture.call.leaveInitiators, [.unknown])
+        XCTAssertEqual(
+            fixture.call.recordedInputPayload(String?.self, for: .leave)?.first,
+            Call.LeaveReason.activeCallReplaced.rawValue
+        )
+    }
+
+    @MainActor
+    func test_hlsPlaybackStage_ownRelease_doesNotLeave() async throws {
+        let fixture = try await makeHLSAudioFixture(stage: .hlsPlayback)
+
+        await fixture.hlsAudioSession.deactivate()
+        await fulfillment { fixture.audioStore.audioStore.state.activeSessionIdentifier == "" }
+        await drainMainQueue()
+
+        XCTAssertTrue(fixture.call.leaveInitiators.isEmpty)
+    }
+
+    @MainActor
+    func test_joinedStage_anotherSessionTakesTheAudioStore_doesNotLeave() async throws {
+        let fixture = try await makeHLSAudioFixture(stage: .joined)
+
+        fixture.takeTheStore()
+        _ = try await fixture.hlsAudioSession.ownershipLost
+            .filter { @Sendable lost in lost }
+            .nextValue(timeout: defaultTimeout)
+        await drainMainQueue()
+
+        XCTAssertTrue(fixture.call.leaveInitiators.isEmpty)
+    }
+
+    @MainActor
+    func test_hlsPlaybackStage_noHLSAudioSession_anotherSessionOwningTheStore_doesNotLeave() async throws {
+        let fixture = try await makeHLSAudioFixture(stage: .hlsPlayback, activates: false)
+
+        fixture.takeTheStore()
+        await fulfillment { fixture.audioStore.audioStore.state.activeSessionIdentifier != "" }
+        await drainMainQueue()
+
+        XCTAssertTrue(fixture.call.leaveInitiators.isEmpty)
+    }
+
     // MARK: - HLS call ended
 
     @MainActor
@@ -1953,6 +2005,41 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
                 for: .joinCall
             )?.first?.2
         )
+    }
+
+    private struct HLSAudioFixture {
+        let call: MockCall
+        let audioStore: MockRTCAudioStore
+        let hlsAudioSession: HLSAudioSession
+
+        /// Another call claims the shared audio store.
+        func takeTheStore() {
+            audioStore.audioStore.dispatch(.setActiveSessionIdentifier(.unique))
+        }
+    }
+
+    /// A call that is in `stage`, with the coordinator's HLS audio session
+    /// active on a store of its own.
+    @MainActor
+    private func makeHLSAudioFixture(
+        stage: WebRTCCoordinator.StateMachine.Stage.ID,
+        activates: Bool = true
+    ) async throws -> HLSAudioFixture {
+        let mockAudioStore = MockRTCAudioStore()
+        mockAudioStore.makeShared()
+        addTeardownBlock { try await mockAudioStore.dismantle() }
+        let call = MockCall(.dummy(callController: subject))
+        let hlsAudioSession = await mockWebRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .hlsAudioSession
+        if activates {
+            try await hlsAudioSession.activate()
+        }
+        enterStage(stage)
+        await drainMainQueue()
+        return .init(call: call, audioStore: mockAudioStore, hlsAudioSession: hlsAudioSession)
     }
 
     /// Puts the coordinator in a stage that the controller observes.
