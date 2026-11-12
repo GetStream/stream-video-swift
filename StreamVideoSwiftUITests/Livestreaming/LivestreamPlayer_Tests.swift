@@ -209,8 +209,13 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
         let call = streamVideo.call(callType: callType, callId: callId)
         let player = LivestreamPlayer(call: call, livestreamState: .joining, joinPolicy: .none)
             .frame(width: defaultScreenSize.width, height: defaultScreenSize.height)
-        
-        // Then
+
+        // The joining view is a spinning indicator.
+        // The check allows that motion.
+        let previousPrecision = precision
+        precision = 0.9
+        defer { precision = previousPrecision }
+
         AssertSnapshot(player, variants: [.defaultLight, .defaultDark])
     }
     
