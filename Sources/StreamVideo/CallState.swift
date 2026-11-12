@@ -529,9 +529,22 @@ public class CallState: ObservableObject {
             backstage = true
         }
         guard let session else { return }
-        session.liveEndedAt = Date()
-        self.session = session
-        configureDuration(for: session)
+        let updated = CallSessionResponse(
+            acceptedBy: session.acceptedBy,
+            anonymousParticipantCount: session.anonymousParticipantCount,
+            endedAt: session.endedAt,
+            id: session.id,
+            liveEndedAt: Date(),
+            liveStartedAt: session.liveStartedAt,
+            missedBy: session.missedBy,
+            participants: session.participants,
+            participantsCountByRole: session.participantsCountByRole,
+            rejectedBy: session.rejectedBy,
+            startedAt: session.startedAt,
+            timerEndsAt: session.timerEndsAt
+        )
+        self.session = updated
+        configureDuration(for: updated)
     }
 
     /// Adds ring outcomes without removing updates received over WebSocket.
