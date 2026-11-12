@@ -49,6 +49,13 @@ extension StreamCallAudioRecorder.Namespace {
                         ?? Just(nil).eraseToAnyPublisher()
                 }
                 .switchToLatest()
+                // A new client reports its current call, or no call. The same
+                // call, or no call, reported again is not a change.
+                .removeDuplicates { $0?.cId == $1?.cId }
+                // Skip "no call" reports until the first call. They can arrive
+                // after the lobby started recording. After the first call,
+                // every "no call" passes, so a call end turns recording off.
+                .drop(while: { $0 == nil })
                 .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in await self?.didUpdate($0) }
         }
 

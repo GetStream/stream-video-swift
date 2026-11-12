@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Leave a livestream when backstage is disabled, even if the user can join backstage. [#1400](https://github.com/GetStream/stream-video-swift/pull/1400)
 - Apply and clear a video background after reconnection. The rebuilt publisher uses the capture session that stayed open. [#1402](https://github.com/GetStream/stream-video-swift/pull/1402)
 - Apply the loudspeaker when call settings request it, after an idle route already reported Speaker. [#1395](https://github.com/GetStream/stream-video-swift/pull/1395)
+- Keep the lobby microphone level meter running when a new client or the audio device module reports its initial state. [#1412](https://github.com/GetStream/stream-video-swift/pull/1412)
 
 ### 🔄 Changed
 
