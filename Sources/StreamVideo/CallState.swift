@@ -673,6 +673,7 @@ public class CallState: ObservableObject {
             backstage: settings.backstage,
             broadcasting: settings.broadcasting,
             encryption: settings.encryption,
+            extraOpts: settings.extraOpts,
             frameRecording: settings.frameRecording,
             geofencing: settings.geofencing,
             individualRecording: settings.individualRecording,
