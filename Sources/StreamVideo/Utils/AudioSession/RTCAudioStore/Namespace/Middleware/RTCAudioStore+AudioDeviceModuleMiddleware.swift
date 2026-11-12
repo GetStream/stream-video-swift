@@ -159,6 +159,13 @@ extension RTCAudioStore {
         /// stops the audio engine, while WebRTC ignores that route change.
         /// Only the transition to a route without input restarts recording,
         /// so a route that stays without input does not restart repeatedly.
+        ///
+        /// - Important: This is a best-effort recovery. During a call, the
+        ///   app must not call `AVAudioSession.setActive(false)`. With CallKit
+        ///   the deactivation fails, but iOS still stops the audio engine and
+        ///   keeps the input in the route, so this method cannot detect it.
+        ///   The caller gets "Session deactivation failed" (`-12988`), and
+        ///   the system log shows "iounit stopped unexpectedly".
         private func didSetCurrentRoute(
             _ route: RTCAudioStore.StoreState.AudioRoute,
             state: RTCAudioStore.StoreState,
