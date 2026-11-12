@@ -39,6 +39,20 @@ extension RTCAudioStore {
                     }
                 }
 
+            case .setCurrentRoute(let value):
+                if let audioDeviceModule = state.audioDeviceModule {
+                    log.throwing(
+                        "Unable to recover from audio input loss.",
+                        subsystems: .audioSession
+                    ) {
+                        try didSetCurrentRoute(
+                            value,
+                            state: state,
+                            audioDeviceModule: audioDeviceModule
+                        )
+                    }
+                }
+
             case .setRecording(let value):
                 if let audioDeviceModule = state.audioDeviceModule {
                     log.throwing(
@@ -134,6 +148,50 @@ extension RTCAudioStore {
             }
 
             // Restart the ADM
+            try audioDeviceModule.setRecording(false)
+            try audioDeviceModule.setRecording(true)
+        }
+
+        /// Restarts recording when the microphone leaves the route mid-call.
+        ///
+        /// Another component in the app can deactivate the shared
+        /// `AVAudioSession`. iOS then removes the input from the route and
+        /// stops the audio engine, while WebRTC ignores that route change.
+        /// Only the transition to a route without input restarts recording,
+        /// so a route that stays without input does not restart repeatedly.
+        private func didSetCurrentRoute(
+            _ route: RTCAudioStore.StoreState.AudioRoute,
+            state: RTCAudioStore.StoreState,
+            audioDeviceModule: AudioDeviceModule
+        ) throws {
+            guard
+                route.inputs.isEmpty,
+                !state.currentRoute.inputs.isEmpty,
+                state.isActive,
+                state.isRecording,
+                !state.isInterrupted
+            else {
+                return
+            }
+
+            // Persistent mode keeps the input graph across a stop/start, so
+            // the engine would not restart. Leave it around the restart.
+            let isMutedSpeechDetectionEnabled = audioDeviceModule
+                .isMutedSpeechDetectionEnabled
+            if isMutedSpeechDetectionEnabled {
+                try audioDeviceModule.setMutedSpeechDetectionEnabled(false)
+            }
+            defer {
+                if isMutedSpeechDetectionEnabled {
+                    log.throwing(
+                        "Unable to restore muted speech detection.",
+                        subsystems: .audioSession
+                    ) {
+                        try audioDeviceModule.setMutedSpeechDetectionEnabled(true)
+                    }
+                }
+            }
+
             try audioDeviceModule.setRecording(false)
             try audioDeviceModule.setRecording(true)
         }

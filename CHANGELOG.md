@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🐞 Fixed
 
+- Restart the microphone when another part of the app deactivates the shared audio session during a call, for example a chat audio player that stops. iOS removes the microphone from the route and stops the audio engine in that case.
 - Leave a livestream when the SFU reports that the live segment ended, unless the user can join backstage. A user who can join backstage follows the SFU reconnect strategy. [#1400](https://github.com/GetStream/stream-video-swift/pull/1400)
 - Mark the call as backstage when the SFU reports that the live segment ended. [#1400](https://github.com/GetStream/stream-video-swift/pull/1400)
 - Record `liveEndedAt` when the SFU reports that the live segment ended. [#1400](https://github.com/GetStream/stream-video-swift/pull/1400)
