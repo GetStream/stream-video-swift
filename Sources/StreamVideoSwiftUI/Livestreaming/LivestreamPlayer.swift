@@ -20,7 +20,9 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
     public enum JoinPolicy {
         /// No automatic action; users must manually join the livestream.
         case none
-        /// Automatically joins the livestream on appearance and leave on disappearance.
+        /// Joins on appearance and leaves on disappearance.
+        /// A remote end shows the waiting view.
+        /// The player then joins a fresh call when backstage becomes false.
         case auto
     }
     
@@ -40,10 +42,19 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
     /// A callback triggered when the fullscreen state changes.
     var onFullScreenStateChange: ((Bool) -> Void)?
     
-    /// The state object representing the call's current state.
-    @ObservedObject var state: CallState
-    
-    @State var call: Call
+    /// Holds the call the player renders.
+    @ObservedObject var session: LivestreamSession
+
+    /// Joins, leaves, and replaces the call.
+    @ObservedObject var joinController: LivestreamJoinController<Factory>
+
+    var call: Call { session.call }
+
+    var state: CallState { session.call.state }
+
+    var livestreamState: LivestreamState { joinController.livestreamState }
+
+    var countdown: TimeInterval { joinController.countdown }
     
     @State var muted: Bool = false
     
@@ -56,12 +67,6 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
     @State var fullScreen = false
     
     @State var showParticipantCount: Bool
-    
-    @State var timerCancellable: AnyCancellable?
-    
-    @State var countdown: TimeInterval
-    
-    @State var livestreamState: LivestreamState
 
     @State var controlsTask: Task<Void, Never>?
     
@@ -91,12 +96,18 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
     ) {
         self.viewFactory = viewFactory
         let call = InjectedValues[\.streamVideo].call(callType: type, callId: id)
-        self.call = call
-        livestreamState = LivestreamState(call: call)
-        countdown = 0
+        let session = LivestreamSession(call: call)
+        _session = ObservedObject(wrappedValue: session)
+        _joinController = ObservedObject(
+            wrappedValue: LivestreamJoinController(
+                session: session,
+                joinPolicy: joinPolicy,
+                livestreamState: LivestreamState(call: call),
+                countdown: 0
+            )
+        )
         self.muted = muted
         self.showParticipantCount = showParticipantCount
-        _state = ObservedObject(wrappedValue: call.state)
         self.joinPolicy = joinPolicy
         self.showsLeaveCallButton = showsLeaveCallButton
         self.onFullScreenStateChange = onFullScreenStateChange
@@ -116,13 +127,19 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
         onFullScreenStateChange: ((Bool) -> Void)? = nil
     ) {
         self.viewFactory = viewFactory
-        self.call = call
-        self.countdown = countdown
-        self.livestreamState = livestreamState ?? LivestreamState(call: call)
+        let session = LivestreamSession(call: call)
+        _session = ObservedObject(wrappedValue: session)
+        _joinController = ObservedObject(
+            wrappedValue: LivestreamJoinController(
+                session: session,
+                joinPolicy: joinPolicy,
+                livestreamState: livestreamState ?? LivestreamState(call: call),
+                countdown: countdown
+            )
+        )
         self.muted = muted
         self.recordings = recordings
         self.showParticipantCount = showParticipantCount
-        _state = ObservedObject(wrappedValue: call.state)
         self.joinPolicy = joinPolicy
         self.showsLeaveCallButton = showsLeaveCallButton
         self.onFullScreenStateChange = onFullScreenStateChange
@@ -144,59 +161,23 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
                 livestreamControls
             }
         }
-        .onChange(of: state.participants, perform: { newValue in
-            if muted && (newValue.first(where: { $0.hasVideo && $0.track != nil }) != nil) {
-                muteLivestreamOnJoin()
-            }
-        })
+        .onChange(of: state.participants) { participants in
+            muteWhenVideoAppears(participants)
+        }
+        .onReceive(callEndedPublisher) { notification in
+            joinController.handleCallEnded(notification)
+        }
         .onChange(of: call.state.backstage) { _ in
-            livestreamState = LivestreamState(call: call)
-            if
-                let startsAt = state.startsAt,
-                livestreamState == .backstage,
-                timerCancellable == nil {
-                timerCancellable = Foundation
-                    .Timer
-                    .publish(every: 1, on: .main, in: .default)
-                    .autoconnect()
-                    .sinkTask(storeIn: disposableBag) { @MainActor _ in
-                        countdown = startsAt.timeIntervalSinceNow
-                        if countdown <= 0 {
-                            stopTimer()
-                            countdown = 0
-                        }
-                    }
-            } else if livestreamState == .live {
-                stopTimer()
-            }
+            joinController.handleBackstageChange()
         }
         .onChange(of: controlsShown) { _ in
-            if controlsShown {
-                controlsTask?.cancel()
-                controlsTask = Task { @MainActor in
-                    try? await Task.sleep(nanoseconds: 2_000_000_000)
-                    try? Task.checkCancellation()
-                    if !streamPaused {
-                        self.controlsShown = false
-                    }
-                }
-            }
+            hideControlsAfterDelay()
         }
         .onAppear {
-            switch joinPolicy {
-            case .none:
-                break
-            case .auto:
-                joinLivestream()
-            }
+            joinController.joinOnAppear()
         }
         .onDisappear {
-            switch joinPolicy {
-            case .none:
-                break
-            case .auto:
-                leaveLivestream(initiator: .app)
-            }
+            leaveOnDisappear()
         }
     }
     
@@ -215,6 +196,36 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
         }
     }
     
+    func muteWhenVideoAppears(_ participants: [CallParticipant]) {
+        guard muted else { return }
+        guard participants.contains(where: { $0.hasVideo && $0.track != nil }) else {
+            return
+        }
+        muteLivestreamOnJoin()
+    }
+
+    func hideControlsAfterDelay() {
+        guard controlsShown else { return }
+        controlsTask?.cancel()
+        controlsTask = Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 2_000_000_000)
+            try? Task.checkCancellation()
+            guard !streamPaused else { return }
+            controlsShown = false
+        }
+    }
+
+    func leaveOnDisappear() {
+        guard joinPolicy == .auto else { return }
+        leaveLivestream(initiator: .app)
+    }
+
+    var callEndedPublisher: NotificationCenter.Publisher {
+        NotificationCenter.default.publisher(
+            for: Notification.Name(CallNotification.callEnded)
+        )
+    }
+
     func muteLivestreamOnJoin() {
         guard !mutedOnJoin else { return }
         Task(disposableBag: disposableBag) {
@@ -225,11 +236,6 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
                 log.error(error)
             }
         }
-    }
-    
-    func stopTimer() {
-        timerCancellable?.cancel()
-        timerCancellable = nil
     }
     
     // MARK: - Private
@@ -399,22 +405,12 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
     }
     
     func joinLivestream() {
-        Task(disposableBag: disposableBag) {
-            do {
-                livestreamState = .joining
-                try await call.join(callSettings: CallSettings(audioOn: false, videoOn: false))
-                livestreamState = call.state.backstage ? .backstage : .live
-            } catch {
-                livestreamState = .error
-                log.error("Error joining livestream")
-            }
-        }
+        joinController.join()
     }
     
     func leaveLivestream(initiator: Call.LeaveInitiator = .user) {
-        call.leave(initiator: initiator, reason: "leaveLivestream")
+        joinController.leave(initiator: initiator)
         disposableBag.removeAll()
-        livestreamState = .initial
     }
 }
 

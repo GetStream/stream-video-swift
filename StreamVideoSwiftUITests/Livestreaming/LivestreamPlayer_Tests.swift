@@ -58,6 +58,88 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
     }
 
     @MainActor
+    func test_callEndedThenBackstageClears_joinsAFreshCall() async {
+        let left = MockCall()
+        left.state.backstage = true
+        left.stub(for: .join, with: JoinCallResponse.dummy())
+        let fresh = MockCall()
+        fresh.stub(for: .join, with: JoinCallResponse.dummy())
+        let video = MockStreamVideo()
+        video.stub(for: .call, with: fresh)
+        let previous = StreamVideoProviderKey.currentValue
+        StreamVideoProviderKey.currentValue = video
+        defer { StreamVideoProviderKey.currentValue = previous }
+        let window = show(
+            LivestreamPlayer(call: left, livestreamState: .backstage)
+        )
+        defer { window.isHidden = true }
+        await fulfillment { left.timesCalled(.join) == 1 }
+
+        NotificationCenter.default.post(
+            name: Notification.Name(CallNotification.callEnded),
+            object: left
+        )
+        left.state.backstage = false
+
+        await fulfillment { fresh.timesCalled(.join) == 1 }
+        XCTAssertEqual(left.timesCalled(.join), 1)
+        guard
+            case let .join(_, _, _, _, settings, _) = fresh
+            .stubbedFunctionInput[.join]?
+            .last
+        else {
+            XCTFail("Fresh call did not record a join")
+            return
+        }
+        XCTAssertEqual(settings?.audioOn, false)
+        XCTAssertEqual(settings?.videoOn, false)
+    }
+
+    @MainActor
+    func test_joinPolicyNone_callEnded_doesNotJoinAFreshCall() async {
+        let left = MockCall()
+        left.state.backstage = true
+        let fresh = MockCall()
+        fresh.stub(for: .join, with: JoinCallResponse.dummy())
+        let video = MockStreamVideo()
+        video.stub(for: .call, with: fresh)
+        let previous = StreamVideoProviderKey.currentValue
+        StreamVideoProviderKey.currentValue = video
+        defer { StreamVideoProviderKey.currentValue = previous }
+        let window = show(
+            LivestreamPlayer(
+                call: left,
+                livestreamState: .backstage,
+                joinPolicy: .none
+            )
+        )
+        defer { window.isHidden = true }
+
+        NotificationCenter.default.post(
+            name: Notification.Name(CallNotification.callEnded),
+            object: left
+        )
+        left.state.backstage = false
+
+        XCTAssertEqual(fresh.timesCalled(.join), 0)
+        XCTAssertEqual(left.timesCalled(.join), 0)
+    }
+
+    @MainActor
+    private func show<V: View>(_ view: V) -> UIWindow {
+        let subject = UIHostingController(rootView: view)
+        let window = UIWindow(frame: UIScreen.main.bounds)
+        let container = UIViewController()
+        container.addChild(subject)
+        subject.view.frame = window.bounds
+        container.view.addSubview(subject.view)
+        subject.didMove(toParent: container)
+        window.rootViewController = container
+        window.makeKeyAndVisible()
+        return window
+    }
+
+    @MainActor
     func test_livestreamPlayer_snapshot() async throws {
         // Given
         let call = streamVideo.call(callType: callType, callId: callId)
