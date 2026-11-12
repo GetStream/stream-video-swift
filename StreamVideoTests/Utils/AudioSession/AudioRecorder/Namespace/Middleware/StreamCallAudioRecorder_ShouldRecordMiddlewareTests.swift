@@ -10,30 +10,74 @@ final class StreamCallAudioRecorder_ShouldRecordMiddlewareClientTests: StreamVid
 
     private var subject: StreamCallAudioRecorder.Namespace.ShouldRecordMiddleware!
     private var newClient: StreamVideo!
+    private var replacementClient: StreamVideo!
 
     override func tearDown() async throws {
         subject = nil
+        await replacementClient?.disconnect()
+        replacementClient = nil
         await newClient?.disconnect()
         newClient = nil
         try await super.tearDown()
     }
 
-    func test_newStreamVideoClient_activeCallEnds_dispatchesSetShouldRecordFalse() async {
-        subject = .init()
-        newClient = StreamVideo.mock(httpClient: HTTPClient_Mock())
-        let validation = expectation(description: "setShouldRecord(false)")
+    /// Collects every `setShouldRecord` value the middleware dispatches.
+    private func recordShouldRecordValues() -> AllocatedUnfairLock<[Bool]> {
+        let values = AllocatedUnfairLock<[Bool]>([])
         subject.dispatcher = .init { actions, _, _, _ in
-            if case .setShouldRecord(false) = actions[0].wrappedValue {
-                validation.fulfill()
+            if case let .setShouldRecord(value) = actions[0].wrappedValue {
+                values.withLock { $0.append(value) }
             }
         }
+        return values
+    }
+
+    func test_newStreamVideoClient_activeCallEnds_dispatchesSetShouldRecordFalseOnce() async {
+        subject = .init()
+        newClient = StreamVideo.mock(httpClient: HTTPClient_Mock())
+        let values = recordShouldRecordValues()
 
         let call = Call.dummy(callType: .default, callId: .unique)
         await MainActor.run { newClient.state.activeCall = call }
-        await wait(for: 0.3)
+        // The middleware reports the recording state after its debounce. Wait
+        // for it, so only the call end can add a value afterwards.
+        await fulfillment { values.withLock { $0.count } >= 1 }
+        values.withLock { $0.removeAll() }
         await MainActor.run { newClient.state.activeCall = nil }
+        await fulfillment { values.withLock { $0.count } >= 1 }
+        await wait(for: 0.5)
 
-        await safeFulfillment(of: [validation])
+        XCTAssertEqual(values.withLock { $0 }, [false])
+    }
+
+    func test_newStreamVideoClient_noActiveCall_afterClientWithoutCall_dispatchesNothing() async {
+        subject = .init()
+        newClient = StreamVideo.mock(httpClient: HTTPClient_Mock())
+        await wait(for: 0.5)
+        let values = recordShouldRecordValues()
+
+        replacementClient = StreamVideo.mock(httpClient: HTTPClient_Mock())
+        await wait(for: 0.7)
+
+        XCTAssertEqual(values.withLock { $0 }, [])
+    }
+
+    func test_clientReplacedDuringCall_dispatchesSetShouldRecordFalseOnce() async {
+        subject = .init()
+        newClient = StreamVideo.mock(httpClient: HTTPClient_Mock())
+        let values = recordShouldRecordValues()
+        let call = Call.dummy(callType: .default, callId: .unique)
+        await MainActor.run { newClient.state.activeCall = call }
+        // The middleware reports the recording state after its debounce. Wait
+        // for it, so only the replacement can add a value afterwards.
+        await fulfillment { values.withLock { $0.count } >= 1 }
+        values.withLock { $0.removeAll() }
+
+        replacementClient = StreamVideo.mock(httpClient: HTTPClient_Mock())
+        await fulfillment { values.withLock { $0.count } >= 1 }
+        await wait(for: 0.5)
+
+        XCTAssertEqual(values.withLock { $0 }, [false])
     }
 
     /// Customer flow: the app creates a new client, uses the lobby, joins,
@@ -45,6 +89,12 @@ final class StreamCallAudioRecorder_ShouldRecordMiddlewareClientTests: StreamVid
         let session = MockRTCAudioStore()
         session.makeShared()
         defer { permissions.dismantle() }
+        // The category middleware stops recording whenever the category
+        // cannot record, and it reports the current one when it starts.
+        // Calls configure `.playAndRecord` first, so the test does too.
+        try await session.audioStore.dispatch(
+            .avAudioSession(.setCategoryAndMode(.playAndRecord, mode: .default))
+        ).result()
 
         let store = StreamCallAudioRecorder.Namespace.store(
             initialState: .initial,
