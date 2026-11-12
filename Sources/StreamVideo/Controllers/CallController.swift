@@ -516,6 +516,7 @@ class CallController: @unchecked Sendable {
 
     func leave(reason: String?, initiator: Call.LeaveInitiator = .unknown) {
         guard call != nil else { return }
+        resetPlaybackType(of: call)
         call = nil
         webRTCCoordinator.leave(reason: reason, initiator: initiator)
     }
@@ -523,6 +524,7 @@ class CallController: @unchecked Sendable {
     /// Cleans up the call controller.
     func cleanUp() {
         guard call != nil else { return }
+        resetPlaybackType(of: call)
         call = nil
         Task(disposableBag: disposableBag) { [weak self] in
             guard let self else { return }
@@ -806,11 +808,22 @@ class CallController: @unchecked Sendable {
         return try await LocationFetcher.getLocation()
     }
 
+    /// Returns the call state to WebRTC once the call that played HLS ends.
+    private func resetPlaybackType(of call: Call?) {
+        guard let call else { return }
+        Task(disposableBag: disposableBag) { @MainActor in
+            if call.state.playbackType != .webRTC {
+                call.state.playbackType = .webRTC
+            }
+        }
+    }
+
     private func webRTCClientDidUpdateStage(
         _ stage: WebRTCCoordinator.StateMachine.Stage
     ) {
         switch stage.id {
         case .idle:
+            resetPlaybackType(of: call)
             call?.update(reconnectionStatus: .disconnected)
         case .rejoining:
             call?.update(reconnectionStatus: .reconnecting)

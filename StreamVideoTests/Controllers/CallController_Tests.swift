@@ -544,6 +544,43 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         XCTAssertEqual(request.e2ee, true)
     }
 
+    // MARK: - playbackType reset
+
+    @MainActor
+    func test_leave_afterHLSPlayback_resetsPlaybackTypeToWebRTC() async throws {
+        let call = Call.dummy(callController: subject)
+        call.state.playbackType = .hls(try XCTUnwrap(URL(string: "https://example.com/live.m3u8")))
+
+        subject.leave(reason: nil)
+
+        await fulfilmentInMainActor { call.state.playbackType == .webRTC }
+    }
+
+    @MainActor
+    func test_cleanUp_afterHLSPlayback_resetsPlaybackTypeToWebRTC() async throws {
+        let call = Call.dummy(callController: subject)
+        call.state.playbackType = .hls(try XCTUnwrap(URL(string: "https://example.com/live.m3u8")))
+
+        subject.cleanUp()
+
+        await fulfilmentInMainActor { call.state.playbackType == .webRTC }
+    }
+
+    @MainActor
+    func test_idleStage_afterHLSPlayback_resetsPlaybackTypeToWebRTC() async throws {
+        let call = Call.dummy(callController: subject)
+        call.state.playbackType = .hls(try XCTUnwrap(URL(string: "https://example.com/live.m3u8")))
+        subject.observeWebRTCStateUpdated()
+
+        mockWebRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .coordinator
+            .stateMachine
+            .transition(MockTestOnlyStage(id: .idle, context: .init()))
+
+        await fulfilmentInMainActor { call.state.playbackType == .webRTC }
+    }
+
     // MARK: - joinCall (HLS grant)
 
     func test_joinCall_hlsGrant_returnsTheGrantAndEntersHLSPlayback() async throws {
