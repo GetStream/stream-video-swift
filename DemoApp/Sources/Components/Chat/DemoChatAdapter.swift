@@ -34,8 +34,10 @@ import StreamVideoSwiftUI
 /// below (IOS-2254). A subclass would inherit the real completion variants.
 /// ponytail: unconditional no-op; if chat ever becomes reachable outside a
 /// call, gate these on `AppState.shared.activeCall == nil` instead.
-struct DemoChatAudioSessionConfigurator: AudioSessionConfiguring {
+final class DemoChatAudioSessionConfigurator: AudioSessionConfiguring, Sendable {
     private let permissionProvider = StreamAudioSessionConfigurator()
+
+    init() {}
 
     func activateRecordingSession() throws {}
     func deactivateRecordingSession() throws {}
