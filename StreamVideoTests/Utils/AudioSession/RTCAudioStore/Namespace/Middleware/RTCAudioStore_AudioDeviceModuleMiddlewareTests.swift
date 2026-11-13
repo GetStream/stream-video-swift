@@ -65,6 +65,134 @@ final class RTCAudioStore_AudioDeviceModuleMiddlewareTests: XCTestCase, @uncheck
         XCTAssertEqual(mock.timesCalled(.initAndStartRecording), 1)
     }
 
+    // MARK: - setCurrentRoute
+
+    func test_setCurrentRoute_whenInputIsLostWhileActiveAndRecording_restartsRecording() {
+        let (module, mock) = makeModule(isRecording: true, isPlaying: true)
+        let state = makeState(
+            isActive: true,
+            isRecording: true,
+            audioDeviceModule: module,
+            currentRoute: microphoneAndSpeakerRoute
+        )
+
+        // Another component deactivated the shared AVAudioSession, which
+        // removes the microphone from the route and stops the audio engine.
+        applyCurrentRoute(speakerOnlyRoute, state: state)
+
+        XCTAssertEqual(mock.timesCalled(.stopRecording), 1)
+        XCTAssertEqual(mock.timesCalled(.initAndStartRecording), 1)
+    }
+
+    func test_setCurrentRoute_whenInputIsLostWithMutedSpeechDetection_restartsOutsidePersistentMode() {
+        let (module, mock) = makeModule(isRecording: true, isPlaying: true)
+        mock.stub(for: \.isRecordingAlwaysPreparedMode, with: true)
+        var invocations: [MockRTCAudioDeviceModule.MockFunctionKey] = []
+        mock.onInvoke = { invocations.append($0) }
+        let state = makeState(
+            isActive: true,
+            isRecording: true,
+            isMutedSpeechDetectionEnabled: true,
+            audioDeviceModule: module,
+            currentRoute: microphoneAndSpeakerRoute
+        )
+
+        applyCurrentRoute(speakerOnlyRoute, state: state)
+
+        XCTAssertEqual(
+            invocations.filter {
+                [.setRecordingAlwaysPreparedMode, .stopRecording, .initAndStartRecording]
+                    .contains($0)
+            },
+            [
+                .setRecordingAlwaysPreparedMode,
+                .stopRecording,
+                .initAndStartRecording,
+                .setRecordingAlwaysPreparedMode
+            ]
+        )
+        XCTAssertEqual(
+            mock.recordedInputPayload(Bool.self, for: .setRecordingAlwaysPreparedMode),
+            [false, true]
+        )
+    }
+
+    func test_setCurrentRoute_whenInputIsLostWhileInactive_doesNotRestartRecording() {
+        let (module, mock) = makeModule(isRecording: true)
+        let state = makeState(
+            isActive: false,
+            isRecording: true,
+            audioDeviceModule: module,
+            currentRoute: microphoneAndSpeakerRoute
+        )
+
+        applyCurrentRoute(speakerOnlyRoute, state: state)
+
+        XCTAssertEqual(mock.timesCalled(.stopRecording), 0)
+        XCTAssertEqual(mock.timesCalled(.initAndStartRecording), 0)
+    }
+
+    func test_setCurrentRoute_whenInputIsLostWhileNotRecording_doesNotRestartRecording() {
+        let (module, mock) = makeModule(isRecording: false)
+        let state = makeState(
+            isActive: true,
+            isRecording: false,
+            audioDeviceModule: module,
+            currentRoute: microphoneAndSpeakerRoute
+        )
+
+        applyCurrentRoute(speakerOnlyRoute, state: state)
+
+        XCTAssertEqual(mock.timesCalled(.stopRecording), 0)
+        XCTAssertEqual(mock.timesCalled(.initAndStartRecording), 0)
+    }
+
+    func test_setCurrentRoute_whenInputIsLostWhileInterrupted_doesNotRestartRecording() {
+        let (module, mock) = makeModule(isRecording: true)
+        let state = makeState(
+            isActive: true,
+            isInterrupted: true,
+            isRecording: true,
+            audioDeviceModule: module,
+            currentRoute: microphoneAndSpeakerRoute
+        )
+
+        applyCurrentRoute(speakerOnlyRoute, state: state)
+
+        XCTAssertEqual(mock.timesCalled(.stopRecording), 0)
+        XCTAssertEqual(mock.timesCalled(.initAndStartRecording), 0)
+    }
+
+    func test_setCurrentRoute_whenPreviousRouteHadNoInput_doesNotRestartRecording() {
+        let (module, mock) = makeModule(isRecording: true)
+        let state = makeState(
+            isActive: true,
+            isRecording: true,
+            audioDeviceModule: module,
+            currentRoute: speakerOnlyRoute
+        )
+
+        applyCurrentRoute(speakerOnlyRoute, state: state)
+
+        XCTAssertEqual(mock.timesCalled(.stopRecording), 0)
+        XCTAssertEqual(mock.timesCalled(.initAndStartRecording), 0)
+    }
+
+    func test_setCurrentRoute_whenInputRemainsAvailable_doesNotRestartRecording() {
+        let (module, mock) = makeModule(isRecording: true)
+        let state = makeState(
+            isActive: true,
+            isRecording: true,
+            audioDeviceModule: module,
+            currentRoute: microphoneAndSpeakerRoute
+        )
+
+        applyCurrentRoute(microphoneAndSpeakerRoute, state: state)
+
+        XCTAssertEqual(mock.timesCalled(.stopRecording), 0)
+        XCTAssertEqual(mock.timesCalled(.initAndStartRecording), 0)
+    }
+
     // MARK: - setRecording
 
     func test_setRecording_whenEnabled_startsRecording() {
@@ -395,6 +523,28 @@ final class RTCAudioStore_AudioDeviceModuleMiddlewareTests: XCTestCase, @uncheck
     }
 
     // MARK: - Helpers
+
+    private let microphoneAndSpeakerRoute = RTCAudioStore.StoreState.AudioRoute.dummy(
+        inputs: [.dummy(type: AVAudioSession.Port.builtInMic.rawValue)],
+        outputs: [.dummy(type: AVAudioSession.Port.builtInSpeaker.rawValue, isSpeaker: true)]
+    )
+
+    private var speakerOnlyRoute: RTCAudioStore.StoreState.AudioRoute {
+        .dummy(outputs: microphoneAndSpeakerRoute.outputs, reason: .categoryChange)
+    }
+
+    private func applyCurrentRoute(
+        _ route: RTCAudioStore.StoreState.AudioRoute,
+        state: RTCAudioStore.StoreState
+    ) {
+        subject.apply(
+            state: state,
+            action: .setCurrentRoute(route),
+            file: #file,
+            function: #function,
+            line: #line
+        )
+    }
 
     private func makeModule(
         isRecording: Bool,

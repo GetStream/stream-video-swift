@@ -52,6 +52,8 @@ The formatting lane can edit files. Inspect its implementation and resulting dif
 For focused execution, use `xcodebuild` with `-only-testing:Target/TestCase`.
 Select the project, scheme, test plan, and destination from current metadata.
 Preserve the command's exit status when filtering its output.
+The console log can omit XCTest assertion messages. Read them from the result bundle
+with `xcrun xcresulttool get test-results tests --path <bundle>.xcresult`.
 Fastlane can skip suites or retry failures. Check actual test execution.
 
 ## Documentation tests
