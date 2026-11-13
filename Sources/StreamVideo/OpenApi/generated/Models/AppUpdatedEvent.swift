@@ -6,20 +6,27 @@ import Foundation
 import StreamCore
 
 /// Emitted when app settings are updated
-public final class AppUpdatedEvent: @unchecked Sendable, Event, Decodable {
-    public var app: AppEventResponse
+public final class AppUpdatedEvent: Sendable, Event, Decodable {
+    public let app: AppEventResponse
     /// Date/time of creation
-    public var createdAt: Date
-    public var custom: [String: RawJSON]
-    public var receivedAt: Date?
+    public let createdAt: Date
+    public let custom: [String: RawJSON]
+    public let receivedAt: Date?
     /// The type of event: "app.updated" in this case
-    public var type: String = "app.updated"
+    public let type: String
 
-    public init(app: AppEventResponse, createdAt: Date, custom: [String: RawJSON], receivedAt: Date? = nil) {
+    public init(
+        app: AppEventResponse,
+        createdAt: Date,
+        custom: [String: RawJSON],
+        receivedAt: Date? = nil,
+        type: String = "app.updated"
+    ) {
         self.app = app
         self.createdAt = createdAt
         self.custom = custom
         self.receivedAt = receivedAt
+        self.type = type
     }
 
     public init(from decoder: Decoder) throws {

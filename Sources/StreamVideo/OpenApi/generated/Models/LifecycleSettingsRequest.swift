@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class LifecycleSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable {
+public final class LifecycleSettingsRequest: Sendable, Encodable, JSONEncodable {
     
     public enum LifecycleSettingsRequestMode: String, Sendable, Codable, CaseIterable {
         case reusable
@@ -24,7 +24,7 @@ public final class LifecycleSettingsRequest: @unchecked Sendable, Encodable, JSO
     }
 
     /// Call lifecycle mode. One of: reusable, single_use. A single_use call cannot be reused once it has ended; the server ends it when its ring settles without an answer (currently: when the caller cancels the ring). Fixed at call creation
-    public var mode: LifecycleSettingsRequestMode?
+    public let mode: LifecycleSettingsRequestMode?
 
     public init(mode: LifecycleSettingsRequestMode? = nil) {
         self.mode = mode

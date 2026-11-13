@@ -6,21 +6,28 @@ import Foundation
 import StreamCore
 
 /// This event is sent when one or more members are updated
-public final class CallMemberUpdatedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
+public final class CallMemberUpdatedEvent: Sendable, Event, Decodable, WSCallEvent {
     /// Represents a call
-    public var call: CallResponse
-    public var callCid: String
-    public var createdAt: Date
+    public let call: CallResponse
+    public let callCid: String
+    public let createdAt: Date
     /// The list of members that were updated
-    public var members: [MemberResponse]
+    public let members: [MemberResponse]
     /// The type of event: "call.member_updated" in this case
-    public var type: String = "call.member_updated"
+    public let type: String
 
-    public init(call: CallResponse, callCid: String, createdAt: Date, members: [MemberResponse]) {
+    public init(
+        call: CallResponse,
+        callCid: String,
+        createdAt: Date,
+        members: [MemberResponse],
+        type: String = "call.member_updated"
+    ) {
         self.call = call
         self.callCid = callCid
         self.createdAt = createdAt
         self.members = members
+        self.type = type
     }
 
     public init(from decoder: Decoder) throws {

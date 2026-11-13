@@ -6,20 +6,21 @@ import Foundation
 import StreamCore
 
 /// A custom event, this event is used to send custom events to other participants in the call.
-public final class CustomVideoEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
-    public var callCid: String
-    public var createdAt: Date
+public final class CustomVideoEvent: Sendable, Event, Decodable, WSCallEvent {
+    public let callCid: String
+    public let createdAt: Date
     /// Custom data for this object
-    public var custom: [String: RawJSON]
+    public let custom: [String: RawJSON]
     /// The type of event, "custom" in this case
-    public var type: String = "custom"
+    public let type: String
     /// User response object
-    public var user: UserResponse
+    public let user: UserResponse
 
-    public init(callCid: String, createdAt: Date, custom: [String: RawJSON], user: UserResponse) {
+    public init(callCid: String, createdAt: Date, custom: [String: RawJSON], type: String = "custom", user: UserResponse) {
         self.callCid = callCid
         self.createdAt = createdAt
         self.custom = custom
+        self.type = type
         self.user = user
     }
 

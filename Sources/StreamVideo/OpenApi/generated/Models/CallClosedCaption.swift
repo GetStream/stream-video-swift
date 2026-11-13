@@ -6,17 +6,17 @@ import Foundation
 import StreamCore
 
 /// CallClosedCaption represents a closed caption of a call.
-public final class CallClosedCaption: @unchecked Sendable, Decodable {
-    public var endTime: Date
-    public var id: String
-    public var language: String
-    public var service: String?
-    public var speakerId: String
-    public var startTime: Date
-    public var text: String
-    public var translated: Bool
+public final class CallClosedCaption: Sendable, Decodable {
+    public let endTime: Date
+    public let id: String
+    public let language: String
+    public let service: String?
+    public let speakerId: String
+    public let startTime: Date
+    public let text: String
+    public let translated: Bool
     /// User response object
-    public var user: UserResponse
+    public let user: UserResponse
 
     public init(
         endTime: Date,

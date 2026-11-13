@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class VideoSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable {
+public final class VideoSettingsRequest: Sendable, Encodable, JSONEncodable {
     
     public enum VideoSettingsRequestCameraFacing: String, Sendable, Codable, CaseIterable {
         case back
@@ -24,11 +24,11 @@ public final class VideoSettingsRequest: @unchecked Sendable, Encodable, JSONEnc
         }
     }
 
-    public var accessRequestEnabled: Bool?
-    public var cameraDefaultOn: Bool?
-    public var cameraFacing: VideoSettingsRequestCameraFacing?
-    public var enabled: Bool?
-    public var targetResolution: TargetResolution?
+    public let accessRequestEnabled: Bool?
+    public let cameraDefaultOn: Bool?
+    public let cameraFacing: VideoSettingsRequestCameraFacing?
+    public let enabled: Bool?
+    public let targetResolution: TargetResolution?
 
     public init(
         accessRequestEnabled: Bool? = nil,

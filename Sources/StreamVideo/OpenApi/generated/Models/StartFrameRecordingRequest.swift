@@ -5,8 +5,8 @@
 import Foundation
 import StreamCore
 
-public final class StartFrameRecordingRequest: @unchecked Sendable, Encodable, JSONEncodable {
-    public var recordingExternalStorage: String?
+public final class StartFrameRecordingRequest: Sendable, Encodable, JSONEncodable {
+    public let recordingExternalStorage: String?
 
     public init(recordingExternalStorage: String? = nil) {
         self.recordingExternalStorage = recordingExternalStorage

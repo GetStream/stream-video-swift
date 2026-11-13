@@ -6,9 +6,9 @@ import Foundation
 import StreamCore
 
 /// BlockUserRequest is the payload for blocking a user.
-public final class BlockUserRequest: @unchecked Sendable, Encodable, JSONEncodable {
+public final class BlockUserRequest: Sendable, Encodable, JSONEncodable {
     /// the user to block
-    public var userId: String
+    public let userId: String
 
     public init(userId: String) {
         self.userId = userId

@@ -33,7 +33,8 @@ class MockResponseBuilder: @unchecked Sendable {
         rejectedBy: [String: Date] = [:],
         recording: Bool = false,
         liveStartedAt: Date? = nil,
-        liveEndedAt: Date? = nil
+        liveEndedAt: Date? = nil,
+        backstage: Bool = false
     ) -> CallResponse {
         let userResponse = makeUserResponse()
         let callIngressResponse = CallIngressResponse(
@@ -49,7 +50,7 @@ class MockResponseBuilder: @unchecked Sendable {
             liveEndedAt: liveEndedAt
         )
         let callResponse = CallResponse(
-            backstage: false,
+            backstage: backstage,
             blockedUserIds: [],
             captioning: false,
             cid: cid,

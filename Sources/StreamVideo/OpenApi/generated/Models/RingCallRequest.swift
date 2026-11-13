@@ -5,13 +5,13 @@
 import Foundation
 import StreamCore
 
-public final class RingCallRequest: @unchecked Sendable, Encodable, JSONEncodable {
+public final class RingCallRequest: Sendable, Encodable, JSONEncodable {
     /// Opaque context stored on the ring attempt; refs and IDs only
-    public var custom: [String: RawJSON]?
+    public let custom: [String: RawJSON]?
     /// Members that should receive the ring. If no ids are provided, all call members who are not already in the call will receive ring notifications.
-    public var membersIds: [String]?
+    public let membersIds: [String]?
     /// Indicate if call should be video
-    public var video: Bool?
+    public let video: Bool?
 
     public init(custom: [String: RawJSON]? = nil, membersIds: [String]? = nil, video: Bool? = nil) {
         self.custom = custom

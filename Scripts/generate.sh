@@ -26,12 +26,14 @@ set -exo pipefail
   ./build/openapi generate-spec -products video -version v1 -clientside -output "$SPEC_DIR/video-openapi-clientside" -renamed-models "$SCRIPT_DIR/renamed-models.json" &&
   # remove old generated code
   rm -rf "$OUTPUT_DIR" &&
+  # immutable_models makes model properties `let` and the models checked
+  # Sendable.
   # number_as_float keeps JSON numbers as Float. The generator defaults to Double
   # since Float truncates float64s, but our generated models are public, so
   # widening them would be a source and binary break.
   # string_coding_keys replaces the CodingKeys enum of each model with one
   # shared StringCodingKey type, which reduces binary size.
-  ./build/openapi generate-client --language swift --spec "$SPEC_DIR/video-openapi-clientside.yaml" --opt number_as_float=true --opt string_coding_keys=true --output "$OUTPUT_DIR/"
+  ./build/openapi generate-client --language swift --spec "$SPEC_DIR/video-openapi-clientside.yaml" --opt immutable_models=true --opt number_as_float=true --opt string_coding_keys=true --output "$OUTPUT_DIR/"
 )
 
 # The generator writes models/, git tracks Models/.

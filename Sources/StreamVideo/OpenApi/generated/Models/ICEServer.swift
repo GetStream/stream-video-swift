@@ -6,13 +6,13 @@ import Foundation
 import StreamCore
 
 /// ICE server configuration for WebRTC connections
-public final class ICEServer: @unchecked Sendable, Decodable {
+public final class ICEServer: Sendable, Decodable {
     /// ICE server password
-    public var password: String
+    public let password: String
     /// ICE server URLs
-    public var urls: [String]
+    public let urls: [String]
     /// ICE server username
-    public var username: String
+    public let username: String
 
     public init(password: String, urls: [String], username: String) {
         self.password = password

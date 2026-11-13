@@ -6,9 +6,9 @@ import Foundation
 import StreamCore
 
 /// BlockUserResponse is the payload for blocking a user.
-public final class BlockUserResponse: @unchecked Sendable, Decodable {
+public final class BlockUserResponse: Sendable, Decodable {
     /// Duration of the request in milliseconds
-    public var duration: String
+    public let duration: String
 
     public init(duration: String) {
         self.duration = duration

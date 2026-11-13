@@ -6,10 +6,10 @@ import Foundation
 import StreamCore
 
 /// Basic response information
-public final class UpdateCallMembersResponse: @unchecked Sendable, Decodable {
+public final class UpdateCallMembersResponse: Sendable, Decodable {
     /// Duration of the request in milliseconds
-    public var duration: String
-    public var members: [MemberResponse]
+    public let duration: String
+    public let members: [MemberResponse]
 
     public init(duration: String, members: [MemberResponse]) {
         self.duration = duration

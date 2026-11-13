@@ -6,18 +6,19 @@ import Foundation
 import StreamCore
 
 /// This event is sent when a call is started. Clients receiving this event should start the call.
-public final class CallLiveStartedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
+public final class CallLiveStartedEvent: Sendable, Event, Decodable, WSCallEvent {
     /// Represents a call
-    public var call: CallResponse
-    public var callCid: String
-    public var createdAt: Date
+    public let call: CallResponse
+    public let callCid: String
+    public let createdAt: Date
     /// The type of event: "call.live_started" in this case
-    public var type: String = "call.live_started"
+    public let type: String
 
-    public init(call: CallResponse, callCid: String, createdAt: Date) {
+    public init(call: CallResponse, callCid: String, createdAt: Date, type: String = "call.live_started") {
         self.call = call
         self.callCid = callCid
         self.createdAt = createdAt
+        self.type = type
     }
 
     public init(from decoder: Decoder) throws {

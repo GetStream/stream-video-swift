@@ -6,17 +6,18 @@ import Foundation
 import StreamCore
 
 /// This event is sent when a user gets updated. The event contains information about the updated user.
-public final class UserUpdatedEvent: @unchecked Sendable, Event, Decodable {
+public final class UserUpdatedEvent: Sendable, Event, Decodable {
     /// Date/time of creation
-    public var createdAt: Date
-    public var receivedAt: Date?
+    public let createdAt: Date
+    public let receivedAt: Date?
     /// The type of event: "user.updated" in this case
-    public var type: String = "user.updated"
-    public var user: UserEventPayload
+    public let type: String
+    public let user: UserEventPayload
 
-    public init(createdAt: Date, receivedAt: Date? = nil, user: UserEventPayload) {
+    public init(createdAt: Date, receivedAt: Date? = nil, type: String = "user.updated", user: UserEventPayload) {
         self.createdAt = createdAt
         self.receivedAt = receivedAt
+        self.type = type
         self.user = user
     }
 

@@ -6,14 +6,14 @@ import Foundation
 import StreamCore
 
 /// CallTranscription represents a transcription of a call.
-public final class CallTranscription: @unchecked Sendable, Decodable {
-    public var endTime: Date
-    public var filename: String
-    public var language: String?
-    public var sessionId: String
-    public var startTime: Date
-    public var translated: Bool?
-    public var url: String
+public final class CallTranscription: Sendable, Decodable {
+    public let endTime: Date
+    public let filename: String
+    public let language: String?
+    public let sessionId: String
+    public let startTime: Date
+    public let translated: Bool?
+    public let url: String
 
     public init(
         endTime: Date,

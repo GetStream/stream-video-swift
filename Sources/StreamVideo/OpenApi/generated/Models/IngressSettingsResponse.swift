@@ -5,10 +5,10 @@
 import Foundation
 import StreamCore
 
-public final class IngressSettingsResponse: @unchecked Sendable, Decodable {
-    public var audioEncodingOptions: IngressAudioEncodingResponse?
-    public var enabled: Bool
-    public var videoEncodingOptions: [String: IngressVideoEncodingResponse]?
+public final class IngressSettingsResponse: Sendable, Decodable {
+    public let audioEncodingOptions: IngressAudioEncodingResponse?
+    public let enabled: Bool
+    public let videoEncodingOptions: [String: IngressVideoEncodingResponse]?
 
     public init(
         audioEncodingOptions: IngressAudioEncodingResponse? = nil,

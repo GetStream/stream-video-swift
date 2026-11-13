@@ -6,21 +6,29 @@ import Foundation
 import StreamCore
 
 /// This event is sent when a call member is muted
-public final class CallUserMutedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
-    public var callCid: String
-    public var createdAt: Date
-    public var fromUserId: String
-    public var mutedUserIds: [String]
-    public var reason: String
+public final class CallUserMutedEvent: Sendable, Event, Decodable, WSCallEvent {
+    public let callCid: String
+    public let createdAt: Date
+    public let fromUserId: String
+    public let mutedUserIds: [String]
+    public let reason: String
     /// The type of event: "call.user_muted" in this case
-    public var type: String = "call.user_muted"
+    public let type: String
 
-    public init(callCid: String, createdAt: Date, fromUserId: String, mutedUserIds: [String], reason: String) {
+    public init(
+        callCid: String,
+        createdAt: Date,
+        fromUserId: String,
+        mutedUserIds: [String],
+        reason: String,
+        type: String = "call.user_muted"
+    ) {
         self.callCid = callCid
         self.createdAt = createdAt
         self.fromUserId = fromUserId
         self.mutedUserIds = mutedUserIds
         self.reason = reason
+        self.type = type
     }
 
     public init(from decoder: Decoder) throws {

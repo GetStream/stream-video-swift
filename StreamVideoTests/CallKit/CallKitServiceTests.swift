@@ -1547,8 +1547,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         subject.callController = callController
         subject.callProvider = callProvider
         stubConnectionState(to: duplicateAfterAnswer ? .connected : .disconnected(error: nil))
-        let response = defaultGetCallResponse!
-        response.call.session = .dummy(
+        let response = makeGetCallResponse(
             acceptedBy: acceptedByCurrentUser && !duplicateAfterAnswer
                 ? [user.id: Date()] : [:]
         )
@@ -1587,7 +1586,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         if duplicateAfterAnswer {
             getContinuation.finish()
             await fulfillment(file: file, line: line) { service.ringingTimerCallCount == 1 }
-            response.call.session?.acceptedBy = [user.id: Date()]
+            call.stub(for: .get, with: makeGetCallResponse(acceptedBy: [user.id: Date()]))
         }
 
         subject.provider(callProvider, perform: CXAnswerCallAction(call: uuid))
@@ -1965,6 +1964,18 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         await fulfillment { call.recordedJoinInterceptors.count == 1 }
 
         return call
+    }
+
+    private func makeGetCallResponse(acceptedBy: [String: Date]) -> GetCallResponse {
+        .dummy(
+            call: .dummy(
+                cid: cid,
+                id: callId,
+                session: .dummy(acceptedBy: acceptedBy),
+                settings: .dummy(ring: .dummy(autoCancelTimeoutMs: 10 * 1000)),
+                type: .default
+            )
+        )
     }
 
     @MainActor

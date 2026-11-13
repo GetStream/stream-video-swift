@@ -5,9 +5,9 @@
 import Foundation
 import StreamCore
 
-public final class SpeechSegmentConfig: @unchecked Sendable, Codable, JSONEncodable {
-    public var maxSpeechCaptionMs: Int?
-    public var silenceDurationMs: Int?
+public final class SpeechSegmentConfig: Sendable, Codable, JSONEncodable {
+    public let maxSpeechCaptionMs: Int?
+    public let silenceDurationMs: Int?
 
     public init(maxSpeechCaptionMs: Int? = nil, silenceDurationMs: Int? = nil) {
         self.maxSpeechCaptionMs = maxSpeechCaptionMs

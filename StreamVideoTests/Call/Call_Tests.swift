@@ -52,7 +52,7 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
 
     func test_reject_nilReasonWithKnownAcceptance_doesNotSendReject() async {
         let (subject, coordinator) = makeOutgoingRing()
-        subject.state.session?.acceptedBy["callee"] = .now
+        subject.state.session = .dummy(acceptedBy: ["callee": .now], id: "ring-session")
 
         do {
             try await subject.reject()
@@ -87,7 +87,9 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
         let (subject, coordinator) = makeOutgoingRing()
         defer { subject.onGetRingState = nil }
         subject.onGetRingState = {
-            await MainActor.run { subject.state.session?.acceptedBy["callee"] = .now }
+            await MainActor.run {
+                subject.state.session = .dummy(acceptedBy: ["callee": .now], id: "ring-session")
+            }
         }
 
         do {
@@ -529,8 +531,10 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
             cid: callCid
         )
         call?.state.members = [Member(user: .init(id: userId), updatedAt: Date())]
-        let member = mockResponseBuilder.makeMemberResponse(id: userId)
-        member.user.name = "newname"
+        let member = MemberResponse.dummy(
+            user: .dummy(id: userId, name: "newname"),
+            userId: userId
+        )
         let event = CallMemberUpdatedEvent(
             call: callResponse,
             callCid: callCid,
@@ -923,6 +927,42 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
                 )
             ]
         )
+    }
+
+    func test_startClosedCaptions_withLanguage_updatesTranscriptionLanguage() async throws {
+        let mockCoordinatorClient = MockDefaultAPIEndpoints()
+        mockCoordinatorClient.stub(
+            for: .startClosedCaptions,
+            with: StartClosedCaptionsResponse(duration: "0")
+        )
+        let call = Call(
+            from: .init(call: .dummy(), members: [], ownCapabilities: []),
+            coordinatorClient: mockCoordinatorClient,
+            callController: .dummy(defaultAPI: mockCoordinatorClient)
+        )
+        await fulfilmentInMainActor { call.state.settings != nil }
+
+        try await call.startClosedCaptions(.init(language: "fr"))
+
+        XCTAssertEqual(call.state.settings?.transcription.language, .fr)
+    }
+
+    func test_startClosedCaptions_withoutLanguage_setsUnknownTranscriptionLanguage() async throws {
+        let mockCoordinatorClient = MockDefaultAPIEndpoints()
+        mockCoordinatorClient.stub(
+            for: .startClosedCaptions,
+            with: StartClosedCaptionsResponse(duration: "0")
+        )
+        let call = Call(
+            from: .init(call: .dummy(), members: [], ownCapabilities: []),
+            coordinatorClient: mockCoordinatorClient,
+            callController: .dummy(defaultAPI: mockCoordinatorClient)
+        )
+        await fulfilmentInMainActor { call.state.settings != nil }
+
+        try await call.startClosedCaptions()
+
+        XCTAssertEqual(call.state.settings?.transcription.language, .unknown)
     }
 
     // MARK: - Recording

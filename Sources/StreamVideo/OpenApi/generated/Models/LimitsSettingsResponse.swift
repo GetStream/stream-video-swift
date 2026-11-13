@@ -5,11 +5,11 @@
 import Foundation
 import StreamCore
 
-public final class LimitsSettingsResponse: @unchecked Sendable, Decodable {
-    public var maxDurationSeconds: Int?
-    public var maxParticipants: Int?
-    public var maxParticipantsExcludeOwner: Bool?
-    public var maxParticipantsExcludeRoles: [String]
+public final class LimitsSettingsResponse: Sendable, Decodable {
+    public let maxDurationSeconds: Int?
+    public let maxParticipants: Int?
+    public let maxParticipantsExcludeOwner: Bool?
+    public let maxParticipantsExcludeRoles: [String]
 
     public init(
         maxDurationSeconds: Int? = nil,

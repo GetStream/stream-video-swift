@@ -5,11 +5,11 @@
 import Foundation
 import StreamCore
 
-public final class LimitsSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable {
-    public var maxDurationSeconds: Int?
-    public var maxParticipants: Int?
-    public var maxParticipantsExcludeOwner: Bool?
-    public var maxParticipantsExcludeRoles: [String]?
+public final class LimitsSettingsRequest: Sendable, Encodable, JSONEncodable {
+    public let maxDurationSeconds: Int?
+    public let maxParticipants: Int?
+    public let maxParticipantsExcludeOwner: Bool?
+    public let maxParticipantsExcludeRoles: [String]?
 
     public init(
         maxDurationSeconds: Int? = nil,

@@ -5,7 +5,7 @@
 import Foundation
 import StreamCore
 
-public final class IndividualRecordingSettingsRequest: @unchecked Sendable, Encodable, JSONEncodable {
+public final class IndividualRecordingSettingsRequest: Sendable, Encodable, JSONEncodable {
     
     public enum IndividualRecordingSettingsRequestMode: String, Sendable, Codable, CaseIterable {
         case autoOn = "auto-on"
@@ -25,9 +25,9 @@ public final class IndividualRecordingSettingsRequest: @unchecked Sendable, Enco
     }
 
     /// Recording mode. One of: available, disabled, auto-on
-    public var mode: IndividualRecordingSettingsRequestMode
+    public let mode: IndividualRecordingSettingsRequestMode
     /// Output types to include: audio_only, video_only, audio_video, screenshare_audio_only, screenshare_video_only, screenshare_audio_video
-    public var outputTypes: [String]?
+    public let outputTypes: [String]?
 
     public init(mode: IndividualRecordingSettingsRequestMode, outputTypes: [String]? = nil) {
         self.mode = mode

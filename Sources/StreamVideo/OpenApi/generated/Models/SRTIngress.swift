@@ -5,8 +5,8 @@
 import Foundation
 import StreamCore
 
-public final class SRTIngress: @unchecked Sendable, Decodable {
-    public var address: String
+public final class SRTIngress: Sendable, Decodable {
+    public let address: String
 
     public init(address: String) {
         self.address = address

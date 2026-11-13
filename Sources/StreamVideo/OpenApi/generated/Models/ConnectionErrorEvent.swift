@@ -6,17 +6,18 @@ import Foundation
 import StreamCore
 
 /// This event is sent when the WS connection fails
-public final class ConnectionErrorEvent: @unchecked Sendable, Event, Decodable {
-    public var connectionId: String
-    public var createdAt: Date
-    public var error: APIError
+public final class ConnectionErrorEvent: Sendable, Event, Decodable {
+    public let connectionId: String
+    public let createdAt: Date
+    public let error: APIError
     /// The type of event: "connection.error" in this case
-    public var type: String = "connection.error"
+    public let type: String
 
-    public init(connectionId: String, createdAt: Date, error: APIError) {
+    public init(connectionId: String, createdAt: Date, error: APIError, type: String = "connection.error") {
         self.connectionId = connectionId
         self.createdAt = createdAt
         self.error = error
+        self.type = type
     }
 
     public init(from decoder: Decoder) throws {

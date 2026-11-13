@@ -6,10 +6,10 @@ import Foundation
 import StreamCore
 
 /// RecordSettings is the payload for recording settings
-public final class RecordSettingsResponse: @unchecked Sendable, Decodable {
-    public var audioOnly: Bool
-    public var mode: String
-    public var quality: String
+public final class RecordSettingsResponse: Sendable, Decodable {
+    public let audioOnly: Bool
+    public let mode: String
+    public let quality: String
 
     public init(audioOnly: Bool, mode: String, quality: String) {
         self.audioOnly = audioOnly

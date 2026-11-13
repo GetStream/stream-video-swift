@@ -5,12 +5,12 @@
 import Foundation
 import StreamCore
 
-public final class CallParticipantResponse: @unchecked Sendable, Decodable {
-    public var joinedAt: Date
-    public var role: String
+public final class CallParticipantResponse: Sendable, Decodable {
+    public let joinedAt: Date
+    public let role: String
     /// User response object
-    public var user: UserResponse
-    public var userSessionId: String
+    public let user: UserResponse
+    public let userSessionId: String
 
     public init(joinedAt: Date, role: String, user: UserResponse, userSessionId: String) {
         self.joinedAt = joinedAt

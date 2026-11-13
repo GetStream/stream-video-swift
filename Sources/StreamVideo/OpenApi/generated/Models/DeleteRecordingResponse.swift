@@ -6,9 +6,9 @@ import Foundation
 import StreamCore
 
 /// Response for DeleteRecording
-public final class DeleteRecordingResponse: @unchecked Sendable, Decodable {
+public final class DeleteRecordingResponse: Sendable, Decodable {
     /// Duration of the request in milliseconds
-    public var duration: String
+    public let duration: String
 
     public init(duration: String) {
         self.duration = duration

@@ -7,20 +7,27 @@ import StreamCore
 
 /// This event is sent to call participants to notify when a user is blocked on a call, clients can use this event to show a notification.
 /// If the user is the current user, the client should leave the call screen as well
-public final class BlockedUserEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
+public final class BlockedUserEvent: Sendable, Event, Decodable, WSCallEvent {
     /// User response object
-    public var blockedByUser: UserResponse?
-    public var callCid: String
-    public var createdAt: Date
+    public let blockedByUser: UserResponse?
+    public let callCid: String
+    public let createdAt: Date
     /// The type of event: "call.blocked_user" in this case
-    public var type: String = "call.blocked_user"
+    public let type: String
     /// User response object
-    public var user: UserResponse
+    public let user: UserResponse
 
-    public init(blockedByUser: UserResponse? = nil, callCid: String, createdAt: Date, user: UserResponse) {
+    public init(
+        blockedByUser: UserResponse? = nil,
+        callCid: String,
+        createdAt: Date,
+        type: String = "call.blocked_user",
+        user: UserResponse
+    ) {
         self.blockedByUser = blockedByUser
         self.callCid = callCid
         self.createdAt = createdAt
+        self.type = type
         self.user = user
     }
 

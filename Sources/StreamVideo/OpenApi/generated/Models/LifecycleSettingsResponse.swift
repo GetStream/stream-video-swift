@@ -6,7 +6,7 @@ import Foundation
 import StreamCore
 
 /// LifecycleSettings is the payload for call lifecycle settings
-public final class LifecycleSettingsResponse: @unchecked Sendable, Decodable {
+public final class LifecycleSettingsResponse: Sendable, Decodable {
     
     public enum LifecycleSettingsResponseMode: String, Sendable, Codable, CaseIterable {
         case reusable
@@ -25,7 +25,7 @@ public final class LifecycleSettingsResponse: @unchecked Sendable, Decodable {
     }
 
     /// Call lifecycle mode. One of: reusable, single_use. A single_use call cannot be reused once it has ended; the server ends it when its ring settles without an answer (currently: when the caller cancels the ring). Fixed at call creation
-    public var mode: LifecycleSettingsResponseMode
+    public let mode: LifecycleSettingsResponseMode
 
     public init(mode: LifecycleSettingsResponseMode) {
         self.mode = mode

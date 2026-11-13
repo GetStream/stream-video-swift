@@ -6,12 +6,12 @@ import Foundation
 import StreamCore
 
 /// BroadcastSettingsResponse is the payload for broadcasting settings
-public final class BroadcastSettingsResponse: @unchecked Sendable, Decodable {
-    public var enabled: Bool
+public final class BroadcastSettingsResponse: Sendable, Decodable {
+    public let enabled: Bool
     /// HLSSettings is the payload for HLS settings
-    public var hls: HLSSettingsResponse
+    public let hls: HLSSettingsResponse
     /// RTMPSettingsResponse is the payload for RTMP settings
-    public var rtmp: RTMPSettingsResponse
+    public let rtmp: RTMPSettingsResponse
 
     public init(enabled: Bool, hls: HLSSettingsResponse, rtmp: RTMPSettingsResponse) {
         self.enabled = enabled

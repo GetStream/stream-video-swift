@@ -6,18 +6,19 @@ import Foundation
 import StreamCore
 
 /// This event is sent when the WS connection is established and authenticated, this event contains the full user object as it is stored on the server
-public final class ConnectedEvent: @unchecked Sendable, Event, Decodable {
+public final class ConnectedEvent: Sendable, Event, Decodable {
     /// The connection_id for this client
-    public var connectionId: String
-    public var createdAt: Date
-    public var me: OwnUserResponse
+    public let connectionId: String
+    public let createdAt: Date
+    public let me: OwnUserResponse
     /// The type of event: "connection.ok" in this case
-    public var type: String = "connection.ok"
+    public let type: String
 
-    public init(connectionId: String, createdAt: Date, me: OwnUserResponse) {
+    public init(connectionId: String, createdAt: Date, me: OwnUserResponse, type: String = "connection.ok") {
         self.connectionId = connectionId
         self.createdAt = createdAt
         self.me = me
+        self.type = type
     }
 
     public init(from decoder: Decoder) throws {

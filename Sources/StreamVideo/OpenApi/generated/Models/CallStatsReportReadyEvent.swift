@@ -6,18 +6,19 @@ import Foundation
 import StreamCore
 
 /// This event is sent when the insights report is ready
-public final class CallStatsReportReadyEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
-    public var callCid: String
-    public var createdAt: Date
+public final class CallStatsReportReadyEvent: Sendable, Event, Decodable, WSCallEvent {
+    public let callCid: String
+    public let createdAt: Date
     /// Call session ID
-    public var sessionId: String
+    public let sessionId: String
     /// The type of event, "call.report_ready" in this case
-    public var type: String = "call.stats_report_ready"
+    public let type: String
 
-    public init(callCid: String, createdAt: Date, sessionId: String) {
+    public init(callCid: String, createdAt: Date, sessionId: String, type: String = "call.stats_report_ready") {
         self.callCid = callCid
         self.createdAt = createdAt
         self.sessionId = sessionId
+        self.type = type
     }
 
     public init(from decoder: Decoder) throws {

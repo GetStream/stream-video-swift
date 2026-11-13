@@ -6,9 +6,9 @@ import Foundation
 import StreamCore
 
 /// StartRecordingResponse is the response payload for the start recording endpoint.
-public final class StartRecordingResponse: @unchecked Sendable, Decodable {
+public final class StartRecordingResponse: Sendable, Decodable {
     /// Duration of the request in milliseconds
-    public var duration: String
+    public let duration: String
 
     public init(duration: String) {
         self.duration = duration

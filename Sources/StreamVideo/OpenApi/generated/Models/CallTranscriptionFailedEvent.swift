@@ -6,20 +6,27 @@ import Foundation
 import StreamCore
 
 /// This event is sent when call transcription has failed
-public final class CallTranscriptionFailedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
-    public var callCid: String
-    public var createdAt: Date
-    public var egressId: String
+public final class CallTranscriptionFailedEvent: Sendable, Event, Decodable, WSCallEvent {
+    public let callCid: String
+    public let createdAt: Date
+    public let egressId: String
     /// The error message detailing why transcription failed.
-    public var error: String?
+    public let error: String?
     /// The type of event: "call.transcription_failed" in this case
-    public var type: String = "call.transcription_failed"
+    public let type: String
 
-    public init(callCid: String, createdAt: Date, egressId: String, error: String? = nil) {
+    public init(
+        callCid: String,
+        createdAt: Date,
+        egressId: String,
+        error: String? = nil,
+        type: String = "call.transcription_failed"
+    ) {
         self.callCid = callCid
         self.createdAt = createdAt
         self.egressId = egressId
         self.error = error
+        self.type = type
     }
 
     public init(from decoder: Decoder) throws {

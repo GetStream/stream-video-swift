@@ -6,19 +6,19 @@ import Foundation
 import StreamCore
 
 /// MemberResponse is the payload for a member of a call.
-public final class MemberResponse: @unchecked Sendable, Decodable {
+public final class MemberResponse: Sendable, Decodable {
     /// Date/time of creation
-    public var createdAt: Date
+    public let createdAt: Date
     /// Custom member response data
-    public var custom: [String: RawJSON]
+    public let custom: [String: RawJSON]
     /// Date/time of deletion
-    public var deletedAt: Date?
-    public var role: String?
+    public let deletedAt: Date?
+    public let role: String?
     /// Date/time of the last update
-    public var updatedAt: Date
+    public let updatedAt: Date
     /// User response object
-    public var user: UserResponse
-    public var userId: String
+    public let user: UserResponse
+    public let userId: String
 
     public init(
         createdAt: Date,

@@ -5,9 +5,9 @@
 import Foundation
 import StreamCore
 
-public final class EgressHLSResponse: @unchecked Sendable, Decodable {
-    public var playlistUrl: String
-    public var status: String
+public final class EgressHLSResponse: Sendable, Decodable {
+    public let playlistUrl: String
+    public let status: String
 
     public init(playlistUrl: String, status: String) {
         self.playlistUrl = playlistUrl

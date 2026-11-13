@@ -7,21 +7,22 @@ import StreamCore
 
 /// This event is sent when a call is created. Clients receiving this event should check if the ringing
 /// field is set to true and if so, show the call screen
-public final class CallCreatedEvent: @unchecked Sendable, Event, Decodable, WSCallEvent {
+public final class CallCreatedEvent: Sendable, Event, Decodable, WSCallEvent {
     /// Represents a call
-    public var call: CallResponse
-    public var callCid: String
-    public var createdAt: Date
+    public let call: CallResponse
+    public let callCid: String
+    public let createdAt: Date
     /// the members added to this call
-    public var members: [MemberResponse]
+    public let members: [MemberResponse]
     /// The type of event: "call.created" in this case
-    public var type: String = "call.created"
+    public let type: String
 
-    public init(call: CallResponse, callCid: String, createdAt: Date, members: [MemberResponse]) {
+    public init(call: CallResponse, callCid: String, createdAt: Date, members: [MemberResponse], type: String = "call.created") {
         self.call = call
         self.callCid = callCid
         self.createdAt = createdAt
         self.members = members
+        self.type = type
     }
 
     public init(from decoder: Decoder) throws {

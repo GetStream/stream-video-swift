@@ -5,9 +5,9 @@
 import Foundation
 import StreamCore
 
-public final class TranslationSettings: @unchecked Sendable, Codable, JSONEncodable {
-    public var enabled: Bool?
-    public var languages: [String]?
+public final class TranslationSettings: Sendable, Codable, JSONEncodable {
+    public let enabled: Bool?
+    public let languages: [String]?
 
     public init(enabled: Bool? = nil, languages: [String]? = nil) {
         self.enabled = enabled
