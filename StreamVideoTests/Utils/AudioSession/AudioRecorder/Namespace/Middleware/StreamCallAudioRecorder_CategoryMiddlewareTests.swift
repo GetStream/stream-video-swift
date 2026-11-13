@@ -81,4 +81,22 @@ final class StreamCallAudioRecorder_CategoryMiddlewareTests: XCTestCase, @unchec
 
         await safeFulfillment(of: [validation])
     }
+
+    /// Only a category change stops recording. Other audio state changes
+    /// must not stop recording that started after the last change.
+    func test_audioStoreCategoryUnchanged_otherStateChanges_noActionDispatch() async throws {
+        let session = MockRTCAudioStore()
+        session.makeShared()
+        subject = .init()
+        let validation = expectation(description: "Dispatcher was called")
+        validation.isInverted = true
+        validation.assertForOverFulfill = false
+        subject.dispatcher = .init { _, _, _, _ in validation.fulfill() }
+
+        session.audioStore.dispatch(.setHasRecordingPermission(true))
+        session.audioStore.dispatch(.setHasRecordingPermission(false))
+
+        await safeFulfillment(of: [validation], timeout: 1)
+        try await session.dismantle()
+    }
 }
