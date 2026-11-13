@@ -49,7 +49,11 @@ extension StreamCallAudioRecorder.Namespace {
                         ?? Just(nil).eraseToAnyPublisher()
                 }
                 .switchToLatest()
-                .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in await self?.didUpdate($0) }
+                // Pair each value with whether a call was active before it.
+                .scan((hadCall: false, call: Call?.none)) { ($0.call != nil, $1) }
+                .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in
+                    await self?.didUpdate($0.call, hadCall: $0.hadCall)
+                }
         }
 
         // MARK: - Private Helpers
@@ -61,9 +65,13 @@ extension StreamCallAudioRecorder.Namespace {
         /// only when all are true. Cleans up and disables recording when the
         /// call ends.
         ///
-        /// - Parameter activeCall: The current active call, or `nil` when
-        ///   there is no active call.
-        private func didUpdate(_ activeCall: Call?) async {
+        /// - Parameters:
+        ///   - activeCall: The current active call, or `nil` when there is
+        ///     no active call.
+        ///   - hadCall: `true` when the previous value was a call. Only then
+        ///     does `nil` stop recording, so lobby recording survives a
+        ///     client change.
+        private func didUpdate(_ activeCall: Call?, hadCall: Bool) async {
             if let activeCall {
                 guard let generation = await beginMonitoring(activeCall) else { return }
 
@@ -101,6 +109,7 @@ extension StreamCallAudioRecorder.Namespace {
                     aggregatedCancellable?.cancel()
                     aggregatedCancellable = nil
                 }
+                guard hadCall else { return }
                 dispatcher?.dispatch(.setShouldRecord(false))
             }
         }

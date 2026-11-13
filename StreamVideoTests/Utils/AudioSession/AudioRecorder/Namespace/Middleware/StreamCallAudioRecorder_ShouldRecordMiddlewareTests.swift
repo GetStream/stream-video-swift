@@ -36,6 +36,24 @@ final class StreamCallAudioRecorder_ShouldRecordMiddlewareClientTests: StreamVid
         await safeFulfillment(of: [validation])
     }
 
+    /// The lobby records without a call. A new client without a call must
+    /// not stop that recording.
+    func test_noCallSeen_newStreamVideoClient_doesNotDispatchSetShouldRecordFalse() async {
+        subject = .init()
+        let validation = expectation(description: "setShouldRecord(false)")
+        validation.isInverted = true
+        validation.assertForOverFulfill = false
+        subject.dispatcher = .init { actions, _, _, _ in
+            if case .setShouldRecord(false) = actions[0].wrappedValue {
+                validation.fulfill()
+            }
+        }
+
+        newClient = StreamVideo.mock(httpClient: HTTPClient_Mock())
+
+        await safeFulfillment(of: [validation], timeout: 1)
+    }
+
     /// Customer flow: the app creates a new client, uses the lobby, joins,
     /// and hangs up. A later audio route change must not reopen the mic.
     func test_newClientLobbyCallHangUp_routeChange_avAudioRecorderStaysOff() async throws {
