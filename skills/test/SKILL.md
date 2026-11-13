@@ -79,6 +79,10 @@ Resolve failures or cancellations before repeating the full check.
 Report the command, iteration counts, failures, and process mode. Mark unavailable repetition as unverified.
 Passing repetitions provide evidence only for the tested conditions.
 
+A test outside the change can fail once and then pass when run alone.
+Record its name, the command, and the conditions, then stop.
+Do not add stress runs, load, or ordering experiments without user approval.
+
 ## Test design
 
 - Add tests for Swift behavior through public or internal APIs.
