@@ -66,10 +66,22 @@ final class SFUAdapter: CustomStringConvertible, @unchecked Sendable {
         }
     }
 
+    // A subject, not @Published: @Published creates its publisher lazily,
+    // so concurrent first subscribers can end up on a discarded publisher.
+    private let connectionStateSubject = CurrentValueSubject<
+        WebSocketConnectionState,
+        Never
+    >(.initialized)
+
     /// The current connection state of the WebSocket.
     ///
     /// Mirrors ``SFUWebSocket``'s state (see ``setUpPublishers()``).
-    @Published private(set) var connectionState: WebSocketConnectionState = .initialized
+    var connectionState: WebSocketConnectionState { connectionStateSubject.value }
+
+    /// Emits the current connection state, then every change.
+    var connectionStatePublisher: AnyPublisher<WebSocketConnectionState, Never> {
+        connectionStateSubject.eraseToAnyPublisher()
+    }
 
     /// A publisher that is used to inform subscribers that the SFUAdapter has refreshed its webSocket
     /// connection.
@@ -607,7 +619,7 @@ final class SFUAdapter: CustomStringConvertible, @unchecked Sendable {
 
         webSocket
             .connectionStatePublisher
-            .sink { [weak self] in self?.connectionState = $0 }
+            .sink { [weak self] in self?.connectionStateSubject.send($0) }
             .store(in: disposableBag)
 
         webSocket

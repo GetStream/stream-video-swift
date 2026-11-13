@@ -250,7 +250,7 @@ actor ICEAdapter: @unchecked Sendable {
         disposableBag.removeAll()
 
         sfuAdapter
-            .$connectionState
+            .connectionStatePublisher
             .removeDuplicates()
             .filter { if case .connected = $0 { true } else { false } }
             .sinkTask(on: self, storeIn: disposableBag) { executor, _ in
