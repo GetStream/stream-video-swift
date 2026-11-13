@@ -222,6 +222,29 @@ final class CallState_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(subject.callSettings, initialCallSettings)
     }
 
+    // MARK: - update(transcriptionLanguage:)
+
+    func test_update_transcriptionLanguage_keepsExtraOpts() {
+        let subject = CallState(MockStreamVideo().callSession)
+        let extraOpts: [String: RawJSON] = ["feature": .string("value")]
+        subject.update(
+            from: CallResponse.dummy(settings: .dummy(extraOpts: extraOpts))
+        )
+
+        subject.update(transcriptionLanguage: .en)
+
+        XCTAssertEqual(subject.settings?.extraOpts, extraOpts)
+    }
+
+    func test_update_transcriptionLanguage_setsTheLanguage() {
+        let subject = CallState(MockStreamVideo().callSession)
+        subject.update(from: CallResponse.dummy())
+
+        subject.update(transcriptionLanguage: .en)
+
+        XCTAssertEqual(subject.settings?.transcription.language, .en)
+    }
+
     func test_update_sfuCallEndedLiveEnded_setsBackstageAndLiveEndedAt() {
         let subject = CallState(.dummy())
         subject.settings = .dummy(backstage: .dummy(enabled: true))

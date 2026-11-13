@@ -6,6 +6,22 @@ import Foundation
 import StreamCore
 
 public final class JoinCallRequest: Sendable, Encodable, JSONEncodable {
+    
+    public enum JoinCallRequestPrefer: String, Sendable, Codable, CaseIterable {
+        case hls
+        case unknown = "_unknown"
+
+        public init(from decoder: Decoder) throws {
+            let container = try decoder.singleValueContainer()
+            if let decodedValue = try? container.decode(String.self),
+               let value = Self(rawValue: decodedValue) {
+                self = value
+            } else {
+                self = .unknown
+            }
+        }
+    }
+
     /// if true the call will be created if it doesn't exist
     public let create: Bool?
     /// CallRequest is the payload for creating a call.
@@ -21,6 +37,10 @@ public final class JoinCallRequest: Sendable, Encodable, JSONEncodable {
     /// List of SFU IDs to exclude when picking a new SFU for the participant
     public let migratingFromList: [String]?
     public let notify: Bool?
+    /// Playback modes other than WebRTC that the client can play. One of: hls. When empty, the response always contains SFU credentials
+    public let playbackCapabilities: [String]?
+    /// Playback mode the client prefers for this join, e.g. after a failed WebRTC join. One of: hls. Only honoured when listed in playback_capabilities and the call has a live HLS broadcast
+    public let prefer: JoinCallRequestPrefer?
     /// if true and the call is created, the notification will include ring=true
     public let ring: Bool?
     public let video: Bool?
@@ -35,6 +55,8 @@ public final class JoinCallRequest: Sendable, Encodable, JSONEncodable {
         migratingFrom: String? = nil,
         migratingFromList: [String]? = nil,
         notify: Bool? = nil,
+        playbackCapabilities: [String]? = nil,
+        prefer: JoinCallRequestPrefer? = nil,
         ring: Bool? = nil,
         video: Bool? = nil
     ) {
@@ -47,6 +69,8 @@ public final class JoinCallRequest: Sendable, Encodable, JSONEncodable {
         self.migratingFrom = migratingFrom
         self.migratingFromList = migratingFromList
         self.notify = notify
+        self.playbackCapabilities = playbackCapabilities
+        self.prefer = prefer
         self.ring = ring
         self.video = video
     }
@@ -62,6 +86,8 @@ public final class JoinCallRequest: Sendable, Encodable, JSONEncodable {
         try container.encodeIfPresent(migratingFrom, forKey: .migratingFrom)
         try container.encodeIfPresent(migratingFromList, forKey: .migratingFromList)
         try container.encodeIfPresent(notify, forKey: .notify)
+        try container.encodeIfPresent(playbackCapabilities, forKey: .playbackCapabilities)
+        try container.encodeIfPresent(prefer, forKey: .prefer)
         try container.encodeIfPresent(ring, forKey: .ring)
         try container.encodeIfPresent(video, forKey: .video)
     }
@@ -78,6 +104,8 @@ extension JoinCallRequest: Hashable {
             lhs.migratingFrom == rhs.migratingFrom &&
             lhs.migratingFromList == rhs.migratingFromList &&
             lhs.notify == rhs.notify &&
+            lhs.playbackCapabilities == rhs.playbackCapabilities &&
+            lhs.prefer == rhs.prefer &&
             lhs.ring == rhs.ring &&
             lhs.video == rhs.video
     }
@@ -92,6 +120,8 @@ extension JoinCallRequest: Hashable {
         hasher.combine(migratingFrom)
         hasher.combine(migratingFromList)
         hasher.combine(notify)
+        hasher.combine(playbackCapabilities)
+        hasher.combine(prefer)
         hasher.combine(ring)
         hasher.combine(video)
     }
