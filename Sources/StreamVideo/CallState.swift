@@ -101,6 +101,12 @@ public class CallState: ObservableObject {
     @Published public internal(set) var isInitialized: Bool = false
     @Published public internal(set) var callSettings: CallSettings = .default
 
+    /// How the backend routed this call to the client.
+    ///
+    /// It is ``PlaybackType/webRTC`` until the join response grants HLS. It
+    /// returns to ``PlaybackType/webRTC`` when the call ends.
+    @Published public internal(set) var playbackType: PlaybackType = .webRTC
+
     /// Indicates whether the current user is speaking while their microphone is muted.
     ///
     /// This is a local signal derived from the active WebRTC audio device.
@@ -416,6 +422,9 @@ public class CallState: ObservableObject {
         mergeMembers(response.members)
         ownCapabilities = response.ownCapabilities
         statsCollectionInterval = response.statsOptions.reportingIntervalMs / 1000
+        // The authenticator rejects invalid grants before this point.
+        playbackType = (try? response.playback?.hlsPlaylistURL())
+            .map(PlaybackType.hls) ?? .webRTC
     }
     
     internal func update(

@@ -12,6 +12,7 @@ class CallController: @unchecked Sendable {
         case participantsCountUpdatesEvent
         case currentUserBlocked
         case backstageSetting
+        case hlsCallEnded
     }
 
     private lazy var clientEventReporter: ClientEventReporting = ClientEventReporter(
@@ -31,7 +32,7 @@ class CallController: @unchecked Sendable {
         callSettings: initialCallSettings,
         clientEventReporter: clientEventReporter
     ) {
-        [weak self, callId] create, ring, migratingFrom, migratingFromList, notify, options in
+        [weak self, callId] create, ring, migratingFrom, migratingFromList, notify, options, declaresPlaybackCapabilities in
         if let self {
             return try await authenticateCall(
                 create: create,
@@ -39,7 +40,8 @@ class CallController: @unchecked Sendable {
                 migratingFrom: migratingFrom,
                 migratingFromList: migratingFromList,
                 notify: notify,
-                options: options
+                options: options,
+                declaresPlaybackCapabilities: declaresPlaybackCapabilities
             )
         } else {
             throw ClientError("Unable to authenticate callId:\(callId).")
@@ -79,6 +81,7 @@ class CallController: @unchecked Sendable {
     private var participants: CollectionDelayedUpdateObserver<[String: CallParticipant]>?
 
     private let disposableBag = DisposableBag()
+    private let callSettingsProcessingQueue = OperationQueue(maxConcurrentOperationCount: 1)
 
     init(
         defaultAPI: DefaultAPIEndpoints,
@@ -515,6 +518,7 @@ class CallController: @unchecked Sendable {
 
     func leave(reason: String?, initiator: Call.LeaveInitiator = .unknown) {
         guard call != nil else { return }
+        resetPlaybackType(of: call)
         call = nil
         webRTCCoordinator.leave(reason: reason, initiator: initiator)
     }
@@ -522,6 +526,7 @@ class CallController: @unchecked Sendable {
     /// Cleans up the call controller.
     func cleanUp() {
         guard call != nil else { return }
+        resetPlaybackType(of: call)
         call = nil
         Task(disposableBag: disposableBag) { [weak self] in
             guard let self else { return }
@@ -716,6 +721,8 @@ class CallController: @unchecked Sendable {
     ///   - migratingFromList: All exhausted SFU edges that should be avoided.
     ///   - notify: Whether the backend should notify call members.
     ///   - options: Additional call creation options and join-only hints.
+    ///   - declaresPlaybackCapabilities: Whether the request tells the backend
+    ///     that this client can play HLS.
     /// - Returns: The backend join response used to continue the WebRTC flow.
     /// - Throws: An error if location fetch or join request fails.
     ///
@@ -727,7 +734,8 @@ class CallController: @unchecked Sendable {
         migratingFrom: String?,
         migratingFromList: [String]?,
         notify: Bool,
-        options: CreateCallOptions?
+        options: CreateCallOptions?,
+        declaresPlaybackCapabilities: Bool
     ) async throws -> JoinCallResponse {
         let location = try await getLocation()
         var membersRequest = [MemberRequest]()
@@ -755,6 +763,7 @@ class CallController: @unchecked Sendable {
             migratingFrom: migratingFrom,
             migratingFromList: migratingFromList?.isEmpty == false ? migratingFromList : nil,
             notify: notify,
+            playbackCapabilities: declaresPlaybackCapabilities ? ["hls"] : nil,
             ring: ring
         )
 
@@ -801,11 +810,26 @@ class CallController: @unchecked Sendable {
         return try await LocationFetcher.getLocation()
     }
 
+    /// Returns the call state to WebRTC once the call that played HLS ends.
+    private func resetPlaybackType(of call: Call?) {
+        guard let call else { return }
+        Task(disposableBag: disposableBag) { @MainActor in
+            if call.state.playbackType != .webRTC {
+                call.state.playbackType = .webRTC
+            }
+        }
+    }
+
     private func webRTCClientDidUpdateStage(
         _ stage: WebRTCCoordinator.StateMachine.Stage
     ) {
+        if stage.id != .hlsPlayback {
+            disposableBag.remove(DisposableKey.hlsCallEnded.rawValue)
+        }
+
         switch stage.id {
         case .idle:
+            resetPlaybackType(of: call)
             call?.update(reconnectionStatus: .disconnected)
         case .rejoining:
             call?.update(reconnectionStatus: .reconnecting)
@@ -813,6 +837,11 @@ class CallController: @unchecked Sendable {
             call?.update(reconnectionStatus: .migrating)
         case .leaving:
             call?.leave()
+        case .hlsPlayback:
+            /// HLS has no SFU health check, so coordinator count events stay
+            /// the source of `participantCount`. It has no reconnection
+            /// either, so the status stays `.connected`.
+            subscribeToHLSCallEndedEvent(call)
         case .joined:
             /// Once connected we should stop listening for CallSessionParticipantCountsUpdatedEvent
             /// updates and only rely on the healthCheck event.
@@ -833,6 +862,25 @@ class CallController: @unchecked Sendable {
         default:
             break
         }
+    }
+
+    /// Leaves when the coordinator ends the call. In HLS there is no SFU, so
+    /// the SFU `CallEnded` event that ends a WebRTC call never arrives.
+    /// The event has no counterpart of `liveEnded`, so it always leaves.
+    private func subscribeToHLSCallEndedEvent(_ call: Call?) {
+        disposableBag.remove(DisposableKey.hlsCallEnded.rawValue)
+
+        guard let call else { return }
+
+        call
+            .eventPublisher(for: CallEndedEvent.self)
+            .sink { [weak call] _ in
+                call?.leave(
+                    initiator: .remoteEvent,
+                    reason: Call.LeaveReason.callEnded.rawValue
+                )
+            }
+            .store(in: disposableBag, key: DisposableKey.hlsCallEnded.rawValue)
     }
 
     private func subscribeToParticipantsCountUpdatesEvent(_ call: Call?) {
@@ -943,7 +991,11 @@ class CallController: @unchecked Sendable {
             .stateAdapter
             .$callSettings
             .removeDuplicates()
-            .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in self?.call?.state.update(callSettings: $0) }
+            // A task per value is unordered, and a stale value would
+            // overwrite a newer one on the call state.
+            .sinkTask(queue: callSettingsProcessingQueue) { @MainActor [weak self] in
+                self?.call?.state.update(callSettings: $0)
+            }
             .store(in: disposableBag)
     }
 

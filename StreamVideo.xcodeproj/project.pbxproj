@@ -333,6 +333,7 @@
 				"Utilities/Dummy/IndividualRecordingSettingsResponse+Dummy.swift",
 				"Utilities/Dummy/JoinCallResponse+Dummy.swift",
 				"Utilities/Dummy/LimitsSettingsResponse+Dummy.swift",
+				"Utilities/Dummy/PlaybackResponse+Dummy.swift",
 				"Utilities/Dummy/PublishOptions+Dummy.swift",
 				"Utilities/Dummy/RawRecordingSettingsResponse+Dummy.swift",
 				"Utilities/Dummy/RecordSettingsResponse+Dummy.swift",

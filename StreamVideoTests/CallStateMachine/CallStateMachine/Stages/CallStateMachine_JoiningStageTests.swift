@@ -193,11 +193,40 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
 
         try await assertJoining(
             context,
-            joinResponse: JoinCallResponse.dummy(ownCapabilities: [.changeMaxDuration]),
+            joinResponse: JoinCallResponse.dummy(
+                statsOptions: .init(enableRtcStats: false, reportingIntervalMs: 5000)
+            ),
             expectedTransition: .joined
         ) { @MainActor in
             XCTAssertEqual(self.callController.timesCalled(.join), 1)
-            XCTAssertEqual(self.call.state.ownCapabilities, [.changeMaxDuration])
+            // Not the capabilities: the controller mirrors the state adapter's
+            // own, which are empty here, onto the call state at any time.
+            XCTAssertEqual(self.call.state.statsCollectionInterval, 5)
+        }
+    }
+
+    func test_execute_withoutRetries_hlsGrant_setsPlaybackTypeToHLS() async throws {
+        let context = Call.StateMachine.Stage.Context(call: call, input: input)
+
+        try await assertJoining(
+            context,
+            joinResponse: JoinCallResponse.dummyHLSGrant(),
+            expectedTransition: .joined
+        ) { @MainActor in
+            let url = try XCTUnwrap(URL(string: "https://example.com/live.m3u8"))
+            XCTAssertEqual(self.call.state.playbackType, .hls(url))
+        }
+    }
+
+    func test_execute_withoutRetries_webRTCJoin_keepsPlaybackTypeWebRTC() async throws {
+        let context = Call.StateMachine.Stage.Context(call: call, input: input)
+
+        try await assertJoining(
+            context,
+            joinResponse: JoinCallResponse.dummy(),
+            expectedTransition: .joined
+        ) { @MainActor in
+            XCTAssertEqual(self.call.state.playbackType, .webRTC)
         }
     }
 

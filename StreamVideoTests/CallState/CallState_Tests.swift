@@ -245,6 +245,48 @@ final class CallState_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(subject.settings?.transcription.language, .en)
     }
 
+    // MARK: - playbackType
+
+    func test_init_playbackType_isWebRTC() {
+        let subject = CallState(MockStreamVideo().callSession)
+
+        XCTAssertEqual(subject.playbackType, .webRTC)
+    }
+
+    func test_update_fromHLSGrant_setsPlaybackTypeToHLSWithThePlaylistURL() throws {
+        let subject = CallState(MockStreamVideo().callSession)
+
+        subject.update(from: JoinCallResponse.dummyHLSGrant())
+
+        let url = try XCTUnwrap(URL(string: "https://example.com/live.m3u8"))
+        XCTAssertEqual(subject.playbackType, .hls(url))
+    }
+
+    func test_update_fromJoinCallResponseWithoutPlayback_setsPlaybackTypeToWebRTC() {
+        let subject = CallState(MockStreamVideo().callSession)
+        subject.update(from: JoinCallResponse.dummyHLSGrant())
+
+        subject.update(from: JoinCallResponse.dummy())
+
+        XCTAssertEqual(subject.playbackType, .webRTC)
+    }
+
+    func test_update_fromGetOrCreateCallResponse_keepsPlaybackType() throws {
+        let subject = CallState(MockStreamVideo().callSession)
+        subject.update(from: JoinCallResponse.dummyHLSGrant())
+
+        subject.update(from: GetOrCreateCallResponse(
+            call: .dummy(),
+            created: false,
+            duration: "",
+            members: [],
+            ownCapabilities: []
+        ))
+
+        let url = try XCTUnwrap(URL(string: "https://example.com/live.m3u8"))
+        XCTAssertEqual(subject.playbackType, .hls(url))
+    }
+
     func test_update_sfuCallEndedLiveEnded_setsBackstageAndLiveEndedAt() {
         let subject = CallState(.dummy())
         subject.settings = .dummy(backstage: .dummy(enabled: true))

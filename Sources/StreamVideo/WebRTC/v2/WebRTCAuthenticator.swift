@@ -18,7 +18,10 @@ protocol WebRTCAuthenticating {
     ///   - ring: Whether to ring the call.
     ///   - notify: Whether notification side effects should be emitted.
     ///   - options: Additional join/create options sent to the backend.
+    ///   - declaresPlaybackCapabilities: Whether the join request declares
+    ///     that the client can play HLS.
     /// - Returns: A tuple containing the SFU adapter and join call response.
+    ///   The SFU adapter is `nil` when the backend granted HLS playback.
     /// - Throws: An error if authentication fails.
     func authenticate(
         coordinator: WebRTCCoordinator,
@@ -27,8 +30,9 @@ protocol WebRTCAuthenticating {
         create: Bool,
         ring: Bool,
         notify: Bool,
-        options: CreateCallOptions?
-    ) async throws -> (sfuAdapter: SFUAdapter, response: JoinCallResponse)
+        options: CreateCallOptions?,
+        declaresPlaybackCapabilities: Bool
+    ) async throws -> (sfuAdapter: SFUAdapter?, response: JoinCallResponse)
 
     /// Awaits the SFU to allow authentication
     /// - Parameter sfuAdapter: The SFU adapter to authenticate with.
@@ -56,7 +60,10 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
     ///   - ring: Whether to ring the call.
     ///   - notify: Whether to notify other participants.
     ///   - options: Additional call creation options for the join request.
+    ///   - declaresPlaybackCapabilities: Whether the join request declares
+    ///     that the client can play HLS.
     /// - Returns: A tuple containing the SFU adapter and join call response.
+    ///   The SFU adapter is `nil` when the backend granted HLS playback.
     /// - Throws: An error if authentication fails.
     func authenticate(
         coordinator: WebRTCCoordinator,
@@ -65,8 +72,9 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
         create: Bool,
         ring: Bool,
         notify: Bool,
-        options: CreateCallOptions?
-    ) async throws -> (sfuAdapter: SFUAdapter, response: JoinCallResponse) {
+        options: CreateCallOptions?,
+        declaresPlaybackCapabilities: Bool
+    ) async throws -> (sfuAdapter: SFUAdapter?, response: JoinCallResponse) {
         let response = try await coordinator
             .callAuthentication(
                 create,
@@ -74,20 +82,48 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
                 currentSFU,
                 migratingFromList,
                 notify,
-                options
+                options,
+                declaresPlaybackCapabilities
             )
 
-        return try await apply(response, to: coordinator.stateAdapter)
+        return try await apply(
+            response,
+            declaresPlaybackCapabilities: declaresPlaybackCapabilities,
+            to: coordinator.stateAdapter
+        )
     }
 
     private func apply(
         _ response: JoinCallResponse,
+        declaresPlaybackCapabilities: Bool,
         to stateAdapter: isolated WebRTCStateAdapter
-    ) async throws -> (sfuAdapter: SFUAdapter, response: JoinCallResponse) {
+    ) async throws -> (sfuAdapter: SFUAdapter?, response: JoinCallResponse) {
         try Task.checkCancellation()
+
+        /// A grant the client did not ask for would end a rejoin or a
+        /// migration in HLS playback in the middle of a call.
+        if let playback = response.playback {
+            guard declaresPlaybackCapabilities else {
+                throw ClientError("Received a playback grant that was not requested.")
+            }
+            _ = try playback.hlsPlaylistURL()
+        }
+
         await stateAdapter.enqueueOwnCapabilities { Set(response.ownCapabilities) }
         // Cleanup can run while capability changes stop screen sharing.
         try Task.checkCancellation()
+
+        /// With an HLS grant the credentials are blank and the client never
+        /// connects to an SFU. Skipping the rest keeps the SFU, ICE, stats and
+        /// tracing setup out of the HLS path. Audio and video go off, because
+        /// a viewer never publishes, and the audio recorder starts when the
+        /// call settings have audio on and the session is active.
+        if response.playback != nil {
+            stateAdapter.enqueueCallSettings {
+                $0.withUpdatedAudioState(false).withUpdatedVideoState(false)
+            }
+            return (nil, response)
+        }
 
         stateAdapter.set(
             token: response.credentials.token

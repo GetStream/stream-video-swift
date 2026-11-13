@@ -12,7 +12,8 @@ final class MockCallAuthenticator: @unchecked Sendable {
         String?,
         [String]?,
         Bool,
-        CreateCallOptions?
+        CreateCallOptions?,
+        Bool
     ) async throws -> JoinCallResponse
 
     var authenticateResult: Result<JoinCallResponse, Error> = .failure(ClientError.Unknown())
@@ -24,7 +25,8 @@ final class MockCallAuthenticator: @unchecked Sendable {
         migratingFrom: String?,
         migratingFromList: [String]?,
         notify: Bool,
-        options: CreateCallOptions?
+        options: CreateCallOptions?,
+        declaresPlaybackCapabilities: Bool
     )] = []
 
     func authenticate(
@@ -33,7 +35,8 @@ final class MockCallAuthenticator: @unchecked Sendable {
         migratingFrom: String?,
         migratingFromList: [String]?,
         notify: Bool,
-        options: CreateCallOptions?
+        options: CreateCallOptions?,
+        declaresPlaybackCapabilities: Bool
     ) async throws -> JoinCallResponse {
         authenticateCalledWithInput.append(
             (
@@ -42,7 +45,8 @@ final class MockCallAuthenticator: @unchecked Sendable {
                 migratingFrom,
                 migratingFromList,
                 notify,
-                options
+                options,
+                declaresPlaybackCapabilities
             )
         )
         if let authenticateHandler {
@@ -52,7 +56,8 @@ final class MockCallAuthenticator: @unchecked Sendable {
                 migratingFrom,
                 migratingFromList,
                 notify,
-                options
+                options,
+                declaresPlaybackCapabilities
             )
         }
         switch authenticateResult {

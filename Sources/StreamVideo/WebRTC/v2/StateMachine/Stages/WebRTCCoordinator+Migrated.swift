@@ -87,10 +87,10 @@ extension WebRTCCoordinator.StateMachine.Stage {
                             peerConnection: nil,
                             details: coordinatorJoinDetails
                         )
-                    let sfuAdapter: SFUAdapter
+                    let grantedSFUAdapter: SFUAdapter?
                     let response: JoinCallResponse
                     do {
-                        (sfuAdapter, response) = try await context
+                        (grantedSFUAdapter, response) = try await context
                             .authenticator
                             .authenticate(
                                 coordinator: coordinator,
@@ -99,7 +99,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
                                 create: false,
                                 ring: false,
                                 notify: false,
-                                options: context.recoveryJoinOptions()
+                                options: context.recoveryJoinOptions(),
+                                declaresPlaybackCapabilities: false
                             )
                     } catch {
                         // Authentication failed before assigning a new SFU, so
@@ -131,6 +132,12 @@ extension WebRTCCoordinator.StateMachine.Stage {
                             ),
                             failure: nil
                         )
+
+                    // Migration never declares HLS support, so the backend
+                    // always assigns a new SFU.
+                    guard let sfuAdapter = grantedSFUAdapter else {
+                        throw ClientError("Missing SFU adapter.")
+                    }
 
                     // Start observing SFU-full errors on the newly assigned SFU
                     // so chained migrations continue to work after this stage.

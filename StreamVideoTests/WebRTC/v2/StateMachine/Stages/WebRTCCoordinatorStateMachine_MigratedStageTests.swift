@@ -83,7 +83,8 @@ final class WebRTCCoordinatorStateMachine_MigratedStageTests: XCTestCase, @unche
                 create: Bool,
                 ring: Bool,
                 notify: Bool,
-                options: CreateCallOptions?
+                options: CreateCallOptions?,
+                declaresPlaybackCapabilities: Bool
             ).self
             let input = try XCTUnwrap(
                 mockCoordinatorStack?.webRTCAuthenticator.recordedInputPayload(
@@ -120,7 +121,8 @@ final class WebRTCCoordinatorStateMachine_MigratedStageTests: XCTestCase, @unche
                 create: Bool,
                 ring: Bool,
                 notify: Bool,
-                options: CreateCallOptions?
+                options: CreateCallOptions?,
+                declaresPlaybackCapabilities: Bool
             ).self
             let input = try XCTUnwrap(
                 mockCoordinatorStack?.webRTCAuthenticator.recordedInputPayload(
@@ -129,6 +131,44 @@ final class WebRTCCoordinatorStateMachine_MigratedStageTests: XCTestCase, @unche
                 )?.first
             )
             XCTAssertEqual(input.migratingFromList, self.subject.context.migratingFromList)
+        }
+    }
+
+    func test_transition_authentication_doesNotDeclarePlaybackCapabilities() async throws {
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.authenticator = mockCoordinatorStack.webRTCAuthenticator
+
+        try await assertTransition(
+            from: .migrating,
+            expectedTarget: .disconnected,
+            subject: subject
+        ) { [mockCoordinatorStack] _ in
+            XCTAssertEqual(
+                mockCoordinatorStack?.webRTCAuthenticator.declaredPlaybackCapabilities,
+                [false]
+            )
+        }
+    }
+
+    func test_transition_authenticationReturnsNoSFUAdapter_transitionsToDisconnected() async throws {
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.authenticator = mockCoordinatorStack.webRTCAuthenticator
+        mockCoordinatorStack.webRTCAuthenticator.stub(
+            for: .authenticate,
+            with: Result<(SFUAdapter?, JoinCallResponse), Error>
+                .success((nil, .dummyHLSGrant()))
+        )
+
+        try await assertTransition(
+            from: .migrating,
+            expectedTarget: .disconnected,
+            subject: subject
+        ) { [mockCoordinatorStack] target in
+            XCTAssertTrue(target.context.flowError is ClientError)
+            XCTAssertEqual(
+                mockCoordinatorStack?.webRTCAuthenticator.timesCalled(.waitForAuthentication),
+                0
+            )
         }
     }
 
