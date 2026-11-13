@@ -37,9 +37,14 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
 
     override func tearDown() {
         allOtherStages = nil
-        mockCoordinatorStack = nil
         validStages = nil
         subject = nil
+        weak let releasedStack = mockCoordinatorStack
+        mockCoordinatorStack = nil
+        AssertAsync.willBeNil(
+            releasedStack,
+            message: "MockWebRTCCoordinatorStack was not released."
+        )
         super.tearDown()
     }
 
@@ -53,10 +58,16 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
 
     func test_transition() {
         for nextStage in allOtherStages {
+            // A valid transition starts a task that mutates the stage context.
+            // Each transition gets its own stage, like the state machine does,
+            // and cancels the task before the next one starts.
+            let stage = WebRTCCoordinator.StateMachine.Stage.joining(subject.context)
+            defer { stage.willTransitionAway() }
+
             if validStages.contains(nextStage.id) {
-                XCTAssertNotNil(subject.transition(from: nextStage))
+                XCTAssertNotNil(stage.transition(from: nextStage))
             } else {
-                XCTAssertNil(subject.transition(from: nextStage))
+                XCTAssertNil(stage.transition(from: nextStage))
             }
         }
     }
@@ -1843,11 +1854,12 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
     ) async throws {
         let transitionExpectation =
             expectation(description: "Stage id:\(subject.id) is expected to transition to id:\(expectedTarget).")
+        let subjectID = subject.id
         subject.transition = { [validator] target in
             guard target.id == expectedTarget else {
                 transitionExpectation
                     .expectationDescription =
-                    "Stage id:\(subject.id) is expected to transition to id:\(expectedTarget) but instead it was transition to id:\(target.id)."
+                    "Stage id:\(subjectID) is expected to transition to id:\(expectedTarget) but instead it was transition to id:\(target.id)."
                 return
             }
             Task {
