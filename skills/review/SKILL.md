@@ -52,6 +52,11 @@ Delegation requires no separate model provider.
 
 ## Handoff
 
+### PR titles
+
+Start the title with the Linear issue key in brackets, e.g. `[IOS-1284] Update WebRTC to 156.0.x`.
+The `PR Title` check enforces it. PRs from forks, release PRs and bot PRs are exempt.
+
 ### PR descriptions
 
 For every PR description you create or edit, read the current [GitHub template](../../.github/PULL_REQUEST_TEMPLATE.md).
