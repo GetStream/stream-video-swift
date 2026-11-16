@@ -5,5 +5,6 @@ runs:
   steps:
     - uses: ruby/setup-ruby@v1
       with:
-        ruby-version: 3.1.0
+        # ubuntu-latest does not publish Ruby 3.1.0. Keep the latest 3.1 patch.
+        ruby-version: 3.1.7
         bundler-cache: true
