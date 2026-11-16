@@ -107,6 +107,8 @@ jobs:
       with:
         client-id: ${{ vars.IOS_RELEASE_BOT_CLIENT_ID }}
         private-key: ${{ secrets.IOS_RELEASE_BOT_PRIVATE_KEY }}
+        permission-contents: write
+        permission-pull-requests: write
     - uses: actions/checkout@v4.1.1
       with:
         token: ${{ steps.app-token.outputs.token }}
