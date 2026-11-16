@@ -71,7 +71,7 @@ jobs:
         job_name: "${{ github.workflow }}: ${{ github.job }}"
         fields: repo,commit,author,workflow
       env:
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_IOS_BOTS }}
       if: failure()
 
   pull-request:
@@ -102,5 +102,5 @@ jobs:
         job_name: "${{ github.workflow }}: ${{ github.job }}"
         fields: repo,commit,author,workflow
       env:
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_IOS_BOTS }}
       if: failure()

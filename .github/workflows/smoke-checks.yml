@@ -69,7 +69,7 @@ jobs:
     - name: Run Sonar analysis
       run: bundle exec fastlane sonar_upload
       env:
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_IOS_BOTS }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
     - uses: 8398a7/action-slack@v3
       with:
@@ -78,7 +78,7 @@ jobs:
         job_name: "Test LLC (Debug)"
         fields: repo,commit,author,workflow
       env:
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_IOS_BOTS }}
       if: ${{ github.event_name == 'push' && failure() }}
     - name: Parse xcresult
       if: failure()
