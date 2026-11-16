@@ -29,6 +29,7 @@ jobs:
   deploy:
     runs-on: macos-15
     env:
+      MATCH_GIT_TOKEN: ${{ steps.bot-token.outputs.token }}
       MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
       APPSTORE_API_KEY: ${{ secrets.APPSTORE_API_KEY }}
       GOOGLE_CLIENT_ID: ${{ vars.GOOGLE_CLIENT_ID }}
@@ -45,13 +46,6 @@ jobs:
         owner: ${{ github.repository_owner }}
         repositories: ios-certificates
         permission-contents: read
-    - name: Pass the bot token to match
-      run: |
-        auth=$(printf 'x-access-token:%s' "$TOKEN" | base64 | tr -d '\n')
-        echo "::add-mask::$auth"
-        echo "MATCH_GIT_BASIC_AUTHORIZATION=$auth" >> "$GITHUB_ENV"
-      env:
-        TOKEN: ${{ steps.bot-token.outputs.token }}
     - uses: ./.github/actions/ruby-cache
     - uses: ./.github/actions/xcode-cache
     - if: ${{ github.event.inputs.release }} == 'Debug'
