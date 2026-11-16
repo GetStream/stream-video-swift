@@ -26,8 +26,8 @@ It downloads `openapi-linux-amd64` and its `.sha256` from a `GetStream/chat` rel
 `generator_release` selects the tag. An empty value uses the latest release.
 The download token comes from `vars.CI_GO_MODULES_CLIENT_ID` and `secrets.CI_GO_MODULES_PRIVATE_KEY`, with contents read on `chat`.
 The job checks the checksum, then runs `Scripts/generate.sh` with `PROTOCOL_DIR` and `OPENAPI` set.
-The pull request job checks out this repository only, downloads the generated files, and opens a pull request when they changed.
-It installs Ruby through `.github/actions/ruby-cache`. That action pins the latest Ruby 3.1 patch, because `ubuntu-latest` does not publish Ruby 3.1.0.
+The pull request job checks out this repository only, downloads the generated files, and runs `Scripts/openapi_open_pull_request.sh`.
+That script commits the generated directory and opens a pull request with `git` and `gh`. It does not install Ruby or Fastlane.
 The pull request targets the branch the workflow ran on. Its title is `[Hygiene]OpenAPI models generation`.
 A failed job notifies Slack through `secrets.SLACK_WEBHOOK_IOS_BOTS`. The Slack action reads that value from the `SLACK_WEBHOOK_URL` environment variable.
 
