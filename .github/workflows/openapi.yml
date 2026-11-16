@@ -117,7 +117,9 @@ jobs:
     - name: Open pull request
       run: bash Scripts/openapi_open_pull_request.sh
       env:
-        GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        # The release bot token can push. This installation cannot create
+        # pull requests, so gh uses the CI bot token for that call only.
+        GH_TOKEN: ${{ secrets.CI_BOT_GITHUB_TOKEN }}
     - uses: 8398a7/action-slack@v3
       with:
         status: ${{ job.status }}
