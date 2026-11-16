@@ -28,19 +28,12 @@ jobs:
     - uses: actions/checkout@v4.1.1
       with:
         persist-credentials: false
-    - name: Generate release bot token
-      id: app-token
-      uses: actions/create-github-app-token@v3
-      with:
-        client-id: ${{ vars.IOS_RELEASE_BOT_CLIENT_ID }}
-        private-key: ${{ secrets.IOS_RELEASE_BOT_PRIVATE_KEY }}
-        owner: ${{ github.repository_owner }}
     - uses: actions/checkout@v4.1.1
       with:
         repository: GetStream/chat
         ref: ${{ inputs.chat_ref }}
         path: chat-source
-        token: ${{ steps.app-token.outputs.token }}
+        ssh-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
         persist-credentials: false
     - name: Place chat next to this repo
       # Scripts/generate.sh reads the private chat repo from the parent directory.
@@ -52,12 +45,15 @@ jobs:
         go-version-file: ../chat/tools/openapi/go.mod
     - name: Install formatters
       run: ./Scripts/bootstrap.sh
+    - name: Connect Bot
+      uses: webfactory/ssh-agent@v0.7.0
+      with:
+        ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
     - name: Download private Go modules
-      env:
-        TOKEN: ${{ steps.app-token.outputs.token }}
+      # Go fetches the private GetStream modules with git over SSH.
       run: |
-        git config --global url."https://x-access-token:${TOKEN}@github.com/".insteadOf "https://github.com/"
-        trap 'git config --global --unset-all "url.https://x-access-token:${TOKEN}@github.com/.insteadof"' EXIT
+        git config --global url."git@github.com:".insteadOf "https://github.com/"
+        trap 'git config --global --unset-all url."git@github.com:".insteadof' EXIT
         go mod download
       working-directory: ../chat/tools/openapi
     - name: Generate OpenAPI models
