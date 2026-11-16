@@ -160,7 +160,8 @@ remove_enum_cases() {
 # Drops models which DefaultAPI and VideoEvent do not reach.
 remove_unused_models() {
   local models_dir="$OUTPUT_DIR/Models"
-  local all reachable previous model
+  # An unassigned local is unset under nounset on Ubuntu bash.
+  local all reachable previous="" model
   all="$(ls "$models_dir" | sed 's/\.swift$//' | sort)"
   reachable="VideoEvent"
   until [ "$reachable" = "$previous" ]; do
