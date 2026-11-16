@@ -21,9 +21,11 @@ Do not edit `Sources/StreamVideo/OpenApi/generated/` by hand. Change the lists b
 
 `.github/workflows/openapi.yml` starts with `workflow_dispatch` on the selected branch.
 The `protocol_ref` input is a `GetStream/protocol` branch name or commit hash. It defaults to `main`.
-The generate job checks out that public repository and does not read `GetStream/chat`.
-It runs `Scripts/generate.sh` with `PROTOCOL_DIR` set to that checkout.
-The job still needs the `openapi` binary from `chat/tools/openapi`. A GitHub-hosted runner does not have that binary, so the job stops until `OPENAPI` points at one.
+The generate job checks out that public repository.
+It downloads `openapi-linux-amd64` and its `.sha256` from a `GetStream/chat` release.
+`generator_release` selects the tag. An empty value uses the latest release.
+The download token comes from `vars.CI_GO_MODULES_CLIENT_ID` and `secrets.CI_GO_MODULES_PRIVATE_KEY`, with contents read on `chat`.
+The job checks the checksum, then runs `Scripts/generate.sh` with `PROTOCOL_DIR` and `OPENAPI` set.
 The pull request job checks out this repository only, downloads the generated files, and opens a pull request when they changed.
 The pull request targets the branch the workflow ran on. Its title is `[Hygiene]OpenAPI models generation`.
 

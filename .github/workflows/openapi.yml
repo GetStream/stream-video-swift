@@ -8,6 +8,11 @@ on:
         required: false
         default: main
         type: string
+      generator_release:
+        description: 'GetStream/chat release tag for openapi-linux-amd64. Empty uses the latest release.'
+        required: false
+        default: ''
+        type: string
 
 permissions:
   contents: read
@@ -37,9 +42,37 @@ jobs:
         sudo mv /tmp/swiftformat/swiftformat_linux /usr/local/bin/swiftformat
         sudo chmod +x /usr/local/bin/swiftformat
         swiftformat --version
+    - name: Create chat read token
+      id: app-token
+      uses: actions/create-github-app-token@v3
+      with:
+        client-id: ${{ vars.CI_GO_MODULES_CLIENT_ID }}
+        private-key: ${{ secrets.CI_GO_MODULES_PRIVATE_KEY }}
+        owner: GetStream
+        repositories: chat
+        permission-contents: read
+    - name: Download OpenAPI generator
+      env:
+        GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        GENERATOR_RELEASE: ${{ inputs.generator_release }}
+      run: |
+        bin="${RUNNER_TEMP}/openapi"
+        mkdir -p "$bin"
+        if [ -n "${GENERATOR_RELEASE}" ]; then
+          gh release download "$GENERATOR_RELEASE" \
+            --repo GetStream/chat \
+            --pattern 'openapi-linux-amd64*' \
+            --dir "$bin"
+        else
+          gh release download \
+            --repo GetStream/chat \
+            --pattern 'openapi-linux-amd64*' \
+            --dir "$bin"
+        fi
+        (cd "$bin" && sha256sum -c openapi-linux-amd64.sha256)
+        chmod +x "$bin/openapi-linux-amd64"
+        echo "OPENAPI=${bin}/openapi-linux-amd64" >> "$GITHUB_ENV"
     - name: Generate OpenAPI models
-      # The spec is the protocol checkout above. generate-client still needs
-      # chat's openapi binary. Set OPENAPI to that binary on the runner.
       run: bash Scripts/generate.sh
       timeout-minutes: 30
       env:
