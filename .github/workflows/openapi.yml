@@ -108,6 +108,8 @@ jobs:
         path: Sources/StreamVideo/OpenApi/generated
     - name: Open pull request
       run: bash Scripts/openapi_open_pull_request.sh
+      env:
+        GH_TOKEN: ${{ github.token }}
     - uses: 8398a7/action-slack@v3
       with:
         status: ${{ job.status }}
