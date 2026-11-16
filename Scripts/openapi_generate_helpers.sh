@@ -191,7 +191,7 @@ apply_coding_directions() {
     diff <(echo "$classified") <(echo "$generated") >&2
     exit 1
   fi
-  sed -i '' 's/send<Response: Codable>/send<Response: Decodable>/' "$OUTPUT_DIR/APIs/DefaultAPI.swift"
+  perl -pi -e 's/send<Response: Codable>/send<Response: Decodable>/' "$OUTPUT_DIR/APIs/DefaultAPI.swift"
   for model in $(jq -r '.decodableModels[]' "$ALLOWED_FILE"); do
     narrow_coding "$models_dir/$model.swift" "$model" Decodable
   done
