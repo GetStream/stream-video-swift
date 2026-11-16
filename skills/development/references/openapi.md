@@ -5,21 +5,25 @@ Do not edit `Sources/StreamVideo/OpenApi/generated/` by hand. Change the lists b
 
 ## Run the generator
 
-1. Get access to the private backend repository through the [repository access procedure](../../../AGENTS.md#related-repositories).
-   `Scripts/generate.sh` expects it at `../chat` from the repository root.
-   For a worktree, add a `chat` symlink next to the worktree.
-2. Run `Scripts/generate.sh`. It builds the backend `tools/openapi` binary, generates the v1 video spec,
-   generates Swift, prunes the output, and formats it.
+1. Run `Scripts/generate.sh`. It reads the published v1 video client spec
+   `openapi/video-openapi-clientside.yaml` from [GetStream/protocol](https://github.com/GetStream/protocol).
+   Set `PROTOCOL_DIR` to a local checkout, or `PROTOCOL_REF` (default `main`) to download that file.
+   `Scripts/apply_renamed_models.rb` applies `Scripts/renamed-models.json` to schema names, then the script generates Swift, prunes the output, and formats it.
    The v1 spec keeps the `/video` paths and the guest, devices, and longpoll endpoints.
    Models encode and decode with the shared `StringCodingKey` type. The script drops the keys no model uses.
    The post-processing steps live in `Scripts/openapi_generate_helpers.sh`.
+2. Swift generation uses the `openapi` binary from the private chat repo.
+   The script uses `OPENAPI` when set, then `../chat/build/openapi`, then builds `../chat/tools/openapi` when that source tree exists.
+   For a worktree, add a `chat` symlink next to the worktree, or set `OPENAPI` to the binary.
 3. Run the script a second time. `git diff` must not change.
 
 ## CI
 
 `.github/workflows/openapi.yml` starts with `workflow_dispatch` on the selected branch.
-The `chat_ref` input is a `GetStream/chat` branch name or commit hash. It defaults to `master`.
-The generate job has read permission only. It uses `CI_BOT_GITHUB_TOKEN` to download private Go modules, removes that login, then runs `Scripts/generate.sh` with `GOPROXY=off`.
+The `protocol_ref` input is a `GetStream/protocol` branch name or commit hash. It defaults to `main`.
+The generate job checks out that public repository and does not read `GetStream/chat`.
+It runs `Scripts/generate.sh` with `PROTOCOL_DIR` set to that checkout.
+The job still needs the `openapi` binary from `chat/tools/openapi`. A GitHub-hosted runner does not have that binary, so the job stops until `OPENAPI` points at one.
 The pull request job checks out this repository only, downloads the generated files, and opens a pull request when they changed.
 The pull request targets the branch the workflow ran on. Its title is `[Hygiene]OpenAPI models generation`.
 
