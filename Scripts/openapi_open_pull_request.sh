@@ -26,14 +26,9 @@ if [ -z "$(git diff --cached --name-only)" ]; then
   exit 0
 fi
 
-author_name="${GIT_AUTHOR_NAME:-}"
-author_email="${GIT_AUTHOR_EMAIL:-}"
-if [ -z "$author_name" ] || [ -z "$author_email" ]; then
-  : "${GH_TOKEN:?set GH_TOKEN}"
-  author_name="$(gh api user --jq .login)"
-  author_id="$(gh api user --jq .id)"
-  author_email="${author_id}+${author_name}@users.noreply.github.com"
-fi
+# The workflow token cannot call GET /user. Commits use the Actions bot.
+author_name="${GIT_AUTHOR_NAME:-github-actions[bot]}"
+author_email="${GIT_AUTHOR_EMAIL:-41898282+github-actions[bot]@users.noreply.github.com}"
 
 GIT_AUTHOR_NAME="$author_name" \
   GIT_AUTHOR_EMAIL="$author_email" \

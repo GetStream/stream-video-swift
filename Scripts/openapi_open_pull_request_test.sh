@@ -36,15 +36,8 @@ bindir="$token_root/bin"
 mkdir -p "$bindir" "$token_root/Sources/StreamVideo/OpenApi/generated"
 cat > "$bindir/gh" <<'EOF'
 #!/usr/bin/env bash
-if [ "${GH_TOKEN:-}" != "workflow-token" ]; then
-  echo "gh expected GITHUB_TOKEN, saw GH_TOKEN=${GH_TOKEN:-empty}" >&2
-  exit 9
-fi
-case "${4:-}" in
-  .login) echo "actions-bot" ;;
-  .id) echo "1" ;;
-  *) echo "unexpected gh $*" >&2; exit 9 ;;
-esac
+echo "gh must not look up the token user: $*" >&2
+exit 9
 EOF
 chmod +x "$bindir/gh"
 git -C "$token_root" init -q
@@ -63,6 +56,6 @@ PATH="$bindir:$PATH" \
   GIT_AUTHOR_NAME= \
   GIT_AUTHOR_EMAIL= \
   "$script"
-test "$(git -C "$token_root" log -1 --format=%an)" = "actions-bot"
+test "$(git -C "$token_root" log -1 --format=%an)" = "github-actions[bot]"
 
 echo "openapi_open_pull_request_test: ok"
