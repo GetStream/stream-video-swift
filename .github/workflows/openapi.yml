@@ -33,7 +33,7 @@ jobs:
         repository: GetStream/chat
         ref: ${{ inputs.chat_ref }}
         path: chat-source
-        token: ${{ secrets.CI_BOT_GITHUB_TOKEN }}
+        ssh-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
         persist-credentials: false
     - name: Place chat next to this repo
       # Scripts/generate.sh reads the private chat repo from the parent directory.
@@ -45,12 +45,15 @@ jobs:
         go-version-file: ../chat/tools/openapi/go.mod
     - name: Install formatters
       run: ./Scripts/bootstrap.sh
+    - name: Connect Bot
+      uses: webfactory/ssh-agent@v0.7.0
+      with:
+        ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
     - name: Download private Go modules
-      env:
-        TOKEN: ${{ secrets.CI_BOT_GITHUB_TOKEN }}
+      # Go fetches the private GetStream modules with git over SSH.
       run: |
-        git config --global url."https://x-access-token:${TOKEN}@github.com/".insteadOf "https://github.com/"
-        trap 'git config --global --unset-all "url.https://x-access-token:${TOKEN}@github.com/.insteadof"' EXIT
+        git config --global url."git@github.com:".insteadOf "https://github.com/"
+        trap 'git config --global --unset-all url."git@github.com:".insteadof' EXIT
         go mod download
       working-directory: ../chat/tools/openapi
     - name: Generate OpenAPI models
@@ -71,7 +74,7 @@ jobs:
         job_name: "${{ github.workflow }}: ${{ github.job }}"
         fields: repo,commit,author,workflow
       env:
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_IOS_BOTS }}
       if: failure()
 
   pull-request:
@@ -83,9 +86,15 @@ jobs:
       contents: write
       pull-requests: write
     steps:
+    - name: Generate release bot token
+      id: app-token
+      uses: actions/create-github-app-token@v3
+      with:
+        client-id: ${{ vars.IOS_RELEASE_BOT_CLIENT_ID }}
+        private-key: ${{ secrets.IOS_RELEASE_BOT_PRIVATE_KEY }}
     - uses: actions/checkout@v4.1.1
       with:
-        token: ${{ secrets.CI_BOT_GITHUB_TOKEN }}
+        token: ${{ steps.app-token.outputs.token }}
     - uses: actions/download-artifact@v4
       with:
         name: openapi-generated
@@ -94,7 +103,7 @@ jobs:
     - name: Open pull request
       run: bundle exec fastlane openapi
       env:
-        GITHUB_TOKEN: ${{ secrets.CI_BOT_GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
     - uses: 8398a7/action-slack@v3
       with:
         status: ${{ job.status }}
@@ -102,5 +111,5 @@ jobs:
         job_name: "${{ github.workflow }}: ${{ github.job }}"
         fields: repo,commit,author,workflow
       env:
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_IOS_BOTS }}
       if: failure()
