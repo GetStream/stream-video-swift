@@ -41,7 +41,9 @@ if [ "${OPENAPI_PR_SKIP_PUBLISH:-}" = 1 ]; then
   exit 0
 fi
 
-git push --set-upstream origin "$branch"
+# This repository rejects fine-grained personal access tokens for Git
+# pushes. The checkout credential is the workflow token.
+env -u GH_TOKEN git push --set-upstream origin "$branch"
 
 body="This PR was created automatically by CI."
 if [ -n "${GITHUB_RUN_ID:-}" ]; then

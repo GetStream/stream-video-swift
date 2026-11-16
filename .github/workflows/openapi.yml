@@ -102,16 +102,12 @@ jobs:
       pull-requests: write
     steps:
     - uses: actions/checkout@v4.1.1
-      with:
-        token: ${{ secrets.CI_BOT_GITHUB_TOKEN }}
     - uses: actions/download-artifact@v4
       with:
         name: openapi-generated
         path: Sources/StreamVideo/OpenApi/generated
     - name: Open pull request
       run: bash Scripts/openapi_open_pull_request.sh
-      env:
-        GH_TOKEN: ${{ secrets.CI_BOT_GITHUB_TOKEN }}
     - uses: 8398a7/action-slack@v3
       with:
         status: ${{ job.status }}
