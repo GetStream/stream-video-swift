@@ -38,13 +38,31 @@ renames.each do |old_name, new_name|
   puts "rename #{old_name} -> #{new_name}"
 end
 
+SCHEMA_REF_PREFIX = "#/components/schemas/"
+
+def renamed_schema_ref(value, applied)
+  return value unless value.start_with?(SCHEMA_REF_PREFIX)
+
+  name = value.delete_prefix(SCHEMA_REF_PREFIX)
+  return value unless applied.key?(name)
+
+  "#{SCHEMA_REF_PREFIX}#{applied[name]}"
+end
+
 def rewrite_refs(node, applied)
   case node
   when Hash
     node.each do |key, value|
       if key == "$ref" && value.is_a?(String)
-        name = value.split("/").last
-        node[key] = "#/components/schemas/#{applied[name]}" if applied.key?(name)
+        node[key] = renamed_schema_ref(value, applied)
+      elsif key == "mapping" && value.is_a?(Hash)
+        value.each do |payload, target|
+          if target.is_a?(String)
+            value[payload] = renamed_schema_ref(target, applied)
+          else
+            rewrite_refs(target, applied)
+          end
+        end
       else
         rewrite_refs(value, applied)
       end

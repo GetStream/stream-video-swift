@@ -3,6 +3,7 @@
 
 require "open3"
 require "tmpdir"
+require "yaml"
 
 script = File.expand_path("apply_renamed_models.rb", __dir__)
 spec = <<~YAML
@@ -18,6 +19,16 @@ spec = <<~YAML
         type: object
       Response:
         type: object
+      VideoEvent:
+        discriminator:
+          mapping:
+            call.response: '#/components/schemas/Response'
+            call.external: other.yaml#/components/schemas/Response
+        properties:
+          payload:
+            $ref: '#/components/responses/Response'
+          external:
+            $ref: other.yaml#/components/schemas/Response
   paths:
     /video/members:
       get:
@@ -59,6 +70,16 @@ Dir.mktmpdir do |dir|
   abort("SortParamRequest schema duplicated or lost\n#{output}") unless output.scan("SortParamRequest:").size == 1
   abort("expected skip notice\n#{stdout}") unless stdout.include?("skip SortParam")
   abort("expected skip notice\n#{stdout}") unless stdout.include?("skip TimeStats")
+
+  document = YAML.load_file(output_path)
+  event = document.dig("components", "schemas", "VideoEvent")
+  mapping = event.dig("discriminator", "mapping")
+  abort("discriminator target not renamed\n#{output}") unless mapping["call.response"] == "#/components/schemas/ModelResponse"
+  abort("external mapping changed\n#{output}") unless mapping["call.external"] == "other.yaml#/components/schemas/Response"
+  payload = event.dig("properties", "payload", "$ref")
+  abort("response component ref changed\n#{output}") unless payload == "#/components/responses/Response"
+  external = event.dig("properties", "external", "$ref")
+  abort("external schema ref changed\n#{output}") unless external == "other.yaml#/components/schemas/Response"
 end
 
 puts "apply_renamed_models_test: ok"
