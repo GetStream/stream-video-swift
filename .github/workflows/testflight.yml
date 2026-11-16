@@ -29,7 +29,6 @@ jobs:
   deploy:
     runs-on: macos-15
     env:
-      MATCH_GIT_TOKEN: ${{ steps.bot-token.outputs.token }}
       MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
       APPSTORE_API_KEY: ${{ secrets.APPSTORE_API_KEY }}
       GOOGLE_CLIENT_ID: ${{ vars.GOOGLE_CLIENT_ID }}
@@ -52,6 +51,8 @@ jobs:
       run: brew install imagemagick
     - run: bundle exec fastlane swiftui_testflight_build configuration:"${{ github.event.inputs.release || (github.event_name == 'pull_request' && 'Debug') || (github.event_name == 'release' && 'Release') }}"
       timeout-minutes: 40
+      env:
+        MATCH_GIT_TOKEN: ${{ steps.bot-token.outputs.token }}
     - uses: 8398a7/action-slack@v3
       with:
         status: ${{ job.status }}
