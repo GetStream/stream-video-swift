@@ -9,16 +9,13 @@ on:
         default: main
         type: string
 
-env:
-  HOMEBREW_NO_INSTALL_CLEANUP: 1 # Disable cleanup for homebrew, we don't need it on CI
-
 permissions:
   contents: read
 
 jobs:
   generate:
     name: Generate
-    runs-on: macos-15
+    runs-on: ubuntu-latest
     timeout-minutes: 45
     permissions:
       contents: read
@@ -32,8 +29,14 @@ jobs:
         ref: ${{ inputs.protocol_ref }}
         path: protocol
         persist-credentials: false
-    - name: Install formatters
-      run: ./Scripts/bootstrap.sh
+    - name: Install SwiftFormat
+      run: |
+        source ./Githubfile
+        wget "https://github.com/nicklockwood/SwiftFormat/releases/download/${SWIFT_FORMAT_VERSION}/swiftformat_linux.zip" -O /tmp/swiftformat_linux.zip
+        unzip -o /tmp/swiftformat_linux.zip -d /tmp/swiftformat
+        sudo mv /tmp/swiftformat/swiftformat_linux /usr/local/bin/swiftformat
+        sudo chmod +x /usr/local/bin/swiftformat
+        swiftformat --version
     - name: Generate OpenAPI models
       # The spec is the protocol checkout above. generate-client still needs
       # chat's openapi binary. Set OPENAPI to that binary on the runner.
@@ -59,7 +62,7 @@ jobs:
   pull-request:
     name: Pull request
     needs: generate
-    runs-on: macos-15
+    runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
       contents: write
