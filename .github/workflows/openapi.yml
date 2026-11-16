@@ -101,7 +101,15 @@ jobs:
       contents: write
       pull-requests: write
     steps:
+    - name: Generate release bot token
+      id: app-token
+      uses: actions/create-github-app-token@v3
+      with:
+        client-id: ${{ vars.IOS_RELEASE_BOT_CLIENT_ID }}
+        private-key: ${{ secrets.IOS_RELEASE_BOT_PRIVATE_KEY }}
     - uses: actions/checkout@v4.1.1
+      with:
+        token: ${{ steps.app-token.outputs.token }}
     - uses: actions/download-artifact@v4
       with:
         name: openapi-generated
@@ -109,7 +117,7 @@ jobs:
     - name: Open pull request
       run: bash Scripts/openapi_open_pull_request.sh
       env:
-        GH_TOKEN: ${{ github.token }}
+        GH_TOKEN: ${{ steps.app-token.outputs.token }}
     - uses: 8398a7/action-slack@v3
       with:
         status: ${{ job.status }}
