@@ -28,7 +28,7 @@ The download token comes from `vars.CI_GO_MODULES_CLIENT_ID` and `secrets.CI_GO_
 The job checks the checksum, then runs `Scripts/generate.sh` with `PROTOCOL_DIR` and `OPENAPI` set.
 The pull request job checks out this repository only, downloads the generated files, and runs `Scripts/openapi_open_pull_request.sh`.
 That script commits the generated directory and opens a pull request with `git` and `gh`. It does not install Ruby or Fastlane.
-The job uses the workflow token. `gh` reads it from `GH_TOKEN`, and `git push` uses the checkout credential. `CI_BOT_GITHUB_TOKEN` is a fine-grained token, and this repository rejects those for Git pushes.
+The job uses the workflow `GITHUB_TOKEN`. The script copies it to `GH_TOKEN` for `gh`, because the CLI ignores `GITHUB_TOKEN` in Actions. `git push` uses the checkout credential. `CI_BOT_GITHUB_TOKEN` is a fine-grained token, and this repository rejects those for Git pushes.
 The pull request targets the branch the workflow ran on. Its title is `[Hygiene]OpenAPI models generation`.
 A failed job notifies Slack through `secrets.SLACK_WEBHOOK_IOS_BOTS`. The Slack action reads that value from the `SLACK_WEBHOOK_URL` environment variable.
 

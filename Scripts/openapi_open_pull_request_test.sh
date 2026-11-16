@@ -30,4 +30,40 @@ OPENAPI_PR_ROOT="$root" \
 test "$(git -C "$root" branch --show-current)" != "main"
 test "$(git -C "$root" show HEAD:Sources/StreamVideo/OpenApi/generated/Model.swift)" = "new"
 
+token_root="$(mktemp -d)"
+trap 'rm -rf "$root" "$token_root"' EXIT
+bindir="$token_root/bin"
+mkdir -p "$bindir" "$token_root/Sources/StreamVideo/OpenApi/generated"
+cat > "$bindir/gh" <<'EOF'
+#!/usr/bin/env bash
+if [ "${GH_TOKEN:-}" != "workflow-token" ]; then
+  echo "gh expected GITHUB_TOKEN, saw GH_TOKEN=${GH_TOKEN:-empty}" >&2
+  exit 9
+fi
+case "${4:-}" in
+  .login) echo "actions-bot" ;;
+  .id) echo "1" ;;
+  *) echo "unexpected gh $*" >&2; exit 9 ;;
+esac
+EOF
+chmod +x "$bindir/gh"
+git -C "$token_root" init -q
+git -C "$token_root" config user.name "OpenAPI Test"
+git -C "$token_root" config user.email "openapi-test@example.com"
+printf 'old\n' > "$token_root/Sources/StreamVideo/OpenApi/generated/Model.swift"
+git -C "$token_root" add Sources
+git -C "$token_root" commit -q -m "base"
+git -C "$token_root" branch -M main
+printf 'token\n' > "$token_root/Sources/StreamVideo/OpenApi/generated/Model.swift"
+PATH="$bindir:$PATH" \
+  OPENAPI_PR_ROOT="$token_root" \
+  OPENAPI_PR_SKIP_PUBLISH=1 \
+  GITHUB_REF_NAME=main \
+  GITHUB_TOKEN=workflow-token \
+  GIT_AUTHOR_NAME= \
+  GIT_AUTHOR_EMAIL= \
+  GH_TOKEN= \
+  "$script"
+test "$(git -C "$token_root" log -1 --format=%an)" = "actions-bot"
+
 echo "openapi_open_pull_request_test: ok"
