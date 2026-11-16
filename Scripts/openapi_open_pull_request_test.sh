@@ -59,10 +59,9 @@ PATH="$bindir:$PATH" \
   OPENAPI_PR_ROOT="$token_root" \
   OPENAPI_PR_SKIP_PUBLISH=1 \
   GITHUB_REF_NAME=main \
-  GITHUB_TOKEN=workflow-token \
+  GH_TOKEN=workflow-token \
   GIT_AUTHOR_NAME= \
   GIT_AUTHOR_EMAIL= \
-  GH_TOKEN= \
   "$script"
 test "$(git -C "$token_root" log -1 --format=%an)" = "actions-bot"
 

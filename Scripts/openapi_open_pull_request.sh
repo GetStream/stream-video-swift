@@ -29,8 +29,7 @@ fi
 author_name="${GIT_AUTHOR_NAME:-}"
 author_email="${GIT_AUTHOR_EMAIL:-}"
 if [ -z "$author_name" ] || [ -z "$author_email" ]; then
-  # gh in Actions reads GH_TOKEN and ignores GITHUB_TOKEN.
-  export GH_TOKEN="${GITHUB_TOKEN:?set GITHUB_TOKEN}"
+  : "${GH_TOKEN:?set GH_TOKEN}"
   author_name="$(gh api user --jq .login)"
   author_id="$(gh api user --jq .id)"
   author_email="${author_id}+${author_name}@users.noreply.github.com"
@@ -48,9 +47,8 @@ if [ "${OPENAPI_PR_SKIP_PUBLISH:-}" = 1 ]; then
 fi
 
 # This repository rejects fine-grained personal access tokens for Git
-# pushes. The checkout credential is the workflow GITHUB_TOKEN.
+# pushes. The checkout credential is the workflow token.
 env -u GH_TOKEN git push --set-upstream origin "$branch"
-export GH_TOKEN="${GITHUB_TOKEN:?set GITHUB_TOKEN}"
 
 body="This PR was created automatically by CI."
 if [ -n "${GITHUB_RUN_ID:-}" ]; then
