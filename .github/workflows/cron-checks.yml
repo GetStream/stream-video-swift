@@ -198,7 +198,7 @@ jobs:
 
   automated-code-review:
     name: Automated Code Review
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@v4.1.1
     - uses: ./.github/actions/ruby-cache
