@@ -233,6 +233,7 @@
     "OwnUserResponse",
     "PermissionRequestEvent",
     "PinResponse",
+    "PlaybackResponse",
     "PushPreferencesResponse",
     "PushScheduleResponse",
     "QueryCallParticipantsResponse",
@@ -364,9 +365,7 @@
       "channelCid"
     ],
     "CallStatsReportReadyEvent": [
-      "counts",
-      "isTrimmed",
-      "participantsOverview"
+      "counts"
     ],
     "HealthCheckEvent": [
       "custom"

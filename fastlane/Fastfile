@@ -480,7 +480,7 @@ lane :code_generation do
   sync_xcodeproj_references
 end
 
-desc 'Open a pull request when generated OpenAPI models changed'
+desc 'Open a pull request when generated OpenAPI models changed. CI uses Scripts/openapi_open_pull_request.sh.'
 lane :openapi do
   next unless is_ci
 

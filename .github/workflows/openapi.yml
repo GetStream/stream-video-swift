@@ -3,14 +3,16 @@ name: OpenAPI
 on:
   workflow_dispatch:
     inputs:
-      chat_ref:
-        description: 'GetStream/chat branch name or commit hash'
+      protocol_ref:
+        description: 'GetStream/protocol branch name or commit hash'
         required: false
-        default: master
+        default: main
         type: string
-
-env:
-  HOMEBREW_NO_INSTALL_CLEANUP: 1 # Disable cleanup for homebrew, we don't need it on CI
+      generator_release:
+        description: 'GetStream/chat release tag for openapi-linux-amd64. Empty uses the latest release.'
+        required: false
+        default: ''
+        type: string
 
 permissions:
   contents: read
@@ -18,50 +20,63 @@ permissions:
 jobs:
   generate:
     name: Generate
-    runs-on: macos-15
+    runs-on: ubuntu-latest
     timeout-minutes: 45
     permissions:
       contents: read
-    env:
-      GOPRIVATE: github.com/GetStream/*
     steps:
     - uses: actions/checkout@v4.1.1
       with:
         persist-credentials: false
     - uses: actions/checkout@v4.1.1
       with:
-        repository: GetStream/chat
-        ref: ${{ inputs.chat_ref }}
-        path: chat-source
-        ssh-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
+        repository: GetStream/protocol
+        ref: ${{ inputs.protocol_ref }}
+        path: protocol
         persist-credentials: false
-    - name: Place chat next to this repo
-      # Scripts/generate.sh reads the private chat repo from the parent directory.
+    - name: Install SwiftFormat
       run: |
-        rm -rf "$GITHUB_WORKSPACE/../chat"
-        mv "$GITHUB_WORKSPACE/chat-source" "$GITHUB_WORKSPACE/../chat"
-    - uses: actions/setup-go@v5
+        source ./Githubfile
+        wget "https://github.com/nicklockwood/SwiftFormat/releases/download/${SWIFT_FORMAT_VERSION}/swiftformat_linux.zip" -O /tmp/swiftformat_linux.zip
+        unzip -o /tmp/swiftformat_linux.zip -d /tmp/swiftformat
+        sudo mv /tmp/swiftformat/swiftformat_linux /usr/local/bin/swiftformat
+        sudo chmod +x /usr/local/bin/swiftformat
+        swiftformat --version
+    - name: Create chat read token
+      id: app-token
+      uses: actions/create-github-app-token@v3
       with:
-        go-version-file: ../chat/tools/openapi/go.mod
-    - name: Install formatters
-      run: ./Scripts/bootstrap.sh
-    - name: Connect Bot
-      uses: webfactory/ssh-agent@v0.7.0
-      with:
-        ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
-    - name: Download private Go modules
-      # Go fetches the private GetStream modules with git over SSH.
+        client-id: ${{ vars.CI_GO_MODULES_CLIENT_ID }}
+        private-key: ${{ secrets.CI_GO_MODULES_PRIVATE_KEY }}
+        owner: GetStream
+        repositories: chat
+        permission-contents: read
+    - name: Download OpenAPI generator
+      env:
+        GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        GENERATOR_RELEASE: ${{ inputs.generator_release }}
       run: |
-        git config --global url."git@github.com:".insteadOf "https://github.com/"
-        trap 'git config --global --unset-all url."git@github.com:".insteadof' EXIT
-        go mod download
-      working-directory: ../chat/tools/openapi
+        bin="${RUNNER_TEMP}/openapi"
+        mkdir -p "$bin"
+        if [ -n "${GENERATOR_RELEASE}" ]; then
+          gh release download "$GENERATOR_RELEASE" \
+            --repo GetStream/chat \
+            --pattern 'openapi-linux-amd64*' \
+            --dir "$bin"
+        else
+          gh release download \
+            --repo GetStream/chat \
+            --pattern 'openapi-linux-amd64*' \
+            --dir "$bin"
+        fi
+        (cd "$bin" && sha256sum -c openapi-linux-amd64.sha256)
+        chmod +x "$bin/openapi-linux-amd64"
+        echo "OPENAPI=${bin}/openapi-linux-amd64" >> "$GITHUB_ENV"
     - name: Generate OpenAPI models
       run: bash Scripts/generate.sh
       timeout-minutes: 30
       env:
-        GITHUB_TOKEN: ""
-        GOPROXY: "off"
+        PROTOCOL_DIR: ${{ github.workspace }}/protocol
     - uses: actions/upload-artifact@v4
       with:
         name: openapi-generated
@@ -80,7 +95,7 @@ jobs:
   pull-request:
     name: Pull request
     needs: generate
-    runs-on: macos-15
+    runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
       contents: write
@@ -99,11 +114,12 @@ jobs:
       with:
         name: openapi-generated
         path: Sources/StreamVideo/OpenApi/generated
-    - uses: ./.github/actions/ruby-cache
     - name: Open pull request
-      run: bundle exec fastlane openapi
+      run: bash Scripts/openapi_open_pull_request.sh
       env:
-        GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+        # Checkout and git push use this token through the git credential.
+        # gh reads GH_TOKEN. The script unsets it for the push.
+        GH_TOKEN: ${{ steps.app-token.outputs.token }}
     - uses: 8398a7/action-slack@v3
       with:
         status: ${{ job.status }}
