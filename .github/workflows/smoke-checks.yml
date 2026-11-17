@@ -156,14 +156,13 @@ jobs:
 
   automated-code-review:
     name: Automated Code Review
-    runs-on: macos-15
+    runs-on: ubuntu-latest
     needs: guard
-    env:
-      XCODE_VERSION: "16.4"
     if: ${{ github.event.inputs.record_snapshots_swiftui != 'true' && github.event.inputs.record_snapshots_uikit != 'true' }}
     steps:
     - uses: actions/checkout@v4.1.1
-    - uses: ./.github/actions/bootstrap
+    - uses: ./.github/actions/ruby-cache
+    - run: ./Scripts/bootstrap.sh
       env:
         INSTALL_INTERFACE_ANALYZER: true
     - run: bundle exec fastlane lint_pr
@@ -243,7 +242,7 @@ jobs:
 
   allure_testops_launch:
     name: Launch Allure TestOps
-    runs-on: macos-15
+    runs-on: ubuntu-latest
     needs:
       - guard
       - build-test-app-and-frameworks

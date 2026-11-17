@@ -19,6 +19,11 @@ gci = ENV['GOOGLE_CLIENT_ID'] || ''
 reversed_gci = gci.split('.').reverse.join('.')
 is_localhost = !is_ci
 @force_check = false
+# These lanes do not build anything, so they can run on Linux.
+lanes_without_xcode = [
+  :sonar_upload, :allure_launch, :allure_upload, :stop_e2e_helpers, :merge_main, :pr, :openapi,
+  :lint_pr, :rubocop, :run_swift_format, :validate_public_interface
+]
 swift_environment_path = File.absolute_path('../Sources/StreamVideo/Generated/SystemEnvironment+Version.swift')
 xcodebuild_formatter = FastlaneCore::Globals.verbose? ? '' : nil
 
@@ -26,7 +31,7 @@ before_all do |lane|
   if is_ci
     setup_ci
     setup_git_config
-    select_xcode(version: xcode_version) unless [:sonar_upload, :allure_launch, :allure_upload, :stop_e2e_helpers, :merge_main, :pr, :openapi].include?(lane)
+    select_xcode(version: xcode_version) unless lanes_without_xcode.include?(lane)
   elsif lane == :test_e2e
     stop_e2e_helpers
   end
