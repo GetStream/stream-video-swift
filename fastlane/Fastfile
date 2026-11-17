@@ -22,6 +22,7 @@ is_localhost = !is_ci
 # These lanes do not build anything, so they can run on Linux.
 lanes_without_xcode = [
   :sonar_upload, :allure_launch, :allure_upload, :stop_e2e_helpers, :merge_main, :pr, :openapi,
+  :merge_release, :publish_release, :copyright,
   :lint_pr, :rubocop, :run_swift_format, :validate_public_interface
 ]
 swift_environment_path = File.absolute_path('../Sources/StreamVideo/Generated/SystemEnvironment+Version.swift')
