@@ -426,6 +426,71 @@ final class RTCAudioStore_InterruptionsEffectTests: XCTestCase, @unchecked Senda
         }
     }
 
+    func test_didEndInterruption_backgroundNonResumingEndThenForegroundEnd_restartsOnce() {
+        final class StateBox: @unchecked Sendable {
+            var state: RTCAudioStore.StoreState
+            init(_ state: RTCAudioStore.StoreState) { self.state = state }
+        }
+
+        let module = AudioDeviceModule(MockRTCAudioDeviceModule())
+        let box = StateBox(
+            makeState(
+                isInterrupted: true,
+                isRecording: true,
+                isMicrophoneMuted: true,
+                isMutedSpeechDetectionEnabled: true,
+                audioDeviceModule: module
+            )
+        )
+        let resume = expectation(description: "Dispatcher called")
+        resume.assertForOverFulfill = false
+        subject.dispatcher = .init { [weak self] actions, _, _, _ in
+            self?.dispatched.append(actions)
+            for action in actions {
+                if case .setInterrupted(let value) = action.wrappedValue {
+                    box.state.isInterrupted = value
+                }
+            }
+            resume.fulfill()
+        }
+        subject.stateProvider = { box.state }
+        applicationStateAdapter.stubbedState = .background
+
+        publisher.audioSessionDidEndInterruption(session, shouldResumeSession: false)
+
+        XCTAssertTrue(dispatched.isEmpty)
+        XCTAssertTrue(box.state.isInterrupted)
+
+        applicationStateAdapter.stubbedState = .foreground
+        publisher.audioSessionDidEndInterruption(session, shouldResumeSession: false)
+        publisher.audioSessionDidEndInterruption(session, shouldResumeSession: true)
+
+        wait(for: [resume], timeout: 1)
+
+        XCTAssertEqual(dispatched.count, 1)
+        guard let actions = dispatched.first else {
+            return XCTFail("Expected the foreground end to recover capture.")
+        }
+
+        XCTAssertEqual(actions.count, 5)
+        guard case .setInterrupted(false) = actions[0].wrappedValue else {
+            return XCTFail("Expected action[0] setInterrupted(false).")
+        }
+        guard case .setMutedSpeechDetectionEnabled(false) = actions[1].wrappedValue else {
+            return XCTFail("Expected action[1] setMutedSpeechDetectionEnabled(false).")
+        }
+        guard case .setRecording(false) = actions[2].wrappedValue else {
+            return XCTFail("Expected action[2] setRecording(false).")
+        }
+        guard case .setRecording(true) = actions[3].wrappedValue else {
+            return XCTFail("Expected action[3] setRecording(true).")
+        }
+        guard case .setMutedSpeechDetectionEnabled(true) = actions[4].wrappedValue else {
+            return XCTFail("Expected action[4] setMutedSpeechDetectionEnabled(true).")
+        }
+        XCTAssertFalse(box.state.isInterrupted)
+    }
+
     // MARK: - Helpers
 
     private func makeState(
