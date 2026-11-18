@@ -42,5 +42,18 @@ if !has_qaed_label && (has_ready_for_qa_label || has_ticked_qa_checkbox)
   warn("The changes should be manually QAed before the Pull Request will be merged")
 end
 
-# Check all commits have correct format. Disable the length rule, since it's hardcoded to 50 and GitHub has the limit 80
-commit_lint.check(disable: [:subject_length])
+# Check all commits have correct format. Disable the length rule, since it's hardcoded to 50 and GitHub has the limit 80.
+# Conventional Commits start with a lowercase type, so subject_cap rejects them.
+commit_lint.check(disable: [:subject_length, :subject_cap])
+
+conventional_commit = /\A(?:build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(?:\([^)]+\))?!?: .+/
+
+git.commits.each do |commit|
+  subject = commit.message.to_s.lines.first.to_s.strip
+  next if subject.empty? || subject.match?(conventional_commit)
+
+  first_character = subject[0]
+  next if first_character == first_character.upcase
+
+  fail("Please start subject with capital letter.\n#{commit.sha}")
+end
