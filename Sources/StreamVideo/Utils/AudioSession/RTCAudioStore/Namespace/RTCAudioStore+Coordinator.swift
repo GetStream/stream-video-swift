@@ -74,7 +74,8 @@ extension RTCAudioStore {
             case let .avAudioSession(value):
                 return shouldExecute(
                     action: value,
-                    state: state.audioSessionConfiguration
+                    state: state.audioSessionConfiguration,
+                    currentRoute: state.currentRoute
                 )
 
             case let .webRTCAudioSession(value):
@@ -112,7 +113,8 @@ extension RTCAudioStore {
         /// live route state without changing the cached configuration.
         private func shouldExecute(
             action: StoreAction.AVAudioSessionAction,
-            state: StoreState.AVAudioSessionConfiguration
+            state: StoreState.AVAudioSessionConfiguration,
+            currentRoute: StoreState.AudioRoute
         ) -> Bool {
             switch action {
             case let .systemSetCategory(value):
@@ -146,6 +148,15 @@ extension RTCAudioStore {
                 return category != state.category || mode != state.mode || categoryOptions != state.options
 
             case let .setOverrideOutputAudioPort(value):
+                // A category change can leave the receiver active while
+                // the cache still says speaker. Apply that request again.
+                if value == .speaker,
+                   value == state.overrideOutputAudioPort,
+                   currentRoute.reason == .categoryChange,
+                   currentRoute.isReceiver,
+                   !currentRoute.isSpeaker {
+                    return true
+                }
                 return value != state.overrideOutputAudioPort
 
             case .restoreOutputAudioPortAfterMediaServicesReset:

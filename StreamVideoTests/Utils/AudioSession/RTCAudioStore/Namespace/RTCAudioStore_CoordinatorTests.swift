@@ -252,6 +252,50 @@ final class RTCAudioStore_CoordinatorTests: XCTestCase, @unchecked Sendable {
         )
     }
 
+    func test_avAudioSession_setOverrideOutputAudioPort_categoryChangeReceiver_cachedSpeaker_returnsTrue() {
+        let configuration = makeAVAudioSessionConfiguration(
+            category: .playAndRecord,
+            mode: .voiceChat,
+            overrideOutputAudioPort: .speaker
+        )
+        let state = makeState(
+            currentRoute: .dummy(
+                outputs: [.dummy(isReceiver: true)],
+                reason: .categoryChange
+            ),
+            audioSessionConfiguration: configuration
+        )
+
+        XCTAssertTrue(
+            subject.shouldExecute(
+                action: .avAudioSession(.setOverrideOutputAudioPort(.speaker)),
+                state: state
+            )
+        )
+    }
+
+    func test_avAudioSession_setOverrideOutputAudioPort_categoryChangeSpeaker_cachedSpeaker_returnsFalse() {
+        let configuration = makeAVAudioSessionConfiguration(
+            category: .playAndRecord,
+            mode: .voiceChat,
+            overrideOutputAudioPort: .speaker
+        )
+        let state = makeState(
+            currentRoute: .dummy(
+                outputs: [.dummy(isSpeaker: true)],
+                reason: .categoryChange
+            ),
+            audioSessionConfiguration: configuration
+        )
+
+        XCTAssertFalse(
+            subject.shouldExecute(
+                action: .avAudioSession(.setOverrideOutputAudioPort(.speaker)),
+                state: state
+            )
+        )
+    }
+
     func test_avAudioSession_restoreOutputAfterMediaServicesReset_returnsTrue() {
         let configuration = makeAVAudioSessionConfiguration(
             category: .playAndRecord,
