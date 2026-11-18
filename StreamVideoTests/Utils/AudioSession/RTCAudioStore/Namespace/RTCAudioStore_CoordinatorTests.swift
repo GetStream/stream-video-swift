@@ -296,6 +296,113 @@ final class RTCAudioStore_CoordinatorTests: XCTestCase, @unchecked Sendable {
         )
     }
 
+    func test_avAudioSession_setOverrideOutputAudioPort_emptyRoute_cachedSpeaker_returnsFalse() {
+        let configuration = makeAVAudioSessionConfiguration(
+            category: .playAndRecord,
+            mode: .voiceChat,
+            overrideOutputAudioPort: .speaker
+        )
+        let state = makeState(
+            currentRoute: .dummy(reason: .unknown),
+            audioSessionConfiguration: configuration
+        )
+
+        XCTAssertFalse(
+            subject.shouldExecute(
+                action: .avAudioSession(.setOverrideOutputAudioPort(.speaker)),
+                state: state
+            )
+        )
+    }
+
+    func test_avAudioSession_setOverrideOutputAudioPort_externalRoute_cachedSpeaker_returnsFalse() {
+        let configuration = makeAVAudioSessionConfiguration(
+            category: .playAndRecord,
+            mode: .voiceChat,
+            overrideOutputAudioPort: .speaker
+        )
+        let state = makeState(
+            currentRoute: .dummy(
+                outputs: [.dummy(isExternal: true)],
+                reason: .newDeviceAvailable
+            ),
+            audioSessionConfiguration: configuration
+        )
+
+        XCTAssertFalse(
+            subject.shouldExecute(
+                action: .avAudioSession(.setOverrideOutputAudioPort(.speaker)),
+                state: state
+            )
+        )
+    }
+
+    func test_avAudioSession_setOverrideOutputAudioPort_receiverRoute_cachedSpeaker_noneRequest_returnsTrue() {
+        let configuration = makeAVAudioSessionConfiguration(
+            category: .playAndRecord,
+            mode: .voiceChat,
+            overrideOutputAudioPort: .speaker
+        )
+        let state = makeState(
+            currentRoute: .dummy(
+                outputs: [.dummy(isReceiver: true)],
+                reason: .oldDeviceUnavailable
+            ),
+            audioSessionConfiguration: configuration
+        )
+
+        XCTAssertTrue(
+            subject.shouldExecute(
+                action: .avAudioSession(.setOverrideOutputAudioPort(.none)),
+                state: state
+            )
+        )
+    }
+
+    func test_avAudioSession_setOverrideOutputAudioPort_receiverRoute_cachedNone_speakerRequest_returnsTrue() {
+        let configuration = makeAVAudioSessionConfiguration(
+            category: .playAndRecord,
+            mode: .voiceChat,
+            overrideOutputAudioPort: .none
+        )
+        let state = makeState(
+            currentRoute: .dummy(
+                outputs: [.dummy(isReceiver: true)],
+                reason: .routeConfigurationChange
+            ),
+            audioSessionConfiguration: configuration
+        )
+
+        XCTAssertTrue(
+            subject.shouldExecute(
+                action: .avAudioSession(.setOverrideOutputAudioPort(.speaker)),
+                state: state
+            )
+        )
+    }
+
+    func test_avAudioSession_setOverrideOutputAudioPort_receiverAndSpeakerRoute_cachedSpeaker_returnsFalse() {
+        let configuration = makeAVAudioSessionConfiguration(
+            category: .playAndRecord,
+            mode: .voiceChat,
+            overrideOutputAudioPort: .speaker
+        )
+        let state = makeState(
+            currentRoute: .dummy(
+                outputs: [.dummy(isSpeaker: true, isReceiver: true)],
+                reason: .categoryChange
+            ),
+            audioSessionConfiguration: configuration
+        )
+
+        XCTAssertFalse(
+            subject.shouldExecute(
+                action: .avAudioSession(.setOverrideOutputAudioPort(.speaker)),
+                state: state
+            )
+        )
+    }
+
     func test_avAudioSession_setOverrideOutputAudioPort_categoryChangeSpeaker_cachedSpeaker_returnsFalse() {
         let configuration = makeAVAudioSessionConfiguration(
             category: .playAndRecord,
