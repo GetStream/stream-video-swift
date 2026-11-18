@@ -19,7 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Apply and clear a video background after reconnection. The rebuilt publisher uses the capture session that stayed open. [#1402](https://github.com/GetStream/stream-video-swift/pull/1402)
 - Apply the loudspeaker when call settings request it, after an idle route already reported Speaker. [#1395](https://github.com/GetStream/stream-video-swift/pull/1395)
 - Start the microphone when CallKit activates a call that was accepted while another call still owned audio. [#1394](https://github.com/GetStream/stream-video-swift/pull/1394)
-- Apply the loudspeaker again when a category change leaves playback on the receiver. [#1429](https://github.com/GetStream/stream-video-swift/pull/1429)
+- Apply the loudspeaker again when playback is on the receiver and the cached port still says speaker. [#1429](https://github.com/GetStream/stream-video-swift/pull/1429)
 
 ### 🔄 Changed
 

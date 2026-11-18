@@ -148,11 +148,11 @@ extension RTCAudioStore {
                 return category != state.category || mode != state.mode || categoryOptions != state.options
 
             case let .setOverrideOutputAudioPort(value):
-                // A category change can leave the receiver active while
-                // the cache still says speaker. Apply that request again.
+                // CallKit activation settles on the receiver. The cache
+                // can still say speaker, so that request must run again.
+                // speakerOn stays unchanged.
                 if value == .speaker,
                    value == state.overrideOutputAudioPort,
-                   currentRoute.reason == .categoryChange,
                    currentRoute.isReceiver,
                    !currentRoute.isSpeaker {
                     return true
