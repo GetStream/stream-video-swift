@@ -10,10 +10,11 @@ extension RTCAudioStore {
 
     /// Converts audio-session interruptions into ordered recovery actions.
     ///
-    /// Interruption start marks the store as interrupted. A resumable end clears
-    /// that state and restarts recording when it was active before the event.
-    /// Muted-speech detection is temporarily disabled around the restart so
-    /// WebRTC rebuilds the input graph instead of treating recovery as a mute
+    /// Interruption start marks the store as interrupted. A resumable end,
+    /// and a non-resuming end while the app is in the foreground, clear
+    /// that state and restart recording when it was active. Muted-speech
+    /// detection is temporarily disabled around the restart so WebRTC
+    /// rebuilds the input graph instead of treating recovery as a mute
     /// toggle.
     ///
     /// Microphone mute restoration belongs to
@@ -21,6 +22,8 @@ extension RTCAudioStore {
     /// effect intentionally does not replay a mute snapshot that could be stale
     /// by the time its queued actions execute.
     final class InterruptionsEffect: StoreEffect<RTCAudioStore.Namespace>, @unchecked Sendable {
+
+        @Injected(\.applicationStateAdapter) private var applicationStateAdapter
 
         private let audioSessionObserver: RTCAudioSessionPublisher
         private let disposableBag = DisposableBag()
@@ -43,8 +46,10 @@ extension RTCAudioStore {
 
         /// Builds and dispatches the action sequence for an audio-session event.
         ///
-        /// A non-resuming end keeps the interrupted flag. The later
-        /// resumable end can then rebuild capture. A resumable end
+        /// A non-resuming end keeps the interrupted flag while the app
+        /// is in the background. The later resumable end can then rebuild
+        /// capture. When the app is already in the foreground, that end
+        /// does not arrive, so this end recovers immediately. A recovery
         /// restarts recording only when the store was interrupted and
         /// recording was previously active. Persistent muted speech
         /// detection is restored after that restart. Mute state is not
@@ -65,11 +70,13 @@ extension RTCAudioStore {
                     return
                 }
 
-                // A non-resuming end leaves the store interrupted.
-                // WebRTC sends a later end when the app becomes
-                // active. Clearing the flag here drops that end,
-                // so the torn-down input graph is never rebuilt.
-                guard shouldResumeSession else {
+                // A non-resuming end in the background leaves the store
+                // interrupted. WebRTC sends a later end when the app
+                // becomes active. Clearing the flag here drops that end,
+                // so the torn-down input graph is never rebuilt. In the
+                // foreground this end is the last one, so recover now.
+                let appIsInBackground = applicationStateAdapter.state == .background
+                guard shouldResumeSession || !appIsInBackground else {
                     return
                 }
 
