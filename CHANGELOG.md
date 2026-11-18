@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Leave a livestream when backstage is disabled, even if the user can join backstage. [#1400](https://github.com/GetStream/stream-video-swift/pull/1400)
 - Apply and clear a video background after reconnection. The rebuilt publisher uses the capture session that stayed open. [#1402](https://github.com/GetStream/stream-video-swift/pull/1402)
 - Apply the loudspeaker when call settings request it, after an idle route already reported Speaker. [#1395](https://github.com/GetStream/stream-video-swift/pull/1395)
+- Start the microphone when CallKit activates a call that was accepted while another call still owned audio. [#1394](https://github.com/GetStream/stream-video-swift/pull/1394)
 - Apply the loudspeaker again when a category change leaves playback on the receiver. [#1429](https://github.com/GetStream/stream-video-swift/pull/1429)
 
 ### 🔄 Changed
@@ -30,10 +31,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - The public initializers of some API models take new required arguments, for example `CallRecording` and `CallResponse`. [#1397](https://github.com/GetStream/stream-video-swift/pull/1397)
 - `IngressAudioEncodingOptionsRequest.channels` and `IngressSourceRequest.fps` are now `Int`, and the `IngressAudioEncodingOptionsRequestChannels` and `IngressSourceRequestFps` enums are deprecated. [#1397](https://github.com/GetStream/stream-video-swift/pull/1397)
 - API model properties are now `let` constants, and the models are `Sendable` without `@unchecked`. To change a value, create a new model. [#1390](https://github.com/GetStream/stream-video-swift/pull/1390)
-
-### 🐞 Fixed
-
-- Start the microphone when CallKit activates a call that was accepted while another call still owned audio. [#1394](https://github.com/GetStream/stream-video-swift/pull/1394)
 
 # [1.56.1](https://github.com/GetStream/stream-video-swift/releases/tag/1.56.1)
 _October 28, 2026_
