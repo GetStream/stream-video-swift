@@ -43,9 +43,11 @@ extension RTCAudioStore {
 
         /// Builds and dispatches the action sequence for an audio-session event.
         ///
-        /// A resumable interruption restarts recording only when the store was
-        /// interrupted and recording was previously active. Persistent muted
-        /// speech detection is restored after that restart. Mute state is not
+        /// A non-resuming end keeps the interrupted flag. The later
+        /// resumable end can then rebuild capture. A resumable end
+        /// restarts recording only when the store was interrupted and
+        /// recording was previously active. Persistent muted speech
+        /// detection is restored after that restart. Mute state is not
         /// appended here because recording recovery owns post-start restoration.
         ///
         /// - Parameter event: The WebRTC audio-session event to process.
@@ -63,12 +65,19 @@ extension RTCAudioStore {
                     return
                 }
 
+                // A non-resuming end leaves the store interrupted.
+                // WebRTC sends a later end when the app becomes
+                // active. Clearing the flag here drops that end,
+                // so the torn-down input graph is never rebuilt.
+                guard shouldResumeSession else {
+                    return
+                }
+
                 var actions: [Namespace.Action] = [
                     .setInterrupted(false)
                 ]
 
                 if
-                    shouldResumeSession,
                     let state = stateProvider?(),
                     state.audioDeviceModule != nil {
                     let isRecording = state.isRecording

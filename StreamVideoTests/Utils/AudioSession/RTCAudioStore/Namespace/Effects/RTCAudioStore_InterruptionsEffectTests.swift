@@ -55,9 +55,9 @@ final class RTCAudioStore_InterruptionsEffectTests: XCTestCase, @unchecked Senda
         }
     }
 
-    func test_didEndInterruption_isInterrupted_shouldResumeFalse_dispatchesSetInterruptedFalseOnly() {
+    func test_didEndInterruption_isInterrupted_shouldResumeFalse_keepsInterrupted() {
         let dispatcherExpectation = expectation(description: "Dispatcher called")
-        dispatcherExpectation.assertForOverFulfill = false
+        dispatcherExpectation.isInverted = true
 
         subject.dispatcher = .init { [weak self] actions, _, _, _ in
             self?.dispatched.append(actions)
@@ -70,16 +70,8 @@ final class RTCAudioStore_InterruptionsEffectTests: XCTestCase, @unchecked Senda
 
         publisher.audioSessionDidEndInterruption(session, shouldResumeSession: false)
 
-        wait(for: [dispatcherExpectation], timeout: 1)
-
-        guard let actions = dispatched.first else {
-            return XCTFail("Expected dispatched actions.")
-        }
-
-        XCTAssertEqual(actions.count, 1)
-        guard case .setInterrupted(false) = actions[0].wrappedValue else {
-            return XCTFail("Expected setInterrupted(false).")
-        }
+        wait(for: [dispatcherExpectation], timeout: 0.2)
+        XCTAssertTrue(dispatched.isEmpty)
     }
 
     func test_didEndInterruption_isInterrupted_shouldResumeTrue_withoutAudioDeviceModule_dispatchesSetInterruptedFalse() {
@@ -177,6 +169,62 @@ final class RTCAudioStore_InterruptionsEffectTests: XCTestCase, @unchecked Senda
 
         guard let actions = dispatched.first else {
             return XCTFail("Expected dispatched actions.")
+        }
+
+        XCTAssertEqual(actions.count, 5)
+        guard case .setInterrupted(false) = actions[0].wrappedValue else {
+            return XCTFail("Expected action[0] setInterrupted(false).")
+        }
+        guard case .setMutedSpeechDetectionEnabled(false) = actions[1].wrappedValue else {
+            return XCTFail("Expected action[1] setMutedSpeechDetectionEnabled(false).")
+        }
+        guard case .setRecording(false) = actions[2].wrappedValue else {
+            return XCTFail("Expected action[2] setRecording(false).")
+        }
+        guard case .setRecording(true) = actions[3].wrappedValue else {
+            return XCTFail("Expected action[3] setRecording(true).")
+        }
+        guard case .setMutedSpeechDetectionEnabled(true) = actions[4].wrappedValue else {
+            return XCTFail("Expected action[4] setMutedSpeechDetectionEnabled(true).")
+        }
+    }
+
+    func test_didEndInterruption_nonResumingEndThenResumingEnd_restartsMutedSpeechCapture() {
+        final class StateBox: @unchecked Sendable {
+            var state: RTCAudioStore.StoreState
+            init(_ state: RTCAudioStore.StoreState) { self.state = state }
+        }
+
+        let module = AudioDeviceModule(MockRTCAudioDeviceModule())
+        let box = StateBox(
+            makeState(
+                isInterrupted: true,
+                isRecording: true,
+                isMicrophoneMuted: true,
+                isMutedSpeechDetectionEnabled: true,
+                audioDeviceModule: module
+            )
+        )
+        let resume = expectation(description: "Dispatcher called")
+        subject.dispatcher = .init { [weak self] actions, _, _, _ in
+            self?.dispatched.append(actions)
+            for action in actions {
+                if case .setInterrupted(let value) = action.wrappedValue {
+                    box.state.isInterrupted = value
+                }
+            }
+            resume.fulfill()
+        }
+        subject.stateProvider = { box.state }
+
+        publisher.audioSessionDidEndInterruption(session, shouldResumeSession: false)
+        publisher.audioSessionDidEndInterruption(session, shouldResumeSession: true)
+
+        wait(for: [resume], timeout: 1)
+
+        XCTAssertEqual(dispatched.count, 1)
+        guard let actions = dispatched.first else {
+            return XCTFail("Expected the resumable end to recover capture.")
         }
 
         XCTAssertEqual(actions.count, 5)
