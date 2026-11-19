@@ -76,20 +76,25 @@ actor HLSAudioSession {
         ]
 
         do {
+            // Subscribe before the claim. A loss during the claim still
+            // reaches the subject. A claim that never owns the store does not.
+            observeOwnership()
             try await dispatch(actions)
         } catch {
             await deactivate()
             throw error
         }
-        observeOwnership()
+        if !ownershipLostSubject.value,
+           audioStore.state.activeSessionIdentifier != identifier {
+            ownershipObserver = nil
+        }
     }
 
     /// Releases the session. A call without a matching activation is a no-op.
     ///
     /// Every step applies only while this session still owns the store, so a
-    /// later owner keeps its configuration. Each step runs in its own
-    /// dispatch, because a failing action stops its batch: the release must
-    /// run whatever happens to the steps before it.
+    /// later owner keeps its configuration. `StoreTask` stops a batch at the
+    /// first thrown action, so each step is its own dispatch.
     func deactivate() async {
         guard isActive else { return }
         isActive = false
@@ -104,23 +109,23 @@ actor HLSAudioSession {
 
     // MARK: - Private Helpers
 
-    /// Reports the loss when another session takes the store. Only a session
-    /// that holds the store can lose it: after a failed claim, another call
-    /// keeps the store and there is nothing to lose.
+    /// Reports a loss only after this session has owned the store. The
+    /// current value is replayed, so a loss that lands before the claim
+    /// returns is still reported.
     private func observeOwnership() {
-        guard
-            isActive,
-            audioStore.state.activeSessionIdentifier == identifier
-        else {
-            return
-        }
+        guard isActive, ownershipObserver == nil else { return }
         let identifier = identifier
         let subject = ownershipLostSubject
+        let ownership = Ownership()
         ownershipObserver = audioStore
             .publisher(\.activeSessionIdentifier)
             .removeDuplicates()
             .sink { current in
-                if !current.isEmpty, current != identifier {
+                if current == identifier {
+                    ownership.didOwn = true
+                    return
+                }
+                if ownership.didOwn, !current.isEmpty {
                     subject.send(true)
                 }
             }
@@ -148,4 +153,10 @@ actor HLSAudioSession {
             )
         }
     }
+}
+
+/// Records whether this session has seen its own identifier. The store
+/// publisher delivers values off the actor.
+private final class Ownership: @unchecked Sendable {
+    var didOwn = false
 }

@@ -161,6 +161,26 @@ final class HLSAudioSession_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertFalse(lost)
     }
 
+    func test_ownershipLost_storeTakenDuringActivation_becomesTrue() async throws {
+        let owner = String.unique
+        let store = mockAudioStore.audioStore
+        let session = HLSAudioSession { actions in
+            try await store.dispatch(actions).result()
+            store.dispatch(.setActiveSessionIdentifier(owner))
+            await self.fulfillment {
+                self.state.activeSessionIdentifier == owner
+            }
+        }
+
+        try await session.activate()
+
+        let lost = try await session.ownershipLost
+            .filter { $0 }
+            .nextValue(timeout: defaultTimeout)
+        XCTAssertTrue(lost)
+        await session.deactivate()
+    }
+
     func test_ownershipLost_afterTheLoss_replaysToLateSubscribers() async throws {
         try await subject.activate()
         mockAudioStore.audioStore.dispatch(.setActiveSessionIdentifier(.unique))
