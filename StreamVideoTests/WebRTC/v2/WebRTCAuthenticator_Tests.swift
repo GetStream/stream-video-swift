@@ -272,6 +272,20 @@ final class WebRTCAuthenticator_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertFalse(callSettings.videoOn)
     }
 
+    func test_authenticate_hlsGrant_turnsAudioAndVideoOffBeforeReturning() async throws {
+        let stateAdapter = mockCoordinatorStack.coordinator.stateAdapter
+        await stateAdapter.set(initialCallSettings: CallSettings(audioOn: true, videoOn: true))
+        mockCoordinatorStack.callAuthenticator.authenticateResult = .success(
+            .dummyHLSGrant(ownCapabilities: [.sendAudio, .sendVideo])
+        )
+
+        _ = try await authenticate(declaresPlaybackCapabilities: true)
+
+        let callSettings = await stateAdapter.callSettings
+        XCTAssertFalse(callSettings.audioOn)
+        XCTAssertFalse(callSettings.videoOn)
+    }
+
     func test_authenticate_hlsGrant_keepsTheOtherCallSettings() async throws {
         let stateAdapter = mockCoordinatorStack.coordinator.stateAdapter
         let initial = await stateAdapter.callSettings
