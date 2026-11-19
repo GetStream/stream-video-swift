@@ -33,6 +33,9 @@ extension StreamCallAudioRecorder.Namespace {
             // Forward interruption state changes to the store
             cancellable = audioStore
                 .publisher(\.isInterrupted)
+                // The publisher emits on every audio store change. Each
+                // `.setIsInterrupted(false)` can restart the recorder.
+                .removeDuplicates()
                 .sink { [weak self] isInterrupted in
                     // Update the store's interruption state
                     self?.dispatcher?.dispatch(.setIsInterrupted(isInterrupted))

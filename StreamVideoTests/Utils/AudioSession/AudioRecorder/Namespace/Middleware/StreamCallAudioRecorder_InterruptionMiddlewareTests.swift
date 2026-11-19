@@ -6,6 +6,62 @@ import Foundation
 @testable import StreamVideo
 import XCTest
 
+final class StreamCallAudioRecorder_InterruptionMiddlewareStoreTests: XCTestCase, @unchecked Sendable {
+
+    private var session: MockRTCAudioStore!
+    private var subject: StreamCallAudioRecorder.Namespace.InterruptionMiddleware!
+
+    override func setUp() {
+        super.setUp()
+        session = MockRTCAudioStore()
+        session.makeShared()
+        subject = .init()
+    }
+
+    override func tearDown() async throws {
+        subject = nil
+        try await session.dismantle()
+        session = nil
+        try await super.tearDown()
+    }
+
+    // MARK: - init
+
+    /// Each `.setIsInterrupted(false)` can restart the recorder, so other
+    /// audio state changes must not dispatch it again.
+    func test_audioStoreIsInterruptedUnchanged_otherStateChanges_noActionDispatch() async throws {
+        let validation = expectation(description: "Dispatcher was called")
+        validation.isInverted = true
+        validation.assertForOverFulfill = false
+        subject.dispatcher = .init { _, _, _, _ in validation.fulfill() }
+
+        try await session.audioStore.dispatch([
+            .setHasRecordingPermission(true),
+            .setHasRecordingPermission(false)
+        ]).result()
+
+        await safeFulfillment(of: [validation], timeout: 1)
+    }
+
+    func test_audioStoreIsInterruptedChanges_dispatchesEachChange() async throws {
+        let dispatched = expectation(description: "Dispatcher was called")
+        dispatched.expectedFulfillmentCount = 2
+        let values = AllocatedUnfairLock<[Bool]>([])
+        subject.dispatcher = .init { actions, _, _, _ in
+            if case let .setIsInterrupted(value) = actions[0].wrappedValue {
+                values.withLock { $0.append(value) }
+                dispatched.fulfill()
+            }
+        }
+
+        try await session.audioStore.dispatch(.setInterrupted(true)).result()
+        try await session.audioStore.dispatch(.setInterrupted(false)).result()
+
+        await safeFulfillment(of: [dispatched])
+        XCTAssertEqual(values.withLock { $0 }, [true, false])
+    }
+}
+
 // TODO: Reenable them
 // final class StreamCallAudioRecorder_InterruptionMiddlewareTests: XCTestCase, @unchecked Sendable {
 //
