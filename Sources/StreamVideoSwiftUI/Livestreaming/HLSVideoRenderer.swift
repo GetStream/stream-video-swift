@@ -36,7 +36,11 @@ public struct HLSVideoRenderer: UIViewRepresentable {
         call: Call,
         contentMode: UIView.ContentMode = .scaleAspectFit
     ) {
-        self.init(call: call, contentMode: contentMode, store: .shared)
+        self.init(
+            call: call,
+            contentMode: contentMode,
+            store: InjectedValues[\.hlsPlayerStore]
+        )
     }
 
     init(

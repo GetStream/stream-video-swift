@@ -19,7 +19,7 @@ final class HLSPlaybackControls {
     /// The player the controls act on. `nil` while the call has none.
     var player: AVPlayer? { store.player(for: call) }
 
-    init(call: Call, store: HLSPlayerStore = .shared) {
+    init(call: Call, store: HLSPlayerStore = InjectedValues[\.hlsPlayerStore]) {
         self.call = call
         self.store = store
     }

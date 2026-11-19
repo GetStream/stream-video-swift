@@ -7,39 +7,10 @@ import Combine
 import Foundation
 import StreamVideo
 
-/// A claim on the shared player of a call. Release it when the view or
-/// control that took it goes away. Releasing more than once is a no-op.
-@MainActor
-final class HLSPlayerLease {
-
-    /// The player shared by every lease of the call.
-    let player: AVPlayer
-
-    private let id = UUID()
-    private weak var store: HLSPlayerStore?
-    private let callId: String
-
-    fileprivate init(player: AVPlayer, callId: String, store: HLSPlayerStore) {
-        self.player = player
-        self.callId = callId
-        self.store = store
-    }
-
-    /// Gives the claim back. The player stops when no claim is left.
-    func release() {
-        store?.release(leaseId: id, callId: callId)
-    }
-
-    fileprivate var leaseId: UUID { id }
-}
-
 /// Keeps one `AVPlayer` per call, so every renderer and control of the same
 /// HLS call share it.
 @MainActor
 final class HLSPlayerStore {
-
-    /// The store the SDK views use.
-    static let shared = HLSPlayerStore()
 
     private struct Entry {
         let player: AVPlayer
@@ -102,7 +73,7 @@ final class HLSPlayerStore {
         return lease
     }
 
-    fileprivate func release(leaseId: UUID, callId: String) {
+    func release(leaseId: UUID, callId: String) {
         guard var entry = entries[callId], entry.leaseIds.remove(leaseId) != nil else {
             return
         }
@@ -117,5 +88,26 @@ final class HLSPlayerStore {
         guard let entry = entries.removeValue(forKey: callId) else { return }
         entry.player.pause()
         entry.player.replaceCurrentItem(with: nil)
+    }
+}
+
+/// - Note: Matches the compiler split used by ``VideoRendererPool``.
+#if compiler(>=6.0)
+extension HLSPlayerStore: @preconcurrency InjectionKey {
+    @MainActor
+    static var currentValue: HLSPlayerStore = .init()
+}
+#else
+extension HLSPlayerStore: InjectionKey {
+    @MainActor
+    static var currentValue: HLSPlayerStore = .init()
+}
+#endif
+
+extension InjectedValues {
+    /// The player store the HLS views use.
+    var hlsPlayerStore: HLSPlayerStore {
+        get { Self[HLSPlayerStore.self] }
+        set { Self[HLSPlayerStore.self] = newValue }
     }
 }

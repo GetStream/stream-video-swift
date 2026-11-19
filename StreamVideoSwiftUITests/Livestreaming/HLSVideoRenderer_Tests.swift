@@ -52,6 +52,19 @@ final class HLSVideoRenderer_Tests: StreamVideoTestCase, @unchecked Sendable {
         XCTAssertEqual(HLSVideoRenderer.videoGravity(for: .center), .resizeAspect)
     }
 
+    // MARK: - init
+
+    func test_init_usesTheInjectedStore() {
+        let injected = HLSPlayerStore { _ in HLSSpyPlayer() }
+        let previous = InjectedValues[\.hlsPlayerStore]
+        InjectedValues[\.hlsPlayerStore] = injected
+        defer { InjectedValues[\.hlsPlayerStore] = previous }
+
+        let renderer = HLSVideoRenderer(call: call)
+
+        XCTAssertTrue(renderer.store === injected)
+    }
+
     // MARK: - attach
 
     func test_attach_hlsCall_showsThePlayer() {
