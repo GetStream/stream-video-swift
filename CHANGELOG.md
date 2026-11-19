@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### ✅ Added
+
+- Add `CallState.playbackType`, which reports `.hls(URL)` when the backend routes a viewer to HLS playback. [#1409](https://github.com/GetStream/stream-video-swift/pull/1409)
+
 ### 🔄 Changed
 
 # [1.57.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.57.0)
