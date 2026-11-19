@@ -865,21 +865,33 @@ class CallController: @unchecked Sendable {
 
     /// Leaves when the coordinator ends the call. In HLS there is no SFU, so
     /// the SFU `CallEnded` event that ends a WebRTC call never arrives.
-    /// The event has no counterpart of `liveEnded`, so it always leaves.
+    /// Watching `endedAt` also catches an end that came before this stage
+    /// started, because the state replays its current value.
+    /// An `endedAt` that the join response carried is not a new end.
+    /// The end has no counterpart of `liveEnded`, so it always leaves.
     private func subscribeToHLSCallEndedEvent(_ call: Call?) {
         disposableBag.remove(DisposableKey.hlsCallEnded.rawValue)
 
         guard let call else { return }
 
-        call
-            .eventPublisher(for: CallEndedEvent.self)
-            .sink { [weak call] _ in
-                call?.leave(
-                    initiator: .remoteEvent,
-                    reason: Call.LeaveReason.callEnded.rawValue
-                )
-            }
-            .store(in: disposableBag, key: DisposableKey.hlsCallEnded.rawValue)
+        /// The stage updates arrive on the main queue.
+        MainActor.assumeIsolated {
+            let joinEndedAt = call.state.joinEndedAt
+            call
+                .state
+                .$endedAt
+                .compactMap { $0 }
+                .filter { $0 != joinEndedAt }
+                .first()
+                .receive(on: DispatchQueue.main)
+                .sink { [weak call] _ in
+                    call?.leave(
+                        initiator: .remoteEvent,
+                        reason: Call.LeaveReason.callEnded.rawValue
+                    )
+                }
+                .store(in: disposableBag, key: DisposableKey.hlsCallEnded.rawValue)
+        }
     }
 
     private func subscribeToParticipantsCountUpdatesEvent(_ call: Call?) {
