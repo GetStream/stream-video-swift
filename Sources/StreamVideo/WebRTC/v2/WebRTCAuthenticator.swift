@@ -122,6 +122,8 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
             stateAdapter.enqueueCallSettings {
                 $0.withUpdatedAudioState(false).withUpdatedVideoState(false)
             }
+            /// The join reads the call settings next, so they must be final.
+            await stateAdapter.waitForCallSettingsUpdates()
             return (nil, response)
         }
 
