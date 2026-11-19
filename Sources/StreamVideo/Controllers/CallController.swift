@@ -943,8 +943,12 @@ class CallController: @unchecked Sendable {
 
         Task(disposableBag: disposableBag) { [weak self, weak call] in
             guard let self else { return }
-            let ownershipLost = await webRTCCoordinator.stateAdapter.hlsAudioSession.ownershipLost
-            // The stage can end while the session is being read.
+            // This read does not suspend. The task starts later, so the
+            // stage can end before it, after the exit cleanup has run.
+            let ownershipLost = webRTCCoordinator
+                .stateAdapter
+                .hlsAudioSession
+                .ownershipLost
             guard webRTCCoordinator.stateMachine.currentStage.id == .hlsPlayback else {
                 return
             }
