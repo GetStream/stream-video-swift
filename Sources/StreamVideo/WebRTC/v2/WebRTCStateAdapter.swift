@@ -273,14 +273,8 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         }
     }
 
-    /// Configures the shared audio session for HLS playback.
-    /// - Parameter source: How the call was joined. A CallKit join keeps the
-    ///   call configuration: CallKit does not activate the session unless the
-    ///   category is aligned with a call.
-    func configureHLSAudioSession(source: JoinSource?) async throws {
-        if case .callKit = source {
-            return
-        }
+    /// Configures the shared audio session for HLS playback and activates it.
+    func configureHLSAudioSession() async throws {
         try await hlsAudioSession.activate()
     }
 
