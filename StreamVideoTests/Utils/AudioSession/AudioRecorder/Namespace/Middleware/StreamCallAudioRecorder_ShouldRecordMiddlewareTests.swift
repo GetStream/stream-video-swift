@@ -366,6 +366,59 @@ final class StreamCallAudioRecorder_ShouldRecordMiddlewareClientTests: StreamVid
         }
     }
 
+    // MARK: - Category change during a call
+
+    /// A category that cannot record stops the recorder. When the category
+    /// allows recording again, the recording of an unmuted call must resume.
+    func test_callUnmuted_categoryDropsAndReturns_avAudioRecorderResumes() async throws {
+        let fixture = try await makeRecorderFixture()
+        newClient = StreamVideo.mock(httpClient: HTTPClient_Mock())
+        var thrown: Error?
+
+        do {
+            try await fixture.session.audioStore.dispatch([
+                .setActive(true),
+                .setHasRecordingPermission(true)
+            ]).result()
+            let call = Call.dummy(callType: .default, callId: .unique)
+            await MainActor.run {
+                call.state.callSettings = CallSettings(audioOn: true)
+                newClient.state.activeCall = call
+            }
+            fixture.recorder.startRecording()
+            await fulfillment(timeout: 10) { fixture.store.state.shouldRecord && fixture.spy.isMeteringEnabled }
+
+            try await fixture.session.audioStore.dispatch(
+                .avAudioSession(
+                    .setCategoryAndModeAndCategoryOptions(.playback, mode: .default, categoryOptions: [])
+                )
+            ).result()
+            await fulfillment(timeout: 10) { fixture.spy.timesCalled(.stop) >= 1 }
+            XCTAssertTrue(fixture.store.state.shouldRecord)
+            // Let any restart that the drop itself causes finish first.
+            await wait(for: 1)
+            let recordCallsAtDrop = fixture.spy.timesCalled(.record)
+
+            try await fixture.session.audioStore.dispatch(
+                .avAudioSession(
+                    .setCategoryAndModeAndCategoryOptions(.playAndRecord, mode: .voiceChat, categoryOptions: [])
+                )
+            ).result()
+
+            await fulfillment(timeout: 10) {
+                fixture.spy.timesCalled(.record) > recordCallsAtDrop && fixture.spy.isMeteringEnabled
+            }
+        } catch {
+            thrown = error
+        }
+
+        try await fixture.session.dismantle()
+        fixture.permissions.dismantle()
+        if let thrown {
+            throw thrown
+        }
+    }
+
     // MARK: - Private Helpers
 
     private func makeRecorderFixture() async throws -> (
