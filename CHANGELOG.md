@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### ✅ Added
+
+- Add `PlaybackResponse`, `JoinCallResponse.playback`, `JoinCallRequest.playbackCapabilities` and `prefer`, and `CallSettingsResponse.extraOpts`. [#1408](https://github.com/GetStream/stream-video-swift/pull/1408)
+
 ### 🔄 Changed
 
 # [1.57.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.57.0)
