@@ -935,9 +935,12 @@ class CallController: @unchecked Sendable {
         }
     }
 
-    /// Leaves when another call takes the audio store from the HLS session.
-    /// A call that becomes the active call also replaces this one, but only
-    /// once its join completes. It takes the store earlier.
+    /// Leaves when another session takes the audio store during HLS.
+    ///
+    /// Assigning `activeCall` leaves the previous call, and that assignment
+    /// happens after `joinCall` returns. The new call claims the store inside
+    /// `joinCall`, so this leaves at the claim. An identifier that returns
+    /// to empty is a release, not a loss.
     private func subscribeToHLSAudioOwnershipLoss(_ call: Call?) {
         guard let call else { return }
 
