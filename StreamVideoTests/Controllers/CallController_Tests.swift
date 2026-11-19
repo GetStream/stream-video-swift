@@ -1590,15 +1590,18 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
             .mockCoordinatorStack
             .coordinator
             .stateAdapter
-        // Starting on, an even number of toggles ends with the speaker on.
         let toggles = 40
+        let expectedSpeakerOn = (toggles - 1) % 2 == 1
 
         for index in 0..<toggles {
-            await stateAdapter.enqueueCallSettings { $0.withUpdatedSpeakerState(index % 2 == 1) }
+            await stateAdapter.enqueueCallSettings {
+                $0.withUpdatedSpeakerState(index % 2 == 1)
+            }
         }
-        let lastSpeakerOn = toggles % 2 == 0
-        await fulfillment { await stateAdapter.callSettings.speakerOn == lastSpeakerOn }
+
+        await wait(for: 5)
         let expected = await stateAdapter.callSettings
+        XCTAssertEqual(expected.speakerOn, expectedSpeakerOn)
 
         await fulfilmentInMainActor { call.state.callSettings == expected }
     }
