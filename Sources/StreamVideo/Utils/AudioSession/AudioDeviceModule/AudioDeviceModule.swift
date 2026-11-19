@@ -286,6 +286,22 @@ final class AudioDeviceModule: NSObject, RTCAudioDeviceModuleDelegate, Encodable
         }
     }
 
+    /// Stores other-audio ducking on the audio engine.
+    ///
+    /// The engine applies it when voice processing and capture are on.
+    /// A matching value is left unchanged.
+    func setOtherAudioDucking(_ configuration: OtherAudioDuckingConfiguration) {
+        engineQueue.sync {
+            let level = configuration.level.rawValue
+            if source.duckingLevel != level {
+                source.duckingLevel = level
+            }
+            if source.isAdvancedDuckingEnabled != configuration.isAdvancedDuckingEnabled {
+                source.isAdvancedDuckingEnabled = configuration.isAdvancedDuckingEnabled
+            }
+        }
+    }
+
     /// Mute mode, stereo preference, and VP bypass. Does not rebuild I/O.
     private func applyStereoPlayoutPreferenceLocked(_ isPreferred: Bool) {
         _ = source.setMuteMode(

@@ -144,6 +144,10 @@ final class MockRTCAudioDeviceModule: RTCAudioDeviceModuleControlling, Mockable,
             return "isRecordingAlwaysPreparedMode"
         case \MockRTCAudioDeviceModule.prefersStereoPlayout:
             return "prefersStereoPlayout"
+        case \MockRTCAudioDeviceModule.isAdvancedDuckingEnabled:
+            return "isAdvancedDuckingEnabled"
+        case \MockRTCAudioDeviceModule.duckingLevel:
+            return "duckingLevel"
         default:
             return "\(self)"
         }
@@ -161,6 +165,8 @@ final class MockRTCAudioDeviceModule: RTCAudioDeviceModuleControlling, Mockable,
         stub(for: \.isVoiceProcessingAGCEnabled, with: false)
         stub(for: \.isRecordingAlwaysPreparedMode, with: false)
         stub(for: \.prefersStereoPlayout, with: false)
+        stub(for: \.isAdvancedDuckingEnabled, with: false)
+        stub(for: \.duckingLevel, with: 0)
 
         stub(for: .initAndStartRecording, with: 0)
         stub(for: .setMicrophoneMuted, with: 0)
@@ -239,6 +245,16 @@ final class MockRTCAudioDeviceModule: RTCAudioDeviceModuleControlling, Mockable,
     var prefersStereoPlayout: Bool {
         get { self[dynamicMember: \.prefersStereoPlayout] }
         set { stub(for: \.prefersStereoPlayout, with: newValue) }
+    }
+
+    var isAdvancedDuckingEnabled: Bool {
+        get { self[dynamicMember: \.isAdvancedDuckingEnabled] }
+        set { stub(for: \.isAdvancedDuckingEnabled, with: newValue) }
+    }
+
+    var duckingLevel: Int {
+        get { self[dynamicMember: \.duckingLevel] }
+        set { stub(for: \.duckingLevel, with: newValue) }
     }
 
     func initAndStartRecording() -> Int {

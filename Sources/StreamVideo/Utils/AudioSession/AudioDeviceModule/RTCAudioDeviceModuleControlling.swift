@@ -20,6 +20,8 @@ protocol RTCAudioDeviceModuleControlling: AnyObject {
     var isVoiceProcessingAGCEnabled: Bool { get set }
     var isRecordingAlwaysPreparedMode: Bool { get }
     var prefersStereoPlayout: Bool { get set }
+    var isAdvancedDuckingEnabled: Bool { get set }
+    var duckingLevel: Int { get set }
 
     func reset() -> Int
     func initAndStartPlayout() -> Int
