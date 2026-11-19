@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Report the microphone level to VoiceOver as one value. [#1444](https://github.com/GetStream/stream-video-swift/pull/1444)
 - Keep the lobby microphone level meter running when a new client or the audio device module reports its initial state. [#1412](https://github.com/GetStream/stream-video-swift/pull/1412)
 - Keep recording when other audio session state changes and the audio session category stays the same. [#1434](https://github.com/GetStream/stream-video-swift/pull/1434)
+- Stop the microphone level meter when a call ends right after it starts. [#1436](https://github.com/GetStream/stream-video-swift/pull/1436)
 
 ### 🔄 Changed
 
