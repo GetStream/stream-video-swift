@@ -157,6 +157,11 @@ class CallController: @unchecked Sendable {
         policy: WebRTCJoinPolicy = .default,
         coordinatorJoinAttemptCount: Int = 0
     ) async throws -> JoinCallResponse {
+        let unifiedSessionId = webRTCCoordinator.stateAdapter.unifiedSessionId
+        await MainActor.run { [weak call] in
+            call?.state.unifiedSessionId = unifiedSessionId
+        }
+
         /// Each join attempt creates a fresh `PassthroughSubject` so
         /// that a failure from a previous attempt cannot accidentally
         /// complete a future retry on the same controller.
