@@ -4,6 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### 🔄 Changed
+
+# [1.57.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.57.0)
+_November 18, 2026_
+
 ### ✅ Added
 - `String.audioCall`, the identifier of the built-in `audio_call` call type, for 1:1 and group voice calls that ring and can't be reused once they have ended. [#1385](https://github.com/GetStream/stream-video-swift/pull/1385)
 - `String.agent`, the identifier of the built-in `agent` call type, for conversations between a user and an AI agent. [#1385](https://github.com/GetStream/stream-video-swift/pull/1385)
@@ -11,6 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🐞 Fixed
 
+- Restore the microphone after a background interruption, and after an interruption that ends while the app is in the foreground. [#1430](https://github.com/GetStream/stream-video-swift/pull/1430)
 - Restart the microphone when another part of the app deactivates the audio session during a call. [#1406](https://github.com/GetStream/stream-video-swift/pull/1406)
 - Leave a livestream when the SFU reports that the live segment ended, unless the user can join backstage. A user who can join backstage follows the SFU reconnect strategy. [#1400](https://github.com/GetStream/stream-video-swift/pull/1400)
 - Mark the call as backstage when the SFU reports that the live segment ended. [#1400](https://github.com/GetStream/stream-video-swift/pull/1400)
