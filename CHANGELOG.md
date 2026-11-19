@@ -4,6 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### 🔄 Changed
+
+# [1.57.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.57.0)
+_November 18, 2026_
+
 ### ✅ Added
 - `String.audioCall`, the identifier of the built-in `audio_call` call type, for 1:1 and group voice calls that ring and can't be reused once they have ended. [#1385](https://github.com/GetStream/stream-video-swift/pull/1385)
 - `String.agent`, the identifier of the built-in `agent` call type, for conversations between a user and an AI agent. [#1385](https://github.com/GetStream/stream-video-swift/pull/1385)
@@ -11,6 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🐞 Fixed
 
+- Restore the microphone after a background interruption, and after an interruption that ends while the app is in the foreground. [#1430](https://github.com/GetStream/stream-video-swift/pull/1430)
 - Restart the microphone when another part of the app deactivates the audio session during a call. [#1406](https://github.com/GetStream/stream-video-swift/pull/1406)
 - Leave a livestream when the SFU reports that the live segment ended, unless the user can join backstage. A user who can join backstage follows the SFU reconnect strategy. [#1400](https://github.com/GetStream/stream-video-swift/pull/1400)
 - Mark the call as backstage when the SFU reports that the live segment ended. [#1400](https://github.com/GetStream/stream-video-swift/pull/1400)
@@ -21,7 +27,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🔄 Changed
 
-- Updated WebRTC to 156.0.5. [#1396](https://github.com/GetStream/stream-video-swift/pull/1396)
+- Updated WebRTC to 156.0.7. [#1425](https://github.com/GetStream/stream-video-swift/pull/1425)
 - Deprecate `GoLiveRequest.startRtmpBroadcasts`, `OwnUserResponse.pushNotifications`, `PushNotificationSettingsResponse`, and `revokeTokensIssuedBefore` on `OwnUserResponse`, `UserResponse` and `UserEventPayload`. The video API no longer has them. The response fields are always `nil`, and the API ignores `startRtmpBroadcasts`. Deprecate `Call.goLive(startRtmpBroadcasts:)`; use `goLive(startHls:startRecording:startTranscription:)` instead. [#1378](https://github.com/GetStream/stream-video-swift/pull/1378)
 - Remove 20 unused API models that no endpoint or event returns, for example `AggregatedStats`, `UserStats` and `VideoResolution`. [#1378](https://github.com/GetStream/stream-video-swift/pull/1378)
 - Remove the public `CodingKeys` enums from the API models to reduce binary size. The models encode and decode the same JSON as before. [#1379](https://github.com/GetStream/stream-video-swift/pull/1379)

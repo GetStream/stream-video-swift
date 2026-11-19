@@ -160,7 +160,8 @@ remove_enum_cases() {
 # Drops models which DefaultAPI and VideoEvent do not reach.
 remove_unused_models() {
   local models_dir="$OUTPUT_DIR/Models"
-  local all reachable previous model
+  # An unassigned local is unset under nounset on Ubuntu bash.
+  local all reachable previous="" model
   all="$(ls "$models_dir" | sed 's/\.swift$//' | sort)"
   reachable="VideoEvent"
   until [ "$reachable" = "$previous" ]; do
@@ -191,7 +192,7 @@ apply_coding_directions() {
     diff <(echo "$classified") <(echo "$generated") >&2
     exit 1
   fi
-  sed -i '' 's/send<Response: Codable>/send<Response: Decodable>/' "$OUTPUT_DIR/APIs/DefaultAPI.swift"
+  perl -pi -e 's/send<Response: Codable>/send<Response: Decodable>/' "$OUTPUT_DIR/APIs/DefaultAPI.swift"
   for model in $(jq -r '.decodableModels[]' "$ALLOWED_FILE"); do
     narrow_coding "$models_dir/$model.swift" "$model" Decodable
   done

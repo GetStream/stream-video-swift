@@ -43,10 +43,17 @@ env:
 jobs:
   guard:
     name: Guard
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    permissions:
+      actions: write # to cancel skip-ci runs
+      contents: read
+      pull-requests: read
+    outputs:
+      checks: ${{ steps.guard.outputs.checks }}
     steps:
       - uses: actions/checkout@v4.1.1
-      - uses: ./.github/actions/ci-guard
+      - id: guard
+        uses: ./.github/actions/ci-guard
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -54,7 +61,7 @@ jobs:
     name: Test LLC (Debug)
     runs-on: macos-15
     needs: guard
-    if: ${{ github.event.inputs.record_snapshots_swiftui != 'true' && github.event.inputs.record_snapshots_uikit != 'true' }}
+    if: ${{ github.event.inputs.record_snapshots_swiftui != 'true' && github.event.inputs.record_snapshots_uikit != 'true' && fromJSON(needs.guard.outputs.checks).llc }}
     steps:
     - uses: actions/checkout@v4.1.1
       with:
@@ -69,7 +76,7 @@ jobs:
     - name: Run Sonar analysis
       run: bundle exec fastlane sonar_upload
       env:
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_IOS_BOTS }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
     - uses: 8398a7/action-slack@v3
       with:
@@ -78,7 +85,7 @@ jobs:
         job_name: "Test LLC (Debug)"
         fields: repo,commit,author,workflow
       env:
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_IOS_BOTS }}
       if: ${{ github.event_name == 'push' && failure() }}
     - name: Parse xcresult
       if: failure()
@@ -102,12 +109,10 @@ jobs:
     name: Test SwiftUI (Debug)
     runs-on: macos-15
     needs: guard
-    if: ${{ github.event.inputs.record_snapshots_uikit != 'true' || github.event.inputs.record_snapshots_swiftui == 'true' }}
+    if: ${{ (github.event.inputs.record_snapshots_uikit != 'true' || github.event.inputs.record_snapshots_swiftui == 'true') && fromJSON(needs.guard.outputs.checks).swiftui }}
     permissions:
       contents: write # to push the snapshots branch
       pull-requests: write
-    env:
-      GITHUB_TOKEN: ${{ secrets.CI_BOT_GITHUB_TOKEN }} # to open a PR
     steps:
     - uses: actions/checkout@v4.1.1
     - uses: ./.github/actions/bootstrap
@@ -132,12 +137,10 @@ jobs:
     name: Test UIKit (Debug)
     runs-on: macos-15
     needs: guard
-    if: ${{ github.event.inputs.record_snapshots_swiftui != 'true' || github.event.inputs.record_snapshots_uikit == 'true' }}
+    if: ${{ (github.event.inputs.record_snapshots_swiftui != 'true' || github.event.inputs.record_snapshots_uikit == 'true') && fromJSON(needs.guard.outputs.checks).uikit }}
     permissions:
       contents: write # to push the snapshots branch
       pull-requests: write
-    env:
-      GITHUB_TOKEN: ${{ secrets.CI_BOT_GITHUB_TOKEN }} # to open a PR
     steps:
     - uses: actions/checkout@v4.1.1
     - uses: ./.github/actions/bootstrap
@@ -160,21 +163,21 @@ jobs:
 
   automated-code-review:
     name: Automated Code Review
-    runs-on: macos-15
+    runs-on: ubuntu-24.04
     needs: guard
-    env:
-      XCODE_VERSION: "16.4"
     if: ${{ github.event.inputs.record_snapshots_swiftui != 'true' && github.event.inputs.record_snapshots_uikit != 'true' }}
     steps:
     - uses: actions/checkout@v4.1.1
-    - uses: ./.github/actions/bootstrap
+    - uses: ./.github/actions/ruby-cache
+    - run: ./Scripts/bootstrap.sh
       env:
         INSTALL_INTERFACE_ANALYZER: true
     - run: bundle exec fastlane lint_pr
     - run: bundle exec fastlane rubocop
+      if: ${{ fromJSON(needs.guard.outputs.checks).ruby }}
     - run: bundle exec fastlane run_swift_format strict:true
     - run: bundle exec fastlane validate_public_interface
-      if: startsWith(github.event.pull_request.head.ref, 'release/')
+      if: ${{ startsWith(github.event.pull_request.head.ref, 'release/') && fromJSON(needs.guard.outputs.checks).public_interface }}
 
   build-old-xcode:
     name: Build SDKs (Old Xcode)
@@ -182,25 +185,24 @@ jobs:
     needs:
       - guard
       - test-llc-debug
-    if: ${{ github.event.inputs.record_snapshots_swiftui != 'true' && github.event.inputs.record_snapshots_uikit != 'true' }}
+    if: ${{ !cancelled() && !failure() && github.event.inputs.record_snapshots_swiftui != 'true' && github.event.inputs.record_snapshots_uikit != 'true' && (fromJSON(needs.guard.outputs.checks).llc || fromJSON(needs.guard.outputs.checks).swiftui || fromJSON(needs.guard.outputs.checks).uikit) }}
     env:
       XCODE_VERSION: "16.4"
     steps:
-    - name: Connect Bot
-      uses: webfactory/ssh-agent@v0.7.0
-      with:
-        ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
     - uses: actions/checkout@v3.1.0
     - uses: ./.github/actions/xcode-cache
     - uses: ./.github/actions/ruby-cache
     - name: List Xcode versions
       run: mdfind "kMDItemCFBundleIdentifier = 'com.apple.dt.Xcode'"
     - name: Build LLC
+      if: ${{ fromJSON(needs.guard.outputs.checks).llc }}
       run: bundle exec fastlane test destination:"generic/platform=iOS Simulator" build_for_testing:true ${{ env.VERBOSE }}
       timeout-minutes: 25
     - name: Build SwiftUI
+      if: ${{ fromJSON(needs.guard.outputs.checks).swiftui }}
       run: bundle exec fastlane test_swiftui destination:"generic/platform=iOS Simulator" build_for_testing:true ${{ env.VERBOSE }}
     - name: Build UIKit
+      if: ${{ fromJSON(needs.guard.outputs.checks).uikit }}
       run: bundle exec fastlane test_uikit destination:"generic/platform=iOS Simulator" build_for_testing:true ${{ env.VERBOSE }}
       timeout-minutes: 25
 
@@ -210,7 +212,7 @@ jobs:
     needs:
       - guard
       - test-llc-debug
-    if: ${{ github.event.inputs.record_snapshots_swiftui != 'true' && github.event.inputs.record_snapshots_uikit != 'true' }}
+    if: ${{ !cancelled() && !failure() && github.event.inputs.record_snapshots_swiftui != 'true' && github.event.inputs.record_snapshots_uikit != 'true' && (fromJSON(needs.guard.outputs.checks).e2e || fromJSON(needs.guard.outputs.checks).swiftui_sample_apps || fromJSON(needs.guard.outputs.checks).uikit_sample_apps || fromJSON(needs.guard.outputs.checks).documentation_tests) }}
     steps:
     - uses: actions/checkout@v4.1.1
     - uses: ./.github/actions/ruby-cache
@@ -233,7 +235,7 @@ jobs:
     needs:
       - guard
       - build-test-app-and-frameworks
-    if: ${{ github.event.inputs.record_snapshots_swiftui != 'true' && github.event.inputs.record_snapshots_uikit != 'true' }}
+    if: ${{ !cancelled() && !failure() && github.event.inputs.record_snapshots_swiftui != 'true' && github.event.inputs.record_snapshots_uikit != 'true' && (fromJSON(needs.guard.outputs.checks).swiftui_sample_apps || fromJSON(needs.guard.outputs.checks).uikit_sample_apps || fromJSON(needs.guard.outputs.checks).documentation_tests) }}
     steps:
     - uses: actions/checkout@v4.1.1
     - uses: actions/download-artifact@v4
@@ -243,19 +245,22 @@ jobs:
     - uses: ./.github/actions/ruby-cache
     - uses: ./.github/actions/xcode-cache
     - name: Build SwiftUI Demo App
+      if: ${{ fromJSON(needs.guard.outputs.checks).swiftui_sample_apps }}
       run: bundle exec fastlane build_swiftui_demo ${{ env.VERBOSE }}
     - name: Build UIKit Demo App
+      if: ${{ fromJSON(needs.guard.outputs.checks).uikit_sample_apps }}
       run: bundle exec fastlane build_uikit_demo ${{ env.VERBOSE }}
     - name: Build Docs Test Project
+      if: ${{ fromJSON(needs.guard.outputs.checks).documentation_tests }}
       run: bundle exec fastlane build_docs_test ${{ env.VERBOSE }}
 
   allure_testops_launch:
     name: Launch Allure TestOps
-    runs-on: macos-15
+    runs-on: ubuntu-24.04
     needs:
       - guard
       - build-test-app-and-frameworks
-    if: ${{ github.event.inputs.record_snapshots_swiftui != 'true' && github.event.inputs.record_snapshots_uikit != 'true' }}
+    if: ${{ !cancelled() && !failure() && github.event.inputs.record_snapshots_swiftui != 'true' && github.event.inputs.record_snapshots_uikit != 'true' && fromJSON(needs.guard.outputs.checks).e2e }}
     outputs:
       launch_id: ${{ steps.get_launch_id.outputs.launch_id }}
     steps:
@@ -273,7 +278,7 @@ jobs:
   test-e2e-debug:
     name: Test E2E UI (Debug)
     runs-on: macos-15
-    if: ${{ github.event.inputs.record_snapshots_swiftui != 'true' && github.event.inputs.record_snapshots_uikit != 'true' }}
+    if: ${{ !cancelled() && !failure() && github.event.inputs.record_snapshots_swiftui != 'true' && github.event.inputs.record_snapshots_uikit != 'true' && fromJSON(needs.guard.outputs.checks).e2e }}
     needs:
       - guard
       - allure_testops_launch
@@ -302,10 +307,7 @@ jobs:
       timeout-minutes: 60
       env:
         MATRIX_SIZE: ${{ strategy.job-total }}
-        STREAM_SDK_TEST_APP: ${{ secrets.STREAM_SDK_TEST_APP }}
-        STREAM_SDK_TEST_ACCOUNT_EMAIL: ${{ secrets.STREAM_SDK_TEST_ACCOUNT_EMAIL }}
-        STREAM_SDK_TEST_ACCOUNT_PASSWORD: ${{ secrets.STREAM_SDK_TEST_ACCOUNT_PASSWORD }}
-        STREAM_SDK_TEST_ACCOUNT_OTP_SECRET: ${{ secrets.STREAM_SDK_TEST_ACCOUNT_OTP_SECRET }}
+        STREAM_SDK_TEST_APP: ${{ vars.STREAM_SDK_TEST_APP }}
     - name: Allure TestOps Upload
       if: env.LAUNCH_ID != '' && (success() || failure())
       run: bundle exec fastlane allure_upload launch_id:$LAUNCH_ID
