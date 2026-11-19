@@ -27,6 +27,23 @@ final class StreamCallAudioRecorder_InterruptionMiddlewareStoreTests: XCTestCase
 
     // MARK: - init
 
+    func test_whenDispatcherAttaches_syncsCurrentInterruptionState() async throws {
+        try await session.audioStore.dispatch(.setInterrupted(true)).result()
+
+        let validation = expectation(description: "Dispatcher was called")
+        let values = AllocatedUnfairLock<[Bool]>([])
+        let middleware = StreamCallAudioRecorder.Namespace.InterruptionMiddleware()
+        middleware.dispatcher = .init { actions, _, _, _ in
+            if case let .setIsInterrupted(value) = actions[0].wrappedValue {
+                values.withLock { $0.append(value) }
+                validation.fulfill()
+            }
+        }
+
+        await safeFulfillment(of: [validation])
+        XCTAssertEqual(values.withLock { $0 }, [true])
+    }
+
     /// Each `.setIsInterrupted(false)` can restart the recorder, so other
     /// audio state changes must not dispatch it again.
     func test_audioStoreIsInterruptedUnchanged_otherStateChanges_noActionDispatch() async throws {
