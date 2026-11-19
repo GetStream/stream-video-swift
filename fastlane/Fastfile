@@ -23,7 +23,7 @@ is_localhost = !is_ci
 lanes_without_xcode = [
   :sonar_upload, :allure_launch, :allure_upload, :stop_e2e_helpers, :merge_main, :pr, :openapi,
   :merge_release, :publish_release, :copyright,
-  :lint_pr, :rubocop, :run_swift_format, :validate_public_interface
+  :lint_pr, :rubocop, :run_swift_format, :validate_public_interface, :required_checks
 ]
 swift_environment_path = File.absolute_path('../Sources/StreamVideo/Generated/SystemEnvironment+Version.swift')
 xcodebuild_formatter = FastlaneCore::Globals.verbose? ? '' : nil
@@ -213,8 +213,6 @@ end
 
 desc 'Runs LLC tests'
 lane :test do |options|
-  next unless is_check_required(sources: sources_matrix[:llc], force_check: @force_check)
-
   update_testplan_on_ci(path: "StreamVideoTests/StreamVideo.xctestplan")
 
   scan_options = {
@@ -242,7 +240,6 @@ desc 'Runs SwiftUI tests'
 lane :test_swiftui do |options|
   test_ui(
     scheme: 'StreamVideoSwiftUI',
-    source: :swiftui,
     device: options[:device],
     destination: options[:destination],
     record: options[:record],
@@ -255,7 +252,6 @@ desc 'Runs UIKit tests'
 lane :test_uikit do |options|
   test_ui(
     scheme: 'StreamVideoUIKit',
-    source: :uikit,
     device: options[:device],
     destination: options[:destination],
     record: options[:record],
@@ -265,8 +261,6 @@ lane :test_uikit do |options|
 end
 
 private_lane :test_ui do |options|
-  next unless is_check_required(sources: sources_matrix[options[:source]], force_check: @force_check)
-
   record_mode = options[:record].to_s == 'true'
   remove_snapshots(scheme: options[:scheme]) if record_mode
 
@@ -341,8 +335,6 @@ end
 
 desc 'Runs e2e ui tests'
 lane :test_e2e do |options|
-  next unless is_check_required(sources: sources_matrix[:e2e], force_check: @force_check)
-
   update_testplan_on_ci(path: 'SwiftUIDemoAppUITests/SwiftUIDemoApp.xctestplan')
 
   start_sinatra
@@ -451,23 +443,15 @@ end
 
 desc 'Builds Tests for Docs'
 lane :build_docs_test do
-  build_example_app(scheme: 'DocumentationTests', project: 'DocumentationTests/DocumentationTests/DocumentationTests.xcodeproj')
+  build_example_app(
+    scheme: 'DocumentationTests',
+    project: 'DocumentationTests/DocumentationTests/DocumentationTests.xcodeproj',
+    derived_data_path: derived_data_path
+  )
 end
 
 private_lane :build_example_app do |options|
   options[:project] ||= xcode_project
-  app_sources =
-    case options[:scheme]
-    when 'DemoApp'
-      :swiftui_sample_apps
-    when 'DemoAppUIKit'
-      :uikit_sample_apps
-    when 'DocumentationTests'
-      options[:derived_data_path] = derived_data_path
-      :documentation_tests
-    end
-
-  next unless is_check_required(sources: sources_matrix[app_sources], force_check: @force_check)
 
   scan(
     project: options[:project],
@@ -547,8 +531,6 @@ end
 
 desc 'Run fastlane linting'
 lane :rubocop do
-  next unless is_check_required(sources: sources_matrix[:ruby], force_check: @force_check)
-
   sh('bundle exec rubocop')
 end
 
@@ -592,10 +574,24 @@ lane :sources_matrix do
     swiftui_sample_apps: ['Sources', 'DemoApp', '.github/workflows/smoke-checks.yml', xcode_project],
     uikit_sample_apps: ['Sources', 'DemoAppUIKit', '.github/workflows/smoke-checks.yml', xcode_project],
     documentation_tests: ['Sources', 'DocumentationTests', '.github/workflows/smoke-checks.yml', xcode_project],
-    size: ['Sources', '.github/workflows/smoke-checks.yml', xcode_project],
+    size: ['Sources', '.github/workflows/smoke-checks.yml', '.github/workflows/sdk-size-metrics.yml', xcode_project],
     public_interface: ['Sources', '.github/workflows/smoke-checks.yml'],
     ruby: ['fastlane', 'Gemfile', 'Gemfile.lock', '.github/workflows/smoke-checks.yml']
   }
+end
+
+desc 'Writes the checks this PR needs to GITHUB_OUTPUT, so CI can skip macOS jobs early'
+lane :required_checks do
+  checks = sources_matrix.transform_values do |sources|
+    begin
+      is_check_required(sources: sources, force_check: @force_check)
+    rescue StandardError => e
+      UI.important("Lookup failed, so the check runs: #{e.message}")
+      true
+    end
+  end
+  UI.important("Required checks: #{checks}")
+  File.write(ENV.fetch('GITHUB_OUTPUT'), "checks=#{checks.to_json}\n", mode: 'a')
 end
 
 lane :copyright do
@@ -609,8 +605,6 @@ lane :copyright do
 end
 
 lane :validate_public_interface do
-  next unless is_check_required(sources: sources_matrix[:public_interface], force_check: @force_check)
-
   # Get branch names
   original_branch = current_branch
   target_branch = ENV['GITHUB_BASE_REF'] || (original_branch.include?('release/') ? 'main' : 'develop')
@@ -651,8 +645,6 @@ lane :validate_public_interface do
 end
 
 lane :show_frameworks_sizes do |options|
-  next unless is_check_required(sources: sources_matrix[:size], force_check: @force_check)
-
   sizes = options[:sizes] || frameworks_sizes
   show_sdk_size(branch_sizes: sizes, github_repo: github_repo)
   update_img_shields_sdk_sizes(sizes: sizes, open_pr: options[:open_pr]) if options[:update_readme]
@@ -745,8 +737,6 @@ lane :update_webrtc do |options|
 end
 
 lane :size_analyze do
-  next unless is_check_required(sources: sources_matrix[:size], force_check: @force_check)
-
   gym(
     scheme: 'DemoAppUIKit',
     configuration: 'Release',
