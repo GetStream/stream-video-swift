@@ -5,7 +5,7 @@
 import Foundation
 
 /// One playback report for `POST /video/call/{type}/{id}/hls_stats`.
-struct HLSStatsReport: Encodable, Sendable, Equatable {
+@_spi(StreamVideo) public struct HLSStatsReport: Encodable, Sendable, Equatable {
     var callSessionId: String
     var userSessionId: String
     var unifiedSessionId: String
@@ -20,7 +20,7 @@ struct HLSStatsReport: Encodable, Sendable, Equatable {
     var stats: HLSPlaybackStats?
     var events: [HLSStatsEvent]
 
-    func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: StringCodingKey.self)
         try container.encode(callSessionId, forKey: "call_session_id")
         try container.encode(userSessionId, forKey: "user_session_id")
@@ -41,7 +41,7 @@ struct HLSStatsReport: Encodable, Sendable, Equatable {
 }
 
 /// A full playback snapshot. The latest report replaces earlier ones.
-struct HLSPlaybackStats: Encodable, Sendable, Equatable {
+@_spi(StreamVideo) public struct HLSPlaybackStats: Encodable, Sendable, Equatable {
     var watchDurationMs: Int64 = 0
     var stallCount: Int = 0
     var stallDurationMs: Int64 = 0
@@ -53,7 +53,7 @@ struct HLSPlaybackStats: Encodable, Sendable, Equatable {
     var width: Int = 0
     var height: Int = 0
 
-    func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: StringCodingKey.self)
         try container.encode(watchDurationMs, forKey: "watch_duration_ms")
         try container.encode(stallCount, forKey: "stall_count")
@@ -70,12 +70,12 @@ struct HLSPlaybackStats: Encodable, Sendable, Equatable {
 
 /// A player event carried beside a report. `started`, `stats`, and `ended`
 /// are report types, so they are not valid event types.
-struct HLSStatsEvent: Encodable, Sendable, Equatable {
+@_spi(StreamVideo) public struct HLSStatsEvent: Encodable, Sendable, Equatable {
     var type: String
     var timestamp: Int64
     var data: [String: String]
 
-    func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: StringCodingKey.self)
         try container.encode(type, forKey: "type")
         try container.encode(timestamp, forKey: "timestamp")
@@ -104,7 +104,7 @@ struct HLSPlaybackEvent: Sendable, Equatable {
     var data: [String: String]
 }
 
-protocol HLSStatsSending: Sendable {
+@_spi(StreamVideo) public protocol HLSStatsSending: Sendable {
     func reportHLSStats(
         callType: String,
         callId: String,

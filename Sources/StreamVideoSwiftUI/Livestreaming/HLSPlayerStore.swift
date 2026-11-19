@@ -5,7 +5,7 @@
 import AVFoundation
 import Combine
 import Foundation
-import StreamVideo
+@_spi(StreamVideo) import StreamVideo
 
 /// Keeps one `AVPlayer` per call, so every renderer and control of the same
 /// HLS call share it.
@@ -14,24 +14,30 @@ final class HLSPlayerStore {
 
     private struct Entry {
         let player: AVPlayer
-        weak var call: Call?
+        var tracking: (any HLSPlaybackTracking)?
         var leaseIds: Set<UUID>
         let playbackTypeObserver: AnyCancellable
     }
 
     private let makePlayer: (URL) -> AVPlayer
+    private let senderForCall: (Call) -> (any HLSStatsSending)?
     private var entries: [String: Entry] = [:]
 
     /// The number of calls that have a player.
     var activePlayerCount: Int { entries.count }
 
-    /// - Parameter makePlayer: Builds the player for a playlist URL.
+    /// - Parameters:
+    ///   - makePlayer: Builds the player for a playlist URL.
+    ///   - senderForCall: Replaces the call's API client. Tests use it to
+    ///     record reports. Nil uses the call's own client.
     init(
         makePlayer: @escaping (URL) -> AVPlayer = {
             AVPlayer(playerItem: AVPlayerItem(url: $0))
-        }
+        },
+        senderForCall: @escaping (Call) -> (any HLSStatsSending)? = { _ in nil }
     ) {
         self.makePlayer = makePlayer
+        self.senderForCall = senderForCall
     }
 
     /// The player of the call, if it has one.
@@ -60,11 +66,15 @@ final class HLSPlayerStore {
             let player = makePlayer(url)
             // A new player has rate 0. Nothing else starts it.
             player.play()
-            call.startHLSPlaybackReporting(player)
+            let tracking = makeHLSPlaybackTracking(
+                player: player,
+                call: call,
+                sender: senderForCall(call)
+            )
             lease = HLSPlayerLease(player: player, callId: callId, store: self)
             entries[callId] = Entry(
                 player: player,
-                call: call,
+                tracking: tracking,
                 leaseIds: [lease.leaseId],
                 // The player has no use once the call stops playing HLS.
                 playbackTypeObserver: call.state
@@ -72,6 +82,7 @@ final class HLSPlayerStore {
                     .filter { $0 == .webRTC }
                     .sink { [weak self] _ in self?.free(callId: callId) }
             )
+            Task { await tracking?.start() }
         }
         return lease
     }
@@ -89,7 +100,7 @@ final class HLSPlayerStore {
 
     private func free(callId: String) {
         guard let entry = entries.removeValue(forKey: callId) else { return }
-        entry.call?.stopHLSPlaybackReporting()
+        entry.tracking?.stop()
         entry.player.pause()
         entry.player.replaceCurrentItem(with: nil)
     }

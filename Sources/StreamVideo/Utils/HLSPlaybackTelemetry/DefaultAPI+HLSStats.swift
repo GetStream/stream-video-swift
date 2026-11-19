@@ -6,8 +6,9 @@ import Foundation
 
 private struct HLSStatsAcknowledgement: Decodable {}
 
+@_spi(StreamVideo)
 extension DefaultAPI: HLSStatsSending {
-    func reportHLSStats(
+    public func reportHLSStats(
         callType: String,
         callId: String,
         report: HLSStatsReport

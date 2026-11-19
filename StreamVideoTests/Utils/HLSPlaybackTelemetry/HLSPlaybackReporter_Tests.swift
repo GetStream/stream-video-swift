@@ -3,7 +3,7 @@
 //
 
 import Foundation
-@testable import StreamVideo
+@_spi(StreamVideo) @testable import StreamVideo
 import XCTest
 
 final class HLSPlaybackReporter_Tests: XCTestCase, @unchecked Sendable {

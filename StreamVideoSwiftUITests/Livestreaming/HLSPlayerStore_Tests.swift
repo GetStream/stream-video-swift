@@ -4,7 +4,7 @@
 
 import AVFoundation
 import Foundation
-@testable import StreamVideo
+@_spi(StreamVideo) @testable import StreamVideo
 @testable import StreamVideoSwiftUI
 import XCTest
 
@@ -55,6 +55,43 @@ final class HLSPlayerStore_Tests: StreamVideoTestCase, @unchecked Sendable {
     func test_acquire_webRTC_returnsNil() {
         XCTAssertNil(subject.acquire(for: makeCall(), playbackType: .webRTC))
         XCTAssertEqual(subject.activePlayerCount, 0)
+    }
+
+    func test_acquire_withASender_sendsStarted() async {
+        let recorder = ReportRecorder()
+        subject = HLSPlayerStore(
+            makePlayer: { [unowned self] url in
+                let player = HLSSpyPlayer()
+                madeURLs.append(url)
+                madePlayers.append(player)
+                return player
+            },
+            senderForCall: { _ in recorder }
+        )
+        let call = makeCall()
+        call.state.unifiedSessionId = "unified-1"
+        call.state.session = CallSessionResponse(
+            acceptedBy: [:],
+            anonymousParticipantCount: 0,
+            id: "session-1",
+            missedBy: [:],
+            participants: [],
+            participantsCountByRole: [:],
+            rejectedBy: [:]
+        )
+
+        _ = subject.acquire(for: call, playbackType: .hls(url))
+
+        let started = expectation(description: "started")
+        Task {
+            while await recorder.reports.isEmpty {
+                try? await Task.sleep(nanoseconds: 20_000_000)
+            }
+            started.fulfill()
+        }
+        await fulfillment(of: [started], timeout: 2)
+        let type = await recorder.reports.first?.type
+        XCTAssertEqual(type, "started")
     }
 
     func test_acquire_twiceForTheSameCall_sharesOnePlayer() {
@@ -168,5 +205,17 @@ final class HLSPlayerStore_Tests: StreamVideoTestCase, @unchecked Sendable {
         let call = MockCall()
         call.state.playbackType = .hls(url)
         return call
+    }
+}
+
+private actor ReportRecorder: HLSStatsSending {
+    private(set) var reports: [HLSStatsReport] = []
+
+    func reportHLSStats(
+        callType _: String,
+        callId _: String,
+        report: HLSStatsReport
+    ) async throws {
+        reports.append(report)
     }
 }

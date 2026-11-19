@@ -7,7 +7,7 @@ import Foundation
 
 /// Watches one `AVPlayer` and reports playback to ``HLSPlaybackReporter``.
 @MainActor
-final class HLSPlaybackTracker {
+@_spi(StreamVideo) public final class HLSPlaybackTracker: HLSPlaybackTracking {
 
     private let player: AVPlayer
     private let reporter: HLSPlaybackReporter
@@ -40,7 +40,7 @@ final class HLSPlaybackTracker {
         self.now = now
     }
 
-    func start() async {
+    public func start() async {
         guard !stopped else { return }
         observe()
         await reporter.start()
@@ -117,7 +117,8 @@ final class HLSPlaybackTracker {
         reportedQuality = true
     }
 
-    func stop() -> Task<Void, Never> {
+    @discardableResult
+    public func stop() -> Task<Void, Never> {
         guard !stopped else { return Task {} }
         stopped = true
         reportTask?.cancel()
@@ -235,4 +236,45 @@ final class HLSPlaybackTracker {
         let nsError = error as NSError
         return String("\(nsError.domain) \(nsError.code)".prefix(128))
     }
+}
+
+/// The player store keeps this for one HLS player and stops it on release.
+@MainActor
+@_spi(StreamVideo) public protocol HLSPlaybackTracking: AnyObject {
+    func start() async
+    @discardableResult
+    func stop() -> Task<Void, Never>
+}
+
+/// Builds playback reporting for the player store.
+///
+/// Returns nil when the call has no session id or no unified session id,
+/// or when no sender is available.
+@MainActor
+@_spi(StreamVideo) public func makeHLSPlaybackTracking(
+    player: AVPlayer,
+    call: Call,
+    sender: (any HLSStatsSending)?
+) -> (any HLSPlaybackTracking)? {
+    let callSessionId = call.state.session?.id ?? ""
+    guard !callSessionId.isEmpty, !call.state.unifiedSessionId.isEmpty else {
+        return nil
+    }
+    let api = sender ?? (call.coordinatorClient as? any HLSStatsSending)
+    guard let api else { return nil }
+    let seconds = call.state.statsCollectionInterval > 0
+        ? TimeInterval(call.state.statsCollectionInterval)
+        : 5
+    let reporter = HLSPlaybackReporter(
+        callType: call.callType,
+        callId: call.callId,
+        callSessionId: callSessionId,
+        unifiedSessionId: call.state.unifiedSessionId,
+        sender: api
+    )
+    return HLSPlaybackTracker(
+        player: player,
+        reporter: reporter,
+        interval: seconds
+    )
 }

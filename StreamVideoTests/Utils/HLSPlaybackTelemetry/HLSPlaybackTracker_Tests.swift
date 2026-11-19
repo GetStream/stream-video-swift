@@ -4,7 +4,7 @@
 
 import AVFoundation
 import Foundation
-@testable import StreamVideo
+@_spi(StreamVideo) @testable import StreamVideo
 import XCTest
 
 @MainActor
