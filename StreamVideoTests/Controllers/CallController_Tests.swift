@@ -684,7 +684,17 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
 
         await call.onEvent(callEndedEvent(for: call.cId))
 
-        XCTAssertEqual(call.leaveInitiators, [.remoteEvent])
+        await fulfilmentInMainActor { call.leaveInitiators == [.remoteEvent] }
+    }
+
+    @MainActor
+    func test_hlsPlaybackStage_callEndedBeforeTheStageStarts_leavesWithRemoteEventInitiator() async throws {
+        let call = MockCall(.dummy(callController: subject))
+        await call.onEvent(callEndedEvent(for: call.cId))
+
+        enterStage(.hlsPlayback)
+
+        await fulfilmentInMainActor { call.leaveInitiators == [.remoteEvent] }
     }
 
     @MainActor
@@ -694,8 +704,42 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         await drainMainQueue()
 
         await call.onEvent(callEndedEvent(for: "default:\(String.unique)"))
+        await drainMainQueue()
 
         XCTAssertTrue(call.leaveInitiators.isEmpty)
+    }
+
+    /// A join response can carry an `endedAt` that the viewer did not cause.
+    @MainActor
+    func test_hlsPlaybackStage_endedAtFromTheJoinResponse_doesNotLeave() async throws {
+        let call = MockCall(.dummy(callController: subject))
+        let staleEndedAt = Date(timeIntervalSince1970: 100)
+        call.state.update(
+            from: JoinCallResponse.dummyHLSGrant(
+                call: .dummy(cid: call.cId, endedAt: staleEndedAt)
+            )
+        )
+
+        enterStage(.hlsPlayback)
+        await drainMainQueue()
+
+        XCTAssertTrue(call.leaveInitiators.isEmpty)
+    }
+
+    @MainActor
+    func test_hlsPlaybackStage_callEndedAfterAStaleEndedAt_leavesWithRemoteEventInitiator() async throws {
+        let call = MockCall(.dummy(callController: subject))
+        call.state.update(
+            from: JoinCallResponse.dummyHLSGrant(
+                call: .dummy(cid: call.cId, endedAt: Date(timeIntervalSince1970: 100))
+            )
+        )
+        enterStage(.hlsPlayback)
+        await drainMainQueue()
+
+        await call.onEvent(callEndedEvent(for: call.cId))
+
+        await fulfilmentInMainActor { call.leaveInitiators == [.remoteEvent] }
     }
 
     @MainActor
@@ -705,6 +749,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         await drainMainQueue()
 
         await call.onEvent(callEndedEvent(for: call.cId))
+        await drainMainQueue()
 
         XCTAssertTrue(call.leaveInitiators.isEmpty)
     }
@@ -718,6 +763,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         await drainMainQueue()
 
         await call.onEvent(callEndedEvent(for: call.cId))
+        await drainMainQueue()
 
         XCTAssertTrue(call.leaveInitiators.isEmpty)
     }
@@ -1925,7 +1971,11 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
     private func callEndedEvent(for cid: String) -> WrappedEvent {
         .coordinatorEvent(
             .typeCallEndedEvent(
-                .init(call: .dummy(cid: cid), callCid: cid, createdAt: .init())
+                .init(
+                    call: .dummy(cid: cid, endedAt: Date()),
+                    callCid: cid,
+                    createdAt: .init()
+                )
             )
         )
     }
