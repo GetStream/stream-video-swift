@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### ✅ Added
 - Audio session policies can set other-audio ducking on `AudioSessionConfiguration`. The default matches the current voice-processing ducking. [#1441](https://github.com/GetStream/stream-video-swift/pull/1441)
+- Add `CallState.playbackType`, which reports `.hls(URL)` when the backend routes a viewer to HLS playback. [#1409](https://github.com/GetStream/stream-video-swift/pull/1409)
 
 ### 🐞 Fixed
 - Report the microphone level to VoiceOver as one value. [#1444](https://github.com/GetStream/stream-video-swift/pull/1444)
