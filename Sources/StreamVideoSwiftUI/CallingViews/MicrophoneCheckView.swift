@@ -113,6 +113,9 @@ public struct AudioVolumeIndicator: View {
                 .frame(height: CGFloat(maxHeight))
             }
         }
+        // Levels update at the display refresh rate. Leave the bars out of
+        // the accessibility tree so a query can snapshot a stable hierarchy.
+        .accessibilityHidden(true)
     }
     
     var levels: [AudioLevel] {
@@ -130,8 +133,10 @@ public struct AudioVolumeIndicator: View {
 }
 
 struct AudioLevel: Identifiable {
+    // The value changes every frame. Identity stays on the index so SwiftUI
+    // updates the existing bar instead of replacing it.
     var id: String {
-        "\(index)-\(value)"
+        "\(index)"
     }
 
     let value: Float

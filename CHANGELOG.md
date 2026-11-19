@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### 🐞 Fixed
+
+- Keep the microphone level bars out of the accessibility tree.
+
 ### 🔄 Changed
 
 # [1.57.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.57.0)
