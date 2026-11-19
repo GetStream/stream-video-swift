@@ -3,7 +3,6 @@
 //
 
 import AVFoundation
-import Combine
 import Foundation
 
 /// Owns the shared audio session while a call plays HLS.
@@ -23,20 +22,12 @@ actor HLSAudioSession {
         UUID().uuidString.replacingOccurrences(of: "-", with: "").prefix(8)
     )
 
-    /// Becomes `true` when another session takes the shared audio state
-    /// from this one, and replays its value to late subscribers.
-    nonisolated var ownershipLost: AnyPublisher<Bool, Never> {
-        ownershipLostSubject.eraseToAnyPublisher()
-    }
-
-    private nonisolated let ownershipLostSubject = CurrentValueSubject<Bool, Never>(false)
     private let dispatchOverride: Dispatch?
 
     /// Whether this session claimed the shared audio state and has not yet
     /// released it. Set before the first await, so a release that runs while
     /// the activation is in flight still undoes it.
     private var isActive = false
-    private var ownershipObserver: AnyCancellable?
 
     /// - Parameter dispatch: Sends the actions to the audio store. Pass a
     ///   replacement to observe or fail the dispatches.
@@ -50,7 +41,6 @@ actor HLSAudioSession {
         try Task.checkCancellation()
         guard !isActive else { return }
         isActive = true
-        ownershipLostSubject.send(false)
 
         // The claim applies only to an unowned store, so an active call keeps
         // its session. The rest applies only while this session owns it.
@@ -76,17 +66,10 @@ actor HLSAudioSession {
         ]
 
         do {
-            // Subscribe before the claim. A loss during the claim still
-            // reaches the subject. A claim that never owns the store does not.
-            observeOwnership()
             try await dispatch(actions)
         } catch {
             await deactivate()
             throw error
-        }
-        if !ownershipLostSubject.value,
-           audioStore.state.activeSessionIdentifier != identifier {
-            ownershipObserver = nil
         }
     }
 
@@ -98,7 +81,6 @@ actor HLSAudioSession {
     func deactivate() async {
         guard isActive else { return }
         isActive = false
-        ownershipObserver = nil
 
         await attempt(.conditioned(owned, action: .setActive(false)))
         // A call created while HLS played has no bootstrap of its own left to
@@ -108,28 +90,6 @@ actor HLSAudioSession {
     }
 
     // MARK: - Private Helpers
-
-    /// Reports a loss only after this session has owned the store. The
-    /// current value is replayed, so a loss that lands before the claim
-    /// returns is still reported.
-    private func observeOwnership() {
-        guard isActive, ownershipObserver == nil else { return }
-        let identifier = identifier
-        let subject = ownershipLostSubject
-        let ownership = Ownership()
-        ownershipObserver = audioStore
-            .publisher(\.activeSessionIdentifier)
-            .removeDuplicates()
-            .sink { current in
-                if current == identifier {
-                    ownership.didOwn = true
-                    return
-                }
-                if ownership.didOwn, !current.isEmpty {
-                    subject.send(true)
-                }
-            }
-    }
 
     private var owned: RTCAudioStore.Namespace.Action.Condition {
         .activeSessionIdentifier(identifier)
@@ -153,10 +113,4 @@ actor HLSAudioSession {
             )
         }
     }
-}
-
-/// Records whether this session has seen its own identifier. The store
-/// publisher delivers values off the actor.
-private final class Ownership: @unchecked Sendable {
-    var didOwn = false
 }
