@@ -91,6 +91,17 @@ final class MicrophoneCheckView_Tests: StreamVideoUITestCase, @unchecked Sendabl
         XCTAssertNotEqual(loud.id, otherIndex.id)
     }
 
+    func test_spokenValue_nearbyLevels_shareOneStep() {
+        XCTAssertEqual(
+            AudioVolumeIndicator.spokenValue(for: [0.41]),
+            AudioVolumeIndicator.spokenValue(for: [0.44])
+        )
+        XCTAssertNotEqual(
+            AudioVolumeIndicator.spokenValue(for: [0.1]),
+            AudioVolumeIndicator.spokenValue(for: [0.9])
+        )
+    }
+
     func test_localParticipantModifier_withoutAllInfo_leftAlignsMic_snapshot() {
         let view = Color.red
             .frame(width: 250, height: 100)

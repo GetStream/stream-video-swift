@@ -113,9 +113,18 @@ public struct AudioVolumeIndicator: View {
                 .frame(height: CGFloat(maxHeight))
             }
         }
-        // Levels update at the display refresh rate. Leave the bars out of
-        // the accessibility tree so a query can snapshot a stable hierarchy.
-        .accessibilityHidden(true)
+        // One element for VoiceOver. Bar frames change every sample, so they
+        // stay out of the tree. The value moves in 10 percent steps.
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Audio level")
+        .accessibilityValue(Self.spokenValue(for: audioLevels))
+    }
+
+    static func spokenValue(for levels: [Float]) -> String {
+        let peak = levels.max() ?? 0
+        let clamped = min(max(peak, 0), 1)
+        let step = Int((clamped * 10).rounded())
+        return "\(step * 10) percent"
     }
     
     var levels: [AudioLevel] {
