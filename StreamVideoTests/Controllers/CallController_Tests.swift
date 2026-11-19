@@ -1599,11 +1599,21 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
             }
         }
 
-        await wait(for: 5)
+        await fulfillment {
+            let first = await stateAdapter.callSettings
+            guard first.speakerOn == expectedSpeakerOn else {
+                return false
+            }
+            try? await Task.sleep(nanoseconds: 50_000_000)
+            let second = await stateAdapter.callSettings
+            guard first == second else {
+                return false
+            }
+            return await MainActor.run { call.state.callSettings == second }
+        }
         let expected = await stateAdapter.callSettings
         XCTAssertEqual(expected.speakerOn, expectedSpeakerOn)
-
-        await fulfilmentInMainActor { call.state.callSettings == expected }
+        XCTAssertEqual(call.state.callSettings, expected)
     }
 
     // MARK: - enableClientCapabilities
