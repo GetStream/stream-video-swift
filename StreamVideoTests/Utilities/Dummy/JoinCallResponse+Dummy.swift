@@ -14,6 +14,7 @@ extension JoinCallResponse {
         members: [MemberResponse] = [],
         membership: MemberResponse? = nil,
         ownCapabilities: [OwnCapability] = [],
+        playback: PlaybackResponse? = nil,
         statsOptions: StatsOptions = .init(enableRtcStats: false, reportingIntervalMs: 0)
     ) -> JoinCallResponse {
         .init(
@@ -24,6 +25,7 @@ extension JoinCallResponse {
             members: members,
             membership: membership,
             ownCapabilities: ownCapabilities,
+            playback: playback,
             statsOptions: statsOptions
         )
     }
