@@ -112,8 +112,9 @@ final class ScriptedWebRTCAuthenticator: WebRTCAuthenticating, @unchecked Sendab
         create: Bool,
         ring: Bool,
         notify: Bool,
-        options: CreateCallOptions?
-    ) async throws -> (sfuAdapter: SFUAdapter, response: JoinCallResponse) {
+        options: CreateCallOptions?,
+        declaresPlaybackCapabilities: Bool
+    ) async throws -> (sfuAdapter: SFUAdapter?, response: JoinCallResponse) {
         try pop(&authenticateResults).get()
     }
 

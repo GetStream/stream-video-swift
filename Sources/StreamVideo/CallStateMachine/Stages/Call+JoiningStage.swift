@@ -180,8 +180,7 @@ extension Call.StateMachine.Stage {
             try Task.checkCancellation()
 
             let sessionID = await call.callController.sessionID()
-            await MainActor.run { call.state.sessionId = sessionID }
-            await call.state.update(from: response)
+            try await apply(response, sessionID: sessionID, to: call)
             call.update(recordingState: response.call.recording ? .recording : .noRecording)
 
             try Task.checkCancellation()
@@ -228,6 +227,22 @@ extension Call.StateMachine.Stage {
             call.callController.observeWebRTCStateUpdated()
 
             return response
+        }
+
+        /// Stores the session id and the join response on the call state.
+        ///
+        /// The cancellation check and the update share one main-actor hop. A
+        /// leave in between could otherwise let a late response restore the
+        /// state that the leave reset.
+        @MainActor
+        private func apply(
+            _ response: JoinCallResponse,
+            sessionID: String,
+            to call: Call
+        ) throws {
+            try Task.checkCancellation()
+            call.state.sessionId = sessionID
+            call.state.update(from: response)
         }
 
         /// Runs the optional join interceptor without letting it block the join

@@ -18,7 +18,8 @@ final class MockWebRTCAuthenticator: WebRTCAuthenticating, Mockable, @unchecked 
             create: Bool,
             ring: Bool,
             notify: Bool,
-            options: CreateCallOptions?
+            options: CreateCallOptions?,
+            declaresPlaybackCapabilities: Bool
         )
 
         case waitForAuthentication(sfuAdapter: SFUAdapter)
@@ -33,9 +34,19 @@ final class MockWebRTCAuthenticator: WebRTCAuthenticating, Mockable, @unchecked 
                 create,
                 ring,
                 notify,
-                options
+                options,
+                declaresPlaybackCapabilities
             ):
-                return (coordinator, currentSFU, migratingFromList, create, ring, notify, options)
+                return (
+                    coordinator,
+                    currentSFU,
+                    migratingFromList,
+                    create,
+                    ring,
+                    notify,
+                    options,
+                    declaresPlaybackCapabilities
+                )
             case let .waitForAuthentication(sfuAdapter):
                 return sfuAdapter
             case let .waitForConnect(sfuAdapter):
@@ -48,6 +59,16 @@ final class MockWebRTCAuthenticator: WebRTCAuthenticating, Mockable, @unchecked 
     /// Set to a suspending closure to block the mock until the
     /// test is ready, preventing the connecting stage from racing.
     var onAuthenticate: (@Sendable () async throws -> Void)?
+
+    /// The `declaresPlaybackCapabilities` value of each ``authenticate`` call.
+    var declaredPlaybackCapabilities: [Bool] {
+        (stubbedFunctionInput[.authenticate] ?? []).compactMap {
+            guard case let .authenticate(_, _, _, _, _, _, _, declared) = $0 else {
+                return nil
+            }
+            return declared
+        }
+    }
 
     var stubbedProperty: [String: Any] = [:]
     var stubbedFunction: [FunctionKey: Any] = [:]
@@ -83,8 +104,9 @@ final class MockWebRTCAuthenticator: WebRTCAuthenticating, Mockable, @unchecked 
         create: Bool,
         ring: Bool,
         notify: Bool,
-        options: CreateCallOptions?
-    ) async throws -> (sfuAdapter: SFUAdapter, response: JoinCallResponse) {
+        options: CreateCallOptions?,
+        declaresPlaybackCapabilities: Bool
+    ) async throws -> (sfuAdapter: SFUAdapter?, response: JoinCallResponse) {
         stubbedFunctionInput[.authenticate]?
             .append(
                 .authenticate(
@@ -94,17 +116,19 @@ final class MockWebRTCAuthenticator: WebRTCAuthenticating, Mockable, @unchecked 
                     create: create,
                     ring: ring,
                     notify: notify,
-                    options: options
+                    options: options,
+                    declaresPlaybackCapabilities: declaresPlaybackCapabilities
                 )
             )
 
         try await onAuthenticate?()
 
-        switch stubbedFunction[.authenticate] as? Result<(SFUAdapter, JoinCallResponse), Error> {
-        case let .success(result):
-            return result
-        case let .failure(failure):
-            throw failure
+        // An HLS grant has no SFU adapter, so it is stubbed with an optional.
+        switch stubbedFunction[.authenticate] {
+        case let result as Result<(SFUAdapter, JoinCallResponse), Error>:
+            return try result.get()
+        case let result as Result<(SFUAdapter?, JoinCallResponse), Error>:
+            return try result.get()
         default:
             throw ClientError("Not stubbed function.")
         }

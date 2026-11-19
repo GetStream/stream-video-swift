@@ -12,6 +12,7 @@ class CallController: @unchecked Sendable {
         case participantsCountUpdatesEvent
         case currentUserBlocked
         case backstageSetting
+        case hlsCallEnded
     }
 
     private lazy var clientEventReporter: ClientEventReporting = ClientEventReporter(
@@ -31,7 +32,7 @@ class CallController: @unchecked Sendable {
         callSettings: initialCallSettings,
         clientEventReporter: clientEventReporter
     ) {
-        [weak self, callId] create, ring, migratingFrom, migratingFromList, notify, options in
+        [weak self, callId] create, ring, migratingFrom, migratingFromList, notify, options, declaresPlaybackCapabilities in
         if let self {
             return try await authenticateCall(
                 create: create,
@@ -39,7 +40,8 @@ class CallController: @unchecked Sendable {
                 migratingFrom: migratingFrom,
                 migratingFromList: migratingFromList,
                 notify: notify,
-                options: options
+                options: options,
+                declaresPlaybackCapabilities: declaresPlaybackCapabilities
             )
         } else {
             throw ClientError("Unable to authenticate callId:\(callId).")
@@ -515,6 +517,7 @@ class CallController: @unchecked Sendable {
 
     func leave(reason: String?, initiator: Call.LeaveInitiator = .unknown) {
         guard call != nil else { return }
+        resetPlaybackType(of: call)
         call = nil
         webRTCCoordinator.leave(reason: reason, initiator: initiator)
     }
@@ -522,6 +525,7 @@ class CallController: @unchecked Sendable {
     /// Cleans up the call controller.
     func cleanUp() {
         guard call != nil else { return }
+        resetPlaybackType(of: call)
         call = nil
         Task(disposableBag: disposableBag) { [weak self] in
             guard let self else { return }
@@ -716,6 +720,8 @@ class CallController: @unchecked Sendable {
     ///   - migratingFromList: All exhausted SFU edges that should be avoided.
     ///   - notify: Whether the backend should notify call members.
     ///   - options: Additional call creation options and join-only hints.
+    ///   - declaresPlaybackCapabilities: Whether the request tells the backend
+    ///     that this client can play HLS.
     /// - Returns: The backend join response used to continue the WebRTC flow.
     /// - Throws: An error if location fetch or join request fails.
     ///
@@ -727,7 +733,8 @@ class CallController: @unchecked Sendable {
         migratingFrom: String?,
         migratingFromList: [String]?,
         notify: Bool,
-        options: CreateCallOptions?
+        options: CreateCallOptions?,
+        declaresPlaybackCapabilities: Bool
     ) async throws -> JoinCallResponse {
         let location = try await getLocation()
         var membersRequest = [MemberRequest]()
@@ -755,6 +762,7 @@ class CallController: @unchecked Sendable {
             migratingFrom: migratingFrom,
             migratingFromList: migratingFromList?.isEmpty == false ? migratingFromList : nil,
             notify: notify,
+            playbackCapabilities: declaresPlaybackCapabilities ? ["hls"] : nil,
             ring: ring
         )
 
@@ -801,11 +809,26 @@ class CallController: @unchecked Sendable {
         return try await LocationFetcher.getLocation()
     }
 
+    /// Returns the call state to WebRTC once the call that played HLS ends.
+    private func resetPlaybackType(of call: Call?) {
+        guard let call else { return }
+        Task(disposableBag: disposableBag) { @MainActor in
+            if call.state.playbackType != .webRTC {
+                call.state.playbackType = .webRTC
+            }
+        }
+    }
+
     private func webRTCClientDidUpdateStage(
         _ stage: WebRTCCoordinator.StateMachine.Stage
     ) {
+        if stage.id != .hlsPlayback {
+            disposableBag.remove(DisposableKey.hlsCallEnded.rawValue)
+        }
+
         switch stage.id {
         case .idle:
+            resetPlaybackType(of: call)
             call?.update(reconnectionStatus: .disconnected)
         case .rejoining:
             call?.update(reconnectionStatus: .reconnecting)
@@ -813,6 +836,11 @@ class CallController: @unchecked Sendable {
             call?.update(reconnectionStatus: .migrating)
         case .leaving:
             call?.leave()
+        case .hlsPlayback:
+            /// HLS has no SFU health check, so coordinator count events stay
+            /// the source of `participantCount`. It has no reconnection
+            /// either, so the status stays `.connected`.
+            subscribeToHLSCallEndedEvent(call)
         case .joined:
             /// Once connected we should stop listening for CallSessionParticipantCountsUpdatedEvent
             /// updates and only rely on the healthCheck event.
@@ -832,6 +860,37 @@ class CallController: @unchecked Sendable {
             }
         default:
             break
+        }
+    }
+
+    /// Leaves when the coordinator ends the call. In HLS there is no SFU, so
+    /// the SFU `CallEnded` event that ends a WebRTC call never arrives.
+    /// Watching `endedAt` also catches an end that came before this stage
+    /// started, because the state replays its current value.
+    /// An `endedAt` that the join response carried is not a new end.
+    /// The end has no counterpart of `liveEnded`, so it always leaves.
+    private func subscribeToHLSCallEndedEvent(_ call: Call?) {
+        disposableBag.remove(DisposableKey.hlsCallEnded.rawValue)
+
+        guard let call else { return }
+
+        /// The stage updates arrive on the main queue.
+        MainActor.assumeIsolated {
+            let joinEndedAt = call.state.joinEndedAt
+            call
+                .state
+                .$endedAt
+                .compactMap { $0 }
+                .filter { $0 != joinEndedAt }
+                .first()
+                .receive(on: DispatchQueue.main)
+                .sink { [weak call] _ in
+                    call?.leave(
+                        initiator: .remoteEvent,
+                        reason: Call.LeaveReason.callEnded.rawValue
+                    )
+                }
+                .store(in: disposableBag, key: DisposableKey.hlsCallEnded.rawValue)
         }
     }
 

@@ -189,6 +189,9 @@ extension WebRTCCoordinator.StateMachine {
             case idle, connecting, connected, joining, joined, leaving, cleanUp,
                  disconnected, fastReconnecting, fastReconnected, rejoining,
                  migrating, migrated, error, blocked, peerConnectionPreparing
+
+            /// The backend routed the call to HLS. There is no SFU connection.
+            case hlsPlayback
         }
 
         /// The identifier for the current stage.
