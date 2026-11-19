@@ -80,7 +80,9 @@ Report the command, iteration counts, failures, and process mode. Mark unavailab
 Passing repetitions provide evidence only for the tested conditions.
 
 A test outside the change can fail once and then pass when run alone.
-Record its name, the command, and the conditions, then stop.
+Record its name, the command, and the conditions. Do not investigate it further.
+This replaces the base comparison in step 5 for that test.
+One failure cannot show a difference from the base.
 Do not add stress runs, load, or ordering experiments without user approval.
 
 ## Test design
