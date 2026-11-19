@@ -47,6 +47,8 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
     let videoCaptureSessionProvider: VideoCaptureSessionProvider
     let screenShareSessionProvider: ScreenShareSessionProvider
     let audioSession: CallAudioSession
+    /// Owns the shared audio session while the call plays HLS.
+    let hlsAudioSession = HLSAudioSession()
     let trackStorage: WebRTCTrackStorage = .init()
 
     /// The latest non-empty session id observed during the call's lifetime.
@@ -269,6 +271,11 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
             _ = await self?.permissionsAdapter
             await self?.configureBatteryObservation()
         }
+    }
+
+    /// Configures the shared audio session for HLS playback and activates it.
+    func configureHLSAudioSession() async throws {
+        try await hlsAudioSession.activate()
     }
 
     /// Sets the session ID.
@@ -642,6 +649,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         // call does not inherit a music session.
         await resetAudioBitrateProfile()
         await audioSession.deactivate()
+        await hlsAudioSession.deactivate()
         await publisher?.close()
         await subscriber?.close()
         self.publisher = nil

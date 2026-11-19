@@ -67,6 +67,9 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
     
     @State var recordings: [CallRecording]?
 
+    /// Drives the shared HLS player when the call plays HLS.
+    @State var hlsControls: HLSPlaybackControls
+
     private let disposableBag = DisposableBag()
 
     /// Initializes a `LivestreamPlayer` with the specified parameters.
@@ -100,6 +103,7 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
         self.joinPolicy = joinPolicy
         self.showsLeaveCallButton = showsLeaveCallButton
         self.onFullScreenStateChange = onFullScreenStateChange
+        _hlsControls = State(wrappedValue: HLSPlaybackControls(call: call))
         call.updateParticipantsSorting(with: livestreamOrAudioRoomSortPreset)
     }
     
@@ -113,6 +117,8 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
         joinPolicy: JoinPolicy = .auto,
         showsLeaveCallButton: Bool = false,
         recordings: [CallRecording]? = nil,
+        streamPaused: Bool = false,
+        hlsPlayerStore: HLSPlayerStore = InjectedValues[\.hlsPlayerStore],
         onFullScreenStateChange: ((Bool) -> Void)? = nil
     ) {
         self.viewFactory = viewFactory
@@ -121,11 +127,15 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
         self.livestreamState = livestreamState ?? LivestreamState(call: call)
         self.muted = muted
         self.recordings = recordings
+        self.streamPaused = streamPaused
         self.showParticipantCount = showParticipantCount
         _state = ObservedObject(wrappedValue: call.state)
         self.joinPolicy = joinPolicy
         self.showsLeaveCallButton = showsLeaveCallButton
         self.onFullScreenStateChange = onFullScreenStateChange
+        _hlsControls = State(
+            wrappedValue: HLSPlaybackControls(call: call, store: hlsPlayerStore)
+        )
         call.updateParticipantsSorting(with: livestreamOrAudioRoomSortPreset)
     }
     
@@ -201,6 +211,13 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
     }
     
     func toggleAudioOutput() {
+        // An HLS viewer has no call audio, so the mute acts on the player.
+        if case .hls = state.playbackType {
+            hlsControls.setMuted(!muted)
+            muted.toggle()
+            return
+        }
+
         Task(disposableBag: disposableBag) {
             do {
                 if !muted {
@@ -213,6 +230,20 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
                 log.error(error)
             }
         }
+    }
+    
+    /// Applies the mute and pause state to the shared HLS player. A player
+    /// starts playing on creation, so a paused stream is paused again.
+    func startHLSPlayback() {
+        hlsControls.setMuted(muted)
+        if streamPaused {
+            hlsControls.setPaused(true)
+        }
+    }
+
+    /// Applies the pause state of the player controls to the HLS player.
+    func applyStreamPaused(_ paused: Bool) {
+        hlsControls.setPaused(paused)
     }
     
     func muteLivestreamOnJoin() {
@@ -315,6 +346,35 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
     
     @ViewBuilder
     private var videoRenderer: some View {
+        if case .hls = state.playbackType {
+            hlsVideoRenderer
+        } else {
+            webRTCVideoRenderer
+        }
+    }
+
+    @ViewBuilder
+    private var hlsVideoRenderer: some View {
+        HLSVideoRenderer(call: call, contentMode: .scaleAspectFit)
+            .onTapGesture {
+                controlsShown = true
+            }
+            .overlay(
+                controlsShown ? LivestreamPlayPauseButton(
+                    streamPaused: $streamPaused
+                ) {
+                    applyStreamPaused(streamPaused)
+                    if !streamPaused {
+                        controlsShown = false
+                    }
+                } : nil
+            )
+            .onAppear { startHLSPlayback() }
+            .onChange(of: fullScreen) { onFullScreenStateChange?($0) }
+    }
+
+    @ViewBuilder
+    private var webRTCVideoRenderer: some View {
         GeometryReader { reader in
             if let participant = state.participants.first(where: { $0.track != nil }) {
                 VideoCallParticipantView(

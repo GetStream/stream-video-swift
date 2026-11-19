@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### ✅ Added
 
 - Add `CallState.playbackType`, which reports `.hls(URL)` when the backend routes a viewer to HLS playback. [#1409](https://github.com/GetStream/stream-video-swift/pull/1409)
+- Add `HLSVideoRenderer` to show an HLS stream, and use it in `LivestreamPlayer` for HLS viewers. [#1445](https://github.com/GetStream/stream-video-swift/pull/1445)
 
 ### 🔄 Changed
 
