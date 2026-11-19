@@ -905,7 +905,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
     // MARK: - configureHLSAudioSession
 
     func test_configureHLSAudioSession_inApp_configuresAndActivatesPlayback() async throws {
-        try await subject.configureHLSAudioSession(source: .inApp)
+        try await subject.configureHLSAudioSession()
 
         let identifier = await subject.hlsAudioSession.identifier
         let state = mockAudioStore.audioStore.state
@@ -915,19 +915,8 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertTrue(state.isActive)
     }
 
-    func test_configureHLSAudioSession_callKit_leavesTheCallConfigurationAlone() async throws {
-        let configuration = mockAudioStore.audioStore.state.audioSessionConfiguration
-
-        try await subject.configureHLSAudioSession(source: .callKit(.init {}))
-
-        let state = mockAudioStore.audioStore.state
-        XCTAssertEqual(state.activeSessionIdentifier, "")
-        XCTAssertNotEqual(state.audioSessionConfiguration.category, .playback)
-        XCTAssertEqual(state.audioSessionConfiguration.mode, configuration.mode)
-    }
-
     func test_cleanUp_afterConfigureHLSAudioSession_deactivatesAndReleasesTheStore() async throws {
-        try await subject.configureHLSAudioSession(source: .inApp)
+        try await subject.configureHLSAudioSession()
 
         await subject.cleanUp()
 

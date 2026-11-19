@@ -315,18 +315,16 @@ extension WebRTCCoordinator.StateMachine.Stage {
             }
         }
 
-        /// Configures the audio session for playback before the join is
-        /// reported, so CallKit activates the playback configuration.
-        ///
-        /// A failure is logged and does not fail the join: the video still
-        /// plays, with the session configuration of the app.
+        /// Activates playback audio before the stage reports the join.
+        /// The stage transition cannot await, so the setup stays here.
+        /// A failure is logged and does not fail the join.
         private func configureHLSAudioSession(
             on coordinator: WebRTCCoordinator
         ) async throws {
             do {
                 try await coordinator
                     .stateAdapter
-                    .configureHLSAudioSession(source: context.joinSource)
+                    .configureHLSAudioSession()
             } catch is CancellationError {
                 throw CancellationError()
             } catch {
