@@ -101,6 +101,7 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
         .allCases
         .reduce(into: [FunctionKey: [MockFunctionInputKey]]()) { $0[$1] = [] }
     var setAudioBitrateProfileHandler: (@Sendable (AudioBitrateProfile) async throws -> Void)?
+    var sessionIDHandler: (@Sendable () async -> Void)?
 
     convenience init(initialCallSettings: CallSettings = .default) {
         self.init(
@@ -166,6 +167,11 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
                 coordinatorJoinAttemptCount: coordinatorJoinAttemptCount
             )
         }
+    }
+
+    override func sessionID() async -> String {
+        await sessionIDHandler?()
+        return await super.sessionID()
     }
 
     override func setDisconnectionTimeout(_ timeout: TimeInterval) {
