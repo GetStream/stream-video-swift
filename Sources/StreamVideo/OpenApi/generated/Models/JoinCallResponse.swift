@@ -15,6 +15,8 @@ public final class JoinCallResponse: Sendable, Decodable {
     /// MemberResponse is the payload for a member of a call.
     public let membership: MemberResponse?
     public let ownCapabilities: [OwnCapability]
+    /// How the client should play the call when it is not given SFU credentials
+    public let playback: PlaybackResponse?
     public let statsOptions: StatsOptions
 
     public init(
@@ -25,6 +27,7 @@ public final class JoinCallResponse: Sendable, Decodable {
         members: [MemberResponse],
         membership: MemberResponse? = nil,
         ownCapabilities: [OwnCapability],
+        playback: PlaybackResponse? = nil,
         statsOptions: StatsOptions
     ) {
         self.call = call
@@ -34,6 +37,7 @@ public final class JoinCallResponse: Sendable, Decodable {
         self.members = members
         self.membership = membership
         self.ownCapabilities = ownCapabilities
+        self.playback = playback
         self.statsOptions = statsOptions
     }
 
@@ -46,6 +50,7 @@ public final class JoinCallResponse: Sendable, Decodable {
         self.members = try container.decode([MemberResponse].self, forKey: .members)
         self.membership = try container.decodeIfPresent(MemberResponse.self, forKey: .membership)
         self.ownCapabilities = try container.decode([OwnCapability].self, forKey: .ownCapabilities)
+        self.playback = try container.decodeIfPresent(PlaybackResponse.self, forKey: .playback)
         self.statsOptions = try container.decode(StatsOptions.self, forKey: .statsOptions)
     }
 }
@@ -59,6 +64,7 @@ extension JoinCallResponse: Hashable {
             lhs.members == rhs.members &&
             lhs.membership == rhs.membership &&
             lhs.ownCapabilities == rhs.ownCapabilities &&
+            lhs.playback == rhs.playback &&
             lhs.statsOptions == rhs.statsOptions
     }
 
@@ -70,6 +76,7 @@ extension JoinCallResponse: Hashable {
         hasher.combine(members)
         hasher.combine(membership)
         hasher.combine(ownCapabilities)
+        hasher.combine(playback)
         hasher.combine(statsOptions)
     }
 }

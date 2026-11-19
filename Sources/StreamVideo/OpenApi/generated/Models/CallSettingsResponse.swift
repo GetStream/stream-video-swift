@@ -12,6 +12,7 @@ public final class CallSettingsResponse: Sendable, Decodable {
     public let broadcasting: BroadcastSettingsResponse
     /// EncryptionSettings is the payload for end-to-end encryption settings
     public let encryption: EncryptionSettingsResponse
+    public let extraOpts: [String: RawJSON]?
     public let frameRecording: FrameRecordingSettingsResponse
     public let geofencing: GeofenceSettings
     public let individualRecording: IndividualRecordingSettingsResponse
@@ -34,6 +35,7 @@ public final class CallSettingsResponse: Sendable, Decodable {
         backstage: BackstageSettings,
         broadcasting: BroadcastSettingsResponse,
         encryption: EncryptionSettingsResponse,
+        extraOpts: [String: RawJSON]? = nil,
         frameRecording: FrameRecordingSettingsResponse,
         geofencing: GeofenceSettings,
         individualRecording: IndividualRecordingSettingsResponse,
@@ -53,6 +55,7 @@ public final class CallSettingsResponse: Sendable, Decodable {
         self.backstage = backstage
         self.broadcasting = broadcasting
         self.encryption = encryption
+        self.extraOpts = extraOpts
         self.frameRecording = frameRecording
         self.geofencing = geofencing
         self.individualRecording = individualRecording
@@ -75,6 +78,7 @@ public final class CallSettingsResponse: Sendable, Decodable {
         self.backstage = try container.decode(BackstageSettings.self, forKey: .backstage)
         self.broadcasting = try container.decode(BroadcastSettingsResponse.self, forKey: .broadcasting)
         self.encryption = try container.decode(EncryptionSettingsResponse.self, forKey: .encryption)
+        self.extraOpts = try container.decodeIfPresent([String: RawJSON].self, forKey: .extraOpts)
         self.frameRecording = try container.decode(FrameRecordingSettingsResponse.self, forKey: .frameRecording)
         self.geofencing = try container.decode(GeofenceSettings.self, forKey: .geofencing)
         self.individualRecording = try container.decode(IndividualRecordingSettingsResponse.self, forKey: .individualRecording)
@@ -98,6 +102,7 @@ extension CallSettingsResponse: Hashable {
             lhs.backstage == rhs.backstage &&
             lhs.broadcasting == rhs.broadcasting &&
             lhs.encryption == rhs.encryption &&
+            lhs.extraOpts == rhs.extraOpts &&
             lhs.frameRecording == rhs.frameRecording &&
             lhs.geofencing == rhs.geofencing &&
             lhs.individualRecording == rhs.individualRecording &&
@@ -119,6 +124,7 @@ extension CallSettingsResponse: Hashable {
         hasher.combine(backstage)
         hasher.combine(broadcasting)
         hasher.combine(encryption)
+        hasher.combine(extraOpts)
         hasher.combine(frameRecording)
         hasher.combine(geofencing)
         hasher.combine(individualRecording)
