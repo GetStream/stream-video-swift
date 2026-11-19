@@ -224,6 +224,182 @@ final class StreamCallAudioRecorder_ShouldRecordMiddlewareClientTests: StreamVid
         await fulfillment(timeout: 3) { !store.state.shouldRecord }
         XCTAssertFalse(store.state.shouldRecord)
     }
+
+    // MARK: - Lobby without a call
+
+    /// The lobby sets `shouldRecord` without a call. After it closes, an
+    /// unrelated audio change must not turn the microphone on again.
+    func test_lobbyClosedWithoutCall_routeChange_avAudioRecorderStaysOff() async throws {
+        let fixture = try await makeRecorderFixture()
+        newClient = StreamVideo.mock(httpClient: HTTPClient_Mock())
+        var thrown: Error?
+
+        do {
+            fixture.recorder.startRecording(ignoreActiveCall: true)
+            await fulfillment(timeout: 10) { fixture.spy.isMeteringEnabled }
+            fixture.recorder.stopRecording()
+            await fulfillment(timeout: 10) { !fixture.spy.isMeteringEnabled }
+            let recordCallsAtClose = fixture.spy.timesCalled(.record)
+
+            try await fixture.session.audioStore.dispatch(
+                .setCurrentRoute(.dummy(outputs: [.dummy(isReceiver: true)]))
+            ).result()
+            await wait(for: 1)
+
+            XCTAssertEqual(fixture.spy.timesCalled(.record), recordCallsAtClose)
+            XCTAssertFalse(fixture.spy.isMeteringEnabled)
+        } catch {
+            thrown = error
+        }
+
+        try await fixture.session.dismantle()
+        fixture.permissions.dismantle()
+        if let thrown {
+            throw thrown
+        }
+    }
+
+    /// A phone call that ends after the lobby closed must not turn the
+    /// microphone on either.
+    func test_lobbyClosedWithoutCall_interruptionEnds_avAudioRecorderStaysOff() async throws {
+        let fixture = try await makeRecorderFixture()
+        newClient = StreamVideo.mock(httpClient: HTTPClient_Mock())
+        var thrown: Error?
+
+        do {
+            fixture.recorder.startRecording(ignoreActiveCall: true)
+            await fulfillment(timeout: 10) { fixture.spy.isMeteringEnabled }
+            fixture.recorder.stopRecording()
+            await fulfillment(timeout: 10) { !fixture.spy.isMeteringEnabled }
+            let recordCallsAtClose = fixture.spy.timesCalled(.record)
+
+            try await fixture.session.audioStore.dispatch(.setInterrupted(true)).result()
+            try await fixture.session.audioStore.dispatch(.setInterrupted(false)).result()
+            await wait(for: 1)
+
+            XCTAssertEqual(fixture.spy.timesCalled(.record), recordCallsAtClose)
+            XCTAssertFalse(fixture.spy.isMeteringEnabled)
+        } catch {
+            thrown = error
+        }
+
+        try await fixture.session.dismantle()
+        fixture.permissions.dismantle()
+        if let thrown {
+            throw thrown
+        }
+    }
+
+    /// An interruption that ends while the microphone is wanted must still
+    /// resume the recording.
+    func test_recording_interruptionEnds_avAudioRecorderResumes() async throws {
+        let fixture = try await makeRecorderFixture()
+        newClient = StreamVideo.mock(httpClient: HTTPClient_Mock())
+        var thrown: Error?
+
+        do {
+            fixture.recorder.startRecording(ignoreActiveCall: true)
+            await fulfillment(timeout: 10) { fixture.spy.isMeteringEnabled }
+
+            try await fixture.session.audioStore.dispatch(.setInterrupted(true)).result()
+            await fulfillment(timeout: 10) { !fixture.spy.isMeteringEnabled }
+            let recordCallsAtInterruption = fixture.spy.timesCalled(.record)
+
+            try await fixture.session.audioStore.dispatch(.setInterrupted(false)).result()
+            await fulfillment(timeout: 10) {
+                fixture.spy.timesCalled(.record) > recordCallsAtInterruption
+                    && fixture.spy.isMeteringEnabled
+            }
+        } catch {
+            thrown = error
+        }
+
+        try await fixture.session.dismantle()
+        fixture.permissions.dismantle()
+        if let thrown {
+            throw thrown
+        }
+    }
+
+    // MARK: - Mute during a call
+
+    /// A mute in a call must clear `shouldRecord`, so a later audio change
+    /// cannot turn the microphone on again.
+    func test_callMuted_routeChange_shouldRecordIsFalseAndAvAudioRecorderStaysOff() async throws {
+        let fixture = try await makeRecorderFixture()
+        newClient = StreamVideo.mock(httpClient: HTTPClient_Mock())
+        var thrown: Error?
+
+        do {
+            try await fixture.session.audioStore.dispatch([
+                .setActive(true),
+                .setHasRecordingPermission(true)
+            ]).result()
+            let call = Call.dummy(callType: .default, callId: .unique)
+            await MainActor.run {
+                call.state.callSettings = CallSettings(audioOn: true)
+                newClient.state.activeCall = call
+            }
+            fixture.recorder.startRecording()
+            await fulfillment(timeout: 10) { fixture.store.state.shouldRecord && fixture.spy.isMeteringEnabled }
+
+            await MainActor.run { call.state.callSettings = CallSettings(audioOn: false) }
+            fixture.recorder.stopRecording()
+            await fulfillment(timeout: 10) { !fixture.store.state.shouldRecord && !fixture.spy.isMeteringEnabled }
+            let recordCallsAtMute = fixture.spy.timesCalled(.record)
+
+            try await fixture.session.audioStore.dispatch(
+                .setCurrentRoute(.dummy(outputs: [.dummy(isReceiver: true)]))
+            ).result()
+            await wait(for: 1)
+
+            XCTAssertEqual(fixture.spy.timesCalled(.record), recordCallsAtMute)
+            XCTAssertFalse(fixture.spy.isMeteringEnabled)
+        } catch {
+            thrown = error
+        }
+
+        try await fixture.session.dismantle()
+        fixture.permissions.dismantle()
+        if let thrown {
+            throw thrown
+        }
+    }
+
+    // MARK: - Private Helpers
+
+    private func makeRecorderFixture() async throws -> (
+        spy: MockAVAudioRecorder,
+        permissions: MockPermissionsStore,
+        session: MockRTCAudioStore,
+        store: Store<StreamCallAudioRecorder.Namespace>,
+        recorder: StreamCallAudioRecorder
+    ) {
+        let spy = try MockAVAudioRecorder.build()
+        spy.stub(for: .record, with: true)
+        let permissions = MockPermissionsStore(inject: true)
+        let session = MockRTCAudioStore()
+        session.makeShared()
+        // Calls configure `.playAndRecord` before the recorder starts.
+        try await session.audioStore.dispatch(
+            .avAudioSession(.setCategoryAndMode(.playAndRecord, mode: .default))
+        ).result()
+
+        let store = StreamCallAudioRecorder.Namespace.store(
+            initialState: .initial,
+            middleware: [
+                StreamCallAudioRecorder.Namespace.InterruptionMiddleware(),
+                StreamCallAudioRecorder.Namespace.CategoryMiddleware(),
+                StreamCallAudioRecorder.Namespace.AVAudioRecorderMiddleware(
+                    audioRecorder: spy,
+                    permissions: permissions.permissionsStore,
+                    audioStore: session.audioStore
+                ),
+                StreamCallAudioRecorder.Namespace.ShouldRecordMiddleware()
+            ]
+        )
+        return (spy, permissions, session, store, StreamCallAudioRecorder(store))
+    }
 }
 
 // TODO: Reenable them
