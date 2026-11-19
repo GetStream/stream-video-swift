@@ -694,6 +694,30 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
         cancellable.cancel()
     }
 
+    func test_willTransitionAway_afterTheJoinReturned_doesNotApplyTheResponse() async throws {
+        let reachedSessionID = expectation(description: "Join reached the session id.")
+        let unexpectedTransition = expectation(
+            description: "Join should not transition after cancellation."
+        )
+        unexpectedTransition.isInverted = true
+        callController.sessionIDHandler = {
+            reachedSessionID.fulfill()
+            // Returns as soon as the leave cancels the join task.
+            try? await Task.sleep(nanoseconds: 5_000_000_000)
+        }
+        callController.stub(for: .join, with: JoinCallResponse.dummyHLSGrant())
+        subject.transition = { _ in unexpectedTransition.fulfill() }
+        subject.context = Call.StateMachine.Stage.Context(call: call, input: input)
+
+        _ = subject.transition(from: .idle(.init()))
+        await fulfillment(of: [reachedSessionID], timeout: defaultTimeout)
+        subject.willTransitionAway()
+        await fulfillment(of: [unexpectedTransition], timeout: 0.2)
+
+        XCTAssertEqual(call.state.playbackType, .webRTC)
+        XCTAssertNil(streamVideo.state.activeCall)
+    }
+
     func test_execute_whenCancelledDuringRetryDelay_doesNotReenterJoining() async throws {
         let unexpectedReentry = expectation(
             description: "Join should not retry after cancellation."
