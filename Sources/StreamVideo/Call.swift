@@ -60,6 +60,9 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     private let disposableBag = DisposableBag()
     internal let callController: CallController
     internal let coordinatorClient: DefaultAPIEndpoints
+    /// Replaces the coordinator client when tests record HLS playback reports.
+    var hlsStatsSender: HLSStatsSending?
+    @MainActor private var hlsPlaybackTracker: HLSPlaybackTracker?
     private var outgoingRingingController: OutgoingRingingController?
 
     /// Checks callee acceptance before an outgoing cancellation is sent.
@@ -1203,6 +1206,48 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     @discardableResult
     public func stopAllRTMPBroadcasts() async throws -> StopAllRTMPBroadcastsResponse {
         try await coordinatorClient.stopAllRTMPBroadcasts(type: callType, id: callId)
+    }
+
+    // MARK: - HLS playback reporting
+
+    /// Reports playback for an HLS player until
+    /// ``stopHLSPlaybackReporting()``.
+    ///
+    /// A call without a session, or one that is already reporting, does nothing.
+    @MainActor
+    public func startHLSPlaybackReporting(_ player: AVPlayer) {
+        guard hlsPlaybackTracker == nil else { return }
+        let callSessionId = state.session?.id ?? ""
+        guard !callSessionId.isEmpty, !state.unifiedSessionId.isEmpty else {
+            return
+        }
+        let sender = hlsStatsSender ?? (coordinatorClient as? DefaultAPI)
+        guard let sender else { return }
+        let seconds = state.statsCollectionInterval > 0
+            ? TimeInterval(state.statsCollectionInterval)
+            : 5
+        let reporter = HLSPlaybackReporter(
+            callType: callType,
+            callId: callId,
+            callSessionId: callSessionId,
+            unifiedSessionId: state.unifiedSessionId,
+            sender: sender
+        )
+        let tracker = HLSPlaybackTracker(
+            player: player,
+            reporter: reporter,
+            interval: seconds
+        )
+        hlsPlaybackTracker = tracker
+        Task { await tracker.start() }
+    }
+
+    /// Sends the final playback report and stops further reports.
+    @MainActor
+    public func stopHLSPlaybackReporting() {
+        let tracker = hlsPlaybackTracker
+        hlsPlaybackTracker = nil
+        _ = tracker?.stop()
     }
 
     // MARK: - Events

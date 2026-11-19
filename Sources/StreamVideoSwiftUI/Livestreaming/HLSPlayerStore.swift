@@ -14,6 +14,7 @@ final class HLSPlayerStore {
 
     private struct Entry {
         let player: AVPlayer
+        weak var call: Call?
         var leaseIds: Set<UUID>
         let playbackTypeObserver: AnyCancellable
     }
@@ -59,9 +60,11 @@ final class HLSPlayerStore {
             let player = makePlayer(url)
             // A new player has rate 0. Nothing else starts it.
             player.play()
+            call.startHLSPlaybackReporting(player)
             lease = HLSPlayerLease(player: player, callId: callId, store: self)
             entries[callId] = Entry(
                 player: player,
+                call: call,
                 leaseIds: [lease.leaseId],
                 // The player has no use once the call stops playing HLS.
                 playbackTypeObserver: call.state
@@ -86,6 +89,7 @@ final class HLSPlayerStore {
 
     private func free(callId: String) {
         guard let entry = entries.removeValue(forKey: callId) else { return }
+        entry.call?.stopHLSPlaybackReporting()
         entry.player.pause()
         entry.player.replaceCurrentItem(with: nil)
     }
