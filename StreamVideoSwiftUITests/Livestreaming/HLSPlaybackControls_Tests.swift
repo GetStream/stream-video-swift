@@ -30,6 +30,24 @@ final class HLSPlaybackControls_Tests: StreamVideoTestCase, @unchecked Sendable 
         try await super.tearDown()
     }
 
+    // MARK: - init
+
+    func test_init_withoutAStore_usesTheInjectedStore() throws {
+        let injected = HLSPlayerStore { [unowned self] _ in
+            let player = HLSSpyPlayer()
+            self.madePlayers.append(player)
+            return player
+        }
+        let previous = InjectedValues[\.hlsPlayerStore]
+        InjectedValues[\.hlsPlayerStore] = injected
+        defer { InjectedValues[\.hlsPlayerStore] = previous }
+        let controls = HLSPlaybackControls(call: call)
+
+        let lease = try XCTUnwrap(injected.acquire(for: call, playbackType: .hls(url)))
+
+        XCTAssertTrue(controls.player === lease.player)
+    }
+
     // MARK: - player
 
     func test_player_withoutAClaim_isNil() {
