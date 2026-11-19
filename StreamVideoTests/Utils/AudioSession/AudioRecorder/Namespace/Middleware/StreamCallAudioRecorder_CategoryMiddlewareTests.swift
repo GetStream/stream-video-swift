@@ -93,8 +93,11 @@ final class StreamCallAudioRecorder_CategoryMiddlewareTests: XCTestCase, @unchec
         validation.assertForOverFulfill = false
         subject.dispatcher = .init { _, _, _, _ in validation.fulfill() }
 
-        session.audioStore.dispatch(.setHasRecordingPermission(true))
-        session.audioStore.dispatch(.setHasRecordingPermission(false))
+        // Wait for the store to process both actions before the inverted wait.
+        try await session.audioStore.dispatch([
+            .setHasRecordingPermission(true),
+            .setHasRecordingPermission(false)
+        ]).result()
 
         await safeFulfillment(of: [validation], timeout: 1)
         try await session.dismantle()
