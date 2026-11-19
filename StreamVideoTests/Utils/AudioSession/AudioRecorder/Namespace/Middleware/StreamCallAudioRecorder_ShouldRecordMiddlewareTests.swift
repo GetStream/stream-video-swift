@@ -50,16 +50,19 @@ final class StreamCallAudioRecorder_ShouldRecordMiddlewareClientTests: StreamVid
         XCTAssertEqual(values.withLock { $0 }, [false])
     }
 
-    func test_newStreamVideoClient_noActiveCall_afterClientWithoutCall_dispatchesNothing() async {
+    func test_newStreamVideoClient_noActiveCall_afterClientWithoutCall_dispatchesNothingBeforeACall() async {
         subject = .init()
-        newClient = StreamVideo.mock(httpClient: HTTPClient_Mock())
-        await wait(for: 0.5)
         let values = recordShouldRecordValues()
-
+        newClient = StreamVideo.mock(httpClient: HTTPClient_Mock())
         replacementClient = StreamVideo.mock(httpClient: HTTPClient_Mock())
-        await wait(for: 0.7)
 
-        XCTAssertEqual(values.withLock { $0 }, [])
+        // The call value is debounced. A value from an earlier "no call"
+        // report is not, so it arrives first if it exists.
+        let call = Call.dummy(callType: .default, callId: .unique)
+        await MainActor.run { replacementClient.state.activeCall = call }
+        await fulfillment { values.withLock { $0.count } >= 1 }
+
+        XCTAssertEqual(values.withLock { $0 }.count, 1)
     }
 
     func test_clientReplacedDuringCall_dispatchesSetShouldRecordFalseOnce() async {
