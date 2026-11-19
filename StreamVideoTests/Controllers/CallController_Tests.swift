@@ -1585,34 +1585,45 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
 
     @MainActor
     func test_callSettingsUpdates_inARow_endWithTheLastValueOnTheCallState() async throws {
+        mockPermissions.stubMicrophonePermission(.granted)
+        mockPermissions.stubCameraPermission(.granted)
         let call = Call.dummy(callController: subject)
+        subject.call = call
+        await wait(for: 0.5)
         let stateAdapter = mockWebRTCCoordinatorFactory
             .mockCoordinatorStack
             .coordinator
             .stateAdapter
+        await stateAdapter.enqueueOwnCapabilities { [.sendAudio, .sendVideo] }
         let toggles = 40
-        let expectedSpeakerOn = (toggles - 1) % 2 == 1
+        let lastIndex = toggles - 1
+        let expectedSpeakerOn = lastIndex % 2 == 1
+        let terminalAudioOutputOn = false
 
-        for index in 0..<toggles {
+        for index in 0..<lastIndex {
+            let speakerOn = index % 2 == 1
             await stateAdapter.enqueueCallSettings {
-                $0.withUpdatedSpeakerState(index % 2 == 1)
+                $0.withUpdatedSpeakerState(speakerOn)
             }
         }
+        await stateAdapter.enqueueCallSettings {
+            $0
+                .withUpdatedSpeakerState(expectedSpeakerOn)
+                .withUpdatedAudioOutputState(terminalAudioOutputOn)
+        }
 
+        await fulfillment(timeout: 60) {
+            let adapterSettings = await stateAdapter.callSettings
+            return adapterSettings.speakerOn == expectedSpeakerOn
+                && adapterSettings.audioOutputOn == terminalAudioOutputOn
+        }
         await fulfillment {
-            let first = await stateAdapter.callSettings
-            guard first.speakerOn == expectedSpeakerOn else {
-                return false
-            }
-            try? await Task.sleep(nanoseconds: 50_000_000)
-            let second = await stateAdapter.callSettings
-            guard first == second else {
-                return false
-            }
-            return await MainActor.run { call.state.callSettings == second }
+            let adapterSettings = await stateAdapter.callSettings
+            return await MainActor.run { call.state.callSettings == adapterSettings }
         }
         let expected = await stateAdapter.callSettings
         XCTAssertEqual(expected.speakerOn, expectedSpeakerOn)
+        XCTAssertEqual(expected.audioOutputOn, terminalAudioOutputOn)
         XCTAssertEqual(call.state.callSettings, expected)
     }
 
