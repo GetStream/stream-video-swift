@@ -35,8 +35,9 @@ extension Task {
         line: UInt = #line,
         @_inheritActorContext block: @Sendable @escaping () async -> Success
     ) where Failure == Never {
+        let entry = DisposableBagEntry()
         self.init(priority: priority) { [weak disposableBag] in
-            defer { disposableBag?.completed(identifier) }
+            defer { entry.finish { disposableBag?.completed(identifier) } }
             return await trace.trace(
                 subsystem: subsystem,
                 file: file,
@@ -44,7 +45,11 @@ extension Task {
                 line: line
             ) { await block() }
         }
-        store(in: disposableBag, key: identifier)
+        entry.store {
+            store(in: disposableBag, key: identifier)
+        } completed: {
+            disposableBag.completed(identifier)
+        }
     }
 
     /// Initializes and stores a throwing task in the given `DisposableBag`.
@@ -68,8 +73,9 @@ extension Task {
         line: UInt = #line,
         @_inheritActorContext block: @Sendable @escaping () async throws -> Success
     ) where Failure == Error {
+        let entry = DisposableBagEntry()
         self.init(priority: priority) { [weak disposableBag] in
-            defer { disposableBag?.completed(identifier) }
+            defer { entry.finish { disposableBag?.completed(identifier) } }
             return try await trace.trace(
                 subsystem: subsystem,
                 file: file,
@@ -77,7 +83,11 @@ extension Task {
                 line: line
             ) { try await block() }
         }
-        store(in: disposableBag, key: identifier)
+        entry.store {
+            store(in: disposableBag, key: identifier)
+        } completed: {
+            disposableBag.completed(identifier)
+        }
     }
 
     /// Stores a cancel handler for the task in the specified `DisposableBag`.
@@ -90,5 +100,33 @@ extension Task {
         identifier: String
     ) {
         store(in: disposableBag, key: identifier)
+    }
+}
+
+/// Removes a task from its bag once, after the task is stored and has
+/// finished, in either order.
+///
+/// A task body can finish before its initializer stores the task. Without
+/// this, the bag would keep the finished task until the bag is cleared.
+private final class DisposableBagEntry: @unchecked Sendable {
+    private let queue = UnfairQueue()
+    private var isStored = false
+    private var isFinished = false
+
+    /// Stores the task, and removes it at once if the task has finished.
+    func store(_ store: () -> Void, completed: () -> Void) {
+        queue.sync {
+            store()
+            isStored = true
+            if isFinished { completed() }
+        }
+    }
+
+    /// Marks the task as finished, and removes it if it is stored.
+    func finish(_ completed: () -> Void) {
+        queue.sync {
+            isFinished = true
+            if isStored { completed() }
+        }
     }
 }
