@@ -83,7 +83,8 @@ extension StreamCallAudioRecorder.Namespace {
         ///
         /// Responds to:
         /// - `.setIsRecording`: Starts or stops recording
-        /// - `.setIsInterrupted`: Pauses recording during interruptions
+        /// - `.setIsInterrupted`: Pauses recording during interruptions and
+        ///   resumes it when the interruption ends
         /// - `.setShouldRecord`: Initiates recording when needed
         ///
         /// - Parameters:
@@ -109,7 +110,10 @@ extension StreamCallAudioRecorder.Namespace {
             case let .setIsInterrupted(value):
                 if value {
                     stopRecording()
-                } else if !value, state.shouldRecord {
+                } else if state.shouldRecord, state.isRecording {
+                    // `shouldRecord` can stay `true` after the caller stopped
+                    // recording (for example after a lobby). Resume only a
+                    // recording that an interruption paused.
                     startRecording()
                 } else {
                     break
