@@ -26,6 +26,15 @@ extension StreamCallAudioRecorder.Namespace {
         /// Subscription to monitor audio interruption state changes.
         private var cancellable: AnyCancellable?
 
+        override var dispatcher: Store<StreamCallAudioRecorder.Namespace>.Dispatcher? {
+            didSet {
+                guard audioStore.state.isInterrupted else {
+                    return
+                }
+                dispatcher?.dispatch(.setIsInterrupted(true))
+            }
+        }
+
         /// Initializes the middleware and sets up interruption monitoring.
         override init() {
             super.init()
@@ -33,6 +42,9 @@ extension StreamCallAudioRecorder.Namespace {
             // Forward interruption state changes to the store
             cancellable = audioStore
                 .publisher(\.isInterrupted)
+                // The publisher emits on every audio store change. Each
+                // `.setIsInterrupted(false)` can restart the recorder.
+                .removeDuplicates()
                 .sink { [weak self] isInterrupted in
                     // Update the store's interruption state
                     self?.dispatcher?.dispatch(.setIsInterrupted(isInterrupted))
