@@ -69,3 +69,12 @@ final class HLSStatsReport: Encodable, Sendable {
         }
     }
 }
+
+private extension StringCodingKey {
+    static let unifiedSessionId: StringCodingKey = "unified_session_id"
+    static let os: StringCodingKey = "os"
+    static let osVersion: StringCodingKey = "os_version"
+    static let endReason: StringCodingKey = "end_reason"
+    static let errorCode: StringCodingKey = "error_code"
+    static let stats: StringCodingKey = "stats"
+}

@@ -6,7 +6,6 @@ import Foundation
 @testable import StreamVideo
 import XCTest
 
-@MainActor
 final class HLSPlaybackReporter_Tests: XCTestCase, @unchecked Sendable {
 
     private actor Recorder: HLSStatsDelivering {
@@ -39,7 +38,7 @@ final class HLSPlaybackReporter_Tests: XCTestCase, @unchecked Sendable {
     }
 
     func test_start_sendsStartedWithAStableUserSession() async {
-        await subject.sendStarted()
+        await subject.reportPlaybackStarted()
 
         let report = await recorder.reports.first
         XCTAssertEqual(report?.type, "started")
@@ -53,10 +52,10 @@ final class HLSPlaybackReporter_Tests: XCTestCase, @unchecked Sendable {
     }
 
     func test_stats_keepsTheUserSessionAndSendsTheSnapshot() async {
-        await subject.sendStarted()
+        await subject.reportPlaybackStarted()
         let userSessionId = await recorder.reports.first?.userSessionId
 
-        await subject.sendStats(
+        await subject.reportPlaybackStats(
             stats: HLSPlaybackStats(
                 watchDurationMs: 4000,
                 stallCount: 1,
@@ -86,9 +85,9 @@ final class HLSPlaybackReporter_Tests: XCTestCase, @unchecked Sendable {
     }
 
     func test_stop_withAnError_sendsEnded() async {
-        await subject.sendStarted()
+        await subject.reportPlaybackStarted()
 
-        await subject.sendEnded(errorCode: "AVFoundationErrorDomain -11800")
+        await subject.reportPlaybackEnded(errorCode: "AVFoundationErrorDomain -11800")
 
         let report = await recorder.reports.last
         XCTAssertEqual(report?.type, "ended")
@@ -97,9 +96,9 @@ final class HLSPlaybackReporter_Tests: XCTestCase, @unchecked Sendable {
     }
 
     func test_stop_withoutAnError_sendsLeft() async {
-        await subject.sendStarted()
+        await subject.reportPlaybackStarted()
 
-        await subject.sendEnded(errorCode: nil)
+        await subject.reportPlaybackEnded(errorCode: nil)
 
         let report = await recorder.reports.last
         XCTAssertEqual(report?.endReason, "left")
@@ -107,7 +106,7 @@ final class HLSPlaybackReporter_Tests: XCTestCase, @unchecked Sendable {
     }
 
     func test_eventsNamedStarted_areOmitted() async {
-        await subject.sendStats(
+        await subject.reportPlaybackStats(
             stats: HLSPlaybackStats(),
             events: [
                 HLSStatsEvent(type: "started", timestamp: 1, data: [:]),

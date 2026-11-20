@@ -7,7 +7,8 @@ import Foundation
 /// Builds HLS playback reports and hands them to ``HLSStatsDelivering``.
 ///
 /// `user_session_id` stays the same from `started` through `ended`.
-@MainActor
+/// The reporter is not isolated to the main actor. It only builds a report
+/// and asks delivery to post it.
 final class HLSStatsReporter {
     private let callType: String
     private let callId: String
@@ -46,11 +47,15 @@ final class HLSStatsReporter {
         self.osVersion = String(osVersion.prefix(64))
     }
 
-    func sendStarted() async {
+    /// Sends the `started` report. `user_session_id` is chosen here and reused.
+    func reportPlaybackStarted() async {
         await send(type: "started", stats: nil, events: [], endReason: nil, errorCode: nil)
     }
 
-    func sendStats(stats: HLSPlaybackStats, events: [HLSStatsEvent]) async {
+    /// Sends a `stats` report with the latest snapshot and the events since
+    /// the previous report. Event types `started`, `stats`, and `ended` are
+    /// dropped. At most 100 events are sent.
+    func reportPlaybackStats(stats: HLSPlaybackStats, events: [HLSStatsEvent]) async {
         await send(
             type: "stats",
             stats: stats,
@@ -60,7 +65,11 @@ final class HLSStatsReporter {
         )
     }
 
-    func sendEnded(errorCode: String?) async {
+    /// Sends the `ended` report.
+    ///
+    /// `end_reason` is `error` when `errorCode` is non-empty, and `left`
+    /// otherwise. The code is cut to 128 characters.
+    func reportPlaybackEnded(errorCode: String?) async {
         let code = errorCode.map { String($0.prefix(128)) }.flatMap { $0.isEmpty ? nil : $0 }
         await send(
             type: "ended",

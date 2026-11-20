@@ -60,7 +60,7 @@ final class HLSPlayerStore_Tests: StreamVideoTestCase, @unchecked Sendable {
     func test_acquire_withASender_sendsStarted() async {
         let recorder = ReportRecorder()
         let call = makeCall()
-        call.callController.hlsStatsDelivering = recorder
+        call.callController.hlsCoordinator.stateAdapter.statsDelivering = recorder
         call.state.session = CallSessionResponse(
             acceptedBy: [:],
             anonymousParticipantCount: 0,
@@ -82,7 +82,7 @@ final class HLSPlayerStore_Tests: StreamVideoTestCase, @unchecked Sendable {
         }
         await fulfillment(of: [started], timeout: 2)
         let report = await recorder.reports.first
-        let unifiedSessionId = call.callController.unifiedSessionId
+        let unifiedSessionId = call.callController.hlsCoordinator.stateAdapter.unifiedSessionId
         XCTAssertEqual(report?.type, "started")
         XCTAssertEqual(report?.unifiedSessionId, unifiedSessionId)
     }

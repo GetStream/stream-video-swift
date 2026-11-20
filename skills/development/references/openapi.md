@@ -70,10 +70,6 @@ Breaking changes wait for a major version. Until then:
 
 ## Adopt an endpoint, event, or field
 
-If the published spec has no operation, do not add the method to `DefaultAPI` or to `DefaultAPIEndpoints`.
-A delivery type may use `DefaultAPI.makeRequest` and `send` until the spec includes the operation.
-Replace that type when generation emits the method.
-
 1. Add the name to the matching list, or remove the field from `removedProperties`.
 2. Run the script. When it lists unclassified models, add each to the coding list that matches
    how `DefaultAPI` uses it, and run it again. Review new public types and fields in the diff.

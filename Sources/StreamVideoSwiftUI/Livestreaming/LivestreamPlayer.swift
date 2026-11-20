@@ -118,7 +118,7 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
         showsLeaveCallButton: Bool = false,
         recordings: [CallRecording]? = nil,
         streamPaused: Bool = false,
-        hlsPlayerStore: HLSPlayerStore = InjectedValues[\.hlsPlayerStore],
+        hlsPlayerStore: any HLSPlayerStoring = InjectedValues[\.hlsPlayerStore],
         onFullScreenStateChange: ((Bool) -> Void)? = nil
     ) {
         self.viewFactory = viewFactory

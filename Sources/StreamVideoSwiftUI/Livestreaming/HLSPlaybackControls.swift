@@ -14,12 +14,12 @@ import StreamVideo
 final class HLSPlaybackControls {
 
     private let call: Call
-    private let store: HLSPlayerStore
+    private let store: any HLSPlayerStoring
 
     /// The player the controls act on. `nil` while the call has none.
     var player: AVPlayer? { store.player(for: call) }
 
-    init(call: Call, store: HLSPlayerStore = InjectedValues[\.hlsPlayerStore]) {
+    init(call: Call, store: any HLSPlayerStoring = InjectedValues[\.hlsPlayerStore]) {
         self.call = call
         self.store = store
     }

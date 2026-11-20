@@ -5,7 +5,7 @@
 import Foundation
 
 /// Sends one HLS playback report to the coordinator.
-protocol HLSStatsDelivering: Sendable {
+protocol HLSStatsDelivering {
     func deliver(
         callType: String,
         callId: String,

@@ -9,7 +9,7 @@ import Foundation
 /// Keeps one `AVPlayer` per call, so every renderer and control of the same
 /// HLS call share it.
 @MainActor
-public final class HLSPlayerStore {
+final class HLSPlayerStore: HLSPlayerStoring {
     private struct Entry {
         let player: AVPlayer
         var stats: HLSStatsAdapter?
@@ -24,7 +24,7 @@ public final class HLSPlayerStore {
     var activePlayerCount: Int { entries.count }
 
     /// - Parameter makePlayer: Builds the player for a playlist URL.
-    public init(
+    init(
         makePlayer: @escaping (URL) -> AVPlayer = {
             AVPlayer(playerItem: AVPlayerItem(url: $0))
         }
@@ -43,7 +43,7 @@ public final class HLSPlayerStore {
     ///   passes the value its subscription emitted, because the state of the
     ///   call does not hold it yet when the subscription runs.
     /// - Returns: `nil` unless `playbackType` is HLS.
-    public func acquire(for call: Call, playbackType: PlaybackType) -> HLSPlayerLease? {
+    public func acquire(for call: Call, playbackType: PlaybackType) -> (any HLSPlayerLeasing)? {
         guard case let .hls(url) = playbackType else {
             return nil
         }
@@ -58,7 +58,10 @@ public final class HLSPlayerStore {
             let player = makePlayer(url)
             // A new player has rate 0. Nothing else starts it.
             player.play()
-            let stats = makeStats(player: player, call: call)
+            let stats = call.callController.hlsCoordinator.reportingAdapter(
+                player: player,
+                call: call
+            )
             lease = HLSPlayerLease(player: player, callId: callId, store: self)
             entries[callId] = Entry(
                 player: player,
@@ -70,7 +73,7 @@ public final class HLSPlayerStore {
                     .filter { $0 == .webRTC }
                     .sink { [weak self] _ in self?.free(callId: callId) }
             )
-            Task { await stats?.start() }
+            Task { await stats?.startReporting() }
         }
         return lease
     }
@@ -86,32 +89,9 @@ public final class HLSPlayerStore {
         }
     }
 
-    private func makeStats(player: AVPlayer, call: Call) -> HLSStatsAdapter? {
-        let callSessionId = call.state.session?.id ?? ""
-        let unifiedSessionId = call.callController.unifiedSessionId
-        guard !callSessionId.isEmpty, !unifiedSessionId.isEmpty else {
-            return nil
-        }
-        let delivery = call.callController.hlsStatsDelivering
-            ?? HLSStatsDelivery(endpoints: call.coordinatorClient)
-        guard let delivery else { return nil }
-        let seconds = call.state.statsCollectionInterval > 0
-            ? TimeInterval(call.state.statsCollectionInterval)
-            : 5
-        return HLSStatsAdapter(
-            player: player,
-            callType: call.callType,
-            callId: call.callId,
-            callSessionId: callSessionId,
-            unifiedSessionId: unifiedSessionId,
-            interval: seconds,
-            delivery: delivery
-        )
-    }
-
     private func free(callId: String) {
         guard let entry = entries.removeValue(forKey: callId) else { return }
-        entry.stats?.stop()
+        entry.stats?.stopReporting()
         entry.player.pause()
         entry.player.replaceCurrentItem(with: nil)
     }
@@ -121,19 +101,22 @@ public final class HLSPlayerStore {
 #if compiler(>=6.0)
 extension HLSPlayerStore: @preconcurrency InjectionKey {
     @MainActor
-    public static var currentValue: HLSPlayerStore = .init()
+    static var currentValue: HLSPlayerStore = .init()
 }
 #else
 extension HLSPlayerStore: InjectionKey {
     @MainActor
-    public static var currentValue: HLSPlayerStore = .init()
+    static var currentValue: HLSPlayerStore = .init()
 }
 #endif
 
 extension InjectedValues {
     /// The player store the HLS views use.
-    public var hlsPlayerStore: HLSPlayerStore {
+    public var hlsPlayerStore: any HLSPlayerStoring {
         get { Self[HLSPlayerStore.self] }
-        set { Self[HLSPlayerStore.self] = newValue }
+        set {
+            guard let store = newValue as? HLSPlayerStore else { return }
+            Self[HLSPlayerStore.self] = store
+        }
     }
 }

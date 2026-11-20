@@ -6,13 +6,14 @@ import Foundation
 
 /// Posts one HLS playback report with the same retry policy as client events.
 ///
-/// The published video client spec has no `hls_stats` operation, so this
-/// uses ``DefaultAPI``'s request builder instead of a generated method.
-final class HLSStatsDelivery: HLSStatsDelivering, @unchecked Sendable {
+/// Delivery calls ``DefaultAPI/reportHLSStats(type:id:report:)``. A failed
+/// report is logged and does not fail playback. `4xx` responses are not
+/// retried. Other client failures retry with ``RetryPolicy/clientEventReporting``.
+final nonisolated class HLSStatsDelivery: HLSStatsDelivering {
     private let api: DefaultAPI
     private let retryPolicy: RetryPolicy
 
-    init?(
+    nonisolated init?(
         endpoints: DefaultAPIEndpoints,
         retryPolicy: RetryPolicy = .clientEventReporting
     ) {
@@ -21,7 +22,7 @@ final class HLSStatsDelivery: HLSStatsDelivering, @unchecked Sendable {
         self.retryPolicy = retryPolicy
     }
 
-    func deliver(
+    nonisolated func deliver(
         callType: String,
         callId: String,
         report: HLSStatsReport
@@ -29,7 +30,11 @@ final class HLSStatsDelivery: HLSStatsDelivering, @unchecked Sendable {
         var retries = 0
         while true {
             do {
-                try await post(callType: callType, callId: callId, report: report)
+                _ = try await api.reportHLSStats(
+                    type: callType,
+                    id: callId,
+                    report: report
+                )
                 return
             } catch {
                 guard retries < retryPolicy.maxRetries, error.hasClientErrors else {
@@ -43,36 +48,6 @@ final class HLSStatsDelivery: HLSStatsDelivering, @unchecked Sendable {
                 try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
                 retries += 1
             }
-        }
-    }
-
-    private func post(
-        callType: String,
-        callId: String,
-        report: HLSStatsReport
-    ) async throws {
-        var path = "/video/call/{type}/{id}/hls_stats"
-        let type = "\(APIHelper.mapValueToPathItem(callType))"
-            .addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
-        let id = "\(APIHelper.mapValueToPathItem(callId))"
-            .addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
-        path = path.replacingOccurrences(
-            of: String(format: "{%@}", "type"),
-            with: type,
-            options: .literal
-        )
-        path = path.replacingOccurrences(
-            of: String(format: "{%@}", "id"),
-            with: id,
-            options: .literal
-        )
-        let urlRequest = try api.makeRequest(
-            uriPath: path,
-            httpMethod: "POST",
-            request: report
-        )
-        _ = try await api.send(request: urlRequest) {
-            try self.api.jsonDecoder.decode(HLSStatsAcknowledgement.self, from: $0)
         }
     }
 }

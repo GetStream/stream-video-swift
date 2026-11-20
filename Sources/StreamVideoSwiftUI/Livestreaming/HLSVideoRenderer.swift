@@ -25,7 +25,7 @@ public struct HLSVideoRenderer: UIViewRepresentable {
 
     var call: Call
     var contentMode: UIView.ContentMode
-    var store: HLSPlayerStore
+    var store: any HLSPlayerStoring
 
     /// Creates a renderer for the HLS stream of the call.
     /// - Parameters:
@@ -46,7 +46,7 @@ public struct HLSVideoRenderer: UIViewRepresentable {
     init(
         call: Call,
         contentMode: UIView.ContentMode,
-        store: HLSPlayerStore
+        store: any HLSPlayerStoring
     ) {
         self.call = call
         self.contentMode = contentMode
@@ -100,12 +100,12 @@ extension HLSVideoRenderer {
     public final class Coordinator {
 
         private var call: Call
-        private let store: HLSPlayerStore
-        private var lease: HLSPlayerLease?
+        private let store: any HLSPlayerStoring
+        private var lease: any HLSPlayerLeasing?
         private weak var view: HLSPlayerView?
         private var playbackTypeObserver: AnyCancellable?
 
-        init(call: Call, store: HLSPlayerStore) {
+        init(call: Call, store: any HLSPlayerStoring) {
             self.call = call
             self.store = store
         }

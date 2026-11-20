@@ -27,7 +27,7 @@ final class HLSPlaybackTracker_Tests: XCTestCase, @unchecked Sendable {
 
     override func tearDown() async throws {
         if let subject {
-            _ = await subject.stop().value
+            _ = await subject.stopReporting().value
         }
         subject = nil
         recorder = nil
@@ -37,7 +37,7 @@ final class HLSPlaybackTracker_Tests: XCTestCase, @unchecked Sendable {
     func test_start_sendsStarted() async {
         await makeSubject()
 
-        await subject.start()
+        await subject.startReporting()
 
         let type = await recorder.reports.first?.type
         XCTAssertEqual(type, "started")
@@ -45,14 +45,14 @@ final class HLSPlaybackTracker_Tests: XCTestCase, @unchecked Sendable {
 
     func test_stallThenPlaying_reportsTheStallAndTheFirstFrame() async {
         await makeSubject()
-        await subject.start()
+        await subject.startReporting()
 
-        subject.note(
-            status: .waitingToPlayAtSpecifiedRate,
+        await subject.recordTimeControlStatus(
+            .waitingToPlayAtSpecifiedRate,
             waitingReason: .toMinimizeStalls
         )
-        subject.note(status: .playing, waitingReason: nil)
-        await subject.reportNow()
+        await subject.recordTimeControlStatus(.playing, waitingReason: nil)
+        await subject.publishCurrentSnapshot()
 
         let events = await recorder.reports.last?.events.map(\.type)
         XCTAssertEqual(events, ["stall_start", "stall_end", "first_frame"])
@@ -62,12 +62,12 @@ final class HLSPlaybackTracker_Tests: XCTestCase, @unchecked Sendable {
 
     func test_stop_afterAFailure_sendsEndedWithTheError() async {
         await makeSubject()
-        await subject.start()
-        subject.noteFailure(
+        await subject.startReporting()
+        await subject.recordPlaybackFailure(
             NSError(domain: "AVFoundationErrorDomain", code: -11800)
         )
 
-        await subject.stop().value
+        await subject.stopReporting().value
 
         let report = await recorder.reports.last
         XCTAssertEqual(report?.type, "ended")
@@ -77,11 +77,11 @@ final class HLSPlaybackTracker_Tests: XCTestCase, @unchecked Sendable {
 
     func test_reportNow_afterStop_sendsNothingMore() async {
         await makeSubject()
-        await subject.start()
-        await subject.stop().value
+        await subject.startReporting()
+        await subject.stopReporting().value
         let count = await recorder.reports.count
 
-        await subject.reportNow()
+        await subject.publishCurrentSnapshot()
 
         let countAfter = await recorder.reports.count
         XCTAssertEqual(countAfter, count)

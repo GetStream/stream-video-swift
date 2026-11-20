@@ -73,13 +73,14 @@ class CallController: @unchecked Sendable {
     private let videoConfig: VideoConfig
     private let webRTCCoordinatorFactory: WebRTCCoordinatorProviding
 
-    /// Replaces HLS stats delivery in tests. Nil uses ``HLSStatsDelivery``.
-    var hlsStatsDelivering: HLSStatsDelivering?
-
-    /// The unified session id owned by the WebRTC state adapter.
-    var unifiedSessionId: String {
-        webRTCCoordinator.stateAdapter.unifiedSessionId
-    }
+    /// Reports HLS playback for this call.
+    ///
+    /// The WebRTC state adapter owns the unified session id. This coordinator
+    /// receives that id the first time it is used.
+    private(set) lazy var hlsCoordinator = HLSCoordinator(
+        unifiedSessionId: webRTCCoordinator.stateAdapter.unifiedSessionId,
+        endpoints: defaultAPI
+    )
 
     private var cachedLocation: String?
     private let initialCallSettings: CallSettings

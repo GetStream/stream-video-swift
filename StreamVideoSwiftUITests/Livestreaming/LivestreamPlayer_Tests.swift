@@ -238,7 +238,7 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
         let store: HLSPlayerStore
         let callController: MockCallController
         /// The claim the renderer holds on the player.
-        let lease: HLSPlayerLease?
+        let lease: (any HLSPlayerLeasing)?
     }
 
     private var hlsURL: URL { URL(string: "https://example.com/live.m3u8")! }

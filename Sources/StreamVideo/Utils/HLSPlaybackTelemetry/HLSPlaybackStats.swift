@@ -55,3 +55,14 @@ final class HLSPlaybackStats: Encodable, Sendable {
         try container.encode(height, forKey: .height)
     }
 }
+
+private extension StringCodingKey {
+    static let watchDurationMs: StringCodingKey = "watch_duration_ms"
+    static let stallCount: StringCodingKey = "stall_count"
+    static let stallDurationMs: StringCodingKey = "stall_duration_ms"
+    static let maxStallDurationMs: StringCodingKey = "max_stall_duration_ms"
+    static let droppedFrames: StringCodingKey = "dropped_frames"
+    static let bitrateKbps: StringCodingKey = "bitrate_kbps"
+    static let bufferLengthMs: StringCodingKey = "buffer_length_ms"
+    static let liveLatencyMs: StringCodingKey = "live_latency_ms"
+}
