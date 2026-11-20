@@ -104,6 +104,8 @@ extension HLSVideoRenderer {
         private var lease: any HLSPlayerLeasing?
         private weak var view: HLSPlayerView?
         private var playbackTypeObserver: AnyCancellable?
+        private var playbackUpdate: Task<Void, Never>?
+        private var playbackGeneration = 0
 
         init(call: Call, store: any HLSPlayerStoring) {
             self.call = call
@@ -119,34 +121,63 @@ extension HLSVideoRenderer {
         func update(call newCall: Call) {
             guard newCall.cId != call.cId else { return }
             playbackTypeObserver = nil
-            lease?.release()
+            let previous = lease
             lease = nil
+            view?.player = nil
             call = newCall
-            observePlaybackType()
+            enqueue { [weak self] in
+                await previous?.release()
+                self?.observePlaybackType()
+            }
         }
 
         func dismantle() {
             playbackTypeObserver = nil
-            lease?.release()
+            let previous = lease
             lease = nil
             view?.player = nil
+            enqueue {
+                await previous?.release()
+            }
+        }
+
+        /// Finishes the playback update started by the latest state change.
+        func finishPlaybackUpdate() async {
+            while true {
+                let generation = playbackGeneration
+                await playbackUpdate?.value
+                if generation == playbackGeneration {
+                    return
+                }
+            }
         }
 
         private func observePlaybackType() {
             playbackTypeObserver = call.state
                 .$playbackType
                 .removeDuplicates()
-                .sink { [weak self] in self?.update(for: $0) }
+                .sink { [weak self] playbackType in
+                    self?.enqueue { await self?.update(for: playbackType) }
+                }
         }
 
-        private func update(for playbackType: PlaybackType) {
+        private func enqueue(_ operation: @escaping @MainActor () async -> Void) {
+            playbackGeneration += 1
+            let previous = playbackUpdate
+            playbackUpdate = Task { @MainActor in
+                await previous?.value
+                await operation()
+            }
+        }
+
+        private func update(for playbackType: PlaybackType) async {
             switch playbackType {
             case .hls:
                 if lease == nil {
-                    lease = store.acquire(for: call, playbackType: playbackType)
+                    lease = await store.acquire(for: call, playbackType: playbackType)
                 }
             case .webRTC:
-                lease?.release()
+                await lease?.release()
                 lease = nil
             }
             view?.player = lease?.player

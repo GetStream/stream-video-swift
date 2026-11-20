@@ -16,22 +16,24 @@ final class HLSPlaybackControls {
     private let call: Call
     private let store: any HLSPlayerStoring
 
-    /// The player the controls act on. `nil` while the call has none.
-    var player: AVPlayer? { store.player(for: call) }
-
     init(call: Call, store: any HLSPlayerStoring = InjectedValues[\.hlsPlayerStore]) {
         self.call = call
         self.store = store
     }
 
+    /// The player the controls act on. `nil` while the call has none.
+    func player() async -> AVPlayer? {
+        await store.player(for: call)
+    }
+
     /// Mutes or unmutes the player. This does not change the call speaker.
-    func setMuted(_ muted: Bool) {
-        player?.isMuted = muted
+    func setMuted(_ muted: Bool) async {
+        await player()?.isMuted = muted
     }
 
     /// Pauses the player, or resumes it from the live edge.
-    func setPaused(_ paused: Bool) {
-        guard let player else { return }
+    func setPaused(_ paused: Bool) async {
+        guard let player = await player() else { return }
         if paused {
             player.pause()
         } else {

@@ -9,11 +9,10 @@ import Foundation
 ///
 /// Release the claim when the view that took it goes away. The player stops
 /// when no claim is left. Releasing more than once does nothing.
-@MainActor
-public protocol HLSPlayerLeasing: AnyObject {
+package protocol HLSPlayerLeasing: AnyObject, Sendable {
     /// The player shared by every claim of the call.
     var player: AVPlayer { get }
 
     /// Gives the claim back.
-    func release()
+    func release() async
 }

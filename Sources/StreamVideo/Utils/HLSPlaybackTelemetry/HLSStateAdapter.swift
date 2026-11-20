@@ -10,17 +10,26 @@ import Foundation
 /// `unifiedSessionId` is the id ``WebRTCStateAdapter`` created. This adapter
 /// keeps the value it was given so a report can send it without reading the
 /// WebRTC adapter again.
-final class HLSStateAdapter {
+actor HLSStateAdapter {
     let unifiedSessionId: String
 
     /// Replaces report delivery in tests.
     ///
     /// Nil posts through ``HLSStatsDelivery``.
-    var statsDelivering: HLSStatsDelivering?
+    private(set) var statsDelivering: HLSStatsDelivering?
 
-    private let endpoints: DefaultAPIEndpoints
+    func setStatsDelivering(_ delivering: HLSStatsDelivering?) {
+        statsDelivering = delivering
+    }
 
-    init(unifiedSessionId: String, endpoints: DefaultAPIEndpoints) {
+    /// The API client is not `Sendable`. The call keeps one client, and this
+    /// adapter only reads it.
+    private let endpoints: UncheckedSendableBox<DefaultAPIEndpoints>
+
+    init(
+        unifiedSessionId: String,
+        endpoints: UncheckedSendableBox<DefaultAPIEndpoints>
+    ) {
         self.unifiedSessionId = unifiedSessionId
         self.endpoints = endpoints
     }
@@ -29,16 +38,19 @@ final class HLSStateAdapter {
     ///
     /// Returns nil when `call` has no call session id, when
     /// `unifiedSessionId` is empty, or when delivery cannot be created.
-    @MainActor
-    func reportingAdapter(player: AVPlayer, call: Call) -> HLSStatsAdapter? {
-        let callSessionId = call.state.session?.id ?? ""
+    func reportingAdapter(player: AVPlayer, call: Call) async -> HLSStatsAdapter? {
+        let callSessionId = await call.state.session?.id ?? ""
         guard !callSessionId.isEmpty, !unifiedSessionId.isEmpty else {
             return nil
         }
-        let delivery = statsDelivering ?? HLSStatsDelivery(endpoints: endpoints)
+        let delivery = statsDelivering ?? HLSStatsDelivery(endpoints: endpoints.value)
         guard let delivery else { return nil }
-        let seconds = call.state.statsCollectionInterval > 0
-            ? TimeInterval(call.state.statsCollectionInterval)
+        // JoinCallResponse.statsOptions.reportingIntervalMs is stored on
+        // CallState as seconds. The generated model has no
+        // reporting_hls_interval_ms. Zero means the join response sent 0.
+        let reportingIntervalSeconds = await call.state.statsCollectionInterval
+        let seconds = reportingIntervalSeconds > 0
+            ? TimeInterval(reportingIntervalSeconds)
             : 5
         return HLSStatsAdapter(
             player: player,

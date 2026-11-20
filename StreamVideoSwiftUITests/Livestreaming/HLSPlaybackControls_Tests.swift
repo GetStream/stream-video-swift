@@ -12,11 +12,11 @@ import XCTest
 final class HLSPlaybackControls_Tests: StreamVideoTestCase, @unchecked Sendable {
 
     private let url = URL(string: "https://example.com/live.m3u8")!
-    private var madePlayers: [HLSSpyPlayer] = []
+    private let made = MadePlayers()
     private lazy var call: MockCall! = .init()
-    private lazy var store: HLSPlayerStore! = .init { [unowned self] _ in
+    private lazy var store: HLSPlayerStore! = .init { [made] _ in
         let player = HLSSpyPlayer()
-        madePlayers.append(player)
+        made.players.append(player)
         return player
     }
 
@@ -26,16 +26,16 @@ final class HLSPlaybackControls_Tests: StreamVideoTestCase, @unchecked Sendable 
         subject = nil
         store = nil
         call = nil
-        madePlayers = []
+        made.players = []
         try await super.tearDown()
     }
 
     // MARK: - init
 
-    func test_init_withoutAStore_usesTheInjectedStore() throws {
-        let injected = HLSPlayerStore { [unowned self] _ in
+    func test_init_withoutAStore_usesTheInjectedStore() async throws {
+        let injected = HLSPlayerStore { [made] _ in
             let player = HLSSpyPlayer()
-            self.madePlayers.append(player)
+            made.players.append(player)
             return player
         }
         let previous = InjectedValues[\.hlsPlayerStore]
@@ -43,81 +43,96 @@ final class HLSPlaybackControls_Tests: StreamVideoTestCase, @unchecked Sendable 
         defer { InjectedValues[\.hlsPlayerStore] = previous }
         let controls = HLSPlaybackControls(call: call)
 
-        let lease = try XCTUnwrap(injected.acquire(for: call, playbackType: .hls(url)))
+        let unwrapped0 = await injected.acquire(for: call, playbackType: .hls(url))
+        let lease = try XCTUnwrap(unwrapped0)
+        let player = await controls.player()
 
-        XCTAssertTrue(controls.player === lease.player)
+        XCTAssertTrue(player === lease.player)
     }
 
     // MARK: - player
 
-    func test_player_withoutAClaim_isNil() {
-        XCTAssertNil(subject.player)
+    func test_player_withoutAClaim_isNil() async {
+        let player = await subject.player()
+
+        XCTAssertNil(player)
     }
 
-    func test_player_afterAClaim_isThePlayerOfTheCall() throws {
-        let lease = try XCTUnwrap(store.acquire(for: call, playbackType: .hls(url)))
+    func test_player_afterAClaim_isThePlayerOfTheCall() async throws {
+        let unwrapped1 = await store.acquire(for: call, playbackType: .hls(url))
+        let lease = try XCTUnwrap(unwrapped1)
+        let player = await subject.player()
 
-        XCTAssertTrue(subject.player === lease.player)
+        XCTAssertTrue(player === lease.player)
     }
 
-    func test_player_afterTheStoreFreedIt_isNilUntilTheCallPlaysHLSAgain() throws {
-        let first = try XCTUnwrap(store.acquire(for: call, playbackType: .hls(url)))
+    func test_player_afterTheStoreFreedIt_isNilUntilTheCallPlaysHLSAgain() async throws {
+        let unwrapped2 = await store.acquire(for: call, playbackType: .hls(url))
+        let first = try XCTUnwrap(unwrapped2)
         call.state.playbackType = .webRTC
-        XCTAssertNil(subject.player)
+        await waitUntilPlayerIsNil()
 
-        let second = try XCTUnwrap(store.acquire(for: call, playbackType: .hls(url)))
+        let unwrapped3 = await store.acquire(for: call, playbackType: .hls(url))
+        let second = try XCTUnwrap(unwrapped3)
+        let player = await subject.player()
 
         XCTAssertFalse(first.player === second.player)
-        XCTAssertTrue(subject.player === second.player)
+        XCTAssertTrue(player === second.player)
     }
 
-    func test_setMuted_afterTheStoreFreedThePlayer_actsOnTheNewPlayerOnly() throws {
-        _ = try XCTUnwrap(store.acquire(for: call, playbackType: .hls(url)))
+    func test_setMuted_afterTheStoreFreedThePlayer_actsOnTheNewPlayerOnly() async throws {
+        let unwrapped4 = await store.acquire(for: call, playbackType: .hls(url))
+        _ = try XCTUnwrap(unwrapped4)
         call.state.playbackType = .webRTC
-        _ = try XCTUnwrap(store.acquire(for: call, playbackType: .hls(url)))
+        await waitUntilPlayerIsNil()
+        let unwrapped5 = await store.acquire(for: call, playbackType: .hls(url))
+        _ = try XCTUnwrap(unwrapped5)
 
-        subject.setMuted(true)
+        await subject.setMuted(true)
 
-        XCTAssertFalse(madePlayers[0].isMuted)
-        XCTAssertTrue(madePlayers[1].isMuted)
+        XCTAssertFalse(made.players[0].isMuted)
+        XCTAssertTrue(made.players[1].isMuted)
     }
 
     // MARK: - setMuted
 
-    func test_setMuted_mutesAndUnmutesThePlayer() throws {
-        _ = try XCTUnwrap(store.acquire(for: call, playbackType: .hls(url)))
+    func test_setMuted_mutesAndUnmutesThePlayer() async throws {
+        let unwrapped6 = await store.acquire(for: call, playbackType: .hls(url))
+        _ = try XCTUnwrap(unwrapped6)
 
-        subject.setMuted(true)
-        XCTAssertTrue(madePlayers[0].isMuted)
+        await subject.setMuted(true)
+        XCTAssertTrue(made.players[0].isMuted)
 
-        subject.setMuted(false)
-        XCTAssertFalse(madePlayers[0].isMuted)
+        await subject.setMuted(false)
+        XCTAssertFalse(made.players[0].isMuted)
     }
 
-    func test_setMuted_withoutAPlayer_doesNothing() {
-        subject.setMuted(true)
+    func test_setMuted_withoutAPlayer_doesNothing() async {
+        await subject.setMuted(true)
 
-        XCTAssertTrue(madePlayers.isEmpty)
+        XCTAssertTrue(made.players.isEmpty)
     }
 
     // MARK: - setPaused
 
-    func test_setPaused_true_pausesThePlayer() throws {
-        _ = try XCTUnwrap(store.acquire(for: call, playbackType: .hls(url)))
+    func test_setPaused_true_pausesThePlayer() async throws {
+        let unwrapped7 = await store.acquire(for: call, playbackType: .hls(url))
+        _ = try XCTUnwrap(unwrapped7)
 
-        subject.setPaused(true)
+        await subject.setPaused(true)
 
-        XCTAssertEqual(madePlayers[0].pauseCount, 1)
+        XCTAssertEqual(made.players[0].pauseCount, 1)
     }
 
-    func test_setPaused_false_playsThePlayerAgain() throws {
-        _ = try XCTUnwrap(store.acquire(for: call, playbackType: .hls(url)))
-        let playCount = madePlayers[0].playCount
+    func test_setPaused_false_playsThePlayerAgain() async throws {
+        let unwrapped8 = await store.acquire(for: call, playbackType: .hls(url))
+        _ = try XCTUnwrap(unwrapped8)
+        let playCount = made.players[0].playCount
 
-        subject.setPaused(false)
+        await subject.setPaused(false)
 
-        XCTAssertEqual(madePlayers[0].playCount, playCount + 1)
-        XCTAssertEqual(madePlayers[0].pauseCount, 0)
+        XCTAssertEqual(made.players[0].playCount, playCount + 1)
+        XCTAssertEqual(made.players[0].pauseCount, 0)
     }
 
     // MARK: - liveEdgeTarget
@@ -169,4 +184,18 @@ final class HLSPlaybackControls_Tests: StreamVideoTestCase, @unchecked Sendable 
     private func seconds(_ value: Double) -> CMTime {
         CMTime(seconds: value, preferredTimescale: 600)
     }
+
+    private func waitUntilPlayerIsNil() async {
+        let deadline = Date().addingTimeInterval(2)
+        while Date() < deadline {
+            if await store.player(for: call) == nil { return }
+            await Task.yield()
+        }
+        let player = await store.player(for: call)
+        XCTAssertNil(player)
+    }
+}
+
+private final class MadePlayers: @unchecked Sendable {
+    var players: [HLSSpyPlayer] = []
 }

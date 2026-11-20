@@ -13,11 +13,11 @@ import XCTest
 final class HLSVideoRenderer_Tests: StreamVideoTestCase, @unchecked Sendable {
 
     private let url = URL(string: "https://example.com/live.m3u8")!
-    private var madePlayers: [HLSSpyPlayer] = []
+    private let made = MadePlayers()
     private lazy var call: MockCall! = .init()
-    private lazy var store: HLSPlayerStore! = .init { [unowned self] _ in
+    private lazy var store: HLSPlayerStore! = .init { [made] _ in
         let player = HLSSpyPlayer()
-        madePlayers.append(player)
+        made.players.append(player)
         return player
     }
 
@@ -26,11 +26,12 @@ final class HLSVideoRenderer_Tests: StreamVideoTestCase, @unchecked Sendable {
 
     override func tearDown() async throws {
         subject.dismantle()
+        await subject.finishPlaybackUpdate()
         subject = nil
         view = nil
         store = nil
         call = nil
-        madePlayers = []
+        made.players = []
         try await super.tearDown()
     }
 
@@ -67,97 +68,127 @@ final class HLSVideoRenderer_Tests: StreamVideoTestCase, @unchecked Sendable {
 
     // MARK: - attach
 
-    func test_attach_hlsCall_showsThePlayer() {
+    func test_attach_hlsCall_showsThePlayer() async {
         call.state.playbackType = .hls(url)
 
         subject.attach(to: view)
+        await subject.finishPlaybackUpdate()
 
-        XCTAssertTrue(view.player === madePlayers.first)
+        XCTAssertTrue(view.player === made.players.first)
     }
 
-    func test_attach_webRTCCall_showsNothing() {
+    func test_attach_webRTCCall_showsNothing() async {
         subject.attach(to: view)
+        await subject.finishPlaybackUpdate()
+        let count = await store.activePlayerCount
 
         XCTAssertNil(view.player)
-        XCTAssertEqual(store.activePlayerCount, 0)
+        XCTAssertEqual(count, 0)
     }
 
-    func test_playbackTypeBecomesHLS_showsThePlayer() {
+    func test_playbackTypeBecomesHLS_showsThePlayer() async {
         subject.attach(to: view)
+        await subject.finishPlaybackUpdate()
 
         call.state.playbackType = .hls(url)
+        await subject.finishPlaybackUpdate()
 
-        XCTAssertTrue(view.player === madePlayers.first)
+        XCTAssertTrue(view.player === made.players.first)
     }
 
-    func test_playbackTypeReturnsToWebRTC_removesThePlayer() {
+    func test_playbackTypeReturnsToWebRTC_removesThePlayer() async {
         call.state.playbackType = .hls(url)
         subject.attach(to: view)
+        await subject.finishPlaybackUpdate()
 
         call.state.playbackType = .webRTC
+        await subject.finishPlaybackUpdate()
+        let count = await store.activePlayerCount
 
         XCTAssertNil(view.player)
-        XCTAssertEqual(store.activePlayerCount, 0)
+        XCTAssertEqual(count, 0)
     }
 
     // MARK: - update(call:)
 
-    func test_updateCall_anotherCall_movesThePlayerToTheNewCall() {
+    func test_updateCall_anotherCall_movesThePlayerToTheNewCall() async {
         call.state.playbackType = .hls(url)
         subject.attach(to: view)
+        await subject.finishPlaybackUpdate()
         let other = MockCall()
         other.state.playbackType = .hls(url)
 
         subject.update(call: other)
+        await subject.finishPlaybackUpdate()
+        let oldPlayer = await store.player(for: call)
+        let newPlayer = await store.player(for: other)
 
-        XCTAssertEqual(madePlayers.count, 2)
-        XCTAssertTrue(view.player === madePlayers[1])
-        XCTAssertNil(store.player(for: call))
-        XCTAssertTrue(store.player(for: other) === madePlayers[1])
+        XCTAssertEqual(made.players.count, 2)
+        XCTAssertTrue(view.player === made.players[1])
+        XCTAssertNil(oldPlayer)
+        XCTAssertTrue(newPlayer === made.players[1])
     }
 
-    func test_updateCall_anotherCall_stopsFollowingTheOldCall() {
+    func test_updateCall_anotherCall_stopsFollowingTheOldCall() async {
         subject.attach(to: view)
+        await subject.finishPlaybackUpdate()
         let other = MockCall()
 
         subject.update(call: other)
+        await subject.finishPlaybackUpdate()
         call.state.playbackType = .hls(url)
+        await subject.finishPlaybackUpdate()
+        let count = await store.activePlayerCount
 
         XCTAssertNil(view.player)
-        XCTAssertEqual(store.activePlayerCount, 0)
+        XCTAssertEqual(count, 0)
     }
 
-    func test_updateCall_sameCall_keepsThePlayer() {
+    func test_updateCall_sameCall_keepsThePlayer() async {
         call.state.playbackType = .hls(url)
         subject.attach(to: view)
+        await subject.finishPlaybackUpdate()
 
         subject.update(call: call)
+        await subject.finishPlaybackUpdate()
 
-        XCTAssertEqual(madePlayers.count, 1)
-        XCTAssertTrue(view.player === madePlayers.first)
+        XCTAssertEqual(made.players.count, 1)
+        XCTAssertTrue(view.player === made.players.first)
     }
 
     // MARK: - dismantle
 
-    func test_dismantle_releasesThePlayerAndEmptiesTheView() {
+    func test_dismantle_releasesThePlayerAndEmptiesTheView() async {
         call.state.playbackType = .hls(url)
         subject.attach(to: view)
+        await subject.finishPlaybackUpdate()
 
         subject.dismantle()
+        await subject.finishPlaybackUpdate()
+        let count = await store.activePlayerCount
 
         XCTAssertNil(view.player)
-        XCTAssertEqual(store.activePlayerCount, 0)
+        XCTAssertEqual(count, 0)
     }
 
-    func test_dismantle_oneOfTwoRenderers_keepsThePlayerForTheOther() {
+    func test_dismantle_oneOfTwoRenderers_keepsThePlayerForTheOther() async {
         call.state.playbackType = .hls(url)
         let other = HLSVideoRenderer.Coordinator(call: call, store: store)
         other.attach(to: HLSPlayerView())
+        await other.finishPlaybackUpdate()
         subject.attach(to: view)
+        await subject.finishPlaybackUpdate()
 
         subject.dismantle()
+        await subject.finishPlaybackUpdate()
+        let count = await store.activePlayerCount
 
-        XCTAssertEqual(store.activePlayerCount, 1)
+        XCTAssertEqual(count, 1)
         other.dismantle()
+        await other.finishPlaybackUpdate()
     }
+}
+
+private final class MadePlayers: @unchecked Sendable {
+    var players: [HLSSpyPlayer] = []
 }

@@ -7,12 +7,10 @@ import Foundation
 
 /// The player store the HLS views use.
 ///
-/// ``HLSPlayerStore`` stays internal to StreamVideo. Views in
-/// StreamVideoSwiftUI talk to the store through this protocol.
-@MainActor
-public protocol HLSPlayerStoring: AnyObject {
+/// StreamVideoSwiftUI uses this protocol. The store is not a public type.
+package protocol HLSPlayerStoring: AnyObject, Sendable {
     /// The player of the call, if it has one.
-    func player(for call: Call) -> AVPlayer?
+    func player(for call: Call) async -> AVPlayer?
 
     /// Takes a claim on the player of the call.
     ///
@@ -22,5 +20,5 @@ public protocol HLSPlayerStoring: AnyObject {
     func acquire(
         for call: Call,
         playbackType: PlaybackType
-    ) -> (any HLSPlayerLeasing)?
+    ) async -> (any HLSPlayerLeasing)?
 }

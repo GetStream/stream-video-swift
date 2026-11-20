@@ -15,7 +15,7 @@ final class HLSCoordinator {
     init(unifiedSessionId: String, endpoints: DefaultAPIEndpoints) {
         stateAdapter = HLSStateAdapter(
             unifiedSessionId: unifiedSessionId,
-            endpoints: endpoints
+            endpoints: UncheckedSendableBox(endpoints)
         )
     }
 
@@ -23,8 +23,7 @@ final class HLSCoordinator {
     ///
     /// Returns nil when the call has no call session id, or when the
     /// coordinator cannot create a delivery client.
-    @MainActor
-    func reportingAdapter(player: AVPlayer, call: Call) -> HLSStatsAdapter? {
-        stateAdapter.reportingAdapter(player: player, call: call)
+    func reportingAdapter(player: AVPlayer, call: Call) async -> HLSStatsAdapter? {
+        await stateAdapter.reportingAdapter(player: player, call: call)
     }
 }

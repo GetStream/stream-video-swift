@@ -210,10 +210,10 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
         }
     }
     
-    func toggleAudioOutput() {
+    func toggleAudioOutput() async {
         // An HLS viewer has no call audio, so the mute acts on the player.
         if case .hls = state.playbackType {
-            hlsControls.setMuted(!muted)
+            await hlsControls.setMuted(!muted)
             muted.toggle()
             return
         }
@@ -234,16 +234,16 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
     
     /// Applies the mute and pause state to the shared HLS player. A player
     /// starts playing on creation, so a paused stream is paused again.
-    func startHLSPlayback() {
-        hlsControls.setMuted(muted)
+    func startHLSPlayback() async {
+        await hlsControls.setMuted(muted)
         if streamPaused {
-            hlsControls.setPaused(true)
+            await hlsControls.setPaused(true)
         }
     }
 
     /// Applies the pause state of the player controls to the HLS player.
-    func applyStreamPaused(_ paused: Bool) {
-        hlsControls.setPaused(paused)
+    func applyStreamPaused(_ paused: Bool) async {
+        await hlsControls.setPaused(paused)
     }
     
     func muteLivestreamOnJoin() {
@@ -363,13 +363,13 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
                 controlsShown ? LivestreamPlayPauseButton(
                     streamPaused: $streamPaused
                 ) {
-                    applyStreamPaused(streamPaused)
+                    Task { await applyStreamPaused(streamPaused) }
                     if !streamPaused {
                         controlsShown = false
                     }
                 } : nil
             )
-            .onAppear { startHLSPlayback() }
+            .onAppear { Task { await startHLSPlayback() } }
             .onChange(of: fullScreen) { onFullScreenStateChange?($0) }
     }
 
@@ -430,7 +430,7 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
                             ? "speaker.wave.2.fill"
                             : "speaker.slash.fill"
                     ) {
-                        toggleAudioOutput()
+                        Task { await toggleAudioOutput() }
                     }
                     LivestreamButton(imageName: "viewfinder") {
                         fullScreen.toggle()

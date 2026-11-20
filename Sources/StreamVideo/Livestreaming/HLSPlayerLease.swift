@@ -7,10 +7,11 @@ import Foundation
 
 /// A claim on the shared player of a call. Release it when the view or
 /// control that took it goes away. Releasing more than once is a no-op.
-@MainActor
-final class HLSPlayerLease: HLSPlayerLeasing {
+///
+/// The player is used on the main actor. `release` hops to the store.
+package final class HLSPlayerLease: HLSPlayerLeasing, @unchecked Sendable {
     /// The player shared by every lease of the call.
-    public let player: AVPlayer
+    package let player: AVPlayer
 
     private let id = UUID()
     private weak var store: HLSPlayerStore?
@@ -23,8 +24,8 @@ final class HLSPlayerLease: HLSPlayerLeasing {
     }
 
     /// Gives the claim back. The player stops when no claim is left.
-    public func release() {
-        store?.release(leaseId: id, callId: callId)
+    package func release() async {
+        await store?.release(leaseId: id, callId: callId)
     }
 
     var leaseId: UUID { id }

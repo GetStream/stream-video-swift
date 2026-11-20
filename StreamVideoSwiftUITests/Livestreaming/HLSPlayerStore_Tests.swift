@@ -12,55 +12,58 @@ import XCTest
 final class HLSPlayerStore_Tests: StreamVideoTestCase, @unchecked Sendable {
 
     private let url = URL(string: "https://example.com/live.m3u8")!
-    private var madeURLs: [URL] = []
-    private var madePlayers: [HLSSpyPlayer] = []
-    private lazy var subject: HLSPlayerStore! = .init { [unowned self] url in
+    private let made = MadePlayers()
+    private lazy var subject: HLSPlayerStore! = .init { [made] url in
         let player = HLSSpyPlayer()
-        madeURLs.append(url)
-        madePlayers.append(player)
+        made.urls.append(url)
+        made.players.append(player)
         return player
     }
 
     override func tearDown() async throws {
         subject = nil
-        madeURLs = []
-        madePlayers = []
+        made.urls = []
+        made.players = []
         try await super.tearDown()
     }
 
     // MARK: - acquire
 
-    func test_acquire_hls_buildsAPlayerForThePlaylist() {
-        let lease = subject.acquire(for: makeCall(), playbackType: .hls(url))
+    func test_acquire_hls_buildsAPlayerForThePlaylist() async {
+        let lease = await subject.acquire(for: makeCall(), playbackType: .hls(url))
 
         XCTAssertNotNil(lease)
-        XCTAssertEqual(madeURLs, [url])
+        XCTAssertEqual(made.urls, [url])
     }
 
-    func test_acquire_firstClaim_startsThePlayer() {
-        _ = subject.acquire(for: makeCall(), playbackType: .hls(url))
+    func test_acquire_firstClaim_startsThePlayer() async {
+        _ = await subject.acquire(for: makeCall(), playbackType: .hls(url))
 
-        XCTAssertEqual(madePlayers.first?.playCount, 1)
+        XCTAssertEqual(made.players.first?.playCount, 1)
     }
 
-    func test_acquire_secondClaim_doesNotStartThePlayerAgain() {
+    func test_acquire_secondClaim_doesNotStartThePlayerAgain() async {
         let call = makeCall()
-        _ = subject.acquire(for: call, playbackType: .hls(url))
+        _ = await subject.acquire(for: call, playbackType: .hls(url))
 
-        _ = subject.acquire(for: call, playbackType: .hls(url))
+        _ = await subject.acquire(for: call, playbackType: .hls(url))
 
-        XCTAssertEqual(madePlayers.first?.playCount, 1)
+        XCTAssertEqual(made.players.first?.playCount, 1)
     }
 
-    func test_acquire_webRTC_returnsNil() {
-        XCTAssertNil(subject.acquire(for: makeCall(), playbackType: .webRTC))
-        XCTAssertEqual(subject.activePlayerCount, 0)
+    func test_acquire_webRTC_returnsNil() async {
+        let lease = await subject.acquire(for: makeCall(), playbackType: .webRTC)
+        let count = await subject.activePlayerCount
+
+        XCTAssertNil(lease)
+        XCTAssertEqual(count, 0)
     }
 
     func test_acquire_withASender_sendsStarted() async {
         let recorder = ReportRecorder()
         let call = makeCall()
-        call.callController.hlsCoordinator.stateAdapter.statsDelivering = recorder
+        await call.callController.hlsCoordinator.stateAdapter
+            .setStatsDelivering(recorder)
         call.state.session = CallSessionResponse(
             acceptedBy: [:],
             anonymousParticipantCount: 0,
@@ -71,7 +74,7 @@ final class HLSPlayerStore_Tests: StreamVideoTestCase, @unchecked Sendable {
             rejectedBy: [:]
         )
 
-        _ = subject.acquire(for: call, playbackType: .hls(url))
+        _ = await subject.acquire(for: call, playbackType: .hls(url))
 
         let started = expectation(description: "started")
         Task {
@@ -82,114 +85,135 @@ final class HLSPlayerStore_Tests: StreamVideoTestCase, @unchecked Sendable {
         }
         await fulfillment(of: [started], timeout: 2)
         let report = await recorder.reports.first
-        let unifiedSessionId = call.callController.hlsCoordinator.stateAdapter.unifiedSessionId
+        let unifiedSessionId = await call.callController.hlsCoordinator
+            .stateAdapter.unifiedSessionId
         XCTAssertEqual(report?.type, "started")
         XCTAssertEqual(report?.unifiedSessionId, unifiedSessionId)
     }
 
-    func test_acquire_twiceForTheSameCall_sharesOnePlayer() {
+    func test_acquire_twiceForTheSameCall_sharesOnePlayer() async {
         let call = makeCall()
 
-        let first = subject.acquire(for: call, playbackType: .hls(url))
-        let second = subject.acquire(for: call, playbackType: .hls(url))
+        let first = await subject.acquire(for: call, playbackType: .hls(url))
+        let second = await subject.acquire(for: call, playbackType: .hls(url))
 
         XCTAssertNotNil(first)
         XCTAssertTrue(first?.player === second?.player)
-        XCTAssertEqual(madeURLs.count, 1)
+        XCTAssertEqual(made.urls.count, 1)
     }
 
-    func test_acquire_differentCalls_usesDifferentPlayers() {
-        let first = subject.acquire(for: makeCall(), playbackType: .hls(url))
-        let second = subject.acquire(for: makeCall(), playbackType: .hls(url))
+    func test_acquire_differentCalls_usesDifferentPlayers() async {
+        let first = await subject.acquire(for: makeCall(), playbackType: .hls(url))
+        let second = await subject.acquire(for: makeCall(), playbackType: .hls(url))
+        let count = await subject.activePlayerCount
 
         XCTAssertFalse(first?.player === second?.player)
-        XCTAssertEqual(subject.activePlayerCount, 2)
+        XCTAssertEqual(count, 2)
     }
 
     // MARK: - player(for:)
 
-    func test_playerForCall_afterAcquire_returnsThePlayer() throws {
+    func test_playerForCall_afterAcquire_returnsThePlayer() async throws {
         let call = makeCall()
-        let lease = try XCTUnwrap(subject.acquire(for: call, playbackType: .hls(url)))
+        let unwrapped0 = await subject.acquire(for: call, playbackType: .hls(url))
+        let lease = try XCTUnwrap(unwrapped0)
+        let player = await subject.player(for: call)
 
-        XCTAssertTrue(subject.player(for: call) === lease.player)
+        XCTAssertTrue(player === lease.player)
     }
 
-    func test_playerForCall_withoutAcquire_returnsNil() {
-        XCTAssertNil(subject.player(for: makeCall()))
+    func test_playerForCall_withoutAcquire_returnsNil() async {
+        let player = await subject.player(for: makeCall())
+
+        XCTAssertNil(player)
     }
 
     // MARK: - release
 
-    func test_release_oneOfTwoLeases_keepsThePlayer() throws {
+    func test_release_oneOfTwoLeases_keepsThePlayer() async throws {
         let call = makeCall()
-        let first = try XCTUnwrap(subject.acquire(for: call, playbackType: .hls(url)))
-        _ = subject.acquire(for: call, playbackType: .hls(url))
+        let unwrapped1 = await subject.acquire(for: call, playbackType: .hls(url))
+        let first = try XCTUnwrap(unwrapped1)
+        _ = await subject.acquire(for: call, playbackType: .hls(url))
 
-        first.release()
+        await first.release()
+        let count = await subject.activePlayerCount
 
-        XCTAssertEqual(subject.activePlayerCount, 1)
-        XCTAssertEqual(madePlayers.first?.pauseCount, 0)
+        XCTAssertEqual(count, 1)
+        XCTAssertEqual(made.players.first?.pauseCount, 0)
     }
 
-    func test_release_bothLeases_stopsAndEmptiesThePlayer() throws {
+    func test_release_bothLeases_stopsAndEmptiesThePlayer() async throws {
         let call = makeCall()
-        let first = try XCTUnwrap(subject.acquire(for: call, playbackType: .hls(url)))
-        let second = try XCTUnwrap(subject.acquire(for: call, playbackType: .hls(url)))
+        let unwrapped2 = await subject.acquire(for: call, playbackType: .hls(url))
+        let first = try XCTUnwrap(unwrapped2)
+        let unwrapped3 = await subject.acquire(for: call, playbackType: .hls(url))
+        let second = try XCTUnwrap(unwrapped3)
 
-        first.release()
-        second.release()
+        await first.release()
+        await second.release()
+        let count = await subject.activePlayerCount
 
-        XCTAssertEqual(subject.activePlayerCount, 0)
-        XCTAssertEqual(madePlayers.first?.pauseCount, 1)
-        XCTAssertEqual(madePlayers.first?.replacedItems.count, 1)
-        XCTAssertNil(madePlayers.first?.replacedItems.first ?? nil)
+        XCTAssertEqual(count, 0)
+        XCTAssertEqual(made.players.first?.pauseCount, 1)
+        XCTAssertEqual(made.players.first?.replacedItems.count, 1)
+        XCTAssertNil(made.players.first?.replacedItems.first ?? nil)
     }
 
-    func test_release_sameLeaseTwice_doesNotFreeThePlayerOfTheOtherLease() throws {
+    func test_release_sameLeaseTwice_doesNotFreeThePlayerOfTheOtherLease() async throws {
         let call = makeCall()
-        let first = try XCTUnwrap(subject.acquire(for: call, playbackType: .hls(url)))
-        _ = subject.acquire(for: call, playbackType: .hls(url))
+        let unwrapped4 = await subject.acquire(for: call, playbackType: .hls(url))
+        let first = try XCTUnwrap(unwrapped4)
+        _ = await subject.acquire(for: call, playbackType: .hls(url))
 
-        first.release()
-        first.release()
+        await first.release()
+        await first.release()
+        let count = await subject.activePlayerCount
 
-        XCTAssertEqual(subject.activePlayerCount, 1)
+        XCTAssertEqual(count, 1)
     }
 
-    func test_acquire_afterTheLastRelease_createsANewPlayer() throws {
+    func test_acquire_afterTheLastRelease_createsANewPlayer() async throws {
         let call = makeCall()
-        let first = try XCTUnwrap(subject.acquire(for: call, playbackType: .hls(url)))
-        first.release()
+        let unwrapped5 = await subject.acquire(for: call, playbackType: .hls(url))
+        let first = try XCTUnwrap(unwrapped5)
+        await first.release()
 
-        let second = try XCTUnwrap(subject.acquire(for: call, playbackType: .hls(url)))
+        let unwrapped6 = await subject.acquire(for: call, playbackType: .hls(url))
+        let second = try XCTUnwrap(unwrapped6)
 
         XCTAssertFalse(first.player === second.player)
-        XCTAssertEqual(madeURLs.count, 2)
+        XCTAssertEqual(made.urls.count, 2)
     }
 
     // MARK: - playbackType
 
-    func test_playbackTypeReturnsToWebRTC_freesThePlayer() throws {
+    func test_playbackTypeReturnsToWebRTC_freesThePlayer() async throws {
         let call = makeCall()
-        _ = try XCTUnwrap(subject.acquire(for: call, playbackType: .hls(url)))
+        let unwrapped7 = await subject.acquire(for: call, playbackType: .hls(url))
+        _ = try XCTUnwrap(unwrapped7)
 
         call.state.playbackType = .webRTC
+        await waitForPlayerCount(0)
+        let player = await subject.player(for: call)
 
-        XCTAssertEqual(subject.activePlayerCount, 0)
-        XCTAssertEqual(madePlayers.first?.pauseCount, 1)
-        XCTAssertNil(subject.player(for: call))
+        XCTAssertEqual(made.players.first?.pauseCount, 1)
+        XCTAssertNil(player)
     }
 
-    func test_release_afterPlaybackTypeReturnedToWebRTC_doesNotFreeANewPlayer() throws {
+    func test_release_afterPlaybackTypeReturnedToWebRTC_doesNotFreeANewPlayer() async throws {
         let call = makeCall()
-        let stale = try XCTUnwrap(subject.acquire(for: call, playbackType: .hls(url)))
+        let unwrapped8 = await subject.acquire(for: call, playbackType: .hls(url))
+        let stale = try XCTUnwrap(unwrapped8)
         call.state.playbackType = .webRTC
-        _ = try XCTUnwrap(subject.acquire(for: call, playbackType: .hls(url)))
+        await waitForPlayerCount(0)
+        let unwrapped9 = await subject.acquire(for: call, playbackType: .hls(url))
+        _ = try XCTUnwrap(unwrapped9)
 
-        stale.release()
+        await stale.release()
+        let count = await subject.activePlayerCount
 
-        XCTAssertEqual(subject.activePlayerCount, 1)
+        XCTAssertEqual(count, 1)
     }
 
     // MARK: - Private Helpers
@@ -199,6 +223,21 @@ final class HLSPlayerStore_Tests: StreamVideoTestCase, @unchecked Sendable {
         call.state.playbackType = .hls(url)
         return call
     }
+
+    private func waitForPlayerCount(_ count: Int) async {
+        let deadline = Date().addingTimeInterval(2)
+        while Date() < deadline {
+            if await subject.activePlayerCount == count { return }
+            await Task.yield()
+        }
+        let actual = await subject.activePlayerCount
+        XCTAssertEqual(actual, count)
+    }
+}
+
+private final class MadePlayers: @unchecked Sendable {
+    var urls: [URL] = []
+    var players: [HLSSpyPlayer] = []
 }
 
 private actor ReportRecorder: HLSStatsDelivering {
