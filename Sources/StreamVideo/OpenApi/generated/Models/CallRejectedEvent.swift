@@ -11,7 +11,7 @@ public final class CallRejectedEvent: Sendable, Event, Decodable, WSCallEvent {
     public let call: CallResponse
     public let callCid: String
     public let createdAt: Date
-    /// Provides information about why the call was rejected. You can provide any value, but the Stream API and SDKs use these default values: rejected, cancel, timeout and busy
+    /// Provides information about why the call was rejected. You can provide any value, but the Stream API and SDKs use these default values: decline, cancel, timeout and busy
     public let reason: String?
     /// The type of event: "call.rejected" in this case
     public let type: String
