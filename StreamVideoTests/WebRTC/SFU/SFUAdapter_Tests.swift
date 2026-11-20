@@ -2,6 +2,7 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import StreamCore
 @testable import StreamVideo
 import XCTest
@@ -697,6 +698,26 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
         }
     }
 
+    func test_connectionState_subscribedConcurrently_everySubscriberReceivesLaterChange() {
+        let count = 4
+        for _ in 0..<1000 {
+            let webSocket = MockSFUWebSocket()
+            let adapter = SFUAdapter(signalService: mockService, webSocket: webSocket)
+            let recorders = (0..<count).map { _ in StateRecorder() }
+
+            DispatchQueue.concurrentPerform(iterations: count) {
+                recorders[$0].observe(adapter.connectionStatePublisher)
+            }
+            webSocket.simulate(state: .connecting)
+
+            XCTAssertEqual(
+                recorders.map(\.latest),
+                Array(repeating: .connecting, count: count)
+            )
+            recorders.forEach { $0.cancel() }
+        }
+    }
+
     // MARK: - Private Helpers
 
     private func assertEventWasPublished<Event: SFUAdapterEvent & Equatable>(
@@ -719,4 +740,21 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
 
         await safeFulfillment(of: [expectation], file: file, line: line)
     }
+}
+
+private final class StateRecorder: @unchecked Sendable {
+    private let lock = NSLock()
+    private var _latest: WebSocketConnectionState?
+    private var cancellable: AnyCancellable?
+
+    var latest: WebSocketConnectionState? { lock.withLock { _latest } }
+
+    func observe(_ publisher: AnyPublisher<WebSocketConnectionState, Never>) {
+        let subscription = publisher.sink { [self] state in
+            lock.withLock { _latest = state }
+        }
+        lock.withLock { cancellable = subscription }
+    }
+
+    func cancel() { lock.withLock { cancellable = nil } }
 }

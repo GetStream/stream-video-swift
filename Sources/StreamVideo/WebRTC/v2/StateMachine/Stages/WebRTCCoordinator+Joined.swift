@@ -215,7 +215,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
             let sfuAdapter = await context.coordinator?.stateAdapter.sfuAdapter
             observeSFUError(sfuAdapter)
             sfuAdapter?
-                .$connectionState
+                .connectionStatePublisher
                 .compactMap {
                     switch $0 {
                     case let .disconnecting(source):
