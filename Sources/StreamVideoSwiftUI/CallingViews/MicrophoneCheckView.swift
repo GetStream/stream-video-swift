@@ -116,8 +116,9 @@ public struct AudioVolumeIndicator: View {
         // One element for VoiceOver. Bar frames change every sample, so they
         // stay out of the tree. The value moves in 10 percent steps.
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Audio level")
-        .accessibilityValue(Self.spokenValue(for: audioLevels))
+        // These names exist on iOS 13. accessibilityLabel(_:) is iOS 14.
+        .accessibility(label: Text("Audio level"))
+        .accessibility(value: Text(Self.spokenValue(for: audioLevels)))
     }
 
     static func spokenValue(for levels: [Float]) -> String {
