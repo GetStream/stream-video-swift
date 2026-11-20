@@ -27,6 +27,10 @@ Apply [shared rules](../../AGENTS.md). Review alone does not authorize fixes.
    For WebRTC changes, check the [integration rules](../development/references/webrtc.md).
    For public interface changes, follow the [documentation decision](../development/SKILL.md#public-interface-documentation).
    Check [changelog rules](../development/SKILL.md#changelog) for qualifying changes and every edited entry.
+   Check new Swift code against [New Swift code](../development/SKILL.md#new-swift-code).
+   Reject `@_spi`, more than one type in a file, a new static method or free function,
+   a struct where a final class fits, an initializer added in an extension,
+   a second owner for a value that already has one, and a hand-written `DefaultAPI` method.
    Report missing updates or validation.
 4. Run each requested review workflow when available.
    Use a separate reviewer for an independent pass when available.

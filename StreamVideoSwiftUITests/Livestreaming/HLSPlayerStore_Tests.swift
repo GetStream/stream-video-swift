@@ -4,7 +4,7 @@
 
 import AVFoundation
 import Foundation
-@_spi(StreamVideo) @testable import StreamVideo
+@testable import StreamVideo
 @testable import StreamVideoSwiftUI
 import XCTest
 
@@ -59,17 +59,8 @@ final class HLSPlayerStore_Tests: StreamVideoTestCase, @unchecked Sendable {
 
     func test_acquire_withASender_sendsStarted() async {
         let recorder = ReportRecorder()
-        subject = HLSPlayerStore(
-            makePlayer: { [unowned self] url in
-                let player = HLSSpyPlayer()
-                madeURLs.append(url)
-                madePlayers.append(player)
-                return player
-            },
-            senderForCall: { _ in recorder }
-        )
         let call = makeCall()
-        call.state.unifiedSessionId = "unified-1"
+        call.callController.hlsStatsDelivering = recorder
         call.state.session = CallSessionResponse(
             acceptedBy: [:],
             anonymousParticipantCount: 0,
@@ -90,8 +81,10 @@ final class HLSPlayerStore_Tests: StreamVideoTestCase, @unchecked Sendable {
             started.fulfill()
         }
         await fulfillment(of: [started], timeout: 2)
-        let type = await recorder.reports.first?.type
-        XCTAssertEqual(type, "started")
+        let report = await recorder.reports.first
+        let unifiedSessionId = call.callController.unifiedSessionId
+        XCTAssertEqual(report?.type, "started")
+        XCTAssertEqual(report?.unifiedSessionId, unifiedSessionId)
     }
 
     func test_acquire_twiceForTheSameCall_sharesOnePlayer() {
@@ -208,10 +201,10 @@ final class HLSPlayerStore_Tests: StreamVideoTestCase, @unchecked Sendable {
     }
 }
 
-private actor ReportRecorder: HLSStatsSending {
+private actor ReportRecorder: HLSStatsDelivering {
     private(set) var reports: [HLSStatsReport] = []
 
-    func reportHLSStats(
+    func deliver(
         callType _: String,
         callId _: String,
         report: HLSStatsReport

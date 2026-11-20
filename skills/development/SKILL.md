@@ -81,6 +81,25 @@ If measurement cannot run, report size impact as unverified.
   Follow semantic versioning and deprecate breaking APIs with a transition path.
   Discuss new dependencies or breaking changes before implementation.
 
+## New Swift code
+
+Follow these rules for every new type and for every edit that adds one.
+
+- Put one type in each file. A protocol, a class, and an enum are separate types.
+- Use a `final class` for a new model or service. Generated API models are final classes.
+  A SwiftUI `View` stays a struct.
+- Do not use `@_spi`.
+- Do not add a free function or a static method.
+  Keep a static property that an existing pattern requires, such as `InjectionKey.currentValue`.
+- Put each initializer in the type's file. Do not add it in an extension.
+- Reuse the nearest existing type and pipeline before adding a new one.
+  Playback stats follow the WebRTC split: an adapter, a collector, and a delivery type.
+- Take a value from its owner and pass it in. Do not copy it onto a second owner.
+  `WebRTCStateAdapter.unifiedSessionId` stays on that adapter.
+- Add a coordinator endpoint through the OpenAPI generator when the published spec
+  contains the operation. Read [Regenerating OpenAPI code](references/openapi.md).
+  Do not add a method to `DefaultAPI` by hand.
+
 ## Result
 
 In the chat handoff, include the failing test and its passing result after the change.

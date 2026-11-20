@@ -4,16 +4,16 @@
 
 import AVFoundation
 import Foundation
-@_spi(StreamVideo) @testable import StreamVideo
+@testable import StreamVideo
 import XCTest
 
 @MainActor
 final class HLSPlaybackTracker_Tests: XCTestCase, @unchecked Sendable {
 
-    private actor Recorder: HLSStatsSending {
+    private actor Recorder: HLSStatsDelivering {
         private(set) var reports: [HLSStatsReport] = []
 
-        func reportHLSStats(
+        func deliver(
             callType _: String,
             callId _: String,
             report: HLSStatsReport
@@ -23,7 +23,7 @@ final class HLSPlaybackTracker_Tests: XCTestCase, @unchecked Sendable {
     }
 
     private var recorder: Recorder!
-    private var subject: HLSPlaybackTracker!
+    private var subject: HLSStatsAdapter!
 
     override func tearDown() async throws {
         if let subject {
@@ -89,17 +89,14 @@ final class HLSPlaybackTracker_Tests: XCTestCase, @unchecked Sendable {
 
     private func makeSubject() async {
         recorder = Recorder()
-        let reporter = HLSPlaybackReporter(
+        subject = HLSStatsAdapter(
+            player: AVPlayer(),
             callType: "livestream",
             callId: "call-1",
             callSessionId: "session-1",
             unifiedSessionId: "unified-1",
-            sender: recorder
-        )
-        subject = HLSPlaybackTracker(
-            player: AVPlayer(),
-            reporter: reporter,
-            interval: 60
+            interval: 60,
+            delivery: recorder
         )
     }
 }

@@ -72,6 +72,15 @@ class CallController: @unchecked Sendable {
     private let defaultAPI: DefaultAPIEndpoints
     private let videoConfig: VideoConfig
     private let webRTCCoordinatorFactory: WebRTCCoordinatorProviding
+
+    /// Replaces HLS stats delivery in tests. Nil uses ``HLSStatsDelivery``.
+    var hlsStatsDelivering: HLSStatsDelivering?
+
+    /// The unified session id owned by the WebRTC state adapter.
+    var unifiedSessionId: String {
+        webRTCCoordinator.stateAdapter.unifiedSessionId
+    }
+
     private var cachedLocation: String?
     private let initialCallSettings: CallSettings
 
@@ -157,11 +166,6 @@ class CallController: @unchecked Sendable {
         policy: WebRTCJoinPolicy = .default,
         coordinatorJoinAttemptCount: Int = 0
     ) async throws -> JoinCallResponse {
-        let unifiedSessionId = webRTCCoordinator.stateAdapter.unifiedSessionId
-        await MainActor.run { [weak call] in
-            call?.state.unifiedSessionId = unifiedSessionId
-        }
-
         /// Each join attempt creates a fresh `PassthroughSubject` so
         /// that a failure from a previous attempt cannot accidentally
         /// complete a future retry on the same controller.

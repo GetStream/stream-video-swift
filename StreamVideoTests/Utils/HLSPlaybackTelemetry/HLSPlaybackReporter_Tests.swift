@@ -3,15 +3,16 @@
 //
 
 import Foundation
-@_spi(StreamVideo) @testable import StreamVideo
+@testable import StreamVideo
 import XCTest
 
+@MainActor
 final class HLSPlaybackReporter_Tests: XCTestCase, @unchecked Sendable {
 
-    private actor Recorder: HLSStatsSending {
+    private actor Recorder: HLSStatsDelivering {
         private(set) var reports: [HLSStatsReport] = []
 
-        func reportHLSStats(
+        func deliver(
             callType _: String,
             callId _: String,
             report: HLSStatsReport
@@ -22,23 +23,23 @@ final class HLSPlaybackReporter_Tests: XCTestCase, @unchecked Sendable {
 
     private let now = Date(timeIntervalSince1970: 1_700_000_000)
     private lazy var recorder: Recorder! = .init()
-    private lazy var subject: HLSPlaybackReporter! = .init(
+    private lazy var subject: HLSStatsReporter! = .init(
         callType: "livestream",
         callId: "call-1",
         callSessionId: "session-1",
         unifiedSessionId: "unified-1",
-        sender: recorder,
+        delivery: recorder,
         now: { [now] in now }
     )
 
-    override func tearDown() {
+    override func tearDown() async throws {
         subject = nil
         recorder = nil
-        super.tearDown()
+        try await super.tearDown()
     }
 
     func test_start_sendsStartedWithAStableUserSession() async {
-        await subject.start()
+        await subject.sendStarted()
 
         let report = await recorder.reports.first
         XCTAssertEqual(report?.type, "started")
@@ -46,15 +47,17 @@ final class HLSPlaybackReporter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(report?.unifiedSessionId, "unified-1")
         XCTAssertEqual(report?.userSessionId.isEmpty, false)
         XCTAssertEqual(report?.timestamp, 1_700_000_000_000)
+        XCTAssertEqual(report?.sdk, SystemEnvironment.sdkName)
+        XCTAssertEqual(report?.sdkVersion, SystemEnvironment.version)
         XCTAssertNil(report?.endReason)
     }
 
     func test_stats_keepsTheUserSessionAndSendsTheSnapshot() async {
-        await subject.start()
+        await subject.sendStarted()
         let userSessionId = await recorder.reports.first?.userSessionId
 
-        await subject.report(
-            measurement: .init(
+        await subject.sendStats(
+            stats: HLSPlaybackStats(
                 watchDurationMs: 4000,
                 stallCount: 1,
                 stallDurationMs: 800,
@@ -67,7 +70,7 @@ final class HLSPlaybackReporter_Tests: XCTestCase, @unchecked Sendable {
                 height: 720
             ),
             events: [
-                .init(type: "stall_start", timestamp: 1_700_000_000_100, data: [:])
+                HLSStatsEvent(type: "stall_start", timestamp: 1_700_000_000_100, data: [:])
             ]
         )
 
@@ -83,9 +86,9 @@ final class HLSPlaybackReporter_Tests: XCTestCase, @unchecked Sendable {
     }
 
     func test_stop_withAnError_sendsEnded() async {
-        await subject.start()
+        await subject.sendStarted()
 
-        await subject.stop(errorCode: "AVFoundationErrorDomain -11800")
+        await subject.sendEnded(errorCode: "AVFoundationErrorDomain -11800")
 
         let report = await recorder.reports.last
         XCTAssertEqual(report?.type, "ended")
@@ -94,9 +97,9 @@ final class HLSPlaybackReporter_Tests: XCTestCase, @unchecked Sendable {
     }
 
     func test_stop_withoutAnError_sendsLeft() async {
-        await subject.start()
+        await subject.sendStarted()
 
-        await subject.stop(errorCode: nil)
+        await subject.sendEnded(errorCode: nil)
 
         let report = await recorder.reports.last
         XCTAssertEqual(report?.endReason, "left")
@@ -104,11 +107,11 @@ final class HLSPlaybackReporter_Tests: XCTestCase, @unchecked Sendable {
     }
 
     func test_eventsNamedStarted_areOmitted() async {
-        await subject.report(
-            measurement: .init(),
+        await subject.sendStats(
+            stats: HLSPlaybackStats(),
             events: [
-                .init(type: "started", timestamp: 1, data: [:]),
-                .init(type: "stall_end", timestamp: 2, data: [:])
+                HLSStatsEvent(type: "started", timestamp: 1, data: [:]),
+                HLSStatsEvent(type: "stall_end", timestamp: 2, data: [:])
             ]
         )
 

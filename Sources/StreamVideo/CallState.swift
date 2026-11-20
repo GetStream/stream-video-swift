@@ -107,9 +107,6 @@ public class CallState: ObservableObject {
     /// returns to ``PlaybackType/webRTC`` when the call ends.
     @Published public internal(set) var playbackType: PlaybackType = .webRTC
 
-    /// Shared by this viewer's WebRTC and HLS playback sessions.
-    var unifiedSessionId: String = ""
-
     /// The `endedAt` the last join response carried.
     ///
     /// An end that differs from it happened after the join.
