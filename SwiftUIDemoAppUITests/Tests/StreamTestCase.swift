@@ -59,7 +59,7 @@ extension StreamTestCase {
     private func alertHandler() {
         let title = "Push Notification Alert"
         _ = addUIInterruptionMonitor(withDescription: title) { (alert: XCUIElement) -> Bool in
-            let allowButton = alert.buttons["Allow"]
+            let allowButton = alert.buttons["Allow"].firstMatch
             if allowButton.exists {
                 allowButton.tap()
                 return true
