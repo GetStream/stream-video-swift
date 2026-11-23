@@ -9,7 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🐞 Fixed
 - Report the microphone level to VoiceOver as one value. [#1444](https://github.com/GetStream/stream-video-swift/pull/1444)
-- Turning the camera off now stops outgoing video even if the server rejects the request or video permission has been revoked.
+- Turning the camera off now stops outgoing video even if the server rejects the request or video permission has been revoked. [#1452](https://github.com/GetStream/stream-video-swift/pull/1452)
 
 ### 🔄 Changed
 
