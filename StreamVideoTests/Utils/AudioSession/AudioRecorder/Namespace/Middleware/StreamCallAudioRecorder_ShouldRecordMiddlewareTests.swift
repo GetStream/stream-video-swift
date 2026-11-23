@@ -201,6 +201,28 @@ final class StreamCallAudioRecorder_ShouldRecordMiddlewareClientTests: StreamVid
             throw thrown
         }
     }
+
+    /// A call that starts and ends at once creates two tasks. The first
+    /// must not cancel the second, or the lobby recording stays on.
+    func test_lobbyRecording_callStartsAndEndsBeforeMonitoring_dispatchesSetShouldRecordFalse() async {
+        let store = StreamCallAudioRecorder.Namespace.store(
+            initialState: .initial,
+            middleware: [StreamCallAudioRecorder.Namespace.ShouldRecordMiddleware()]
+        )
+        let recorder = StreamCallAudioRecorder(store)
+        newClient = StreamVideo.mock(httpClient: HTTPClient_Mock())
+        recorder.startRecording(ignoreActiveCall: true)
+        await fulfillment { store.state.shouldRecord }
+
+        let call = Call.dummy(callType: .default, callId: .unique)
+        await MainActor.run {
+            newClient.state.activeCall = call
+            newClient.state.activeCall = nil
+        }
+
+        // The reducer turns `shouldRecord` off only for `.setShouldRecord(false)`.
+        await fulfillment(timeout: 3) { !store.state.shouldRecord }
+    }
 }
 
 // TODO: Reenable them
