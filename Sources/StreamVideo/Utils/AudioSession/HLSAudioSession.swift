@@ -83,7 +83,18 @@ actor HLSAudioSession {
         await attempt(.conditioned(owned, action: .setActive(false)))
         // A call created while HLS played has no bootstrap of its own left to
         // run, so the call configuration comes back before the release.
-        await attempt(.conditioned(owned, action: .callBootstrapConfiguration))
+        await attempt(
+            .conditioned(
+                owned,
+                action: .avAudioSession(
+                    .setCategoryAndModeAndCategoryOptions(
+                        .playAndRecord,
+                        mode: .voiceChat,
+                        categoryOptions: [.allowBluetoothHFP, .allowBluetoothA2DP]
+                    )
+                )
+            )
+        )
         await attempt(.conditioned(owned, action: .setActiveSessionIdentifier("")))
     }
 

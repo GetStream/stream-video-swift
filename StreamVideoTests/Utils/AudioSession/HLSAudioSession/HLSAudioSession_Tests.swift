@@ -213,11 +213,18 @@ final class HLSAudioSession_Tests: XCTestCase, @unchecked Sendable {
 
         let owned = RTCAudioStore.Namespace.Action.Condition
             .activeSessionIdentifier(subject.identifier)
+        let bootstrap: RTCAudioStore.StoreAction = .avAudioSession(
+            .setCategoryAndModeAndCategoryOptions(
+                .playAndRecord,
+                mode: .voiceChat,
+                categoryOptions: [.allowBluetoothHFP, .allowBluetoothA2DP]
+            )
+        )
         XCTAssertEqual(
             recorder.batches,
             [
                 [.conditioned(owned, action: .setActive(false))],
-                [.conditioned(owned, action: .callBootstrapConfiguration)],
+                [.conditioned(owned, action: bootstrap)],
                 [.conditioned(owned, action: .setActiveSessionIdentifier(""))]
             ]
         )
@@ -242,7 +249,14 @@ final class HLSAudioSession_Tests: XCTestCase, @unchecked Sendable {
     }
 
     func test_deactivate_restoreFails_stillReleases() async throws {
-        let recorder = DispatchRecorder(failing: { $0.contains(.callBootstrapConfiguration) })
+        let bootstrap: RTCAudioStore.StoreAction = .avAudioSession(
+            .setCategoryAndModeAndCategoryOptions(
+                .playAndRecord,
+                mode: .voiceChat,
+                categoryOptions: [.allowBluetoothHFP, .allowBluetoothA2DP]
+            )
+        )
+        let recorder = DispatchRecorder(failing: { $0.contains(bootstrap) })
         let subject = HLSAudioSession(dispatch: recorder.dispatch)
         try await subject.activate()
         recorder.reset()
