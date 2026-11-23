@@ -104,17 +104,17 @@ final class HLSAudioSession_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(state.activeSessionIdentifier, "")
     }
 
-    func test_activate_anotherSessionOwnsTheStore_doesNotTakeOver() async throws {
+    func test_activate_anotherSessionOwnsTheStore_takesOwnershipAndPlays() async throws {
         let owner = String.unique
         mockAudioStore.audioStore.dispatch(.setActiveSessionIdentifier(owner))
         await fulfillment { self.state.activeSessionIdentifier == owner }
-        let configuration = state.audioSessionConfiguration
 
         try await subject.activate()
 
-        XCTAssertEqual(state.activeSessionIdentifier, owner)
-        XCTAssertEqual(state.audioSessionConfiguration, configuration)
-        XCTAssertFalse(state.isActive)
+        XCTAssertEqual(state.activeSessionIdentifier, subject.identifier)
+        XCTAssertEqual(state.audioSessionConfiguration.category, .playback)
+        XCTAssertEqual(state.audioSessionConfiguration.mode, .moviePlayback)
+        XCTAssertTrue(state.isActive)
     }
 
     func test_deactivate_afterTheLoss_leavesTheNewOwnersConfigurationAlone() async throws {

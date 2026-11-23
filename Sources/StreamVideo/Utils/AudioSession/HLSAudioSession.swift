@@ -42,16 +42,14 @@ actor HLSAudioSession {
         guard !isActive else { return }
         isActive = true
 
-        // The claim applies only to an unowned store, so an active call keeps
-        // its session. The rest applies only while this session owns it.
-        // `.playback` plays through the speaker, unlike the voice-chat mode
-        // that `CallAudioSession` leaves behind when the store is unowned.
-        // The options are explicit: the call ones are invalid for playback.
+        // Claim unconditionally, as WebRTC calls do. A skipped claim lets a
+        // leaving call deactivate the session under live HLS playback. The
+        // rest applies only while this session owns it. `.playback` plays
+        // through the speaker, unlike the voice-chat mode that
+        // `CallAudioSession` leaves behind. The options are explicit: the
+        // call ones are invalid for playback.
         let actions: [RTCAudioStore.Namespace.Action] = [
-            .conditioned(
-                .activeSessionIdentifier(""),
-                action: .setActiveSessionIdentifier(identifier)
-            ),
+            .setActiveSessionIdentifier(identifier),
             .conditioned(
                 owned,
                 action: .avAudioSession(
