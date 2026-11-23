@@ -41,15 +41,17 @@ final class URLSessionTransport_Tests: XCTestCase, @unchecked Sendable {
             headers: ["Authorization": token, "stream-auth-type": "jwt"]
         )
 
+        let url = request.url.absoluteString
+
         _ = try? await subject.execute(request: request)
 
         await fulfillment { [logDestination] in
-            logDestination?.errorMessages.isEmpty == false
+            logDestination?.errorMessages.contains { $0.contains(url) } == true
         }
-        let message = try XCTUnwrap(logDestination.errorMessages.first)
-        XCTAssertTrue(message.contains(request.url.absoluteString))
+        let messages = logDestination.errorMessages
+        let message = try XCTUnwrap(messages.first { $0.contains(url) })
         XCTAssertTrue(message.contains("stream-auth-type"))
-        XCTAssertFalse(message.contains(token))
+        XCTAssertFalse(messages.contains { $0.contains(token) })
     }
 }
 
