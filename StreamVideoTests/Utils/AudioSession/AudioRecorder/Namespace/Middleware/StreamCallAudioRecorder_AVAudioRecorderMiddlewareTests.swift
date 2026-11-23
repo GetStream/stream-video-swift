@@ -234,23 +234,9 @@ final class StreamCallAudioRecorder_AVAudioRecorderMiddlewareTests: StreamVideoT
         XCTAssertEqual(mockPermissions.timesCalled(.requestMicrophonePermission), 0)
     }
 
-    func test_setIsInterruptedFalse_shouldRecordTrueIsRecordingTrue_requestRecordPermissionWasNotCalled() async {
-        subject.apply(
-            state: .init(isRecording: true, isInterrupted: true, shouldRecord: true, meter: 0),
-            action: .setIsInterrupted(false),
-            file: #file,
-            function: #function,
-            line: #line
-        )
-
-        await wait(for: 0.1)
-        XCTAssertEqual(mockPermissions.timesCalled(.requestMicrophonePermission), 0)
-    }
-
-    func test_setIsInterruptedFalse_shouldRecordTrueIsRecordingFalse_requestRecordPermissionWasCalled() async {
-        mockPermissions.stubMicrophonePermission(.unknown)
-        await fulfillment { self.mockPermissions.mockStore.state.microphonePermission == .unknown }
-
+    /// `isRecording` is the caller's intent. A stopped recording must not
+    /// restart when an interruption ends, even if `shouldRecord` is `true`.
+    func test_setIsInterruptedFalse_shouldRecordTrueIsRecordingFalse_doesNotStartRecording() async {
         subject.apply(
             state: .init(isRecording: false, isInterrupted: true, shouldRecord: true, meter: 0),
             action: .setIsInterrupted(false),
@@ -259,7 +245,30 @@ final class StreamCallAudioRecorder_AVAudioRecorderMiddlewareTests: StreamVideoT
             line: #line
         )
 
-        await fulfillment { self.mockPermissions.timesCalled(.requestMicrophonePermission) == 1 }
+        await wait(for: 0.2)
+        XCTAssertEqual(audioRecorder.timesCalled(.record), 0)
+    }
+
+    func test_setIsInterruptedFalse_shouldRecordTrueIsRecordingTrue_restartsRecording() async {
+        await prepareAsRecording()
+        subject.apply(
+            state: .init(isRecording: true, isInterrupted: true, shouldRecord: true, meter: 0),
+            action: .setIsInterrupted(true),
+            file: #file,
+            function: #function,
+            line: #line
+        )
+        await fulfillment { self.audioRecorder.timesCalled(.stop) == 1 }
+
+        subject.apply(
+            state: .init(isRecording: true, isInterrupted: true, shouldRecord: true, meter: 0),
+            action: .setIsInterrupted(false),
+            file: #file,
+            function: #function,
+            line: #line
+        )
+
+        await fulfillment { self.audioRecorder.timesCalled(.record) == 2 }
     }
 
     // MARK: - setShouldRecord

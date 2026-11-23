@@ -193,7 +193,7 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
     func waitForAuthentication(on sfuAdapter: SFUAdapter) async throws {
         sfuAdapter.connect()
         _ = try await sfuAdapter
-            .$connectionState
+            .connectionStatePublisher
             .filter {
                 switch $0 {
                 case .authenticating:
@@ -210,7 +210,7 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
     /// - Throws: An error if connection fails.
     func waitForConnect(on sfuAdapter: SFUAdapter) async throws {
         _ = try await sfuAdapter
-            .$connectionState
+            .connectionStatePublisher
             .filter {
                 switch $0 {
                 case .connected:
