@@ -648,7 +648,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         XCTAssertEqual(state.activeSessionIdentifier, "")
     }
 
-    func test_leave_afterHLSJoin_leavesAudioSessionOwnershipUntouched() async throws {
+    func test_leave_afterHLSJoinTookTheStoreFromAnotherCall_releasesTheStore() async throws {
         let mockAudioStore = MockRTCAudioStore()
         mockAudioStore.makeShared()
         addTeardownBlock { try await mockAudioStore.dismantle() }
@@ -665,7 +665,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         await fulfillment { stack.coordinator.stateMachine.currentStage.id == .idle }
 
         let state = mockAudioStore.audioStore.state
-        XCTAssertEqual(state.activeSessionIdentifier, "other-call")
+        XCTAssertEqual(state.activeSessionIdentifier, "")
         XCTAssertFalse(state.isActive)
     }
 
