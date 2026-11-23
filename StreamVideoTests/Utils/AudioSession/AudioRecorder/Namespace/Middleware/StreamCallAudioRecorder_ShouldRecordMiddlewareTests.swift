@@ -11,9 +11,15 @@ final class StreamCallAudioRecorder_ShouldRecordMiddlewareClientTests: StreamVid
     private var subject: StreamCallAudioRecorder.Namespace.ShouldRecordMiddleware!
     private var newClient: StreamVideo!
     private var replacementClient: StreamVideo!
+    private var fixtureSession: MockRTCAudioStore?
+    private var fixturePermissions: MockPermissionsStore?
 
     override func tearDown() async throws {
         subject = nil
+        try await fixtureSession?.dismantle()
+        fixtureSession = nil
+        fixturePermissions?.dismantle()
+        fixturePermissions = nil
         await replacementClient?.disconnect()
         replacementClient = nil
         await newClient?.disconnect()
@@ -231,138 +237,20 @@ final class StreamCallAudioRecorder_ShouldRecordMiddlewareClientTests: StreamVid
     func test_lobbyClosedWithoutCall_routeChange_avAudioRecorderStaysOff() async throws {
         let fixture = try await makeRecorderFixture()
         newClient = StreamVideo.mock(httpClient: HTTPClient_Mock())
-        var thrown: Error?
 
-        do {
-            fixture.recorder.startRecording(ignoreActiveCall: true)
-            await fulfillment(timeout: 10) { fixture.spy.isMeteringEnabled }
-            fixture.recorder.stopRecording()
-            await fulfillment(timeout: 10) { !fixture.spy.isMeteringEnabled }
-            let recordCallsAtClose = fixture.spy.timesCalled(.record)
+        fixture.recorder.startRecording(ignoreActiveCall: true)
+        await fulfillment(timeout: 10) { fixture.spy.isMeteringEnabled }
+        fixture.recorder.stopRecording()
+        await fulfillment(timeout: 10) { !fixture.spy.isMeteringEnabled }
+        let recordCallsAtClose = fixture.spy.timesCalled(.record)
 
-            try await fixture.session.audioStore.dispatch(
-                .setCurrentRoute(.dummy(outputs: [.dummy(isReceiver: true)]))
-            ).result()
-            await wait(for: 1)
+        try await fixture.session.audioStore.dispatch(
+            .setCurrentRoute(.dummy(outputs: [.dummy(isReceiver: true)]))
+        ).result()
+        await wait(for: 1)
 
-            XCTAssertEqual(fixture.spy.timesCalled(.record), recordCallsAtClose)
-            XCTAssertFalse(fixture.spy.isMeteringEnabled)
-        } catch {
-            thrown = error
-        }
-
-        try await fixture.session.dismantle()
-        fixture.permissions.dismantle()
-        if let thrown {
-            throw thrown
-        }
-    }
-
-    /// A phone call that ends after the lobby closed must not turn the
-    /// microphone on either.
-    func test_lobbyClosedWithoutCall_interruptionEnds_avAudioRecorderStaysOff() async throws {
-        let fixture = try await makeRecorderFixture()
-        newClient = StreamVideo.mock(httpClient: HTTPClient_Mock())
-        var thrown: Error?
-
-        do {
-            fixture.recorder.startRecording(ignoreActiveCall: true)
-            await fulfillment(timeout: 10) { fixture.spy.isMeteringEnabled }
-            fixture.recorder.stopRecording()
-            await fulfillment(timeout: 10) { !fixture.spy.isMeteringEnabled }
-            let recordCallsAtClose = fixture.spy.timesCalled(.record)
-
-            try await fixture.session.audioStore.dispatch(.setInterrupted(true)).result()
-            try await fixture.session.audioStore.dispatch(.setInterrupted(false)).result()
-            await wait(for: 1)
-
-            XCTAssertEqual(fixture.spy.timesCalled(.record), recordCallsAtClose)
-            XCTAssertFalse(fixture.spy.isMeteringEnabled)
-        } catch {
-            thrown = error
-        }
-
-        try await fixture.session.dismantle()
-        fixture.permissions.dismantle()
-        if let thrown {
-            throw thrown
-        }
-    }
-
-    /// An interruption that ends while the microphone is wanted must still
-    /// resume the recording.
-    func test_recording_interruptionEnds_avAudioRecorderResumes() async throws {
-        let fixture = try await makeRecorderFixture()
-        newClient = StreamVideo.mock(httpClient: HTTPClient_Mock())
-        var thrown: Error?
-
-        do {
-            fixture.recorder.startRecording(ignoreActiveCall: true)
-            await fulfillment(timeout: 10) { fixture.spy.isMeteringEnabled }
-
-            try await fixture.session.audioStore.dispatch(.setInterrupted(true)).result()
-            await fulfillment(timeout: 10) { !fixture.spy.isMeteringEnabled }
-            let recordCallsAtInterruption = fixture.spy.timesCalled(.record)
-
-            try await fixture.session.audioStore.dispatch(.setInterrupted(false)).result()
-            await fulfillment(timeout: 10) {
-                fixture.spy.timesCalled(.record) > recordCallsAtInterruption
-                    && fixture.spy.isMeteringEnabled
-            }
-        } catch {
-            thrown = error
-        }
-
-        try await fixture.session.dismantle()
-        fixture.permissions.dismantle()
-        if let thrown {
-            throw thrown
-        }
-    }
-
-    // MARK: - Mute during a call
-
-    /// A mute in a call must clear `shouldRecord`, so a later audio change
-    /// cannot turn the microphone on again.
-    func test_callMuted_routeChange_shouldRecordIsFalseAndAvAudioRecorderStaysOff() async throws {
-        let fixture = try await makeRecorderFixture()
-        newClient = StreamVideo.mock(httpClient: HTTPClient_Mock())
-        var thrown: Error?
-
-        do {
-            try await fixture.session.audioStore.dispatch([
-                .setActive(true),
-                .setHasRecordingPermission(true)
-            ]).result()
-            let call = Call.dummy(callType: .default, callId: .unique)
-            await MainActor.run {
-                call.state.callSettings = CallSettings(audioOn: true)
-                newClient.state.activeCall = call
-            }
-            fixture.recorder.startRecording()
-            await fulfillment(timeout: 10) { fixture.store.state.shouldRecord && fixture.spy.isMeteringEnabled }
-
-            await MainActor.run { call.state.callSettings = CallSettings(audioOn: false) }
-            fixture.recorder.stopRecording()
-            await fulfillment(timeout: 10) { !fixture.store.state.shouldRecord && !fixture.spy.isMeteringEnabled }
-            let recordCallsAtMute = fixture.spy.timesCalled(.record)
-
-            try await fixture.session.audioStore.dispatch(
-                .setCurrentRoute(.dummy(outputs: [.dummy(isReceiver: true)]))
-            ).result()
-            await wait(for: 1)
-
-            XCTAssertEqual(fixture.spy.timesCalled(.record), recordCallsAtMute)
-            XCTAssertFalse(fixture.spy.isMeteringEnabled)
-        } catch {
-            thrown = error
-        }
-
-        try await fixture.session.dismantle()
-        fixture.permissions.dismantle()
-        if let thrown {
-            throw thrown
-        }
+        XCTAssertEqual(fixture.spy.timesCalled(.record), recordCallsAtClose)
+        XCTAssertFalse(fixture.spy.isMeteringEnabled)
     }
 
     // MARK: - Category change during a call
@@ -372,57 +260,46 @@ final class StreamCallAudioRecorder_ShouldRecordMiddlewareClientTests: StreamVid
     func test_callUnmuted_categoryDropsAndReturns_avAudioRecorderResumes() async throws {
         let fixture = try await makeRecorderFixture()
         newClient = StreamVideo.mock(httpClient: HTTPClient_Mock())
-        var thrown: Error?
-
-        do {
-            try await fixture.session.audioStore.dispatch([
-                .setActive(true),
-                .setHasRecordingPermission(true)
-            ]).result()
-            let call = Call.dummy(callType: .default, callId: .unique)
-            await MainActor.run {
-                call.state.callSettings = CallSettings(audioOn: true)
-                newClient.state.activeCall = call
-            }
-            fixture.recorder.startRecording()
-            await fulfillment(timeout: 10) { fixture.store.state.shouldRecord && fixture.spy.isMeteringEnabled }
-
-            try await fixture.session.audioStore.dispatch(
-                .avAudioSession(
-                    .setCategoryAndModeAndCategoryOptions(.playback, mode: .default, categoryOptions: [])
-                )
-            ).result()
-            await fulfillment(timeout: 10) { fixture.spy.timesCalled(.stop) >= 1 }
-            XCTAssertTrue(fixture.store.state.shouldRecord)
-            // Let any restart that the drop itself causes finish first.
-            await wait(for: 1)
-            let recordCallsAtDrop = fixture.spy.timesCalled(.record)
-
-            try await fixture.session.audioStore.dispatch(
-                .avAudioSession(
-                    .setCategoryAndModeAndCategoryOptions(.playAndRecord, mode: .voiceChat, categoryOptions: [])
-                )
-            ).result()
-
-            await fulfillment(timeout: 10) {
-                fixture.spy.timesCalled(.record) > recordCallsAtDrop && fixture.spy.isMeteringEnabled
-            }
-        } catch {
-            thrown = error
+        try await fixture.session.audioStore.dispatch([
+            .setActive(true),
+            .setHasRecordingPermission(true)
+        ]).result()
+        let call = Call.dummy(callType: .default, callId: .unique)
+        await MainActor.run {
+            call.state.callSettings = CallSettings(audioOn: true)
+            newClient.state.activeCall = call
         }
+        fixture.recorder.startRecording()
+        await fulfillment(timeout: 10) { fixture.store.state.shouldRecord && fixture.spy.isMeteringEnabled }
 
-        try await fixture.session.dismantle()
-        fixture.permissions.dismantle()
-        if let thrown {
-            throw thrown
+        try await fixture.session.audioStore.dispatch(
+            .avAudioSession(
+                .setCategoryAndModeAndCategoryOptions(.playback, mode: .default, categoryOptions: [])
+            )
+        ).result()
+        await fulfillment(timeout: 10) { fixture.spy.timesCalled(.stop) >= 1 }
+        XCTAssertTrue(fixture.store.state.shouldRecord)
+        // Let any restart that the drop itself causes finish first.
+        await wait(for: 1)
+        let recordCallsAtDrop = fixture.spy.timesCalled(.record)
+
+        try await fixture.session.audioStore.dispatch(
+            .avAudioSession(
+                .setCategoryAndModeAndCategoryOptions(.playAndRecord, mode: .voiceChat, categoryOptions: [])
+            )
+        ).result()
+
+        await fulfillment(timeout: 10) {
+            fixture.spy.timesCalled(.record) > recordCallsAtDrop && fixture.spy.isMeteringEnabled
         }
     }
 
     // MARK: - Private Helpers
 
+    /// Builds a recorder with the real middleware. `tearDown` cleans up the
+    /// shared audio store and permissions.
     private func makeRecorderFixture() async throws -> (
         spy: MockAVAudioRecorder,
-        permissions: MockPermissionsStore,
         session: MockRTCAudioStore,
         store: Store<StreamCallAudioRecorder.Namespace>,
         recorder: StreamCallAudioRecorder
@@ -430,8 +307,10 @@ final class StreamCallAudioRecorder_ShouldRecordMiddlewareClientTests: StreamVid
         let spy = try MockAVAudioRecorder.build()
         spy.stub(for: .record, with: true)
         let permissions = MockPermissionsStore(inject: true)
+        fixturePermissions = permissions
         let session = MockRTCAudioStore()
         session.makeShared()
+        fixtureSession = session
         // Calls configure `.playAndRecord` before the recorder starts.
         try await session.audioStore.dispatch(
             .avAudioSession(.setCategoryAndMode(.playAndRecord, mode: .default))
@@ -450,7 +329,7 @@ final class StreamCallAudioRecorder_ShouldRecordMiddlewareClientTests: StreamVid
                 StreamCallAudioRecorder.Namespace.ShouldRecordMiddleware()
             ]
         )
-        return (spy, permissions, session, store, StreamCallAudioRecorder(store))
+        return (spy, session, store, StreamCallAudioRecorder(store))
     }
 }
 

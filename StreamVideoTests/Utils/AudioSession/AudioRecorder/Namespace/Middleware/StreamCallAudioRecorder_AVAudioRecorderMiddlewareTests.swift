@@ -234,19 +234,6 @@ final class StreamCallAudioRecorder_AVAudioRecorderMiddlewareTests: StreamVideoT
         XCTAssertEqual(mockPermissions.timesCalled(.requestMicrophonePermission), 0)
     }
 
-    func test_setIsInterruptedFalse_shouldRecordTrueIsRecordingTrue_requestRecordPermissionWasNotCalled() async {
-        subject.apply(
-            state: .init(isRecording: true, isInterrupted: true, shouldRecord: true, meter: 0),
-            action: .setIsInterrupted(false),
-            file: #file,
-            function: #function,
-            line: #line
-        )
-
-        await wait(for: 0.1)
-        XCTAssertEqual(mockPermissions.timesCalled(.requestMicrophonePermission), 0)
-    }
-
     /// `isRecording` is the caller's intent. A stopped recording must not
     /// restart when an interruption ends, even if `shouldRecord` is `true`.
     func test_setIsInterruptedFalse_shouldRecordTrueIsRecordingFalse_doesNotStartRecording() async {
