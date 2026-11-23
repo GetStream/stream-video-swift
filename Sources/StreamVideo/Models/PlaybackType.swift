@@ -6,8 +6,8 @@ import Foundation
 
 /// How the backend routed a joined call to the client.
 ///
-/// The backend picks the route when the client joins. The route does not
-/// change for the lifetime of the call.
+/// The backend picks the route on the first join. The call state returns to
+/// `webRTC` when the call ends.
 public enum PlaybackType: Equatable, Sendable {
 
     /// The client is connected to the call through WebRTC.
