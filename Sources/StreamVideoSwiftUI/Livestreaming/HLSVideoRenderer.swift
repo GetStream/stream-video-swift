@@ -65,14 +65,14 @@ public struct HLSVideoRenderer: UIViewRepresentable {
     public func makeUIView(context: Context) -> HLSPlayerView {
         let view = HLSPlayerView()
         view.backgroundColor = .clear
-        view.videoGravity = Self.videoGravity(for: contentMode)
+        view.videoGravity = videoGravity(for: contentMode)
         context.coordinator.attach(to: view)
         return view
     }
 
     /// Applies the content mode.
     public func updateUIView(_ uiView: HLSPlayerView, context: Context) {
-        uiView.videoGravity = Self.videoGravity(for: contentMode)
+        uiView.videoGravity = videoGravity(for: contentMode)
         context.coordinator.update(call: call)
     }
 
@@ -84,7 +84,7 @@ public struct HLSVideoRenderer: UIViewRepresentable {
         coordinator.dismantle()
     }
 
-    static func videoGravity(for contentMode: UIView.ContentMode) -> AVLayerVideoGravity {
+    private func videoGravity(for contentMode: UIView.ContentMode) -> AVLayerVideoGravity {
         switch contentMode {
         case .scaleAspectFill:
             return .resizeAspectFill

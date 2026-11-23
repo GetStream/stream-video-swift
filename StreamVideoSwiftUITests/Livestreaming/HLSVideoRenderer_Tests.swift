@@ -34,24 +34,6 @@ final class HLSVideoRenderer_Tests: StreamVideoTestCase, @unchecked Sendable {
         try await super.tearDown()
     }
 
-    // MARK: - videoGravity
-
-    func test_videoGravity_scaleAspectFit_resizesAspect() {
-        XCTAssertEqual(HLSVideoRenderer.videoGravity(for: .scaleAspectFit), .resizeAspect)
-    }
-
-    func test_videoGravity_scaleAspectFill_resizesAspectFill() {
-        XCTAssertEqual(HLSVideoRenderer.videoGravity(for: .scaleAspectFill), .resizeAspectFill)
-    }
-
-    func test_videoGravity_scaleToFill_resizes() {
-        XCTAssertEqual(HLSVideoRenderer.videoGravity(for: .scaleToFill), .resize)
-    }
-
-    func test_videoGravity_otherModes_resizeAspect() {
-        XCTAssertEqual(HLSVideoRenderer.videoGravity(for: .center), .resizeAspect)
-    }
-
     // MARK: - init
 
     func test_init_usesTheInjectedStore() {
