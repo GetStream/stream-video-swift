@@ -137,6 +137,33 @@ final class HLSVideoRenderer_Tests: StreamVideoTestCase, @unchecked Sendable {
         XCTAssertTrue(view.player === madePlayers.first)
     }
 
+    // MARK: - onPlayerReady
+
+    func test_attach_webRTCCall_doesNotCallOnPlayerReady() {
+        var readyCount = 0
+        let subject = HLSVideoRenderer.Coordinator(call: call, store: store) {
+            readyCount += 1
+        }
+
+        subject.attach(to: view)
+
+        XCTAssertEqual(readyCount, 0)
+        subject.dismantle()
+    }
+
+    func test_playbackTypeBecomesHLS_callsOnPlayerReadyOnce() {
+        var readyCount = 0
+        let subject = HLSVideoRenderer.Coordinator(call: call, store: store) {
+            readyCount += 1
+        }
+        subject.attach(to: view)
+
+        call.state.playbackType = .hls(url)
+
+        XCTAssertEqual(readyCount, 1)
+        subject.dismantle()
+    }
+
     // MARK: - dismantle
 
     func test_dismantle_releasesThePlayerAndEmptiesTheView() {

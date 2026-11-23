@@ -355,22 +355,28 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
 
     @ViewBuilder
     private var hlsVideoRenderer: some View {
-        HLSVideoRenderer(call: call, contentMode: .scaleAspectFit)
-            .onTapGesture {
-                controlsShown = true
-            }
-            .overlay(
-                controlsShown ? LivestreamPlayPauseButton(
-                    streamPaused: $streamPaused
-                ) {
-                    applyStreamPaused(streamPaused)
-                    if !streamPaused {
-                        controlsShown = false
-                    }
-                } : nil
-            )
-            .onAppear { startHLSPlayback() }
-            .onChange(of: fullScreen) { onFullScreenStateChange?($0) }
+        HLSVideoRenderer(
+            call: call,
+            contentMode: .scaleAspectFit,
+            store: InjectedValues[\.hlsPlayerStore],
+            // The player is created after the view appears, so the mute
+            // and pause state is applied once it exists.
+            onPlayerReady: { startHLSPlayback() }
+        )
+        .onTapGesture {
+            controlsShown = true
+        }
+        .overlay(
+            controlsShown ? LivestreamPlayPauseButton(
+                streamPaused: $streamPaused
+            ) {
+                applyStreamPaused(streamPaused)
+                if !streamPaused {
+                    controlsShown = false
+                }
+            } : nil
+        )
+        .onChange(of: fullScreen) { onFullScreenStateChange?($0) }
     }
 
     @ViewBuilder

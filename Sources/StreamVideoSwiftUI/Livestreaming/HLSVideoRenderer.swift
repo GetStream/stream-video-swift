@@ -26,6 +26,7 @@ public struct HLSVideoRenderer: UIViewRepresentable {
     var call: Call
     var contentMode: UIView.ContentMode
     var store: HLSPlayerStore
+    var onPlayerReady: (() -> Void)?
 
     /// Creates a renderer for the HLS stream of the call.
     /// - Parameters:
@@ -46,16 +47,18 @@ public struct HLSVideoRenderer: UIViewRepresentable {
     init(
         call: Call,
         contentMode: UIView.ContentMode,
-        store: HLSPlayerStore
+        store: HLSPlayerStore,
+        onPlayerReady: (() -> Void)? = nil
     ) {
         self.call = call
         self.contentMode = contentMode
         self.store = store
+        self.onPlayerReady = onPlayerReady
     }
 
     /// Creates the coordinator that owns the claim on the player.
     public func makeCoordinator() -> Coordinator {
-        Coordinator(call: call, store: store)
+        Coordinator(call: call, store: store, onPlayerReady: onPlayerReady)
     }
 
     /// Creates the view that shows the player.
@@ -104,10 +107,18 @@ extension HLSVideoRenderer {
         private var lease: HLSPlayerLease?
         private weak var view: HLSPlayerView?
         private var playbackTypeObserver: AnyCancellable?
+        /// Called after a new player is shown. Lets the owner apply state,
+        /// such as mute, that a player created earlier would not have.
+        private let onPlayerReady: (() -> Void)?
 
-        init(call: Call, store: HLSPlayerStore) {
+        init(
+            call: Call,
+            store: HLSPlayerStore,
+            onPlayerReady: (() -> Void)? = nil
+        ) {
             self.call = call
             self.store = store
+            self.onPlayerReady = onPlayerReady
         }
 
         func attach(to view: HLSPlayerView) {
@@ -142,14 +153,15 @@ extension HLSVideoRenderer {
         private func update(for playbackType: PlaybackType) {
             switch playbackType {
             case .hls:
-                if lease == nil {
-                    lease = store.acquire(for: call, playbackType: playbackType)
-                }
+                guard lease == nil else { return }
+                lease = store.acquire(for: call, playbackType: playbackType)
+                view?.player = lease?.player
+                if lease != nil { onPlayerReady?() }
             case .webRTC:
                 lease?.release()
                 lease = nil
+                view?.player = nil
             }
-            view?.player = lease?.player
         }
     }
 }
