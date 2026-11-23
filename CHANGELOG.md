@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Keep the lobby microphone level meter running when a new client or the audio device module reports its initial state. [#1412](https://github.com/GetStream/stream-video-swift/pull/1412)
 - Keep recording when other audio session state changes and the audio session category stays the same. [#1434](https://github.com/GetStream/stream-video-swift/pull/1434)
 - Stop the microphone level meter when a call ends right after it starts. [#1436](https://github.com/GetStream/stream-video-swift/pull/1436)
+- Keep the microphone off after the lobby closes without a call. [#1437](https://github.com/GetStream/stream-video-swift/pull/1437)
 
 ### 🔄 Changed
 
