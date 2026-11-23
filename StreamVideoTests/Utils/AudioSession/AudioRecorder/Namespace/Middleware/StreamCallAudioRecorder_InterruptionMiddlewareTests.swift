@@ -32,8 +32,7 @@ final class StreamCallAudioRecorder_InterruptionMiddlewareStoreTests: XCTestCase
 
         let validation = expectation(description: "Dispatcher was called")
         let values = AllocatedUnfairLock<[Bool]>([])
-        let middleware = StreamCallAudioRecorder.Namespace.InterruptionMiddleware()
-        middleware.dispatcher = .init { actions, _, _, _ in
+        subject.dispatcher = .init { actions, _, _, _ in
             if case let .setIsInterrupted(value) = actions[0].wrappedValue {
                 values.withLock { $0.append(value) }
                 validation.fulfill()
