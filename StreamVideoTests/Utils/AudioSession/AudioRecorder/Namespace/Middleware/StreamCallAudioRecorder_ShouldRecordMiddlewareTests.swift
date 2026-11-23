@@ -222,7 +222,6 @@ final class StreamCallAudioRecorder_ShouldRecordMiddlewareClientTests: StreamVid
 
         // The reducer turns `shouldRecord` off only for `.setShouldRecord(false)`.
         await fulfillment(timeout: 3) { !store.state.shouldRecord }
-        XCTAssertFalse(store.state.shouldRecord)
     }
 }
 

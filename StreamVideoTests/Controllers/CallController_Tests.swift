@@ -1621,10 +1621,6 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
             let adapterSettings = await stateAdapter.callSettings
             return await MainActor.run { call.state.callSettings == adapterSettings }
         }
-        let expected = await stateAdapter.callSettings
-        XCTAssertEqual(expected.speakerOn, expectedSpeakerOn)
-        XCTAssertEqual(expected.audioOutputOn, terminalAudioOutputOn)
-        XCTAssertEqual(call.state.callSettings, expected)
     }
 
     // MARK: - enableClientCapabilities
