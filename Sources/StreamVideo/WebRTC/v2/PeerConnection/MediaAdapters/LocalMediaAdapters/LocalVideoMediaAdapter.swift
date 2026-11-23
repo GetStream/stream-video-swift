@@ -178,17 +178,27 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
     /// Updates the local video media based on new call settings.
     ///
+    /// Muting stops capture and disables local tracks before notifying the
+    /// SFU, even after publishing permission is revoked. Signaling failures
+    /// are reported without re-enabling local video.
+    ///
     /// - Parameter settings: The updated call settings.
     func didUpdateCallSettings(
         _ settings: CallSettings
     ) async throws {
         try await processingQueue.addSynchronousTaskOperation { [weak self] in
-            guard let self, ownCapabilities.contains(.sendVideo) else { return }
-            callSettings = settings
-            registerPrimaryTrackIfPossible(settings)
+            guard let self else { return }
 
             let isMuted = !settings.videoOn
             let isLocalMuted = primaryTrack.isEnabled == false
+
+            if isMuted, !isLocalMuted {
+                try await unpublish()
+            }
+
+            guard ownCapabilities.contains(.sendVideo) else { return }
+            callSettings = settings
+            registerPrimaryTrackIfPossible(settings)
 
             if isMuted != isLocalMuted {
                 try await sfuAdapter.updateTrackMuteState(
@@ -205,9 +215,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                 track: primaryTrack
             )
 
-            if isMuted, primaryTrack.isEnabled {
-                try await unpublish()
-            } else if !isMuted {
+            if !isMuted {
                 try await publish()
             }
         }
