@@ -13,10 +13,13 @@ final class StreamCallAudioRecorder_CategoryMiddlewareTests: XCTestCase, @unchec
     private lazy var subject: StreamCallAudioRecorder
         .Namespace
         .CategoryMiddleware! = .init()
+    private var session: MockRTCAudioStore?
 
-    override func tearDown() {
+    override func tearDown() async throws {
         subject = nil
-        super.tearDown()
+        try await session?.dismantle()
+        session = nil
+        try await super.tearDown()
     }
 
     // MARK: - init
@@ -80,5 +83,26 @@ final class StreamCallAudioRecorder_CategoryMiddlewareTests: XCTestCase, @unchec
         )
 
         await safeFulfillment(of: [validation])
+    }
+
+    /// Only a category change stops recording. Other audio state changes
+    /// must not stop recording that started after the last change.
+    func test_audioStoreCategoryUnchanged_otherStateChanges_noActionDispatch() async throws {
+        let session = MockRTCAudioStore()
+        session.makeShared()
+        self.session = session
+        subject = .init()
+        let validation = expectation(description: "Dispatcher was called")
+        validation.isInverted = true
+        validation.assertForOverFulfill = false
+        subject.dispatcher = .init { _, _, _, _ in validation.fulfill() }
+
+        // Wait for the store to process both actions before the inverted wait.
+        try await session.audioStore.dispatch([
+            .setHasRecordingPermission(true),
+            .setHasRecordingPermission(false)
+        ]).result()
+
+        await safeFulfillment(of: [validation], timeout: 1)
     }
 }
