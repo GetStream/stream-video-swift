@@ -39,10 +39,11 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
         allOtherStages = nil
         validStages = nil
         subject = nil
-        weak let releasedStack = mockCoordinatorStack
+        // A weak capture builds on Swift 6.1, which rejects weak let.
+        let releasedStack = { [weak stack = mockCoordinatorStack] in stack }
         mockCoordinatorStack = nil
         AssertAsync.willBeNil(
-            releasedStack,
+            releasedStack(),
             message: "MockWebRTCCoordinatorStack was not released."
         )
         super.tearDown()
