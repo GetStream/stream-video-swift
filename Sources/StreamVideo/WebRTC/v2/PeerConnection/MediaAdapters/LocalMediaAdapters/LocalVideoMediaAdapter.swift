@@ -195,6 +195,9 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             if isMuted, !isLocalMuted {
                 try await unpublish()
             }
+            // Stop app-state observers before the SFU request can fail, so
+            // returning to the foreground does not report video as unmuted.
+            backgroundMuteAdapter.didUpdateCallSettings(settings)
 
             guard ownCapabilities.contains(.sendVideo) else { return }
             callSettings = settings
@@ -207,8 +210,6 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                     for: sessionID
                 )
             }
-
-            backgroundMuteAdapter.didUpdateCallSettings(settings)
 
             try await configureActiveVideoCaptureSession(
                 position: settings.cameraPosition == .back ? .back : .front,
