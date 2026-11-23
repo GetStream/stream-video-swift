@@ -261,13 +261,14 @@ extension UserRobot {
     
     @discardableResult
     private func userControls(toggle: XCUIElement, action: UserControls) -> Self {
-        switch (action, toggle.isOn) {
-        case (.disable, true):
+        // A tap can be held behind a permission prompt, and the app may
+        // change the value after it. Tap until the target value is reached.
+        let target = action == .enable ? "1" : "0"
+        for _ in 0..<3 where toggle.value as? String != target {
             toggle.tap()
-        case (.enable, false):
-            toggle.tap()
-        default:
-            break
+            if toggle.waitForValue(target, timeout: 2).value as? String == target {
+                break
+            }
         }
 
         return self
