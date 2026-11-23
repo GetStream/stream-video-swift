@@ -9,7 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🐞 Fixed
 - Report the microphone level to VoiceOver as one value. [#1444](https://github.com/GetStream/stream-video-swift/pull/1444)
-- Failed API requests no longer write the user token to the logs.
+- Failed API requests no longer write the user token to the logs. [#1451](https://github.com/GetStream/stream-video-swift/pull/1451)
 
 ### 🔄 Changed
 
