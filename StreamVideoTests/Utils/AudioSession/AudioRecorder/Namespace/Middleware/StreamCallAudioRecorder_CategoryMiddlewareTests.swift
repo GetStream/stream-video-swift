@@ -13,10 +13,13 @@ final class StreamCallAudioRecorder_CategoryMiddlewareTests: XCTestCase, @unchec
     private lazy var subject: StreamCallAudioRecorder
         .Namespace
         .CategoryMiddleware! = .init()
+    private var session: MockRTCAudioStore?
 
-    override func tearDown() {
+    override func tearDown() async throws {
         subject = nil
-        super.tearDown()
+        try await session?.dismantle()
+        session = nil
+        try await super.tearDown()
     }
 
     // MARK: - init
@@ -87,6 +90,7 @@ final class StreamCallAudioRecorder_CategoryMiddlewareTests: XCTestCase, @unchec
     func test_audioStoreCategoryUnchanged_otherStateChanges_noActionDispatch() async throws {
         let session = MockRTCAudioStore()
         session.makeShared()
+        self.session = session
         subject = .init()
         let validation = expectation(description: "Dispatcher was called")
         validation.isInverted = true
@@ -100,6 +104,5 @@ final class StreamCallAudioRecorder_CategoryMiddlewareTests: XCTestCase, @unchec
         ]).result()
 
         await safeFulfillment(of: [validation], timeout: 1)
-        try await session.dismantle()
     }
 }
