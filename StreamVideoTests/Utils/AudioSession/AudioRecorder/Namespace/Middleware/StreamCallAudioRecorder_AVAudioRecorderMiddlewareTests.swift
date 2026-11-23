@@ -328,7 +328,49 @@ final class StreamCallAudioRecorder_AVAudioRecorderMiddlewareTests: StreamVideoT
         await safeFulfillment(of: [meterExpectation])
     }
 
+    // MARK: - audioDeviceModule
+
+    func test_init_initialAudioDeviceModuleReport_doesNotRestartRunningRecording() async {
+        // The initial report is queued during init. Start recording
+        // right after, so a restart on that report would be observable.
+        subject = .init(
+            audioRecorder: audioRecorder,
+            permissions: mockPermissions.permissionsStore,
+            audioStore: mockAudioStore.audioStore
+        )
+        subject.stateProvider = { self.recordingState }
+        await prepareAsRecording()
+
+        await wait(for: 0.5)
+        XCTAssertEqual(audioRecorder.timesCalled(.record), 1)
+        XCTAssertEqual(audioRecorder.timesCalled(.stop), 0)
+    }
+
+    func test_audioDeviceModuleChanges_whileRecording_switchesModeEachTime() async throws {
+        audioRecorder.stub(for: .record, with: true)
+        subject.stateProvider = { self.recordingState }
+        await prepareAsRecording()
+
+        // nil -> module: recording moves to the module, recorder stops.
+        try await mockAudioStore.audioStore.dispatch(
+            .setAudioDeviceModule(.init(MockRTCAudioDeviceModule()))
+        ).result()
+        await fulfillment { self.audioRecorder.timesCalled(.stop) == 1 }
+        await wait(for: 0.2)
+        XCTAssertEqual(audioRecorder.timesCalled(.record), 1)
+
+        // module -> nil: recording moves back to the recorder.
+        try await mockAudioStore.audioStore.dispatch(
+            .setAudioDeviceModule(nil)
+        ).result()
+        await fulfillment { self.audioRecorder.timesCalled(.record) == 2 }
+    }
+
     // MARK: - Private Helpers
+
+    private var recordingState: StreamCallAudioRecorder.Namespace.State {
+        .init(isRecording: true, isInterrupted: false, shouldRecord: true, meter: 0)
+    }
 
     private func prepareAsRecording() async {
         audioRecorder.stub(for: .record, with: true)
