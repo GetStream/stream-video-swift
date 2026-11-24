@@ -198,7 +198,7 @@ jobs:
 
   automated-code-review:
     name: Automated Code Review
-    runs-on: ubuntu-24.04
+    runs-on: { group: github-public-amd64 }
     steps:
     - uses: actions/checkout@v4.1.1
     - uses: ./.github/actions/ruby-cache
@@ -208,7 +208,7 @@ jobs:
 
   slack:
     name: Slack Report
-    runs-on: ubuntu-latest
+    runs-on: { group: github-public-amd64 }
     needs: [build-and-test-debug, test-e2e-debug, build-test-app-and-frameworks, build-apps, build-old-xcode, automated-code-review]
     if: failure() && github.event_name == 'schedule'
     steps:
