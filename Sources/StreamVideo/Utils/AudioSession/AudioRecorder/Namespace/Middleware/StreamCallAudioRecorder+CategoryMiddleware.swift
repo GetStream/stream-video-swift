@@ -36,6 +36,9 @@ extension StreamCallAudioRecorder.Namespace {
                 // Observe the derived configuration so system-driven category
                 // changes also stop the local recorder.
                 .publisher(\.audioSessionConfiguration.category)
+                // The store emits on every state change. Only a category
+                // change may stop recording.
+                .removeDuplicates()
                 .filter { $0 != .playAndRecord && $0 != .record }
                 .sink { [weak self] _ in
                     // Stop recording when category becomes incompatible

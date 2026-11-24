@@ -10,6 +10,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### 🐞 Fixed
 - Report the microphone level to VoiceOver as one value. [#1444](https://github.com/GetStream/stream-video-swift/pull/1444)
 - Turning the camera off now stops outgoing video even if the server rejects the request or video permission has been revoked. [#1452](https://github.com/GetStream/stream-video-swift/pull/1452)
+- Failed API requests no longer write the user token to the logs. [#1451](https://github.com/GetStream/stream-video-swift/pull/1451)
+- Keep the lobby microphone level meter running when a new client or the audio device module reports its initial state. [#1412](https://github.com/GetStream/stream-video-swift/pull/1412)
+- Keep recording when other audio session state changes and the audio session category stays the same. [#1434](https://github.com/GetStream/stream-video-swift/pull/1434)
+- Stop the microphone level meter when a call ends right after it starts. [#1436](https://github.com/GetStream/stream-video-swift/pull/1436)
+- Keep the microphone off after the lobby closes without a call. [#1437](https://github.com/GetStream/stream-video-swift/pull/1437)
+- Stop restarting an active recording when other audio session state changes. [#1439](https://github.com/GetStream/stream-video-swift/pull/1439)
+- Fix a rare crash or missed SFU connection state update when a call joins. [#1416](https://github.com/GetStream/stream-video-swift/pull/1416)
 
 ### 🔄 Changed
 

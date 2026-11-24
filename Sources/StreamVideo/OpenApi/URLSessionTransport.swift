@@ -124,11 +124,23 @@ final class URLSessionTransport: DefaultAPITransport, @unchecked Sendable {
             // Log error and rethrow
             log.error(
                 "URLSessionTransport: \(request.url.absoluteString)\n"
-                    + "Headers:\n\(request.headers)\n"
+                    + "Headers:\n\(Self.loggableHeaders(request.headers))\n"
                     + "Query items:\n\(request.queryParams)",
                 subsystems: .httpRequests, error: error
             )
             throw error
+        }
+    }
+
+    /// Returns the headers with the user token masked, because error logs
+    /// can reach the system log and crash reporters.
+    private static func loggableHeaders(
+        _ headers: [String: String]
+    ) -> [String: String] {
+        headers.reduce(into: [:]) { result, header in
+            let isAuthorization = header.key
+                .caseInsensitiveCompare("authorization") == .orderedSame
+            result[header.key] = isAuthorization ? "<redacted>" : header.value
         }
     }
 }

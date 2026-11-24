@@ -234,23 +234,9 @@ final class StreamCallAudioRecorder_AVAudioRecorderMiddlewareTests: StreamVideoT
         XCTAssertEqual(mockPermissions.timesCalled(.requestMicrophonePermission), 0)
     }
 
-    func test_setIsInterruptedFalse_shouldRecordTrueIsRecordingTrue_requestRecordPermissionWasNotCalled() async {
-        subject.apply(
-            state: .init(isRecording: true, isInterrupted: true, shouldRecord: true, meter: 0),
-            action: .setIsInterrupted(false),
-            file: #file,
-            function: #function,
-            line: #line
-        )
-
-        await wait(for: 0.1)
-        XCTAssertEqual(mockPermissions.timesCalled(.requestMicrophonePermission), 0)
-    }
-
-    func test_setIsInterruptedFalse_shouldRecordTrueIsRecordingFalse_requestRecordPermissionWasCalled() async {
-        mockPermissions.stubMicrophonePermission(.unknown)
-        await fulfillment { self.mockPermissions.mockStore.state.microphonePermission == .unknown }
-
+    /// `isRecording` is the caller's intent. A stopped recording must not
+    /// restart when an interruption ends, even if `shouldRecord` is `true`.
+    func test_setIsInterruptedFalse_shouldRecordTrueIsRecordingFalse_doesNotStartRecording() async {
         subject.apply(
             state: .init(isRecording: false, isInterrupted: true, shouldRecord: true, meter: 0),
             action: .setIsInterrupted(false),
@@ -259,7 +245,30 @@ final class StreamCallAudioRecorder_AVAudioRecorderMiddlewareTests: StreamVideoT
             line: #line
         )
 
-        await fulfillment { self.mockPermissions.timesCalled(.requestMicrophonePermission) == 1 }
+        await wait(for: 0.2)
+        XCTAssertEqual(audioRecorder.timesCalled(.record), 0)
+    }
+
+    func test_setIsInterruptedFalse_shouldRecordTrueIsRecordingTrue_restartsRecording() async {
+        await prepareAsRecording()
+        subject.apply(
+            state: .init(isRecording: true, isInterrupted: true, shouldRecord: true, meter: 0),
+            action: .setIsInterrupted(true),
+            file: #file,
+            function: #function,
+            line: #line
+        )
+        await fulfillment { self.audioRecorder.timesCalled(.stop) == 1 }
+
+        subject.apply(
+            state: .init(isRecording: true, isInterrupted: true, shouldRecord: true, meter: 0),
+            action: .setIsInterrupted(false),
+            file: #file,
+            function: #function,
+            line: #line
+        )
+
+        await fulfillment { self.audioRecorder.timesCalled(.record) == 2 }
     }
 
     // MARK: - setShouldRecord
@@ -328,7 +337,49 @@ final class StreamCallAudioRecorder_AVAudioRecorderMiddlewareTests: StreamVideoT
         await safeFulfillment(of: [meterExpectation])
     }
 
+    // MARK: - audioDeviceModule
+
+    func test_init_initialAudioDeviceModuleReport_doesNotRestartRunningRecording() async {
+        // The initial report is queued during init. Start recording
+        // right after, so a restart on that report would be observable.
+        subject = .init(
+            audioRecorder: audioRecorder,
+            permissions: mockPermissions.permissionsStore,
+            audioStore: mockAudioStore.audioStore
+        )
+        subject.stateProvider = { self.recordingState }
+        await prepareAsRecording()
+
+        await wait(for: 0.5)
+        XCTAssertEqual(audioRecorder.timesCalled(.record), 1)
+        XCTAssertEqual(audioRecorder.timesCalled(.stop), 0)
+    }
+
+    func test_audioDeviceModuleChanges_whileRecording_switchesModeEachTime() async throws {
+        audioRecorder.stub(for: .record, with: true)
+        subject.stateProvider = { self.recordingState }
+        await prepareAsRecording()
+
+        // nil -> module: recording moves to the module, recorder stops.
+        try await mockAudioStore.audioStore.dispatch(
+            .setAudioDeviceModule(.init(MockRTCAudioDeviceModule()))
+        ).result()
+        await fulfillment { self.audioRecorder.timesCalled(.stop) == 1 }
+        await wait(for: 0.2)
+        XCTAssertEqual(audioRecorder.timesCalled(.record), 1)
+
+        // module -> nil: recording moves back to the recorder.
+        try await mockAudioStore.audioStore.dispatch(
+            .setAudioDeviceModule(nil)
+        ).result()
+        await fulfillment { self.audioRecorder.timesCalled(.record) == 2 }
+    }
+
     // MARK: - Private Helpers
+
+    private var recordingState: StreamCallAudioRecorder.Namespace.State {
+        .init(isRecording: true, isInterrupted: false, shouldRecord: true, meter: 0)
+    }
 
     private func prepareAsRecording() async {
         audioRecorder.stub(for: .record, with: true)
