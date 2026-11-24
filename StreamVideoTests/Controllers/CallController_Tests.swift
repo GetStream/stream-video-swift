@@ -1581,6 +1581,48 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         XCTAssertEqual(call.state.anonymousParticipantCount, 0)
     }
 
+    // MARK: - call settings mirror
+
+    @MainActor
+    func test_callSettingsUpdates_inARow_endWithTheLastValueOnTheCallState() async throws {
+        mockPermissions.stubMicrophonePermission(.granted)
+        mockPermissions.stubCameraPermission(.granted)
+        let call = Call.dummy(callController: subject)
+        subject.call = call
+        await wait(for: 0.5)
+        let stateAdapter = mockWebRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+        await stateAdapter.enqueueOwnCapabilities { [.sendAudio, .sendVideo] }
+        let toggles = 40
+        let lastIndex = toggles - 1
+        let expectedSpeakerOn = lastIndex % 2 == 1
+        let terminalAudioOutputOn = false
+
+        for index in 0..<lastIndex {
+            let speakerOn = index % 2 == 1
+            await stateAdapter.enqueueCallSettings {
+                $0.withUpdatedSpeakerState(speakerOn)
+            }
+        }
+        await stateAdapter.enqueueCallSettings {
+            $0
+                .withUpdatedSpeakerState(expectedSpeakerOn)
+                .withUpdatedAudioOutputState(terminalAudioOutputOn)
+        }
+
+        await fulfillment(timeout: 60) {
+            let adapterSettings = await stateAdapter.callSettings
+            return adapterSettings.speakerOn == expectedSpeakerOn
+                && adapterSettings.audioOutputOn == terminalAudioOutputOn
+        }
+        await fulfillment {
+            let adapterSettings = await stateAdapter.callSettings
+            return await MainActor.run { call.state.callSettings == adapterSettings }
+        }
+    }
+
     // MARK: - enableClientCapabilities
 
     func test_enableClientCapabilities_correctlyUpdatesStateAdapter() async throws {
@@ -1693,15 +1735,22 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
     ) async rethrows {
         let transitionExpectation = expectation(description: "WebRTCCoordinator is expected to transition to stage id:\(id).")
 
+        // Subscribe before the operation starts, so a fast transition cannot
+        // pass the stage before anyone observes it.
+        let stages = CurrentValueSubject<WebRTCCoordinator.StateMachine.Stage?, Never>(nil)
+        let cancellable = mockWebRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .coordinator
+            .stateMachine
+            .publisher
+            .filter { $0.id == id }
+            .sink { stages.send($0) }
+        defer { cancellable.cancel() }
+
         try await withThrowingTaskGroup(of: Void.self) { group in
             group.addTask {
-                let target = try await self
-                    .mockWebRTCCoordinatorFactory
-                    .mockCoordinatorStack
-                    .coordinator
-                    .stateMachine
-                    .publisher
-                    .filter { $0.id == id }
+                let target = try await stages
+                    .compactMap { $0 }
                     .nextValue(timeout: defaultTimeout)
 
                 await self.assertNoThrowAsync(
@@ -1712,7 +1761,6 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
                 transitionExpectation.fulfill()
             }
             group.addTask {
-                await self.wait(for: 0.1)
                 try await operation()
             }
             group.addTask {

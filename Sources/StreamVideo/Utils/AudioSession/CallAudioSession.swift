@@ -413,6 +413,11 @@ final class CallAudioSession: @unchecked Sendable {
             return
         }
 
+        if audioStore.state.activeSessionIdentifier == identifier,
+           let otherAudioDucking = lastAppliedConfiguration?.otherAudioDucking {
+            audioDeviceModule.setOtherAudioDucking(otherAudioDucking)
+        }
+
         audioDeviceModule
             .publisher
             .receive(on: processingQueue)
@@ -652,12 +657,26 @@ final class CallAudioSession: @unchecked Sendable {
         lastAppliedConfiguration = configuration
         lastCallSettings = callSettings
         lastOwnCapabilities = ownCapabilities
+        applyOtherAudioDucking(configuration.otherAudioDucking)
 
         if !mutedSpeechDetectionEnabled {
             setSpeakingWhileMuted(false)
         }
 
         return task
+    }
+
+    /// Pushes the policy's ducking onto the current audio device module.
+    ///
+    /// Another session can own the shared module. This session applies
+    /// ducking only while it owns the store.
+    private func applyOtherAudioDucking(
+        _ configuration: OtherAudioDuckingConfiguration
+    ) {
+        guard audioStore.state.activeSessionIdentifier == identifier else {
+            return
+        }
+        audioStore.state.audioDeviceModule?.setOtherAudioDucking(configuration)
     }
 
     private func shouldEnableMutedSpeechDetection(

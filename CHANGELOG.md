@@ -4,6 +4,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### ✅ Added
+- Audio session policies can set other-audio ducking on `AudioSessionConfiguration`. The default matches the current voice-processing ducking. [#1441](https://github.com/GetStream/stream-video-swift/pull/1441)
+
+### 🐞 Fixed
+- Report the microphone level to VoiceOver as one value. [#1444](https://github.com/GetStream/stream-video-swift/pull/1444)
+- Keep the lobby microphone level meter running when a new client or the audio device module reports its initial state. [#1412](https://github.com/GetStream/stream-video-swift/pull/1412)
+- Keep recording when other audio session state changes and the audio session category stays the same. [#1434](https://github.com/GetStream/stream-video-swift/pull/1434)
+- Stop the microphone level meter when a call ends right after it starts. [#1436](https://github.com/GetStream/stream-video-swift/pull/1436)
+- Keep the microphone off after the lobby closes without a call. [#1437](https://github.com/GetStream/stream-video-swift/pull/1437)
+- Stop restarting an active recording when other audio session state changes. [#1439](https://github.com/GetStream/stream-video-swift/pull/1439)
+- Fix a rare crash or missed SFU connection state update when a call joins. [#1416](https://github.com/GetStream/stream-video-swift/pull/1416)
+
 ### 🔄 Changed
 
 # [1.57.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.57.0)

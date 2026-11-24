@@ -25,6 +25,25 @@ final class Task_DisposableBag_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertTrue(subject.isEmpty)
     }
 
+    /// Off an actor, a task body can finish before the initializer stores
+    /// the task in the bag.
+    func test_init_tasksFinishBeforeTheyAreStored_bagEndsEmpty() async {
+        let subject = DisposableBag()
+
+        // One creator leaves idle threads that can run a body at once.
+        await Task.detached {
+            var tasks: [Task<Void, Never>] = []
+            for _ in 0..<50000 {
+                tasks.append(Task(disposableBag: subject) {})
+            }
+            for task in tasks {
+                await task.value
+            }
+        }.value
+
+        XCTAssertTrue(subject.isEmpty)
+    }
+
     func test_init_removeAll_cancelsTask() async {
         let subject = DisposableBag()
         let (stream, continuation) = AsyncStream<Void>.makeStream()

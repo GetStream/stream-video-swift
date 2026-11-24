@@ -15,8 +15,10 @@ extension Publisher where Output: Sendable {
     /// - Parameters:
     ///   - disposableBag: An optional `DisposableBag` to store the task for
     ///     lifecycle management. Defaults to `nil`.
-    ///   - identifier: An optional unique identifier for the task when stored
-    ///     in a `DisposableBag`. Defaults to `nil`.
+    ///   - identifier: An optional identifier for the tasks when stored in a
+    ///     `DisposableBag`. Defaults to `nil`, which gives each task its own
+    ///     key. With a value, every task shares it and a new task cancels the
+    ///     previous one.
     ///   - receiveCompletion: A closure called upon completion of the publisher
     ///     with either a success or failure. Defaults to a no-op closure.
     ///   - receiveValue: A closure to asynchronously process the publisher's
@@ -29,7 +31,7 @@ extension Publisher where Output: Sendable {
     ///   - Errors during task execution are logged using `LogConfig.logger`.
     public func sinkTask(
         storeIn disposableBag: DisposableBag,
-        identifier: String = UUIDProviderKey.currentValue.get().uuidString,
+        identifier: String? = nil,
         file: StaticString = #file,
         function: StaticString = #function,
         line: UInt = #line,
@@ -47,7 +49,9 @@ extension Publisher where Output: Sendable {
             // Create a new task to handle the received value.
             Task(
                 disposableBag: disposableBag,
-                identifier: identifier,
+                // Each task needs its own key. A shared key lets a finished task
+                // remove, and so cancel, a newer one.
+                identifier: identifier ?? UUIDProviderKey.currentValue.get().uuidString,
                 file: file,
                 function: function,
                 line: line

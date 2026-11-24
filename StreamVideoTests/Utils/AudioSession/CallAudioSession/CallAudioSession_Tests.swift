@@ -214,6 +214,70 @@ final class CallAudioSession_Tests: XCTestCase, @unchecked Sendable {
         }
     }
 
+    func test_activate_otherAudioDuckingPolicy_appliesLevelToAudioDeviceModule() async {
+        let callSettingsSubject = PassthroughSubject<CallSettings, Never>()
+        let capabilitiesSubject = PassthroughSubject<Set<OwnCapability>, Never>()
+        let delegate = SpyAudioSessionAdapterDelegate()
+        let mockAudioDeviceModule = MockRTCAudioDeviceModule()
+        mockAudioStore.audioStore.dispatch(
+            .setAudioDeviceModule(.init(mockAudioDeviceModule))
+        )
+        subject = .init(policy: MinOtherAudioDuckingPolicy())
+        await claimOwnership(of: subject)
+
+        subject.activate(
+            callSettingsPublisher: callSettingsSubject.eraseToAnyPublisher(),
+            ownCapabilitiesPublisher: capabilitiesSubject.eraseToAnyPublisher(),
+            delegate: delegate,
+            statsAdapter: nil,
+            shouldSetActive: true
+        )
+        callSettingsSubject.send(CallSettings(audioOn: true, speakerOn: true))
+        capabilitiesSubject.send([.sendAudio])
+
+        let expected = OtherAudioDuckingConfiguration(
+            level: .min,
+            isAdvancedDuckingEnabled: true
+        )
+        await fulfillment {
+            mockAudioDeviceModule.duckingLevel == expected.level.rawValue
+                && mockAudioDeviceModule.isAdvancedDuckingEnabled
+        }
+    }
+
+    func test_activate_otherAudioDucking_appliesWhenModuleIsInstalledLater() async {
+        let callSettingsSubject = PassthroughSubject<CallSettings, Never>()
+        let capabilitiesSubject = PassthroughSubject<Set<OwnCapability>, Never>()
+        let delegate = SpyAudioSessionAdapterDelegate()
+        subject = .init(policy: MinOtherAudioDuckingPolicy())
+        await claimOwnership(of: subject)
+
+        subject.activate(
+            callSettingsPublisher: callSettingsSubject.eraseToAnyPublisher(),
+            ownCapabilitiesPublisher: capabilitiesSubject.eraseToAnyPublisher(),
+            delegate: delegate,
+            statsAdapter: nil,
+            shouldSetActive: true
+        )
+        callSettingsSubject.send(CallSettings(audioOn: true, speakerOn: true))
+        capabilitiesSubject.send([.sendAudio])
+
+        await fulfillment {
+            self.mockAudioStore.audioStore.state.audioSessionConfiguration.category == .playAndRecord
+        }
+
+        let mockAudioDeviceModule = MockRTCAudioDeviceModule()
+        mockAudioStore.audioStore.dispatch(
+            .setAudioDeviceModule(.init(mockAudioDeviceModule))
+        )
+
+        await fulfillment {
+            mockAudioDeviceModule.duckingLevel
+                == OtherAudioDuckingConfiguration.Level.min.rawValue
+                && mockAudioDeviceModule.isAdvancedDuckingEnabled
+        }
+    }
+
     // MARK: shouldSetActive = false
 
     func test_activate_shouldSetActiveFalse_activeStore_waitsForCallKitActivation() async {
@@ -1793,5 +1857,23 @@ private final class InitializationOrderAudioObserver: NSObject,
         didUpdateAudioProcessingState state: RTCAudioProcessingState
     ) {
         delegate.audioDeviceModule(module, didUpdateAudioProcessingState: state)
+    }
+}
+
+private struct MinOtherAudioDuckingPolicy: AudioSessionPolicy {
+    func configuration(
+        for callSettings: CallSettings,
+        ownCapabilities: Set<OwnCapability>
+    ) -> AudioSessionConfiguration {
+        .init(
+            isActive: true,
+            category: .playAndRecord,
+            mode: .voiceChat,
+            options: [],
+            otherAudioDucking: .init(
+                level: .min,
+                isAdvancedDuckingEnabled: true
+            )
+        )
     }
 }

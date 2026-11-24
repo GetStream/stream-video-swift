@@ -65,11 +65,16 @@ extension StreamCallAudioRecorder.Namespace {
 
             super.init()
 
+            // The store reports its current device module when observation
+            // starts. That report matches the initial mode and must not stop a
+            // recording that started in the meantime.
             audioDeviceModuleCancellable = audioStore
                 .publisher(\.audioDeviceModule)
-                .receive(on: processingQueue)
+                .map { $0.map(Mode.audioDeviceModule) ?? initialMode }
                 .removeDuplicates()
-                .sink { [weak self] in self?.didUpdate($0, initialMode: initialMode) }
+                .drop(while: { $0 == initialMode })
+                .receive(on: processingQueue)
+                .sink { [weak self] in self?.didUpdate(to: $0) }
         }
 
         // MARK: - Middleware
@@ -78,7 +83,8 @@ extension StreamCallAudioRecorder.Namespace {
         ///
         /// Responds to:
         /// - `.setIsRecording`: Starts or stops recording
-        /// - `.setIsInterrupted`: Pauses recording during interruptions
+        /// - `.setIsInterrupted`: Pauses recording during interruptions and
+        ///   resumes it when the interruption ends
         /// - `.setShouldRecord`: Initiates recording when needed
         ///
         /// - Parameters:
@@ -104,7 +110,10 @@ extension StreamCallAudioRecorder.Namespace {
             case let .setIsInterrupted(value):
                 if value {
                     stopRecording()
-                } else if !value, state.shouldRecord {
+                } else if state.shouldRecord, state.isRecording {
+                    // `shouldRecord` can stay `true` after the caller stopped
+                    // recording (for example after a lobby). Resume only a
+                    // recording that an interruption paused.
                     startRecording()
                 } else {
                     break
@@ -250,19 +259,8 @@ extension StreamCallAudioRecorder.Namespace {
             }
         }
 
-        private func didUpdate(
-            _ audioDeviceModule: AudioDeviceModule?,
-            initialMode: Mode
-        ) {
+        private func didUpdate(to newMode: Mode) {
             stopRecording()
-
-            let newMode: Mode = {
-                if let audioDeviceModule {
-                    return .audioDeviceModule(audioDeviceModule)
-                } else {
-                    return initialMode
-                }
-            }()
 
             processingQueue.addTaskOperation { [weak self] in
                 self?.mode = newMode

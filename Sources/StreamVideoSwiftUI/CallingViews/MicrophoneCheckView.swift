@@ -113,6 +113,19 @@ public struct AudioVolumeIndicator: View {
                 .frame(height: CGFloat(maxHeight))
             }
         }
+        // One element for VoiceOver. Bar frames change every sample, so they
+        // stay out of the tree. The value moves in 10 percent steps.
+        .accessibilityElement(children: .ignore)
+        // These names exist on iOS 13. accessibilityLabel(_:) is iOS 14.
+        .accessibility(label: Text("Audio level"))
+        .accessibility(value: Text(Self.spokenValue(for: audioLevels)))
+    }
+
+    static func spokenValue(for levels: [Float]) -> String {
+        let peak = levels.max() ?? 0
+        let clamped = min(max(peak, 0), 1)
+        let step = Int((clamped * 10).rounded())
+        return "\(step * 10) percent"
     }
     
     var levels: [AudioLevel] {
@@ -130,8 +143,10 @@ public struct AudioVolumeIndicator: View {
 }
 
 struct AudioLevel: Identifiable {
+    // The value changes every frame. Identity stays on the index so SwiftUI
+    // updates the existing bar instead of replacing it.
     var id: String {
-        "\(index)-\(value)"
+        "\(index)"
     }
 
     let value: Float

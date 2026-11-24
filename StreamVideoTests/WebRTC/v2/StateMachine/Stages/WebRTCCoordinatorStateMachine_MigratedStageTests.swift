@@ -327,11 +327,12 @@ final class WebRTCCoordinatorStateMachine_MigratedStageTests: XCTestCase, @unche
     ) async throws {
         let transitionExpectation =
             expectation(description: "Stage id:\(subject.id) is expected to transition to id:\(expectedTarget).")
+        let subjectID = subject.id
         subject.transition = { [validator] target in
             guard target.id == expectedTarget else {
                 transitionExpectation
                     .expectationDescription =
-                    "Stage id:\(subject.id) is expected to transition to id:\(expectedTarget) but landed on id:\(target.id)"
+                    "Stage id:\(subjectID) is expected to transition to id:\(expectedTarget) but landed on id:\(target.id)"
                 return
             }
             Task {

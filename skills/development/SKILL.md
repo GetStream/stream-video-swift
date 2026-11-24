@@ -80,6 +80,9 @@ If measurement cannot run, report size impact as unverified.
 - Preserve deployment targets, media quality, and public API compatibility.
   Follow semantic versioning and deprecate breaking APIs with a transition path.
   Discuss new dependencies or breaking changes before implementation.
+- Keep sources and tests building with the old Xcode in the `build-old-xcode`
+  job of `.github/workflows/smoke-checks.yml`.
+  Avoid newer Swift syntax, such as `weak let` from Swift 6.2.
 
 ## Result
 

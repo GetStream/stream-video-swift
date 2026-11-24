@@ -20,6 +20,12 @@ final class GleapAdapter {
 
     init() {
         #if canImport(Gleap)
+        if AppEnvironment.configuration.isTest {
+            // Gleap redirects stderr to a pipe drained on the main thread.
+            // Under XCUITest os_log mirrors to stderr, the pipe fills and
+            // the main thread blocks in writev, deadlocking the app.
+            Gleap.disableConsoleLog()
+        }
         Gleap.initialize(withToken: "qsoyideVaZ7ZOehLLl8LqDC6YOPagLvr")
         Gleap.showFeedbackButton(false)
         log.debug("✅ Gleap has been activated.")
