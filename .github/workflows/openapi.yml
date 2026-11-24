@@ -20,7 +20,7 @@ permissions:
 jobs:
   generate:
     name: Generate
-    runs-on: ubuntu-latest
+    runs-on: { group: github-public-amd64 }
     timeout-minutes: 45
     permissions:
       contents: read
@@ -95,7 +95,7 @@ jobs:
   pull-request:
     name: Pull request
     needs: generate
-    runs-on: ubuntu-latest
+    runs-on: { group: github-public-amd64 }
     timeout-minutes: 20
     permissions:
       contents: write
