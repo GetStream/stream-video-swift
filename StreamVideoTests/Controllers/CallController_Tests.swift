@@ -710,17 +710,16 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
     }
 
     /// A join response can carry an `endedAt` that the viewer did not cause.
+    /// The call state still holds the previous join when the stage arrives.
     @MainActor
     func test_hlsPlaybackStage_endedAtFromTheJoinResponse_doesNotLeave() async throws {
         let call = MockCall(.dummy(callController: subject))
-        let staleEndedAt = Date(timeIntervalSince1970: 100)
-        call.state.update(
-            from: JoinCallResponse.dummyHLSGrant(
-                call: .dummy(cid: call.cId, endedAt: staleEndedAt)
-            )
+        let response = JoinCallResponse.dummyHLSGrant(
+            call: .dummy(cid: call.cId, endedAt: Date(timeIntervalSince1970: 100))
         )
-
-        enterStage(.hlsPlayback)
+        enterHLSPlayback(joining: response)
+        await drainMainQueue()
+        call.state.update(from: response)
         await drainMainQueue()
 
         XCTAssertTrue(call.leaveInitiators.isEmpty)
@@ -729,17 +728,43 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
     @MainActor
     func test_hlsPlaybackStage_callEndedAfterAStaleEndedAt_leavesWithRemoteEventInitiator() async throws {
         let call = MockCall(.dummy(callController: subject))
-        call.state.update(
-            from: JoinCallResponse.dummyHLSGrant(
-                call: .dummy(cid: call.cId, endedAt: Date(timeIntervalSince1970: 100))
-            )
+        let response = JoinCallResponse.dummyHLSGrant(
+            call: .dummy(cid: call.cId, endedAt: Date(timeIntervalSince1970: 100))
         )
-        enterStage(.hlsPlayback)
+        enterHLSPlayback(joining: response)
         await drainMainQueue()
+        call.state.update(from: response)
 
         await call.onEvent(callEndedEvent(for: call.cId))
 
         await fulfilmentInMainActor { call.leaveInitiators == [.remoteEvent] }
+    }
+
+    // MARK: - HLS backstage
+
+    @MainActor
+    func test_hlsPlaybackStage_backstageWithoutJoinBackstage_leavesWithRemoteEventInitiator() async throws {
+        let call = MockCall(.dummy(callController: subject))
+        call.state.ownCapabilities = [.sendAudio]
+        enterStage(.hlsPlayback)
+        await drainMainQueue()
+
+        call.state.backstage = true
+
+        await fulfilmentInMainActor { call.leaveInitiators == [.remoteEvent] }
+    }
+
+    @MainActor
+    func test_hlsPlaybackStage_backstageWithJoinBackstage_doesNotLeave() async throws {
+        let call = MockCall(.dummy(callController: subject))
+        call.state.ownCapabilities = [.joinBackstage]
+        enterStage(.hlsPlayback)
+        await drainMainQueue()
+
+        call.state.backstage = true
+        await drainMainQueue()
+
+        XCTAssertTrue(call.leaveInitiators.isEmpty)
     }
 
     @MainActor
@@ -1966,6 +1991,19 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
             .coordinator
             .stateMachine
             .transition(MockTestOnlyStage(id: id, context: .init()))
+    }
+
+    /// Enters a real HLS stage, which carries the join response.
+    private func enterHLSPlayback(joining response: JoinCallResponse) {
+        subject.observeWebRTCStateUpdated()
+        let stateMachine = mockWebRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .coordinator
+            .stateMachine
+        stateMachine.transition(MockTestOnlyStage(id: .connecting, context: .init()))
+        var context = WebRTCCoordinator.StateMachine.Stage.Context()
+        context.initialJoinCallResponse = response
+        stateMachine.transition(.hlsPlayback(context))
     }
 
     private func callEndedEvent(for cid: String) -> WrappedEvent {

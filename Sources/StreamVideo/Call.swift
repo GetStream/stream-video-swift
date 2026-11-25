@@ -788,6 +788,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         case callkitJoinTimeout = "callkit.join.timeout"
         case blockedUser = "call.blocked_user"
         case callEnded = "call.ended"
+        case liveEnded = "call.live_ended"
         case error
         case disconnected
         case rejoinAttemptLimitExceeded = "rejoin_attempt_limit_exceeded"

@@ -13,6 +13,7 @@ class CallController: @unchecked Sendable {
         case currentUserBlocked
         case backstageSetting
         case hlsCallEnded
+        case hlsBackstage
     }
 
     private lazy var clientEventReporter: ClientEventReporting = ClientEventReporter(
@@ -825,6 +826,7 @@ class CallController: @unchecked Sendable {
     ) {
         if stage.id != .hlsPlayback {
             disposableBag.remove(DisposableKey.hlsCallEnded.rawValue)
+            disposableBag.remove(DisposableKey.hlsBackstage.rawValue)
         }
 
         switch stage.id {
@@ -841,7 +843,9 @@ class CallController: @unchecked Sendable {
             /// HLS has no SFU health check, so coordinator count events stay
             /// the source of `participantCount`. It has no reconnection
             /// either, so the status stays `.connected`.
-            subscribeToHLSCallEndedEvent(call)
+            let hlsStage = stage as? WebRTCCoordinator.StateMachine.Stage.HLSPlaybackStage
+            subscribeToHLSCallEndedEvent(call, joinEndedAt: hlsStage?.joinEndedAt)
+            subscribeToHLSBackstage(call)
         case .joined:
             /// Once connected we should stop listening for CallSessionParticipantCountsUpdatedEvent
             /// updates and only rely on the healthCheck event.
@@ -868,16 +872,19 @@ class CallController: @unchecked Sendable {
     /// the SFU `CallEnded` event that ends a WebRTC call never arrives.
     /// Watching `endedAt` also catches an end that came before this stage
     /// started, because the state replays its current value.
-    /// An `endedAt` that the join response carried is not a new end.
-    /// The end has no counterpart of `liveEnded`, so it always leaves.
-    private func subscribeToHLSCallEndedEvent(_ call: Call?) {
+    /// An `endedAt` that the join response carried is not a new end. The stage
+    /// hands it over, because the call state can still hold a previous join.
+    /// Every end leaves. Only backstage has a stay case, handled below.
+    private func subscribeToHLSCallEndedEvent(
+        _ call: Call?,
+        joinEndedAt: Date?
+    ) {
         disposableBag.remove(DisposableKey.hlsCallEnded.rawValue)
 
         guard let call else { return }
 
         /// The stage updates arrive on the main queue.
         MainActor.assumeIsolated {
-            let joinEndedAt = call.state.joinEndedAt
             call
                 .state
                 .$endedAt
@@ -892,6 +899,38 @@ class CallController: @unchecked Sendable {
                     )
                 }
                 .store(in: disposableBag, key: DisposableKey.hlsCallEnded.rawValue)
+        }
+    }
+
+    /// Leaves when the call goes backstage and the user cannot join it there,
+    /// like `liveEnded` does for WebRTC. A `join-backstage` user stays.
+    /// The current value is skipped, because the call state can still hold a
+    /// previous join when the stage starts.
+    private func subscribeToHLSBackstage(_ call: Call?) {
+        disposableBag.remove(DisposableKey.hlsBackstage.rawValue)
+
+        guard let call else { return }
+
+        MainActor.assumeIsolated {
+            call
+                .state
+                .$backstage
+                .dropFirst()
+                .filter { $0 }
+                .receive(on: DispatchQueue.main)
+                .sink { [weak call] _ in
+                    guard
+                        let call,
+                        !call.state.ownCapabilities.contains(.joinBackstage)
+                    else {
+                        return
+                    }
+                    call.leave(
+                        initiator: .remoteEvent,
+                        reason: Call.LeaveReason.liveEnded.rawValue
+                    )
+                }
+                .store(in: disposableBag, key: DisposableKey.hlsBackstage.rawValue)
         }
     }
 
