@@ -8,6 +8,9 @@ import Foundation
 ///
 /// The backend picks the route on the first join. The call state returns to
 /// `webRTC` when the call ends.
+///
+/// - Important: This API is in beta. Future releases can add cases, so keep a
+///   `default` when you switch over it.
 public enum PlaybackType: Equatable, Sendable {
 
     /// The client is connected to the call through WebRTC.
