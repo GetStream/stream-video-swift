@@ -330,9 +330,15 @@ jobs:
       env:
         MATRIX_SIZE: ${{ strategy.job-total }}
         STREAM_SDK_TEST_APP: ${{ vars.STREAM_SDK_TEST_APP }}
-    - name: Allure TestOps Upload
+    - name: Allure TestOps Export
       if: env.LAUNCH_ID != '' && (success() || failure())
-      run: bundle exec fastlane allure_upload launch_id:$LAUNCH_ID
+      run: bundle exec fastlane allure_export
+    - uses: actions/upload-artifact@v4
+      if: env.LAUNCH_ID != '' && (success() || failure())
+      with:
+        name: allure-results-${{ matrix.batch }}
+        path: fastlane/allure-results
+        if-no-files-found: ignore
     - name: Allure TestOps Launch Removal
       if: env.LAUNCH_ID != '' && cancelled()
       run: bundle exec fastlane allure_launch_removal launch_id:$LAUNCH_ID
@@ -351,3 +357,29 @@ jobs:
           fastlane/test_output/report.junit
           fastlane/test_output/logs/*/Diagnostics/**/*.txt
           fastlane/test_output/logs/*/Diagnostics/simctl_diagnostics/DiagnosticReports/*
+
+  allure_testops_upload:
+    name: Upload Allure TestOps results
+    # Runs on a static-IP runner, as `gh` is blocked on macOS runners.
+    runs-on: { group: github-public-amd64 }
+    needs:
+      - allure_testops_launch
+      - test-e2e-debug
+    if: ${{ !cancelled() && needs.allure_testops_launch.outputs.launch_id != '' && (needs.test-e2e-debug.result == 'success' || needs.test-e2e-debug.result == 'failure') }}
+    steps:
+    - uses: actions/checkout@v4.1.1
+    - uses: ./.github/actions/ruby-cache
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: allure-results-*
+        merge-multiple: true
+        path: fastlane/allure-results
+    - name: Install allurectl
+      run: |
+        source ./Githubfile
+        wget "https://github.com/allure-framework/allurectl/releases/download/${ALLURECTL_VERSION}/allurectl_linux_amd64" -O ./fastlane/allurectl
+        chmod +x ./fastlane/allurectl
+    - name: Allure TestOps Upload
+      run: bundle exec fastlane allure_upload launch_id:${{ needs.allure_testops_launch.outputs.launch_id }}
+      env:
+        ALLURE_TOKEN: ${{ secrets.ALLURE_TOKEN }}

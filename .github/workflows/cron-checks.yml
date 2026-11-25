@@ -90,6 +90,9 @@ jobs:
       timeout-minutes: 90
       env:
         STREAM_SDK_TEST_APP: ${{ vars.STREAM_SDK_TEST_APP }}
+    - name: Allure TestOps Export
+      if: success() || failure()
+      run: bundle exec fastlane allure_export
     - name: Allure TestOps Upload
       if: success() || failure()
       run: bundle exec fastlane allure_upload launch_id:$LAUNCH_ID
