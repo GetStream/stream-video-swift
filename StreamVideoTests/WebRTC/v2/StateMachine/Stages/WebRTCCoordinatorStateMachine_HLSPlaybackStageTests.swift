@@ -68,4 +68,18 @@ final class WebRTCCoordinatorStateMachine_HLSPlaybackStageTests: XCTestCase, @un
         XCTAssertNil(subject.context.initialJoinCallResponse)
         XCTAssertNil(subject.context.joinResponseHandler)
     }
+
+    func test_transition_fromConnecting_keepsTheEndedAtOfTheJoinResponse() throws {
+        let endedAt = Date(timeIntervalSince1970: 100)
+        subject.context.initialJoinCallResponse = .dummyHLSGrant(
+            call: .dummy(endedAt: endedAt)
+        )
+
+        _ = subject.transition(from: .init(id: .connecting, context: subject.context))
+
+        let stage = try XCTUnwrap(
+            subject as? WebRTCCoordinator.StateMachine.Stage.HLSPlaybackStage
+        )
+        XCTAssertEqual(stage.joinEndedAt, endedAt)
+    }
 }

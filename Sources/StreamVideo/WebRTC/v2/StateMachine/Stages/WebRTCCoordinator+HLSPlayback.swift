@@ -28,6 +28,11 @@ extension WebRTCCoordinator.StateMachine.Stage {
         WebRTCCoordinator.StateMachine.Stage,
         @unchecked Sendable {
 
+        /// The `endedAt` the join response carried.
+        ///
+        /// An end that differs from it happened after the join.
+        private(set) var joinEndedAt: Date?
+
         /// Initializes a new instance of `HLSPlaybackStage`.
         /// - Parameter context: The context for the HLS playback stage.
         init(_ context: Context) {
@@ -45,6 +50,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
         ) -> Self? {
             switch previousStage.id {
             case .connecting:
+                // The report below clears the response.
+                joinEndedAt = context.initialJoinCallResponse?.call.endedAt
                 // Reported inline: no task means no late report after a leave.
                 reportJoinCompletion()
                 return self

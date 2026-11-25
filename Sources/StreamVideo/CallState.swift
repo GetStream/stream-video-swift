@@ -107,11 +107,6 @@ public class CallState: ObservableObject {
     /// returns to ``PlaybackType/webRTC`` when the call ends.
     @Published public internal(set) var playbackType: PlaybackType = .webRTC
 
-    /// The `endedAt` the last join response carried.
-    ///
-    /// An end that differs from it happened after the join.
-    internal private(set) var joinEndedAt: Date?
-
     /// Indicates whether the current user is speaking while their microphone is muted.
     ///
     /// This is a local signal derived from the active WebRTC audio device.
@@ -424,7 +419,6 @@ public class CallState: ObservableObject {
         line: UInt = #line
     ) {
         update(from: response.call, file: file, function: function, line: line)
-        joinEndedAt = response.call.endedAt
         mergeMembers(response.members)
         ownCapabilities = response.ownCapabilities
         statsCollectionInterval = response.statsOptions.reportingIntervalMs / 1000
