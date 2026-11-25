@@ -883,7 +883,8 @@ class CallController: @unchecked Sendable {
 
         guard let call else { return }
 
-        /// The stage updates arrive on the main queue.
+        /// The stage updates arrive on the main queue. Subscribing at once
+        /// keeps the current value from slipping past the subscription.
         MainActor.assumeIsolated {
             call
                 .state
@@ -891,8 +892,7 @@ class CallController: @unchecked Sendable {
                 .compactMap { $0 }
                 .filter { $0 != joinEndedAt }
                 .first()
-                .receive(on: DispatchQueue.main)
-                .sink { [weak call] _ in
+                .sinkTask(storeIn: disposableBag) { @MainActor [weak call] _ in
                     call?.leave(
                         initiator: .remoteEvent,
                         reason: Call.LeaveReason.callEnded.rawValue
@@ -917,8 +917,7 @@ class CallController: @unchecked Sendable {
                 .$backstage
                 .dropFirst()
                 .filter { $0 }
-                .receive(on: DispatchQueue.main)
-                .sink { [weak call] _ in
+                .sinkTask(storeIn: disposableBag) { @MainActor [weak call] _ in
                     guard
                         let call,
                         !call.state.ownCapabilities.contains(.joinBackstage)
