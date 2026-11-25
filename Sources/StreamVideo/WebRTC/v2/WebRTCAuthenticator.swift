@@ -119,8 +119,12 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
         /// a viewer never publishes, and the audio recorder starts when the
         /// call settings have audio on and the session is active.
         if response.playback != nil {
+            /// The settings passed to `join` win over the current ones.
+            let joinCallSettings = stateAdapter.initialCallSettings
             stateAdapter.enqueueCallSettings {
-                $0.withUpdatedAudioState(false).withUpdatedVideoState(false)
+                (joinCallSettings ?? $0)
+                    .withUpdatedAudioState(false)
+                    .withUpdatedVideoState(false)
             }
             /// The join reads the call settings next, so they must be final.
             await stateAdapter.waitForCallSettingsUpdates()
