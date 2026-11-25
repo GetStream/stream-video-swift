@@ -37,16 +37,24 @@ final class PlaybackResponse_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertNil(subject.statsToken)
     }
 
+    func test_decode_unknownTypeAndReason_mapsToUnknown() throws {
+        let subject = try decode(type: "future-type", reason: "future-reason")
+
+        XCTAssertEqual(subject.type, .unknown)
+        XCTAssertEqual(subject.reason, .unknown)
+    }
+
     // MARK: - Private helpers
 
     private func decode(
+        type: String = "hls",
         reason: String,
         statsToken: String? = nil
     ) throws -> PlaybackResponse {
         let token = statsToken.map { ", \"stats_token\": \"\($0)\"" } ?? ""
         let json = """
         {
-            "type": "hls",
+            "type": "\(type)",
             "playlist_url": "https://example.com/live.m3u8",
             "reason": "\(reason)"\(token)
         }
