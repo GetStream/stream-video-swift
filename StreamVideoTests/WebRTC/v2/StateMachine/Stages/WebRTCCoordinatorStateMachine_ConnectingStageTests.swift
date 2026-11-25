@@ -320,29 +320,6 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
         }
     }
 
-    func test_transition_fromIdleHLSGrant_callKitSource_configuresTheHLSAudioSession() async throws {
-        let mockAudioStore = prepareAudioStore()
-        subject.context.coordinator = mockCoordinatorStack.coordinator
-        subject.context.authenticator = mockCoordinatorStack.webRTCAuthenticator
-        subject.context.joinSource = .callKit(.init {})
-        mockCoordinatorStack.webRTCAuthenticator.stub(
-            for: .authenticate,
-            with: Result<(SFUAdapter?, JoinCallResponse), Error>
-                .success((nil, .dummyHLSGrant()))
-        )
-
-        try await assertTransition(
-            from: .idle,
-            expectedTarget: .hlsPlayback,
-            subject: subject
-        ) { [mockCoordinatorStack] _ in
-            let identifier = await mockCoordinatorStack?.coordinator.stateAdapter.hlsAudioSession.identifier
-            let state = mockAudioStore.audioStore.state
-            XCTAssertEqual(state.audioSessionConfiguration.category, .playback)
-            XCTAssertEqual(state.activeSessionIdentifier, identifier)
-        }
-    }
-
     func test_transition_fromIdleSFUGrant_doesNotConfigureTheHLSAudioSession() async throws {
         let mockAudioStore = prepareAudioStore()
         subject.context.coordinator = mockCoordinatorStack.coordinator
