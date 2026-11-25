@@ -28,7 +28,7 @@ env:
 jobs:
   build-test-app-and-frameworks:
     name: Build Test App and Frameworks
-    runs-on: macos-15
+    runs-on: { group: scaleway-macos }
     steps:
     - uses: actions/checkout@v4.1.1
     - uses: ./.github/actions/ruby-cache
@@ -58,7 +58,7 @@ jobs:
             device: "iPhone 15 Pro"
             setup_runtime: true
       fail-fast: false
-    runs-on: macos-15
+    runs-on: { group: scaleway-macos }
     env:
       GITHUB_EVENT: ${{ toJson(github.event) }}
       ALLURE_TOKEN: ${{ secrets.ALLURE_TOKEN }}
@@ -124,7 +124,7 @@ jobs:
             device: "iPhone 14 Pro"
             setup_runtime: true
       fail-fast: false
-    runs-on: macos-15
+    runs-on: { group: scaleway-macos }
     env:
       XCODE_VERSION: "26.2"
       IOS_SIMULATOR_DEVICE: "${{ matrix.device }} (${{ matrix.ios }})"
@@ -158,7 +158,7 @@ jobs:
 
   build-apps:
     name: Build Demo Apps
-    runs-on: macos-15
+    runs-on: { group: scaleway-macos }
     needs: build-test-app-and-frameworks
     steps:
     - uses: actions/checkout@v4.1.1
@@ -177,7 +177,7 @@ jobs:
 
   build-old-xcode:
     name: Build SDKs (Old Xcode)
-    runs-on: macos-15
+    runs-on: { group: scaleway-macos }
     if: ${{ github.event_name != 'push' && github.event.inputs.snapshots != 'true' }}
     env:
       XCODE_VERSION: "16.4"
