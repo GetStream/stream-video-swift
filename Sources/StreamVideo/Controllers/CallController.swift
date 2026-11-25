@@ -893,7 +893,9 @@ class CallController: @unchecked Sendable {
                 .filter { $0 != joinEndedAt }
                 .first()
                 .sinkTask(storeIn: disposableBag) { @MainActor [weak call] _ in
-                    call?.leave(
+                    /// The stage can end before this task runs.
+                    guard let call, call.state.playbackType != .webRTC else { return }
+                    call.leave(
                         initiator: .remoteEvent,
                         reason: Call.LeaveReason.callEnded.rawValue
                     )
@@ -920,6 +922,7 @@ class CallController: @unchecked Sendable {
                 .sinkTask(storeIn: disposableBag) { @MainActor [weak call] _ in
                     guard
                         let call,
+                        call.state.playbackType != .webRTC,
                         !call.state.ownCapabilities.contains(.joinBackstage)
                     else {
                         return

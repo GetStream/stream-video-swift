@@ -679,7 +679,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
     @MainActor
     func test_hlsPlaybackStage_callEndedEventForTheCall_leavesWithRemoteEventInitiator() async throws {
         let call = MockCall(.dummy(callController: subject))
-        enterStage(.hlsPlayback)
+        await enterStage(.hlsPlayback)
         await drainMainQueue()
 
         await call.onEvent(callEndedEvent(for: call.cId))
@@ -692,7 +692,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         let call = MockCall(.dummy(callController: subject))
         await call.onEvent(callEndedEvent(for: call.cId))
 
-        enterStage(.hlsPlayback)
+        await enterStage(.hlsPlayback)
 
         await fulfilmentInMainActor { call.leaveInitiators == [.remoteEvent] }
     }
@@ -700,7 +700,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
     @MainActor
     func test_hlsPlaybackStage_callEndedEventForAnotherCall_doesNotLeave() async throws {
         let call = MockCall(.dummy(callController: subject))
-        enterStage(.hlsPlayback)
+        await enterStage(.hlsPlayback)
         await drainMainQueue()
 
         await call.onEvent(callEndedEvent(for: "default:\(String.unique)"))
@@ -717,7 +717,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         let response = JoinCallResponse.dummyHLSGrant(
             call: .dummy(cid: call.cId, endedAt: Date(timeIntervalSince1970: 100))
         )
-        enterHLSPlayback(joining: response)
+        await enterHLSPlayback(joining: response)
         await drainMainQueue()
         call.state.update(from: response)
         await drainMainQueue()
@@ -731,7 +731,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         let response = JoinCallResponse.dummyHLSGrant(
             call: .dummy(cid: call.cId, endedAt: Date(timeIntervalSince1970: 100))
         )
-        enterHLSPlayback(joining: response)
+        await enterHLSPlayback(joining: response)
         await drainMainQueue()
         call.state.update(from: response)
 
@@ -746,7 +746,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
     func test_hlsPlaybackStage_backstageWithoutJoinBackstage_leavesWithRemoteEventInitiator() async throws {
         let call = MockCall(.dummy(callController: subject))
         call.state.ownCapabilities = [.sendAudio]
-        enterStage(.hlsPlayback)
+        await enterStage(.hlsPlayback)
         await drainMainQueue()
 
         call.state.backstage = true
@@ -760,7 +760,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         call.state.ownCapabilities = [.sendAudio]
         call.state.backstage = true
 
-        enterStage(.hlsPlayback)
+        await enterStage(.hlsPlayback)
         await drainMainQueue()
 
         XCTAssertTrue(call.leaveInitiators.isEmpty)
@@ -770,7 +770,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
     func test_hlsPlaybackStage_backstageWithJoinBackstage_doesNotLeave() async throws {
         let call = MockCall(.dummy(callController: subject))
         call.state.ownCapabilities = [.joinBackstage]
-        enterStage(.hlsPlayback)
+        await enterStage(.hlsPlayback)
         await drainMainQueue()
 
         call.state.backstage = true
@@ -779,10 +779,38 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         XCTAssertTrue(call.leaveInitiators.isEmpty)
     }
 
+    /// The leave runs in a task, so the stage can end before it runs.
+    @MainActor
+    func test_hlsPlaybackStage_callEndedThenPlaybackEndsBeforeTheLeaveRuns_doesNotLeave() async throws {
+        let call = MockCall(.dummy(callController: subject))
+        await enterStage(.hlsPlayback)
+        await drainMainQueue()
+
+        call.state.endedAt = Date()
+        call.state.playbackType = .webRTC
+        await drainMainQueue()
+
+        XCTAssertTrue(call.leaveInitiators.isEmpty)
+    }
+
+    @MainActor
+    func test_hlsPlaybackStage_backstageThenPlaybackEndsBeforeTheLeaveRuns_doesNotLeave() async throws {
+        let call = MockCall(.dummy(callController: subject))
+        call.state.ownCapabilities = [.sendAudio]
+        await enterStage(.hlsPlayback)
+        await drainMainQueue()
+
+        call.state.backstage = true
+        call.state.playbackType = .webRTC
+        await drainMainQueue()
+
+        XCTAssertTrue(call.leaveInitiators.isEmpty)
+    }
+
     @MainActor
     func test_joinedStage_callEndedEvent_doesNotLeave() async throws {
         let call = MockCall(.dummy(callController: subject))
-        enterStage(.joined)
+        await enterStage(.joined)
         await drainMainQueue()
 
         await call.onEvent(callEndedEvent(for: call.cId))
@@ -794,9 +822,9 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
     @MainActor
     func test_hlsPlaybackStageLeft_callEndedEvent_doesNotLeave() async throws {
         let call = MockCall(.dummy(callController: subject))
-        enterStage(.hlsPlayback)
+        await enterStage(.hlsPlayback)
         await drainMainQueue()
-        enterStage(.joined)
+        await enterStage(.joined)
         await drainMainQueue()
 
         await call.onEvent(callEndedEvent(for: call.cId))
@@ -1996,8 +2024,9 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
 
     /// Puts the coordinator in a stage that the controller observes.
     @MainActor
-    private func enterStage(_ id: WebRTCCoordinator.StateMachine.Stage.ID) {
+    private func enterStage(_ id: WebRTCCoordinator.StateMachine.Stage.ID) async {
         subject.observeWebRTCStateUpdated()
+        if id == .hlsPlayback { await markCallAsPlayingHLS() }
         mockWebRTCCoordinatorFactory
             .mockCoordinatorStack
             .coordinator
@@ -2005,9 +2034,22 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
             .transition(MockTestOnlyStage(id: id, context: .init()))
     }
 
+    /// An HLS join sets the playback type before the stage starts. The idle
+    /// stage that observing replays resets it in a task, so let both run.
+    @MainActor
+    private func markCallAsPlayingHLS() async {
+        await drainMainQueue()
+        await Task { @MainActor in }.value
+        subject.call?.state.playbackType = .hls(
+            URL(string: "https://example.com/live.m3u8")!
+        )
+    }
+
     /// Enters a real HLS stage, which carries the join response.
-    private func enterHLSPlayback(joining response: JoinCallResponse) {
+    @MainActor
+    private func enterHLSPlayback(joining response: JoinCallResponse) async {
         subject.observeWebRTCStateUpdated()
+        await markCallAsPlayingHLS()
         let stateMachine = mockWebRTCCoordinatorFactory
             .mockCoordinatorStack
             .coordinator
