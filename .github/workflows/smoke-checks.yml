@@ -59,7 +59,7 @@ jobs:
 
   test-llc-debug:
     name: Test LLC (Debug)
-    runs-on: macos-15
+    runs-on: { group: scaleway-macos }
     needs: guard
     if: ${{ github.event.inputs.record_snapshots_swiftui != 'true' && github.event.inputs.record_snapshots_uikit != 'true' && fromJSON(needs.guard.outputs.checks).llc }}
     steps:
@@ -129,7 +129,7 @@ jobs:
 
   test-swiftui-debug:
     name: Test SwiftUI (Debug)
-    runs-on: macos-15
+    runs-on: { group: scaleway-macos }
     needs: guard
     if: ${{ (github.event.inputs.record_snapshots_uikit != 'true' || github.event.inputs.record_snapshots_swiftui == 'true') && fromJSON(needs.guard.outputs.checks).swiftui }}
     permissions:
@@ -157,7 +157,7 @@ jobs:
 
   test-uikit-debug:
     name: Test UIKit (Debug)
-    runs-on: macos-15
+    runs-on: { group: scaleway-macos }
     needs: guard
     if: ${{ (github.event.inputs.record_snapshots_swiftui != 'true' || github.event.inputs.record_snapshots_uikit == 'true') && fromJSON(needs.guard.outputs.checks).uikit }}
     permissions:
@@ -203,7 +203,7 @@ jobs:
 
   build-old-xcode:
     name: Build SDKs (Old Xcode)
-    runs-on: macos-15
+    runs-on: { group: scaleway-macos }
     needs:
       - guard
       - test-llc-debug
@@ -230,7 +230,7 @@ jobs:
 
   build-test-app-and-frameworks:
     name: Build Test App and Frameworks
-    runs-on: macos-15
+    runs-on: { group: scaleway-macos }
     needs:
       - guard
       - test-llc-debug
@@ -253,7 +253,7 @@ jobs:
 
   build-apps:
     name: Build Demo Apps
-    runs-on: macos-15
+    runs-on: { group: scaleway-macos }
     needs:
       - guard
       - build-test-app-and-frameworks
@@ -299,7 +299,7 @@ jobs:
 
   test-e2e-debug:
     name: Test E2E UI (Debug)
-    runs-on: macos-15
+    runs-on: { group: scaleway-macos }
     if: ${{ !cancelled() && !failure() && github.event.inputs.record_snapshots_swiftui != 'true' && github.event.inputs.record_snapshots_uikit != 'true' && fromJSON(needs.guard.outputs.checks).e2e }}
     needs:
       - guard
