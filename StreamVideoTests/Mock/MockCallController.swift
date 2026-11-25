@@ -152,6 +152,9 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
         }
 
         if let stub = stubbedFunction[.join] as? JoinCallResponse {
+            // The authenticator applies the capabilities before it returns.
+            // Without it, the controller's mirror resets the call state later.
+            await super.updateOwnCapabilities(ownCapabilities: stub.ownCapabilities)
             return stub
         } else if let joinError = stubbedFunction[.join] as? Error {
             throw joinError

@@ -194,13 +194,13 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
         try await assertJoining(
             context,
             joinResponse: JoinCallResponse.dummy(
+                ownCapabilities: [.changeMaxDuration],
                 statsOptions: .init(enableRtcStats: false, reportingIntervalMs: 5000)
             ),
             expectedTransition: .joined
         ) { @MainActor in
             XCTAssertEqual(self.callController.timesCalled(.join), 1)
-            // Not the capabilities: the controller mirrors the state adapter's
-            // own, which are empty here, onto the call state at any time.
+            XCTAssertEqual(self.call.state.ownCapabilities, [.changeMaxDuration])
             XCTAssertEqual(self.call.state.statsCollectionInterval, 5)
         }
     }
