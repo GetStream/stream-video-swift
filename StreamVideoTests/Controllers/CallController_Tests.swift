@@ -755,6 +755,18 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
     }
 
     @MainActor
+    func test_hlsPlaybackStage_alreadyBackstageWhenTheStageStarts_doesNotLeave() async throws {
+        let call = MockCall(.dummy(callController: subject))
+        call.state.ownCapabilities = [.sendAudio]
+        call.state.backstage = true
+
+        enterStage(.hlsPlayback)
+        await drainMainQueue()
+
+        XCTAssertTrue(call.leaveInitiators.isEmpty)
+    }
+
+    @MainActor
     func test_hlsPlaybackStage_backstageWithJoinBackstage_doesNotLeave() async throws {
         let call = MockCall(.dummy(callController: subject))
         call.state.ownCapabilities = [.joinBackstage]
