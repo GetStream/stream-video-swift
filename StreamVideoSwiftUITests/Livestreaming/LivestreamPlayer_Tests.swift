@@ -232,15 +232,6 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
 
     // MARK: - Private Helpers
 
-    private struct HLSFixture {
-        let subject: LivestreamPlayer<DefaultViewFactory>
-        let player: HLSSpyPlayer
-        let store: HLSPlayerStore
-        let callController: MockCallController
-        /// The claim the renderer holds on the player.
-        let lease: HLSPlayerLease?
-    }
-
     private var hlsURL: URL { URL(string: "https://example.com/live.m3u8")! }
 
     /// Builds a player whose call reports `playbackType` and whose HLS player

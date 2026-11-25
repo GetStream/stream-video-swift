@@ -30,7 +30,9 @@ actor HLSAudioSession {
     private var isActive = false
 
     /// - Parameter dispatch: Sends the actions to the audio store. Pass a
-    ///   replacement to observe or fail the dispatches.
+    ///   replacement to observe or fail the dispatches. The store has no
+    ///   other way to fail a release step, as `RTCAudioSession` has no
+    ///   public initializer to subclass.
     init(dispatch: Dispatch? = nil) {
         dispatchOverride = dispatch
     }
