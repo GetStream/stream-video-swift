@@ -23,6 +23,7 @@ public enum OwnCapability: String, Sendable, Decodable, CaseIterable {
     case removeCallMember = "remove-call-member"
     case screenshare
     case sendAudio = "send-audio"
+    case sendData = "send-data"
     case sendVideo = "send-video"
     case startBroadcastCall = "start-broadcast-call"
     case startClosedCaptionsCall = "start-closed-captions-call"

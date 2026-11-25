@@ -25,14 +25,30 @@ final class PlaybackResponse_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(subject.reason, .hint)
     }
 
+    func test_decode_withStatsToken_exposesStatsToken() throws {
+        let subject = try decode(reason: "percentage", statsToken: "jwt")
+
+        XCTAssertEqual(subject.statsToken, "jwt")
+    }
+
+    func test_decode_withoutStatsToken_hasNoStatsToken() throws {
+        let subject = try decode(reason: "percentage")
+
+        XCTAssertNil(subject.statsToken)
+    }
+
     // MARK: - Private helpers
 
-    private func decode(reason: String) throws -> PlaybackResponse {
+    private func decode(
+        reason: String,
+        statsToken: String? = nil
+    ) throws -> PlaybackResponse {
+        let token = statsToken.map { ", \"stats_token\": \"\($0)\"" } ?? ""
         let json = """
         {
             "type": "hls",
             "playlist_url": "https://example.com/live.m3u8",
-            "reason": "\(reason)"
+            "reason": "\(reason)"\(token)
         }
         """
         return try JSONDecoder.streamCore.decode(

@@ -29,6 +29,25 @@ final class JoinCallRequest_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertNil(json["playback_capabilities"])
     }
 
+    func test_encode_withUnifiedSessionId_encodesUnifiedSessionIdKey() throws {
+        let subject = JoinCallRequest(
+            location: "FRA",
+            unifiedSessionId: "unified-id"
+        )
+
+        let json = try encode(subject)
+
+        XCTAssertEqual(json["unified_session_id"] as? String, "unified-id")
+    }
+
+    func test_encode_withoutUnifiedSessionId_omitsUnifiedSessionIdKey() throws {
+        let subject = JoinCallRequest(location: "FRA")
+
+        let json = try encode(subject)
+
+        XCTAssertNil(json["unified_session_id"])
+    }
+
     // MARK: - Private helpers
 
     private func encode(_ subject: JoinCallRequest) throws -> [String: Any] {
