@@ -433,6 +433,7 @@
 				CallViewModel_Tests.swift,
 				Livestreaming/HLSPlaybackControls_Tests.swift,
 				Livestreaming/HLSPlayerStore_Tests.swift,
+				Livestreaming/HLSPlayerView_Tests.swift,
 				Livestreaming/HLSSpyPlayer.swift,
 				Livestreaming/HLSVideoRenderer_Tests.swift,
 				Livestreaming/LivestreamPlayer_Tests.swift,
