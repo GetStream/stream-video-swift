@@ -17,8 +17,10 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
+  # Optional: a Sonar failure must not fail the workflow run.
   sonar:
     runs-on: { group: github-public-amd64 }
+    continue-on-error: true
     steps:
     - uses: actions/checkout@v4.1.1
 

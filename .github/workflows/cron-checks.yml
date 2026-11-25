@@ -93,9 +93,16 @@ jobs:
     - name: Allure TestOps Export
       if: success() || failure()
       run: bundle exec fastlane allure_export
-    - name: Allure TestOps Upload
+    - name: Save Allure launch id
       if: success() || failure()
-      run: bundle exec fastlane allure_upload launch_id:$LAUNCH_ID
+      run: |
+        mkdir -p fastlane/allure-results
+        echo "$LAUNCH_ID" > fastlane/allure-results/launch_id
+    - uses: actions/upload-artifact@v4
+      if: success() || failure()
+      with:
+        name: allure-results-${{ matrix.ios }}
+        path: fastlane/allure-results
     - name: Allure TestOps Launch Removal
       if: cancelled()
       run: bundle exec fastlane allure_launch_removal launch_id:$LAUNCH_ID
@@ -114,6 +121,40 @@ jobs:
           fastlane/test_output/report.junit
           fastlane/test_output/logs/*/Diagnostics/**/*.txt
           fastlane/test_output/logs/*/Diagnostics/simctl_diagnostics/DiagnosticReports/*
+
+  # Optional: a TestOps failure must not fail the workflow run.
+  allure_testops_upload:
+    name: Upload Allure TestOps results
+    # Runs on a static-IP runner, as `gh` is blocked on macOS runners.
+    runs-on: { group: github-public-amd64 }
+    needs: test-e2e-debug
+    continue-on-error: true
+    if: ${{ !cancelled() && (needs.test-e2e-debug.result == 'success' || needs.test-e2e-debug.result == 'failure') }}
+    strategy:
+      matrix:
+        ios: ["26.2", "17.5"]
+      fail-fast: false
+    steps:
+    - uses: actions/checkout@v4.1.1
+    - uses: ./.github/actions/ruby-cache
+    - uses: actions/download-artifact@v4
+      with:
+        name: allure-results-${{ matrix.ios }}
+        path: fastlane/allure-results
+    - name: Install allurectl
+      run: |
+        source ./Githubfile
+        wget "https://github.com/allure-framework/allurectl/releases/download/${ALLURECTL_VERSION}/allurectl_linux_amd64" -O ./fastlane/allurectl
+        chmod +x ./fastlane/allurectl
+    - name: Allure TestOps Upload
+      run: |
+        LAUNCH_ID=$(cat fastlane/allure-results/launch_id)
+        rm fastlane/allure-results/launch_id
+        if [[ -n "$LAUNCH_ID" ]]; then
+          bundle exec fastlane allure_upload launch_id:$LAUNCH_ID
+        fi
+      env:
+        ALLURE_TOKEN: ${{ secrets.ALLURE_TOKEN }}
 
   build-and-test-debug:
     name: Test LLC (Debug)

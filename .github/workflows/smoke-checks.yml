@@ -276,9 +276,11 @@ jobs:
       if: ${{ fromJSON(needs.guard.outputs.checks).documentation_tests }}
       run: bundle exec fastlane build_docs_test ${{ env.VERBOSE }}
 
+  # Optional: a TestOps failure must not fail the workflow run.
   allure_testops_launch:
     name: Launch Allure TestOps
     runs-on: { group: github-public-amd64 }
+    continue-on-error: true
     needs:
       - guard
       - build-test-app-and-frameworks
@@ -362,6 +364,7 @@ jobs:
     name: Upload Allure TestOps results
     # Runs on a static-IP runner, as `gh` is blocked on macOS runners.
     runs-on: { group: github-public-amd64 }
+    continue-on-error: true
     needs:
       - allure_testops_launch
       - test-e2e-debug
