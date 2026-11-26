@@ -700,7 +700,6 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         XCTAssertEqual(authenticator.declaredPlaybackCapabilities, [true, true])
     }
 
-
     // MARK: - HLS call ended
 
     @MainActor
