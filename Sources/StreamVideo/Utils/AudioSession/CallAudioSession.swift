@@ -83,15 +83,20 @@ final class CallAudioSession: @unchecked Sendable {
         ///   CallKit because it will not activate the audio session unless the
         ///   category and mode are already aligned with call audio.
         /// - Important: We only apply this bootstrap configuration when the
-        ///   shared audio store is currently unowned.
+        ///   shared audio store is unowned and has no audio device module.
+        ///   A call sets both together, so the module check is a safeguard:
+        ///   a running call's configuration must never be overridden.
         audioStore.dispatch(
             .conditioned(
-                .activeSessionIdentifier(""),
-                action: .avAudioSession(
-                    .setCategoryAndModeAndCategoryOptions(
-                        .playAndRecord,
-                        mode: .voiceChat,
-                        categoryOptions: [.allowBluetoothHFP, .allowBluetoothA2DP]
+                .audioDeviceModuleIsNil,
+                action: .conditioned(
+                    .activeSessionIdentifier(""),
+                    action: .avAudioSession(
+                        .setCategoryAndModeAndCategoryOptions(
+                            .playAndRecord,
+                            mode: .voiceChat,
+                            categoryOptions: [.allowBluetoothHFP, .allowBluetoothA2DP]
+                        )
                     )
                 )
             )

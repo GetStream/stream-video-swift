@@ -11,7 +11,8 @@ extension RTCAudioStore {
 
     /// Mirrors the system audio session into the store so reducers can keep a
     /// coherent view of category, mode, and options that were set by other
-    /// actors such as CallKit or Control Center.
+    /// actors such as CallKit or Control Center. It mirrors only while an
+    /// audio device module is installed.
     final class AVAudioSessionEffect: StoreEffect<RTCAudioStore.Namespace>, @unchecked Sendable {
 
         @Injected(\.avAudioSessionObserver) private var avAudioSessionObserver
@@ -41,23 +42,26 @@ extension RTCAudioStore {
             audioDeviceModuleCancellable = statePublisher
                 .map(\.audioDeviceModule)
                 .removeDuplicates()
-                .compactMap { $0 }
                 .sink { [weak self] in self?.didUpdate($0) }
         }
 
         // MARK: - Private Helpers
 
-        private func didUpdate(_ audioDeviceModule: AudioDeviceModule) {
+        /// Restarts observation for a new audio device module and stops it
+        /// when the module is removed, for example when a call ends.
+        private func didUpdate(_ audioDeviceModule: AudioDeviceModule?) {
             avAudioSessionObserverCancellable?.cancel()
             avAudioSessionObserverCancellable = nil
             avAudioSessionObserver.stopObserving()
 
+            guard audioDeviceModule != nil else { return }
+
+            // Start first so the replayed value is a fresh snapshot.
+            avAudioSessionObserver.startObserving()
             avAudioSessionObserverCancellable = avAudioSessionObserver
                 .publisher
                 .removeDuplicates()
                 .sink { [weak self] in self?.didUpdate($0) }
-
-            avAudioSessionObserver.startObserving()
         }
 
         private func didUpdate(_ state: AVAudioSession.Snapshot) {
