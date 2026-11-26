@@ -276,6 +276,79 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         await fulfillment { self.subject.primaryTrack.isEnabled == true }
     }
 
+    func test_didUpdateCallSettings_muteRequestFails_localTracksAreDisabled(
+    ) async throws {
+        let captureDevice = MockCaptureDevice()
+        captureDevice.stub(for: \.position, with: .front)
+        mockCaptureDeviceProvider.stubbedFunction[.deviceForAVPosition] = captureDevice
+        let transceiver = try makeTransceiver(
+            of: .video,
+            videoOptions: publishOptions[0]
+        )
+        mockPeerConnection.stub(for: .addTransceiver, with: transceiver)
+        try await subject.setUp(
+            with: .init(videoOn: true),
+            ownCapabilities: [.sendVideo]
+        )
+        try await subject.didUpdateCallSettings(.init(videoOn: true))
+        let senderTrack = try XCTUnwrap(transceiver.sender.track)
+        XCTAssertTrue(subject.primaryTrack.isEnabled)
+        XCTAssertTrue(senderTrack.isEnabled)
+
+        var response = Stream_Video_Sfu_Signal_UpdateMuteStatesResponse()
+        response.error.code = .requestValidationFailed
+        response.error.message = "Mute request failed"
+        mockSFUStack.service.stub(for: .updateTrackMuteState, with: response)
+
+        let error = await XCTAssertThrowsErrorAsync {
+            try await subject.didUpdateCallSettings(.init(videoOn: false))
+        }
+
+        XCTAssertEqual(error as? Stream_Video_Sfu_Models_Error, response.error)
+        XCTAssertFalse(subject.primaryTrack.isEnabled)
+        XCTAssertFalse(senderTrack.isEnabled)
+        XCTAssertEqual(mockVideoCapturer.timesCalled(.stopCapture), 1)
+        XCTAssertEqual(
+            mockSFUStack.service.updateMuteStatesWasCalledWithRequest?
+                .muteStates.first?.muted,
+            true
+        )
+    }
+
+    func test_didUpdateCallSettings_muteRequestFails_foregroundDoesNotUnmute(
+    ) async throws {
+        let appStateAdapter = MockAppStateAdapter()
+        appStateAdapter.makeShared()
+        defer { appStateAdapter.dismante() }
+        // Starting in background makes activation report only muted states.
+        appStateAdapter.stubbedState = .background
+        mockVideoCapturer.stub(for: .supportsBackgrounding, with: false)
+        let captureDevice = MockCaptureDevice()
+        captureDevice.stub(for: \.position, with: .front)
+        mockCaptureDeviceProvider.stubbedFunction[.deviceForAVPosition] = captureDevice
+        try await subject.setUp(
+            with: .init(videoOn: true),
+            ownCapabilities: [.sendVideo]
+        )
+        try await subject.didUpdateCallSettings(.init(videoOn: true))
+        var response = Stream_Video_Sfu_Signal_UpdateMuteStatesResponse()
+        response.error.code = .requestValidationFailed
+        response.error.message = "Mute request failed"
+        mockSFUStack.service.stub(for: .updateTrackMuteState, with: response)
+        _ = await XCTAssertThrowsErrorAsync {
+            try await subject.didUpdateCallSettings(.init(videoOn: false))
+        }
+
+        appStateAdapter.stubbedState = .foreground
+        await wait(for: 0.5)
+
+        XCTAssertEqual(
+            mockSFUStack.service.updateMuteStatesWasCalledWithRequest?
+                .muteStates.first?.muted,
+            true
+        )
+    }
+
     // MARK: - didUpdateOwnCapabilities
 
     func test_didUpdateOwnCapabilities_addsVideoCapability_trackCanBeRegistered() async throws {
@@ -317,7 +390,11 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertFalse(request.muteStates[0].muted)
     }
 
-    func test_didUpdateOwnCapabilities_removesVideoCapability_blocksMuteUpdate() async throws {
+    func test_didUpdateOwnCapabilities_sendVideoRevoked_localTrackIsDisabled(
+    ) async throws {
+        let captureDevice = MockCaptureDevice()
+        captureDevice.stub(for: \.position, with: .front)
+        mockCaptureDeviceProvider.stubbedFunction[.deviceForAVPosition] = captureDevice
         try await subject.setUp(
             with: .init(videoOn: true),
             ownCapabilities: [.sendVideo]
@@ -333,7 +410,13 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
             self.mockSFUStack.service.updateMuteStatesWasCalledWithRequest == nil
         }
         XCTAssertNil(mockSFUStack.service.updateMuteStatesWasCalledWithRequest)
-        XCTAssertTrue(subject.primaryTrack.isEnabled)
+        XCTAssertFalse(subject.primaryTrack.isEnabled)
+        XCTAssertEqual(mockVideoCapturer.timesCalled(.stopCapture), 1)
+
+        try await subject.didUpdateCallSettings(.init(videoOn: true))
+
+        XCTAssertFalse(subject.primaryTrack.isEnabled)
+        XCTAssertNil(mockSFUStack.service.updateMuteStatesWasCalledWithRequest)
     }
 
     // MARK: - didUpdatePublishOptions
