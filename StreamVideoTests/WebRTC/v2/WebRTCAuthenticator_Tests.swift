@@ -300,6 +300,17 @@ final class WebRTCAuthenticator_Tests: XCTestCase, @unchecked Sendable {
         )
     }
 
+    func test_authenticate_hlsGrantWithUnknownType_throwsClientError() async throws {
+        mockCoordinatorStack.callAuthenticator.authenticateResult = .success(
+            .dummyHLSGrant(
+                ownCapabilities: [.sendAudio],
+                playback: .dummy(type: .unknown)
+            )
+        )
+
+        await assertAuthenticateThrowsClientError(containing: "playback type")
+    }
+
     func test_authenticate_withValidData_shouldReturnSFUAdapterAndJoinCallResponse() async throws {
         let currentSFU = String.unique
         let create = true
