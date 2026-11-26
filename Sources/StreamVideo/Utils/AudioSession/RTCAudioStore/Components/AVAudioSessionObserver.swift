@@ -96,9 +96,11 @@ final class AVAudioSessionObserver {
     private let subject: CurrentValueSubject<AVAudioSession.Snapshot, Never> = .init(.init())
     private var cancellable: AnyCancellable?
 
-    /// Starts emitting snapshots roughly every 100ms, which is fast enough to
-    /// catch rapid route transitions without adding noticeable overhead.
+    /// Emits a fresh snapshot right away, then roughly every 100ms, which is
+    /// fast enough to catch rapid route transitions without adding noticeable
+    /// overhead.
     func startObserving() {
+        subject.send(.init())
         cancellable = DefaultTimer
             .publish(every: 0.1)
             .sink { [weak self] _ in self?.subject.send(.init()) }

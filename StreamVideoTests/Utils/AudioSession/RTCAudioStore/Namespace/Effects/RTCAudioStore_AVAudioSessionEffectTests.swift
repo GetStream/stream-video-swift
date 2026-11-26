@@ -79,6 +79,58 @@ final class RTCAudioStore_AVAudioSessionEffectTests: XCTestCase, @unchecked Send
         XCTAssertTrue(dispatchedActions.isEmpty)
     }
 
+    func test_whenAudioDeviceModuleRemoved_stopsObserving() async {
+        // `testObserver.publisher` would resolve to `Optional.publisher`
+        // on the implicitly unwrapped property, so bind a non-optional.
+        let observer: AVAudioSessionObserver = testObserver
+        effect.set(statePublisher: stateSubject.eraseToAnyPublisher())
+        stateSubject.send(makeState(audioDeviceModule: makeAudioDeviceModule()))
+
+        // Prove the observer polls before asserting that it stops.
+        let didPoll = expectation(description: "Observer polls")
+        didPoll.assertForOverFulfill = false
+        let pollCancellable = observer
+            .publisher
+            .dropFirst()
+            .sink { _ in didPoll.fulfill() }
+        await fulfillment(of: [didPoll], timeout: 2)
+        pollCancellable.cancel()
+
+        stateSubject.send(makeState(audioDeviceModule: nil))
+
+        // Skip the replayed value and one tick that can still be in flight.
+        let didPollAfterRemoval = expectation(description: "Observer polls after removal")
+        didPollAfterRemoval.isInverted = true
+        didPollAfterRemoval.assertForOverFulfill = false
+        let silenceCancellable = observer
+            .publisher
+            .dropFirst(2)
+            .sink { _ in didPollAfterRemoval.fulfill() }
+        await fulfillment(of: [didPollAfterRemoval], timeout: 0.5)
+        silenceCancellable.cancel()
+    }
+
+    func test_whenAudioDeviceModuleReplacedAfterRemoval_restartsObserving() async {
+        let observer: AVAudioSessionObserver = testObserver
+        effect.set(statePublisher: stateSubject.eraseToAnyPublisher())
+        stateSubject.send(makeState(audioDeviceModule: makeAudioDeviceModule()))
+        stateSubject.send(makeState(audioDeviceModule: nil))
+
+        // Skip the replayed value and the immediate one sent on restart.
+        // Only a timer tick of the restarted observer can fulfill this.
+        let didPollAfterRestart = expectation(description: "Observer polls again")
+        didPollAfterRestart.assertForOverFulfill = false
+        let cancellable = observer
+            .publisher
+            .dropFirst(2)
+            .sink { _ in didPollAfterRestart.fulfill() }
+
+        stateSubject.send(makeState(audioDeviceModule: makeAudioDeviceModule()))
+
+        await fulfillment(of: [didPollAfterRestart], timeout: 2)
+        cancellable.cancel()
+    }
+
     // MARK: - Helpers
 
     private func makeAudioDeviceModule() -> AudioDeviceModule {

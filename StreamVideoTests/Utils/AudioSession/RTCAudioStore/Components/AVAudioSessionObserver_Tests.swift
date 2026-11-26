@@ -51,11 +51,13 @@ final class AVAudioSessionObserver_Tests: XCTestCase, @unchecked Sendable {
 
     func test_startObserving_emitsSnapshotsFromTimer() async {
         let observer = AVAudioSessionObserver()
-        let expectation = expectation(description: "snapshots")
-        expectation.expectedFulfillmentCount = 2
+        let expectation = expectation(description: "timer snapshot")
+        expectation.assertForOverFulfill = false
 
+        // Skip the replayed value and the immediate one from
+        // `startObserving()`. Only a timer tick can fulfill this.
         observer.publisher
-            .prefix(2)
+            .dropFirst(2)
             .sink { snapshot in
                 XCTAssertEqual(snapshot.category, AVAudioSession.sharedInstance().category)
                 expectation.fulfill()
@@ -68,31 +70,46 @@ final class AVAudioSessionObserver_Tests: XCTestCase, @unchecked Sendable {
         observer.stopObserving()
     }
 
+    func test_startObserving_emitsSnapshotBeforeFirstTick() {
+        let subject = AVAudioSessionObserver()
+        var received = 0
+        subject.publisher
+            .dropFirst()
+            .sink { _ in received += 1 }
+            .store(in: &cancellables)
+
+        subject.startObserving()
+
+        XCTAssertEqual(received, 1)
+        subject.stopObserving()
+    }
+
     func test_stopObserving_preventsFurtherEmissions() async throws {
         try XCTSkipIf(
             TestRunnerEnvironment.isCI,
             "https://linear.app/stream/issue/IOS-1326/cifix-failing-test-on-ios-15-and-16-only-which-passes-locally"
         )
         let observer = AVAudioSessionObserver()
-        let firstTwo = expectation(description: "first snapshots")
+        let firstThree = expectation(description: "first snapshots")
         let noMoreSnapshots = expectation(description: "no extra snapshots")
         noMoreSnapshots.isInverted = true
 
+        // Replayed value, immediate value and at least one timer tick.
         observer.publisher
-            .prefix(2)
+            .prefix(3)
             .sink(
-                receiveCompletion: { _ in firstTwo.fulfill() },
+                receiveCompletion: { _ in firstThree.fulfill() },
                 receiveValue: { _ in }
             )
             .store(in: &cancellables)
 
         observer.publisher
-            .dropFirst(2)
+            .dropFirst(3)
             .sink { _ in noMoreSnapshots.fulfill() }
             .store(in: &cancellables)
 
         observer.startObserving()
-        await fulfillment(of: [firstTwo], timeout: 1)
+        await fulfillment(of: [firstThree], timeout: 1)
 
         observer.stopObserving()
         await fulfillment(of: [noMoreSnapshots], timeout: 0.3)
