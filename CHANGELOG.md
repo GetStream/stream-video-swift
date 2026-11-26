@@ -16,7 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Keep the microphone off after the lobby closes without a call. [#1437](https://github.com/GetStream/stream-video-swift/pull/1437)
 - Stop restarting an active recording when other audio session state changes. [#1439](https://github.com/GetStream/stream-video-swift/pull/1439)
 - Fix a rare crash or missed SFU connection state update when a call joins. [#1416](https://github.com/GetStream/stream-video-swift/pull/1416)
-- Stop reading the audio session state after a call ends.
+- Stop reading the audio session state after a call ends. [#1462](https://github.com/GetStream/stream-video-swift/pull/1462)
 
 ### 🔄 Changed
 
