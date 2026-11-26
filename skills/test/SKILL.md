@@ -96,6 +96,8 @@ Do not add stress runs, load, or ordering experiments without user approval.
   Avoid large helpers with flags that hide the behavior under test.
 - Use a distinct observable effect to prove timer cancellation.
   Duplicate state assignments can hide a timer that still fires.
+- Mark each override of an AVFoundation member in a test double `nonisolated`.
+  Without it, `StreamVideoTests` fails to compile with main-actor isolation errors.
 - Change snapshot references only for an intended visual change.
   Inspect visual differences before accepting new references.
   Run snapshot tests on the simulator model CI uses, as set in `.github/workflows/`.
