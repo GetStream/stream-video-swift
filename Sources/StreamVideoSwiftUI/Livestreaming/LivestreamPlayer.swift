@@ -88,6 +88,10 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
     /// Keeps `streamPaused` in step with the shared HLS player.
     @State var rateObserver: AnyCancellable?
 
+    /// Whether this player may set the call of the Picture-in-Picture
+    /// adapter. It is on while the player is visible and has not left.
+    @State var claimsPictureInPictureCall = false
+
     /// Whether this player set the call of the Picture-in-Picture adapter.
     @State var setsPictureInPictureCall = false
 
@@ -228,18 +232,19 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
             }
         }
         .onAppear {
-            if
-                isPictureInPictureEnabled,
-                pictureInPictureAdapter.call == nil {
-                pictureInPictureAdapter.call = call
-                setsPictureInPictureCall = true
-            }
+            claimsPictureInPictureCall = true
+            setPictureInPictureCall()
             switch joinPolicy {
             case .none:
                 break
             case .auto:
                 joinLivestream()
             }
+        }
+        // A player that appears before the previous one disappears finds
+        // the call taken. It sets the call when the adapter clears it.
+        .onReceive(pictureInPictureAdapter.callDidChange) {
+            if $0 == nil { setPictureInPictureCall() }
         }
         .onDisappear {
             clearPictureInPictureCall()
@@ -539,9 +544,21 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
         }
     }
     
+    /// Sets the adapter call, unless the adapter holds a call.
+    private func setPictureInPictureCall() {
+        guard
+            isPictureInPictureEnabled,
+            claimsPictureInPictureCall,
+            pictureInPictureAdapter.call == nil
+        else { return }
+        pictureInPictureAdapter.call = call
+        setsPictureInPictureCall = true
+    }
+
     /// Clears the adapter call if this player set it, unless another screen
     /// has replaced it.
     private func clearPictureInPictureCall() {
+        claimsPictureInPictureCall = false
         guard
             setsPictureInPictureCall,
             pictureInPictureAdapter.call?.cId == call.cId

@@ -136,6 +136,26 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
     }
 
     @MainActor
+    func test_livestreamPlayer_appearsBeforeThePreviousOneDisappears_takesTheCallOver() async {
+        let adapter = injectPictureInPictureAdapter()
+        let first = MockCall()
+        let second = MockCall()
+        let firstWindow = host(LivestreamPlayer(call: first, joinPolicy: .none))
+        defer { firstWindow.isHidden = true }
+        await fulfilmentInMainActor { adapter.call?.cId == first.cId }
+        let lifecycle = Lifecycle()
+        let secondWindow = host(LivestreamPlayer(call: second, joinPolicy: .none), lifecycle)
+        defer { secondWindow.isHidden = true }
+        await fulfilmentInMainActor { lifecycle.appeared }
+
+        firstWindow.rootViewController = nil
+        await fulfilmentInMainActor { adapter.call?.cId == second.cId }
+
+        secondWindow.rootViewController = nil
+        await fulfilmentInMainActor { adapter.call == nil }
+    }
+
+    @MainActor
     func test_livestreamPlayer_pictureInPictureDisabled_appears_leavesTheAdapterAlone() async {
         let adapter = injectPictureInPictureAdapter()
         let lifecycle = Lifecycle()

@@ -15,7 +15,11 @@ public final class StreamPictureInPictureAdapter: @unchecked Sendable {
     /// The active call instance.
     public var call: Call? {
         willSet { store?.dispatch(.setCall(newValue)) }
+        didSet { callDidChange.send(call) }
     }
+
+    /// Sends the call each time it is set.
+    let callDidChange = PassthroughSubject<Call?, Never>()
 
     /// The view used as an anchor for Picture-in-Picture display.
     public var sourceView: UIView? { willSet { store?.dispatch(.setSourceView(newValue)) } }
