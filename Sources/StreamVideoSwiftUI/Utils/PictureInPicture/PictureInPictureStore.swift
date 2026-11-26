@@ -21,6 +21,8 @@ final class PictureInPictureStore: ObservableObject, @unchecked Sendable {
         var sourceView: UIView?
         /// The layer of the HLS player that Picture-in-Picture can show.
         nonisolated(unsafe) var playerLayer: AVPlayerLayer?
+        /// The `cId` of the call that the player layer shows.
+        var playerLayerCallId: String?
         var viewFactory: PictureInPictureViewFactory
         var content: PictureInPictureContent
         var preferredContentSize: CGSize
@@ -47,8 +49,8 @@ final class PictureInPictureStore: ObservableObject, @unchecked Sendable {
         case setCall(Call?)
         /// Sets the source view for Picture-in-Picture.
         case setSourceView(UIView?)
-        /// Sets the layer of the HLS player.
-        case setPlayerLayer(AVPlayerLayer)
+        /// Sets the layer of the HLS player and the `cId` of its call.
+        case setPlayerLayer(AVPlayerLayer, cId: String)
         /// Clears the layer of the HLS player, if the state still holds it.
         case removePlayerLayer(AVPlayerLayer)
         /// Updates the view factory for creating content.
@@ -90,11 +92,13 @@ final class PictureInPictureStore: ObservableObject, @unchecked Sendable {
                 updatedState.call = value
             case let .setSourceView(value):
                 updatedState.sourceView = value
-            case let .setPlayerLayer(value):
+            case let .setPlayerLayer(value, cId):
                 updatedState.playerLayer = value
+                updatedState.playerLayerCallId = cId
             case let .removePlayerLayer(value):
                 if updatedState.playerLayer === value {
                     updatedState.playerLayer = nil
+                    updatedState.playerLayerCallId = nil
                 }
             case let .setViewFactory(value):
                 updatedState.viewFactory = value

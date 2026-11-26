@@ -83,20 +83,24 @@ final class PictureInPictureController: @unchecked Sendable {
         self.store = store
         self.makePictureInPictureController = makePictureInPictureController
 
-        Publishers.CombineLatest3(
+        Publishers.CombineLatest4(
             store
                 .publisher(for: \.call)
                 .removeDuplicates { $0?.cId == $1?.cId },
             store.publisher(for: \.sourceView).removeDuplicates(),
-            // Only the identity travels through the sink. The layer is read
-            // from the store, because it isn't `Sendable`.
+            // Only the identity travels through the sink, because the layer
+            // isn't `Sendable`.
             store
                 .publisher(for: \.playerLayer)
                 .map { $0.map(ObjectIdentifier.init) }
-                .removeDuplicates()
+                .removeDuplicates(),
+            store.publisher(for: \.playerLayerCallId).removeDuplicates()
         )
-        .sinkTask(storeIn: disposableBag) { @MainActor [weak self] call, sourceView, _ in
-            self?.didUpdate(call: call, sourceView: sourceView)
+        // Each value runs in its own task, so a stale value can run last.
+        // The latest state makes every run end in the same result.
+        .sinkTask(storeIn: disposableBag) { @MainActor [weak self] _, _, _, _ in
+            guard let self else { return }
+            didUpdate(call: store.state.call, sourceView: store.state.sourceView)
         }
         .store(in: disposableBag)
 
@@ -148,7 +152,9 @@ final class PictureInPictureController: @unchecked Sendable {
 
         // The system shows the player layer of the HLS renderer.
         var hlsPlayerLayer: AVPlayerLayer?
-        if case .hls = call.state.playbackType {
+        if
+            case .hls = call.state.playbackType,
+            store.state.playerLayerCallId == call.cId {
             hlsPlayerLayer = store.state.playerLayer
         }
         let contentSource = hlsPlayerLayer.map {

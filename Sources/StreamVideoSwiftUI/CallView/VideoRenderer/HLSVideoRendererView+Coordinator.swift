@@ -87,15 +87,12 @@ extension HLSVideoRendererView {
             }
         }
 
-        /// Lets Picture in Picture show the layer, when the adapter holds
-        /// the call of this view.
+        /// Lets Picture in Picture show the layer for the call of this view.
         private func registerPlayerLayer() {
-            guard
-                let layer = view?.playerLayer,
-                pictureInPictureAdapter.call?.cId == call.cId
-            else { return }
+            guard let layer = view?.playerLayer else { return }
             registeredLayer = layer
-            pictureInPictureAdapter.store?.dispatch(.setPlayerLayer(layer))
+            pictureInPictureAdapter.store?
+                .dispatch(.setPlayerLayer(layer, cId: call.cId))
         }
 
         /// Clears the layer, unless Picture in Picture shows another one now.

@@ -247,28 +247,18 @@ final class HLSVideoRendererView_Tests: StreamVideoTestCase, @unchecked Sendable
 
     // MARK: - Picture in Picture
 
-    func test_playerShown_adapterHoldsTheCall_registersTheLayer() async {
-        let adapter = await injectAdapter(holding: call)
+    func test_playerShown_registersTheLayerWithTheCallId() async {
+        let adapter = await injectAdapter()
         call.state.playbackType = .hls(url)
 
         subject.attach(to: view)
 
         await fulfilmentInMainActor { adapter.store?.state.playerLayer === self.view.playerLayer }
-    }
-
-    func test_playerShown_adapterHoldsAnotherCall_registersNothing() async {
-        let adapter = await injectAdapter(holding: MockCall())
-        call.state.playbackType = .hls(url)
-
-        subject.attach(to: view)
-        await fulfilmentInMainActor { self.view.player != nil }
-        await wait(for: 0.1)
-
-        XCTAssertNil(adapter.store?.state.playerLayer)
+        XCTAssertEqual(adapter.store?.state.playerLayerCallId, call.cId)
     }
 
     func test_playbackTypeReturnsToWebRTC_clearsTheLayer() async {
-        let adapter = await injectAdapter(holding: call)
+        let adapter = await injectAdapter()
         call.state.playbackType = .hls(url)
         subject.attach(to: view)
         await fulfilmentInMainActor { adapter.store?.state.playerLayer != nil }
@@ -279,7 +269,7 @@ final class HLSVideoRendererView_Tests: StreamVideoTestCase, @unchecked Sendable
     }
 
     func test_dismantle_clearsTheLayer() async {
-        let adapter = await injectAdapter(holding: call)
+        let adapter = await injectAdapter()
         call.state.playbackType = .hls(url)
         subject.attach(to: view)
         await fulfilmentInMainActor { adapter.store?.state.playerLayer != nil }
@@ -289,15 +279,40 @@ final class HLSVideoRendererView_Tests: StreamVideoTestCase, @unchecked Sendable
         await fulfilmentInMainActor { adapter.store?.state.playerLayer == nil }
     }
 
+    func test_dismantle_viewAlreadyReleased_clearsTheLayer() async {
+        let adapter = await injectAdapter()
+        call.state.playbackType = .hls(url)
+        var released: HLSPlayerView? = HLSPlayerView()
+        subject.attach(to: released!)
+        await fulfilmentInMainActor { adapter.store?.state.playerLayer != nil }
+
+        released = nil
+        subject.dismantle()
+
+        await fulfilmentInMainActor { adapter.store?.state.playerLayer == nil }
+    }
+
+    func test_updateCall_anotherCall_clearsTheLayerOfTheOldCall() async {
+        let adapter = await injectAdapter()
+        call.state.playbackType = .hls(url)
+        subject.attach(to: view)
+        await fulfilmentInMainActor { adapter.store?.state.playerLayer != nil }
+
+        subject.update(call: MockCall())
+
+        await fulfilmentInMainActor { adapter.store?.state.playerLayer == nil }
+    }
+
     func test_dismantle_anotherLayerIsRegistered_leavesItAlone() async {
-        let adapter = await injectAdapter(holding: call)
+        let adapter = await injectAdapter()
         call.state.playbackType = .hls(url)
         subject.attach(to: view)
         await fulfilmentInMainActor { adapter.store?.state.playerLayer != nil }
         let other = AVPlayerLayer()
-        adapter.store?.dispatch(.setPlayerLayer(other))
+        adapter.store?.dispatch(.setPlayerLayer(other, cId: call.cId))
 
         subject.dismantle()
+        await wait(for: 0.2)
 
         XCTAssertTrue(adapter.store?.state.playerLayer === other)
     }
@@ -322,13 +337,12 @@ final class HLSVideoRendererView_Tests: StreamVideoTestCase, @unchecked Sendable
         )
     }
 
-    /// Replaces the shared adapter with one that holds `call`.
-    /// Teardown restores the previous one.
-    private func injectAdapter(holding call: Call) async -> StreamPictureInPictureAdapter {
+    /// Replaces the shared adapter with a fresh one. Teardown restores the
+    /// previous one.
+    private func injectAdapter() async -> StreamPictureInPictureAdapter {
         previousAdapter = previousAdapter ?? InjectedValues[\.pictureInPictureAdapter]
         let adapter = StreamPictureInPictureAdapter()
         InjectedValues[\.pictureInPictureAdapter] = adapter
-        adapter.call = call
         await fulfilmentInMainActor { adapter.store != nil }
         return adapter
     }
