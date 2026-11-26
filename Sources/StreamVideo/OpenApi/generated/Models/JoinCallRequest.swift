@@ -43,6 +43,8 @@ public final class JoinCallRequest: Sendable, Encodable, JSONEncodable {
     public let prefer: JoinCallRequestPrefer?
     /// if true and the call is created, the notification will include ring=true
     public let ring: Bool?
+    /// SDK session ID for this call, the same value the SDK sends for its WebRTC sessions and HLS stats reports
+    public let unifiedSessionId: String?
     public let video: Bool?
 
     public init(
@@ -58,6 +60,7 @@ public final class JoinCallRequest: Sendable, Encodable, JSONEncodable {
         playbackCapabilities: [String]? = nil,
         prefer: JoinCallRequestPrefer? = nil,
         ring: Bool? = nil,
+        unifiedSessionId: String? = nil,
         video: Bool? = nil
     ) {
         self.create = create
@@ -72,6 +75,7 @@ public final class JoinCallRequest: Sendable, Encodable, JSONEncodable {
         self.playbackCapabilities = playbackCapabilities
         self.prefer = prefer
         self.ring = ring
+        self.unifiedSessionId = unifiedSessionId
         self.video = video
     }
 
@@ -89,6 +93,7 @@ public final class JoinCallRequest: Sendable, Encodable, JSONEncodable {
         try container.encodeIfPresent(playbackCapabilities, forKey: .playbackCapabilities)
         try container.encodeIfPresent(prefer, forKey: .prefer)
         try container.encodeIfPresent(ring, forKey: .ring)
+        try container.encodeIfPresent(unifiedSessionId, forKey: .unifiedSessionId)
         try container.encodeIfPresent(video, forKey: .video)
     }
 }
@@ -107,6 +112,7 @@ extension JoinCallRequest: Hashable {
             lhs.playbackCapabilities == rhs.playbackCapabilities &&
             lhs.prefer == rhs.prefer &&
             lhs.ring == rhs.ring &&
+            lhs.unifiedSessionId == rhs.unifiedSessionId &&
             lhs.video == rhs.video
     }
 
@@ -123,6 +129,7 @@ extension JoinCallRequest: Hashable {
         hasher.combine(playbackCapabilities)
         hasher.combine(prefer)
         hasher.combine(ring)
+        hasher.combine(unifiedSessionId)
         hasher.combine(video)
     }
 }
