@@ -105,6 +105,10 @@ public class CallState: ObservableObject {
     ///
     /// It is ``PlaybackType/webRTC`` until the join response grants HLS. It
     /// returns to ``PlaybackType/webRTC`` when the call ends.
+    ///
+    /// Observe it to pick a renderer: HLS viewers have no participants or
+    /// tracks. Like the other published properties, it changes on the main
+    /// actor.
     @Published public internal(set) var playbackType: PlaybackType = .webRTC
 
     /// Indicates whether the current user is speaking while their microphone is muted.

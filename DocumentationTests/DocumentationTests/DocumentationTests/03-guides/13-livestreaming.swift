@@ -12,7 +12,7 @@ import SwiftUI
 @MainActor
 private func content() {
     container {
-        struct HLSPlayerView: View {
+        struct HLSStreamView: View {
             let hlsURL: URL
 
             var body: some View {
