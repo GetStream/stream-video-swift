@@ -20,4 +20,8 @@ private func content() {
             Text("Join stream")
         }
     }
+
+    viewContainer {
+        HLSVideoRenderer(call: call, contentMode: .scaleAspectFill)
+    }
 }

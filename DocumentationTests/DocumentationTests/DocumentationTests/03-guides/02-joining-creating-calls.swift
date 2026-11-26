@@ -4,6 +4,7 @@
 
 import StreamVideo
 
+@MainActor
 private func content() {
     asyncContainer {
         let call = streamVideo.call(callType: "default", callId: "123")
@@ -13,6 +14,15 @@ private func content() {
     asyncContainer {
         let call = streamVideo.call(callType: "default", callId: "123")
         let result = try await call.join()
+    }
+
+    asyncContainer {
+        let call = streamVideo.call(callType: "livestream", callId: "123")
+        try await call.join()
+
+        if case .hls(let url) = call.state.playbackType {
+            print("The backend granted HLS playback from \(url)")
+        }
     }
 
     asyncContainer {

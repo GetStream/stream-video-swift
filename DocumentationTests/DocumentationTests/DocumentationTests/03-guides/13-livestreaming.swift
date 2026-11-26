@@ -26,6 +26,64 @@ private func content() {
         let hlsPlaylistURL = response.playlistUrl
     }
 
+    asyncContainer {
+        try await call.join()
+
+        if case .hls(let url) = call.state.playbackType {
+            print("The backend granted HLS playback from \(url)")
+        }
+    }
+
+    container {
+        struct LivestreamVideoView: View {
+            let call: Call
+            @StateObject var state: CallState
+
+            var body: some View {
+                if case .hls = state.playbackType {
+                    HLSVideoRenderer(call: call)
+                } else {
+                    Text("Render the host's WebRTC video here")
+                }
+            }
+        }
+    }
+
+    container {
+        struct CustomHLSView: View {
+            let call: Call
+            @StateObject var state: CallState
+            @State private var player: AVPlayer?
+            @State private var playback: HLSPlayback
+
+            init(call: Call) {
+                self.call = call
+                _state = StateObject(wrappedValue: call.state)
+                _playback = State(wrappedValue: HLSPlayback(call: call))
+            }
+
+            var body: some View {
+                Group {
+                    if let player {
+                        VideoPlayer(player: player)
+                    }
+                }
+                .task(id: state.playbackType) {
+                    player = await playback.acquire()
+                }
+                .onDisappear {
+                    Task { await playback.release() }
+                }
+            }
+        }
+    }
+
+    asyncContainer {
+        let playback = HLSPlayback(call: call)
+        await playback.setMuted(true)
+        await playback.setPaused(true)
+    }
+
     container {
         struct LivestreamApp: App {
             @State var streamVideo: StreamVideo
