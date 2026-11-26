@@ -15,7 +15,7 @@ import UIKit
 /// afterwards. A detached player keeps playing the audio.
 ///
 /// The layer keeps the player while Picture in Picture is active and shows
-/// this layer, because the Picture-in-Picture window draws it.
+/// this layer for the call of the store, because the window draws it.
 final class HLSPlayerView: UIView {
 
     override class var layerClass: AnyClass { AVPlayerLayer.self }
@@ -83,11 +83,15 @@ final class HLSPlayerView: UIView {
             pictureInPictureObserver == nil,
             let store = pictureInPictureAdapter.store
         else { return }
-        pictureInPictureObserver = Publishers.CombineLatest(
+        pictureInPictureObserver = Publishers.CombineLatest4(
             store.publisher(for: \.isActive),
-            store.publisher(for: \.playerLayer)
+            store.publisher(for: \.playerLayer),
+            store.publisher(for: \.playerLayerCallId),
+            store.publisher(for: \.call)
         )
-        .map { [weak self] in $0 && $1 === self?.playerLayer }
+        .map { [weak self] isActive, layer, layerCallId, call in
+            isActive && layer === self?.playerLayer && layerCallId == call?.cId
+        }
         .removeDuplicates()
         .sink { [weak self] in
             self?.isPictureInPictureActive = $0

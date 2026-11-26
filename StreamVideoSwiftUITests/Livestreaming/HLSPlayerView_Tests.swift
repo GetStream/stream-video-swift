@@ -12,6 +12,7 @@ import XCTest
 final class HLSPlayerView_Tests: StreamVideoTestCase, @unchecked Sendable {
 
     private var previousAdapter: StreamPictureInPictureAdapter?
+    private lazy var call: MockCall! = .init()
     private lazy var mockAppStateAdapter: MockAppStateAdapter! = .init()
     private lazy var player: MockHLSPlayer! = .init()
     private lazy var subject: HLSPlayerView! = {
@@ -24,6 +25,7 @@ final class HLSPlayerView_Tests: StreamVideoTestCase, @unchecked Sendable {
     override func tearDown() async throws {
         subject = nil
         player = nil
+        call = nil
         mockAppStateAdapter.dismante()
         mockAppStateAdapter = nil
         if let previousAdapter {
@@ -117,16 +119,25 @@ final class HLSPlayerView_Tests: StreamVideoTestCase, @unchecked Sendable {
     func test_appEntersBackground_pictureInPictureShowsAnotherLayer_detachesThePlayer() async {
         let store = await injectPictureInPictureStore()
         subject.player = player
-        let other = HLSPlayerView()
-        // Subscribed after the view, so its delivery comes after the view's.
-        let delivered = expectation(description: "The state reached the view.")
-        let observer = store.publisher(for: \.isActive)
-            .filter { $0 }
-            .sink { _ in delivered.fulfill() }
-        activatePictureInPicture(of: other.playerLayer, in: store)
-        await fulfillment(of: [delivered], timeout: defaultTimeout)
-        observer.cancel()
 
+        await activatePictureInPictureAndWaitForTheView(
+            of: HLSPlayerView().playerLayer,
+            in: store
+        )
+        mockAppStateAdapter.stubbedState = .background
+
+        XCTAssertNil(layerPlayer)
+    }
+
+    func test_appEntersBackground_layerRegisteredForAnotherCall_detachesThePlayer() async {
+        let store = await injectPictureInPictureStore()
+        subject.player = player
+
+        await activatePictureInPictureAndWaitForTheView(
+            of: subject.playerLayer,
+            cId: "other:call",
+            in: store
+        )
         mockAppStateAdapter.stubbedState = .background
 
         XCTAssertNil(layerPlayer)
@@ -136,10 +147,29 @@ final class HLSPlayerView_Tests: StreamVideoTestCase, @unchecked Sendable {
 
     private func activatePictureInPicture(
         of layer: AVPlayerLayer,
+        cId: String? = nil,
         in store: PictureInPictureStore
     ) {
-        store.dispatch(.setPlayerLayer(layer, cId: "livestream:id"))
+        store.dispatch(.setCall(call))
+        store.dispatch(.setPlayerLayer(layer, cId: cId ?? call.cId))
         store.dispatch(.setActive(true))
+    }
+
+    /// The view has no state to observe, so this subscribes after the view.
+    /// The store sends a change to the subscribers in order, and each one
+    /// hops to the main queue. This delivery then comes after the view's.
+    private func activatePictureInPictureAndWaitForTheView(
+        of layer: AVPlayerLayer,
+        cId: String? = nil,
+        in store: PictureInPictureStore
+    ) async {
+        let delivered = expectation(description: "The state reached the view.")
+        let observer = store.publisher(for: \.isActive)
+            .filter { $0 }
+            .sink { _ in delivered.fulfill() }
+        activatePictureInPicture(of: layer, cId: cId, in: store)
+        await fulfillment(of: [delivered], timeout: defaultTimeout)
+        observer.cancel()
     }
 
     /// Replaces the shared adapter with a fresh one. Teardown restores it.
