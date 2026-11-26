@@ -85,22 +85,20 @@ final class HLSPlayerView_Tests: StreamVideoTestCase, @unchecked Sendable {
 
     func test_appEntersBackground_pictureInPictureActive_keepsThePlayerAttached() async {
         let store = await injectPictureInPictureStore()
-        store.dispatch(.setActive(true))
-        await fulfilmentInMainActor { store.state.isActive }
         subject.player = player
-        await wait(for: 0.1)
-
         mockAppStateAdapter.stubbedState = .background
 
-        XCTAssertTrue(layerPlayer === player)
+        activatePictureInPicture(of: subject.playerLayer, in: store)
+
+        await fulfilmentInMainActor { self.layerPlayer === self.player }
     }
 
     func test_pictureInPictureStops_appInBackground_detachesThePlayer() async {
         let store = await injectPictureInPictureStore()
-        store.dispatch(.setActive(true))
-        await fulfilmentInMainActor { store.state.isActive }
         subject.player = player
         mockAppStateAdapter.stubbedState = .background
+        activatePictureInPicture(of: subject.playerLayer, in: store)
+        await fulfilmentInMainActor { self.layerPlayer === self.player }
 
         store.dispatch(.setActive(false))
 
@@ -116,7 +114,33 @@ final class HLSPlayerView_Tests: StreamVideoTestCase, @unchecked Sendable {
         XCTAssertNil(layerPlayer)
     }
 
+    func test_appEntersBackground_pictureInPictureShowsAnotherLayer_detachesThePlayer() async {
+        let store = await injectPictureInPictureStore()
+        subject.player = player
+        let other = HLSPlayerView()
+        // Subscribed after the view, so its delivery comes after the view's.
+        let delivered = expectation(description: "The state reached the view.")
+        let observer = store.publisher(for: \.isActive)
+            .filter { $0 }
+            .sink { _ in delivered.fulfill() }
+        activatePictureInPicture(of: other.playerLayer, in: store)
+        await fulfillment(of: [delivered], timeout: defaultTimeout)
+        observer.cancel()
+
+        mockAppStateAdapter.stubbedState = .background
+
+        XCTAssertNil(layerPlayer)
+    }
+
     // MARK: - Private Helpers
+
+    private func activatePictureInPicture(
+        of layer: AVPlayerLayer,
+        in store: PictureInPictureStore
+    ) {
+        store.dispatch(.setPlayerLayer(layer, cId: "livestream:id"))
+        store.dispatch(.setActive(true))
+    }
 
     /// Replaces the shared adapter with a fresh one. Teardown restores it.
     private func injectPictureInPictureStore() async -> PictureInPictureStore {

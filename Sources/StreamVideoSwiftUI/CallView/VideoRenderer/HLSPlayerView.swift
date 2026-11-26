@@ -14,8 +14,8 @@ import UIKit
 /// pauses a player that stays attached to a layer, and nothing resumes it
 /// afterwards. A detached player keeps playing the audio.
 ///
-/// The layer keeps the player while Picture in Picture is active, because
-/// the Picture-in-Picture window shows this layer.
+/// The layer keeps the player while Picture in Picture is active and shows
+/// this layer, because the Picture-in-Picture window draws it.
 final class HLSPlayerView: UIView {
 
     override class var layerClass: AnyClass { AVPlayerLayer.self }
@@ -83,13 +83,16 @@ final class HLSPlayerView: UIView {
             pictureInPictureObserver == nil,
             let store = pictureInPictureAdapter.store
         else { return }
-        pictureInPictureObserver = store
-            .publisher(for: \.isActive)
-            .removeDuplicates()
-            .sink { [weak self] in
-                self?.isPictureInPictureActive = $0
-                self?.updateLayerPlayer()
-            }
+        pictureInPictureObserver = Publishers.CombineLatest(
+            store.publisher(for: \.isActive),
+            store.publisher(for: \.playerLayer)
+        )
+        .map { [weak self] in $0 && $1 === self?.playerLayer }
+        .removeDuplicates()
+        .sink { [weak self] in
+            self?.isPictureInPictureActive = $0
+            self?.updateLayerPlayer()
+        }
     }
 
     private func updateLayerPlayer() {
