@@ -868,13 +868,9 @@ class CallController: @unchecked Sendable {
         }
     }
 
-    /// Leaves when the coordinator ends the call. In HLS there is no SFU, so
-    /// the SFU `CallEnded` event that ends a WebRTC call never arrives.
-    /// Watching `endedAt` also catches an end that came before this stage
-    /// started, because the state replays its current value.
-    /// An `endedAt` that the join response carried is not a new end. The stage
-    /// hands it over, because the call state can still hold a previous join.
-    /// Every end leaves. Only backstage has a stay case, handled below.
+    /// Leaves when the call ends. HLS has no SFU `CallEnded` event, so this
+    /// watches `endedAt`, which replays an end from before the stage started.
+    /// `joinEndedAt` is the end the join response already carried. Ignore it.
     private func subscribeToHLSCallEndedEvent(
         _ call: Call?,
         joinEndedAt: Date?

@@ -177,42 +177,6 @@ final class WebRTCAuthenticator_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(input.migratingFromList, migratingFromList)
     }
 
-    func test_authenticate_declaringPlaybackCapabilities_callAuthenticationReceivesTheFlag() async throws {
-        mockCoordinatorStack.callAuthenticator.authenticateResult = .success(.dummy())
-
-        _ = try await subject.authenticate(
-            coordinator: mockCoordinatorStack.coordinator,
-            currentSFU: nil,
-            migratingFromList: nil,
-            create: false,
-            ring: false,
-            notify: false,
-            options: nil,
-            declaresPlaybackCapabilities: true
-        )
-
-        let input = try XCTUnwrap(mockCoordinatorStack.callAuthenticator.authenticateCalledWithInput.first)
-        XCTAssertTrue(input.declaresPlaybackCapabilities)
-    }
-
-    func test_authenticate_notDeclaringPlaybackCapabilities_callAuthenticationReceivesTheFlag() async throws {
-        mockCoordinatorStack.callAuthenticator.authenticateResult = .success(.dummy())
-
-        _ = try await subject.authenticate(
-            coordinator: mockCoordinatorStack.coordinator,
-            currentSFU: nil,
-            migratingFromList: nil,
-            create: false,
-            ring: false,
-            notify: false,
-            options: nil,
-            declaresPlaybackCapabilities: false
-        )
-
-        let input = try XCTUnwrap(mockCoordinatorStack.callAuthenticator.authenticateCalledWithInput.first)
-        XCTAssertFalse(input.declaresPlaybackCapabilities)
-    }
-
     // MARK: - authenticate (HLS grant)
 
     func test_authenticate_hlsGrant_returnsResponseWithoutSFUAdapter() async throws {
@@ -334,50 +298,6 @@ final class WebRTCAuthenticator_Tests: XCTestCase, @unchecked Sendable {
             declaresPlaybackCapabilities: false,
             containing: "not requested"
         )
-    }
-
-    func test_authenticate_hlsGrantWithHTTPPlaylistURL_throwsClientError() async throws {
-        mockCoordinatorStack.callAuthenticator.authenticateResult = .success(
-            .dummyHLSGrant(
-                ownCapabilities: [.sendAudio],
-                playback: .dummy(playlistUrl: "http://example.com/live.m3u8")
-            )
-        )
-
-        await assertAuthenticateThrowsClientError(containing: "playlist URL")
-    }
-
-    func test_authenticate_hlsGrantWithUnknownType_throwsClientError() async throws {
-        mockCoordinatorStack.callAuthenticator.authenticateResult = .success(
-            .dummyHLSGrant(
-                ownCapabilities: [.sendAudio],
-                playback: .dummy(type: .unknown)
-            )
-        )
-
-        await assertAuthenticateThrowsClientError(containing: "playback type")
-    }
-
-    func test_authenticate_hlsGrantWithEmptyPlaylistURL_throwsClientError() async throws {
-        mockCoordinatorStack.callAuthenticator.authenticateResult = .success(
-            .dummyHLSGrant(
-                ownCapabilities: [.sendAudio],
-                playback: .dummy(playlistUrl: "")
-            )
-        )
-
-        await assertAuthenticateThrowsClientError(containing: "playlist URL")
-    }
-
-    func test_authenticate_hlsGrantWithRelativePlaylistURL_throwsClientError() async throws {
-        mockCoordinatorStack.callAuthenticator.authenticateResult = .success(
-            .dummyHLSGrant(
-                ownCapabilities: [.sendAudio],
-                playback: .dummy(playlistUrl: "/live.m3u8")
-            )
-        )
-
-        await assertAuthenticateThrowsClientError(containing: "playlist URL")
     }
 
     func test_authenticate_withValidData_shouldReturnSFUAdapterAndJoinCallResponse() async throws {

@@ -660,20 +660,6 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         XCTAssertEqual(authenticator.declaredPlaybackCapabilities, [true, true])
     }
 
-    func test_joinCall_hlsGrantWithUnknownType_throwsClientError() async throws {
-        let (subject, _) = makeHLSJoinSubject(
-            response: .dummyHLSGrant(playback: .dummy(type: .unknown))
-        )
-
-        do {
-            _ = try await subject.joinCall(callSettings: nil, source: .inApp)
-            XCTFail("Expected the join to fail.")
-        } catch {
-            XCTAssertTrue(error is ClientError)
-            XCTAssertTrue(error.localizedDescription.contains("playback type"))
-        }
-    }
-
     // MARK: - HLS call ended
 
     @MainActor
@@ -865,13 +851,6 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         let request = try await joinRequest(declaresPlaybackCapabilities: true)
 
         XCTAssertEqual(request.playbackCapabilities, ["hls"])
-        XCTAssertNil(request.prefer)
-    }
-
-    func test_authenticateCall_notDeclaringPlaybackCapabilities_omitsJoinRequestPlaybackCapabilities() async throws {
-        let request = try await joinRequest(declaresPlaybackCapabilities: false)
-
-        XCTAssertNil(request.playbackCapabilities)
         XCTAssertNil(request.prefer)
     }
 

@@ -44,7 +44,59 @@ final class PlaybackResponse_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(subject.reason, .unknown)
     }
 
+    // MARK: - hlsPlaylistURL
+
+    func test_hlsPlaylistURL_httpsURL_returnsTheURL() throws {
+        let url = try PlaybackResponse.dummy().hlsPlaylistURL()
+
+        XCTAssertEqual(url.absoluteString, "https://example.com/live.m3u8")
+    }
+
+    func test_hlsPlaylistURL_httpURL_throwsClientError() {
+        assertThrowsClientError(
+            PlaybackResponse.dummy(playlistUrl: "http://example.com/live.m3u8"),
+            containing: "playlist URL"
+        )
+    }
+
+    func test_hlsPlaylistURL_emptyURL_throwsClientError() {
+        assertThrowsClientError(
+            PlaybackResponse.dummy(playlistUrl: ""),
+            containing: "playlist URL"
+        )
+    }
+
+    func test_hlsPlaylistURL_relativeURL_throwsClientError() {
+        assertThrowsClientError(
+            PlaybackResponse.dummy(playlistUrl: "/live.m3u8"),
+            containing: "playlist URL"
+        )
+    }
+
+    func test_hlsPlaylistURL_unknownType_throwsClientError() {
+        assertThrowsClientError(
+            PlaybackResponse.dummy(type: .unknown),
+            containing: "playback type"
+        )
+    }
+
     // MARK: - Private helpers
+
+    private func assertThrowsClientError(
+        _ subject: PlaybackResponse,
+        containing message: String,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        XCTAssertThrowsError(try subject.hlsPlaylistURL(), file: file, line: line) {
+            XCTAssertTrue($0 is ClientError, file: file, line: line)
+            XCTAssertTrue(
+                $0.localizedDescription.contains(message),
+                file: file,
+                line: line
+            )
+        }
+    }
 
     private func decode(
         type: String = "hls",
