@@ -53,6 +53,27 @@ final class CallAudioSession_Tests: XCTestCase, @unchecked Sendable {
         }
     }
 
+    func test_init_whenAudioDeviceModuleIsInstalled_doesNotApplyBootstrapConfiguration() async throws {
+        let liveSession = AVAudioSession.sharedInstance()
+        try liveSession.setCategory(.playback, mode: .default, options: [])
+        let audioStore = mockAudioStore.audioStore
+        // Synthetic state: a module with an empty identifier isolates the
+        // module condition. Production sets both together.
+        try await audioStore.dispatch(
+            .setAudioDeviceModule(AudioDeviceModule(MockRTCAudioDeviceModule()))
+        ).result()
+        try await audioStore.dispatch(.setHasRecordingPermission(true)).result()
+        XCTAssertEqual(audioStore.state.activeSessionIdentifier, "")
+        XCTAssertEqual(audioStore.state.audioSessionConfiguration.category, .playback)
+
+        subject = .init(policy: MockAudioSessionPolicy())
+        // Barrier: the store runs batches in order.
+        try await audioStore.dispatch(.setHasRecordingPermission(false)).result()
+
+        XCTAssertEqual(audioStore.state.audioSessionConfiguration.category, .playback)
+        XCTAssertEqual(liveSession.category, .playback)
+    }
+
     func test_init_whenAnotherSessionOwnsAudio_doesNotOverrideConfiguration() async {
         let owner = String.unique
 

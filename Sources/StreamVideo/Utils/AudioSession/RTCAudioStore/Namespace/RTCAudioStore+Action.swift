@@ -18,10 +18,16 @@ extension RTCAudioStore {
             /// Matches only when the shared audio store is owned by `value`.
             case activeSessionIdentifier(String)
 
+            /// Matches only while the store has no audio device module.
+            case audioDeviceModuleIsNil
+
             func evaluate(with state: StoreState) -> Bool {
                 switch self {
                 case let .activeSessionIdentifier(value):
                     return state.activeSessionIdentifier == value
+
+                case .audioDeviceModuleIsNil:
+                    return state.audioDeviceModule == nil
                 }
             }
 
@@ -29,6 +35,9 @@ extension RTCAudioStore {
                 switch self {
                 case let .activeSessionIdentifier(value):
                     return ".activeSessionIdentifier(\(value))"
+
+                case .audioDeviceModuleIsNil:
+                    return ".audioDeviceModuleIsNil"
                 }
             }
         }
