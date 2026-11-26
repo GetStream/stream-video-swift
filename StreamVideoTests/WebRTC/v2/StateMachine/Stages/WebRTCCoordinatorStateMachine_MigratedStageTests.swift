@@ -103,6 +103,23 @@ final class WebRTCCoordinatorStateMachine_MigratedStageTests: XCTestCase, @unche
         }
     }
 
+    func test_transition_authentication_doesNotDeclarePlaybackCapabilities() async throws {
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.authenticator = mockCoordinatorStack.webRTCAuthenticator
+        subject.context.migratingFromSFU = String.unique
+
+        try await assertTransition(
+            from: .migrating,
+            expectedTarget: .disconnected,
+            subject: subject
+        ) { [mockCoordinatorStack] _ in
+            XCTAssertEqual(
+                mockCoordinatorStack?.webRTCAuthenticator.declaredPlaybackCapabilities,
+                [false]
+            )
+        }
+    }
+
     func test_transition_authenticationReceivesMigratingFromList() async throws {
         subject.context.coordinator = mockCoordinatorStack.coordinator
         subject.context.authenticator = mockCoordinatorStack.webRTCAuthenticator

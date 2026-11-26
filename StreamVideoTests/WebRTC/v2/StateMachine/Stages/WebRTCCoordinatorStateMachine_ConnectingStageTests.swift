@@ -169,6 +169,22 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
         }
     }
 
+    func test_transition_fromIdle_declaresPlaybackCapabilities() async throws {
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.authenticator = mockCoordinatorStack.webRTCAuthenticator
+
+        try await assertTransition(
+            from: .idle,
+            expectedTarget: .error,
+            subject: subject
+        ) { [mockCoordinatorStack] _ in
+            XCTAssertEqual(
+                mockCoordinatorStack?.webRTCAuthenticator.declaredPlaybackCapabilities,
+                [true]
+            )
+        }
+    }
+
     func test_transition_fromIdleAuthenticationFailsCreateFalse_transitionsToDisconnectedWithExpectedInput() async throws {
         subject.context.coordinator = mockCoordinatorStack.coordinator
         subject.context.authenticator = mockCoordinatorStack.webRTCAuthenticator
@@ -527,6 +543,22 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
             XCTAssertFalse(input.notify)
             XCTAssertEqual(input.options?.team, options.team)
             XCTAssertEqual(input.options?.highScaleLivestreamPublisherHint, true)
+        }
+    }
+
+    func test_transition_fromRejoining_doesNotDeclarePlaybackCapabilities() async throws {
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.authenticator = mockCoordinatorStack.webRTCAuthenticator
+
+        try await assertTransition(
+            from: .rejoining,
+            expectedTarget: .disconnected,
+            subject: subject
+        ) { [mockCoordinatorStack] _ in
+            XCTAssertEqual(
+                mockCoordinatorStack?.webRTCAuthenticator.declaredPlaybackCapabilities,
+                [false]
+            )
         }
     }
 
