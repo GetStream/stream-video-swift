@@ -70,6 +70,16 @@ final class WebRTCCoordinatorStateMachine_CleanUpStageTests: XCTestCase, @unchec
         ) { _ in }
     }
 
+    func test_transition_fromHLSPlayback_transitionsToIdle() async throws {
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+
+        try await assertTransition(
+            from: .hlsPlayback,
+            expectedTarget: .idle,
+            subject: subject
+        ) { _ in }
+    }
+
     func test_transition_cleanUpForReconnectionWasCalledOnStateAdapter() async throws {
         subject.context.coordinator = mockCoordinatorStack.coordinator
         await mockCoordinatorStack

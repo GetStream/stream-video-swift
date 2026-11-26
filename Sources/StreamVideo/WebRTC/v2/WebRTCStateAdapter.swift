@@ -906,6 +906,12 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         }
     }
 
+    /// Waits until every call settings update enqueued so far has finished.
+    func waitForCallSettingsUpdates() async {
+        // The queue is serial, so an empty operation ends after the others.
+        try? await callSettingsProcessingQueue.addSynchronousTaskOperation {}
+    }
+
     /// Enqueues an own capabilities update that is applied on the actor’s
     /// serial queue.
     ///

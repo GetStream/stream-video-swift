@@ -169,6 +169,22 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
         }
     }
 
+    func test_transition_fromIdle_declaresPlaybackCapabilities() async throws {
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.authenticator = mockCoordinatorStack.webRTCAuthenticator
+
+        try await assertTransition(
+            from: .idle,
+            expectedTarget: .error,
+            subject: subject
+        ) { [mockCoordinatorStack] _ in
+            XCTAssertEqual(
+                mockCoordinatorStack?.webRTCAuthenticator.declaredPlaybackCapabilities,
+                [true]
+            )
+        }
+    }
+
     func test_transition_fromIdleAuthenticationFailsCreateFalse_transitionsToDisconnectedWithExpectedInput() async throws {
         subject.context.coordinator = mockCoordinatorStack.coordinator
         subject.context.authenticator = mockCoordinatorStack.webRTCAuthenticator
@@ -192,7 +208,8 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
                 create: Bool,
                 ring: Bool,
                 notify: Bool,
-                options: CreateCallOptions?
+                options: CreateCallOptions?,
+                declaresPlaybackCapabilities: Bool
             ).self
             let input = try XCTUnwrap(
                 mockCoordinatorStack?.webRTCAuthenticator.recordedInputPayload(
@@ -234,7 +251,8 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
                 create: Bool,
                 ring: Bool,
                 notify: Bool,
-                options: CreateCallOptions?
+                options: CreateCallOptions?,
+                declaresPlaybackCapabilities: Bool
             ).self
             let input = try XCTUnwrap(
                 mockCoordinatorStack?.webRTCAuthenticator.recordedInputPayload(
@@ -250,6 +268,32 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
             XCTAssertTrue(input.notify)
             XCTAssertEqual(input.options?.team, options.team)
             XCTAssertTrue((target as? WebRTCCoordinator.StateMachine.Stage.ErrorStage)?.error is ClientError)
+        }
+    }
+
+    func test_transition_fromIdleHLSGrant_transitionsToHLSPlaybackWithoutConnectingToSFU() async throws {
+        let response = JoinCallResponse.dummyHLSGrant()
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.authenticator = mockCoordinatorStack.webRTCAuthenticator
+        mockCoordinatorStack.webRTCAuthenticator.stub(
+            for: .authenticate,
+            with: Result<(SFUAdapter?, JoinCallResponse), Error>.success((nil, response))
+        )
+
+        try await assertTransition(
+            from: .idle,
+            expectedTarget: .hlsPlayback,
+            subject: subject
+        ) { [mockCoordinatorStack] target in
+            XCTAssertEqual(target.context.initialJoinCallResponse, response)
+            XCTAssertNil(target.context.sfuFullObserver)
+            XCTAssertEqual(target.context.currentSFU, "")
+            XCTAssertEqual(
+                mockCoordinatorStack?.webRTCAuthenticator.timesCalled(.waitForAuthentication),
+                0
+            )
+            let sfuAdapter = await mockCoordinatorStack?.coordinator.stateAdapter.sfuAdapter
+            XCTAssertNil(sfuAdapter)
         }
     }
 
@@ -439,7 +483,8 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
                 create: Bool,
                 ring: Bool,
                 notify: Bool,
-                options: CreateCallOptions?
+                options: CreateCallOptions?,
+                declaresPlaybackCapabilities: Bool
             ).self
             let input = try XCTUnwrap(
                 mockCoordinatorStack?.webRTCAuthenticator.recordedInputPayload(
@@ -484,7 +529,8 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
                 create: Bool,
                 ring: Bool,
                 notify: Bool,
-                options: CreateCallOptions?
+                options: CreateCallOptions?,
+                declaresPlaybackCapabilities: Bool
             ).self
             let input = try XCTUnwrap(
                 mockCoordinatorStack?.webRTCAuthenticator.recordedInputPayload(
@@ -497,6 +543,22 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
             XCTAssertFalse(input.notify)
             XCTAssertEqual(input.options?.team, options.team)
             XCTAssertEqual(input.options?.highScaleLivestreamPublisherHint, true)
+        }
+    }
+
+    func test_transition_fromRejoining_doesNotDeclarePlaybackCapabilities() async throws {
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.authenticator = mockCoordinatorStack.webRTCAuthenticator
+
+        try await assertTransition(
+            from: .rejoining,
+            expectedTarget: .disconnected,
+            subject: subject
+        ) { [mockCoordinatorStack] _ in
+            XCTAssertEqual(
+                mockCoordinatorStack?.webRTCAuthenticator.declaredPlaybackCapabilities,
+                [false]
+            )
         }
     }
 

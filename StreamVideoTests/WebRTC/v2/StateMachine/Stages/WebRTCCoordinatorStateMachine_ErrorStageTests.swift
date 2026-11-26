@@ -52,6 +52,19 @@ final class WebRTCCoordinatorStateMachine_ErrorStageTests: XCTestCase, @unchecke
         await fulfillment(of: [transitionExpectation])
     }
 
+    func test_transition_fromHLSPlayback_landsOnCleanUp() async {
+        let transitionExpectation = expectation(description: "Will transition to id:.cleanUp")
+        subject.transition = {
+            if $0.id == .cleanUp {
+                transitionExpectation.fulfill()
+            }
+        }
+
+        XCTAssertNotNil(subject.transition(from: .hlsPlayback(subject.context)))
+
+        await fulfillment(of: [transitionExpectation])
+    }
+
     func test_transition_sendsErrorToJoinResponseHandler() async {
         let handler = PassthroughSubject<JoinCallResponse, Error>()
         let expectation = expectation(description: "Join response handler receives failure")

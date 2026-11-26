@@ -29,4 +29,22 @@ extension JoinCallResponse {
             statsOptions: statsOptions
         )
     }
+
+    /// A response the backend returns when it grants HLS playback: blank SFU
+    /// credentials and a `playback` value.
+    static func dummyHLSGrant(
+        call: CallResponse = .dummy(),
+        ownCapabilities: [OwnCapability] = [],
+        playback: PlaybackResponse = .dummy()
+    ) -> JoinCallResponse {
+        .dummy(
+            call: call,
+            credentials: .dummy(
+                server: .dummy(edgeName: "", url: "", wsEndpoint: ""),
+                token: ""
+            ),
+            ownCapabilities: ownCapabilities,
+            playback: playback
+        )
+    }
 }

@@ -62,6 +62,16 @@ final class WebRTCCoordinatorStateMachine_BlockedStageTests: XCTestCase, @unchec
         }
     }
 
+    func test_transition_fromHLSPlayback_landsOnCleanUp() async throws {
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+
+        try await assertTransition(
+            from: .hlsPlayback,
+            expectedTarget: .cleanUp,
+            subject: subject
+        ) { _ in }
+    }
+
     // MARK: - Private helpers
 
     private func assertTransition(
