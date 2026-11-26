@@ -39,7 +39,7 @@ private func content() {
             print("Playing the call over HLS from \(url)")
         }
 
-        let cancellable = call.state.$playbackType.sink { playbackType in
+        _ = call.state.$playbackType.sink { playbackType in
             if case .hls = playbackType {
                 // Show an HLS renderer instead of participant video.
             }
