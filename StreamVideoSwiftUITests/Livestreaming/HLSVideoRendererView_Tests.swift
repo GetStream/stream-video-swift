@@ -283,10 +283,12 @@ final class HLSVideoRendererView_Tests: StreamVideoTestCase, @unchecked Sendable
         let adapter = await injectAdapter()
         call.state.playbackType = .hls(url)
         var released: HLSPlayerView? = HLSPlayerView()
+        weak var weakView = released
         subject.attach(to: released!)
         await fulfilmentInMainActor { adapter.store?.state.playerLayer != nil }
 
         released = nil
+        XCTAssertNil(weakView)
         subject.dismantle()
 
         await fulfilmentInMainActor { adapter.store?.state.playerLayer == nil }

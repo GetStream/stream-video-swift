@@ -83,7 +83,7 @@ final class PictureInPictureController: @unchecked Sendable {
         self.store = store
         self.makePictureInPictureController = makePictureInPictureController
 
-        Publishers.CombineLatest4(
+        Publishers.CombineLatest3(
             store
                 .publisher(for: \.call)
                 .removeDuplicates { $0?.cId == $1?.cId },
@@ -91,14 +91,13 @@ final class PictureInPictureController: @unchecked Sendable {
             // Only the identity travels through the sink, because the layer
             // isn't `Sendable`.
             store
-                .publisher(for: \.playerLayer)
-                .map { $0.map(ObjectIdentifier.init) }
-                .removeDuplicates(),
-            store.publisher(for: \.playerLayerCallId).removeDuplicates()
+                .publisher(for: \.self)
+                .map { ($0.playerLayer.map(ObjectIdentifier.init), $0.playerLayerCallId) }
+                .removeDuplicates { $0 == $1 }
         )
         // Each value runs in its own task, so a stale value can run last.
         // The latest state makes every run end in the same result.
-        .sinkTask(storeIn: disposableBag) { @MainActor [weak self] _, _, _, _ in
+        .sinkTask(storeIn: disposableBag) { @MainActor [weak self] _, _, _ in
             guard let self else { return }
             didUpdate(call: store.state.call, sourceView: store.state.sourceView)
         }

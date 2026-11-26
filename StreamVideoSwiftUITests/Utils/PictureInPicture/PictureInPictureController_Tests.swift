@@ -111,9 +111,9 @@ final class PictureInPictureControllerTests: XCTestCase, @unchecked Sendable {
 
     // MARK: - Private
 
-    /// Registers a layer, then sends a newer source view. The controller
-    /// handles the updates in order, so the source of the new view is the
-    /// outcome of the layer registration.
+    /// Registers a layer, then sends a newer source view. The store applies
+    /// the actions in order, and the controller reads the latest state. A
+    /// source that shows the new view comes from a state with the layer.
     @MainActor
     private func assertShowsVideoCall(
         _ configured: (
@@ -197,8 +197,9 @@ private final class Factory {
     private(set) var contentSources: [AVPictureInPictureController.ContentSource] = []
     private(set) var controllers: [AVPictureInPictureController] = []
 
-    /// The source of the last controller. A simulator can't create a system
-    /// controller, so it falls back to the last source the factory received.
+    /// The latest source. A system controller holds it. A simulator creates
+    /// none, so the controller is built again on every update and the last
+    /// source the factory received is the latest.
     var latestContentSource: AVPictureInPictureController.ContentSource? {
         controllers.last?.contentSource ?? contentSources.last
     }

@@ -79,20 +79,22 @@ extension HLSVideoRendererView {
                 return
             }
             let call = call
+            // A call change during the request must not move the layer.
+            let callId = call.cId
             playerRequest = Task { [weak self] in
                 let player = await call.hlsPlayer()
                 guard !Task.isCancelled else { return }
                 self?.view?.player = player
-                if player != nil { self?.registerPlayerLayer() }
+                if player != nil { self?.registerPlayerLayer(callId: callId) }
             }
         }
 
         /// Lets Picture in Picture show the layer for the call of this view.
-        private func registerPlayerLayer() {
+        private func registerPlayerLayer(callId: String) {
             guard let layer = view?.playerLayer else { return }
             registeredLayer = layer
             pictureInPictureAdapter.store?
-                .dispatch(.setPlayerLayer(layer, cId: call.cId))
+                .dispatch(.setPlayerLayer(layer, cId: callId))
         }
 
         /// Clears the layer, unless Picture in Picture shows another one now.
