@@ -241,6 +241,7 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
     
     /// Applies the mute and pause state to the shared HLS player. A player
     /// starts playing on creation, so a paused stream is paused again.
+    @MainActor
     func startHLSPlayback() async {
         await hlsPlayback.setMuted(muted)
         if streamPaused {
@@ -249,6 +250,7 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
     }
 
     /// Applies the pause state of the player controls to the HLS player.
+    @MainActor
     func applyStreamPaused(_ paused: Bool) async {
         await hlsPlayback.setPaused(paused)
     }
