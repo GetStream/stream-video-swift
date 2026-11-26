@@ -13,6 +13,12 @@ import SwiftUI
 /// audio output toggling, fullscreen mode, and participant count display.
 /// The view reacts dynamically to the state of the associated call and allows
 /// customisation of its behaviour through policies and callback actions.
+///
+/// When the backend routes the viewer to HLS (``CallState/playbackType`` is
+/// ``PlaybackType/hls(_:)``), the player shows ``HLSVideoRenderer`` instead of
+/// participant video. The mute and play/pause controls then act on the HLS
+/// player, and the audio keeps playing while the app is in the background.
+/// Joining an HLS livestream through CallKit is not supported.
 @available(iOS 14.0, *)
 public struct LivestreamPlayer<Factory: ViewFactory>: View {
     
@@ -68,7 +74,7 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
     @State var recordings: [CallRecording]?
 
     /// Drives the shared HLS player when the call plays HLS.
-    @State var hlsControls: HLSPlaybackControls
+    @State var hlsPlayback: HLSPlayback
 
     private let disposableBag = DisposableBag()
 
@@ -103,7 +109,7 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
         self.joinPolicy = joinPolicy
         self.showsLeaveCallButton = showsLeaveCallButton
         self.onFullScreenStateChange = onFullScreenStateChange
-        _hlsControls = State(wrappedValue: HLSPlaybackControls(call: call))
+        _hlsPlayback = State(wrappedValue: HLSPlayback(call: call))
         call.updateParticipantsSorting(with: livestreamOrAudioRoomSortPreset)
     }
     
@@ -118,7 +124,6 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
         showsLeaveCallButton: Bool = false,
         recordings: [CallRecording]? = nil,
         streamPaused: Bool = false,
-        hlsPlayerStore: HLSPlayerStore = InjectedValues[\.hlsPlayerStore],
         onFullScreenStateChange: ((Bool) -> Void)? = nil
     ) {
         self.viewFactory = viewFactory
@@ -133,9 +138,7 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
         self.joinPolicy = joinPolicy
         self.showsLeaveCallButton = showsLeaveCallButton
         self.onFullScreenStateChange = onFullScreenStateChange
-        _hlsControls = State(
-            wrappedValue: HLSPlaybackControls(call: call, store: hlsPlayerStore)
-        )
+        _hlsPlayback = State(wrappedValue: HLSPlayback(call: call))
         call.updateParticipantsSorting(with: livestreamOrAudioRoomSortPreset)
     }
     
@@ -210,11 +213,15 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
         }
     }
     
-    func toggleAudioOutput() {
+    func toggleAudioOutput() async {
         // An HLS viewer has no call audio, so the mute acts on the player.
         if case .hls = state.playbackType {
-            hlsControls.setMuted(!muted)
-            muted.toggle()
+            // The state changes before the player is updated. A second tap
+            // that arrives meanwhile then flips the value the first one set,
+            // and the button and the player end up the same.
+            let target = !muted
+            muted = target
+            await hlsPlayback.setMuted(target)
             return
         }
 
@@ -234,16 +241,16 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
     
     /// Applies the mute and pause state to the shared HLS player. A player
     /// starts playing on creation, so a paused stream is paused again.
-    func startHLSPlayback() {
-        hlsControls.setMuted(muted)
+    func startHLSPlayback() async {
+        await hlsPlayback.setMuted(muted)
         if streamPaused {
-            hlsControls.setPaused(true)
+            await hlsPlayback.setPaused(true)
         }
     }
 
     /// Applies the pause state of the player controls to the HLS player.
-    func applyStreamPaused(_ paused: Bool) {
-        hlsControls.setPaused(paused)
+    func applyStreamPaused(_ paused: Bool) async {
+        await hlsPlayback.setPaused(paused)
     }
     
     func muteLivestreamOnJoin() {
@@ -358,10 +365,9 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
         HLSVideoRenderer(
             call: call,
             contentMode: .scaleAspectFit,
-            store: InjectedValues[\.hlsPlayerStore],
             // The player is created after the view appears, so the mute
             // and pause state is applied once it exists.
-            onPlayerReady: { startHLSPlayback() }
+            onPlayerReady: { await startHLSPlayback() }
         )
         .onTapGesture {
             controlsShown = true
@@ -370,7 +376,7 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
             controlsShown ? LivestreamPlayPauseButton(
                 streamPaused: $streamPaused
             ) {
-                applyStreamPaused(streamPaused)
+                Task { await applyStreamPaused(streamPaused) }
                 if !streamPaused {
                     controlsShown = false
                 }
@@ -436,7 +442,7 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
                             ? "speaker.wave.2.fill"
                             : "speaker.slash.fill"
                     ) {
-                        toggleAudioOutput()
+                        Task { await toggleAudioOutput() }
                     }
                     LivestreamButton(imageName: "viewfinder") {
                         fullScreen.toggle()

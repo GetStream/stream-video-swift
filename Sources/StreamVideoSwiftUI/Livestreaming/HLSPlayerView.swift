@@ -13,9 +13,9 @@ import UIKit
 /// While the app is in the background the layer lets go of the player. iOS
 /// pauses a player that stays attached to a layer, and nothing resumes it
 /// afterwards. A detached player keeps playing the audio.
-public final class HLSPlayerView: UIView {
+final class HLSPlayerView: UIView {
 
-    override public class var layerClass: AnyClass { AVPlayerLayer.self }
+    override class var layerClass: AnyClass { AVPlayerLayer.self }
 
     @Injected(\.applicationStateAdapter) private var applicationStateAdapter
 
@@ -43,12 +43,12 @@ public final class HLSPlayerView: UIView {
         set { playerLayer.videoGravity = newValue }
     }
 
-    override public init(frame: CGRect) {
+    override init(frame: CGRect) {
         super.init(frame: frame)
         observeApplicationState()
     }
 
-    public required init?(coder: NSCoder) {
+    required init?(coder: NSCoder) {
         super.init(coder: coder)
         observeApplicationState()
     }

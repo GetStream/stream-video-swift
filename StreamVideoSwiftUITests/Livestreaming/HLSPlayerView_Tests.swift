@@ -12,7 +12,7 @@ import XCTest
 final class HLSPlayerView_Tests: StreamVideoTestCase, @unchecked Sendable {
 
     private lazy var mockAppStateAdapter: MockAppStateAdapter! = .init()
-    private lazy var player: HLSSpyPlayer! = .init()
+    private lazy var player: MockHLSPlayer! = .init()
     private lazy var subject: HLSPlayerView! = {
         mockAppStateAdapter.makeShared()
         return HLSPlayerView()

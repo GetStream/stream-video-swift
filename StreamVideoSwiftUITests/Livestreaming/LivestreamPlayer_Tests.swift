@@ -15,9 +15,13 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
     private let callId = "test"
     private let callType = "livestream"
     private var mockStreamVideo: MockStreamVideo! = .init()
+    private var previousStore: HLSPlayerStore?
 
     override func tearDown() async throws {
         mockStreamVideo = nil
+        if let previousStore {
+            InjectedValues[\.hlsPlayerStore] = previousStore
+        }
         try await super.tearDown()
     }
 
@@ -62,10 +66,10 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
 
     @MainActor
     func test_livestreamPlayer_toggleAudioOutput_hls_mutesThePlayerNotTheSpeaker() async throws {
-        let fixture = makeHLSFixture(playbackType: .hls(hlsURL))
-        fixture.subject.startHLSPlayback()
+        let fixture = await makeHLSFixture(playbackType: .hls(hlsURL))
+        await fixture.subject.startHLSPlayback()
 
-        fixture.subject.toggleAudioOutput()
+        await fixture.subject.toggleAudioOutput()
 
         XCTAssertTrue(fixture.player.isMuted)
         XCTAssertEqual(fixture.callController.timesCalled(.changeSoundState), 0)
@@ -73,10 +77,10 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
 
     @MainActor
     func test_livestreamPlayer_toggleAudioOutput_webRTC_mutesTheSpeakerNotThePlayer() async throws {
-        let fixture = makeHLSFixture(playbackType: .webRTC)
-        fixture.subject.startHLSPlayback()
+        let fixture = await makeHLSFixture(playbackType: .webRTC)
+        await fixture.subject.startHLSPlayback()
 
-        fixture.subject.toggleAudioOutput()
+        await fixture.subject.toggleAudioOutput()
 
         await fulfillment { fixture.callController.timesCalled(.changeSoundState) == 1 }
         XCTAssertFalse(fixture.player.isMuted)
@@ -84,32 +88,32 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
 
     @MainActor
     func test_livestreamPlayer_startHLSPlayback_mutedOnStart_mutesThePlayer() async throws {
-        let fixture = makeHLSFixture(playbackType: .hls(hlsURL), muted: true)
+        let fixture = await makeHLSFixture(playbackType: .hls(hlsURL), muted: true)
 
-        fixture.subject.startHLSPlayback()
+        await fixture.subject.startHLSPlayback()
 
         XCTAssertTrue(fixture.player.isMuted)
     }
 
     @MainActor
     func test_livestreamPlayer_applyStreamPaused_hls_pausesAndResumesThePlayer() async throws {
-        let fixture = makeHLSFixture(playbackType: .hls(hlsURL))
-        fixture.subject.startHLSPlayback()
+        let fixture = await makeHLSFixture(playbackType: .hls(hlsURL))
+        await fixture.subject.startHLSPlayback()
         let playCount = fixture.player.playCount
 
-        fixture.subject.applyStreamPaused(true)
+        await fixture.subject.applyStreamPaused(true)
         XCTAssertEqual(fixture.player.pauseCount, 1)
 
-        fixture.subject.applyStreamPaused(false)
+        await fixture.subject.applyStreamPaused(false)
         XCTAssertEqual(fixture.player.playCount, playCount + 1)
     }
 
     @MainActor
     func test_livestreamPlayer_applyStreamPaused_webRTC_doesNotTouchThePlayer() async throws {
-        let fixture = makeHLSFixture(playbackType: .webRTC)
-        fixture.subject.startHLSPlayback()
+        let fixture = await makeHLSFixture(playbackType: .webRTC)
+        await fixture.subject.startHLSPlayback()
 
-        fixture.subject.applyStreamPaused(true)
+        await fixture.subject.applyStreamPaused(true)
 
         XCTAssertEqual(fixture.player.pauseCount, 0)
         XCTAssertEqual(fixture.player.playCount, 0)
@@ -117,18 +121,18 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
 
     @MainActor
     func test_livestreamPlayer_startHLSPlayback_streamPaused_pausesThePlayerAgain() async throws {
-        let fixture = makeHLSFixture(playbackType: .hls(hlsURL), streamPaused: true)
+        let fixture = await makeHLSFixture(playbackType: .hls(hlsURL), streamPaused: true)
 
-        fixture.subject.startHLSPlayback()
+        await fixture.subject.startHLSPlayback()
 
         XCTAssertEqual(fixture.player.pauseCount, 1)
     }
 
     @MainActor
     func test_livestreamPlayer_startHLSPlayback_streamNotPaused_doesNotPauseThePlayer() async throws {
-        let fixture = makeHLSFixture(playbackType: .hls(hlsURL))
+        let fixture = await makeHLSFixture(playbackType: .hls(hlsURL))
 
-        fixture.subject.startHLSPlayback()
+        await fixture.subject.startHLSPlayback()
 
         XCTAssertEqual(fixture.player.pauseCount, 0)
     }
@@ -235,32 +239,31 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
     private var hlsURL: URL { URL(string: "https://example.com/live.m3u8")! }
 
     /// Builds a player whose call reports `playbackType` and whose HLS player
-    /// is a spy.
+    /// is a mock.
     @MainActor
     private func makeHLSFixture(
         playbackType: PlaybackType,
         muted: Bool = false,
         streamPaused: Bool = false
-    ) -> HLSFixture {
-        let player = HLSSpyPlayer()
+    ) async -> HLSFixture {
+        let player = MockHLSPlayer()
         let store = HLSPlayerStore { _ in player }
+        previousStore = InjectedValues[\.hlsPlayerStore]
+        InjectedValues[\.hlsPlayerStore] = store
         let callController = MockCallController()
         let call = MockCall(.dummy(callController: callController))
         call.state.playbackType = playbackType
-        let lease = store.acquire(for: call, playbackType: playbackType)
+        _ = await store.acquire(for: call, claimId: .init(), playbackType: playbackType)
         let subject = LivestreamPlayer(
             call: call,
             muted: muted,
             joinPolicy: .none,
-            streamPaused: streamPaused,
-            hlsPlayerStore: store
+            streamPaused: streamPaused
         )
         return .init(
             subject: subject,
             player: player,
-            store: store,
-            callController: callController,
-            lease: lease
+            callController: callController
         )
     }
 }

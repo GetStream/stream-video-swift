@@ -7,12 +7,9 @@ import Foundation
 @testable import StreamVideoSwiftUI
 
 /// A `LivestreamPlayer` whose call reports a playback type and whose HLS
-/// player is a spy.
+/// player is a mock.
 struct HLSFixture {
     let subject: LivestreamPlayer<DefaultViewFactory>
-    let player: HLSSpyPlayer
-    let store: HLSPlayerStore
+    let player: MockHLSPlayer
     let callController: MockCallController
-    /// The claim the renderer holds on the player.
-    let lease: HLSPlayerLease?
 }

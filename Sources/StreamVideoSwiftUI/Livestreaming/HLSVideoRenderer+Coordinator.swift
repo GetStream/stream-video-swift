@@ -2,32 +2,34 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import AVFoundation
 import Combine
 import Foundation
 import StreamVideo
+import SwiftUI
+import UIKit
 
-extension HLSVideoRenderer {
+extension HLSVideoRenderer.Representable {
 
     /// Owns the claim on the shared player for one renderer.
     @MainActor
-    public final class Coordinator {
+    final class Coordinator {
 
         private var call: Call
-        private let store: HLSPlayerStore
-        private var lease: HLSPlayerLease?
+        private var playback: HLSPlayback
         private weak var view: HLSPlayerView?
         private var playbackTypeObserver: AnyCancellable?
         /// Called after a new player is shown. Lets the owner apply state,
         /// such as mute, that a player created earlier would not have.
-        private let onPlayerReady: (() -> Void)?
+        private let onPlayerReady: (@MainActor () async -> Void)?
+        private var playbackUpdate: Task<Void, Never>?
 
         init(
             call: Call,
-            store: HLSPlayerStore,
-            onPlayerReady: (() -> Void)? = nil
+            onPlayerReady: (@MainActor () async -> Void)? = nil
         ) {
             self.call = call
-            self.store = store
+            playback = HLSPlayback(call: call)
             self.onPlayerReady = onPlayerReady
         }
 
@@ -40,36 +42,52 @@ extension HLSVideoRenderer {
         func update(call newCall: Call) {
             guard newCall.cId != call.cId else { return }
             playbackTypeObserver = nil
-            lease?.release()
-            lease = nil
             call = newCall
-            observePlaybackType()
+            // Runs after an acquire in flight, so that claim is released too.
+            enqueue { [self] in
+                await playback.release()
+                view?.player = nil
+                playback = HLSPlayback(call: call)
+                observePlaybackType()
+            }
         }
 
         func dismantle() {
             playbackTypeObserver = nil
-            lease?.release()
-            lease = nil
-            view?.player = nil
+            // Captures self, so the claim is released even after the owner
+            // has gone.
+            enqueue { [self] in
+                await playback.release()
+                view?.player = nil
+            }
         }
 
         private func observePlaybackType() {
             playbackTypeObserver = call.state
                 .$playbackType
                 .removeDuplicates()
-                .sink { [weak self] in self?.update(for: $0) }
+                .sink { [weak self] playbackType in
+                    self?.enqueue { await self?.update(for: playbackType) }
+                }
         }
 
-        private func update(for playbackType: PlaybackType) {
+        private func enqueue(_ operation: @escaping @MainActor () async -> Void) {
+            let previous = playbackUpdate
+            playbackUpdate = Task { @MainActor in
+                await previous?.value
+                await operation()
+            }
+        }
+
+        private func update(for playbackType: PlaybackType) async {
             switch playbackType {
             case .hls:
-                guard lease == nil else { return }
-                lease = store.acquire(for: call, playbackType: playbackType)
-                view?.player = lease?.player
-                if lease != nil { onPlayerReady?() }
+                let previous = view?.player
+                let player = await playback.acquire()
+                view?.player = player
+                if player != nil, player !== previous { await onPlayerReady?() }
             case .webRTC:
-                lease?.release()
-                lease = nil
+                await playback.release()
                 view?.player = nil
             }
         }
