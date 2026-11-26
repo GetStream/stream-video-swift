@@ -65,7 +65,7 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
     // MARK: - Picture in Picture
 
     @MainActor
-    func test_livestreamPlayer_appears_setsTheCallOnThePictureInPictureAdapter() async {
+    func test_livestreamPlayer_appears_adapterWithoutCall_setsTheCall() async {
         let adapter = injectPictureInPictureAdapter()
         let call = MockCall()
 
@@ -76,7 +76,21 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
     }
 
     @MainActor
-    func test_livestreamPlayer_disappears_clearsTheCallOfThePictureInPictureAdapter() async {
+    func test_livestreamPlayer_appears_adapterHoldsAnotherCall_keepsTheOtherCall() async {
+        let adapter = injectPictureInPictureAdapter()
+        let other = MockCall()
+        adapter.call = other
+        let lifecycle = Lifecycle()
+
+        let window = host(LivestreamPlayer(call: MockCall(), joinPolicy: .none), lifecycle)
+        defer { window.isHidden = true }
+        await fulfilmentInMainActor { lifecycle.appeared }
+
+        XCTAssertEqual(adapter.call?.cId, other.cId)
+    }
+
+    @MainActor
+    func test_livestreamPlayer_disappears_clearsTheCallItSet() async {
         let adapter = injectPictureInPictureAdapter()
         let call = MockCall()
         let window = host(LivestreamPlayer(call: call, joinPolicy: .none))
@@ -93,13 +107,14 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
         let adapter = injectPictureInPictureAdapter()
         let call = MockCall()
         let other = MockCall()
-        let window = host(LivestreamPlayer(call: call, joinPolicy: .none))
+        let lifecycle = Lifecycle()
+        let window = host(LivestreamPlayer(call: call, joinPolicy: .none), lifecycle)
         defer { window.isHidden = true }
         await fulfilmentInMainActor { adapter.call?.cId == call.cId }
         adapter.call = other
 
         window.rootViewController = nil
-        await wait(for: 0.2)
+        await fulfilmentInMainActor { lifecycle.disappeared }
 
         XCTAssertEqual(adapter.call?.cId, other.cId)
     }
@@ -109,12 +124,13 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
         let adapter = injectPictureInPictureAdapter()
         let call = MockCall()
         adapter.call = call
-        let window = host(LivestreamPlayer(call: call, joinPolicy: .none))
+        let lifecycle = Lifecycle()
+        let window = host(LivestreamPlayer(call: call, joinPolicy: .none), lifecycle)
         defer { window.isHidden = true }
-        await wait(for: 0.2)
+        await fulfilmentInMainActor { lifecycle.appeared }
 
         window.rootViewController = nil
-        await wait(for: 0.2)
+        await fulfilmentInMainActor { lifecycle.disappeared }
 
         XCTAssertEqual(adapter.call?.cId, call.cId)
     }
@@ -122,16 +138,18 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
     @MainActor
     func test_livestreamPlayer_pictureInPictureDisabled_appears_leavesTheAdapterAlone() async {
         let adapter = injectPictureInPictureAdapter()
+        let lifecycle = Lifecycle()
 
         let window = host(
             LivestreamPlayer(
                 call: MockCall(),
                 joinPolicy: .none,
                 isPictureInPictureEnabled: false
-            )
+            ),
+            lifecycle
         )
         defer { window.isHidden = true }
-        await wait(for: 0.2)
+        await fulfilmentInMainActor { lifecycle.appeared }
 
         XCTAssertNil(adapter.call)
     }
@@ -422,12 +440,24 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
         return adapter
     }
 
+    /// Hosts the view. The outer modifiers mark that the lifecycle callbacks
+    /// ran. SwiftUI calls the callbacks of the player first.
     @MainActor
-    private func host(_ view: some View) -> UIWindow {
+    private func host(_ view: some View, _ lifecycle: Lifecycle = .init()) -> UIWindow {
         let window = UIWindow(frame: UIScreen.main.bounds)
-        window.rootViewController = UIHostingController(rootView: view)
+        window.rootViewController = UIHostingController(
+            rootView: view
+                .onAppear { lifecycle.appeared = true }
+                .onDisappear { lifecycle.disappeared = true }
+        )
         window.makeKeyAndVisible()
         return window
+    }
+
+    @MainActor
+    private final class Lifecycle {
+        var appeared = false
+        var disappeared = false
     }
 
     private var hlsURL: URL { URL(string: "https://example.com/live.m3u8")! }

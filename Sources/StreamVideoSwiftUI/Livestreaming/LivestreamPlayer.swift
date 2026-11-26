@@ -103,7 +103,8 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
     ///   - joinPolicy: The policy dictating how users join the livestream. Defaults to `.auto`.
     ///   - showsLeaveCallButton: Whether to show a button to leave the call. Defaults to `false`.
     ///   - isPictureInPictureEnabled: Whether the player can start Picture in
-    ///     Picture. Defaults to `true`.
+    ///     Picture. Defaults to `true`. An outer `.enablePictureInPicture` is
+    ///     not needed.
     ///   - onFullScreenStateChange: A callback for fullscreen state changes.
     public init(
         viewFactory: Factory = DefaultViewFactory.shared,
@@ -229,7 +230,7 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
         .onAppear {
             if
                 isPictureInPictureEnabled,
-                pictureInPictureAdapter.call?.cId != call.cId {
+                pictureInPictureAdapter.call == nil {
                 pictureInPictureAdapter.call = call
                 setsPictureInPictureCall = true
             }
