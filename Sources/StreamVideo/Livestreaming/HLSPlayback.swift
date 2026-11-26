@@ -21,7 +21,7 @@ import Foundation
 /// ```
 ///
 /// - Important: This API is in beta, like ``PlaybackType``.
-public final class HLSPlayback: @unchecked Sendable {
+public actor HLSPlayback {
 
     private typealias Claim = (
         id: UUID,
@@ -31,7 +31,6 @@ public final class HLSPlayback: @unchecked Sendable {
 
     private let call: Call
     private let store: HLSPlayerStore
-    private let queue = UnfairQueue()
     /// The claim of this instance.
     private var claim: Claim?
 
@@ -109,22 +108,20 @@ public final class HLSPlayback: @unchecked Sendable {
     // MARK: - Private Helpers
 
     /// The claim for `playbackType`, and the claim it replaced.
-    /// The claim is set before the first suspension, so a concurrent
-    /// `acquire()` joins it instead of taking a second claim.
+    /// It runs without a suspension, so a concurrent `acquire()` joins
+    /// the claim instead of taking a second one.
     private func currentOrNewClaim(
         for playbackType: PlaybackType
     ) -> (claim: Claim, replaced: Claim?) {
-        queue.sync {
-            if let claim, claim.playbackType == playbackType { return (claim, nil) }
-            let replaced = claim
-            let id = UUID()
-            let task = Task { [call, store] in
-                await store.acquire(for: call, claimId: id, playbackType: playbackType)
-            }
-            let newClaim = (id: id, playbackType: playbackType, task: task)
-            claim = newClaim
-            return (newClaim, replaced)
+        if let claim, claim.playbackType == playbackType { return (claim, nil) }
+        let replaced = claim
+        let id = UUID()
+        let task = Task { [call, store] in
+            await store.acquire(for: call, claimId: id, playbackType: playbackType)
         }
+        let newClaim = (id: id, playbackType: playbackType, task: task)
+        claim = newClaim
+        return (newClaim, replaced)
     }
 
     /// Waits for the claim to finish, then releases it.
@@ -136,18 +133,14 @@ public final class HLSPlayback: @unchecked Sendable {
     /// Drops the claim with `id`. Returns false when it is already gone.
     @discardableResult
     private func forget(_ id: UUID) -> Bool {
-        queue.sync {
-            guard claim?.id == id else { return false }
-            claim = nil
-            return true
-        }
+        guard claim?.id == id else { return false }
+        claim = nil
+        return true
     }
 
     private func takeClaim() -> Claim? {
-        queue.sync {
-            let taken = claim
-            claim = nil
-            return taken
-        }
+        let taken = claim
+        claim = nil
+        return taken
     }
 }
