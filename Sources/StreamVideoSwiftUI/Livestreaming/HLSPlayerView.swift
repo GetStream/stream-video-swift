@@ -20,7 +20,8 @@ final class HLSPlayerView: UIView {
     @Injected(\.applicationStateAdapter) private var applicationStateAdapter
 
     private var playerLayer: AVPlayerLayer {
-        // The class property makes the layer an `AVPlayerLayer`.
+        // Safe: UIKit creates `layer` from `layerClass`, so it is always an
+        // `AVPlayerLayer`. Apple documents this pattern for AVPlayerLayer.
         // swiftlint:disable:next force_cast
         layer as! AVPlayerLayer
     }
