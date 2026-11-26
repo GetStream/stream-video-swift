@@ -103,6 +103,9 @@ actor HLSPlayerStore {
     }
 
     /// Gives a claim back. The player stops when no claim is left.
+    ///
+    /// Wait for the `acquire` of the claim first. A claim that is still
+    /// being acquired is not known yet, so releasing it does nothing.
     func release(claimId: UUID, for call: Call) async {
         let callId = call.cId
         guard let entry = entries[callId], entry.claimIds.remove(claimId) != nil else {

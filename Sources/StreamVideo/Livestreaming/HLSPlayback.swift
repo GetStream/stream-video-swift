@@ -65,9 +65,9 @@ public final class HLSPlayback: @unchecked Sendable {
         if let replaced { await give(back: replaced) }
         let player = await claim.task.value
         // The store frees the player when the call leaves HLS. Drop the
-        // stale claim, and acquire again.
+        // stale claim, and acquire again, unless a release took the claim.
         if let player, await store.player(for: call) !== player {
-            forget(claim.id)
+            guard forget(claim.id) else { return nil }
             return await acquire()
         }
         // A call that does not play HLS yet must not keep a nil claim.
@@ -133,9 +133,13 @@ public final class HLSPlayback: @unchecked Sendable {
         await store.release(claimId: claim.id, for: call)
     }
 
-    private func forget(_ id: UUID) {
+    /// Drops the claim with `id`. Returns false when it is already gone.
+    @discardableResult
+    private func forget(_ id: UUID) -> Bool {
         queue.sync {
-            if claim?.id == id { claim = nil }
+            guard claim?.id == id else { return false }
+            claim = nil
+            return true
         }
     }
 
