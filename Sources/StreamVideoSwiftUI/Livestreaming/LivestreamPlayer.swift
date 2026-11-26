@@ -15,7 +15,7 @@ import SwiftUI
 /// customisation of its behaviour through policies and callback actions.
 ///
 /// When the backend routes the viewer to HLS (``CallState/playbackType`` is
-/// ``PlaybackType/hls(_:)``), the player shows ``HLSVideoRenderer`` instead of
+/// ``PlaybackType/hls(_:)``), the player shows ``HLSVideoRendererView`` instead of
 /// participant video. The mute and play/pause controls then act on the HLS
 /// player, and the audio keeps playing while the app is in the background.
 /// Joining an HLS livestream through CallKit is not supported.
@@ -364,7 +364,7 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
 
     @ViewBuilder
     private var hlsVideoRenderer: some View {
-        HLSVideoRenderer(
+        HLSVideoRendererView(
             call: call,
             contentMode: .scaleAspectFit,
             // The player is created after the view appears, so the mute

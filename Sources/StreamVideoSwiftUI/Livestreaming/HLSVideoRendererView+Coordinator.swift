@@ -9,11 +9,13 @@ import StreamVideo
 import SwiftUI
 import UIKit
 
-extension HLSVideoRenderer.Representable {
+/// Extension for `HLSVideoRendererView` to define the `Coordinator` class.
+extension HLSVideoRendererView {
 
-    /// Owns the claim on the shared player for one renderer.
+    /// A class to coordinate the `HLSVideoRendererView` and own its claim on
+    /// the shared player.
     @MainActor
-    final class Coordinator {
+    public final class Coordinator {
 
         private var call: Call
         private var playback: HLSPlayback

@@ -41,7 +41,7 @@ private func content() {
 
             var body: some View {
                 if case .hls = state.playbackType {
-                    HLSVideoRenderer(call: call)
+                    HLSVideoRendererView(call: call)
                 } else {
                     Text("Render the host's WebRTC video here")
                 }

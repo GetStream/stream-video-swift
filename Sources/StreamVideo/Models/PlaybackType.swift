@@ -23,7 +23,7 @@ public enum PlaybackType: Equatable, Sendable {
     /// The client has no SFU connection in this mode, so the call has no
     /// participants or tracks, and it never publishes. The client leaves when
     /// the call ends, or when the call goes to backstage and the user has no
-    /// `join-backstage` capability. Use `HLSVideoRenderer` or ``HLSPlayback``
+    /// `join-backstage` capability. Use `HLSVideoRendererView` or ``HLSPlayback``
     /// to play the stream, or use the URL with a player such as `AVPlayer`.
     case hls(URL)
 }

@@ -10,7 +10,7 @@ import UIKit
 import XCTest
 
 @MainActor
-final class HLSVideoRenderer_Tests: StreamVideoTestCase, @unchecked Sendable {
+final class HLSVideoRendererView_Tests: StreamVideoTestCase, @unchecked Sendable {
 
     private let url = URL(string: "https://example.com/live.m3u8")!
     private let made = MadePlayers()
@@ -22,7 +22,7 @@ final class HLSVideoRenderer_Tests: StreamVideoTestCase, @unchecked Sendable {
     }
 
     private lazy var view: HLSPlayerView! = .init()
-    private lazy var subject: HLSVideoRenderer.Representable.Coordinator! = .init(call: call)
+    private lazy var subject: HLSVideoRendererView.Coordinator! = .init(call: call)
     private var previousStore: HLSPlayerStore?
     @Atomic private var readyCount = 0
 
@@ -151,7 +151,7 @@ final class HLSVideoRenderer_Tests: StreamVideoTestCase, @unchecked Sendable {
     // MARK: - onPlayerReady
 
     func test_attach_webRTCCall_doesNotCallOnPlayerReady() async {
-        let subject = HLSVideoRenderer.Representable.Coordinator(call: call) { [weak self] in
+        let subject = HLSVideoRendererView.Coordinator(call: call) { [weak self] in
             self?._readyCount.mutate { $0 += 1 }
         }
 
@@ -164,7 +164,7 @@ final class HLSVideoRenderer_Tests: StreamVideoTestCase, @unchecked Sendable {
     }
 
     func test_playbackTypeBecomesHLS_callsOnPlayerReadyOnce() async {
-        let subject = HLSVideoRenderer.Representable.Coordinator(call: call) { [weak self] in
+        let subject = HLSVideoRendererView.Coordinator(call: call) { [weak self] in
             self?._readyCount.mutate { $0 += 1 }
         }
         subject.attach(to: view)
@@ -203,7 +203,7 @@ final class HLSVideoRenderer_Tests: StreamVideoTestCase, @unchecked Sendable {
 
     func test_dismantle_oneOfTwoRenderers_keepsThePlayerForTheOther() async {
         call.state.playbackType = .hls(url)
-        let other = HLSVideoRenderer.Representable.Coordinator(call: call)
+        let other = HLSVideoRendererView.Coordinator(call: call)
         other.attach(to: HLSPlayerView())
         subject.attach(to: view)
         await fulfilmentInMainActor { self.view.player != nil }

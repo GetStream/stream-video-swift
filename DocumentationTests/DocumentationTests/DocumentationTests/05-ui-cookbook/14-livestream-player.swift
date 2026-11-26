@@ -22,6 +22,6 @@ private func content() {
     }
 
     viewContainer {
-        HLSVideoRenderer(call: call, contentMode: .scaleAspectFill)
+        HLSVideoRendererView(call: call, contentMode: .scaleAspectFill)
     }
 }
