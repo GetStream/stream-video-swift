@@ -14,6 +14,14 @@ private func content() {
     }
 
     viewContainer {
+        LivestreamPlayer(
+            type: "livestream",
+            id: "some_id",
+            isPictureInPictureEnabled: false
+        )
+    }
+
+    viewContainer {
         NavigationLink {
             LivestreamPlayer(type: "livestream", id: "vQyteZAnDYYk")
         } label: {

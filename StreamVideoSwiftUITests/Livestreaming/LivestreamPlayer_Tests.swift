@@ -15,9 +15,13 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
     private let callId = "test"
     private let callType = "livestream"
     private var mockStreamVideo: MockStreamVideo! = .init()
+    private var previousAdapter: StreamPictureInPictureAdapter?
 
     override func tearDown() async throws {
         mockStreamVideo = nil
+        if let previousAdapter {
+            InjectedValues[\.pictureInPictureAdapter] = previousAdapter
+        }
         try await super.tearDown()
     }
 
@@ -56,6 +60,80 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
         subject.leaveLivestream()
 
         XCTAssertEqual(call.leaveInitiators, [.user])
+    }
+
+    // MARK: - Picture in Picture
+
+    @MainActor
+    func test_livestreamPlayer_appears_setsTheCallOnThePictureInPictureAdapter() async {
+        let adapter = injectPictureInPictureAdapter()
+        let call = MockCall()
+
+        let window = host(LivestreamPlayer(call: call, joinPolicy: .none))
+        defer { window.isHidden = true }
+
+        await fulfilmentInMainActor { adapter.call?.cId == call.cId }
+    }
+
+    @MainActor
+    func test_livestreamPlayer_disappears_clearsTheCallOfThePictureInPictureAdapter() async {
+        let adapter = injectPictureInPictureAdapter()
+        let call = MockCall()
+        let window = host(LivestreamPlayer(call: call, joinPolicy: .none))
+        defer { window.isHidden = true }
+        await fulfilmentInMainActor { adapter.call?.cId == call.cId }
+
+        window.rootViewController = nil
+
+        await fulfilmentInMainActor { adapter.call == nil }
+    }
+
+    @MainActor
+    func test_livestreamPlayer_disappears_adapterHoldsAnotherCall_keepsTheOtherCall() async {
+        let adapter = injectPictureInPictureAdapter()
+        let call = MockCall()
+        let other = MockCall()
+        let window = host(LivestreamPlayer(call: call, joinPolicy: .none))
+        defer { window.isHidden = true }
+        await fulfilmentInMainActor { adapter.call?.cId == call.cId }
+        adapter.call = other
+
+        window.rootViewController = nil
+        await wait(for: 0.2)
+
+        XCTAssertEqual(adapter.call?.cId, other.cId)
+    }
+
+    @MainActor
+    func test_livestreamPlayer_disappears_appSetTheCall_keepsTheCall() async {
+        let adapter = injectPictureInPictureAdapter()
+        let call = MockCall()
+        adapter.call = call
+        let window = host(LivestreamPlayer(call: call, joinPolicy: .none))
+        defer { window.isHidden = true }
+        await wait(for: 0.2)
+
+        window.rootViewController = nil
+        await wait(for: 0.2)
+
+        XCTAssertEqual(adapter.call?.cId, call.cId)
+    }
+
+    @MainActor
+    func test_livestreamPlayer_pictureInPictureDisabled_appears_leavesTheAdapterAlone() async {
+        let adapter = injectPictureInPictureAdapter()
+
+        let window = host(
+            LivestreamPlayer(
+                call: MockCall(),
+                joinPolicy: .none,
+                isPictureInPictureEnabled: false
+            )
+        )
+        defer { window.isHidden = true }
+        await wait(for: 0.2)
+
+        XCTAssertNil(adapter.call)
     }
 
     // MARK: - HLS playback
@@ -334,6 +412,15 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
     }
 
     // MARK: - Private Helpers
+
+    /// Replaces the shared adapter with a fresh one. Teardown restores it.
+    @MainActor
+    private func injectPictureInPictureAdapter() -> StreamPictureInPictureAdapter {
+        previousAdapter = previousAdapter ?? InjectedValues[\.pictureInPictureAdapter]
+        let adapter = StreamPictureInPictureAdapter()
+        InjectedValues[\.pictureInPictureAdapter] = adapter
+        return adapter
+    }
 
     @MainActor
     private func host(_ view: some View) -> UIWindow {

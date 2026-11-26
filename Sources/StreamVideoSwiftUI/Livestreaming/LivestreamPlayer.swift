@@ -21,6 +21,11 @@ import SwiftUI
 /// which the HLS player follows. The play/pause control acts on the HLS
 /// player, and the audio keeps playing while the app is in the background.
 /// Joining an HLS livestream through CallKit is not supported.
+///
+/// The player supports Picture in Picture for HLS and WebRTC livestreams.
+/// It uses `StreamPictureInPictureAdapter`, so the host app needs the
+/// "Audio, AirPlay, and Picture in Picture" background mode. Pass
+/// `isPictureInPictureEnabled: false` to turn it off.
 @available(iOS 14.0, *)
 public struct LivestreamPlayer<Factory: ViewFactory>: View {
     
@@ -34,6 +39,8 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
     
     /// Accesses the color palette from the app's dependency injection.
     @Injected(\.colors) var colors
+
+    @Injected(\.pictureInPictureAdapter) private var pictureInPictureAdapter
     
     @Injected(\.formatters.mediaDuration) private var formatter: MediaDurationFormatter
 
@@ -45,6 +52,9 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
     /// Indicates whether a button to leave the livestream is shown.
     var showsLeaveCallButton: Bool
     
+    /// Indicates whether the video area can start Picture in Picture.
+    var isPictureInPictureEnabled: Bool
+
     /// A callback triggered when the fullscreen state changes.
     var onFullScreenStateChange: ((Bool) -> Void)?
     
@@ -78,6 +88,9 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
     /// Keeps `streamPaused` in step with the shared HLS player.
     @State var rateObserver: AnyCancellable?
 
+    /// Whether this player set the call of the Picture-in-Picture adapter.
+    @State var setsPictureInPictureCall = false
+
     private let disposableBag = DisposableBag()
 
     /// Initializes a `LivestreamPlayer` with the specified parameters.
@@ -89,6 +102,8 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
     ///   - showParticipantCount: Whether to show the count of participants. Defaults to `true`.
     ///   - joinPolicy: The policy dictating how users join the livestream. Defaults to `.auto`.
     ///   - showsLeaveCallButton: Whether to show a button to leave the call. Defaults to `false`.
+    ///   - isPictureInPictureEnabled: Whether the player can start Picture in
+    ///     Picture. Defaults to `true`.
     ///   - onFullScreenStateChange: A callback for fullscreen state changes.
     public init(
         viewFactory: Factory = DefaultViewFactory.shared,
@@ -98,9 +113,11 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
         showParticipantCount: Bool = true,
         joinPolicy: JoinPolicy = .auto,
         showsLeaveCallButton: Bool = false,
+        isPictureInPictureEnabled: Bool = true,
         onFullScreenStateChange: ((Bool) -> Void)? = nil
     ) {
         self.viewFactory = viewFactory
+        self.isPictureInPictureEnabled = isPictureInPictureEnabled
         let call = InjectedValues[\.streamVideo].call(callType: type, callId: id)
         self.call = call
         livestreamState = LivestreamState(call: call)
@@ -125,9 +142,11 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
         showsLeaveCallButton: Bool = false,
         recordings: [CallRecording]? = nil,
         streamPaused: Bool = false,
+        isPictureInPictureEnabled: Bool = true,
         onFullScreenStateChange: ((Bool) -> Void)? = nil
     ) {
         self.viewFactory = viewFactory
+        self.isPictureInPictureEnabled = isPictureInPictureEnabled
         self.call = call
         self.countdown = countdown
         self.livestreamState = livestreamState ?? LivestreamState(call: call)
@@ -208,6 +227,12 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
             }
         }
         .onAppear {
+            if
+                isPictureInPictureEnabled,
+                pictureInPictureAdapter.call?.cId != call.cId {
+                pictureInPictureAdapter.call = call
+                setsPictureInPictureCall = true
+            }
             switch joinPolicy {
             case .none:
                 break
@@ -216,6 +241,7 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
             }
         }
         .onDisappear {
+            clearPictureInPictureCall()
             switch joinPolicy {
             case .none:
                 break
@@ -379,11 +405,14 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
     
     @ViewBuilder
     private var videoRenderer: some View {
-        if case .hls = state.playbackType {
-            hlsVideoRenderer
-        } else {
-            webRTCVideoRenderer
+        Group {
+            if case .hls = state.playbackType {
+                hlsVideoRenderer
+            } else {
+                webRTCVideoRenderer
+            }
         }
+        .enablePictureInPicture(isPictureInPictureEnabled)
     }
 
     @ViewBuilder
@@ -509,8 +538,20 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
         }
     }
     
+    /// Clears the adapter call if this player set it, unless another screen
+    /// has replaced it.
+    private func clearPictureInPictureCall() {
+        guard
+            setsPictureInPictureCall,
+            pictureInPictureAdapter.call?.cId == call.cId
+        else { return }
+        pictureInPictureAdapter.call = nil
+        setsPictureInPictureCall = false
+    }
+
     func leaveLivestream(initiator: Call.LeaveInitiator = .user) {
         call.leave(initiator: initiator, reason: "leaveLivestream")
+        clearPictureInPictureCall()
         disposableBag.removeAll()
         livestreamState = .initial
     }
