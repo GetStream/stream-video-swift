@@ -273,11 +273,6 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         }
     }
 
-    /// Configures the shared audio session for HLS playback and activates it.
-    func configureHLSAudioSession() async throws {
-        try await hlsAudioSession.activate()
-    }
-
     /// Sets the session ID.
     func set(sessionID value: String) {
         self.sessionID = value

@@ -324,7 +324,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
             do {
                 try await coordinator
                     .stateAdapter
-                    .configureHLSAudioSession()
+                    .hlsAudioSession
+                    .activate()
             } catch is CancellationError {
                 throw CancellationError()
             } catch {
