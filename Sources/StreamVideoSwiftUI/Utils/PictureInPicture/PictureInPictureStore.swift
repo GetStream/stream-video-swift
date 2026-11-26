@@ -2,6 +2,7 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import AVFoundation
 import Combine
 import Foundation
 import StreamVideo
@@ -18,6 +19,8 @@ final class PictureInPictureStore: ObservableObject, @unchecked Sendable {
         var isActive: Bool
         var call: Call?
         var sourceView: UIView?
+        /// The layer of the HLS player that Picture-in-Picture can show.
+        nonisolated(unsafe) var playerLayer: AVPlayerLayer?
         var viewFactory: PictureInPictureViewFactory
         var content: PictureInPictureContent
         var preferredContentSize: CGSize
@@ -44,6 +47,10 @@ final class PictureInPictureStore: ObservableObject, @unchecked Sendable {
         case setCall(Call?)
         /// Sets the source view for Picture-in-Picture.
         case setSourceView(UIView?)
+        /// Sets the layer of the HLS player.
+        case setPlayerLayer(AVPlayerLayer)
+        /// Clears the layer of the HLS player, if the state still holds it.
+        case removePlayerLayer(AVPlayerLayer)
         /// Updates the view factory for creating content.
         case setViewFactory(PictureInPictureViewFactory)
         /// Changes the current content being displayed.
@@ -83,6 +90,12 @@ final class PictureInPictureStore: ObservableObject, @unchecked Sendable {
                 updatedState.call = value
             case let .setSourceView(value):
                 updatedState.sourceView = value
+            case let .setPlayerLayer(value):
+                updatedState.playerLayer = value
+            case let .removePlayerLayer(value):
+                if updatedState.playerLayer === value {
+                    updatedState.playerLayer = nil
+                }
             case let .setViewFactory(value):
                 updatedState.viewFactory = value
             case let .setContent(value):

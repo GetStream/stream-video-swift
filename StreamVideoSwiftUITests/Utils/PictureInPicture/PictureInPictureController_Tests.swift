@@ -58,6 +58,48 @@ final class PictureInPictureControllerTests: XCTestCase, @unchecked Sendable {
         XCTAssertNotNil(configured.subject)
     }
 
+    // MARK: - Content source
+
+    // A simulator can't create a system controller, so these tests read the
+    // content source the factory receives.
+
+    @MainActor
+    func test_hlsCall_playerLayerRegistered_controllerShowsThePlayerLayer() async {
+        let configured = await makeConfiguredSubject(callFirst: true, call: makeHLSCall())
+        let layer = AVPlayerLayer()
+
+        configured.store.dispatch(.setPlayerLayer(layer))
+
+        await fulfilmentInMainActor {
+            configured.factory.contentSources.last?.playerLayer === layer
+        }
+        withExtendedLifetime(configured.subject) {}
+    }
+
+    @MainActor
+    func test_hlsCall_withoutPlayerLayer_controllerShowsTheVideoCall() async {
+        let configured = await makeConfiguredSubject(callFirst: true, call: makeHLSCall())
+
+        let source = configured.factory.contentSources.last
+        XCTAssertNotNil(source?.activeVideoCallSourceView)
+        XCTAssertNil(source?.playerLayer)
+        withExtendedLifetime(configured.subject) {}
+    }
+
+    @MainActor
+    func test_webRTCCall_playerLayerRegistered_controllerShowsTheVideoCall() async {
+        let configured = await makeConfiguredSubject(callFirst: true)
+
+        configured.store.dispatch(.setPlayerLayer(AVPlayerLayer()))
+        await fulfilmentInMainActor { configured.store.state.playerLayer != nil }
+        await wait(for: 0.1)
+
+        let source = configured.factory.contentSources.last
+        XCTAssertNotNil(source?.activeVideoCallSourceView)
+        XCTAssertNil(source?.playerLayer)
+        withExtendedLifetime(configured.subject) {}
+    }
+
     @MainActor
     func test_pictureInPictureUnsupported_initializationReturnsNil() {
         let subject = PictureInPictureController(
@@ -71,8 +113,16 @@ final class PictureInPictureControllerTests: XCTestCase, @unchecked Sendable {
     // MARK: - Private
 
     @MainActor
+    private func makeHLSCall() -> MockCall {
+        let call = MockCall()
+        call.state.playbackType = .hls(URL(string: "https://example.com/live.m3u8")!)
+        return call
+    }
+
+    @MainActor
     private func makeConfiguredSubject(
-        callFirst: Bool
+        callFirst: Bool,
+        call: Call = MockCall()
     ) async -> (
         subject: PictureInPictureController?,
         store: PictureInPictureStore,
@@ -86,14 +136,14 @@ final class PictureInPictureControllerTests: XCTestCase, @unchecked Sendable {
             makePictureInPictureController: factory.make
         )
         if callFirst {
-            store.dispatch(.setCall(MockCall()))
+            store.dispatch(.setCall(call))
             await fulfilmentInMainActor { store.state.call != nil }
             store.dispatch(.setSourceView(UIView()))
             await fulfilmentInMainActor { store.state.sourceView != nil }
         } else {
             store.dispatch(.setSourceView(UIView()))
             await fulfilmentInMainActor { store.state.sourceView != nil }
-            store.dispatch(.setCall(MockCall()))
+            store.dispatch(.setCall(call))
             await fulfilmentInMainActor { store.state.call != nil }
         }
         await assertControllerWasConfigured(factory)

@@ -17,12 +17,17 @@ extension HLSVideoRendererView {
     @MainActor
     public final class Coordinator {
 
+        @Injected(\.pictureInPictureAdapter) private var pictureInPictureAdapter
+
         private var call: Call
         private weak var view: HLSPlayerView?
         private var playbackTypeObserver: AnyCancellable?
         /// The latest request for the player. A result that comes after
         /// another change is dropped.
         private var playerRequest: Task<Void, Never>?
+        /// The layer registered with Picture in Picture. The view can be gone
+        /// before the teardown runs, so the coordinator keeps the layer.
+        private var registeredLayer: AVPlayerLayer?
 
         init(call: Call) {
             self.call = call
@@ -36,6 +41,7 @@ extension HLSVideoRendererView {
         /// Follows `call` when the view is given another one.
         func update(call newCall: Call) {
             guard newCall !== call else { return }
+            unregisterPlayerLayer()
             call = newCall
             clear()
             observePlaybackType()
@@ -43,6 +49,7 @@ extension HLSVideoRendererView {
 
         func dismantle() {
             playbackTypeObserver = nil
+            unregisterPlayerLayer()
             clear()
         }
 
@@ -67,13 +74,35 @@ extension HLSVideoRendererView {
 
         private func show(_ playbackType: PlaybackType, isLive: Bool) {
             clear()
-            guard case .hls = playbackType, isLive else { return }
+            guard case .hls = playbackType, isLive else {
+                unregisterPlayerLayer()
+                return
+            }
             let call = call
             playerRequest = Task { [weak self] in
                 let player = await call.hlsPlayer()
                 guard !Task.isCancelled else { return }
                 self?.view?.player = player
+                if player != nil { self?.registerPlayerLayer() }
             }
+        }
+
+        /// Lets Picture in Picture show the layer, when the adapter holds
+        /// the call of this view.
+        private func registerPlayerLayer() {
+            guard
+                let layer = view?.playerLayer,
+                pictureInPictureAdapter.call?.cId == call.cId
+            else { return }
+            registeredLayer = layer
+            pictureInPictureAdapter.store?.dispatch(.setPlayerLayer(layer))
+        }
+
+        /// Clears the layer, unless Picture in Picture shows another one now.
+        private func unregisterPlayerLayer() {
+            guard let layer = registeredLayer else { return }
+            registeredLayer = nil
+            pictureInPictureAdapter.store?.dispatch(.removePlayerLayer(layer))
         }
 
         private func clear() {

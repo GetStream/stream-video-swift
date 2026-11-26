@@ -83,14 +83,20 @@ final class PictureInPictureController: @unchecked Sendable {
         self.store = store
         self.makePictureInPictureController = makePictureInPictureController
 
-        Publishers.CombineLatest(
+        Publishers.CombineLatest3(
             store
                 .publisher(for: \.call)
                 .removeDuplicates { $0?.cId == $1?.cId },
-            store.publisher(for: \.sourceView).removeDuplicates()
+            store.publisher(for: \.sourceView).removeDuplicates(),
+            // Only the identity travels through the sink. The layer is read
+            // from the store, because it isn't `Sendable`.
+            store
+                .publisher(for: \.playerLayer)
+                .map { $0.map(ObjectIdentifier.init) }
+                .removeDuplicates()
         )
-        .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in
-            self?.didUpdate(call: $0, sourceView: $1)
+        .sinkTask(storeIn: disposableBag) { @MainActor [weak self] call, sourceView, _ in
+            self?.didUpdate(call: call, sourceView: sourceView)
         }
         .store(in: disposableBag)
 
@@ -109,11 +115,11 @@ final class PictureInPictureController: @unchecked Sendable {
             .store(in: disposableBag)
     }
 
-    /// Updates the Picture-in-Picture controller when the call or source view
-    /// changes.
+    /// Updates the Picture-in-Picture controller when the call, source view
+    /// or HLS player layer changes.
     @MainActor
     private func didUpdate(call: Call?, sourceView: UIView?) {
-        guard call != nil, let sourceView else {
+        guard let call, let sourceView else {
             /// We ensure to cleanUp every Picture-in-Picture interacting component so that the next
             /// Call will start with clean state.
             pictureInPictureController?.stopPictureInPicture()
@@ -140,7 +146,14 @@ final class PictureInPictureController: @unchecked Sendable {
         // before the first PiP activation.
         contentViewController.loadViewIfNeeded()
 
-        let contentSource = AVPictureInPictureController.ContentSource(
+        // The system shows the player layer of the HLS renderer.
+        var hlsPlayerLayer: AVPlayerLayer?
+        if case .hls = call.state.playbackType {
+            hlsPlayerLayer = store.state.playerLayer
+        }
+        let contentSource = hlsPlayerLayer.map {
+            AVPictureInPictureController.ContentSource(playerLayer: $0)
+        } ?? AVPictureInPictureController.ContentSource(
             activeVideoCallSourceView: sourceView,
             contentViewController: contentViewController
         )
@@ -154,6 +167,8 @@ final class PictureInPictureController: @unchecked Sendable {
         } else {
             pictureInPictureController?.contentSource = contentSource
         }
+        // A livestream has no seeking in the Picture-in-Picture window.
+        pictureInPictureController?.requiresLinearPlayback = hlsPlayerLayer != nil
 
         log.debug(
             "SourceView updated and contentViewController preferredContentSize:\(contentViewController.preferredContentSize)",
