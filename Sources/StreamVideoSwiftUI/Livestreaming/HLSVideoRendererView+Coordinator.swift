@@ -64,6 +64,12 @@ extension HLSVideoRendererView {
             }
         }
 
+        /// Follows the playback type of the same call. It is `.webRTC` until
+        /// the join response grants HLS, and it returns to `.webRTC` when the
+        /// call ends. `dismantle()` covers neither change when the app keeps
+        /// this view on screen, for example while it shows the view before
+        /// the join completes. `LivestreamPlayer` swaps views on the type,
+        /// so for it only the first value acquires the player.
         private func observePlaybackType() {
             playbackTypeObserver = call.state
                 .$playbackType
