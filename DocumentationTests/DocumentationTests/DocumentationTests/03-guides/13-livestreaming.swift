@@ -35,15 +35,116 @@ private func content() {
     }
 
     container {
-        struct LivestreamVideoView: View {
+        struct LivestreamViewer: View {
             let call: Call
             @StateObject var state: CallState
+            @State private var isMuted = false
+            @State private var isPaused = false
+            @State private var playback: HLSPlayback
+
+            init(call: Call) {
+                self.call = call
+                _state = StateObject(wrappedValue: call.state)
+                _playback = State(wrappedValue: HLSPlayback(call: call))
+            }
 
             var body: some View {
-                if case .hls = state.playbackType {
+                VStack {
+                    videoView
+                    controls
+                }
+                // Runs on appear, and again every time playbackType changes.
+                .task(id: state.playbackType) { await applyControls() }
+                .onDisappear { Task { await playback.release() } }
+            }
+
+            @ViewBuilder
+            private var videoView: some View {
+                switch state.playbackType {
+                case .hls:
                     HLSVideoRendererView(call: call)
+                default:
+                    webRTCVideoView
+                }
+            }
+
+            private var host: CallParticipant? {
+                state.participants.first { $0.roles.contains("host") }
+            }
+
+            @ViewBuilder
+            private var webRTCVideoView: some View {
+                GeometryReader { reader in
+                    if let host {
+                        VideoRendererView(id: host.id, size: reader.size) { renderer in
+                            renderer.handleViewRendering(for: host) { _, _ in }
+                        }
+                    } else {
+                        Text("The host's video is not available")
+                    }
+                }
+            }
+
+            private var controls: some View {
+                HStack(spacing: 24) {
+                    Button {
+                        Task { await setMuted(!isMuted) }
+                    } label: {
+                        Label(
+                            isMuted ? "Unmute" : "Mute",
+                            systemImage: isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill"
+                        )
+                    }
+                    Button {
+                        Task { await setPaused(!isPaused) }
+                    } label: {
+                        Label(
+                            isPaused ? "Resume" : "Pause",
+                            systemImage: isPaused ? "play.fill" : "pause.fill"
+                        )
+                    }
+                }
+                .padding()
+            }
+
+            private func setMuted(_ muted: Bool) async {
+                isMuted = muted
+                if case .hls = state.playbackType {
+                    await playback.setMuted(muted)
                 } else {
-                    Text("Render the host's WebRTC video here")
+                    do {
+                        if muted {
+                            try await call.speaker.disableAudioOutput()
+                        } else {
+                            try await call.speaker.enableAudioOutput()
+                        }
+                    } catch {
+                        print("Could not change the audio output: \(error)")
+                    }
+                }
+            }
+
+            private func setPaused(_ paused: Bool) async {
+                isPaused = paused
+                if case .hls = state.playbackType {
+                    await playback.setPaused(paused)
+                } else {
+                    host?.track?.isEnabled = !paused
+                }
+            }
+
+            /// Applies the controls to the mode that is active now.
+            private func applyControls() async {
+                if case .hls = state.playbackType {
+                    // A new HLS player starts unmuted and playing.
+                    // acquire() makes sure that the player exists.
+                    guard await playback.acquire() != nil else { return }
+                    await playback.setMuted(isMuted)
+                    if isPaused { await playback.setPaused(true) }
+                } else {
+                    await playback.release()
+                    await setMuted(isMuted)
+                    host?.track?.isEnabled = !isPaused
                 }
             }
         }
