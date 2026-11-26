@@ -31,7 +31,7 @@ permissions:
 jobs:
   guard:
     name: Guard
-    runs-on: ubuntu-24.04
+    runs-on: { group: github-public-amd64 }
     permissions:
       actions: write # to cancel skip-ci runs
       contents: read
@@ -47,7 +47,7 @@ jobs:
 
   sdk_size:
     name: Metrics
-    runs-on: macos-15
+    runs-on: { group: scaleway-macos }
     needs: guard
     if: ${{ fromJSON(needs.guard.outputs.checks).size }}
     env:
