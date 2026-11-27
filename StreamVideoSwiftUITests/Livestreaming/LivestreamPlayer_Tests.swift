@@ -65,34 +65,39 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
     // MARK: - HLS playback
 
     @MainActor
-    func test_livestreamPlayer_toggleAudioOutput_hls_mutesThePlayerNotTheSpeaker() async throws {
+    func test_livestreamPlayer_toggleAudioOutput_hls_usesTheSpeaker() async throws {
         let fixture = await makeHLSFixture(playbackType: .hls(hlsURL))
-        await fixture.subject.startHLSPlayback()
-
-        await fixture.subject.toggleAudioOutput()
-
-        XCTAssertTrue(fixture.player.isMuted)
-        XCTAssertEqual(fixture.callController.timesCalled(.changeSoundState), 0)
-    }
-
-    @MainActor
-    func test_livestreamPlayer_toggleAudioOutput_webRTC_mutesTheSpeakerNotThePlayer() async throws {
-        let fixture = await makeHLSFixture(playbackType: .webRTC)
-        await fixture.subject.startHLSPlayback()
 
         await fixture.subject.toggleAudioOutput()
 
         await fulfillment { fixture.callController.timesCalled(.changeSoundState) == 1 }
-        XCTAssertFalse(fixture.player.isMuted)
     }
 
     @MainActor
-    func test_livestreamPlayer_startHLSPlayback_mutedOnStart_mutesThePlayer() async throws {
+    func test_livestreamPlayer_toggleAudioOutput_webRTC_usesTheSpeaker() async throws {
+        let fixture = await makeHLSFixture(playbackType: .webRTC)
+
+        await fixture.subject.toggleAudioOutput()
+
+        await fulfillment { fixture.callController.timesCalled(.changeSoundState) == 1 }
+    }
+
+    @MainActor
+    func test_livestreamPlayer_startHLSPlayback_mutedOnStart_turnsTheAudioOutputOff() async throws {
         let fixture = await makeHLSFixture(playbackType: .hls(hlsURL), muted: true)
 
         await fixture.subject.startHLSPlayback()
 
-        XCTAssertTrue(fixture.player.isMuted)
+        await fulfillment { fixture.callController.timesCalled(.changeSoundState) == 1 }
+    }
+
+    @MainActor
+    func test_livestreamPlayer_startHLSPlayback_notMutedOnStart_keepsTheAudioOutput() async throws {
+        let fixture = await makeHLSFixture(playbackType: .hls(hlsURL))
+
+        await fixture.subject.startHLSPlayback()
+
+        XCTAssertEqual(fixture.callController.timesCalled(.changeSoundState), 0)
     }
 
     @MainActor

@@ -56,8 +56,8 @@ actor HLSPlayerStore {
             await free(callId: callId)
         }
 
-        // One hop creates the player and both observers.
-        let (player, observer, resumeObserver) = await MainActor.run {
+        // One hop creates the player and its observers.
+        let (player, observer, resumeObserver, audioObserver) = await MainActor.run {
             let player = makePlayer(url)
             // A new player has rate 0. Nothing else starts it.
             player.play()
@@ -69,13 +69,19 @@ actor HLSPlayerStore {
                 .sink { [weak self] _ in
                     Task { await self?.free(callId: callId, player: player) }
                 }
-            return (player, observer, makeResumeObserver(callId: callId))
+            return (
+                player,
+                observer,
+                makeResumeObserver(callId: callId),
+                makeAudioOutputObserver(call: call, player: player)
+            )
         }
         // Another claim stored its player while this one was on the main
         // actor. Nothing suspends from this check to the insert.
         if entries[callId] != nil {
             observer.cancel()
             resumeObserver.cancel()
+            audioObserver.cancel()
             await discard(player)
             return await acquire(for: call, claimId: claimId, playbackType: playbackType)
         }
@@ -85,7 +91,8 @@ actor HLSPlayerStore {
             player: player,
             claimIds: [claimId],
             playbackTypeObserver: observer,
-            resumeObserver: resumeObserver
+            resumeObserver: resumeObserver,
+            audioOutputObserver: audioObserver
         )
         // The change to WebRTC can come before the entry exists.
         if await MainActor.run(body: { call.state.playbackType }) == .webRTC {
@@ -117,6 +124,21 @@ actor HLSPlayerStore {
     }
 
     // MARK: - Private Helpers
+
+    /// Mutes the player while the audio output of the call is off. The
+    /// subscription sees the value in state too, so a new player starts
+    /// with it.
+    @MainActor
+    private func makeAudioOutputObserver(
+        call: Call,
+        player: AVPlayer
+    ) -> AnyCancellable {
+        call.state
+            .$callSettings
+            .map(\.audioOutputOn)
+            .removeDuplicates()
+            .sink { [weak player] in player?.isMuted = !$0 }
+    }
 
     /// iOS can pause a player without a user action, for example when the app
     /// goes to the background. Nothing resumes it afterwards, so resume it
@@ -166,6 +188,7 @@ actor HLSPlayerStore {
         if let expected, entry.player !== expected { return }
         entries.removeValue(forKey: callId)
         entry.resumeObserver.cancel()
+        entry.audioOutputObserver.cancel()
         await discard(entry.player)
     }
 

@@ -16,7 +16,8 @@ import SwiftUI
 ///
 /// When the backend routes the viewer to HLS (``CallState/playbackType`` is
 /// ``PlaybackType/hls(_:)``), the player shows ``HLSVideoRendererView`` instead of
-/// participant video. The mute and play/pause controls then act on the HLS
+/// participant video. The mute control changes the audio output of the call,
+/// which the HLS player follows. The play/pause control acts on the HLS
 /// player, and the audio keeps playing while the app is in the background.
 /// Joining an HLS livestream through CallKit is not supported.
 @available(iOS 14.0, *)
@@ -214,17 +215,6 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
     }
     
     func toggleAudioOutput() async {
-        // An HLS viewer has no call audio, so the mute acts on the player.
-        if case .hls = state.playbackType {
-            // The state changes before the player is updated. A second tap
-            // that arrives meanwhile then flips the value the first one set,
-            // and the button and the player end up the same.
-            let target = !muted
-            muted = target
-            await hlsPlayback.setMuted(target)
-            return
-        }
-
         Task(disposableBag: disposableBag) {
             do {
                 if !muted {
@@ -239,11 +229,12 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
         }
     }
     
-    /// Applies the mute and pause state to the shared HLS player. A player
-    /// starts playing on creation, so a paused stream is paused again.
+    /// Applies the mute and pause state to the shared HLS player. The player
+    /// follows the audio output of the call. A player starts playing on
+    /// creation, so a paused stream is paused again.
     @MainActor
     func startHLSPlayback() async {
-        await hlsPlayback.setMuted(muted)
+        if muted { muteLivestreamOnJoin() }
         if streamPaused {
             await hlsPlayback.setPaused(true)
         }

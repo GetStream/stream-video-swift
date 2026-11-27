@@ -13,10 +13,13 @@ import Foundation
 /// holds a claim. Calls can come from any thread. The player is changed on the
 /// main actor.
 ///
+/// The player is muted while the audio output of the call is off. Use
+/// `call.speaker.disableAudioOutput()` and `enableAudioOutput()` to change it.
+///
 /// ```swift
 /// let playback = HLSPlayback(call: call)
 /// let player = await playback.acquire() // nil unless the call plays HLS
-/// await playback.setMuted(true)
+/// await playback.setPaused(true)
 /// await playback.release()
 /// ```
 ///
@@ -79,14 +82,6 @@ public actor HLSPlayback {
     /// Waits for an acquire in flight, so its claim is released too.
     public func release() async {
         if let claim = takeClaim() { await give(back: claim) }
-    }
-
-    /// Mutes or unmutes the player. This does not change the call speaker.
-    ///
-    /// Does nothing when no player exists.
-    public func setMuted(_ muted: Bool) async {
-        let player = await store.player(for: call)
-        await MainActor.run { player?.isMuted = muted }
     }
 
     /// Pauses, or resumes from the live edge.

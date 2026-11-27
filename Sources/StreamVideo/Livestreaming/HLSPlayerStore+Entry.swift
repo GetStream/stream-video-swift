@@ -21,19 +21,23 @@ extension HLSPlayerStore {
         let playbackTypeObserver: AnyCancellable
         /// Resumes the player when the system paused it. Freed with the entry.
         let resumeObserver: AnyCancellable
+        /// Mutes the player with the audio output of the call.
+        let audioOutputObserver: AnyCancellable
 
         init(
             url: URL,
             player: AVPlayer,
             claimIds: Set<UUID>,
             playbackTypeObserver: AnyCancellable,
-            resumeObserver: AnyCancellable
+            resumeObserver: AnyCancellable,
+            audioOutputObserver: AnyCancellable
         ) {
             self.url = url
             self.player = player
             self.claimIds = claimIds
             self.playbackTypeObserver = playbackTypeObserver
             self.resumeObserver = resumeObserver
+            self.audioOutputObserver = audioOutputObserver
         }
     }
 }

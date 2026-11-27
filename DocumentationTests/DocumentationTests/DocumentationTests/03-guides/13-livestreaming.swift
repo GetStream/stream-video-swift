@@ -109,18 +109,15 @@ private func content() {
 
             private func setMuted(_ muted: Bool) async {
                 isMuted = muted
-                if case .hls = state.playbackType {
-                    await playback.setMuted(muted)
-                } else {
-                    do {
-                        if muted {
-                            try await call.speaker.disableAudioOutput()
-                        } else {
-                            try await call.speaker.enableAudioOutput()
-                        }
-                    } catch {
-                        print("Could not change the audio output: \(error)")
+                // The HLS player follows the audio output of the call.
+                do {
+                    if muted {
+                        try await call.speaker.disableAudioOutput()
+                    } else {
+                        try await call.speaker.enableAudioOutput()
                     }
+                } catch {
+                    print("Could not change the audio output: \(error)")
                 }
             }
 
@@ -136,10 +133,10 @@ private func content() {
             /// Applies the controls to the mode that is active now.
             private func applyControls() async {
                 if case .hls = state.playbackType {
-                    // A new HLS player starts unmuted and playing.
-                    // acquire() makes sure that the player exists.
+                    // A new HLS player starts playing, and follows the
+                    // audio output of the call. acquire() makes sure that
+                    // the player exists.
                     guard await playback.acquire() != nil else { return }
-                    await playback.setMuted(isMuted)
                     if isPaused { await playback.setPaused(true) }
                 } else {
                     await playback.release()
@@ -181,7 +178,7 @@ private func content() {
 
     asyncContainer {
         let playback = HLSPlayback(call: call)
-        await playback.setMuted(true)
+        try await call.speaker.disableAudioOutput()
         await playback.setPaused(true)
     }
 

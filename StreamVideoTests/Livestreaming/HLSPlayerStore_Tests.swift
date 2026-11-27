@@ -242,6 +242,44 @@ final class HLSPlayerStore_Tests: StreamVideoTestCase, @unchecked Sendable {
         XCTAssertTrue(current === second.player)
     }
 
+    // MARK: - audio output
+
+    func test_acquire_audioOutputOff_startsAMutedPlayer() async throws {
+        let call = makeCall()
+        call.state.update(callSettings: .init(audioOutputOn: false))
+
+        _ = try await acquire(for: call, .hls(url))
+
+        XCTAssertEqual(made.players.first?.isMuted, true)
+    }
+
+    func test_acquire_audioOutputOn_startsAnUnmutedPlayer() async throws {
+        _ = try await acquire(for: makeCall(), .hls(url))
+
+        XCTAssertEqual(made.players.first?.isMuted, false)
+    }
+
+    func test_audioOutputChange_mutesAndUnmutesThePlayer() async throws {
+        let call = makeCall()
+        _ = try await acquire(for: call, .hls(url))
+
+        call.state.update(callSettings: .init(audioOutputOn: false))
+        XCTAssertEqual(made.players.first?.isMuted, true)
+
+        call.state.update(callSettings: .init(audioOutputOn: true))
+        XCTAssertEqual(made.players.first?.isMuted, false)
+    }
+
+    func test_audioOutputChange_afterThePlayerWasFreed_doesNotTouchIt() async throws {
+        let call = makeCall()
+        let acquired = try await acquire(for: call, .hls(url))
+        await subject.release(claimId: acquired.claimId, for: call)
+
+        call.state.update(callSettings: .init(audioOutputOn: false))
+
+        XCTAssertEqual(made.players.first?.isMuted, false)
+    }
+
     // MARK: - setPausedByUser
 
     func test_setPausedByUser_withAPlayer_returnsThePlayer() async throws {

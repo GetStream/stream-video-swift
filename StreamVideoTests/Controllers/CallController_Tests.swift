@@ -682,6 +682,18 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         }
     }
 
+    func test_joinCall_hlsGrant_speakerAudioOutputUpdatesTheCallState() async throws {
+        let (subject, _) = makeHLSJoinSubject(response: .dummyHLSGrant())
+        let call = Call.dummy(callController: subject)
+        _ = try await subject.joinCall(callSettings: nil, source: .inApp)
+
+        try await call.speaker.disableAudioOutput()
+        await fulfilmentInMainActor { !call.state.callSettings.audioOutputOn }
+
+        try await call.speaker.enableAudioOutput()
+        await fulfilmentInMainActor { call.state.callSettings.audioOutputOn }
+    }
+
     func test_joinCall_afterAFailedFirstAttempt_declaresPlaybackCapabilitiesAgain() async throws {
         let stack = mockWebRTCCoordinatorFactory.mockCoordinatorStack
         let authenticator = stack.webRTCAuthenticator

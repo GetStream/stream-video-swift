@@ -124,40 +124,6 @@ final class HLSPlayback_Tests: StreamVideoTestCase, @unchecked Sendable {
         XCTAssertNil(stored)
     }
 
-    // MARK: - setMuted
-
-    func test_setMuted_mutesAndUnmutesThePlayer() async {
-        call.state.playbackType = .hls(url)
-        _ = await subject.acquire()
-
-        await subject.setMuted(true)
-        XCTAssertTrue(made.players[0].isMuted)
-
-        await subject.setMuted(false)
-        XCTAssertFalse(made.players[0].isMuted)
-    }
-
-    func test_setMuted_withoutAPlayer_doesNothing() async {
-        await subject.setMuted(true)
-
-        XCTAssertTrue(made.players.isEmpty)
-    }
-
-    func test_setMuted_afterTheStoreFreedThePlayer_actsOnTheNewPlayerOnly() async throws {
-        call.state.playbackType = .hls(url)
-        _ = await subject.acquire()
-        call.state.playbackType = .webRTC
-        await fulfillment { [store, call] in await store?.player(for: call!) == nil }
-        call.state.playbackType = .hls(url)
-        let claim = await store.acquire(for: call, claimId: .init(), playbackType: .hls(url))
-        _ = try XCTUnwrap(claim)
-
-        await subject.setMuted(true)
-
-        XCTAssertFalse(made.players[0].isMuted)
-        XCTAssertTrue(made.players[1].isMuted)
-    }
-
     // MARK: - setPaused
 
     func test_setPaused_true_pausesThePlayer() async {
