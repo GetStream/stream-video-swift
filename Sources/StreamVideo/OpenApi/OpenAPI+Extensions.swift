@@ -355,13 +355,23 @@ extension PlaybackResponse {
         guard type == .hls else {
             throw ClientError("Unsupported playback type \(type.rawValue).")
         }
-        guard
-            let url = URL(string: playlistUrl),
-            url.scheme?.lowercased() == "https",
-            url.host?.isEmpty == false
-        else {
+        guard let url = playlistUrl.hlsPlaylistURL else {
             throw ClientError("Invalid HLS playlist URL.")
         }
+        return url
+    }
+}
+
+extension String {
+
+    /// The string as an HLS playlist URL, or `nil` unless it is an absolute
+    /// `https` URL.
+    var hlsPlaylistURL: URL? {
+        guard
+            let url = URL(string: self),
+            url.scheme?.lowercased() == "https",
+            url.host?.isEmpty == false
+        else { return nil }
         return url
     }
 }

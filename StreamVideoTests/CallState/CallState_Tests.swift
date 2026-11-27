@@ -287,6 +287,72 @@ final class CallState_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(subject.playbackType, .hls(url))
     }
 
+    // MARK: - HLS playlist
+
+    @MainActor
+    func test_updateState_hlsBroadcastingStarted_whilePlayingHLS_followsTheNewPlaylistURL() throws {
+        let subject = CallState(MockStreamVideo().callSession)
+        subject.update(from: JoinCallResponse.dummyHLSGrant())
+
+        subject.updateState(from: makeHLSStartedEvent("https://example.com/new/live.m3u8"))
+
+        XCTAssertEqual(
+            subject.playbackType,
+            .hls(try XCTUnwrap(URL(string: "https://example.com/new/live.m3u8")))
+        )
+    }
+
+    @MainActor
+    func test_updateState_hlsBroadcastingStarted_whilePlayingWebRTC_keepsWebRTC() {
+        let subject = CallState(MockStreamVideo().callSession)
+
+        subject.updateState(from: makeHLSStartedEvent("https://example.com/new/live.m3u8"))
+
+        XCTAssertEqual(subject.playbackType, .webRTC)
+    }
+
+    @MainActor
+    func test_updateState_hlsBroadcastingStarted_withAnInvalidURL_keepsThePlaybackType() throws {
+        let subject = CallState(MockStreamVideo().callSession)
+        subject.update(from: JoinCallResponse.dummyHLSGrant())
+        let before = subject.playbackType
+
+        subject.updateState(from: makeHLSStartedEvent("http://example.com/live.m3u8"))
+        subject.updateState(from: makeHLSStartedEvent(""))
+
+        XCTAssertEqual(subject.playbackType, before)
+    }
+
+    @MainActor
+    func test_update_fromCallResponse_withANewHLSPlaylistURL_whilePlayingHLS_followsIt() throws {
+        let subject = CallState(MockStreamVideo().callSession)
+        subject.update(from: JoinCallResponse.dummyHLSGrant())
+
+        subject.update(from: CallResponse.dummy(
+            egress: .init(
+                broadcasting: true,
+                hls: .init(playlistUrl: "https://example.com/new/live.m3u8", status: "running"),
+                rtmps: []
+            )
+        ))
+
+        XCTAssertEqual(
+            subject.playbackType,
+            .hls(try XCTUnwrap(URL(string: "https://example.com/new/live.m3u8")))
+        )
+    }
+
+    @MainActor
+    func test_update_fromCallResponse_withoutHLS_keepsThePlaybackType() {
+        let subject = CallState(MockStreamVideo().callSession)
+        subject.update(from: JoinCallResponse.dummyHLSGrant())
+        let before = subject.playbackType
+
+        subject.update(from: CallResponse.dummy(egress: .init(broadcasting: false, rtmps: [])))
+
+        XCTAssertEqual(subject.playbackType, before)
+    }
+
     func test_update_sfuCallEndedLiveEnded_setsBackstageAndLiveEndedAt() {
         let subject = CallState(.dummy())
         subject.settings = .dummy(backstage: .dummy(enabled: true))
@@ -685,6 +751,17 @@ final class CallState_Tests: XCTestCase, @unchecked Sendable {
             "Execution time was \(duration) with maximumDuration: \(maxDuration)",
             file: file,
             line: line
+        )
+    }
+
+    private func makeHLSStartedEvent(_ url: String) -> VideoEvent {
+        .typeCallHLSBroadcastingStartedEvent(
+            .init(
+                call: .dummy(),
+                callCid: "livestream:1",
+                createdAt: Date(),
+                hlsPlaylistUrl: url
+            )
         )
     }
 }

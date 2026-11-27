@@ -73,6 +73,7 @@ public class CallState: ObservableObject {
     @Published public internal(set) var capabilitiesByRole: [String: [String]] = [:]
     @Published public internal(set) var backstage: Bool = false
     @Published public internal(set) var broadcasting: Bool = false
+
     @Published public internal(set) var createdAt: Date = .distantPast {
         didSet { if !isInitialized { isInitialized = true }}
     }
@@ -187,8 +188,9 @@ public class CallState: ObservableObject {
             blockUser(id: event.user.id)
         case let .typeCallAcceptedEvent(event):
             update(from: event.call)
-        case .typeCallHLSBroadcastingStartedEvent:
+        case let .typeCallHLSBroadcastingStartedEvent(event):
             updateEgress(broadcasting: true)
+            followHLSPlaylist(event.hlsPlaylistUrl)
         case .typeCallHLSBroadcastingStoppedEvent:
             updateEgress(broadcasting: false)
         case let .typeCallCreatedEvent(event):
@@ -741,8 +743,20 @@ public class CallState: ObservableObject {
         )
     }
 
+    /// A new HLS broadcast has a new playlist URL. While the call plays HLS,
+    /// follow it, so the viewer plays the new stream.
+    private func followHLSPlaylist(_ playlistUrl: String?) {
+        guard
+            case let .hls(current) = playbackType,
+            let url = playlistUrl?.hlsPlaylistURL,
+            url != current
+        else { return }
+        playbackType = .hls(url)
+    }
+
     private func didUpdate(_ egress: EgressResponse?) {
         broadcasting = egress?.broadcasting ?? false
+        followHLSPlaylist(egress?.hls?.playlistUrl)
         let runningStatus = "running"
         rawRecordingStatus = egress?.rawRecording?.status == runningStatus
         individualRecordingStatus = egress?.individualRecording?.status == runningStatus
