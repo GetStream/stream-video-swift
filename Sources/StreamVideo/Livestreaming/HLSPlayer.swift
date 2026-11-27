@@ -61,6 +61,9 @@ public class HLSPlayer: AVPlayer, @unchecked Sendable {
     /// How many times the player loads the same stream again before it gives
     /// up. The count restarts when the stream is ready to play.
     private let maxReloads = 10
+
+    /// Called once when the player gives up loading the stream.
+    var onGiveUp: (() -> Void)?
     private var reloadCount = 0
 
     /// Loads a failed stream again. See ``observeFailures()``.
@@ -112,6 +115,7 @@ public class HLSPlayer: AVPlayer, @unchecked Sendable {
         observers = []
         reload?.cancel()
         reload = nil
+        onGiveUp = nil
         pause()
         replaceCurrentItem(with: nil)
     }
@@ -155,6 +159,7 @@ public class HLSPlayer: AVPlayer, @unchecked Sendable {
             if reloadCount == maxReloads {
                 reloadCount += 1
                 log.warning("HLS stream did not load after \(maxReloads) attempts. Giving up.")
+                onGiveUp?()
             }
             return
         }

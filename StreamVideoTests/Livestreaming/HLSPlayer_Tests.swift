@@ -379,6 +379,18 @@ final class HLSPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
         XCTAssertEqual(subject.reloadedURLs.count, 10)
     }
 
+    func test_itemFailedRepeatedly_tellsOnceThatItGaveUp() async {
+        let (subject, items) = makeFailingPlayer()
+        let gaveUp = Counter(0)
+        subject.onGiveUp = { gaveUp.increment() }
+
+        await failLatestItem(of: subject, items: items, times: 9)
+        XCTAssertEqual(gaveUp.value, 0)
+        await failLatestItem(of: subject, items: items, times: 4)
+
+        XCTAssertEqual(gaveUp.value, 1)
+    }
+
     func test_itemReadyToPlay_resetsTheReloadCount() async {
         let (subject, items) = makeFailingPlayer()
         await failLatestItem(of: subject, items: items, times: 10)
@@ -480,6 +492,14 @@ final class HLSPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
         item.liveOffset = offset
         return SeekRecordingHLSPlayer(playerItem: item)
     }
+}
+
+private final class Counter: @unchecked Sendable {
+    private let lock = NSLock()
+    private var count: Int
+    init(_ count: Int) { self.count = count }
+    var value: Int { lock.withLock { count } }
+    func increment() { lock.withLock { count += 1 } }
 }
 
 private final class ItemBox: @unchecked Sendable {
