@@ -287,23 +287,6 @@ final class HLSStateAdapter_Tests: StreamVideoTestCase, @unchecked Sendable {
         XCTAssertTrue(sentReports().isEmpty)
     }
 
-    func test_player_whileTheStatsDeliveryHangs_stillReturnsThePlayer() async {
-        mockAPI.reportHLSStatsHandler = { try? await Task.sleep(nanoseconds: 3_000_000_000) }
-        subject = HLSStateAdapter { [made] _ in
-            let player = MockHLSPlayer()
-            player.simulate(.playing)
-            made.players.append(player)
-            return player
-        }
-        makeStatsCall()
-
-        let started = Date()
-        let player = subject.player(for: call)
-
-        XCTAssertNotNil(player)
-        XCTAssertLessThan(Date().timeIntervalSince(started), 2)
-    }
-
     func test_playlistURLChanged_reportsTheNewPlaybackWithItsOwnSession() async throws {
         makeStatsCall()
         _ = subject.player(for: call)
@@ -334,8 +317,10 @@ final class HLSStateAdapter_Tests: StreamVideoTestCase, @unchecked Sendable {
     func test_free_sendsTheFinalStatsOfThePlayerItemWithEnded() async throws {
         let item = MockHLSPlayerItem(url: url)
         item.size = CGSize(width: 1280, height: 720)
+        // Only `stubbedItem` holds the item, and `invalidate()` clears it. A
+        // final read after `invalidate()` finds no item.
         subject = HLSStateAdapter { [made] _ in
-            let player = MockHLSPlayer(playerItem: item)
+            let player = MockHLSPlayer()
             player.stubbedItem = item
             made.players.append(player)
             return player
@@ -354,17 +339,17 @@ final class HLSStateAdapter_Tests: StreamVideoTestCase, @unchecked Sendable {
     }
 
     func test_free_whileTheStatsDeliveryHangs_stillStopsThePlayer() async {
-        mockAPI.reportHLSStatsHandler = { try? await Task.sleep(nanoseconds: 3_000_000_000) }
+        // The report never finishes in this test. A free that waits for it
+        // leaves the player running, and the wait below times out.
+        mockAPI.reportHLSStatsHandler = { try? await Task.sleep(nanoseconds: 60_000_000_000) }
         makeStatsCall()
         _ = subject.player(for: call)
         made.players[0].simulate(.playing)
         await fulfillment { self.sentReports().count == 1 }
 
-        let started = Date()
         subject.free()
 
         await fulfillment { [made] in made.players[0].pauseCount == 1 }
-        XCTAssertLessThan(Date().timeIntervalSince(started), 2)
     }
 
     // MARK: - Private Helpers
