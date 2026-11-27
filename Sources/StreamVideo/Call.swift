@@ -1738,6 +1738,26 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         proximity.remove(policy)
     }
 
+    // MARK: - HLS playback
+
+    /// The player of the call while it plays HLS.
+    ///
+    /// Use it to build your own HLS UI when ``CallState/playbackType`` is
+    /// ``PlaybackType/hls(_:)``. Ask again when the playback type changes.
+    /// Every caller gets the same player, and the SDK stops it when the call
+    /// leaves HLS or ends. Mute it with `speaker.disableAudioOutput()`. Pause
+    /// it with `pause()`, and resume it with `play()`.
+    ///
+    /// Only this method returns a player that the SDK manages. Do not create
+    /// an ``HLSPlayer`` yourself.
+    ///
+    /// - Returns: The player, or `nil` while the call does not play HLS, and
+    ///   after the call has left.
+    /// - Important: This API is in beta, like ``PlaybackType``.
+    public func hlsPlayer() async -> HLSPlayer? {
+        await callController.hlsPlayer()
+    }
+
     // MARK: - Client Capabilities
 
     /// Enables a set of client capabilities for the call.

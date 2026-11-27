@@ -18,6 +18,10 @@ extension RTCAudioStore {
             /// Matches only when the shared audio store is owned by `value`.
             case activeSessionIdentifier(String)
 
+            /// Matches only when the owner of the shared audio store is an HLS
+            /// session. See ``HLSAudioSession``.
+            case activeSessionIsHLS
+
             /// Matches only while the store has no audio device module.
             case audioDeviceModuleIsNil
 
@@ -25,6 +29,9 @@ extension RTCAudioStore {
                 switch self {
                 case let .activeSessionIdentifier(value):
                     return state.activeSessionIdentifier == value
+
+                case .activeSessionIsHLS:
+                    return state.activeSessionIdentifier.hasPrefix(HLSAudioSession.identifierPrefix)
 
                 case .audioDeviceModuleIsNil:
                     return state.audioDeviceModule == nil
@@ -35,6 +42,9 @@ extension RTCAudioStore {
                 switch self {
                 case let .activeSessionIdentifier(value):
                     return ".activeSessionIdentifier(\(value))"
+
+                case .activeSessionIsHLS:
+                    return ".activeSessionIsHLS"
 
                 case .audioDeviceModuleIsNil:
                     return ".audioDeviceModuleIsNil"

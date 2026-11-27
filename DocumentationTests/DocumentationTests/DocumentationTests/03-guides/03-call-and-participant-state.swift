@@ -35,6 +35,18 @@ private func content() {
     }
 
     container {
+        if case .hls(let url) = call.state.playbackType {
+            print("Playing the call over HLS from \(url)")
+        }
+
+        _ = call.state.$playbackType.sink { playbackType in
+            if case .hls = playbackType {
+                // Show an HLS renderer instead of participant video.
+            }
+        }
+    }
+
+    container {
         @MainActor
         class CallObserver {
             private var cancellables = Set<AnyCancellable>()

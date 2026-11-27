@@ -86,21 +86,31 @@ final class CallAudioSession: @unchecked Sendable {
         ///   shared audio store is unowned and has no audio device module.
         ///   A call sets both together, so the module check is a safeguard:
         ///   a running call's configuration must never be overridden.
-        audioStore.dispatch(
-            .conditioned(
-                .audioDeviceModuleIsNil,
-                action: .conditioned(
-                    .activeSessionIdentifier(""),
-                    action: .avAudioSession(
-                        .setCategoryAndModeAndCategoryOptions(
-                            .playAndRecord,
-                            mode: .voiceChat,
-                            categoryOptions: [.allowBluetoothHFP, .allowBluetoothA2DP]
-                        )
-                    )
-                )
+        ///   A call object that exists while an HLS session plays, for
+        ///   example a ringing call, must not change the HLS audio. See
+        ///   ``prepareToTakeOver()``.
+        audioStore.dispatch(bootstrap(owner: .activeSessionIdentifier("")))
+    }
+
+    /// Applies the call configuration when an HLS session owns the store.
+    ///
+    /// Call it right before this session takes the store, while the call
+    /// joins. CallKit activates the audio session with the category it finds,
+    /// and the HLS playback leaves the category on `playback`. The HLS
+    /// session cannot restore the call configuration, because the call takes
+    /// the store before the HLS session leaves. A session that has an audio
+    /// device module is a running call and keeps its configuration.
+    func prepareToTakeOver() async {
+        do {
+            try await audioStore
+                .dispatch(bootstrap(owner: .activeSessionIsHLS))
+                .result()
+        } catch {
+            log.error(
+                "Failed to prepare the audio session for the call: \(error).",
+                subsystems: .audioSession
             )
-        )
+        }
     }
 
     func activate(
@@ -241,6 +251,26 @@ final class CallAudioSession: @unchecked Sendable {
     }
 
     // MARK: - Private Helpers
+
+    /// The call configuration, applied while the store has no audio device
+    /// module and `owner` holds it.
+    private func bootstrap(
+        owner: RTCAudioStore.Namespace.Action.Condition
+    ) -> RTCAudioStore.StoreAction {
+        .conditioned(
+            .audioDeviceModuleIsNil,
+            action: .conditioned(
+                owner,
+                action: .avAudioSession(
+                    .setCategoryAndModeAndCategoryOptions(
+                        .playAndRecord,
+                        mode: .voiceChat,
+                        categoryOptions: [.allowBluetoothHFP, .allowBluetoothA2DP]
+                    )
+                )
+            )
+        )
+    }
 
     private func applyAudioBitrateProfile(
         _ profile: AudioBitrateProfile,

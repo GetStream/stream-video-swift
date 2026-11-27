@@ -73,6 +73,10 @@ public class CallState: ObservableObject {
     @Published public internal(set) var capabilitiesByRole: [String: [String]] = [:]
     @Published public internal(set) var backstage: Bool = false
     @Published public internal(set) var broadcasting: Bool = false
+
+    /// Whether the HLS broadcast of the call stopped since the join.
+    @Published internal private(set) var hlsBroadcastingStopped = false
+
     @Published public internal(set) var createdAt: Date = .distantPast {
         didSet { if !isInitialized { isInitialized = true }}
     }
@@ -105,6 +109,10 @@ public class CallState: ObservableObject {
     ///
     /// It is ``PlaybackType/webRTC`` until the join response grants HLS. It
     /// returns to ``PlaybackType/webRTC`` when the call ends.
+    ///
+    /// Observe it to pick a renderer: HLS viewers have no participants or
+    /// tracks. Like the other published properties, it changes on the main
+    /// actor.
     @Published public internal(set) var playbackType: PlaybackType = .webRTC
 
     /// Indicates whether the current user is speaking while their microphone is muted.
@@ -183,10 +191,13 @@ public class CallState: ObservableObject {
             blockUser(id: event.user.id)
         case let .typeCallAcceptedEvent(event):
             update(from: event.call)
-        case .typeCallHLSBroadcastingStartedEvent:
+        case let .typeCallHLSBroadcastingStartedEvent(event):
             updateEgress(broadcasting: true)
+            hlsBroadcastingStopped = false
+            followHLSPlaylist(event.hlsPlaylistUrl)
         case .typeCallHLSBroadcastingStoppedEvent:
             updateEgress(broadcasting: false)
+            hlsBroadcastingStopped = true
         case let .typeCallCreatedEvent(event):
             // A delayed creation snapshot must not clear the hydrated session.
             if session != nil,
@@ -425,6 +436,7 @@ public class CallState: ObservableObject {
         // The authenticator rejects invalid grants before this point.
         playbackType = (try? response.playback?.hlsPlaylistURL())
             .map(PlaybackType.hls) ?? .webRTC
+        hlsBroadcastingStopped = false
     }
     
     internal func update(
@@ -737,8 +749,23 @@ public class CallState: ObservableObject {
         )
     }
 
+    /// A new HLS broadcast has a new playlist URL. While the call plays HLS,
+    /// follow it, so the viewer plays the new stream.
+    private func followHLSPlaylist(_ playlistUrl: String?) {
+        guard
+            case let .hls(current) = playbackType,
+            let url = playlistUrl?.hlsPlaylistURL,
+            url != current
+        else { return }
+        // A new playlist means a running broadcast. Clear the stop before the
+        // new URL is published, so a request for the player succeeds.
+        hlsBroadcastingStopped = false
+        playbackType = .hls(url)
+    }
+
     private func didUpdate(_ egress: EgressResponse?) {
         broadcasting = egress?.broadcasting ?? false
+        followHLSPlaylist(egress?.hls?.playlistUrl)
         let runningStatus = "running"
         rawRecordingStatus = egress?.rawRecording?.status == runningStatus
         individualRecordingStatus = egress?.individualRecording?.status == runningStatus

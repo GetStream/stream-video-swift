@@ -15,6 +15,7 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
         case trace
         case changeAudioState
         case changeVideoState
+        case changeSoundState
         case changeCameraMode
         case updateOwnCapabilities
         case enableClientCapabilities
@@ -45,6 +46,8 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
         case changeAudioState(Bool)
 
         case changeVideoState(Bool)
+
+        case changeSoundState(Bool)
 
         case changeCameraMode(CameraPosition)
 
@@ -81,6 +84,8 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
                 return value
             case let .changeVideoState(value):
                 return value
+            case let .changeSoundState(value):
+                return value
             case let .changeCameraMode(value):
                 return value
             case let .updateOwnCapabilities(value):
@@ -103,7 +108,10 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
     var setAudioBitrateProfileHandler: (@Sendable (AudioBitrateProfile) async throws -> Void)?
     var sessionIDHandler: (@Sendable () async -> Void)?
 
-    convenience init(initialCallSettings: CallSettings = .default) {
+    convenience init(
+        initialCallSettings: CallSettings = .default,
+        hlsStateAdapter: HLSStateAdapter = .init()
+    ) {
         self.init(
             defaultAPI: MockDefaultAPIEndpoints(),
             user: .dummy(),
@@ -112,7 +120,8 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
             apiKey: .unique,
             videoConfig: .dummy(),
             initialCallSettings: initialCallSettings,
-            cachedLocation: nil
+            cachedLocation: nil,
+            hlsStateAdapter: hlsStateAdapter
         )
     }
 
@@ -206,6 +215,11 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
     override func changeVideoState(isEnabled: Bool) async throws {
         stubbedFunctionInput[.changeVideoState]?
             .append(.changeVideoState(isEnabled))
+    }
+
+    override func changeSoundState(isEnabled: Bool) async throws {
+        stubbedFunctionInput[.changeSoundState]?
+            .append(.changeSoundState(isEnabled))
     }
 
     override func changeAudioState(

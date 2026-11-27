@@ -12,7 +12,7 @@ import SwiftUI
 @MainActor
 private func content() {
     container {
-        struct HLSPlayerView: View {
+        struct HLSStreamView: View {
             let hlsURL: URL
 
             var body: some View {
@@ -24,6 +24,118 @@ private func content() {
     asyncContainer {
         let response = try await call.startHLS()
         let hlsPlaylistURL = response.playlistUrl
+    }
+
+    asyncContainer {
+        try await call.join()
+
+        if case .hls = call.state.playbackType {
+            print("This viewer plays HLS")
+        }
+    }
+
+    viewContainer {
+        HLSVideoRendererView(call: call)
+    }
+
+    // Before: a viewer that shows the hosts over WebRTC.
+    container {
+        struct LivestreamView: View {
+            let call: Call
+            @ObservedObject var state: CallState
+
+            var body: some View {
+                GeometryReader { reader in
+                    ParticipantsGridLayout(
+                        call: call,
+                        participants: state.participants,
+                        availableFrame: reader.frame(in: .local),
+                        onChangeTrackVisibility: { participant, isVisible in
+                            Task {
+                                await call.changeTrackVisibility(for: participant, isVisible: isVisible)
+                            }
+                        }
+                    )
+                }
+            }
+        }
+    }
+
+    // After: the same viewer with HLS. Lines that changed start with `HLS:`.
+    container {
+        struct LivestreamView: View {
+            let call: Call
+            @ObservedObject var state: CallState
+
+            var body: some View {
+                // HLS: switch on the playback type.
+                switch state.playbackType {
+                // HLS: show the HLS stream.
+                case .hls:
+                    // HLS: one renderer shows all hosts.
+                    HLSVideoRendererView(call: call)
+                // HLS: keep the WebRTC view for everything else.
+                default:
+                    GeometryReader { reader in
+                        ParticipantsGridLayout(
+                            call: call,
+                            participants: state.participants,
+                            availableFrame: reader.frame(in: .local),
+                            onChangeTrackVisibility: { participant, isVisible in
+                                Task {
+                                    await call.changeTrackVisibility(for: participant, isVisible: isVisible)
+                                }
+                            }
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    container {
+        struct LivestreamView: View {
+            let call: Call
+            @ObservedObject var state: CallState
+
+            var body: some View {
+                switch state.playbackType {
+                case .hls:
+                    HLSVideoRendererView(call: call)
+                default:
+                    WebRTCLivestreamView(call: call)
+                }
+            }
+        }
+    }
+
+    container {
+        struct CustomHLSView: View {
+            let call: Call
+            @ObservedObject var state: CallState
+            @State private var player: HLSPlayer?
+
+            var body: some View {
+                VideoPlayer(player: player)
+                    // Ask again when the stream changes, or when the host
+                    // returns from backstage.
+                    .task(id: "\(state.playbackType) \(state.backstage)") {
+                        player = await call.hlsPlayer()
+                    }
+            }
+        }
+    }
+
+    asyncContainer {
+        try await call.speaker.disableAudioOutput()
+    }
+
+    asyncContainer {
+        let player = await call.hlsPlayer()
+        player?.pause()
+        player?.play()
+        player?.playFromLiveEdge()
+        player?.resumeFromLive = false
     }
 
     container {
@@ -157,5 +269,14 @@ private func content() {
                 state.members.filter { $0.role == "host" }.map(\.id)
             }
         }
+    }
+}
+
+/// The WebRTC view of an existing app. The HLS examples use it as a stand-in.
+private struct WebRTCLivestreamView: View {
+    let call: Call
+
+    var body: some View {
+        EmptyView()
     }
 }

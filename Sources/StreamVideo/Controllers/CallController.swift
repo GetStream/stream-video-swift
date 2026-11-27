@@ -81,6 +81,9 @@ class CallController: @unchecked Sendable {
     private var webRTCParticipantsObserver: AnyCancellable?
     private var participants: CollectionDelayedUpdateObserver<[String: CallParticipant]>?
 
+    /// Owns the HLS player of the call.
+    let hlsStateAdapter: HLSStateAdapter
+
     private let disposableBag = DisposableBag()
     private let callSettingsProcessingQueue = OperationQueue(maxConcurrentOperationCount: 1)
 
@@ -93,7 +96,8 @@ class CallController: @unchecked Sendable {
         videoConfig: VideoConfig,
         initialCallSettings: CallSettings,
         cachedLocation: String?,
-        webRTCCoordinatorFactory: WebRTCCoordinatorProviding = WebRTCCoordinatorFactory()
+        webRTCCoordinatorFactory: WebRTCCoordinatorProviding = WebRTCCoordinatorFactory(),
+        hlsStateAdapter: HLSStateAdapter = .init()
     ) {
         self.user = user
         self.callId = callId
@@ -104,6 +108,7 @@ class CallController: @unchecked Sendable {
         self.defaultAPI = defaultAPI
         self.cachedLocation = cachedLocation
         self.webRTCCoordinatorFactory = webRTCCoordinatorFactory
+        self.hlsStateAdapter = hlsStateAdapter
 
         _ = webRTCCoordinator
 
@@ -517,6 +522,12 @@ class CallController: @unchecked Sendable {
         try await webRTCCoordinator.zoom(by: factor)
     }
 
+    /// The shared HLS player of the call. `nil` unless the call plays HLS.
+    func hlsPlayer() async -> HLSPlayer? {
+        guard let call else { return nil }
+        return await hlsStateAdapter.player(for: call)
+    }
+
     func leave(reason: String?, initiator: Call.LeaveInitiator = .unknown) {
         guard call != nil else { return }
         resetPlaybackType(of: call)
@@ -811,13 +822,15 @@ class CallController: @unchecked Sendable {
         return try await LocationFetcher.getLocation()
     }
 
-    /// Returns the call state to WebRTC once the call that played HLS ends.
+    /// Returns the call state to WebRTC once the call that played HLS ends,
+    /// and frees the HLS player.
     private func resetPlaybackType(of call: Call?) {
         guard let call else { return }
-        Task(disposableBag: disposableBag) { @MainActor in
+        Task(disposableBag: disposableBag) { @MainActor [hlsStateAdapter] in
             if call.state.playbackType != .webRTC {
                 call.state.playbackType = .webRTC
             }
+            hlsStateAdapter.free()
         }
     }
 
