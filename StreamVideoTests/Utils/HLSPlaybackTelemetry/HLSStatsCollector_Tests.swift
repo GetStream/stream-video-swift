@@ -231,6 +231,43 @@ final class HLSStatsCollector_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertNil(result.errorCode)
     }
 
+    func test_itemBecomesReady_afterAnError_clearsTheError() async throws {
+        player.stubbedItem = item
+        await subject.startObservingPlayer()
+        item.fail(with: NSError(domain: "AVFoundationErrorDomain", code: -11800))
+
+        item.simulate(status: .readyToPlay)
+        let result = try await stopped()
+
+        XCTAssertNil(result.errorCode)
+        XCTAssertEqual(result.events.map(\.type), ["error"])
+    }
+
+    func test_playerPlays_afterAnError_clearsTheError() async throws {
+        player.stubbedItem = item
+        await subject.startObservingPlayer()
+        item.fail(with: NSError(domain: "AVFoundationErrorDomain", code: -11800))
+
+        player.simulate(.playing)
+        let result = try await stopped()
+
+        XCTAssertNil(result.errorCode)
+    }
+
+    func test_sameErrorAgain_afterRecovering_isRecordedAgain() async throws {
+        player.stubbedItem = item
+        await subject.startObservingPlayer()
+        let error = NSError(domain: "AVFoundationErrorDomain", code: -11800)
+        item.fail(with: error)
+        item.simulate(status: .readyToPlay)
+
+        item.fail(with: error)
+        let result = try await stopped()
+
+        XCTAssertEqual(result.errorCode, "AVFoundationErrorDomain -11800")
+        XCTAssertEqual(result.events.map(\.type), ["error", "error"])
+    }
+
     func test_sameErrorTwice_isRecordedOnce() async throws {
         player.stubbedItem = item
         await subject.startObservingPlayer()

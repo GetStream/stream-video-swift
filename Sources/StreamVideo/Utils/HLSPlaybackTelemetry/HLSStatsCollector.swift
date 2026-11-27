@@ -95,7 +95,8 @@ final class HLSStatsCollector: @unchecked Sendable {
     }
 
     /// Stops observation, closes an open stall, and returns the final
-    /// snapshot with the pending events and the last playback error code.
+    /// snapshot with the pending events and the playback error code that no
+    /// later recovery cleared.
     ///
     /// The final read of the player is done when this returns, so the caller
     /// can clear the player after it. A second call returns nil.
@@ -136,7 +137,14 @@ final class HLSStatsCollector: @unchecked Sendable {
         // player.
         observations.append(
             player.observe(\.currentItem?.status, options: [.initial, .new]) { [weak self] player, _ in
-                self?.enqueueFailure(player.currentItem?.error)
+                let item = player.currentItem
+                // A ready item means the stream recovered from an earlier
+                // error, so a later stop must not report it.
+                if item?.status == .readyToPlay {
+                    self?.enqueue { collector, _ in collector.lastErrorCode = nil }
+                } else {
+                    self?.enqueueFailure(item?.error)
+                }
             }
         )
         observations.append(
@@ -188,6 +196,8 @@ final class HLSStatsCollector: @unchecked Sendable {
         defer { lastStatus = status }
         switch status {
         case .playing:
+            // Playing means the stream recovered from an earlier error.
+            lastErrorCode = nil
             endStallIfOneIsOpen(at: date)
             guard !sawFirstPlay else { return }
             sawFirstPlay = true
