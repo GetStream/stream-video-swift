@@ -352,6 +352,30 @@ final class HLSStateAdapter_Tests: StreamVideoTestCase, @unchecked Sendable {
         await fulfillment { [made] in made.players[0].pauseCount == 1 }
     }
 
+    func test_backstageBecomesTrue_sendsEnded() async {
+        makeStatsCall()
+        _ = subject.player(for: call)
+        made.players[0].simulate(.playing)
+        await fulfillment { self.sentReports().count == 1 }
+
+        call.state.backstage = true
+
+        await fulfillment { self.sentReports().last?.type == .ended }
+    }
+
+    func test_hlsBroadcastingStopped_sendsEnded() async {
+        makeStatsCall()
+        _ = subject.player(for: call)
+        made.players[0].simulate(.playing)
+        await fulfillment { self.sentReports().count == 1 }
+
+        call.state.updateState(from: .typeCallHLSBroadcastingStoppedEvent(
+            .init(callCid: "livestream:1", createdAt: Date())
+        ))
+
+        await fulfillment { self.sentReports().last?.type == .ended }
+    }
+
     func test_free_withStats_mutesThePlayerAtOnce() {
         makeStatsCall()
         _ = subject.player(for: call)
