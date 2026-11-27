@@ -18,6 +18,9 @@ final class MockHLSPlayer: HLSPlayer, @unchecked Sendable {
 
     /// What `rate` reports. A player without an item stays at 0.
     nonisolated(unsafe) var stubbedRate: Float = 0
+    /// What `timeControlStatus` reports. Change it with ``simulate``.
+    private nonisolated(unsafe) var stubbedStatus: AVPlayer.TimeControlStatus = .paused
+    private nonisolated(unsafe) var stubbedReason: AVPlayer.WaitingReason?
     /// The item `currentItem` reports, until the player clears its item.
     nonisolated(unsafe) var stubbedItem: AVPlayerItem?
 
@@ -29,6 +32,12 @@ final class MockHLSPlayer: HLSPlayer, @unchecked Sendable {
             stubbedRate = newValue
             didChangeValue(forKey: "rate")
         }
+    }
+
+    override nonisolated var timeControlStatus: AVPlayer.TimeControlStatus { stubbedStatus }
+
+    override nonisolated var reasonForWaitingToPlay: AVPlayer.WaitingReason? {
+        stubbedReason
     }
 
     /// How often `currentItem` was read.
@@ -49,5 +58,16 @@ final class MockHLSPlayer: HLSPlayer, @unchecked Sendable {
         willChangeValue(forKey: "currentItem")
         stubbedItem = item
         didChangeValue(forKey: "currentItem")
+    }
+
+    /// Changes `timeControlStatus` the way the system does, so observers fire.
+    nonisolated func simulate(
+        _ status: AVPlayer.TimeControlStatus,
+        reason: AVPlayer.WaitingReason? = nil
+    ) {
+        willChangeValue(forKey: "timeControlStatus")
+        stubbedStatus = status
+        stubbedReason = reason
+        didChangeValue(forKey: "timeControlStatus")
     }
 }

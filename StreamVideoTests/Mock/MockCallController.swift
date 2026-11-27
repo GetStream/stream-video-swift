@@ -109,11 +109,12 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
     var sessionIDHandler: (@Sendable () async -> Void)?
 
     convenience init(
+        defaultAPI: DefaultAPIEndpoints = MockDefaultAPIEndpoints(),
         initialCallSettings: CallSettings = .default,
         hlsStateAdapter: HLSStateAdapter = .init()
     ) {
         self.init(
-            defaultAPI: MockDefaultAPIEndpoints(),
+            defaultAPI: defaultAPI,
             user: .dummy(),
             callId: .unique,
             callType: .unique,

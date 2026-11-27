@@ -271,6 +271,83 @@ final class CallState_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(subject.playbackType, .webRTC)
     }
 
+    // MARK: - hlsStats
+
+    func test_update_fromJoinCallResponseWithStatsToken_storesTheTokenAndTheDefaultInterval() {
+        let subject = CallState(MockStreamVideo().callSession)
+
+        subject.update(
+            from: JoinCallResponse.dummyHLSGrant(
+                playback: .dummy(statsToken: "token-1")
+            )
+        )
+
+        XCTAssertEqual(subject.hlsStats?.token, "token-1")
+        XCTAssertEqual(subject.hlsStats?.interval, 10)
+    }
+
+    func test_update_withHLSInterval_usesItOverTheWebRTCInterval() {
+        XCTAssertEqual(hlsStatsInterval(hlsMs: 2500, webRTCMs: 7000), 2.5)
+    }
+
+    func test_update_withoutHLSInterval_usesTheWebRTCInterval() {
+        XCTAssertEqual(hlsStatsInterval(hlsMs: nil, webRTCMs: 7000), 7)
+    }
+
+    func test_update_withNonPositiveIntervals_fallsBackToTenSeconds() {
+        XCTAssertEqual(hlsStatsInterval(hlsMs: -1, webRTCMs: -5000), 10)
+    }
+
+    func test_update_withLessThanASecond_usesOneSecond() {
+        XCTAssertEqual(hlsStatsInterval(hlsMs: 500, webRTCMs: 0), 1)
+    }
+
+    func test_update_withMoreThanAMinute_usesAMinute() {
+        XCTAssertEqual(hlsStatsInterval(hlsMs: 3_600_000, webRTCMs: 0), 60)
+    }
+
+    func test_update_withHLSStatsDisabled_hasNoHLSStats() {
+        let subject = CallState(MockStreamVideo().callSession)
+
+        subject.update(
+            from: JoinCallResponse.dummy(
+                playback: .dummy(statsToken: "token-1"),
+                statsOptions: .init(
+                    enableHlsStats: false,
+                    enableRtcStats: false,
+                    reportingIntervalMs: 0
+                )
+            )
+        )
+
+        XCTAssertNil(subject.hlsStats)
+    }
+
+    func test_update_withBlankStatsToken_hasNoHLSStats() {
+        let subject = CallState(MockStreamVideo().callSession)
+
+        subject.update(
+            from: JoinCallResponse.dummyHLSGrant(
+                playback: .dummy(statsToken: "  ")
+            )
+        )
+
+        XCTAssertNil(subject.hlsStats)
+    }
+
+    func test_update_fromJoinCallResponseWithoutPlayback_clearsTheHLSStats() {
+        let subject = CallState(MockStreamVideo().callSession)
+        subject.update(
+            from: JoinCallResponse.dummyHLSGrant(
+                playback: .dummy(statsToken: "token-1")
+            )
+        )
+
+        subject.update(from: JoinCallResponse.dummy())
+
+        XCTAssertNil(subject.hlsStats)
+    }
+
     func test_update_fromGetOrCreateCallResponse_keepsPlaybackType() throws {
         let subject = CallState(MockStreamVideo().callSession)
         subject.update(from: JoinCallResponse.dummyHLSGrant())
@@ -817,5 +894,20 @@ final class CallState_Tests: XCTestCase, @unchecked Sendable {
                 hlsPlaylistUrl: url
             )
         )
+    }
+
+    private func hlsStatsInterval(hlsMs: Int?, webRTCMs: Int) -> TimeInterval? {
+        let subject = CallState(MockStreamVideo().callSession)
+        subject.update(
+            from: JoinCallResponse.dummy(
+                playback: .dummy(statsToken: "token-1"),
+                statsOptions: .init(
+                    enableRtcStats: false,
+                    reportingHlsIntervalMs: hlsMs,
+                    reportingIntervalMs: webRTCMs
+                )
+            )
+        )
+        return subject.hlsStats?.interval
     }
 }

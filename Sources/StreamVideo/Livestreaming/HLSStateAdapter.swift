@@ -10,8 +10,9 @@ import Foundation
 ///
 /// The call controller owns one adapter. Every renderer and control of the
 /// call reaches the same player through it. The first request while the call
-/// plays HLS creates the player. The adapter frees it when the call leaves
-/// HLS, and when the controller tears the call down.
+/// plays HLS creates the player and starts its stats reporting. The adapter
+/// frees it when the call leaves HLS, and when the controller tears the call
+/// down. Freeing sends the final stats.
 ///
 /// Only the members that touch the player or the call state run on the main
 /// actor, because `AVPlayer` and `CallState` live there. So a request never
@@ -20,6 +21,7 @@ final class HLSStateAdapter: Sendable {
 
     private let makePlayer: @MainActor (URL) -> HLSPlayer
     @MainActor private var player: HLSPlayer?
+    @MainActor private var stats: HLSStatsAdapter?
     @MainActor private var url: URL?
     @MainActor private var observers: [AnyCancellable] = []
 
@@ -47,11 +49,27 @@ final class HLSStateAdapter: Sendable {
     }
 
     /// Stops and forgets the player.
+    ///
+    /// With stats reporting, the player stops after the final read of its
+    /// item, a moment later. That read does not wait for the network.
     @MainActor
     func free() {
-        player?.invalidate()
-        player = nil
+        let player = player
+        let stats = stats
+        self.player = nil
+        self.stats = nil
         url = nil
+        guard let stats else {
+            player?.invalidate()
+            return
+        }
+        // The player keeps its item while the final stats are read. Mute it
+        // so a new player does not play over it.
+        player?.isMuted = true
+        Task {
+            await stats.stopReporting()
+            player?.invalidate()
+        }
     }
 
     // MARK: - Private Helpers
@@ -65,9 +83,20 @@ final class HLSStateAdapter: Sendable {
         player.startObserving(
             audioOutputOn: call.state.$callSettings.map(\.audioOutputOn).eraseToAnyPublisher()
         )
+        // Reporting reads the state of the player when it starts, so it
+        // can start after the player plays. Creation does not wait for it.
+        let stats = call.callController.makeHLSStatsAdapter(player: player, call: call)
+        if let stats {
+            Task { await stats.startReporting() }
+            // A player that gives up ends the stats with an error.
+            player.onGiveUp = { [weak stats] in
+                Task { await stats?.stopReporting(gaveUp: true) }
+            }
+        }
         // A new player has rate 0. Nothing else starts it.
         player.play()
         self.player = player
+        self.stats = stats
         self.url = url
         return player
     }

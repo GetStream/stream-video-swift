@@ -739,7 +739,8 @@ class CallController: @unchecked Sendable {
     /// - Throws: An error if location fetch or join request fails.
     ///
     /// - Note: `JoinCallRequest.e2ee` is `true` when an E2EE manager is set
-    ///   on ``WebRTCStateAdapter``.
+    ///   on ``WebRTCStateAdapter``. `JoinCallRequest.unifiedSessionId` is the
+    ///   id of that adapter. It stays the same across rejoins and migrations.
     private func authenticateCall(
         create: Bool,
         ring: Bool,
@@ -776,7 +777,8 @@ class CallController: @unchecked Sendable {
             migratingFromList: migratingFromList?.isEmpty == false ? migratingFromList : nil,
             notify: notify,
             playbackCapabilities: declaresPlaybackCapabilities ? ["hls"] : nil,
-            ring: ring
+            ring: ring,
+            unifiedSessionId: webRTCCoordinator.stateAdapter.unifiedSessionId
         )
 
         return try await defaultAPI.joinCall(
@@ -820,6 +822,27 @@ class CallController: @unchecked Sendable {
             return cachedLocation
         }
         return try await LocationFetcher.getLocation()
+    }
+
+    /// Builds the adapter that reports HLS playback of `player` for `call`.
+    ///
+    /// Returns nil when the join response disabled HLS stats or sent no usable
+    /// `stats_token`, or when `call` has no call session id.
+    @MainActor
+    func makeHLSStatsAdapter(player: AVPlayer, call: Call) -> HLSStatsAdapter? {
+        let callSessionId = call.state.session?.id ?? ""
+        let stats = call.state.hlsStats
+        guard let stats, !callSessionId.isEmpty else { return nil }
+        return HLSStatsAdapter(
+            player: player,
+            api: defaultAPI,
+            callType: call.callType,
+            callId: call.callId,
+            callSessionId: callSessionId,
+            unifiedSessionId: webRTCCoordinator.stateAdapter.unifiedSessionId,
+            statsToken: stats.token,
+            interval: stats.interval
+        )
     }
 
     /// Returns the call state to WebRTC once the call that played HLS ends,
