@@ -174,6 +174,29 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
         XCTAssertNil(adapter.call)
     }
 
+    @MainActor
+    func test_livestreamPlayer_pictureInPictureDisabled_disappears_keepsTheSourceViewOfTheApp() async {
+        let adapter = injectPictureInPictureAdapter()
+        await fulfilmentInMainActor { adapter.store != nil }
+        let appSourceView = UIView()
+        adapter.sourceView = appSourceView
+        await fulfilmentInMainActor { adapter.store?.state.sourceView === appSourceView }
+        let window = host(
+            LivestreamPlayer(
+                call: MockCall(),
+                joinPolicy: .none,
+                isPictureInPictureEnabled: false
+            )
+        )
+        defer { window.isHidden = true }
+        await wait(for: 0.3)
+
+        window.rootViewController = nil
+        await wait(for: 0.3)
+
+        XCTAssertTrue(adapter.store?.state.sourceView === appSourceView)
+    }
+
     // MARK: - HLS playback
 
     @MainActor

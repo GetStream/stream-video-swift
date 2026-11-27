@@ -411,14 +411,23 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
     
     @ViewBuilder
     private var videoRenderer: some View {
-        Group {
-            if case .hls = state.playbackType {
-                hlsVideoRenderer
-            } else {
-                webRTCVideoRenderer
-            }
+        // The modifier stays off the view when Picture in Picture is off. A
+        // disabled one still clears the source view of the app when it goes
+        // away.
+        if isPictureInPictureEnabled {
+            video.enablePictureInPicture(true)
+        } else {
+            video
         }
-        .enablePictureInPicture(isPictureInPictureEnabled)
+    }
+
+    @ViewBuilder
+    private var video: some View {
+        if case .hls = state.playbackType {
+            hlsVideoRenderer
+        } else {
+            webRTCVideoRenderer
+        }
     }
 
     @ViewBuilder
