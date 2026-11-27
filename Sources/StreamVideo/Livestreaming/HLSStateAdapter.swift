@@ -63,6 +63,9 @@ final class HLSStateAdapter: Sendable {
             player?.invalidate()
             return
         }
+        // The player keeps its item while the final stats are read. Mute it
+        // so a new player does not play over it.
+        player?.isMuted = true
         Task {
             await stats.stopReporting()
             player?.invalidate()

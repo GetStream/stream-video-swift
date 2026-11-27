@@ -352,6 +352,17 @@ final class HLSStateAdapter_Tests: StreamVideoTestCase, @unchecked Sendable {
         await fulfillment { [made] in made.players[0].pauseCount == 1 }
     }
 
+    func test_free_withStats_mutesThePlayerAtOnce() {
+        makeStatsCall()
+        _ = subject.player(for: call)
+
+        subject.free()
+
+        // The final stats are read before the player stops. The old player
+        // must not play audio over a new one meanwhile.
+        XCTAssertEqual(made.players.first?.isMuted, true)
+    }
+
     // MARK: - Private Helpers
 
     private func makeHLSStoppedEvent() -> VideoEvent {
