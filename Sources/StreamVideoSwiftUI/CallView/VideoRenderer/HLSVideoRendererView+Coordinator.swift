@@ -98,15 +98,14 @@ extension HLSVideoRendererView {
         private func registerPlayerLayer(callId: String) {
             guard let layer = view?.playerLayer else { return }
             registeredLayer = layer
-            pictureInPictureAdapter.store?
-                .dispatch(.setPlayerLayer(layer, cId: callId))
+            pictureInPictureAdapter.setPlayerLayer(layer, cId: callId)
         }
 
         /// Clears the layer, unless Picture in Picture shows another one now.
         private func unregisterPlayerLayer() {
             guard let layer = registeredLayer else { return }
             registeredLayer = nil
-            pictureInPictureAdapter.store?.dispatch(.removePlayerLayer(layer))
+            pictureInPictureAdapter.removePlayerLayer(layer)
         }
 
         private func clear() {

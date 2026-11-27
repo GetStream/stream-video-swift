@@ -2,6 +2,7 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import AVFoundation
 import Combine
 import Foundation
 import StreamVideo
@@ -25,6 +26,10 @@ public final class StreamPictureInPictureAdapter: @unchecked Sendable {
     public var sourceView: UIView? { willSet { store?.dispatch(.setSourceView(newValue)) } }
 
     private(set) var store: PictureInPictureStore?
+
+    /// The HLS layer set before the store existed. The store gets it when it
+    /// is created, like the call.
+    @MainActor private var pendingPlayerLayer: (layer: AVPlayerLayer, cId: String)?
 
     private let disposableBag = DisposableBag()
     private var pictureInPictureController: Any?
@@ -50,6 +55,10 @@ public final class StreamPictureInPictureAdapter: @unchecked Sendable {
                 store.dispatch(.setCall(call))
             }
 
+            if let pendingPlayerLayer {
+                store.dispatch(.setPlayerLayer(pendingPlayerLayer.layer, cId: pendingPlayerLayer.cId))
+            }
+            pendingPlayerLayer = nil
             self.store = store
             self.pictureInPictureController = PictureInPictureController(store: store)
 
@@ -88,6 +97,24 @@ public final class StreamPictureInPictureAdapter: @unchecked Sendable {
     }
 
     // MARK: - State updaters
+
+    /// Lets Picture in Picture show the layer of an HLS player for the call
+    /// with `cId`.
+    @MainActor
+    func setPlayerLayer(_ layer: AVPlayerLayer, cId: String) {
+        guard let store else {
+            pendingPlayerLayer = (layer, cId)
+            return
+        }
+        store.dispatch(.setPlayerLayer(layer, cId: cId))
+    }
+
+    /// Clears the layer, unless Picture in Picture shows another one now.
+    @MainActor
+    func removePlayerLayer(_ layer: AVPlayerLayer) {
+        if pendingPlayerLayer?.layer === layer { pendingPlayerLayer = nil }
+        store?.dispatch(.removePlayerLayer(layer))
+    }
 
     /// Updates the ViewFactory instance the will be used by Picture-in-Picture to create UI components.
     @MainActor
