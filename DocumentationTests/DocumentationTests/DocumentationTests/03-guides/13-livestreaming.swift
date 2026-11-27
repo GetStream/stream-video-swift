@@ -29,120 +29,81 @@ private func content() {
     asyncContainer {
         try await call.join()
 
-        if case .hls(let url) = call.state.playbackType {
-            print("The backend granted HLS playback from \(url)")
+        if case .hls = call.state.playbackType {
+            print("This viewer plays HLS")
+        }
+    }
+
+    viewContainer {
+        HLSVideoRendererView(call: call)
+    }
+
+    // Before: a viewer that shows the hosts over WebRTC.
+    container {
+        struct LivestreamView: View {
+            let call: Call
+            @ObservedObject var state: CallState
+
+            var body: some View {
+                GeometryReader { reader in
+                    ParticipantsGridLayout(
+                        call: call,
+                        participants: state.participants,
+                        availableFrame: reader.frame(in: .local),
+                        onChangeTrackVisibility: { participant, isVisible in
+                            Task {
+                                await call.changeTrackVisibility(for: participant, isVisible: isVisible)
+                            }
+                        }
+                    )
+                }
+            }
+        }
+    }
+
+    // After: the same viewer with HLS. Lines that changed start with `HLS:`.
+    container {
+        struct LivestreamView: View {
+            let call: Call
+            @ObservedObject var state: CallState
+
+            var body: some View {
+                // HLS: switch on the playback type.
+                switch state.playbackType {
+                // HLS: show the HLS stream.
+                case .hls:
+                    // HLS: one renderer shows all hosts.
+                    HLSVideoRendererView(call: call)
+                // HLS: keep the WebRTC view for everything else.
+                default:
+                    GeometryReader { reader in
+                        ParticipantsGridLayout(
+                            call: call,
+                            participants: state.participants,
+                            availableFrame: reader.frame(in: .local),
+                            onChangeTrackVisibility: { participant, isVisible in
+                                Task {
+                                    await call.changeTrackVisibility(for: participant, isVisible: isVisible)
+                                }
+                            }
+                        )
+                    }
+                }
+            }
         }
     }
 
     container {
-        struct LivestreamViewer: View {
+        struct LivestreamView: View {
             let call: Call
-            @StateObject var state: CallState
-            @State private var isMuted = false
-            @State private var isPaused = false
-
-            init(call: Call) {
-                self.call = call
-                _state = StateObject(wrappedValue: call.state)
-            }
+            @ObservedObject var state: CallState
 
             var body: some View {
-                VStack {
-                    videoView
-                    controls
-                }
-                // Runs on appear, and again every time playbackType changes.
-                .task(id: state.playbackType) { await applyControls() }
-            }
-
-            @ViewBuilder
-            private var videoView: some View {
                 switch state.playbackType {
                 case .hls:
                     HLSVideoRendererView(call: call)
                 default:
-                    webRTCVideoView
-                }
-            }
-
-            private var host: CallParticipant? {
-                state.participants.first { $0.roles.contains("host") }
-            }
-
-            @ViewBuilder
-            private var webRTCVideoView: some View {
-                GeometryReader { reader in
-                    if let host {
-                        VideoRendererView(id: host.id, size: reader.size) { renderer in
-                            renderer.handleViewRendering(for: host) { _, _ in }
-                        }
-                    } else {
-                        Text("The host's video is not available")
-                    }
-                }
-            }
-
-            private var controls: some View {
-                HStack(spacing: 24) {
-                    Button {
-                        Task { await setMuted(!isMuted) }
-                    } label: {
-                        Label(
-                            isMuted ? "Unmute" : "Mute",
-                            systemImage: isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill"
-                        )
-                    }
-                    Button {
-                        Task { await setPaused(!isPaused) }
-                    } label: {
-                        Label(
-                            isPaused ? "Resume" : "Pause",
-                            systemImage: isPaused ? "play.fill" : "pause.fill"
-                        )
-                    }
-                }
-                .padding()
-            }
-
-            private func setMuted(_ muted: Bool) async {
-                isMuted = muted
-                // The HLS player follows the audio output of the call.
-                do {
-                    if muted {
-                        try await call.speaker.disableAudioOutput()
-                    } else {
-                        try await call.speaker.enableAudioOutput()
-                    }
-                } catch {
-                    print("Could not change the audio output: \(error)")
-                }
-            }
-
-            private func setPaused(_ paused: Bool) async {
-                isPaused = paused
-                if case .hls = state.playbackType {
-                    guard let player = await call.hlsPlayer() else { return }
-                    if paused {
-                        player.pause()
-                    } else {
-                        // Restarts near the live edge by default.
-                        player.play()
-                    }
-                } else {
-                    host?.track?.isEnabled = !paused
-                }
-            }
-
-            /// Applies the controls to the mode that is active now.
-            private func applyControls() async {
-                if case .hls = state.playbackType {
-                    // hlsPlayer() makes sure that the player exists. A new
-                    // player starts playing, and follows the audio output of
-                    // the call.
-                    guard let player = await call.hlsPlayer() else { return }
-                    if isPaused { player.pause() }
-                } else {
-                    host?.track?.isEnabled = !isPaused
+                    WebRTCLivestreamView(call: call)
                 }
             }
         }
@@ -151,37 +112,30 @@ private func content() {
     container {
         struct CustomHLSView: View {
             let call: Call
-            @StateObject var state: CallState
-            @State private var player: AVPlayer?
-
-            init(call: Call) {
-                self.call = call
-                _state = StateObject(wrappedValue: call.state)
-            }
+            @ObservedObject var state: CallState
+            @State private var player: HLSPlayer?
 
             var body: some View {
-                Group {
-                    if let player {
-                        VideoPlayer(player: player)
+                VideoPlayer(player: player)
+                    // Ask again when the stream changes, or when the host
+                    // returns from backstage.
+                    .task(id: "\(state.playbackType) \(state.backstage)") {
+                        player = await call.hlsPlayer()
                     }
-                }
-                .task(id: state.playbackType) {
-                    // The SDK stops the player when the call leaves HLS.
-                    player = await call.hlsPlayer()
-                }
             }
         }
     }
 
     asyncContainer {
         try await call.speaker.disableAudioOutput()
+    }
+
+    asyncContainer {
         let player = await call.hlsPlayer()
         player?.pause()
-        // play() restarts near the live edge. Turn that off to continue where
-        // the stream stopped.
-        player?.resumeFromLive = false
         player?.play()
         player?.playFromLiveEdge()
+        player?.resumeFromLive = false
     }
 
     container {
@@ -315,5 +269,14 @@ private func content() {
                 state.members.filter { $0.role == "host" }.map(\.id)
             }
         }
+    }
+}
+
+/// The WebRTC view of an existing app. The HLS examples use it as a stand-in.
+private struct WebRTCLivestreamView: View {
+    let call: Call
+
+    var body: some View {
+        EmptyView()
     }
 }
