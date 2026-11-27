@@ -162,6 +162,75 @@ final class HLSStateAdapter_Tests: StreamVideoTestCase, @unchecked Sendable {
         XCTAssertEqual(made.players[1].pauseCount, 0)
     }
 
+    // MARK: - the host stops and starts the live
+
+    func test_backstageBecomesTrue_stopsThePlayer() {
+        call.state.playbackType = .hls(url)
+        _ = subject.player(for: call)
+
+        call.state.backstage = true
+
+        XCTAssertEqual(made.players.first?.pauseCount, 1)
+        XCTAssertEqual(made.players.first?.replacedItems.count, 1)
+    }
+
+    func test_player_whileTheCallIsBackstage_returnsNilAndCreatesNothing() {
+        call.state.playbackType = .hls(url)
+        call.state.backstage = true
+
+        let player = subject.player(for: call)
+
+        XCTAssertNil(player)
+        XCTAssertTrue(made.players.isEmpty)
+    }
+
+    func test_backstageBecomesFalse_withTheSameURL_createsANewPlayerOnTheNextRequest() {
+        call.state.playbackType = .hls(url)
+        _ = subject.player(for: call)
+        call.state.backstage = true
+
+        call.state.backstage = false
+        let player = subject.player(for: call)
+
+        XCTAssertEqual(made.urls, [url, url])
+        XCTAssertTrue(player === made.players[1])
+        XCTAssertEqual(made.players[1].pauseCount, 0)
+    }
+
+    func test_hlsBroadcastingStopped_stopsThePlayerAndReturnsNil() {
+        call.state.playbackType = .hls(url)
+        _ = subject.player(for: call)
+
+        call.state.updateState(from: makeHLSStoppedEvent())
+
+        XCTAssertEqual(made.players.first?.pauseCount, 1)
+        XCTAssertEqual(made.players.first?.replacedItems.count, 1)
+        XCTAssertNil(subject.player(for: call))
+        XCTAssertEqual(made.players.count, 1)
+    }
+
+    func test_hlsBroadcastingStarted_afterAStop_withANewURL_swapsToANewPlayer() {
+        call.state.playbackType = .hls(url)
+        _ = subject.player(for: call)
+        call.state.updateState(from: makeHLSStoppedEvent())
+
+        call.state.updateState(from: makeHLSStartedEvent(otherURL))
+        let player = subject.player(for: call)
+
+        XCTAssertEqual(made.urls, [url, otherURL])
+        XCTAssertTrue(player === made.players[1])
+    }
+
+    func test_hlsBroadcastingStarted_withANewURL_swapsThePlayerOfTheCall() {
+        call.state.playbackType = .hls(url)
+        _ = subject.player(for: call)
+
+        call.state.updateState(from: makeHLSStartedEvent(otherURL))
+
+        XCTAssertEqual(made.urls, [url, otherURL])
+        XCTAssertEqual(made.players[0].pauseCount, 1)
+    }
+
     // MARK: - audio output
 
     func test_audioOutputOff_mutesThePlayerAndOnAgainUnmutesIt() async {
@@ -187,6 +256,23 @@ final class HLSStateAdapter_Tests: StreamVideoTestCase, @unchecked Sendable {
     }
 
     // MARK: - Private Helpers
+
+    private func makeHLSStoppedEvent() -> VideoEvent {
+        .typeCallHLSBroadcastingStoppedEvent(
+            .init(callCid: "livestream:1", createdAt: Date())
+        )
+    }
+
+    private func makeHLSStartedEvent(_ url: URL) -> VideoEvent {
+        .typeCallHLSBroadcastingStartedEvent(
+            .init(
+                call: .dummy(),
+                callCid: "livestream:1",
+                createdAt: Date(),
+                hlsPlaylistUrl: url.absoluteString
+            )
+        )
+    }
 
     /// A call that plays HLS, once its controller pushed the call settings.
     /// The controller pushes its own settings to the state when it is set up.

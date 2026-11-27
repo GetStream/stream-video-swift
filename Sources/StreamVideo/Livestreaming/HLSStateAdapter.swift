@@ -21,7 +21,7 @@ final class HLSStateAdapter: Sendable {
     private let makePlayer: @MainActor (URL) -> HLSPlayer
     @MainActor private var player: HLSPlayer?
     @MainActor private var url: URL?
-    @MainActor private var playbackTypeObserver: AnyCancellable?
+    @MainActor private var observers: [AnyCancellable] = []
 
     /// - Parameter makePlayer: Builds the player for a playlist URL.
     init(
@@ -32,7 +32,9 @@ final class HLSStateAdapter: Sendable {
         self.makePlayer = makePlayer
     }
 
-    /// The player of the call. Returns nil unless the call plays HLS.
+    /// The player of the call. Returns nil unless the call plays HLS, and
+    /// while the host is not live: the call is backstage, or its HLS
+    /// broadcast stopped.
     ///
     /// The first call creates the player. Repeated calls return the same
     /// player, until the call moves to another playlist URL.
@@ -40,6 +42,7 @@ final class HLSStateAdapter: Sendable {
     func player(for call: Call) -> HLSPlayer? {
         guard case let .hls(url) = call.state.playbackType else { return nil }
         observePlaybackType(of: call)
+        guard !call.state.backstage, !call.state.hlsBroadcastingStopped else { return nil }
         return player(for: url, call: call)
     }
 
@@ -69,25 +72,38 @@ final class HLSStateAdapter: Sendable {
         return player
     }
 
-    /// A change to WebRTC means the player has no use. Another playlist URL
-    /// replaces the player, if there is one. The subscription sees the value
-    /// in state too.
+    /// A change to WebRTC means the player has no use, and so does the end of
+    /// the live: the host went backstage, or stopped the HLS broadcast.
+    /// Another playlist URL replaces the player, if there is one. The
+    /// subscriptions see the values in state too.
     @MainActor
     private func observePlaybackType(of call: Call) {
-        guard playbackTypeObserver == nil else { return }
-        playbackTypeObserver = call.state
-            .$playbackType
-            .removeDuplicates()
-            .sink { [weak self, weak call] playbackType in
-                MainActor.assumeIsolated {
-                    switch playbackType {
-                    case .webRTC:
-                        self?.free()
-                    case let .hls(url):
-                        guard let self, let call, self.player != nil else { return }
-                        _ = self.player(for: url, call: call)
+        guard observers.isEmpty else { return }
+        observers = [
+            call.state
+                .$playbackType
+                .removeDuplicates()
+                .sink { [weak self, weak call] playbackType in
+                    MainActor.assumeIsolated {
+                        switch playbackType {
+                        case .webRTC:
+                            self?.free()
+                        case let .hls(url):
+                            guard let self, let call, self.player != nil else { return }
+                            _ = self.player(for: url, call: call)
+                        }
                     }
-                }
-            }
+                },
+            call.state
+                .$backstage
+                .removeDuplicates()
+                .filter { $0 }
+                .sink { [weak self] _ in MainActor.assumeIsolated { self?.free() } },
+            call.state
+                .$hlsBroadcastingStopped
+                .removeDuplicates()
+                .filter { $0 }
+                .sink { [weak self] _ in MainActor.assumeIsolated { self?.free() } }
+        ]
     }
 }
