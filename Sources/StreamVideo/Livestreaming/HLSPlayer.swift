@@ -26,6 +26,7 @@ import Foundation
 /// - Important: This API is in beta, like ``PlaybackType``.
 // Xcode 27 infers it from AVPlayer. An older SDK may not, and the call
 // controller hands the player across actors.
+// Not `final` and not `open`: the test doubles subclass it in the module.
 public class HLSPlayer: AVPlayer, @unchecked Sendable {
 
     /// Whether `play()` restarts near the live edge.
