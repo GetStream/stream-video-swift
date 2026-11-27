@@ -4,7 +4,7 @@
 
 import Foundation
 
-/// The URLs and players a store built, in order.
+/// The URLs and players an adapter built, in order.
 final class MadePlayers: @unchecked Sendable {
     var urls: [URL] = []
     var players: [MockHLSPlayer] = []

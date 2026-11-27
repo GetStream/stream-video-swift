@@ -2,7 +2,6 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
-import AVFoundation
 import Combine
 import Foundation
 import StreamWebRTC
@@ -831,7 +830,7 @@ class CallController: @unchecked Sendable {
             if call.state.playbackType != .webRTC {
                 call.state.playbackType = .webRTC
             }
-            await hlsStateAdapter.free()
+            hlsStateAdapter.free()
         }
     }
 
