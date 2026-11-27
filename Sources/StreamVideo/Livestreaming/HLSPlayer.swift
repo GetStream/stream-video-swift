@@ -103,16 +103,21 @@ public class HLSPlayer: AVPlayer, @unchecked Sendable {
         guard #available(iOS 15.0, *) else { return AnyCancellable {} }
         return NotificationCenter.default
             .publisher(for: AVPlayer.rateDidChangeNotification, object: self)
+            // Read the rate now. A system pause that lands before the main
+            // thread runs the sink must not count as the user's. `rate` is
+            // main-actor isolated in the SDK, and the notification comes from
+            // any thread, so read it through KVC.
+            .compactMap { @Sendable [weak self] notification -> Bool? in
+                guard
+                    let self,
+                    (notification.userInfo?[AVPlayer.rateDidChangeReasonKey] as? String)
+                    == AVPlayer.RateDidChangeReason.setRateCalled.rawValue
+                else { return nil }
+                return (value(forKey: "rate") as? Float) == 0
+            }
             // The notification does not name a thread.
             .receive(on: DispatchQueue.main)
-            .filter {
-                ($0.userInfo?[AVPlayer.rateDidChangeReasonKey] as? String)
-                    == AVPlayer.RateDidChangeReason.setRateCalled.rawValue
-            }
-            .sink { [weak self] _ in
-                guard let self else { return }
-                isPausedByUser = rate == 0
-            }
+            .sink { [weak self] in self?.isPausedByUser = $0 }
     }
 
     /// iOS can pause a player without a user action, for example when the app

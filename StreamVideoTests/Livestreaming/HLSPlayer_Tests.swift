@@ -158,6 +158,20 @@ final class HLSPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
         XCTAssertEqual(subject.playCount, 0)
     }
 
+    func test_userPlay_thenTheSystemPausesBeforeTheNotificationIsHandled_staysAUserPlay() async {
+        let subject = makeObservedPlayer()
+
+        // The user plays. The system pauses before the main thread handles
+        // the notification, so a late read of the rate sees a pause.
+        postRateChange(of: subject, rate: 1, reason: .setRateCalled)
+        subject.stubbedRate = 0
+        await wait(for: 0.1)
+        mockAppState.stubbedState = .background
+        mockAppState.stubbedState = .foreground
+
+        await fulfillment("The player did not resume.") { subject.playCount == 1 }
+    }
+
     func test_playerResumedFromOutsideAfterPausing_appBecomesActive_resumes() async {
         let subject = makeObservedPlayer()
         // The player reads its rate when it handles the notification on the
