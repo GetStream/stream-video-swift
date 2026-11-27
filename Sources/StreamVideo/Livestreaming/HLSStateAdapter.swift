@@ -13,18 +13,18 @@ import Foundation
 /// plays HLS creates the player. The adapter frees it when the call leaves
 /// HLS, and when the controller tears the call down.
 ///
-/// It runs on the main actor, so a request never interleaves with a change
-/// of the playback type.
-@MainActor
-final class HLSStateAdapter {
+/// Only the members that touch the player or the call state run on the main
+/// actor, because `AVPlayer` and `CallState` live there. So a request never
+/// interleaves with a change of the playback type.
+final class HLSStateAdapter: Sendable {
 
     private let makePlayer: @MainActor (URL) -> HLSPlayer
-    private var player: HLSPlayer?
-    private var url: URL?
-    private var playbackTypeObserver: AnyCancellable?
+    @MainActor private var player: HLSPlayer?
+    @MainActor private var url: URL?
+    @MainActor private var playbackTypeObserver: AnyCancellable?
 
     /// - Parameter makePlayer: Builds the player for a playlist URL.
-    nonisolated init(
+    init(
         makePlayer: @escaping @MainActor (URL) -> HLSPlayer = { url in
             HLSPlayer(playerItem: AVPlayerItem(url: url))
         }
@@ -36,6 +36,7 @@ final class HLSStateAdapter {
     ///
     /// The first call creates the player. Repeated calls return the same
     /// player, until the call moves to another playlist URL.
+    @MainActor
     func player(for call: Call) -> HLSPlayer? {
         guard case let .hls(url) = call.state.playbackType else { return nil }
         observePlaybackType(of: call)
@@ -43,6 +44,7 @@ final class HLSStateAdapter {
     }
 
     /// Stops and forgets the player.
+    @MainActor
     func free() {
         player?.invalidate()
         player = nil
@@ -52,6 +54,7 @@ final class HLSStateAdapter {
     // MARK: - Private Helpers
 
     /// The player for `url`. Another URL replaces the player.
+    @MainActor
     private func player(for url: URL, call: Call) -> HLSPlayer {
         if let player, self.url == url { return player }
         free()
@@ -69,6 +72,7 @@ final class HLSStateAdapter {
     /// A change to WebRTC means the player has no use. Another playlist URL
     /// replaces the player, if there is one. The subscription sees the value
     /// in state too.
+    @MainActor
     private func observePlaybackType(of call: Call) {
         guard playbackTypeObserver == nil else { return }
         playbackTypeObserver = call.state
