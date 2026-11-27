@@ -83,6 +83,23 @@ If measurement cannot run, report size impact as unverified.
 - Keep sources and tests building with the old Xcode in the `build-old-xcode`
   job of `.github/workflows/smoke-checks.yml`.
   Avoid newer Swift syntax, such as `weak let` from Swift 6.2.
+  Unwrap an implicitly unwrapped optional before you capture it in a closure.
+  The old compiler captures it as a plain optional, and the code fails to compile.
+
+## New Swift code
+
+Follow these rules for every new type and for every edit that adds one.
+
+- Put one type in each file. A protocol, a class, and an enum are separate types.
+- Prefer a `final class` for every new type. Use a `struct` only when a `struct`
+  is required, for example a SwiftUI `View`.
+- Do not use `@_spi`.
+- Do not add a free function or a static method.
+  Keep a static property that an existing pattern requires, such as `InjectionKey.currentValue`.
+- Put each initializer in the type's file. Do not add it in an extension.
+- Reuse the nearest existing type and pipeline before adding a new one.
+- Do not mark a type `@MainActor` unless the type itself must stay on the main actor.
+  Mark the member that needs the main actor, or read that state at the use site.
 
 ## Result
 
