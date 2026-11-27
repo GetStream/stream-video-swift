@@ -86,6 +86,53 @@ final class HLSVideoRendererView_Tests: StreamVideoTestCase, @unchecked Sendable
         }
     }
 
+    // MARK: - the host leaves and returns
+
+    func test_backstageBecomesTrue_removesThePlayer() async {
+        call.state.playbackType = .hls(url)
+        subject.attach(to: view)
+        await fulfilmentInMainActor { self.view.player != nil }
+
+        call.state.backstage = true
+
+        XCTAssertNil(view.player)
+    }
+
+    func test_backstageBecomesFalse_withTheSameURL_showsANewPlayer() async {
+        call.state.playbackType = .hls(url)
+        subject.attach(to: view)
+        await fulfilmentInMainActor { self.view.player != nil }
+        call.state.backstage = true
+
+        call.state.backstage = false
+
+        await fulfilmentInMainActor {
+            self.made.players.count == 2 && self.view.player === self.made.players[1]
+        }
+    }
+
+    func test_hlsBroadcastingStarted_withANewURL_showsANewPlayer() async {
+        call.state.playbackType = .hls(url)
+        subject.attach(to: view)
+        await fulfilmentInMainActor { self.view.player != nil }
+        call.state.updateState(from: .typeCallHLSBroadcastingStoppedEvent(
+            .init(callCid: "livestream:1", createdAt: Date())
+        ))
+
+        call.state.updateState(from: .typeCallHLSBroadcastingStartedEvent(
+            .init(
+                call: .dummy(),
+                callCid: "livestream:1",
+                createdAt: Date(),
+                hlsPlaylistUrl: "https://example.com/other.m3u8"
+            )
+        ))
+
+        await fulfilmentInMainActor {
+            self.made.players.count == 2 && self.view.player === self.made.players[1]
+        }
+    }
+
     // MARK: - update(call:)
 
     func test_updateCall_anotherCall_movesThePlayerToTheNewCall() async {

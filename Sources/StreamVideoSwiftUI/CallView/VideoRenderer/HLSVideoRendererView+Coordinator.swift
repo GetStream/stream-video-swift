@@ -50,16 +50,24 @@ extension HLSVideoRendererView {
         /// the join response grants HLS, and it returns to `.webRTC` when the
         /// call ends. The view can stay on screen through both changes, for
         /// example while it shows the view before the join completes.
+        ///
+        /// It follows the backstage flag too. The SDK stops the player when
+        /// the call goes backstage, and the view asks again when the host
+        /// returns, even with the same playlist URL. A new HLS broadcast has
+        /// a new URL, which the playback type follows.
         private func observePlaybackType() {
-            playbackTypeObserver = call.state
-                .$playbackType
-                .removeDuplicates()
-                .sink { [weak self] in self?.show($0) }
+            let state = call.state
+            playbackTypeObserver = Publishers
+                .CombineLatest(state.$playbackType, state.$backstage)
+                .removeDuplicates { $0 == $1 }
+                .sink { [weak self] playbackType, isBackstage in
+                    self?.show(playbackType, isLive: !isBackstage)
+                }
         }
 
-        private func show(_ playbackType: PlaybackType) {
+        private func show(_ playbackType: PlaybackType, isLive: Bool) {
             clear()
-            guard case .hls = playbackType else { return }
+            guard case .hls = playbackType, isLive else { return }
             let call = call
             playerRequest = Task { [weak self] in
                 let player = await call.hlsPlayer()
