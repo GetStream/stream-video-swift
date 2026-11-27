@@ -376,6 +376,62 @@ final class HLSStateAdapter_Tests: StreamVideoTestCase, @unchecked Sendable {
         await fulfillment { self.sentReports().last?.type == .ended }
     }
 
+    func test_playerFailsBeforePlaying_thenGivesUp_sendsStartedThenEndedWithTheError() async {
+        makeStatsCall()
+        _ = subject.player(for: call)
+        // Let the stats start observing before the player fails.
+        await wait(for: 0.2)
+        let item = MockHLSPlayerItem(url: url)
+        made.players[0].replaceCurrentItem(with: item)
+        item.fail(with: NSError(domain: "CoreMediaErrorDomain", code: -12642))
+
+        made.players[0].onGiveUp?()
+
+        await fulfillment { self.sentReports().count == 2 }
+        XCTAssertEqual(sentReports().map(\.type), [.started, .ended])
+        XCTAssertEqual(sentReports().last?.endReason, .error)
+        XCTAssertEqual(sentReports().last?.errorCode, "CoreMediaErrorDomain -12642")
+    }
+
+    func test_playerFailsBeforePlaying_thenTheCallLeavesTheLive_sendsStartedThenEndedWithTheError() async {
+        makeStatsCall()
+        _ = subject.player(for: call)
+        // Let the stats start observing before the player fails.
+        await wait(for: 0.2)
+        let item = MockHLSPlayerItem(url: url)
+        made.players[0].replaceCurrentItem(with: item)
+        item.fail(with: NSError(domain: "CoreMediaErrorDomain", code: -12642))
+
+        call.state.backstage = true
+
+        await fulfillment { self.sentReports().count == 2 }
+        XCTAssertEqual(sentReports().map(\.type), [.started, .ended])
+        XCTAssertEqual(sentReports().last?.endReason, .error)
+    }
+
+    func test_playerGivesUp_thenTheCallLeavesTheLive_sendsOneEnded() async {
+        makeStatsCall()
+        _ = subject.player(for: call)
+        made.players[0].simulate(.playing)
+        await fulfillment { self.sentReports().count == 1 }
+
+        made.players[0].onGiveUp?()
+        call.state.backstage = true
+        await wait(for: 0.3)
+
+        XCTAssertEqual(sentReports().map(\.type), [.started, .ended])
+    }
+
+    func test_playerLoadsForever_thenTheCallLeavesTheLive_sendsNothing() async {
+        makeStatsCall()
+        _ = subject.player(for: call)
+
+        call.state.backstage = true
+        await wait(for: 0.3)
+
+        XCTAssertTrue(sentReports().isEmpty)
+    }
+
     func test_free_withStats_mutesThePlayerAtOnce() {
         makeStatsCall()
         _ = subject.player(for: call)

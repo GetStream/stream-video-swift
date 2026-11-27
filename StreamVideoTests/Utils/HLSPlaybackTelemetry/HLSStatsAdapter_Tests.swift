@@ -169,6 +169,112 @@ final class HLSStatsAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(api.hlsStatsReports.count, count)
     }
 
+    // MARK: - terminal errors
+
+    private let failure = NSError(domain: "AVFoundationErrorDomain", code: -11800)
+
+    @MainActor
+    func test_itemFailsBeforePlaying_thenThePlayerGivesUp_sendsStartedThenEndedWithTheError() async {
+        let item = MockHLSPlayerItem(url: URL(string: "https://example.com/live.m3u8")!)
+        player.stubbedItem = item
+        await makeSubject()
+        await subject.startReporting()
+        item.fail(with: failure)
+
+        await subject.stopReporting(gaveUp: true)
+
+        await fulfillment { self.api.hlsStatsReports.count == 2 }
+        XCTAssertEqual(api.hlsStatsReports.map(\.type), [.started, .ended])
+        XCTAssertEqual(api.hlsStatsReports.last?.endReason, .error)
+        XCTAssertEqual(api.hlsStatsReports.last?.errorCode, "AVFoundationErrorDomain -11800")
+        XCTAssertEqual(api.hlsStatsReports.last?.events?.map(\.type), ["error"])
+    }
+
+    @MainActor
+    func test_itemFailsBeforePlaying_thenTheCallLeaves_sendsStartedThenEndedWithTheError() async {
+        let item = MockHLSPlayerItem(url: URL(string: "https://example.com/live.m3u8")!)
+        player.stubbedItem = item
+        await makeSubject()
+        await subject.startReporting()
+        item.fail(with: failure)
+
+        await subject.stopReporting()
+
+        await fulfillment { self.api.hlsStatsReports.count == 2 }
+        XCTAssertEqual(api.hlsStatsReports.map(\.type), [.started, .ended])
+        XCTAssertEqual(api.hlsStatsReports.last?.endReason, .error)
+        XCTAssertEqual(api.hlsStatsReports.last?.errorCode, "AVFoundationErrorDomain -11800")
+    }
+
+    @MainActor
+    func test_itemFailsThenRecovers_thenPlaysAndLeaves_sendsEndedWithoutAnError() async {
+        let item = MockHLSPlayerItem(url: URL(string: "https://example.com/live.m3u8")!)
+        player.stubbedItem = item
+        await makeSubject()
+        await subject.startReporting()
+        item.fail(with: failure)
+        item.simulate(status: .readyToPlay)
+        player.simulate(.playing)
+        await fulfillment { self.api.hlsStatsReports.count == 1 }
+
+        await subject.stopReporting()
+
+        await fulfillment { self.api.hlsStatsReports.count == 2 }
+        XCTAssertEqual(api.hlsStatsReports.map(\.type), [.started, .ended])
+        XCTAssertEqual(api.hlsStatsReports.last?.endReason, .left)
+        XCTAssertNil(api.hlsStatsReports.last?.errorCode)
+    }
+
+    @MainActor
+    func test_itemFailsAfterPlaying_thenThePlayerGivesUp_sendsEndedWithTheErrorOnce() async {
+        let item = MockHLSPlayerItem(url: URL(string: "https://example.com/live.m3u8")!)
+        player.stubbedItem = item
+        await makeSubject()
+        await subject.startReporting()
+        player.simulate(.playing)
+        await fulfillment { self.api.hlsStatsReports.count == 1 }
+        item.fail(with: failure)
+
+        await subject.stopReporting(gaveUp: true)
+        await subject.stopReporting()
+
+        await fulfillment { self.api.hlsStatsReports.count == 2 }
+        await wait(for: 0.2)
+        XCTAssertEqual(api.hlsStatsReports.map(\.type), [.started, .ended])
+        XCTAssertEqual(api.hlsStatsReports.last?.endReason, .error)
+        XCTAssertEqual(api.hlsStatsReports.last?.errorCode, "AVFoundationErrorDomain -11800")
+    }
+
+    @MainActor
+    func test_playerGivesUpWithoutAnError_sendsEndedWithTheTimeoutCode() async {
+        await makeSubject()
+        await subject.startReporting()
+
+        await subject.stopReporting(gaveUp: true)
+
+        await fulfillment { self.api.hlsStatsReports.count == 2 }
+        XCTAssertEqual(api.hlsStatsReports.map(\.type), [.started, .ended])
+        XCTAssertEqual(api.hlsStatsReports.last?.endReason, .error)
+        XCTAssertEqual(api.hlsStatsReports.last?.errorCode, "load_timeout")
+    }
+
+    @MainActor
+    func test_itemFailsAfterPlaying_thenTheCallLeaves_sendsEndedWithoutAnError() async {
+        let item = MockHLSPlayerItem(url: URL(string: "https://example.com/live.m3u8")!)
+        player.stubbedItem = item
+        await makeSubject()
+        await subject.startReporting()
+        player.simulate(.playing)
+        await fulfillment { self.api.hlsStatsReports.count == 1 }
+        item.fail(with: failure)
+
+        await subject.stopReporting()
+
+        await fulfillment { self.api.hlsStatsReports.count == 2 }
+        XCTAssertEqual(api.hlsStatsReports.last?.endReason, .left)
+        XCTAssertNil(api.hlsStatsReports.last?.errorCode)
+    }
+
     // MARK: - Private Helpers
 
     private func makeSubject(interval: TimeInterval = 60) async {

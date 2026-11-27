@@ -159,7 +159,9 @@ final class HLSStatsReporter: @unchecked Sendable {
         retry: Bool
     ) async {
         guard !isRejected else { return }
-        let events = nextEvents()
+        // `started` carries no events, so a final `ended` right after it gets
+        // the pending ones.
+        let events = type == .started ? [] : nextEvents()
         let report = ReportHLSStatsRequest(
             callSessionId: callSessionId,
             endReason: endReason,

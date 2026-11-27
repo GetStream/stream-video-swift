@@ -88,6 +88,10 @@ final class HLSStateAdapter: Sendable {
         let stats = call.callController.makeHLSStatsAdapter(player: player, call: call)
         if let stats {
             Task { await stats.startReporting() }
+            // A player that gives up ends the stats with an error.
+            player.onGiveUp = { [weak stats] in
+                Task { await stats?.stopReporting(gaveUp: true) }
+            }
         }
         // A new player has rate 0. Nothing else starts it.
         player.play()
