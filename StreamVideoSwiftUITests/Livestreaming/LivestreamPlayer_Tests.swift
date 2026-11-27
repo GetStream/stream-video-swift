@@ -197,6 +197,22 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
         XCTAssertTrue(adapter.store?.state.sourceView === appSourceView)
     }
 
+    @MainActor
+    func test_livestreamPlayer_disappears_adapterHoldsAnotherInstanceOfTheCall_keepsIt() async {
+        let adapter = injectPictureInPictureAdapter()
+        let call = MockCall(.dummy(callType: "livestream", callId: "same"))
+        let other = MockCall(.dummy(callType: "livestream", callId: "same"))
+        let window = host(LivestreamPlayer(call: call, joinPolicy: .none))
+        defer { window.isHidden = true }
+        await fulfilmentInMainActor { adapter.call === call }
+        adapter.call = other
+
+        window.rootViewController = nil
+        await wait(for: 0.2)
+
+        XCTAssertTrue(adapter.call === other)
+    }
+
     // MARK: - HLS playback
 
     @MainActor

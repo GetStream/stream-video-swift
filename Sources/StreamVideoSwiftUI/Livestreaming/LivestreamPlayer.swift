@@ -570,7 +570,7 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
         claimsPictureInPictureCall = false
         guard
             setsPictureInPictureCall,
-            pictureInPictureAdapter.call?.cId == call.cId
+            pictureInPictureAdapter.call === call
         else { return }
         pictureInPictureAdapter.call = nil
         setsPictureInPictureCall = false
