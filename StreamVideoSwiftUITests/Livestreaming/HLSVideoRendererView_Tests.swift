@@ -178,7 +178,7 @@ final class HLSVideoRendererView_Tests: StreamVideoTestCase, @unchecked Sendable
         XCTAssertNil(view.player)
     }
 
-    func test_twoRenderers_ofTheSameCall_showTheSamePlayer() async {
+    func test_twoRenderers_ofTheSameCall_shareThePlayerInstance() async {
         call.state.playbackType = .hls(url)
         let otherView = HLSPlayerView()
         let other = HLSVideoRendererView.Coordinator(call: call)

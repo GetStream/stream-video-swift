@@ -12,8 +12,10 @@ import UIKit
 ///
 /// The backend routes a viewer to HLS when it joins. Check
 /// ``CallState/playbackType`` for `.hls`, and use this view instead of the
-/// participant video views. Every renderer of the same call shows the same
-/// player, so the stream is loaded once.
+/// participant video views. Every renderer of the same call uses the same
+/// player, so the stream is loaded once. An `AVPlayer` draws in only one
+/// layer at a time, the most recently created, so show one renderer per call
+/// at a time.
 ///
 /// The renderer stays empty while the call does not play HLS, and fills as
 /// soon as it does.
