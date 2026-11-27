@@ -74,6 +74,9 @@ public class CallState: ObservableObject {
     @Published public internal(set) var backstage: Bool = false
     @Published public internal(set) var broadcasting: Bool = false
 
+    /// Whether the HLS broadcast of the call stopped since the join.
+    @Published internal private(set) var hlsBroadcastingStopped = false
+
     @Published public internal(set) var createdAt: Date = .distantPast {
         didSet { if !isInitialized { isInitialized = true }}
     }
@@ -190,9 +193,11 @@ public class CallState: ObservableObject {
             update(from: event.call)
         case let .typeCallHLSBroadcastingStartedEvent(event):
             updateEgress(broadcasting: true)
+            hlsBroadcastingStopped = false
             followHLSPlaylist(event.hlsPlaylistUrl)
         case .typeCallHLSBroadcastingStoppedEvent:
             updateEgress(broadcasting: false)
+            hlsBroadcastingStopped = true
         case let .typeCallCreatedEvent(event):
             // A delayed creation snapshot must not clear the hydrated session.
             if session != nil,
@@ -431,6 +436,7 @@ public class CallState: ObservableObject {
         // The authenticator rejects invalid grants before this point.
         playbackType = (try? response.playback?.hlsPlaylistURL())
             .map(PlaybackType.hls) ?? .webRTC
+        hlsBroadcastingStopped = false
     }
     
     internal func update(

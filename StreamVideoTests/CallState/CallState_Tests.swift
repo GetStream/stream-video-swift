@@ -353,6 +353,33 @@ final class CallState_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(subject.playbackType, before)
     }
 
+    @MainActor
+    func test_updateState_hlsBroadcastingStopped_marksTheStopUntilItStartsAgain() {
+        let subject = CallState(MockStreamVideo().callSession)
+        subject.update(from: JoinCallResponse.dummyHLSGrant())
+        XCTAssertFalse(subject.hlsBroadcastingStopped)
+
+        subject.updateState(from: .typeCallHLSBroadcastingStoppedEvent(
+            .init(callCid: "livestream:1", createdAt: Date())
+        ))
+        XCTAssertTrue(subject.hlsBroadcastingStopped)
+
+        subject.updateState(from: makeHLSStartedEvent("https://example.com/live.m3u8"))
+        XCTAssertFalse(subject.hlsBroadcastingStopped)
+    }
+
+    @MainActor
+    func test_update_fromJoinResponse_clearsTheHLSStop() {
+        let subject = CallState(MockStreamVideo().callSession)
+        subject.updateState(from: .typeCallHLSBroadcastingStoppedEvent(
+            .init(callCid: "livestream:1", createdAt: Date())
+        ))
+
+        subject.update(from: JoinCallResponse.dummyHLSGrant())
+
+        XCTAssertFalse(subject.hlsBroadcastingStopped)
+    }
+
     func test_update_sfuCallEndedLiveEnded_setsBackstageAndLiveEndedAt() {
         let subject = CallState(.dummy())
         subject.settings = .dummy(backstage: .dummy(enabled: true))
