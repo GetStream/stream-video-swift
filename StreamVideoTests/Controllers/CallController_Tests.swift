@@ -2155,28 +2155,28 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
     // MARK: - makeHLSStatsAdapter
 
     @MainActor
-    func test_makeHLSStatsAdapter_withHLSStatsAndSession_returnsAnAdapter() async {
+    func test_makeHLSStatsAdapter_withHLSStatsAndSession_returnsAnAdapter() {
         let call = makeHLSStatsCall(statsToken: "token-1", sessionId: "session-1")
 
-        let adapter = await subject.makeHLSStatsAdapter(player: AVPlayer(), call: call)
+        let adapter = subject.makeHLSStatsAdapter(player: AVPlayer(), call: call)
 
         XCTAssertNotNil(adapter)
     }
 
     @MainActor
-    func test_makeHLSStatsAdapter_withoutHLSStats_returnsNil() async {
+    func test_makeHLSStatsAdapter_withoutHLSStats_returnsNil() {
         let call = makeHLSStatsCall(statsToken: nil, sessionId: "session-1")
 
-        let adapter = await subject.makeHLSStatsAdapter(player: AVPlayer(), call: call)
+        let adapter = subject.makeHLSStatsAdapter(player: AVPlayer(), call: call)
 
         XCTAssertNil(adapter)
     }
 
     @MainActor
-    func test_makeHLSStatsAdapter_withBlankCallSessionId_returnsNil() async {
+    func test_makeHLSStatsAdapter_withBlankCallSessionId_returnsNil() {
         let call = makeHLSStatsCall(statsToken: "token-1", sessionId: "")
 
-        let adapter = await subject.makeHLSStatsAdapter(player: AVPlayer(), call: call)
+        let adapter = subject.makeHLSStatsAdapter(player: AVPlayer(), call: call)
 
         XCTAssertNil(adapter)
     }

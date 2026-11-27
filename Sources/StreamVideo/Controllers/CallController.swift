@@ -828,10 +828,10 @@ class CallController: @unchecked Sendable {
     ///
     /// Returns nil when the join response disabled HLS stats or sent no usable
     /// `stats_token`, or when `call` has no call session id.
-    func makeHLSStatsAdapter(player: AVPlayer, call: Call) async -> HLSStatsAdapter? {
-        let (callSessionId, stats) = await MainActor.run {
-            (call.state.session?.id ?? "", call.state.hlsStats)
-        }
+    @MainActor
+    func makeHLSStatsAdapter(player: AVPlayer, call: Call) -> HLSStatsAdapter? {
+        let callSessionId = call.state.session?.id ?? ""
+        let stats = call.state.hlsStats
         guard let stats, !callSessionId.isEmpty else { return nil }
         return HLSStatsAdapter(
             player: player,

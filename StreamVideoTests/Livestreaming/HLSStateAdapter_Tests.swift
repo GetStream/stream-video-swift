@@ -13,7 +13,10 @@ final class HLSStateAdapter_Tests: StreamVideoTestCase, @unchecked Sendable {
     private let url = URL(string: "https://example.com/live.m3u8")!
     private let otherURL = URL(string: "https://example.com/other.m3u8")!
     private let made = MadePlayers()
-    private lazy var call: MockCall! = .init()
+    private nonisolated(unsafe) var mockAPI: MockDefaultAPIEndpoints! = .init()
+    private lazy var call: MockCall! = .init(
+        .dummy(callController: MockCallController(defaultAPI: mockAPI))
+    )
     private lazy var mockAppState: MockAppStateAdapter! = .init()
     private lazy var subject: HLSStateAdapter! = .init { [made] url in
         let player = MockHLSPlayer()
@@ -30,6 +33,7 @@ final class HLSStateAdapter_Tests: StreamVideoTestCase, @unchecked Sendable {
     override func tearDown() async throws {
         mockAppState.dismante()
         mockAppState = nil
+        mockAPI = nil
         subject = nil
         call = nil
         made.players = []
@@ -255,6 +259,114 @@ final class HLSStateAdapter_Tests: StreamVideoTestCase, @unchecked Sendable {
         XCTAssertEqual(made.players.first?.isMuted, true)
     }
 
+    // MARK: - stats
+
+    func test_player_withStatsAndAPlayingPlayer_sendsStarted() async throws {
+        makeStatsCall()
+
+        _ = subject.player(for: call)
+        let player = try XCTUnwrap(made.players.first)
+        XCTAssertEqual(sentReports().count, 0)
+        player.simulate(.playing)
+
+        await fulfillment { self.sentReports().count == 1 }
+        let report = try XCTUnwrap(sentReports().first)
+        XCTAssertEqual(report.type, .started)
+        XCTAssertEqual(report.statsToken, "token-1")
+        XCTAssertFalse(report.unifiedSessionId.isEmpty)
+    }
+
+    func test_player_withoutAStatsToken_sendsNothing() async throws {
+        call.state.playbackType = .hls(url)
+
+        _ = subject.player(for: call)
+        try XCTUnwrap(made.players.first).simulate(.playing)
+        subject.free()
+        await wait(for: 0.2)
+
+        XCTAssertTrue(sentReports().isEmpty)
+    }
+
+    func test_player_whileTheStatsDeliveryHangs_stillReturnsThePlayer() async {
+        mockAPI.reportHLSStatsHandler = { try? await Task.sleep(nanoseconds: 3_000_000_000) }
+        subject = HLSStateAdapter { [made] _ in
+            let player = MockHLSPlayer()
+            player.simulate(.playing)
+            made.players.append(player)
+            return player
+        }
+        makeStatsCall()
+
+        let started = Date()
+        let player = subject.player(for: call)
+
+        XCTAssertNotNil(player)
+        XCTAssertLessThan(Date().timeIntervalSince(started), 2)
+    }
+
+    func test_playlistURLChanged_reportsTheNewPlaybackWithItsOwnSession() async throws {
+        makeStatsCall()
+        _ = subject.player(for: call)
+        made.players[0].simulate(.playing)
+        await fulfillment { self.sentReports().count == 1 }
+
+        call.state.playbackType = .hls(otherURL)
+        _ = subject.player(for: call)
+        made.players[1].simulate(.playing)
+
+        await fulfillment { self.sentReports().filter { $0.type == .started }.count == 2 }
+        let sessions = Set(sentReports().filter { $0.type == .started }.map(\.userSessionId))
+        XCTAssertEqual(sessions.count, 2)
+        XCTAssertEqual(sentReports().filter { $0.type == .ended }.count, 1)
+    }
+
+    func test_playbackTypeBecomesWebRTC_sendsEnded() async {
+        makeStatsCall()
+        _ = subject.player(for: call)
+        made.players[0].simulate(.playing)
+        await fulfillment { self.sentReports().count == 1 }
+
+        call.state.playbackType = .webRTC
+
+        await fulfillment { self.sentReports().last?.type == .ended }
+    }
+
+    func test_free_sendsTheFinalStatsOfThePlayerItemWithEnded() async throws {
+        let item = MockHLSPlayerItem(url: url)
+        item.size = CGSize(width: 1280, height: 720)
+        subject = HLSStateAdapter { [made] _ in
+            let player = MockHLSPlayer(playerItem: item)
+            player.stubbedItem = item
+            made.players.append(player)
+            return player
+        }
+        makeStatsCall()
+        _ = subject.player(for: call)
+        made.players[0].simulate(.playing)
+        await fulfillment { self.sentReports().count == 1 }
+
+        subject.free()
+
+        await fulfillment { self.sentReports().last?.type == .ended }
+        let final = try XCTUnwrap(sentReports().last)
+        XCTAssertEqual(final.stats?.width, 1280)
+        XCTAssertEqual(final.stats?.height, 720)
+    }
+
+    func test_free_whileTheStatsDeliveryHangs_stillStopsThePlayer() async {
+        mockAPI.reportHLSStatsHandler = { try? await Task.sleep(nanoseconds: 3_000_000_000) }
+        makeStatsCall()
+        _ = subject.player(for: call)
+        made.players[0].simulate(.playing)
+        await fulfillment { self.sentReports().count == 1 }
+
+        let started = Date()
+        subject.free()
+
+        await fulfillment { [made] in made.players[0].pauseCount == 1 }
+        XCTAssertLessThan(Date().timeIntervalSince(started), 2)
+    }
+
     // MARK: - Private Helpers
 
     private func makeHLSStoppedEvent() -> VideoEvent {
@@ -288,5 +400,34 @@ final class HLSStateAdapter_Tests: StreamVideoTestCase, @unchecked Sendable {
         await fulfilmentInMainActor { !call.state.callSettings.audioOutputOn }
         call.state.playbackType = .hls(url)
         return call
+    }
+
+    /// Gives the call a join response and a session, so it reports playback.
+    private func makeStatsCall() {
+        mockAPI.stub(for: .reportHLSStats, with: ReportHLSStatsResponse(duration: "1ms"))
+        call.state.update(
+            from: JoinCallResponse.dummyHLSGrant(
+                playback: .dummy(statsToken: "token-1")
+            )
+        )
+        call.state.playbackType = .hls(url)
+        call.state.session = CallSessionResponse(
+            acceptedBy: [:],
+            anonymousParticipantCount: 0,
+            id: "session-1",
+            missedBy: [:],
+            participants: [],
+            participantsCountByRole: [:],
+            rejectedBy: [:]
+        )
+    }
+
+    private nonisolated func sentReports() -> [ReportHLSStatsRequest] {
+        mockAPI
+            .recordedInputPayload(
+                (String, String, ReportHLSStatsRequest).self,
+                for: .reportHLSStats
+            )?
+            .map(\.2) ?? []
     }
 }
