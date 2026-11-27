@@ -847,6 +847,26 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(availability?.1, false)
     }
 
+    func test_configureAudioSession_whenAnHLSSessionOwnsAudio_appliesTheCallConfigurationBeforeTakingTheStore() async throws {
+        let hls = HLSAudioSession()
+        try await hls.activate()
+        let audioStore = mockAudioStore.audioStore
+        XCTAssertEqual(audioStore.state.audioSessionConfiguration.category, .playback)
+
+        try await subject.configureAudioSession(source: .callKit(.init {}))
+
+        let state = audioStore.state
+        XCTAssertEqual(state.audioSessionConfiguration.category, .playAndRecord)
+        XCTAssertEqual(state.audioSessionConfiguration.mode, .voiceChat)
+        XCTAssertEqual(
+            state.audioSessionConfiguration.options,
+            [.allowBluetoothHFP, .allowBluetoothA2DP]
+        )
+        let audioSession = await subject.audioSession
+        XCTAssertEqual(state.activeSessionIdentifier, audioSession.identifier)
+        await hls.deactivate()
+    }
+
     func test_configureAudioSession_callKitSource_otherActiveSession_doesNotTakeAudio_() async throws {
         try await configureActiveCallKitAudio()
         let otherModule = AudioDeviceModule(MockRTCAudioDeviceModule())

@@ -1319,6 +1319,9 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
             .setEngineAvailability(isAudioEngineAvailable)
 
         if !otherCallOwnsActiveStore {
+            // A call that starts while HLS plays needs the call category
+            // before it takes the store, and before CallKit activates it.
+            await audioSession.prepareToTakeOver()
             try await audioStore.dispatch(
                 [
                     // Claim ownership before installing the ADM so any late

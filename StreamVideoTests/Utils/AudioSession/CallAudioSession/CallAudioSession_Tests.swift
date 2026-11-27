@@ -74,6 +74,101 @@ final class CallAudioSession_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(liveSession.category, .playback)
     }
 
+    func test_init_whenAnHLSSessionOwnsAudio_doesNotChangeTheConfiguration() async throws {
+        let hls = HLSAudioSession()
+        try await hls.activate()
+        let audioStore = mockAudioStore.audioStore
+
+        // A call that only rings must not touch the HLS playback.
+        subject = .init(policy: MockAudioSessionPolicy())
+        // Barrier: the store runs batches in order.
+        try await audioStore.dispatch(.setHasRecordingPermission(false)).result()
+
+        let configuration = audioStore.state.audioSessionConfiguration
+        XCTAssertEqual(configuration.category, .playback)
+        XCTAssertEqual(configuration.mode, .moviePlayback)
+        XCTAssertEqual(audioStore.state.activeSessionIdentifier, hls.identifier)
+        await hls.deactivate()
+    }
+
+    func test_prepareToTakeOver_whenAnHLSSessionOwnsAudio_appliesTheCallConfiguration() async throws {
+        let hls = HLSAudioSession()
+        try await hls.activate()
+        subject = .init(policy: MockAudioSessionPolicy())
+        let audioStore = mockAudioStore.audioStore
+
+        await subject.prepareToTakeOver()
+
+        // CallKit activates the session with the category it finds, so the
+        // call category must be there before the call takes the store.
+        let configuration = audioStore.state.audioSessionConfiguration
+        XCTAssertEqual(configuration.category, .playAndRecord)
+        XCTAssertEqual(configuration.mode, .voiceChat)
+        XCTAssertEqual(configuration.options, [.allowBluetoothHFP, .allowBluetoothA2DP])
+        XCTAssertEqual(audioStore.state.activeSessionIdentifier, hls.identifier)
+        await hls.deactivate()
+    }
+
+    func test_prepareToTakeOver_whenAnHLSSessionOwnsAudioWithAnAudioDeviceModule_doesNotOverrideConfiguration() async throws {
+        let hls = HLSAudioSession()
+        try await hls.activate()
+        let audioStore = mockAudioStore.audioStore
+        try await audioStore.dispatch(
+            .setAudioDeviceModule(AudioDeviceModule(MockRTCAudioDeviceModule()))
+        ).result()
+        subject = .init(policy: MockAudioSessionPolicy())
+
+        await subject.prepareToTakeOver()
+
+        XCTAssertEqual(audioStore.state.audioSessionConfiguration.category, .playback)
+        await hls.deactivate()
+    }
+
+    func test_prepareToTakeOver_whenAnotherCallOwnsAudio_doesNotOverrideConfiguration() async throws {
+        let audioStore = mockAudioStore.audioStore
+        audioStore.dispatch(.setActiveSessionIdentifier(.unique))
+        audioStore.dispatch(
+            .avAudioSession(
+                .setCategoryAndModeAndCategoryOptions(.playback, mode: .moviePlayback, categoryOptions: [])
+            )
+        )
+        await fulfillment { audioStore.state.audioSessionConfiguration.category == .playback }
+        subject = .init(policy: MockAudioSessionPolicy())
+
+        await subject.prepareToTakeOver()
+
+        XCTAssertEqual(audioStore.state.audioSessionConfiguration.category, .playback)
+    }
+
+    func test_hlsSessionDeactivates_afterACallTookTheStore_keepsTheCallConfiguration() async throws {
+        let hls = HLSAudioSession()
+        try await hls.activate()
+        let audioStore = mockAudioStore.audioStore
+        subject = .init(policy: MockAudioSessionPolicy())
+        await subject.prepareToTakeOver()
+        audioStore.dispatch(.setActiveSessionIdentifier(subject.identifier))
+        audioStore.dispatch(
+            .avAudioSession(
+                .setCategoryAndModeAndCategoryOptions(
+                    .playAndRecord,
+                    mode: .default,
+                    categoryOptions: [.defaultToSpeaker]
+                )
+            )
+        )
+        await fulfillment {
+            audioStore.state.activeSessionIdentifier == self.subject.identifier
+                && audioStore.state.audioSessionConfiguration.mode == .default
+        }
+
+        await hls.deactivate()
+
+        let state = audioStore.state
+        XCTAssertEqual(state.activeSessionIdentifier, subject.identifier)
+        XCTAssertEqual(state.audioSessionConfiguration.mode, .default)
+        XCTAssertEqual(state.audioSessionConfiguration.options, [.defaultToSpeaker])
+    }
+
     func test_init_whenAnotherSessionOwnsAudio_doesNotOverrideConfiguration() async {
         let owner = String.unique
 

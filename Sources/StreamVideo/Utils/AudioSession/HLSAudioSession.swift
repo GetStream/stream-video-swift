@@ -17,9 +17,13 @@ actor HLSAudioSession {
 
     @Injected(\.audioStore) private var audioStore
 
+    /// Starts the identifier of every HLS session, so a call can tell that
+    /// an HLS session owns the shared audio state.
+    nonisolated static let identifierPrefix = "hls-"
+
     /// Stable identifier used to claim ownership of the shared audio state.
-    nonisolated let identifier = String(
-        UUID().uuidString.replacingOccurrences(of: "-", with: "").prefix(8)
+    nonisolated let identifier = identifierPrefix + String(
+        UUID().uuidString.replacingOccurrences(of: "-", with: "").prefix(4)
     )
 
     private let dispatchOverride: Dispatch?
@@ -80,8 +84,9 @@ actor HLSAudioSession {
         isActive = false
 
         await attempt(.conditioned(owned, action: .setActive(false)))
-        // A call created while HLS played has no bootstrap of its own left to
-        // run, so the call configuration comes back before the release.
+        // CallKit activates a call with the category it finds. A call that
+        // starts after HLS needs the call configuration in place, so it
+        // comes back before the release.
         await attempt(
             .conditioned(
                 owned,
