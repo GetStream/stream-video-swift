@@ -162,6 +162,18 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
                 muteLivestreamOnJoin()
             }
         })
+        // Not on the HLS renderer: it is gone when the call leaves HLS, so a
+        // modifier there never sees the change that frees the player.
+        .onChange(of: state.playbackType) { playbackType in
+            guard case .hls = playbackType else {
+                // Cancel it: the state can keep the old value alive.
+                rateObserver?.cancel()
+                rateObserver = nil
+                return
+            }
+            guard livestreamState == .live else { return }
+            Task { await startHLSPlayback() }
+        }
         .onChange(of: call.state.backstage) { _ in
             livestreamState = LivestreamState(call: call)
             if
@@ -236,6 +248,7 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
         if muted { muteLivestreamOnJoin() }
         guard let player = await call.hlsPlayer() else { return }
         if streamPaused { player.pause() }
+        rateObserver?.cancel()
         rateObserver = followRate(of: player, into: $streamPaused)
     }
 
@@ -382,13 +395,6 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
         // The player is created after the view appears, so the mute and
         // pause state is applied once it exists.
         .onAppear { Task { await startHLSPlayback() } }
-        .onChange(of: state.playbackType) { playbackType in
-            guard case .hls = playbackType else {
-                rateObserver = nil
-                return
-            }
-            Task { await startHLSPlayback() }
-        }
         .onTapGesture {
             controlsShown = true
         }

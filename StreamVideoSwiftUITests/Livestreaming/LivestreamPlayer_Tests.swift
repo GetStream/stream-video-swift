@@ -181,6 +181,39 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
     }
 
     @MainActor
+    func test_livestreamPlayer_playbackTypeBecomesWebRTC_stopsFollowingThePlayerRate() async throws {
+        let made = MadePlayers()
+        let callController = MockCallController(
+            hlsStateAdapter: HLSStateAdapter { _ in
+                let player = MockHLSPlayer()
+                player.stubbedItem = AVPlayerItem(url: self.hlsURL)
+                made.players.append(player)
+                return player
+            }
+        )
+        let call = MockCall(.dummy(callController: callController))
+        call.state.playbackType = .hls(hlsURL)
+        let window = host(LivestreamPlayer(call: call, joinPolicy: .none))
+        defer { window.isHidden = true }
+        await fulfilmentInMainActor { made.players.count == 1 }
+        let player = try XCTUnwrap(made.players.first)
+        await wait(for: 0.3)
+        // The observer of the rate reads the item when the rate changes.
+        let readsWhileFollowing = player.currentItemReadCount
+        player.rate = player.rate == 0 ? 1 : 0
+        await wait(for: 0.2)
+        XCTAssertGreaterThan(player.currentItemReadCount, readsWhileFollowing)
+
+        call.state.playbackType = .webRTC
+        await wait(for: 0.2)
+        let reads = player.currentItemReadCount
+        player.rate = player.rate == 0 ? 1 : 0
+        await wait(for: 0.3)
+
+        XCTAssertEqual(player.currentItemReadCount, reads)
+    }
+
+    @MainActor
     func test_livestreamPlayer_startHLSPlayback_afterAURLSwap_doesNotPauseTheNewPlayer() async throws {
         let players = [MockHLSPlayer(), MockHLSPlayer()]
         let made = MadePlayers()
@@ -301,6 +334,14 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
     }
 
     // MARK: - Private Helpers
+
+    @MainActor
+    private func host(_ view: some View) -> UIWindow {
+        let window = UIWindow(frame: UIScreen.main.bounds)
+        window.rootViewController = UIHostingController(rootView: view)
+        window.makeKeyAndVisible()
+        return window
+    }
 
     private var hlsURL: URL { URL(string: "https://example.com/live.m3u8")! }
 

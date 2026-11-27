@@ -26,7 +26,13 @@ final class MockHLSPlayer: HLSPlayer, @unchecked Sendable {
         }
     }
 
-    override nonisolated var currentItem: AVPlayerItem? { stubbedItem ?? super.currentItem }
+    /// How often `currentItem` was read.
+    private(set) nonisolated(unsafe) var currentItemReadCount = 0
+
+    override nonisolated var currentItem: AVPlayerItem? {
+        currentItemReadCount += 1
+        return stubbedItem ?? super.currentItem
+    }
 
     override nonisolated func play() { playCount += 1 }
 
