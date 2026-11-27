@@ -40,12 +40,10 @@ private func content() {
             @StateObject var state: CallState
             @State private var isMuted = false
             @State private var isPaused = false
-            @State private var playback: HLSPlayback
 
             init(call: Call) {
                 self.call = call
                 _state = StateObject(wrappedValue: call.state)
-                _playback = State(wrappedValue: HLSPlayback(call: call))
             }
 
             var body: some View {
@@ -55,7 +53,6 @@ private func content() {
                 }
                 // Runs on appear, and again every time playbackType changes.
                 .task(id: state.playbackType) { await applyControls() }
-                .onDisappear { Task { await playback.release() } }
             }
 
             @ViewBuilder
@@ -124,7 +121,13 @@ private func content() {
             private func setPaused(_ paused: Bool) async {
                 isPaused = paused
                 if case .hls = state.playbackType {
-                    await playback.setPaused(paused)
+                    guard let player = await call.hlsPlayer() else { return }
+                    if paused {
+                        player.pause()
+                    } else {
+                        // Restarts near the live edge by default.
+                        player.play()
+                    }
                 } else {
                     host?.track?.isEnabled = !paused
                 }
@@ -133,14 +136,12 @@ private func content() {
             /// Applies the controls to the mode that is active now.
             private func applyControls() async {
                 if case .hls = state.playbackType {
-                    // A new HLS player starts playing, and follows the
-                    // audio output of the call. acquire() makes sure that
-                    // the player exists.
-                    guard await playback.acquire() != nil else { return }
-                    if isPaused { await playback.setPaused(true) }
+                    // hlsPlayer() makes sure that the player exists. A new
+                    // player starts playing, and follows the audio output of
+                    // the call.
+                    guard let player = await call.hlsPlayer() else { return }
+                    if isPaused { player.pause() }
                 } else {
-                    await playback.release()
-                    await setMuted(isMuted)
                     host?.track?.isEnabled = !isPaused
                 }
             }
@@ -152,12 +153,10 @@ private func content() {
             let call: Call
             @StateObject var state: CallState
             @State private var player: AVPlayer?
-            @State private var playback: HLSPlayback
 
             init(call: Call) {
                 self.call = call
                 _state = StateObject(wrappedValue: call.state)
-                _playback = State(wrappedValue: HLSPlayback(call: call))
             }
 
             var body: some View {
@@ -167,19 +166,22 @@ private func content() {
                     }
                 }
                 .task(id: state.playbackType) {
-                    player = await playback.acquire()
-                }
-                .onDisappear {
-                    Task { await playback.release() }
+                    // The SDK stops the player when the call leaves HLS.
+                    player = await call.hlsPlayer()
                 }
             }
         }
     }
 
     asyncContainer {
-        let playback = HLSPlayback(call: call)
         try await call.speaker.disableAudioOutput()
-        await playback.setPaused(true)
+        let player = await call.hlsPlayer()
+        player?.pause()
+        // play() restarts near the live edge. Turn that off to continue where
+        // the stream stopped.
+        player?.resumeFromLive = false
+        player?.play()
+        player?.playFromLiveEdge()
     }
 
     container {

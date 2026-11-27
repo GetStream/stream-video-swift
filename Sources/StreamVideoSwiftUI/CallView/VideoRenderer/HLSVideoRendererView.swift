@@ -31,10 +31,6 @@ public struct HLSVideoRendererView: UIViewRepresentable {
     /// How the video fits the view.
     var contentMode: UIView.ContentMode
 
-    /// Called after a new player is shown, so the owner can apply state, such
-    /// as mute, that a player created earlier would not have.
-    var onPlayerReady: (@MainActor () async -> Void)?
-
     /// Initializes a new instance of `HLSVideoRendererView`.
     /// - Parameters:
     ///   - call: The call that plays HLS.
@@ -44,17 +40,8 @@ public struct HLSVideoRendererView: UIViewRepresentable {
         call: Call,
         contentMode: UIView.ContentMode = .scaleAspectFit
     ) {
-        self.init(call: call, contentMode: contentMode, onPlayerReady: nil)
-    }
-
-    init(
-        call: Call,
-        contentMode: UIView.ContentMode,
-        onPlayerReady: (@MainActor () async -> Void)?
-    ) {
         self.call = call
         self.contentMode = contentMode
-        self.onPlayerReady = onPlayerReady
     }
 
     /// Creates the view that shows the player of the call.
@@ -80,13 +67,13 @@ public struct HLSVideoRendererView: UIViewRepresentable {
         context.coordinator.update(call: call)
     }
 
-    /// Creates the coordinator that owns the claim on the player.
+    /// Creates the coordinator that shows the player of the call.
     /// - Returns: A new `Coordinator` instance.
     public func makeCoordinator() -> Coordinator {
-        Coordinator(call: call, onPlayerReady: onPlayerReady)
+        Coordinator(call: call)
     }
 
-    /// Gives the player back when the view goes away.
+    /// Clears the view when it goes away. The player stays with the call.
     /// - Parameters:
     ///   - uiView: The view that hosts the HLS player.
     ///   - coordinator: The coordinator associated with the view.

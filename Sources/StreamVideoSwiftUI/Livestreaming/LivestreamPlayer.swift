@@ -2,6 +2,7 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import AVFoundation
 import Combine
 import StreamVideo
 import SwiftUI
@@ -74,8 +75,8 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
     
     @State var recordings: [CallRecording]?
 
-    /// Drives the shared HLS player when the call plays HLS.
-    @State var hlsPlayback: HLSPlayback
+    /// Keeps `streamPaused` in step with the shared HLS player.
+    @State var rateObserver: AnyCancellable?
 
     private let disposableBag = DisposableBag()
 
@@ -110,7 +111,6 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
         self.joinPolicy = joinPolicy
         self.showsLeaveCallButton = showsLeaveCallButton
         self.onFullScreenStateChange = onFullScreenStateChange
-        _hlsPlayback = State(wrappedValue: HLSPlayback(call: call))
         call.updateParticipantsSorting(with: livestreamOrAudioRoomSortPreset)
     }
     
@@ -139,7 +139,6 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
         self.joinPolicy = joinPolicy
         self.showsLeaveCallButton = showsLeaveCallButton
         self.onFullScreenStateChange = onFullScreenStateChange
-        _hlsPlayback = State(wrappedValue: HLSPlayback(call: call))
         call.updateParticipantsSorting(with: livestreamOrAudioRoomSortPreset)
     }
     
@@ -235,15 +234,35 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
     @MainActor
     func startHLSPlayback() async {
         if muted { muteLivestreamOnJoin() }
-        if streamPaused {
-            await hlsPlayback.setPaused(true)
-        }
+        guard let player = await call.hlsPlayer() else { return }
+        if streamPaused { player.pause() }
+        rateObserver = followRate(of: player, into: $streamPaused)
     }
 
     /// Applies the pause state of the player controls to the HLS player.
     @MainActor
     func applyStreamPaused(_ paused: Bool) async {
-        await hlsPlayback.setPaused(paused)
+        guard let player = await call.hlsPlayer() else { return }
+        if paused {
+            player.pause()
+        } else {
+            player.play()
+        }
+    }
+
+    /// Follows a pause or play that did not come from the controls, such as
+    /// one from the Picture-in-Picture window. It only reads the player, so
+    /// it does not pause or resume it again.
+    @MainActor
+    func followRate(
+        of player: HLSPlayer,
+        into streamPaused: Binding<Bool>
+    ) -> AnyCancellable {
+        player
+            .publisher(for: \.rate)
+            .dropFirst()
+            .receive(on: DispatchQueue.main)
+            .sink { streamPaused.wrappedValue = $0 == 0 }
     }
     
     func muteLivestreamOnJoin() {
@@ -357,11 +376,12 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
     private var hlsVideoRenderer: some View {
         HLSVideoRendererView(
             call: call,
-            contentMode: .scaleAspectFit,
-            // The player is created after the view appears, so the mute
-            // and pause state is applied once it exists.
-            onPlayerReady: { await startHLSPlayback() }
+            contentMode: .scaleAspectFit
         )
+        // The player is created after the view appears, so the mute and
+        // pause state is applied once it exists.
+        .onAppear { Task { await startHLSPlayback() } }
+        .onChange(of: state.playbackType) { _ in Task { await startHLSPlayback() } }
         .onTapGesture {
             controlsShown = true
         }

@@ -26,6 +26,13 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
     private lazy var mockWebRTCCoordinatorFactory: MockWebRTCCoordinatorFactory! = .init(
         videoConfig: Self.videoConfig
     )
+    private let madeHLSPlayers = MadePlayers()
+    private lazy var hlsStateAdapter: HLSStateAdapter! = .init { [madeHLSPlayers] _ in
+        let player = MockHLSPlayer()
+        madeHLSPlayers.players.append(player)
+        return player
+    }
+
     private lazy var subject: CallController! = .init(
         defaultAPI: defaultAPI,
         user: user,
@@ -35,7 +42,8 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         videoConfig: Self.videoConfig,
         initialCallSettings: initialCallSettings,
         cachedLocation: cachedLocation,
-        webRTCCoordinatorFactory: mockWebRTCCoordinatorFactory
+        webRTCCoordinatorFactory: mockWebRTCCoordinatorFactory,
+        hlsStateAdapter: hlsStateAdapter
     )
 
     // MARK: - Lifecycle
@@ -54,6 +62,8 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         mockPermissions.dismantle()
 
         subject = nil
+        hlsStateAdapter = nil
+        madeHLSPlayers.players = []
         mockWebRTCCoordinatorFactory = nil
         cachedLocation = nil
         apiKey = nil
@@ -579,6 +589,63 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
             .transition(MockTestOnlyStage(id: .idle, context: .init()))
 
         await fulfilmentInMainActor { call.state.playbackType == .webRTC }
+    }
+
+    // MARK: - HLS player
+
+    @MainActor
+    func test_hlsPlayer_whenTheCallPlaysHLS_returnsOnePlayerForEveryRequest() async throws {
+        let call = try makeHLSPlayerCall()
+
+        let first = await call.hlsPlayer()
+        let second = await call.hlsPlayer()
+
+        XCTAssertNotNil(first)
+        XCTAssertTrue(first === second)
+        XCTAssertEqual(madeHLSPlayers.players.count, 1)
+    }
+
+    @MainActor
+    func test_hlsPlayer_whenTheCallDoesNotPlayHLS_returnsNil() async throws {
+        let call = try makeHLSPlayerCall()
+        call.state.playbackType = .webRTC
+
+        let player = await call.hlsPlayer()
+
+        XCTAssertNil(player)
+        XCTAssertTrue(madeHLSPlayers.players.isEmpty)
+    }
+
+    @MainActor
+    func test_hlsPlayer_afterTheCallLeft_returnsNil() async throws {
+        let call = try makeHLSPlayerCall()
+        _ = await call.hlsPlayer()
+
+        subject.leave(reason: nil)
+        await fulfilmentInMainActor { call.state.playbackType == .webRTC }
+        let player = await call.hlsPlayer()
+
+        XCTAssertNil(player)
+    }
+
+    @MainActor
+    func test_leave_afterHLSPlayer_freesThePlayer() async throws {
+        let call = try makeHLSPlayerCall()
+        _ = await call.hlsPlayer()
+
+        subject.leave(reason: nil)
+
+        await fulfillment { [madeHLSPlayers] in madeHLSPlayers.players.first?.pauseCount == 1 }
+    }
+
+    @MainActor
+    func test_cleanUp_afterHLSPlayer_freesThePlayer() async throws {
+        let call = try makeHLSPlayerCall()
+        _ = await call.hlsPlayer()
+
+        subject.cleanUp()
+
+        await fulfillment { [madeHLSPlayers] in madeHLSPlayers.players.first?.pauseCount == 1 }
     }
 
     // MARK: - joinCall (HLS grant)
@@ -2108,6 +2175,14 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         await withCheckedContinuation { continuation in
             DispatchQueue.main.async { continuation.resume() }
         }
+    }
+
+    /// A call on the lazy `subject` that plays HLS, with mock players.
+    @MainActor
+    private func makeHLSPlayerCall() throws -> Call {
+        let call = Call.dummy(callController: subject)
+        call.state.playbackType = .hls(try XCTUnwrap(URL(string: "https://example.com/live.m3u8")))
+        return call
     }
 
     /// Builds a controller whose join API returns `response`. Its coordinator

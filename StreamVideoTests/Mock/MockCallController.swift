@@ -108,7 +108,10 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
     var setAudioBitrateProfileHandler: (@Sendable (AudioBitrateProfile) async throws -> Void)?
     var sessionIDHandler: (@Sendable () async -> Void)?
 
-    convenience init(initialCallSettings: CallSettings = .default) {
+    convenience init(
+        initialCallSettings: CallSettings = .default,
+        hlsStateAdapter: HLSStateAdapter = .init()
+    ) {
         self.init(
             defaultAPI: MockDefaultAPIEndpoints(),
             user: .dummy(),
@@ -117,7 +120,8 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
             apiKey: .unique,
             videoConfig: .dummy(),
             initialCallSettings: initialCallSettings,
-            cachedLocation: nil
+            cachedLocation: nil,
+            hlsStateAdapter: hlsStateAdapter
         )
     }
 

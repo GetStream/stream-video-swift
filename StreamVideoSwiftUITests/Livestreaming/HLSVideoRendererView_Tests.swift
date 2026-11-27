@@ -14,31 +14,22 @@ final class HLSVideoRendererView_Tests: StreamVideoTestCase, @unchecked Sendable
 
     private let url = URL(string: "https://example.com/live.m3u8")!
     private let made = MadePlayers()
-    private lazy var call: MockCall! = .init()
-    private lazy var store: HLSPlayerStore! = .init { [made] _ in
-        let player = MockHLSPlayer()
-        made.players.append(player)
-        return player
-    }
-
+    private lazy var mockAppState: MockAppStateAdapter! = .init()
+    private lazy var call: MockCall! = makeCall()
     private lazy var view: HLSPlayerView! = .init()
     private lazy var subject: HLSVideoRendererView.Coordinator! = .init(call: call)
-    private var previousStore: HLSPlayerStore?
-    @Atomic private var readyCount = 0
 
     override func setUp() async throws {
         try await super.setUp()
-        previousStore = InjectedValues[\.hlsPlayerStore]
-        InjectedValues[\.hlsPlayerStore] = store
+        mockAppState.makeShared()
     }
 
     override func tearDown() async throws {
         subject.dismantle()
-        await fulfillment { [store, call] in await store?.player(for: call!) == nil }
+        mockAppState.dismante()
+        mockAppState = nil
         subject = nil
         view = nil
-        InjectedValues[\.hlsPlayerStore] = previousStore!
-        store = nil
         call = nil
         made.players = []
         try await super.tearDown()
@@ -58,10 +49,9 @@ final class HLSVideoRendererView_Tests: StreamVideoTestCase, @unchecked Sendable
     func test_attach_webRTCCall_showsNothing() async {
         subject.attach(to: view)
         await wait(for: 0.1)
-        let stored = await store.player(for: call)
 
         XCTAssertNil(view.player)
-        XCTAssertNil(stored)
+        XCTAssertTrue(made.players.isEmpty)
     }
 
     func test_playbackTypeBecomesHLS_showsThePlayer() async {
@@ -79,10 +69,21 @@ final class HLSVideoRendererView_Tests: StreamVideoTestCase, @unchecked Sendable
         await fulfilmentInMainActor { self.view.player != nil }
 
         call.state.playbackType = .webRTC
-        await fulfilmentInMainActor { self.view.player == nil }
-        let stored = await store.player(for: call)
 
-        XCTAssertNil(stored)
+        await fulfilmentInMainActor { self.view.player == nil }
+        await fulfillment { [made] in made.players.first?.pauseCount == 1 }
+    }
+
+    func test_playlistURLChanges_showsThePlayerOfTheNewURL() async {
+        call.state.playbackType = .hls(url)
+        subject.attach(to: view)
+        await fulfilmentInMainActor { self.view.player != nil }
+
+        call.state.playbackType = .hls(URL(string: "https://example.com/other.m3u8")!)
+
+        await fulfilmentInMainActor {
+            self.made.players.count == 2 && self.view.player === self.made.players[1]
+        }
     }
 
     // MARK: - update(call:)
@@ -91,32 +92,28 @@ final class HLSVideoRendererView_Tests: StreamVideoTestCase, @unchecked Sendable
         call.state.playbackType = .hls(url)
         subject.attach(to: view)
         await fulfilmentInMainActor { self.view.player != nil }
-        let other = MockCall()
+        let other = makeCall()
         other.state.playbackType = .hls(url)
 
         subject.update(call: other)
         await fulfilmentInMainActor {
-            self.view.player === self.made.players.last && self.made.players.count == 2
+            self.made.players.count == 2 && self.view.player === self.made.players[1]
         }
-        let oldPlayer = await store.player(for: call)
-        let newPlayer = await store.player(for: other)
+        let newPlayer = await other.hlsPlayer()
 
-        XCTAssertEqual(made.players.count, 2)
-        XCTAssertNil(oldPlayer)
         XCTAssertTrue(newPlayer === made.players[1])
     }
 
     func test_updateCall_anotherCall_stopsFollowingTheOldCall() async {
         subject.attach(to: view)
-        let other = MockCall()
+        let other = makeCall()
 
         subject.update(call: other)
         call.state.playbackType = .hls(url)
         await wait(for: 0.1)
-        let stored = await store.player(for: call)
 
         XCTAssertNil(view.player)
-        XCTAssertNil(stored)
+        XCTAssertTrue(made.players.isEmpty)
     }
 
     func test_updateCall_sameCall_keepsThePlayer() async {
@@ -130,90 +127,69 @@ final class HLSVideoRendererView_Tests: StreamVideoTestCase, @unchecked Sendable
         XCTAssertTrue(view.player === made.players.first)
     }
 
-    func test_updateCall_whileAcquireIsInFlight_showsThePlayerOfTheNewCall() async {
+    func test_updateCall_whileThePlayerRequestIsInFlight_showsThePlayerOfTheNewCall() async {
         call.state.playbackType = .hls(url)
         subject.attach(to: view)
-        let other = MockCall()
+        let other = makeCall()
         other.state.playbackType = .hls(url)
 
         subject.update(call: other)
-        await fulfilmentInMainActor {
-            self.view.player != nil && self.made.players.count == 2
-        }
-        let oldPlayer = await store.player(for: call)
-        let newPlayer = await store.player(for: other)
+        await fulfilmentInMainActor { self.view.player != nil }
+        let newPlayer = await other.hlsPlayer()
 
-        XCTAssertTrue(view.player === made.players[1])
-        XCTAssertTrue(newPlayer === made.players[1])
-        XCTAssertNil(oldPlayer)
-    }
-
-    // MARK: - onPlayerReady
-
-    func test_attach_webRTCCall_doesNotCallOnPlayerReady() async {
-        let subject = HLSVideoRendererView.Coordinator(call: call) { [weak self] in
-            self?._readyCount.mutate { $0 += 1 }
-        }
-
-        subject.attach(to: view)
-        await wait(for: 0.1)
-
-        XCTAssertEqual(readyCount, 0)
-        subject.dismantle()
-        await fulfillment { [store, call] in await store?.player(for: call!) == nil }
-    }
-
-    func test_playbackTypeBecomesHLS_callsOnPlayerReadyOnce() async {
-        let subject = HLSVideoRendererView.Coordinator(call: call) { [weak self] in
-            self?._readyCount.mutate { $0 += 1 }
-        }
-        subject.attach(to: view)
-
-        call.state.playbackType = .hls(url)
-        await fulfilmentInMainActor { self.readyCount == 1 }
-
-        XCTAssertEqual(readyCount, 1)
-        subject.dismantle()
-        await fulfillment { [store, call] in await store?.player(for: call!) == nil }
+        XCTAssertNotNil(newPlayer)
+        XCTAssertTrue(view.player === newPlayer)
     }
 
     // MARK: - dismantle
 
-    func test_dismantle_releasesThePlayerAndEmptiesTheView() async {
+    func test_dismantle_emptiesTheViewAndKeepsThePlayerOfTheCall() async {
         call.state.playbackType = .hls(url)
         subject.attach(to: view)
         await fulfilmentInMainActor { self.view.player != nil }
 
         subject.dismantle()
-        await fulfilmentInMainActor { self.view.player == nil }
-        await fulfillment { [store, call] in await store?.player(for: call!) == nil }
+
+        XCTAssertNil(view.player)
+        let player = await call.hlsPlayer()
+        XCTAssertTrue(player === made.players.first)
+        XCTAssertEqual(made.players.first?.pauseCount, 0)
     }
 
-    func test_dismantle_whileAcquireIsInFlight_releasesTheClaim() async {
+    func test_dismantle_whileThePlayerRequestIsInFlight_keepsTheViewEmpty() async {
         call.state.playbackType = .hls(url)
         subject.attach(to: view)
 
         subject.dismantle()
         await wait(for: 0.2)
-        let stored = await store.player(for: call)
 
-        XCTAssertNil(stored)
         XCTAssertNil(view.player)
     }
 
-    func test_dismantle_oneOfTwoRenderers_keepsThePlayerForTheOther() async {
+    func test_twoRenderers_ofTheSameCall_showTheSamePlayer() async {
         call.state.playbackType = .hls(url)
+        let otherView = HLSPlayerView()
         let other = HLSVideoRendererView.Coordinator(call: call)
-        other.attach(to: HLSPlayerView())
+        other.attach(to: otherView)
         subject.attach(to: view)
-        await fulfilmentInMainActor { self.view.player != nil }
+        await fulfilmentInMainActor { self.view.player != nil && otherView.player != nil }
 
+        XCTAssertTrue(view.player === otherView.player)
+        XCTAssertEqual(made.players.count, 1)
         subject.dismantle()
-        await fulfilmentInMainActor { self.view.player == nil }
-        let stored = await store.player(for: call)
-
-        XCTAssertNotNil(stored)
+        XCTAssertNil(view.player)
+        XCTAssertNotNil(otherView.player)
         other.dismantle()
-        await fulfillment { [store, call] in await store?.player(for: call!) == nil }
+    }
+
+    // MARK: - Private Helpers
+
+    private func makeCall() -> MockCall {
+        let adapter = HLSStateAdapter { [made] _ in
+            let player = MockHLSPlayer()
+            made.players.append(player)
+            return player
+        }
+        return MockCall(.dummy(callController: MockCallController(hlsStateAdapter: adapter)))
     }
 }

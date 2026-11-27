@@ -12,27 +12,20 @@ import UIKit
 /// Extension for `HLSVideoRendererView` to define the `Coordinator` class.
 extension HLSVideoRendererView {
 
-    /// A class to coordinate the `HLSVideoRendererView` and own its claim on
-    /// the shared player.
+    /// A class to coordinate the `HLSVideoRendererView` and show the player
+    /// of the call.
     @MainActor
     public final class Coordinator {
 
         private var call: Call
-        private var playback: HLSPlayback
         private weak var view: HLSPlayerView?
         private var playbackTypeObserver: AnyCancellable?
-        /// Called after a new player is shown. Lets the owner apply state,
-        /// such as mute, that a player created earlier would not have.
-        private let onPlayerReady: (@MainActor () async -> Void)?
-        private var playbackUpdate: Task<Void, Never>?
+        /// The latest request for the player. A result that comes after
+        /// another change is dropped.
+        private var playerRequest: Task<Void, Never>?
 
-        init(
-            call: Call,
-            onPlayerReady: (@MainActor () async -> Void)? = nil
-        ) {
+        init(call: Call) {
             self.call = call
-            playback = HLSPlayback(call: call)
-            self.onPlayerReady = onPlayerReady
         }
 
         func attach(to view: HLSPlayerView) {
@@ -43,61 +36,42 @@ extension HLSVideoRendererView {
         /// Follows `call` when the view is given another one.
         func update(call newCall: Call) {
             guard newCall.cId != call.cId else { return }
-            playbackTypeObserver = nil
             call = newCall
-            // Runs after an acquire in flight, so that claim is released too.
-            enqueue { [self] in
-                await playback.release()
-                view?.player = nil
-                playback = HLSPlayback(call: call)
-                observePlaybackType()
-            }
+            clear()
+            observePlaybackType()
         }
 
         func dismantle() {
             playbackTypeObserver = nil
-            // Captures self, so the claim is released even after the owner
-            // has gone.
-            enqueue { [self] in
-                await playback.release()
-                view?.player = nil
-            }
+            clear()
         }
 
         /// Follows the playback type of the same call. It is `.webRTC` until
         /// the join response grants HLS, and it returns to `.webRTC` when the
-        /// call ends. `dismantle()` covers neither change when the app keeps
-        /// this view on screen, for example while it shows the view before
-        /// the join completes. `LivestreamPlayer` swaps views on the type,
-        /// so for it only the first value acquires the player.
+        /// call ends. The view can stay on screen through both changes, for
+        /// example while it shows the view before the join completes.
         private func observePlaybackType() {
             playbackTypeObserver = call.state
                 .$playbackType
                 .removeDuplicates()
-                .sink { [weak self] playbackType in
-                    self?.enqueue { await self?.update(for: playbackType) }
-                }
+                .sink { [weak self] in self?.show($0) }
         }
 
-        private func enqueue(_ operation: @escaping @MainActor () async -> Void) {
-            let previous = playbackUpdate
-            playbackUpdate = Task { @MainActor in
-                await previous?.value
-                await operation()
+        private func show(_ playbackType: PlaybackType) {
+            clear()
+            guard case .hls = playbackType else { return }
+            let call = call
+            playerRequest = Task { [weak self] in
+                let player = await call.hlsPlayer()
+                guard !Task.isCancelled else { return }
+                self?.view?.player = player
             }
         }
 
-        private func update(for playbackType: PlaybackType) async {
-            switch playbackType {
-            case .hls:
-                let previous = view?.player
-                let player = await playback.acquire()
-                view?.player = player
-                if player != nil, player !== previous { await onPlayerReady?() }
-            case .webRTC:
-                await playback.release()
-                view?.player = nil
-            }
+        private func clear() {
+            playerRequest?.cancel()
+            playerRequest = nil
+            view?.player = nil
         }
     }
 }

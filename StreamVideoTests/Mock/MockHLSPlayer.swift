@@ -4,13 +4,13 @@
 
 import AVFoundation
 import Foundation
+@testable import StreamVideo
 
 /// Records the commands sent to a player instead of loading a stream.
-final class MockHLSPlayer: AVPlayer, @unchecked Sendable {
+final class MockHLSPlayer: HLSPlayer, @unchecked Sendable {
     private(set) nonisolated(unsafe) var playCount = 0
     private(set) nonisolated(unsafe) var pauseCount = 0
     private(set) nonisolated(unsafe) var replacedItems: [AVPlayerItem?] = []
-    private(set) nonisolated(unsafe) var seekTimes: [CMTime] = []
     /// What `rate` reports. A player without an item stays at 0.
     nonisolated(unsafe) var stubbedRate: Float = 0
     /// The item `currentItem` reports, until the player clears its item.
@@ -18,7 +18,12 @@ final class MockHLSPlayer: AVPlayer, @unchecked Sendable {
 
     override nonisolated var rate: Float {
         get { stubbedRate }
-        set { stubbedRate = newValue }
+        set {
+            // Notifies KVO observers, which a stubbed property would skip.
+            willChangeValue(forKey: "rate")
+            stubbedRate = newValue
+            didChangeValue(forKey: "rate")
+        }
     }
 
     override nonisolated var currentItem: AVPlayerItem? { stubbedItem ?? super.currentItem }
@@ -31,6 +36,4 @@ final class MockHLSPlayer: AVPlayer, @unchecked Sendable {
         replacedItems.append(item)
         stubbedItem = item
     }
-
-    override nonisolated func seek(to time: CMTime) { seekTimes.append(time) }
 }

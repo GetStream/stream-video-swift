@@ -15,13 +15,9 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
     private let callId = "test"
     private let callType = "livestream"
     private var mockStreamVideo: MockStreamVideo! = .init()
-    private var previousStore: HLSPlayerStore?
 
     override func tearDown() async throws {
         mockStreamVideo = nil
-        if let previousStore {
-            InjectedValues[\.hlsPlayerStore] = previousStore
-        }
         try await super.tearDown()
     }
 
@@ -143,6 +139,25 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
     }
 
     @MainActor
+    func test_livestreamPlayer_followRate_playerPausedAndResumedFromOutside_updatesStreamPaused() async throws {
+        let fixture = await makeHLSFixture(playbackType: .hls(hlsURL))
+        let streamPaused = Atomic<Bool>(wrappedValue: false)
+        let binding = Binding(
+            get: { streamPaused.wrappedValue },
+            set: { streamPaused.wrappedValue = $0 }
+        )
+        let observer = fixture.subject.followRate(of: fixture.player, into: binding)
+
+        fixture.player.rate = 0
+        await fulfillment { streamPaused.wrappedValue }
+        fixture.player.rate = 1
+        await fulfillment { !streamPaused.wrappedValue }
+
+        XCTAssertEqual(fixture.player.pauseCount, 0)
+        observer.cancel()
+    }
+
+    @MainActor
     func test_livestreamPlayer_snapshot() async throws {
         // Given
         let call = streamVideo.call(callType: callType, callId: callId)
@@ -252,13 +267,11 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
         streamPaused: Bool = false
     ) async -> HLSFixture {
         let player = MockHLSPlayer()
-        let store = HLSPlayerStore { _ in player }
-        previousStore = InjectedValues[\.hlsPlayerStore]
-        InjectedValues[\.hlsPlayerStore] = store
-        let callController = MockCallController()
+        let callController = MockCallController(
+            hlsStateAdapter: HLSStateAdapter { _ in player }
+        )
         let call = MockCall(.dummy(callController: callController))
         call.state.playbackType = playbackType
-        _ = await store.acquire(for: call, claimId: .init(), playbackType: playbackType)
         let subject = LivestreamPlayer(
             call: call,
             muted: muted,
