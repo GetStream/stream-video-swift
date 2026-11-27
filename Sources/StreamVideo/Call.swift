@@ -1748,7 +1748,11 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// leaves HLS or ends. Mute it with `speaker.disableAudioOutput()`. Pause
     /// it with `pause()`, and resume it with `play()`.
     ///
-    /// - Returns: The player, or `nil` while the call does not play HLS.
+    /// Only this method returns a player that the SDK manages. Do not create
+    /// an ``HLSPlayer`` yourself.
+    ///
+    /// - Returns: The player, or `nil` while the call does not play HLS, and
+    ///   after the call has left.
     /// - Important: This API is in beta, like ``PlaybackType``.
     public func hlsPlayer() async -> HLSPlayer? {
         await callController.hlsPlayer()

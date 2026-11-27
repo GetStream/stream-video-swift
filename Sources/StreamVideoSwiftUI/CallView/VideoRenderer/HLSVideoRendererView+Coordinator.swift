@@ -35,7 +35,7 @@ extension HLSVideoRendererView {
 
         /// Follows `call` when the view is given another one.
         func update(call newCall: Call) {
-            guard newCall.cId != call.cId else { return }
+            guard newCall !== call else { return }
             call = newCall
             clear()
             observePlaybackType()

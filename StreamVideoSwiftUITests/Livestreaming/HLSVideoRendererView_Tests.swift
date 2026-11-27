@@ -116,6 +116,18 @@ final class HLSVideoRendererView_Tests: StreamVideoTestCase, @unchecked Sendable
         XCTAssertTrue(made.players.isEmpty)
     }
 
+    func test_updateCall_anotherInstanceWithTheSameCId_followsTheNewInstance() async {
+        subject.attach(to: view)
+        let other = makeCall(callType: call.callType, callId: call.callId)
+        other.state.playbackType = .hls(url)
+
+        subject.update(call: other)
+
+        await fulfilmentInMainActor { self.view.player != nil }
+        let player = await other.hlsPlayer()
+        XCTAssertTrue(view.player === player)
+    }
+
     func test_updateCall_sameCall_keepsThePlayer() async {
         call.state.playbackType = .hls(url)
         subject.attach(to: view)
@@ -184,12 +196,21 @@ final class HLSVideoRendererView_Tests: StreamVideoTestCase, @unchecked Sendable
 
     // MARK: - Private Helpers
 
-    private func makeCall() -> MockCall {
+    private func makeCall(
+        callType: String = .default,
+        callId: String = .unique
+    ) -> MockCall {
         let adapter = HLSStateAdapter { [made] _ in
             let player = MockHLSPlayer()
             made.players.append(player)
             return player
         }
-        return MockCall(.dummy(callController: MockCallController(hlsStateAdapter: adapter)))
+        return MockCall(
+            .dummy(
+                callType: callType,
+                callId: callId,
+                callController: MockCallController(hlsStateAdapter: adapter)
+            )
+        )
     }
 }
