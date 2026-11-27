@@ -74,6 +74,40 @@ final class PictureInPictureControllerTests: XCTestCase, @unchecked Sendable {
         withExtendedLifetime(configured.subject) {}
     }
 
+    /// AVKit keeps the controls of the content a controller was created
+    /// with, so the player layer needs a controller of its own.
+    @MainActor
+    func test_hlsCall_playerLayerAfterTheVideoCall_controllerIsCreatedForThePlayerLayer() async {
+        let call = makeHLSCall()
+        let configured = await makeConfiguredSubject(callFirst: true, call: call)
+        let layer = AVPlayerLayer()
+
+        configured.store.dispatch(.setPlayerLayer(layer, cId: call.cId))
+
+        await fulfilmentInMainActor {
+            configured.factory.contentSources.last?.playerLayer === layer
+        }
+        withExtendedLifetime(configured.subject) {}
+    }
+
+    @MainActor
+    func test_hlsCall_playerLayerRemoved_controllerIsCreatedForTheVideoCall() async {
+        let call = makeHLSCall()
+        let configured = await makeConfiguredSubject(callFirst: true, call: call)
+        let layer = AVPlayerLayer()
+        configured.store.dispatch(.setPlayerLayer(layer, cId: call.cId))
+        await fulfilmentInMainActor {
+            configured.factory.contentSources.last?.playerLayer === layer
+        }
+
+        configured.store.dispatch(.removePlayerLayer(layer))
+
+        await fulfilmentInMainActor {
+            configured.factory.contentSources.last?.activeVideoCallSourceView != nil
+        }
+        withExtendedLifetime(configured.subject) {}
+    }
+
     @MainActor
     func test_hlsCall_withoutPlayerLayer_controllerShowsTheVideoCall() async {
         let configured = await makeConfiguredSubject(callFirst: true, call: makeHLSCall())

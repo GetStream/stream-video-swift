@@ -36,6 +36,9 @@ final class PictureInPictureController: @unchecked Sendable {
     // MARK: - Private Properties
 
     /// The system Picture-in-Picture controller instance.
+    /// Whether the system controller was created for the HLS player layer.
+    private var controllerUsesPlayerLayer = false
+
     private var pictureInPictureController: AVPictureInPictureController? {
         didSet { didUpdate(pictureInPictureController) }
     }
@@ -163,7 +166,17 @@ final class PictureInPictureController: @unchecked Sendable {
             contentViewController: contentViewController
         )
 
-        if pictureInPictureController == nil {
+        // AVKit keeps the controls of the content it was created with, so a
+        // switch between the video call and the HLS player needs a new
+        // controller. An active window keeps its controller.
+        let usesPlayerLayer = hlsPlayerLayer != nil
+        if
+            pictureInPictureController == nil
+            || (
+                usesPlayerLayer != controllerUsesPlayerLayer
+                    && pictureInPictureController?.isPictureInPictureActive != true
+            ) {
+            controllerUsesPlayerLayer = usesPlayerLayer
             pictureInPictureController = makePictureInPictureController(contentSource)
             pictureInPictureController?.canStartPictureInPictureAutomaticallyFromInline = store
                 .state
@@ -174,6 +187,14 @@ final class PictureInPictureController: @unchecked Sendable {
         }
         // A livestream has no seeking in the Picture-in-Picture window.
         pictureInPictureController?.requiresLinearPlayback = hlsPlayerLayer != nil
+        log.debug(
+            "Content source: \(hlsPlayerLayer == nil ? "video call" : "HLS player layer") "
+                + "playbackType:\(call.state.playbackType) "
+                + "layerCallId:\(store.state.playerLayerCallId ?? "nil") "
+                + "callId:\(call.cId) "
+                + "hasLayer:\(store.state.playerLayer != nil)",
+            subsystems: .pictureInPicture
+        )
 
         log.debug(
             "SourceView updated and contentViewController preferredContentSize:\(contentViewController.preferredContentSize)",
