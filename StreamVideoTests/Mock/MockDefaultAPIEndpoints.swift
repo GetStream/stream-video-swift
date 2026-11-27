@@ -78,6 +78,7 @@ final class MockDefaultAPIEndpoints: DefaultAPIEndpoints, Mockable, @unchecked S
         case videoConnect
         case ringCall
         case clientCallEvent
+        case reportHLSStats
         case getCallRingState
     }
 
@@ -133,6 +134,7 @@ final class MockDefaultAPIEndpoints: DefaultAPIEndpoints, Mockable, @unchecked S
         case videoConnect
         case ringCall(request: RingCallRequest)
         case clientCallEvent(request: ReportClientEventRequest)
+        case reportHLSStats(type: String, id: String, request: ReportHLSStatsRequest)
         case getCallRingState(type: String, id: String, callSessionId: String)
 
         var payload: Any {
@@ -239,6 +241,8 @@ final class MockDefaultAPIEndpoints: DefaultAPIEndpoints, Mockable, @unchecked S
                 return request
             case let .clientCallEvent(request: request):
                 return request
+            case let .reportHLSStats(type, id, request):
+                return (type, id, request)
             case let .getCallRingState(type, id, callSessionId):
                 return (type, id, callSessionId)
             }
@@ -629,6 +633,43 @@ final class MockDefaultAPIEndpoints: DefaultAPIEndpoints, Mockable, @unchecked S
             return value
         }
         return try stubbedResult(for: .clientCallEvent)
+    }
+
+    /// Runs before `reportHLSStats` answers. Suspend in it to keep a report
+    /// in flight.
+    var reportHLSStatsHandler: (@Sendable () async throws -> Void)?
+    @Atomic private var hlsStatsStatusCodes: [Int?] = []
+
+    /// The HLS stats reports received, in order.
+    var hlsStatsReports: [ReportHLSStatsRequest] {
+        (recordedInputPayload((String, String, ReportHLSStatsRequest).self, for: .reportHLSStats) ?? [])
+            .map(\.2)
+    }
+
+    /// Makes the next `reportHLSStats` calls fail with an `APIError` of these
+    /// status codes, one per call. A `nil` entry succeeds. After the entries
+    /// run out, calls succeed.
+    func failHLSStats(withStatusCodes statusCodes: [Int?]) {
+        hlsStatsStatusCodes = statusCodes
+    }
+
+    func reportHLSStats(
+        type: String,
+        id: String,
+        reportHLSStatsRequest: ReportHLSStatsRequest
+    ) async throws -> ReportHLSStatsResponse {
+        stubbedFunctionInput[.reportHLSStats]?.append(
+            .reportHLSStats(type: type, id: id, request: reportHLSStatsRequest)
+        )
+        try await reportHLSStatsHandler?()
+        var statusCode: Int?
+        _hlsStatsStatusCodes.mutate {
+            if !$0.isEmpty { statusCode = $0.removeFirst() }
+        }
+        if let statusCode {
+            throw APIError(code: 0, message: "Failed.", statusCode: statusCode)
+        }
+        return try stubbedResult(for: .reportHLSStats)
     }
 
     func getCallRingState(type: String, id: String, callSessionId: String) async throws -> GetCallRingStateResponse {

@@ -331,6 +331,7 @@
 				"Utilities/Dummy/FrameRecordingSettingsResponse+Dummy.swift",
 				"Utilities/Dummy/GeofenceSettings+Dummy.swift",
 				"Utilities/Dummy/GetCallResponse+Dummy.swift",
+				"Utilities/Dummy/HLSPlaybackStats+Dummy.swift",
 				"Utilities/Dummy/HLSSettingsResponse+Dummy.swift",
 				"Utilities/Dummy/IndividualRecordingSettingsResponse+Dummy.swift",
 				"Utilities/Dummy/JoinCallResponse+Dummy.swift",

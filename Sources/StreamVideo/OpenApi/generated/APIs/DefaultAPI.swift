@@ -327,6 +327,30 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         }
     }
 
+    open func reportHLSStats(
+        type: String,
+        id: String,
+        reportHLSStatsRequest: ReportHLSStatsRequest
+    ) async throws -> ReportHLSStatsResponse {
+        var path = "/video/call/{type}/{id}/hls_stats"
+
+        let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
+        let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        path = path.replacingOccurrences(of: String(format: "{%@}", "type"), with: typePostEscape, options: .literal, range: nil)
+        let idPreEscape = "\(APIHelper.mapValueToPathItem(id))"
+        let idPostEscape = idPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        path = path.replacingOccurrences(of: String(format: "{%@}", "id"), with: idPostEscape, options: .literal, range: nil)
+
+        let urlRequest = try makeRequest(
+            uriPath: path,
+            httpMethod: "POST",
+            request: reportHLSStatsRequest
+        )
+        return try await send(request: urlRequest) {
+            try self.jsonDecoder.decode(ReportHLSStatsResponse.self, from: $0)
+        }
+    }
+
     open func joinCall(type: String, id: String, joinCallRequest: JoinCallRequest) async throws -> JoinCallResponse {
         var path = "/video/call/{type}/{id}/join"
 
@@ -1220,6 +1244,9 @@ protocol DefaultAPIEndpoints {
         -> CollectUserFeedbackResponse
 
     func goLive(type: String, id: String, goLiveRequest: GoLiveRequest) async throws -> GoLiveResponse
+
+    func reportHLSStats(type: String, id: String, reportHLSStatsRequest: ReportHLSStatsRequest) async throws
+        -> ReportHLSStatsResponse
 
     func joinCall(type: String, id: String, joinCallRequest: JoinCallRequest) async throws -> JoinCallResponse
 
