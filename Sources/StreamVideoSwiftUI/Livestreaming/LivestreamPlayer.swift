@@ -252,7 +252,8 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
 
     /// Follows a pause or play that did not come from the controls, such as
     /// one from the Picture-in-Picture window. It only reads the player, so
-    /// it does not pause or resume it again.
+    /// it does not pause or resume it again. A player without an item was
+    /// stopped by the SDK, so its rate does not count.
     @MainActor
     func followRate(
         of player: HLSPlayer,
@@ -260,8 +261,8 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
     ) -> AnyCancellable {
         player
             .publisher(for: \.rate)
-            .dropFirst()
             .receive(on: DispatchQueue.main)
+            .filter { [weak player] _ in player?.currentItem != nil }
             .sink { streamPaused.wrappedValue = $0 == 0 }
     }
     
@@ -381,7 +382,13 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
         // The player is created after the view appears, so the mute and
         // pause state is applied once it exists.
         .onAppear { Task { await startHLSPlayback() } }
-        .onChange(of: state.playbackType) { _ in Task { await startHLSPlayback() } }
+        .onChange(of: state.playbackType) { playbackType in
+            guard case .hls = playbackType else {
+                rateObserver = nil
+                return
+            }
+            Task { await startHLSPlayback() }
+        }
         .onTapGesture {
             controlsShown = true
         }

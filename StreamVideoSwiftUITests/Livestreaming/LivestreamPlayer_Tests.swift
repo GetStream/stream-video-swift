@@ -141,13 +141,16 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
     @MainActor
     func test_livestreamPlayer_followRate_playerPausedAndResumedFromOutside_updatesStreamPaused() async throws {
         let fixture = await makeHLSFixture(playbackType: .hls(hlsURL))
-        let streamPaused = Atomic<Bool>(wrappedValue: false)
+        fixture.player.stubbedItem = AVPlayerItem(url: hlsURL)
+        fixture.player.stubbedRate = 1
+        let streamPaused = Atomic<Bool>(wrappedValue: true)
         let binding = Binding(
             get: { streamPaused.wrappedValue },
             set: { streamPaused.wrappedValue = $0 }
         )
         let observer = fixture.subject.followRate(of: fixture.player, into: binding)
 
+        await fulfillment { !streamPaused.wrappedValue }
         fixture.player.rate = 0
         await fulfillment { streamPaused.wrappedValue }
         fixture.player.rate = 1
@@ -155,6 +158,49 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
 
         XCTAssertEqual(fixture.player.pauseCount, 0)
         observer.cancel()
+    }
+
+    @MainActor
+    func test_livestreamPlayer_followRate_invalidatedPlayer_doesNotPauseTheButton() async throws {
+        let fixture = await makeHLSFixture(playbackType: .hls(hlsURL))
+        fixture.player.stubbedItem = AVPlayerItem(url: hlsURL)
+        fixture.player.stubbedRate = 1
+        let streamPaused = Atomic<Bool>(wrappedValue: false)
+        let binding = Binding(
+            get: { streamPaused.wrappedValue },
+            set: { streamPaused.wrappedValue = $0 }
+        )
+        let observer = fixture.subject.followRate(of: fixture.player, into: binding)
+
+        fixture.player.invalidate()
+        fixture.player.rate = 0
+
+        await wait(for: 0.3)
+        XCTAssertFalse(streamPaused.wrappedValue)
+        observer.cancel()
+    }
+
+    @MainActor
+    func test_livestreamPlayer_startHLSPlayback_afterAURLSwap_doesNotPauseTheNewPlayer() async throws {
+        let players = [MockHLSPlayer(), MockHLSPlayer()]
+        let made = MadePlayers()
+        let callController = MockCallController(
+            hlsStateAdapter: HLSStateAdapter { _ in
+                let player = players[made.players.count]
+                made.players.append(player)
+                return player
+            }
+        )
+        let call = MockCall(.dummy(callController: callController))
+        call.state.playbackType = .hls(hlsURL)
+        let subject = LivestreamPlayer(call: call, joinPolicy: .none)
+        await subject.startHLSPlayback()
+
+        call.state.playbackType = .hls(URL(string: "https://example.com/other.m3u8")!)
+        await fulfillment { players[0].pauseCount == 1 }
+        await subject.startHLSPlayback()
+
+        XCTAssertEqual(players[1].pauseCount, 0)
     }
 
     @MainActor
