@@ -90,6 +90,22 @@ final class HLSVideoRendererView_Tests: StreamVideoTestCase, @unchecked Sendable
         }
     }
 
+    func test_playlistURLChanges_keepsTheOldPlayerOnTheViewUntilTheNewOneIsShown() async {
+        call.state.playbackType = .hls(url)
+        subject.attach(to: view)
+        await fulfilmentInMainActor { self.view.player != nil }
+        let oldPlayer = view.player
+
+        call.state.playbackType = .hls(URL(string: "https://example.com/other.m3u8")!)
+
+        // The view keeps a player, so an active Picture-in-Picture layer
+        // never goes empty in between.
+        XCTAssertTrue(view.player === oldPlayer)
+        await fulfilmentInMainActor {
+            self.made.players.count == 2 && self.view.player === self.made.players[1]
+        }
+    }
+
     // MARK: - the host leaves and returns
 
     func test_backstageBecomesTrue_removesThePlayer() async {

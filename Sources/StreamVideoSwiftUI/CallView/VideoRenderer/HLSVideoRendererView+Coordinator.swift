@@ -73,8 +73,13 @@ extension HLSVideoRendererView {
         }
 
         private func show(_ playbackType: PlaybackType, isLive: Bool) {
-            clear()
+            playerRequest?.cancel()
+            playerRequest = nil
+            // A new playlist URL keeps the old player on the view until the
+            // new one arrives, so an active Picture-in-Picture layer never
+            // goes empty. Leaving HLS, or the live, clears it at once.
             guard case .hls = playbackType, isLive else {
+                view?.player = nil
                 unregisterPlayerLayer()
                 return
             }
