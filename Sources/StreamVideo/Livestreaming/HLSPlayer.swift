@@ -43,6 +43,30 @@ public class HLSPlayer: AVPlayer, @unchecked Sendable {
     private var isPausedByUser = false
     private var observers: [AnyCancellable] = []
 
+    /// How long a stream can stay in the unknown state before the player
+    /// loads it again.
+    var loadTimeout: TimeInterval = 6
+
+    /// The first wait before a failed stream is loaded again. Each failure
+    /// doubles it, up to ``maxReloadDelay``.
+    var initialReloadDelay: TimeInterval = 1 {
+        didSet { reloadDelay = initialReloadDelay }
+    }
+
+    var maxReloadDelay: TimeInterval = 8
+
+    /// Creates the item for a stream that loads again.
+    var makeItem: (URL) -> AVPlayerItem = { AVPlayerItem(url: $0) }
+
+    /// How many times the player loads the same stream again before it gives
+    /// up. The count restarts when the stream is ready to play.
+    private let maxReloads = 10
+    private var reloadCount = 0
+
+    /// Loads a failed stream again. See ``observeFailures()``.
+    private var reload: Task<Void, Never>?
+    private var reloadDelay: TimeInterval = 1
+
     /// Plays the stream. Restarts near the live edge when ``resumeFromLive``
     /// is `true`, unless the player is already playing. A seek during
     /// playback would stall it.
@@ -76,6 +100,7 @@ public class HLSPlayer: AVPlayer, @unchecked Sendable {
         observers = [
             observeUserPauses(),
             observeSystemPauses(),
+            observeFailures(),
             audioOutputOn
                 .removeDuplicates()
                 .sink { [weak self] in self?.isMuted = !$0 }
@@ -85,11 +110,72 @@ public class HLSPlayer: AVPlayer, @unchecked Sendable {
     /// Stops the observers and the stream. The player is not used again.
     func invalidate() {
         observers = []
+        reload?.cancel()
+        reload = nil
         pause()
         replaceCurrentItem(with: nil)
     }
 
     // MARK: - Private Helpers
+
+    /// A new broadcast is announced before its playlist has segments. The
+    /// first load then fails, or hangs without an error. `AVPlayer` retries
+    /// neither, so load the same URL again until it plays.
+    private func observeFailures() -> AnyCancellable {
+        publisher(for: \.currentItem?.status)
+            // The status changes on any thread.
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] status in
+                guard let self else { return }
+                switch status {
+                case .failed:
+                    scheduleReload(after: reloadDelay)
+                    reloadDelay = min(reloadDelay * 2, maxReloadDelay)
+                case .readyToPlay:
+                    reload?.cancel()
+                    reload = nil
+                    reloadDelay = initialReloadDelay
+                    reloadCount = 0
+                case .unknown where currentItem != nil:
+                    // ponytail: a fixed load timeout; a slow network can hit
+                    // it too, and then loads the same URL again.
+                    scheduleReload(after: loadTimeout)
+                default:
+                    break
+                }
+            }
+    }
+
+    /// Replaces the item with a new one for the same URL after `delay`. It
+    /// does nothing when the item changed meanwhile, or the player stopped.
+    private func scheduleReload(after delay: TimeInterval) {
+        guard let url = (currentItem?.asset as? AVURLAsset)?.url else { return }
+        reload?.cancel()
+        guard reloadCount < maxReloads else {
+            if reloadCount == maxReloads {
+                reloadCount += 1
+                log.warning("HLS stream did not load after \(maxReloads) attempts. Giving up.")
+            }
+            return
+        }
+        // ponytail: ten attempts per ready state, about a minute with the
+        // backoff. A longer outage needs a new player, which the SDK creates
+        // when the host comes back with a new playlist.
+        reload = Task { @MainActor [weak self] in
+            try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+            guard
+                let self,
+                !Task.isCancelled,
+                (currentItem?.asset as? AVURLAsset)?.url == url
+            else { return }
+            reload = nil
+            reloadCount += 1
+            log.debug("HLS stream did not load after \(delay)s. Loading it again.")
+            replaceCurrentItem(with: makeItem(url))
+            // The user's pause stays: a reload does not play the stream.
+            if !isPausedByUser { play() }
+        }
+    }
 
     /// Something other than the SDK can pause or play the player, for
     /// example the app or the Picture-in-Picture window. Treat it as the

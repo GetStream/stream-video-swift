@@ -11,6 +11,11 @@ final class MockHLSPlayer: HLSPlayer, @unchecked Sendable {
     private(set) nonisolated(unsafe) var playCount = 0
     private(set) nonisolated(unsafe) var pauseCount = 0
     private(set) nonisolated(unsafe) var replacedItems: [AVPlayerItem?] = []
+    /// The URLs of the items the player was given, in order.
+    nonisolated var reloadedURLs: [URL] {
+        replacedItems.compactMap { ($0?.asset as? AVURLAsset)?.url }
+    }
+
     /// What `rate` reports. A player without an item stays at 0.
     nonisolated(unsafe) var stubbedRate: Float = 0
     /// The item `currentItem` reports, until the player clears its item.
@@ -40,6 +45,9 @@ final class MockHLSPlayer: HLSPlayer, @unchecked Sendable {
 
     override nonisolated func replaceCurrentItem(with item: AVPlayerItem?) {
         replacedItems.append(item)
+        // Notifies KVO observers, which a stubbed property would skip.
+        willChangeValue(forKey: "currentItem")
         stubbedItem = item
+        didChangeValue(forKey: "currentItem")
     }
 }

@@ -310,6 +310,86 @@ final class HLSPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
         XCTAssertFalse(subject.isMuted)
     }
 
+    // MARK: - load a stream that does not load
+
+    func test_itemFailed_replacesItWithANewItemForTheSameURL() async {
+        let (subject, item) = makeLoadingPlayer()
+
+        item.simulate(status: .failed)
+
+        await fulfillment("The item was not loaded again.") { subject.reloadedURLs == [self.url] }
+        XCTAssertEqual(subject.playCount, 1)
+    }
+
+    func test_itemUnknownAfterTheTimeout_replacesItWithANewItemForTheSameURL() async {
+        let (subject, _) = makeLoadingPlayer(loadTimeout: 0.05)
+
+        await fulfillment("The item was not loaded again.") { subject.reloadedURLs.first == self.url }
+        // The new item stays unknown too, so it is loaded again until the
+        // player gives up. Every attempt uses the same URL.
+        subject.invalidate()
+        XCTAssertTrue(subject.reloadedURLs.dropLast().allSatisfy { $0 == self.url })
+        XCTAssertGreaterThanOrEqual(subject.playCount, 1)
+    }
+
+    func test_itemReadyToPlayBeforeTheTimeout_isNotReplaced() async {
+        let (subject, item) = makeLoadingPlayer(loadTimeout: 0.2)
+
+        item.simulate(status: .readyToPlay)
+
+        await wait(for: 0.5)
+        XCTAssertTrue(subject.reloadedURLs.isEmpty)
+    }
+
+    func test_invalidateBeforeTheTimeout_doesNotReplaceTheItem() async {
+        let (subject, _) = makeLoadingPlayer(loadTimeout: 0.2)
+
+        subject.invalidate()
+
+        await wait(for: 0.5)
+        XCTAssertTrue(subject.reloadedURLs.isEmpty)
+    }
+
+    func test_playerPausedByUser_itemUnknownAfterTheTimeout_isReloadedButNotPlayed() async {
+        let (subject, _) = makeLoadingPlayer(loadTimeout: 0.2)
+        postRateChange(of: subject, rate: 0, reason: .setRateCalled)
+
+        await fulfillment("The item was not loaded again.") { subject.reloadedURLs.first == self.url }
+        subject.invalidate()
+        XCTAssertEqual(subject.playCount, 0)
+    }
+
+    func test_itemReplacedByAnotherURLBeforeTheTimeout_doesNotLoadTheOldURLAgain() async {
+        let (subject, _) = makeLoadingPlayer(loadTimeout: 0.2)
+        let other = MockHLSPlayerItem(url: URL(string: "https://example.com/other.m3u8")!)
+        subject.replaceCurrentItem(with: other)
+        other.simulate(status: .readyToPlay)
+
+        await wait(for: 0.5)
+
+        XCTAssertFalse(subject.reloadedURLs.contains(url))
+        XCTAssertEqual(subject.reloadedURLs.count, 1)
+    }
+
+    func test_itemFailedRepeatedly_givesUpAfterTenReloads() async {
+        let (subject, items) = makeFailingPlayer()
+
+        await failLatestItem(of: subject, items: items, times: 12)
+
+        XCTAssertEqual(subject.reloadedURLs.count, 10)
+    }
+
+    func test_itemReadyToPlay_resetsTheReloadCount() async {
+        let (subject, items) = makeFailingPlayer()
+        await failLatestItem(of: subject, items: items, times: 10)
+        XCTAssertEqual(subject.reloadedURLs.count, 10)
+
+        items.items.last?.simulate(status: .readyToPlay)
+        await failLatestItem(of: subject, items: items, times: 1)
+
+        XCTAssertEqual(subject.reloadedURLs.count, 11)
+    }
+
     // MARK: - Private Helpers
 
     private func makeObservedPlayer() -> MockHLSPlayer {
@@ -317,6 +397,47 @@ final class HLSPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
         let player = MockHLSPlayer()
         player.startObserving(audioOutputOn: audioOutputOn.eraseToAnyPublisher())
         return player
+    }
+
+    /// A player that loads a stream that never plays. The timings are short.
+    private func makeLoadingPlayer(
+        loadTimeout: TimeInterval = 60
+    ) -> (MockHLSPlayer, MockHLSPlayerItem) {
+        mockAppState.makeShared()
+        let item = MockHLSPlayerItem(url: url)
+        let player = MockHLSPlayer()
+        player.stubbedItem = item
+        player.loadTimeout = loadTimeout
+        player.initialReloadDelay = 0.05
+        player.startObserving(audioOutputOn: audioOutputOn.eraseToAnyPublisher())
+        return (player, item)
+    }
+
+    /// A player whose reloads create items that the test can fail.
+    private func makeFailingPlayer() -> (MockHLSPlayer, ItemBox) {
+        mockAppState.makeShared()
+        let items = ItemBox()
+        let first = MockHLSPlayerItem(url: url)
+        items.items.append(first)
+        let player = MockHLSPlayer()
+        player.stubbedItem = first
+        player.initialReloadDelay = 0.01
+        player.maxReloadDelay = 0.01
+        player.makeItem = { [items] url in
+            let item = MockHLSPlayerItem(url: url)
+            items.items.append(item)
+            return item
+        }
+        player.startObserving(audioOutputOn: audioOutputOn.eraseToAnyPublisher())
+        return (player, items)
+    }
+
+    /// Fails the latest item and gives the player time to replace it.
+    private func failLatestItem(of _: MockHLSPlayer, items: ItemBox, times: Int) async {
+        for _ in 0..<times {
+            items.items.last?.simulate(status: .failed)
+            await wait(for: 0.1)
+        }
     }
 
     private func postRateChange(
@@ -359,4 +480,8 @@ final class HLSPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
         item.liveOffset = offset
         return SeekRecordingHLSPlayer(playerItem: item)
     }
+}
+
+private final class ItemBox: @unchecked Sendable {
+    nonisolated(unsafe) var items: [MockHLSPlayerItem] = []
 }
