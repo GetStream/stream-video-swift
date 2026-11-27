@@ -35,10 +35,10 @@ final class PictureInPictureController: @unchecked Sendable {
 
     // MARK: - Private Properties
 
-    /// The system Picture-in-Picture controller instance.
     /// Whether the system controller was created for the HLS player layer.
     private var controllerUsesPlayerLayer = false
 
+    /// The system Picture-in-Picture controller instance.
     private var pictureInPictureController: AVPictureInPictureController? {
         didSet { didUpdate(pictureInPictureController) }
     }
@@ -177,6 +177,9 @@ final class PictureInPictureController: @unchecked Sendable {
                     && pictureInPictureController?.isPictureInPictureActive != true
             ) {
             controllerUsesPlayerLayer = usesPlayerLayer
+            // Let go of the controller that the new one replaces.
+            pictureInPictureController?.delegate = nil
+            pictureInPictureController?.contentSource = nil
             pictureInPictureController = makePictureInPictureController(contentSource)
             pictureInPictureController?.canStartPictureInPictureAutomaticallyFromInline = store
                 .state

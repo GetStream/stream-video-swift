@@ -75,36 +75,35 @@ final class PictureInPictureControllerTests: XCTestCase, @unchecked Sendable {
     }
 
     /// AVKit keeps the controls of the content a controller was created
-    /// with, so the player layer needs a controller of its own.
+    /// with, so the player layer needs a controller of its own. A swap of
+    /// the content source on the old controller is not enough. A simulator
+    /// has no system controller and rebuilds it on every update, so only a
+    /// device shows the difference to a swap.
     @MainActor
-    func test_hlsCall_playerLayerAfterTheVideoCall_controllerIsCreatedForThePlayerLayer() async {
+    func test_hlsCall_playerLayerAfterTheVideoCall_newControllerIsCreatedForThePlayerLayer() async {
         let call = makeHLSCall()
         let configured = await makeConfiguredSubject(callFirst: true, call: call)
         let layer = AVPlayerLayer()
 
         configured.store.dispatch(.setPlayerLayer(layer, cId: call.cId))
 
-        await fulfilmentInMainActor {
-            configured.factory.contentSources.last?.playerLayer === layer
-        }
+        await fulfilmentInMainActor { configured.factory.controllers.count == 2 }
+        XCTAssertTrue(configured.factory.contentSources.last?.playerLayer === layer)
         withExtendedLifetime(configured.subject) {}
     }
 
     @MainActor
-    func test_hlsCall_playerLayerRemoved_controllerIsCreatedForTheVideoCall() async {
+    func test_hlsCall_playerLayerRemoved_newControllerIsCreatedForTheVideoCall() async {
         let call = makeHLSCall()
         let configured = await makeConfiguredSubject(callFirst: true, call: call)
         let layer = AVPlayerLayer()
         configured.store.dispatch(.setPlayerLayer(layer, cId: call.cId))
-        await fulfilmentInMainActor {
-            configured.factory.contentSources.last?.playerLayer === layer
-        }
+        await fulfilmentInMainActor { configured.factory.controllers.count == 2 }
 
         configured.store.dispatch(.removePlayerLayer(layer))
 
-        await fulfilmentInMainActor {
-            configured.factory.contentSources.last?.activeVideoCallSourceView != nil
-        }
+        await fulfilmentInMainActor { configured.factory.controllers.count == 3 }
+        XCTAssertNotNil(configured.factory.contentSources.last?.activeVideoCallSourceView)
         withExtendedLifetime(configured.subject) {}
     }
 
