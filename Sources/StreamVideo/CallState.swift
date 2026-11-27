@@ -134,6 +134,13 @@ public class CallState: ObservableObject {
 
     @Published public internal(set) var statsCollectionInterval: Int = 0
 
+    /// What HLS playback reporting needs from the latest join response.
+    ///
+    /// Nil when the backend disabled HLS stats, or the join sent no usable
+    /// `playback.stats_token`. The interval is the HLS interval, else the
+    /// WebRTC one, else 10 s, kept in the 1-60 s range the backend accepts.
+    internal private(set) var hlsStats: (token: String, interval: TimeInterval)?
+
     /// A public enum representing the settings for incoming video streams in a WebRTC
     /// session. This enum supports different policies like none, manual, or
     /// disabled, each potentially applying to specific session IDs.
@@ -433,10 +440,28 @@ public class CallState: ObservableObject {
         mergeMembers(response.members)
         ownCapabilities = response.ownCapabilities
         statsCollectionInterval = response.statsOptions.reportingIntervalMs / 1000
+        hlsStats = makeHLSStats(from: response)
         // The authenticator rejects invalid grants before this point.
         playbackType = (try? response.playback?.hlsPlaylistURL())
             .map(PlaybackType.hls) ?? .webRTC
         hlsBroadcastingStopped = false
+    }
+
+    private func makeHLSStats(
+        from response: JoinCallResponse
+    ) -> (token: String, interval: TimeInterval)? {
+        let options = response.statsOptions
+        guard
+            options.enableHlsStats != false,
+            let token = response.playback?.statsToken,
+            !token.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        else {
+            return nil
+        }
+        let seconds = [options.reportingHlsIntervalMs ?? 0, options.reportingIntervalMs]
+            .first { $0 > 0 }
+            .map { TimeInterval($0) / 1000 } ?? 10
+        return (token, min(max(seconds, 1), 60))
     }
     
     internal func update(

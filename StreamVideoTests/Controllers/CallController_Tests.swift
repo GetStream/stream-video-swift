@@ -554,6 +554,84 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         XCTAssertEqual(request.e2ee, true)
     }
 
+    func test_joinCall_setsJoinRequestUnifiedSessionIdOfTheCoordinator() async throws {
+        let defaultAPI = MockDefaultAPIEndpoints()
+        let webRTCCoordinatorFactory = MockWebRTCCoordinatorFactory(
+            videoConfig: Self.videoConfig
+        )
+        let subject = CallController(
+            defaultAPI: defaultAPI,
+            user: user,
+            callId: callId,
+            callType: callType,
+            apiKey: apiKey,
+            videoConfig: Self.videoConfig,
+            initialCallSettings: initialCallSettings,
+            cachedLocation: cachedLocation,
+            webRTCCoordinatorFactory: webRTCCoordinatorFactory
+        )
+        let expectedResponse = JoinCallResponse.dummy()
+        defaultAPI.stub(for: .joinCall, with: expectedResponse)
+        webRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .coordinator
+            .stateMachine
+            .currentStage
+            .context
+            .authenticator = CallAuthenticationBackedWebRTCAuthenticator(
+                sfuAdapter: webRTCCoordinatorFactory
+                    .mockCoordinatorStack
+                    .sfuStack
+                    .adapter
+            )
+
+        let joinTask = Task {
+            try await subject.joinCall(
+                create: true,
+                callSettings: nil,
+                options: nil,
+                ring: false,
+                notify: false,
+                source: .inApp
+            )
+        }
+
+        await fulfillment {
+            defaultAPI.timesCalled(.joinCall) == 1
+        }
+
+        await fulfillment {
+            webRTCCoordinatorFactory
+                .mockCoordinatorStack
+                .coordinator
+                .stateMachine
+                .currentStage
+                .id == .joining
+        }
+        webRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .sfuStack
+            .setConnectionState(to: .connected(healthCheckInfo: .init()))
+        webRTCCoordinatorFactory.mockCoordinatorStack.joinResponse([])
+
+        _ = try await joinTask.value
+
+        let request = try XCTUnwrap(
+            defaultAPI.recordedInputPayload(
+                (String, String, JoinCallRequest).self,
+                for: .joinCall
+            )?.first?.2
+        )
+
+        let unifiedSessionId = await webRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .unifiedSessionId
+        XCTAssertFalse(unifiedSessionId.isEmpty)
+        XCTAssertEqual(request.unifiedSessionId, unifiedSessionId)
+    }
+
     // MARK: - playbackType reset
 
     @MainActor
@@ -2074,6 +2152,35 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         )
     }
 
+    // MARK: - makeHLSStatsAdapter
+
+    @MainActor
+    func test_makeHLSStatsAdapter_withHLSStatsAndSession_returnsAnAdapter() async {
+        let call = makeHLSStatsCall(statsToken: "token-1", sessionId: "session-1")
+
+        let adapter = await subject.makeHLSStatsAdapter(player: AVPlayer(), call: call)
+
+        XCTAssertNotNil(adapter)
+    }
+
+    @MainActor
+    func test_makeHLSStatsAdapter_withoutHLSStats_returnsNil() async {
+        let call = makeHLSStatsCall(statsToken: nil, sessionId: "session-1")
+
+        let adapter = await subject.makeHLSStatsAdapter(player: AVPlayer(), call: call)
+
+        XCTAssertNil(adapter)
+    }
+
+    @MainActor
+    func test_makeHLSStatsAdapter_withBlankCallSessionId_returnsNil() async {
+        let call = makeHLSStatsCall(statsToken: "token-1", sessionId: "")
+
+        let adapter = await subject.makeHLSStatsAdapter(player: AVPlayer(), call: call)
+
+        XCTAssertNil(adapter)
+    }
+
     // MARK: - Private helpers
 
     /// Sends a join request through the coordinator's authentication closure
@@ -2118,6 +2225,29 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
                 for: .joinCall
             )?.first?.2
         )
+    }
+
+    @MainActor
+    private func makeHLSStatsCall(
+        statsToken: String?,
+        sessionId: String
+    ) -> MockCall {
+        let call = MockCall(.dummy(callController: subject))
+        call.state.update(
+            from: JoinCallResponse.dummy(
+                playback: statsToken.map { .dummy(statsToken: $0) }
+            )
+        )
+        call.state.session = CallSessionResponse(
+            acceptedBy: [:],
+            anonymousParticipantCount: 0,
+            id: sessionId,
+            missedBy: [:],
+            participants: [],
+            participantsCountByRole: [:],
+            rejectedBy: [:]
+        )
+        return call
     }
 
     /// Puts the coordinator in a stage that the controller observes.
