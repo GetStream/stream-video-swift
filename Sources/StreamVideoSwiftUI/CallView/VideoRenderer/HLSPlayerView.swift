@@ -13,13 +13,17 @@ import UIKit
 /// While the app is in the background the layer lets go of the player. iOS
 /// pauses a player that stays attached to a layer, and nothing resumes it
 /// afterwards. A detached player keeps playing the audio.
+///
+/// The layer keeps the player while Picture in Picture is active and shows
+/// this layer for the call of the store, because the window draws it.
 final class HLSPlayerView: UIView {
 
     override class var layerClass: AnyClass { AVPlayerLayer.self }
 
     @Injected(\.applicationStateAdapter) private var applicationStateAdapter
+    @Injected(\.pictureInPictureAdapter) private var pictureInPictureAdapter
 
-    private var playerLayer: AVPlayerLayer {
+    var playerLayer: AVPlayerLayer {
         // Safe: UIKit creates `layer` from `layerClass`, so it is always an
         // `AVPlayerLayer`. Apple documents this pattern for AVPlayerLayer.
         // swiftlint:disable:next force_cast
@@ -29,12 +33,15 @@ final class HLSPlayerView: UIView {
     /// The player the view shows when the app is not in the background.
     private var requestedPlayer: AVPlayer?
     private var isInBackground = false
+    private var isPictureInPictureActive = false
     private var stateObserver: AnyCancellable?
+    private var pictureInPictureObserver: AnyCancellable?
 
     var player: AVPlayer? {
         get { requestedPlayer }
         set {
             requestedPlayer = newValue
+            observePictureInPicture()
             updateLayerPlayer()
         }
     }
@@ -47,11 +54,13 @@ final class HLSPlayerView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         observeApplicationState()
+        observePictureInPicture()
     }
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         observeApplicationState()
+        observePictureInPicture()
     }
 
     // MARK: - Private Helpers
@@ -67,7 +76,31 @@ final class HLSPlayerView: UIView {
             }
     }
 
+    /// The adapter creates its store a moment after it is first used, so
+    /// this retries each time a player is set.
+    private func observePictureInPicture() {
+        guard
+            pictureInPictureObserver == nil,
+            let store = pictureInPictureAdapter.store
+        else { return }
+        pictureInPictureObserver = Publishers.CombineLatest4(
+            store.publisher(for: \.isActive),
+            store.publisher(for: \.playerLayer),
+            store.publisher(for: \.playerLayerCallId),
+            store.publisher(for: \.call)
+        )
+        .map { [weak self] isActive, layer, layerCallId, call in
+            isActive && layer === self?.playerLayer && layerCallId == call?.cId
+        }
+        .removeDuplicates()
+        .sink { [weak self] in
+            self?.isPictureInPictureActive = $0
+            self?.updateLayerPlayer()
+        }
+    }
+
     private func updateLayerPlayer() {
-        playerLayer.player = isInBackground ? nil : requestedPlayer
+        let isDetached = isInBackground && !isPictureInPictureActive
+        playerLayer.player = isDetached ? nil : requestedPlayer
     }
 }

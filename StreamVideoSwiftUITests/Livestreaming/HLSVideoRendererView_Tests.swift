@@ -18,6 +18,7 @@ final class HLSVideoRendererView_Tests: StreamVideoTestCase, @unchecked Sendable
     private lazy var call: MockCall! = makeCall()
     private lazy var view: HLSPlayerView! = .init()
     private lazy var subject: HLSVideoRendererView.Coordinator! = .init(call: call)
+    private var previousAdapter: StreamPictureInPictureAdapter?
 
     override func setUp() async throws {
         try await super.setUp()
@@ -30,6 +31,9 @@ final class HLSVideoRendererView_Tests: StreamVideoTestCase, @unchecked Sendable
         mockAppState = nil
         subject = nil
         view = nil
+        if let previousAdapter {
+            InjectedValues[\.pictureInPictureAdapter] = previousAdapter
+        }
         call = nil
         made.players = []
         try await super.tearDown()
@@ -81,6 +85,22 @@ final class HLSVideoRendererView_Tests: StreamVideoTestCase, @unchecked Sendable
 
         call.state.playbackType = .hls(URL(string: "https://example.com/other.m3u8")!)
 
+        await fulfilmentInMainActor {
+            self.made.players.count == 2 && self.view.player === self.made.players[1]
+        }
+    }
+
+    func test_playlistURLChanges_keepsTheOldPlayerOnTheViewUntilTheNewOneIsShown() async {
+        call.state.playbackType = .hls(url)
+        subject.attach(to: view)
+        await fulfilmentInMainActor { self.view.player != nil }
+        let oldPlayer = view.player
+
+        call.state.playbackType = .hls(URL(string: "https://example.com/other.m3u8")!)
+
+        // The view keeps a player, so an active Picture-in-Picture layer
+        // never goes empty in between.
+        XCTAssertTrue(view.player === oldPlayer)
         await fulfilmentInMainActor {
             self.made.players.count == 2 && self.view.player === self.made.players[1]
         }
@@ -241,6 +261,80 @@ final class HLSVideoRendererView_Tests: StreamVideoTestCase, @unchecked Sendable
         other.dismantle()
     }
 
+    // MARK: - Picture in Picture
+
+    func test_playerShown_registersTheLayerWithTheCallId() async {
+        let adapter = await injectAdapter()
+        call.state.playbackType = .hls(url)
+
+        subject.attach(to: view)
+
+        await fulfilmentInMainActor { adapter.store?.state.playerLayer === self.view.playerLayer }
+        XCTAssertEqual(adapter.store?.state.playerLayerCallId, call.cId)
+    }
+
+    func test_playbackTypeReturnsToWebRTC_clearsTheLayer() async {
+        let adapter = await injectAdapter()
+        call.state.playbackType = .hls(url)
+        subject.attach(to: view)
+        await fulfilmentInMainActor { adapter.store?.state.playerLayer != nil }
+
+        call.state.playbackType = .webRTC
+
+        await fulfilmentInMainActor { adapter.store?.state.playerLayer == nil }
+    }
+
+    func test_dismantle_clearsTheLayer() async {
+        let adapter = await injectAdapter()
+        call.state.playbackType = .hls(url)
+        subject.attach(to: view)
+        await fulfilmentInMainActor { adapter.store?.state.playerLayer != nil }
+
+        subject.dismantle()
+
+        await fulfilmentInMainActor { adapter.store?.state.playerLayer == nil }
+    }
+
+    func test_dismantle_viewAlreadyReleased_clearsTheLayer() async {
+        let adapter = await injectAdapter()
+        call.state.playbackType = .hls(url)
+        var released: HLSPlayerView? = HLSPlayerView()
+        weak var weakView = released
+        subject.attach(to: released!)
+        await fulfilmentInMainActor { adapter.store?.state.playerLayer != nil }
+
+        released = nil
+        XCTAssertNil(weakView)
+        subject.dismantle()
+
+        await fulfilmentInMainActor { adapter.store?.state.playerLayer == nil }
+    }
+
+    func test_updateCall_anotherCall_clearsTheLayerOfTheOldCall() async {
+        let adapter = await injectAdapter()
+        call.state.playbackType = .hls(url)
+        subject.attach(to: view)
+        await fulfilmentInMainActor { adapter.store?.state.playerLayer != nil }
+
+        subject.update(call: MockCall())
+
+        await fulfilmentInMainActor { adapter.store?.state.playerLayer == nil }
+    }
+
+    func test_dismantle_anotherLayerIsRegistered_leavesItAlone() async {
+        let adapter = await injectAdapter()
+        call.state.playbackType = .hls(url)
+        subject.attach(to: view)
+        await fulfilmentInMainActor { adapter.store?.state.playerLayer != nil }
+        let other = AVPlayerLayer()
+        adapter.store?.dispatch(.setPlayerLayer(other, cId: call.cId))
+
+        subject.dismantle()
+        await wait(for: 0.2)
+
+        XCTAssertTrue(adapter.store?.state.playerLayer === other)
+    }
+
     // MARK: - Private Helpers
 
     private func makeCall(
@@ -259,5 +353,15 @@ final class HLSVideoRendererView_Tests: StreamVideoTestCase, @unchecked Sendable
                 callController: MockCallController(hlsStateAdapter: adapter)
             )
         )
+    }
+
+    /// Replaces the shared adapter with a fresh one. Teardown restores the
+    /// previous one.
+    private func injectAdapter() async -> StreamPictureInPictureAdapter {
+        previousAdapter = previousAdapter ?? InjectedValues[\.pictureInPictureAdapter]
+        let adapter = StreamPictureInPictureAdapter()
+        InjectedValues[\.pictureInPictureAdapter] = adapter
+        await fulfilmentInMainActor { adapter.store != nil }
+        return adapter
     }
 }

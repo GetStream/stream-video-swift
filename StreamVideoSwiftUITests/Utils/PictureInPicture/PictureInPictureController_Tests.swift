@@ -58,6 +58,80 @@ final class PictureInPictureControllerTests: XCTestCase, @unchecked Sendable {
         XCTAssertNotNil(configured.subject)
     }
 
+    // MARK: - Content source
+
+    @MainActor
+    func test_hlsCall_playerLayerOfTheCall_controllerShowsThePlayerLayer() async {
+        let call = makeHLSCall()
+        let configured = await makeConfiguredSubject(callFirst: true, call: call)
+        let layer = AVPlayerLayer()
+
+        configured.store.dispatch(.setPlayerLayer(layer, cId: call.cId))
+
+        await fulfilmentInMainActor {
+            configured.factory.latestContentSource?.playerLayer === layer
+        }
+        withExtendedLifetime(configured.subject) {}
+    }
+
+    /// AVKit keeps the controls of the content a controller was created
+    /// with, so the player layer needs a controller of its own. A swap of
+    /// the content source on the old controller is not enough. A simulator
+    /// has no system controller and rebuilds it on every update, so only a
+    /// device shows the difference to a swap.
+    @MainActor
+    func test_hlsCall_playerLayerAfterTheVideoCall_newControllerIsCreatedForThePlayerLayer() async {
+        let call = makeHLSCall()
+        let configured = await makeConfiguredSubject(callFirst: true, call: call)
+        let layer = AVPlayerLayer()
+
+        configured.store.dispatch(.setPlayerLayer(layer, cId: call.cId))
+
+        await fulfilmentInMainActor { configured.factory.controllers.count == 2 }
+        XCTAssertTrue(configured.factory.contentSources.last?.playerLayer === layer)
+        withExtendedLifetime(configured.subject) {}
+    }
+
+    @MainActor
+    func test_hlsCall_playerLayerRemoved_newControllerIsCreatedForTheVideoCall() async {
+        let call = makeHLSCall()
+        let configured = await makeConfiguredSubject(callFirst: true, call: call)
+        let layer = AVPlayerLayer()
+        configured.store.dispatch(.setPlayerLayer(layer, cId: call.cId))
+        await fulfilmentInMainActor { configured.factory.controllers.count == 2 }
+
+        configured.store.dispatch(.removePlayerLayer(layer))
+
+        await fulfilmentInMainActor { configured.factory.controllers.count == 3 }
+        XCTAssertNotNil(configured.factory.contentSources.last?.activeVideoCallSourceView)
+        withExtendedLifetime(configured.subject) {}
+    }
+
+    @MainActor
+    func test_hlsCall_withoutPlayerLayer_controllerShowsTheVideoCall() async {
+        let configured = await makeConfiguredSubject(callFirst: true, call: makeHLSCall())
+
+        let source = configured.factory.latestContentSource
+        XCTAssertNotNil(source?.activeVideoCallSourceView)
+        XCTAssertNil(source?.playerLayer)
+        withExtendedLifetime(configured.subject) {}
+    }
+
+    @MainActor
+    func test_hlsCall_playerLayerOfAnotherCall_controllerShowsTheVideoCall() async {
+        let configured = await makeConfiguredSubject(callFirst: true, call: makeHLSCall())
+
+        await assertShowsVideoCall(configured, afterRegistering: "other:call")
+    }
+
+    @MainActor
+    func test_webRTCCall_playerLayerRegistered_controllerShowsTheVideoCall() async {
+        let call = MockCall()
+        let configured = await makeConfiguredSubject(callFirst: true, call: call)
+
+        await assertShowsVideoCall(configured, afterRegistering: call.cId)
+    }
+
     @MainActor
     func test_pictureInPictureUnsupported_initializationReturnsNil() {
         let subject = PictureInPictureController(
@@ -70,9 +144,43 @@ final class PictureInPictureControllerTests: XCTestCase, @unchecked Sendable {
 
     // MARK: - Private
 
+    /// Registers a layer, then sends a newer source view. The store applies
+    /// the actions in order, and the controller reads the latest state. A
+    /// source that shows the new view comes from a state with the layer.
+    @MainActor
+    private func assertShowsVideoCall(
+        _ configured: (
+            subject: PictureInPictureController?,
+            store: PictureInPictureStore,
+            factory: Factory
+        ),
+        afterRegistering cId: String,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) async {
+        let marker = UIView()
+        configured.store.dispatch(.setPlayerLayer(AVPlayerLayer(), cId: cId))
+        configured.store.dispatch(.setSourceView(marker))
+
+        await fulfilmentInMainActor(filePath: file, line: line) {
+            configured.factory.latestContentSource?.activeVideoCallSourceView === marker
+        }
+
+        XCTAssertNil(configured.factory.latestContentSource?.playerLayer, file: file, line: line)
+        withExtendedLifetime(configured.subject) {}
+    }
+
+    @MainActor
+    private func makeHLSCall() -> MockCall {
+        let call = MockCall()
+        call.state.playbackType = .hls(URL(string: "https://example.com/live.m3u8")!)
+        return call
+    }
+
     @MainActor
     private func makeConfiguredSubject(
-        callFirst: Bool
+        callFirst: Bool,
+        call: Call = MockCall()
     ) async -> (
         subject: PictureInPictureController?,
         store: PictureInPictureStore,
@@ -86,14 +194,14 @@ final class PictureInPictureControllerTests: XCTestCase, @unchecked Sendable {
             makePictureInPictureController: factory.make
         )
         if callFirst {
-            store.dispatch(.setCall(MockCall()))
+            store.dispatch(.setCall(call))
             await fulfilmentInMainActor { store.state.call != nil }
             store.dispatch(.setSourceView(UIView()))
             await fulfilmentInMainActor { store.state.sourceView != nil }
         } else {
             store.dispatch(.setSourceView(UIView()))
             await fulfilmentInMainActor { store.state.sourceView != nil }
-            store.dispatch(.setCall(MockCall()))
+            store.dispatch(.setCall(call))
             await fulfilmentInMainActor { store.state.call != nil }
         }
         await assertControllerWasConfigured(factory)
@@ -121,6 +229,13 @@ private final class Factory {
 
     private(set) var contentSources: [AVPictureInPictureController.ContentSource] = []
     private(set) var controllers: [AVPictureInPictureController] = []
+
+    /// The latest source. A system controller holds it. A simulator creates
+    /// none, so the controller is built again on every update and the last
+    /// source the factory received is the latest.
+    var latestContentSource: AVPictureInPictureController.ContentSource? {
+        controllers.last?.contentSource ?? contentSources.last
+    }
 
     func make(
         contentSource: AVPictureInPictureController.ContentSource

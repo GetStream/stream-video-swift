@@ -2,6 +2,7 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+import AVFoundation
 import Foundation
 @testable import StreamVideo
 @testable import StreamVideoSwiftUI
@@ -31,6 +32,41 @@ final class StreamPictureInPictureAdapterTests: XCTestCase, @unchecked Sendable 
         subject.call = call
 
         await fulfilmentInMainActor { self.subject.store?.state.call?.cId == call.cId }
+    }
+
+    // MARK: - Player layer
+
+    @MainActor
+    func test_setPlayerLayer_beforeTheStoreExists_reachesTheStore() async {
+        let layer = AVPlayerLayer()
+
+        // The store is created a moment after the adapter.
+        subject.setPlayerLayer(layer, cId: "call-1")
+
+        await fulfilmentInMainActor { self.subject.store?.state.playerLayer === layer }
+        XCTAssertEqual(subject.store?.state.playerLayerCallId, "call-1")
+    }
+
+    @MainActor
+    func test_removePlayerLayer_beforeTheStoreExists_keepsTheStoreEmpty() async {
+        let layer = AVPlayerLayer()
+        subject.setPlayerLayer(layer, cId: "call-1")
+
+        subject.removePlayerLayer(layer)
+
+        await fulfilmentInMainActor { self.subject.store != nil }
+        await wait(for: 0.2)
+        XCTAssertNil(subject.store?.state.playerLayer)
+    }
+
+    @MainActor
+    func test_setPlayerLayer_afterTheStoreExists_reachesTheStore() async {
+        let layer = AVPlayerLayer()
+        await fulfilmentInMainActor { self.subject.store != nil }
+
+        subject.setPlayerLayer(layer, cId: "call-1")
+
+        await fulfilmentInMainActor { self.subject.store?.state.playerLayer === layer }
     }
 
     // MARK: - SourceView updated
