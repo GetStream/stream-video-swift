@@ -94,7 +94,7 @@ final class HLSPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
     }
 
     func test_play_withoutAnItem_doesNotSeek() {
-        let subject = SeekRecordingPlayer()
+        let subject = SeekRecordingHLSPlayer()
 
         subject.play()
 
@@ -160,8 +160,12 @@ final class HLSPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
 
     func test_playerResumedFromOutsideAfterPausing_appBecomesActive_resumes() async {
         let subject = makeObservedPlayer()
+        // The player reads its rate when it handles the notification on the
+        // main thread, so let each one run.
         postRateChange(of: subject, rate: 0, reason: .setRateCalled)
+        await wait(for: 0.1)
         postRateChange(of: subject, rate: 1, reason: .setRateCalled)
+        await wait(for: 0.1)
         subject.stubbedRate = 0
 
         mockAppState.stubbedState = .background
@@ -192,6 +196,49 @@ final class HLSPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
         let subject = makeObservedPlayer()
 
         postInterruption(.began, options: .shouldResume)
+
+        await wait(for: 0.3)
+        XCTAssertEqual(subject.playCount, 0)
+    }
+
+    func test_pause_appBecomesActive_staysPaused() async {
+        mockAppState.makeShared()
+        let subject = makeSubject(
+            ranges: [CMTimeRange(start: seconds(10), duration: seconds(90))],
+            offset: seconds(6)
+        )
+        subject.startObserving(audioOutputOn: audioOutputOn.eraseToAnyPublisher())
+        subject.play()
+        subject.pause()
+        let seeks = subject.seekTimes.count
+
+        mockAppState.stubbedState = .background
+        mockAppState.stubbedState = .foreground
+
+        await wait(for: 0.3)
+        XCTAssertEqual(subject.seekTimes.count, seeks)
+        XCTAssertEqual(subject.rate, 0)
+    }
+
+    func test_rateChangeFromABackgroundThread_isHandledOnTheMainThread() async {
+        let subject = makeObservedPlayer()
+        subject.stubbedRate = 0
+
+        await withCheckedContinuation { continuation in
+            DispatchQueue.global().async {
+                NotificationCenter.default.post(
+                    name: AVPlayer.rateDidChangeNotification,
+                    object: subject,
+                    userInfo: [
+                        AVPlayer.rateDidChangeReasonKey:
+                            AVPlayer.RateDidChangeReason.setRateCalled.rawValue
+                    ]
+                )
+                continuation.resume()
+            }
+        }
+        mockAppState.stubbedState = .background
+        mockAppState.stubbedState = .foreground
 
         await wait(for: 0.3)
         XCTAssertEqual(subject.playCount, 0)
@@ -292,17 +339,10 @@ final class HLSPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
     private func makeSubject(
         ranges: [CMTimeRange],
         offset: CMTime
-    ) -> SeekRecordingPlayer {
+    ) -> SeekRecordingHLSPlayer {
         let item = MockHLSPlayerItem(url: url)
         item.ranges = ranges
         item.liveOffset = offset
-        return SeekRecordingPlayer(playerItem: item)
+        return SeekRecordingHLSPlayer(playerItem: item)
     }
-}
-
-/// Records the seeks, and keeps the real `play()` of `HLSPlayer`.
-private final class SeekRecordingPlayer: HLSPlayer, @unchecked Sendable {
-    private(set) nonisolated(unsafe) var seekTimes: [CMTime] = []
-
-    override nonisolated func seek(to time: CMTime) { seekTimes.append(time) }
 }

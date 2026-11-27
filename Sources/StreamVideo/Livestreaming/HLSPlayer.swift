@@ -16,7 +16,16 @@ import Foundation
 /// the app returns to the foreground. It never resumes a player that you
 /// paused with `pause()`.
 ///
+/// Only ``Call/hlsPlayer()`` returns a player that the SDK manages: it mutes
+/// with the audio output of the call, resumes after a system pause, and stops
+/// when the call leaves HLS. A player that you create with an inherited
+/// initializer is not managed. The live-edge seek belongs to `play()` and
+/// ``playFromLiveEdge()``. Setting `rate` or calling `playImmediately(atRate:)`
+/// does not seek.
+///
 /// - Important: This API is in beta, like ``PlaybackType``.
+// Xcode 27 infers it from AVPlayer. An older SDK may not, and the call
+// controller hands the player across actors.
 public class HLSPlayer: AVPlayer, @unchecked Sendable {
 
     /// Whether `play()` restarts near the live edge.
@@ -29,22 +38,30 @@ public class HLSPlayer: AVPlayer, @unchecked Sendable {
 
     @Injected(\.applicationStateAdapter) private var applicationStateAdapter
 
-    /// Whether `pause()` was the last play command. Any thread can change
-    /// it, because the rate notification does not name a thread.
-    @Atomic private var isPausedByUser = false
+    /// Whether the user paused the player. It changes on the main thread.
+    private var isPausedByUser = false
     private var observers: [AnyCancellable] = []
 
     /// Plays the stream. Restarts near the live edge when ``resumeFromLive``
     /// is `true`, unless the player is already playing. A seek during
     /// playback would stall it.
     override public func play() {
+        isPausedByUser = false
         if resumeFromLive, rate == 0 { seekToLiveEdge() }
         super.play()
+    }
+
+    /// Pauses the stream. The SDK keeps it paused when the system would
+    /// resume it.
+    override public func pause() {
+        isPausedByUser = true
+        super.pause()
     }
 
     /// Restarts near the live edge and plays, whatever ``resumeFromLive``
     /// says.
     public func playFromLiveEdge() {
+        isPausedByUser = false
         seekToLiveEdge()
         super.play()
     }
@@ -79,10 +96,15 @@ public class HLSPlayer: AVPlayer, @unchecked Sendable {
     /// pauses, such as an audio interruption, carry another reason. The
     /// resume of the SDK is a `play()` call too, and it only plays a player
     /// that the user did not pause, so it keeps the state.
+    ///
+    /// `pause()` and `play()` record the state themselves, which covers
+    /// iOS 14 and earlier. This covers the calls that bypass them.
     private func observeUserPauses() -> AnyCancellable {
         guard #available(iOS 15.0, *) else { return AnyCancellable {} }
         return NotificationCenter.default
             .publisher(for: AVPlayer.rateDidChangeNotification, object: self)
+            // The notification does not name a thread.
+            .receive(on: DispatchQueue.main)
             .filter {
                 ($0.userInfo?[AVPlayer.rateDidChangeReasonKey] as? String)
                     == AVPlayer.RateDidChangeReason.setRateCalled.rawValue
