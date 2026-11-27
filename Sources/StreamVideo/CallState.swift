@@ -757,6 +757,9 @@ public class CallState: ObservableObject {
             let url = playlistUrl?.hlsPlaylistURL,
             url != current
         else { return }
+        // A new playlist means a running broadcast. Clear the stop before the
+        // new URL is published, so a request for the player succeeds.
+        hlsBroadcastingStopped = false
         playbackType = .hls(url)
     }
 

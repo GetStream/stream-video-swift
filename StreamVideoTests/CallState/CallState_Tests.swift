@@ -368,6 +368,33 @@ final class CallState_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertFalse(subject.hlsBroadcastingStopped)
     }
 
+    /// A new broadcast can reach the call as a call update before its
+    /// started event. The stop must be gone when the new URL is published,
+    /// so a subscriber that asks for the player at once gets one.
+    @MainActor
+    func test_update_fromCallResponse_withANewHLSPlaylistURL_afterAStop_clearsTheStopFirst() throws {
+        let subject = CallState(MockStreamVideo().callSession)
+        subject.update(from: JoinCallResponse.dummyHLSGrant())
+        subject.updateState(from: .typeCallHLSBroadcastingStoppedEvent(
+            .init(callCid: "livestream:1", createdAt: Date())
+        ))
+        var stoppedWhenTheURLChanged: [Bool] = []
+        let cancellable = subject.$playbackType.dropFirst().sink { [unowned subject] _ in
+            stoppedWhenTheURLChanged.append(subject.hlsBroadcastingStopped)
+        }
+
+        subject.update(from: CallResponse.dummy(
+            egress: .init(
+                broadcasting: true,
+                hls: .init(playlistUrl: "https://example.com/new/live.m3u8", status: "running"),
+                rtmps: []
+            )
+        ))
+
+        XCTAssertEqual(stoppedWhenTheURLChanged, [false])
+        cancellable.cancel()
+    }
+
     @MainActor
     func test_update_fromJoinResponse_clearsTheHLSStop() {
         let subject = CallState(MockStreamVideo().callSession)
